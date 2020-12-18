@@ -197,4 +197,4 @@ jobs:
               termination: edge
         ' > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-routes -f values.yaml bcgov/ocp-route
+        helm upgrade --install proto-aps-portal-routes-2 -f values.yaml bcgov/ocp-route
