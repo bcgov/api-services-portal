@@ -24,22 +24,37 @@ jobs:
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
       
+    - name: Docker Image
+      uses: docker/build-push-action@v1
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        registry: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: bcgov/aps-portal/portal-backend
+        path: backend
+        dockerfile: backend/Dockerfile
+        tag_with_ref: true
+        tag_with_sha: false
+        add_git_labels: true
+        push: true
 
-    # - name: Docker Image
-    #   uses: docker/build-push-action@v1
-    #   env:
-    #     DOCKER_BUILDKIT: 1
-    #   with:
-    #     registry: docker.pkg.github.com
-    #     username: $GITHUB_ACTOR
-    #     password: ${{ secrets.GITHUB_TOKEN }}
-    #     repository: bcgov/aps-portal/backend-portal
-    #     path: backend
-    #     dockerfile: backend/Dockerfile
-    #     tag_with_ref: true
-    #     tag_with_sha: false
-    #     add_git_labels: true
-    #     push: true
+    - name: Docker Image for Frontend
+      uses: docker/build-push-action@v1
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        registry: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: bcgov/aps-portal/portal-ui
+        dockerfile: Dockerfile
+        tag_with_ref: true
+        tag_with_sha: false
+        add_git_labels: true
+        push: true
+        
     - name: 'Get Helm'
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
@@ -92,7 +107,7 @@ jobs:
         replicaCount: 1
 
         image:
-          repository: docker.pkg.github.com/bcgov/aps-portal/backend-portal
+          repository: docker.pkg.github.com/bcgov/aps-portal/portal-backend
           tag: dev
           pullPolicy: Always
 
@@ -105,6 +120,8 @@ jobs:
         securityContext:
           runAsUser: 1002770000
 
+        containerPort: 3000
+
         env:
           COOKIE_SECRET:
             value: "234873290483290"
@@ -112,6 +129,32 @@ jobs:
         ' > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal -f values.yaml bcgov/generic-api
+
+    - name: 'Deploy Frontend'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        replicaCount: 1
+
+        image:
+          repository: docker.pkg.github.com/bcgov/aps-portal/portal-ui
+          tag: dev
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext:
+          fsGroup: 1002770000
+
+        securityContext:
+          runAsUser: 1002770000
+
+        containerPort: 3000
+        ' > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-ui -f values.yaml bcgov/generic-api
 
     - name: 'Deploy Routes'
       run: |

@@ -11,7 +11,6 @@ const Header: React.FC<{}> = () => {
         <Link href="/">
           <a>
             <Image
-              objectFit
               src="/images/bc_logo_header.svg"
               width={170}
               height={43}

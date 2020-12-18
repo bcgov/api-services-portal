@@ -8,6 +8,19 @@ To run this project first run `npm install`. Note: If you generated this project
 
 Once running, the Keystone Admin UI is reachable via `localhost:3000/admin`.
 
+### Docker
+
+```
+docker build --tag portal-backend .
+
+docker run -ti --rm \
+  -e COOKIE_SECRET=s3cr3t \
+  -e MONGO_URL="mongodb://192.168.1.68:17017/keystonedb2" \
+  -e MONGO_USER="" \
+  -e MONGO_PASSWORD = "" \
+  -p 4000:3000 portal-backend
+```
+
 ## Next steps
 
 This example has no front-end application but you can build your own using the GraphQL API (`http://localhost:3000/admin/graphiql`).

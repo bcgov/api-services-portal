@@ -9,7 +9,7 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ children }) => {
   return (
     <nav className={styles.navbar}>
-      <div class={styles.container}>
+      <div className={styles.container}>
         <ul>{children}</ul>
       </div>
     </nav>
