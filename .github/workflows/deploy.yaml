@@ -72,7 +72,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: bcgov/aps-portal/portal-backend
         path: backend
-        dockerfile: Dockerfile
+        dockerfile: ./backend/Dockerfile
         tag_with_ref: true
         tag_with_sha: false
         add_git_labels: true
