@@ -175,7 +175,7 @@ jobs:
         routes:
           - host: "aps-portal.apps.silver.devops.gov.bc.ca"
             targetPort: http
-            service: proto-apps-portal-ui-generic-api
+            service: proto-aps-portal-ui-generic-api
             wildcardPolicy: None
             tls:
               termination: edge
@@ -191,7 +191,7 @@ jobs:
         routes:
           - host: "aps-portal-api.apps.silver.devops.gov.bc.ca"
             targetPort: http
-            service: proto-apps-portal-generic-api
+            service: proto-aps-portal-generic-api
             wildcardPolicy: None
             tls:
               termination: edge
