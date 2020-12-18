@@ -49,7 +49,7 @@ jobs:
       uses: docker/login-action@v1 
       with:
         registry: docker.pkg.github.com
-        username: $GITHUB_ACTOR
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     -
       name: Build and push for Backend
