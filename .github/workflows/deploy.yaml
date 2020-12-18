@@ -23,6 +23,13 @@ jobs:
         insecure_skip_tls_verify: true
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+
+    # In this step, this action saves a list of existing images,
+    # the cache is created without them in the post run.
+    # It also restores the cache if it exists.
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      # Ignore the failure of a step and avoid terminating the job.
+      continue-on-error: true
       
     - name: Docker Image
       uses: docker/build-push-action@v1
@@ -59,7 +66,7 @@ jobs:
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
         tar -xf helm-v3.4.2-linux-amd64.tar.gz
-    
+
     - name: 'Deploy Database'
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
