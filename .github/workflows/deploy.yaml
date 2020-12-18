@@ -182,7 +182,7 @@ jobs:
             value: "234873290483290"
             secure: true
           MONGO_URL:
-            value: "mongodb://proto-aps-portal-db-mongodb:27017/keystonedb"
+            value: "mongodb://proto-aps-portal-db-mongodb:27017"
           MONGO_USER:
             value: root
             secure: true
