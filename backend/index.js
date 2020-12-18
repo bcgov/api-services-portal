@@ -7,7 +7,7 @@ const initialiseData = require('./initial-data');
 
 const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose');
 const PROJECT_NAME = 'app2';
-const adapterConfig = { mongoUri: process.env.MONGO_URL, useNewUrlParser: true, user: process.env.MONGO_USER, pass: process.env.MONGO_PASSWORD };
+const adapterConfig = { mongoUri: process.env.MONGO_URL, useNewUrlParser: false, user: process.env.MONGO_USER, pass: process.env.MONGO_PASSWORD };
 
 require('dotenv').config()
 
