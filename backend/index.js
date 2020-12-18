@@ -17,6 +17,8 @@ const keystone = new Keystone({
   cookieSecret: process.env.COOKIE_SECRET
 });
 
+keystone.set("session store", "mongo");
+
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => Boolean(user && user.isAdmin);
 const userOwnsItem = ({ authentication: { item: user } }) => {
