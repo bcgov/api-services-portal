@@ -58,7 +58,7 @@ jobs:
         context: backend
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
-        file: ./backend/Dockerfile
+        file: ./Dockerfile
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
 
