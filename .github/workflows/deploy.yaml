@@ -40,14 +40,56 @@ jobs:
     #     tag_with_sha: false
     #     add_git_labels: true
     #     push: true
-    
-    - name: 'Deploy'
+    - name: 'Get Helm'
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
         tar -xf helm-v3.4.2-linux-amd64.tar.gz
+    
+    - name: 'Deploy Database'
+      run: |
         export PATH=$PATH:`pwd`/linux-amd64
 
         echo '
+        auth:
+            rootPassword: "s3cr3t"
+
+        arbiter:
+            enabled: false
+
+        rbac:
+            create: true
+
+        strategyType: Recreate
+
+        persistence:
+            enabled: true
+            size: 2Gi
+
+        resources:
+          limits:
+            cpu: 300m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi    
+
+        podSecurityContext:
+          enable: true
+          fsGroup: 1002770000
+
+        securityContext:
+          runAsUser: 1002770000
+        ' > values.yaml
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm upgrade --install proto-aps-portal-db -f values.yaml bitnami/mongodb
+
+    - name: 'Deploy Backend'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        replicaCount: 1
+
         image:
           repository: docker.pkg.github.com/bcgov/aps-portal/backend-portal
           tag: dev
