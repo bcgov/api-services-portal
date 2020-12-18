@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ dev ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.6'
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+        insecure_skip_tls_verify: true
+
+        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+      
+    - uses: actions/checkout@v2
+
+    - name: Docker Image for gwa-api
+      uses: docker/build-push-action@v1
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        registry: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: bcgov/aps-portal/backend-portal
+        path: backend
+        dockerfile: backend/Dockerfile
+        tag_with_ref: true
+        tag_with_sha: false
+        add_git_labels: true
+        push: true
+    
+    - name: 'Deploy'
+      run: |
+        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        image:
+          repository: docker.pkg.github.com/bcgov/aps-portal/backend-portal
+          tag: dev
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext: false
+        securityContext: false
+        ' > values.yaml
+        helm repository add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal -f values.yaml bcgov/generic-api
