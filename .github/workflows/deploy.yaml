@@ -55,12 +55,12 @@ jobs:
       name: Build and push for Backend
       uses: docker/build-push-action@v2
       with:
+        context: backend
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
         registry: docker.pkg.github.com
         repository: bcgov/aps-portal/portal-backend
-        path: backend
-        dockerfile: backend/Dockerfile
+        file: backend/Dockerfile
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
 
