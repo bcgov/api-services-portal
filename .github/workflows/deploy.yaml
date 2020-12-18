@@ -62,6 +62,7 @@ jobs:
         path: backend
         dockerfile: backend/Dockerfile
         push: true
+        tags: ${{ steps.docker_meta.outputs.tags }}
 
     - name: Docker Image for Frontend
       uses: docker/build-push-action@v1
