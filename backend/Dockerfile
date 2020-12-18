@@ -1,10 +1,10 @@
 FROM node:12-alpine
 
-COPY backend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
-COPY backend/*.js ./
-COPY backend/lists/* ./lists/
+COPY *.js ./
+COPY lists/* ./lists/
 
 ENV COOKIE_SECRET=change_me
 
