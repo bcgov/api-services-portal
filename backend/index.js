@@ -4,6 +4,7 @@ const { Text, Checkbox, Password } = require('@keystonejs/fields');
 const { GraphQLApp } = require('@keystonejs/app-graphql');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
 const initialiseData = require('./initial-data');
+const expressSession = require('express-session');
 const MongoStore = require('connect-mongo')(expressSession);
 
 const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose');
@@ -21,7 +22,7 @@ const keystone = new Keystone({
     maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     sameSite: false,
   },  
-  sessionStore: new MongoStore({ url: process.env.MONGO_URL, options: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
+//   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
 });
 
 // Access control functions
