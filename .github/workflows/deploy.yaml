@@ -24,21 +24,31 @@ jobs:
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
-    # In this step, this action saves a list of existing images,
-    # the cache is created without them in the post run.
-    # It also restores the cache if it exists.
-    - uses: satackey/action-docker-layer-caching@v0.0.11
-      # Ignore the failure of a step and avoid terminating the job.
-      continue-on-error: true
-
-    - name: Docker Image
-      uses: docker/build-push-action@v1
-      env:
-        DOCKER_BUILDKIT: 1
+    -
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    -
+      name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+    -
+      name: Login to DockerHub
+      uses: docker/login-action@v1 
       with:
         registry: docker.pkg.github.com
         username: $GITHUB_ACTOR
         password: ${{ secrets.GITHUB_TOKEN }}
+    -
+      name: Build and push for Backend
+      uses: docker/build-push-action@v2
+      with:
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
+        registry: docker.pkg.github.com
         repository: bcgov/aps-portal/portal-backend
         path: backend
         dockerfile: backend/Dockerfile
