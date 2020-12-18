@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+      
     - name: Install oc
       uses: redhat-actions/oc-installer@v1
       with:
@@ -22,7 +24,6 @@ jobs:
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
       
-    - uses: actions/checkout@v2
 
     # - name: Docker Image
     #   uses: docker/build-push-action@v1
