@@ -56,8 +56,16 @@ jobs:
         imagePullSecrets:
           - name: dev-github-read-packages-creds
 
-        podSecurityContext: false
-        securityContext: false
+        podSecurityContext:
+          fsGroup: 1002770000
+
+        securityContext:
+          runAsUser: 1002770000
+
+        env:
+          COOKIE_SECRET:
+            value: "234873290483290"
+            secure: true
         ' > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal -f values.yaml bcgov/generic-api
