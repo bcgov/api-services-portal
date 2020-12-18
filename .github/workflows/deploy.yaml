@@ -160,6 +160,9 @@ jobs:
           runAsUser: 1002770000
 
         containerPort: 3000
+        env:
+          HOSTNAME:
+            value: "0.0.0.0"
         ' > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal-ui -f values.yaml bcgov/generic-api
@@ -176,6 +179,16 @@ jobs:
             wildcardPolicy: None
             tls:
               termination: edge
+        ' > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-routes -f values.yaml bcgov/ocp-route
+
+    - name: 'Deploy Route 2'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        routes:
           - host: "aps-portal-api.apps.silver.devops.gov.bc.ca"
             targetPort: http
             service: proto-apps-portal-generic-api
