@@ -24,21 +24,21 @@ jobs:
       
     - uses: actions/checkout@v2
 
-    - name: Docker Image for gwa-api
-      uses: docker/build-push-action@v1
-      env:
-        DOCKER_BUILDKIT: 1
-      with:
-        registry: docker.pkg.github.com
-        username: $GITHUB_ACTOR
-        password: ${{ secrets.GITHUB_TOKEN }}
-        repository: bcgov/aps-portal/backend-portal
-        path: backend
-        dockerfile: backend/Dockerfile
-        tag_with_ref: true
-        tag_with_sha: false
-        add_git_labels: true
-        push: true
+    # - name: Docker Image
+    #   uses: docker/build-push-action@v1
+    #   env:
+    #     DOCKER_BUILDKIT: 1
+    #   with:
+    #     registry: docker.pkg.github.com
+    #     username: $GITHUB_ACTOR
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    #     repository: bcgov/aps-portal/backend-portal
+    #     path: backend
+    #     dockerfile: backend/Dockerfile
+    #     tag_with_ref: true
+    #     tag_with_sha: false
+    #     add_git_labels: true
+    #     push: true
     
     - name: 'Deploy'
       run: |
@@ -58,5 +58,5 @@ jobs:
         podSecurityContext: false
         securityContext: false
         ' > values.yaml
-        helm repository add bcgov http://bcgov.github.io/helm-charts
+        helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal -f values.yaml bcgov/generic-api
