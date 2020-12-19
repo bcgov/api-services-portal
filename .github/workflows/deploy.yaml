@@ -62,26 +62,27 @@ jobs:
     #     push: true
     #     tags: ${{ steps.docker_meta.outputs.tags }}
 
-    - name: Docker Image for Backend
-      uses: docker/build-push-action@v1
-      env:
-        DOCKER_BUILDKIT: 1
-      with:
-        registry: docker.pkg.github.com
-        username: $GITHUB_ACTOR
-        password: ${{ secrets.GITHUB_TOKEN }}
-        repository: bcgov/aps-portal/portal-backend
-        path: backend
-        dockerfile: ./backend/Dockerfile
-        tag_with_ref: true
-        tag_with_sha: false
-        add_git_labels: true
-        push: true
+    # - name: Docker Image for Backend
+    #   uses: docker/build-push-action@v1
+    #   env:
+    #     DOCKER_BUILDKIT: 1
+    #   with:
+    #     registry: docker.pkg.github.com
+    #     username: $GITHUB_ACTOR
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    #     repository: bcgov/aps-portal/portal-backend
+    #     path: backend
+    #     dockerfile: ./backend/Dockerfile
+    #     tag_with_ref: true
+    #     tag_with_sha: false
+    #     add_git_labels: true
+    #     push: true
 
     - name: Docker Image for Frontend
       uses: docker/build-push-action@v1
       env:
         DOCKER_BUILDKIT: 1
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         registry: docker.pkg.github.com
         username: $GITHUB_ACTOR
