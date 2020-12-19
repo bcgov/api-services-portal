@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import Typography from 'typography';
 import Link from 'next/link';
 import '@bcgov/bc-sans/css/BCSans.css';
@@ -18,6 +19,15 @@ export default function MyApp({ Component, pageProps }) {
   typography.injectStyles();
   return (
     <>
+      <Head>
+        <meta charSet="utf-8" />
+        <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+      </Head>
       <Header />
       <NavBar>
         <li>
@@ -37,7 +47,9 @@ export default function MyApp({ Component, pageProps }) {
         </li>
       </NavBar>
       <main>
-        <Component {...pageProps} />
+        <div style={{ margin: '0 auto', maxWidth: 960 }}>
+          <Component {...pageProps} />
+        </div>
       </main>
     </>
   );

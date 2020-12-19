@@ -15,16 +15,7 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <Head>
-          <title>API Program Services</title>
-          <meta charSet="utf-8" />
-          <meta http-equiv="x-ua-compatible" content="ie=edge" />
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no"
-          />
-          <link href="/favicon.ico" rel="icon" type="image/x-icon" />
-        </Head>
+        <Head />
         <body>
           <Main />
           <NextScript />
