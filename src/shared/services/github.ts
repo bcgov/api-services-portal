@@ -11,8 +11,6 @@ const gh = async (query: string, variables: any = {}) => {
       }),
     });
     const json = await req.json();
-    console.log("CRED = " + process.env.GITHUB_API_TOKEN);
-    console.log(JSON.stringify(json));
 
     return json;
   } catch (err) {
