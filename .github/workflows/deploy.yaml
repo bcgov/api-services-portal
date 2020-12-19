@@ -93,6 +93,7 @@ jobs:
         tag_with_sha: false
         add_git_labels: true
         push: true
+        build_args: GITHUB_API_TOKEN=${{ secrets.GH_TOKEN }}
         
     - name: 'Setup Network Security Policy'
       run: |

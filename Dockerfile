@@ -6,6 +6,8 @@ RUN npm install
 COPY src ./
 COPY public ./
 
+ARG GITHUB_API_TOKEN
+
 RUN npm run build
 
 ENTRYPOINT [ "npm", "run" ]
