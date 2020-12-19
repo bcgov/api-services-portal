@@ -82,7 +82,6 @@ jobs:
       uses: docker/build-push-action@v1
       env:
         DOCKER_BUILDKIT: 1
-        GITHUB_API_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         registry: docker.pkg.github.com
         username: $GITHUB_ACTOR
@@ -93,7 +92,7 @@ jobs:
         tag_with_sha: false
         add_git_labels: true
         push: true
-        build_args: GITHUB_API_TOKEN=${{ secrets.GH_TOKEN }}
+        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
         
     - name: 'Setup Network Security Policy'
       run: |
