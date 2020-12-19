@@ -3,7 +3,7 @@ const gh = async (query: string, variables: any = {}) => {
     const req = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.GITHUB_API_TOKEN}`,
+        Authorization: `token ${process.env.GITHUB_API_TOKEN}`,
       },
       body: JSON.stringify({
         query,
