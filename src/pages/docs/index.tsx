@@ -13,7 +13,7 @@ const DocsPage = ({ text, json }) => {
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div style={{ overflow: 'hidden' }} className={styles['markdown-body']}>
+      <div className={styles['markdown-body']}>
         <ReactMarkdown plugins={[gfm]}>{text}</ReactMarkdown>
       </div>
     </>
