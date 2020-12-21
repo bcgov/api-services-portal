@@ -29,6 +29,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
-    "keystonejs-grapesjs-editor": "^1.0.10"
+    "keystonejs-grapesjs-editor": "^1.0.10",
+    "openid-client": "^4.2.2"
   }
 }
