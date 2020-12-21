@@ -159,7 +159,10 @@ jobs:
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
 
-        echo '
+        echo "
+        annotations:
+          sha: $GITHUB_SHA
+
         replicaCount: 1
 
         image:
@@ -180,17 +183,17 @@ jobs:
 
         env:
           COOKIE_SECRET:
-            value: "234873290483290"
+            value: '234873290483290'
             secure: true
           MONGO_URL:
-            value: "mongodb://proto-aps-portal-db-mongodb:27017"
+            value: 'mongodb://proto-aps-portal-db-mongodb:27017'
           MONGO_USER:
             value: root
             secure: true
           MONGO_PASSWORD:
             value: s3cr3t
             secure: true
-        ' > values.yaml
+        " > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal -f values.yaml bcgov/generic-api
 
@@ -198,7 +201,10 @@ jobs:
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
 
-        echo '
+        echo "
+        annotations:
+          sha: $GITHUB_SHA
+
         replicaCount: 1
 
         image:
@@ -218,8 +224,8 @@ jobs:
         containerPort: 3000
         env:
           HOSTNAME:
-            value: "0.0.0.0"
-        ' > values.yaml
+            value: '0.0.0.0'
+        " > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal-ui -f values.yaml bcgov/generic-api
 
