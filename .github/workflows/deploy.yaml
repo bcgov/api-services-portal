@@ -164,6 +164,9 @@ jobs:
           sha: $GITHUB_SHA
 
         replicaCount: 1
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
 
         image:
           repository: docker.pkg.github.com/bcgov/aps-portal/portal-backend
@@ -206,6 +209,9 @@ jobs:
           sha: $GITHUB_SHA
 
         replicaCount: 1
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
 
         image:
           repository: docker.pkg.github.com/bcgov/aps-portal/portal-ui
