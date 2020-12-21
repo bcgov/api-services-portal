@@ -163,7 +163,7 @@ jobs:
         podAnnotations:
           sha: $GITHUB_SHA
 
-        replicaCount: 1
+        replicaCount: 2
         rollingUpdate:
           maxUnavailable: 50%
           maxSurge: 50%
@@ -208,7 +208,7 @@ jobs:
         podAnnotations:
           sha: $GITHUB_SHA
 
-        replicaCount: 1
+        replicaCount: 2
         rollingUpdate:
           maxUnavailable: 50%
           maxSurge: 50%
