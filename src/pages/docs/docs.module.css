@@ -1,0 +1,17 @@
+
+.markdown-body code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: #EFEFEF;
+    border-radius: 6px;
+}
+
+.markdown-body pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #EFEFEF;
+    border-radius: 6px;    
+}

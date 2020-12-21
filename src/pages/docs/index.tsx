@@ -5,13 +5,15 @@ import gfm from 'remark-gfm';
 
 import gh from '../../shared/services/github';
 
+import styles from './docs.module.css';
+
 const DocsPage = ({ text, json }) => {
   return (
     <>
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div style={{ overflow: 'hidden' }}>
+      <div style={{ overflow: 'hidden' }} className={styles['markdown-body']}>
         <ReactMarkdown plugins={[gfm]}>{text}</ReactMarkdown>
       </div>
     </>
