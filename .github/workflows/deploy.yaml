@@ -160,7 +160,7 @@ jobs:
         export PATH=$PATH:`pwd`/linux-amd64
 
         echo "
-        annotations:
+        podAnnotations:
           sha: $GITHUB_SHA
 
         replicaCount: 1
@@ -202,7 +202,7 @@ jobs:
         export PATH=$PATH:`pwd`/linux-amd64
 
         echo "
-        annotations:
+        podAnnotations:
           sha: $GITHUB_SHA
 
         replicaCount: 1
