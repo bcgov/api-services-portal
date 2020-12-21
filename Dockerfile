@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY src ./
-COPY public ./
+COPY public ./public/
 
 ARG GITHUB_API_TOKEN
 
