@@ -3,7 +3,7 @@ const { Markdown } = require('@keystonejs/fields-markdown');
 
 module.exports = {
   fields: {
-    pathname: {
+    title: {
       type: Text,
       isRequired: true,
     },
@@ -21,9 +21,9 @@ module.exports = {
     },
     slug: {
       type: Slug,
-      unique: false,
+      makeUnique: true,
       isRequired: true,
-      generate: ({ resolvedData }) => slugify(resolvedData.pathname + '-yeah')
+      generate: ({ resolvedData }) => slugify(resolvedData.title + '-yeah')
     },
     isComplete: {
       type: Checkbox,
