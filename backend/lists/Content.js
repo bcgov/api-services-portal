@@ -15,7 +15,7 @@ module.exports = {
       type: Url,
       isRequired: false,
     },
-    pathname: {
+    slug: {
       type: Slug,
       isRequired: true,
     },
@@ -25,4 +25,3 @@ module.exports = {
     },
   },
 };
-
