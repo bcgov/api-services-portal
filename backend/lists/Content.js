@@ -23,7 +23,7 @@ module.exports = {
       type: Slug,
       unique: false,
       isRequired: true,
-      from: "pathname"
+      generate: ({ resolvedData }) => slugify(resolvedData.pathname + '-yeah')
     },
     isComplete: {
       type: Checkbox,
