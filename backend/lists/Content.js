@@ -1,5 +1,6 @@
 const { Text, Checkbox, Slug, Url } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
+const slugify = require('slugify');
 
 module.exports = {
   fields: {

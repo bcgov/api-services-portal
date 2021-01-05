@@ -30,6 +30,7 @@
     "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
     "keystonejs-grapesjs-editor": "^1.0.10",
-    "openid-client": "^4.2.2"
+    "openid-client": "^4.2.2",
+    "slugify": "^1.4.6"
   }
 }
