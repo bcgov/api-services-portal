@@ -3,6 +3,10 @@ const { Markdown } = require('@keystonejs/fields-markdown');
 
 module.exports = {
   fields: {
+    pathname: {
+      type: Text,
+      isRequired: true,
+    },
     description: {
       type: Text,
       isRequired: true,
@@ -19,6 +23,7 @@ module.exports = {
       type: Slug,
       unique: false,
       isRequired: true,
+      from: "pathname"
     },
     isComplete: {
       type: Checkbox,
