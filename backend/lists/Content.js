@@ -1,5 +1,5 @@
-const { Text, Checkbox } = require('@keystonejs/fields')
-const { Markdown } = require('@keystonejs/fields-markdown')
+const { Text, Checkbox, Slug, Url } = require('@keystonejs/fields');
+const { Markdown } = require('@keystonejs/fields-markdown');
 
 module.exports = {
   fields: {
@@ -11,9 +11,18 @@ module.exports = {
       type: Markdown,
       isRequired: false,
     },
+    readme: {
+      type: Url,
+      isRequired: false,
+    },
+    pathname: {
+      type: Slug,
+      isRequired: true,
+    },
     isComplete: {
       type: Checkbox,
       defaultValue: false,
     },
   },
 };
+
