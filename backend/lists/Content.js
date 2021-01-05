@@ -21,8 +21,7 @@ module.exports = {
     },
     slug: {
       type: Slug,
-      makeUnique: true,
-      isRequired: true,
+      makeUnique: () => true,
       generate: ({ resolvedData }) => slugify(resolvedData.title + '-yeah')
     },
     isComplete: {
