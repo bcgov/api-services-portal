@@ -17,6 +17,7 @@ module.exports = {
     },
     slug: {
       type: Slug,
+      unique: false,
       isRequired: true,
     },
     isComplete: {
