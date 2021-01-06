@@ -17,13 +17,13 @@ module.exports = {
       isRequired: false,
     },
     readme: {
-      type: Url,
+      type: Text,
       isRequired: false,
     },
     slug: {
       type: Slug,
       makeUnique: () => true,
-      generate: ({ resolvedData }) => slugify(resolvedData.title + '-yeah')
+      generate: ({ resolvedData }) => slugify(resolvedData.title + '-yeah'),
     },
     isComplete: {
       type: Checkbox,
