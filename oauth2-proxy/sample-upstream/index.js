@@ -9,10 +9,10 @@ const jwksRsa = require('jwks-rsa');
 app.set('trust proxy', 1) // trust first proxy
 
 app.use(session({
-    secret: 's3cr3t',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: process.env.NODE_ENV == 'production' }
   }))
 
 const jwtCheck = jwksRsa.expressJwtSecret({
@@ -33,9 +33,8 @@ app.all('', jwt({
 app.all('', (req, res, next) => {
     if ('user' in req.session && 'user' in req && req.session['user']['sub'] != req['user']['sid']) {
         console.log("Detected different user!  Invalid session")
-        req.session.destroy()
+        req.session.regenerate()
     }
-
     if (!('user' in req.session) && 'user' in req) {
         console.log(JSON.stringify(req.user, null, 4))
         console.log("New login, set session")
@@ -47,14 +46,14 @@ app.all('', (req, res, next) => {
 
 app.get('/public', (req, res) => {
     if ('session' in req && 'user' in req.session) {
-        res.send(`Unprotected content. Hello ${req.session.user.name} (with email ${req.session.user.email}, username ${req.session.user.preferred_username}) in ${req.session.user.namespace}!`)
+        res.send(`Unprotected content. Hello ${req.session.user.name} (with email ${req.session.user.email}, username ${req.session.user.preferred_username}) in ${req.session.user.namespace}! <a href="/">Go to protected</a>`)
     } else {
-        res.send(`Unprotected content. Anonymous!`)
+        res.send(`Unprotected content. Anonymous! <a href="/">Signin</a>`)
     }
 })
 
 app.get('/', (req, res) => {
-    res.send(`Hello ${req.session.user.name} (with email ${req.session.user.email}, username ${req.session.user.preferred_username}) in ${req.session.user.namespace}!`)
+    res.send(`Hello ${req.session.user.name} (with email ${req.session.user.email}, username ${req.session.user.preferred_username}) in ${req.session.user.namespace}!  <a href="/oauth2/sign_in">Signout</a>`)
 })
 
 app.listen(port, () => {
