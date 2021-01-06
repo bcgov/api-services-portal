@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import Typography from 'typography';
-import Link from 'next/link';
 import '@bcgov/bc-sans/css/BCSans.css';
 
 import Header from '../components/header';
@@ -16,7 +15,11 @@ const typography = new Typography({
 });
 
 export default function MyApp({ Component, pageProps }) {
-  typography.injectStyles();
+  const links = [
+    { name: 'APIs', url: '/apis' },
+    { name: 'Documentation', url: '/docs' },
+  ];
+
   return (
     <>
       <Head>
@@ -27,29 +30,12 @@ export default function MyApp({ Component, pageProps }) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+        <style type="text/css">{typography.toString()}</style>
       </Head>
       <Header />
-      <NavBar>
-        <li>
-          <Link href="/">
-            <a>Home</a>
-          </Link>
-        </li>
-        <li>
-          <Link href="/apis">
-            <a>APIs</a>
-          </Link>
-        </li>
-        <li>
-          <Link href="/docs">
-            <a>Documentation</a>
-          </Link>
-        </li>
-      </NavBar>
+      <NavBar links={links} />
       <main>
-        <div style={{ margin: '0 auto', maxWidth: 960 }}>
-          <Component {...pageProps} />
-        </div>
+        <Component {...pageProps} />
       </main>
     </>
   );
