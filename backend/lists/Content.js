@@ -1,4 +1,11 @@
-const { Text, Checkbox, Slug, Url } = require('@keystonejs/fields');
+const {
+  Text,
+  Checkbox,
+  Slug,
+  Url,
+  Float,
+  Integer,
+} = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const slugify = require('slugify');
 
@@ -23,7 +30,10 @@ module.exports = {
     slug: {
       type: Slug,
       makeUnique: () => true,
-      generate: ({ resolvedData }) => slugify(resolvedData.title + '-yeah'),
+      generate: ({ resolvedData }) => slugify(resolvedData.title),
+    },
+    order: {
+      type: Integer,
     },
     isComplete: {
       type: Checkbox,

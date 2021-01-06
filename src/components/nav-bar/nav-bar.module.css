@@ -21,7 +21,7 @@
   margin: 0;
   color: #fff;
   list-style: none;
-  margin-left: -25px;
+  margin-left: -15px;
   /* border-style: dotted;
     border-width: 1px;
     border-color: red; */
@@ -47,9 +47,9 @@
   text-decoration: underline;
 }
 
-.container ul .active {
-  text-decoration: underline;
-  font-weight: bold;
+.active a {
+  text-decoration: underline !important;
+  font-weight: bold !important;
 }
 
 .navbar a:focus {
