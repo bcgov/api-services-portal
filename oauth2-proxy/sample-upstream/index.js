@@ -15,13 +15,11 @@ app.use(session({
     cookie: { secure: false }
   }))
 
-const jwtcerts = "https://authz-apps-gov-bc-ca.dev.apsgw.xyz/auth/realms/aps/protocol/openid-connect/certs"
-
 const jwtCheck = jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: jwtcerts
+    jwksUri: process.env.JWKS_URL
 })
 
 app.all('', jwt({ 

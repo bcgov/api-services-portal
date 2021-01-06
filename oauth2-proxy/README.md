@@ -38,5 +38,7 @@ docker run -ti --rm --name proxy -p 4180:4180 \
 ```
 (cd sample-upstream && docker build --tag sample.local .)
 
-docker run -ti --rm -p 9000:9000 sample.local
+docker run -ti --rm -p 9000:9000 \
+    -e JWKS_URL="${OIDC_ISSUER}/protocol/openid-connect/certs" \
+    sample.local
 ```
