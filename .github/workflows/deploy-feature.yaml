@@ -191,7 +191,7 @@ jobs:
             value: '234873290483290'
             secure: true
           MONGO_URL:
-            value: 'mongodb://proto-aps-portal-db-mongodb-${GITHUB_REF:19}:27017'
+            value: 'mongodb://proto-aps-portal-db-${GITHUB_REF:19}-mongodb:27017'
           MONGO_USER:
             value: root
             secure: true
