@@ -4,9 +4,6 @@ on:
   delete:
     branches: [ feature/* ]
 
-env:
-  DEPLOY_TAG: ${GITHUB_REF:20}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,14 +32,14 @@ jobs:
         kind: NetworkSecurityPolicy
         apiVersion: security.devops.gov.bc.ca/v1alpha1
         metadata:
-          name: proto-aps-portal-${DEPLOY_TAG}
+          name: proto-aps-portal-${GITHUB_REF:19}
         spec:
           description: |
             allow the backend to talk to mongodb
           source:
-            - - app.kubernetes.io/instance=proto-aps-portal-${DEPLOY_TAG}
+            - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}
           destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-db-${DEPLOY_TAG}
+            - - app.kubernetes.io/instance=proto-aps-portal-db-${GITHUB_REF:19}
         """ > nsp.yaml
         oc delete -f nsp.yaml
 
@@ -55,8 +52,8 @@ jobs:
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
        
-        helm delete proto-aps-portal-db-${DEPLOY_TAG}
-        helm delete proto-aps-portal-${DEPLOY_TAG}
-        helm delete proto-aps-portal-ui-${DEPLOY_TAG}
-        helm delete proto-aps-portal-routes-${DEPLOY_TAG}
-        helm delete proto-aps-portal-routes-2-${DEPLOY_TAG}
+        helm delete proto-aps-portal-db-${GITHUB_REF:19}
+        helm delete proto-aps-portal-${GITHUB_REF:19}
+        helm delete proto-aps-portal-ui-${GITHUB_REF:19}
+        helm delete proto-aps-portal-routes-${GITHUB_REF:19}
+        helm delete proto-aps-portal-routes-2-${GITHUB_REF:19}
