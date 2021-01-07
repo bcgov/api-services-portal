@@ -1,0 +1,62 @@
+name: Delete Feature
+
+on:
+  delete:
+    branches: [ feature/* ]
+
+env:
+  DEPLOY_TAG: ${GITHUB_REF:20}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.6'
+
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+        insecure_skip_tls_verify: true
+
+        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    - name: 'Delete Network Security Policy'
+      run: |
+        echo """
+        kind: NetworkSecurityPolicy
+        apiVersion: security.devops.gov.bc.ca/v1alpha1
+        metadata:
+          name: proto-aps-portal-${DEPLOY_TAG}
+        spec:
+          description: |
+            allow the backend to talk to mongodb
+          source:
+            - - app.kubernetes.io/instance=proto-aps-portal-${DEPLOY_TAG}
+          destination:
+            - - app.kubernetes.io/instance=proto-aps-portal-db-${DEPLOY_TAG}
+        """ > nsp.yaml
+        oc delete -f nsp.yaml
+
+    - name: 'Get Helm'
+      run: |
+        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+
+    - name: 'Delete ALL'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+       
+        helm delete proto-aps-portal-db-${DEPLOY_TAG}
+        helm delete proto-aps-portal-${DEPLOY_TAG}
+        helm delete proto-aps-portal-ui-${DEPLOY_TAG}
+        helm delete proto-aps-portal-routes-${DEPLOY_TAG}
+        helm delete proto-aps-portal-routes-2-${DEPLOY_TAG}
