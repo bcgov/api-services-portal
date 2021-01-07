@@ -165,7 +165,8 @@ jobs:
         podAnnotations:
           sha: $GITHUB_SHA
 
-        replicaCount: 2
+        replicaCount: 1
+
         rollingUpdate:
           maxUnavailable: 50%
           maxSurge: 50%
@@ -210,7 +211,8 @@ jobs:
         podAnnotations:
           sha: $GITHUB_SHA
 
-        replicaCount: 2
+        replicaCount: 1
+
         rollingUpdate:
           maxUnavailable: 50%
           maxSurge: 50%
@@ -241,15 +243,15 @@ jobs:
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
 
-        echo '
+        echo "
         routes:
-          - host: "aps-portal.apps.silver.devops.gov.bc.ca"
+          - host: aps-portal.apps.silver.devops.gov.bc.ca
             targetPort: http
             service: proto-aps-portal-ui-${GITHUB_REF:19}-generic-api
             wildcardPolicy: None
             tls:
               termination: edge
-        ' > values.yaml
+        " > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal-routes-${GITHUB_REF:19} -f values.yaml bcgov/ocp-route
 
