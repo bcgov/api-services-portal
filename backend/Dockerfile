@@ -5,6 +5,8 @@ RUN npm install
 
 COPY *.js ./
 COPY lists/* ./lists/
+COPY pages/* ./pages/
+COPY components/* ./components/
 
 ENV COOKIE_SECRET=change_me
 

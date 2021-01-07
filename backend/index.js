@@ -89,7 +89,7 @@ module.exports = {
       pages: pages,
       enableDefaultRoute: true,
       isAccessAllowed: (user) => {
-        console.log("isALlowed?")
+        console.log("isAllowed?")
         console.log(JSON.stringify(user))
         return true
       },
