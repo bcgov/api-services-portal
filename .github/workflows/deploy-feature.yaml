@@ -4,13 +4,17 @@ on:
   push:
     branches: [ feature/* ]
 
-env:
-  DEPLOY_TAG: ${GITHUB_REF:20}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_TAG: "${GITHUB_REF:20}"
     steps:
+    - run: |
+        echo "YES $DEPLOY_TAG"
+        exit 1
+        
     - uses: actions/checkout@v2
       
     - name: Install oc
