@@ -12,9 +12,9 @@ jobs:
       DEPLOY_TAG: "${GITHUB_REF:20}"
     steps:
     - run: |
-        echo "YES $DEPLOY_TAG"
+        echo "YES $DEPLOY_TAG ${GITHUB_REF:20}"
         exit 1
-        
+
     - uses: actions/checkout@v2
       
     - name: Install oc
