@@ -62,27 +62,31 @@ class Oauth2ProxyAuthStrategy {
             // The SessionManager is expecting an Authorization header, so give it one
             //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
 
+            const name = req['oauth_user']['name']
             const email = req['oauth_user']['email']
 
+            const username = req['oauth_user']['preferred_username']
+
             let results = await users.adapter.find({ ['email']: email })
+
+            var operation = "update"
 
             if (results.length == 0) {
                 console.log("EMAIL NOT FOUND - CREATING USER AUTOMATICALLY")
                 const { errors } = await this.keystone.executeGraphQL({
                     context: this.keystone.createContext({ skipAccessControl: true }),
-                    query: `mutation initialUser($email: String) {
-                          createUser(data: {name: "Admin", email: $email, isAdmin: false, groups: $groups}) {
-                            id
-                          }
-                        }`,
-                    variables: { email },
+                    query: `mutation ($name: String, $email: String, $username: String) {
+                            createUser(data: {name: $name, username: $username, email: $email, isAdmin: false}) {
+                                id
+                          
+                        } }`,
+                    variables: { name, email, username },
                 });   
-                results = await users.adapter.find({ ['email']: email })             
+                results = await users.adapter.find({ ['email']: email })       
+                operation = "create"      
             }
-            var operation = "update"
 
             const user = results[0]
-            user['oauth'] = req.oauth_user
 
             await this._authenticateItem(user, null, operation === 'create', req, res, next);
         })
