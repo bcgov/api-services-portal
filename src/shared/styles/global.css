@@ -1,9 +1,14 @@
 @tailwind base;
+
+/* Write your own custom base styles here */
+
+/* Start purging... */
 @tailwind components;
+/* Stop purging. */
 
 html {
   --brand-blue: #036;
-  --brand-yellow: -#fcba19;
+  --brand-yellow: #fcba19;
 }
 
 body {
@@ -54,4 +59,6 @@ h6 {
   font-size: 0.80345rem;
 }
 
+/* Start purging... */
 @tailwind utilities;
+/* Stop purging. */
