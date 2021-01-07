@@ -23,14 +23,14 @@ const pagesQuery = gql`
   }
 `;
 
-const DocsContentPage = ({ pages, content }) => {
+const DocsContentPage = ({ pages, content, title }) => {
   return (
     <>
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div className={styles.container}>
-        <aside className={styles.sidebar}>
+      <div className="grid grid-cols-12 gap-8">
+        <aside className={`${styles.sidebar} col-span-2 hidden md:block`}>
           <nav className={styles.nav}>
             {pages.map((page: any) => (
               <li key={page.id}>
@@ -39,7 +39,7 @@ const DocsContentPage = ({ pages, content }) => {
             ))}
           </nav>
         </aside>
-        <div className={styles.content}>
+        <div className="container mr-50% col-span-12 md:col-span-9 lg:col-span-7 py-6 px-4 sm:px-0">
           <div className={styles.markdownBody}>
             <ReactMarkdown plugins={[gfm]}>{content}</ReactMarkdown>
           </div>
@@ -98,6 +98,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     props: {
       content,
       pages: pages.allContents,
+      title: page.title,
     },
     revalidate: 1,
   };

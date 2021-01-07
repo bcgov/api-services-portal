@@ -1,9 +1,57 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+
+html {
+  --brand-blue: #036;
+  --brand-yellow: -#fcba19;
 }
 
 body {
-  margin-top: 100px;
+  margin-top: 106px;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  font-size: 2.074rem;
+}
+
+h2 {
+  font-size: 1.54912rem;
+}
+
+h3 {
+  font-size: 1.33882rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+h5 {
+  font-size: 0.86425rem;
+}
+
+h6 {
+  font-size: 0.80345rem;
+}
+
+@tailwind utilities;
