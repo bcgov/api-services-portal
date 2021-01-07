@@ -1,0 +1,273 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ feature/* ]
+
+env:
+  DEPLOY_TAG: ${GITHUB_REF:20}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.6'
+
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+        insecure_skip_tls_verify: true
+
+        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+
+    # -
+    #   name: Docker meta
+    #   id: docker_meta
+    #   uses: crazy-max/ghaction-docker-meta@v1
+    #   with:
+    #     images: bcgov/aps-portal/portal-backend # list of Docker images to use as base name for tags
+    # -
+    #   name: Set up QEMU
+    #   uses: docker/setup-qemu-action@v1        
+    # -
+    #   name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v1
+    # -
+    #   name: Cache Docker layers
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: /tmp/.buildx-cache
+    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-buildx-
+    # -
+    #   name: Login to DockerHub
+    #   uses: docker/login-action@v1 
+    #   with:
+    #     registry: docker.pkg.github.com
+    #     username: ${{ github.repository_owner }}
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    # -
+    #   name: Build and push for Backend
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     context: backend
+    #     cache-from: type=local,src=/tmp/.buildx-cache
+    #     cache-to: type=local,dest=/tmp/.buildx-cache
+    #     file: ./backend/Dockerfile
+    #     push: true
+    #     tags: ${{ steps.docker_meta.outputs.tags }}
+
+    - name: Docker Image for Backend
+      uses: docker/build-push-action@v1
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        registry: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: bcgov/aps-portal/portal-backend
+        path: backend
+        dockerfile: ./backend/Dockerfile
+        tag_with_ref: true
+        tag_with_sha: false
+        add_git_labels: true
+        push: true
+
+    - name: Docker Image for Frontend
+      uses: docker/build-push-action@v1
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        registry: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: bcgov/aps-portal/portal-ui
+        dockerfile: Dockerfile
+        tag_with_ref: true
+        tag_with_sha: false
+        add_git_labels: true
+        push: true
+        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 'Setup Network Security Policy'
+      run: |
+        echo """
+        kind: NetworkSecurityPolicy
+        apiVersion: security.devops.gov.bc.ca/v1alpha1
+        metadata:
+          name: proto-aps-portal-${DEPLOY_TAG}
+        spec:
+          description: |
+            allow the backend to talk to mongodb
+          source:
+            - - app.kubernetes.io/instance=proto-aps-portal-${DEPLOY_TAG}
+          destination:
+            - - app.kubernetes.io/instance=proto-aps-portal-db-${DEPLOY_TAG}
+        """ > nsp.yaml
+        oc apply -f nsp.yaml
+
+    - name: 'Get Helm'
+      run: |
+        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+
+    - name: 'Deploy Database'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        auth:
+            rootPassword: "s3cr3t"
+
+        arbiter:
+            enabled: false
+
+        rbac:
+            create: true
+
+        strategyType: Recreate
+
+        persistence:
+            enabled: true
+            size: 2Gi
+
+        resources:
+          limits:
+            cpu: 300m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi    
+
+        podSecurityContext:
+            enabled: true
+            fsGroup: 1002770000
+
+        containerSecurityContext:
+            enabled: true
+            runAsUser: 1002770000
+        ' > values.yaml
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm upgrade --install proto-aps-portal-db-${DEPLOY_TAG} -f values.yaml bitnami/mongodb
+
+    - name: 'Deploy Backend'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo "
+        podAnnotations:
+          sha: $GITHUB_SHA
+
+        replicaCount: 2
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
+
+        image:
+          repository: docker.pkg.github.com/bcgov/aps-portal/portal-backend
+          tag: feature-${DEPLOY_TAG}
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext:
+          fsGroup: 1002770000
+
+        securityContext:
+          runAsUser: 1002770000
+
+        containerPort: 3000
+
+        env:
+          COOKIE_SECRET:
+            value: '234873290483290'
+            secure: true
+          MONGO_URL:
+            value: 'mongodb://proto-aps-portal-db-mongodb-${DEPLOY_TAG}:27017'
+          MONGO_USER:
+            value: root
+            secure: true
+          MONGO_PASSWORD:
+            value: s3cr3t
+            secure: true
+        " > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-${DEPLOY_TAG} -f values.yaml bcgov/generic-api
+
+    - name: 'Deploy Frontend'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo "
+        podAnnotations:
+          sha: $GITHUB_SHA
+
+        replicaCount: 2
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
+
+        image:
+          repository: docker.pkg.github.com/bcgov/aps-portal/portal-ui
+          tag: feature-${DEPLOY_TAG}
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext:
+          fsGroup: 1002770000
+
+        securityContext:
+          runAsUser: 1002770000
+
+        containerPort: 3000
+        env:
+          HOSTNAME:
+            value: '0.0.0.0'
+        " > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-ui-${DEPLOY_TAG} -f values.yaml bcgov/generic-api
+
+    - name: 'Deploy Routes'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo '
+        routes:
+          - host: "aps-portal.apps.silver.devops.gov.bc.ca"
+            targetPort: http
+            service: proto-aps-portal-ui-${DEPLOY_TAG}-generic-api
+            wildcardPolicy: None
+            tls:
+              termination: edge
+        ' > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-routes-${DEPLOY_TAG} -f values.yaml bcgov/ocp-route
+
+    - name: 'Deploy Route 2'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo "
+        routes:
+          - host: aps-portal-api-${DEPLOY_TAG}.apps.silver.devops.gov.bc.ca
+            targetPort: http
+            service: proto-aps-portal-${DEPLOY_TAG}-generic-api
+            wildcardPolicy: None
+            tls:
+              termination: edge
+        " > values.yaml
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-routes-2-${DEPLOY_TAG} -f values.yaml bcgov/ocp-route
