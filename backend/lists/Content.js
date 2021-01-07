@@ -10,6 +10,7 @@ const { Markdown } = require('@keystonejs/fields-markdown');
 const slugify = require('slugify');
 
 module.exports = {
+  labelField: "title",
   fields: {
     title: {
       type: Text,
@@ -30,7 +31,10 @@ module.exports = {
     slug: {
       type: Slug,
       makeUnique: () => true,
-      generate: ({ resolvedData }) => slugify(resolvedData.title),
+      generate: ({ resolvedData }) => slugify(resolvedData.title).toLowerCase(),
+      adminConfig: {
+        isReadOnly: true, //slug can be created automatically and you may want to show this as read only
+      }
     },
     order: {
       type: Integer,

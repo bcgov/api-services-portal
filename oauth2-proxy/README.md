@@ -25,12 +25,15 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --redirect-url="http://localhost:4180/oauth2/callback" \
     --cookie-secure=False \
     --cookie-refresh=60s \
-    --cookie-name=app.sid \
-    --pass-access-token \
-    --pass-user-headers \
-    --pass-host-header \
+    --cookie-name=keystoneproxy.sid \
+    --pass-basic-auth=false \
+    --pass-access-token=true \
+    --set-xauthrequest=true \
+    --skip-jwt-bearer-tokens=true \
+    --set-authorization-header=true \
+    --pass-authorization-header=true \
     --skip-auth-regex=/public \
-    --upstream="http://${hostip}:9000"
+    --upstream="http://${hostip}:3000"
 ```
 
 # Sample Upstream
@@ -44,3 +47,5 @@ docker run -ti --rm -p 9000:9000 \
     -e JWKS_URL="${OIDC_ISSUER}/protocol/openid-connect/certs" \
     sample.local
 ```
+
+Go to: `http://localhost:9000/public`

@@ -33,7 +33,11 @@ app.all('', jwt({
 app.all('', (req, res, next) => {
     if ('user' in req.session && 'user' in req && req.session['user']['sub'] != req['user']['sid']) {
         console.log("Detected different user!  Invalid session")
-        req.session.regenerate()
+        req.session.regenerate((err) => {
+            req.session.user = req.user
+            next()
+        })
+        return
     }
     if (!('user' in req.session) && 'user' in req) {
         console.log(JSON.stringify(req.user, null, 4))
