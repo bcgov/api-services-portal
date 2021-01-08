@@ -20,6 +20,7 @@ export default function MyApp({ Component, pageProps }) {
     { name: 'Documentation', url: '/docs' },
   ];
 
+  
   return (
     <>
       <Head>
