@@ -3,6 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 //import styles from './nav-bar.module.css';
+var styles = {
+    active: "",
+    navbar: "",
+    container: ""
+}
 
 interface NavBarProps {
   links: any[];

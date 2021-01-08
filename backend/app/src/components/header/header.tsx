@@ -1,9 +1,14 @@
 import * as React from 'react';
-//import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 
-import styles from './header.module.css';
+//import styles from './header.module.scss';
 //<Image src="/images/bc_logo_header.svg" width={170} height={43} />
+var styles = {
+    header: "",
+    banner: "",
+    other: ""
+}
 
 const Header: React.FC<{}> = () => {
   return (

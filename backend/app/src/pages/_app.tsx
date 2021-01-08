@@ -3,7 +3,7 @@ import Typography from 'typography';
 //import '@bcgov/bc-sans/css/BCSans.css';
 //import '../shared/styles/global.css';
 
-//import Header from '../components/header';
+import Header from '../components/header';
 //import NavBar from '../components/nav-bar';
 
 // const typography = new Typography({
