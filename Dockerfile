@@ -5,8 +5,8 @@ RUN npm install
 
 COPY src ./
 COPY public ./public/
-COPY *.config.js
-COPY tsconfig.json
+COPY *.config.js ./
+COPY tsconfig.json ./
 
 ARG GITHUB_API_TOKEN
 
