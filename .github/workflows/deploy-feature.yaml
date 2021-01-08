@@ -190,7 +190,7 @@ jobs:
         oauthProxy:
           enabled: true
           config:
-            upstream: "http://127.0.0.1:8000"
+            upstream: "http://127.0.0.1:3000"
             client-id: "${{ secrets.OIDC_CLIENT_ID }}"
             client-secret: "${{ secrets.OIDC_CLIENT_SECRET }}"
             oidc-issuer-url: "${{ secrets.OIDC_ISSUER }}"
