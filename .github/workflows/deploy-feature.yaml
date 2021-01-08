@@ -5,7 +5,7 @@ on:
     branches: [ feature/* ]
 
 env:
-  REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+  REGISTRY: docker.pkg.github.com #${{ secrets.CONTAINER_REGISTRY }}
   # REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   # REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
@@ -71,7 +71,7 @@ jobs:
       env:
         DOCKER_BUILDKIT: 1
       with:
-        registry: docker.pkg.github.com
+        registry: ${{ env.REGISTRY }}
         username: $GITHUB_ACTOR
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: bcgov/aps-portal/portal-backend
@@ -87,7 +87,7 @@ jobs:
       env:
         DOCKER_BUILDKIT: 1
       with:
-        registry: docker.pkg.github.com
+        registry: ${{ env.REGISTRY }}
         username: $GITHUB_ACTOR
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: bcgov/aps-portal/portal-ui
