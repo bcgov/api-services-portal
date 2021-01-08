@@ -61,7 +61,7 @@ jobs:
         file: ./backend/Dockerfile
         target: runtime
         push: true
-        tags: ${{ steps.docker_meta.outputs.tag }}        
+        tags: ${{ steps.docker_meta.outputs.tags }}        
 
     # - name: Docker Image for Backend
     #   uses: docker/build-push-action@v1
