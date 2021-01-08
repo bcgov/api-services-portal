@@ -7,6 +7,7 @@ import { gql } from 'graphql-request';
 import { useRouter } from 'next/router';
 
 import api from '../shared/services/api';
+import Card from '../components/card';
 import gh from '../shared/services/github';
 
 import styles from './docs/docs.module.css';
@@ -18,15 +19,16 @@ const DocsPage = ({ pages }) => {
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div className={styles.container}>
-        <div className={styles.content}>
-          <div className={styles.markdownBody}>
-            {pages.map((d) => (
-              <li key={d.id}>
+      <div className="container mx-auto pt-4 px-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {pages.map((d) => (
+            <Card key={d.id}>
+              <h3 className="text-base">
                 <Link href={`/docs/${d.slug}`}>{d.title}</Link>
-              </li>
-            ))}
-          </div>
+              </h3>
+              <p>{d.description}</p>
+            </Card>
+          ))}
         </div>
       </div>
     </>
@@ -40,6 +42,7 @@ export async function getStaticProps(context) {
         id
         title
         slug
+        description
       }
     }
   `;
