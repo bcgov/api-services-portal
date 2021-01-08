@@ -37,12 +37,9 @@ const keystone = new Keystone({
 //   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
 });
 
-
-
-for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'DataSet', 'DataSetGroup', 'Gateway', 'Organization', 'Plugin', 'ServiceRoute', 'Content', 'Todo']) {
+for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer', 'DataSet', 'DataSetGroup', 'Gateway', 'Organization', 'Plugin', 'ServiceRoute', 'Content', 'Todo']) {
     keystone.createList(_list, require('./lists/' + _list));
 }
-
 
 const authStrategy = keystone.createAuthStrategy({
     type: Oauth2ProxyAuthStrategy,

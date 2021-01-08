@@ -40,7 +40,7 @@ module.exports = {
         },
         {
             label: 'Administration',
-            children: ['User', 'Organization', 'Plugin', 'Group'],
+            children: ['User', 'Organization', 'Plugin', 'Group', 'CredentialIssuer'],
         },
         {
             label: 'A Hello Page',
