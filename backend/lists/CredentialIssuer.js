@@ -16,6 +16,7 @@ module.exports = {
     oidcDiscoveryUrl: {
         type: Url,
         isRequired: true,
+        views: '../admin/fieldViews/link'
     },
     clientId: {
         type: Text,
@@ -25,7 +26,7 @@ module.exports = {
         type: Password,
         isRequired: false,
     },
-    dataSetGroups: { type: Relationship, ref: 'DataSetGroup', many: true }
+    dataSetGroups: { type: Relationship, ref: 'DatasetGroup', many: true }
   },
   plugins: [
     byTracking(),

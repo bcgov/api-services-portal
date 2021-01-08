@@ -13,10 +13,10 @@ module.exports = {
         // },
         // Ordering existing list pages
         {
-            label: 'Datasets',
+            label: 'Discovery',
             children: [
-                { listKey: 'DataSetGroup', label: 'API Families' },
-                { listKey: 'DataSet', label: 'Datasets' },
+                { listKey: 'DatasetGroup', label: 'Dataset Groups' },
+                { listKey: 'Dataset', label: 'Datasets' },
             ],
         },
         {
@@ -27,11 +27,6 @@ module.exports = {
             ],
         },
         {
-            label: 'Documentation',
-            component: Placeholder,
-            path: 'docs',
-        },
-        {
             label: 'Consumers',
             children: [
                 { listKey: 'Consumer', label: 'Consumers' },
@@ -39,8 +34,13 @@ module.exports = {
             ],
         },
         {
+            label: 'Documentation',
+            component: Placeholder,
+            path: 'docs',
+        },
+        {
             label: 'Administration',
-            children: ['User', 'Organization', 'Plugin', 'Group', 'CredentialIssuer'],
+            children: ['TemporaryIdentity', 'User', 'Organization', 'Plugin', 'Group', 'CredentialIssuer'],
         },
         {
             label: 'A Hello Page',

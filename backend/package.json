@@ -1,9 +1,9 @@
 {
-  "name": "@keystonejs/example-projects-starter",
-  "description": "An example KeystoneJS project with a User list and Authentication.",
+  "name": "bcgov-aps-portal",
+  "description": "The APS API Services Portal",
   "private": true,
-  "version": "5.0.22",
-  "author": "The KeystoneJS Development Team",
+  "version": "0.1.0",
+  "author": "BC Gov APS",
   "repository": "https://github.com/keystonejs/keystone/tree/master/packages/create-keystone-app/example-projects/starter",
   "homepage": "https://github.com/keystonejs/keystone",
   "license": "MIT",
@@ -17,9 +17,13 @@
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables"
   },
   "dependencies": {
+    "@bcgov/bc-sans": "^1.0.1",
+    "@keystone-next/admin-ui": "^7.0.0",
     "@keystonejs/adapter-mongoose": "^10.1.0",
     "@keystonejs/app-admin-ui": "^7.3.12",
     "@keystonejs/app-graphql": "^6.1.3",
+    "@keystonejs/app-next": "^5.2.3",
+    "@keystonejs/app-static": "^5.1.3",
     "@keystonejs/auth-password": "^5.1.18",
     "@keystonejs/fields": "^21.0.0",
     "@keystonejs/fields-markdown": "^5.2.13",
@@ -31,9 +35,25 @@
     "dotenv": "^8.2.0",
     "express-jwt": "^6.0.0",
     "express-session": "^1.17.1",
+    "graphql": "^15.4.0",
+    "graphql-request": "^3.4.0",
+    "isomorphic-unfetch": "^3.1.0",
     "jwks-rsa": "^1.12.1",
     "keystonejs-grapesjs-editor": "^1.0.10",
+    "next": "^10.0.3",
     "openid-client": "^4.2.2",
-    "slugify": "^1.4.6"
+    "remark-gfm": "^1.0.0",
+    "slugify": "^1.4.6",
+    "swr": "^0.3.9",
+    "typography": "^0.16.19"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14",
+    "@types/react": "^17.0.0",
+    "autoprefixer": "^10.1.0",
+    "postcss": "^8.2.2",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3",
+    "tailwindcss": "^2.0.2"
   }
 }

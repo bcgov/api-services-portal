@@ -9,6 +9,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    content: {
+        type: Markdown,
+        isRequired: false,
+    },  
     isApproved: {
       type: Checkbox,
       isRequired: false,
@@ -17,7 +21,7 @@ module.exports = {
         type: Checkbox,
         isRequired: false,
     },
-    dataSetGroup: { type: Relationship, ref: 'DataSetGroup' },
+    dataSetGroup: { type: Relationship, ref: 'DatasetGroup' },
   },
   plugins: [
     byTracking(),

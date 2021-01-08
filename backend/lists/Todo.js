@@ -5,9 +5,13 @@ const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
 module.exports = {
   fields: {
+    name: {
+        type: Text,
+        isRequired: true,
+    },
     description: {
       type: Text,
-      isRequired: true,
+      isRequired: false,
     },
     content: {
       type: Markdown,

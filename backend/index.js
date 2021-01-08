@@ -3,6 +3,10 @@ const { Oauth2ProxyAuthStrategy } = require('./auth');
 const { Text, Checkbox, Password, Select } = require('@keystonejs/fields');
 const { GraphQLApp } = require('@keystonejs/app-graphql');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
+//const { AdminUIApp } = require('@keystone-next/admin-ui');
+const { StaticApp } = require('@keystonejs/app-static');
+const { NextApp } = require('@keystonejs/app-next');
+
 const initialiseData = require('./initial-data');
 const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
@@ -10,6 +14,7 @@ const MongoStore = require('connect-mongo')(session);
 
 const { Strategy, Issuer, Client } = require('openid-client');
 
+const { staticRoute, staticPath, distDir } = require('./config');
 
 const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose');
 const PROJECT_NAME = 'APS Service Portal';
@@ -37,7 +42,7 @@ const keystone = new Keystone({
 //   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
 });
 
-for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer', 'DataSet', 'DataSetGroup', 'Gateway', 'Organization', 'Plugin', 'ServiceRoute', 'Content', 'Todo']) {
+for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer', 'TemporaryIdentity', 'Dataset', 'DatasetGroup', 'Gateway', 'Organization', 'OrganizationUnit', 'Plugin', 'ServiceRoute', 'Content', 'Todo']) {
     keystone.createList(_list, require('./lists/' + _list));
 }
 
@@ -79,18 +84,20 @@ module.exports = {
   keystone,
   apps: [
     new GraphQLApp(),
+    new StaticApp({ path: '/public', src: 'public' }),
     new AdminUIApp({
       name: PROJECT_NAME,
       signinPath: "oauth2/sign_in",
       authStrategy,
       pages: pages,
-      enableDefaultRoute: true,
+      enableDefaultRoute: false,
       isAccessAllowed: (user) => {
         console.log("isAllowed?")
         console.log(JSON.stringify(user))
         return true
       },
-    })
+    }),
+    new NextApp({ dir: 'app' })
   ],
-  
+  distDir
 }
