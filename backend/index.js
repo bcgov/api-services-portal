@@ -97,7 +97,7 @@ module.exports = {
         return true
       },
     }),
-    new NextApp({ dir: 'app' })
+    // new NextApp({ dir: 'app' })
   ],
-  distDir
+//   distDir
 }

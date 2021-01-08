@@ -2,7 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-//import styles from './header.module.scss';
+//import _styles from './header.module.css';
 //<Image src="/images/bc_logo_header.svg" width={170} height={43} />
 var styles = {
     header: "",
@@ -16,6 +16,7 @@ const Header: React.FC<{}> = () => {
       <hgroup className={styles.banner}>
         <Link href="/">
           <a>
+                <Image/>
           </a>
         </Link>
         <h1 className="white font-normal mb-0 ml-4 mr-2">
