@@ -52,7 +52,7 @@ jobs:
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
       with:
-        images: bcgov/aps-portal/portal-backend
+        images: bcgov/portal-backend
 
     - name: Build and push
       id: docker_build
@@ -174,7 +174,7 @@ jobs:
           maxSurge: 50%
 
         image:
-          repository: docker.pkg.github.com/bcgov/aps-portal/portal-backend
+          repository: ${{ env.REGISTRY }}/bcgov/portal-backend
           tag: feature-${GITHUB_REF:19}
           pullPolicy: Always
 
