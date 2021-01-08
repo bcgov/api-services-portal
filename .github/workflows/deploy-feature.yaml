@@ -187,6 +187,15 @@ jobs:
 
         containerPort: 3000
 
+        oauthProxy:
+          enabled: true
+          config:
+            upstream: "http://127.0.0.1:8000"
+            client-id: "${{ secrets.OIDC_CLIENT_ID }}"
+            client-secret: "${{ secrets.OIDC_CLIENT_SECRET }}"
+            oidc-issuer-url: "${{ secrets.OIDC_ISSUER }}"
+            redirect-url: "https://aps-portal-api-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback"
+
         env:
           COOKIE_SECRET:
             value: '234873290483290'
