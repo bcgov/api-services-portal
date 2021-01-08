@@ -197,7 +197,7 @@ jobs:
             redirect-url: "https://aps-portal-api-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback"
 
         env:
-          COOKIE_SECRET:
+          SESSION_SECRET:
             value: '234873290483290'
             secure: true
           MONGO_URL:
@@ -208,7 +208,11 @@ jobs:
           MONGO_PASSWORD:
             value: s3cr3t
             secure: true
+          JWKS_URL:
+            value: "${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs"
+
         " > values.yaml
+        
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal-${GITHUB_REF:19} -f values.yaml bcgov/generic-api
 
