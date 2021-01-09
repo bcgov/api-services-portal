@@ -4,9 +4,11 @@ COPY package*.json ./
 RUN npm install
 
 COPY *.js ./
+COPY app/* ./app/
+COPY components/* ./components/
 COPY lists/* ./lists/
 COPY pages/* ./pages/
-COPY components/* ./components/
+COPY public/* ./public/
 
 ENV COOKIE_SECRET=change_me
 
