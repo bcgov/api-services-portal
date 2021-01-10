@@ -81,6 +81,7 @@ jobs:
         tag_with_sha: false
         add_git_labels: true
         push: true
+        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
     - name: Docker Image for Frontend
       uses: docker/build-push-action@v1

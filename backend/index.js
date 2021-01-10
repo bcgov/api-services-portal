@@ -47,7 +47,7 @@ for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer',
     keystone.createList(_list, require('./lists/' + _list));
 }
 
-const authStrategy = true ? keystone.createAuthStrategy({
+const authStrategy = false ? keystone.createAuthStrategy({
     type: PasswordAuthStrategy,
     list: 'User'
 }) : keystone.createAuthStrategy({
@@ -59,7 +59,7 @@ const authStrategy = true ? keystone.createAuthStrategy({
       onAuthenticated: ({ token, item, isNewItem }, req, res) => {
           console.log("Token = "+token);
           console.log("Redirecting to /admin")
-          res.redirect('/admin');
+          res.redirect('/');
       }      
     },
     hooks: {

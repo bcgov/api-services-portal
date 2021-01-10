@@ -6,14 +6,18 @@ import { REMOVE } from './queries'
 
 const Item = props => (
     <li style={styles.listItem}>
-      {props.accessRequest.name}
-      { props.accessRequest.datasetGroup && (
-            <p>Dataset {props.accessRequest.datasetGroup.name}</p>
-      )}
-      { props.accessRequest.isApproved ? ( <span>APPROVED</span> ) : false }
-      { props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
-          <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
-      ):false}
+    { props ? (
+        <>
+        {props.accessRequest.name}
+        { props.accessRequest.datasetGroup && (
+                <p>Dataset {props.accessRequest.datasetGroup.name}</p>
+        )}
+        { props.accessRequest.isApproved ? ( <span>APPROVED</span> ) : false }
+        { props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
+            <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
+        ):false}
+        </>
+    ):false }
       <button
         style={styles.deleteButton}
         className="trash"

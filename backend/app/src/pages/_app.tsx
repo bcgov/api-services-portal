@@ -17,7 +17,7 @@ import NavBar from '../components/nav-bar';
 export default function MyApp({ Component, pageProps }) {
   const links = [
     { name: 'APIs', url: '/apis' },
-    { name: 'Service Routes', url: '/services' },
+    // { name: 'Service Routes', url: '/services' },
     { name: 'Access Requests', url: '/requests' },
     { name: 'Documentation', url: '/docs' },
   ];

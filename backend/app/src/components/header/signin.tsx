@@ -5,13 +5,13 @@ const { useEffect, useState } = React;
 import graphql from '../../shared/services/graphql'
 
 const GET_USER = `
-query GetUser {
-    allTemporaryIdentities {
-      name
-      username
-      email
+    query GetUser {
+        allTemporaryIdentities {
+        name
+        username
+        email
+        }
     }
-}
 `
 
 
@@ -34,9 +34,13 @@ const Signin: React.FC<SigninProps> = ({ }) => {
 
     return (
         <div className="">
-            { data ? data.name : "Anonymous" }
+            { data != null && data.allTemporaryIdentities && data.allTemporaryIdentities.length == 1 ? (
+                <span>{data.allTemporaryIdentities[0].username} (<a href="/admin/signout">Signout</a>)</span>
+            ) : (
+                <span><a href="/admin/signin">Signin</a></span>
+            ) }
         </div>
-    );
+    )
 };
 
 export default Signin;

@@ -20,7 +20,7 @@ const Header: React.FC<{}> = () => {
           API Program Services
         </h1>
       </hgroup>
-      <hgroup className={styles.other}>x</hgroup>
+      <hgroup className={styles.other}><Signin/></hgroup>
     </header>
   );
 };

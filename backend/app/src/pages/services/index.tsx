@@ -44,12 +44,3 @@ export async function getServerSideProps(context) {
       },
     };
 }
-
-const ADD_TODO = `
-    mutation AddServiceRoute($name: String!) {
-        createServiceRoute(data: { name: $name }) {
-            name
-            id
-        }
-    }
-`;

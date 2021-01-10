@@ -22,6 +22,7 @@ function List({ data, state, refetch }) {
         );
       }
     }
+    return false
   }
 
   export default List
