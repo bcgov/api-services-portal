@@ -6,7 +6,7 @@ import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
-const ApiDiscoveryPage = () => {
+const MyProfilePage = () => {
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     // let fetch = () => {
@@ -23,17 +23,13 @@ const ApiDiscoveryPage = () => {
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Discover APIs</h1>
+            <h1 style={styles.mainHeading}>My Profile</h1>
             <p style={styles.introText}>
-                This is for Developers wishing to find APIs provided by the BC Government.  Lists are pulled in from the BC Data Catalog and from here where API Owners are able to create private Datasets that they can control access to.
+                This page provides details about the user.
             </p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Catalog</h2>
-            </div>
         </div>
     )
 }
 
-export default ApiDiscoveryPage;
+export default MyProfilePage;
 

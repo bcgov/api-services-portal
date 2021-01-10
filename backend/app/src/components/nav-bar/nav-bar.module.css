@@ -63,6 +63,10 @@
   outline-offset: 1px;
 }
 
+.namespace {
+    float: pull-right;
+}
+
 /*
     These are sample media queries only. Media queries are quite subjective
     but, in general, should be made for the three different classes of screen

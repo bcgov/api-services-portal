@@ -17,6 +17,7 @@ const GET_USER = `
         username
         email
         roles
+        namespace
         }
     }
 `
@@ -44,6 +45,7 @@ export default function MyApp({ Component, pageProps }) {
     { name: 'My Credentials', url: '/my-credentials', access: ['developer'] },
     { name: 'Documentation', url: '/docs', access: null },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
+    { name: 'My Profile', url: '/my-profile', access: ['developer'] },
   ];
 
   let [{ state, user }, setState] = useState({ state: 'loading', user: null });

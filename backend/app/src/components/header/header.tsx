@@ -8,7 +8,7 @@ import Signin from './signin';
 
 
 interface HeaderProps {
-    user: { username, roles };
+    user: { username, roles, namespace };
 }
 
 //<Image src="/images/bc_logo_header.svg" width={170} height={43} />
