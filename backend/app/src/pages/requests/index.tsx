@@ -2,7 +2,7 @@ import * as React from 'react';
 
 const { useEffect, useState } = React;
 
-import styles from './request.css';
+import { styles } from './request.css';
 
 import graphql from '../../shared/services/graphql'
 

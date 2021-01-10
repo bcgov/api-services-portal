@@ -1,4 +1,4 @@
-import styles from './request.css'
+import { styles } from './request.css'
 
 import graphql from '../../shared/services/graphql'
 

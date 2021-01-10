@@ -42,3 +42,6 @@ export const REMOVE = `
         }
     }
 `
+
+const empty = () => false
+export default empty

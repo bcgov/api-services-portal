@@ -7,7 +7,7 @@ const brightness = {
 const tint = (opacity = 1, theme = 'default') =>
   `hsla(261, 84%, ${brightness[theme]}, ${opacity})`;
 
-const styles = {
+export const styles = {
     app: {
       padding: 10,
     //   maxWidth: 600,
@@ -68,4 +68,7 @@ const styles = {
     },
   }
 
-  export default styles
+const empty = () => false
+export default empty
+
+  

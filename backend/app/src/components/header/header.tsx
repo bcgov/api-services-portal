@@ -4,6 +4,8 @@ import Link from 'next/link';
 
 import styles from './header.module.css';
 
+import Signin from './signin';
+
 //<Image src="/images/bc_logo_header.svg" width={170} height={43} />
 const Header: React.FC<{}> = () => {
   return (
@@ -18,7 +20,7 @@ const Header: React.FC<{}> = () => {
           API Program Services
         </h1>
       </hgroup>
-      <hgroup className={styles.other}>Sign In</hgroup>
+      <hgroup className={styles.other}>x</hgroup>
     </header>
   );
 };
