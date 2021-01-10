@@ -6,7 +6,7 @@ import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
-const ServicesPage = () => {
+const ServiceAccountsPage = () => {
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     // let fetch = () => {
@@ -23,17 +23,17 @@ const ServicesPage = () => {
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Services</h1>
+            <h1 style={styles.mainHeading}>Service Accounts</h1>
             <p style={styles.introText}>
-                List of services from the API Owner perspective.  This should pull in details from Prometheus and gwa-api Status.
+                Service Accounts are credentials for accessing the API Gateway Services.  This is for API Owners to manage the Service Accounts.
             </p>
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Gateway Services</h2>
+                <h2 style={styles.appHeading}>Service Accounts</h2>
             </div>
         </div>
     )
 }
 
-export default ServicesPage;
+export default ServiceAccountsPage;
 

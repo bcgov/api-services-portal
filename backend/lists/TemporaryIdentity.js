@@ -44,7 +44,8 @@ module.exports = {
         update: access.userIsAdmin,
       },
     },
-    groups: { type: Text, required: true }
+    groups: { type: Text, required: true },
+    roles: { type: Text, required: true }
   },
   // List-level access controls
   access: {

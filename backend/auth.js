@@ -82,6 +82,15 @@ class Oauth2ProxyAuthStrategy {
             const name = req['oauth_user']['name']
             const email = req['oauth_user']['email']
             const groups = JSON.stringify(req['oauth_user']['groups'])
+            const roles = JSON.stringify(['developer'])
+            /*
+                Roles:
+                credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
+                api-manager      : The API Manager makes APIs available for consumption with supporting documentation.  They approve requests for access.
+                api-owner        : Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
+                developer        : A Developer discovers APIs, requests access if required and consumes them - everyone has 'developer' role
+                aps-admin        : Someone from the APS team with elevated privileges.
+            */
 
             const username = req['oauth_user']['preferred_username']
 
@@ -94,17 +103,17 @@ class Oauth2ProxyAuthStrategy {
                 console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
                 const { errors } = await this.keystone.executeGraphQL({
                     context: this.keystone.createContext({ skipAccessControl: true }),
-                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $groups: String) {
-                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, groups: $groups }) {
+                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $groups: String, $roles: String) {
+                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, groups: $groups, roles: $roles }) {
                                 id
                         } }`,
-                    variables: { jti, sub, name, email, username, groups },
+                    variables: { jti, sub, name, email, username, groups, roles },
                 })
                 if (errors) {
                     console.log("NO! Something went wrong " + errors)
                 }
                 results = await users.adapter.find({ ['jti']: jti })       
-                operation = "create"      
+                operation = "create"
             }
 
             const user = results[0]

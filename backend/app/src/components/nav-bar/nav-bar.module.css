@@ -12,7 +12,6 @@
 }
 
 .container {
-  padding: 10px 0 10px 0;
 }
 
 .container ul {
@@ -36,7 +35,7 @@
   font-size: 0.813em;
   font-weight: normal; /* 400 */
   color: #fff;
-  padding: 0 15px 0 15px;
+  padding: 10px 15px 10px 15px;
   text-decoration: none;
   /* border-style: dotted;
     border-width: 1px;
@@ -44,12 +43,19 @@
 }
 
 .container ul li a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+}
+
+.active {
+    background-color: #fcba19;
+}
+
+.inactive {
+    background-color: #38598a;
 }
 
 .active a {
-  text-decoration: underline !important;
-  font-weight: bold !important;
+    color: black !important;
 }
 
 .navbar a:focus {

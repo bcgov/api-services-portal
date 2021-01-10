@@ -6,7 +6,7 @@ import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
-const CredentialIssuerPage = () => {
+const ApiDiscoveryPage = () => {
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     // let fetch = () => {
@@ -23,17 +23,17 @@ const CredentialIssuerPage = () => {
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Credential Issuers</h1>
+            <h1 style={styles.mainHeading}>Discover APIs</h1>
             <p style={styles.introText}>
-                There will be many different providers of credentials on the API Gateway - different OIDC Providers and API Key generators.  This page is exclusively for the credential providers to define how the credentials will be created.
+                This is for Developers wishing to find APIs provided by the BC Government.
             </p>
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Issuers</h2>
+                <h2 style={styles.appHeading}>Catalog</h2>
             </div>
         </div>
     )
 }
 
-export default CredentialIssuerPage;
+export default ApiDiscoveryPage;
 

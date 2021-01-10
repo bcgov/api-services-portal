@@ -6,7 +6,7 @@ import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
-const ServicesPage = () => {
+const CredentialIssuerPage = () => {
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     // let fetch = () => {
@@ -23,17 +23,19 @@ const ServicesPage = () => {
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Services</h1>
+            <h1 style={styles.mainHeading}>Credential Issuers</h1>
             <p style={styles.introText}>
-                List of services from the API Owner perspective.  This should pull in details from Prometheus and gwa-api Status.
+                There will be many different providers of credentials on the API Gateway - different OIDC Providers and API Key generators.  This page is exclusively for the credential providers to define how the credentials will be created.
             </p>
+            <hr style={styles.divider}/>
+                <p style={styles.note}>NOTE: Access to this feature will be restricted to the CredentialAdmin role.</p>
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Gateway Services</h2>
+                <h2 style={styles.appHeading}>Issuers</h2>
             </div>
         </div>
     )
 }
 
-export default ServicesPage;
+export default CredentialIssuerPage;
 

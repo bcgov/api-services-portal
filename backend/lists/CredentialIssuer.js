@@ -26,6 +26,7 @@ module.exports = {
         type: Password,
         isRequired: false,
     },
+    contact: { type: Relationship, ref: 'User', many: false },
     dataSetGroups: { type: Relationship, ref: 'DatasetGroup', many: true }
   },
   plugins: [

@@ -19,8 +19,15 @@ export const styles = {
       marginTop: 10,
     },
     introText: {
-      lineHeight: 1.5,
+      lineHeight: 1.9,
+      padding: '5px',
       color: tint(0.6, 'dark'),
+    },
+    note: {
+        lineHeight: 1.9,
+        padding: '5px',
+        color: tint(1, 'dark'),
+        fontSize: '120%'
     },
     divider: {
       marginTop: 30,
@@ -66,6 +73,21 @@ export const styles = {
       padding: 0,
       cursor: 'pointer',
     },
+
+    primaryButton: {
+      display: 'inline-block',
+      background: tint(0.4),
+      padding: "5px",
+      cursor: 'pointer',
+      borderRadius: '5px',
+      margin: '5px'
+
+    },
+
+    innerModal: {
+        width: '100%',
+        display: 'block',
+    }
   }
 
 const empty = () => false

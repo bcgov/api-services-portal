@@ -25,7 +25,7 @@ const DatasetsPage = () => {
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>Datasets</h1>
             <p style={styles.introText}>
-                Datasets are groups of APIs that are protected in the same way.
+                Datasets are groups of APIs that are protected in the same way, and are discoverable by Citizens through the BC Data Catalog, or by invitation from an API Manager.
             </p>
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>

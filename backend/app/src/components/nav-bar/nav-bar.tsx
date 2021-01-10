@@ -1,18 +1,21 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { withRouter } from 'next/router';
 
 import styles from './nav-bar.module.css';
 
 interface NavBarProps {
   links: any[];
+  user: { roles };
+  pathname: string;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links }) => {
-  const { pathname } = { pathname : "/" } //useRouter();
+const NavBar: React.FC<NavBarProps> = ({ links, user, pathname }) => {
   const getClassName = (url: string) =>
     pathname.includes(url) ? styles.active : null;
-  const homeClassName = pathname === '/' ? styles.active : null;
+  const homeClassName = pathname == '/' ? styles.active : styles.inactive;
+
+  const roles = user != null && 'roles' in user ? JSON.parse(user.roles) : []
 
   return (
     <nav className={styles.navbar}>
@@ -23,7 +26,7 @@ const NavBar: React.FC<NavBarProps> = ({ links }) => {
               <a>Home</a>
             </Link>
           </li>
-          {links.map((link) => (
+          {links.filter(link => link.access == null || link.access.filter(value => roles.includes(value)).length > 0).map((link) => (
             <li key={link.url} className={getClassName(link.url)}>
               <Link href={link.url}>
                 <a>{link.name}</a>
