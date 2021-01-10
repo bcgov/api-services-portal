@@ -1,10 +1,10 @@
 import Head from 'next/head';
 import Typography from 'typography';
-//import '@bcgov/bc-sans/css/BCSans.css';
-//import '../shared/styles/global.css';
+import '@bcgov/bc-sans/css/BCSans.css';
+import '../shared/styles/global.css';
 
 import Header from '../components/header';
-//import NavBar from '../components/nav-bar';
+import NavBar from '../components/nav-bar';
 
 // const typography = new Typography({
 //   baseFontSize: '16px',
@@ -17,10 +17,11 @@ import Header from '../components/header';
 export default function MyApp({ Component, pageProps }) {
   const links = [
     { name: 'APIs', url: '/apis' },
+    { name: 'Service Routes', url: '/services' },
+    { name: 'Access Requests', url: '/requests' },
     { name: 'Documentation', url: '/docs' },
   ];
 
-  
   return (
     <>
       <Head>
@@ -33,8 +34,8 @@ export default function MyApp({ Component, pageProps }) {
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
         {/* <style type="text/css">{typography.toString()}</style> */}
       </Head>
-      {/* <Header /> */}
-      {/* <NavBar links={links} /> */}
+      <Header />
+      <NavBar links={links} />
       <main>
         <Component {...pageProps} />
       </main>

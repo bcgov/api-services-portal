@@ -48,7 +48,7 @@ for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer',
 
 const authStrategy = keystone.createAuthStrategy({
     type: Oauth2ProxyAuthStrategy,
-    list: 'User',
+    list: 'TemporaryIdentity',
     signinPath: "oauth2/sign_in",
 
     config: {
@@ -97,7 +97,7 @@ module.exports = {
         return true
       },
     }),
-    // new NextApp({ dir: 'app' })
+    new NextApp({ dir: 'app' })
   ],
-//   distDir
+   distDir
 }

@@ -2,19 +2,14 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-//import styles from './nav-bar.module.css';
-var styles = {
-    active: "",
-    navbar: "",
-    container: ""
-}
+import styles from './nav-bar.module.css';
 
 interface NavBarProps {
   links: any[];
 }
 
 const NavBar: React.FC<NavBarProps> = ({ links }) => {
-  const { pathname } = useRouter();
+  const { pathname } = { pathname : "/" } //useRouter();
   const getClassName = (url: string) =>
     pathname.includes(url) ? styles.active : null;
   const homeClassName = pathname === '/' ? styles.active : null;

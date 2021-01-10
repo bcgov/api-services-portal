@@ -34,7 +34,7 @@ module.exports = {
       isRequired: false,
     },
     organization: { type: Relationship, ref: 'Organization' },
-    subOganization: { type: Relationship, ref: 'Organization' },
+    organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     services: { type: Relationship, ref: 'ServiceRoute', many: true },
 
   }

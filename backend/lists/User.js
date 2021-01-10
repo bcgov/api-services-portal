@@ -1,4 +1,4 @@
-const { Text, Checkbox, Relationship, Select } = require('@keystonejs/fields')
+const { Text, Checkbox, Relationship, Select, Password } = require('@keystonejs/fields')
 
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => {
@@ -40,7 +40,10 @@ module.exports = {
         update: access.userIsAdmin,
       },
     },
-    groups: { type: Relationship, ref: "Group.members", many: true }
+    password: {
+        type: Password,
+        required: true
+    }
   },
   // List-level access controls
   access: {

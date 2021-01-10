@@ -30,11 +30,11 @@ module.exports = {
     },
     slug: {
       type: Slug,
-      makeUnique: () => true,
       generate: ({ resolvedData }) => slugify(resolvedData.title).toLowerCase(),
       adminConfig: {
         isReadOnly: true, //slug can be created automatically and you may want to show this as read only
-      }
+      },
+      isUnique: true
     },
     order: {
       type: Integer,

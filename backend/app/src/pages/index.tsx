@@ -14,7 +14,6 @@ const Homepage = () => {
           <p>
             Discover and access APIs from various ministries and programs across
             government.
-            And more.
           </p>
         </main>
       </div>

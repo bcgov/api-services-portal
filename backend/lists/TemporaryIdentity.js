@@ -28,12 +28,13 @@ const access = { userIsAdmin, userOwnsItem, userIsAdminOrOwner };
 
 module.exports = {
   fields: {
-    subject: { type: Text, required: true },
+    jti: { type: Text, required: true, isUnique: true },
+    sub: { type: Text, required: true },
     name: { type: Text },
     username: { type: Text, required: false },
     email: {
       type: Text,
-      isUnique: true,
+      isUnique: false,
     },
     isAdmin: {
       type: Checkbox,
@@ -43,7 +44,7 @@ module.exports = {
         update: access.userIsAdmin,
       },
     },
-    groups: { type: Relationship, ref: "Group", many: true }
+    groups: { type: Text, required: true }
   },
   // List-level access controls
   access: {

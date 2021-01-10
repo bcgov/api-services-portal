@@ -1,7 +1,7 @@
 import { GraphQLClient, gql } from 'graphql-request';
 
 const apiClient = new GraphQLClient(
-  'https://aps-portal-api.apps.silver.devops.gov.bc.ca/admin/api',
+  'http://localhost:3000/admin/api',
   {
     headers: {
       'Content-Type': 'application/json',

@@ -40,7 +40,7 @@ class Oauth2ProxyAuthStrategy {
         app = express()
         app.set('trust proxy', true);
 
-        const users = this.keystone.getListByKey('User')
+        const users = this.keystone.getListByKey('TemporaryIdentity')
 
         const jwtCheck = jwksRsa.expressJwtSecret({
             cache: true,
@@ -57,37 +57,58 @@ class Oauth2ProxyAuthStrategy {
             getToken: (req) => ('x-forwarded-access-token' in req.headers) ? req.headers['x-forwarded-access-token'] : null
         })
 
-        app.get('/admin/signin', verifyJWT, async (req, res, next) => {
+        const checkExpired = (err, req, res, next) => {
+            console.log("CHECK EXPIRED!! " + err);
+            if (err) {
+                if (err.name === 'UnauthorizedError') {
+                    console.log("CODE = "+err.code);
+                    console.log("INNER = "+err.inner);
+                    res.redirect('/oauth2/sign_out')
+                    return
+                }
+                next(err)
+            } else {
+                next();
+            }
+        }
 
+        app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
+            console.log("AuTH");
             // The SessionManager is expecting an Authorization header, so give it one
             //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
+            const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+            const sub = req['oauth_user']['sub'] // Subject ID - Whom the token refers to
 
             const name = req['oauth_user']['name']
             const email = req['oauth_user']['email']
+            const groups = JSON.stringify(req['oauth_user']['groups'])
 
             const username = req['oauth_user']['preferred_username']
 
-            let results = await users.adapter.find({ ['email']: email })
+            let results = await users.adapter.find({ 'jti': jti })
 
             var operation = "update"
+            console.log("AuTH"+jti+sub);
 
             if (results.length == 0) {
-                console.log("EMAIL NOT FOUND - CREATING USER AUTOMATICALLY")
+                console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
                 const { errors } = await this.keystone.executeGraphQL({
                     context: this.keystone.createContext({ skipAccessControl: true }),
-                    query: `mutation ($name: String, $email: String, $username: String) {
-                            createUser(data: {name: $name, username: $username, email: $email, isAdmin: false}) {
+                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $groups: String) {
+                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, groups: $groups }) {
                                 id
-                          
                         } }`,
-                    variables: { name, email, username },
-                });   
-                results = await users.adapter.find({ ['email']: email })       
+                    variables: { jti, sub, name, email, username, groups },
+                })
+                if (errors) {
+                    console.log("NO! Something went wrong " + errors)
+                }
+                results = await users.adapter.find({ ['jti']: jti })       
                 operation = "create"      
             }
 
             const user = results[0]
-
+            console.log("USER = "+JSON.stringify(user, null, 4))
             await this._authenticateItem(user, null, operation === 'create', req, res, next);
         })
         return app
@@ -95,10 +116,10 @@ class Oauth2ProxyAuthStrategy {
 
     async _authenticateItem(item, accessToken, isNewItem, req, res, next) {
         const token = await this._sessionManager.startAuthedSession(req, {
-        item,
-        list: this._getList(),
+            item,
+            list: this._getList(),
         });
-        console.log("Created session " + JSON.stringify(req.session, null, 3))
+        // console.log("Created session " + JSON.stringify(req.session, null, 3))
 
         req.session.oauth_user = req.oauth_user
         

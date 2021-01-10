@@ -21,7 +21,7 @@ module.exports = {
         type: Checkbox,
         isRequired: false,
     },
-    dataSetGroup: { type: Relationship, ref: 'DatasetGroup' },
+    datasetGroup: { type: Relationship, ref: 'DatasetGroup' },
   },
   plugins: [
     byTracking(),
