@@ -1,4 +1,4 @@
-import { styles } from './request.css'
+import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
@@ -16,8 +16,6 @@ const Item = props => (
         { props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
             <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
         ):false}
-        </>
-    ):false }
       <button
         style={styles.deleteButton}
         className="trash"
@@ -33,7 +31,9 @@ const Item = props => (
           />
         </svg>
       </button>
-    </li>
+      </>
+  ):false }
+  </li>
 )
 
 export default Item
