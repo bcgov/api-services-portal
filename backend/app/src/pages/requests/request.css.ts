@@ -34,10 +34,10 @@ const styles = {
     //   maxWidth: 500,
     },
     appHeading: {
-      textTransform: uppercase,
+      textTransform: 'uppercase',
       fontWeight: 900,
       marginTop: 50,
-    },
+    } as React.CSSProperties,
     formInput: {
       color: tint(1, 'dark'),
       padding: '12px 16px',
