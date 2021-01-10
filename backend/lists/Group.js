@@ -9,7 +9,6 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    members: { type: Relationship, ref: "User.groups", many: true }
   },
   plugins: [
     byTracking(),

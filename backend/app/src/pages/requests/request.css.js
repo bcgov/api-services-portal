@@ -34,7 +34,7 @@ const styles = {
     //   maxWidth: 500,
     },
     appHeading: {
-      textTransform: 'uppercase',
+      textTransform: uppercase,
       fontWeight: 900,
       marginTop: 50,
     },

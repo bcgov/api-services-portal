@@ -1,6 +1,7 @@
 const { Keystone } = require('@keystonejs/keystone');
-const { Oauth2ProxyAuthStrategy } = require('./auth');
 const { Text, Checkbox, Password, Select } = require('@keystonejs/fields');
+const { Oauth2ProxyAuthStrategy } = require('./auth');
+const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
 const { GraphQLApp } = require('@keystonejs/app-graphql');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
 //const { AdminUIApp } = require('@keystone-next/admin-ui');
@@ -46,7 +47,10 @@ for (_list of ['User', 'Group', 'AccessRequest', 'Consumer', 'CredentialIssuer',
     keystone.createList(_list, require('./lists/' + _list));
 }
 
-const authStrategy = keystone.createAuthStrategy({
+const authStrategy = true ? keystone.createAuthStrategy({
+    type: PasswordAuthStrategy,
+    list: 'User'
+}) : keystone.createAuthStrategy({
     type: Oauth2ProxyAuthStrategy,
     list: 'TemporaryIdentity',
     signinPath: "oauth2/sign_in",
@@ -75,7 +79,7 @@ const authStrategy = keystone.createAuthStrategy({
   
       }
     }
-  });
+});
 
 const { pages } = require('./admin-hooks.js')
 

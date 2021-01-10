@@ -23,7 +23,7 @@ const RequestsPage = () => {
             setState({ state: 'error', data: null });
         });
     };
-
+    
     useEffect(fetch, []);
 
     return (
