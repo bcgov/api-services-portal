@@ -6,7 +6,7 @@ import { REMOVE } from './queries'
 
 const Item = props => (
     <li style={styles.listItem}>
-    { props ? (
+    { props && props.accessRequest ? (
         <>
         {props.accessRequest.name}
         { props.accessRequest.datasetGroup && (

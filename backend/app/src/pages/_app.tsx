@@ -20,6 +20,7 @@ export default function MyApp({ Component, pageProps }) {
     // { name: 'Service Routes', url: '/services' },
     { name: 'Access Requests', url: '/requests' },
     { name: 'Datasets', url: '/datasets' },
+    { name: 'Credential Issuers', url: '/credentialissuers' },
     { name: 'Documentation', url: '/docs' },
   ];
 
