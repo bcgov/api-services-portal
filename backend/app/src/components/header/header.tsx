@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({user}) => {
       <hgroup className={styles.banner}>
         <Link href="/">
           <a>
-            <img src="/public/images/bc_logo_header.svg"/>
+            <img src="/images/bc_logo_header.svg"/>
           </a>
         </Link>
         <h1 className="white font-normal mb-0 ml-4 mr-2">
