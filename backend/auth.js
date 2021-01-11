@@ -83,7 +83,7 @@ class Oauth2ProxyAuthStrategy {
             const email = req['oauth_user']['email']
             const namespace = req['oauth_user']['namespace']
             const groups = JSON.stringify(req['oauth_user']['groups'])
-            const roles = JSON.stringify(['developer'])
+            const roles = JSON.stringify(['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin'])
             /*
                 Roles:
                 credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
