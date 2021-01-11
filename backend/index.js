@@ -88,7 +88,7 @@ module.exports = {
   keystone,
   apps: [
     new GraphQLApp(),
-    new StaticApp({ path: '/public', src: 'public' }),
+    new StaticApp({ path: '/site', src: 'public' }),
     new AdminUIApp({
       name: PROJECT_NAME,
       signinPath: "oauth2/sign_in",
