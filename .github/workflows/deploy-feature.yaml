@@ -208,6 +208,8 @@ jobs:
           SESSION_SECRET:
             value: '234873290483290'
             secure: true
+          AUTH_STRATEGY:
+            value: Oauth2Proxy
           MONGO_URL:
             value: 'mongodb://proto-aps-portal-db-${GITHUB_REF:19}-mongodb:27017'
           MONGO_USER:
