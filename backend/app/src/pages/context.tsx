@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-const AppContext = createContext();
+const AppContext = createContext({});
 
 export function AppWrapper({ children, router }) {
   let sharedState = { router: router }
@@ -16,4 +16,5 @@ export function useAppContext() {
   return useContext(AppContext);
 }
 
-export default () => ( <></> )
+const Empty = () => ( <></> )
+export default Empty
