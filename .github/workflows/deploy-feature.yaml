@@ -102,21 +102,21 @@ jobs:
     #     push: true
     #     build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-    - name: Docker Image for Frontend
-      uses: docker/build-push-action@v1
-      env:
-        DOCKER_BUILDKIT: 1
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: $GITHUB_ACTOR
-        password: ${{ secrets.GITHUB_TOKEN }}
-        repository: bcgov/aps-portal/portal-ui
-        dockerfile: Dockerfile
-        tag_with_ref: true
-        tag_with_sha: false
-        add_git_labels: true
-        push: true
-        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+    # - name: Docker Image for Frontend
+    #   uses: docker/build-push-action@v1
+    #   env:
+    #     DOCKER_BUILDKIT: 1
+    #   with:
+    #     registry: ${{ env.REGISTRY }}
+    #     username: $GITHUB_ACTOR
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    #     repository: bcgov/aps-portal/portal-ui
+    #     dockerfile: Dockerfile
+    #     tag_with_ref: true
+    #     tag_with_sha: false
+    #     add_git_labels: true
+    #     push: true
+    #     build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
         
     - name: 'Setup Network Security Policy'
       run: |
@@ -240,41 +240,41 @@ jobs:
         helm repo add bcgov http://bcgov.github.io/helm-charts
         helm upgrade --install proto-aps-portal-${GITHUB_REF:19} -f values.yaml bcgov/generic-api
 
-    - name: 'Deploy Frontend'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
+    # - name: 'Deploy Frontend'
+    #   run: |
+    #     export PATH=$PATH:`pwd`/linux-amd64
 
-        echo "
-        podAnnotations:
-          sha: $GITHUB_SHA
+    #     echo "
+    #     podAnnotations:
+    #       sha: $GITHUB_SHA
 
-        replicaCount: 1
+    #     replicaCount: 1
 
-        rollingUpdate:
-          maxUnavailable: 50%
-          maxSurge: 50%
+    #     rollingUpdate:
+    #       maxUnavailable: 50%
+    #       maxSurge: 50%
 
-        image:
-          repository: docker.pkg.github.com/bcgov/aps-portal/portal-ui
-          tag: feature-${GITHUB_REF:19}
-          pullPolicy: Always
+    #     image:
+    #       repository: docker.pkg.github.com/bcgov/aps-portal/portal-ui
+    #       tag: feature-${GITHUB_REF:19}
+    #       pullPolicy: Always
 
-        imagePullSecrets:
-          - name: dev-github-read-packages-creds
+    #     imagePullSecrets:
+    #       - name: dev-github-read-packages-creds
 
-        podSecurityContext:
-          fsGroup: 1002770000
+    #     podSecurityContext:
+    #       fsGroup: 1002770000
 
-        securityContext:
-          runAsUser: 1002770000
+    #     securityContext:
+    #       runAsUser: 1002770000
 
-        containerPort: 3000
-        env:
-          HOSTNAME:
-            value: '0.0.0.0'
-        " > values.yaml
-        helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-ui-${GITHUB_REF:19} -f values.yaml bcgov/generic-api
+    #     containerPort: 3000
+    #     env:
+    #       HOSTNAME:
+    #         value: '0.0.0.0'
+    #     " > values.yaml
+    #     helm repo add bcgov http://bcgov.github.io/helm-charts
+    #     helm upgrade --install proto-aps-portal-ui-${GITHUB_REF:19} -f values.yaml bcgov/generic-api
 
     - name: 'Deploy Routes'
       run: |
