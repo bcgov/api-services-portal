@@ -68,7 +68,7 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }} 
         load: true
         build_args: |
-          GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
     -
       name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
