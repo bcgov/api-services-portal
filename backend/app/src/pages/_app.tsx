@@ -18,6 +18,7 @@ export default function MyApp({ Component, pageProps }) {
   console.log(router);
   const links = [
     { name: 'Services', url: '/services', access: ['api-owner'] },
+    { name: 'Consumers', url: '/consumers', access: ['api-owner'] },
     {
       name: 'Access Requests',
       url: '/requests',

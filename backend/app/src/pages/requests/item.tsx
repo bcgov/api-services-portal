@@ -15,17 +15,28 @@ const Item = props => (
         <NameValue name="Family" value={ props.accessRequest.datasetGroup && (
                 <p>Dataset {props.accessRequest.datasetGroup.name}</p>
         )} width="200px"/>
-        <NameValue name="Approved?" value={ props.accessRequest.isApproved ? ( <span>APPROVED</span> ) : <span>PENDING</span> } width="200px"/>
         <NameValue name="Organization" value={ props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
             <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
         ):false} width="400px"/>
-      <button
-        style={styles.deleteButton}
-        className="trash"
-        onClick={() => {
-          graphql(REMOVE, { id: props.accessRequest.id }).then(props.refetch);
-        }}
-      >
+
+        { props.accessRequest.isApproved === null ? (
+            <div className="flex">
+                <button style={styles.primaryButton}>Approve</button>
+            </div>
+        ) : false }
+        { props.accessRequest.isApproved && props.accessRequest.isIssued == null ? (
+            <button style={styles.primaryButton}>Send Credentials</button>
+        ) : false}
+        { props.accessRequest.isComplete == true ? (
+            <p>COMPLETE</p>
+        ): false }
+        <button
+                style={styles.primaryButton}
+                className="trash"
+                onClick={() => {
+                graphql(REMOVE, { id: props.accessRequest.id }).then(props.refetch);
+                }}
+              >
         <svg viewBox="0 0 14 16" style={styles.deleteIcon}>
           <title>Delete this item</title>
           <path

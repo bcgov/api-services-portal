@@ -5,9 +5,8 @@ const Placeholder = require.resolve('./pages/placeholder')
 
 module.exports = {
     pages: [
-        // Custom pages
         {
-            label: 'A new dashboard',
+            label: 'Dashboard',
             path: '',
             component: Placeholder,
         },
@@ -30,11 +29,6 @@ module.exports = {
         {
             label: 'BCDC',
             children: ['Organization', 'OrganizationUnit', 'Dataset'],
-        },
-        {
-            label: 'A Hello Page',
-            path: 'hello',
-            component: HelloPage,
         }
     ]
 }

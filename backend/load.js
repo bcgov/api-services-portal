@@ -210,9 +210,9 @@ function update_orgs() {
               return;
           }
 
-          if (data.name != "ministry-of-citizens-services") {
-              return;
-          }
+        //   if (data.name != "ministry-of-citizens-services") {
+        //       return;
+        //   }
           ((name) => {
             find_all_children (name, (async (childs) => {
                 console.log(file);
@@ -236,6 +236,6 @@ function update_orgs() {
 }
 
 
-//import_org_units()
-//import_orgs()
+// import_org_units()
+// import_orgs()
 update_orgs()

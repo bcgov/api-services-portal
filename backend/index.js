@@ -48,9 +48,10 @@ const keystone = new Keystone({
 });
 
 for (_list of [
+  'AccessRequest',
   'User',
   'Group',
-  'AccessRequest',
+  'Activity',
   'Consumer',
   'CredentialIssuer',
   'TemporaryIdentity',
@@ -120,8 +121,8 @@ module.exports = {
       pages: pages,
       enableDefaultRoute: false,
       isAccessAllowed: (user) => {
-        console.log('isAllowed?');
-        console.log(JSON.stringify(user));
+        // console.log('isAllowed?');
+        // console.log(JSON.stringify(user));
         return true;
       },
     }),

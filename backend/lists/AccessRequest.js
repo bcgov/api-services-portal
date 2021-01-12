@@ -32,6 +32,7 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    consumer: { type: Relationship, ref: 'Consumer' },
     datasetGroup: { type: Relationship, ref: 'DatasetGroup' },
     activity: { type: Relationship, ref: 'Activity', many: true },
   },

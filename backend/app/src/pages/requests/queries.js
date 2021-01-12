@@ -20,12 +20,16 @@ export const GET_LIST = `
           name
           content
           isApproved
-          isActive
+          isIssued
+          isComplete
           createdAt
           datasetGroup {
               name
               authMethod
               useAcl
+              credentialIssuer {
+                  name
+              }
               organization {
                   name
               }
