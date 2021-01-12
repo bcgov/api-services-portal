@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-const AppContext = createContext({});
+const AppContext = createContext({router: null});
 
 export function AppWrapper({ children, router }) {
   let sharedState = { router: router }
