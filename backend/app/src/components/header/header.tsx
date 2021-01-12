@@ -7,10 +7,11 @@ import SignIn from './signin';
 import styles from './header.module.css';
 
 interface HeaderProps {
+  user: { username; roles; namespace };
   onNavClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavClick }) => {
+const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
   return (
     <header className="flex items-center px-4 md:px-12 bg-bc-blue border-b-2 border-bc-yellow fixed top-0 w-full h-header">
       <hgroup className="flex items-center content-start mr-2">
@@ -30,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick }) => {
       </hgroup>
       <hgroup className="flex flex-1 items-center justify-end text-white">
         <div className="hidden sm:block">
-          <SignIn />
+          <SignIn user={user}/>
         </div>
         <div className="block sm:hidden w-6 h-6">
           <button onClick={onNavClick}>
