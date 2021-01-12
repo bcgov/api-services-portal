@@ -66,8 +66,10 @@ for (_list of [
 ]) {
   keystone.createList(_list, require('./lists/' + _list));
 }
+const strategyType = (process.env.AUTH_STRATEGY || "Password")
+console.log("Auth Strategy: " + strategyType)
 
-const authStrategy = (process.env.AUTH_STRATEGY || "Password") == "Password"
+const authStrategy = strategyType === "Password"
   ? keystone.createAuthStrategy({
       type: PasswordAuthStrategy,
       list: 'User',
