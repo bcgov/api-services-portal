@@ -15,3 +15,5 @@ export function AppWrapper({ children, router }) {
 export function useAppContext() {
   return useContext(AppContext);
 }
+
+export default () => ( <></> )
