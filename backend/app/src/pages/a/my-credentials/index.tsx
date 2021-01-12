@@ -3,9 +3,9 @@ import Modal from 'react-modal';
 
 const { useEffect, useState } = React;
 
-import { styles } from '../../shared/styles/devportal.css';
+import { styles } from '../../../shared/styles/devportal.css';
 
-import graphql from '../../shared/services/graphql'
+import graphql from '../../../shared/services/graphql'
 
 const customStyles = {
     content : {

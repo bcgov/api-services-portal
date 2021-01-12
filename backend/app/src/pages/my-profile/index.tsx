@@ -8,24 +8,26 @@ import graphql from '../../shared/services/graphql'
 
 const MyProfilePage = () => {
 
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    // let fetch = () => {
-    //     graphql(GET_LIST)
-    //     .then(({ data }) => {
-    //         setState({ state: 'loaded', data });
-    //     })
-    //     .catch((err) => {
-    //         setState({ state: 'error', data: null });
-    //     });
-    // };
-    
-    // useEffect(fetch, []);
+    let [{ state, user }, setState] = useState({ state: 'loading', user: null });
+    let _fetch = () => {
+        fetch('/admin/session').then(res => res.json()).then (json => {
+            console.log(json)
+            setState({ state: 'loaded', user: json['user'] });
+        }).catch (err => {
+            console.log(err)
+            setState({ state: 'error', user: null });
+        })
+    };
+
+    useEffect(_fetch, []);
 
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>My Profile</h1>
             <p style={styles.introText}>
-                This page provides details about the user.
+                <pre>
+                    {JSON.stringify(user, null, 3)}
+                </pre>
             </p>
         </div>
     )

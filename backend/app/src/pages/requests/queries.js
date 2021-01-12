@@ -1,3 +1,18 @@
+export const GET_DATASET_GROUP = `
+    query GetDatasetGroup ($id: ID!) {
+        allDatasetGroups(where: {id: $id}) {
+            id
+            name
+        }
+
+        allTemporaryIdentities {
+            name
+            username
+            email
+        }
+    }
+`
+
 export const GET_LIST = `
     query GetAccessRequests {
         allAccessRequests {
@@ -6,6 +21,7 @@ export const GET_LIST = `
           content
           isApproved
           isActive
+          createdAt
           datasetGroup {
               name
               authMethod
@@ -26,10 +42,13 @@ export const GET_LIST = `
 `
 
 export const ADD = `
-    mutation AddAccessRequest($name: String!) {
-        createAccessRequest(data: { name: $name }) {
+    mutation AddAccessRequest($name: String!, $datasetGroupId: String!) {
+        createAccessRequest(data: { name: $name, connect: { datasetGroup: { id: $datasetGroupId }}  } ) {
             name
             id
+            datasetGroup {
+                id
+            }
         }
     }
 `

@@ -15,7 +15,7 @@ const NavBar: React.FC<NavBarProps> = ({ links, open, pathname, user }) => {
   const getClassName = (url: string) =>
     pathname.includes(url) ? styles.active : null;
   const homeClassName = pathname === '/' ? styles.active : null;
-  const roles = user != null && 'roles' in user ? JSON.parse(user.roles) : [];
+  const roles = user != null && 'roles' in user && user['roles'] != null ? JSON.parse(user.roles) : [];
 
   return (
     <nav

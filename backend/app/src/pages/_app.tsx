@@ -6,21 +6,11 @@ import '../shared/styles/global.css';
 
 import { useRouter } from 'next/router';
 
+import { AppWrapper } from './context';
+
 const { useEffect, useState } = React;
 
-import graphql from '../shared/services/graphql';
 
-const GET_USER = `
-    query GetUser {
-        allTemporaryIdentities {
-        name
-        username
-        email
-        roles
-        namespace
-        }
-    }
-`;
 import AppBar from '../components/app-bar';
 
 export default function MyApp({ Component, pageProps }) {
@@ -44,25 +34,25 @@ export default function MyApp({ Component, pageProps }) {
       url: '/service-accounts',
       access: ['api-owner'],
     },
-    { name: 'API Discovery', url: '/api-discovery', access: ['developer'] },
-    { name: 'My Credentials', url: '/my-credentials', access: ['developer'] },
+    { name: 'API Discovery', url: '/a/api-discovery', access: ['developer'] },
+    { name: 'My Credentials', url: '/a/my-credentials', access: ['developer'] },
     { name: 'Documentation', url: '/docs', access: null },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
     { name: 'My Profile', url: '/my-profile', access: ['developer'] },
   ];
 
   let [{ state, user }, setState] = useState({ state: 'loading', user: null });
-  let fetch = () => {
-    graphql(GET_USER)
-      .then(({ data }) => {
-        setState({ state: 'loaded', user: data.allTemporaryIdentities[0] });
-      })
-      .catch((err) => {
+  let _fetch = () => {
+    fetch('/admin/session').then(res => res.json()).then (json => {
+        console.log(json)
+        setState({ state: 'loaded', user: json['user'] });
+    }).catch (err => {
+        console.log(err)
         setState({ state: 'error', user: null });
-      });
+    })
   };
 
-  useEffect(fetch, []);
+  useEffect(_fetch, []);
 
   return (
     <>
@@ -82,7 +72,9 @@ export default function MyApp({ Component, pageProps }) {
         user={user}
       />
       <main>
-        <Component {...pageProps} />
+          <AppWrapper router={router}>
+            <Component {...pageProps} />
+          </AppWrapper>
       </main>
     </>
   );

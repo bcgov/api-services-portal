@@ -13,7 +13,7 @@ const Form = ({ refetch }) => {
 
     return (
       <div>
-        <form
+        <form style={styles.form}
           onSubmit={e => {
             e.preventDefault();
             graphql(ADD, { name: value }).then(refetch);

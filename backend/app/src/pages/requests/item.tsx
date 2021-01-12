@@ -4,18 +4,21 @@ import graphql from '../../shared/services/graphql'
 
 import { REMOVE } from './queries'
 
+import NameValue from '../../components/name-value';
+
 const Item = props => (
     <li style={styles.listItem}>
     { props && props.accessRequest ? (
         <>
-        {props.accessRequest.name}
-        { props.accessRequest.datasetGroup && (
+        <NameValue name="Created" value={props.accessRequest.createdAt} width="300px"/>
+        <NameValue name="Name" value={props.accessRequest.name} width="300px"/>
+        <NameValue name="Family" value={ props.accessRequest.datasetGroup && (
                 <p>Dataset {props.accessRequest.datasetGroup.name}</p>
-        )}
-        { props.accessRequest.isApproved ? ( <span>APPROVED</span> ) : false }
-        { props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
+        )} width="200px"/>
+        <NameValue name="Approved?" value={ props.accessRequest.isApproved ? ( <span>APPROVED</span> ) : <span>PENDING</span> } width="200px"/>
+        <NameValue name="Organization" value={ props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
             <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
-        ):false}
+        ):false} width="400px"/>
       <button
         style={styles.deleteButton}
         className="trash"

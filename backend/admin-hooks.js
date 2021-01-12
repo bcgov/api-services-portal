@@ -6,32 +6,10 @@ const Placeholder = require.resolve('./pages/placeholder')
 module.exports = {
     pages: [
         // Custom pages
-        // {
-        //     label: 'A new dashboard',
-        //     path: '',
-        //     component: Placeholder,
-        // },
-        // Ordering existing list pages
         {
-            label: 'Discovery',
-            children: [
-                { listKey: 'DatasetGroup', label: 'Dataset Groups' },
-                { listKey: 'Dataset', label: 'Datasets' },
-            ],
-        },
-        {
-            label: 'Gateway',
-            children: [
-                { listKey: 'Gateway', label: 'Namespaces' },
-                { listKey: 'ServiceRoute', label: 'Services' },
-            ],
-        },
-        {
-            label: 'Consumers',
-            children: [
-                { listKey: 'Consumer', label: 'Consumers' },
-                { listKey: 'AccessRequest', label: 'Access Requests' },
-            ],
+            label: 'A new dashboard',
+            path: '',
+            component: Placeholder,
         },
         {
             label: 'Documentation',
@@ -39,8 +17,24 @@ module.exports = {
             path: 'docs',
         },
         {
-            label: 'Administration',
-            children: ['TemporaryIdentity', 'User', 'Organization', 'OrganizationUnit', 'Plugin', 'Group', 'CredentialIssuer'],
+            label: 'Workflow',
+            children: ['AccessRequest', 'DatasetGroup', 'CredentialIssuer'],
+        },
+        {
+            label: 'Session',
+            children: ['TemporaryIdentity', 'User'],
+        },
+        {
+            label: 'Keycloak',
+            children: ['Gateway', 'Group'],
+        },
+        {
+            label: 'Kong',
+            children: ['Plugin', 'Gateway', 'ServiceRoute', 'Consumer'],
+        },
+        {
+            label: 'BCDC',
+            children: ['Organization', 'OrganizationUnit', 'Dataset'],
         },
         {
             label: 'A Hello Page',
@@ -49,4 +43,3 @@ module.exports = {
         }
     ]
 }
-  

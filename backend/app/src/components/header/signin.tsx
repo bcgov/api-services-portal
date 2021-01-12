@@ -11,8 +11,7 @@ const Signin: React.FC<SigninProps> = ({ user }) => {
     <div className="">
       {user ? (
         <span>
-          {user.username} (<a href="/admin/signout">Signout</a>) : Roles{' '}
-          {user.roles} | Namespace "{user.namespace}"
+          {user.username} (<a href="/oauth2/sign_out">Signout</a>)
         </span>
       ) : (
         <span>

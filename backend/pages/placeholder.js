@@ -20,6 +20,7 @@ const Placeholder = () => {
                 </HeaderInset>
                 <Grid gap={16}>
                     <p>Need to add some content.</p>
+                    <a href="/a/">Portal</a>
                 </Grid>
             </Container>
         </main>        

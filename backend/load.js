@@ -57,7 +57,7 @@ function load_all() {
 
 
 function graphql(query, variables = {}) {
-    return fetch('http://localhost:3000/admin/api', {
+    return fetch('http://localhost:7000/admin/api', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ function find_all_children (name, cb) {
           data = JSON.parse(fs.readFileSync('../data/orgs/' + file))['result']
           if (data.groups.length > 0) {
             for (grp of data.groups) {
-                  if (grp['name'] == name) {
+                  if (grp['name'] === name) {
                       childs.push(data.name)
                   }
               }
@@ -166,34 +166,32 @@ function find_all_children (name, cb) {
     });
 }
 
-const GET_ORG_BY_NAME = `
-    query GetOrg($name: String) {
-        allOrganizations(where: {name: $name}) {
-            id
-            name
-        }
-    }
-`
-
-
-const GET_BY_NAME = `
-    query GetOrgUnit($name: String) {
-        allOrganizationUnits(where: {name: $name}) {
-            id
-            name
-        }
-    }
-`
 const ADD_UNIT_TO_ORG = `
     mutation update($id: ID!, $data: OrganizationUpdateInput) {
         updateOrganization(id: $id, data: $data) {
             name
-            id
+            orgUnits {
+                name
+            }
         }
     }
 `;
 
-
+async function lookup_id_from_name (entity, name) {
+    const GET = `
+        query Get($name: String) {
+            all${entity}(where: {name: $name}) {
+                id
+            }
+        }
+    `
+    const result = await graphql(GET, {name: name})
+    if (result.data['all' + entity].length == 0) {
+        return null
+    } else {
+        return result.data['all' + entity][0].id
+    }
+}
 
 function update_orgs() {
     fs.readdir('../data/orgs', async (err, files) => {
@@ -212,42 +210,32 @@ function update_orgs() {
               return;
           }
 
+          if (data.name != "ministry-of-citizens-services") {
+              return;
+          }
           ((name) => {
-            find_all_children (name, (childs => {
+            find_all_children (name, (async (childs) => {
                 console.log(file);
                 console.log("CHILDREN = "+childs);
-                graphql(GET_ORG_BY_NAME, {name: name}).then(getorg => {
-                    for (child of childs) {
-                        graphql(GET_BY_NAME, {name: child}).then(getby => {
-                            console.log(JSON.stringify(getby.data.allOrganizationUnits[0].id))
-
-                            graphql(ADD_UNIT_TO_ORG, {id: getorg.data.allOrganizations[0].id, data: { orgUnits: { disconnectAll: false, connect: [ { id:getby.data.allOrganizationUnits[0].id }] }}}).then(ee => {
-                                console.log("AAA = "+JSON.stringify(ee));
-                            }).catch(err => {
-                                console.log("ERR" + err)
-                            })
-
-                        }).catch(err => {
-                            console.log("ERR" + err)
-                        });
+                console.log("GET " + name);
+                const orgId = await lookup_id_from_name ('Organizations', name)
+                const ids = []
+                for (child of childs) {
+                    const orgUnitId = await lookup_id_from_name ('OrganizationUnits', child)
+                    if (orgUnitId == null) {
+                        continue
                     }
-            })}));
+                    ids.push(orgUnitId)
+                }
+                const ee = await graphql(ADD_UNIT_TO_ORG, {id: orgId, data: { orgUnits: { disconnectAll: true, connect: ids.map(id => { return { id: id} }) }}});//.then(ee => {
+                console.log("AAA = "+JSON.stringify(ee, null, 3));
+            }));
         })(data.name);
-
-        // });
-        //   const done = (e) => {
-        //       console.log(e)
-        //       console.log("DNE"+JSON.stringify(e));
-        //   }
-        //   graphql(ADD_ORG, out).then(done).catch(err => {
-        //       console.log("ERR" + err)
-        //   });
-        //   console.log(JSON.stringify(out, null, 3))
         });
     });
 }
 
 
-import_orgs()
-import_org_units()
+//import_org_units()
+//import_orgs()
 update_orgs()

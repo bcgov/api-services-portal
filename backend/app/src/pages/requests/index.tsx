@@ -31,11 +31,11 @@ const RequestsPage = () => {
             <h1 style={styles.mainHeading}>Access Requests</h1>
             <p style={styles.introText}>
                 List of pending access requests to services that you provide!  Access requests can be initiated by an API Owner, or they can be requested by a Developer.
+
             </p>
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>
                 <h2 style={styles.appHeading}>Requests</h2>
-                <Form refetch={fetch} />
                 <List data={data} state={state} refetch={fetch} />
             </div>
         </div>

@@ -19,15 +19,16 @@ module.exports = async keystone => {
   if (count === 0) {
     const password = randomString();
     const email = 'admin@local';
+    const roles = ['developer']
 
     const { errors } = await keystone.executeGraphQL({
       context: keystone.createContext({ skipAccessControl: true }),
-      query: `mutation initialUser($password: String, $email: String) {
-            createUser(data: {name: "Admin", email: $email, isAdmin: true, password: $password}) {
+      query: `mutation initialUser($password: String, $email: String, $roles: String) {
+            createUser(data: {name: "Admin", email: $email, isAdmin: true, password: $password, roles: $roles}) {
               id
             }
           }`,
-      variables: { password, email },
+      variables: { password, email, roles },
     });
 
     if (errors) {
@@ -43,4 +44,22 @@ module.exports = async keystone => {
       `);
     }
   }
+
+  for (role of [ 'developer', 'api-owner', 'api-manager', 'credential-admin', 'aps-admin']) {
+    const password = "password";
+    const name = "user_" + role;
+    const email = role + "@local";
+    const roles = JSON.stringify([role])
+
+    const { errors } = await keystone.executeGraphQL({
+        context: keystone.createContext({ skipAccessControl: true }),
+        query: `mutation roleUser($name: String, $password: String, $email: String, $roles: String) {
+                createUser(data: {name: $name, username: $name, email: $email, isAdmin: false, password: $password, roles: $roles}) {
+                id
+                }
+            }`,
+        variables: { name, password, email, roles },
+        });
+    }
 };
+

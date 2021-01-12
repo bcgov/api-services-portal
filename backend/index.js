@@ -82,8 +82,8 @@ const authStrategy = strategyType === "Password"
       config: {
         onAuthenticated: ({ token, item, isNewItem }, req, res) => {
           console.log('Token = ' + token);
-          console.log('Redirecting to /admin');
-          res.redirect('/');
+          console.log('Redirecting to /home');
+          res.redirect(302, '/home');
         },
       },
       hooks: {
@@ -113,6 +113,8 @@ module.exports = {
     new StaticApp({ path: '/site', src: 'public' }),
     new AdminUIApp({
       name: PROJECT_NAME,
+      adminPath: '/admin',
+      apiPath: '/admin/api',
       signinPath: 'oauth2/sign_in',
       authStrategy,
       pages: pages,
@@ -125,5 +127,7 @@ module.exports = {
     }),
     new NextApp({ dir: 'app' }),
   ],
+  configureExpress: app => {
+  },
   distDir,
 };

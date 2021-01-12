@@ -40,7 +40,7 @@ class Oauth2ProxyAuthStrategy {
         app = express()
         app.set('trust proxy', true);
 
-        const users = this.keystone.getListByKey('TemporaryIdentity')
+        const users = this.keystone.getListByKey(this.listKey)
 
         const jwtCheck = jwksRsa.expressJwtSecret({
             cache: true,
@@ -71,6 +71,15 @@ class Oauth2ProxyAuthStrategy {
                 next();
             }
         }
+
+        app.get('/admin/session', async (req, res, next) => {
+            const toJson = (val) => val ? JSON.parse(val) : null;
+
+            const response = req && req.user ? {anonymous: false, user: req.user } : {anonymous:true}
+            response.groups = toJson(response.groups)
+            response.roles = toJson(response.roles)
+            res.json(response)
+        })
 
         app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
             console.log("AuTH");

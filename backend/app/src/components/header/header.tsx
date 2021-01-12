@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
   return (
     <header className="flex items-center px-4 md:px-12 bg-bc-blue border-b-2 border-bc-yellow fixed top-0 w-full h-header">
       <hgroup className="flex items-center content-start mr-2">
-        <Link href="/">
+        <Link href="/home">
           <a>
             <span className="hidden sm:block">
               <img src="/images/bc_logo_header.svg" width={170} height={43} />

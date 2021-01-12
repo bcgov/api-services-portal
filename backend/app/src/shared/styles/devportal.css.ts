@@ -56,12 +56,12 @@ export const styles = {
     },
 
     listItem: {
-      padding: '32px 16px',
+      padding: '8px 4px',
       fontSize: '1.25em',
       fontWeight: 600,
       width: '100%',
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
       borderTop: `1px solid ${tint(0.2)}`,
     },
 
@@ -77,6 +77,7 @@ export const styles = {
     primaryButton: {
       display: 'inline-block',
       background: tint(0.4),
+      height: "50px",
       padding: "5px",
       cursor: 'pointer',
       borderRadius: '5px',
@@ -87,7 +88,16 @@ export const styles = {
     innerModal: {
         width: '100%',
         display: 'block',
+    },
+
+    form: {
+        border: "1px solid black",
+        borderRadius: "10px",
+        margin: "10px",
+        padding: "10px"
     }
+
+
   }
 
 const empty = () => false

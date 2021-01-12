@@ -43,7 +43,8 @@ module.exports = {
     password: {
         type: Password,
         required: true
-    }
+    },
+    roles: { type: Text, required: true }
   },
   // List-level access controls
   access: {
