@@ -66,12 +66,12 @@ jobs:
         context: backend
         file: ./backend/Dockerfile
         tags: ${{ steps.docker_meta.outputs.tags }} 
-        load: true
+        push: true
         build_args: |
           GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-    -
-      name: Push
-      run: docker push ${{ steps.docker_meta.outputs.tags }} 
+    # -
+    #   name: Push
+    #   run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
     # - name: Build and push
     #   id: docker_build
