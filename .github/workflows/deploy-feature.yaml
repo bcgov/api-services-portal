@@ -41,33 +41,36 @@ jobs:
         username: ${{ env.REGISTRY_USERNAME }}
         password: ${{ env.REGISTRY_PASSWORD }}
 
-    # - uses: actions/cache@v2
-    #   with:
-    #     path: /tmp/.buildx-cache
-    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-buildx-
+    - uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
     
-    # - name: Set up Docker Buildx
-    #   id: buildx
-    #   uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
 
-    # - name: Docker meta
-    #   id: docker_meta
-    #   uses: crazy-max/ghaction-docker-meta@v1
-    #   with:
-    #     images: ${{ env.REGISTRY }}/bcgov/aps-portal-backend
+    - name: Docker meta
+      id: docker_meta
+      uses: crazy-max/ghaction-docker-meta@v1
+      with:
+        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend
 
     - name: Build
       uses: docker/build-push-action@v2
       with:
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
         context: backend
         file: ./backend/Dockerfile
-        tags: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend:latest
+        tags: ${{ steps.docker_meta.outputs.tags }} 
         load: true
+        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
     -
       name: Push
-      run: docker push ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend:latest
+      run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
     # - name: Build and push
     #   id: docker_build
