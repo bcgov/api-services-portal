@@ -213,12 +213,12 @@ jobs:
         oauthProxy:
           enabled: true
           config:
-            upstream: "http://127.0.0.1:3000"
-            client-id: "${{ secrets.OIDC_CLIENT_ID }}"
-            client-secret: "${{ secrets.OIDC_CLIENT_SECRET }}"
-            oidc-issuer-url: "${{ secrets.OIDC_ISSUER }}"
-            redirect-url: "https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback"
-            skip-auth-regex: "/public|/docs|/_next|/images"
+            upstream: http://127.0.0.1:3000
+            client-id: ${{ secrets.OIDC_CLIENT_ID }}
+            client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
+            oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
+            redirect-url: https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback
+            skip-auth-regex: '/public|/docs|/_next|/images'
 
         env:
           SESSION_SECRET:
