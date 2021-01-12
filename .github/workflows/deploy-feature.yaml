@@ -67,7 +67,8 @@ jobs:
         file: ./backend/Dockerfile
         tags: ${{ steps.docker_meta.outputs.tags }} 
         load: true
-        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        build_args: |
+          GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
     -
       name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
@@ -177,7 +178,7 @@ jobs:
             runAsUser: 1002770000
         ' > values.yaml
         helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm upgrade --install proto-aps-portal-db-${GITHUB_REF:19} -f values.yaml bitnami/mongodb
+        helm upgrade --install proto-aps-portal-${GITHUB_REF:19}-db -f values.yaml bitnami/mongodb
 
     - name: 'Deploy Backend'
       run: |
@@ -225,7 +226,7 @@ jobs:
           AUTH_STRATEGY:
             value: Oauth2Proxy
           MONGO_URL:
-            value: 'mongodb://proto-aps-portal-db-${GITHUB_REF:19}-mongodb:27017'
+            value: 'mongodb://proto-aps-portal-${GITHUB_REF:19}-db-mongodb:27017'
           MONGO_USER:
             value: root
             secure: true
@@ -284,27 +285,27 @@ jobs:
         routes:
           - host: aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca
             targetPort: http
-            service: proto-aps-portal-ui-${GITHUB_REF:19}-generic-api
-            wildcardPolicy: None
-            tls:
-              termination: edge
-        " > values.yaml
-        helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-routes-${GITHUB_REF:19} -f values.yaml bcgov/ocp-route
-
-    - name: 'Deploy Route 2'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
-
-        echo "
-        routes:
-          - host: aps-portal-api-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca
-            targetPort: http
             service: proto-aps-portal-${GITHUB_REF:19}-generic-api
             wildcardPolicy: None
             tls:
               termination: edge
         " > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-routes-2-${GITHUB_REF:19} -f values.yaml bcgov/ocp-route
+        helm upgrade --install proto-aps-portal-${GITHUB_REF:19}-routes -f values.yaml bcgov/ocp-route
+
+    # - name: 'Deploy Route 2'
+    #   run: |
+    #     export PATH=$PATH:`pwd`/linux-amd64
+
+    #     echo "
+    #     routes:
+    #       - host: aps-portal-api-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca
+    #         targetPort: http
+    #         service: proto-aps-portal-${GITHUB_REF:19}-generic-api
+    #         wildcardPolicy: None
+    #         tls:
+    #           termination: edge
+    #     " > values.yaml
+    #     helm repo add bcgov http://bcgov.github.io/helm-charts
+    #     helm upgrade --install proto-aps-portal-routes-2-${GITHUB_REF:19} -f values.yaml bcgov/ocp-route
 
