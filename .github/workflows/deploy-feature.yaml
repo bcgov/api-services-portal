@@ -5,12 +5,12 @@ on:
     branches: [ feature/* ]
 
 env:
-  REGISTRY: docker.pkg.github.com
+  # REGISTRY: docker.pkg.github.com
   # REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   # REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-  # REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-  # REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  # REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+  REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+  REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
 jobs:
   build:
@@ -34,12 +34,12 @@ jobs:
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
-    # - name: Login to DockerHub
-    #   uses: docker/login-action@v1 
-    #   with:
-    #     registry: ${{ env.REGISTRY }}
-    #     username: ${{ env.REGISTRY_USERNAME }}
-    #     password: ${{ env.REGISTRY_PASSWORD }}
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ env.REGISTRY_USERNAME }}
+        password: ${{ env.REGISTRY_PASSWORD }}
 
     # - uses: actions/cache@v2
     #   with:
@@ -58,6 +58,17 @@ jobs:
     #   with:
     #     images: ${{ env.REGISTRY }}/bcgov/aps-portal-backend
 
+    - name: Build
+      uses: docker/build-push-action@v2
+      with:
+        context: backend
+        file: ./backend/Dockerfile
+        tags: ${{ env.REGISTRY }}/aps-portal-backend:latest
+        load: true
+    -
+      name: Push
+      run: docker push ${{ env.REGISTRY }}/aps-portal-backend:latest
+
     # - name: Build and push
     #   id: docker_build
     #   uses: docker/build-push-action@v2
@@ -71,22 +82,22 @@ jobs:
     #     tags: ${{ steps.docker_meta.outputs.tags }}        
     #     build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-    - name: Docker Image for Backend
-      uses: docker/build-push-action@v1
-      env:
-        DOCKER_BUILDKIT: 1
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: $GITHUB_ACTOR
-        password: ${{ secrets.GITHUB_TOKEN }}
-        repository: bcgov/aps-portal/portal-backend
-        path: backend
-        dockerfile: ./backend/Dockerfile
-        tag_with_ref: true
-        tag_with_sha: false
-        add_git_labels: true
-        push: true
-        build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+    # - name: Docker Image for Backend
+    #   uses: docker/build-push-action@v1
+    #   env:
+    #     DOCKER_BUILDKIT: 1
+    #   with:
+    #     registry: ${{ env.REGISTRY }}
+    #     username: $GITHUB_ACTOR
+    #     password: ${{ secrets.GITHUB_TOKEN }}
+    #     repository: bcgov/aps-portal/portal-backend
+    #     path: backend
+    #     dockerfile: ./backend/Dockerfile
+    #     tag_with_ref: true
+    #     tag_with_sha: false
+    #     add_git_labels: true
+    #     push: true
+    #     build_args: GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
     - name: Docker Image for Frontend
       uses: docker/build-push-action@v1
