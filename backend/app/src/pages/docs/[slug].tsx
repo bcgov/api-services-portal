@@ -29,7 +29,7 @@ const DocsContentPage = ({ pages, content, title }) => {
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12">
         <aside className={`${styles.sidebar} col-span-2 hidden md:block`}>
           <nav className={styles.nav}>
             {pages.map((page: any) => (
@@ -39,9 +39,20 @@ const DocsContentPage = ({ pages, content, title }) => {
             ))}
           </nav>
         </aside>
-        <div className="container mr-50% col-span-12 md:col-span-9 lg:col-span-7 py-6 px-4 sm:px-0">
-          <div className={styles.markdownBody}>
-            <ReactMarkdown plugins={[gfm]}>{content}</ReactMarkdown>
+        <div className="col-span-12 sm:col-span-10 bg-white">
+          <div className="container sm:mr-auto sm:max-w-3xl py-6 px-6">
+            <article className={styles.markdownBody}>
+              <nav className="mb-3 flex list-none text-gray-500 text-sm">
+                <li>
+                  <Link href="/docs">
+                    <a>Docs</a>
+                  </Link>
+                </li>
+                <li className="mx-2 text-gray-400">/</li>
+                <li>{title}</li>
+              </nav>
+              <ReactMarkdown plugins={[gfm]}>{content}</ReactMarkdown>
+            </article>
           </div>
         </div>
       </div>

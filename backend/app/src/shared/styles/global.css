@@ -12,7 +12,14 @@ html {
 }
 
 body {
-  margin-top: 106px;
+  margin-top: 65px;
+  background-color: #f1f1f1;
+}
+
+@media (min-width: 640px) {
+  body {
+    margin-top: 106px;
+  }
 }
 
 h1,
@@ -57,6 +64,10 @@ h5 {
 
 h6 {
   font-size: 0.80345rem;
+}
+
+p {
+  line-height: 1.5;
 }
 
 /* Start purging... */

@@ -1,24 +1,3 @@
-.header {
-  background-color: #036;
-  border-bottom: 2px solid #fcba19;
-  color: #fff;
-  height: 65px;
-  top: 0px;
-  position: fixed;
-  width: 100%;
-}
-
-.header a {
-  width: 173px;
-}
-
-.banner {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 0 10px 0 0;
-}
-
 .other {
   display: flex;
   flex-grow: 1;

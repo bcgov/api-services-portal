@@ -1,24 +1,29 @@
 import * as React from 'react';
+import cx from 'classnames';
 import Link from 'next/link';
-import { withRouter } from 'next/router';
 
 import styles from './nav-bar.module.css';
 
 interface NavBarProps {
   links: any[];
-  user: { roles };
+  open: boolean;
   pathname: string;
+  user: { roles };
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, user, pathname }) => {
+const NavBar: React.FC<NavBarProps> = ({ links, open, pathname, user }) => {
   const getClassName = (url: string) =>
     pathname.includes(url) ? styles.active : null;
-  const homeClassName = pathname == '/' ? styles.active : styles.inactive;
-
-  const roles = user != null && 'roles' in user ? JSON.parse(user.roles) : []
+  const homeClassName = pathname === '/' ? styles.active : null;
+  const roles = user != null && 'roles' in user ? JSON.parse(user.roles) : [];
 
   return (
-    <nav className={styles.navbar}>
+    <nav
+      className={cx('bg-bc-blue-alt sm:block', styles.navbar, {
+        ['block']: open,
+        ['hidden']: !open,
+      })}
+    >
       <div className={styles.container}>
         <ul>
           <li className={homeClassName}>
@@ -26,13 +31,19 @@ const NavBar: React.FC<NavBarProps> = ({ links, user, pathname }) => {
               <a>Home</a>
             </Link>
           </li>
-          {links.filter(link => link.access == null || link.access.filter(value => roles.includes(value)).length > 0).map((link) => (
-            <li key={link.url} className={getClassName(link.url)}>
-              <Link href={link.url}>
-                <a>{link.name}</a>
-              </Link>
-            </li>
-          ))}
+          {links
+            .filter(
+              (link) =>
+                link.access == null ||
+                link.access.filter((value) => roles.includes(value)).length > 0
+            )
+            .map((link) => (
+              <li key={link.url} className={getClassName(link.url)}>
+                <Link href={link.url}>
+                  <a>{link.name}</a>
+                </Link>
+              </li>
+            ))}
         </ul>
       </div>
     </nav>
