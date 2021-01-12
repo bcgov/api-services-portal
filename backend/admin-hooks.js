@@ -12,11 +12,6 @@ module.exports = {
             component: Placeholder,
         },
         {
-            label: 'Documentation',
-            component: Placeholder,
-            path: 'docs',
-        },
-        {
             label: 'Workflow',
             children: ['AccessRequest', 'DatasetGroup', 'CredentialIssuer'],
         },

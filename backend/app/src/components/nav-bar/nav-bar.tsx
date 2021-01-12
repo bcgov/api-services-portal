@@ -27,7 +27,7 @@ const NavBar: React.FC<NavBarProps> = ({ links, open, pathname, user }) => {
       <div className={styles.container}>
         <ul>
           <li className={homeClassName}>
-            <Link href="/">
+            <Link href="/home">
               <a>Home</a>
             </Link>
           </li>

@@ -21,6 +21,7 @@ module.exports = {
         type: Checkbox,
         isRequired: false,
     },
+    requestor: { type: Relationship, ref: 'TemporaryIdentity' },
     datasetGroup: { type: Relationship, ref: 'DatasetGroup' },
   },
   plugins: [

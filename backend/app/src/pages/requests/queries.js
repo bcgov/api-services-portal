@@ -42,8 +42,8 @@ export const GET_LIST = `
 `
 
 export const ADD = `
-    mutation AddAccessRequest($name: String, $datasetGroupId: String) {
-        createAccessRequest(data: { name: $name, connect: { datasetGroup: { id: $datasetGroupId }}  } ) {
+    mutation AddAccessRequest($name: String!, $datasetGroupId: ID!) {
+        createAccessRequest(data: { name: $name, datasetGroup: { connect: { id: $datasetGroupId } } } ) {
             id
         }
     }

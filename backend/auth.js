@@ -82,6 +82,8 @@ class Oauth2ProxyAuthStrategy {
         })
 
         app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
+            const allRoles = ['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin']
+            const oauthUser = req['oauth_user']
             console.log("AuTH");
             // The SessionManager is expecting an Authorization header, so give it one
             //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
@@ -92,7 +94,14 @@ class Oauth2ProxyAuthStrategy {
             const email = req['oauth_user']['email']
             const namespace = req['oauth_user']['namespace']
             const groups = JSON.stringify(req['oauth_user']['groups'])
-            const roles = JSON.stringify(['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin'])
+            let roles = JSON.stringify(allRoles)
+            console.log(JSON.stringify(oauthUser, null, 4))
+            try {
+                roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
+            } catch (e) {
+                console.log(e)
+
+            }
             /*
                 Roles:
                 credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
