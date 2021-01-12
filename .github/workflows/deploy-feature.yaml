@@ -132,7 +132,7 @@ jobs:
           source:
             - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}
           destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-db-${GITHUB_REF:19}
+            - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}-db
         """ > nsp.yaml
         oc apply -f nsp.yaml
 
