@@ -5,10 +5,10 @@ on:
     branches: [ feature/* ]
 
 env:
-  # REGISTRY: docker.pkg.github.com
+  REGISTRY: docker.pkg.github.com
   # REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   # REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-  REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+  #REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
   REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
@@ -63,11 +63,11 @@ jobs:
       with:
         context: backend
         file: ./backend/Dockerfile
-        tags: ${{ env.REGISTRY }}/aps-portal-backend:latest
+        tags: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend:latest
         load: true
     -
       name: Push
-      run: docker push ${{ env.REGISTRY }}/aps-portal-backend:latest
+      run: docker push ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend:latest
 
     # - name: Build and push
     #   id: docker_build
