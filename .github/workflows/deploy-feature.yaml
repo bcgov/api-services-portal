@@ -56,7 +56,7 @@ jobs:
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
       with:
-        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal-backend
+        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
 
     - name: Build
       uses: docker/build-push-action@v2
@@ -195,7 +195,7 @@ jobs:
           maxSurge: 50%
 
         image:
-          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/portal-backend
+          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
           tag: feature-${GITHUB_REF:19}
           pullPolicy: Always
 
