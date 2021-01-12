@@ -12,17 +12,28 @@ module.exports = {
     content: {
         type: Markdown,
         isRequired: false,
-    },  
+    },
     isApproved: {
       type: Checkbox,
       isRequired: false,
+      default: false
     },
-    isActive: {
+    isIssued: {
         type: Checkbox,
         isRequired: false,
+        default: false
     },
-    requestor: { type: Relationship, ref: 'TemporaryIdentity' },
+    isComplete: {
+        type: Checkbox,
+        isRequired: false,
+        default: false
+    },
+    credential: {
+        type: Text,
+        isRequired: false,
+    },
     datasetGroup: { type: Relationship, ref: 'DatasetGroup' },
+    activity: { type: Relationship, ref: 'Activity', many: true },
   },
   plugins: [
     byTracking(),

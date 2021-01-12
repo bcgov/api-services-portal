@@ -8,6 +8,10 @@ module.exports = {
     name: {
         type: Text,
         isRequired: true,
+    },
+    config: {
+        type: Text,
+        isRequired: true,
     }
   },
   plugins: [

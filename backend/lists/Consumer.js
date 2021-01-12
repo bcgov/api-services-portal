@@ -9,14 +9,12 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    isApproved: {
-      type: Checkbox,
-      isRequired: false,
-    },
     isActive: {
         type: Checkbox,
         isRequired: false,
-    }
+    },
+    accessRequest: { type: Relationship, ref: 'AccessRequest', many: true },
+    plugins: { type: Relationship, ref: 'Plugin', many: true }
   },
   plugins: [
     byTracking(),
