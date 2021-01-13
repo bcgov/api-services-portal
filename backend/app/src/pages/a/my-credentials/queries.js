@@ -1,19 +1,11 @@
 export const GET_LIST = `
-    query GetServices {
-        allDatasetGroups {
+    query GetConsumers($id: ID!) {
+        allAccessRequests(where: { requestor: { id: $id } } ) {
           id
           name
-          authMethod
-          useAcl
-          organization {
-            title
-          }
-          organizationUnit {
-            title
-          }
-          services {
+          consumer {
               name
-              host
+              isActive
           }
         }
     }

@@ -73,7 +73,7 @@ export default function MyApp({ Component, pageProps }) {
         user={user}
       />
       <main>
-          <AppWrapper router={router}>
+          <AppWrapper router={router} user={user}>
             <Component {...pageProps} />
           </AppWrapper>
       </main>

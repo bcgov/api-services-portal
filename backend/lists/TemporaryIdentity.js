@@ -44,6 +44,10 @@ module.exports = {
         update: access.userIsAdmin,
       },
     },
+    userId: {
+        type: Text,
+        isUnique: false,
+    },
     namespace: { type: Text, required: true },
     groups: { type: Text, required: true },
     roles: { type: Text, required: true }

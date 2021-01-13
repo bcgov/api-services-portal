@@ -26,7 +26,7 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    actor: { type: Relationship, ref: 'TemporaryIdentity' }
+    actor: { type: Relationship, ref: 'User' }
   },
   plugins: [
     atTracking()

@@ -6,9 +6,11 @@ export const GET_DATASET_GROUP = `
         }
 
         allTemporaryIdentities {
+            id
             name
             username
             email
+            userId
         }
     }
 `
@@ -18,11 +20,15 @@ export const GET_LIST = `
         allAccessRequests {
           id
           name
-          content
           isApproved
           isIssued
           isComplete
           createdAt
+          requestor {
+            name
+            username
+            email
+          }
           datasetGroup {
               name
               authMethod
@@ -32,9 +38,52 @@ export const GET_LIST = `
               }
               organization {
                   name
+                  title
               }
               organizationUnit {
                   name
+                  title
+              }
+              services {
+                  name
+                  host
+              }
+          }
+        }
+    }
+`
+
+export const GET_REQUEST = `
+    query GetAccessRequests($id: ID!) {
+        allAccessRequests(where: { id: $id } ) {
+          id
+          name
+          isApproved
+          isIssued
+          isComplete
+          createdAt
+          requestor {
+            name
+            username
+            email
+          }
+          datasetGroup {
+              name
+              authMethod
+              useAcl
+              credentialIssuer {
+                  name
+                  authMethod
+                  mode
+                  oidcDiscoveryUrl
+              }
+              organization {
+                  name
+                  title
+              }
+              organizationUnit {
+                  name
+                  title
               }
               services {
                   name
@@ -46,17 +95,36 @@ export const GET_LIST = `
 `
 
 export const ADD = `
-    mutation AddAccessRequest($name: String!, $datasetGroupId: ID!) {
-        createAccessRequest(data: { name: $name, datasetGroup: { connect: { id: $datasetGroupId } } } ) {
+    mutation AddAccessRequest($name: String!, $requestor: ID!, $datasetGroupId: ID!) {
+        createAccessRequest(data: { name: $name, requestor: { connect: { id: $requestor } }, datasetGroup: { connect: { id: $datasetGroupId } } } ) {
             id
         }
     }
 `
+        // createActivity(data: { type: "AccessRequest", name: $name, action: "Create", message: "Access Request Created", refId: $datasetGroupId, actor: { connect: { id: $requestor } }  }) {
+        //     id
+        // }
 
 export const REMOVE = `
     mutation RemoveAccessRequest($id: ID!) {
         deleteAccessRequest(id: $id) {
             name
+            id
+        }
+    }
+`
+
+export const APPROVE = `
+    mutation Approve($id: ID!) {
+        updateAccessRequest(id: $id, data: { isApproved: true }) {
+            id
+        }
+    }
+`
+
+export const FULFILL_REQUEST = `
+    mutation FulfillRequest($id: ID!) {
+        updateAccessRequest(id: $id, data: { isIssued: true }) {
             id
         }
     }

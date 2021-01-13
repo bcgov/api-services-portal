@@ -2,7 +2,7 @@ import { styles } from '../../shared/styles/devportal.css';
 
 import graphql from '../../shared/services/graphql'
 
-import { REMOVE } from './queries'
+import { REMOVE, APPROVE } from './queries'
 
 import NameValue from '../../components/name-value';
 
@@ -11,22 +11,30 @@ const Item = props => (
     { props && props.accessRequest ? (
         <>
         <NameValue name="Created" value={props.accessRequest.createdAt} width="300px"/>
-        <NameValue name="Name" value={props.accessRequest.name} width="300px"/>
+        <NameValue name="Requestor" value={props.accessRequest.requestor.name} width="300px"/>
         <NameValue name="Family" value={ props.accessRequest.datasetGroup && (
                 <p>Dataset {props.accessRequest.datasetGroup.name}</p>
         )} width="200px"/>
         <NameValue name="Organization" value={ props.accessRequest.datasetGroup && props.accessRequest.datasetGroup.organization && props.accessRequest.datasetGroup.organizationUnit ? (
-            <p>{props.accessRequest.datasetGroup.organization.name} {"->"} {props.accessRequest.datasetGroup.organizationUnit.name}</p>
+            <p>{props.accessRequest.datasetGroup.organization.title} {"->"} {props.accessRequest.datasetGroup.organizationUnit.title}</p>
         ):false} width="400px"/>
 
         { props.accessRequest.isApproved === null ? (
             <div className="flex">
-                <button style={styles.primaryButton}>Approve</button>
+                <button style={styles.primaryButton} onClick={() => {
+                    graphql(APPROVE, { id: props.accessRequest.id }).then(props.refetch);
+                }}>Approve</button>
             </div>
         ) : false }
         { props.accessRequest.isApproved && props.accessRequest.isIssued == null ? (
-            <button style={styles.primaryButton}>Send Credentials</button>
+            <div className="flex">
+                <a style={styles.primaryButton} href={`/requests/issue/${props.accessRequest.id}`}>Send Credentials</a>
+            </div>
+
         ) : false}
+        { props.accessRequest.isIssued && props.accessRequest.isComplete == null ? (
+                <p style={styles.message}>Credentials Sent to Requestor</p>
+        ): false }
         { props.accessRequest.isComplete == true ? (
             <p>COMPLETE</p>
         ): false }

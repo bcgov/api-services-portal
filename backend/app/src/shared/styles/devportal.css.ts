@@ -85,6 +85,17 @@ export const styles = {
 
     },
 
+
+    message: {
+        display: 'inline-block',
+        background: tint(0.2, 'dark'),
+        height: "50px",
+        padding: "5px",
+        borderRadius: '5px',
+        margin: '5px'
+  
+      },
+  
     innerModal: {
         width: '100%',
         display: 'block',

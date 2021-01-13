@@ -1,11 +1,17 @@
 import * as React from 'react';
 import Modal from 'react-modal';
 
+import { GET_LIST } from './queries'
+
+import { useAppContext } from '../../context'
+
 const { useEffect, useState } = React;
 
 import { styles } from '../../../shared/styles/devportal.css';
 
 import graphql from '../../../shared/services/graphql'
+
+import List from './list'
 
 const customStyles = {
     content : {
@@ -20,19 +26,21 @@ const customStyles = {
 };
 
 const MyCredentialsPage = () => {
+    const context = useAppContext()
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    // let fetch = () => {
-    //     graphql(GET_LIST)
-    //     .then(({ data }) => {
-    //         setState({ state: 'loaded', data });
-    //     })
-    //     .catch((err) => {
-    //         setState({ state: 'error', data: null });
-    //     });
-    // };
+    let fetch = () => {
+        graphql(GET_LIST, { id : context.user ? context.user.id : false })
+        .then(({ data }) => {
+            setState({ state: 'loaded', data });
+        })
+        .catch((err) => {
+            setState({ state: 'error', data: null });
+        });
+    };
     
-    // useEffect(fetch, []);
+    useEffect(fetch, []);
+
     var subtitle;
     const [modalIsOpen,setIsOpen] = React.useState(false);
     function openModal() {
@@ -56,8 +64,10 @@ const MyCredentialsPage = () => {
             <hr style={styles.divider} />
             <div style={styles.formWrapper}>
                 <h2 style={styles.appHeading}>Credentials</h2>
-                <button style={styles.primaryButton}>Generate new API Key</button>
-                <button style={styles.primaryButton} onClick={openModal}>Request Access</button>
+                {/* <button style={styles.primaryButton}>Generate new API Key</button>
+                <button style={styles.primaryButton} onClick={openModal}>Request Access</button> */}
+
+                <List data={data} state={state} refetch={fetch} />
 
             </div>
 

@@ -1,7 +1,9 @@
-const { Text, Checkbox, Select, Relationship, Url, Password } = require('@keystonejs/fields')
+const { Text, Checkbox, Select, Relationship, Url, Password, Virtual } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
-const { byTracking, atTracking } = require('@keystonejs/list-plugins')
+const { byTracking } = require('../components/ByTracking')
+
+const { atTracking } = require('@keystonejs/list-plugins')
 
 module.exports = {
   fields: {
@@ -11,19 +13,38 @@ module.exports = {
     },
     description: {
         type: Markdown,
-        isRequired: true,
+        isRequired: false,
+    },
+    authMethod: { type: Select, emptyOption: false, default: 'oidc', options: [
+        { value: 'oidc', label: 'OIDC'},
+        { value: 'keys', label: 'API Key'},
+      ]
+    },
+    mode: { type: Select, emptyOption: false, default: 'auto', options: [
+        { value: 'manual', label: 'Manual'},
+        { value: 'auto', label: 'Automatic'},
+      ]
+    },
+    instruction: {
+        type: Virtual,
+        resolver: item => `For OIDC, modes: Manual: will provide client id/secret in Request or direct.  Auto: Client Registration (Initial Access Token).  For API Key, the Key is generated, but option to be manual or automatic.`
     },
     oidcDiscoveryUrl: {
         type: Url,
-        isRequired: true,
+        isRequired: false,
         views: '../admin/fieldViews/link'
+    },
+    initialAccessToken: {
+        type: Text,
+        isMultiline: true,
+        isRequired: false,
     },
     clientId: {
         type: Text,
         isRequired: false,
     },
     clientSecret: {
-        type: Password,
+        type: Text,
         isRequired: false,
     },
     contact: { type: Relationship, ref: 'User', many: false },

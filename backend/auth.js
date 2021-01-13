@@ -40,6 +40,7 @@ class Oauth2ProxyAuthStrategy {
         app = express()
         app.set('trust proxy', true);
 
+        const _users = this.keystone.getListByKey('User')
         const users = this.keystone.getListByKey(this.listKey)
 
         const jwtCheck = jwksRsa.expressJwtSecret({
@@ -113,6 +114,10 @@ class Oauth2ProxyAuthStrategy {
 
             const username = req['oauth_user']['preferred_username']
 
+            let _results = await _users.adapter.find({ 'email': email })
+
+            let userId = _results.length == 1 ? _results[0].id : null;
+
             let results = await users.adapter.find({ 'jti': jti })
 
             var operation = "update"
@@ -122,11 +127,11 @@ class Oauth2ProxyAuthStrategy {
                 console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
                 const { errors } = await this.keystone.executeGraphQL({
                     context: this.keystone.createContext({ skipAccessControl: true }),
-                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String) {
-                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles }) {
+                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $userId: String) {
+                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, userId: $userId }) {
                                 id
                         } }`,
-                    variables: { jti, sub, name, email, username, namespace, groups, roles },
+                    variables: { jti, sub, name, email, username, namespace, groups, roles, userId },
                 })
                 if (errors) {
                     console.log("NO! Something went wrong " + errors)

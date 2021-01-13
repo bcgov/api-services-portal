@@ -31,12 +31,12 @@ module.exports = {
     },
     description: {
       type: Text,
+      isMultiline: true,
       isRequired: false,
     },
     credentialIssuer: { type: Relationship, ref: 'CredentialIssuer' },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     services: { type: Relationship, ref: 'ServiceRoute', many: true },
-
   }
 }
