@@ -220,6 +220,8 @@ jobs:
             redirect-url: https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback
             skip-auth-regex: '/public|/docs|/_next|/images'
             whitelist-domain: authz-apps-gov-bc-ca.dev.apsgw.xyz
+            skip-provider-button: 'true'
+
 
         env:
           SESSION_SECRET:
@@ -227,6 +229,7 @@ jobs:
             secure: true
           AUTH_STRATEGY:
             value: Oauth2Proxy
+
           MONGO_URL:
             value: 'mongodb://proto-aps-portal-${GITHUB_REF:19}-db-mongodb:27017'
           MONGO_USER:
@@ -235,7 +238,9 @@ jobs:
           MONGO_PASSWORD:
             value: s3cr3t
             secure: true
-          OIDC_ISSUER:
+          GITHUB_API_TOKEN:
+            secure: true
+          OIDC_ISSUER:  
             value: '${{ secrets.OIDC_ISSUER }}'
           JWKS_URL:
             value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
