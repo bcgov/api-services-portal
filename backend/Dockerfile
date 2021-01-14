@@ -10,6 +10,7 @@ COPY app ./app
 COPY components ./components
 COPY lists ./lists
 COPY pages ./pages
+COPY services ./services
 COPY public ./public
 
 ARG GITHUB_API_TOKEN
