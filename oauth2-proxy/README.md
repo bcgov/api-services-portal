@@ -24,16 +24,19 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --validate-url="${OIDC_ISSUER}/protocol/openid-connect/userinfo" \
     --redirect-url="http://localhost:4180/oauth2/callback" \
     --cookie-secure=False \
-    --cookie-refresh=60s \
-    --cookie-name=keystoneproxy.sid \
+    --cookie-refresh=1h \
     --pass-basic-auth=false \
     --pass-access-token=true \
     --set-xauthrequest=true \
     --skip-jwt-bearer-tokens=true \
     --set-authorization-header=true \
     --pass-authorization-header=true \
-    --skip-auth-regex=/public \
+    --skip-auth-regex="/public|/docs|/_next|/images" \
+    --whitelist-domain="authz-apps-gov-bc-ca.dev.apsgw.xyz" \
     --upstream="http://${hostip}:3000"
+
+
+    --cookie-name=keystone.sid \
 ```
 
 # Sample Upstream
