@@ -7,6 +7,21 @@ To run this project first run `npm install`. Note: If you generated this project
 
 Once running, the Keystone Admin UI is reachable via `localhost:3000/admin`.
 
+```
+hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
+export MONGO_URL=mongodb://$hostip:17017/keystonedb3
+export MONGO_USER=""
+export MONGO_PASSWORD=""
+
+export OIDC_ISSUER=""
+export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs
+
+export EXTERNAL_URL="http://localhost:4180"
+
+npm run dev
+```
+
+
 
 ## Design
 

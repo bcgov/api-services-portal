@@ -11,8 +11,8 @@ const querystring = require('querystring')
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 
-const proxy = "http://localhost:4180"
-const authLogoutUrl = "https://authz-apps-gov-bc-ca.dev.apsgw.xyz/auth/realms/aps-v2/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy)
+const proxy = process.env.EXTERNAL_URL
+const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy)
 
 class Oauth2ProxyAuthStrategy {
     constructor(keystone, listKey, config) {
