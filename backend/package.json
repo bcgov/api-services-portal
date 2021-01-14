@@ -42,6 +42,7 @@
     "graphql-request": "^3.4.0",
     "isomorphic-unfetch": "^3.1.0",
     "jwks-rsa": "^1.12.1",
+    "keycloak-admin": "^1.14.5",
     "keystonejs-grapesjs-editor": "^1.0.10",
     "next": "9.5.5",
     "openid-client": "^4.2.2",

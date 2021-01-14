@@ -6,8 +6,13 @@
 const express = require('express')
 const session = require('express-session')
 
+const querystring = require('querystring')
+
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
+
+const proxy = "http://localhost:4180"
+const authLogoutUrl = "https://authz-apps-gov-bc-ca.dev.apsgw.xyz/auth/realms/aps-v2/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy)
 
 class Oauth2ProxyAuthStrategy {
     constructor(keystone, listKey, config) {
@@ -40,9 +45,6 @@ class Oauth2ProxyAuthStrategy {
         app = express()
         app.set('trust proxy', true);
 
-        const _users = this.keystone.getListByKey('User')
-        const users = this.keystone.getListByKey(this.listKey)
-
         const jwtCheck = jwksRsa.expressJwtSecret({
             cache: true,
             rateLimit: true,
@@ -60,18 +62,45 @@ class Oauth2ProxyAuthStrategy {
 
         const checkExpired = (err, req, res, next) => {
             console.log("CHECK EXPIRED!! " + err);
+
             if (err) {
                 if (err.name === 'UnauthorizedError') {
                     console.log("CODE = "+err.code);
                     console.log("INNER = "+err.inner);
-                    res.redirect('/oauth2/sign_out')
-                    return
+                    res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
                 }
                 next(err)
             } else {
+                //
                 next();
             }
         }
+
+        app.get('/', [verifyJWT, checkExpired], async (req, res, next) => {
+            if (req.oauth_user) {
+                const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+                console.log("SESSION USER = " + req.user)
+                if (req.user) {
+                    if (jti != req.user.jti) {
+                        console.log("Looks like a different credential.. ")
+                        await this._sessionManager.endAuthedSession(req);
+                        res.redirect('/admin/signin')
+                        // this.register_user(req, res)
+                        return
+                    }
+                } else {
+                    res.redirect('/admin/signin')
+                    return
+                    // this.register_user(req,res)
+                    // return
+                }
+            }
+            next();
+        });
+
+        app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
+            res.redirect('/home')
+        })
 
         app.get('/admin/session', async (req, res, next) => {
             const toJson = (val) => val ? JSON.parse(val) : null;
@@ -82,69 +111,87 @@ class Oauth2ProxyAuthStrategy {
             res.json(response)
         })
 
-        app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
-            const allRoles = ['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin']
-            const oauthUser = req['oauth_user']
-            console.log("AuTH");
-            // The SessionManager is expecting an Authorization header, so give it one
-            //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
-            const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
-            const sub = req['oauth_user']['sub'] // Subject ID - Whom the token refers to
-
-            const name = req['oauth_user']['name']
-            const email = req['oauth_user']['email']
-            const namespace = req['oauth_user']['namespace']
-            const groups = JSON.stringify(req['oauth_user']['groups'])
-            let roles = JSON.stringify(allRoles)
-            console.log(JSON.stringify(oauthUser, null, 4))
-            try {
-                roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
-            } catch (e) {
-                console.log(e)
-
-            }
-            /*
-                Roles:
-                credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
-                api-manager      : The API Manager makes APIs available for consumption with supporting documentation.  They approve requests for access.
-                api-owner        : Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
-                developer        : A Developer discovers APIs, requests access if required and consumes them - everyone has 'developer' role
-                aps-admin        : Someone from the APS team with elevated privileges.
-            */
-
-            const username = req['oauth_user']['preferred_username']
-
-            let _results = await _users.adapter.find({ 'email': email })
-
-            let userId = _results.length == 1 ? _results[0].id : null;
-
-            let results = await users.adapter.find({ 'jti': jti })
-
-            var operation = "update"
-            console.log("AuTH"+jti+sub);
-
-            if (results.length == 0) {
-                console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
-                const { errors } = await this.keystone.executeGraphQL({
-                    context: this.keystone.createContext({ skipAccessControl: true }),
-                    query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $userId: String) {
-                            createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, userId: $userId }) {
-                                id
-                        } }`,
-                    variables: { jti, sub, name, email, username, namespace, groups, roles, userId },
-                })
-                if (errors) {
-                    console.log("NO! Something went wrong " + errors)
+        app.get('/admin/signout', [verifyJWT, checkExpired], async (req, res, next) => {
+            console.log("Signing out")
+            if (req.oauth_user) {
+                if (req.user) {
+                    await this._sessionManager.endAuthedSession(req);
                 }
-                results = await users.adapter.find({ ['jti']: jti })       
-                operation = "create"
             }
+            res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
+        })
 
-            const user = results[0]
-            console.log("USER = "+JSON.stringify(user, null, 4))
-            await this._authenticateItem(user, null, operation === 'create', req, res, next);
+        app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
+            this.register_user(req,res)
         })
         return app
+    }
+
+    async register_user(req, res, next) {
+        const _users = this.keystone.getListByKey('User')
+        const users = this.keystone.getListByKey(this.listKey)
+
+        // If no user in session but we are authenticated, then redirect to /admin/signin
+        const allRoles = ['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin']
+        const oauthUser = req['oauth_user']
+        console.log("AuTH");
+        // The SessionManager is expecting an Authorization header, so give it one
+        //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
+        const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+        const sub = req['oauth_user']['sub'] // Subject ID - Whom the token refers to
+
+        const name = req['oauth_user']['name']
+        const email = req['oauth_user']['email']
+        const namespace = req['oauth_user']['namespace']
+        const groups = JSON.stringify(req['oauth_user']['groups'])
+        let roles = JSON.stringify(allRoles)
+        console.log(JSON.stringify(oauthUser, null, 4))
+        try {
+            roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
+        } catch (e) {
+            console.log(e)
+
+        }
+        /*
+            Roles:
+            credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
+            api-manager      : The API Manager makes APIs available for consumption with supporting documentation.  They approve requests for access.
+            api-owner        : Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
+            developer        : A Developer discovers APIs, requests access if required and consumes them - everyone has 'developer' role
+            aps-admin        : Someone from the APS team with elevated privileges.
+        */
+
+        const username = req['oauth_user']['preferred_username']
+
+        let _results = await _users.adapter.find({ 'email': email })
+
+        let userId = _results.length == 1 ? _results[0].id : null;
+
+        let results = await users.adapter.find({ 'jti': jti })
+
+        var operation = "update"
+        console.log("AuTH"+jti+sub);
+
+        if (results.length == 0) {
+            console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
+            const { errors } = await this.keystone.executeGraphQL({
+                context: this.keystone.createContext({ skipAccessControl: true }),
+                query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $userId: String) {
+                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, userId: $userId }) {
+                            id
+                    } }`,
+                variables: { jti, sub, name, email, username, namespace, groups, roles, userId },
+            })
+            if (errors) {
+                console.log("NO! Something went wrong " + errors)
+            }
+            results = await users.adapter.find({ ['jti']: jti })       
+            operation = "create"
+        }
+
+        const user = results[0]
+        console.log("USER = "+JSON.stringify(user, null, 4))
+        await this._authenticateItem(user, null, operation === 'create', req, res, next);
     }
 
     async _authenticateItem(item, accessToken, isNewItem, req, res, next) {

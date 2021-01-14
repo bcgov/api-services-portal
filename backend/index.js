@@ -13,6 +13,7 @@ const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
+
 const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
@@ -84,7 +85,7 @@ const authStrategy = strategyType === "Password"
         onAuthenticated: ({ token, item, isNewItem }, req, res) => {
           console.log('Token = ' + token);
           console.log('Redirecting to /home');
-          res.redirect(302, '/home');
+          res.redirect(302, '/admin/home');
         },
       },
       hooks: {

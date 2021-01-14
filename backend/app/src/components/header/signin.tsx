@@ -15,7 +15,7 @@ const Signin: React.FC<SigninProps> = ({ user }) => {
         </span>
       ) : (
         <span>
-          <Button color="secondary" href="/admin/signin">
+          <Button color="secondary" href="/oauth2/sign_out">
             Sign In
           </Button>
         </span>
