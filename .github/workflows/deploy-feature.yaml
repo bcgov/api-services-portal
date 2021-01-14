@@ -219,6 +219,7 @@ jobs:
             oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
             redirect-url: https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback
             skip-auth-regex: '/public|/docs|/_next|/images'
+            whitelist-domain: authz-apps-gov-bc-ca.dev.apsgw.xyz
 
         env:
           SESSION_SECRET:
@@ -234,8 +235,12 @@ jobs:
           MONGO_PASSWORD:
             value: s3cr3t
             secure: true
+          OIDC_ISSUER:
+            value: '${{ secrets.OIDC_ISSUER }}'
           JWKS_URL:
-            value: "${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs"
+            value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
+          EXTERNAL_URL:
+            value: 'https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca'
 
         " > values.yaml
         
