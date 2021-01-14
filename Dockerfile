@@ -1,14 +1,20 @@
-FROM node:12-alpine
+FROM node:alpine
+
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
 
-COPY src ./
-COPY public ./public/
-COPY *.config.js ./
-COPY tsconfig.json ./
+COPY *.js ./
+COPY app ./app
+COPY components ./components
+COPY lists ./lists
+COPY pages ./pages
+COPY services ./services
+COPY public ./public
 
 ARG GITHUB_API_TOKEN
+ENV COOKIE_SECRET=change_me
 
 RUN npm run build
 
