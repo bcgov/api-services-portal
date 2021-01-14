@@ -239,7 +239,7 @@ jobs:
             value: s3cr3t
             secure: true
           GITHUB_API_TOKEN:
-            value: ""
+            value: "TBD"
             secure: true
           OIDC_ISSUER:  
             value: '${{ secrets.OIDC_ISSUER }}'
