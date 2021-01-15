@@ -58,6 +58,14 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
 
+    - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.tags }}'
+      id: set-deploy-id
+
+    - name: Get deploy ID
+      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
+
     - name: Build
       uses: docker/build-push-action@v2
       with:
@@ -125,14 +133,14 @@ jobs:
         kind: NetworkSecurityPolicy
         apiVersion: security.devops.gov.bc.ca/v1alpha1
         metadata:
-          name: proto-aps-portal-${GITHUB_REF:19}
+          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
         spec:
           description: |
             allow the backend to talk to mongodb
           source:
-            - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}
+            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
           destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}-db
+            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
         """ > nsp.yaml
         oc apply -f nsp.yaml
 
@@ -178,7 +186,7 @@ jobs:
             runAsUser: 1002770000
         ' > values.yaml
         helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm upgrade --install proto-aps-portal-${GITHUB_REF:19}-db -f values.yaml bitnami/mongodb
+        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
 
     - name: 'Deploy Backend'
       run: |
@@ -196,7 +204,7 @@ jobs:
 
         image:
           repository: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
-          tag: feature-${GITHUB_REF:19}
+          tag: feature-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
           pullPolicy: Always
 
         imagePullSecrets:
@@ -217,7 +225,7 @@ jobs:
             client-id: ${{ secrets.OIDC_CLIENT_ID }}
             client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
             oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
-            redirect-url: https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca/oauth2/callback
+            redirect-url: https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
             skip-auth-regex: '/public|/docs|/_next|/images'
             whitelist-domain: authz-apps-gov-bc-ca.dev.apsgw.xyz
             skip-provider-button: 'true'
@@ -231,7 +239,7 @@ jobs:
             value: Oauth2Proxy
 
           MONGO_URL:
-            value: 'mongodb://proto-aps-portal-${GITHUB_REF:19}-db-mongodb:27017'
+            value: 'mongodb://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
           MONGO_USER:
             value: root
             secure: true
@@ -246,12 +254,12 @@ jobs:
           JWKS_URL:
             value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
           EXTERNAL_URL:
-            value: 'https://aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca'
+            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
 
         " > values.yaml
         
         helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-${GITHUB_REF:19} -f values.yaml bcgov/generic-api
+        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
 
     # - name: 'Deploy Frontend'
     #   run: |
@@ -295,15 +303,15 @@ jobs:
 
         echo "
         routes:
-          - host: aps-portal-${GITHUB_REF:19}.apps.silver.devops.gov.bc.ca
+          - host: aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
             targetPort: http
-            service: proto-aps-portal-${GITHUB_REF:19}-generic-api
+            service: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api
             wildcardPolicy: None
             tls:
               termination: edge
         " > values.yaml
         helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-${GITHUB_REF:19}-routes -f values.yaml bcgov/ocp-route
+        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
 
     # - name: 'Deploy Route 2'
     #   run: |
