@@ -97,7 +97,25 @@ module.exports = {
             console.log(JSON.stringify(apiKey, null, 3))
         }
         // }
-        
+        console.log(JSON.stringify(Object.keys(context), null, 4))
+
+        const name = updatedItem.name
+        const refId = updatedItem.id
+        const action = operation
+        const message = "Changes to " + JSON.stringify(originalInput)
+        const userId = context.req.user.id
+
+        const { errors } = await context.executeGraphQL({
+            query: `mutation ($name: String, $action: String, $refId: String, $message: String, $userId: String) {
+                    createActivity(data: { type: "AccessRequest", name: $name, action: $action, refId: $refId, message: $message, actor: { connect: { id : $userId }} }) {
+                        id
+                } }`,
+            variables: { name, action, refId, message, userId },
+        })
+        if (errors) {
+            console.log("NO! Something went wrong " + errors)
+        }
+    
 
     })
   }

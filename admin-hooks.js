@@ -12,7 +12,7 @@ module.exports = {
         },
         {
             label: 'Workflow',
-            children: ['AccessRequest', 'DatasetGroup', 'CredentialIssuer'],
+            children: ['AccessRequest', 'DatasetGroup', 'CredentialIssuer', 'Activity'],
         },
         {
             label: 'Session',

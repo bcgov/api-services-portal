@@ -183,7 +183,7 @@ class Oauth2ProxyAuthStrategy {
             }
             console.log("USER CREATE " + JSON.stringify(data, null, 4))
 
-            userId = data.id
+            userId = data.createUser.id
         }
 
         let results = await users.adapter.find({ 'jti': jti })
