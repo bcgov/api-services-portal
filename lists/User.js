@@ -27,10 +27,10 @@ const access = { userIsAdmin, userOwnsItem, userIsAdminOrOwner };
 module.exports = {
   fields: {
     name: { type: Text },
-    username: { type: Text, required: false },
+    username: { type: Text, required: false, isUnique: true },
     email: {
       type: Text,
-      isUnique: true,
+      isUnique: false,
     },
     isAdmin: {
       type: Checkbox,
@@ -42,9 +42,8 @@ module.exports = {
     },
     password: {
         type: Password,
-        required: true
-    },
-    roles: { type: Text, required: true }
+        required: false
+    }
   },
   // List-level access controls
   access: {

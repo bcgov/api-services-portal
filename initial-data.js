@@ -23,12 +23,12 @@ module.exports = async keystone => {
 
     const { errors } = await keystone.executeGraphQL({
       context: keystone.createContext({ skipAccessControl: true }),
-      query: `mutation initialUser($password: String, $email: String, $roles: String) {
-            createUser(data: {name: "Admin", email: $email, isAdmin: true, password: $password, roles: $roles}) {
+      query: `mutation initialUser($password: String, $email: String) {
+            createUser(data: {name: "Admin", email: $email, username: "admin", isAdmin: true, password: $password}) {
               id
             }
           }`,
-      variables: { password, email, roles },
+      variables: { password, email },
     });
 
     if (errors) {

@@ -39,7 +39,7 @@ export default function MyApp({ Component, pageProps }) {
     { name: 'My Credentials', url: '/a/my-credentials', access: ['developer'] },
     { name: 'Documentation', url: '/docs', access: null },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
-    { name: 'My Profile', url: '/my-profile', access: ['developer'] },
+    { name: 'My Profile', url: '/my-profile', access: ['developer', 'api-owner', 'api-manager', 'credential-admin', 'aps-admin'] },
   ];
 
   let [{ state, user }, setState] = useState({ state: 'loading', user: null });

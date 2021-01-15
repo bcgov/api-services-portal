@@ -134,16 +134,16 @@ class Oauth2ProxyAuthStrategy {
         // If no user in session but we are authenticated, then redirect to /admin/signin
         const allRoles = ['developer', 'api-manager', 'api-owner', 'aps-admin', 'credential-admin']
         const oauthUser = req['oauth_user']
-        console.log("AuTH");
+
         // The SessionManager is expecting an Authorization header, so give it one
         //req['headers']['authorization'] = 'Bearer ' + req.headers['x-forwarded-access-token']
-        const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
-        const sub = req['oauth_user']['sub'] // Subject ID - Whom the token refers to
+        const jti = oauthUser['jti'] // JWT ID - Unique Identifier for the token
+        const sub = oauthUser['sub'] // Subject ID - Whom the token refers to
 
-        const name = req['oauth_user']['name']
-        const email = req['oauth_user']['email']
-        const namespace = req['oauth_user']['namespace']
-        const groups = JSON.stringify(req['oauth_user']['groups'])
+        const name = oauthUser['name']
+        const email = oauthUser['email']
+        const namespace = oauthUser['namespace']
+        const groups = JSON.stringify(oauthUser['groups'])
         let roles = JSON.stringify(allRoles)
         console.log(JSON.stringify(oauthUser, null, 4))
         try {
@@ -161,16 +161,35 @@ class Oauth2ProxyAuthStrategy {
             aps-admin        : Someone from the APS team with elevated privileges.
         */
 
-        const username = req['oauth_user']['preferred_username']
+        const username = oauthUser['preferred_username']
 
-        let _results = await _users.adapter.find({ 'email': email })
+        let _results = await _users.adapter.find({ 'username': username })
 
         let userId = _results.length == 1 ? _results[0].id : null;
+
+        if (_results.length == 0) {
+            // auto-create a user record
+            const { data, errors } = await this.keystone.executeGraphQL({
+                context: this.keystone.createContext({ skipAccessControl: true }),
+                query: `mutation ($name: String, $email: String, $username: String) {
+                        createUser(data: {name: $name, username: $username, email: $email, isAdmin: false }) {
+                            id
+                    } }`,
+                variables: { name, email, username },
+            })
+            if (errors) {
+                console.log("NO! Something went wrong creating user " + errors)
+                throw new Error("Error creating user " + errors)
+            }
+            console.log("USER CREATE " + JSON.stringify(data, null, 4))
+
+            userId = data.id
+        }
 
         let results = await users.adapter.find({ 'jti': jti })
 
         var operation = "update"
-        console.log("AuTH"+jti+sub);
+        console.log("Auth "+jti+sub);
 
         if (results.length == 0) {
             console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
@@ -274,6 +293,7 @@ class Oauth2ProxyAuthStrategy {
     }
   }
   
+  // Need to keep this as 'password' otherwise the admin-ui won't work!
   Oauth2ProxyAuthStrategy.authType = 'password';
   
   module.exports = { Oauth2ProxyAuthStrategy };
