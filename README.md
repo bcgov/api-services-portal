@@ -3,12 +3,16 @@
 
 ## Running the Project.
 
-To run this project first run `npm install`. Note: If you generated this project via the Keystone cli step this has been done for you \\o/.
+To run this project first run `npm install`.
 
-Once running, the Keystone Admin UI is reachable via `localhost:3000/admin`.
+This application requires to have an Authentication proxy in front of it.  Go to [oauth2-proxy](oauth2-proxy) for instructions on starting the proxy locally.
+
+You can then run `npm run dev` to start the application on port 3000.  The proxy runs on port 4180.
 
 ```
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
+
+export AUTH_STRATEGY=Oauth2Proxy
 export MONGO_URL=mongodb://$hostip:17017/keystonedb3
 export MONGO_USER=""
 export MONGO_PASSWORD=""
@@ -21,7 +25,7 @@ export EXTERNAL_URL="http://localhost:4180"
 npm run dev
 ```
 
-
+Once running, the `aps portal` application is reachable via `localhost:4180`.
 
 ## Design
 

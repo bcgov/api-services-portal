@@ -34,9 +34,6 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --skip-auth-regex="/public|/docs|/_next|/images" \
     --whitelist-domain="authz-apps-gov-bc-ca.dev.apsgw.xyz" \
     --upstream="http://${hostip}:3000"
-
-
-    --cookie-name=keystone.sid \
 ```
 
 # Sample Upstream
@@ -51,4 +48,4 @@ docker run -ti --rm -p 9000:9000 \
     sample.local
 ```
 
-Go to: `http://localhost:9000/public`
+Go to: `http://localhost:4180/public`
