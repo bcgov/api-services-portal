@@ -1,7 +1,7 @@
 import { GraphQLClient, gql } from 'graphql-request';
 
 const apiClient = new GraphQLClient(
-  'https://aps-portal-api.apps.silver.devops.gov.bc.ca/admin/api',
+  process.env.EXTERNAL_URL + '/admin/api',
   {
     headers: {
       'Content-Type': 'application/json',
@@ -9,12 +9,16 @@ const apiClient = new GraphQLClient(
   }
 );
 
+// NOTE: This can be called at build time
 const api = async (query: string, variables: any = {}) => {
   try {
     const data = await apiClient.request(query);
     return data;
   } catch (err) {
-    throw new Error(err);
+    // If content is gathered at build time using this api, the first time doing a
+    // deployment the backend won't be there, so catch the error and return empty
+    return {allContents: []}
+    //throw new Error(err);
   }
 };
 
