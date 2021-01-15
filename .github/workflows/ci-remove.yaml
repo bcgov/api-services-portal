@@ -12,7 +12,7 @@ jobs:
       run: |
         echo "BRANCH = ${{ github.event.ref }}"
         export BRANCH="${{ github.event.ref }}"
-        echo '::set-output name=DEPLOY_ID::${BRANCH//\//-}'
+        echo "::set-output name=DEPLOY_ID::${BRANCH//\//-}"
       id: set-deploy-id
 
     - name: Get deploy ID
