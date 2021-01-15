@@ -127,7 +127,7 @@ module.exports = {
         return true;
       },
     }),
-    new NextApp({ dir: 'app' }),
+    new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: app => {
   },

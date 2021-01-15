@@ -2,16 +2,10 @@ FROM node:alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY src/package*.json ./
 RUN npm install
 
-COPY *.js ./
-COPY app ./app
-COPY components ./components
-COPY lists ./lists
-COPY pages ./pages
-COPY services ./services
-COPY public ./public
+COPY src/* .
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
