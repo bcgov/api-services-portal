@@ -1,7 +1,7 @@
 module.exports = {
   purge: [
-    './app/src/components/**/*.{js,ts,jsx,tsx}',
-    './app/src/pages/**/*.{js,ts,jsx,tsx}',
+    './nextapp/src/components/**/*.{js,ts,jsx,tsx}',
+    './nextapp/src/pages/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'media', // 'media' or 'class'
   theme: {
