@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ feature/* ]
+    branches: [ dev, main, feature/* ]
 
 env:
   REGISTRY: docker.pkg.github.com

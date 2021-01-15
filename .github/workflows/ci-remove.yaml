@@ -2,7 +2,7 @@ name: Delete Deployment
 
 on:
   delete:
-    branches: [ feature/* ]
+    branches: [ dev, main, feature/* ]
 
 jobs:
   delete:
