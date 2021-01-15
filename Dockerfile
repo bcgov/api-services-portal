@@ -5,7 +5,7 @@ WORKDIR /app
 COPY src/package*.json ./
 RUN npm install
 
-COPY src/* .
+COPY src ./
 
 ARG GITHUB_API_TOKEN
 ENV COOKIE_SECRET=change_me
