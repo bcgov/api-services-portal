@@ -5,7 +5,7 @@ on:
     branches: [ feature/* ]
 
 jobs:
-  build:
+  delete:
     runs-on: ubuntu-latest
     steps:
     - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
