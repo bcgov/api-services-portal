@@ -8,6 +8,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Docker meta
+      id: docker_meta
+      uses: crazy-max/ghaction-docker-meta@v1
+      with:
+        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
+
+    - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
+      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.tags }}'
+      id: set-deploy-id
+
+    - name: Get deploy ID
+      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
     - uses: actions/checkout@v2
       
     - name: Install oc
@@ -32,14 +45,7 @@ jobs:
         kind: NetworkSecurityPolicy
         apiVersion: security.devops.gov.bc.ca/v1alpha1
         metadata:
-          name: proto-aps-portal-${GITHUB_REF:19}
-        spec:
-          description: |
-            allow the backend to talk to mongodb
-          source:
-            - - app.kubernetes.io/instance=proto-aps-portal-${GITHUB_REF:19}
-          destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-db-${GITHUB_REF:19}
+          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
         """ > nsp.yaml
         oc delete -f nsp.yaml
 
@@ -52,8 +58,6 @@ jobs:
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
        
-        helm delete proto-aps-portal-db-${GITHUB_REF:19}
-        helm delete proto-aps-portal-${GITHUB_REF:19}
-        helm delete proto-aps-portal-ui-${GITHUB_REF:19}
-        helm delete proto-aps-portal-routes-${GITHUB_REF:19}
-        helm delete proto-aps-portal-routes-2-${GITHUB_REF:19}
+        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
+        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
