@@ -1,4 +1,4 @@
-name: Delete Feature
+name: Delete Deployment
 
 on:
   delete:
@@ -8,14 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Docker meta
-      id: docker_meta
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
-
     - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
-      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.tags }}'
+      run: |
+        echo "BRANCH = ${{ github.event.ref }}"
+        export BRANCH="${{ github.event.ref }}"
+        echo '::set-output name=DEPLOY_ID::${BRANCH//\//-}'
       id: set-deploy-id
 
     - name: Get deploy ID
