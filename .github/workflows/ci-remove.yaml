@@ -1,4 +1,4 @@
-name: Delete Deployment of ${{ github.event.ref }}
+name: Delete Deployment
 
 on:
   delete:
