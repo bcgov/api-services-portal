@@ -1,15 +1,15 @@
 import * as React from 'react';
+import { ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import Typography from 'typography';
+import { useRouter } from 'next/router';
 import '@bcgov/bc-sans/css/BCSans.css';
 import '../shared/styles/global.css';
 
-import { useRouter } from 'next/router';
-
 import { AppWrapper } from './context';
+import theme from '../shared/theme';
 
 const { useEffect, useState } = React;
-
 
 import AppBar from '../components/app-bar';
 
@@ -39,24 +39,37 @@ export default function MyApp({ Component, pageProps }) {
     { name: 'My Credentials', url: '/a/my-credentials', access: ['developer'] },
     { name: 'Documentation', url: '/docs', access: null },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
-    { name: 'My Profile', url: '/my-profile', access: ['developer', 'api-owner', 'api-manager', 'credential-admin', 'aps-admin'] },
+    {
+      name: 'My Profile',
+      url: '/my-profile',
+      access: [
+        'developer',
+        'api-owner',
+        'api-manager',
+        'credential-admin',
+        'aps-admin',
+      ],
+    },
   ];
 
   let [{ state, user }, setState] = useState({ state: 'loading', user: null });
   let _fetch = () => {
-    fetch('/admin/session').then(res => res.json()).then (json => {
-        console.log(json)
+    fetch('/admin/session')
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
         setState({ state: 'loaded', user: json['user'] });
-    }).catch (err => {
-        console.log(err)
+      })
+      .catch((err) => {
+        console.log(err);
         setState({ state: 'error', user: null });
-    })
+      });
   };
 
   useEffect(_fetch, []);
 
   return (
-    <>
+    <ChakraProvider theme={theme}>
       <Head>
         <meta charSet="utf-8" />
         <meta httpEquiv="x-ua-compatible" content="ie=edge" />
@@ -73,10 +86,10 @@ export default function MyApp({ Component, pageProps }) {
         user={user}
       />
       <main>
-          <AppWrapper router={router} user={user}>
-            <Component {...pageProps} />
-          </AppWrapper>
+        <AppWrapper router={router} user={user}>
+          <Component {...pageProps} />
+        </AppWrapper>
       </main>
-    </>
+    </ChakraProvider>
   );
 }

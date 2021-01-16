@@ -1,0 +1,27 @@
+import { extendTheme } from '@chakra-ui/react';
+
+const colors = {
+  'bc-blue': '#003366',
+  'bc-yellow': '#FCBA19',
+  text: '#313132',
+  'bc-blue-alt': '#38598A',
+  'bc-gray': '#f2f2f2',
+};
+const theme = extendTheme({
+  colors,
+  fonts: {
+    body: 'BCSans, "Noto Sans", Verdana, Arial, system-ui, sans-serif',
+    heading: 'BCSans, "Noto Sans", system-ui, sans-serif',
+    mono: 'Consolas, Menlo, monospace',
+  },
+  components: {
+    Button: {
+      variants: {
+        primary: { bg: 'bc-blue' },
+        secondary: { bg: 'bc-yellow' },
+      },
+    },
+  },
+});
+
+export default theme;
