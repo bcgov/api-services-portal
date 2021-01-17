@@ -1,17 +1,28 @@
 import * as React from 'react';
 //import Image from 'next/image';
+import cx from 'classnames';
 import { Box, Heading, IconButton } from '@chakra-ui/react';
 import Link from 'next/link';
+import Router from 'next/router';
 
+import styles from './header.module.css';
 import SignIn from './signin';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
   user: any;
-  onNavClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
+const Header: React.FC<HeaderProps> = ({ user }) => {
+  const [open, setOpen] = React.useState<boolean>(false);
+  const onNavClick = () => {
+    setOpen((state) => !state);
+  };
+
+  Router.events.on('routeChangeStart', () => {
+    setOpen(false);
+  });
+
   return (
     <Box
       as="header"
@@ -22,6 +33,9 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
       justifyContent="space-between"
       color="white"
       px={{ base: 4, sm: 16 }}
+      className={cx(styles.container, {
+        [styles.open]: open,
+      })}
     >
       <Box
         as="hgroup"
@@ -31,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
       >
         <Link href="/home">
           <a>
-            <Box as="span" display={{ base: 'none', sm: 'block' }}>
-              <img src="/images/bc_logo_header.svg" width={170} height={43} />
+            <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
+              <img src="/images/bc_logo_header.svg" width={154} height={43} />
             </Box>
             <Box as="span" display={{ base: 'block', sm: 'none' }}>
               <img src="/images/bc_logo_vert.svg" width={50} height={44} />

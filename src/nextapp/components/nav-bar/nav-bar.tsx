@@ -1,53 +1,55 @@
 import * as React from 'react';
-import { Box, Container, Link as UiLink } from '@chakra-ui/react';
-import cx from 'classnames';
-import Link from 'next/link';
+import { Box, Container, Link, useMediaQuery } from '@chakra-ui/react';
+import NextLink from 'next/link';
 
-import styles from './nav-bar.module.css';
+const linkProps = {
+  px: 4,
+  py: 3,
+  d: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  whiteSpace: 'nowrap',
+  borderBottomWidth: 2,
+  borderBottomColor: 'bc-blue-alt',
+  fontWeight: 400,
+  _activeLink: {
+    fontWeight: 400,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: 'bc-yellow',
+  },
+  _hover: { textDecoration: 'underline' },
+};
 
 interface NavBarProps {
   links: any[];
-  open: boolean;
   pathname: string;
   user: any;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, open, pathname, user }) => {
-  const getClassName = (url: string) =>
-    pathname.includes(url) ? styles.active : null;
-  const homeClassName = pathname === '/' ? styles.active : null;
-  const roles =
-    user != null && 'roles' in user && user['roles'] != null
-      ? JSON.parse(user.roles)
-      : [];
-
+const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
   return (
-    <Box as="nav" bg="bc-blue-alt">
+    <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px">
       <Container
         as="ul"
-        mx={{ base: 6, sm: 8 }}
+        mx={{ base: 0, sm: 8 }}
+        px={{ base: 0, sm: 4 }}
         d="flex"
         alignItems="center"
+        flexDir={{ base: 'column', sm: 'row' }}
         color="white"
       >
-        <li>
-          <UiLink href="/home" px={4} py={4} d="block">
-            <a>Home</a>
-          </UiLink>
-        </li>
-        {links
-          .filter(
-            (link) =>
-              link.access == null ||
-              link.access.filter((value) => roles.includes(value)).length > 0
-          )
-          .map((link) => (
-            <li key={link.url} className={getClassName(link.url)}>
-              <Link href={link.url}>
-                <a>{link.name}</a>
+        {links.map((link) => (
+          <Box as="li" key={link.url} width={{ base: '100%', sm: 'auto' }}>
+            <NextLink href={link.url}>
+              <Link
+                {...linkProps}
+                aria-current={pathname === link.url ? 'page' : null}
+              >
+                {link.name}
               </Link>
-            </li>
-          ))}
+            </NextLink>
+          </Box>
+        ))}
       </Container>
     </Box>
   );

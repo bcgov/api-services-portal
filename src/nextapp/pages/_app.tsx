@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
-import Typography from 'typography';
 import { useRouter } from 'next/router';
 import '@bcgov/bc-sans/css/BCSans.css';
 import '../shared/styles/global.css';
@@ -15,8 +14,8 @@ import AppBar from '../components/app-bar';
 
 export default function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  console.log(router);
   const links = [
+    { name: 'Home', url: '/', access: null },
     { name: 'Services', url: '/services', access: ['api-owner'] },
     { name: 'Consumers', url: '/consumers', access: ['api-owner'] },
     {
@@ -78,7 +77,6 @@ export default function MyApp({ Component, pageProps }) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
-        {/* <style type="text/css">{typography.toString()}</style> */}
       </Head>
       <AppBar
         links={links}

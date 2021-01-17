@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Router from 'next/router';
 
 import Header from '../header';
 import NavBar from '../nav-bar';
@@ -14,6 +15,9 @@ const AppBar: React.FC<AppBarProps> = ({ links, pathname, user }) => {
   const onToggleNav = React.useCallback(() => {
     setOpen((state) => !state);
   }, [setOpen]);
+  Router.events.on('routeChangeStart', () => {
+    setOpen(false);
+  });
 
   return (
     <>

@@ -1,7 +1,13 @@
-.other {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  justify-content: flex-end;
-  margin: 0;
+.container + nav {
+  display: none;
+}
+
+.open + nav {
+  display: block;
+}
+
+@media screen and (min-width: 30em) {
+  .container + nav {
+    display: block !important;
+  }
 }
