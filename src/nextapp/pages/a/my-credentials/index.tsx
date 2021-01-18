@@ -29,8 +29,9 @@ const MyCredentialsPage = () => {
     const context = useAppContext()
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
+
     let fetch = () => {
-        graphql(GET_LIST, { id : context.user ? context.user.id : false })
+        graphql(GET_LIST, { id : context.user ? context.user.userId : "" })
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -39,7 +40,7 @@ const MyCredentialsPage = () => {
         });
     };
     
-    useEffect(fetch, []);
+    useEffect(fetch, [context.user]);
 
     var subtitle;
     const [modalIsOpen,setIsOpen] = React.useState(false);

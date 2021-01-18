@@ -21,12 +21,17 @@ function List({ data, state, refetch }) {
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {data.allAccessRequests.map((item, index) => (
                 <li style={styles.listItem}>
-                { item.consumer ? (
                     <>
-                    <NameValue name="Name" value={item.consumer.name} width="300px"/>
+                    <NameValue name="Requested On" value={item.createdAt} width="300px"/>
                     <NameValue name="Access Request" value={item.name} width="300px"/>
+                    <NameValue name="Client ID" value={item.consumer ? item.consumer.username:""} width="300px"/>
+                    { item.isIssued ? (
+                        <button style={styles.primaryButton}>Generate Credentials</button>
+
+                    ) : (
+                        <span>PENDING</span>
+                    )}
                     </>
-                ) : false }
                 </li>
             ))}
           </ul>

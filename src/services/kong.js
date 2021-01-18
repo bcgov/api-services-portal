@@ -1,7 +1,8 @@
 const fetch = require('node-fetch')
 
 module.exports = {
-    createConsumer: async function (kongUrl, consumerId, customId) {
+    createKongConsumer: async function (consumerId, customId) {
+        const kongUrl = process.env.KONG_URL
         let body = {
             username: consumerId,
             tags: ['aps-portal-poc']
@@ -29,7 +30,8 @@ module.exports = {
         }
     },
 
-    addKeyAuthToConsumer: async function (kongUrl, consumerUuid) {
+    addKeyAuthToConsumer: async function (consumerUuid) {
+        const kongUrl = process.env.KONG_URL
         body = {
         }
         console.log("CALLING with " + consumerUuid);
@@ -50,5 +52,41 @@ module.exports = {
         return {
             apiKey: response['key']
         }
+    },
+
+    //TODO: Need to handle paging
+    getConsumersByNamespace: async function (namespace) {
+        const kongUrl = process.env.KONG_URL
+        let response = await fetch(`${kongUrl}/consumers?tags=ns.${namespace}`, {
+            method: 'get',
+            headers: { 
+                'Content-Type': 'application/json' },
+        })
+        .then(res => res.json())
+        .catch (err => {
+            console.log("KONG CONSUMER " + err)
+            throw(err)
+        })
+        console.log("KONG RESPONSE = "+ JSON.stringify(response, null, 3))
+        return response['data']
+    },
+
+    getConsumersByUsername: async function (username) {
+        const consumers = await this.getConsumersByNamespace(namespace)
+    },
+
+    getConsumerNamespace: function (consumer) {
+        if ('tags' in consumer) {
+            const ns = consumer['tags'].filter(tag => tag.startsWith('ns.') && tag.indexOf('.', 3) == -1)
+            if (ns.length == 1) {
+                return ns.substring(3)
+            }
+        }
+        return null
+    },
+
+    isKongConsumerNamespaced: function (consumer) {
+        return getConsumerNamespace(consumer) != null
     }
+
 }

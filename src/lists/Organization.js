@@ -4,6 +4,8 @@ const { Content } = require('@keystonejs/fields-content');
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
+const { EnforcementPoint } = require('../authz/enforcement')
+
 module.exports = {
   fields: {
     name: {
@@ -31,5 +33,6 @@ module.exports = {
         isRequired: false,
     },
     orgUnits: { type: Relationship, ref: "OrganizationUnit", many: true }
-  }
+  },
+  access: EnforcementPoint,
 }

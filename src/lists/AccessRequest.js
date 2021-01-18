@@ -2,9 +2,13 @@ const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { clientRegistration } = require('../services/keycloak');
-const { createConsumer, addKeyAuthToConsumer } = require('../services/kong');
+const { createKongConsumer, addKeyAuthToConsumer } = require('../services/kong');
 
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
+
+const { recordActivity } = require('./Activity')
+
+const { EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
@@ -44,6 +48,7 @@ module.exports = {
     datasetGroup: { type: Relationship, isRequired: true, ref: 'DatasetGroup' },
     activity: { type: Relationship, ref: 'Activity', many: true },
   },
+  access: EnforcementPoint,
   plugins: [
     byTracking(),
     atTracking()
@@ -85,38 +90,72 @@ module.exports = {
         // Mark AccessRequest as Complete
         // 
         // async function doit() {
-        if (updatedItem.isIssued) {
-            const consumerId = updatedItem.consumerId
-            const kongUrl = "https://adminapi-264e6f-dev.apps.silver.devops.gov.bc.ca"
-            const token = "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3NWI2Mzg4NC1iN2RiLTRiODItOWFkZS02NDk0ZmUxNzI1N2MifQ.eyJleHAiOjAsImlhdCI6MTYxMDU3Mjc5NiwianRpIjoiNmVmZTVhY2EtYThmZS00ODg4LWI4YjQtMDAyODRmNDc5YzA5IiwiaXNzIjoiaHR0cHM6Ly9kZXYub2lkYy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMveHRta2U3a3kiLCJhdWQiOiJodHRwczovL2Rldi5vaWRjLmdvdi5iYy5jYS9hdXRoL3JlYWxtcy94dG1rZTdreSIsInR5cCI6IkluaXRpYWxBY2Nlc3NUb2tlbiJ9.yOP-Pf84ilqtydHOIYiYI4oHjRGFvUM4vs6Sz2FRTm4"
-            const client = await clientRegistration("https://dev.oidc.gov.bc.ca/auth", "xtmke7ky", token, consumerId, consumerId + "-secret")
+        if (existingItem && existingItem.isIssued == null && updatedItem.isIssued) {
+            const consumerUsername = updatedItem.consumerId
+            const token = "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3NWI2Mzg4NC1iN2RiLTRiODItOWFkZS02NDk0ZmUxNzI1N2MifQ.eyJleHAiOjAsImlhdCI6MTYxMDkxNzYxOCwianRpIjoiNWU3N2MyMzItMzUyOC00Mjg2LTg2NGItZGNjNzlhMzQ5NWRiIiwiaXNzIjoiaHR0cHM6Ly9kZXYub2lkYy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMveHRta2U3a3kiLCJhdWQiOiJodHRwczovL2Rldi5vaWRjLmdvdi5iYy5jYS9hdXRoL3JlYWxtcy94dG1rZTdreSIsInR5cCI6IkluaXRpYWxBY2Nlc3NUb2tlbiJ9.diEwRmTS32XSyX0OVj-yzngKzrWD4dy5XfySphHFWWo"
+            const client = await clientRegistration("https://dev.oidc.gov.bc.ca/auth", "xtmke7ky", token, consumerUsername, consumerUsername + "-secret")
             console.log("CLIENT = "+JSON.stringify(client, null, 3))
-            const consumer = await createConsumer (kongUrl, consumerId, '')
+            const consumer = await createKongConsumer (consumerUsername, '')
             console.log("CONSUMER = "+ JSON.stringify(consumer, null, 3))
-            const apiKey = await addKeyAuthToConsumer (kongUrl, consumer.id)
-            console.log(JSON.stringify(apiKey, null, 3))
+            if (consumer != null) {
+                const apiKey = await addKeyAuthToConsumer (consumer.id)
+                console.log("API KEY " + JSON.stringify(apiKey, null, 3))
+                // {
+                //     "apiKey": "z7Ynl7OlcLYHTIt4uIAhzQ36I5zg07z1"
+                //  }
+            }
+
+            let consumerId = null
+
+            if (true) {
+                const username = consumerUsername
+                const kongConsumerId = consumer.id
+                const result = await context.executeGraphQL({
+                    query: `mutation ($username: String, $kongConsumerId: String) {
+                                createConsumer(data: { username: $username, kongConsumerId: $kongConsumerId, tags: "[]" }) {
+                                    id
+                                }
+                            }`,
+                    variables: { username, kongConsumerId },
+                }).catch (err => {
+                    console.log("Activity : recording activity failed " + err)
+                })
+                //{"data":{"createConsumer":{"id":"6004b65c2a7e02414bb3ccb5"}}}
+                console.log("KEYSTONE CONSUMER " + JSON.stringify(result))
+                consumerId = result.data.createConsumer.id
+            }
+            if (true) {
+                console.log("UPD AR " + updatedItem.id)
+                console.log("UPD AR " + consumerId)
+                const reqId = updatedItem.id
+                try {
+                    const result = await context.executeGraphQL({
+                        query: `mutation ($reqId: ID!, $consumerId: ID!) {
+                                    updateAccessRequest(id: $reqId, data: { consumer: { connect: { id: $consumerId } } } ) {
+                                        id
+                                    }
+                                }`,
+                        variables: { reqId, consumerId },
+                    }).catch (err => {
+                        console.log("AccessRequest : failed update " + err)
+                    })
+                    console.log("FINISHED")
+                    console.log("UPDATE ACCESS REQUEST " + JSON.stringify(result,null, 4))
+                } catch (e) {
+                    console.log("EEERR " + e);
+                }
+
+            }
         }
         // }
-        console.log(JSON.stringify(Object.keys(context), null, 4))
 
-        const name = updatedItem.name
+        // const name = updatedItem.name
         const refId = updatedItem.id
         const action = operation
         const message = "Changes to " + JSON.stringify(originalInput)
-        const userId = context.req.user.id
 
-        const { errors } = await context.executeGraphQL({
-            query: `mutation ($name: String, $action: String, $refId: String, $message: String, $userId: String) {
-                    createActivity(data: { type: "AccessRequest", name: $name, action: $action, refId: $refId, message: $message, actor: { connect: { id : $userId }} }) {
-                        id
-                } }`,
-            variables: { name, action, refId, message, userId },
-        })
-        if (errors) {
-            console.log("NO! Something went wrong " + errors)
-        }
-    
-
+        const act = await recordActivity (context, action, 'AccessRequest', refId, message)
+        console.log("ACTIVITY = "+ JSON.stringify(act, null, 3))
     })
   }
 }

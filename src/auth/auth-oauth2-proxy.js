@@ -296,4 +296,7 @@ class Oauth2ProxyAuthStrategy {
   // Need to keep this as 'password' otherwise the admin-ui won't work!
   Oauth2ProxyAuthStrategy.authType = 'password';
   
-  module.exports = { Oauth2ProxyAuthStrategy };
+  module.exports = {
+      Oauth2ProxyAuthStrategy
+  }
+  

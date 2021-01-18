@@ -3,6 +3,8 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
+const { EnforcementPoint } = require('../authz/enforcement')
+
 module.exports = {
   fields: {
     name: {
@@ -10,6 +12,7 @@ module.exports = {
         isRequired: true,
     },
   },
+  access: EnforcementPoint,
   plugins: [
     byTracking(),
     atTracking()

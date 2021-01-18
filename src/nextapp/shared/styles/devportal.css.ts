@@ -106,6 +106,12 @@ export const styles = {
         borderRadius: "10px",
         margin: "10px",
         padding: "10px"
+    },
+
+    h2: {
+        marginTop: "20px",
+        backgroundColor: "rgba(59, 130, 246, 0.5)",
+        padding: "10px"
     }
 
 

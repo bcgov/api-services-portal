@@ -1,6 +1,6 @@
 const { Keystone } = require('@keystonejs/keystone');
 const { Text, Checkbox, Password, Select } = require('@keystonejs/fields');
-const { Oauth2ProxyAuthStrategy } = require('./auth');
+const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
 const { GraphQLApp } = require('@keystonejs/app-graphql');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');

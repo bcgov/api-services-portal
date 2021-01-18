@@ -1,11 +1,12 @@
 export const GET_LIST = `
     query GetConsumers($id: ID!) {
-        allAccessRequests(where: { requestor: { id: $id } } ) {
+        allAccessRequests(where: { requestor: { id: $id }  } ) {
           id
           name
+          isIssued
+          createdAt
           consumer {
-              name
-              isActive
+              username
           }
         }
     }

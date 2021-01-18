@@ -62,6 +62,7 @@ export const GET_REQUEST = `
           isIssued
           isComplete
           createdAt
+          consumerId
           requestor {
             name
             username
@@ -123,8 +124,8 @@ export const APPROVE = `
 `
 
 export const FULFILL_REQUEST = `
-    mutation FulfillRequest($id: ID!) {
-        updateAccessRequest(id: $id, data: { isIssued: true }) {
+    mutation FulfillRequest($id: ID!, $consumerId: String) {
+        updateAccessRequest(id: $id, data: { isIssued: true, consumerId: $consumerId }) {
             id
         }
     }

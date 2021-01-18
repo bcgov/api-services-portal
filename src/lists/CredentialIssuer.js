@@ -5,6 +5,8 @@ const { byTracking } = require('../components/ByTracking')
 
 const { atTracking } = require('@keystonejs/list-plugins')
 
+const { EnforcementPoint } = require('../authz/enforcement')
+
 module.exports = {
   fields: {
     name: {
@@ -50,6 +52,7 @@ module.exports = {
     contact: { type: Relationship, ref: 'User', many: false },
     dataSetGroups: { type: Relationship, ref: 'DatasetGroup', many: true }
   },
+  access: EnforcementPoint,
   plugins: [
     byTracking(),
     atTracking()

@@ -55,15 +55,20 @@ const NewRequest = () => {
             <div style={styles.formWrapper}>
             { dataset == null ? false: (
                 <>
-                <div >
-                <NameValue name="Requestor" value={data.allTemporaryIdentities[0].username} width="250px"/>
-                <NameValue name="Requestor Email" value={data.allTemporaryIdentities[0].email} width="350px"/>
+                <h2 style={styles.h2}>Requestor</h2>
+                <div className="flex">
+                    <NameValue name="Name" value={data.allTemporaryIdentities[0].name} width="250px"/>
+                    <NameValue name="Username" value={data.allTemporaryIdentities[0].username} width="250px"/>
+                    <NameValue name="Email" value={data.allTemporaryIdentities[0].email} width="350px"/>
                 </div>
-                <div>
-                <NameValue name="Dataset" value={dataset.name} width="150px"/>
-                <NameValue name="Environment" value="Sandbox (change)" width="200px"/>
+                <hr/>
+                <h2 style={styles.h2}>APIs</h2>
+                <div className="flex">
+                    <NameValue name="Family" value={dataset.name} width="150px"/>
+                    <NameValue name="Environment" value="[ ] Sandbox [ ] Production" width="300px"/>
                 </div>
-                <div>
+                <h2 style={styles.h2}>Additional Instruction</h2>
+                <div className="flex">
                     <label>Other Comments</label>
                     <input type="textarea" name="other"/>
                 </div>
