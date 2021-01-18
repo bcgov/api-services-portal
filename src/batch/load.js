@@ -11,10 +11,10 @@ const { extract_kong_all } = require('./sources/kong')
 
 // import_org_units()
 // import_orgs()
-update_orgs()
+//update_orgs()
 
 //extract_kong_all()
 //import_plugins()
-//import_datasets()
+import_datasets()
 //import_service_routes()
 //import_consumers()
