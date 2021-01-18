@@ -106,8 +106,10 @@ class Oauth2ProxyAuthStrategy {
             const toJson = (val) => val ? JSON.parse(val) : null;
 
             const response = req && req.user ? {anonymous: false, user: req.user } : {anonymous:true}
-            response.groups = toJson(response.groups)
-            response.roles = toJson(response.roles)
+            if (response.anonymous == false) {
+                response.user.groups = toJson(response.user.groups)
+                response.user.roles = toJson(response.user.roles)
+            }
             res.json(response)
         })
 
