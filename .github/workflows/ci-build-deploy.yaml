@@ -190,7 +190,8 @@ jobs:
             secure: true
           AUTH_STRATEGY:
             value: Oauth2Proxy
-
+          KONG_URL:
+            value: '${{ secrets.KONG_URL_DEV}}'
           MONGO_URL:
             value: 'mongodb://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
           MONGO_USER:

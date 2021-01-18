@@ -84,14 +84,29 @@ const FulfillRequest = () => {
 
                 <h2 style={styles.h2}>Consumer Details</h2>
                 <div className="flex">
-                    <div>
-                        <label>Client ID</label>
-                        <input type="text" name="consumerId" defaultValue={data.consumerId} onChange={onConsumerChange}/>
-                    </div>
-                    <div>
-                        <label>Client Secret</label>
-                        <input type="text" name="" defaultValue="GENERATED"/>
-                    </div>
+                    { (request.datasetGroup.credentialIssuer.authMethod === "oidc") ? (
+                        <>
+                            <div>
+                                <label>Client ID</label>
+                                <input type="text" name="consumerId" defaultValue={data.consumerId} onChange={onConsumerChange}/>
+                            </div>
+                            <div>
+                                <label>Client Secret</label>
+                                <input type="text" name="" defaultValue="GENERATED"/>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div>
+                                <label>Gateway Consumer</label>
+                                <input type="text" name="" defaultValue={request.requestor.username}/>
+                            </div>
+                            <div>
+                                <label>API Key</label>
+                                <input type="text" name="" defaultValue="GENERATED"/>
+                            </div>
+                        </>
+                    )}
                 </div>
                 <h2 style={styles.h2}>Communication to {request.requestor.name}</h2>
                 <div className="flex">
