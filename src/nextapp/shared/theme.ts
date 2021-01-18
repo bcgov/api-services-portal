@@ -14,6 +14,13 @@ const theme = extendTheme({
     heading: 'BCSans, "Noto Sans", system-ui, sans-serif',
     mono: 'Consolas, Menlo, monospace',
   },
+  styles: {
+    global: {
+      body: {
+        background: '#f1f1f1',
+      },
+    },
+  },
   components: {
     Button: {
       variants: {

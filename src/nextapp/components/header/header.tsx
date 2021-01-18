@@ -31,6 +31,9 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       bg="bc-blue"
       alignItems="center"
       justifyContent="space-between"
+      pos="fixed"
+      top={0}
+      w="100%"
       color="white"
       px={{ base: 4, sm: 16 }}
       className={cx(styles.container, {

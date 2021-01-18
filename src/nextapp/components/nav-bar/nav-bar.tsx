@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Container, Link, useMediaQuery } from '@chakra-ui/react';
 import NextLink from 'next/link';
+import { useRouter } from 'next/router';
 
 const linkProps = {
   px: 4,
@@ -8,7 +9,6 @@ const linkProps = {
   d: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  whiteSpace: 'nowrap',
   borderBottomWidth: 2,
   borderBottomColor: 'bc-blue-alt',
   fontWeight: 400,
@@ -22,11 +22,10 @@ const linkProps = {
 
 interface NavBarProps {
   links: any[];
-  pathname: string;
-  user: any;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
+const NavBar: React.FC<NavBarProps> = ({ links }) => {
+  const router = useRouter();
   return (
     <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px">
       <Container
@@ -43,9 +42,11 @@ const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
-                aria-current={pathname === link.url ? 'page' : null}
+                aria-current={router?.pathname === link.url ? 'page' : false}
               >
-                {link.name}
+                <Box as="span" whiteSpace="nowrap">
+                  {link.name}
+                </Box>
               </Link>
             </NextLink>
           </Box>

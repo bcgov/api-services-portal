@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import '@bcgov/bc-sans/css/BCSans.css';
@@ -14,8 +14,8 @@ import AppBar from '../components/app-bar';
 
 export default function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const links = [
-    { name: 'Home', url: '/', access: null },
+  const allNavItems = [
+    { name: 'Home', url: '/', access: [] },
     { name: 'Services', url: '/services', access: ['api-owner'] },
     { name: 'Consumers', url: '/consumers', access: ['api-owner'] },
     {
@@ -36,7 +36,7 @@ export default function MyApp({ Component, pageProps }) {
     },
     { name: 'API Discovery', url: '/a/api-discovery', access: ['developer'] },
     { name: 'My Credentials', url: '/a/my-credentials', access: ['developer'] },
-    { name: 'Documentation', url: '/docs', access: null },
+    { name: 'Documentation', url: '/docs', access: [] },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
     {
       name: 'My Profile',
@@ -50,7 +50,6 @@ export default function MyApp({ Component, pageProps }) {
       ],
     },
   ];
-
   let [{ state, user }, setState] = useState({ state: 'loading', user: null });
   let _fetch = () => {
     fetch('/admin/session')
@@ -64,6 +63,12 @@ export default function MyApp({ Component, pageProps }) {
         setState({ state: 'error', user: null });
       });
   };
+  const links = allNavItems.filter((item) => {
+    if (item.access.length <= 0) {
+      return true;
+    }
+    return false;
+  });
 
   useEffect(_fetch, []);
 
@@ -78,16 +83,12 @@ export default function MyApp({ Component, pageProps }) {
         />
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
       </Head>
-      <AppBar
-        links={links}
-        pathname={router ? router.pathname : '/'}
-        user={user}
-      />
-      <main>
+      <AppBar links={links} user={user} />
+      <Box as="main" mt={{ base: '65px', sm: '115px' }}>
         <AppWrapper router={router} user={user}>
           <Component {...pageProps} />
         </AppWrapper>
-      </main>
+      </Box>
     </ChakraProvider>
   );
 }
