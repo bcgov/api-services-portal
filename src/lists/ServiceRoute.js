@@ -11,49 +11,49 @@ module.exports = {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     kongRouteId: {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     kongServiceId: {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     namespace: {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     host: {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     isActive: {
         type: Checkbox,
         isRequired: false,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     tags: {
         type: Text,
         isRequired: true,
         adminConfig: {
-            isReadOnly: true
+            isReadOnly: false
         }
     },
     plugins: { type: Relationship, ref: 'Plugin', many: true },

@@ -76,6 +76,7 @@ const ADD = `
         $contacts: String,
         $catalogContent: String,
         $orgId: ID!,
+        $orgUnitId: ID!,
         $tags: String) {
 
         createDataset(data: { 
@@ -91,6 +92,7 @@ const ADD = `
             catalogContent: $catalogContent,
             isInCatalog: true,
             organization: { connect: { id: $orgId } }
+            organizationUnit: { connect: { id: $orgUnitId } }
         }) {
             id
             name
@@ -113,8 +115,10 @@ function import_datasets() {
           const data = json['result']
           const name = data.name
 
-          const orgId = await lookup_id_from_attr ('Organizations', 'bcdc_id', data.organization.id)
-
+          const orgId = await lookup_id_from_attr ('Organizations', 'bcdc_id', data.org)
+          const orgUnitId = await lookup_id_from_attr ('OrganizationUnits', 'bcdc_id', data.organization.id)
+          console.log("ORG = "+data.org + " == " + orgId)
+          console.log("ORG UNIT = "+data.organization.id + " == " + orgUnitId)
           const out = {
               name: data.name,
               sector: data.sector,
@@ -126,6 +130,7 @@ function import_datasets() {
               title: data.title,
               securityClass: data.security_class,
               orgId: orgId,
+              orgUnitId: orgUnitId,
               tags: JSON.stringify(data.tags),
           }
 

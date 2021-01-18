@@ -24,7 +24,7 @@ const ADD = `
 
 
 async function import_consumers() {
-    consumers = await get_json_content ('kong', 'gw-consumers.json')
+    consumers = await get_json_content ('kong', 'gw-consumers')
 
     for (consumer of consumers['data']) {
         const out = {

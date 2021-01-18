@@ -2,7 +2,11 @@
 
 import { styles } from '../../../shared/styles/devportal.css';
 
-import { Button, ButtonGroup } from "@chakra-ui/react"
+import { Button, ButtonGroup, Flex, Box, Heading } from "@chakra-ui/react"
+
+import Card from '../../../components/card';
+import GridLayout from '../../../layouts/grid';
+
 
 import NameValue from '../../../components/name-value';
 
@@ -22,22 +26,28 @@ function List({ data, state, refetch }) {
         }
         console.log(JSON.stringify(data, null, 4))
         return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+            
+          <GridLayout>
             {data.allDatasetGroups.map((item, index) => (
-                <li style={styles.listItem}>
-                    <NameValue name="Organization" value={(item.organization ? item.organization.title : "-") + " / " + (item.organizationUnit ? item.organizationUnit.title : "-")} width="300px"/>
-                    <NameValue name="Family" value={item.name} width="300px"/>
-                    <NameValue name="Auth Method" value={item.authMethod} width="250px"/>
-                    <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/>
-                    <ButtonGroup>
-                        <Button colorScheme="teal">Try API</Button>
-                        { item.authMethod != "public" ? (
-                                <Button colorScheme="blue" onClick={(e) => goto(`/requests/new/${item.id}`)}>Request Access</Button>
-                        ): false }
-                    </ButtonGroup>
-                </li>
+                <Card>
+                    <Heading size="md" mb={2}>
+                        {item.name}
+                    </Heading>
+                    <div>
+                        <NameValue name="Organization" value={(item.organization ? item.organization.title : "-") + " / " + (item.organizationUnit ? item.organizationUnit.title : "-")} width="300px"/>
+                        <NameValue name="Family" value={item.name} width="300px"/>
+                        <NameValue name="Auth Method" value={item.authMethod} width="250px"/>
+                        {/* <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/> */}
+                        <ButtonGroup>
+                            <Button colorScheme="teal">Try API</Button>
+                            { item.authMethod != "public" ? (
+                                    <Button colorScheme="blue" onClick={(e) => goto(`/requests/new/${item.id}`)}>Request Access</Button>
+                            ): false }
+                        </ButtonGroup>
+                    </div>
+                </Card>
             ))}
-          </ul>
+          </GridLayout>
         );
       }
     }

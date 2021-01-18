@@ -17,10 +17,10 @@ const ADD = `
 `;
 
 async function import_plugins() {
-    services = await get_json_content ('kong', 'gw-services.json')
-    routes = await get_json_content ('kong', 'gw-routes.json')
-    consumers = await get_json_content ('kong', 'gw-consumers.json')
-    plugins = await get_json_content ('kong', 'gw-plugins.json')
+    services = await get_json_content ('kong', 'gw-services')
+    routes = await get_json_content ('kong', 'gw-routes')
+    consumers = await get_json_content ('kong', 'gw-consumers')
+    plugins = await get_json_content ('kong', 'gw-plugins')
 
     serviceKeys = create_key_map (services['data'], 'id')
     routeKeys = create_key_map (routes['data'], 'id')

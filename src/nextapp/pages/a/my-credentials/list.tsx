@@ -23,7 +23,7 @@ function List({ data, state, refetch }) {
         console.log(JSON.stringify(data, null, 4))
         return (
             <Table variant="simple">
-                <TableCaption>Imperial to metric conversion factors</TableCaption>
+                <TableCaption>-</TableCaption>
                 <Thead>
                     <Tr>
                     <Th>Requested On</Th>

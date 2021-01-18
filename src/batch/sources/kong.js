@@ -1,15 +1,15 @@
 const fs = require('fs')
-const { copy, read } = require('../utils')
+const { copyv2, read } = require('../utils')
 
 function extract_kong_all() {
-    const baseUrl = 'https://adminapi-264e6f-dev.apps.silver.devops.gov.bc.ca'
+    const baseUrl = 'http://localhost:7001'
 
     fs.mkdirSync('../../_data/kong', { recursive: true })
 
-    copy (`${baseUrl}/services`, 'kong/gw-services')
-    copy (`${baseUrl}/routes`, 'kong/gw-routes')
-    copy (`${baseUrl}/consumers`, 'kong/gw-consumers')
-    copy (`${baseUrl}/plugins`, 'kong/gw-plugins')
+    copyv2 (baseUrl, `/services`, 'kong/gw-services')
+    copyv2 (baseUrl, `/routes`, 'kong/gw-routes')
+    copyv2 (baseUrl, `/consumers`, 'kong/gw-consumers')
+    copyv2 (baseUrl, `/plugins`, 'kong/gw-plugins')
 }
 
 

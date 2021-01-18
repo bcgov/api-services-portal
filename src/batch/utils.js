@@ -10,14 +10,35 @@ function checkStatus(res) {
     }
 }
 
-async function copy (url, filename) {
-    const out = '../../_data/' + filename + '.json'
+async function copyv2 (baseUrl, path, filename, index = 0) {
+    const out = '../../_data/' + filename + '-' + index + '.json'
+    return fetch (`${baseUrl}${path}`)
+    .then (checkStatus)
+    .then (data => data.json())
+    .then (json => {
+        fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
+        console.log("WROTE "+  filename)
+        if (json.next != null) {
+            copyv2 (baseUrl, json.next, filename, index + 1 )
+        }
+    })
+    .catch (err => {
+        console.log("COPY ERROR " + filename + " - " + err)
+        throw(err)
+    })
+}
+
+async function copy (url, filename, index = 0) {
+    const out = '../../_data/' + filename + '-' + index + '.json'
     return fetch (url)
     .then (checkStatus)
     .then (data => data.json())
     .then (json => {
         fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
         console.log("WROTE "+  filename)
+        if (json.next != null) {
+            copy (json.next, filename, index + 1 )
+        }
     })
     .catch (err => {
         console.log("COPY ERROR " + filename + " - " + err)
@@ -43,7 +64,20 @@ function iterate_through_json_content(location, next) {
 }
 
 function get_json_content(location, file) {
-    return JSON.parse(fs.readFileSync('../../_data/' + location + '/' + file))
+    let index = 0
+    let data = []
+    while (true) {
+        filePath = '../../_data/' + location + '/' + file + "-" + index + ".json"
+        console.log("READ " + filePath)
+        if (fs.existsSync(filePath)) {
+            fileData = JSON.parse(fs.readFileSync(filePath))
+            data = data.concat(fileData['data'])
+            index++
+        } else {
+            console.log("RETURNING " + data.length)
+            return { next: null, data: data }
+        }
+    }
 }
 
 function create_key_map (list, idKey) {
@@ -62,6 +96,7 @@ function lookup_namespace (item) {
 module.exports = {
     read: read,
     copy: copy,
+    copyv2: copyv2,
     get_json_content: get_json_content,
     iterate_through_json_content: iterate_through_json_content,
     create_key_map: create_key_map,
