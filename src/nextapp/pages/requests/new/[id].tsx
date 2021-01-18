@@ -22,7 +22,6 @@ import { create } from 'domain';
 
 const NewRequest = () => {
     const context = useAppContext()
-    const [envValue, setEnvValue] = useState("development")
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     let fetch = () => {
@@ -74,7 +73,7 @@ const NewRequest = () => {
                     </Flex>
                     <Flex direction="column" className="m-5">
                         <label><b>Environment</b></label>
-                        <RadioGroup onChange={setEnvValue} value={envValue} isRequired={true}>
+                        <RadioGroup isRequired={true}>
                             <Stack direction="row">
                                 <Radio value="development">Development</Radio>
                                 <Radio value="testing">Testing</Radio>
