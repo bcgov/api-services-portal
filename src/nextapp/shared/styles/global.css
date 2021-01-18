@@ -6,22 +6,6 @@
 @tailwind components;
 /* Stop purging. */
 
-html {
-  --brand-blue: #036;
-  --brand-yellow: #fcba19;
-}
-
-body {
-  margin-top: 65px;
-  background-color: #f1f1f1;
-}
-
-@media (min-width: 640px) {
-  body {
-    margin-top: 106px;
-  }
-}
-
 /* Start purging... */
 @tailwind utilities;
 /* Stop purging. */

@@ -11,8 +11,8 @@ const Card: React.FC<CardProps> = ({ children }) => {
       d="flex"
       bg="white"
       border="1px"
-      borderColor="gray.200"
-      boxShadow="base"
+      borderColor="#eaeaea"
+      boxShadow="md"
       borderRadius="4px"
     >
       <Box m="4">{children}</Box>

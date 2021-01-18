@@ -5,14 +5,15 @@ import NavBar from '../nav-bar';
 
 interface AppBarProps {
   links: { name: string; url: string }[];
+  pathname: string | undefined;
   user: any;
 }
 
-const AppBar: React.FC<AppBarProps> = ({ links, user }) => {
+const AppBar: React.FC<AppBarProps> = ({ links, pathname, user }) => {
   return (
     <>
       <Header user={user} />
-      <NavBar links={links} />
+      <NavBar links={links} pathname={pathname} />
     </>
   );
 };

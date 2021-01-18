@@ -83,8 +83,8 @@ export default function MyApp({ Component, pageProps }) {
         />
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
       </Head>
-      <AppBar links={links} user={user} />
-      <Box as="main" mt={{ base: '65px', sm: '115px' }}>
+      <AppBar links={links} user={user} pathname={router?.pathname} />
+      <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
         <AppWrapper router={router} user={user}>
           <Component {...pageProps} />
         </AppWrapper>
