@@ -41,7 +41,7 @@ const NewRequest = () => {
     const dataset = (data ? data.allDatasetGroups[0] : data)
 
     const refetch = () => {
-        window.location.href = "/requests"
+        window.location.href = "/a/my-credentials"
     }
 
     
