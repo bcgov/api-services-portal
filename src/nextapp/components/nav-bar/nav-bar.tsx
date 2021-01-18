@@ -1,52 +1,58 @@
 import * as React from 'react';
-import cx from 'classnames';
-import Link from 'next/link';
+import { Box, Container, Link, useMediaQuery } from '@chakra-ui/react';
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
 
-import styles from './nav-bar.module.css';
+const linkProps = {
+  px: 4,
+  py: 3,
+  d: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderBottomWidth: 2,
+  borderBottomColor: 'bc-blue-alt',
+  fontWeight: 400,
+  _activeLink: {
+    fontWeight: 400,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: 'bc-yellow',
+  },
+  _hover: { textDecoration: 'underline' },
+};
 
 interface NavBarProps {
   links: any[];
-  open: boolean;
-  pathname: string;
-  user: { roles };
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, open, pathname, user }) => {
-  const getClassName = (url: string) =>
-    pathname.includes(url) ? styles.active : null;
-  const homeClassName = pathname === '/' ? styles.active : null;
-  const roles = user != null && 'roles' in user && user['roles'] != null ? JSON.parse(user.roles) : [];
-
+const NavBar: React.FC<NavBarProps> = ({ links }) => {
+  const router = useRouter();
   return (
-    <nav
-      className={cx('bg-bc-blue-alt sm:block', styles.navbar, {
-        ['block']: open,
-        ['hidden']: !open,
-      })}
-    >
-      <div className={styles.container}>
-        <ul>
-          <li className={homeClassName}>
-            <Link href="/home">
-              <a>Home</a>
-            </Link>
-          </li>
-          {links
-            .filter(
-              (link) =>
-                link.access == null ||
-                link.access.filter((value) => roles.includes(value)).length > 0
-            )
-            .map((link) => (
-              <li key={link.url} className={getClassName(link.url)}>
-                <Link href={link.url}>
-                  <a>{link.name}</a>
-                </Link>
-              </li>
-            ))}
-        </ul>
-      </div>
-    </nav>
+    <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px">
+      <Container
+        as="ul"
+        mx={{ base: 0, sm: 8 }}
+        px={{ base: 0, sm: 4 }}
+        d="flex"
+        alignItems="center"
+        flexDir={{ base: 'column', sm: 'row' }}
+        color="white"
+      >
+        {links.map((link) => (
+          <Box as="li" key={link.url} width={{ base: '100%', sm: 'auto' }}>
+            <NextLink href={link.url}>
+              <Link
+                {...linkProps}
+                aria-current={router?.pathname === link.url ? 'page' : false}
+              >
+                <Box as="span" whiteSpace="nowrap">
+                  {link.name}
+                </Box>
+              </Link>
+            </NextLink>
+          </Box>
+        ))}
+      </Container>
+    </Box>
   );
 };
 

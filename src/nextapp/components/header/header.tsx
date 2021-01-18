@@ -1,58 +1,82 @@
 import * as React from 'react';
 //import Image from 'next/image';
+import cx from 'classnames';
+import { Box, Heading, IconButton } from '@chakra-ui/react';
 import Link from 'next/link';
+import Router from 'next/router';
 
-import Button from '../button';
-import SignIn from './signin';
 import styles from './header.module.css';
+import SignIn from './signin';
+import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
-  user: { username; roles; namespace };
-  onNavClick: () => void;
+  user: any;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavClick, user }) => {
+const Header: React.FC<HeaderProps> = ({ user }) => {
+  const [open, setOpen] = React.useState<boolean>(false);
+  const onNavClick = () => {
+    setOpen((state) => !state);
+  };
+
+  Router.events.on('routeChangeStart', () => {
+    setOpen(false);
+  });
+
   return (
-    <header className="flex items-center px-4 md:px-12 bg-bc-blue border-b-2 border-bc-yellow fixed top-0 w-full h-header">
-      <hgroup className="flex items-center content-start mr-2">
+    <Box
+      as="header"
+      height="65px"
+      d="flex"
+      bg="bc-blue"
+      alignItems="center"
+      justifyContent="space-between"
+      pos="fixed"
+      top={0}
+      w="100%"
+      color="white"
+      px={{ base: 4, sm: 16 }}
+      className={cx(styles.container, {
+        [styles.open]: open,
+      })}
+    >
+      <Box
+        as="hgroup"
+        d="flex"
+        alignItems="center"
+        flexGrow={{ base: 1, sm: 0 }}
+      >
         <Link href="/home">
           <a>
-            <span className="hidden sm:block">
-              <img src="/images/bc_logo_header.svg" width={170} height={43} />
-            </span>
-            <span className="sm:hidden">
+            <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
+              <img src="/images/bc_logo_header.svg" width={154} height={43} />
+            </Box>
+            <Box as="span" display={{ base: 'block', sm: 'none' }}>
               <img src="/images/bc_logo_vert.svg" width={50} height={44} />
-            </span>
+            </Box>
           </a>
         </Link>
-        <h1 className="text-white text-lg md:text-3xl mb-0 ml-4 mr-2">
+        <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
           API Program Services
-        </h1>
-      </hgroup>
-      <hgroup className="flex flex-1 items-center justify-end text-white">
-        <div className="hidden sm:block">
-          <SignIn user={user}/>
-        </div>
-        <div className="block sm:hidden w-6 h-6">
-          <button onClick={onNavClick}>
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              role="img"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 448 512"
-              data-testid="hamburger-icon-button"
-              aria-label="Toggle mobile navigation"
-            >
-              <path
-                fill="currentColor"
-                d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      </hgroup>
-    </header>
+        </Heading>
+      </Box>
+      <Box as="hgroup">
+        <Box display={{ base: 'none', sm: 'block' }}>
+          <SignIn user={user} />
+        </Box>
+        <Box display={{ sm: 'none' }}>
+          <IconButton
+            aria-label="Toggle Navigation"
+            onClick={onNavClick}
+            variant="ghost"
+            size="lg"
+            _hover={{ bg: 'transparent' }}
+          >
+            <MobileNavIcon />
+          </IconButton>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
