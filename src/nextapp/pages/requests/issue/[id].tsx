@@ -101,7 +101,7 @@ const FulfillRequest = () => {
                             </div>
                             <div>
                                 <label>Client Secret</label>
-                                <Input placeholder="Client / Consumer ID" name="" defaultValue="GENERATED" disabled="true"/>
+                                <Input placeholder="Client / Consumer ID" name="" defaultValue="GENERATED" disabled={true}/>
                             </div>
                         </>
                     ) : (
