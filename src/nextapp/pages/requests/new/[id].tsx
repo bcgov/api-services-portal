@@ -12,6 +12,8 @@ import graphql from '../../../shared/services/graphql'
 
 import NameValue from '../../../components/name-value';
 
+import { Button, ButtonGroup, Textarea, RadioGroup, Radio, Stack, Flex } from "@chakra-ui/react"
+
 import { useAppContext } from '../../context'
 
 import Form from '../form'
@@ -20,6 +22,8 @@ import { create } from 'domain';
 
 const NewRequest = () => {
     const context = useAppContext()
+    const [value, setValue] = useState("development")
+
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     let fetch = () => {
         const { router: { pathname, query: { id } } } = context
@@ -64,16 +68,31 @@ const NewRequest = () => {
                 <hr/>
                 <h2 style={styles.h2}>APIs</h2>
                 <div className="flex">
-                    <NameValue name="Family" value={dataset.name} width="150px"/>
-                    <NameValue name="Environment" value="[ ] Sandbox [ ] Production" width="300px"/>
+                    <Flex direction="column" className="m-5">
+                        <label><b>Family</b></label>
+                        <div>{dataset.name}</div>
+                    </Flex>
+                    <Flex direction="column" className="m-5">
+                        <label><b>Environment</b></label>
+                        <RadioGroup onChange={setValue} value={value} isRequired={true}>
+                            <Stack direction="row">
+                                <Radio value="development">Development</Radio>
+                                <Radio value="testing">Testing</Radio>
+                                <Radio value="sandbox">Sandbox</Radio>
+                                <Radio value="production">Production</Radio>
+                            </Stack>
+                        </RadioGroup>
+                    </Flex>
                 </div>
                 <h2 style={styles.h2}>Additional Instruction</h2>
-                <div className="flex">
-                    <label>Other Comments</label>
-                    <input type="textarea" name="other"/>
+                <div className="flex m-5">
+                    <Textarea name="other" placeholder="Additional instructions for the API Manager"/>
                 </div>
 
-                <button style={styles.primaryButton} onClick={() => create()}>Submit</button>
+                <ButtonGroup variant="outline" spacing="6" className="m-5">
+                    <Button colorScheme="blue" onClick={() => create()}>Submit</Button>
+                    <Button>Cancel</Button>
+                </ButtonGroup>
                 </>
             )}
             </div>

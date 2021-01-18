@@ -12,6 +12,8 @@ import graphql from '../../../shared/services/graphql'
 
 import NameValue from '../../../components/name-value';
 
+import { Button, ButtonGroup, Input, Textarea, Flex } from "@chakra-ui/react"
+
 import { useAppContext } from '../../context'
 
 import Form from '../form'
@@ -78,8 +80,15 @@ const FulfillRequest = () => {
                 <div className="flex">
                     <NameValue name="Family" value={request.datasetGroup.name} width="150px"/>
                     <NameValue name="Environment" value="Sandbox" width="300px"/>
+                </div>
+
+                <h2 style={styles.h2}>Gateway Policies/Plugins</h2>
+                <div className="flex">
                     <NameValue name="Auth Method" value={request.datasetGroup.credentialIssuer.authMethod} width="150px"/>
                     <NameValue name="Mode" value={request.datasetGroup.credentialIssuer.mode} width="150px"/>
+                    <Flex direction="column" className="m-5">
+                        * Rate Limiting
+                    </Flex>
                 </div>
 
                 <h2 style={styles.h2}>Consumer Details</h2>
@@ -88,11 +97,11 @@ const FulfillRequest = () => {
                         <>
                             <div>
                                 <label>Client ID</label>
-                                <input type="text" name="consumerId" defaultValue={data.consumerId} onChange={onConsumerChange}/>
+                                <Input placeholder="Client / Consumer ID" name="consumerId" defaultValue={data.consumerId} onChange={onConsumerChange}/>
                             </div>
                             <div>
                                 <label>Client Secret</label>
-                                <input type="text" name="" defaultValue="GENERATED"/>
+                                <Input placeholder="Client / Consumer ID" name="" defaultValue="GENERATED" disabled="true"/>
                             </div>
                         </>
                     ) : (
@@ -109,11 +118,14 @@ const FulfillRequest = () => {
                     )}
                 </div>
                 <h2 style={styles.h2}>Communication to {request.requestor.name}</h2>
-                <div className="flex">
-                    <textarea name="communication" defaultValue={comms}>
-                    </textarea>
+                <div className="flex m-5">
+                    <Textarea placeholder="Communication" name="communication" defaultValue={comms}/>
                 </div>
-                <button style={styles.primaryButton} onClick={() => fulfill()}>Send Credentials to Requestor</button>
+
+                <ButtonGroup variant="outline" spacing="6" className="m-5">
+                    <Button colorScheme="blue" onClick={() => fulfill()}>Send Credentials</Button>
+                    <Button>Cancel</Button>
+                </ButtonGroup>
                 </>
             )}
             </div>

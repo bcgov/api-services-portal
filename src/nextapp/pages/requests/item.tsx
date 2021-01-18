@@ -4,7 +4,11 @@ import graphql from '../../shared/services/graphql'
 
 import { REMOVE, APPROVE } from './queries'
 
+import { Button, ButtonGroup } from "@chakra-ui/react"
+
 import NameValue from '../../components/name-value';
+
+const goto = (url) => { window.location.href = url; return false; }
 
 const Item = props => (
     <li style={styles.listItem}>
@@ -21,14 +25,14 @@ const Item = props => (
 
         { props.accessRequest.isApproved === null ? (
             <div className="flex">
-                <button style={styles.primaryButton} onClick={() => {
+                <Button colorScheme="blue" onClick={() => {
                     graphql(APPROVE, { id: props.accessRequest.id }).then(props.refetch);
-                }}>Approve</button>
+                }}>Approve</Button>
             </div>
         ) : false }
         { props.accessRequest.isApproved && props.accessRequest.isIssued == null ? (
             <div className="flex">
-                <a style={styles.primaryButton} href={`/requests/issue/${props.accessRequest.id}`}>Send Credentials</a>
+                <Button colorScheme="blue" onClick={(e) => goto(`/requests/issue/${props.accessRequest.id}`)}>Send Credentials</Button>
             </div>
 
         ) : false}

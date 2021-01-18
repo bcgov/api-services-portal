@@ -5,10 +5,11 @@ export const GET_LIST = `
           name
           authMethod
           mode
-          createdBy {
+          contact {
               name
+              username
           }
-          dataSetGroups {
+          datasetGroups {
               name
           }
         }

@@ -36,7 +36,7 @@ module.exports = {
       isMultiline: true,
       isRequired: false,
     },
-    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer' },
+    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.datasetGroups' },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     services: { type: Relationship, ref: 'ServiceRoute', many: true },

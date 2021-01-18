@@ -2,6 +2,8 @@
 
 import { styles } from '../../../shared/styles/devportal.css';
 
+import { Button, ButtonGroup } from "@chakra-ui/react"
+
 import NameValue from '../../../components/name-value';
 
 function List({ data, state, refetch }) {
@@ -13,6 +15,8 @@ function List({ data, state, refetch }) {
         return <p>Error!</p>;
       }
       case 'loaded': {
+        const goto = (url) => { window.location.href = url; return false; }
+
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
@@ -25,14 +29,12 @@ function List({ data, state, refetch }) {
                     <NameValue name="Family" value={item.name} width="300px"/>
                     <NameValue name="Auth Method" value={item.authMethod} width="250px"/>
                     <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/>
-                    <div className="flex">
-                            <button style={styles.primaryButton}>Try API</button>
-                    </div>
-                    { item.authMethod != "public" ? (
-                        <div className="flex">
-                            <a style={styles.primaryButton} href={`/requests/new/${item.id}`}>Request Access</a>
-                        </div>
-                    ): false }
+                    <ButtonGroup>
+                        <Button colorScheme="teal">Try API</Button>
+                        { item.authMethod != "public" ? (
+                                <Button colorScheme="blue" onClick={(e) => goto(`/requests/new/${item.id}`)}>Request Access</Button>
+                        ): false }
+                    </ButtonGroup>
                 </li>
             ))}
           </ul>

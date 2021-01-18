@@ -2,7 +2,11 @@
 
 import { styles } from '../../../shared/styles/devportal.css';
 
+import { Button, ButtonGroup } from "@chakra-ui/react"
+import { Table, Thead, Tbody, Tr, Th, Td, TableCaption } from "@chakra-ui/react"
+
 import NameValue from '../../../components/name-value';
+
 
 function List({ data, state, refetch }) {
     switch (state) {
@@ -18,24 +22,36 @@ function List({ data, state, refetch }) {
         }
         console.log(JSON.stringify(data, null, 4))
         return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <Table variant="simple">
+                <TableCaption>Imperial to metric conversion factors</TableCaption>
+                <Thead>
+                    <Tr>
+                    <Th>Requested On</Th>
+                    <Th>Access Request</Th>
+                    <Th>Client ID</Th>
+                    <Th>Actions</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
             {data.allAccessRequests.map((item, index) => (
-                <li style={styles.listItem}>
-                    <>
-                    <NameValue name="Requested On" value={item.createdAt} width="300px"/>
-                    <NameValue name="Access Request" value={item.name} width="300px"/>
-                    <NameValue name="Client ID" value={item.consumer ? item.consumer.username:""} width="300px"/>
+                <Tr>
+                    <Td>{item.createdAt}</Td>
+                    <Td>{item.name}</Td>
+                    <Td>{item.consumer ? item.consumer.username:""}</Td>
+                    <Td>
                     { item.isIssued ? (
-                        <button style={styles.primaryButton}>Generate Credentials</button>
+                        <Button colorScheme="blue">Collect Credentials</Button>
 
                     ) : (
                         <span>PENDING</span>
                     )}
-                    </>
-                </li>
+                    </Td>
+                </Tr>
             ))}
-          </ul>
-        );
+                </Tbody>
+            </Table>
+
+        )
       }
     }
     return (<></>)

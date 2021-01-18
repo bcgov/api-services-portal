@@ -23,9 +23,9 @@ function List({ data, state, refetch }) {
                 <li style={styles.listItem}>
                     <NameValue name="Name" value={item.name} width="300px"/>
                     <NameValue name="Auth Method" value={item.authMethod} width="200px"/>
-                    <NameValue name="Mode" value={item.mode} width="200px"/>
-                    <NameValue name="Contact" value={item.createdBy.name} width="200px"/>
-                    <NameValue name="Families Using" value={item.dataSetGroups.map(g => g.name)} width="200px"/>
+                    <NameValue name="Mode" value={item.mode} width="150px"/>
+                    <NameValue name="Contact" value={item.contact.name} width="200px"/>
+                    <NameValue name="API Families Using" value={item.datasetGroups.map(g => g.name)} width="400px"/>
                 </li>
             ))}
           </ul>
