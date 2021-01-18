@@ -63,11 +63,12 @@ export default function MyApp({ Component, pageProps }) {
         setState({ state: 'error', user: null });
       });
   };
-  const links = allNavItems.filter((item) => {
-    if (item.access.length <= 0) {
-      return true;
+  const links = allNavItems.filter((link) => {
+    if (link.access.length == 0) {
+        return true
+    } else {
+        return user != null && link.access.filter((value) => user.roles.includes(value)).length > 0
     }
-    return false;
   });
 
   useEffect(_fetch, []);
