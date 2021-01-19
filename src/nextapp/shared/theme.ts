@@ -20,7 +20,7 @@ const theme = extendTheme({
       body: {
         background: '#f1f1f1',
       },
-      'body > div:first-child': {
+      'body > div:first-of-type': {
         height: '100vh',
         display: 'flex',
         flexDir: 'column',
