@@ -15,7 +15,9 @@
   "build": "cross-env NODE_ENV=production keystone build",
   "start": "cross-env NODE_ENV=production keystone start",
   "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
-  "test": "jest --coverage"
+  "lint": "eslint .",
+  "test": "jest --coverage",
+  "test:watch": "jest -w --coverage"
  },
  "dependencies": {
   "@bcgov/bc-sans": "^1.0.1",
