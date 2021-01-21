@@ -1,38 +1,32 @@
 import * as React from 'react';
-import cx from 'classnames';
+import { Button as ChakraButton } from '@chakra-ui/react';
 
 interface ButtonProps {
   color?: 'primary' | 'secondary';
   children: React.ReactNode;
   href?: string;
+  onClick?: () => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
   color = 'primary',
   children,
   href,
+  onClick,
 }) => {
-  const classes = cx(
-    'text-white',
-    'py-2',
-    'px-4',
-    'rounded-sm',
-    'text-base',
-    'no-underline',
-    'leading-6',
-    {
-      ['bg-bc-blue']: color === 'primary',
-      ['bg-bc-yellow']: color === 'secondary',
+  const handleClick = React.useCallback(() => {
+    if (href) {
+      window.open(href, '_self');
+    } else {
+      onClick();
     }
+  }, [href, onClick]);
+
+  return (
+    <ChakraButton variant={color} borderRadius={4} onClick={handleClick}>
+      {children}
+    </ChakraButton>
   );
-  if (href.trim()) {
-    return (
-      <a className={classes} href={href}>
-        {children}
-      </a>
-    );
-  }
-  return <button className={classes}>{children}</button>;
 };
 
 export default Button;

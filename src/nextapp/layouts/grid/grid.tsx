@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Container, Grid } from '@chakra-ui/react';
+import { Box, Grid } from '@chakra-ui/react';
 
 interface GridLayoutProps {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface GridLayoutProps {
 
 const GridLayout: React.FC<GridLayoutProps> = ({ children }) => {
   return (
-    <Container centerContent maxWidth="6xl" py={4}>
+    <Box py={4}>
       <Grid
         templateColumns={{
           base: null,
@@ -19,7 +19,7 @@ const GridLayout: React.FC<GridLayoutProps> = ({ children }) => {
       >
         {children}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

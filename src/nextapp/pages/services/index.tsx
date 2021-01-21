@@ -1,46 +1,45 @@
 import * as React from 'react';
+import { Box, Container, Divider, Heading } from '@chakra-ui/react';
 
-const { useEffect, useState } = React;
-
-import { GET_LIST } from './queries'
-
-import { styles } from '../../shared/styles/devportal.css';
-
-import graphql from '../../shared/services/graphql'
-
-import List from './list'
+import PageHeader from '../../components/page-header';
+import { GET_LIST } from './queries';
+import graphql from '../../shared/services/graphql';
+import List from './list';
 
 const ServicesPage = () => {
+  let [{ state, data }, setState] = React.useState({
+    state: 'loading',
+    data: null,
+  });
+  let fetch = () => {
+    graphql(GET_LIST)
+      .then(({ data }) => {
+        setState({ state: 'loaded', data });
+      })
+      .catch((err) => {
+        setState({ state: 'error', data: null });
+      });
+  };
 
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
-        graphql(GET_LIST)
-        .then(({ data }) => {
-            setState({ state: 'loaded', data });
-        })
-        .catch((err) => {
-            setState({ state: 'error', data: null });
-        });
-    };
-    
-    useEffect(fetch, []);
+  React.useEffect(fetch, []);
 
-    return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Services</h1>
-            <p style={styles.introText}>
-                List of services from the API Owner perspective.  This should pull in details from Prometheus and gwa-api Status.
-            </p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Gateway Services</h2>
-
-                <List data={data} state={state} refetch={fetch} />
-
-            </div>
-        </div>
-    )
-}
+  return (
+    <Container maxW="6xl">
+      <PageHeader title="Services">
+        <p>
+          List of services from the API Owner perspective. This should pull in
+          details from Prometheus and gwa-api Status.
+        </p>
+      </PageHeader>
+      <Divider my={4} />
+      <Box d="flex">
+        <Heading as="h3" size="base">
+          Gateway Services
+        </Heading>
+        <List data={data} state={state} refetch={fetch} />
+      </Box>
+    </Container>
+  );
+};
 
 export default ServicesPage;
-
