@@ -1,27 +1,22 @@
 import * as React from 'react';
-import { Box, Container, Divider, Heading } from '@chakra-ui/react';
+import {
+  Box,
+  Container,
+  Divider,
+  Heading,
+  SimpleGrid,
+  Skeleton,
+  Text,
+} from '@chakra-ui/react';
+import { ErrorBoundary } from 'react-error-boundary';
 
+import AppError from '../../components/app-error';
 import PageHeader from '../../components/page-header';
-import { GET_LIST } from './queries';
-import graphql from '../../shared/services/graphql';
-import List from './list';
+import ServicesList from './list';
+import { withAuth } from 'shared/services/auth';
 
-const ServicesPage = () => {
-  let [{ state, data }, setState] = React.useState({
-    state: 'loading',
-    data: null,
-  });
-  let fetch = () => {
-    graphql(GET_LIST)
-      .then(({ data }) => {
-        setState({ state: 'loaded', data });
-      })
-      .catch((err) => {
-        setState({ state: 'error', data: null });
-      });
-  };
-
-  React.useEffect(fetch, []);
+const ServicesPage: React.FC = () => {
+  const isServer = typeof window === 'undefined';
 
   return (
     <Container maxW="6xl">
@@ -32,14 +27,30 @@ const ServicesPage = () => {
         </p>
       </PageHeader>
       <Divider my={4} />
-      <Box d="flex">
-        <Heading as="h3" size="base">
-          Gateway Services
-        </Heading>
-        <List data={data} state={state} refetch={fetch} />
+      <Box d="flex" flexDir="column">
+        <Box as="header" my={4}>
+          <Heading as="h3" size="base">
+            Gateway Services
+          </Heading>
+        </Box>
+        {!isServer && (
+          <ErrorBoundary fallback={<AppError />}>
+            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4}>
+              <React.Suspense
+                fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+                  <Skeleton key={d} height="200px" />
+                ))}
+              >
+                <ServicesList />
+              </React.Suspense>
+            </SimpleGrid>
+          </ErrorBoundary>
+        )}
       </Box>
     </Container>
   );
 };
 
 export default ServicesPage;
+
+//export const getServerSideProps = withAuth;

@@ -1,4 +1,10 @@
-const links = [
+interface NavLink {
+  name: string;
+  url: string;
+  access: string[];
+}
+
+const links: NavLink[] = [
   { name: 'Home', url: '/', access: [] },
   { name: 'Services', url: '/services', access: ['api-owner'] },
   { name: 'Consumers', url: '/consumers', access: ['api-owner'] },

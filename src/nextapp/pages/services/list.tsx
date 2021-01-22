@@ -1,37 +1,78 @@
-//import Item from './item'
+import {
+  Box,
+  Heading,
+  Link,
+  List,
+  ListItem,
+  SimpleGrid,
+  Text,
+} from '@chakra-ui/react';
+import * as React from 'react';
+import { useQuery } from 'react-query';
 
-import { styles } from '../../shared/styles/devportal.css';
+import api from '../../shared/services/api';
+import { GET_LIST } from './queries';
 
-import NameValue from '../../components/name-value';
+const ServicesList: React.FC = () => {
+  const { data } = useQuery<any>('services', async () => await api(GET_LIST), {
+    suspense: true,
+  });
 
-function List({ data, state, refetch }) {
-    switch (state) {
-      case 'loading': {
-        return <p>Loading...</p>;
-      }
-      case 'error': {
-        return <p>Error!</p>;
-      }
-      case 'loaded': {
-        if (!data) {
-              return <p>Ooops, something went wrong!</p>
-        }
-        console.log(JSON.stringify(data, null, 4))
-        return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {data.allDatasetGroups.map((item, index) => (
-                <li style={styles.listItem}>
-                    <NameValue name="Organization" value={(item.organization ? item.organization.title : "-") + " / " + (item.organizationUnit ? item.organizationUnit.title : "-")} width="300px"/>
-                    <NameValue name="Family" value={item.name} width="300px"/>
-                    <NameValue name="Auth Method" value={item.authMethod} width="250px"/>
-                    <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/>
-                </li>
-            ))}
-          </ul>
-        );
-      }
-    }
-    return (<></>)
-  }
+  return (
+    <>
+      {data?.allDatasetGroups.map((d) => (
+        <Box
+          key={d}
+          bg="green.100"
+          borderRadius={4}
+          borderColor="green.600"
+          borderWidth={1}
+          borderTopWidth={3}
+          p={4}
+        >
+          <Box as="header" key={d.name}>
+            <Heading as="h4" size="sm">
+              {d.name}
+            </Heading>
+            <Text color="green.700" fontSize="xs">
+              {d.host}
+            </Text>
+          </Box>
+          <Box>
+            <Box my={2}>
+              <Text>{d.organization?.title}</Text>
+            </Box>
+            <List
+              as="dl"
+              d="flex"
+              flexWrap="wrap"
+              fontSize="sm"
+              color="green.800"
+            >
+              <ListItem as="dt" width="50%" fontWeight="bold">
+                Security
+              </ListItem>
+              <ListItem as="dd" width="50%" textAlign="right">
+                {d.authMethod}
+              </ListItem>
+              <ListItem as="dt" width="50%" fontWeight="bold">
+                Response
+              </ListItem>
+              <ListItem as="dd" width="50%" textAlign="right">
+                400ms
+              </ListItem>
+              <ListItem as="dt" width="50%" fontWeight="bold">
+                Uptime
+              </ListItem>
+              <ListItem as="dd" width="50%" textAlign="right">
+                99.99%
+              </ListItem>
+            </List>
+          </Box>
+        </Box>
+      ))}
+    </>
+  );
+};
 
-  export default List
+export default ServicesList;
