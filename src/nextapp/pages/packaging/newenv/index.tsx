@@ -57,7 +57,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
                            <option value={p.id}>{p.name}</option>
                         ))}
                         </Select>
-                        <RadioGroup onChange={val => setEnvValue(val)} value={envValue}>
+                        <RadioGroup onChange={setEnvValue} value={envValue}>
                             <Stack direction="column">
                                 <Radio value="dev">Development</Radio>
                                 <Radio value="test">Test</Radio>
