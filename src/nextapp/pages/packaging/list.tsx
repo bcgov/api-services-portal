@@ -28,7 +28,7 @@ function List({ data, state, refetch }) {
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
-        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{},pkg:{}});
+        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:""},pkg:{}});
         const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
         return (
             <>
