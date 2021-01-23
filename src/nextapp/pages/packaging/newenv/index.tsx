@@ -44,6 +44,21 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
 
 
     //onChange={setEnvValue} value={envValue}
+    /*
+        #10 13.07 ./pages/packaging/newenv/index.tsx:60:37
+        #10 13.07 Type error: Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(nextValue: ReactText) => void'.
+        #10 13.07   Types of parameters 'value' and 'nextValue' are incompatible.
+        #10 13.07     Type 'ReactText' is not assignable to type 'SetStateAction<string>'.
+        #10 13.07       Type 'number' is not assignable to type 'SetStateAction<string>'.
+        #10 13.07 
+        #10 13.07   58 |                         ))}
+        #10 13.07   59 |                         </Select>
+        #10 13.07 > 60 |                         <RadioGroup onChange={setEnvValue} value={envValue}>
+        #10 13.07      |                                     ^
+        #10 13.07   61 |                             <Stack direction="column">
+        #10 13.07   62 |                                 <Radio value="dev">Development</Radio>
+        #10 13.07   63 |                                 <Radio value="test">Test</Radio>
+    */
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />

@@ -77,7 +77,7 @@ const NewRequest = () => {
                 <div className="flex">
                     <Flex direction="column" className="m-5">
                         <label><b>Application</b></label>
-                        <RadioGroup isRequired={true} onChange={setApplicationId} value={applicationId}>
+                        <RadioGroup isRequired={true} onChange={(a) => { setApplicationId(a) } } value={applicationId}>
                             <Stack direction="column">
                                 { data.allApplications.map(e => (
                                     <Radio value={e.id}>{e.name}</Radio>
