@@ -42,9 +42,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
         graphql(ADD_ENV, { name: (envValue == "other" ? name : envValue), package: _package }).then( () => { setName(''); setPackage(''); onClose(); successToast(); onComplete() });
     }
 
-    const handlePackageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setPackage(event.target.value)
-    }
+
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -54,7 +52,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>
-                        <Select placeholder="Select Package" onChange={handlePackageChange} value={_package}>
+                        <Select placeholder="Select Package" onChange={(e) => setPackage(e.target.value)} value={_package}>
                         {packages.map(p => (
                            <option value={p.id}>{p.name}</option>
                         ))}
