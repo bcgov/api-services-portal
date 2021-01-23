@@ -19,7 +19,7 @@ import {
     VStack
   } from "@chakra-ui/react"
 
-function WalkthroughPopover(summary) {
+function WalkthroughPopover(summary = { title: "", sector: "", license_title: "", notes: "" }) {
     const initialFocusRef = React.useRef()
     return (
       <Popover

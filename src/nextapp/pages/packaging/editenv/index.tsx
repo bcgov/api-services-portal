@@ -23,7 +23,7 @@ import {
 
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const EditDialog = ({isOpen, onClose, onComplete, pkg, env}) => {
+const EditDialog = ({isOpen, onClose, onComplete, pkg, env = { id: null, name: ""}}) => {
     const [name, setName] = useState(env.name);
 
     const toast = useToast()

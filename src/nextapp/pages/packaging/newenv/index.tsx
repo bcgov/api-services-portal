@@ -23,7 +23,7 @@ import {
 
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
+const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
     const [name, setName] = useState('');
     const [envValue, setEnvValue] = useState('dev');
     const [_package, setPackage] = useState('');
