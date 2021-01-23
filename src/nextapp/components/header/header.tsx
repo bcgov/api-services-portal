@@ -35,6 +35,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       top={0}
       w="100%"
       color="white"
+      zIndex="1000"
       px={{ base: 4, sm: 16 }}
       className={cx(styles.container, {
         [styles.open]: open,

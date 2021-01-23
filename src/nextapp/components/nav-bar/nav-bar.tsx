@@ -27,7 +27,7 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ links }) => {
   const router = useRouter();
   return (
-    <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px">
+    <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px" zIndex="1000">
       <Container
         as="ul"
         mx={{ base: 0, sm: 8 }}

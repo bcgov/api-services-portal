@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 
 function graphql(query, variables = {}) {
-    return fetch('http://localhost:7000/admin/api', {
+    return fetch(`${process.env.EXTERNAL_URL}/admin/api`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

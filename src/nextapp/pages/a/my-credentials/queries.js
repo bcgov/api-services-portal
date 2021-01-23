@@ -3,8 +3,22 @@ export const GET_LIST = `
         allAccessRequests(where: { requestor: { id: $id }  } ) {
           id
           name
+          isApproved
           isIssued
           createdAt
+          requestor {
+              name
+              username
+          }
+          packageEnvironment {
+              name
+              package {
+                name
+              }
+          }
+          application {
+              name
+          }
           consumer {
               username
           }

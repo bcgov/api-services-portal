@@ -59,12 +59,7 @@ const MyCredentialsPage = () => {
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>My Credentials</h1>
-            <p style={styles.introText}>
-                This is for Developers wishing to access BC Government APis.
-            </p>
-            <hr style={styles.divider} />
             <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Credentials</h2>
                 {/* <button style={styles.primaryButton}>Generate new API Key</button>
                 <button style={styles.primaryButton} onClick={openModal}>Request Access</button> */}
 

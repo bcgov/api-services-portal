@@ -35,6 +35,20 @@ module.exports = {
             isReadOnly: false
         }
     },
+    methods: {
+        type: Text,
+        isRequired: false,
+        adminConfig: {
+            isReadOnly: false
+        }
+    },
+    paths: {
+        type: Text,
+        isRequired: false,
+        adminConfig: {
+            isReadOnly: false
+        }
+    },
     host: {
         type: Text,
         isRequired: true,
@@ -57,7 +71,7 @@ module.exports = {
         }
     },
     plugins: { type: Relationship, ref: 'Plugin', many: true },
-
+    environment: { type: Relationship, ref: 'Environment.services', many: false },
   },
   access: EnforcementPoint,
   plugins: [

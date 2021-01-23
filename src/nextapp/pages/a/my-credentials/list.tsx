@@ -3,7 +3,7 @@
 import { styles } from '../../../shared/styles/devportal.css';
 
 import { Button, ButtonGroup } from "@chakra-ui/react"
-import { Table, Thead, Tbody, Tr, Th, Td, TableCaption } from "@chakra-ui/react"
+import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, Tag } from "@chakra-ui/react"
 
 import NameValue from '../../../components/name-value';
 
@@ -26,24 +26,30 @@ function List({ data, state, refetch }) {
                 <TableCaption>-</TableCaption>
                 <Thead>
                     <Tr>
-                    <Th>Requested On</Th>
-                    <Th>Access Request</Th>
-                    <Th>Client ID</Th>
+                    <Th>API</Th>
+                    <Th>Environment</Th>
+                    <Th>Application</Th>
+                    <Th>Requested</Th>
+                    <Th>Requestor</Th>
+                    <Th>Consumer Details</Th>
                     <Th>Actions</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
             {data.allAccessRequests.map((item, index) => (
                 <Tr>
+                    <Td>{item.packageEnvironment.package == null ? "--MISSING--" : item.packageEnvironment.package.name}</Td>
+                    <Td>{item.packageEnvironment.name}</Td>
+                    <Td>{item.application == null ? false:item.application.name}</Td>
                     <Td>{item.createdAt}</Td>
-                    <Td>{item.name}</Td>
+                    <Td>{item.requestor.name} ({item.requestor.username})</Td>
                     <Td>{item.consumer ? item.consumer.username:""}</Td>
                     <Td>
                     { item.isIssued ? (
                         <Button colorScheme="blue">Collect Credentials</Button>
 
                     ) : (
-                        <span>PENDING</span>
+                        <Tag colorScheme="blue">PENDING</Tag>
                     )}
                     </Td>
                 </Tr>

@@ -50,21 +50,23 @@ const keystone = new Keystone({
 
 for (_list of [
   'AccessRequest',
-  'User',
-  'Group',
   'Activity',
+  'Application',
   'Consumer',
+  'Content',
   'CredentialIssuer',
-  'TemporaryIdentity',
   'Dataset',
-  'DatasetGroup',
+  'Environment',
   'Gateway',
+  'Group',
   'Organization',
   'OrganizationUnit',
+  'Package',
   'Plugin',
   'ServiceRoute',
-  'Content',
+  'TemporaryIdentity',
   'Todo',
+  'User',
 ]) {
   keystone.createList(_list, require('./lists/' + _list));
 }

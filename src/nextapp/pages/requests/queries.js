@@ -1,16 +1,26 @@
-export const GET_DATASET_GROUP = `
-    query GetDatasetGroup ($id: ID!) {
-        allDatasetGroups(where: {id: $id}) {
+export const GET_PACKAGE = `
+    query Get ($id: ID!) {
+        allPackages(where: {id: $id}) {
+            id
+            name
+            environments {
+                id
+                name
+                authMethod
+            }
+        }
+
+        allApplications {
             id
             name
         }
 
         allTemporaryIdentities {
             id
+            userId
             name
             username
             email
-            userId
         }
     }
 `
@@ -29,20 +39,25 @@ export const GET_LIST = `
             username
             email
           }
-          datasetGroup {
+          application {
+              name
+          }
+          packageEnvironment {
               name
               authMethod
-              useAcl
               credentialIssuer {
                   name
               }
-              organization {
-                  name
-                  title
-              }
-              organizationUnit {
-                  name
-                  title
+              package {
+                name
+                organization {
+                    name
+                    title
+                }
+                organizationUnit {
+                    name
+                    title
+                }
               }
               services {
                   name
@@ -68,16 +83,17 @@ export const GET_REQUEST = `
             username
             email
           }
-          datasetGroup {
+          application {
+            name
+          }
+          packageEnvironment {
+            name
+            authMethod
+            credentialIssuer {
+                name
+            }
+            package {
               name
-              authMethod
-              useAcl
-              credentialIssuer {
-                  name
-                  authMethod
-                  mode
-                  oidcDiscoveryUrl
-              }
               organization {
                   name
                   title
@@ -86,18 +102,23 @@ export const GET_REQUEST = `
                   name
                   title
               }
-              services {
-                  name
-                  host
-              }
+            }
+            services {
+                name
+                host
+            }
           }
         }
     }
 `
 
 export const ADD = `
-    mutation AddAccessRequest($name: String!, $requestor: ID!, $datasetGroupId: ID!) {
-        createAccessRequest(data: { name: $name, requestor: { connect: { id: $requestor } }, datasetGroup: { connect: { id: $datasetGroupId } } } ) {
+    mutation AddAccessRequest($name: String!, $requestor: ID!, $applicationId: ID!, $packageEnvironmentId: ID!) {
+        createAccessRequest(data: { name: $name, 
+            requestor: { connect: { id: $requestor } }, 
+            application: { connect: { id: $applicationId } }
+            packageEnvironment: { connect: { id: $packageEnvironmentId } }
+         } ) {
             id
         }
     }
@@ -118,6 +139,14 @@ export const REMOVE = `
 export const APPROVE = `
     mutation Approve($id: ID!) {
         updateAccessRequest(id: $id, data: { isApproved: true }) {
+            id
+        }
+    }
+`
+
+export const REJECT = `
+    mutation Approve($id: ID!) {
+        updateAccessRequest(id: $id, data: { isApproved: false, isComplete: true }) {
             id
         }
     }

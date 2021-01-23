@@ -1,5 +1,7 @@
 import Item from './item'
 
+import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel } from "@chakra-ui/react"
+
 function List({ data, state, refetch }) {
     switch (state) {
       case 'loading': {
@@ -14,11 +16,23 @@ function List({ data, state, refetch }) {
         }
         console.log(JSON.stringify(data, null, 4))
         return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <Table variant="simple">
+            <TableCaption>-</TableCaption>
+            <Thead>
+                <Tr>
+                <Th>Created</Th>
+                <Th>Requestor</Th>
+                <Th>Application</Th>
+                <Th>API</Th>
+                <Th>Environment</Th>
+                </Tr>
+            </Thead>
+            <Tbody>
             {data.allAccessRequests.map((item, index) => (
               <Item accessRequest={item} refetch={refetch} key={index} />
             ))}
-          </ul>
+            </Tbody>
+            </Table>
         );
       }
     }

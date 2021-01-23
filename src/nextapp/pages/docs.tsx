@@ -35,7 +35,7 @@ const DocsPage = ({ pages }) => {
   );
 };
 
-export async function getStaticProps(context) {
+export async function getServerSideProps(context) {
   const pagesQuery = gql`
     {
       allContents(where: { isComplete: true }) {

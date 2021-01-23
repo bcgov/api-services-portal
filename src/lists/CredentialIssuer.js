@@ -50,7 +50,7 @@ module.exports = {
         isRequired: false,
     },
     contact: { type: Relationship, ref: 'User', many: false },
-    datasetGroups: { type: Relationship, ref: 'DatasetGroup.credentialIssuer', many: true }
+    environments: { type: Relationship, ref: 'Environment.credentialIssuer', many: true }
   },
   access: EnforcementPoint,
   plugins: [

@@ -9,8 +9,11 @@ export const GET_LIST = `
               name
               username
           }
-          datasetGroups {
+          environments {
               name
+              package {
+                name
+              }
           }
         }
     }

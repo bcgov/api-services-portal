@@ -4,10 +4,12 @@ const { iterate_through_json_content, get_json_content, create_key_map } = requi
 const ADD = `
     mutation Add(
         $name: String, 
+        $kongPluginId: String,
         $config: String) {
 
         createPlugin(data: { 
             name: $name, 
+            kongPluginId: $kongPluginId,
             config: $config
         }) {
             id
@@ -30,6 +32,7 @@ async function import_plugins() {
             const name = plugin.name
             const out = {
                 name: plugin.name,
+                kongPluginId: plugin.id,
                 config: JSON.stringify(plugin.config, null, 3)
             }
 

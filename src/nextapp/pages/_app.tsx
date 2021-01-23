@@ -16,14 +16,14 @@ export default function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const allNavItems = [
     { name: 'Home', url: '/', access: [] },
-    { name: 'Services', url: '/services', access: ['api-owner'] },
+    { name: 'Gateway', url: '/services', access: ['api-owner'] },
     { name: 'Consumers', url: '/consumers', access: ['api-owner'] },
     {
       name: 'Access Requests',
       url: '/requests',
       access: ['api-manager', 'credential-admin'],
     },
-    { name: 'Datasets', url: '/datasets', access: ['api-owner'] },
+    { name: 'Packaging', url: '/packaging', access: ['api-owner'] },
     {
       name: 'Credential Issuers',
       url: '/credential-issuers',
@@ -35,6 +35,7 @@ export default function MyApp({ Component, pageProps }) {
       access: ['api-owner'],
     },
     { name: 'API Discovery', url: '/a/api-discovery', access: ['developer'] },
+    { name: 'Applications', url: '/a/applications', access: ['developer'] },
     { name: 'My Credentials', url: '/a/my-credentials', access: ['developer'] },
     { name: 'Documentation', url: '/docs', access: [] },
     { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
@@ -64,6 +65,7 @@ export default function MyApp({ Component, pageProps }) {
       });
   };
   const links = allNavItems.filter((link) => {
+      return true
     if (link.access.length == 0) {
         return true
     } else {

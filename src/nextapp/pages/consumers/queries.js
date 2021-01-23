@@ -2,7 +2,13 @@ export const GET_LIST = `
     query GetConsumers {
         allConsumers {
           id
-          name
+          username
+          customId
+          plugins {
+              name
+          }
+          tags
+          createdAt
         }
     }
 `

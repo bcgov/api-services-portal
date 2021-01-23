@@ -6,6 +6,8 @@ import { GET_LIST } from './queries'
 
 import { styles } from '../../shared/styles/devportal.css';
 
+import { Alert, AlertIcon } from "@chakra-ui/react"
+
 import graphql from '../../shared/services/graphql'
 
 import List from './list'
@@ -28,15 +30,12 @@ const ConsumersPage = () => {
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>Consumers</h1>
-            <p style={styles.introText}>
+            <Alert status="info">
+                <AlertIcon />
                 List of consumers that have been granted access, from the API Owner perspective.  This should pull in details from Kong, enriched with the AccessRequest.
-            </p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Consumers</h2>
-
+            </Alert>
+            <div className="m-10">
                 <List data={data} state={state} refetch={fetch} />
-
             </div>
         </div>
     )

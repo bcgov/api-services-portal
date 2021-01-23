@@ -56,7 +56,7 @@ const FulfillRequest = () => {
     const comms = `
         To {request.requestor.username},
 
-        Your credential for the {request.datasetGroup.name} API services are ready.  You can retrieve them at https://portal.api.gov.bc.ca .
+        Your credential for the {request.packageEnvironment.name} API services are ready.  You can retrieve them at https://portal.api.gov.bc.ca .
 
     `
     return (
@@ -75,17 +75,25 @@ const FulfillRequest = () => {
                     <NameValue name="Username" value={request.requestor.username} width="250px"/>
                     <NameValue name="Email" value={request.requestor.email} width="350px"/>
                 </div>
+                <h2 style={styles.h2}>What application will be using this API?</h2>
+                <div className="flex">
+                    <NameValue name="Application" value={request.application.name} width="150px"/>
+                </div>
                 <hr/>
                 <h2 style={styles.h2}>APIs</h2>
                 <div className="flex">
-                    <NameValue name="Family" value={request.datasetGroup.name} width="150px"/>
-                    <NameValue name="Environment" value="Sandbox" width="300px"/>
+                    <NameValue name="API" value={request.packageEnvironment.package.name} width="150px"/>
+                    <NameValue name="Environment" value={request.packageEnvironment.name} width="150px"/>
                 </div>
-
-                <h2 style={styles.h2}>Gateway Policies/Plugins</h2>
+                <h2 style={styles.h2}>Additional Controls</h2>
                 <div className="flex">
-                    <NameValue name="Auth Method" value={request.datasetGroup.credentialIssuer.authMethod} width="150px"/>
-                    <NameValue name="Mode" value={request.datasetGroup.credentialIssuer.mode} width="150px"/>
+                    { request.packageEnvironment.credentialIssuer != null ? (
+                        <>
+                        <NameValue name="Auth Method" value={request.packageEnvironment.credentialIssuer.authMethod} width="150px"/>
+                        <NameValue name="Mode" value={request.packageEnvironment.credentialIssuer.mode} width="150px"/>
+                        </>
+                    ):false}
+
                     <Flex direction="column" className="m-5">
                         * Rate Limiting
                     </Flex>
@@ -93,7 +101,7 @@ const FulfillRequest = () => {
 
                 <h2 style={styles.h2}>Consumer Details</h2>
                 <div className="flex">
-                    { (request.datasetGroup.credentialIssuer.authMethod === "oidc") ? (
+                    { (request.packageEnvironment.authMethod === "oidc") ? (
                         <>
                             <div>
                                 <label>Client ID</label>

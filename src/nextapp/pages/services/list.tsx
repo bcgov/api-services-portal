@@ -2,6 +2,8 @@
 
 import { styles } from '../../shared/styles/devportal.css';
 
+import { Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel } from "@chakra-ui/react"
+
 import NameValue from '../../components/name-value';
 
 function List({ data, state, refetch }) {
@@ -18,16 +20,47 @@ function List({ data, state, refetch }) {
         }
         console.log(JSON.stringify(data, null, 4))
         return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {data.allDatasetGroups.map((item, index) => (
-                <li style={styles.listItem}>
-                    <NameValue name="Organization" value={(item.organization ? item.organization.title : "-") + " / " + (item.organizationUnit ? item.organizationUnit.title : "-")} width="300px"/>
-                    <NameValue name="Family" value={item.name} width="300px"/>
-                    <NameValue name="Auth Method" value={item.authMethod} width="250px"/>
-                    <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/>
-                </li>
+            <Table variant="simple">
+            <TableCaption>-</TableCaption>
+            <Thead>
+                <Tr>
+                <Th>Service Route</Th>
+                <Th>Controls</Th>
+                <Th>Actions</Th>
+                </Tr>
+            </Thead>
+            <Tbody>
+
+            {data.allServiceRoutes.map((item, index) => (
+                <Tr>
+                    <Td>
+                        <HStack spacing={1}>{item.methods != null ? JSON.parse(item.methods).map(p => (
+                            <Tag size="sm" colorScheme="blue" borderRadius="20px">
+                                <TagLabel>{p}</TagLabel>
+                            </Tag>
+                        )) : false}</HStack>
+
+                        <div className="m-1">{item.host}</div>
+                        <HStack spacing={1}>{item.paths != null ? JSON.parse(item.paths).map(p => (
+                            <Tag size="sm" colorScheme="blue" borderRadius="20px">
+                            <TagLabel>{p}</TagLabel>
+                        </Tag>
+                        )):false}</HStack>
+                    </Td>
+                    <Td>
+                    <HStack spacing={4}>{Array.isArray(item.plugins) ? item.plugins.map(p => (
+                            <Tag size="lg" colorScheme="orange" borderRadius="5px">
+                                <TagLabel>{p.name}</TagLabel>
+                            </Tag>
+                        )) : false}</HStack></Td>
+                    <Td>
+                        <Button colorScheme="blue">View</Button>
+                    </Td>
+                </Tr>
             ))}
-          </ul>
+            </Tbody>
+            </Table>
+
         );
       }
     }

@@ -8,6 +8,8 @@ const ADD = `
         $kongServiceId: String, 
         $namespace: String, 
         $host: String, 
+        $paths: String, 
+        $methods: String, 
         $isActive: Boolean, 
         $tags: String) {
 
@@ -17,6 +19,8 @@ const ADD = `
             kongServiceId: $kongServiceId,
             namespace: $namespace, 
             host: $host, 
+            paths: $paths, 
+            methods: $methods, 
             isActive: $isActive, 
             tags: $tags
         }) {
@@ -35,7 +39,7 @@ function build_hosts (route) {
     const scheme = 'https'
     const paths = route['paths'] != null && route.paths.length > 1 ? "[" + route.paths.join('|') + "]" : (route.paths == null || route.paths.length == 0 ? "/" : route.paths[0])
     return route.hosts.map(host => {
-        return scheme + "://" + host + paths
+        return { host: scheme + "://" + host, paths: route['paths'] == null ? ["/"]:route['paths'], methods: route['methods'] == null ? [ '*' ]:route['methods'] }
     })
 }
 
@@ -58,7 +62,9 @@ async function import_service_routes() {
                 namespace: ns,
                 kongServiceId: service.id,
                 kongRouteId: route.id,
-                host: host,
+                host: host.host,
+                paths: JSON.stringify(host.paths),
+                methods: JSON.stringify(host.methods),
                 isActive: true,
                 tags: JSON.stringify(service.tags),
             }

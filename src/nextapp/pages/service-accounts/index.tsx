@@ -4,6 +4,8 @@ const { useEffect, useState } = React;
 
 import { styles } from '../../shared/styles/devportal.css';
 
+import { Alert, AlertIcon } from "@chakra-ui/react"
+
 import graphql from '../../shared/services/graphql'
 
 const ServiceAccountsPage = () => {
@@ -24,12 +26,12 @@ const ServiceAccountsPage = () => {
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>Service Accounts</h1>
-            <p style={styles.introText}>
+            <Alert status="info">
+                <AlertIcon />
                 Service Accounts are credentials for accessing the API Gateway Services.  This is for API Owners to manage the Service Accounts.
-            </p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Service Accounts</h2>
+            </Alert>
+
+            <div className="m-10">
             </div>
         </div>
     )

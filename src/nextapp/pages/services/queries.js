@@ -1,19 +1,24 @@
 export const GET_LIST = `
     query GetServices {
-        allDatasetGroups {
+        allServiceRoutes {
           id
           name
-          authMethod
-          useAcl
-          organization {
-            title
-          }
-          organizationUnit {
-            title
-          }
-          services {
+          host
+          paths
+          methods
+          plugins {
               name
-              host
+          }
+          environment {
+            name
+            package {
+                organization {
+                    title
+                }
+                organizationUnit {
+                    title
+                }
+            }
           }
         }
     }

@@ -11,35 +11,21 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    description: {
-        type: Markdown,
-        isRequired: true,
-    },
     authMethod: { type: Select, emptyOption: false, default: 'public', options: [
         { value: 'public', label: 'Public'},
         { value: 'oidc', label: 'OIDC'},
         { value: 'keys', label: 'API Keys'},
       ]
     },
-    useAcl: {
-        type: Checkbox,
-        isRequired: true,
-        default: false
-    },
-    oidcIssuer: {
-        type: Text,
-        isRequired: false,
-        default: false
-    },
+    plugins: { type: Relationship, ref: 'Plugin', many: true },
     description: {
       type: Text,
       isMultiline: true,
       isRequired: false,
     },
-    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.datasetGroups' },
-    organization: { type: Relationship, ref: 'Organization' },
-    organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    services: { type: Relationship, ref: 'ServiceRoute', many: true },
+    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
+    services: { type: Relationship, ref: 'ServiceRoute.environment', many: true },
+    package: { type: Relationship, ref: 'Package.environments', many: false },
   },
   access: EnforcementPoint,
 }

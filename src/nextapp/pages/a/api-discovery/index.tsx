@@ -27,12 +27,7 @@ const ApiDiscoveryPage = () => {
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>Discover APIs</h1>
-            <p style={styles.introText}>
-                This is for Developers wishing to find APIs provided by the BC Government.  Lists are pulled in from the BC Data Catalog and from here where API Owners are able to create private Datasets that they can control access to.
-            </p>
-            <hr style={styles.divider} />
             <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Catalog</h2>
                 <List data={data} state={state} refetch={fetch} />
             </div>
         </div>
