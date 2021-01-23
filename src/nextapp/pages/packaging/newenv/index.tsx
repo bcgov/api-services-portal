@@ -43,7 +43,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
     }
 
 
-
+    //onChange={setEnvValue} value={envValue}
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
@@ -57,7 +57,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages}) => {
                            <option value={p.id}>{p.name}</option>
                         ))}
                         </Select>
-                        <RadioGroup onChange={setEnvValue} value={envValue}>
+                        <RadioGroup>
                             <Stack direction="column">
                                 <Radio value="dev">Development</Radio>
                                 <Radio value="test">Test</Radio>
