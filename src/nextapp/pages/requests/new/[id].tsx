@@ -52,6 +52,7 @@ const NewRequest = () => {
         graphql(ADD, { name: dataset.name + " FOR " + data.allTemporaryIdentities[0].name, requestor: data.allTemporaryIdentities[0].userId, applicationId: applicationId, packageEnvironmentId: environmentId }).then(refetch);
     }
     //onChange={(a) => { setApplicationId(a) } } value={applicationId}
+    //onChange={setEnvironmentId} value={environmentId}
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>New Access Request</h1>
@@ -94,7 +95,7 @@ const NewRequest = () => {
                 <div className="flex">
                     <Flex direction="column" className="m-5">
                         <label><b>Environment</b></label>
-                        <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
+                        <RadioGroup isRequired={true} >
                             <Stack direction="column">
                                 { dataset.environments.map(e => (
                                     <Radio value={e.id}>{e.name} : {e.authMethod}</Radio>
