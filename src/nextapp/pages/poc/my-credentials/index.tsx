@@ -5,6 +5,8 @@ import { GET_LIST } from './queries'
 
 import { useAppContext } from '../../context'
 
+import { useAuth } from '../../../shared/services/auth'
+
 const { useEffect, useState } = React;
 
 import { styles } from '../../../shared/styles/devportal.css';
@@ -27,11 +29,13 @@ const customStyles = {
 
 const MyCredentialsPage = () => {
     const context = useAppContext()
+    const auth = useAuth()
+    console.log("AUTH = "+JSON.stringify(auth))
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
 
     let fetch = () => {
-        graphql(GET_LIST, { id : context.user ? context.user.userId : "" })
+        graphql(GET_LIST, { id : auth.user ? auth.user.userId : "" })
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -40,7 +44,7 @@ const MyCredentialsPage = () => {
         });
     };
     
-    useEffect(fetch, [context.user]);
+    useEffect(fetch, [auth.user]);
 
     var subtitle;
     const [modalIsOpen,setIsOpen] = React.useState(false);

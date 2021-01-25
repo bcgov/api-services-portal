@@ -17,7 +17,9 @@ export const GET_LIST = gql`
         title
       }
       environments {
+        id
         name
+        active
         authMethod
         services {
             name
@@ -42,7 +44,7 @@ const ServicesList: React.FC = () => {
       )}
       {data?.allPackages.map((d) => d.environments?.map((e) => (
         <Box
-          key={d}
+          key={e.id}
           bg={e.active ? "green.100" : "yellow.100"}
           borderRadius={4}
           borderColor={e.active ? "green.600" : "yellow.600"}
