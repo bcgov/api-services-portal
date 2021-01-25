@@ -60,6 +60,11 @@ const EditDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, 
                         <div>{pkg.name} : {name}</div>
                         <Input placeholder="name" value={name} onChange={event => setName(event.currentTarget.value)}/>
                         <pre>{JSON.stringify(env, null, 4)}</pre>
+                        <div>Services:</div>
+                        <Input placeholder="list of services part of this environment"/>
+                        <div>Required Controls:</div>
+                        
+                        <Input placeholder="controls"/>
                     </Stack>
                 </ModalBody>
 
