@@ -23,7 +23,7 @@ const Signin: React.FC = () => {
         <Text>{user.username}</Text>
       </Box>
       <Link
-        href="/admin/sign_out"
+        href="/admin/signout"
         fontSize="xs"
         bg="bc-blue-alt"
         py={1}
