@@ -6,13 +6,15 @@ import { styles } from '../../../shared/styles/devportal.css';
 
 import { Box, ButtonGroup, Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel, Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, useDisclosure, useToast } from "@chakra-ui/react"
 
-import { FormControl, FormLabel, Switch } from "@chakra-ui/react"
+import { FormControl, FormLabel, Switch, IconButton } from "@chakra-ui/react"
+import { EditIcon } from "@chakra-ui/icons"
 
 import graphql from '../../../shared/services/graphql'
 
 import { REMOVE_ENV, UPDATE_ACTIVE } from './queries'
 
 import EditEnvDialog from './editenv'
+import EditPkgDialog from './editpkg'
 
 import bcdc from './bcdc'
 
@@ -51,8 +53,10 @@ function List({ data, state, refetch }) {
             })
         }
 
-        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:""},pkg:{id:null, name:""}});
-        const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
+        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: ""},pkg:{id:null, name:""}});
+        const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure(false)
+        const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure(false)
+
         return (
             <>
                 <Accordion defaultIndex={[]} allowMultiple>
@@ -60,7 +64,7 @@ function List({ data, state, refetch }) {
                     <AccordionItem>
                         <AccordionButton>
                             <Box flex="1" textAlign="left">
-                                {item.name}
+                                {item.name} <IconButton aria-label="Edit Package" size="sm" icon={<EditIcon />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
                             </Box>
                             <AccordionIcon />
                         </AccordionButton>
@@ -105,6 +109,7 @@ function List({ data, state, refetch }) {
                 ))}
                 </Accordion>                
                 <EditEnvDialog isOpen={isEnvOpen} onClose={onEnvClose} onComplete={refetch} pkg={selectedPkgEnv.pkg} env={selectedPkgEnv.env}/>
+                <EditPkgDialog isOpen={isPkgOpen} onClose={onPkgClose} onComplete={refetch} pkg={selectedPkgEnv.pkg}/>
 
             </>
         );

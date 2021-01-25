@@ -16,9 +16,10 @@ module.exports = {
         isRequired: true,
         defaultValue: false
     },
-    authMethod: { type: Select, emptyOption: false, default: 'public', options: [
+    authMethod: { type: Select, emptyOption: false, defaultValue: 'private', options: [
+        { value: 'private', label: 'Private'},
         { value: 'public', label: 'Public'},
-        { value: 'oidc', label: 'OIDC'},
+        { value: 'JWT', label: 'JWT'},
         { value: 'keys', label: 'API Keys'},
       ]
     },

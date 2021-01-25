@@ -75,5 +75,23 @@ export const UPDATE_ACTIVE = `
     }
 `
 
+export const UPD_PKG = `
+    mutation Update($id: ID!, $name: String) {
+        updatePackage(id: $id, data: { name: $name } ) {
+            name
+            id
+        }
+    }
+`
+
+export const GET_AVAIL_SERVICES = `
+    query GET {
+        allServiceRoutes {
+            id
+            name
+        }
+    }
+`
+
 const empty = () => false
 export default empty

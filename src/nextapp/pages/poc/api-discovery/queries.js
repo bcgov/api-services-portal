@@ -13,6 +13,7 @@ export const GET_LIST = `
             }
           }
           dataset {
+            name
             title
             notes
             sector

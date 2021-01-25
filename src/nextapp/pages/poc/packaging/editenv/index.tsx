@@ -8,6 +8,7 @@ const { useState } = React;
 
 import {
     Modal,
+    Link,
     ModalOverlay,
     ModalContent,
     ModalHeader,
@@ -16,14 +17,20 @@ import {
     ModalCloseButton,
     RadioGroup,
     Radio,
+    HStack,
+    Switch,
 
     Select,
     useToast
 } from "@chakra-ui/react"
 
+import GenericControl from '../controls/generic'
+
+import ServiceSelector from '../controls/serviceSelector'
+
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const EditDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: ""}}) => {
+const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: "", authMethod: ""}}) => {
     const [name, setName] = useState(env.name);
 
     const toast = useToast()
@@ -41,7 +48,7 @@ const EditDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, 
         setName(env.name);
     }, [env])
 
-    const create = () => {
+    const update = () => {
         graphql(UPD_ENV, { id: env.id, name: name }).then( () => { onClose(); successToast(); onComplete() });
     }
 
@@ -50,26 +57,35 @@ const EditDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, 
     // }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal key="EditEnvDialog" isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Edit Environment</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>
-                        <div>{pkg.name} : {name}</div>
+                        <h3>{pkg.name} : {name}</h3>
                         <Input placeholder="name" value={name} onChange={event => setName(event.currentTarget.value)}/>
-                        <pre>{JSON.stringify(env, null, 4)}</pre>
-                        <div>Services:</div>
-                        <Input placeholder="list of services part of this environment"/>
+                        <div>Auth Method:</div>
+                        <div>{env.authMethod}</div>
                         <div>Required Controls:</div>
-                        
-                        <Input placeholder="controls"/>
+                        <GenericControl meta={{name: "Rate Limiting", config: [ {label: "Minutes", placeholder: "minutes", value: "500"}]}}/>
+                        <GenericControl meta={{name: "IP Restrictions", config: [ {label: "Allow", placeholder: "allow", value: ""}, {label: "Deny", placeholder: "deny", value: ""}]}}/>
+                        <GenericControl meta={{name: "OIDC Auth", config: [ {label: "Discovery URL", placeholder: "discovery url", value: ""}]}}/>
+                        <GenericControl meta={{name: "API Key Auth", config: [ {label: "Header Key", placeholder: "header key", value: ""}]}}/>
+                        <div>Gateway Services: <Link>(change)</Link></div>
+                        <ServiceSelector mode="view"/>
+                        <div>Application Requests:</div>
+                        <HStack spacing={2}>
+                            <Switch/>
+                            <Input placeholder="Milestone application has to reach before access can be approved."/>
+                        </HStack>
+                        <Textarea placeholder="Additional information to ask from Application when requesting access."/>
                     </Stack>
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3} onClick={create}>
+                    <Button colorScheme="blue" mr={3} onClick={update}>
                     Update
                     </Button>
                     <Button variant="ghost" onClick={onClose}>Close</Button>
@@ -79,4 +95,4 @@ const EditDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, 
     )
 }
 
-export default EditDialog;
+export default EditEnvDialog;
