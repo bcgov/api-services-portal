@@ -54,8 +54,8 @@ function List({ data, state, refetch }) {
         }
 
         const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: ""},pkg:{id:null, name:""}});
-        const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure(false)
-        const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure(false)
+        const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
+        const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure()
 
         return (
             <>
