@@ -29,7 +29,7 @@ function List({ data, state, refetch }) {
         return (
             
           <GridLayout>
-            {data.allPackages.map((item, index) => (
+            {data.allPackages.filter(p => p.environments.filter(e => e.active).length > 0).map((item, index) => (
                 <Card>
                     <Heading size="md" mb={2}>
                         {item.name}
@@ -42,7 +42,7 @@ function List({ data, state, refetch }) {
                         )}
                         {/* <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/> */}
                         <div><b>Environments</b></div>
-                        <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.map(p => (
+                        <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
                             <Tag size="lg" colorScheme="orange" borderRadius="5px">
                                 <TagLabel>{p.name}</TagLabel>
                             </Tag>

@@ -18,6 +18,7 @@ export const GET_LIST = `
           environments {
             id
             name
+            active
             services {
                 name
                 host
@@ -59,6 +60,15 @@ export const REMOVE_ENV = `
 export const UPD_ENV = `
     mutation Update($id: ID!, $name: String) {
         updateEnvironment(id: $id, data: { name: $name } ) {
+            name
+            id
+        }
+    }
+`
+
+export const UPDATE_ACTIVE = `
+    mutation Update($id: ID!, $active: Boolean) {
+        updateEnvironment(id: $id, data: { active: $active } ) {
             name
             id
         }

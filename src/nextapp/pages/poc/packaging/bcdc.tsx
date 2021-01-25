@@ -37,7 +37,7 @@ function WalkthroughPopover(summary = { title: "", sector: "", license_title: ""
           <PopoverArrow />
           <PopoverCloseButton />
           <PopoverBody>
-            {summary.notes.length > 175 ? summary.notes.substring(0,175) + "..." : summary.notes}
+            {summary.notes && summary.notes.length > 175 ? summary.notes.substring(0,175) + "..." : summary.notes}
             <Divider/>
             <SimpleGrid columns={2}>
                 {[{l:'Sector',f:'sector'},{l:'License',f:'license_title'}].map(rec => (

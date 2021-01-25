@@ -4,13 +4,13 @@ const { useEffect, useState } = React;
 
 import { styles } from '../../../shared/styles/devportal.css';
 
-import { Box, ButtonGroup, Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel, Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, useDisclosure } from "@chakra-ui/react"
+import { Box, ButtonGroup, Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel, Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, useDisclosure, useToast } from "@chakra-ui/react"
 
 import { FormControl, FormLabel, Switch } from "@chakra-ui/react"
 
 import graphql from '../../../shared/services/graphql'
 
-import { REMOVE_ENV } from './queries'
+import { REMOVE_ENV, UPDATE_ACTIVE } from './queries'
 
 import EditEnvDialog from './editenv'
 
@@ -30,11 +30,25 @@ function List({ data, state, refetch }) {
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
-        const toggleActive = (item) => {
-            console.log(JSON.stringify(item))
-            if (item.active) {
-                item.active = !item.active
-            }
+        const toast = useToast()
+        const errorToast = (message) => {
+            toast({
+                title: "Failed to make active",
+                description: message,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            })
+        }
+    
+        const toggleActive = (pkg, env) => {
+            console.log(JSON.stringify(env))
+            graphql(UPDATE_ACTIVE, { id: env.id, active: !env.active }).then(() => {
+                env.active = !env.active
+                setSelectedPkgEnv({env: env, pkg:pkg})
+            }).catch (err => {
+                errorToast(JSON.stringify(err.message))
+            })
         }
 
         const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:""},pkg:{}});
@@ -51,17 +65,17 @@ function List({ data, state, refetch }) {
                             <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>
+                            { item.dataset == null ? false: (
+                                <>{bcdc(item.dataset)}</>
+                            )}
+
                             <Table variant="simple">
                             <Tbody>
                             {item.environments.map (env => (
                             <Tr>
-                                <Td> { item.dataset == null ? false: (
-                                    <>{bcdc(item.dataset)}</>
-                                )}
-                                </Td>
                                 <Td>
                                     <FormControl display="flex" alignItems="center">
-                                        <Switch onChange={() => toggleActive(item)}/>
+                                        <Switch onChange={() => toggleActive(item, env)} isChecked={env.active ? env.active:false}/>
                                     </FormControl>
                                 </Td>
                                 <Td>

@@ -5,6 +5,7 @@ export const GET_LIST = `
           name
           environments {
             name
+            active
             authMethod
             services {
                 name

@@ -13,7 +13,13 @@ const graphql = function (query, variables = {}) {
         console.log(query)
         console.log(JSON.stringify(json, null, 4))
         if ('errors' in json) {
-            throw Error("Errors!")
+            const err = json['errors'][0]
+            if ('data' in err) {
+                if ('messages' in err['data']) {
+                    throw Error(err['data']['messages'][0])
+                }
+            }
+            throw Error(JSON.stringify(json))
         }
         return json
     });

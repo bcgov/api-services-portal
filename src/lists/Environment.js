@@ -11,6 +11,11 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    active: {
+        type: Checkbox,
+        isRequired: true,
+        defaultValue: false
+    },
     authMethod: { type: Select, emptyOption: false, default: 'public', options: [
         { value: 'public', label: 'Public'},
         { value: 'oidc', label: 'OIDC'},
@@ -28,4 +33,34 @@ module.exports = {
     package: { type: Relationship, ref: 'Package.environments', many: false },
   },
   access: EnforcementPoint,
+  hooks: {
+    validateInput: ({
+        operation,
+        existingItem,
+        originalInput,
+        resolvedData,
+        context,
+        addFieldValidationError, // Field hooks only
+        addValidationError, // List hooks only
+        listKey,
+        fieldPath, // Field hooks only
+    }) => {
+        console.log("VALIDATE " + operation + " " + JSON.stringify(existingItem, null, 3));
+        console.log("VALIDATE " + operation + " " + JSON.stringify(originalInput, null, 3));
+        console.log("VALIDATE " + operation + " " + JSON.stringify(resolvedData, null, 3));
+        if ('active' in originalInput) {
+            // do validation
+            if (Object.keys(originalInput).length != 1) {
+                addValidationError("You can not update other data when changing the active status")
+            } else {
+                // validations:
+                // - there is at least on service associated with it
+                // - if prod, that it has a BCDC record
+                if (originalInput['active'] == true && existingItem['name'] == "prod") {
+                    addValidationError("Failed validation.  Not able to activate prod because of a good reason!")
+                }
+            }
+        }
+    }
+  }
 }
