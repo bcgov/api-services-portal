@@ -9,9 +9,30 @@ import {
 } from '@chakra-ui/react';
 import * as React from 'react';
 import { useQuery } from 'react-query';
+import { gql } from 'graphql-request';
 
 import api from '../../shared/services/api';
-import { GET_LIST } from './queries';
+
+export const GET_LIST = gql`
+  query GetServices {
+    allDatasetGroups {
+      id
+      name
+      authMethod
+      useAcl
+      organization {
+        title
+      }
+      organizationUnit {
+        title
+      }
+      services {
+        name
+        host
+      }
+    }
+  }
+`;
 
 const ServicesList: React.FC = () => {
   const { data } = useQuery<any>('services', async () => await api(GET_LIST), {
