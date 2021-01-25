@@ -23,7 +23,17 @@ const pagesQuery = gql`
   }
 `;
 
-const DocsContentPage = ({ pages, content, title }) => {
+interface DocsContentPageProps {
+  pages: any[];
+  content: any;
+  title: string;
+}
+
+const DocsContentPage: React.FC<DocsContentPageProps> = ({
+  pages,
+  content,
+  title,
+}) => {
   return (
     <>
       <Head>
@@ -70,7 +80,7 @@ export async function getStaticPaths() {
       }
     }
   `;
-  const pages = await api(pagesQuery);
+  const pages: { allContents: any[] } = await api(pagesQuery);
 
   return {
     paths: pages.allContents.map((page) => ({
@@ -83,7 +93,7 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const pages = await api(pagesQuery);
+  const pages: { allContents: any[] } = await api(pagesQuery);
   const page = pages.allContents.find((page) => page.slug === params.slug);
   let content = page.content;
 

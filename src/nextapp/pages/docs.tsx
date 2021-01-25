@@ -27,10 +27,11 @@ interface PageData {
 }
 
 interface DocsPageProps {
+  error: string;
   pages: PageData[];
 }
 
-const DocsPage: React.FC<DocsPageProps> = ({ pages }) => {
+const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
   return (
     <>
       <Head>
@@ -64,6 +65,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ pages }) => {
                 We are in the process of populating this section. Check back
                 soon
               </Text>
+              {error && <Text color="red.500">{error}</Text>}
             </Box>
           </Center>
         )}
@@ -87,23 +89,32 @@ const DocsPage: React.FC<DocsPageProps> = ({ pages }) => {
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  const pagesQuery = gql`
-    {
-      allContents(where: { isComplete: true }) {
-        id
-        title
-        slug
-        description
+  try {
+    const pagesQuery = gql`
+      {
+        allContents(where: { isComplete: true }) {
+          id
+          title
+          slug
+          description
+        }
       }
-    }
-  `;
-  const pages = await api(pagesQuery);
+    `;
+    const pages: { allContents: any[] } = await api(pagesQuery);
 
-  return {
-    props: {
-      pages: pages.allContents,
-    },
-  };
+    return {
+      props: {
+        pages: pages.allContents,
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        pages: [],
+        error: err.message,
+      },
+    };
+  }
 };
 
 export default DocsPage;

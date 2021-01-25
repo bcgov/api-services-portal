@@ -6,7 +6,6 @@ import {
   Heading,
   SimpleGrid,
   Skeleton,
-  Text,
 } from '@chakra-ui/react';
 import { ErrorBoundary } from 'react-error-boundary';
 
