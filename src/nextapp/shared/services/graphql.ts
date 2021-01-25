@@ -9,7 +9,14 @@ const graphql = function (query, variables = {}) {
         variables,
         query,
       }),
-    }).then(x => x.json());
+    }).then(x => x.json()).then(json => {
+        console.log(query)
+        console.log(JSON.stringify(json, null, 4))
+        if ('errors' in json) {
+            throw Error("Errors!")
+        }
+        return json
+    });
 }
 
 export default graphql
