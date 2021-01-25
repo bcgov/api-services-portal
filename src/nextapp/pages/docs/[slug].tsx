@@ -71,25 +71,32 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
 };
 
 export async function getStaticPaths() {
-  const pagesQuery = gql`
-    {
-      allContents(where: { isComplete: true }) {
-        id
-        title
-        slug
+  try {
+    const pagesQuery = gql`
+      {
+        allContents(where: { isComplete: true }) {
+          id
+          title
+          slug
+        }
       }
-    }
-  `;
-  const pages: { allContents: any[] } = await api(pagesQuery);
+    `;
+    const pages: { allContents: any[] } = await api(pagesQuery);
 
-  return {
-    paths: pages.allContents.map((page) => ({
-      params: {
-        slug: page.slug,
-      },
-    })),
-    fallback: false,
-  };
+    return {
+      paths: pages.allContents.map((page) => ({
+        params: {
+          slug: page.slug,
+        },
+      })),
+      fallback: false,
+    };
+  } catch {
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
