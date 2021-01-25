@@ -12,7 +12,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import AppError from '../../../components/app-error';
 import PageHeader from '../../../components/page-header';
 import ServicesList from '../../../components/services-list';
-import { withAuth } from 'shared/services/auth';
 
 const ServicesPage: React.FC = () => {
   const isServer = typeof window === 'undefined';
@@ -51,5 +50,3 @@ const ServicesPage: React.FC = () => {
 };
 
 export default ServicesPage;
-
-//export const getServerSideProps = withAuth;

@@ -8,7 +8,7 @@ export const getSession = async (): Promise<UserData> => {
 
     if (req.ok) {
       const json = await req.json();
-      return json;
+      return json.user;
     } else {
       throw new Error('Auth Error');
     }

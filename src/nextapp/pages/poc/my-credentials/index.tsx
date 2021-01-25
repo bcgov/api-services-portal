@@ -29,13 +29,12 @@ const customStyles = {
 
 const MyCredentialsPage = () => {
     const context = useAppContext()
-    const auth = useAuth()
-    console.log("AUTH = "+JSON.stringify(auth))
+    const user = useAuth()
 
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
 
     let fetch = () => {
-        graphql(GET_LIST, { id : auth.user ? auth.user.userId : "" })
+        graphql(GET_LIST, { id : user ? user.userId : "" })
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -44,7 +43,7 @@ const MyCredentialsPage = () => {
         });
     };
     
-    useEffect(fetch, [auth.user]);
+    useEffect(fetch, [user]);
 
     var subtitle;
     const [modalIsOpen,setIsOpen] = React.useState(false);

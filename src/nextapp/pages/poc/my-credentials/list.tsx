@@ -20,7 +20,6 @@ function List({ data, state, refetch }) {
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
-        console.log(JSON.stringify(data, null, 4))
         return (
             <Table variant="simple">
                 <TableCaption>-</TableCaption>
@@ -37,7 +36,7 @@ function List({ data, state, refetch }) {
                 </Thead>
                 <Tbody>
             {data.allAccessRequests.map((item, index) => (
-                <Tr>
+                <Tr key={index}>
                     <Td>{item.packageEnvironment.package == null ? "--MISSING--" : item.packageEnvironment.package.name}</Td>
                     <Td>{item.packageEnvironment.name}</Td>
                     <Td>{item.application == null ? false:item.application.name}</Td>
