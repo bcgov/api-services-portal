@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Box, Container, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 
 const linkProps = {
   px: 4,

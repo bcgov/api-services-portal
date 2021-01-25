@@ -11,7 +11,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import AppError from '../../components/app-error';
 import PageHeader from '../../components/page-header';
-import ServicesList from './list';
+import ServicesList from '../../components/services-list';
 import { withAuth } from 'shared/services/auth';
 
 const ServicesPage: React.FC = () => {

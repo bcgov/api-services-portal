@@ -1,12 +1,4 @@
-import {
-  Box,
-  Heading,
-  Link,
-  List,
-  ListItem,
-  SimpleGrid,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Center, Heading, List, ListItem, Text } from '@chakra-ui/react';
 import * as React from 'react';
 import { useQuery } from 'react-query';
 import { gql } from 'graphql-request';
@@ -41,6 +33,11 @@ const ServicesList: React.FC = () => {
 
   return (
     <>
+      {data?.allDatasetGroups.length <= 0 && (
+        <Box width="100%">
+          <Text color="gray.400">No services created yet.</Text>
+        </Box>
+      )}
       {data?.allDatasetGroups.map((d) => (
         <Box
           key={d}

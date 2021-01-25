@@ -104,7 +104,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
     return {
       props: {
-        pages: pages.allContents,
+        pages: pages.allContents || [],
       },
     };
   } catch (err) {
