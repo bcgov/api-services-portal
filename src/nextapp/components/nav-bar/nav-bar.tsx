@@ -43,6 +43,7 @@ const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
       bg="bc-blue-alt"
       pos="fixed"
       w="100%"
+      zIndex="1000"
       top="65px"
     >
       <Container
