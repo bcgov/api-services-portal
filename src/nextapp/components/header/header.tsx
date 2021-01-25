@@ -10,10 +10,10 @@ import SignIn from './signin';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
-  user: any;
+  children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC<HeaderProps> = ({ children }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const onNavClick = () => {
     setOpen((state) => !state);
@@ -62,9 +62,9 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         </Heading>
       </Box>
       <Box as="hgroup">
-        <Box display={{ base: 'none', sm: 'block' }}>
-          <SignIn user={user} />
-        </Box>
+        {children && (
+          <Box display={{ base: 'none', sm: 'block' }}>{children}</Box>
+        )}
         <Box display={{ sm: 'none' }}>
           <IconButton
             aria-label="Toggle Navigation"

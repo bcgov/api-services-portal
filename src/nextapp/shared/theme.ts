@@ -6,6 +6,7 @@ const colors = {
   text: '#313132',
   'bc-blue-alt': '#38598A',
   'bc-gray': '#f2f2f2',
+  'bc-divider': '#606060',
 };
 const theme = extendTheme({
   colors,
@@ -18,6 +19,11 @@ const theme = extendTheme({
     global: {
       body: {
         background: '#f1f1f1',
+      },
+      'body > div:first-of-type': {
+        height: '100vh',
+        display: 'flex',
+        flexDir: 'column',
       },
     },
   },

@@ -1,58 +1,120 @@
 import * as React from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
+import {
+  Box,
+  Center,
+  Container,
+  Heading,
+  Icon,
+  Link,
+  Text,
+} from '@chakra-ui/react';
+import NextLink from 'next/link';
+import { FaRegFolderOpen } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { useRouter } from 'next/router';
+import type { GetStaticProps } from 'next';
 
 import api from '../shared/services/api';
 import Card from '../components/card';
-import gh from '../shared/services/github';
+import GridLayout from '../layouts/grid';
+import PageHeader from '../components/page-header';
 
-import styles from './docs/docs.module.css';
+interface PageData {
+  id: string;
+  description: string;
+  slug: string;
+  title: string;
+}
 
-const DocsPage = ({ pages }) => {
-  const router = useRouter();
+interface DocsPageProps {
+  error: string;
+  pages: PageData[];
+}
+
+const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
   return (
     <>
       <Head>
         <title>API Program Services | Documentation</title>
       </Head>
-      <div className="container mx-auto pt-4 px-2">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {pages.map((d) => (
-            <Card key={d.id}>
-              <h3 className="text-base">
-                <Link href={`/docs/${d.slug}`}>{d.title}</Link>
-              </h3>
-              <p>{d.description}</p>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <Container maxW="6xl">
+        <PageHeader title="APS Documentation">
+          <p>This is some content</p>
+        </PageHeader>
+        {pages.length === 0 && (
+          <Center my={12}>
+            <Box
+              textAlign="center"
+              p={8}
+              bg="white"
+              borderRadius="4px"
+              maxW={{ sm: 400 }}
+              mx={{ base: 4 }}
+            >
+              <Icon
+                as={FaRegFolderOpen}
+                w={20}
+                h={20}
+                mb={4}
+                color="gray.300"
+              />
+              <Heading as="h3" size="md" mb={2}>
+                No Documentation Found
+              </Heading>
+              <Text>
+                We are in the process of populating this section. Check back
+                soon
+              </Text>
+              {error && <Text color="red.500">{error}</Text>}
+            </Box>
+          </Center>
+        )}
+        {pages.length > 0 && (
+          <GridLayout>
+            {pages.map((d) => (
+              <Card key={d.id}>
+                <Heading as="h3" size="md" mb={2}>
+                  <NextLink passHref href={`/docs/${d.slug}`}>
+                    <Link _hover={{ textDecor: 'underline' }}>{d.title}</Link>
+                  </NextLink>
+                </Heading>
+                <Text>{d.description}</Text>
+              </Card>
+            ))}
+          </GridLayout>
+        )}
+      </Container>
     </>
   );
 };
 
-export async function getServerSideProps(context) {
-  const pagesQuery = gql`
-    {
-      allContents(where: { isComplete: true }) {
-        id
-        title
-        slug
-        description
+export const getStaticProps: GetStaticProps = async () => {
+  try {
+    const pagesQuery = gql`
+      {
+        allContents(where: { isComplete: true }) {
+          id
+          title
+          slug
+          description
+        }
       }
-    }
-  `;
-  const pages = await api(pagesQuery);
+    `;
+    const pages: { allContents: any[] } = await api(pagesQuery);
 
-  return {
-    props: {
-      pages: pages.allContents,
-    },
-  };
-}
+    return {
+      props: {
+        pages: pages.allContents || [],
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        pages: [],
+        error: err.message,
+      },
+    };
+  }
+};
 
 export default DocsPage;

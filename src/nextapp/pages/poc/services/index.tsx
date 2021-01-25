@@ -1,45 +1,55 @@
 import * as React from 'react';
+import {
+  Box,
+  Container,
+  Divider,
+  Heading,
+  SimpleGrid,
+  Skeleton,
+} from '@chakra-ui/react';
+import { ErrorBoundary } from 'react-error-boundary';
 
-const { useEffect, useState } = React;
+import AppError from '../../components/app-error';
+import PageHeader from '../../components/page-header';
+import ServicesList from '../../components/services-list';
+import { withAuth } from 'shared/services/auth';
 
-import { GET_LIST } from './queries'
+const ServicesPage: React.FC = () => {
+  const isServer = typeof window === 'undefined';
 
-import { Alert, AlertIcon } from "@chakra-ui/react"
-
-import { styles } from '../../../shared/styles/devportal.css';
-
-import graphql from '../../../shared/services/graphql'
-
-import List from './list'
-
-const ServicesPage = () => {
-
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
-        graphql(GET_LIST)
-        .then(({ data }) => {
-            setState({ state: 'loaded', data });
-        })
-        .catch((err) => {
-            setState({ state: 'error', data: null });
-        });
-    };
-    
-    useEffect(fetch, []);
-
-    return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Services</h1>
-            <Alert status="info">
-                <AlertIcon />
-                List of services from the API Owner perspective.  This should pull in details from Prometheus and gwa-api Status.
-            </Alert>
-            <div className="m-5">
-                <List data={data} state={state} refetch={fetch} />
-            </div>
-        </div>
-    )
-}
+  return (
+    <Container maxW="6xl">
+      <PageHeader title="Services">
+        <p>
+          List of services from the API Owner perspective. This should pull in
+          details from Prometheus and gwa-api Status.
+        </p>
+      </PageHeader>
+      <Divider my={4} />
+      <Box d="flex" flexDir="column">
+        <Box as="header" my={4}>
+          <Heading as="h3" size="base">
+            Gateway Services
+          </Heading>
+        </Box>
+        {!isServer && (
+          <ErrorBoundary fallback={<AppError />}>
+            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4}>
+              <React.Suspense
+                fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+                  <Skeleton key={d} height="200px" />
+                ))}
+              >
+                <ServicesList />
+              </React.Suspense>
+            </SimpleGrid>
+          </ErrorBoundary>
+        )}
+      </Box>
+    </Container>
+  );
+};
 
 export default ServicesPage;
 
+//export const getServerSideProps = withAuth;

@@ -2,96 +2,52 @@ import * as React from 'react';
 import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import type { AppProps } from 'next/app';
 import '@bcgov/bc-sans/css/BCSans.css';
+
+import { AuthProvider } from '../shared/services/auth/auth-context';
+import Header from '../components/header';
+import NavBar from '../components/nav-bar';
+import theme from '../shared/theme';
+import navItems from '../shared/data/links';
+import AuthAction from '../components/auth-action';
 import '../shared/styles/global.css';
 
-import { AppWrapper } from './context';
-import theme from '../shared/theme';
+const queryClient = new QueryClient();
 
-const { useEffect, useState } = React;
-
-import AppBar from '../components/app-bar';
-
-export default function MyApp({ Component, pageProps }) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
-  const allNavItems = [
-    { name: 'Home', url: '/', access: [] },
-    { name: 'Gateway', url: '/poc/services', access: ['api-owner'] },
-    { name: 'Consumers', url: '/poc/consumers', access: ['api-owner'] },
-    {
-      name: 'Access Requests',
-      url: '/poc/requests',
-      access: ['api-manager', 'credential-admin'],
-    },
-    { name: 'Packaging', url: '/poc/packaging', access: ['api-owner'] },
-    {
-      name: 'Credential Issuers',
-      url: '/poc/credential-issuers',
-      access: ['credential-admin'],
-    },
-    {
-      name: 'Service Accounts',
-      url: '/poc/service-accounts',
-      access: ['api-owner'],
-    },
-    { name: 'API Discovery', url: '/poc/api-discovery', access: ['developer'] },
-    { name: 'Applications', url: '/poc/applications', access: ['developer'] },
-    { name: 'My Credentials', url: '/poc/my-credentials', access: ['developer'] },
-    { name: 'Documentation', url: '/docs', access: [] },
-    { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
-    {
-      name: 'My Profile',
-      url: '/poc/my-profile',
-      access: [
-        'developer',
-        'api-owner',
-        'api-manager',
-        'credential-admin',
-        'aps-admin',
-      ],
-    },
-  ];
-  let [{ state, user }, setState] = useState({ state: 'loading', user: null });
-  let _fetch = () => {
-    fetch('/admin/session')
-      .then((res) => res.json())
-      .then((json) => {
-        console.log(json);
-        setState({ state: 'loaded', user: json['user'] });
-      })
-      .catch((err) => {
-        console.log(err);
-        setState({ state: 'error', user: null });
-      });
-  };
-  const links = allNavItems.filter((link) => {
-      return true
-    if (link.access.length == 0) {
-        return true
-    } else {
-        return user != null && link.access.filter((value) => user.roles.includes(value)).length > 0
+  const links = navItems.filter((item) => {
+    if (item.access.length <= 0) {
+      return true;
     }
   });
 
-  useEffect(_fetch, []);
-
   return (
-    <ChakraProvider theme={theme}>
-      <Head>
-        <meta charSet="utf-8" />
-        <meta httpEquiv="x-ua-compatible" content="ie=edge" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
-        <link href="/favicon.ico" rel="icon" type="image/x-icon" />
-      </Head>
-      <AppBar links={links} user={user} />
-      <Box as="main" mt={{ base: '65px', sm: '115px' }}>
-        <AppWrapper router={router} user={user}>
-          <Component {...pageProps} />
-        </AppWrapper>
-      </Box>
-    </ChakraProvider>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider theme={theme}>
+        <AuthProvider>
+          <Head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1, shrink-to-fit=no"
+            />
+            <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+          </Head>
+          <Header>
+            <AuthAction />
+          </Header>
+          <NavBar links={links} pathname={router?.pathname} />
+          <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
+            <Component {...pageProps} />
+          </Box>
+        </AuthProvider>
+      </ChakraProvider>
+    </QueryClientProvider>
   );
-}
+};
+
+export default App;

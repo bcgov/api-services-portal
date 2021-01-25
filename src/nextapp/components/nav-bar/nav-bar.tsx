@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Box, Container, Link, useMediaQuery } from '@chakra-ui/react';
+import { Box, Container, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 
 const linkProps = {
   px: 4,
@@ -22,12 +21,30 @@ const linkProps = {
 
 interface NavBarProps {
   links: any[];
+  pathname: string | undefined;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links }) => {
-  const router = useRouter();
+const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
+  const [active, setActive] = React.useState<string>('');
+
+  // Router isn't active SSR, so wait till the client loads before setting
+  // current so there's no diff between SSR and Client
+  React.useEffect(() => {
+    if (pathname) {
+      const [rootPage] = /\/?([a-zA-Z-_]*)/.exec(pathname);
+      setActive(rootPage);
+    }
+  }, [pathname, setActive]);
+
   return (
-    <Box as="nav" bg="bc-blue-alt" pos="fixed" w="100%" top="65px" zIndex="1000">
+    <Box
+      as="nav"
+      role="banner"
+      bg="bc-blue-alt"
+      pos="fixed"
+      w="100%"
+      top="65px"
+    >
       <Container
         as="ul"
         mx={{ base: 0, sm: 8 }}
@@ -42,7 +59,7 @@ const NavBar: React.FC<NavBarProps> = ({ links }) => {
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
-                aria-current={router?.pathname === link.url ? 'page' : false}
+                aria-current={link.url === active ? 'page' : false}
               >
                 <Box as="span" whiteSpace="nowrap">
                   {link.name}
