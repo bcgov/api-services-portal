@@ -14,11 +14,14 @@ import navItems from '../shared/data/links';
 import AuthAction from '../components/auth-action';
 import '../shared/styles/global.css';
 
+import { AppWrapper } from './context';
+
 const queryClient = new QueryClient();
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const links = navItems.filter((item) => {
+    return true
     if (item.access.length <= 0) {
       return true;
     }
@@ -42,7 +45,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
           </Header>
           <NavBar links={links} pathname={router?.pathname} />
           <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
-            <Component {...pageProps} />
+            <AppWrapper router={router}>
+                <Component {...pageProps} />
+            </AppWrapper>
           </Box>
         </AuthProvider>
       </ChakraProvider>

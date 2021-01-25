@@ -7,7 +7,9 @@ import { styles } from '../../../shared/styles/devportal.css';
 import { Box, ButtonGroup, Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel, Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, useDisclosure, useToast } from "@chakra-ui/react"
 
 import { FormControl, FormLabel, Switch, IconButton } from "@chakra-ui/react"
-import { EditIcon } from "@chakra-ui/icons"
+
+import  { Icon } from '@chakra-ui/react'
+import { FaEdit } from 'react-icons/fa';
 
 import graphql from '../../../shared/services/graphql'
 
@@ -64,7 +66,7 @@ function List({ data, state, refetch }) {
                     <AccordionItem>
                         <AccordionButton>
                             <Box flex="1" textAlign="left">
-                                {item.name} <IconButton aria-label="Edit Package" size="sm" icon={<EditIcon />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
+                                {item.name} <IconButton aria-label="Edit Package" size="sm" icon={<Icon as={FaEdit} />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
                             </Box>
                             <AccordionIcon />
                         </AccordionButton>

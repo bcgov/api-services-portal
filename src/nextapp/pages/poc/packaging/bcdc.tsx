@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { ArrowForwardIcon } from '@chakra-ui/icons'
+import  { Icon } from '@chakra-ui/react'
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
 import {
     Box,
@@ -28,7 +29,7 @@ function WalkthroughPopover(summary = { title: "", sector: "", license_title: ""
         closeOnBlur={false}
       >
         <PopoverTrigger>
-          <Button>BC Data Catalog<ArrowForwardIcon/></Button>
+          <Button>BC Data Catalog <Icon as={FaExternalLinkAlt}/></Button>
         </PopoverTrigger>
         <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
           <PopoverHeader pt={10} fontWeight="bold" border="0">

@@ -7,20 +7,22 @@ import api from '../../shared/services/api';
 
 export const GET_LIST = gql`
   query GetServices {
-    allDatasetGroups {
+    allPackages {
       id
       name
-      authMethod
-      useAcl
       organization {
         title
       }
       organizationUnit {
         title
       }
-      services {
+      environments {
         name
-        host
+        authMethod
+        services {
+            name
+            host
+        }
       }
     }
   }
@@ -33,24 +35,24 @@ const ServicesList: React.FC = () => {
 
   return (
     <>
-      {data?.allDatasetGroups.length <= 0 && (
+      {data?.allPackages.length <= 0 && (
         <Box width="100%">
           <Text color="gray.400">No services created yet.</Text>
         </Box>
       )}
-      {data?.allDatasetGroups.map((d) => (
+      {data?.allPackages.map((d) => d.environments?.map((e) => (
         <Box
           key={d}
-          bg="green.100"
+          bg={e.active ? "green.100" : "yellow.100"}
           borderRadius={4}
-          borderColor="green.600"
+          borderColor={e.active ? "green.600" : "yellow.600"}
           borderWidth={1}
           borderTopWidth={3}
           p={4}
         >
           <Box as="header" key={d.name}>
             <Heading as="h4" size="sm">
-              {d.name}
+              {d.name} - {e.name}
             </Heading>
             <Text color="green.700" fontSize="xs">
               {d.host}
@@ -88,7 +90,8 @@ const ServicesList: React.FC = () => {
             </List>
           </Box>
         </Box>
-      ))}
+      )))
+      }
     </>
   );
 };
