@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react';
 
-const AppContext = createContext({router: null, user: null});
+const AppContext = createContext({router: null});
 
-export function AppWrapper({ children, router, user }) {
-  let sharedState = { router: router, user: user }
+export function AppWrapper({ children, router }) {
+  let sharedState = { router: router }
 
   return (
     <AppContext.Provider value={sharedState}>
