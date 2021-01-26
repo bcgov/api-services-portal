@@ -1,0 +1,2 @@
+Rule ID	listKey = {}	operation = {}	result = {}
+BasicRule	AccessRequest	read	deny

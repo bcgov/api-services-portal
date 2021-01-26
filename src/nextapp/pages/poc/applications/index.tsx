@@ -7,7 +7,7 @@ import { Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
 import { GET_LIST } from './queries'
 
-import { useAppContext } from '../../context'
+//import { useAppContext } from '../../context'
 
 const { useEffect, useState } = React
 
@@ -32,7 +32,6 @@ const customStyles = {
 };
 
 const MyApplicationsPage = () => {
-    const context = useAppContext()
 
     let [{ state, data}, setState] = useState({ state: 'loading', data: null });
 
@@ -46,7 +45,7 @@ const MyApplicationsPage = () => {
         });
     };
     
-    useEffect(fetch, [context.user]);
+    useEffect(fetch, []);
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
