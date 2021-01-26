@@ -8,7 +8,7 @@ import { useAuth } from '../../shared/services/auth';
 const Signin: React.FC = () => {
   const user = useAuth();
 
-  if (!user || user.anonymous) {
+  if (!user) {
     return (
       <Button color="secondary" href="/oauth2/sign_in">
         Login
