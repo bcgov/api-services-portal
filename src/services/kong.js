@@ -1,5 +1,21 @@
 const fetch = require('node-fetch')
 
+const getKeyAuth = async function (consumerUuid) {
+    const kongUrl = process.env.KONG_URL
+    response = await fetch(`${kongUrl}/consumers/${consumerUuid}/key-auth`, {
+        method: 'get',
+        headers: { 
+            'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .catch (err => {
+        console.log("KONG KEYAUTH " + err)
+        throw(err)
+    });
+    console.log(JSON.stringify(response))
+    return response.data[0].id
+}
+
 module.exports = {
     createKongConsumer: async function (consumerId, customId) {
         const kongUrl = process.env.KONG_URL
@@ -54,6 +70,35 @@ module.exports = {
         }
     },
 
+    genKeyForConsumer: async function (consumerUuid) {
+        const kongUrl = process.env.KONG_URL
+        const { v4: uuidv4 } = require('uuid');
+
+        body = {
+            key: uuidv4().replace(/-/g,'')
+        }
+        console.log("CALLING with " + consumerUuid);
+
+        authId = await getKeyAuth(consumerUuid)
+
+        response = await fetch(`${kongUrl}/consumers/${consumerUuid}/key-auth/${authId}`, {
+            method: 'put',
+            body:    JSON.stringify(body),
+            headers: { 
+                'Content-Type': 'application/json' },
+        })
+        .then(res => res.json())
+        .catch (err => {
+            console.log("KONG KEYAUTH " + err)
+            throw(err)
+        });
+        
+        console.log(JSON.stringify(response, null, 3));
+        return {
+            apiKey: response['key']
+        }
+    },
+
     //TODO: Need to handle paging
     getConsumersByNamespace: async function (namespace) {
         const kongUrl = process.env.KONG_URL
@@ -87,6 +132,8 @@ module.exports = {
 
     isKongConsumerNamespaced: function (consumer) {
         return getConsumerNamespace(consumer) != null
-    }
+    },
+
+    getKeyAuth: getKeyAuth
 
 }

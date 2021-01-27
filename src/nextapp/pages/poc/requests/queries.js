@@ -84,6 +84,7 @@ export const GET_REQUEST = `
             email
           }
           application {
+            appId
             name
           }
           packageEnvironment {

@@ -44,7 +44,7 @@ const NewRequest = () => {
     const dataset = (data ? data.allPackages[0] : data)
 
     const refetch = () => {
-        window.location.href = "/poc/my-credentials"
+        window.location.href = "/poc/applications"
     }
 
     

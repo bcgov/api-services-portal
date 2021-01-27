@@ -2,6 +2,7 @@ export const GET_LIST = `
     query GET {
         allApplications {
           id
+          appId
           name
           owner { 
             name
@@ -11,7 +12,21 @@ export const GET_LIST = `
             id
             userId
         }
-
+        allAccessRequests(where: { isComplete: null }) {
+            id
+            name
+            isIssued
+            application {
+              appId
+            }
+            packageEnvironment {
+              name
+              package {
+                  name
+              }
+            }
+          }
+  
     }
 `
 
@@ -31,5 +46,15 @@ export const REMOVE = `
         }
     }
 `
+
+export const GEN_CREDENTIAL = `
+    mutation GenCredential($id: ID!) {
+        updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+            credential
+        }
+    }
+`
+
+
 const empty = () => false
 export default empty

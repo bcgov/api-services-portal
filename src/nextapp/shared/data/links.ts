@@ -26,7 +26,6 @@ const links: NavLink[] = [
   },
   { name: 'API Discovery', url: '/poc/api-discovery', access: ['developer'] },
   { name: 'Applications', url: '/poc/applications', access: ['developer'] },
-  { name: 'My Credentials', url: '/poc/my-credentials', access: ['developer'] },
   { name: 'Documentation', url: '/docs', access: [] },
   { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
   {

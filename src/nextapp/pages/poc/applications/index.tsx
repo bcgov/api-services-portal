@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
     useDisclosure
   } from "@chakra-ui/react"
-import { Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
+import { Alert, AlertIcon, Button, ButtonGroup, Input, Textarea, Stack } from "@chakra-ui/react"
 
 import { GET_LIST } from './queries'
 
@@ -52,11 +52,15 @@ const MyApplicationsPage = () => {
     return (
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>Applications</h1>
-            <p style={styles.introText}>
-                This is for Developers wishing to access BC Government APis.
-            </p>
+            <Stack spacing={10} className="m-5">
+                <Alert status="info">
+                    <AlertIcon />
+                    Register a new application to get access to BC Government APIs.
+                </Alert>
+            </Stack>
+
             <div style={styles.formWrapper}>
-                <Button colorScheme="blue" onClick={onOpen}>New Application</Button>
+                <Button colorScheme="blue" onClick={onOpen}>Register Application</Button>
 
                 <List data={data} state={state} refetch={fetch} />
             </div>       

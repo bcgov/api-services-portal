@@ -2,7 +2,7 @@ const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { clientRegistration } = require('../services/keycloak');
-const { createKongConsumer, addKeyAuthToConsumer } = require('../services/kong');
+const { createKongConsumer, addKeyAuthToConsumer, genKeyForConsumer } = require('../services/kong');
 
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
@@ -91,6 +91,25 @@ module.exports = {
         // Mark AccessRequest as Complete
         // 
         // async function doit() {
+
+        if (originalInput.credential == "NEW") {
+            const username = existingItem.consumerId
+            const result = await context.executeGraphQL({
+                query: `query ($where: ConsumerWhereInput) {
+                            allConsumers(where: $where) {
+                                kongConsumerId
+                            }
+                        }`,
+                variables: { where: { username_contains_i: username } },
+            })
+            console.log("ANSWER = "+username + " " + JSON.stringify(result));
+            const kongConsumerId = result.data.allConsumers[0].kongConsumerId
+
+            const apiKey = await genKeyForConsumer (kongConsumerId)
+            console.log("API KEY " + JSON.stringify(apiKey, null, 3))
+            updatedItem['credential'] = apiKey.apiKey
+        }
+
         if (existingItem && existingItem.isIssued == null && updatedItem.isIssued) {
             const consumerUsername = updatedItem.consumerId
             const token = "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3NWI2Mzg4NC1iN2RiLTRiODItOWFkZS02NDk0ZmUxNzI1N2MifQ.eyJleHAiOjAsImlhdCI6MTYxMDkxNzYxOCwianRpIjoiNWU3N2MyMzItMzUyOC00Mjg2LTg2NGItZGNjNzlhMzQ5NWRiIiwiaXNzIjoiaHR0cHM6Ly9kZXYub2lkYy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMveHRta2U3a3kiLCJhdWQiOiJodHRwczovL2Rldi5vaWRjLmdvdi5iYy5jYS9hdXRoL3JlYWxtcy94dG1rZTdreSIsInR5cCI6IkluaXRpYWxBY2Nlc3NUb2tlbiJ9.diEwRmTS32XSyX0OVj-yzngKzrWD4dy5XfySphHFWWo"
@@ -118,8 +137,6 @@ module.exports = {
                                 }
                             }`,
                     variables: { username, kongConsumerId },
-                }).catch (err => {
-                    console.log("Activity : recording activity failed " + err)
                 })
                 //{"data":{"createConsumer":{"id":"6004b65c2a7e02414bb3ccb5"}}}
                 console.log("KEYSTONE CONSUMER " + JSON.stringify(result))
