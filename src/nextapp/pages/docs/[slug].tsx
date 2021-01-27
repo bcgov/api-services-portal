@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { gql } from 'graphql-request';
@@ -100,7 +100,7 @@ export async function getStaticPaths() {
   }
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pages: { allContents: any[] } = await api(pagesQuery);
   const page = pages.allContents.find((page) => page.slug === params.slug);
   let content = page.content;
