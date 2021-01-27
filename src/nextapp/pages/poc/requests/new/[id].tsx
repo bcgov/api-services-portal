@@ -12,7 +12,7 @@ import graphql from '../../../../shared/services/graphql'
 
 import NameValue from '../../../../components/name-value';
 
-import { Button, ButtonGroup, Textarea, RadioGroup, Radio, Stack, Flex } from "@chakra-ui/react"
+import { Button, ButtonGroup, Link, Textarea, RadioGroup, Radio, Stack, Flex } from "@chakra-ui/react"
 
 import { useAppContext } from '../../../context'
 
@@ -59,61 +59,64 @@ const NewRequest = () => {
             <div style={styles.formWrapper}>
             { dataset == null ? false: (
                 <>
-                <h2 style={styles.h2}>Requestor</h2>
-                <div className="flex">
-                    <NameValue name="Name" value={data.allTemporaryIdentities[0].name} width="250px"/>
-                    <NameValue name="Username" value={data.allTemporaryIdentities[0].username} width="250px"/>
-                    <NameValue name="Email" value={data.allTemporaryIdentities[0].email} width="350px"/>
-                </div>
-                <hr/>
-                <h2 style={styles.h2}>APIs</h2>
-                <div className="flex">
-                    <Flex direction="column" className="m-5">
-                        <label><b>Package</b></label>
-                        <div>{dataset.name}</div>
-                    </Flex>
-                </div>
                 <h2 style={styles.h2}>Which application will be using this API?</h2>
                 { data.allApplications != null ? (
                 <div className="flex">
                     <Flex direction="column" className="m-5">
-                        <label><b>Application</b></label>
-                        <RadioGroup isRequired={true} onChange={setApplicationId} defaultValue={applicationId}>
-                            <Stack direction="column">
-                                { data.allApplications.map(e => (
-                                    <Radio value={e.id}>{e.name}</Radio>
-                                ))}
-                            </Stack>
-                        </RadioGroup>
+                    { data.allApplications == null || data.allApplications.length == 0 ? (
+                            <span>To get started, you must <Link colorScheme="blue" size="sm" href="/poc/applications">Register an Application</Link> first.</span>
+                        ) : (
+                            <>
+                                <label><b>Application</b></label>
+                                <RadioGroup isRequired={true} onChange={setApplicationId} defaultValue={applicationId}>
+                                    <Stack direction="column">
+                                        { data.allApplications.map(e => (
+                                            <Radio value={e.id}>{e.name}</Radio>
+                                        ))}
+                                    </Stack>
+                                </RadioGroup>
+                            </>
+                                
+                        ) }
                     </Flex>
                 </div>
                 ): false}
+                { data.allApplications != null && data.allApplications.length > 0 && (
+                    <>
+                        <h2 style={styles.h2}>APIs</h2>
+                        <div className="flex">
+                            <Flex direction="column" className="m-5">
+                                <label><b>Package</b></label>
+                                <div>{dataset.name}</div>
+                            </Flex>
+                        </div>
 
-                <hr/>
-                <h2 style={styles.h2}>Which {dataset.name} Environment?</h2>
-                { dataset.environments != null ? (
-                <div className="flex">
-                    <Flex direction="column" className="m-5">
-                        <label><b>Environment</b></label>
-                        <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
-                            <Stack direction="column">
-                                { dataset.environments.map(e => (
-                                    <Radio value={e.id}>{e.name} : {e.authMethod}</Radio>
-                                ))}
-                            </Stack>
-                        </RadioGroup>
-                    </Flex>
-                </div>
-                ): false}
-                <h2 style={styles.h2}>Additional Instruction</h2>
-                <div className="flex m-5">
-                    <Textarea name="other" placeholder="Additional instructions for the API Manager"/>
-                </div>
+                        <h2 style={styles.h2}>Which {dataset.name} Environment?</h2>
+                        { dataset.environments != null ? (
+                        <div className="flex">
+                            <Flex direction="column" className="m-5">
+                                <label><b>Environment</b></label>
+                                <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
+                                    <Stack direction="column">
+                                        { dataset.environments.map(e => (
+                                            <Radio value={e.id}>{e.name} : {e.authMethod}</Radio>
+                                        ))}
+                                    </Stack>
+                                </RadioGroup>
+                            </Flex>
+                        </div>
+                        ): false}
+                        <h2 style={styles.h2}>Additional Instruction</h2>
+                        <div className="flex m-5">
+                            <Textarea name="other" placeholder="Additional instructions for the API Manager"/>
+                        </div>
 
-                <ButtonGroup variant="outline" spacing="6" className="m-5">
-                    <Button colorScheme="blue" onClick={() => create()}>Submit</Button>
-                    <Button>Cancel</Button>
-                </ButtonGroup>
+                        <ButtonGroup variant="outline" spacing="6" className="m-5">
+                            <Button colorScheme="blue" onClick={() => create()}>Submit</Button>
+                            <Button>Cancel</Button>
+                        </ButtonGroup>
+                    </>
+                )}
                 </>
             )}
             </div>

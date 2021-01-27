@@ -67,22 +67,21 @@ const FulfillRequest = () => {
             <div style={styles.formWrapper}>
             { request == null ? false: (
                 <>
-                <h2 style={styles.h2}>Requestor</h2>
+                <h2 style={styles.h2}>API</h2>
                 <div className="flex">
-                    <NameValue name="Name" value={request.requestor.name} width="250px"/>
-                    <NameValue name="Username" value={request.requestor.username} width="250px"/>
-                    <NameValue name="Email" value={request.requestor.email} width="350px"/>
+                    <NameValue name="Package" value={request.packageEnvironment.package.name} width="200px"/>
+                    <NameValue name="Environment" value={request.packageEnvironment.name} width="150px"/>
                 </div>
                 <h2 style={styles.h2}>What application will be using this API?</h2>
                 <div className="flex">
                     <NameValue name="ID" value={request.application.appId} width="250px"/>
                     <NameValue name="Application" value={request.application.name} width="150px"/>
                 </div>
-                <hr/>
-                <h2 style={styles.h2}>API</h2>
+                <h2 style={styles.h2}>Requestor</h2>
                 <div className="flex">
-                    <NameValue name="Package" value={request.packageEnvironment.package.name} width="200px"/>
-                    <NameValue name="Environment" value={request.packageEnvironment.name} width="150px"/>
+                    <NameValue name="Name" value={request.requestor.name} width="250px"/>
+                    <NameValue name="Username" value={request.requestor.username} width="250px"/>
+                    <NameValue name="Email" value={request.requestor.email} width="350px"/>
                 </div>
                 <h2 style={styles.h2}>Additional Controls</h2>
                 <div className="flex">
@@ -103,7 +102,7 @@ const FulfillRequest = () => {
                     </Flex>
                 </div>
 
-                <h2 style={styles.h2}>Consumer Details</h2>
+                {/* <h2 style={styles.h2}>Consumer Details</h2>
                 <Flex direction="column" className="m-5">
                     { (request.packageEnvironment.authMethod === "oidc") ? (
                         <>
@@ -124,7 +123,7 @@ const FulfillRequest = () => {
                             ]}}/>
                         </>
                     )}
-                </Flex>
+                </Flex> */}
                 <h2 style={styles.h2}>Communication to {request.requestor.name}</h2>
                 <div className="flex m-5">
                     <Textarea placeholder="Communication" name="communication" defaultValue={comms} style={{height:"200px"}}/>
