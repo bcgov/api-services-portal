@@ -128,7 +128,7 @@ const server = mockServer(schema, {
     allPackages: () => new MockList(6, (o, { id }) => ({ id })),
   }),
   Package: () => ({
-    name: casual.name,
+    name: casual.title,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -150,7 +150,7 @@ const server = mockServer(schema, {
       })),
   }),
   Organization: () => ({
-    name: casual.word,
+    name: casual.title,
     sector: casual.word,
     bcdcId: casual.uuid,
     title: casual.word,
@@ -160,15 +160,15 @@ const server = mockServer(schema, {
   }),
 
   OrganizationUnit: () => ({
-    name: casual.word,
+    name: casual.title,
     sector: casual.word,
-    title: casual.word,
+    title: casual.title,
     bcdcId: casual.uuid,
     tags: casual.word,
     description: casual.short_description,
   }),
   Environment: () => ({
-    name: casual.word,
+    name: casual.title,
     active: casual.boolean,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'apiKey']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
@@ -176,7 +176,7 @@ const server = mockServer(schema, {
     services: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   ServiceRoute: () => ({
-    name: casual.word,
+    name: casual.title,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -188,7 +188,7 @@ const server = mockServer(schema, {
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   CredentialIssuer: () => ({
-    name: casual.word,
+    name: casual.title,
     description: casual.description,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'apiKey']),
     mode: casual.word,
@@ -200,12 +200,12 @@ const server = mockServer(schema, {
     environments: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   Plugin: () => ({
-    name: casual.word,
+    name: casual.title,
     kongPluginId: casual.uuid,
     config: casual.word,
   }),
   Dataset: () => ({
-    name: casual.word,
+    name: casual.title,
     sector: casual.word,
     license_title: casual.word,
     view_audience: casual.word,
@@ -226,12 +226,14 @@ const server = mockServer(schema, {
   }),
 });
 
-app.get('/admin/session', (req, res) => {
+app.get('/admin/session', (_, res) => {
   res.json({
-    name: 'Viktor Vaughn',
-    username: 'DOOM',
-    email: 'villain@doom.net',
-    roles: ['api-developer'],
+    user: {
+      name: 'Viktor Vaughn',
+      username: 'vikvaughn',
+      email: 'villain@doom.net',
+      roles: ['api-owner'],
+    },
   });
 });
 

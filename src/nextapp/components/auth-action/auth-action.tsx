@@ -6,9 +6,9 @@ import Button from '../button';
 import { useAuth } from '../../shared/services/auth';
 
 const Signin: React.FC = () => {
-  const user = useAuth();
+  const auth = useAuth();
 
-  if (!user) {
+  if (!auth.user) {
     return (
       <Button color="secondary" href="/oauth2/sign_in">
         Login
@@ -20,7 +20,7 @@ const Signin: React.FC = () => {
     <Box d="flex" alignItems="center" justifyContent="space-between">
       <Box as="span" mr={4} d="flex" alignItems="center">
         <Icon size="lg" as={FaUser} mr={2} color="bc-blue-alt" />
-        <Text>{user.username}</Text>
+        <Text>{auth.user.username}</Text>
       </Box>
       <Link
         href="/admin/signout"

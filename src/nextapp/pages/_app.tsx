@@ -10,7 +10,7 @@ import { AuthProvider } from '../shared/services/auth/auth-context';
 import Header from '../components/header';
 import NavBar from '../components/nav-bar';
 import theme from '../shared/theme';
-import navItems from '../shared/data/links';
+import links from '../shared/data/links';
 import AuthAction from '../components/auth-action';
 import '../shared/styles/global.css';
 
@@ -54,7 +54,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
           <NavBarAuthFiltered pathname={router?.pathname} />
           <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
             <AppWrapper router={router}>
-                <Component {...pageProps} />
+              <Component {...pageProps} />
             </AppWrapper>
           </Box>
         </AuthProvider>

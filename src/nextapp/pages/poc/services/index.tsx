@@ -33,7 +33,7 @@ const ServicesPage: React.FC = () => {
         </Box>
         {!isServer && (
           <ErrorBoundary fallback={<AppError />}>
-            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
               <React.Suspense
                 fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
                   <Skeleton key={d} height="200px" />

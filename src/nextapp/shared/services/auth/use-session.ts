@@ -2,6 +2,13 @@ import { useQuery, QueryStatus } from 'react-query';
 
 import type { UserData } from '../../../types';
 
+export interface UserSessionResult {
+  ok: boolean;
+  user: UserData;
+  status: QueryStatus;
+  error?: Error;
+}
+
 export const getSession = async (): Promise<UserData> => {
   try {
     const req = await fetch('http://localhost:4000/admin/session');
@@ -16,13 +23,6 @@ export const getSession = async (): Promise<UserData> => {
     throw new Error(err);
   }
 };
-
-interface UserSessionResult {
-  ok: boolean;
-  user: UserData;
-  status: QueryStatus;
-  error?: Error;
-}
 
 export const useSession = (): UserSessionResult => {
   const { data, status, error } = useQuery<UserData, Error>(
