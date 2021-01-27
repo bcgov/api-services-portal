@@ -6,6 +6,7 @@ interface NavLink {
 
 const links: NavLink[] = [
   { name: 'Home', url: '/', access: [] },
+  { name: 'API Discovery', url: '/poc/api-discovery', access: ['developer', 'api-owner'] },
   { name: 'Services', url: '/poc/services', access: ['api-owner'] },
   { name: 'Consumers', url: '/poc/consumers', access: ['api-owner'] },
   {
@@ -24,7 +25,6 @@ const links: NavLink[] = [
     url: '/poc/service-accounts',
     access: ['api-owner'],
   },
-  { name: 'API Discovery', url: '/poc/api-discovery', access: ['developer'] },
   { name: 'Applications', url: '/poc/applications', access: ['developer'] },
   { name: 'Documentation', url: '/docs', access: [] },
   { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
