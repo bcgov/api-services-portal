@@ -4,6 +4,7 @@ import {
   Container,
   Divider,
   Heading,
+  Select,
   SimpleGrid,
   Skeleton,
 } from '@chakra-ui/react';
@@ -12,9 +13,16 @@ import { ErrorBoundary } from 'react-error-boundary';
 import AppError from '../../../components/app-error';
 import PageHeader from '../../../components/page-header';
 import ServicesList from '../../../components/services-list';
+import { withAuth } from '../../../shared/services/auth';
+
+type Filters = 'all' | 'up' | 'down';
 
 const ServicesPage: React.FC = () => {
+  const [filter, setFilter] = React.useState<Filters>('all');
   const isServer = typeof window === 'undefined';
+  const onFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(event.target.value as Filters);
+  };
 
   return (
     <Container maxW="6xl">
@@ -26,10 +34,28 @@ const ServicesPage: React.FC = () => {
       </PageHeader>
       <Divider my={4} />
       <Box d="flex" flexDir="column">
-        <Box as="header" my={4}>
-          <Heading as="h3" size="base">
+        <Box
+          as="header"
+          my={4}
+          d="flex"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Heading as="h3" size="md">
             Gateway Services
           </Heading>
+          <Select
+            w="25%"
+            borderWidth={2}
+            borderRadius={0}
+            borderColor="text"
+            onChange={onFilterChange}
+            value={filter}
+          >
+            <option value="all">All Services</option>
+            <option value="up">Up</option>
+            <option value="down">Down</option>
+          </Select>
         </Box>
         {!isServer && (
           <ErrorBoundary fallback={<AppError />}>
@@ -39,7 +65,7 @@ const ServicesPage: React.FC = () => {
                   <Skeleton key={d} height="200px" />
                 ))}
               >
-                <ServicesList />
+                <ServicesList filter={filter} />
               </React.Suspense>
             </SimpleGrid>
           </ErrorBoundary>
@@ -48,5 +74,7 @@ const ServicesPage: React.FC = () => {
     </Container>
   );
 };
+
+export const getServerSideProps = withAuth;
 
 export default ServicesPage;

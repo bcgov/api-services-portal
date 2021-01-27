@@ -12,8 +12,9 @@ import links from '../../data/links';
  * ```javascript
  * import { withAuth } from 'shared/services/auth'
  * ...
- * export const getServerSideProps = authPageProps;
+ * export const getServerSideProps = withAuth;
  * ```
+ * TODO: Make into a HOC
  */
 export const withAuth: GetServerSideProps = async (context) => {
   const redirect = (): void => {
@@ -23,7 +24,7 @@ export const withAuth: GetServerSideProps = async (context) => {
 
   try {
     const user = await getSession();
-    const [section] = /\/?([a-zA-Z-_]*)/.exec(context.req.url);
+    const [section] = /\/?(poc\/)([a-zA-Z-_]*)/.exec(context.req.url);
     const currentRoute = links.find((link) => section === link.url);
 
     if (

@@ -18,19 +18,26 @@ import { AppWrapper } from './context';
 
 import { useAuth } from '../shared/services/auth';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const NavBarAuthFiltered = ( pathname ) => {
-    const links = navItems.filter((item) => {
-        const user = useAuth()
-        if (item.access.length <= 0 || (user && user.roles.filter(r => item.access.includes(r)).length > 0)) {
-          return true;
-        }
-    })
-    return (
-        <NavBar links={links} pathname={pathname} />
-    )
-}
+const NavBarAuthFiltered = (pathname) => {
+  const links = navItems.filter((item) => {
+    const user = useAuth();
+    if (
+      item.access.length <= 0 ||
+      (user && user.roles.filter((r) => item.access.includes(r)).length > 0)
+    ) {
+      return true;
+    }
+  });
+  return <NavBar links={links} pathname={pathname} />;
+};
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();

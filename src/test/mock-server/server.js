@@ -125,36 +125,29 @@ const schema = `
 
 const server = mockServer(schema, {
   RootQuery: () => ({
-    allPackages: () => new MockList(6, (o, { id }) => ({ id })),
+    allPackages: () => new MockList(6, (_, { id }) => ({ id })),
   }),
   Package: () => ({
     name: casual.title,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
-    host: casual.domain,
+    host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     methods: 'GET',
     paths: casual.domain,
-    isActive: casual.boolean,
-    tags: casual.word,
-    environments: () =>
-      new MockList(2, (_, { id }) => ({
-        id,
-        name: casual.word,
-        active: casual.boolean,
-        authMethod: casual.random_element(['private', 'public', 'JWT', 'keys']),
-        services: () =>
-          new MockList(4, (_, { id }) => ({
-            id,
-          })),
-      })),
+    isActive: casual.coin_flip,
+    tags: casual.words(3),
   }),
   Organization: () => ({
-    name: casual.title,
-    sector: casual.word,
+    name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
+    sector: casual.random_element([
+      'Health & Safety',
+      'Service',
+      'Social Services',
+    ]),
     bcdcId: casual.uuid,
     title: casual.word,
-    tags: casual.word,
+    tags: casual.words(3),
     description: casual.description,
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
   }),
@@ -168,12 +161,12 @@ const server = mockServer(schema, {
     description: casual.short_description,
   }),
   Environment: () => ({
-    name: casual.title,
+    name: casual.random_element(['dev', 'test', 'prod']),
     active: casual.boolean,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'apiKey']),
+    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
-    services: () => new MockList(2, (_, { id }) => ({ id })),
+    services: () => new MockList(1, (_, { id }) => ({ id })),
   }),
   ServiceRoute: () => ({
     name: casual.title,
@@ -182,7 +175,7 @@ const server = mockServer(schema, {
     namespace: casual.word,
     methods: casual.word,
     paths: casual.word,
-    host: casual.domain,
+    host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
     tags: casual.word,
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
@@ -190,7 +183,7 @@ const server = mockServer(schema, {
   CredentialIssuer: () => ({
     name: casual.title,
     description: casual.description,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'apiKey']),
+    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     mode: casual.word,
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,

@@ -30,6 +30,7 @@ export const useSession = (): UserSessionResult => {
     getSession,
     {
       retry: false,
+      refetchOnWindowFocus: true,
     }
   );
 
