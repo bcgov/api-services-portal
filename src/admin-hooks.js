@@ -16,7 +16,7 @@ module.exports = {
         },
         {
             label: 'Packaging',
-            children: ['Package', 'Environment', 'CredentialIssuer'],
+            children: ['Package', 'Environment', 'CredentialIssuer', 'Content'],
         },
         {
             label: 'Session',

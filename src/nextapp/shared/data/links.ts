@@ -11,7 +11,7 @@ const links: NavLink[] = [
   {
     name: 'Access Requests',
     url: '/poc/requests',
-    access: ['api-manager', 'credential-admin'],
+    access: ['api-owner', 'api-manager', 'credential-admin'],
   },
   { name: 'Packaging', url: '/poc/packaging', access: ['api-owner'] },
   {

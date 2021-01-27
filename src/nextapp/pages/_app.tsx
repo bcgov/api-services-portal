@@ -16,16 +16,24 @@ import '../shared/styles/global.css';
 
 import { AppWrapper } from './context';
 
+import { useAuth } from '../shared/services/auth';
+
 const queryClient = new QueryClient();
+
+const NavBarAuthFiltered = ( pathname ) => {
+    const links = navItems.filter((item) => {
+        const user = useAuth()
+        if (item.access.length <= 0 || (user && user.roles.filter(r => item.access.includes(r)).length > 0)) {
+          return true;
+        }
+    })
+    return (
+        <NavBar links={links} pathname={pathname} />
+    )
+}
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
-  const links = navItems.filter((item) => {
-    return true
-    if (item.access.length <= 0) {
-      return true;
-    }
-  });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -43,7 +51,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
           <Header>
             <AuthAction />
           </Header>
-          <NavBar links={links} pathname={router?.pathname} />
+          <NavBarAuthFiltered pathname={router?.pathname} />
           <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
             <AppWrapper router={router}>
                 <Component {...pageProps} />

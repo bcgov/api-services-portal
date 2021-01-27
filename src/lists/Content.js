@@ -24,6 +24,10 @@ module.exports = {
       type: Markdown,
       isRequired: false,
     },
+    githubRepository: {
+        type: Text,
+        isRequired: false,
+    },
     readme: {
       type: Text,
       isRequired: false,

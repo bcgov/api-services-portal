@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
           </a>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
-          API Program Services
+          API Services Portal
         </Heading>
       </Box>
       <Box as="hgroup">

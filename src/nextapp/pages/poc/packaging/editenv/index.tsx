@@ -7,6 +7,7 @@ import { UPD_ENV } from '../queries'
 const { useState } = React;
 
 import {
+    Badge,
     Modal,
     Link,
     ModalOverlay,
@@ -30,8 +31,10 @@ import ServiceSelector from '../controls/serviceSelector'
 
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: "", authMethod: ""}}) => {
+const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: "", authMethod: "", services: []}}) => {
     const [name, setName] = useState(env.name);
+    let [ items, setItems ] = useState (env.services.map(s => s.id))
+    let [ editable, setEditable ] = useState (false)
 
     const toast = useToast()
     const successToast = () => {
@@ -45,12 +48,15 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
     }
     
     React.useEffect(() => {
+        setEditable(false);
         setName(env.name);
+        setItems(env.services.map(s => s.id));
     }, [env])
 
     const update = () => {
-        graphql(UPD_ENV, { id: env.id, name: name }).then( () => { onClose(); successToast(); onComplete() });
+        graphql(UPD_ENV, { id: env.id, data: { name: name, services: { disconnectAll: true, connect: items.map(sid => { return {id: sid} })}}}).then( () => { onClose(); successToast(); onComplete() });
     }
+
 
     // const handlePackageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     //     setPackage(event.target.value)
@@ -73,8 +79,8 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
                         <GenericControl meta={{name: "IP Restrictions", config: [ {label: "Allow", placeholder: "allow", value: ""}, {label: "Deny", placeholder: "deny", value: ""}]}}/>
                         <GenericControl meta={{name: "OIDC Auth", config: [ {label: "Discovery URL", placeholder: "discovery url", value: ""}]}}/>
                         <GenericControl meta={{name: "API Key Auth", config: [ {label: "Header Key", placeholder: "header key", value: ""}]}}/>
-                        <div>Gateway Services: <Link>(change)</Link></div>
-                        <ServiceSelector mode="view"/>
+                        <div>Gateway Services: <Link onClick={() => setEditable(!editable)}>(change)</Link> <Badge>{items.length} Services</Badge></div>
+                        <ServiceSelector mode={editable ? "edit":"view"} packageEnvironmentId={env.id} setItems={setItems} items={items}/>
                         <div>Application Requests:</div>
                         <HStack spacing={2}>
                             <Switch/>

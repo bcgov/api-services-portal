@@ -9,10 +9,10 @@ import graphql from '../../../../shared/services/graphql'
 
 import { Badge, Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 
-const ServiceSelector = ({mode = "view", selection = []}) => {
+const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items = []}) => {
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     let fetch = () => {
-        graphql(GET_AVAIL_SERVICES)
+        graphql(GET_AVAIL_SERVICES, {ns: "dss-loc"})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -22,21 +22,29 @@ const ServiceSelector = ({mode = "view", selection = []}) => {
     };
     
     useEffect(fetch, []);
+    
     //  onChange={(e) => setActive(!active)} isChecked={active}
     return mode == "edit" ? (
                 <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-                { state === 'loaded' && data.allServiceRoutes.map(svc => (
+                { state === 'loaded' && data.allServiceRoutes.filter(svc => svc.environment == null || svc.environment.id == packageEnvironmentId).map(svc => (
                     <HStack spacing={3}>
-                        <Switch size="sm" isChecked={selection.includes(svc.id)}/>
+                        <Switch size="sm" onChange={(e) => { if (!items.includes(svc.id)) { setItems([
+                                ...items,
+                                svc.id
+                                ]) } else {
+                                    const its = [...items]
+                                    its.splice(its.indexOf(svc.id), 1)
+                                    setItems(its)
+                                } }} isChecked={items.includes(svc.id)}/>
                         <span>{svc.name}</span>
                     </HStack>
                 ))}
                 </Box>
-            ) : state === 'loaded' && data.allServiceRoutes.filter (svc => selection.includes(svc.id)).length == 0 ? (
+            ) : state === 'loaded' && data.allServiceRoutes.filter (svc => items.includes(svc.id)).length == 0 ? (
                     <Badge>No Services Linked to Environment</Badge>
                 ) : (
                     <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-                        { state === 'loaded' && data.allServiceRoutes.filter (svc => selection.includes(svc.id)).map(svc => (
+                        { state === 'loaded' && data.allServiceRoutes.filter (svc => items.includes(svc.id)).map(svc => (
                             <HStack spacing={3}>
                                 <span>{svc.name}</span>
                             </HStack>

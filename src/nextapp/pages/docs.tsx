@@ -12,7 +12,7 @@ import {
 import NextLink from 'next/link';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import type { GetStaticProps } from 'next';
+import type { GetServerSideProps } from 'next';
 
 import api from '../shared/services/api';
 import Card from '../components/card';
@@ -88,7 +88,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const pagesQuery = gql`
       {

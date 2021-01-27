@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { gql } from 'graphql-request';
 
@@ -19,6 +19,7 @@ const pagesQuery = gql`
       slug
       content
       readme
+      githubRepository
     }
   }
 `;
@@ -61,7 +62,7 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
                 <li className="mx-2 text-gray-400">/</li>
                 <li>{title}</li>
               </nav>
-              <ReactMarkdown plugins={[gfm]}>{content}</ReactMarkdown>
+              <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>{content}</ReactMarkdownWithHtml>
             </article>
           </div>
         </div>
@@ -106,8 +107,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   if (page.readme) {
     const repoQuery = gql`
-      query README($readme: String!) {
-        repository(name: "gwa-api", owner: "bcgov") {
+      query README($readme: String!, $repo: String!, $owner: String!) {
+        repository(name: $repo, owner: $owner) {
           object(expression: $readme) {
             ... on Blob {
               text
@@ -116,10 +117,23 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         }
       }
     `;
+    console.log("QUERY = "+JSON.stringify({
+        readme: `master:${page.readme}`,
+        repo: page.githubRepository ? page.githubRepository.split('/')[1] : "gwa-api",
+        owner: page.githubRepository ? page.githubRepository.split('/')[0] : "bcgov",
+      }));
+
     const repo = await gh(repoQuery, {
       readme: `master:${page.readme}`,
+      repo: page.githubRepository ? page.githubRepository.split('/')[1] : "gwa-api",
+      owner: page.githubRepository ? page.githubRepository.split('/')[0] : "bcgov",
     });
-    content = repo.repository.object.text;
+    
+    if ('text' in repo.repository.object) {
+        content = repo.repository.object.text;
+    } else {
+        content = "Unable to retrieve content at this time.  Try again later."
+    }
   }
 
   return {

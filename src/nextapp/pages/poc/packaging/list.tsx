@@ -55,7 +55,7 @@ function List({ data, state, refetch }) {
             })
         }
 
-        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: ""},pkg:{id:null, name:""}});
+        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: "", services: []},pkg:{id:null, name:""}});
         const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
         const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure()
 
@@ -86,7 +86,7 @@ function List({ data, state, refetch }) {
                                 </Td>
                                 <Td>
                                     {env.name}</Td>
-                                <Td><HStack spacing={4}>{Array.isArray(env.services) ? env.services.map(svc => (
+                                <Td><HStack wrap="wrap" spacing={4}>{Array.isArray(env.services) ? env.services.map(svc => (
                                     <Tag size="lg" colorScheme="blue" borderRadius="full">
                                         <TagLabel>{svc.name}</TagLabel>
                                     </Tag>

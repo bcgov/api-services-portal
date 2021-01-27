@@ -20,6 +20,7 @@ export const GET_LIST = `
             name
             active
             services {
+                id
                 name
                 host
             }
@@ -58,8 +59,8 @@ export const REMOVE_ENV = `
 `
 
 export const UPD_ENV = `
-    mutation Update($id: ID!, $name: String) {
-        updateEnvironment(id: $id, data: { name: $name } ) {
+    mutation Update($id: ID!, $data: EnvironmentUpdateInput ) {
+        updateEnvironment(id: $id, data: $data ) {
             name
             id
         }
@@ -85,10 +86,13 @@ export const UPD_PKG = `
 `
 
 export const GET_AVAIL_SERVICES = `
-    query GET {
-        allServiceRoutes {
+    query GET($ns: String!) {
+        allServiceRoutes(where: { namespace: $ns }) {
             id
             name
+            environment {
+                id
+            }
         }
     }
 `

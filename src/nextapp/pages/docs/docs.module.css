@@ -5,6 +5,7 @@
 
 .nav {
   margin: 10px 0;
+  list-style-type: none;
 }
 
 .nav li {
@@ -26,9 +27,28 @@
   overflow: hidden;
 }
 
+.markdownBody h1 {
+  font-size: 150%;
+  font-weight: bold;
+}
+
+.markdownBody h2 {
+    padding-bottom: .3em;
+    font-size: 1.5em;
+    border-bottom: 1px solid #EFEFEF;
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.markdownBody p {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
 .markdownBody code {
   padding: 0.2em 0.4em;
   margin: 0;
+  margin-bottom: 16px;
   font-size: 85%;
   background-color: #efefef;
   border-radius: 6px;
@@ -46,4 +66,12 @@
 .markdownBody blockquote {
   padding: 0 1em;
   border-left: 0.25em solid #cccccc;
+}
+
+.markdownBody ul {
+  list-style-type: circle;
+}
+
+.markdownBody ol {
+    list-style-type: circle;
 }
