@@ -12,7 +12,7 @@ const api = async <T>(query: string, variables: unknown = {}): Promise<T> => {
     const data = await apiClient.request<T>(query, variables);
     return data;
   } catch (err) {
-    console.log("Error querying " + err)
+    console.log('Error querying ' + err);
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
     return {} as T;

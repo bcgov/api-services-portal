@@ -4,7 +4,7 @@ import type { UserData } from '../../../types';
 
 export const getSession = async (): Promise<UserData> => {
   try {
-    const req = await fetch('/admin/session');
+    const req = await fetch('http://localhost:4000/admin/session');
 
     if (req.ok) {
       const json = await req.json();
