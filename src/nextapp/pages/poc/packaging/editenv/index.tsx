@@ -33,6 +33,7 @@ import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
 const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: "", authMethod: "", services: []}}) => {
     const [name, setName] = useState(env.name);
+    const [authMethod, setAuthMethod] = useState(env.authMethod);
     let [ items, setItems ] = useState (env.services.map(s => s.id))
     let [ editable, setEditable ] = useState (false)
 
@@ -50,11 +51,12 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
     React.useEffect(() => {
         setEditable(false);
         setName(env.name);
+        setAuthMethod(env.authMethod);
         setItems(env.services.map(s => s.id));
     }, [env])
 
     const update = () => {
-        graphql(UPD_ENV, { id: env.id, data: { name: name, services: { disconnectAll: true, connect: items.map(sid => { return {id: sid} })}}}).then( () => { onClose(); successToast(); onComplete() });
+        graphql(UPD_ENV, { id: env.id, data: { name: name, authMethod: authMethod, services: { disconnectAll: true, connect: items.map(sid => { return {id: sid} })}}}).then( () => { onClose(); successToast(); onComplete() });
     }
 
 
@@ -73,7 +75,7 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
                         <h3>{pkg.name} : {name}</h3>
                         <Input placeholder="name" value={name} onChange={event => setName(event.currentTarget.value)}/>
                         <div>Auth Method:</div>
-                        <div>{env.authMethod}</div>
+                        <div><Input value={authMethod} onChange={event => setAuthMethod(event.currentTarget.value)}/></div>
                         <div>Required Controls:</div>
                         <GenericControl meta={{name: "Rate Limiting", config: [ {label: "Minutes", placeholder: "minutes", value: "500"}]}}/>
                         <GenericControl meta={{name: "IP Restrictions", config: [ {label: "Allow", placeholder: "allow", value: ""}, {label: "Deny", placeholder: "deny", value: ""}]}}/>

@@ -91,6 +91,20 @@ module.exports = {
         // Mark AccessRequest as Complete
         // 
         // async function doit() {
+        const pkgEnvResult = existingItem ? (await context.executeGraphQL({
+            query: `query ($id: ID!) {
+                        allEnvironments(id: $id) {
+                            name
+                            authMethod
+                            package {
+                                name
+                            }
+                        }
+                    }`,
+            variables: { id: existingItem.id },
+        })).data.allEnvironments[0] : null
+
+        console.log(JSON.stringify(pkgEnvResult, null, 3));
 
         if (originalInput.credential == "NEW") {
             const username = existingItem.consumerId

@@ -155,7 +155,7 @@ export const REJECT = `
 
 export const FULFILL_REQUEST = `
     mutation FulfillRequest($id: ID!, $consumerId: String) {
-        updateAccessRequest(id: $id, data: { isIssued: true, consumerId: $consumerId }) {
+        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, consumerId: $consumerId }) {
             id
         }
     }

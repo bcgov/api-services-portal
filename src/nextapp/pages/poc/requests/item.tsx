@@ -33,9 +33,10 @@ const Item = props => (
             <Td>
                 { props.accessRequest.isApproved === null ? (
                     <HStack spacing={4}>
-                        <Button colorScheme="blue" onClick={() => {
+                        <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/issue/${props.accessRequest.id}`)}>Approve</Button>
+                        {/* <Button colorScheme="blue" onClick={() => {
                             graphql(APPROVE, { id: props.accessRequest.id }).then(props.refetch);
-                        }}>Approve</Button>
+                        }}>Approve</Button> */}
                         <Button colorScheme="red" onClick={() => {
                             graphql(REJECT, { id: props.accessRequest.id }).then(props.refetch);
                         }}>Reject</Button>

@@ -19,6 +19,7 @@ export const GET_LIST = `
             id
             name
             active
+            authMethod
             services {
                 id
                 name

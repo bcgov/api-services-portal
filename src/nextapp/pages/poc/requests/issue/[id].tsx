@@ -63,11 +63,7 @@ const FulfillRequest = () => {
     `
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Access Request - Issue Credentials</h1>
-            <p style={styles.introText}>
-                By Credential Admin issuing credentials
-            </p>
-            <hr style={styles.divider} />
+            <h1 style={styles.mainHeading}>Access Request - Approve Request</h1>
             <div style={styles.formWrapper}>
             { request == null ? false: (
                 <>
@@ -135,7 +131,7 @@ const FulfillRequest = () => {
                 </div>
 
                 <ButtonGroup variant="outline" spacing="6" className="m-5">
-                    <Button colorScheme="blue" onClick={() => fulfill()}>Send Credentials</Button>
+                    <Button colorScheme="blue" onClick={() => fulfill()}>Approve</Button>
                     <Button>Cancel</Button>
                 </ButtonGroup>
                 </>
