@@ -58,7 +58,7 @@ module.exports = {
                 // - there is at least on service associated with it
                 // - if prod, that it has a BCDC record
                 if (originalInput['active'] == true && existingItem['name'] == "dev") {
-                    addValidationError("Failed validation.  Not able to activate prod because of a good reason!")
+                    addValidationError("Failed validation.  Not able to activate because of a good reason!")
                 }
             }
         }
