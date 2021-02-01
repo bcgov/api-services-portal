@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Box, Center, Heading, Text } from '@chakra-ui/react';
-import Button from '../../../components/button';
+import Button from '@/components/button';
+import links from '@/shared/data/links';
 import { useRouter } from 'next/router';
 
-import links from '../../data/links';
 import { useSession, UserSessionResult } from './use-session';
 
 const authContext = React.createContext<UserSessionResult>(null);

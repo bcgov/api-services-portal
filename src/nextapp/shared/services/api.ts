@@ -1,6 +1,8 @@
 import { GraphQLClient } from 'graphql-request';
 
-const apiClient = new GraphQLClient('http://localhost:3000/admin/api', {
+import { apiHost } from '../config';
+
+const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
   headers: {
     'Content-Type': 'application/json',
   },

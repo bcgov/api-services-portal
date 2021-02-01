@@ -151,7 +151,6 @@ const server = mockServer(schema, {
     description: casual.description,
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
   }),
-
   OrganizationUnit: () => ({
     name: casual.title,
     sector: casual.word,
@@ -220,6 +219,7 @@ const server = mockServer(schema, {
 });
 
 app.get('/admin/session', (_, res) => {
+  // res.sendStatus(401);
   res.json({
     user: {
       name: 'Viktor Vaughn',
@@ -235,4 +235,4 @@ app.post('/admin/api', async (req, res) => {
   res.json(response);
 });
 
-app.listen(port, () => console.log('mock server running'));
+app.listen(port, () => console.log(`Mock server running on port ${port}`));

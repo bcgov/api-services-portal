@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { Box, Link, Icon, Text } from '@chakra-ui/react';
+import Button from '@/components/button';
 import { FaUser } from 'react-icons/fa';
-
-import Button from '../button';
-import { useAuth } from '../../shared/services/auth';
+import { useAuth } from '@/shared/services/auth';
 
 const Signin: React.FC = () => {
   const auth = useAuth();

@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { Box, Container, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
-
-import type { NavLink } from '../../shared/data/links';
-import { useAuth } from '../../shared/services/auth';
+import type { NavLink } from '@/shared/data/links';
+import { useAuth } from '@/shared/services/auth';
 
 const linkProps = {
   px: 4,

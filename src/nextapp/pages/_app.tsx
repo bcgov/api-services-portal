@@ -4,15 +4,14 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import type { AppProps } from 'next/app';
+import { AuthProvider } from '@/shared/services/auth/auth-context';
+import Header from '@/components/header';
+import NavBar from '@/components/nav-bar';
+import theme from '@/shared/theme';
+import links from '@/shared/data/links';
+import AuthAction from '@/components/auth-action';
 import '@bcgov/bc-sans/css/BCSans.css';
-
-import { AuthProvider } from '../shared/services/auth/auth-context';
-import Header from '../components/header';
-import NavBar from '../components/nav-bar';
-import theme from '../shared/theme';
-import links from '../shared/data/links';
-import AuthAction from '../components/auth-action';
-import '../shared/styles/global.css';
+import '@/shared/styles/global.css';
 
 import { AppWrapper } from './context';
 

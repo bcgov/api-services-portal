@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AppError from '@/components/app-error';
 import {
   Box,
   Container,
@@ -9,13 +10,28 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import { ErrorBoundary } from 'react-error-boundary';
-
-import AppError from '../../../components/app-error';
-import PageHeader from '../../../components/page-header';
-import ServicesList from '../../../components/services-list';
-import { withAuth } from '../../../shared/services/auth';
+import PageHeader from '@/components/page-header';
+import ServicesList from '@/components/services-list';
+import { withAuth } from '@/shared/services/auth';
 
 type Filters = 'all' | 'up' | 'down';
+
+export const getServerSideProps = withAuth(async (context) => {
+  const { user } = context;
+
+  if (!user) {
+    return {
+      redirect: {
+        destination: '/unauthorized',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+});
 
 const ServicesPage: React.FC = () => {
   const [filter, setFilter] = React.useState<Filters>('all');
@@ -74,7 +90,5 @@ const ServicesPage: React.FC = () => {
     </Container>
   );
 };
-
-export const getServerSideProps = withAuth;
 
 export default ServicesPage;

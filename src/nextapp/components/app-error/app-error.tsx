@@ -2,9 +2,7 @@ import * as React from 'react';
 import { Box, Center, Heading, Icon } from '@chakra-ui/react';
 import { FaExclamationCircle } from 'react-icons/fa';
 
-interface AppErrorProps {}
-
-const AppError: React.FC<AppErrorProps> = () => {
+const AppError: React.FC = () => {
   return (
     <Box color="red.500" width="100%">
       <Center my={100}>

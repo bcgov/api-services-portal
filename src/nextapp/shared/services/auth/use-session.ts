@@ -1,24 +1,30 @@
 import { useQuery, QueryStatus } from 'react-query';
 
 import type { UserData } from '../../../types';
+import { apiHost } from '../../config';
+
+export interface AuthFailedResponse {
+  error: boolean;
+}
+
+type SessionReturn = UserData | AuthFailedResponse;
 
 export interface UserSessionResult {
   ok: boolean;
-  user: UserData;
+  user?: UserData;
   status: QueryStatus;
   error?: Error;
 }
 
 export const getSession = async (): Promise<UserData> => {
   try {
-    const req = await fetch('http://localhost:4000/admin/session');
+    const req = await fetch(`${apiHost}/admin/session`);
 
     if (req.ok) {
       const json = await req.json();
       return json.user;
-    } else {
-      throw new Error('Auth Error');
     }
+    return undefined;
   } catch (err) {
     throw new Error(err);
   }
@@ -35,7 +41,7 @@ export const useSession = (): UserSessionResult => {
   );
 
   return {
-    ok: !!data,
+    ok: !data,
     user: data,
     status,
     error,
