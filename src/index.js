@@ -18,13 +18,28 @@ const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
-const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose');
-const PROJECT_NAME = 'APS Service Portal';
-const adapterConfig = {
+const { KnexAdapter } = require('@keystonejs/adapter-knex');
+const knexAdapterConfig = {
+    knexOptions: {
+        connection: {
+            host : process.env.KNEX_HOST,
+            user : process.env.KNEX_USER,
+            password : process.env.KNEX_PASSWORD,
+            database : process.env.KNEX_DATABASE
+          }        
+    }
+  };
+  
+const { MongooseAdapter } = require('@keystonejs/adapter-mongoose');
+const mongooseAdapterConfig = {
   mongoUri: process.env.MONGO_URL,
   user: process.env.MONGO_USER,
   pass: process.env.MONGO_PASSWORD,
 };
+
+const adapter = process.env.ADAPTER ? process.env.ADAPTER : "mongoose"
+
+const PROJECT_NAME = 'APS Service Portal';
 
 require('dotenv').config();
 
@@ -37,7 +52,7 @@ require('dotenv').config();
 //  })
 
 const keystone = new Keystone({
-  adapter: new Adapter(adapterConfig),
+  adapter: adapter == "knex" ? new KnexAdapter(knexAdapterConfig) : new MongooseAdapter(mongooseAdapterConfig),
   onConnect: process.env.CREATE_TABLES !== 'true' && initialiseData,
   cookieSecret: process.env.COOKIE_SECRET,
   cookie: {
