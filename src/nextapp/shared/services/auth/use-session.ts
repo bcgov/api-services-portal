@@ -1,13 +1,10 @@
 import { useQuery, QueryStatus } from 'react-query';
-
-import type { UserData } from '../../../types';
-import { apiHost } from '../../config';
+import { apiHost } from '@/shared/config';
+import type { UserData } from 'types';
 
 export interface AuthFailedResponse {
   error: boolean;
 }
-
-type SessionReturn = UserData | AuthFailedResponse;
 
 export interface UserSessionResult {
   ok: boolean;
