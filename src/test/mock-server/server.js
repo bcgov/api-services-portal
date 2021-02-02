@@ -114,17 +114,17 @@ const schema = `
     isAdmin: Boolean!,
   }
 
-  type RootQuery {
+  type Query {
     allPackages: [ Package ]
   }
 
   schema {
-    query: RootQuery
+    query: Query
   }
 `;
 
 const server = mockServer(schema, {
-  RootQuery: () => ({
+  Query: () => ({
     allPackages: () => new MockList(6, (_, { id }) => ({ id })),
   }),
   Package: () => ({

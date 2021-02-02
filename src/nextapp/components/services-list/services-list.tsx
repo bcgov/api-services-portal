@@ -1,4 +1,5 @@
 import * as React from 'react';
+import api from '@/shared/services/api';
 import {
   Box,
   Center,
@@ -11,8 +12,7 @@ import {
 import { FaCheck, FaExclamation } from 'react-icons/fa';
 import { useQuery } from 'react-query';
 import { gql } from 'graphql-request';
-
-import api from '../../shared/services/api';
+import type { Environment, Query } from '@/types/query.types';
 
 export const GET_LIST = gql`
   query GetServices {
@@ -44,10 +44,14 @@ interface ServicesListProps {
 }
 
 const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
-  const { data } = useQuery<any>('services', async () => await api(GET_LIST), {
-    suspense: true,
-  });
-  const stateFilter = (d) => {
+  const { data } = useQuery<Query>(
+    'services',
+    async () => await api(GET_LIST),
+    {
+      suspense: true,
+    }
+  );
+  const stateFilter = (d: Environment) => {
     switch (filter) {
       case 'up':
         return d.active;

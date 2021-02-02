@@ -17,7 +17,8 @@
   "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
   "lint": "eslint .",
   "test": "jest --coverage",
-  "test:watch": "jest -w --coverage"
+  "test:watch": "jest -w --coverage",
+  "generate": "graphql-codegen"
  },
  "dependencies": {
   "@bcgov/bc-sans": "^1.0.1",
@@ -75,6 +76,8 @@
   "@babel/preset-env": "^7.12.11",
   "@babel/preset-react": "^7.12.10",
   "@babel/preset-typescript": "^7.12.7",
+  "@graphql-codegen/cli": "^1.20.1",
+  "@graphql-codegen/typescript": "^1.20.2",
   "@testing-library/react": "^11.2.3",
   "@types/jest": "^26.0.20",
   "@types/node": "^14.14.14",
