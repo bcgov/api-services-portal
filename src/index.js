@@ -18,11 +18,23 @@ const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
-const { MongooseAdapter: Adapter } = require('@keystonejs/adapter-mongoose');
-
 const apiPath = '/admin/api';
 const PROJECT_NAME = 'APS Service Portal';
-const adapterConfig = {
+
+const { KnexAdapter } = require('@keystonejs/adapter-knex');
+const knexAdapterConfig = {
+    knexOptions: {
+        connection: {
+            host : process.env.KNEX_HOST,
+            user : process.env.KNEX_USER,
+            password : process.env.KNEX_PASSWORD,
+            database : process.env.KNEX_DATABASE
+          }        
+    }
+  };
+  
+const { MongooseAdapter } = require('@keystonejs/adapter-mongoose');
+const mongooseAdapterConfig = {
   mongoUri: process.env.MONGO_URL,
   user: process.env.MONGO_USER,
   pass: process.env.MONGO_PASSWORD,
@@ -47,6 +59,8 @@ async function generateTypes() {
   }
 }
 
+const adapter = process.env.ADAPTER ? process.env.ADAPTER : "mongoose"
+
 require('dotenv').config();
 
 // const session = expressSession({
@@ -58,7 +72,6 @@ require('dotenv').config();
 //  })
 
 const keystone = new Keystone({
-  adapter: new Adapter(adapterConfig),
   onConnect(keystone) {
     if (process.env.NODE_ENV === 'development') {
       generateTypes();
@@ -67,6 +80,7 @@ const keystone = new Keystone({
       initialiseData(keystone);
     }
   },
+  adapter: adapter == "knex" ? new KnexAdapter(knexAdapterConfig) : new MongooseAdapter(mongooseAdapterConfig),
   cookieSecret: process.env.COOKIE_SECRET,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Default to true in production

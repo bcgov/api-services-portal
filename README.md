@@ -12,6 +12,11 @@ You can then run `npm run dev` to start the application on port 3000. The proxy 
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
 
 export AUTH_STRATEGY=Oauth2Proxy
+export ADAPTER=knex
+export KNEX_HOST=$hostip
+export KNEX_DATABASE=keystonejs
+export KNEX_USER=""
+export KNEX_PASSWORD=""
 export MONGO_URL=mongodb://$hostip:17017/keystonedb3
 export MONGO_USER=""
 export MONGO_PASSWORD=""
