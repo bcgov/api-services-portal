@@ -59,12 +59,12 @@ require('dotenv').config();
 
 const keystone = new Keystone({
   adapter: new Adapter(adapterConfig),
-  onConnect() {
+  onConnect(keystone) {
     if (process.env.NODE_ENV === 'development') {
       generateTypes();
     }
     if (process.env.CREATE_TABLES !== 'true') {
-      initialiseData();
+      initialiseData(keystone);
     }
   },
   cookieSecret: process.env.COOKIE_SECRET,
