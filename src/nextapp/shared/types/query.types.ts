@@ -511,6 +511,7 @@ export type Application = {
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   owner?: Maybe<User>;
@@ -527,6 +528,24 @@ export type ApplicationWhereInput = {
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
   id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  appId?: Maybe<Scalars['String']>;
+  appId_not?: Maybe<Scalars['String']>;
+  appId_contains?: Maybe<Scalars['String']>;
+  appId_not_contains?: Maybe<Scalars['String']>;
+  appId_starts_with?: Maybe<Scalars['String']>;
+  appId_not_starts_with?: Maybe<Scalars['String']>;
+  appId_ends_with?: Maybe<Scalars['String']>;
+  appId_not_ends_with?: Maybe<Scalars['String']>;
+  appId_i?: Maybe<Scalars['String']>;
+  appId_not_i?: Maybe<Scalars['String']>;
+  appId_contains_i?: Maybe<Scalars['String']>;
+  appId_not_contains_i?: Maybe<Scalars['String']>;
+  appId_starts_with_i?: Maybe<Scalars['String']>;
+  appId_not_starts_with_i?: Maybe<Scalars['String']>;
+  appId_ends_with_i?: Maybe<Scalars['String']>;
+  appId_not_ends_with_i?: Maybe<Scalars['String']>;
+  appId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  appId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -594,6 +613,8 @@ export type ApplicationWhereUniqueInput = {
 export enum SortApplicationsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
+  AppIdAsc = 'appId_ASC',
+  AppIdDesc = 'appId_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
@@ -611,6 +632,7 @@ export enum SortApplicationsBy {
 }
 
 export type ApplicationUpdateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
@@ -622,6 +644,7 @@ export type ApplicationsUpdateInput = {
 };
 
 export type ApplicationCreateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
@@ -881,6 +904,7 @@ export type Content = {
   title?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   content?: Maybe<Scalars['String']>;
+  githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
@@ -948,6 +972,24 @@ export type ContentWhereInput = {
   content_not_ends_with_i?: Maybe<Scalars['String']>;
   content_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   content_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  githubRepository?: Maybe<Scalars['String']>;
+  githubRepository_not?: Maybe<Scalars['String']>;
+  githubRepository_contains?: Maybe<Scalars['String']>;
+  githubRepository_not_contains?: Maybe<Scalars['String']>;
+  githubRepository_starts_with?: Maybe<Scalars['String']>;
+  githubRepository_not_starts_with?: Maybe<Scalars['String']>;
+  githubRepository_ends_with?: Maybe<Scalars['String']>;
+  githubRepository_not_ends_with?: Maybe<Scalars['String']>;
+  githubRepository_i?: Maybe<Scalars['String']>;
+  githubRepository_not_i?: Maybe<Scalars['String']>;
+  githubRepository_contains_i?: Maybe<Scalars['String']>;
+  githubRepository_not_contains_i?: Maybe<Scalars['String']>;
+  githubRepository_starts_with_i?: Maybe<Scalars['String']>;
+  githubRepository_not_starts_with_i?: Maybe<Scalars['String']>;
+  githubRepository_ends_with_i?: Maybe<Scalars['String']>;
+  githubRepository_not_ends_with_i?: Maybe<Scalars['String']>;
+  githubRepository_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  githubRepository_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   readme?: Maybe<Scalars['String']>;
   readme_not?: Maybe<Scalars['String']>;
   readme_contains?: Maybe<Scalars['String']>;
@@ -1009,6 +1051,8 @@ export enum SortContentsBy {
   DescriptionDesc = 'description_DESC',
   ContentAsc = 'content_ASC',
   ContentDesc = 'content_DESC',
+  GithubRepositoryAsc = 'githubRepository_ASC',
+  GithubRepositoryDesc = 'githubRepository_DESC',
   ReadmeAsc = 'readme_ASC',
   ReadmeDesc = 'readme_DESC',
   SlugAsc = 'slug_ASC',
@@ -1023,6 +1067,7 @@ export type ContentUpdateInput = {
   title?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   content?: Maybe<Scalars['String']>;
+  githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
@@ -1038,6 +1083,7 @@ export type ContentCreateInput = {
   title?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   content?: Maybe<Scalars['String']>;
+  githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
