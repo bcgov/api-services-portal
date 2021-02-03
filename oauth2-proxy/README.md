@@ -31,9 +31,15 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --skip-jwt-bearer-tokens=true \
     --set-authorization-header=true \
     --pass-authorization-header=true \
-    --skip-auth-regex="/public|/docs|/_next|/images" \
+    --skip-auth-regex="/home|/public|/docs|/_next|/images" \
     --whitelist-domain="authz-apps-gov-bc-ca.dev.apsgw.xyz" \
     --upstream="http://${hostip}:3000"
+```
+
+Alternate for unprotected the "/" root:
+
+```
+    --skip-auth-regex="/home|/public|/docs|/_next|/images/|^[/]$" \
 ```
 
 # Sample Upstream
