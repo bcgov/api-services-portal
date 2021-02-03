@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Router from 'next/router';
 
 import styles from './header.module.css';
-import SignIn from './signin';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {

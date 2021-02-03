@@ -1,8 +1,7 @@
 import * as React from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
 
-const Homepage = () => {
+const Homepage: React.FC = () => {
   return (
     <>
       <Head>

@@ -1,7 +1,7 @@
 import { getSession } from './use-session';
-import type { GetServerSideProps } from 'next';
-
-import links from '../../data/links';
+import links from '@/shared/data/links';
+import { UserData } from 'types';
+import type { GetServerSidePropsContext } from 'next';
 
 /**
  * Authentication function for pages
@@ -12,39 +12,30 @@ import links from '../../data/links';
  * ```javascript
  * import { withAuth } from 'shared/services/auth'
  * ...
- * export const getServerSideProps = authPageProps;
+ * export const getServerSideProps = withAuth((req, res) => ({ props: { user: req.user } }));
  * ```
  */
-export const withAuth: GetServerSideProps = async (context) => {
-  const redirect = (): void => {
-    context.res.writeHead(307, { Location: '/' });
-    context.res.end();
-  };
+interface ReturnServerSideContext extends GetServerSidePropsContext {
+  user?: UserData;
+}
 
-  try {
+export function withAuth(handler) {
+  return async (
+    context: GetServerSidePropsContext
+  ): Promise<ReturnServerSideContext> => {
+    const nextContext: ReturnServerSideContext = { ...context };
     const user = await getSession();
-    const [section] = /\/?([a-zA-Z-_]*)/.exec(context.req.url);
+    const [section] = /\/?(poc\/)([a-zA-Z-_]*)/.exec(context.req.url);
     const currentRoute = links.find((link) => section === link.url);
 
     if (
+      user &&
       currentRoute &&
       currentRoute.access.some((role) => user.roles.includes(role))
     ) {
-      return {
-        props: {
-          user,
-        },
-      };
-    } else {
-      redirect();
+      nextContext.user = user;
     }
-  } catch (err) {
-    redirect();
 
-    return {
-      props: {
-        err: err.message,
-      },
-    };
-  }
-};
+    return handler(nextContext);
+  };
+}

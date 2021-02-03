@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Container, Heading } from '@chakra-ui/react';
+import { Box, Heading } from '@chakra-ui/react';
 
 interface PageHeaderProps {
   children: React.ReactNode;

@@ -5,9 +5,8 @@ import { GetStaticProps } from 'next';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { gql } from 'graphql-request';
-
-import api from '../../shared/services/api';
-import gh from '../../shared/services/github';
+import api from '@/shared/services/api';
+import gh from '@/shared/services/github';
 
 import styles from './docs.module.css';
 

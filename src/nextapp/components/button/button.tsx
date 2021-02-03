@@ -23,7 +23,12 @@ const Button: React.FC<ButtonProps> = ({
   }, [href, onClick]);
 
   return (
-    <ChakraButton variant={color} borderRadius={4} onClick={handleClick}>
+    <ChakraButton
+      variant={color}
+      borderRadius={4}
+      onClick={handleClick}
+      color="white"
+    >
       {children}
     </ChakraButton>
   );

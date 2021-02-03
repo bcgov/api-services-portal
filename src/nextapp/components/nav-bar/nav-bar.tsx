@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Box, Container, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
+import type { NavLink } from '@/shared/data/links';
+import { useAuth } from '@/shared/services/auth';
 
 const linkProps = {
   px: 4,
@@ -20,21 +22,26 @@ const linkProps = {
 };
 
 interface NavBarProps {
-  links: any[];
+  links: NavLink[];
   pathname: string | undefined;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
-  const [active, setActive] = React.useState<string>('');
-
+  const { user } = useAuth();
+  const authenticatedLinks = links.filter(
+    (link) =>
+      link.access.length === 0 ||
+      user?.roles.some((role) => link.access.includes(role))
+  );
   // Router isn't active SSR, so wait till the client loads before setting
   // current so there's no diff between SSR and Client
-  React.useEffect(() => {
+  const active = React.useMemo(() => {
     if (pathname) {
-      const [rootPage] = /\/?([a-zA-Z-_]*)/.exec(pathname);
-      setActive(rootPage);
+      return pathname;
     }
-  }, [pathname, setActive]);
+
+    return '';
+  }, [pathname]);
 
   return (
     <Box
@@ -55,7 +62,7 @@ const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
         flexDir={{ base: 'column', sm: 'row' }}
         color="white"
       >
-        {links.map((link) => (
+        {authenticatedLinks.map((link) => (
           <Box as="li" key={link.url} width={{ base: '100%', sm: 'auto' }}>
             <NextLink href={link.url}>
               <Link

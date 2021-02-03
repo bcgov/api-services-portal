@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/shared/*": ["shared/*"],
+      "@/layouts/*": ["components/*"],
+      "@/types/*": ["shared/types/*"],
+      "@/*": ["./*"]
+    },
     "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "baseUrl": ".",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
