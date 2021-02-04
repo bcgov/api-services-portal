@@ -4,6 +4,7 @@ const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
   text: '#313132',
+  'bc-link': '#1A5A96',
   'bc-blue-alt': '#38598A',
   'bc-gray': '#f2f2f2',
   'bc-divider': '#606060',
