@@ -209,6 +209,8 @@ jobs:
             value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
           EXTERNAL_URL:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
+          NEXT_PUBLIC_API_ROOT:
+            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
 
         " > values.yaml
         
