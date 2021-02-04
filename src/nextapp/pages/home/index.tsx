@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Box, Container, Heading, Icon, Link, Text } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
-
+import { withAuth } from '@/shared/services/auth';
 import Card from '@/components/card';
 import GridLayout from '@/layouts/grid';
 import {
@@ -18,35 +18,51 @@ const actions = [
     title: 'API Program Service',
     url: '/poc/services',
     icon: FaServer,
+    roles: [],
   },
   {
     title: 'BC Government APIs',
     url: '/poc/api-discovery',
     icon: FaBook,
+    roles: ['api-provider'],
   },
   {
     title: 'Manage Access',
     url: '/poc/requests',
     icon: FaShieldAlt,
+    roles: ['api-provider'],
   },
   {
     title: 'Service Accounts',
     url: '/poc/service-accounts',
     icon: FaCoffee,
+    roles: ['api-provider'],
   },
   {
     title: 'Dataset Groups / Packages',
     url: '/poc/packaging',
     icon: FaDatabase,
+    roles: ['api-provider'],
   },
   {
     title: 'Documentation',
     url: '/docs',
     icon: FaBook,
+    roles: [],
   },
 ];
 
-const HomePage: React.FC = () => {
+export const getServerSideProps = withAuth(async (context) => {
+  const { user } = context;
+
+  return {
+    props: {
+      user: user || {},
+    },
+  };
+});
+
+const HomePage: React.FC = ({ user }) => {
   return (
     <>
       <Head>
@@ -73,23 +89,29 @@ const HomePage: React.FC = () => {
       </Box>
       <Container maxW="6xl">
         <GridLayout>
-          {actions.map((action) => (
-            <Card key={action.url}>
-              <Heading size="md" mb={2}>
-                <NextLink passHref href={action.url}>
-                  <Link color="bc-link" display="flex" alignItems="center">
-                    <Icon as={action.icon} mr={2} />
-                    {action.title}
-                  </Link>
-                </NextLink>
-              </Heading>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad
-                nulla error doloribus ducimus magni iste aut ea quidem impedit,
-                non suscipit sapiente praesentium
-              </p>
-            </Card>
-          ))}
+          {actions
+            .filter(
+              (action) =>
+                user.roles.some((r) => action.roles.includes(r) >= 0) ||
+                action.roles.length === 0
+            )
+            .map((action) => (
+              <Card key={action.url}>
+                <Heading size="md" mb={2}>
+                  <NextLink passHref href={action.url}>
+                    <Link color="bc-link" display="flex" alignItems="center">
+                      <Icon as={action.icon} color="bc-yellow" mr={2} />
+                      {action.title}
+                    </Link>
+                  </NextLink>
+                </Heading>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad
+                  nulla error doloribus ducimus magni iste aut ea quidem
+                  impedit, non suscipit sapiente praesentium
+                </p>
+              </Card>
+            ))}
         </GridLayout>
       </Container>
     </>
