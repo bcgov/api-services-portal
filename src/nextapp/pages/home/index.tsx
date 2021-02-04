@@ -2,18 +2,25 @@ import * as React from 'react';
 import { Box, Container, Heading, Icon, Link, Text } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
-import { withAuth } from '@/shared/services/auth';
 import Card from '@/components/card';
 import GridLayout from '@/layouts/grid';
 import {
   FaBook,
-  FaCoffee,
   FaDatabase,
   FaServer,
   FaShieldAlt,
+  FaToolbox,
 } from 'react-icons/fa';
+import { getSession } from '@/shared/services/auth';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
-const actions = [
+type HomeActions = {
+  title: string;
+  url: string;
+  icon: React.ComponentType;
+  roles: string[];
+};
+const actions: HomeActions[] = [
   {
     title: 'API Program Service',
     url: '/poc/services',
@@ -24,25 +31,25 @@ const actions = [
     title: 'BC Government APIs',
     url: '/poc/api-discovery',
     icon: FaBook,
-    roles: ['api-provider'],
+    roles: ['api-owner', 'api-provider'],
   },
   {
     title: 'Manage Access',
     url: '/poc/requests',
     icon: FaShieldAlt,
-    roles: ['api-provider'],
+    roles: ['api-owner', 'api-provider'],
   },
   {
     title: 'Service Accounts',
     url: '/poc/service-accounts',
-    icon: FaCoffee,
-    roles: ['api-provider'],
+    icon: FaToolbox,
+    roles: ['api-owner', 'api-provider'],
   },
   {
     title: 'Dataset Groups / Packages',
     url: '/poc/packaging',
     icon: FaDatabase,
-    roles: ['api-provider'],
+    roles: ['api-owner', 'api-provider'],
   },
   {
     title: 'Documentation',
@@ -52,29 +59,32 @@ const actions = [
   },
 ];
 
-export const getServerSideProps = withAuth(async (context) => {
-  const { user } = context;
+export const getServerSideProps: GetServerSideProps = async () => {
+  const user = await getSession();
 
   return {
     props: {
-      user: user || {},
+      user,
     },
   };
-});
+};
 
-const HomePage: React.FC = ({ user }) => {
+const HomePage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ user }) => {
   return (
     <>
       <Head>
         <title>API Program Services | Home</title>
       </Head>
-      <Box bgColor="bc-blue" color="white">
+      <Box bgColor="bc-blue" color="white" bgImg="url( /images/banner.png )">
         <Container maxW="6xl" paddingY={8}>
           <Box
             padding={4}
             marginTop={{ base: 0, sm: 8 }}
-            bgColor="rgba(255, 255, 255, 0.05)"
+            bgColor="rgba(0, 51, 102, 0.8)"
             maxW={{ base: '100%', md: '60%' }}
+            textShadow="0 0 10px rgba(0, 0, 0, 0.8)"
           >
             <Heading fontWeight="normal" marginBottom={4}>
               BC Government API Program Service
@@ -92,7 +102,7 @@ const HomePage: React.FC = ({ user }) => {
           {actions
             .filter(
               (action) =>
-                user.roles.some((r) => action.roles.includes(r) >= 0) ||
+                user.roles.some((r: string) => action.roles.includes(r)) ||
                 action.roles.length === 0
             )
             .map((action) => (

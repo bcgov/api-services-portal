@@ -62,6 +62,7 @@ const ServicesPage: React.FC = () => {
           </Heading>
           <Select
             w="25%"
+            bgColor="white"
             borderWidth={2}
             borderRadius={0}
             borderColor="text"
