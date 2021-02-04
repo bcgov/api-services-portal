@@ -11,8 +11,7 @@ import {
   FaShieldAlt,
   FaToolbox,
 } from 'react-icons/fa';
-import { getSession } from '@/shared/services/auth';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { useAuth } from '@/shared/services/auth';
 
 type HomeActions = {
   title: string;
@@ -59,19 +58,9 @@ const actions: HomeActions[] = [
   },
 ];
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const user = await getSession();
+const HomePage: React.FC = () => {
+  const { user } = useAuth();
 
-  return {
-    props: {
-      user,
-    },
-  };
-};
-
-const HomePage: React.FC<
-  InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ user }) => {
   return (
     <>
       <Head>
@@ -102,7 +91,7 @@ const HomePage: React.FC<
           {actions
             .filter(
               (action) =>
-                user.roles.some((r: string) => action.roles.includes(r)) ||
+                user?.roles.some((r: string) => action.roles.includes(r)) ||
                 action.roles.length === 0
             )
             .map((action) => (

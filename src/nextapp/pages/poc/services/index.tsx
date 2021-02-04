@@ -12,28 +12,29 @@ import {
 import { ErrorBoundary } from 'react-error-boundary';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
-import { withAuth } from '@/shared/services/auth';
+import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
 
 type Filters = 'all' | 'up' | 'down';
 
-export const getServerSideProps = withAuth(async (context) => {
-  const { user } = context;
+// export const getServerSideProps = withAuth(async (context) => {
+//   const { user } = context;
 
-  if (!user) {
-    return {
-      redirect: {
-        destination: '/unauthorized',
-        permanent: false,
-      },
-    };
-  }
+//   if (!user) {
+//     return {
+//       redirect: {
+//         destination: '/unauthorized',
+//         permanent: false,
+//       },
+//     };
+//   }
 
-  return {
-    props: {},
-  };
-});
+//   return {
+//     props: {},
+//   };
+// });
 
 const ServicesPage: React.FC = () => {
+  const { user } = useAuth();
   const [filter, setFilter] = React.useState<Filters>('all');
   const isServer = typeof window === 'undefined';
   const onFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -74,7 +75,7 @@ const ServicesPage: React.FC = () => {
             <option value="down">Down</option>
           </Select>
         </Box>
-        {!isServer && (
+        {user && !isServer && (
           <ErrorBoundary fallback={<AppError />}>
             <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
               <React.Suspense
