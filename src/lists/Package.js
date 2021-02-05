@@ -3,13 +3,22 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
-const { EnforcementPoint } = require('../authz/enforcement')
+const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
     name: {
         type: Text,
         isRequired: true,
+    },
+    namespace: {
+        type: Text,
+        isRequired: true,
+        defaultValue: ({ context, originalInput }) => {
+            console.log("DEFAULT VALUE = "+context['authedItem']['namespace']);
+            return context['authedItem'] == null ? null : context['authedItem']['namespace']
+        },
+        access: FieldEnforcementPoint
     },
     description: {
       type: Markdown,

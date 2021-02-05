@@ -325,6 +325,7 @@ export type Activity = {
   action?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -427,6 +428,24 @@ export type ActivityWhereInput = {
   refId_not_ends_with_i?: Maybe<Scalars['String']>;
   refId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   refId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   actor?: Maybe<UserWhereInput>;
   actor_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -464,6 +483,8 @@ export enum SortActivitiesBy {
   MessageDesc = 'message_DESC',
   RefIdAsc = 'refId_ASC',
   RefIdDesc = 'refId_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   ActorAsc = 'actor_ASC',
   ActorDesc = 'actor_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
@@ -478,6 +499,7 @@ export type ActivityUpdateInput = {
   action?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
 };
 
@@ -492,6 +514,7 @@ export type ActivityCreateInput = {
   action?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
 };
 
@@ -2561,6 +2584,7 @@ export type Package = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<Dataset>;
   organization?: Maybe<Organization>;
@@ -2616,6 +2640,24 @@ export type PackageWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description?: Maybe<Scalars['String']>;
   description_not?: Maybe<Scalars['String']>;
   description_contains?: Maybe<Scalars['String']>;
@@ -2657,6 +2699,8 @@ export enum SortPackagesBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
   DatasetAsc = 'dataset_ASC',
@@ -2671,6 +2715,7 @@ export enum SortPackagesBy {
 
 export type PackageUpdateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
   organization?: Maybe<OrganizationRelateToOneInput>;
@@ -2685,6 +2730,7 @@ export type PackagesUpdateInput = {
 
 export type PackageCreateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
   organization?: Maybe<OrganizationRelateToOneInput>;
@@ -3897,8 +3943,8 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -3906,12 +3952,12 @@ export type UnauthenticateUserOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -4064,7 +4110,7 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -4740,10 +4786,10 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -5305,14 +5351,14 @@ export type MutationDeleteUsersArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 

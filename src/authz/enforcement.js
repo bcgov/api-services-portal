@@ -1,21 +1,109 @@
 const fs = require('fs')
+const csv = require('csv-parser')
 
 let rules = {
     rulePath: fs.realpathSync('authz/matrix.csv', []),
-    ts: fs.statSync('authz/matrix.csv').mtime,
+    ts: 0,
     cache: null
 }
 
+fs.watch(rules.rulePath, (eventType, filename) => {
+    console.log("Watch Detected: " + eventType)
+    refreshRules()
+})
+
+const actions = {
+    "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
+    "filterByOwner": require('./actions/filterByOwner'),
+    "filterByPackageNS": require('./actions/filterByPackageNS'),
+    "filterByUserNS": require('./actions/filterByUserNS'),
+}
+
+const conditions = {
+    "matchOneOfRole": require('./conditions/matchOneOfRole'),
+    "inRole": require('./conditions/inRole'),
+    "matchFieldKey": require('./conditions/matchFieldKey'),
+    "matchListKey": require('./conditions/matchListKey'),
+    "matchOneOfOperation": require('./conditions/matchOneOfOperation'),
+    "matchOperation": require('./conditions/matchOperation'),
+    "matchUserNS": require('./conditions/matchUserNS'),
+}
+
 // Use a decision matrix to determine who is allowed to do what
-function EnforcementPoint ({ listKey, operation, itemId, authentication: { item } }) {
-    console.log("*** ACCESS *** " + listKey + " [" + (itemId == null ? "":itemId) + "] " + operation + " by " + (item == null ? "ANON":item.name))
-    console.log(fs.statSync('authz/matrix.csv').mtime)
-    if (fs.statSync('authz/matrix.csv').mtime != rules.ts) {
-        console.log("RELOAD RULES...")
+function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, originalInput, authentication: { item } }) {
+    console.log("GQLNAME = "+gqlName)
+    console.log("*** ACCESS *** (" +  gqlName + ") " + listKey + " " + fieldKey + " [" + (itemId == null ? "":itemId) + "] " + operation + " by " + (item == null ? "ANON":item.name))
+    try {
+        if (fs.statSync(rules.rulePath).mtimeMs != rules.ts) {
+            refreshRules()
+        }
+        const roles = item == null ? ['guest']:item.roles
+        const ctx = {
+            operation: operation,
+            listKey: listKey,
+            fieldKey: fieldKey,
+            item: {},
+            user: {
+                id: item == null ? null : item.userId,
+                roles: roles,
+                namespace: item == null ? null : item.namespace,
+                item: originalInput
+            }
+        }
+
+        if (rules.cache == null) {
+            return false
+        }
+
+        for ( rule of rules.cache) {
+            let ruleConditionState = true
+            for ( key of Object.keys(rule)) {
+                if (!(['result','ID'].includes(key)) && !(Object.keys(actions).includes(key)) && !(key in conditions)) {
+                    console.log("WARNING! " + key + " not a valid rule!")
+                }
+                if (key != "result" && key in conditions && rule[key] != "" && rule[key] != null) {
+                    const result = conditions[key](ctx, rule[key])
+                    if (result == false) {
+                        ruleConditionState = false
+                        break
+                    }
+                }
+            }
+            if (ruleConditionState && rule['result'] === 'allow') {
+                for ( akey of Object.keys(rule).filter(k => Object.keys(actions).includes(k))) {
+                    if (rule[akey] != "" && rule[akey] != null) {
+                        const result = actions[akey](ctx, rule[akey])
+                        if (result) {
+                            return result
+                        }
+                    }
+                }
+                return true
+            }
+            if (ruleConditionState && rule['result'] === 'deny') {
+                return false
+            }
+        }
+        console.log("DENIED! " + operation + " listKey = " + listKey)
+        return false
+    } catch (err) {
+        console.log("Unexpected Error - " + err)
+        return false
     }
-    return true
+}
+
+function refreshRules() {
+    const results = []
+    fs.createReadStream(rules.rulePath)
+    .pipe(csv())
+    .on('data', (data) => results.push(data))
+    .on('end', () => {
+      rules.cache = results
+      rules.ts = fs.statSync(rules.rulePath).mtimeMs
+    })
 }
 
 module.exports = {
-    EnforcementPoint: EnforcementPoint
+    EnforcementPoint: EnforcementPoint,
+    FieldEnforcementPoint: EnforcementPoint
 }

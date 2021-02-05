@@ -154,6 +154,13 @@ class Oauth2ProxyAuthStrategy {
             console.log(e)
 
         }
+
+        /*
+            A bit about namespace:
+              We are moving away from the namespace being part of the JWT to where the namespace list is provided in the JWT
+              and the selected namespace is updated into the TemporaryIdentity from within the APS Portal.
+              For this to happen, changes on the Metrics/Auth Proxy will be necessary.
+        */
         /*
             Roles:
             credential-admin : Application for authenticating with an OIDC Auth provider for the purposes of client registration.  The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.

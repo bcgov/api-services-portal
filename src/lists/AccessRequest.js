@@ -8,7 +8,7 @@ const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
 const { recordActivity } = require('./Activity')
 
-const { EnforcementPoint } = require('../authz/enforcement')
+const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
@@ -23,7 +23,8 @@ module.exports = {
     isApproved: {
       type: Checkbox,
       isRequired: false,
-      default: false
+      default: false,
+      access: FieldEnforcementPoint
     },
     isIssued: {
         type: Checkbox,

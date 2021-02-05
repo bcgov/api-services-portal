@@ -3,7 +3,7 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
-const { EnforcementPoint } = require('../authz/enforcement')
+const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
@@ -14,7 +14,8 @@ module.exports = {
     active: {
         type: Checkbox,
         isRequired: true,
-        defaultValue: false
+        defaultValue: false,
+        access: FieldEnforcementPoint
     },
     authMethod: { type: Select, emptyOption: false, defaultValue: 'public', options: [
         { value: 'private', label: 'Private'},

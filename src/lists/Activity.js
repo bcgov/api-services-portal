@@ -28,6 +28,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    namespace: {
+        type: Text,
+        isRequired: true,
+    },
     actor: { type: Relationship, ref: 'User' }
   },
   access: EnforcementPoint,
