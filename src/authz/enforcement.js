@@ -7,16 +7,23 @@ let rules = {
     cache: null
 }
 
+refreshRules()
+
 fs.watch(rules.rulePath, (eventType, filename) => {
     console.log("Watch Detected: " + eventType)
     refreshRules()
 })
 
+const { filterByOwner, filterByRequestor } = require('./actions/filterByUser')
+
 const actions = {
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
-    "filterByOwner": require('./actions/filterByOwner'),
+    "filterByOwner": filterByOwner,
+    "filterByRequestor": filterByRequestor,
     "filterByPackageNS": require('./actions/filterByPackageNS'),
     "filterByUserNS": require('./actions/filterByUserNS'),
+    "filterByActive": require('./actions/filterByActive'),
+    "filterByActiveEnvironment": require('./actions/filterByActiveEnvironment'),
 }
 
 const conditions = {
@@ -31,7 +38,7 @@ const conditions = {
 
 // Use a decision matrix to determine who is allowed to do what
 function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, originalInput, authentication: { item } }) {
-    console.log("GQLNAME = "+gqlName)
+
     console.log("*** ACCESS *** (" +  gqlName + ") " + listKey + " " + fieldKey + " [" + (itemId == null ? "":itemId) + "] " + operation + " by " + (item == null ? "ANON":item.name))
     try {
         if (fs.statSync(rules.rulePath).mtimeMs != rules.ts) {
@@ -61,6 +68,10 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
                 if (!(['result','ID'].includes(key)) && !(Object.keys(actions).includes(key)) && !(key in conditions)) {
                     console.log("WARNING! " + key + " not a valid rule!")
                 }
+                if (fieldKey != null && rule['matchFieldKey'] == "") {
+                    continue
+                }
+
                 if (key != "result" && key in conditions && rule[key] != "" && rule[key] != null) {
                     const result = conditions[key](ctx, rule[key])
                     if (result == false) {

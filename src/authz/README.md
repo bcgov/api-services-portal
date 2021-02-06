@@ -12,3 +12,8 @@ The columns are grouped by the following:
 ## Actions
 
 Actions can be: "allow" and "deny", but they can also be GraphQLWhere clauses (i.e./ `{ name_contains: 'k' }`)
+
+
+## Enhancements
+
+* For Developer role, only show Datasets, Organizations, OrganizationUnits, ServiceRoutes that are linked to an Environment
