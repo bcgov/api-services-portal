@@ -1,5 +1,4 @@
 import * as React from 'react';
-import AppError from '@/components/app-error';
 import {
   Box,
   Container,
@@ -9,7 +8,7 @@ import {
   SimpleGrid,
   Skeleton,
 } from '@chakra-ui/react';
-import { ErrorBoundary } from 'react-error-boundary';
+import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
 import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
@@ -76,17 +75,15 @@ const ServicesPage: React.FC = () => {
           </Select>
         </Box>
         {user && !isServer && (
-          <ErrorBoundary fallback={<AppError />}>
-            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
-              <React.Suspense
-                fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-                  <Skeleton key={d} height="200px" />
-                ))}
-              >
-                <ServicesList filter={filter} />
-              </React.Suspense>
-            </SimpleGrid>
-          </ErrorBoundary>
+          <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
+            <ClientRequest
+              fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+                <Skeleton key={d} height="200px" />
+              ))}
+            >
+              <ServicesList filter={filter} />
+            </ClientRequest>
+          </SimpleGrid>
         )}
       </Box>
     </Container>

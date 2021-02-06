@@ -11,33 +11,9 @@ import {
 } from '@chakra-ui/react';
 import { FaCheck, FaExclamation } from 'react-icons/fa';
 import { useQuery } from 'react-query';
-import { gql } from 'graphql-request';
 import type { Environment, Query } from '@/types/query.types';
 
-export const GET_LIST = gql`
-  query GetServices {
-    allPackages {
-      id
-      name
-      organization {
-        title
-      }
-      organizationUnit {
-        title
-      }
-      environments {
-        id
-        name
-        active
-        authMethod
-        services {
-          name
-          host
-        }
-      }
-    }
-  }
-`;
+import { GET_LIST } from './queries';
 
 interface ServicesListProps {
   filter: 'all' | 'up' | 'down';

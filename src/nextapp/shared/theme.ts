@@ -31,8 +31,8 @@ const theme = extendTheme({
   components: {
     Button: {
       variants: {
-        primary: { bg: 'bc-blue' },
-        secondary: { bg: 'bc-yellow' },
+        primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
+        secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
       },
     },
   },

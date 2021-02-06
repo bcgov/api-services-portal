@@ -125,7 +125,7 @@ const schema = `
 
 const server = mockServer(schema, {
   Query: () => ({
-    allPackages: () => new MockList(6, (_, { id }) => ({ id })),
+    allPackages: () => new MockList(0, (_, { id }) => ({ id })),
   }),
   Package: () => ({
     name: casual.title,
@@ -222,10 +222,15 @@ app.get('/admin/session', (_, res) => {
   // res.sendStatus(401);
   res.json({
     user: {
+      id: casual.uuid,
+      userId: casual.uuid,
       name: 'Viktor Vaughn',
       username: 'vikvaughn',
       email: 'villain@doom.net',
       roles: ['api-owner'],
+      isAdmin: false,
+      namespace: 'ns.sampler',
+      groups: null,
     },
   });
 });

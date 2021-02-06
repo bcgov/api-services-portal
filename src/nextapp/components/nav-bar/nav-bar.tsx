@@ -50,7 +50,7 @@ const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
       bg="bc-blue-alt"
       pos="fixed"
       w="100%"
-      zIndex="1000"
+      zIndex={{ base: 1000, sm: 1 }}
       top="65px"
     >
       <Container
