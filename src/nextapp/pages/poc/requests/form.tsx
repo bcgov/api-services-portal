@@ -9,7 +9,7 @@ import graphql from '../../../shared/services/graphql'
 import { ADD } from './queries'
 
 const Form = ({ refetch }) => {
-    let [value, setValue] = useState('');
+    const [value, setValue] = useState('');
 
     return (
       <div>

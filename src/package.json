@@ -16,6 +16,7 @@
   "start": "cross-env NODE_ENV=production keystone start",
   "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
   "lint": "eslint .",
+  "lint-ts": "eslint ./nextapp --ext .ts,.tsx --quiet & tsc -p ./nextapp/tsconfig.json --noEmit",
   "test": "jest --coverage",
   "test:watch": "jest -w --coverage",
   "generate": "graphql-codegen"

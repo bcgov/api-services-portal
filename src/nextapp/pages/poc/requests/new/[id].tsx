@@ -26,8 +26,8 @@ const NewRequest = () => {
     const [environmentId, setEnvironmentId] = useState<React.ReactText>();
     const [applicationId, setApplicationId] = useState<React.ReactText>();
 
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const fetch = () => {
         const { router: { pathname, query: { id } } } = context
         if (context['router'] != null && id) {
             graphql(GET_PACKAGE, { id : id })
@@ -71,7 +71,7 @@ const NewRequest = () => {
                                 <RadioGroup isRequired={true} onChange={setApplicationId} defaultValue={applicationId}>
                                     <Stack direction="column">
                                         { data.allApplications.map(e => (
-                                            <Radio value={e.id}>{e.name}</Radio>
+                                            <Radio key={e.id} value={e.id}>{e.name}</Radio>
                                         ))}
                                     </Stack>
                                 </RadioGroup>
@@ -99,7 +99,7 @@ const NewRequest = () => {
                                 <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
                                     <Stack direction="column">
                                         { dataset.environments.map(e => (
-                                            <Radio value={e.id}>{e.name} : {e.authMethod}</Radio>
+                                            <Radio key={e.id} value={e.id}>{e.name} : {e.authMethod}</Radio>
                                         ))}
                                     </Stack>
                                 </RadioGroup>

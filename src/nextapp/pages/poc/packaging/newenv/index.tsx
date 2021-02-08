@@ -69,7 +69,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
                     <Stack direction="column" spacing={4}>
                         <Select placeholder="Select Package" onChange={(e) => setPackage(e.target.value)} value={_package}>
                         {packages.map(p => (
-                           <option value={p.id}>{p.name}</option>
+                           <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                         </Select>
                         <RadioGroup onChange={setEnvValue} value={envValue}>

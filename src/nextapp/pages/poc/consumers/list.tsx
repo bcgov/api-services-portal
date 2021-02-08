@@ -36,18 +36,18 @@ function List({ data, state, refetch }) {
                     </Thead>
                     <Tbody>
                 {data.allConsumers.map((item, index) => (
-                    <Tr>
+                    <Tr key={item.customId}>
                         <Td>{item.username}</Td>
                         <Td>{item.customId}</Td>
                         <Td>
                             <HStack spacing={4}>{Array.isArray(item.plugins) ? item.plugins.map(p => (
-                                <Tag size="lg" colorScheme="orange" borderRadius="5px">
+                                <Tag key={p.name} size="lg" colorScheme="orange" borderRadius="5px">
                                     <TagLabel>{p.name}</TagLabel>
                                 </Tag>
                             )) : false}</HStack>     
                         </Td>
                         <Td><HStack spacing={4}>{Array.isArray(item.tags) ? item.tags.map(tag => (
-                            <Tag size="lg" colorScheme="red" borderRadius="full">
+                            <Tag key={tag} size="lg" colorScheme="red" borderRadius="full">
                                 <TagLabel>{tag}</TagLabel>
                             </Tag>
                         )) : false}</HStack></Td>

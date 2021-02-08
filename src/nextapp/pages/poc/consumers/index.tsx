@@ -14,8 +14,8 @@ import List from './list'
 
 const ConsumersPage = () => {
 
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const fetch = () => {
         graphql(GET_LIST)
         .then(({ data }) => {
             setState({ state: 'loaded', data });

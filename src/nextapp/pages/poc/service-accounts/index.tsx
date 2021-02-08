@@ -10,7 +10,7 @@ import graphql from '../../../shared/services/graphql'
 
 const ServiceAccountsPage = () => {
 
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     // let fetch = () => {
     //     graphql(GET_LIST)
     //     .then(({ data }) => {

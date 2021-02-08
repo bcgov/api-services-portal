@@ -30,7 +30,7 @@ function List({ data, state, refetch }) {
             
           <GridLayout>
             {data.allPackages.filter(p => p.environments.filter(e => e.active).length > 0).map((item, index) => (
-                <Card>
+                <Card key={item.id}>
                     <Heading size="md" mb={2}>
                         {item.name}
                     </Heading>
@@ -43,7 +43,7 @@ function List({ data, state, refetch }) {
                         {/* <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/> */}
                         { (item.dataset != null) ? (
                             <>
-                                <div><b><a href={`https://catalogue.data.gov.bc.ca/dataset/${item.dataset.name}`} target="_blank">{item.dataset.title} <Badge>BCDC</Badge></a></b></div>
+                                <div><b><a href={`https://catalogue.data.gov.bc.ca/dataset/${item.dataset.name}`} target="_blank" rel="noreferrer">{item.dataset.title} <Badge>BCDC</Badge></a></b></div>
                                 <div>
                                     {item.dataset.notes.length > 175 ? item.dataset.notes.substring(0,175) + "..." : item.dataset.notes}
                                 </div>
@@ -56,7 +56,7 @@ function List({ data, state, refetch }) {
                                     ))}
                                 </SimpleGrid>       
                                 <Stack direction="row" wrap="wrap" spacing={1} shouldWrapChildren={true}>{Array.isArray(JSON.parse(item.dataset.tags)) ? JSON.parse(item.dataset.tags).map(p => (
-                                    <Tag size="sm" colorScheme="orange" borderRadius="5px">
+                                    <Tag key={p.name} size="sm" colorScheme="orange" borderRadius="5px">
                                         <TagLabel>{p.name}</TagLabel>
                                     </Tag>
                                 )) : false}</Stack>   
@@ -65,7 +65,7 @@ function List({ data, state, refetch }) {
                         ) : false }
                         <div><b>Environments</b></div>
                         <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
-                            <Tag size="lg" colorScheme="blue" borderRadius="5px">
+                            <Tag key={p.name} size="lg" colorScheme="blue" borderRadius="5px">
                                 <TagLabel>{p.name}</TagLabel>
                             </Tag>
                         )) : false}</HStack>   

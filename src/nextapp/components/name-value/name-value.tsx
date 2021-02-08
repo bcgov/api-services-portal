@@ -3,9 +3,9 @@ import * as React from 'react';
 import cx from 'classnames';
 
 interface NameValueProps {
-  name: String;
+  name: string;
   value: any;
-  width: String;
+  width: string;
 }
 
 const NameValue: React.FC<NameValueProps> = ({ name, value, width }) => {

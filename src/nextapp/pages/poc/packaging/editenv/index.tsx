@@ -34,8 +34,8 @@ import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" }, env = { id: null, name: "", authMethod: "", services: []}}) => {
     const [name, setName] = useState(env.name);
     const [authMethod, setAuthMethod] = useState(env.authMethod);
-    let [ items, setItems ] = useState (env.services.map(s => s.id))
-    let [ editable, setEditable ] = useState (false)
+    const [ items, setItems ] = useState (env.services.map(s => s.id))
+    const [ editable, setEditable ] = useState (false)
 
     const toast = useToast()
     const successToast = () => {

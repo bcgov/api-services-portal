@@ -5,7 +5,7 @@ import NavBar from '../nav-bar';
 
 describe('components/nav-bar', () => {
   it('should work', () => {
-    const links = [{ name: 'Home', url: '/' }];
+    const links = [{ name: 'Home', url: '/', access: [] }];
     const { getByText } = render(<NavBar links={links} pathname="/" />);
     expect(getByText('Home')).toBeTruthy();
   });

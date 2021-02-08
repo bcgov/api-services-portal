@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { useQuery } from 'react-query';
+import type { Query } from '@/types/query.types';
 
 import { GET_LIST } from './queries';
 
@@ -35,7 +36,7 @@ const PackagesList: React.FC = () => {
     <Box width="100%">
       <Accordion>
         {data.allPackages.map((d) => (
-          <AccordionItem key={d}>
+          <AccordionItem key={d.id}>
             <AccordionButton>
               <Box flex="1" textAlign="left">
                 {d.name}

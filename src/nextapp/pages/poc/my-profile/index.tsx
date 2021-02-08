@@ -8,8 +8,8 @@ import graphql from '../../../shared/services/graphql'
 
 const MyProfilePage = () => {
 
-    let [{ state, user }, setState] = useState({ state: 'loading', user: null });
-    let _fetch = () => {
+    const [{ state, user }, setState] = useState({ state: 'loading', user: null });
+    const _fetch = () => {
         fetch('/admin/session').then(res => res.json()).then (json => {
             console.log(json)
             setState({ state: 'loaded', user: json['user'] });
