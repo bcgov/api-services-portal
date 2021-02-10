@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
@@ -17,8 +18,9 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  useToast,
 } from '@chakra-ui/react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 import { ADD_ENV, ADD_PACKAGE } from './queries';
 
@@ -31,8 +33,23 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
   open,
   onClose,
 }) => {
-  const packageMutation = useMutation((name: string) =>
-    api(ADD_PACKAGE, { name })
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const packageMutation = useMutation(
+    (name: string) => api(ADD_PACKAGE, { name }),
+    {
+      onSuccess: (data) => {
+        queryClient.setQueryData('packages', (cached) => {
+          return {
+            allPackages: [
+              ...cached.allPackages,
+              { ...data.createPackage, environments: [] },
+            ],
+          };
+        });
+        onClose();
+      },
+    }
   );
   // const environmentMutation = useMutation((packageId: string, name: string) =>
   //   api(ADD_ENV, { packageId, name })
@@ -51,7 +68,18 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
         // const environment = data.get('environment') as string;
         const res = await packageMutation.mutateAsync(packageName);
         // await environmentMutation.mutateAsync(packageName, environment);
-        console.log(res);
+        if (res.errors) {
+          toast({
+            title: 'Create Failed',
+            status: 'error',
+          });
+        } else {
+          toast({
+            title: `Package ${packageName} created!`,
+            description: 'You can now add more environments',
+            status: 'success',
+          });
+        }
       }
     }
   };
@@ -63,7 +91,11 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
         <ModalHeader>Create Package</ModalHeader>
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
-            <FormControl isRequired mb={4}>
+            <FormControl
+              isRequired
+              mb={4}
+              isDisabled={packageMutation.isLoading}
+            >
               <FormLabel>Package Name</FormLabel>
               <Input placeholder="Package Name" name="name" />
             </FormControl>
@@ -97,7 +129,11 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
         <ModalFooter>
           <ButtonGroup>
             <Button onClick={onClose}>Cancel</Button>
-            <Button variant="primary" onClick={createPackage}>
+            <Button
+              isLoading={packageMutation.isLoading}
+              variant="primary"
+              onClick={createPackage}
+            >
               Create
             </Button>
           </ButtonGroup>

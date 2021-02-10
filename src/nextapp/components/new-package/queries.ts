@@ -4,6 +4,7 @@ export const ADD_PACKAGE = gql`
   mutation Add($name: String!) {
     createPackage(data: { name: $name }) {
       id
+      name
     }
   }
 `;

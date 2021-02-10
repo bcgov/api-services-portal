@@ -39,7 +39,7 @@ const PackagingPage: React.FC = () => {
       <Box mt={5}>
         <ClientRequest
           fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-            <Skeleton key={d} width="100%" height="8" mb={2} />
+            <Skeleton key={d} width="100%" height="160px" mb={2} />
           ))}
         >
           <PackagesList />

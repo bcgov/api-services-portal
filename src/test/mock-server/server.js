@@ -10,6 +10,8 @@ const cors = require('cors');
 
 const app = express();
 const port = 4000;
+const random = (start, end) =>
+  Math.floor(Math.random() * (end - start) + start);
 
 app.use(cors());
 app.use(express.json());
@@ -175,7 +177,7 @@ const server = mockServer(schemaWithMocks, {
     isActive: casual.coin_flip,
     tags: casual.words(3),
     environments: () =>
-      new MockList(Math.floor(Math.random() * (3 - 0) + 0), (_, { id }) => ({
+      new MockList(random(0, 3), (_, { id }) => ({
         id,
       })),
   }),
@@ -206,10 +208,10 @@ const server = mockServer(schemaWithMocks, {
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
-    services: () => new MockList(1, (_, { id }) => ({ id })),
+    services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
   ServiceRoute: () => ({
-    name: casual.title,
+    name: casual.populate('{{domain}}.api.gov.bc.ca'),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,

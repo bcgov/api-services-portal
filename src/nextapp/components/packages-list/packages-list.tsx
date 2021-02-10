@@ -15,9 +15,11 @@ import {
   Text,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
+import NewPackage from '@/components/new-package';
 import { useQuery } from 'react-query';
 import type { Query, EnvironmentAuthMethodType } from '@/types/query.types';
 
+import AddEnvironment from './add-environment';
 import { GET_LIST } from './queries';
 import {
   FaKey,
@@ -56,8 +58,9 @@ const PackagesList: React.FC = () => {
   if (data.allPackages.length === 0) {
     return (
       <EmptyPane
-        title="You Have No Packages"
-        message="Create your first package via the New Package button. You can create additional environments once a package has been made."
+        title="Make your first Package"
+        message="You can create additional environments once a package has been made."
+        action={<NewPackage />}
       />
     );
   }
@@ -93,7 +96,6 @@ const PackagesList: React.FC = () => {
               </Box>
               <Box>
                 <ButtonGroup
-                  isAttached
                   size="sm"
                   variant="tertiary"
                   opacity={0}
@@ -104,10 +106,12 @@ const PackagesList: React.FC = () => {
                     },
                   }}
                 >
-                  <Button>Edit</Button>
-                  <IconButton aria-label="Add Environment">
-                    <Icon as={FaPlusCircle} />
-                  </IconButton>
+                  <Button leftIcon={<Icon as={FaPenSquare} />}>Edit</Button>
+                  <AddEnvironment packageName={d.name}>
+                    <Button leftIcon={<Icon as={FaPlusCircle} />}>
+                      Add Env
+                    </Button>
+                  </AddEnvironment>
                 </ButtonGroup>
               </Box>
             </Box>
@@ -119,7 +123,9 @@ const PackagesList: React.FC = () => {
                   boxShadow="inset 0 3px 5px rgba(0, 0, 0, 0.1)"
                 >
                   <Center>
-                    <Button variant="primary">Add Environment</Button>
+                    <AddEnvironment packageName={d.name}>
+                      <Button variant="primary">Add Environment</Button>
+                    </AddEnvironment>
                   </Center>
                 </Box>
               )}
