@@ -1,4 +1,9 @@
-const { mockServer, MockList } = require('graphql-tools');
+const {
+  addMocksToSchema,
+  makeExecutableSchema,
+  mockServer,
+  MockList,
+} = require('graphql-tools');
 const casual = require('casual-browserify');
 const express = require('express');
 const cors = require('cors');
@@ -10,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const schema = `
+const schemaStruct = `
   type Organization {
     id: ID!
     name: String!
@@ -118,17 +123,49 @@ const schema = `
     allPackages: [ Package ]
   }
 
+  input CreatePackageInput {
+    name: String!
+  }
+
+  input CreateEnvironmentInput {
+    name: String!
+    package: ID!
+  }
+
+  type Mutation {
+    createPackage(data: CreatePackageInput): Package!
+    createEnvironment(data: CreateEnvironmentInput): Environment!
+  }
+
   schema {
     query: Query
+    mutation: Mutation
   }
 `;
 
-const server = mockServer(schema, {
+//const store = createMockStore({ schema: schemaStruct });
+const allPackages = new MockList(6, (_, { id }) => ({ id }));
+// const allPackages = [{ id: casual.uuid, name: 'hi' }];
+const schema = makeExecutableSchema({ typeDefs: schemaStruct });
+const schemaWithMocks = addMocksToSchema({
+  schema,
+});
+const server = mockServer(schemaWithMocks, {
   Query: () => ({
-    allPackages: () => new MockList(0, (_, { id }) => ({ id })),
+    allPackages: () => allPackages,
+  }),
+  Mutation: () => ({
+    createPackage: ({ data }) => {
+      // allPackages.push({ id: casual.uuid, name: data.name });
+      return { name: data.name };
+    },
+    createEnvironment: ({ data }) => {
+      return { name: data.name };
+    },
   }),
   Package: () => ({
     name: casual.title,
+    description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -137,6 +174,10 @@ const server = mockServer(schema, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
+    environments: () =>
+      new MockList(Math.floor(Math.random() * (3 - 0) + 0), (_, { id }) => ({
+        id,
+      })),
   }),
   Organization: () => ({
     name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),

@@ -33,6 +33,7 @@ const theme = extendTheme({
       variants: {
         primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
         secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
+        tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
       },
     },
   },

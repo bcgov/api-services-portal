@@ -5,6 +5,7 @@ export const GET_LIST = gql`
     allPackages {
       id
       name
+      description
       organization {
         title
       }

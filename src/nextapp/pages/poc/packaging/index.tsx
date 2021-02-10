@@ -13,18 +13,14 @@ import {
 import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import PackagesList from '@/components/packages-list';
+import NewPackage from '@/components/new-package';
 
 const PackagingPage: React.FC = () => {
-  const actionElements = (
-    <ButtonGroup>
-      <Button variant="primary">New Package</Button>
-      <Button variant="primary">New Environment</Button>
-    </ButtonGroup>
-  );
+  const actionElements = <NewPackage />;
 
   return (
     <Container maxW="6xl">
-      <VStack mt={4}>
+      <VStack my={4}>
         <Alert status="info">
           <AlertIcon />
           API Owner can define environments and which Services are for which

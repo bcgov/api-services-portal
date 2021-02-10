@@ -3,14 +3,20 @@ import { Box, Center, Heading, Icon, Text } from '@chakra-ui/react';
 import { FaRegFolderOpen } from 'react-icons/fa';
 
 interface EmptyPaneProps {
+  action?: React.ReactNode;
   error?: string;
   message: string;
   title: string;
 }
 
-const EmptyPane: React.FC<EmptyPaneProps> = ({ error, message, title }) => {
+const EmptyPane: React.FC<EmptyPaneProps> = ({
+  action,
+  error,
+  message,
+  title,
+}) => {
   return (
-    <Center my={12}>
+    <Center my={12} data-testid="empty-pane">
       <Box
         textAlign="center"
         p={8}
@@ -25,6 +31,7 @@ const EmptyPane: React.FC<EmptyPaneProps> = ({ error, message, title }) => {
         </Heading>
         <Text>{message}</Text>
         {error && <Text color="red.500">{error}</Text>}
+        {action && <Box mt="4">{action}</Box>}
       </Box>
     </Center>
   );
