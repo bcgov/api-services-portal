@@ -32,6 +32,7 @@ const links: NavLink[] = [
   { name: 'Applications', url: '/poc/applications', access: ['developer'] },
   { name: 'Documentation', url: '/docs', access: [] },
   { name: 'APS Admin', url: '/admin', access: ['aps-admin'] },
+  { name: 'POC Packages', url: '/poc/packages', access: ['aps-admin'] },
 ];
 
 export default links;
