@@ -16,4 +16,10 @@ Actions can be: "allow" and "deny", but they can also be GraphQLWhere clauses (i
 
 ## Enhancements
 
-* For Developer role, only show Datasets, Organizations, OrganizationUnits, ServiceRoutes that are linked to an Environment
+* For Developer role, only show Datasets, Organizations, OrganizationUnits, ServiceRoutes that are linked to a Package or Environment
+
+* This one is for Applications that an API Owner can see.  They should be able to see their own applications, and the Applications that have made a Request for Access to a PackageEnvironment that they are associated with by namespace.
+
+* Secure Content - allow an API Owner to associate content to a Package, and have it available once they have been approved for using that Package
+
+
