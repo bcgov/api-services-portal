@@ -1,16 +1,23 @@
-const { mockServer, MockList } = require('graphql-tools');
+const {
+  addMocksToSchema,
+  makeExecutableSchema,
+  mockServer,
+  MockList,
+} = require('graphql-tools');
 const casual = require('casual-browserify');
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 const port = 4000;
+const random = (start, end) =>
+  Math.floor(Math.random() * (end - start) + start);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const schema = `
+const schemaStruct = `
   type Organization {
     id: ID!
     name: String!
@@ -118,17 +125,49 @@ const schema = `
     allPackages: [ Package ]
   }
 
+  input CreatePackageInput {
+    name: String!
+  }
+
+  input CreateEnvironmentInput {
+    name: String!
+    package: ID!
+  }
+
+  type Mutation {
+    createPackage(data: CreatePackageInput): Package!
+    createEnvironment(data: CreateEnvironmentInput): Environment!
+  }
+
   schema {
     query: Query
+    mutation: Mutation
   }
 `;
 
-const server = mockServer(schema, {
+//const store = createMockStore({ schema: schemaStruct });
+const allPackages = new MockList(6, (_, { id }) => ({ id }));
+// const allPackages = [{ id: casual.uuid, name: 'hi' }];
+const schema = makeExecutableSchema({ typeDefs: schemaStruct });
+const schemaWithMocks = addMocksToSchema({
+  schema,
+});
+const server = mockServer(schemaWithMocks, {
   Query: () => ({
-    allPackages: () => new MockList(6, (_, { id }) => ({ id })),
+    allPackages: () => allPackages,
+  }),
+  Mutation: () => ({
+    createPackage: ({ data }) => {
+      // allPackages.push({ id: casual.uuid, name: data.name });
+      return { name: data.name };
+    },
+    createEnvironment: ({ data }) => {
+      return { name: data.name };
+    },
   }),
   Package: () => ({
     name: casual.title,
+    description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -137,6 +176,10 @@ const server = mockServer(schema, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
+    environments: () =>
+      new MockList(random(0, 3), (_, { id }) => ({
+        id,
+      })),
   }),
   Organization: () => ({
     name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
@@ -165,10 +208,10 @@ const server = mockServer(schema, {
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
-    services: () => new MockList(1, (_, { id }) => ({ id })),
+    services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
   ServiceRoute: () => ({
-    name: casual.title,
+    name: casual.populate('{{domain}}.api.gov.bc.ca'),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -222,10 +265,15 @@ app.get('/admin/session', (_, res) => {
   // res.sendStatus(401);
   res.json({
     user: {
+      id: casual.uuid,
+      userId: casual.uuid,
       name: 'Viktor Vaughn',
       username: 'vikvaughn',
       email: 'villain@doom.net',
       roles: ['api-owner'],
+      isAdmin: false,
+      namespace: 'ns.sampler',
+      groups: null,
     },
   });
 });

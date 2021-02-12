@@ -33,9 +33,9 @@ const customStyles = {
 
 const MyApplicationsPage = () => {
 
-    let [{ state, data}, setState] = useState({ state: 'loading', data: null });
+    const [{ state, data}, setState] = useState({ state: 'loading', data: null });
 
-    let fetch = () => {
+    const fetch = () => {
         graphql(GET_LIST, {})
         .then(({ data }) => {
             setState({ state: 'loaded', data });

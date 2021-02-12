@@ -24,8 +24,8 @@ import { create } from 'domain';
 
 const FulfillRequest = () => {
     const context = useAppContext()
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const fetch = () => {
         const { router: { pathname, query: { id } } } = context
         if (context['router'] != null && id) {
             graphql(GET_REQUEST, { id : id })

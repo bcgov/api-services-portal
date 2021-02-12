@@ -2,6 +2,7 @@ import * as React from 'react';
 import api from '@/shared/services/api';
 import {
   Box,
+  Button,
   Center,
   Heading,
   Icon,
@@ -9,35 +10,13 @@ import {
   ListItem,
   Text,
 } from '@chakra-ui/react';
+import EmptyPane from '@/components/empty-pane';
 import { FaCheck, FaExclamation } from 'react-icons/fa';
+import NewPackage from '@/components/new-package';
 import { useQuery } from 'react-query';
-import { gql } from 'graphql-request';
 import type { Environment, Query } from '@/types/query.types';
 
-export const GET_LIST = gql`
-  query GetServices {
-    allPackages {
-      id
-      name
-      organization {
-        title
-      }
-      organizationUnit {
-        title
-      }
-      environments {
-        id
-        name
-        active
-        authMethod
-        services {
-          name
-          host
-        }
-      }
-    }
-  }
-`;
+import { GET_LIST } from './queries';
 
 interface ServicesListProps {
   filter: 'all' | 'up' | 'down';
@@ -66,8 +45,12 @@ const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
   return (
     <>
       {data.allPackages.length <= 0 && (
-        <Box width="100%">
-          <Text color="gray.400">No services created yet.</Text>
+        <Box gridColumnStart="2" gridColumnEnd="4">
+          <EmptyPane
+            title="No services created yet."
+            message="You need to create a package before services are available"
+            action={<NewPackage />}
+          />
         </Box>
       )}
       {data.allPackages.map((d) =>

@@ -23,6 +23,12 @@ import bcdc from './bcdc'
 import NameValue from '../../../components/name-value';
 
 function List({ data, state, refetch }) {
+    const toast = useToast()
+    const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: "", services: []},pkg:{id:null, name:""}});
+    const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
+    const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure()
+
+
     switch (state) {
       case 'loading': {
         return <p>Loading...</p>;
@@ -34,7 +40,7 @@ function List({ data, state, refetch }) {
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
-        const toast = useToast()
+
         const errorToast = (message) => {
             toast({
                 title: "Failed to make active",
@@ -55,15 +61,11 @@ function List({ data, state, refetch }) {
             })
         }
 
-        const [selectedPkgEnv, setSelectedPkgEnv] = useState({env:{id:null, name:"", authMethod: "", services: []},pkg:{id:null, name:""}});
-        const { isOpen: isEnvOpen, onOpen: onEnvOpen, onClose: onEnvClose } = useDisclosure()
-        const { isOpen: isPkgOpen, onOpen: onPkgOpen, onClose: onPkgClose } = useDisclosure()
-
         return (
             <>
                 <Accordion defaultIndex={[]} allowMultiple>
                 {data.allPackages.map((item, index) => (
-                    <AccordionItem>
+                    <AccordionItem key={item.name}>
                         <AccordionButton>
                             <Box flex="1" textAlign="left">
                                 {item.name} <IconButton aria-label="Edit Package" size="sm" icon={<Icon as={FaEdit} />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
@@ -78,7 +80,7 @@ function List({ data, state, refetch }) {
                             <Table variant="simple">
                             <Tbody>
                             {item.environments.map (env => (
-                            <Tr>
+                            <Tr key={env.id}>
                                 <Td>
                                     <FormControl display="flex" alignItems="center">
                                         <Switch onChange={() => toggleActive(item, env)} isChecked={env.active ? env.active:false}/>
@@ -87,7 +89,7 @@ function List({ data, state, refetch }) {
                                 <Td>
                                     {env.name}</Td>
                                 <Td><HStack wrap="wrap" spacing={4}>{Array.isArray(env.services) ? env.services.map(svc => (
-                                    <Tag size="lg" colorScheme="blue" borderRadius="full">
+                                    <Tag key={svc.name} size="lg" colorScheme="blue" borderRadius="full">
                                         <TagLabel>{svc.name}</TagLabel>
                                     </Tag>
                                 )) : false}</HStack></Td>

@@ -20,7 +20,7 @@ function List({ data, state, refetch }) {
         return (
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {data.allCredentialIssuers.map((item, index) => (
-                <li style={styles.listItem}>
+                <li key={item.name} style={styles.listItem}>
                     <NameValue name="Name" value={item.name} width="300px"/>
                     <NameValue name="Auth Method" value={item.authMethod} width="200px"/>
                     <NameValue name="Mode" value={item.mode} width="150px"/>

@@ -4,6 +4,7 @@ const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
   text: '#313132',
+  'bc-link': '#1A5A96',
   'bc-blue-alt': '#38598A',
   'bc-gray': '#f2f2f2',
   'bc-divider': '#606060',
@@ -30,8 +31,9 @@ const theme = extendTheme({
   components: {
     Button: {
       variants: {
-        primary: { bg: 'bc-blue' },
-        secondary: { bg: 'bc-yellow' },
+        primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
+        secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
+        tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
       },
     },
   },

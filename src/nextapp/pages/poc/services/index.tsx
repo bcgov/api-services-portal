@@ -1,5 +1,4 @@
 import * as React from 'react';
-import AppError from '@/components/app-error';
 import {
   Box,
   Container,
@@ -9,31 +8,32 @@ import {
   SimpleGrid,
   Skeleton,
 } from '@chakra-ui/react';
-import { ErrorBoundary } from 'react-error-boundary';
+import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
-import { withAuth } from '@/shared/services/auth';
+import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
 
 type Filters = 'all' | 'up' | 'down';
 
-export const getServerSideProps = withAuth(async (context) => {
-  const { user } = context;
+// export const getServerSideProps = withAuth(async (context) => {
+//   const { user } = context;
 
-  if (!user) {
-    return {
-      redirect: {
-        destination: '/unauthorized',
-        permanent: false,
-      },
-    };
-  }
+//   if (!user) {
+//     return {
+//       redirect: {
+//         destination: '/unauthorized',
+//         permanent: false,
+//       },
+//     };
+//   }
 
-  return {
-    props: {},
-  };
-});
+//   return {
+//     props: {},
+//   };
+// });
 
 const ServicesPage: React.FC = () => {
+  const { user } = useAuth();
   const [filter, setFilter] = React.useState<Filters>('all');
   const isServer = typeof window === 'undefined';
   const onFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -62,6 +62,7 @@ const ServicesPage: React.FC = () => {
           </Heading>
           <Select
             w="25%"
+            bgColor="white"
             borderWidth={2}
             borderRadius={0}
             borderColor="text"
@@ -73,18 +74,16 @@ const ServicesPage: React.FC = () => {
             <option value="down">Down</option>
           </Select>
         </Box>
-        {!isServer && (
-          <ErrorBoundary fallback={<AppError />}>
-            <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
-              <React.Suspense
-                fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-                  <Skeleton key={d} height="200px" />
-                ))}
-              >
-                <ServicesList filter={filter} />
-              </React.Suspense>
-            </SimpleGrid>
-          </ErrorBoundary>
+        {user && !isServer && (
+          <SimpleGrid columns={{ base: 1, sm: 3, md: 4 }} spacing={4} mb={8}>
+            <ClientRequest
+              fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+                <Skeleton key={d} height="200px" />
+              ))}
+            >
+              <ServicesList filter={filter} />
+            </ClientRequest>
+          </SimpleGrid>
         )}
       </Box>
     </Container>

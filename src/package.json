@@ -16,6 +16,7 @@
   "start": "cross-env NODE_ENV=production keystone start",
   "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
   "lint": "eslint .",
+  "lint-ts": "eslint ./nextapp --ext .ts,.tsx --quiet & tsc -p ./nextapp/tsconfig.json --noEmit",
   "test": "jest --coverage",
   "test:watch": "jest -w --coverage",
   "generate": "graphql-codegen"
@@ -79,6 +80,7 @@
   "@graphql-codegen/cli": "^1.20.1",
   "@graphql-codegen/typescript": "^1.20.2",
   "@testing-library/react": "^11.2.3",
+  "@types/classnames": "^2.2.11",
   "@types/jest": "^26.0.20",
   "@types/node": "^14.14.14",
   "@types/react": "^17.0.0",

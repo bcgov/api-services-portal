@@ -8,7 +8,7 @@ const Wrapper = ({ children }) => {
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 
-const customRender = (ui, options) =>
+const customRender = (ui: React.ReactElement, options?: any) =>
   render(ui, { wrapper: Wrapper, ...options });
 
 // re-export everything

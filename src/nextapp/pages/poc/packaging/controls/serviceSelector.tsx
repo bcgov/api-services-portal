@@ -10,8 +10,8 @@ import graphql from '../../../../shared/services/graphql'
 import { Badge, Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 
 const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items = []}) => {
-    let [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    let fetch = () => {
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const fetch = () => {
         graphql(GET_AVAIL_SERVICES, {ns: "dss-loc"})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
@@ -27,7 +27,7 @@ const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items =
     return mode == "edit" ? (
                 <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
                 { state === 'loaded' && data.allServiceRoutes.filter(svc => svc.environment == null || svc.environment.id == packageEnvironmentId).map(svc => (
-                    <HStack spacing={3}>
+                    <HStack key={svc.id} spacing={3}>
                         <Switch size="sm" onChange={(e) => { if (!items.includes(svc.id)) { setItems([
                                 ...items,
                                 svc.id
@@ -45,7 +45,7 @@ const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items =
                 ) : (
                     <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
                         { state === 'loaded' && data.allServiceRoutes.filter (svc => items.includes(svc.id)).map(svc => (
-                            <HStack spacing={3}>
+                            <HStack key={svc.id} spacing={3}>
                                 <span>{svc.name}</span>
                             </HStack>
                         ))}

@@ -42,7 +42,7 @@ function SecretInput({value, defaultShow}) {
 }
 
 function List({ data, state, refetch }) {
-    let [{cred,reqId}, setCred] = useState({cred:"", reqId:null});
+    const [{cred,reqId}, setCred] = useState({cred:"", reqId:null});
 
     const generateCredential = (reqId) => {
         graphql(GEN_CREDENTIAL, { id: reqId }).then(data => {
@@ -74,10 +74,10 @@ function List({ data, state, refetch }) {
                 </Thead>
                 <Tbody>
             {data.allApplications.map((item, index) => (
-                <Tr verticalAlign="top">
+                <Tr key={item.appId} verticalAlign="top">
                     <Td>{item.appId}
                     {data.allAccessRequests.filter(req => req.application && req.application.appId == item.appId).map((req, index) => (
-                            <Box>
+                            <Box key={req.id}>
                             <HStack className="m-5">
                             <span><b>Access Request {req.packageEnvironment.package.name} {req.packageEnvironment.name}</b></span>
                             { req.isIssued ? (

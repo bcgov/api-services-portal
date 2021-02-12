@@ -25,15 +25,16 @@ export function withAuth(handler) {
   ): Promise<ReturnServerSideContext> => {
     const nextContext: ReturnServerSideContext = { ...context };
     const user = await getSession();
-    const [section] = /\/?(poc\/)([a-zA-Z-_]*)/.exec(context.req.url);
+    const [section] = /\/?(home|docs|poc\/)([a-zA-Z-_]*)/.exec(context.req.url);
     const currentRoute = links.find((link) => section === link.url);
 
-    if (
-      user &&
-      currentRoute &&
-      currentRoute.access.some((role) => user.roles.includes(role))
-    ) {
-      nextContext.user = user;
+    if (user && currentRoute) {
+      if (
+        currentRoute.access.length === 0 ||
+        currentRoute.access.some((role) => user.roles.includes(role))
+      ) {
+        nextContext.user = user;
+      }
     }
 
     return handler(nextContext);

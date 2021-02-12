@@ -6,7 +6,7 @@ const { useEffect, useState } = React;
 import { Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 
 const GenericControl = ({showAlways = false, meta = { name: "", config: []}}) => {
-    let [active, setActive] = useState(false);
+    const [active, setActive] = useState(false);
 
     return (
         <Box maxW="sm" borderWidth="0px" borderRadius="lg" overflow="hidden">
