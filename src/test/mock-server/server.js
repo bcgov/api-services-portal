@@ -129,14 +129,28 @@ const schemaStruct = `
     name: String!
   }
 
+  input EnvironmentPackageInput {
+    id: ID!
+  }
+
+  input CreateEnvironmentOneToManyInput {
+    connect: EnvironmentPackageInput
+  }
+
   input CreateEnvironmentInput {
     name: String!
-    package: ID!
+    package: CreateEnvironmentOneToManyInput
+  }
+
+  input UpdateEnvironmentInput {
+    active: Boolean
   }
 
   type Mutation {
     createPackage(data: CreatePackageInput): Package!
     createEnvironment(data: CreateEnvironmentInput): Environment!
+    updateEnvironment(id: ID!, data: UpdateEnvironmentInput): Environment!
+    deleteEnvironment(id: ID!): Environment!
   }
 
   schema {
@@ -146,8 +160,14 @@ const schemaStruct = `
 `;
 
 //const store = createMockStore({ schema: schemaStruct });
-const allPackages = new MockList(6, (_, { id }) => ({ id }));
-// const allPackages = [{ id: casual.uuid, name: 'hi' }];
+// const allPackages = new MockList(6, (_, { id }) => ({ id }));
+const allPackages = [
+  {
+    id: casual.uuid,
+    name: 'BC Data Catalogue',
+    environments: [{ id: casual.uuid, name: 'test', active: true }],
+  },
+];
 const schema = makeExecutableSchema({ typeDefs: schemaStruct });
 const schemaWithMocks = addMocksToSchema({
   schema,
@@ -158,11 +178,51 @@ const server = mockServer(schemaWithMocks, {
   }),
   Mutation: () => ({
     createPackage: ({ data }) => {
-      // allPackages.push({ id: casual.uuid, name: data.name });
-      return { name: data.name };
+      const id = casual.uuid;
+      allPackages.push({ id, name: data.name, environments: [] });
+      return { id, name: data.name };
     },
     createEnvironment: ({ data }) => {
-      return { name: data.name };
+      const parent = allPackages.find((d) => d.id === data.package.connect.id);
+      const res = {
+        id: casual.uuid,
+        name: data.name,
+        active: false,
+      };
+
+      if (parent) {
+        parent.environments.push(res);
+      }
+
+      return res;
+    },
+    updateEnvironment: ({ id, data }) => {
+      allPackages.forEach((p) => {
+        const environmentIds = p.environments.map((e) => e.id);
+
+        if (environmentIds.includes(id)) {
+          const environmentIndex = environmentIds.indexOf(id);
+          if (environmentIndex >= 0) {
+            p.environments[environmentIndex].active = data.active;
+          }
+        }
+      });
+
+      return { id, active: data.active };
+    },
+    deleteEnvironment: ({ id }) => {
+      let name = '';
+
+      allPackages.forEach((p) => {
+        const environmentIds = p.environments.map((e) => e.id);
+        const environmentIndex = environmentIds.indexOf(id);
+        if (environmentIndex >= 0) {
+          name = p.environments[environmentIndex].name;
+        }
+        p.environments = p.environments.filter((e) => e.id !== id);
+      });
+
+      return { id, name };
     },
   }),
   Package: () => ({
@@ -176,10 +236,10 @@ const server = mockServer(schemaWithMocks, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
-    environments: () =>
-      new MockList(random(0, 3), (_, { id }) => ({
-        id,
-      })),
+    environments: (...args) => {
+      console.log(args);
+      return [];
+    },
   }),
   Organization: () => ({
     name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),

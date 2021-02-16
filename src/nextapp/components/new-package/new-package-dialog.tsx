@@ -2,7 +2,6 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
-  Box,
   Button,
   ButtonGroup,
   FormControl,
@@ -21,8 +20,11 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useMutation, useQueryClient } from 'react-query';
-
-import { ADD_ENV, ADD_PACKAGE } from './queries';
+import {
+  ADD_ENVIRONMENT,
+  ADD_PACKAGE,
+} from '@/shared/queries/packages-queries';
+import type { Mutation } from '@/types/query.types';
 
 interface NewPackageDialogProps {
   open: boolean;
@@ -35,25 +37,18 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const packageMutation = useMutation(
-    (name: string) => api(ADD_PACKAGE, { name }),
+  const packageMutation = useMutation((name: string) =>
+    api(ADD_PACKAGE, { name })
+  );
+  const environmentMutation = useMutation(
+    async (variables) => await api(ADD_ENVIRONMENT, variables),
     {
-      onSuccess: (data) => {
-        queryClient.setQueryData('packages', (cached) => {
-          return {
-            allPackages: [
-              ...cached.allPackages,
-              { ...data.createPackage, environments: [] },
-            ],
-          };
-        });
+      onSuccess: () => {
+        queryClient.invalidateQueries('packages');
         onClose();
       },
     }
   );
-  // const environmentMutation = useMutation((packageId: string, name: string) =>
-  //   api(ADD_ENV, { packageId, name })
-  // );
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -65,9 +60,13 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
 
       if (form.current.checkValidity()) {
         const packageName = data.get('name') as string;
-        // const environment = data.get('environment') as string;
+        const environment = data.get('environment') as string;
         const res = await packageMutation.mutateAsync(packageName);
-        // await environmentMutation.mutateAsync(packageName, environment);
+        await environmentMutation.mutateAsync({
+          package: res.createPackage.id,
+          name: environment,
+        });
+
         if (res.errors) {
           toast({
             title: 'Create Failed',
