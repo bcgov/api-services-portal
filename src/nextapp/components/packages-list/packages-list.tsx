@@ -22,6 +22,7 @@ import {
 
 import AddEnvironment from './add-environment';
 import { GET_LIST } from './queries';
+import EditPackage from './edit-package';
 
 const PackagesList: React.FC = () => {
   const { data } = useQuery<Query>(
@@ -74,8 +75,7 @@ const PackagesList: React.FC = () => {
               <Box>
                 <ButtonGroup
                   size="sm"
-                  variant="tertiary"
-                  opacity={0}
+                  opacity={data.allPackages.length > 1 ? 0 : 1}
                   transition="opacity ease-in 0.2s"
                   sx={{
                     '.package-item:hover &': {
@@ -83,12 +83,20 @@ const PackagesList: React.FC = () => {
                     },
                   }}
                 >
-                  <Button leftIcon={<Icon as={FaPenSquare} />}>Edit</Button>
-                  <AddEnvironment packageId={d.id}>
-                    <Button leftIcon={<Icon as={FaPlusCircle} />}>
-                      Add Env
-                    </Button>
-                  </AddEnvironment>
+                  {d.environments.length < 6 && (
+                    <AddEnvironment
+                      packageId={d.id}
+                      environments={d.environments.map((d) => d.name)}
+                    >
+                      <Button
+                        variant="tertiary"
+                        leftIcon={<Icon as={FaPlusCircle} />}
+                      >
+                        Add Env
+                      </Button>
+                    </AddEnvironment>
+                  )}
+                  <EditPackage data={d} />
                 </ButtonGroup>
               </Box>
             </Box>
@@ -100,7 +108,10 @@ const PackagesList: React.FC = () => {
                   boxShadow="inset 0 3px 5px rgba(0, 0, 0, 0.1)"
                 >
                   <Center>
-                    <AddEnvironment packageId={d.id}>
+                    <AddEnvironment
+                      packageId={d.id}
+                      environments={d.environments.map((d) => d.name)}
+                    >
                       <Button variant="primary">Add Environment</Button>
                     </AddEnvironment>
                   </Center>

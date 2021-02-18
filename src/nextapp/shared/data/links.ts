@@ -18,7 +18,7 @@ const links: NavLink[] = [
     url: '/poc/requests',
     access: ['api-owner', 'api-manager', 'credential-admin'],
   },
-  { name: 'Packaging', url: '/poc/packaging', access: ['api-owner'] },
+  { name: 'Packages', url: '/packages', access: ['api-owner'] },
   {
     name: 'Credential Issuers',
     url: '/poc/credential-issuers',

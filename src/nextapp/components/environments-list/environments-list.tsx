@@ -2,6 +2,7 @@ import * as React from 'react';
 import api from '@/shared/services/api';
 import {
   Box,
+  Button,
   ButtonGroup,
   HStack,
   Icon,
@@ -12,6 +13,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
+import Link from 'next/link';
 import { useMutation, useQueryClient } from 'react-query';
 import type {
   Mutation,
@@ -28,6 +30,7 @@ import {
 } from 'react-icons/fa';
 import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/packages-queries';
 import DeleteEnvironment from './delete-environment';
+import EditEnvironment from './edit-environment';
 
 const getAuthToken = (method: EnvironmentAuthMethodType) => {
   switch (method) {
@@ -141,24 +144,12 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
             </HStack>
           </Box>
           <Box>
-            <ButtonGroup
-              isAttached
-              sx={{
-                '.environment-item:hover &': {
-                  opacity: 1,
-                },
-              }}
-              opacity="0"
-              transition="opacity ease-in 0.2s"
-              color="red"
-            >
-              <IconButton
-                aria-label="Edit Environment"
-                color="bc-blue-alt"
-                size="sm"
-              >
-                <Icon as={FaPenSquare} />
-              </IconButton>
+            <ButtonGroup>
+              <Link href={`/packages/${e.id}`}>
+                <Button size="xs" variant="outline">
+                  Edit
+                </Button>
+              </Link>
               <DeleteEnvironment id={e.id} />
             </ButtonGroup>
           </Box>

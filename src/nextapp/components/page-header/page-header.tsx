@@ -4,7 +4,7 @@ import { Box, Heading } from '@chakra-ui/react';
 interface PageHeaderProps {
   actions?: React.ReactNode;
   children: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({

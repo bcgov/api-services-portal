@@ -39,6 +39,18 @@ export const REMOVE_ENVIRONMENT = gql`
   }
 `;
 
+export const GET_SERVICES = gql`
+  query GET($ns: String!) {
+    allServiceRoutes(where: { namespace: $ns }) {
+      id
+      name
+      environment {
+        id
+      }
+    }
+  }
+`;
+
 export const GET_LIST = gql`
   query GET {
     allPackages {

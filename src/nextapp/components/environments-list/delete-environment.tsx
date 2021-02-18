@@ -48,8 +48,8 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
     <>
       <IconButton
         aria-label="Delete Environment"
-        colorScheme="red"
-        size="sm"
+        size="xs"
+        variant="outline"
         onClick={onConfirm}
       >
         <Icon as={FaTrash} />

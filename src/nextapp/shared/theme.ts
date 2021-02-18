@@ -36,6 +36,34 @@ const theme = extendTheme({
         tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
       },
     },
+    Input: {
+      variants: {
+        'bc-input': {
+          field: {
+            bg: 'white',
+            border: '2px solid',
+            borderColor: '#606060',
+            _focus: {
+              borderColor: '#3B99FC',
+            },
+          },
+        },
+      },
+    },
+    Select: {
+      variants: {
+        'bc-input': {
+          field: {
+            bg: 'white',
+            border: '2px solid',
+            borderColor: '#606060',
+            _focus: {
+              borderColor: '#3B99FC',
+            },
+          },
+        },
+      },
+    },
   },
 });
 

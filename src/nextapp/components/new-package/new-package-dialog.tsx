@@ -96,7 +96,11 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
               isDisabled={packageMutation.isLoading}
             >
               <FormLabel>Package Name</FormLabel>
-              <Input placeholder="Package Name" name="name" />
+              <Input
+                placeholder="Package Name"
+                name="name"
+                variant="bc-input"
+              />
             </FormControl>
             <FormControl as="fieldset" isRequired>
               <FormLabel as="legend">Environment</FormLabel>

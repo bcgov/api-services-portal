@@ -10,7 +10,7 @@ import {
 import { useMutation, useQueryClient } from 'react-query';
 import { ADD_ENVIRONMENT } from '@/shared/queries/packages-queries';
 
-const environments: { name: string; value: string }[] = [
+const options: { name: string; value: string }[] = [
   { name: 'Development', value: 'dev' },
   { name: 'Sandbox', value: 'sandbox' },
   { name: 'Test', value: 'test' },
@@ -20,11 +20,13 @@ const environments: { name: string; value: string }[] = [
 
 interface AddEnvironmentProps {
   children: React.ReactNode;
+  environments: string[];
   packageId: string;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   children,
+  environments,
   packageId,
 }) => {
   const toast = useToast();
@@ -59,11 +61,13 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
     <Menu>
       <MenuButton>{children}</MenuButton>
       <MenuList>
-        {environments.map((e) => (
-          <MenuItem key={e.value} onClick={onSelect(e.value)} value={e.value}>
-            {e.name}
-          </MenuItem>
-        ))}
+        {options
+          .filter((e) => !environments.includes(e.value))
+          .map((e) => (
+            <MenuItem key={e.value} onClick={onSelect(e.value)} value={e.value}>
+              {e.name}
+            </MenuItem>
+          ))}
       </MenuList>
     </Menu>
   );
