@@ -57,7 +57,7 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
               <FormControl id="package-organization">
                 <FormLabel>Organization</FormLabel>
                 <Select
-                  defaultValue={data.organization[0]}
+                  defaultValue={data.organization ? data.organization[0] : ''}
                   name="organization"
                   variant="bc-input"
                 >
@@ -71,7 +71,7 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
               <FormControl id="package-organization-unit">
                 <FormLabel>Organization Unit</FormLabel>
                 <Select
-                  defaultValue={data.organizationUnit.name}
+                  defaultValue={data.organizationUnit?.name}
                   name="organizationUnit"
                   variant="bc-input"
                 >

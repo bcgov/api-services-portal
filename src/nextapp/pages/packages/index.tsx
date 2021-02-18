@@ -25,9 +25,9 @@ const PackagingPage: React.FC = () => {
         </Alert>
       </VStack>
 
-      <PageHeader title="Dataset Groups / Packages" actions={actionElements}>
+      <PageHeader title="Products" actions={actionElements}>
         <p>
-          Dataset Groups / Packages are groups of APIs that are protected in the
+          <strong>Products</strong> are groups of APIs that are protected in the
           same way, and are discoverable by Citizens through the BC Data
           Catalog, or by invitation from an API Manager.
         </p>

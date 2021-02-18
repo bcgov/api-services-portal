@@ -21,6 +21,7 @@ import type {
   Environment,
 } from '@/types/query.types';
 import {
+  FaCube,
   FaKey,
   FaLock,
   FaLockOpen,

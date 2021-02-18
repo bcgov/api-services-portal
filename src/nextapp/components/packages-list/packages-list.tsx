@@ -18,6 +18,9 @@ import {
   FaPenSquare,
   FaPlusCircle,
   FaTrash,
+  FaCube,
+  FaFolder,
+  FaFolderOpen,
 } from 'react-icons/fa';
 
 import AddEnvironment from './add-environment';
@@ -63,7 +66,7 @@ const PackagesList: React.FC = () => {
             >
               <Box display="flex" alignItems="center">
                 <Icon
-                  as={FaLayerGroup}
+                  as={d.environments.length > 0 ? FaFolder : FaFolderOpen}
                   color={d.environments.length > 0 ? 'bc-blue-alt' : 'gray.200'}
                   mr={4}
                   boxSize="1.5rem"
