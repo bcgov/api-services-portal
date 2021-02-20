@@ -1,7 +1,7 @@
 {
-    "description": "OpenAPI to Postman Service",
+    "description": "APS Portal Data Feeder",
     "license": "MIT",
-    "repository": "https://github.com/bcgov-dss/api-serv-infra",
+    "repository": "https://github.com/bcgov/aps-portal",
     "dependencies": {
         "express": "^4.17.1",
         "node-fetch": "^2.6.1",
