@@ -48,7 +48,7 @@ jobs:
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
         context: feeds
-        file: Dockerfile
+        file: feeds/Dockerfile
         tags: ${{ steps.docker_meta.outputs.tags }} 
         load: true
         build-args: |
