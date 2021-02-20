@@ -1,0 +1,24 @@
+        {
+            "host": "142.34.143.180",
+            "id": "0126b693-efe7-4f02-8d26-986dfb42916e",
+            "protocol": "https",
+            "read_timeout": 60000,
+            "tls_verify_depth": null,
+            "port": 443,
+            "updated_at": 1609298530,
+            "ca_certificates": null,
+            "created_at": 1609298530,
+            "connect_timeout": 60000,
+            "write_timeout": 60000,
+            "name": "apidata-ocp-https-geocoder",
+            "retries": 5,
+            "path": null,
+            "tls_verify": null,
+            "tags": [
+                "ns.dss-loc.apidata",
+                "ns.dss-loc",
+                "non-prod",
+                "serv-geocoder"
+            ],
+            "client_certificate": null
+        }

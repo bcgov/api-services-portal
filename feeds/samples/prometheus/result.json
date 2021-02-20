@@ -1,0 +1,17 @@
+{
+    "request": {
+        "start": 32,
+        "end": 111,
+        "step": 23323
+    },
+    "day":"12",
+    "metric": {
+      "service": "apidata-ocp-https-geocoder"
+    },
+    "values": [
+      [
+        1613752200,
+        "2.2222222222222223"
+      ]
+    ]
+  }

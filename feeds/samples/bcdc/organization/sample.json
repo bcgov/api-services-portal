@@ -1,0 +1,116 @@
+{
+        "approval_status": "approved",
+        "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2020-01-23-182833.103016BCGov.png",
+        "url": "https://www2.gov.bc.ca/gov/content?id=EAD0DA87CFBA4CA0B020773C97AF86FB",
+        "title": "Ministry of Citizens Services",
+        "name": "ministry-of-citizens-services",
+        "is_organization": true,
+        "image_url": "2020-01-23-182833.103016BCGov.png",
+        "groups": [],
+        "users": [
+            {
+                "capacity": "admin",
+                "name": "admin"
+            },
+            {
+                "capacity": "admin",
+                "name": "aeliving"
+            },
+            {
+                "capacity": "admin",
+                "name": "aldodge"
+            },
+            {
+                "capacity": "admin",
+                "name": "bkelsey"
+            },
+            {
+                "capacity": "admin",
+                "name": "bsparks"
+            },
+            {
+                "capacity": "admin",
+                "name": "cbexson"
+            },
+            {
+                "capacity": "admin",
+                "name": "crigdon"
+            },
+            {
+                "capacity": "admin",
+                "name": "dbcuser3"
+            },
+            {
+                "capacity": "admin",
+                "name": "dehirner"
+            },
+            {
+                "capacity": "admin",
+                "name": "dkelsey"
+            },
+            {
+                "capacity": "admin",
+                "name": "gjlawran"
+            },
+            {
+                "capacity": "admin",
+                "name": "hleckenb"
+            },
+            {
+                "capacity": "admin",
+                "name": "jbrammal"
+            },
+            {
+                "capacity": "admin",
+                "name": "kjnether"
+            },
+            {
+                "capacity": "admin",
+                "name": "mboulstr"
+            },
+            {
+                "capacity": "admin",
+                "name": "mdwilkie"
+            },
+            {
+                "capacity": "admin",
+                "name": "mhoole"
+            },
+            {
+                "capacity": "admin",
+                "name": "ppiatkow"
+            },
+            {
+                "capacity": "admin",
+                "name": "rejohnso"
+            },
+            {
+                "capacity": "admin",
+                "name": "replicat"
+            },
+            {
+                "capacity": "admin",
+                "name": "rrford"
+            },
+            {
+                "capacity": "admin",
+                "name": "sheivand"
+            },
+            {
+                "capacity": "admin",
+                "name": "shevande"
+            },
+            {
+                "capacity": "admin",
+                "name": "stchapma"
+            },
+            {
+                "capacity": "admin",
+                "name": "tlanktre"
+            }
+        ],
+        "type": "organization",
+        "id": "007ae636-4cdf-4273-b274-6608c615dba0",
+        "tags": [],
+        "description": "The Ministry of Citizens’ Services provides a wide range of services to British Columbians across the province, both in person and online. From BC Services Cards to freedom of information to information technology infrastructure, we help deliver services that people count on. "
+}

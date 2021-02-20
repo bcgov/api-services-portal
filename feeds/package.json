@@ -1,0 +1,13 @@
+{
+    "description": "OpenAPI to Postman Service",
+    "license": "MIT",
+    "repository": "https://github.com/bcgov-dss/api-serv-infra",
+    "dependencies": {
+        "express": "^4.17.1",
+        "node-fetch": "^2.6.1",
+        "yaml": "1.10.0"
+    },
+    "scripts": {
+        "start": "node index.js"
+    }
+}

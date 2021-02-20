@@ -1,4 +1,4 @@
-const { Text, Checkbox } = require('@keystonejs/fields')
+const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
@@ -9,27 +9,20 @@ module.exports = {
   fields: {
     name: {
         type: Text,
-        isRequired: true,
+        isRequired: true
     },
-    kongPluginId: {
+    day: {
         type: Text,
-        isRequired: false,
+        isRequired: true
     },
-    tags: {
+    values: {
         type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
+        isRequired: true
     },
-    config: {
-        type: Text,
-        isRequired: true,
-    }
+    service: { type: Relationship, ref: 'GatewayService', many: false },
   },
   access: EnforcementPoint,
   plugins: [
-    byTracking(),
     atTracking()
   ]
 }

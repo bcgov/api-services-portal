@@ -1,0 +1,9 @@
+{
+    "type": "Service",
+    "name": "aps-apidata-gwa2",
+    "action": "update",
+    "message": "Updated a Service on Gateway - yeah great markdown!",
+    "refId": "33-33-33-33-33-33-33-33",
+    "namespace": "abc-ns",
+    "actor": "acope@idir"
+}

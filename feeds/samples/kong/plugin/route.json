@@ -1,0 +1,26 @@
+{
+    "created_at": 1609297051,
+    "id": "040e5e73-a3d9-4482-90d3-9adf7c7a8ab5",
+    "tags": [
+        "ns.dss-aps.cd-apps",
+        "ns.dss-aps"
+    ],
+    "enabled": false,
+    "protocols": [
+        "https",
+        "http"
+    ],
+    "name": "acl",
+    "consumer": null,
+    "service": null,
+    "route": {
+        "id": "126a2433-9b3f-4b1c-97ac-da3b6a5e30d2"
+    },
+    "config": {
+        "allow": [
+            "bceala_admin"
+        ],
+        "hide_groups_header": false,
+        "deny": null
+    }
+}

@@ -1,0 +1,110 @@
+{
+        "sector": "Service",
+        "approval_status": "approved",
+        "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2020-07-22-170926.389405BCGov.png",
+        "url": "https://www2.gov.bc.ca/gov/content?id=2F6E3BF426034EDBA62F3F016EE2313D",
+        "title": "Data Innovation Program (DIP)d",
+        "name": "data-innovation-program-dip",
+        "is_organization": true,
+        "image_url": "2020-07-22-170926.389405BCGov.png",
+        "groups": [
+            {
+                "capacity": "public",
+                "name": "ministry-of-citizens-services"
+            }
+        ],
+        "users": [
+            {
+                "capacity": "admin",
+                "name": "aeliving"
+            },
+            {
+                "capacity": "admin",
+                "name": "aldodge"
+            },
+            {
+                "capacity": "editor",
+                "name": "bdecker"
+            },
+            {
+                "capacity": "admin",
+                "name": "bkelsey"
+            },
+            {
+                "capacity": "admin",
+                "name": "bsparks"
+            },
+            {
+                "capacity": "admin",
+                "name": "cbexson"
+            },
+            {
+                "capacity": "admin",
+                "name": "crigdon"
+            },
+            {
+                "capacity": "admin",
+                "name": "dbcuser3"
+            },
+            {
+                "capacity": "admin",
+                "name": "dehirner"
+            },
+            {
+                "capacity": "admin",
+                "name": "dkelsey"
+            },
+            {
+                "capacity": "editor",
+                "name": "dzcoward"
+            },
+            {
+                "capacity": "admin",
+                "name": "gjlawran"
+            },
+            {
+                "capacity": "admin",
+                "name": "kjnether"
+            },
+            {
+                "capacity": "admin",
+                "name": "mboulstr"
+            },
+            {
+                "capacity": "admin",
+                "name": "mdwilkie"
+            },
+            {
+                "capacity": "admin",
+                "name": "mhoole"
+            },
+            {
+                "capacity": "admin",
+                "name": "rejohnso"
+            },
+            {
+                "capacity": "admin",
+                "name": "replicat"
+            },
+            {
+                "capacity": "admin",
+                "name": "rrford"
+            },
+            {
+                "capacity": "admin",
+                "name": "shevande"
+            },
+            {
+                "capacity": "admin",
+                "name": "stchapma"
+            },
+            {
+                "capacity": "admin",
+                "name": "tlanktre"
+            }
+        ],
+        "type": "organization",
+        "id": "d8e38fa3-e522-4d65-9ae1-b1402dd342c3",
+        "tags": [],
+        "description": "The Data Innovation Program is a data integration and analytics program for government. Government’s programs and services span all aspects of life in B.C., such as education, health care, public safety, social services, the economy and the environment. While every B.C. ministry collects and manages its own data, the Data Innovation Program securely links and de-identifies data from multiple ministries, giving government analysts a better understanding of B.C.’s complex issues. This group represents the data sets that are part of the Data Innovation Program. For more information about the program, please visit https://www2.gov.bc.ca/gov/content?id=2F6E3BF426034EDBA62F3F016EE2313D"
+}

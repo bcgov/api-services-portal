@@ -8,6 +8,10 @@ const { EnforcementPoint } = require('../authz/enforcement')
 // Aidan (actor) approved (action) AccessRequest[erxAPIs for Bill #222-333-333] (type,name,refId) "Approved access request" (message)
 module.exports = {
   fields: {
+    extRefId: {
+        type: Text,
+        isRequired: false,
+    },
     type: {
         type: Text,
         isRequired: true,

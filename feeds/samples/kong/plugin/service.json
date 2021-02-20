@@ -1,0 +1,38 @@
+{
+    "created_at": 1610758139,
+    "id": "030c952c-f152-48b8-80a5-f6e2e35d49a3",
+    "tags": [
+        "ns.dss-aps.apidata",
+        "ns.dss-aps"
+    ],
+    "enabled": false,
+    "protocols": [
+        "https",
+        "http"
+    ],
+    "name": "oidc",
+    "consumer": null,
+    "service": {
+        "id": "9f018387-ccbc-41c8-b0d9-3df42e8cba61"
+    },
+    "route": null,
+    "config": {
+        "response_type": "code",
+        "introspection_endpoint": null,
+        "filters": null,
+        "bearer_only": "no",
+        "ssl_verify": "no",
+        "session_secret": null,
+        "introspection_endpoint_auth_method": null,
+        "realm": "kong",
+        "redirect_after_logout_uri": "/",
+        "scope": "openid",
+        "token_endpoint_auth_method": "client_secret_post",
+        "logout_path": "/logout",
+        "client_id": "konga",
+        "client_secret": "70c5c568-8591-4cdb-b394-9608d9a83086",
+        "discovery": "https://dev-sso.pathfinder.gov.bc.ca/auth/realms/databc/.well-known/openid-configuration",
+        "recovery_page_path": null,
+        "redirect_uri_path": ""
+    }
+}

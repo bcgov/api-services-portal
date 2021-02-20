@@ -1,0 +1,40 @@
+
+        {
+            "id": "119904b5-62c6-4be8-9eb7-560fefe2e415",
+            "path_handling": "v0",
+            "paths": [
+                "/addresses*",
+                "/sites/*",
+                "/intersections/*",
+                "/occupants/*"
+            ],
+            "destinations": null,
+            "headers": null,
+            "protocols": [
+                "https",
+                "http"
+            ],
+            "created_at": 1609304686,
+            "snis": null,
+            "service": {
+                "id": "0126b693-efe7-4f02-8d26-986dfb42916e"
+            },
+            "name": "apidata-ocp-https-geocoder-ocp-https-f3577-3",
+            "strip_path": false,
+            "preserve_host": true,
+            "regex_priority": 0,
+            "updated_at": 1609304686,
+            "sources": null,
+            "methods": [
+                "GET",
+                "OPTIONS"
+            ],
+            "https_redirect_status_code": 426,
+            "hosts": [
+                "geocoderdlv.api.gov.bc.ca"
+            ],
+            "tags": [
+                "ns.dss-loc.apidata",
+                "ns.dss-loc"
+            ]
+        }

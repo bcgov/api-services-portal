@@ -11,6 +11,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    bcdc_id: {
+        type: Text,
+        isRequired: false,
+    },
     sector: {
         type: Text,
         isRequired: false,

@@ -1,0 +1,33 @@
+{
+    "id": "126a2433-9b3f-4b1c-97ac-da3b6a5e30d2",
+    "path_handling": "v0",
+    "paths": [
+        "/int/bcea-la"
+    ],
+    "destinations": null,
+    "headers": null,
+    "protocols": [
+        "http",
+        "https"
+    ],
+    "created_at": 1609297051,
+    "snis": null,
+    "service": {
+        "id": "f23619ed-e2b4-48a9-a63f-f4be0dfe2a61"
+    },
+    "name": "cd-apps-ocp-https-tbd-ocp-https-ccc17-0",
+    "strip_path": true,
+    "preserve_host": false,
+    "regex_priority": 0,
+    "updated_at": 1609297051,
+    "sources": null,
+    "methods": null,
+    "https_redirect_status_code": 426,
+    "hosts": [
+        "test.apps.gov.bc.ca"
+    ],
+    "tags": [
+        "ns.dss-aps.cd-apps",
+        "ns.dss-aps"
+    ]
+}
