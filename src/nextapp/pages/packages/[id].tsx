@@ -21,7 +21,8 @@ import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const data = await api<Query>(GET_ENVIRONMENT_LIST);
-  const paths = data.allEnvironments.map((d) => ({ params: { id: d.id } }));
+  const paths =
+    data.allEnvironments?.map((d) => ({ params: { id: d.id } })) || [];
 
   return {
     paths,
