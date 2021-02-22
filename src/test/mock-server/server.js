@@ -121,8 +121,19 @@ const schemaStruct = `
     isAdmin: Boolean!,
   }
 
+  input EnvironmentWhereUniqueInput {
+    id: ID!
+  }
+
+  input ServiceRouteWhereInput {
+    namespace: String!
+  }
+
   type Query {
     allPackages: [ Package ]
+    allEnvironments: [ Environment ]
+    allServiceRoutes(where: ServiceRouteWhereInput): [ ServiceRoute ]
+    Environment(where: EnvironmentWhereUniqueInput!): Environment
   }
 
   input CreatePackageInput {
@@ -175,6 +186,14 @@ const schemaWithMocks = addMocksToSchema({
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
     allPackages: () => allPackages,
+    allEnvironments: () => {
+      const result = [];
+      allPackages.forEach((p) => {
+        p.environments.forEach((e) => result.push(e));
+      });
+      return result;
+    },
+    allServiceRoutes: () => new MockList(8, (_, { id }) => ({ id })),
   }),
   Mutation: () => ({
     createPackage: ({ data }) => {

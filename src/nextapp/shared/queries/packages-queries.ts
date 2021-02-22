@@ -25,7 +25,7 @@ export const UPDATE_ENVIRONMENT_ACTIVE = gql`
     updateEnvironment(id: $id, data: { active: $active }) {
       name
       id
-      active
+      isActive
     }
   }
 `;
@@ -46,6 +46,34 @@ export const GET_SERVICES = gql`
       name
       environment {
         id
+      }
+    }
+  }
+`;
+
+export const GET_ENVIRONMENT_LIST = gql`
+  query {
+    allEnvironments {
+      id
+    }
+  }
+`;
+
+export const GET_ENVIRONMENT = gql`
+  query GET($id: ID!) {
+    Environment(where: { id: $id }) {
+      name
+      active
+      authMethod
+      package {
+        organization {
+          name
+        }
+      }
+      services {
+        name
+        id
+        isActive
       }
     }
   }
@@ -72,7 +100,7 @@ export const GET_LIST = gql`
       environments {
         id
         name
-        active
+        isActive
         authMethod
         services {
           id

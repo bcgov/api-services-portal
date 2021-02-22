@@ -7,13 +7,20 @@ import {
   Input,
   InputLeftElement,
   InputGroup,
+  Text,
 } from '@chakra-ui/react';
+import ClientRequest from '@/components/client-request';
 import { FaSearch, FaWrench } from 'react-icons/fa';
+import type { ServiceRoute } from '@/types/query.types';
 
 import ActiveServices from './active-services';
 import AvailableServices from './available-services';
 
-const ServicesManager: React.FC = () => {
+interface ServicesManagerProps {
+  data: ServiceRoute[];
+}
+
+const ServicesManager: React.FC<ServicesManagerProps> = ({ data }) => {
   return (
     <Box bg="white" overflow="hidden">
       <Box
@@ -41,9 +48,11 @@ const ServicesManager: React.FC = () => {
       </Box>
       <Divider />
       <Box display="grid" gridTemplateColumns="1fr auto 1fr">
-        <ActiveServices />
+        <ActiveServices data={data} />
         <Divider orientation="vertical" height="100%" />
-        <AvailableServices />
+        <ClientRequest fallback={<Text>Loading...</Text>}>
+          <AvailableServices />
+        </ClientRequest>
       </Box>
     </Box>
   );

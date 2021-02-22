@@ -1,28 +1,63 @@
 import * as React from 'react';
 import {
-  Button,
   Box,
   Container,
   Heading,
-  Icon,
   Select,
   Badge,
   Text,
+  Switch,
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
-import { FaCheckCircle, FaTimes } from 'react-icons/fa';
 import ServicesManager from '@/components/services-manager';
+import api from '@/shared/services/api';
+import {
+  GET_ENVIRONMENT,
+  GET_ENVIRONMENT_LIST,
+} from '@/shared/queries/packages-queries';
+import type { Query } from '@/types/query.types';
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
 
-const EnvironmentPage: React.FC = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  const data = await api<Query>(GET_ENVIRONMENT_LIST);
+  const paths = data.allEnvironments.map((d) => ({ params: { id: d.id } }));
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const data = await api<Query>(GET_ENVIRONMENT, { id: context.params.id });
+
+  return {
+    props: {
+      data: data.Environment,
+    },
+  };
+};
+
+const EnvironmentPage: React.FC<
+  InferGetStaticPropsType<typeof getStaticProps>
+> = ({ data }) => {
+  const statusBoxColorScheme = data.active ? 'green' : 'orange';
+  const statusText = data.active ? 'Running' : 'Idle';
+  const breadcrumb = [
+    { href: '/packages', text: 'Products' },
+    { text: `${data.package.organization.name} Product Environment` },
+  ];
+
   return (
     <Container maxW="6xl">
       <PageHeader
+        breadcrumb={breadcrumb}
         title={
           <>
             Edit Environment{' '}
             <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
-              Development
+              {data.name}
             </Badge>
           </>
         }
@@ -40,16 +75,21 @@ const EnvironmentPage: React.FC = () => {
             p={4}
             display="flex"
             border="2px solid"
-            borderColor="green.500"
+            borderColor={data.active ? 'green.500' : 'orange.500'}
             borderRadius={4}
             overflow="hidden"
           >
             <Box display="flex">
-              <Icon as={FaCheckCircle} color="green" mt={1} />
+              <Switch isChecked={data.active} value="active" />
             </Box>
-            <Box flex={1} ml={4} display="flex" flexDirection="column">
-              <Heading size="sm" mb={2} color="green">
-                Geocoder Development Environment is Running
+            <Box flex={1} ml={5} display="flex" flexDirection="column">
+              <Heading size="sm" mb={2} color="inherit">
+                {data.package.organization.name}{' '}
+                <Text as="samp" bgColor="cyan.100" px={1} borderRadius={2}>
+                  {data.name}
+                </Text>{' '}
+                Environment is{' '}
+                <Badge colorScheme={statusBoxColorScheme}>{statusText}</Badge>
               </Heading>
               <Box mr={8}>
                 <Text mb={4}>
@@ -63,7 +103,12 @@ const EnvironmentPage: React.FC = () => {
                     <Text fontWeight="bold" mr={4}>
                       Authentication
                     </Text>
-                    <Select size="sm" variant="filled" width="auto">
+                    <Select
+                      size="sm"
+                      variant="filled"
+                      width="auto"
+                      value={data.authMethod}
+                    >
                       <option value="public">Public</option>
                       <option value="keys">API Keys</option>
                       <option value="private">Private</option>
@@ -73,21 +118,11 @@ const EnvironmentPage: React.FC = () => {
                 </Box>
               </Box>
             </Box>
-            <Box>
-              <Button
-                colorScheme="red"
-                variant="outline"
-                size="sm"
-                leftIcon={<Icon as={FaTimes} />}
-              >
-                Disable
-              </Button>
-            </Box>
           </Box>
         </>
       </PageHeader>
       <Box my={5}>
-        <ServicesManager />
+        <ServicesManager data={data.services} />
       </Box>
     </Container>
   );

@@ -1,31 +1,47 @@
 import * as React from 'react';
-import casual from 'casual-browserify';
+import api from '@/shared/services/api';
 import {
   Box,
   Heading,
-  Icon,
   Select,
   Wrap,
   WrapItem,
   Text,
   Tag,
-  Center,
   TagLabel,
   TagLeftIcon,
-  TagCloseButton,
 } from '@chakra-ui/react';
-import { FaRegFolderOpen, FaDatabase, FaArrowRight } from 'react-icons/fa';
+import { FaPlusCircle, FaDatabase } from 'react-icons/fa';
+import { useQuery, useQueryClient } from 'react-query';
+import type { Query } from '@/types/query.types';
+import { GET_SERVICES } from '@/shared/queries/packages-queries';
 
 const AvailableServices: React.FC = () => {
-  const [total, setTotal] = React.useState<number>(8);
+  const client = useQueryClient();
+  const { data } = useQuery<Query>(
+    'services',
+    async () => await api(GET_SERVICES, { ns: '123' }),
+    {
+      suspense: true,
+    }
+  );
+  const onClick = React.useCallback(() => {
+    console.log('click');
+  }, []);
+  const onDragStart = React.useCallback(
+    (d) => (event: React.DragEvent<HTMLDivElement>) => {
+      event.dataTransfer.setData('application/aps-service', JSON.stringify(d));
+      event.dataTransfer.effectAllowed = 'move';
+    },
+    []
+  );
   const onDragEnd = React.useCallback(
     (event) => {
-      console.log(event.dataTransfer.dropEffect);
       if (event.dataTransfer.dropEffect === 'move') {
-        setTotal((state) => state - 1);
+        client.invalidateQueries('services');
       }
     },
-    [setTotal]
+    [client]
   );
   return (
     <Box flex={1}>
@@ -52,25 +68,35 @@ const AvailableServices: React.FC = () => {
         </Box>
       </Box>
       <Wrap p={4}>
-        {total > 0 &&
-          casual.array_of_words(total).map((d, i) => (
+        {data.allServiceRoutes.length > 0 &&
+          data.allServiceRoutes.map((d, i) => (
             <WrapItem key={i}>
               <Tag
+                draggable
                 colorScheme="gray"
                 color="gray.500"
                 cursor="move"
-                draggable
+                onClick={onClick}
                 onDragEnd={onDragEnd}
-                onDragStart={(ev) => {
-                  ev.dataTransfer.setData('application/aps-service', d);
-                  ev.dataTransfer.effectAllowed = 'move';
-                }}
+                onDragStart={onDragStart(d)}
                 _hover={{
                   boxShadow: 'outline',
+                  '& .icon-db': {
+                    display: 'none',
+                  },
+                  '& .icon-add': {
+                    display: 'inline-block',
+                  },
                 }}
               >
-                <TagLeftIcon as={FaDatabase} />
-                <TagLabel>{casual.words(4).replace(/\s/g, '-')}</TagLabel>
+                <TagLeftIcon as={FaDatabase} className="icon-db" />
+                <TagLeftIcon
+                  as={FaPlusCircle}
+                  className="icon-add"
+                  display="none"
+                  color="green"
+                />
+                <TagLabel>{d.name}</TagLabel>
               </Tag>
             </WrapItem>
           ))}

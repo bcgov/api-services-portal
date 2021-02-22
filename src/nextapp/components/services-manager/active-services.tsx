@@ -20,14 +20,14 @@ import {
   FaArrowRight,
   FaArrowCircleDown,
 } from 'react-icons/fa';
+import { ServiceRoute } from '@/shared/types/query.types';
 
-type ActiveItem = {
-  id: string;
-  name: string;
-};
+interface ActiveServicesProps {
+  data: ServiceRoute[];
+}
 
-const ActiveServices: React.FC = () => {
-  const [data, setData] = React.useState<ActiveItem[]>([]);
+const ActiveServices: React.FC<ActiveServicesProps> = ({ data = [] }) => {
+  const [active, setData] = React.useState<ServiceRoute[]>(data);
   const [hasDragTarget, setDragTarget] = React.useState<boolean>(false);
 
   return (
@@ -45,7 +45,7 @@ const ActiveServices: React.FC = () => {
         py={2}
       >
         <Heading size="sm" color="green.600">
-          Active Services <Badge colorScheme="green">{data.length}</Badge>
+          Active Services <Badge colorScheme="green">{active.length}</Badge>
         </Heading>
         {hasDragTarget && (
           <Box
@@ -74,13 +74,11 @@ const ActiveServices: React.FC = () => {
         color="blue.500"
         boxShadow={hasDragTarget ? 'inner' : ''}
         onDrop={(event) => {
-          const id: string = event.dataTransfer.getData(
+          const payload: string = event.dataTransfer.getData(
             'application/aps-service'
           );
-          setData((state: ActiveItem[]) => [
-            ...state,
-            { id, name: casual.name },
-          ]);
+          const service: ServiceRoute = JSON.parse(payload);
+          setData((state: ServiceRoute[]) => [...state, service]);
           setDragTarget(false);
         }}
         onDragOver={(ev) => {
@@ -93,7 +91,7 @@ const ActiveServices: React.FC = () => {
           setDragTarget(false);
         }}
       >
-        {data.length === 0 && (
+        {active.length === 0 && (
           <Center height="100%">
             <Box maxWidth="50%" textAlign="center" my={4} position="relative">
               <Icon
@@ -116,7 +114,7 @@ const ActiveServices: React.FC = () => {
           </Center>
         )}
         <Wrap p={4}>
-          {data.map((d, i) => (
+          {active.map((d, i) => (
             <WrapItem key={i}>
               <Tag colorScheme="green" color="green.800">
                 <TagLeftIcon as={FaDatabase} />
