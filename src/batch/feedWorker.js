@@ -171,6 +171,7 @@ const metadata = {
         sync: ['username', 'tags', 'customId', 'namespace', 'plugins'],
         transformations: {
             tags: {name: "toString"},
+            namespace: {name:"mapNamespace"},
             plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true}
         }
     },

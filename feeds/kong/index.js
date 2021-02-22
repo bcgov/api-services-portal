@@ -14,22 +14,32 @@ async function sync({url, workingPath, destinationUrl}) {
     // Now, send to portal
     destination = portal(destinationUrl)
 
-    xfer.get_json_content('gw-services')['data'].map(svc => {
-        const name = svc['name']
-        svc['plugins'] = findAllPlugins (xfer, 'service', svc['id'])
-        console.log(name + ` with ${svc['plugins'].length} plugins`)
+    // xfer.get_json_content('gw-services')['data'].map(svc => {
+    //     const name = svc['name']
+    //     svc['plugins'] = findAllPlugins (xfer, 'service', svc['id'])
+    //     console.log(name + ` with ${svc['plugins'].length} plugins`)
 
-        destination.fireAndForget('/feed/GatewayService', svc)
-        .then ((result) => console.log(`[${name}] OK`, result))
-        .catch (err => console.log(`[${name}] ERR ${err}`))
-    })
+    //     destination.fireAndForget('/feed/GatewayService', svc)
+    //     .then ((result) => console.log(`[${name}] OK`, result))
+    //     .catch (err => console.log(`[${name}] ERR ${err}`))
+    // })
 
-    xfer.get_json_content('gw-routes')['data'].map(route => {
-        const name = route['name']
-        route['plugins'] = findAllPlugins (xfer, 'route', route['id'])
-        console.log(name + ` with ${route['plugins'].length} plugins`)
+    // xfer.get_json_content('gw-routes')['data'].map(route => {
+    //     const name = route['name']
+    //     route['plugins'] = findAllPlugins (xfer, 'route', route['id'])
+    //     console.log(name + ` with ${route['plugins'].length} plugins`)
 
-        destination.fireAndForget('/feed/GatewayRoute', route)
+    //     destination.fireAndForget('/feed/GatewayRoute', route)
+    //     .then ((result) => console.log(`[${name}] OK`, result))
+    //     .catch (err => console.log(`[${name}] ERR ${err}`))
+    // })
+
+    xfer.get_json_content('gw-consumers')['data'].map(consu => {
+        const name = consu['username']
+        consu['plugins'] = findAllPlugins (xfer, 'consumer', consu['id'])
+        console.log(name + ` with ${consu['plugins'].length} plugins`)
+
+        destination.fireAndForget('/feed/Consumer', consu)
         .then ((result) => console.log(`[${name}] OK`, result))
         .catch (err => console.log(`[${name}] ERR ${err}`))
     })
