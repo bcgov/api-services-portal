@@ -1,0 +1,22 @@
+{
+    "dashboardId": 3,
+    "evalMatches": [
+        {
+            "value": 133.33333333333331,
+            "metric": "aps-gwa-api - 404",
+            "tags": {
+                "code": "404",
+                "service": "aps-gwa-api"
+            }
+        }
+    ],
+    "message": "Some message",
+    "orgId": 1,
+    "panelId": 15,
+    "ruleId": 2,
+    "ruleName": "400 and 500 Errors alert",
+    "ruleUrl": "https://ops-grafana-dev-264e6f-dev.apps.silver.devops.gov.bc.ca/d/OGHXbp-Gz/gateway-usage-v2-copy?tab=alert&viewPanel=15&orgId=1",
+    "state": "alerting",
+    "tags": {},
+    "title": "[Alerting] 400 and 500 Errors alert"
+}

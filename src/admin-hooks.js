@@ -15,8 +15,12 @@ module.exports = {
             children: ['AccessRequest', 'Application', 'Activity'],
         },
         {
-            label: 'Packaging',
+            label: 'Product',
             children: ['Package', 'Environment', 'CredentialIssuer', 'Content'],
+        },
+        {
+            label: 'Monitoring',
+            children: ['Alert', 'GatewayMetric'],
         },
         {
             label: 'Session',
@@ -24,11 +28,11 @@ module.exports = {
         },
         {
             label: 'Keycloak',
-            children: ['Gateway', 'Group'],
+            children: ['Namespace', 'Group'],
         },
         {
             label: 'Kong',
-            children: ['ServiceRoute', 'Consumer', 'Plugin'],
+            children: ['ServiceRoute', 'Consumer', 'Plugin', 'GatewayService', 'GatewayRoute'],
         },
         {
             label: 'BCDC',

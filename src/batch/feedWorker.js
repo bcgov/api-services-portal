@@ -203,7 +203,7 @@ const putFeedWorker = async (keystone, req, res) => {
     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
 
     const result = await syncRecords(keystone, entity, eid, json)
-    res.json(result)
+    res.status(result.status).json(result)
 }
 
 const deleteFeedWorker = async (keystone, req, res) => {

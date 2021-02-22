@@ -1,0 +1,13 @@
+{
+    "dashboardId": 3,
+    "evalMatches": [],
+    "message": "Some message",
+    "orgId": 1,
+    "panelId": 15,
+    "ruleId": 2,
+    "ruleName": "400 and 500 Errors alert",
+    "ruleUrl": "https://ops-grafana-dev-264e6f-dev.apps.silver.devops.gov.bc.ca/d/OGHXbp-Gz/gateway-usage-v2-copy?tab=alert&viewPanel=15&orgId=1",
+    "state": "ok",
+    "tags": {},
+    "title": "[OK] 400 and 500 Errors alert"
+}

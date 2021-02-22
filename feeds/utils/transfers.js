@@ -1,14 +1,7 @@
 const fs = require('fs')
 const fetch = require('node-fetch')
 const PromisePool = require('es6-promise-pool')
-
-function checkStatus(res) {
-    if (res.ok) { // res.status >= 200 && res.status < 300
-        return res;
-    } else {
-        throw Error(res.statusText);
-    }
-}
+const { checkStatus } = require('./checkStatus')
 
 function transfers (workingPath, baseUrl, exceptions) {
     fs.mkdirSync(workingPath, { recursive: true })
@@ -33,10 +26,12 @@ function transfers (workingPath, baseUrl, exceptions) {
                 exceptions.push({relativeUrl:url, filename:filename, error:"" + err})
             })
         },
+
         read: function (filename) {
             const infile = workingPath + '/' + filename + '.json'
             return JSON.parse(fs.readFileSync(infile))
         },
+
         concurrentWork: function(producer, concurrency = 5) {
             var pool = new PromisePool(producer, concurrency)
             
@@ -51,6 +46,51 @@ function transfers (workingPath, baseUrl, exceptions) {
                 throw Exception ('Some promise rejected: ' + error.message)
             })
             
+        },
+
+        iterate_through_json_content_sync: function iterate_through_json_content_sync(location, next) {
+            const files = fs.readdirSync(workingPath + "/" + location)
+            files.forEach((file) => {
+                data = JSON.parse(fs.readFileSync(workingPath + "/" + location + '/' + file))
+                next(file, data)
+            })
+        },
+        
+        iterate_through_json_content: function iterate_through_json_content(location, next) {
+            fs.readdir(workingPath + "/" + location, (err, files) => {
+                if (err) {
+                    throw(err)
+                }
+                files.forEach((file) => {
+                  data = JSON.parse(fs.readFileSync(workingPath + "/" + location + '/' + file))
+                  next(file, data)
+                })
+            })
+        },
+        
+        get_json_content: function get_json_content(location, file) {
+            let index = 0
+            let data = []
+            while (true) {
+                filePath = workingPath + "/" + location + '/' + file + "-" + index + ".json"
+                console.log("READ " + filePath)
+                if (fs.existsSync(filePath)) {
+                    fileData = JSON.parse(fs.readFileSync(filePath))
+                    data = data.concat(fileData['data'])
+                    index++
+                } else {
+                    console.log("RETURNING " + data.length)
+                    return { next: null, data: data }
+                }
+            }
+        },
+        
+        create_key_map: function create_key_map (list, idKey) {
+            const map = {}
+            for (item of list) {
+                map[item[idKey]] = item
+            }
+            return map
         }
     }
 }
