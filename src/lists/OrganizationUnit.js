@@ -14,7 +14,7 @@ module.exports = {
     },
     sector: {
         type: Text,
-        isRequired: true,
+        isRequired: false,
     },
     title: {
         type: Text,
