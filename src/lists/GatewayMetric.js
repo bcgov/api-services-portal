@@ -7,11 +7,15 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
-    name: {
+    query: {
         type: Text,
         isRequired: true
     },
     day: {
+        type: Text,
+        isRequired: true
+    },
+    metric: {
         type: Text,
         isRequired: true
     },

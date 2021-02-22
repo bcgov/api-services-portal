@@ -99,8 +99,9 @@ const metadata = {
     'GatewayMetric': {
         query: 'allGatewayMetrics',
         refKey: 'name',
-        sync: ['day', 'values'],
+        sync: ['query', 'day', 'metric', 'values'],
         transformations: {
+            metric: {name:"toString"},
             values: {name:"toString"},
             service: {name: "connectOne", key: "metric.service", list: "allGatewayServices", refKey: 'name' },
         }
