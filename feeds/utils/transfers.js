@@ -68,11 +68,11 @@ function transfers (workingPath, baseUrl, exceptions) {
             })
         },
         
-        get_json_content: function get_json_content(location, file) {
+        get_json_content: function get_json_content(file) {
             let index = 0
             let data = []
             while (true) {
-                filePath = workingPath + "/" + location + '/' + file + "-" + index + ".json"
+                filePath = workingPath + '/' + file + "-" + index + ".json"
                 console.log("READ " + filePath)
                 if (fs.existsSync(filePath)) {
                     fileData = JSON.parse(fs.readFileSync(filePath))

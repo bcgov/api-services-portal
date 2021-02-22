@@ -50,7 +50,7 @@ function producer (xfer, keyFile, apiCall, outFolder) {
     }
 }
 
-function findAllChildren (xfer, parentName, cb) {
+function findAllChildren (xfer, parentName) {
     const childs = []
     xfer.iterate_through_json_content_sync ('orgs', (file, json) => {
         data = json['result']
