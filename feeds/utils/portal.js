@@ -6,7 +6,7 @@ const fetch = require('node-fetch')
 function portal (baseUrl) {
 
     return {
-        fireAndForget: async function (url, payload) {
+        fireAndForget: (url, payload) => {
 
             return fetch(baseUrl + url, {
                 method: 'put',

@@ -23,17 +23,26 @@ async function sync({url, workingPath, destinationUrl}) {
     // Now, send to portal
     destination = portal(destinationUrl)
 
-    xfer.iterate_through_json_content ('orgs', async (file, json) => {
+    // xfer.iterate_through_json_content ('orgs', async (file, json) => {
+    //     const data = json['result']
+    //     if (isOrgUnit(data)) {
+    //         return
+    //     }
+    //     console.log(data['name'])
+    //     data['orgUnits'] = findAllChildren (xfer, data['name'])
+    //     destination.fireAndForget('/feed/Organization', data)
+    //     .then ((result) => console.log(`[${data['name']}] OK`, result))
+    //     .catch (err => console.log(`[${data['name']}] ERR ${err}`))
+    // })
+
+    xfer.iterate_through_json_content ('packages', async (file, json) => {
         const data = json['result']
-        if (isOrgUnit(data)) {
-            return
-        }
-        console.log(data['name'])
-        data['orgUnits'] = findAllChildren (xfer, data['name'])
-        destination.fireAndForget('/feed/Organization', data)
+        console.log("Go - "+data['name'])
+        destination.fireAndForget('/feed/Dataset', data)
         .then ((result) => console.log(`[${data['name']}] OK`, result))
         .catch (err => console.log(`[${data['name']}] ERR ${err}`))
     })
+
 }
 
 function producer (xfer, keyFile, apiCall, outFolder) {

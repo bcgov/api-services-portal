@@ -240,7 +240,10 @@ const lookup = async function (keystone, query, refKey, eid, fields) {
     })
     console.log("QUERY : " + refKey + " == " + eid)
     console.log(JSON.stringify(result, null, 3))
-    return result['data'][query].length != 1 ? null : result['data'][query][0]
+    if (result['data'][query].length > 1) {
+        throw Error('Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid)
+    }
+    return result['data'][query].length == 0 ? null : result['data'][query][0]
 }
 
 const create = async function (keystone, entity, data) {

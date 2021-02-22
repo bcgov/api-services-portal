@@ -4,7 +4,7 @@ const { transfers } = require('../utils/transfers')
 const { portal } = require('../utils/portal')
 
 const queries = [
-    { query: 'sum(increase(konglog_service_agent_counter[60m])) by (service, status)', id: 'service-status'}
+    { query: 'sum(increase(konglog_service_agent_counter[60m])) by (service, status)', id: 'konglog_service_status'}
 ]
 async function sync({workingPath, url, destinationUrl}) {
     console.log("Prometheus SYNC "+url)
@@ -40,13 +40,12 @@ async function sync({workingPath, url, destinationUrl}) {
 
     for (var d = 0; d < 14; d++) {
         const target = moment().add(-d, 'days').format('YYYY-MM-DD')
-
         for ( _query of queries) {
-
-            console.log(JSON.stringify(xfer.get_json_content('query-' + _query.id + '-' + target), null, 4))
             xfer.get_json_content('query-' + _query.id + '-' + target)['data'][0]['result'].map(metric => {
                 const name = JSON.stringify(metric['metric'])
+                metric['id'] = _query.id + '.' + target + '.' + JSON.stringify(metric['metric'])
                 metric['day'] = target
+                metric['query'] = _query.id
 
                 destination.fireAndForget('/feed/GatewayMetric', metric)
                 .then ((result) => console.log(`[${name}] OK`, result))
