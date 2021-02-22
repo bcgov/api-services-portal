@@ -1,6 +1,10 @@
 const fs = require('fs')
 const { copyv2, read } = require('../utils')
 
+function sync({url}) {
+    console.log("Kong SYNC "+url)
+}
+
 function extract_kong_all() {
     const baseUrl = 'http://localhost:7001'
 
@@ -14,5 +18,6 @@ function extract_kong_all() {
 
 
 module.exports = {
+    sync: sync,
     extract_kong_all: extract_kong_all
 }

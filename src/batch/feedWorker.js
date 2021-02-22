@@ -105,6 +105,29 @@ const metadata = {
             service: {name: "connectOne", key: "metric.service", list: "allGatewayServices", refKey: 'name' },
         }
     },
+    'Alert': {
+        query: 'allAlerts',
+        refKey: 'name',
+        sync: ['name'],
+        transformations: {
+        }
+    },
+    'Namespace': {
+        query: 'allNamespaces',
+        refKey: 'extRefId',
+        sync: ['name'],
+        transformations: {
+            members: {name: "connectExclusiveList", list: "Member", syncFirst: true},
+        }
+    },
+    'MemberRole': {
+        query: 'allMemberRoles',
+        refKey: 'extRefId',
+        sync: ['role', 'user'],
+        transformations: {
+            user: {name: "connectOne", key: "metric.service", list: "allUsers", refKey: 'name' },
+        }
+    },
     'GatewayService': {
         query: 'allGatewayServices',
         refKey: 'kongServiceId',
@@ -174,6 +197,7 @@ const putFeedWorker = async (keystone, req, res) => {
     const entity = req.params['entity']
     const eid = 'id' in req.params ? req.params['id'] : req.body['id']
     const json = req.body
+    console.log(JSON.stringify(json, null, 4))
 
     assert.strictEqual(entity in metadata, true)
     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)

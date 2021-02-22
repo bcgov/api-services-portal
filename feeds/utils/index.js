@@ -27,9 +27,13 @@ async function copyv2 (baseUrl, path, filename, index = 0) {
         throw(err)
     })
 }
-
 async function copy (url, filename, index = 0) {
-    const out = '../../_data/' + filename + '-' + index + '.json'
+    return copyv3 ('../../_data', url, filename, index)
+}
+
+async function copyv3 (workingPath, url, filename, index = 0) {
+    console.log("Fetching " + url)
+    const out = workingPath + '/' + filename + '-' + index + '.json'
     return fetch (url)
     .then (checkStatus)
     .then (data => data.json())
@@ -37,7 +41,7 @@ async function copy (url, filename, index = 0) {
         fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
         console.log("WROTE "+  filename)
         if (json.next != null) {
-            copy (json.next, filename, index + 1 )
+            copyv3 (workingPath, json.next, filename, index + 1 )
         }
     })
     .catch (err => {
@@ -47,7 +51,11 @@ async function copy (url, filename, index = 0) {
 }
 
 function read (filename) {
-    const infile = '../../_data/' + filename + '.json'
+    return readv2('../../_data', filename)
+}
+
+function readv2 (workingPath, filename) {
+    const infile = workingPath + '/' + filename + '.json'
     return JSON.parse(fs.readFileSync(infile))
 }
 
@@ -95,8 +103,10 @@ function lookup_namespace (item) {
 
 module.exports = {
     read: read,
+    readv2: readv2,
     copy: copy,
     copyv2: copyv2,
+    copyv3: copyv3,
     get_json_content: get_json_content,
     iterate_through_json_content: iterate_through_json_content,
     create_key_map: create_key_map,

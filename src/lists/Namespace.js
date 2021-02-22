@@ -11,23 +11,19 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    kongPluginId: {
+    serviceAccounts: {
+        type: Text,
+        isRequired: true,
+    },
+    permDomains: {
+        type: Text,
+        isRequired: true,
+    },
+    extRefId: {
         type: Text,
         isRequired: false,
     },
-    tags: {
-        type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
-    },
-    config: {
-        type: Text,
-        isRequired: true,
-    },
-    service: { type: Relationship, ref: 'GatewayService', many: false },
-    route: { type: Relationship, ref: 'GatewayRoute', many: false }
+    members: { type: Relationship, isRequired: true, ref: 'MemberRole', many: true }
   },
   access: EnforcementPoint,
   plugins: [

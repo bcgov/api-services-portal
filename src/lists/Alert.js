@@ -9,29 +9,20 @@ module.exports = {
   fields: {
     name: {
         type: Text,
-        isRequired: true,
+        isRequired: true
     },
-    kongPluginId: {
+    state: {
         type: Text,
-        isRequired: false,
+        isRequired: false
     },
-    tags: {
+    description: {
         type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
-    },
-    config: {
-        type: Text,
-        isRequired: true,
+        isRequired: false
     },
     service: { type: Relationship, ref: 'GatewayService', many: false },
-    route: { type: Relationship, ref: 'GatewayRoute', many: false }
   },
   access: EnforcementPoint,
   plugins: [
-    byTracking(),
     atTracking()
   ]
 }
