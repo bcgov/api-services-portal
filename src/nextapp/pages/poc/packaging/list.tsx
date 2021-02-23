@@ -64,11 +64,11 @@ function List({ data, state, refetch }) {
         return (
             <>
                 <Accordion defaultIndex={[]} allowMultiple>
-                {data.allPackages.map((item, index) => (
+                {data.allProducts.map((item, index) => (
                     <AccordionItem key={item.name}>
                         <AccordionButton>
                             <Box flex="1" textAlign="left">
-                                {item.name} <IconButton aria-label="Edit Package" size="sm" icon={<Icon as={FaEdit} />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
+                                {item.name} <IconButton aria-label="Edit Product" size="sm" icon={<Icon as={FaEdit} />} onClick={(e) => { setSelectedPkgEnv({pkg: item, env: selectedPkgEnv.env}); onPkgOpen(); e.preventDefault(); }}/>
                             </Box>
                             <AccordionIcon />
                         </AccordionButton>

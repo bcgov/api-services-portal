@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { FaTrash } from 'react-icons/fa';
 import { useMutation, useQueryClient } from 'react-query';
-import { REMOVE_ENVIRONMENT } from '@/shared/queries/packages-queries';
+import { REMOVE_ENVIRONMENT } from '@/shared/queries/products-queries';
 
 interface DeleteEnvironmentProps {
   id: string;
@@ -41,7 +41,7 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
   const onDelete = async () => {
     await mutation.mutateAsync(id);
     setOpen(false);
-    client.invalidateQueries('packages');
+    client.invalidateQueries('products');
   };
 
   return (

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Button, Icon, useDisclosure } from '@chakra-ui/react';
 
-import NewPackageDialog from './new-package-dialog';
+import NewProductDialog from './new-product-dialog';
 import { FaLayerGroup } from 'react-icons/fa';
 
-const NewPackage: React.FC = () => {
+const NewProduct: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -14,11 +14,11 @@ const NewPackage: React.FC = () => {
         onClick={onOpen}
         leftIcon={<Icon as={FaLayerGroup} />}
       >
-        New Package
+        New Product
       </Button>
-      <NewPackageDialog open={isOpen} onClose={onClose} />
+      <NewProductDialog open={isOpen} onClose={onClose} />
     </>
   );
 };
 
-export default NewPackage;
+export default NewProduct;

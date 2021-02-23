@@ -58,7 +58,7 @@ const FulfillRequest = () => {
     const comms = `
         To {{RequestorName}},
 
-        Your credential for the {{PackageName}} API services are ready.  You can retrieve them at https://api.gov.bc.ca .
+        Your credential for the {{ProductName}} API services are ready.  You can retrieve them at https://api.gov.bc.ca .
 
     `
     return (
@@ -104,7 +104,7 @@ const FulfillRequest = () => {
 
                 {/* <h2 style={styles.h2}>Consumer Details</h2>
                 <Flex direction="column" className="m-5">
-                    { (request.packageEnvironment.authMethod === "oidc") ? (
+                    { (request.productEnvironment.authMethod === "oidc") ? (
                         <>
                             <div>
                                 <label>Client ID</label>

@@ -1,4 +1,4 @@
-export const GET_PACKAGE = `
+export const GET_PRODUCT = `
     query Get ($id: ID!) {
         allProducts(where: {id: $id}) {
             id

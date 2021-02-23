@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 
 const { useEffect, useState } = React;
 
-import { ADD, GET_PACKAGE } from './../queries'
+import { ADD, GET_PRODUCT } from './../queries'
 
 import { styles } from '../../../../shared/styles/devportal.css';
 
@@ -30,7 +30,7 @@ const NewRequest = () => {
     const fetch = () => {
         const { router: { pathname, query: { id } } } = context
         if (context['router'] != null && id) {
-            graphql(GET_PACKAGE, { id : id })
+            graphql(GET_PRODUCT, { id : id })
             .then(({ data }) => {
                 setState({ state: 'loaded', data });
             })

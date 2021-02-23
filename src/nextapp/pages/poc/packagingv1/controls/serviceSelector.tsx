@@ -9,7 +9,7 @@ import graphql from '../../../../shared/services/graphql'
 
 import { Badge, Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 
-const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items = []}) => {
+const ServiceSelector = ({mode = "view", productEnvironmentId, setItems, items = []}) => {
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     let fetch = () => {
         graphql(GET_AVAIL_SERVICES, {ns: "dss-loc"})
@@ -26,7 +26,7 @@ const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items =
     //  onChange={(e) => setActive(!active)} isChecked={active}
     return mode == "edit" ? (
                 <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-                { state === 'loaded' && data.allGatewayServices.filter(svc => svc.environment == null || svc.environment.id == packageEnvironmentId).map(svc => (
+                { state === 'loaded' && data.allGatewayServices.filter(svc => svc.environment == null || svc.environment.id == productEnvironmentId).map(svc => (
                     <HStack spacing={3}>
                         <Switch size="sm" onChange={(e) => { if (!items.includes(svc.id)) { setItems([
                                 ...items,

@@ -14,7 +14,7 @@ import {
 import { FaPlusCircle, FaDatabase } from 'react-icons/fa';
 import { useQuery, useQueryClient } from 'react-query';
 import type { Query } from '@/types/query.types';
-import { GET_SERVICES } from '@/shared/queries/packages-queries';
+import { GET_SERVICES } from '@/shared/queries/products-queries';
 
 const AvailableServices: React.FC = () => {
   const client = useQueryClient();

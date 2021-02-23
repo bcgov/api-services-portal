@@ -22,29 +22,29 @@ import {
 import { useMutation, useQueryClient } from 'react-query';
 import {
   ADD_ENVIRONMENT,
-  ADD_PACKAGE,
-} from '@/shared/queries/packages-queries';
+  ADD_PRODUCT,
+} from '@/shared/queries/products-queries';
 import type { Mutation } from '@/types/query.types';
 
-interface NewPackageDialogProps {
+interface NewProductDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
+const NewProductDialog: React.FC<NewProductDialogProps> = ({
   open,
   onClose,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const packageMutation = useMutation((name: string) =>
-    api(ADD_PACKAGE, { name })
+  const productMutation = useMutation((name: string) =>
+    api(ADD_PRODUCT, { name })
   );
   const environmentMutation = useMutation(
     async (variables) => await api(ADD_ENVIRONMENT, variables),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('packages');
+        queryClient.invalidateQueries('products');
         onClose();
       },
     }
@@ -52,18 +52,18 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createPackage();
+    createProduct();
   };
-  const createPackage = async () => {
+  const createProduct = async () => {
     if (form.current) {
       const data = new FormData(form.current);
 
       if (form.current.checkValidity()) {
-        const packageName = data.get('name') as string;
+        const productName = data.get('name') as string;
         const environment = data.get('environment') as string;
-        const res = await packageMutation.mutateAsync(packageName);
+        const res = await productMutation.mutateAsync(productName);
         await environmentMutation.mutateAsync({
-          package: res.createPackage.id,
+          product: res.createProduct.id,
           name: environment,
         });
 
@@ -74,7 +74,7 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
           });
         } else {
           toast({
-            title: `Package ${packageName} created!`,
+            title: `Product ${productName} created!`,
             description: 'You can now add more environments',
             status: 'success',
           });
@@ -87,17 +87,17 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
     <Modal isOpen={open} onClose={onClose}>
       <ModalOverlay />
       <ModalContent borderRadius="4px">
-        <ModalHeader>Create Package</ModalHeader>
+        <ModalHeader>Create Product</ModalHeader>
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
             <FormControl
               isRequired
               mb={4}
-              isDisabled={packageMutation.isLoading}
+              isDisabled={productMutation.isLoading}
             >
-              <FormLabel>Package Name</FormLabel>
+              <FormLabel>Product Name</FormLabel>
               <Input
-                placeholder="Package Name"
+                placeholder="Product Name"
                 name="name"
                 variant="bc-input"
               />
@@ -124,7 +124,7 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
                 </Stack>
               </RadioGroup>
               <FormHelperText>
-                Select the first environment for this package
+                Select the first environment for this product
               </FormHelperText>
             </FormControl>
           </form>
@@ -133,9 +133,9 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
           <ButtonGroup>
             <Button onClick={onClose}>Cancel</Button>
             <Button
-              isLoading={packageMutation.isLoading}
+              isLoading={productMutation.isLoading}
               variant="primary"
-              onClick={createPackage}
+              onClick={createProduct}
             >
               Create
             </Button>
@@ -146,4 +146,4 @@ const NewPackageDialog: React.FC<NewPackageDialogProps> = ({
   );
 };
 
-export default NewPackageDialog;
+export default NewProductDialog;

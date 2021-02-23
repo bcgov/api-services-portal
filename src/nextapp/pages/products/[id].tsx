@@ -15,7 +15,7 @@ import api from '@/shared/services/api';
 import {
   GET_ENVIRONMENT,
   GET_ENVIRONMENT_LIST,
-} from '@/shared/queries/packages-queries';
+} from '@/shared/queries/products-queries';
 import type { Query } from '@/types/query.types';
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
 
@@ -46,8 +46,8 @@ const EnvironmentPage: React.FC<
   const statusBoxColorScheme = data.active ? 'green' : 'orange';
   const statusText = data.active ? 'Running' : 'Idle';
   const breadcrumb = [
-    { href: '/packages', text: 'Products' },
-    { text: `${data.package.organization.name} Product Environment` },
+    { href: '/products', text: 'Products' },
+    { text: `${data.product.organization.name} Product Environment` },
   ];
 
   return (
@@ -85,7 +85,7 @@ const EnvironmentPage: React.FC<
             </Box>
             <Box flex={1} ml={5} display="flex" flexDirection="column">
               <Heading size="sm" mb={2} color="inherit">
-                {data.package.organization.name}{' '}
+                {data.product.organization.name}{' '}
                 <Text as="samp" bgColor="cyan.100" px={1} borderRadius={2}>
                   {data.name}
                 </Text>{' '}

@@ -60,8 +60,8 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
     }
 
 
-    // const handlePackageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     setPackage(event.target.value)
+    // const handleProductChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     setProduct(event.target.value)
     // }
 
     return (
@@ -82,7 +82,7 @@ const EditEnvDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
                         <GenericControl meta={{name: "OIDC Auth", config: [ {label: "Discovery URL", placeholder: "discovery url", value: ""}]}}/>
                         <GenericControl meta={{name: "API Key Auth", config: [ {label: "Header Key", placeholder: "header key", value: ""}]}}/>
                         <div>Gateway Services: <Link onClick={() => setEditable(!editable)}>(change)</Link> <Badge>{items.length} Services</Badge></div>
-                        <ServiceSelector mode={editable ? "edit":"view"} packageEnvironmentId={env.id} setItems={setItems} items={items}/>
+                        <ServiceSelector mode={editable ? "edit":"view"} productEnvironmentId={env.id} setItems={setItems} items={items}/>
                         <div>Application Requests:</div>
                         <HStack spacing={2}>
                             <Switch/>

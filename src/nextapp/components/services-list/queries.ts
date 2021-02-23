@@ -2,7 +2,7 @@ import { gql } from 'graphql-request';
 
 export const GET_LIST = gql`
   query GetServices {
-    allPackages {
+    allProducts {
       id
       name
       organization {

@@ -26,8 +26,8 @@ const NewDialog = ({isOpen, onClose, onComplete}) => {
     const toast = useToast()
     const successToast = () => {
         toast({
-            title: "Package created.",
-            description: "We've created a new package for you.",
+            title: "Product created.",
+            description: "We've created a new product for you.",
             status: "success",
             duration: 9000,
             isClosable: true,
@@ -41,7 +41,7 @@ const NewDialog = ({isOpen, onClose, onComplete}) => {
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>New Package</ModalHeader>
+                <ModalHeader>New Product</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>

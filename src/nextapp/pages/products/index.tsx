@@ -9,11 +9,11 @@ import {
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
-import PackagesList from '@/components/packages-list';
-import NewPackage from '@/components/new-package';
+import ProductsList from '@/components/products-list';
+import NewProduct from '@/components/new-product';
 
 const PackagingPage: React.FC = () => {
-  const actionElements = <NewPackage />;
+  const actionElements = <NewProduct />;
 
   return (
     <Container maxW="6xl">
@@ -39,7 +39,7 @@ const PackagingPage: React.FC = () => {
             <Skeleton key={d} width="100%" height="160px" mb={2} />
           ))}
         >
-          <PackagesList />
+          <ProductsList />
         </ClientRequest>
       </Box>
     </Container>

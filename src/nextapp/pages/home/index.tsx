@@ -45,7 +45,7 @@ const actions: HomeActions[] = [
     roles: ['api-owner', 'api-provider'],
   },
   {
-    title: 'Dataset Groups / Packages',
+    title: 'Dataset Groups / Products',
     url: '/poc/packaging',
     icon: FaDatabase,
     roles: ['api-owner', 'api-provider'],

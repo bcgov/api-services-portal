@@ -20,13 +20,13 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { FaPenSquare } from 'react-icons/fa';
-import type { Package } from '@/shared/types/query.types';
+import type { Product } from '@/shared/types/query.types';
 
-interface EditPackageProps {
-  data: Package;
+interface EditProductProps {
+  data: Product;
 }
 
-const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
+const EditProduct: React.FC<EditProductProps> = ({ data }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -44,8 +44,8 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
           <ModalHeader>{`Edit ${data.name}`}</ModalHeader>
           <ModalBody>
             <VStack as="form" onSubmit={(e) => e.preventDefault()} spacing={4}>
-              <FormControl isRequired id="package-name">
-                <FormLabel>Package Name</FormLabel>
+              <FormControl isRequired id="product-name">
+                <FormLabel>Product Name</FormLabel>
                 <Input
                   type="text"
                   name="name"
@@ -54,7 +54,7 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
                 />
                 <FormHelperText>Must be unique</FormHelperText>
               </FormControl>
-              <FormControl id="package-organization">
+              <FormControl id="product-organization">
                 <FormLabel>Organization</FormLabel>
                 <Select
                   defaultValue={data.organization ? data.organization[0] : ''}
@@ -65,10 +65,10 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
                   <option value="loc">Location Services</option>
                 </Select>
                 <FormHelperText>
-                  Which organization does this package belong to?
+                  Which organization does this product belong to?
                 </FormHelperText>
               </FormControl>
-              <FormControl id="package-organization-unit">
+              <FormControl id="product-organization-unit">
                 <FormLabel>Organization Unit</FormLabel>
                 <Select
                   defaultValue={data.organizationUnit?.name}
@@ -86,7 +86,7 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="red">Delete Package</Button>
+            <Button colorScheme="red">Delete Product</Button>
             <Box flex={1} />
             <Button mr={3} onClick={onClose}>
               Cancel
@@ -99,4 +99,4 @@ const EditPackage: React.FC<EditPackageProps> = ({ data }) => {
   );
 };
 
-export default EditPackage;
+export default EditProduct;

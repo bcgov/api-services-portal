@@ -12,11 +12,11 @@ import {
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
-import PackagesList from '@/components/packages-list';
-import NewPackage from '@/components/new-package';
+import ProductsList from '@/components/products-list';
+import NewProduct from '@/components/new-product';
 
 const PackagingPage: React.FC = () => {
-  const actionElements = <NewPackage />;
+  const actionElements = <NewProduct />;
 
   return (
     <Container maxW="6xl">
@@ -28,9 +28,9 @@ const PackagingPage: React.FC = () => {
         </Alert>
       </VStack>
 
-      <PageHeader title="Dataset Groups / Packages" actions={actionElements}>
+      <PageHeader title="Dataset Groups / Products" actions={actionElements}>
         <p>
-          Dataset Groups / Packages are groups of APIs that are protected in the
+          Dataset Groups / Products are groups of APIs that are protected in the
           same way, and are discoverable by Citizens through the BC Data
           Catalog, or by invitation from an API Manager.
         </p>
@@ -42,7 +42,7 @@ const PackagingPage: React.FC = () => {
             <Skeleton key={d} width="100%" height="160px" mb={2} />
           ))}
         >
-          <PackagesList />
+          <ProductsList />
         </ClientRequest>
       </Box>
     </Container>

@@ -37,8 +37,8 @@ function List({ data, state, refetch }) {
                 <Tbody>
             {data.allAccessRequests.map((item, index) => (
                 <Tr key={index}>
-                    <Td>{item.packageEnvironment.package == null ? "--MISSING--" : item.packageEnvironment.package.name}</Td>
-                    <Td>{item.packageEnvironment.name}</Td>
+                    <Td>{item.productEnvironment.product == null ? "--MISSING--" : item.productEnvironment.product.name}</Td>
+                    <Td>{item.productEnvironment.name}</Td>
                     <Td>{item.application == null ? false:item.application.name}</Td>
                     <Td>{item.createdAt}</Td>
                     <Td>{item.requestor.name} ({item.requestor.username})</Td>

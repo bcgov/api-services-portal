@@ -8,7 +8,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useMutation, useQueryClient } from 'react-query';
-import { ADD_ENVIRONMENT } from '@/shared/queries/packages-queries';
+import { ADD_ENVIRONMENT } from '@/shared/queries/products-queries';
 
 const options: { name: string; value: string }[] = [
   { name: 'Development', value: 'dev' },
@@ -21,22 +21,22 @@ const options: { name: string; value: string }[] = [
 interface AddEnvironmentProps {
   children: React.ReactNode;
   environments: string[];
-  packageId: string;
+  productId: string;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   children,
   environments,
-  packageId,
+  productId,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
   const mutation = useMutation(
     async (value: string) =>
-      await api(ADD_ENVIRONMENT, { package: packageId, name: value }),
+      await api(ADD_ENVIRONMENT, { product: productId, name: value }),
     {
       onSuccess: () => {
-        client.invalidateQueries('packages');
+        client.invalidateQueries('products');
         toast({
           title: 'Environment Added',
           description:

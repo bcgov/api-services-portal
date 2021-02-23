@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { FaCheck, FaExclamation } from 'react-icons/fa';
-import NewPackage from '@/components/new-package';
+import NewProduct from '@/components/new-product';
 import { useQuery } from 'react-query';
 import type { Environment, Query } from '@/types/query.types';
 
@@ -44,16 +44,16 @@ const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
 
   return (
     <>
-      {data.allPackages.length <= 0 && (
+      {data.allProducts.length <= 0 && (
         <Box gridColumnStart="2" gridColumnEnd="4">
           <EmptyPane
             title="No services created yet."
-            message="You need to create a package before services are available"
-            action={<NewPackage />}
+            message="You need to create a product before services are available"
+            action={<NewProduct />}
           />
         </Box>
       )}
-      {data.allPackages.map((d) =>
+      {data.allProducts.map((d) =>
         d.environments?.filter(stateFilter).map((e) => (
           <Box
             key={e.id}

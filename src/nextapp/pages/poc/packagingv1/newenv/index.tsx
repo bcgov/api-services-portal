@@ -23,10 +23,10 @@ import {
 
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
+const NewDialog = ({isOpen, onClose, onComplete, products = []}) => {
     const [name, setName] = useState('');
     const [envValue, setEnvValue] = useState<React.ReactText>('dev');
-    const [_package, setPackage] = useState('');
+    const [_product, setProduct] = useState('');
 
     const toast = useToast()
     const successToast = () => {
@@ -39,7 +39,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
         })
     }
     const create = () => {
-        graphql(ADD_ENV, { name: (envValue == "other" ? name : envValue), product: _package }).then( () => { setName(''); setPackage(''); onClose(); successToast(); onComplete() });
+        graphql(ADD_ENV, { name: (envValue == "other" ? name : envValue), product: _product }).then( () => { setName(''); setProduct(''); onClose(); successToast(); onComplete() });
     }
 
 
@@ -67,8 +67,8 @@ const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>
-                        <Select placeholder="Select Package" onChange={(e) => setPackage(e.target.value)} value={_package}>
-                        {packages.map(p => (
+                        <Select placeholder="Select Product" onChange={(e) => setProduct(e.target.value)} value={_product}>
+                        {products.map(p => (
                            <option value={p.id}>{p.name}</option>
                         ))}
                         </Select>

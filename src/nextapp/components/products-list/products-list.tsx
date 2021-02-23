@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import EnvironmentsList from '@/components/environments-list';
-import NewPackage from '@/components/new-package';
+import NewProduct from '@/components/new-product';
 import { useQuery } from 'react-query';
 import type { Query } from '@/types/query.types';
 import {
@@ -25,31 +25,31 @@ import {
 
 import AddEnvironment from './add-environment';
 import { GET_LIST } from './queries';
-import EditPackage from './edit-package';
+import EditProduct from './edit-product';
 
-const PackagesList: React.FC = () => {
+const ProductsList: React.FC = () => {
   const { data } = useQuery<Query>(
-    'packages',
+    'products',
     async () => await api(GET_LIST),
     {
       suspense: true,
     }
   );
 
-  if (data.allPackages.length === 0) {
+  if (data.allProducts.length === 0) {
     return (
       <EmptyPane
-        title="Make your first Package"
-        message="You can create additional environments once a package has been made."
-        action={<NewPackage />}
+        title="Make your first Product"
+        message="You can create additional environments once a product has been made."
+        action={<NewProduct />}
       />
     );
   }
 
   return (
     <Box width="100%">
-      {data.allPackages.map((d) => (
-        <Box key={d.id} mb={8} className="package-item">
+      {data.allProducts.map((d) => (
+        <Box key={d.id} mb={8} className="product-item">
           <Box
             as="header"
             bgColor="white"
@@ -78,17 +78,17 @@ const PackagesList: React.FC = () => {
               <Box>
                 <ButtonGroup
                   size="sm"
-                  opacity={data.allPackages.length > 1 ? 0 : 1}
+                  opacity={data.allProducts.length > 1 ? 0 : 1}
                   transition="opacity ease-in 0.2s"
                   sx={{
-                    '.package-item:hover &': {
+                    '.product-item:hover &': {
                       opacity: 1,
                     },
                   }}
                 >
                   {d.environments.length < 6 && (
                     <AddEnvironment
-                      packageId={d.id}
+                      productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
                       <Button
@@ -99,7 +99,7 @@ const PackagesList: React.FC = () => {
                       </Button>
                     </AddEnvironment>
                   )}
-                  <EditPackage data={d} />
+                  <EditProduct data={d} />
                 </ButtonGroup>
               </Box>
             </Box>
@@ -112,7 +112,7 @@ const PackagesList: React.FC = () => {
                 >
                   <Center>
                     <AddEnvironment
-                      packageId={d.id}
+                      productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
                       <Button variant="primary">Add Environment</Button>
@@ -133,4 +133,4 @@ const PackagesList: React.FC = () => {
   );
 };
 
-export default PackagesList;
+export default ProductsList;

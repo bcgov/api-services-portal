@@ -32,8 +32,8 @@ const EditPkgDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
     const toast = useToast()
     const successToast = () => {
         toast({
-            title: "Package updated.",
-            description: "We've updated the package for you.",
+            title: "Product updated.",
+            description: "We've updated the product for you.",
             status: "success",
             duration: 9000,
             isClosable: true,
@@ -52,7 +52,7 @@ const EditPkgDialog = ({isOpen, onClose, onComplete, pkg = { id: null, name: "" 
         <Modal key="EditPkgDialog" isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Edit Package</ModalHeader>
+                <ModalHeader>Edit Product</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>

@@ -29,7 +29,7 @@ import {
   FaTrash,
   FaUserSecret,
 } from 'react-icons/fa';
-import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/packages-queries';
+import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import EditEnvironment from './edit-environment';
 
@@ -59,7 +59,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
       await api(UPDATE_ENVIRONMENT_ACTIVE, payload),
     {
       onSuccess: (_, vars) => {
-        client.invalidateQueries('packages');
+        client.invalidateQueries('products');
         toast({
           title: vars.active ? 'Environment Enabled' : 'Environment Disabled',
           status: vars.active ? 'success' : 'warning',
@@ -146,7 +146,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
           </Box>
           <Box>
             <ButtonGroup>
-              <Link href={`/packages/${e.id}`}>
+              <Link href={`/products/${e.id}`}>
                 <Button size="xs" variant="outline">
                   Edit
                 </Button>

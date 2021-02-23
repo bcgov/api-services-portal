@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request';
 
-export const ADD_PACKAGE = gql`
+export const ADD_PRODUCT = gql`
   mutation Add($name: String!) {
-    createPackage(data: { name: $name }) {
+    createProduct(data: { name: $name }) {
       id
       name
     }
@@ -10,9 +10,9 @@ export const ADD_PACKAGE = gql`
 `;
 
 export const ADD_ENVIRONMENT = gql`
-  mutation Add($name: String!, $package: ID!) {
+  mutation Add($name: String!, $product: ID!) {
     createEnvironment(
-      data: { name: $name, package: { connect: { id: $package } } }
+      data: { name: $name, product: { connect: { id: $product } } }
     ) {
       id
       name
@@ -65,7 +65,7 @@ export const GET_ENVIRONMENT = gql`
       name
       active
       authMethod
-      package {
+      product {
         organization {
           name
         }
@@ -81,7 +81,7 @@ export const GET_ENVIRONMENT = gql`
 
 export const GET_LIST = gql`
   query GET {
-    allPackages {
+    allProducts {
       id
       name
       description

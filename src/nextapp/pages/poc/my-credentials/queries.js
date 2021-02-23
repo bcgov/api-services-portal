@@ -10,9 +10,9 @@ export const GET_LIST = `
               name
               username
           }
-          packageEnvironment {
+          productEnvironment {
               name
-              package {
+              product {
                 name
               }
           }

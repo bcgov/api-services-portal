@@ -40,7 +40,7 @@ const DatasetsPage = () => {
             <h1 style={styles.mainHeading}>Products</h1>
             <Alert status="info">
                 <AlertIcon />
-                Products are groups of Services that are packaged together and discoverable by Citizens through the BC Data Catalog, or by invitation from an API Manager.
+                Products are groups of Services that are productd together and discoverable by Citizens through the BC Data Catalog, or by invitation from an API Manager.
             </Alert>
             <Alert status="info">
                 <AlertIcon />
@@ -54,7 +54,7 @@ const DatasetsPage = () => {
                 </ButtonGroup>
                 <List data={data} state={state} refetch={fetch}/>
                 <NewDialog isOpen={isPkgOpen} onClose={onPkgClose} onComplete={fetch}/>
-                <NewEnvDialog isOpen={isEnvOpen} onClose={onEnvClose} onComplete={fetch} packages={data.allProducts}/>
+                <NewEnvDialog isOpen={isEnvOpen} onClose={onEnvClose} onComplete={fetch} products={data.allProducts}/>
             </div>
         </div>
     )

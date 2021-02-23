@@ -11,7 +11,7 @@ export const GET_LIST = `
           }
           environments {
               name
-              package {
+              product {
                 name
               }
           }
