@@ -12,7 +12,7 @@ async function sync({workingPath, url, destinationUrl}) {
     const exceptions = []
     xfer = transfers(workingPath, url, exceptions)
 
-    last 14 days
+    // last 14 days
     for (var d = 0; d < 14; d++) {
         const target = moment().add(-d, 'days').format('YYYY-MM-DD')
 
