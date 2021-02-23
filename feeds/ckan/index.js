@@ -8,7 +8,7 @@ async function sync({url, workingPath, destinationUrl}) {
     fs.mkdirSync(workingPath + '/packages', { recursive: true })
 
     const exceptions = []
-    xfer = transfers(workingPath, url, exceptions)
+    const xfer = transfers(workingPath, url, exceptions)
 
     await xfer.copy ('/api/action/group_list', 'group-keys')
     await xfer.copy ('/api/action/organization_list', 'organization-keys')
@@ -21,7 +21,7 @@ async function sync({url, workingPath, destinationUrl}) {
     console.log(JSON.stringify(exceptions, null, 4))
 
     // Now, send to portal
-    destination = portal(destinationUrl)
+    const destination = portal(destinationUrl)
 
     xfer.iterate_through_json_content ('orgs', async (file, json) => {
         const data = json['result']

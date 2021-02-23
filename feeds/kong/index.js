@@ -4,7 +4,7 @@ const { portal } = require('../utils/portal')
 
 async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
-    xfer = transfers(workingPath, url, exceptions)
+    const xfer = transfers(workingPath, url, exceptions)
 
     await xfer.copy (`/services`, 'gw-services')
     await xfer.copy (`/routes`, 'gw-routes')
@@ -12,7 +12,7 @@ async function sync({url, workingPath, destinationUrl}) {
     await xfer.copy (`/plugins`, 'gw-plugins')
 
     // Now, send to portal
-    destination = portal(destinationUrl)
+    const destination = portal(destinationUrl)
 
     xfer.get_json_content('gw-services')['data'].map(svc => {
         const name = svc['name']
