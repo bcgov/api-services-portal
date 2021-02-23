@@ -62,7 +62,7 @@ function List({ data, state, refetch }) {
         return (
             <>
                 <Accordion defaultIndex={[]} allowMultiple>
-                {data.allPackages.map((item, index) => (
+                {data.allProducts.map((item, index) => (
                     <AccordionItem>
                         <AccordionButton>
                             <Box flex="1" textAlign="left">

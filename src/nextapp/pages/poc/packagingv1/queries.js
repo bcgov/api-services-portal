@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GET {
-        allPackages {
+        allProducts {
           id
           name
           organization {
@@ -36,15 +36,15 @@ export const GET_LIST = `
 
 export const ADD = `
     mutation Add($name: String!) {
-        createPackage(data: { name: $name } ) {
+        createProduct(data: { name: $name } ) {
             id
         }
     }
 `
 
 export const ADD_ENV = `
-    mutation Add($name: String!, $package: ID!) {
-        createEnvironment(data: { name: $name, package: { connect: { id: $package } } } ) {
+    mutation Add($name: String!, $product: ID!) {
+        createEnvironment(data: { name: $name, product: { connect: { id: $product } } } ) {
             id
         }
     }
@@ -79,7 +79,7 @@ export const UPDATE_ACTIVE = `
 
 export const UPD_PKG = `
     mutation Update($id: ID!, $name: String) {
-        updatePackage(id: $id, data: { name: $name } ) {
+        updateProduct(id: $id, data: { name: $name } ) {
             name
             id
         }
@@ -88,7 +88,7 @@ export const UPD_PKG = `
 
 export const GET_AVAIL_SERVICES = `
     query GET($ns: String!) {
-        allServiceRoutes(where: { namespace: $ns }) {
+        allGatewayServices(where: { namespace: $ns }) {
             id
             name
             environment {

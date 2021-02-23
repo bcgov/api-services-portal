@@ -19,9 +19,9 @@ export const GET_LIST = `
             application {
               appId
             }
-            packageEnvironment {
+            productEnvironment {
               name
-              package {
+              product {
                   name
               }
             }

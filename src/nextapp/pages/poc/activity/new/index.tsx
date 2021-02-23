@@ -19,33 +19,34 @@ import {
 
 import { Stack, Button, ButtonGroup, Input, Textarea } from "@chakra-ui/react"
 
-const NewDialog = ({isOpen, onClose, onComplete}) => {
+const NewDialog = ({isOpen, onClose, ownerUserId, onComplete}) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
     const toast = useToast()
     const successToast = () => {
         toast({
-            title: "Product created.",
-            description: "We've created a new product for you.",
+            title: "Application created.",
+            description: "We've created your application for you.",
             status: "success",
             duration: 9000,
             isClosable: true,
         })
     }
     const create = () => {
-        graphql(ADD, { name: name }).then( () => { onClose(); successToast(); onComplete() });
+        graphql(ADD, { name: name, description: description, owner: ownerUserId }).then( () => { onClose(); successToast(); onComplete() });
     }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>New Product</ModalHeader>
+                <ModalHeader>New Application</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <Stack direction="column" spacing={4}>
                         <Input placeholder="name" defaultValue={name} onChange={event => setName(event.currentTarget.value)}/>
+                        <Textarea placeholder="What does your application do?" defaultValue={description} onChange={event => setDescription(event.currentTarget.value)}/>
                     </Stack>
                 </ModalBody>
 

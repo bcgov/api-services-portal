@@ -39,7 +39,7 @@ const NewDialog = ({isOpen, onClose, onComplete, packages = []}) => {
         })
     }
     const create = () => {
-        graphql(ADD_ENV, { name: (envValue == "other" ? name : envValue), package: _package }).then( () => { setName(''); setPackage(''); onClose(); successToast(); onComplete() });
+        graphql(ADD_ENV, { name: (envValue == "other" ? name : envValue), product: _package }).then( () => { setName(''); setPackage(''); onClose(); successToast(); onComplete() });
     }
 
 

@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GetServices {
-        allPackages {
+        allProducts {
           id
           name
           environments {

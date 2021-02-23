@@ -69,8 +69,8 @@ const FulfillRequest = () => {
                 <>
                 <h2 style={styles.h2}>API</h2>
                 <div className="flex">
-                    <NameValue name="Package" value={request.packageEnvironment.package.name} width="200px"/>
-                    <NameValue name="Environment" value={request.packageEnvironment.name} width="150px"/>
+                    <NameValue name="Product" value={request.productEnvironment.product.name} width="200px"/>
+                    <NameValue name="Environment" value={request.productEnvironment.name} width="150px"/>
                 </div>
                 <h2 style={styles.h2}>What application will be using this API?</h2>
                 <div className="flex">
@@ -85,10 +85,10 @@ const FulfillRequest = () => {
                 </div>
                 <h2 style={styles.h2}>Additional Controls</h2>
                 <div className="flex">
-                    { request.packageEnvironment.credentialIssuer != null ? (
+                    { request.productEnvironment.credentialIssuer != null ? (
                         <>
-                        <NameValue name="Auth Method" value={request.packageEnvironment.credentialIssuer.authMethod} width="150px"/>
-                        <NameValue name="Mode" value={request.packageEnvironment.credentialIssuer.mode} width="150px"/>
+                        <NameValue name="Auth Method" value={request.productEnvironment.credentialIssuer.authMethod} width="150px"/>
+                        <NameValue name="Mode" value={request.productEnvironment.credentialIssuer.mode} width="150px"/>
                         </>
                     ):false}
 

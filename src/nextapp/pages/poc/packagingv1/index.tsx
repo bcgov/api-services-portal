@@ -37,24 +37,24 @@ const DatasetsPage = () => {
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Dataset Groups / Packages</h1>
+            <h1 style={styles.mainHeading}>Products</h1>
             <Alert status="info">
                 <AlertIcon />
-                Dataset Groups / Packages are groups of APIs that are protected in the same way, and are discoverable by Citizens through the BC Data Catalog, or by invitation from an API Manager.
+                Products are groups of Services that are packaged together and discoverable by Citizens through the BC Data Catalog, or by invitation from an API Manager.
             </Alert>
             <Alert status="info">
                 <AlertIcon />
-                API Owner can define environments and which Services are for which environment.
+                An API Owner can define environments and which Services are for which environment.
             </Alert>
 
             <div className="m-10">
                 <ButtonGroup className="m-5">
-                    <Button colorScheme="blue" onClick={onPkgOpen}>New Package</Button>
+                    <Button colorScheme="blue" onClick={onPkgOpen}>New Product</Button>
                     <Button colorScheme="blue" onClick={onEnvOpen}>New Environment</Button>
                 </ButtonGroup>
                 <List data={data} state={state} refetch={fetch}/>
                 <NewDialog isOpen={isPkgOpen} onClose={onPkgClose} onComplete={fetch}/>
-                <NewEnvDialog isOpen={isEnvOpen} onClose={onEnvClose} onComplete={fetch} packages={data.allPackages}/>
+                <NewEnvDialog isOpen={isEnvOpen} onClose={onEnvClose} onComplete={fetch} packages={data.allProducts}/>
             </div>
         </div>
     )

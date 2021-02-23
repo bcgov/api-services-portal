@@ -26,7 +26,7 @@ const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items =
     //  onChange={(e) => setActive(!active)} isChecked={active}
     return mode == "edit" ? (
                 <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-                { state === 'loaded' && data.allServiceRoutes.filter(svc => svc.environment == null || svc.environment.id == packageEnvironmentId).map(svc => (
+                { state === 'loaded' && data.allGatewayServices.filter(svc => svc.environment == null || svc.environment.id == packageEnvironmentId).map(svc => (
                     <HStack spacing={3}>
                         <Switch size="sm" onChange={(e) => { if (!items.includes(svc.id)) { setItems([
                                 ...items,
@@ -40,11 +40,11 @@ const ServiceSelector = ({mode = "view", packageEnvironmentId, setItems, items =
                     </HStack>
                 ))}
                 </Box>
-            ) : state === 'loaded' && data.allServiceRoutes.filter (svc => items.includes(svc.id)).length == 0 ? (
+            ) : state === 'loaded' && data.allGatewayServices.filter (svc => items.includes(svc.id)).length == 0 ? (
                     <Badge>No Services Linked to Environment</Badge>
                 ) : (
                     <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-                        { state === 'loaded' && data.allServiceRoutes.filter (svc => items.includes(svc.id)).map(svc => (
+                        { state === 'loaded' && data.allGatewayServices.filter (svc => items.includes(svc.id)).map(svc => (
                             <HStack spacing={3}>
                                 <span>{svc.name}</span>
                             </HStack>

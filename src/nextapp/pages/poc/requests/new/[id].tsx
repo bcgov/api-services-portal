@@ -41,7 +41,7 @@ const NewRequest = () => {
     };
     useEffect(fetch, [context]);
 
-    const dataset = (data ? data.allPackages[0] : data)
+    const dataset = (data ? data.allProducts[0] : data)
 
     const refetch = () => {
         window.location.href = "/poc/applications"
@@ -49,7 +49,7 @@ const NewRequest = () => {
 
     
     const create = () => {
-        graphql(ADD, { name: dataset.name + " FOR " + data.allTemporaryIdentities[0].name, requestor: data.allTemporaryIdentities[0].userId, applicationId: applicationId, packageEnvironmentId: environmentId }).then(refetch);
+        graphql(ADD, { name: dataset.name + " FOR " + data.allTemporaryIdentities[0].name, requestor: data.allTemporaryIdentities[0].userId, applicationId: applicationId, productEnvironmentId: environmentId }).then(refetch);
     }
     //onChange={(a) => { setApplicationId(a) } } value={applicationId}
     //onChange={setEnvironmentId} value={environmentId}
@@ -86,7 +86,7 @@ const NewRequest = () => {
                         <h2 style={styles.h2}>APIs</h2>
                         <div className="flex">
                             <Flex direction="column" className="m-5">
-                                <label><b>Package</b></label>
+                                <label><b>Product</b></label>
                                 <div>{dataset.name}</div>
                             </Flex>
                         </div>

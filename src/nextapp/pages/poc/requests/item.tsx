@@ -22,12 +22,12 @@ const Item = props => (
                 <p>{props.accessRequest.application.name}</p>
                 )}
             </Td>
-            <Td>{ props.accessRequest.packageEnvironment && props.accessRequest.packageEnvironment.package && (
-                <p>{props.accessRequest.packageEnvironment.package.name}</p>
+            <Td>{ props.accessRequest.productEnvironment && props.accessRequest.productEnvironment.product && (
+                <p>{props.accessRequest.productEnvironment.product.name}</p>
                 )}
             </Td>
-            <Td>{ props.accessRequest.packageEnvironment && (
-                <p>{props.accessRequest.packageEnvironment.name}</p>
+            <Td>{ props.accessRequest.productEnvironment && (
+                <p>{props.accessRequest.productEnvironment.name}</p>
                 )}
             </Td>
             <Td>

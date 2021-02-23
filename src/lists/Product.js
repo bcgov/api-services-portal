@@ -28,7 +28,7 @@ module.exports = {
     dataset: { type: Relationship, ref: 'Dataset' },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    environments: { type: Relationship, ref: 'Environment.package', many: true },
+    environments: { type: Relationship, ref: 'Environment.product', many: true },
   },
   access: EnforcementPoint,
 }

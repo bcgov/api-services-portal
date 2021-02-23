@@ -29,7 +29,7 @@ function List({ data, state, refetch }) {
         return (
             
           <GridLayout>
-            {data.allPackages.filter(p => p.environments.filter(e => e.active).length > 0).map((item, index) => (
+            {data.allProducts.filter(p => p.environments.filter(e => e.active).length > 0).map((item, index) => (
                 <Card key={item.id}>
                     <Heading size="md" mb={2}>
                         {item.name}

@@ -79,7 +79,7 @@ function List({ data, state, refetch }) {
                     {data.allAccessRequests.filter(req => req.application && req.application.appId == item.appId).map((req, index) => (
                             <Box key={req.id}>
                             <HStack className="m-5">
-                            <span><b>Access Request {req.packageEnvironment.package.name} {req.packageEnvironment.name}</b></span>
+                            <span><b>Access Request {req.productEnvironment.product.name} {req.productEnvironment.name}</b></span>
                             { req.isIssued ? (
                                 <Button size="xs" colorScheme="blue" onClick={() => generateCredential(req.id)}>Generate Credential</Button>
 

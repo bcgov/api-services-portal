@@ -15,8 +15,8 @@ module.exports = {
             children: ['AccessRequest', 'Application', 'Activity'],
         },
         {
-            label: 'Product',
-            children: ['Package', 'Environment', 'CredentialIssuer', 'Content'],
+            label: 'Products',
+            children: ['Product', 'Environment', 'CredentialIssuer', 'Content'],
         },
         {
             label: 'Monitoring',
@@ -32,7 +32,7 @@ module.exports = {
         },
         {
             label: 'Kong',
-            children: ['ServiceRoute', 'Consumer', 'Plugin', 'GatewayService', 'GatewayRoute'],
+            children: ['GatewayService', 'GatewayRoute', 'Consumer', 'Plugin'],
         },
         {
             label: 'BCDC',

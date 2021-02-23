@@ -4,7 +4,7 @@ const filterByEnvironmentPackageNS = (context, value) => {
         console.log("Action: Filter By Package NS" + namespace)
     }
     
-    return { packageEnvironment: { package: { namespace: namespace } } }
+    return { productEnvironment: { product: { namespace: namespace } } }
 }
 
 module.exports = filterByEnvironmentPackageNS

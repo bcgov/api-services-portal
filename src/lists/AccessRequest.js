@@ -47,7 +47,7 @@ module.exports = {
     requestor: { type: Relationship, isRequired: true, ref: 'User' },
     application: { type: Relationship, isRequired: true, ref: 'Application' },
     consumer: { type: Relationship, ref: 'Consumer' },
-    packageEnvironment: { type: Relationship, isRequired: true, ref: 'Environment' },
+    productEnvironment: { type: Relationship, isRequired: true, ref: 'Environment' },
     activity: { type: Relationship, ref: 'Activity', many: true },
   },
   access: EnforcementPoint,
@@ -97,7 +97,7 @@ module.exports = {
                         allEnvironments(id: $id) {
                             name
                             authMethod
-                            package {
+                            product {
                                 name
                             }
                         }

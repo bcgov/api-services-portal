@@ -1,6 +1,6 @@
 export const GET_PACKAGE = `
     query Get ($id: ID!) {
-        allPackages(where: {id: $id}) {
+        allProducts(where: {id: $id}) {
             id
             name
             environments {
@@ -42,13 +42,13 @@ export const GET_LIST = `
           application {
               name
           }
-          packageEnvironment {
+          productEnvironment {
               name
               authMethod
               credentialIssuer {
                   name
               }
-              package {
+              product {
                 name
                 organization {
                     name
@@ -87,13 +87,13 @@ export const GET_REQUEST = `
             appId
             name
           }
-          packageEnvironment {
+          productEnvironment {
             name
             authMethod
             credentialIssuer {
                 name
             }
-            package {
+            product {
               name
               organization {
                   name
@@ -114,11 +114,11 @@ export const GET_REQUEST = `
 `
 
 export const ADD = `
-    mutation AddAccessRequest($name: String!, $requestor: ID!, $applicationId: ID!, $packageEnvironmentId: ID!) {
+    mutation AddAccessRequest($name: String!, $requestor: ID!, $applicationId: ID!, $productEnvironmentId: ID!) {
         createAccessRequest(data: { name: $name, 
             requestor: { connect: { id: $requestor } }, 
             application: { connect: { id: $applicationId } }
-            packageEnvironment: { connect: { id: $packageEnvironmentId } }
+            productEnvironment: { connect: { id: $productEnvironmentId } }
          } ) {
             id
         }

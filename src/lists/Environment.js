@@ -31,8 +31,8 @@ module.exports = {
       isRequired: false,
     },
     credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
-    services: { type: Relationship, ref: 'ServiceRoute.environment', many: true },
-    package: { type: Relationship, ref: 'Package.environments', many: false },
+    services: { type: Relationship, ref: 'GatewayService.environment', many: true },
+    product: { type: Relationship, ref: 'Product.environments', many: false },
   },
   access: EnforcementPoint,
   hooks: {
