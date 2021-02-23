@@ -62,12 +62,9 @@ const ServicesPage: React.FC = () => {
           </Heading>
           <Select
             w="25%"
-            bgColor="white"
-            borderWidth={2}
-            borderRadius={0}
-            borderColor="text"
             onChange={onFilterChange}
             value={filter}
+            variant="select"
           >
             <option value="all">All Services</option>
             <option value="up">Up</option>
