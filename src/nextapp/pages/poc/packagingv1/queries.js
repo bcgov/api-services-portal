@@ -87,8 +87,8 @@ export const UPD_PKG = `
 `
 
 export const GET_AVAIL_SERVICES = `
-    query GET($ns: String!) {
-        allGatewayServices(where: { namespace: $ns }) {
+    query GET {
+        allGatewayServices {
             id
             name
             environment {

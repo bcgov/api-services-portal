@@ -12,7 +12,7 @@ import { Badge, Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 const ServiceSelector = ({mode = "view", productEnvironmentId, setItems, items = []}) => {
     let [{ state, data }, setState] = useState({ state: 'loading', data: null });
     let fetch = () => {
-        graphql(GET_AVAIL_SERVICES, {ns: "dss-loc"})
+        graphql(GET_AVAIL_SERVICES, {})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
