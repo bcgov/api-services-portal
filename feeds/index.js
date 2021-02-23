@@ -72,21 +72,21 @@ app.use((err, req, res, next) => {
     }
 })
 
-function kongCron(source='kong', frequencyMinutes=15) {
+function kongCron(source, frequencyMinutes) {
     sources[source].sync(config[source])
     console.log(`[KONG] SLEEPING FOR ${frequencyMinutes} minutes`)
-    setTimeout(kongCron, frequencyMinutes * 60 * 1000)
+    setTimeout(kongCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
 }
 
-kongCron()
+kongCron('kong', 15)
 
-function prometheusCron(source='prometheus', frequencyMinutes=10) {
+function prometheusCron(source, frequencyMinutes) {
     sources[source].sync(config[source])
     console.log(`[PROM] SLEEPING FOR ${frequencyMinutes} minutes`)
-    setTimeout(prometheusCron, frequencyMinutes * 60 * 1000)
+    setTimeout(prometheusCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
 }
 
-prometheusCron()
+prometheusCron('prometheus', 10)
 
 function ckanCron(source='ckan', frequencyMinutes=6*60) {
     sources[source].sync(config[source])
