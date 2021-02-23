@@ -12,7 +12,7 @@ async function sync({workingPath, url, destinationUrl}) {
     const exceptions = []
     xfer = transfers(workingPath, url, exceptions)
 
-    // last 14 days
+    last 14 days
     for (var d = 0; d < 14; d++) {
         const target = moment().add(-d, 'days').format('YYYY-MM-DD')
 
@@ -37,22 +37,39 @@ async function sync({workingPath, url, destinationUrl}) {
     }
     
     // Now, send to portal
-    destination = portal(destinationUrl)
+    await xfer.concurrentWork(producer(xfer, destinationUrl))
+}
 
+function producer (xfer, destinationUrl) {
+    const destination = portal(destinationUrl)
+
+    const work = []
     for (var d = 0; d < 14; d++) {
         const target = moment().add(-d, 'days').format('YYYY-MM-DD')
         for ( _query of queries) {
             xfer.get_json_content('query-' + _query.id + '-' + target)['data'][0]['result'].map(metric => {
-                const name = JSON.stringify(metric['metric'])
-                metric['id'] = _query.id + '.' + target + '.' + JSON.stringify(metric['metric'])
-                metric['day'] = target
-                metric['query'] = _query.id
-
-                destination.fireAndForget('/feed/GatewayMetric', metric)
-                .then ((result) => console.log(`[${name}] OK`, result))
-                .catch (err => console.log(`[${name}] ERR ${err}`))
+                work.push ({target: target, query: _query, metric: metric})
             })
         }
+    }
+    let index = 0
+    return () => {
+        if (index == work.length) {
+            console.log("Finished producing "+ index + " records.")
+            return null
+        }
+        const item = work[index]
+        index++
+
+        const name = JSON.stringify(item.metric['metric'])
+        item.metric['id'] = item.query.id + '.' + item.target + '.' + JSON.stringify(item.metric['metric'])
+        item.metric['day'] = item.target
+        item.metric['query'] = item.query.id
+
+        return destination.fireAndForget('/feed/GatewayMetric', item.metric)
+        .then ((result) => console.log(`[${name}] OK`, result))
+        .catch (err => console.log(`[${name}] ERR ${err}`))
+
     }
 }
 

@@ -12,42 +12,36 @@ async function sync({url, workingPath, destinationUrl}) {
     await xfer.copy (`/plugins`, 'gw-plugins')
 
     // Now, send to portal
-    const destination = portal(destinationUrl)
-
-    xfer.get_json_content('gw-services')['data'].map(svc => {
-        const name = svc['name']
-        svc['plugins'] = findAllPlugins (xfer, 'service', svc['id'])
-        console.log(name + ` with ${svc['plugins'].length} plugins`)
-
-        destination.fireAndForget('/feed/GatewayService', svc)
-        .then ((result) => console.log(`[${name}] OK`, result))
-        .catch (err => console.log(`[${name}] ERR ${err}`))
-    })
-
-    xfer.get_json_content('gw-routes')['data'].map(route => {
-        const name = route['name']
-        route['plugins'] = findAllPlugins (xfer, 'route', route['id'])
-        console.log(name + ` with ${route['plugins'].length} plugins`)
-
-        destination.fireAndForget('/feed/GatewayRoute', route)
-        .then ((result) => console.log(`[${name}] OK`, result))
-        .catch (err => console.log(`[${name}] ERR ${err}`))
-    })
-
-    xfer.get_json_content('gw-consumers')['data'].map(consu => {
-        const name = consu['username']
-        consu['plugins'] = findAllPlugins (xfer, 'consumer', consu['id'])
-        console.log(name + ` with ${consu['plugins'].length} plugins`)
-
-        destination.fireAndForget('/feed/Consumer', consu)
-        .then ((result) => console.log(`[${name}] OK`, result))
-        .catch (err => console.log(`[${name}] ERR ${err}`))
-    })
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-services', 'name', 'service', '/feed/GatewayService'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/Consumer'))
 }
 
-function findAllPlugins (xfer, type, serviceOrRouteId) {
+function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
+    const destination = portal(destinationUrl)
+    const items = xfer.get_json_content(file)['data']
+    const allPlugins = xfer.get_json_content ('gw-plugins')['data']
+    let index = 0
+    return () => {
+        if (index == items.length) {
+            console.log("Finished producing "+ index + " records.")
+            return null
+        }
+        const item = items[index]
+        index++
+        const nm = item[name]
+        item['plugins'] = findAllPlugins (allPlugins, type, item['id'])
+        console.log(nm + ` with ${item['plugins'].length} plugins`)
+
+        return destination.fireAndForget(feedPath, item)
+        .then ((result) => console.log(`[${nm}] OK`, result))
+        .catch (err => console.log(`[${nm}] ERR ${err}`))
+    }
+}
+
+function findAllPlugins (allPlugins, type, serviceOrRouteId) {
     const childs = []
-    xfer.get_json_content ('gw-plugins')['data'].map(plugin => {
+    .map(plugin => {
         if (plugin[type] != null && serviceOrRouteId === plugin[type]['id']) {
             childs.push(plugin)
         }

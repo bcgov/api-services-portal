@@ -1,5 +1,6 @@
 const fs = require('fs')
 const fetch = require('node-fetch')
+const url = require('url');
 const PromisePool = require('es6-promise-pool')
 const { checkStatus } = require('./checkStatus')
 
@@ -8,17 +9,23 @@ function transfers (workingPath, baseUrl, exceptions) {
 
     return {
 
-        copy: async function (url, filename, index = 0) {
-            console.log("Fetching " + baseUrl + url)
+        copy: async function (_url, filename, index = 0) {
+            console.log("Fetching " + baseUrl + _url)
             const out = workingPath + '/' + filename + '-' + index + '.json'
-            return fetch (baseUrl + url)
+            return fetch (baseUrl + _url)
             .then (checkStatus)
             .then (data => data.json())
             .then (json => {
                 fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
                 console.log("WROTE "+  filename)
                 if (json.next != null) {
-                    copyv3 (workingPath, json.next, filename, index + 1 )
+                    copy (json.next, filename, index + 1 )
+                } else if ('result' in json && json['result'].length > 0) {
+                    const u = url.parse(baseUrl + _url,true)
+                    if ('limit' in u.query) {
+                        const newUrl = `${u.pathname}?limit=${u.query.limit}&offset=${Number(u.query.offset) + Number(u.query.limit)}`
+                        this.copy (newUrl, filename, index + 1)
+                    }
                 }
             })
             .catch (err => {
@@ -43,7 +50,7 @@ function transfers (workingPath, baseUrl, exceptions) {
                 console.log('All promises fulfilled')
             }, function (error) {
                 console.log('Some promise rejected: ' + error.message)
-                throw Exception ('Some promise rejected: ' + error.message)
+                throw Error ('Some promise rejected: ' + error.message)
             })
             
         },
@@ -56,6 +63,10 @@ function transfers (workingPath, baseUrl, exceptions) {
             })
         },
         
+        get_file_list: function iterate_through_json_content(location) {
+            return fs.readdirSync(workingPath + "/" + location)
+        },
+
         iterate_through_json_content: function iterate_through_json_content(location, next) {
             fs.readdir(workingPath + "/" + location, (err, files) => {
                 if (err) {
@@ -84,7 +95,24 @@ function transfers (workingPath, baseUrl, exceptions) {
                 }
             }
         },
-        
+
+        get_list_ids: function get_list_ids(file) {
+            let index = 0
+            let data = []
+            while (true) {
+                filePath = workingPath + '/' + file + "-" + index + ".json"
+                console.log("READ " + filePath)
+                if (fs.existsSync(filePath)) {
+                    fileData = JSON.parse(fs.readFileSync(filePath))
+                    data = data.concat(fileData['result'])
+                    index++
+                } else {
+                    console.log("RETURNING " + data.length)
+                    return { next: null, data: data }
+                }
+            }
+        },
+
         create_key_map: function create_key_map (list, idKey) {
             const map = {}
             for (item of list) {

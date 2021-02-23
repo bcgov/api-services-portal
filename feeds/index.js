@@ -88,11 +88,11 @@ function prometheusCron(source, frequencyMinutes) {
 
 prometheusCron('prometheus', 10)
 
-function ckanCron(source='ckan', frequencyMinutes=6*60) {
-    sources[source].sync(config[source])
-    console.log(`[CKAN] SLEEPING FOR ${frequencyMinutes} minutes`)
-    setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
-}
+// function ckanCron(source='ckan', frequencyMinutes=6*60) {
+//     sources[source].sync(config[source])
+//     console.log(`[CKAN] SLEEPING FOR ${frequencyMinutes} minutes`)
+//     setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
+// }
 
 // ckanCron()
 
@@ -100,4 +100,4 @@ const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)
 })
 
-process.on('SIGINT', () => server.close())
+process.on('SIGINT', () => process.kill(process.pid, 'SIGTERM'))

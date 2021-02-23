@@ -157,3 +157,15 @@ In `./src/.env.local` be sure to set these
 ```
 NEXT_PUBLIC_API_ROOT=http://localhost:4000
 ```
+
+
+
+### Database (KNex)
+
+When using Postgres as a backend, there is limited support for migrations.  So need to come up with a process for `upgrading` databases.
+
+```
+select 'drop table "' || tablename || '" cascade;' from pg_tables where schemaname='public';
+```
+
+In the mean time, it is possible to drop the tables and re-run the `init-aps-portal-keystonejs-batch-job`.

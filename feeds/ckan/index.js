@@ -10,50 +10,75 @@ async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
     const xfer = transfers(workingPath, url, exceptions)
 
-    await xfer.copy ('/api/action/group_list', 'group-keys')
-    await xfer.copy ('/api/action/organization_list', 'organization-keys')
-    await xfer.copy ('/api/action/package_list', 'package-keys')
+    await xfer.copy ('/api/action/group_list?limit=100&offset=0', 'group-keys')
+    await xfer.copy ('/api/action/organization_list?limit=100&offset=0', 'organization-keys')
+    await xfer.copy ('/api/action/package_list?limit=100&offset=0', 'package-keys')
 
-    await xfer.concurrentWork (producer(xfer, 'group-keys-0', '/api/action/group_show', 'groups/'))
-    await xfer.concurrentWork (producer(xfer, 'package-keys-0', '/api/action/package_show', 'packages/'), 10)
-    await xfer.concurrentWork (producer(xfer, 'organization-keys-0', '/api/action/organization_show', 'orgs/'))
+    await xfer.concurrentWork (getCkanDataProducer(xfer, 'group-keys', '/api/action/group_show', 'groups/'))
+    await xfer.concurrentWork (getCkanDataProducer(xfer, 'package-keys', '/api/action/package_show', 'packages/'), 10)
+    await xfer.concurrentWork (getCkanDataProducer(xfer, 'organization-keys', '/api/action/organization_show', 'orgs/'))
     console.log("Exceptions? " + (exceptions.length == 0 ? "NO":"YES!"))
     console.log(JSON.stringify(exceptions, null, 4))
 
     // Now, send to portal
-    const destination = portal(destinationUrl)
-
-    xfer.iterate_through_json_content ('orgs', async (file, json) => {
-        const data = json['result']
-        if (isOrgUnit(data)) {
-            return
-        }
-        console.log(data['name'])
-        data['orgUnits'] = findAllChildren (xfer, data['name'])
-        destination.fireAndForget('/feed/Organization', data)
-        .then ((result) => console.log(`[${data['name']}] OK`, result))
-        .catch (err => console.log(`[${data['name']}] ERR ${err}`))
-    })
-
-    xfer.iterate_through_json_content ('packages', async (file, json) => {
-        const data = json['result']
-        console.log("Go - "+data['name'])
-        destination.fireAndForget('/feed/Dataset', data)
-        .then ((result) => console.log(`[${data['name']}] OK`, result))
-        .catch (err => console.log(`[${data['name']}] ERR ${err}`))
-    })
-
+    await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl))
+    await xfer.concurrentWork(loadDatasetProducer(xfer, workingPath, destinationUrl))
 }
 
-function producer (xfer, keyFile, apiCall, outFolder) {
-    const data = xfer.read(keyFile)
+function loadOrgProducer (xfer, workingPath, destinationUrl) {
+    const destination = portal(destinationUrl)
+    const fileList = xfer.get_file_list ('orgs')
     let index = 0
     return () => {
-        if (index == data['result'].length) {
+        if (index == fileList.length) {
             console.log("Finished producing "+ index + " records.")
             return null
         }
-        const item = data['result'][index]
+        const file = fileList[index]
+        const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'orgs' + '/' + file))['result']
+        index++
+
+        if (isOrgUnit(data)) {
+            return new Promise ((resolve, reject) => resolve())
+        }
+
+        console.log(new Date() + " : " + data['name'])
+        data['orgUnits'] = findAllChildren (xfer, data['name'])
+        return destination.fireAndForget('/feed/Organization', data)
+        .then ((result) => console.log(`[${data['name']}] OK`, result))
+        .catch (err => console.log(`[${data['name']}] ERR ${err}`))
+    }
+}
+
+function loadDatasetProducer (xfer, workingPath, destinationUrl) {
+    const destination = portal(destinationUrl)
+    const fileList = xfer.get_file_list ('packages')
+    let index = 0
+    return () => {
+        if (index == fileList.length) {
+            console.log("Finished producing "+ index + " records.")
+            return null
+        }
+        const file = fileList[index]
+        const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'packages' + '/' + file))['result']
+        index++
+
+        console.log(new Date() + " : " + data['name'])
+        return destination.fireAndForget('/feed/Dataset', data)
+        .then ((result) => console.log(`[${data['name']}] OK`, result))
+        .catch (err => console.log(`[${data['name']}] ERR ${err}`))
+    }
+}
+
+function getCkanDataProducer (xfer, keyFile, apiCall, outFolder) {
+    const data = xfer.get_list_ids(keyFile)
+    let index = 0
+    return () => {
+        if (index == data.data.length) {
+            console.log("Finished producing "+ index + " records.")
+            return null
+        }
+        const item = data.data[index]
         index++
         return xfer.copy (apiCall + '?id=' + item, outFolder + item)
     }
