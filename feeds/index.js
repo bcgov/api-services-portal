@@ -94,7 +94,7 @@ function ckanCron(source='ckan', frequencyMinutes=6*60) {
     setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
 }
 
-ckanCron()
+// ckanCron()
 
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)
