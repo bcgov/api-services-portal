@@ -11,8 +11,6 @@ import { GET_LIST } from './queries'
 
 const { useEffect, useState } = React
 
-import NewDialog from './new'
-
 import { styles } from '../../../shared/styles/devportal.css'
 
 import graphql from '../../../shared/services/graphql'
