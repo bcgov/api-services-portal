@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GET($first: Int, $skip: Int) {
-        allActivities( first:$first, skip: $skip) {
+        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {
           id
           type
           name
