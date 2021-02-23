@@ -1,0 +1,53 @@
+name: Create Release
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  release-on-push:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+
+      - id: release
+        uses: rymndhng/release-on-push-action@v0.15.0
+        with:
+          bump_version_scheme: patch
+
+      - name: Check Output Parameters
+        run: |
+          echo "Got tag name ${{ steps.release.outputs.tag_name }}"
+          echo "Got release version ${{ steps.release.outputs.version }}"
+
+      - name: Create docker image aps-portal
+        uses: docker/build-push-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: $GITHUB_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: bcgov/aps-portal/aps-portal
+          path: .
+          dockerfile: ./Dockerfile
+          push: true
+          tags: ${{ steps.release.outputs.tag_name }}
+          tag_with_sha: false
+
+      - name: Create docker image data-feeder
+        uses: docker/build-push-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: $GITHUB_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: bcgov/aps-portal/data-feeder
+          path: feeds
+          dockerfile: feeds/Dockerfile
+          push: true
+          tags: ${{ steps.release.outputs.tag_name }}
+          tag_with_sha: false
