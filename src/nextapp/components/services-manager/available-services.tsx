@@ -68,8 +68,8 @@ const AvailableServices: React.FC = () => {
         </Box>
       </Box>
       <Wrap p={4}>
-        {data.allServiceRoutes.length > 0 &&
-          data.allServiceRoutes.map((d, i) => (
+        {data.allGatewayServices.length > 0 &&
+          data.allGatewayServices.map((d, i) => (
             <WrapItem key={i}>
               <Tag
                 draggable

@@ -20,14 +20,14 @@ import {
   FaArrowRight,
   FaArrowCircleDown,
 } from 'react-icons/fa';
-import { ServiceRoute } from '@/shared/types/query.types';
+import { GatewayService } from '@/shared/types/query.types';
 
 interface ActiveServicesProps {
-  data: ServiceRoute[];
+  data: GatewayService[];
 }
 
 const ActiveServices: React.FC<ActiveServicesProps> = ({ data = [] }) => {
-  const [active, setData] = React.useState<ServiceRoute[]>(data);
+  const [active, setData] = React.useState<GatewayService[]>(data);
   const [hasDragTarget, setDragTarget] = React.useState<boolean>(false);
 
   return (
@@ -77,8 +77,8 @@ const ActiveServices: React.FC<ActiveServicesProps> = ({ data = [] }) => {
           const payload: string = event.dataTransfer.getData(
             'application/aps-service'
           );
-          const service: ServiceRoute = JSON.parse(payload);
-          setData((state: ServiceRoute[]) => [...state, service]);
+          const service: GatewayService = JSON.parse(payload);
+          setData((state: GatewayService[]) => [...state, service]);
           setDragTarget(false);
         }}
         onDragOver={(ev) => {

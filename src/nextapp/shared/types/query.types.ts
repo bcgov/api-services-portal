@@ -2679,7 +2679,7 @@ export type GatewayService = {
 
 
 /**  A keystone list  */
-export type GatewayServiceRoutesArgs = {
+export type GatewayGatewayServicesArgs = {
   where?: Maybe<GatewayRouteWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortGatewayRoutesBy>>;

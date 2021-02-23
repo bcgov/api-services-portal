@@ -41,7 +41,7 @@ export const REMOVE_ENVIRONMENT = gql`
 
 export const GET_SERVICES = gql`
   query GET($ns: String!) {
-    allServiceRoutes(where: { namespace: $ns }) {
+    allGatewayServices(where: { namespace: $ns }) {
       id
       name
       environment {

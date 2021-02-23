@@ -31,18 +31,18 @@ export default ServicesPage;
 export async function getServerSideProps(context) {
   const query = gql`
     {
-      allServiceRoutes(where: {}) {
+      allGatewayServices(where: {}) {
         id
         name
         host
       }
     }
   `;
-  const results: { allServiceRoutes: any[] } = await api(query);
+  const results: { allGatewayServices: any[] } = await api(query);
 
   return {
     props: {
-      services: results.allServiceRoutes,
+      services: results.allGatewayServices,
     },
   };
 }

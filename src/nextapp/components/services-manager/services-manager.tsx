@@ -11,13 +11,13 @@ import {
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import { FaSearch, FaWrench } from 'react-icons/fa';
-import type { ServiceRoute } from '@/types/query.types';
+import type { GatewayService } from '@/types/query.types';
 
 import ActiveServices from './active-services';
 import AvailableServices from './available-services';
 
 interface ServicesManagerProps {
-  data: ServiceRoute[];
+  data: GatewayService[];
 }
 
 const ServicesManager: React.FC<ServicesManagerProps> = ({ data }) => {
