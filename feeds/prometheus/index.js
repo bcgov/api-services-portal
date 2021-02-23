@@ -6,6 +6,7 @@ const { portal } = require('../utils/portal')
 const queries = [
     { query: 'sum(increase(konglog_service_agent_counter[60m])) by (service, status)', id: 'konglog_service_status'}
 ]
+
 async function sync({workingPath, url, destinationUrl}) {
     console.log("Prometheus SYNC "+url)
     const exceptions = []
@@ -31,7 +32,7 @@ async function sync({workingPath, url, destinationUrl}) {
             console.log(day.fromNow())
             const path = "/api/v1/query_range?" + querystring.stringify(params)
 
-            //await xfer.copy (path, 'query-' + _query.id + '-' + target)
+            await xfer.copy (path, 'query-' + _query.id + '-' + target)
         }
     }
     

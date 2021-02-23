@@ -72,6 +72,30 @@ app.use((err, req, res, next) => {
     }
 })
 
+function kongCron(source='kong', frequencyMinutes=15) {
+    sources[source].sync(config[source])
+    console.log(`[KONG] SLEEPING FOR ${frequencyMinutes} minutes`)
+    setTimeout(kongCron, frequencyMinutes * 60 * 1000)
+}
+
+kongCron()
+
+function prometheusCron(source='prometheus', frequencyMinutes=10) {
+    sources[source].sync(config[source])
+    console.log(`[PROM] SLEEPING FOR ${frequencyMinutes} minutes`)
+    setTimeout(prometheusCron, frequencyMinutes * 60 * 1000)
+}
+
+prometheusCron()
+
+function ckanCron(source='ckan', frequencyMinutes=6*60) {
+    sources[source].sync(config[source])
+    console.log(`[CKAN] SLEEPING FOR ${frequencyMinutes} minutes`)
+    setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
+}
+
+ckanCron()
+
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)
 })
