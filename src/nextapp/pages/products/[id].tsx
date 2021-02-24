@@ -16,6 +16,7 @@ import {
   GET_ENVIRONMENT,
   UPDATE_ENVIRONMENT,
 } from '@/shared/queries/products-queries';
+import Head from 'next/head';
 import { Query } from '@/types/query.types';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
@@ -52,6 +53,7 @@ const EnvironmentPage: React.FC<
     ['environment', id],
     async () => await api<Query>(GET_ENVIRONMENT, { id })
   );
+  const title = `${data.Environment.product.organization.name} Product Environment`;
   const client = useQueryClient();
   const mutation = useMutation(
     async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
@@ -61,7 +63,7 @@ const EnvironmentPage: React.FC<
   const breadcrumb = [
     { href: '/products', text: 'Products' },
     {
-      text: `${data.Environment.product.organization.name} Product Environment`,
+      text: title,
     },
   ];
   const onToggleActive = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,118 +82,123 @@ const EnvironmentPage: React.FC<
   };
 
   return (
-    <Container maxW="6xl">
-      <PageHeader
-        actions={
-          <EnvironmentNav
-            id={data.Environment.id}
-            data={data.Environment.product.environments}
-          />
-        }
-        breadcrumb={breadcrumb}
-        title={
+    <>
+      <Head>
+        <title>API Program Services | {title}</title>
+      </Head>
+      <Container maxW="6xl">
+        <PageHeader
+          actions={
+            <EnvironmentNav
+              id={data.Environment.id}
+              data={data.Environment.product.environments}
+            />
+          }
+          breadcrumb={breadcrumb}
+          title={
+            <>
+              Edit Environment{' '}
+              <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
+                {data.Environment.name}
+              </Badge>
+            </>
+          }
+        >
           <>
-            Edit Environment{' '}
-            <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
-              {data.Environment.name}
-            </Badge>
-          </>
-        }
-      >
-        <>
-          <Text>
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias sunt
-            facere aliquam harum dolorem error soluta, iusto ad vel nesciunt
-            sequi et excepturi ex modi dignissimos, iste reprehenderit. Commodi,
-            minus!
-          </Text>
-          <Box
-            bgColor="white"
-            mt={8}
-            p={4}
-            display="flex"
-            border="2px solid"
-            borderColor={data.Environment.active ? 'green.500' : 'orange.500'}
-            borderRadius={4}
-            overflow="hidden"
-          >
-            <Box display="flex">
-              <Switch
-                isChecked={data.Environment.active}
-                value="active"
-                onChange={onToggleActive}
-              />
-            </Box>
-            <Box flex={1} ml={5} display="flex" flexDirection="column">
-              <Heading
-                size="sm"
-                mb={2}
-                color="inherit"
-                display="flex"
-                alignItems="center"
-              >
-                {data.Environment.product.organization.name}{' '}
-                <Badge
-                  px={2}
-                  mx={1}
-                  colorScheme="blue"
-                  variant="solid"
-                  fontSize="inherit"
+            <Text>
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias
+              sunt facere aliquam harum dolorem error soluta, iusto ad vel
+              nesciunt sequi et excepturi ex modi dignissimos, iste
+              reprehenderit. Commodi, minus!
+            </Text>
+            <Box
+              bgColor="white"
+              mt={8}
+              p={4}
+              display="flex"
+              border="2px solid"
+              borderColor={data.Environment.active ? 'green.500' : 'orange.500'}
+              borderRadius={4}
+              overflow="hidden"
+            >
+              <Box display="flex">
+                <Switch
+                  isChecked={data.Environment.active}
+                  value="active"
+                  onChange={onToggleActive}
+                />
+              </Box>
+              <Box flex={1} ml={5} display="flex" flexDirection="column">
+                <Heading
+                  size="sm"
+                  mb={2}
+                  color="inherit"
+                  display="flex"
+                  alignItems="center"
                 >
-                  {data.Environment.name}
-                </Badge>{' '}
-                Environment is{' '}
-                <Badge
-                  colorScheme={statusBoxColorScheme}
-                  px={2}
-                  mx={1}
-                  variant="solid"
-                  fontSize="inherit"
-                >
-                  {statusText}
-                </Badge>
-              </Heading>
-              <Box mr={8}>
-                <Text mb={4}>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius
-                  a facere velit ullam ea! Minima, nemo voluptatibus, expedita,
-                  libero quae itaque eos qui sapiente commodi repudiandae
-                  provident laboriosam odio voluptates.
-                </Text>
-                <Box>
-                  <Box display="flex" alignItems="center">
-                    <Text fontWeight="bold" mr={4}>
-                      Authentication
-                    </Text>
-                    <Select
-                      size="sm"
-                      variant="filled"
-                      width="auto"
-                      value={data.Environment.authMethod}
-                      onChange={onAuthChange}
-                    >
-                      <option value="public">Public</option>
-                      <option value="keys">API Keys</option>
-                      <option value="private">Private</option>
-                      <option value="jwt">JWT</option>
-                    </Select>
+                  {data.Environment.product.organization.name}{' '}
+                  <Badge
+                    px={2}
+                    mx={1}
+                    colorScheme="blue"
+                    variant="solid"
+                    fontSize="inherit"
+                  >
+                    {data.Environment.name}
+                  </Badge>{' '}
+                  Environment is{' '}
+                  <Badge
+                    colorScheme={statusBoxColorScheme}
+                    px={2}
+                    mx={1}
+                    variant="solid"
+                    fontSize="inherit"
+                  >
+                    {statusText}
+                  </Badge>
+                </Heading>
+                <Box mr={8}>
+                  <Text mb={4}>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Eius a facere velit ullam ea! Minima, nemo voluptatibus,
+                    expedita, libero quae itaque eos qui sapiente commodi
+                    repudiandae provident laboriosam odio voluptates.
+                  </Text>
+                  <Box>
+                    <Box display="flex" alignItems="center">
+                      <Text fontWeight="bold" mr={4}>
+                        Authentication
+                      </Text>
+                      <Select
+                        size="sm"
+                        variant="filled"
+                        width="auto"
+                        value={data.Environment.authMethod}
+                        onChange={onAuthChange}
+                      >
+                        <option value="public">Public</option>
+                        <option value="keys">API Keys</option>
+                        <option value="private">Private</option>
+                        <option value="jwt">JWT</option>
+                      </Select>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
             </Box>
-          </Box>
-        </>
-      </PageHeader>
-      <Box my={5}>
-        {user?.namespace && (
-          <ServicesManager
-            data={data.Environment.services}
-            environmentId={id}
-            namespace={user.namespace}
-          />
-        )}
-      </Box>
-    </Container>
+          </>
+        </PageHeader>
+        <Box my={5}>
+          {user?.namespace && (
+            <ServicesManager
+              data={data.Environment.services}
+              environmentId={id}
+              namespace={user.namespace}
+            />
+          )}
+        </Box>
+      </Container>
+    </>
   );
 };
 
