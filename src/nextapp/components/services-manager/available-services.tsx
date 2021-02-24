@@ -11,28 +11,66 @@ import {
   TagLeftIcon,
 } from '@chakra-ui/react';
 import { FaPlusCircle, FaDatabase } from 'react-icons/fa';
-import { useQueryClient } from 'react-query';
-import { useApi } from '@/shared/services/api';
-import { GET_SERVICES } from '@/shared/queries/products-queries';
+import { useMutation, useQueryClient } from 'react-query';
+import api, { useApi } from '@/shared/services/api';
+import {
+  GET_SERVICES,
+  UPDATE_ENVIRONMENT,
+} from '@/shared/queries/products-queries';
 
 interface AvailableServicesProps {
+  activeIds: string[];
+  environmentId: string;
   namespace: string;
   search: string;
 }
 
 const AvailableServices: React.FC<AvailableServicesProps> = ({
+  activeIds,
+  environmentId,
   namespace,
   search,
 }) => {
   const client = useQueryClient();
+  const mutation = useMutation(
+    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes),
+    {
+      onSuccess: () => {
+        console.log('success', environmentId);
+        client.invalidateQueries(['environment', environmentId]);
+      },
+    }
+  );
   const [sortBy, setSortBy] = React.useState<string>('name');
   const { data } = useApi('services', {
     query: GET_SERVICES,
     variables: { ns: namespace },
   });
-  const onClick = React.useCallback(() => {
-    console.log('click');
-  }, []);
+  const onServicesChange = React.useCallback(
+    async (id: string) => {
+      await mutation.mutateAsync({
+        id,
+        data: {
+          services: {
+            disconnectAll: true,
+            connect: [
+              ...activeIds.map((a) => ({
+                id: a,
+              })),
+              { id },
+            ],
+          },
+        },
+      });
+    },
+    [activeIds, client, mutation]
+  );
+  const onClick = React.useCallback(
+    (id: string) => () => {
+      onServicesChange(id);
+    },
+    [onServicesChange]
+  );
   const onDragStart = React.useCallback(
     (d) => (event: React.DragEvent<HTMLDivElement>) => {
       event.dataTransfer.setData('application/aps-service', JSON.stringify(d));
@@ -50,7 +88,6 @@ const AvailableServices: React.FC<AvailableServicesProps> = ({
   );
   const onSortChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
-      console.log(event.target.value);
       setSortBy(event.target.value);
     },
     [setSortBy]
@@ -83,6 +120,7 @@ const AvailableServices: React.FC<AvailableServicesProps> = ({
       <Wrap p={4}>
         {data.allGatewayServices.length > 0 &&
           data.allGatewayServices
+            .filter((d) => !activeIds.includes(d.id))
             .filter(
               (d) => d.name.toLowerCase().search(search.toLowerCase()) >= 0
             )
@@ -102,7 +140,7 @@ const AvailableServices: React.FC<AvailableServicesProps> = ({
                   colorScheme="gray"
                   color="gray.500"
                   cursor="move"
-                  onClick={onClick}
+                  onClick={onClick(d.id)}
                   onDragEnd={onDragEnd}
                   onDragStart={onDragStart(d)}
                   _hover={{

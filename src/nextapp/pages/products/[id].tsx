@@ -14,66 +14,86 @@ import PageHeader from '@/components/page-header';
 import ServicesManager from '@/components/services-manager';
 import {
   GET_ENVIRONMENT,
-  GET_ENVIRONMENT_LIST,
   UPDATE_ENVIRONMENT,
 } from '@/shared/queries/products-queries';
-import { Mutation, Query } from '@/types/query.types';
-import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
+import { Query } from '@/types/query.types';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
-import { useMutation, useQueryClient } from 'react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from 'react-query';
+import EnvironmentNav from '@/components/environment-nav';
+import { dehydrate } from 'react-query/hydration';
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const data = await api<Query>(GET_ENVIRONMENT_LIST);
-  const paths =
-    data.allEnvironments?.map((d) => ({ params: { id: d.id } })) || [];
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const queryClient = new QueryClient();
 
-  return {
-    paths,
-    fallback: false,
-  };
-};
-
-export const getStaticProps: GetStaticProps = async (context) => {
-  const data = await api<Query>(GET_ENVIRONMENT, { id: context.params.id });
+  await queryClient.prefetchQuery(
+    ['environment', context.params.id],
+    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id })
+  );
 
   return {
     props: {
-      data: data.Environment,
+      id: context.params.id,
+      dehydratedState: dehydrate(queryClient),
     },
   };
 };
 
 const EnvironmentPage: React.FC<
-  InferGetStaticPropsType<typeof getStaticProps>
-> = ({ data }) => {
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ id }) => {
   const { user } = useAuth();
+  const { data } = useQuery<Query>(
+    ['environment', id],
+    async () => await api<Query>(GET_ENVIRONMENT, { id })
+  );
   const client = useQueryClient();
   const mutation = useMutation(
     async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
   );
-  const statusBoxColorScheme = data.active ? 'green' : 'orange';
-  const statusText = data.active ? 'Running' : 'Idle';
+  const statusBoxColorScheme = data.Environment.active ? 'green' : 'orange';
+  const statusText = data.Environment.active ? 'Running' : 'Idle';
   const breadcrumb = [
     { href: '/products', text: 'Products' },
-    { text: `${data.product.organization.name} Product Environment` },
+    {
+      text: `${data.Environment.product.organization.name} Product Environment`,
+    },
   ];
   const onToggleActive = async (event: React.ChangeEvent<HTMLInputElement>) => {
     await mutation.mutateAsync({
-      id: data.id,
+      id: data.Environment.id,
       data: { active: event.target.checked },
     });
-    client.invalidateQueries('environment');
+    client.invalidateQueries(['environment', id]);
+  };
+  const onAuthChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    await mutation.mutateAsync({
+      id: data.Environment.id,
+      data: { authMethod: event.target.value },
+    });
+    client.invalidateQueries(['environment', id]);
   };
 
   return (
     <Container maxW="6xl">
       <PageHeader
+        actions={
+          <EnvironmentNav
+            id={data.Environment.id}
+            data={data.Environment.product.environments}
+          />
+        }
         breadcrumb={breadcrumb}
         title={
           <>
             Edit Environment{' '}
             <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
-              {data.name}
+              {data.Environment.name}
             </Badge>
           </>
         }
@@ -91,13 +111,13 @@ const EnvironmentPage: React.FC<
             p={4}
             display="flex"
             border="2px solid"
-            borderColor={data.active ? 'green.500' : 'orange.500'}
+            borderColor={data.Environment.active ? 'green.500' : 'orange.500'}
             borderRadius={4}
             overflow="hidden"
           >
             <Box display="flex">
               <Switch
-                isChecked={data.active}
+                isChecked={data.Environment.active}
                 value="active"
                 onChange={onToggleActive}
               />
@@ -110,7 +130,7 @@ const EnvironmentPage: React.FC<
                 display="flex"
                 alignItems="center"
               >
-                {data.product.organization.name}{' '}
+                {data.Environment.product.organization.name}{' '}
                 <Badge
                   px={2}
                   mx={1}
@@ -118,7 +138,7 @@ const EnvironmentPage: React.FC<
                   variant="solid"
                   fontSize="inherit"
                 >
-                  {data.name}
+                  {data.Environment.name}
                 </Badge>{' '}
                 Environment is{' '}
                 <Badge
@@ -147,7 +167,8 @@ const EnvironmentPage: React.FC<
                       size="sm"
                       variant="filled"
                       width="auto"
-                      value={data.authMethod}
+                      value={data.Environment.authMethod}
+                      onChange={onAuthChange}
                     >
                       <option value="public">Public</option>
                       <option value="keys">API Keys</option>
@@ -163,7 +184,11 @@ const EnvironmentPage: React.FC<
       </PageHeader>
       <Box my={5}>
         {user?.namespace && (
-          <ServicesManager data={data.services} namespace={user.namespace} />
+          <ServicesManager
+            data={data.Environment.services}
+            environmentId={id}
+            namespace={user.namespace}
+          />
         )}
       </Box>
     </Container>

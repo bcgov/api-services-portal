@@ -22,11 +22,13 @@ import AvailableServices from './available-services';
 
 interface ServicesManagerProps {
   data: GatewayService[];
+  environmentId: string;
   namespace: string;
 }
 
 const ServicesManager: React.FC<ServicesManagerProps> = ({
   data,
+  environmentId,
   namespace,
 }) => {
   const [search, setSearch] = React.useState<string>('');
@@ -105,7 +107,12 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
             </Box>
           }
         >
-          <AvailableServices namespace={namespace} search={search} />
+          <AvailableServices
+            activeIds={data.map((d) => d.id)}
+            environmentId={environmentId}
+            namespace={namespace}
+            search={search}
+          />
         </ClientRequest>
       </Box>
     </Box>

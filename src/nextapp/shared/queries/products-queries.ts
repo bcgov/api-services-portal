@@ -17,6 +17,18 @@ export const DELETE_PRODUCT = gql`
   }
 `;
 
+export const GET_PRODUCT = gql`
+  query GET($id: ID!) {
+    Product(where: { id: $id }) {
+      id
+      environments {
+        name
+        id
+      }
+    }
+  }
+`;
+
 export const ADD_ENVIRONMENT = gql`
   mutation Add($name: String!, $product: ID!) {
     createEnvironment(
@@ -87,6 +99,10 @@ export const GET_ENVIRONMENT = gql`
       product {
         organization {
           name
+        }
+        environments {
+          name
+          id
         }
       }
       services {

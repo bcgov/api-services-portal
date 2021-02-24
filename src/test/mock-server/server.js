@@ -130,14 +130,23 @@ const schemaStruct = `
     namespace: String!
   }
 
+  input ProductWhereUniqueInput {
+    id: ID!
+  }
+
   type Query {
     allProducts: [ Product ]
     allEnvironments: [ Environment ]
     allGatewayServices(where: GatewayServiceWhereInput): [ GatewayService ]
     Environment(where: EnvironmentWhereUniqueInput!): Environment
+    Product(where: ProductWhereUniqueInput!): Product
   }
 
   input CreateProductInput {
+    name: String!
+  }
+
+  input UpdateProductInput {
     name: String!
   }
 
@@ -154,12 +163,25 @@ const schemaStruct = `
     product: CreateEnvironmentOneToManyInput
   }
 
+  input GatewayServiceWhereUniqueInput {
+    id: ID!
+  }
+
+  input GatewayServiceRelateToManyInput {
+    disconnectAll: Boolean
+    connect: [GatewayServiceWhereUniqueInput]
+  }
+
   input UpdateEnvironmentInput {
     active: Boolean
+    name: String
+    authMethod: String
+    services: GatewayServiceRelateToManyInput
   }
 
   type Mutation {
     createProduct(data: CreateProductInput): Product!
+    updateProduct(id: ID!, data: UpdateProductInput): Product!
     deleteProduct(id: ID!): Product!
     createEnvironment(data: CreateEnvironmentInput): Environment!
     updateEnvironment(id: ID!, data: UpdateEnvironmentInput): Environment!
@@ -203,6 +225,12 @@ const server = mockServer(schemaWithMocks, {
       allProducts.push({ id, name: data.name, environments: [] });
       return { id, name: data.name };
     },
+    updateProduct: ({ id, data }) => {
+      return {
+        id,
+        ...data,
+      };
+    },
     deleteProduct: ({ id }) => {
       allProducts = allProducts.filter((d) => d.id !== id);
       return allProducts;
@@ -228,7 +256,10 @@ const server = mockServer(schemaWithMocks, {
         if (environmentIds.includes(id)) {
           const environmentIndex = environmentIds.indexOf(id);
           if (environmentIndex >= 0) {
-            p.environments[environmentIndex].active = data.active;
+            p.environments[environmentIndex] = {
+              ...p.environments[environmentIndex],
+              ...data,
+            };
           }
         }
       });
@@ -261,10 +292,6 @@ const server = mockServer(schemaWithMocks, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
-    environments: (...args) => {
-      console.log(args);
-      return [];
-    },
   }),
   Organization: () => ({
     name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
@@ -287,8 +314,9 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.word,
     description: casual.short_description,
   }),
-  Environment: () => ({
-    name: casual.random_element(['dev', 'test', 'prod']),
+  Environment: ({ id }) => ({
+    id,
+    name: casual.random_element(['dev', 'test', 'prod', 'sandbox', 'other']),
     active: casual.boolean,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
