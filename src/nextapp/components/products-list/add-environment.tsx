@@ -1,6 +1,7 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
+  Button,
   Menu,
   MenuButton,
   MenuList,
@@ -59,7 +60,9 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 
   return (
     <Menu>
-      <MenuButton>{children}</MenuButton>
+      <MenuButton as={Button} variant="unstyled">
+        {children}
+      </MenuButton>
       <MenuList>
         {options
           .filter((e) => !environments.includes(e.value))

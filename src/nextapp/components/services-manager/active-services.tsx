@@ -24,9 +24,13 @@ import { GatewayService } from '@/shared/types/query.types';
 
 interface ActiveServicesProps {
   data: GatewayService[];
+  search: string;
 }
 
-const ActiveServices: React.FC<ActiveServicesProps> = ({ data = [] }) => {
+const ActiveServices: React.FC<ActiveServicesProps> = ({
+  data = [],
+  search,
+}) => {
   const [active, setData] = React.useState<GatewayService[]>(data);
   const [hasDragTarget, setDragTarget] = React.useState<boolean>(false);
 
@@ -114,19 +118,23 @@ const ActiveServices: React.FC<ActiveServicesProps> = ({ data = [] }) => {
           </Center>
         )}
         <Wrap p={4}>
-          {active.map((d, i) => (
-            <WrapItem key={i}>
-              <Tag colorScheme="green" color="green.800">
-                <TagLeftIcon as={FaDatabase} />
-                <TagLabel>{casual.words(4).replace(/\s/g, '-')}</TagLabel>
-                <TagCloseButton
-                  onClick={() =>
-                    setData((state) => state.filter((d, idx) => idx !== i))
-                  }
-                />
-              </Tag>
-            </WrapItem>
-          ))}
+          {active
+            .filter(
+              (d) => d.name.toLowerCase().search(search.toLowerCase()) >= 0
+            )
+            .map((d, i) => (
+              <WrapItem key={i}>
+                <Tag colorScheme="green" color="green.800">
+                  <TagLeftIcon as={FaDatabase} />
+                  <TagLabel>{d.name}</TagLabel>
+                  <TagCloseButton
+                    onClick={() =>
+                      setData((state) => state.filter((d, idx) => idx !== i))
+                    }
+                  />
+                </Tag>
+              </WrapItem>
+            ))}
         </Wrap>
       </Box>
     </Box>

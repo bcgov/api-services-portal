@@ -48,6 +48,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         )}
         <Box
           as="hgroup"
+          display="flex"
           flexDirection={{ base: 'column', sm: 'row' }}
           alignItems={{ base: 'flex-start', sm: 'center' }}
           justifyContent="space-between"

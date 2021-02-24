@@ -1,69 +1,64 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Button,
-  Icon,
-  IconButton,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
   useToast,
 } from '@chakra-ui/react';
-import { FaTrash } from 'react-icons/fa';
+import { DELETE_PRODUCT } from '@/shared/queries/products-queries';
+import api from '@/shared/services/api';
 import { useMutation, useQueryClient } from 'react-query';
-import { REMOVE_ENVIRONMENT } from '@/shared/queries/products-queries';
 
-interface DeleteEnvironmentProps {
+interface DeleteProductProps {
   id: string;
+  onDeleted: () => void;
 }
 
-const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
-  const client = useQueryClient();
+const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
   const toast = useToast();
+  const client = useQueryClient();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const onClose = () => setIsOpen(false);
+  const cancelRef = React.useRef();
+  const onOpen = () => {
+    setIsOpen(true);
+  };
   const mutation = useMutation(
-    async (id: string) => await api(REMOVE_ENVIRONMENT, { id }),
+    async (id: string) => await api(DELETE_PRODUCT, { id }),
     {
       onSuccess: () => {
         toast({
-          title: 'Environment Deleted',
+          title: 'Product Deleted',
           status: 'success',
         });
+        onDeleted();
       },
     }
   );
-  const [open, setOpen] = React.useState<boolean>(false);
-  const cancelRef = React.useRef<HTMLButtonElement>(null);
-  const onClose = () => setOpen(false);
-  const onConfirm = () => setOpen(true);
   const onDelete = async () => {
     await mutation.mutateAsync(id);
-    setOpen(false);
+    setIsOpen(false);
     client.invalidateQueries('products');
   };
 
   return (
     <>
-      <IconButton
-        aria-label="Delete Environment"
-        size="xs"
-        variant="outline"
-        onClick={onConfirm}
-      >
-        <Icon as={FaTrash} />
-      </IconButton>
-
+      <Button onClick={onOpen} colorScheme="red">
+        Delete Product
+      </Button>
       <AlertDialog
-        isOpen={open}
+        isOpen={isOpen}
         leastDestructiveRef={cancelRef}
         onClose={onClose}
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Environment
+              Delete Product
             </AlertDialogHeader>
 
             <AlertDialogBody>
@@ -85,4 +80,4 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
   );
 };
 
-export default DeleteEnvironment;
+export default DeleteProduct;

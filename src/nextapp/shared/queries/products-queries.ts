@@ -9,6 +9,14 @@ export const ADD_PRODUCT = gql`
   }
 `;
 
+export const DELETE_PRODUCT = gql`
+  mutation Remove($id: ID!) {
+    deleteProduct(id: $id) {
+      id
+    }
+  }
+`;
+
 export const ADD_ENVIRONMENT = gql`
   mutation Add($name: String!, $product: ID!) {
     createEnvironment(
@@ -16,6 +24,15 @@ export const ADD_ENVIRONMENT = gql`
     ) {
       id
       name
+    }
+  }
+`;
+
+export const UPDATE_ENVIRONMENT = gql`
+  mutation Update($id: ID!, $data: UpdateEnvironmentInput) {
+    updateEnvironment(id: $id, data: $data) {
+      name
+      id
     }
   }
 `;
@@ -44,6 +61,7 @@ export const GET_SERVICES = gql`
     allGatewayServices(where: { namespace: $ns }) {
       id
       name
+      isActive
       environment {
         id
       }
@@ -62,6 +80,7 @@ export const GET_ENVIRONMENT_LIST = gql`
 export const GET_ENVIRONMENT = gql`
   query GET($id: ID!) {
     Environment(where: { id: $id }) {
+      id
       name
       active
       authMethod

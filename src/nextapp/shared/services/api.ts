@@ -1,4 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
+import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
 
@@ -20,6 +22,23 @@ const api = async <T>(query: string, variables: unknown = {}): Promise<T> => {
     return {} as T;
     //throw new Error(err);
   }
+};
+
+interface UseApiOptions {
+  query: string;
+  variables: unknown;
+}
+
+export const useApi = (
+  key: string,
+  query: UseApiOptions,
+  queryOptions: UseQueryOptions = { suspense: true }
+): UseQueryResult<Query> => {
+  return useQuery<Query>(
+    key,
+    async () => await api<Query>(query.query, query.variables),
+    queryOptions
+  );
 };
 
 export default api;

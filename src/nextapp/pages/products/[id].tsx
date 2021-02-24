@@ -1,4 +1,5 @@
 import * as React from 'react';
+import api from '@/shared/services/api';
 import {
   Box,
   Container,
@@ -11,13 +12,15 @@ import {
 // import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesManager from '@/components/services-manager';
-import api from '@/shared/services/api';
 import {
   GET_ENVIRONMENT,
   GET_ENVIRONMENT_LIST,
+  UPDATE_ENVIRONMENT,
 } from '@/shared/queries/products-queries';
-import type { Query } from '@/types/query.types';
+import { Mutation, Query } from '@/types/query.types';
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
+import { useAuth } from '@/shared/services/auth';
+import { useMutation, useQueryClient } from 'react-query';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const data = await api<Query>(GET_ENVIRONMENT_LIST);
@@ -43,12 +46,24 @@ export const getStaticProps: GetStaticProps = async (context) => {
 const EnvironmentPage: React.FC<
   InferGetStaticPropsType<typeof getStaticProps>
 > = ({ data }) => {
+  const { user } = useAuth();
+  const client = useQueryClient();
+  const mutation = useMutation(
+    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
+  );
   const statusBoxColorScheme = data.active ? 'green' : 'orange';
   const statusText = data.active ? 'Running' : 'Idle';
   const breadcrumb = [
     { href: '/products', text: 'Products' },
     { text: `${data.product.organization.name} Product Environment` },
   ];
+  const onToggleActive = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    await mutation.mutateAsync({
+      id: data.id,
+      data: { active: event.target.checked },
+    });
+    client.invalidateQueries('environment');
+  };
 
   return (
     <Container maxW="6xl">
@@ -81,16 +96,40 @@ const EnvironmentPage: React.FC<
             overflow="hidden"
           >
             <Box display="flex">
-              <Switch isChecked={data.active} value="active" />
+              <Switch
+                isChecked={data.active}
+                value="active"
+                onChange={onToggleActive}
+              />
             </Box>
             <Box flex={1} ml={5} display="flex" flexDirection="column">
-              <Heading size="sm" mb={2} color="inherit">
+              <Heading
+                size="sm"
+                mb={2}
+                color="inherit"
+                display="flex"
+                alignItems="center"
+              >
                 {data.product.organization.name}{' '}
-                <Text as="samp" bgColor="cyan.100" px={1} borderRadius={2}>
+                <Badge
+                  px={2}
+                  mx={1}
+                  colorScheme="blue"
+                  variant="solid"
+                  fontSize="inherit"
+                >
                   {data.name}
-                </Text>{' '}
+                </Badge>{' '}
                 Environment is{' '}
-                <Badge colorScheme={statusBoxColorScheme}>{statusText}</Badge>
+                <Badge
+                  colorScheme={statusBoxColorScheme}
+                  px={2}
+                  mx={1}
+                  variant="solid"
+                  fontSize="inherit"
+                >
+                  {statusText}
+                </Badge>
               </Heading>
               <Box mr={8}>
                 <Text mb={4}>
@@ -123,7 +162,9 @@ const EnvironmentPage: React.FC<
         </>
       </PageHeader>
       <Box my={5}>
-        <ServicesManager data={data.services} />
+        {user?.namespace && (
+          <ServicesManager data={data.services} namespace={user.namespace} />
+        )}
       </Box>
     </Container>
   );

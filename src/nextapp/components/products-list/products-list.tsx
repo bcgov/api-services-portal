@@ -80,6 +80,7 @@ const ProductsList: React.FC = () => {
                   size="sm"
                   opacity={data.allProducts.length > 1 ? 0 : 1}
                   transition="opacity ease-in 0.2s"
+                  position="relative"
                   sx={{
                     '.product-item:hover &': {
                       opacity: 1,
@@ -91,12 +92,20 @@ const ProductsList: React.FC = () => {
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
-                      <Button
-                        variant="tertiary"
-                        leftIcon={<Icon as={FaPlusCircle} />}
+                      <Box
+                        as="span"
+                        display="flex"
+                        alignItems="center"
+                        bgColor="bc-link"
+                        py={1}
+                        px={2}
+                        height="100%"
+                        color="white"
+                        borderRadius={4}
                       >
+                        <Icon as={FaPlusCircle} mr={2} />
                         Add Env
-                      </Button>
+                      </Box>
                     </AddEnvironment>
                   )}
                   <EditProduct data={d} />
@@ -115,7 +124,7 @@ const ProductsList: React.FC = () => {
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
-                      <Button variant="primary">Add Environment</Button>
+                      Add Environment
                     </AddEnvironment>
                   </Center>
                 </Box>
