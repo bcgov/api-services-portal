@@ -2,7 +2,7 @@ const fetch = require('node-fetch')
 
 
 
-module.exports = (kongUrl) => {
+module.exports = function (kongUrl) {
     return {
         getConsumerByUsername: async function (username) {
             return await fetch(`${kongUrl}/consumers/${username}`, {
