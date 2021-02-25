@@ -19,7 +19,7 @@ function transfers (workingPath, baseUrl, exceptions) {
                 fs.writeFileSync(out, JSON.stringify(json, null, 4), null);
                 console.log("WROTE "+  filename)
                 if (json.next != null) {
-                    copy (json.next, filename, index + 1 )
+                    this.copy (json.next, filename, index + 1 )
                 } else if ('result' in json && json['result'].length > 0) {
                     const u = url.parse(baseUrl + _url,true)
                     if ('limit' in u.query) {

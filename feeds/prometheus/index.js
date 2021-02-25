@@ -4,7 +4,7 @@ const { transfers } = require('../utils/transfers')
 const { portal } = require('../utils/portal')
 
 const queries = [
-    { query: 'sum(increase(konglog_service_agent_counter[60m])) by (service, status)', id: 'konglog_service_status'}
+    { query: 'sum(increase(kong_http_status[60m])) by (service)', id: 'kong_http_status'}
 ]
 
 async function sync({workingPath, url, destinationUrl}) {
