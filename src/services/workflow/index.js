@@ -14,124 +14,103 @@ Workflow:
 
 Scenarios:
 - Public API - Try it
-- API Key protected - Test Environment : Try It
-- API Key protected w/ ACL - Test Environment : Request Access -> RESULT: Get added to a group
-- API Key protected w/ ACL - Production Environment : Request Access -> RESULT: Get new credentials and added to a group
+- Basic Auth / API Key w/ ACL - Test Environment : Request Access -> RESULT: Get added to a group
+- Basic Auth / API Key w/ ACL - Production Environment : Request Access -> RESULT: Get new credentials and added to a group
 - OIDC protected - Test environment : Request Access -> RESULT (auto): after approval, send credentials to Requestor
 - OIDC protected - Prod environment : Request Access -> RESULT (manual): send credentials to Requestor
-*/
-const workflow = (listKey, operation, existingItem, context) => {
-    // If isIssued was moved to True, then
-    // call Keycloak with the token from the Issuer
-    // And put the Token in the request for the Requestor
-    
-    // Lookup the datasetGroup and then the Credential Issuer
-    // Use the information to invoke Keycloak
-    // Need: JWT Token, Client ID, generate a Secret
-    // Scope(?)
-    //
-    // Communicate with Requestor
-    // Mark AccessRequest as Complete
-    // 
-    // async function doit() {
-    const pkgEnvResult = existingItem ? (await context.executeGraphQL({
-        query: `query ($id: ID!) {
-                    allEnvironments(id: $id) {
-                        name
-                        authMethod
-                        package {
-                            name
-                        }
-                    }
-                }`,
-        variables: { id: existingItem.id },
-    })).data.allEnvironments[0] : null
+- OIDC protected with Claims
 
-    console.log(JSON.stringify(pkgEnvResult, null, 3));
+Application will be a Consumer.
+The AccessRequest will hold a reference to the Credential (in keycloak or in kong).
+
+For OIDC, a Claim can be added to the Token
+For API Key and Basic Auth can be added to Kong
+
+*/
+
+const { lookupEnvironmentAndApplicationByAccessRequest, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToAccessRequest } = require('../keystone')
+
+const { clientRegistration, getOpenidFromDiscovery } = require('../keycloak');
+
+const { v4: uuidv4 } = require('uuid');
+
+const kong = require('../kong');
+
+const kongApi = new kong(process.env.KONG_URL)
+
+const { recordActivity } = require('../../lists/Activity')
+
+const regenerateApiKey = async function(appId) {
+    const kongConsumerId = lookupKongConsumerIdByName(appId)
+
+    const apiKey = await kongApi.genKeyForConsumer (kongConsumerId)
+    return apiKey.apiKey
+}
+
+const isUpdatingToApproved = (existingItem, updatedItem) => existingItem && existingItem.isApproved == null && updatedItem.isApproved
+const isUpdatingToIssued = (existingItem, updatedItem) => existingItem && existingItem.isIssued == null && updatedItem.isIssued
+
+const workflow = async (context, operation, existingItem, originalInput, updatedItem) => {
+
+    const requestDetails = operation == 'create' ? null : lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 
     if (originalInput.credential == "NEW") {
-        const username = existingItem.consumerId
-        const result = await context.executeGraphQL({
-            query: `query ($where: ConsumerWhereInput) {
-                        allConsumers(where: $where) {
-                            kongConsumerId
-                        }
-                    }`,
-            variables: { where: { username_contains_i: username } },
-        })
-        console.log("ANSWER = "+username + " " + JSON.stringify(result));
-        const kongConsumerId = result.data.allConsumers[0].kongConsumerId
+        const appId = requestDetails.application.appId
+        // throw error if this is not an authMethod = 'api-key'
 
-        const apiKey = await genKeyForConsumer (kongConsumerId)
-        console.log("API KEY " + JSON.stringify(apiKey, null, 3))
-        updatedItem['credential'] = apiKey.apiKey
+        //const credentialReference = JSON.stringify(requestDetails.credentialReference)
+
+        // Need additional info about the particular productEnvironment to get the right api key
+        // at the moment, just taking the first one! :(
+        updatedItem['credential'] = regenerateApiKey (appId)
+
+    } else if (isUpdatingToIssued(existingItem, updatedItem)) {
+        const reqId = existingItem.id
+
+        // Find the credential issuer and based on its type, go do the appropriate action
+        const issuer = lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+
+        const appId = requestDetails.application.appId
+
+        const credentialReference = {}
+
+        if (issuer.mode == 'manual') {
+            throw Error('Manual credential issuing not supported yet!')
+        }
+
+        if (issuer.authMethod == 'oidc') {
+            const token = issuer.initialAccessToken
+
+            const openid = getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+
+            // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
+            const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+            const clientId = appId + '-' + extraIdentifier
+            const client = await clientRegistration(openid.issuer, token, clientId, uuidv4())
+            credentialReference['clientId'] = client.clientId
+
+            await kongApi.createOrGetConsumer (appId, '')
+        } else {
+            // kong consumer could already exist - create if doesn't exist
+            const consumer = await kongApi.createOrGetConsumer (appId, '')
+            const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
+            credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
+        }
+
+        // Link new Credential to Access Request for reference
+        linkCredRefsToAccessRequest(context, reqId, credentialReference)
+
+        // Add the controls to the Consumer for Services/Routes that are part of the ProductEnvironment
+        // Get the services from the ProductEnvironment
+        // For each, add the Consumer Plugin
     }
 
-    if (existingItem && existingItem.isIssued == null && updatedItem.isIssued) {
-        const consumerUsername = updatedItem.consumerId
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3NWI2Mzg4NC1iN2RiLTRiODItOWFkZS02NDk0ZmUxNzI1N2MifQ.eyJleHAiOjAsImlhdCI6MTYxMDkxNzYxOCwianRpIjoiNWU3N2MyMzItMzUyOC00Mjg2LTg2NGItZGNjNzlhMzQ5NWRiIiwiaXNzIjoiaHR0cHM6Ly9kZXYub2lkYy5nb3YuYmMuY2EvYXV0aC9yZWFsbXMveHRta2U3a3kiLCJhdWQiOiJodHRwczovL2Rldi5vaWRjLmdvdi5iYy5jYS9hdXRoL3JlYWxtcy94dG1rZTdreSIsInR5cCI6IkluaXRpYWxBY2Nlc3NUb2tlbiJ9.diEwRmTS32XSyX0OVj-yzngKzrWD4dy5XfySphHFWWo"
-        const client = await clientRegistration("https://dev.oidc.gov.bc.ca/auth", "xtmke7ky", token, consumerUsername, consumerUsername + "-secret")
-        console.log("CLIENT = "+JSON.stringify(client, null, 3))
-        const consumer = await createKongConsumer (consumerUsername, '')
-        console.log("CONSUMER = "+ JSON.stringify(consumer, null, 3))
-        if (consumer != null) {
-            const apiKey = await addKeyAuthToConsumer (consumer.id)
-            console.log("API KEY " + JSON.stringify(apiKey, null, 3))
-            // {
-            //     "apiKey": "z7Ynl7OlcLYHTIt4uIAhzQ36I5zg07z1"
-            //  }
-        }
-
-        let consumerId = null
-
-        if (true) {
-            const username = consumerUsername
-            const kongConsumerId = consumer.id
-            const result = await context.executeGraphQL({
-                query: `mutation ($username: String, $kongConsumerId: String) {
-                            createConsumer(data: { username: $username, kongConsumerId: $kongConsumerId, tags: "[]" }) {
-                                id
-                            }
-                        }`,
-                variables: { username, kongConsumerId },
-            })
-            //{"data":{"createConsumer":{"id":"6004b65c2a7e02414bb3ccb5"}}}
-            console.log("KEYSTONE CONSUMER " + JSON.stringify(result))
-            consumerId = result.data.createConsumer.id
-        }
-        if (true) {
-            console.log("UPD AR " + updatedItem.id)
-            console.log("UPD AR " + consumerId)
-            const reqId = updatedItem.id
-            try {
-                const result = await context.executeGraphQL({
-                    query: `mutation ($reqId: ID!, $consumerId: ID!) {
-                                updateAccessRequest(id: $reqId, data: { consumer: { connect: { id: $consumerId } } } ) {
-                                    id
-                                }
-                            }`,
-                    variables: { reqId, consumerId },
-                }).catch (err => {
-                    console.log("AccessRequest : failed update " + err)
-                })
-                console.log("FINISHED")
-                console.log("UPDATE ACCESS REQUEST " + JSON.stringify(result,null, 4))
-            } catch (e) {
-                console.log("EEERR " + e);
-            }
-
-        }
-    }
-    // }
-
-    // const name = updatedItem.name
     const refId = updatedItem.id
     const action = operation
     const message = "Changes to " + JSON.stringify(originalInput)
 
     const act = await recordActivity (context, action, 'AccessRequest', refId, message)
     console.log("ACTIVITY = "+ JSON.stringify(act, null, 3))
-
 }
 
 module.exports = {

@@ -64,6 +64,7 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
 
         for ( rule of rules.cache) {
             let ruleConditionState = true
+            const matches = []
             for ( key of Object.keys(rule)) {
                 if (!(['result','ID'].includes(key)) && !(Object.keys(actions).includes(key)) && !(key in conditions)) {
                     console.log("WARNING! " + key + " not a valid rule!")
@@ -77,25 +78,33 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
                     if (result == false) {
                         ruleConditionState = false
                         break
+                    } else {
+                        matches.push(key)
                     }
                 }
             }
             if (ruleConditionState && rule['result'] === 'allow') {
+                //console.log(" Matches " + matches)
+                //console.log(JSON.stringify(rule, null, 4))
                 for ( akey of Object.keys(rule).filter(k => Object.keys(actions).includes(k))) {
+                    //console.log("Post actions for " + akey + " : " + rule[akey])
                     if (rule[akey] != "" && rule[akey] != null) {
                         const result = actions[akey](ctx, rule[akey])
                         if (result) {
+                            //console.log("--> FILTER " + JSON.stringify(result))
                             return result
                         }
                     }
                 }
+                //console.log("--> ALLOW")
                 return true
             }
             if (ruleConditionState && rule['result'] === 'deny') {
+                //console.log("--> DENY")
                 return false
             }
         }
-        console.log("DENIED! " + operation + " listKey = " + listKey)
+        //console.log("DENIED! " + operation + " listKey = " + listKey)
         return false
     } catch (err) {
         console.log("Unexpected Error - " + err)

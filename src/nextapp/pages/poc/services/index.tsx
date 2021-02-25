@@ -69,6 +69,7 @@ const ServicesPage: React.FC = () => {
             <option value="all">All Services</option>
             <option value="up">Up</option>
             <option value="down">Down</option>
+            <option value="unassigned">Unassigned Product</option>
           </Select>
         </Box>
         {user && !isServer && (

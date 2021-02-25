@@ -2,7 +2,7 @@
 const fetch = require('node-fetch')
 
 module.exports = {
-    clientRegistration: async function (baseUrl, realmName, accessToken, clientId, clientSecret) {
+    clientRegistration: async function (issuer, accessToken, clientId, clientSecret) {
         // const kcAdminClient = new KcAdminClient({
         //     baseUrl: baseUrl,
         //     realmName: realmName
@@ -21,17 +21,8 @@ module.exports = {
             protocol: "openid-connect"
         }
 
-        console.log("CALLING "+`${baseUrl}/admin/realms/${realmName}/clients`);
-        // request.post(`${baseUrl}/admin/realms/${realmName}/clients`, {
-        //     json: body,
-        //     'auth': {
-        //         'bearer': accessToken
-        //     }
-        //     }, function (error, response, body) {
-        //         console.log(error)
-        //         console.log(response)
-        //     });
-        const response = await fetch(`${baseUrl}/realms/${realmName}/clients-registrations/default`, {
+        console.log("CALLING "+`${issuer}/clients-registrations/default`);
+        const response = await fetch(`${issuer}/clients-registrations/default`, {
             method: 'post',
             body:    JSON.stringify(body),
             headers: { 
@@ -43,6 +34,7 @@ module.exports = {
         .then(res => res.json())
         .catch (err => {
             console.log("KEYCLOAK " + err)
+            throw Error("Keycloak error " + err)
         });
         console.log(JSON.stringify(response, null, 3));
         return {
@@ -51,6 +43,22 @@ module.exports = {
             clientSecret: clientSecret,
             registrationAccessToken: response['registrationAccessToken']
         }
+    },
+    
+    getOpenidFromDiscovery: async function (url) {
+        return await fetch(url, {
+            method: 'get',
+            headers: { 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .catch (err => {
+            console.log("KEYCLOAK ERR " + err)
+            throw Error("Failed to get details from the OIDC Discovery endpoint")
+        });
+
     }
 }
 

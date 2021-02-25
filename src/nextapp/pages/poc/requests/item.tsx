@@ -12,52 +12,43 @@ import { Tr, Th, Td, Tag, TagLabel } from "@chakra-ui/react"
 
 const goto = (url) => { window.location.href = url; return false; }
 
-const Item = props => (
+const Item = ({refetch, accessRequest}) => (
     <>
-    { props && props.accessRequest ? (
+    { accessRequest ? (
         <Tr>
-            <Td>{props.accessRequest.createdAt}</Td>
-            <Td>{props.accessRequest.requestor.name}</Td>
-            <Td>{ props.accessRequest.application && (
-                <p>{props.accessRequest.application.name}</p>
-                )}
-            </Td>
-            <Td>{ props.accessRequest.productEnvironment && props.accessRequest.productEnvironment.product && (
-                <p>{props.accessRequest.productEnvironment.product.name}</p>
-                )}
-            </Td>
-            <Td>{ props.accessRequest.productEnvironment && (
-                <p>{props.accessRequest.productEnvironment.name}</p>
-                )}
-            </Td>
+            <Td>{accessRequest.createdAt}</Td>
+            <Td>{accessRequest.requestor.name}</Td>
+            <Td>{accessRequest.application?.name}</Td>
+            <Td>{accessRequest.productEnvironment?.product.name}</Td>
+            <Td>{accessRequest.productEnvironment?.name}</Td>
             <Td>
-                { props.accessRequest.isApproved === null ? (
+                { accessRequest.isApproved === null ? (
                     <HStack spacing={4}>
-                        <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/issue/${props.accessRequest.id}`)}>Approve</Button>
+                        <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/issue/${accessRequest.id}`)}>Approve</Button>
                         {/* <Button colorScheme="blue" onClick={() => {
                             graphql(APPROVE, { id: props.accessRequest.id }).then(props.refetch);
                         }}>Approve</Button> */}
                         <Button colorScheme="red" onClick={() => {
-                            graphql(REJECT, { id: props.accessRequest.id }).then(props.refetch);
+                            graphql(REJECT, { id: accessRequest.id }).then(refetch);
                         }}>Reject</Button>
                     </HStack>
                 ) : false }
-                { props.accessRequest.isApproved && props.accessRequest.isIssued == null ? (
+                { accessRequest.isApproved && accessRequest.isIssued == null ? (
                     <HStack spacing={4}>
-                        <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/issue/${props.accessRequest.id}`)}>Send Credentials</Button>
+                        <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/issue/${accessRequest.id}`)}>Send Credentials</Button>
                         <Button colorScheme="red" onClick={() => {
-                            graphql(REJECT, { id: props.accessRequest.id }).then(props.refetch);
+                            graphql(REJECT, { id: accessRequest.id }).then(refetch);
                         }}>Reject</Button>
                     </HStack>
 
                 ) : false}
-                { props.accessRequest.isComplete && !props.accessRequest.isApproved ? (
+                { accessRequest.isComplete && !accessRequest.isApproved ? (
                         <p style={styles.message}>Request Rejected</p>
                 ): false }
-                { props.accessRequest.isIssued && props.accessRequest.isComplete == null ? (
+                { accessRequest.isIssued && accessRequest.isComplete == null ? (
                         <p style={styles.message}>Credentials Sent to Requestor</p>
                 ): false }
-                { props.accessRequest.isComplete == true ? (
+                { accessRequest.isComplete == true ? (
                     <p>CLOSED</p>
                 ): false }
           </Td>

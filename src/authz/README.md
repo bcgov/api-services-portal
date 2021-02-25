@@ -23,3 +23,11 @@ Actions can be: "allow" and "deny", but they can also be GraphQLWhere clauses (i
 * Secure Content - allow an API Owner to associate content to a Package, and have it available once they have been approved for using that Package
 
 
+## Principals
+
+* Rules are evaluated sequentially and once a `result` of `allow` or `deny` is received, then evaluation stops
+
+* A user can belong to multiple roles
+
+* Rules for fields are only evaluated if the `matchFieldKey` is specified
+
