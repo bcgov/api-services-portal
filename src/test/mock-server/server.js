@@ -47,11 +47,11 @@ const schemaStruct = `
     plugins: [ Plugin ]
     description: String
     credentialIssuer: CredentialIssuer
-    services: [ ServiceRoute ]
-    package: Package
+    services: [ GatewayService ]
+    product: Product
   }
 
-  type ServiceRoute {
+  type GatewayService {
     id: ID!
     name: String!
     kongRouteId: String!
@@ -63,6 +63,7 @@ const schemaStruct = `
     isActive: Boolean!
     tags: String!
     plugins: [ Plugin ]
+    updatedAt: String
     environment: Environment,
   }
 
@@ -81,7 +82,7 @@ const schemaStruct = `
     environments: [ Environment ]
   }
 
-  type Package {
+  type Product {
     id: ID!
     name: String!
     description: String!
@@ -125,40 +126,63 @@ const schemaStruct = `
     id: ID!
   }
 
-  input ServiceRouteWhereInput {
+  input GatewayServiceWhereInput {
     namespace: String!
   }
 
-  type Query {
-    allPackages: [ Package ]
-    allEnvironments: [ Environment ]
-    allServiceRoutes(where: ServiceRouteWhereInput): [ ServiceRoute ]
-    Environment(where: EnvironmentWhereUniqueInput!): Environment
+  input ProductWhereUniqueInput {
+    id: ID!
   }
 
-  input CreatePackageInput {
+  type Query {
+    allProducts: [ Product ]
+    allEnvironments: [ Environment ]
+    allGatewayServices(where: GatewayServiceWhereInput): [ GatewayService ]
+    Environment(where: EnvironmentWhereUniqueInput!): Environment
+    Product(where: ProductWhereUniqueInput!): Product
+  }
+
+  input CreateProductInput {
     name: String!
   }
 
-  input EnvironmentPackageInput {
+  input UpdateProductInput {
+    name: String!
+  }
+
+  input EnvironmentProductInput {
     id: ID!
   }
 
   input CreateEnvironmentOneToManyInput {
-    connect: EnvironmentPackageInput
+    connect: EnvironmentProductInput
   }
 
   input CreateEnvironmentInput {
     name: String!
-    package: CreateEnvironmentOneToManyInput
+    product: CreateEnvironmentOneToManyInput
+  }
+
+  input GatewayServiceWhereUniqueInput {
+    id: ID!
+  }
+
+  input GatewayServiceRelateToManyInput {
+    disconnectAll: Boolean
+    connect: [GatewayServiceWhereUniqueInput]
   }
 
   input UpdateEnvironmentInput {
     active: Boolean
+    name: String
+    authMethod: String
+    services: GatewayServiceRelateToManyInput
   }
 
   type Mutation {
-    createPackage(data: CreatePackageInput): Package!
+    createProduct(data: CreateProductInput): Product!
+    updateProduct(id: ID!, data: UpdateProductInput): Product!
+    deleteProduct(id: ID!): Product!
     createEnvironment(data: CreateEnvironmentInput): Environment!
     updateEnvironment(id: ID!, data: UpdateEnvironmentInput): Environment!
     deleteEnvironment(id: ID!): Environment!
@@ -171,8 +195,8 @@ const schemaStruct = `
 `;
 
 //const store = createMockStore({ schema: schemaStruct });
-// const allPackages = new MockList(6, (_, { id }) => ({ id }));
-const allPackages = [
+// const allProducts = new MockList(6, (_, { id }) => ({ id }));
+let allProducts = [
   {
     id: casual.uuid,
     name: 'BC Data Catalogue',
@@ -185,24 +209,34 @@ const schemaWithMocks = addMocksToSchema({
 });
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
-    allPackages: () => allPackages,
+    allProducts: () => allProducts,
     allEnvironments: () => {
       const result = [];
-      allPackages.forEach((p) => {
+      allProducts.forEach((p) => {
         p.environments.forEach((e) => result.push(e));
       });
       return result;
     },
-    allServiceRoutes: () => new MockList(8, (_, { id }) => ({ id })),
+    allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
   }),
   Mutation: () => ({
-    createPackage: ({ data }) => {
+    createProduct: ({ data }) => {
       const id = casual.uuid;
-      allPackages.push({ id, name: data.name, environments: [] });
+      allProducts.push({ id, name: data.name, environments: [] });
       return { id, name: data.name };
     },
+    updateProduct: ({ id, data }) => {
+      return {
+        id,
+        ...data,
+      };
+    },
+    deleteProduct: ({ id }) => {
+      allProducts = allProducts.filter((d) => d.id !== id);
+      return allProducts;
+    },
     createEnvironment: ({ data }) => {
-      const parent = allPackages.find((d) => d.id === data.package.connect.id);
+      const parent = allProducts.find((d) => d.id === data.product.connect.id);
       const res = {
         id: casual.uuid,
         name: data.name,
@@ -216,23 +250,26 @@ const server = mockServer(schemaWithMocks, {
       return res;
     },
     updateEnvironment: ({ id, data }) => {
-      allPackages.forEach((p) => {
+      allProducts.forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
 
         if (environmentIds.includes(id)) {
           const environmentIndex = environmentIds.indexOf(id);
           if (environmentIndex >= 0) {
-            p.environments[environmentIndex].active = data.active;
+            p.environments[environmentIndex] = {
+              ...p.environments[environmentIndex],
+              ...data,
+            };
           }
         }
       });
 
-      return { id, active: data.active };
+      return { id, ...data };
     },
     deleteEnvironment: ({ id }) => {
       let name = '';
 
-      allPackages.forEach((p) => {
+      allProducts.forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
         const environmentIndex = environmentIds.indexOf(id);
         if (environmentIndex >= 0) {
@@ -244,7 +281,7 @@ const server = mockServer(schemaWithMocks, {
       return { id, name };
     },
   }),
-  Package: () => ({
+  Product: () => ({
     name: casual.title,
     description: casual.words(10),
     kongRouteId: casual.uuid,
@@ -255,10 +292,6 @@ const server = mockServer(schemaWithMocks, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
-    environments: (...args) => {
-      console.log(args);
-      return [];
-    },
   }),
   Organization: () => ({
     name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
@@ -281,16 +314,17 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.word,
     description: casual.short_description,
   }),
-  Environment: () => ({
-    name: casual.random_element(['dev', 'test', 'prod']),
+  Environment: ({ id }) => ({
+    id,
+    name: casual.random_element(['dev', 'test', 'prod', 'sandbox', 'other']),
     active: casual.boolean,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
-  ServiceRoute: () => ({
-    name: casual.populate('{{domain}}.api.gov.bc.ca'),
+  GatewayService: () => ({
+    name: casual.populate('{{word}}.api.gov.bc.ca'),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.word,
@@ -299,6 +333,7 @@ const server = mockServer(schemaWithMocks, {
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
     tags: casual.word,
+    updatedAt: casual.date('YYYY-MM-DD'),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   CredentialIssuer: () => ({

@@ -5,7 +5,6 @@ import {
   Checkbox,
   FormControl,
   FormLabel,
-  FormErrorMessage,
   FormHelperText,
   Icon,
   Input,
@@ -21,6 +20,8 @@ import {
 } from '@chakra-ui/react';
 import { FaPenSquare } from 'react-icons/fa';
 import type { Product } from '@/shared/types/query.types';
+
+import DeleteProduct from './delete-product';
 
 interface EditProductProps {
   data: Product;
@@ -86,7 +87,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="red">Delete Product</Button>
+            <DeleteProduct id={data.id} onDeleted={onClose} />
             <Box flex={1} />
             <Button mr={3} onClick={onClose}>
               Cancel
