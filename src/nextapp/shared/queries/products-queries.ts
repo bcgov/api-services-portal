@@ -54,7 +54,7 @@ export const UPDATE_ENVIRONMENT_ACTIVE = gql`
     updateEnvironment(id: $id, data: { active: $active }) {
       name
       id
-      isActive
+      active
     }
   }
 `;
@@ -135,7 +135,7 @@ export const GET_LIST = gql`
       environments {
         id
         name
-        isActive
+        active
         authMethod
         services {
           id

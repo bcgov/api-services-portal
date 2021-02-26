@@ -1,4 +1,5 @@
 import * as React from 'react';
+import api from '@/shared/services/api';
 import {
   Box,
   Divider,
@@ -15,6 +16,8 @@ import {
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import { FaRegTimesCircle, FaSearch, FaWrench } from 'react-icons/fa';
+import { useMutation, useQueryClient } from 'react-query';
+import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import type { GatewayService } from '@/types/query.types';
 
 import ActiveServices from './active-services';
@@ -31,7 +34,34 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
   environmentId,
   namespace,
 }) => {
+  const dataTransferType = 'application/service';
   const [search, setSearch] = React.useState<string>('');
+
+  // Mutations
+  const client = useQueryClient();
+  const mutation = useMutation(
+    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes),
+    {
+      onSuccess: () => {
+        client.invalidateQueries(['environment', environmentId]);
+      },
+    }
+  );
+  const onServicesChange = React.useCallback(
+    async (payload: { id: string }[]) => {
+      await mutation.mutateAsync({
+        id: environmentId,
+        data: {
+          services: {
+            disconnectAll: true,
+            connect: payload,
+          },
+        },
+      });
+    },
+    [environmentId, mutation]
+  );
+
   const onSearchChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setSearch(event.target.value);
@@ -84,7 +114,11 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
       </Box>
       <Divider />
       <Box display="grid" gridTemplateColumns="1fr auto 1fr" minHeight="200px">
-        <ActiveServices data={data} search={search} />
+        <ActiveServices
+          data={data}
+          onRemoveService={onServicesChange}
+          search={search}
+        />
         <Divider orientation="vertical" height="100%" />
 
         <ClientRequest
@@ -109,7 +143,8 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
         >
           <AvailableServices
             activeIds={data.map((d) => d.id)}
-            environmentId={environmentId}
+            dragDataType={dataTransferType}
+            onAddService={onServicesChange}
             namespace={namespace}
             search={search}
           />

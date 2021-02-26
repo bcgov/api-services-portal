@@ -11,80 +11,60 @@ import {
   TagLeftIcon,
 } from '@chakra-ui/react';
 import { FaPlusCircle, FaDatabase } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
-import api, { useApi } from '@/shared/services/api';
-import {
-  GET_SERVICES,
-  UPDATE_ENVIRONMENT,
-} from '@/shared/queries/products-queries';
+import { useApi } from '@/shared/services/api';
+import { GET_SERVICES } from '@/shared/queries/products-queries';
+import { GatewayService } from '@/shared/types/query.types';
 
 interface AvailableServicesProps {
   activeIds: string[];
-  environmentId: string;
+  dragDataType: string;
+  onAddService: (payload: { id: string }[]) => void;
   namespace: string;
   search: string;
 }
 
 const AvailableServices: React.FC<AvailableServicesProps> = ({
   activeIds,
-  environmentId,
+  dragDataType,
+  onAddService,
   namespace,
   search,
 }) => {
-  const client = useQueryClient();
-  const mutation = useMutation(
-    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes),
-    {
-      onSuccess: () => {
-        console.log('success', environmentId);
-        client.invalidateQueries(['environment', environmentId]);
-      },
-    }
-  );
   const [sortBy, setSortBy] = React.useState<string>('name');
   const { data } = useApi('services', {
     query: GET_SERVICES,
     variables: { ns: namespace },
   });
-  const onServicesChange = React.useCallback(
-    async (id: string) => {
-      await mutation.mutateAsync({
-        id,
-        data: {
-          services: {
-            disconnectAll: true,
-            connect: [
-              ...activeIds.map((a) => ({
-                id: a,
-              })),
-              { id },
-            ],
-          },
-        },
-      });
+  const handleAddService = React.useCallback(
+    (id: string) => {
+      const currentIds = activeIds.map((id) => ({ id }));
+      onAddService([...currentIds, { id }]);
     },
-    [activeIds, client, mutation]
+    [activeIds, onAddService]
   );
   const onClick = React.useCallback(
     (id: string) => () => {
-      onServicesChange(id);
+      handleAddService(id);
     },
-    [onServicesChange]
+    [handleAddService]
   );
   const onDragStart = React.useCallback(
     (d) => (event: React.DragEvent<HTMLDivElement>) => {
-      event.dataTransfer.setData('application/aps-service', JSON.stringify(d));
+      event.dataTransfer.setData(dragDataType, JSON.stringify(d));
       event.dataTransfer.effectAllowed = 'move';
     },
-    []
+    [dragDataType]
   );
   const onDragEnd = React.useCallback(
     (event) => {
       if (event.dataTransfer.dropEffect === 'move') {
-        client.invalidateQueries('services');
+        const { id }: GatewayService = JSON.parse(
+          event.dataTransfer.getData(dragDataType)
+        );
+        handleAddService(id);
       }
     },
-    [client]
+    [dragDataType, handleAddService]
   );
   const onSortChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -133,7 +113,7 @@ const AvailableServices: React.FC<AvailableServicesProps> = ({
                 return 0;
               }
             })
-            .map((d, i) => (
+            .map((d) => (
               <WrapItem key={d.id}>
                 <Tag
                   draggable
