@@ -1,9 +1,10 @@
+const assert = require('assert').strict;
 
 module.exports = {
-    lookupEnvironmentAndApplicationByAccessRequest: async function lookupEnvironment (context, id) {
-        return await context.executeGraphQL({
+    lookupEnvironmentAndApplicationByAccessRequest: async function lookupEnvironmentAndApplicationByAccessRequest (context, id) {
+        const result = await context.executeGraphQL({
             query: `query GetSpecificEnvironment($id: ID!) {
-                        allAccessRequests(id: $id) {
+                        allAccessRequests(where: {id: $id}) {
                             productEnvironment {
                                 name
                                 credentialIssuer {
@@ -17,22 +18,28 @@ module.exports = {
                         }
                     }`,
             variables: { id: id },
-        }).data.allAccessRequests[0]
+        })
+        console.log("lookupEnvironmentAndApplicationByAccessRequest " + JSON.stringify(result))
+        return result.data.allAccessRequests[0]
     },
     lookupKongConsumerIdByName: async function (context, name) {
-        return await context.executeGraphQL({
+        assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Consumer Username")
+        const result = await context.executeGraphQL({
             query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
                         allConsumers(where: $where) {
                             kongConsumerId
                         }
                     }`,
-            variables: { where: { username_contains_i: name } },
-        }).data.allConsumers[0].kongConsumerId    
+            variables: { where: { username: name } },
+        })
+        console.log("lookupKongConsumerIdByName [" + name+ "] " + JSON.stringify(result))
+        assert.strictEqual(result.data.allConsumers.length, 1, "Unexpected data returned for Consumer lookup")
+        return result.data.allConsumers[0].kongConsumerId
     },
     lookupCredentialIssuerById: async function (context, id) {
-        return await context.executeGraphQL({
+        const result = await context.executeGraphQL({
             query: `query GetCredentialIssuerById($id: ID!) {
-                        allCredentialIssuers(id: $id) {
+                        allCredentialIssuers(where: {id: $id}) {
                             name
                             authMethod
                             mode
@@ -42,8 +49,10 @@ module.exports = {
                             clientSecret
                         }
                     }`,
-            variables: { where: { id: id } },
-        }).data.allCredentialIssuers[0]    
+            variables: { id: id },
+        })
+        console.log("lookupCredentialIssuerById " + JSON.stringify(result))
+        return result.data.allCredentialIssuers[0]    
     },
     addKongConsumer: async function(context, username, kongConsumerId) {
         // This should actually go away and the "Feeders" should be used
@@ -51,6 +60,7 @@ module.exports = {
             query: `mutation CreateNewConsumer($username: String, $kongConsumerId: String) {
                         createConsumer(data: { username: $username, kongConsumerId: $kongConsumerId, tags: "[]" }) {
                             id
+                            kongConsumerId
                         }
                     }`,
             variables: { username, kongConsumerId },
@@ -63,8 +73,8 @@ module.exports = {
         const credRefAsString = JSON.stringify(credentialReference)
         try {
             const result = await context.executeGraphQL({
-                query: `mutation UpdateConsumerInAccessRequest($reqId: ID!, $credRef: String) {
-                            updateAccessRequest(id: $reqId, data: { credentialReference: $credRef } ) {
+                query: `mutation UpdateConsumerInAccessRequest($requestId: ID!, $credRefAsString: String) {
+                            updateAccessRequest(id: $requestId, data: { credentialReference: $credRefAsString } ) {
                                 id
                             }
                         }`,

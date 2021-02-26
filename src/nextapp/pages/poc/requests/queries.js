@@ -77,7 +77,6 @@ export const GET_REQUEST = `
           isIssued
           isComplete
           createdAt
-          consumerId
           requestor {
             name
             username
@@ -154,8 +153,8 @@ export const REJECT = `
 `
 
 export const FULFILL_REQUEST = `
-    mutation FulfillRequest($id: ID!, $consumerId: String) {
-        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, consumerId: $consumerId }) {
+    mutation FulfillRequest($id: ID!) {
+        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true }) {
             id
         }
     }

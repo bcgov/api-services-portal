@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 
-
+const checkStatus = require('./checkStatus').checkStatus
 
 module.exports = function (kongUrl) {
     return {
@@ -10,6 +10,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .then(json => { return {
                 id: json['id'],
@@ -19,10 +20,17 @@ module.exports = function (kongUrl) {
         },
 
         createOrGetConsumer: async function (username, customId) {
+            console.log("createOrGetConsumer")
             try {
-                return this.getConsumerByUsername (username)
+                console.log("createOrGetConsumer - TRY "+username)
+                const result = await this.getConsumerByUsername (username)
+                console.log("createOrGetConsumer - RESULT "+JSON.stringify(result))
+                return result
             } catch (err) {
-                return this.createKongConsumer (username, customId)
+                console.log("createOrGetConsumer CATCH ERROR " + err)
+                const result = await this.createKongConsumer (username, customId)
+                console.log("createOrGetConsumer CATCH RESULT "+JSON.stringify(result))
+                return result
             }
         },
 

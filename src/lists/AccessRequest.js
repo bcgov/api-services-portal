@@ -4,7 +4,7 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
-const workflow = require('../services/workflow');
+const workflow = require('../services/workflow')
 
 module.exports = {
   fields: {
@@ -51,6 +51,22 @@ module.exports = {
     atTracking()
   ],
   hooks: {
+    validateInput: (async function ({
+        operation,
+        existingItem,
+        originalInput,
+        resolvedData,
+        context,
+        addFieldValidationError, // Field hooks only
+        addValidationError, // List hooks only
+        listKey,
+        fieldPath, // Field hooks only
+    }) {
+        console.log("VALIDATE AR " + operation + " " + JSON.stringify(existingItem, null, 3));
+        console.log("VALIDATE AR " + operation + " " + JSON.stringify(originalInput, null, 3));
+        console.log("VALIDATE AR " + operation + " " + JSON.stringify(resolvedData, null, 3));
+        await workflow.Validate(context, operation, existingItem, originalInput, resolvedData, addValidationError)
+    }),
     beforeChange: ({
         operation,
         existingItem,
@@ -71,7 +87,7 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) {
-        workflow(context, operation, existingItem, originalInput, updatedItem)
+        await workflow.Apply(context, operation, existingItem, originalInput, updatedItem)
     })
   }
 }

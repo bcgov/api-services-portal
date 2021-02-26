@@ -12,7 +12,7 @@ import graphql from '../../../../shared/services/graphql'
 
 import NameValue from '../../../../components/name-value';
 
-import { Button, ButtonGroup, Input, Textarea, Flex } from "@chakra-ui/react"
+import { Button, ButtonGroup, Input, Textarea, Flex, useToast } from "@chakra-ui/react"
 
 import { useAppContext } from '../../../context'
 
@@ -46,8 +46,23 @@ const FulfillRequest = () => {
     }
 
     
+    const toast = useToast()
+    const errorToast = (message) => {
+        toast({
+            title: "Failed to approve request",
+            description: message,
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+        })
+    }
+
     const fulfill = () => {
-        graphql(FULFILL_REQUEST, { id: request.id, consumerId: request.application.appId }).then(refetch);
+        graphql(FULFILL_REQUEST, { id: request.id })
+        .then(refetch)
+        .catch (err => {
+            errorToast(JSON.stringify(err.message))
+        })
     }
 
     const onConsumerChange = (evt) => {

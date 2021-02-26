@@ -32,13 +32,6 @@ export type ApplicationRelateToOneInput = {
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
-export type ConsumerRelateToOneInput = {
-  create?: Maybe<ConsumerCreateInput>;
-  connect?: Maybe<ConsumerWhereUniqueInput>;
-  disconnect?: Maybe<ConsumerWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
 export type EnvironmentRelateToOneInput = {
   create?: Maybe<EnvironmentCreateInput>;
   connect?: Maybe<EnvironmentWhereUniqueInput>;
@@ -71,11 +64,10 @@ export type AccessRequest = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  consumerId?: Maybe<Scalars['String']>;
+  credentialReference?: Maybe<Scalars['String']>;
   credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
   application?: Maybe<Application>;
-  consumer?: Maybe<Consumer>;
   productEnvironment?: Maybe<Environment>;
   activity: Array<Activity>;
   _activityMeta?: Maybe<_QueryMeta>;
@@ -156,24 +148,24 @@ export type AccessRequestWhereInput = {
   isIssued_not?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isComplete_not?: Maybe<Scalars['Boolean']>;
-  consumerId?: Maybe<Scalars['String']>;
-  consumerId_not?: Maybe<Scalars['String']>;
-  consumerId_contains?: Maybe<Scalars['String']>;
-  consumerId_not_contains?: Maybe<Scalars['String']>;
-  consumerId_starts_with?: Maybe<Scalars['String']>;
-  consumerId_not_starts_with?: Maybe<Scalars['String']>;
-  consumerId_ends_with?: Maybe<Scalars['String']>;
-  consumerId_not_ends_with?: Maybe<Scalars['String']>;
-  consumerId_i?: Maybe<Scalars['String']>;
-  consumerId_not_i?: Maybe<Scalars['String']>;
-  consumerId_contains_i?: Maybe<Scalars['String']>;
-  consumerId_not_contains_i?: Maybe<Scalars['String']>;
-  consumerId_starts_with_i?: Maybe<Scalars['String']>;
-  consumerId_not_starts_with_i?: Maybe<Scalars['String']>;
-  consumerId_ends_with_i?: Maybe<Scalars['String']>;
-  consumerId_not_ends_with_i?: Maybe<Scalars['String']>;
-  consumerId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  consumerId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credentialReference?: Maybe<Scalars['String']>;
+  credentialReference_not?: Maybe<Scalars['String']>;
+  credentialReference_contains?: Maybe<Scalars['String']>;
+  credentialReference_not_contains?: Maybe<Scalars['String']>;
+  credentialReference_starts_with?: Maybe<Scalars['String']>;
+  credentialReference_not_starts_with?: Maybe<Scalars['String']>;
+  credentialReference_ends_with?: Maybe<Scalars['String']>;
+  credentialReference_not_ends_with?: Maybe<Scalars['String']>;
+  credentialReference_i?: Maybe<Scalars['String']>;
+  credentialReference_not_i?: Maybe<Scalars['String']>;
+  credentialReference_contains_i?: Maybe<Scalars['String']>;
+  credentialReference_not_contains_i?: Maybe<Scalars['String']>;
+  credentialReference_starts_with_i?: Maybe<Scalars['String']>;
+  credentialReference_not_starts_with_i?: Maybe<Scalars['String']>;
+  credentialReference_ends_with_i?: Maybe<Scalars['String']>;
+  credentialReference_not_ends_with_i?: Maybe<Scalars['String']>;
+  credentialReference_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credentialReference_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   credential?: Maybe<Scalars['String']>;
   credential_not?: Maybe<Scalars['String']>;
   credential_contains?: Maybe<Scalars['String']>;
@@ -196,8 +188,6 @@ export type AccessRequestWhereInput = {
   requestor_is_null?: Maybe<Scalars['Boolean']>;
   application?: Maybe<ApplicationWhereInput>;
   application_is_null?: Maybe<Scalars['Boolean']>;
-  consumer?: Maybe<ConsumerWhereInput>;
-  consumer_is_null?: Maybe<Scalars['Boolean']>;
   productEnvironment?: Maybe<EnvironmentWhereInput>;
   productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
@@ -245,16 +235,14 @@ export enum SortAccessRequestsBy {
   IsIssuedDesc = 'isIssued_DESC',
   IsCompleteAsc = 'isComplete_ASC',
   IsCompleteDesc = 'isComplete_DESC',
-  ConsumerIdAsc = 'consumerId_ASC',
-  ConsumerIdDesc = 'consumerId_DESC',
+  CredentialReferenceAsc = 'credentialReference_ASC',
+  CredentialReferenceDesc = 'credentialReference_DESC',
   CredentialAsc = 'credential_ASC',
   CredentialDesc = 'credential_DESC',
   RequestorAsc = 'requestor_ASC',
   RequestorDesc = 'requestor_DESC',
   ApplicationAsc = 'application_ASC',
   ApplicationDesc = 'application_DESC',
-  ConsumerAsc = 'consumer_ASC',
-  ConsumerDesc = 'consumer_DESC',
   ProductEnvironmentAsc = 'productEnvironment_ASC',
   ProductEnvironmentDesc = 'productEnvironment_DESC',
   ActivityAsc = 'activity_ASC',
@@ -275,11 +263,10 @@ export type AccessRequestUpdateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  consumerId?: Maybe<Scalars['String']>;
+  credentialReference?: Maybe<Scalars['String']>;
   credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
-  consumer?: Maybe<ConsumerRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
   activity?: Maybe<ActivityRelateToManyInput>;
 };
@@ -295,11 +282,10 @@ export type AccessRequestCreateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  consumerId?: Maybe<Scalars['String']>;
+  credentialReference?: Maybe<Scalars['String']>;
   credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
-  consumer?: Maybe<ConsumerRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
   activity?: Maybe<ActivityRelateToManyInput>;
 };

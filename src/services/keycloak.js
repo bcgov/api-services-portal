@@ -1,6 +1,8 @@
 
 const fetch = require('node-fetch')
 
+const checkStatus = require('./checkStatus').checkStatus
+
 module.exports = {
     clientRegistration: async function (issuer, accessToken, clientId, clientSecret) {
         // const kcAdminClient = new KcAdminClient({
@@ -31,11 +33,8 @@ module.exports = {
                 'Origin': '',
                 'Authorization': 'bearer ' + accessToken },
         })
+        .then(checkStatus)
         .then(res => res.json())
-        .catch (err => {
-            console.log("KEYCLOAK " + err)
-            throw Error("Keycloak error " + err)
-        });
         console.log(JSON.stringify(response, null, 3));
         return {
             id: response['id'],
@@ -53,12 +52,8 @@ module.exports = {
                 'Content-Type': 'application/json'
             }
         })
+        .then(checkStatus)
         .then(res => res.json())
-        .catch (err => {
-            console.log("KEYCLOAK ERR " + err)
-            throw Error("Failed to get details from the OIDC Discovery endpoint")
-        });
-
     }
 }
 
