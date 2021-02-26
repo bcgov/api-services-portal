@@ -34,6 +34,29 @@ Once running, the `aps portal` application is reachable via `localhost:4180`.
 
 ## Design
 
+The application is built around the KeystoneJS V5 and NextJS frameworks.
+
+The following customizations have been implemented
+
+### Authentication
+
+Support for an OAuth-Proxy for the Admin API was added to support authenticating with in OAuth flow
+
+### Authorization
+
+A decision matrix and authorization rules engine was implemented to centralize the rules around access to data
+
+### Injestor
+
+An ingestion framework for adding content from external sources
+
+### Feeders
+
+A set of feeders that live close to the external sources for reading and sending data to the Ingestor
+
+
+
+## User Journeys
 Roles:
 
 - **Credential Admin**: Application for authenticating with an OIDC Auth provider for the purposes of client registration. The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
