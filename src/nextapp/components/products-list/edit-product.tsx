@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  Checkbox,
   FormControl,
   FormLabel,
   FormHelperText,
@@ -15,12 +14,14 @@ import {
   ModalFooter,
   ModalBody,
   Select,
+  Text,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
 import { FaPenSquare } from 'react-icons/fa';
 import type { Product } from '@/shared/types/query.types';
 
+import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
 
 interface EditProductProps {
@@ -80,9 +81,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
                   <option value="loc">Location Services</option>
                 </Select>
               </FormControl>
-              <FormControl>
-                <Checkbox defaultIsChecked>Link to BCDC</Checkbox>
-              </FormControl>
+              <DatasetInput value={data.dataset.name} />
             </VStack>
           </ModalBody>
 

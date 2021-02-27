@@ -99,6 +99,7 @@ const schemaStruct = `
   }
 
   type Dataset {
+    id: ID!
     name: String!
     sector: String
     license_title: String
@@ -126,6 +127,10 @@ const schemaStruct = `
     id: ID!
   }
 
+  input DatasetWhereInput {
+    name: String!
+  }
+
   input GatewayServiceWhereInput {
     namespace: String!
   }
@@ -138,6 +143,7 @@ const schemaStruct = `
     allProducts: [ Product ]
     allEnvironments: [ Environment ]
     allGatewayServices(where: GatewayServiceWhereInput): [ GatewayService ]
+    allDatasets(where: GatewayServiceWhereInput, search: String!): [ Dataset ]
     Environment(where: EnvironmentWhereUniqueInput!): Environment
     Product(where: ProductWhereUniqueInput!): Product
   }
@@ -200,7 +206,9 @@ let allProducts = [
   {
     id: casual.uuid,
     name: 'BC Data Catalogue',
-    environments: [{ id: casual.uuid, name: 'test', active: true }],
+    environments: [
+      { id: casual.uuid, name: 'test', active: true, services: [] },
+    ],
   },
 ];
 const schema = makeExecutableSchema({ typeDefs: schemaStruct });
@@ -218,6 +226,7 @@ const server = mockServer(schemaWithMocks, {
       return result;
     },
     allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
+    allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -354,7 +363,7 @@ const server = mockServer(schemaWithMocks, {
     config: casual.word,
   }),
   Dataset: () => ({
-    name: casual.title,
+    name: casual.uuid,
     sector: casual.word,
     license_title: casual.word,
     view_audience: casual.word,

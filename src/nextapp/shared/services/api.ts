@@ -1,5 +1,10 @@
 import { GraphQLClient } from 'graphql-request';
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import {
+  QueryKey,
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from 'react-query';
 import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
@@ -30,7 +35,7 @@ interface UseApiOptions {
 }
 
 export const useApi = (
-  key: string,
+  key: QueryKey,
   query: UseApiOptions,
   queryOptions: UseQueryOptions = { suspense: true }
 ): UseQueryResult<Query> => {

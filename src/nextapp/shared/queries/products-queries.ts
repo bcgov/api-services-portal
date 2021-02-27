@@ -73,7 +73,6 @@ export const GET_SERVICES = gql`
     allGatewayServices(where: { namespace: $ns }) {
       id
       name
-      isActive
       environment {
         id
       }
@@ -108,7 +107,6 @@ export const GET_ENVIRONMENT = gql`
       services {
         name
         id
-        isActive
       }
     }
   }
@@ -137,11 +135,6 @@ export const GET_LIST = gql`
         name
         active
         authMethod
-        services {
-          id
-          name
-          host
-        }
         credentialIssuer {
           name
         }
