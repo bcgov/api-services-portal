@@ -139,11 +139,21 @@ const schemaStruct = `
     id: ID!
   }
 
+  input OrganizationWhereInput {
+    id: ID!
+  }
+
+  input OrganizationUnitWhereInput {
+    id: ID!
+  }
+
   type Query {
     allProducts: [ Product ]
     allEnvironments: [ Environment ]
     allGatewayServices(where: GatewayServiceWhereInput): [ GatewayService ]
-    allDatasets(where: GatewayServiceWhereInput, search: String!): [ Dataset ]
+    allOrganizations(where: OrganizationWhereInput): [ Organization ]
+    allOrganizationUnits(where: OrganizationUnitWhereInput, search: String): [ OrganizationUnit ]
+    allDatasets(where: GatewayServiceWhereInput, search: String): [ Dataset ]
     Environment(where: EnvironmentWhereUniqueInput!): Environment
     Product(where: ProductWhereUniqueInput!): Product
   }
@@ -154,6 +164,9 @@ const schemaStruct = `
 
   input UpdateProductInput {
     name: String!
+    organization: ID
+    organizationUnit: ID
+    dataset: String
   }
 
   input EnvironmentProductInput {
@@ -211,10 +224,13 @@ let allProducts = [
     ],
   },
 ];
+const allOrganizations = new MockList(8, (_, { id }) => ({ id }));
+const allOrganizationUnits = new MockList(18, (_, { id }) => ({ id }));
 const schema = makeExecutableSchema({ typeDefs: schemaStruct });
 const schemaWithMocks = addMocksToSchema({
   schema,
 });
+
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
     allProducts: () => allProducts,
@@ -227,6 +243,8 @@ const server = mockServer(schemaWithMocks, {
     },
     allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
+    allOrganizations: () => allOrganizations,
+    allOrganizationUnits: () => allOrganizationUnits,
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -303,7 +321,7 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.words(3),
   }),
   Organization: () => ({
-    name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
+    name: casual.word,
     sector: casual.random_element([
       'Health & Safety',
       'Service',

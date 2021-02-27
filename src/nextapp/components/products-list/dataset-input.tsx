@@ -21,24 +21,37 @@ interface DatasetInputProps {
 const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
   const theme = useTheme();
   const [search, setSearch] = React.useState<string>('');
+  const [selected, setSelected] = React.useState<Dataset | null>(null);
   const { data, isLoading, isSuccess } = useApi(['dataset-search', search], {
     query: SEARCH_DATASETS,
     variables: { search },
   });
-  console.log(search);
-  const onStateChange = (changes: StateChangeOptions<Dataset>) => {
-    console.log(changes);
-    if (changes.selectedItem && !changes.selectedItem) {
-      setSearch(changes.inputValue);
-    }
-  };
+  const onChange = React.useCallback(
+    (selection: Dataset) => {
+      if (selection) {
+        setSelected(selection);
+      } else {
+        setSelected(null);
+      }
+    },
+    [setSelected]
+  );
+  const onStateChange = React.useCallback(
+    (changes: StateChangeOptions<Dataset>) => {
+      if (changes.selectedItem && !changes.selectedItem) {
+        setSearch(changes.inputValue);
+      }
+    },
+    [setSearch]
+  );
 
   return (
     <>
       <FormControl id="dataset" position="relative">
         <Downshift
+          onChange={onChange}
           onStateChange={onStateChange}
-          itemToString={(item) => (item ? item.name : '')}
+          itemToString={(item) => (item ? item.title : '')}
         >
           {({
             getInputProps,
@@ -84,16 +97,24 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
                   isSuccess &&
                   data.allDatasets
                     .filter((d) => !inputValue || d.title.includes(inputValue))
-                    .map((d, index) => (
+                    .map((d, index, arr) => (
                       <Box
                         key={d.id}
                         px={4}
                         py={2}
+                        borderBottomRightRadius={
+                          index === arr.length - 1 ? 2 : 0
+                        }
+                        borderBottomLeftRadius={
+                          index === arr.length - 1 ? 2 : 0
+                        }
                         {...getItemProps({
                           key: d.id,
                           index,
                           item: d,
                           style: {
+                            color:
+                              highlightedIndex === index ? 'white' : 'inherit',
                             backgroundColor:
                               highlightedIndex === index
                                 ? theme.colors['bc-link']
@@ -110,12 +131,14 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
           )}
         </Downshift>
         <FormHelperText>
-          This value is the slug value of a corresponding BC Data Catalogue
-          entry, i.e.{' '}
           <Text as="em">
             https://catalogue.data.gov.bc.ca/dataset/
-            <Text as="mark">property-transfer-tax-data-2021</Text>
+            <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
           </Text>
+        </FormHelperText>
+        <FormHelperText>
+          This value is the slug value of a corresponding BC Data Catalogue
+          entry
         </FormHelperText>
       </FormControl>
     </>

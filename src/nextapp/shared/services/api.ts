@@ -31,7 +31,7 @@ const api = async <T>(query: string, variables: unknown = {}): Promise<T> => {
 
 interface UseApiOptions {
   query: string;
-  variables: unknown;
+  variables?: unknown;
 }
 
 export const useApi = (

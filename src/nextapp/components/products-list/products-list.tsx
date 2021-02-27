@@ -1,27 +1,12 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Center,
-  Heading,
-  Icon,
-} from '@chakra-ui/react';
+import { Box, ButtonGroup, Center, Heading, Icon } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import EnvironmentsList from '@/components/environments-list';
 import NewProduct from '@/components/new-product';
 import { useQuery } from 'react-query';
 import type { Query } from '@/types/query.types';
-import {
-  FaLayerGroup,
-  FaPenSquare,
-  FaPlusCircle,
-  FaTrash,
-  FaCube,
-  FaFolder,
-  FaFolderOpen,
-} from 'react-icons/fa';
+import { FaPlusCircle, FaFolder, FaFolderOpen } from 'react-icons/fa';
 
 import AddEnvironment from './add-environment';
 import { GET_LIST } from './queries';

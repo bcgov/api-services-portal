@@ -9,6 +9,14 @@ export const ADD_PRODUCT = gql`
   }
 `;
 
+export const UPDATE_PRODUCT = gql`
+  mutation Update($id: ID!, $data: UpdateProductInput) {
+    updateProduct(id: $id, data: $data) {
+      id
+    }
+  }
+`;
+
 export const DELETE_PRODUCT = gql`
   mutation Remove($id: ID!) {
     deleteProduct(id: $id) {
