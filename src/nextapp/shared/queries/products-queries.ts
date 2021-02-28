@@ -10,7 +10,7 @@ export const ADD_PRODUCT = gql`
 `;
 
 export const UPDATE_PRODUCT = gql`
-  mutation Update($id: ID!, $data: UpdateProductInput) {
+  mutation Update($id: ID!, $data: ProductUpdateInput) {
     updateProduct(id: $id, data: $data) {
       id
     }

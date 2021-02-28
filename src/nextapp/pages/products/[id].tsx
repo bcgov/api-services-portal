@@ -58,8 +58,8 @@ const EnvironmentPage: React.FC<
   const mutation = useMutation(
     async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
   );
-  const statusBoxColorScheme = data.Environment.active ? 'green' : 'orange';
-  const statusText = data.Environment.active ? 'Running' : 'Idle';
+  const statusBoxColorScheme = data.Environment?.active ? 'green' : 'orange';
+  const statusText = data.Environment?.active ? 'Running' : 'Idle';
   const breadcrumb = [
     { href: '/products', text: 'Products' },
     {
@@ -68,14 +68,14 @@ const EnvironmentPage: React.FC<
   ];
   const onToggleActive = async (event: React.ChangeEvent<HTMLInputElement>) => {
     await mutation.mutateAsync({
-      id: data.Environment.id,
+      id: data.Environment?.id,
       data: { active: event.target.checked },
     });
     client.invalidateQueries(['environment', id]);
   };
   const onAuthChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     await mutation.mutateAsync({
-      id: data.Environment.id,
+      id: data.Environment?.id,
       data: { authMethod: event.target.value },
     });
     client.invalidateQueries(['environment', id]);
@@ -90,8 +90,8 @@ const EnvironmentPage: React.FC<
         <PageHeader
           actions={
             <EnvironmentNav
-              id={data.Environment.id}
-              data={data.Environment.product.environments}
+              id={data.Environment?.id}
+              data={data.Environment?.product.environments}
             />
           }
           breadcrumb={breadcrumb}
@@ -99,7 +99,7 @@ const EnvironmentPage: React.FC<
             <>
               Edit Environment{' '}
               <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
-                {data.Environment.name}
+                {data.Environment?.name}
               </Badge>
             </>
           }
@@ -117,13 +117,15 @@ const EnvironmentPage: React.FC<
               p={4}
               display="flex"
               border="2px solid"
-              borderColor={data.Environment.active ? 'green.500' : 'orange.500'}
+              borderColor={
+                data.Environment?.active ? 'green.500' : 'orange.500'
+              }
               borderRadius={4}
               overflow="hidden"
             >
               <Box display="flex">
                 <Switch
-                  isChecked={data.Environment.active}
+                  isChecked={data.Environment?.active}
                   value="active"
                   onChange={onToggleActive}
                 />
@@ -136,7 +138,7 @@ const EnvironmentPage: React.FC<
                   display="flex"
                   alignItems="center"
                 >
-                  {data.Environment.product.organization.name}{' '}
+                  {data.Environment?.product.organization.name}{' '}
                   <Badge
                     px={2}
                     mx={1}
@@ -144,7 +146,7 @@ const EnvironmentPage: React.FC<
                     variant="solid"
                     fontSize="inherit"
                   >
-                    {data.Environment.name}
+                    {data.Environment?.name}
                   </Badge>{' '}
                   Environment is{' '}
                   <Badge
@@ -173,7 +175,7 @@ const EnvironmentPage: React.FC<
                         size="sm"
                         variant="filled"
                         width="auto"
-                        value={data.Environment.authMethod}
+                        value={data.Environment?.authMethod}
                         onChange={onAuthChange}
                       >
                         <option value="public">Public</option>
@@ -191,7 +193,7 @@ const EnvironmentPage: React.FC<
         <Box my={5}>
           {user?.namespace && (
             <ServicesManager
-              data={data.Environment.services}
+              data={data.Environment?.services}
               environmentId={id}
               namespace={user.namespace}
             />
