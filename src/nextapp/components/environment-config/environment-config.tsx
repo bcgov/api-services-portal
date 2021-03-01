@@ -8,17 +8,22 @@ import {
   Badge,
   Text,
   Switch,
+  ButtonGroup,
+  Icon,
+  useToast,
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import { Environment, EnvironmentAuthMethodType } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 interface EnvironmentConfigProps {
   data: Environment;
 }
 
 const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
+  const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [authMethod, setAuthMethod] = React.useState<EnvironmentAuthMethodType>(
     data.authMethod
@@ -29,8 +34,10 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
   // Updates
   const client = useQueryClient();
   const mutation = useMutation(
-    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
+    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes, true)
   );
+
+  // Events
   const onChange = React.useCallback(() => {
     if (!hasChanged) {
       setChanged(true);
@@ -45,18 +52,33 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
       payload[key] = value;
     });
 
-    await mutation.mutateAsync({
-      id: data.id,
-      data: payload,
-    });
-    client.invalidateQueries(['environment', data.id]);
+    try {
+      await mutation.mutateAsync({
+        id: data.id,
+        data: payload,
+      });
+      client.invalidateQueries(['environment', data.id]);
+    } catch (err) {
+      toast({
+        title: 'Environment Update Failed',
+        description: err.map((e: Error) => e.message).join(', '),
+        isClosable: true,
+        status: 'error',
+      });
+    }
   };
   const onAuthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setAuthMethod(event.target.value as EnvironmentAuthMethodType);
   };
+  const onReset = React.useCallback(() => {
+    if (authMethod !== data.authMethod) {
+      setAuthMethod(data.authMethod);
+    }
+    setChanged(false);
+  }, [authMethod, data, setAuthMethod, setChanged]);
 
   return (
-    <form onChange={onChange} onSubmit={onSubmit}>
+    <form onChange={onChange} onSubmit={onSubmit} onReset={onReset}>
       <Box
         bgColor="white"
         mt={8}
@@ -68,7 +90,12 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
         overflow="hidden"
       >
         <Box display="flex">
-          <Switch defaultIsChecked={data.active} name="active" value="active" />
+          <Switch
+            defaultIsChecked={data.active}
+            id="active"
+            name="active"
+            value="active"
+          />
         </Box>
         <Box flex={1} ml={5} display="flex" flexDirection="column">
           <Heading
@@ -98,6 +125,12 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
             >
               {statusText}
             </Badge>
+            {mutation.isError && (
+              <Box color="red" display="flex" alignItems="center" ml={8}>
+                <Icon as={FaExclamationTriangle} mr={2} />
+                <Text>Error updating environment</Text>
+              </Box>
+            )}
           </Heading>
           <Box>
             <Text mb={4}>
@@ -108,12 +141,13 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
             </Text>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>
-                Authentication
+                Authentication {authMethod}
               </Text>
               <Select
                 size="sm"
                 variant="filled"
                 width="auto"
+                id="authMethod"
                 name="authMethod"
                 value={authMethod}
                 onChange={onAuthChange}
@@ -125,8 +159,9 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
               </Select>
               {authMethod === 'JWT' && (
                 <Select
-                  name="credentialIssuer"
                   size="sm"
+                  id="credentialIssuer"
+                  name="credentialIssuer"
                   variant="filled"
                   width="auto"
                   ml={3}
@@ -139,13 +174,16 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
               )}
               <Box flex={1} />
               <Box>
-                <Button
-                  isDisabled={!hasChanged}
-                  type="submit"
-                  variant="primary"
-                >
-                  Apply Changes
-                </Button>
+                <ButtonGroup size="sm">
+                  <Button type="reset">Cancel</Button>
+                  <Button
+                    isDisabled={!hasChanged}
+                    type="submit"
+                    variant="primary"
+                  >
+                    Apply Changes
+                  </Button>
+                </ButtonGroup>
               </Box>
             </Box>
           </Box>

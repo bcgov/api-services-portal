@@ -38,7 +38,7 @@ const EnvironmentPage: React.FC<
     ['environment', id],
     async () => await api<Query>(GET_ENVIRONMENT, { id })
   );
-  const title = `${data.Environment.product.organization.name} Product Environment`;
+  const title = `${data.Environment?.product.organization.name} Product Environment`;
   const breadcrumb = [
     { href: '/products', text: 'Products' },
     {
