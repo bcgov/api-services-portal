@@ -16,7 +16,7 @@ interface EnvironmentNavProps {
   id: string;
 }
 
-const EnvironmentNav: React.FC<EnvironmentNavProps> = ({ data, id }) => {
+const EnvironmentNav: React.FC<EnvironmentNavProps> = ({ data = [], id }) => {
   const router = useRouter();
   const onSelect = (id: string) => () => {
     router.push(`/products/${id}`);
@@ -29,7 +29,7 @@ const EnvironmentNav: React.FC<EnvironmentNavProps> = ({ data, id }) => {
         variant="tertiary"
         size="sm"
         leftIcon={<Icon as={FaExchangeAlt} />}
-        isDisabled={data.length < 2}
+        isDisabled={data?.length < 2}
       >
         Switch Environment
       </MenuButton>

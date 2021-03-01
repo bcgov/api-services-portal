@@ -27,7 +27,7 @@ interface EnvironmentConfigProps {
   data: Environment;
 }
 
-const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
+const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [authMethod, setAuthMethod] = React.useState<EnvironmentAuthMethodType>(

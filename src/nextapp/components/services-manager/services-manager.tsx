@@ -30,7 +30,7 @@ interface ServicesManagerProps {
 }
 
 const ServicesManager: React.FC<ServicesManagerProps> = ({
-  data,
+  data = [],
   environmentId,
   namespace,
 }) => {
