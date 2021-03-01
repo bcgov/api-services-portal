@@ -14,9 +14,14 @@ import {
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
-import { Environment, EnvironmentAuthMethodType } from '@/types/query.types';
+import {
+  Environment,
+  EnvironmentAuthMethodType,
+  EnvironmentUpdateInput,
+} from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
 import { FaExclamationTriangle } from 'react-icons/fa';
+import CredentialIssuerSelect from './credential-issuer-select';
 
 interface EnvironmentConfigProps {
   data: Environment;
@@ -46,11 +51,16 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
   const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const payload = {};
+    const payload: EnvironmentUpdateInput = {
+      active: Boolean(formData.get('active')),
+      authMethod: formData.get('authMethod') as EnvironmentAuthMethodType,
+    };
 
-    formData.forEach((value, key) => {
-      payload[key] = value;
-    });
+    if (formData.has('credentialIssuer')) {
+      payload.credentialIssuer = {
+        connect: { id: formData.get('credentialIssuer') as string },
+      };
+    }
 
     try {
       await mutation.mutateAsync({
@@ -141,7 +151,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
             </Text>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>
-                Authentication {authMethod}
+                Authentication
               </Text>
               <Select
                 size="sm"
@@ -158,26 +168,17 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data }) => {
                 <option value="JWT">JWT</option>
               </Select>
               {authMethod === 'JWT' && (
-                <Select
-                  size="sm"
-                  id="credentialIssuer"
-                  name="credentialIssuer"
-                  variant="filled"
-                  width="auto"
-                  ml={3}
-                >
-                  <option value="public">Public</option>
-                  <option value="keys">API Keys</option>
-                  <option value="private">Private</option>
-                  <option value="jwt">JWT</option>
-                </Select>
+                <CredentialIssuerSelect environmentId={data.id} />
               )}
               <Box flex={1} />
               <Box>
                 <ButtonGroup size="sm">
-                  <Button type="reset">Cancel</Button>
+                  <Button type="reset" isDisabled={mutation.isLoading}>
+                    Cancel
+                  </Button>
                   <Button
                     isDisabled={!hasChanged}
+                    isLoading={mutation.isLoading}
                     type="submit"
                     variant="primary"
                   >

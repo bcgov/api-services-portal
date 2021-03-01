@@ -49,7 +49,7 @@ export const ADD_ENVIRONMENT = gql`
 `;
 
 export const UPDATE_ENVIRONMENT = gql`
-  mutation Update($id: ID!, $data: UpdateEnvironmentInput) {
+  mutation Update($id: ID!, $data: EnvironmentUpdateInput) {
     updateEnvironment(id: $id, data: $data) {
       name
       id

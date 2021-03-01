@@ -23,7 +23,6 @@ const api = async <T>(
 ): Promise<T> => {
   try {
     const data = await apiClient.request<T>(query, variables);
-    console.log('data', data);
     return data;
   } catch (err) {
     if (isClient) {
