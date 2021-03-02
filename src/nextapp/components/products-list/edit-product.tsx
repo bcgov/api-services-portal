@@ -20,7 +20,7 @@ import {
 import { FaPenSquare } from 'react-icons/fa';
 import { useMutation, useQueryClient } from 'react-query';
 import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
-import type { Product } from '@/shared/types/query.types';
+import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
 
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
@@ -37,7 +37,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const mutation = useMutation(
-    (payload: Omit<Product, 'id' | 'environments'>) =>
+    (payload: ProductUpdateInput) =>
       api(UPDATE_PRODUCT, { id: data.id, data: payload }),
     {
       onSuccess: () => {
@@ -58,11 +58,19 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
   );
   const updateProduct = React.useCallback(async () => {
     const formData = new FormData(formRef.current);
-    const payload: Omit<Product, 'id' | 'environments'> = {};
+    const payload: ProductUpdateInput = {
+      name: formData.get('name') as string,
+    };
 
-    formData.forEach((value, key) => {
-      payload[key] = value;
-    });
+    for (const k of formData.keys()) {
+      if (k !== 'name') {
+        payload[k] = {
+          connect: {
+            id: formData.get(k),
+          },
+        };
+      }
+    }
 
     await mutation.mutateAsync(payload);
   }, [mutation]);
