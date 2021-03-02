@@ -64,11 +64,17 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
 
     for (const k of formData.keys()) {
       if (k !== 'name') {
-        payload[k] = {
-          connect: {
-            id: formData.get(k),
-          },
-        };
+        if (formData.get(k)) {
+          payload[k] = {
+            connect: {
+              id: formData.get(k),
+            },
+          };
+        } else {
+          payload[k] = {
+            disconnectAll: true,
+          };
+        }
       }
     }
 
