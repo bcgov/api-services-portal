@@ -7,7 +7,8 @@ import ServicesManager from '@/components/services-manager';
 import { GET_ENVIRONMENT } from '@/shared/queries/products-queries';
 import Head from 'next/head';
 import { Query } from '@/types/query.types';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import {,
+  Center GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
 import { QueryClient, useQuery } from 'react-query';
 import EnvironmentConfig from '@/components/environment-config';
@@ -38,6 +39,24 @@ const EnvironmentPage: React.FC<
     ['environment', id],
     async () => await api<Query>(GET_ENVIRONMENT, { id })
   );
+
+  if (!data) {
+    return (
+      <>
+        <Head>
+          <title>API Program Services | Environment Not Found</title>
+        </Head>
+        <Box width="100%" height="100%">
+          <Center>
+            <Box>
+              <Text>Environment Not Found</Text>
+            </Box>
+          </Center>
+        </Box>
+      </>
+    );
+  }
+
   const title = `${data.Environment?.product.organization?.name} Product Environment`;
   const breadcrumb = [
     { href: '/products', text: 'Products' },
