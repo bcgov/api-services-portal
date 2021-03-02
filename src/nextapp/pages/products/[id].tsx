@@ -1,14 +1,13 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
-import { Box, Container, Badge, Text } from '@chakra-ui/react';
+import { Box, Center, Container, Badge, Text } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesManager from '@/components/services-manager';
 import { GET_ENVIRONMENT } from '@/shared/queries/products-queries';
 import Head from 'next/head';
 import { Query } from '@/types/query.types';
-import {,
-  Center GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
 import { QueryClient, useQuery } from 'react-query';
 import EnvironmentConfig from '@/components/environment-config';
