@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   await queryClient.prefetchQuery(
     ['environment', context.params.id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id}, context.req.headers)
+    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id})
   );
 
   return {
