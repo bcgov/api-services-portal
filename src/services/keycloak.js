@@ -21,6 +21,7 @@ module.exports = {
             clientId: clientId,
             secret: clientSecret
         })
+        console.log(JSON.stringify(body, null, 4))
 
         console.log("CALLING "+`${issuer}/clients-registrations/default`);
         const response = await fetch(`${issuer}/clients-registrations/default`, {

@@ -92,67 +92,72 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
 
     const requestDetails = operation == 'create' ? null : await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 
-    if (originalInput.credential == "NEW") {
-        const appId = requestDetails.application.appId
-        // throw error if this is not an authMethod = 'api-key'
+    try {
+        if (originalInput.credential == "NEW") {
+            const appId = requestDetails.application.appId
+            // throw error if this is not an authMethod = 'api-key'
 
-        //const credentialReference = JSON.stringify(requestDetails.credentialReference)
+            //const credentialReference = JSON.stringify(requestDetails.credentialReference)
 
-        // Need additional info about the particular productEnvironment to get the right api key
-        // at the moment, just taking the first one! :(
-        updatedItem['credential'] = await regenerateApiKey (context, appId)
+            // Need additional info about the particular productEnvironment to get the right api key
+            // at the moment, just taking the first one! :(
+            updatedItem['credential'] = await regenerateApiKey (context, appId)
 
-    } else if (isUpdatingToIssued(existingItem, updatedItem)) {
-        console.log(JSON.stringify(existingItem, null ,4))
-        const reqId = existingItem.id
+        } else if (isUpdatingToIssued(existingItem, updatedItem)) {
+            console.log(JSON.stringify(existingItem, null ,4))
+            const reqId = existingItem.id
 
-        // Find the credential issuer and based on its type, go do the appropriate action
-        const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+            // Find the credential issuer and based on its type, go do the appropriate action
+            const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
 
-        const appId = requestDetails.application.appId
+            const appId = requestDetails.application.appId
 
-        const credentialReference = {}
+            const credentialReference = {}
 
-        if (issuer.mode == 'manual') {
-            throw Error('Manual credential issuing not supported yet!')
+            if (issuer.mode == 'manual') {
+                throw Error('Manual credential issuing not supported yet!')
+            }
+
+            if (issuer.authMethod == 'oidc') {
+                const token = issuer.initialAccessToken
+
+                const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+
+                // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
+                const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+                const clientId = appId + '-' + extraIdentifier
+                const client = await clientRegistration(openid.issuer, token, clientId, uuidv4())
+                credentialReference['clientId'] = client.clientId
+
+                const consumer = await kongApi.createOrGetConsumer (appId, '')
+                await addKongConsumer(context, appId, consumer.id)
+            } else {
+                // kong consumer could already exist - create if doesn't exist
+                const consumer = await kongApi.createOrGetConsumer (appId, '')
+                const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
+                credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
+
+                await addKongConsumer(context, appId, consumer.id)
+            }
+
+            // Link new Credential to Access Request for reference
+            await linkCredRefsToAccessRequest(context, reqId, credentialReference)
+
+            // Add the controls to the Consumer for Services/Routes that are part of the ProductEnvironment
+            // Get the services from the ProductEnvironment
+            // For each, add the Consumer Plugin
         }
 
-        if (issuer.authMethod == 'oidc') {
-            const token = issuer.initialAccessToken
+        const refId = updatedItem.id
+        const action = operation
+        const message = "Changes to " + JSON.stringify(originalInput)
 
-            const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-
-            // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-            const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
-            const clientId = appId + '-' + extraIdentifier
-            const client = await clientRegistration(openid.issuer, token, clientId, uuidv4())
-            credentialReference['clientId'] = client.clientId
-
-            const consumer = await kongApi.createOrGetConsumer (appId, '')
-            await addKongConsumer(context, appId, consumer.id)
-        } else {
-            // kong consumer could already exist - create if doesn't exist
-            const consumer = await kongApi.createOrGetConsumer (appId, '')
-            const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
-            credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
-
-            await addKongConsumer(context, appId, consumer.id)
-        }
-
-        // Link new Credential to Access Request for reference
-        await linkCredRefsToAccessRequest(context, reqId, credentialReference)
-
-        // Add the controls to the Consumer for Services/Routes that are part of the ProductEnvironment
-        // Get the services from the ProductEnvironment
-        // For each, add the Consumer Plugin
+        const act = await recordActivity (context, action, 'AccessRequest', refId, message)
+        console.log("ACTIVITY = "+ JSON.stringify(act, null, 3))
+    } catch (err) {
+        console.log("WORKFLOW ERR - "+err)
+        throw (err)
     }
-
-    const refId = updatedItem.id
-    const action = operation
-    const message = "Changes to " + JSON.stringify(originalInput)
-
-    const act = await recordActivity (context, action, 'AccessRequest', refId, message)
-    console.log("ACTIVITY = "+ JSON.stringify(act, null, 3))
 }
 
 module.exports = {

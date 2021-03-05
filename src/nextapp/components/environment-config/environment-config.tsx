@@ -115,7 +115,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             display="flex"
             alignItems="center"
           >
-            {data?.product.organization.name}{' '}
+            {data?.product.organization?.name}{' '}
             <Badge
               px={2}
               mx={1}

@@ -52,15 +52,14 @@ module.exports = {
         console.log("VALIDATE " + operation + " " + JSON.stringify(resolvedData, null, 3));
         if ('active' in originalInput) {
             // do validation
-            if (Object.keys(originalInput).length != 1) {
-                addValidationError("You can not update other data when changing the active status")
-            } else {
-                // validations:
-                // - there is at least on service associated with it
-                // - if prod, that it has a BCDC record
-                if (originalInput['active'] == true && existingItem['name'] == "dev") {
-                    addValidationError("Failed validation.  Not able to activate because of a good reason!")
-                }
+            // if (Object.keys(originalInput).length != 1) {
+            //     addValidationError("You can not update other data when changing the active status")
+            // } else {
+            // validations:
+            // - there is at least on service associated with it
+            // - if prod, that it has a BCDC record
+            if (originalInput['active'] == true && existingItem['name'] == "dev") {
+                addValidationError("Failed validation.  Not able to activate because of a good reason!")
             }
         }
     }
