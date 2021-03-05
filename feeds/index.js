@@ -5,6 +5,8 @@ const assert = require('assert').strict;
 const app = express()
 const port = 6000
 
+const replay = require('./utils/replay')
+
 assert.strictEqual('WORKING_PATH' in process.env, true, 'WORKING_PATH must be set')
 assert.strictEqual('DESTINATION_URL' in process.env, true, 'DESTINATION_URL must be set')
 
@@ -55,6 +57,13 @@ app.get('/sync/:source/', (req, res) => {
     sources[source].sync(config[source])
     res.send({state:'processing'})
 })
+
+// Replay an existing feeds file
+app.get('/replay/', (req, res) => {
+    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL})
+    res.send({state:'processing'})
+})
+
 
 // List of entities
 

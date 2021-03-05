@@ -2,6 +2,8 @@ const fs = require('fs')
 const { transfers } = require('../utils/transfers')
 const { portal } = require('../utils/portal')
 
+const mask = require('./mask')
+
 async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
     const xfer = transfers(workingPath, url, exceptions)
@@ -20,7 +22,7 @@ async function sync({url, workingPath, destinationUrl}) {
 function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
     const destination = portal(destinationUrl)
     const items = xfer.get_json_content(file)['data']
-    const allPlugins = xfer.get_json_content ('gw-plugins')['data']
+    const allPlugins = xfer.get_json_content ('gw-plugins')['data'].map(mask)
     let index = 0
     return () => {
         if (index == items.length) {

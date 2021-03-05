@@ -39,8 +39,8 @@ function transfers (workingPath, baseUrl, exceptions) {
             return JSON.parse(fs.readFileSync(infile))
         },
 
-        concurrentWork: function(producer, concurrency = 5) {
-            var pool = new PromisePool(producer, concurrency)
+        concurrentWork: async function(producer, concurrency = 5) {
+            var pool = new PromisePool(await producer, concurrency)
             
             // Start the pool.
             var poolPromise = pool.start()

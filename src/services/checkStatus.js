@@ -7,6 +7,4 @@ function checkStatus(res) {
     }
 }
 
-module.exports = {
-    checkStatus: checkStatus
-}
+module.exports = checkStatus

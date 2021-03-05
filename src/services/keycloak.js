@@ -1,7 +1,9 @@
 
 const fetch = require('node-fetch')
 
-const checkStatus = require('./checkStatus').checkStatus
+const checkStatus = require('./checkStatus')
+
+const clientTemplate = require('./keycloak/client-template.json')
 
 module.exports = {
     clientRegistration: async function (issuer, accessToken, clientId, clientSecret) {
@@ -14,14 +16,11 @@ module.exports = {
         // const createdClient = await kcAdminClient.clients.create({
         //     clientId
         // })
-        const body = {
+        const body = Object.assign(JSON.parse(JSON.stringify(clientTemplate)), {
             enabled: true,
-            redirectUris: [ "https://*" ],
             clientId: clientId,
-            secret: clientSecret,
-            publicClient: false,
-            protocol: "openid-connect"
-        }
+            secret: clientSecret
+        })
 
         console.log("CALLING "+`${issuer}/clients-registrations/default`);
         const response = await fetch(`${issuer}/clients-registrations/default`, {

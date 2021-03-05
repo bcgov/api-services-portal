@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 
-const checkStatus = require('./checkStatus').checkStatus
+const checkStatus = require('./checkStatus')
 
 module.exports = function (kongUrl) {
     return {
