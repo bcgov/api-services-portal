@@ -25,6 +25,7 @@ export KONG_URL=""
 export OIDC_ISSUER=""
 export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs
 
+export NEXT_PUBLIC_API_ROOT=http://localhost:4180
 export EXTERNAL_URL="http://localhost:4180"
 
 npm run dev
@@ -46,23 +47,30 @@ Support for an OAuth-Proxy for the Admin API was added to support authenticating
 
 A decision matrix and authorization rules engine was implemented to centralize the rules around access to data
 
-### Injestor
+### Ingestor
 
-An ingestion framework for adding content from external sources
+An ingestion framework for adding content from external sources.
+
 
 ### Feeders
 
 A set of feeders that live close to the external sources for reading and sending data to the Ingestor
 
-
+Currently support feeders:
+* CKAN (Comprehensive Knowledge Archive Network)
+* Kong
+* Keycloak
+* Prometheus
+* Github
 
 ## User Journeys
 Roles:
 
-- **Credential Admin**: Application for authenticating with an OIDC Auth provider for the purposes of client registration. The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
-- **API Manager**: The API Manager makes APIs available for consumption with supporting documentation. They approve requests for access.
 - **API Owner**: Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
 - **Developer**: A Developer discovers APIs, requests access if required and consumes them.
+- **Credential Admin**: Application for authenticating with an OIDC Auth provider for the purposes of client registration. The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
+- **API Manager**: The API Manager makes APIs available for consumption with supporting documentation. They approve requests for access.
+- **Pilot Tester**: This role enables features that are still being reviewed and not quite ready for broader use.
 
 Typical Flow:
 

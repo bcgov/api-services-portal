@@ -34,12 +34,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   await queryClient.prefetchQuery(
     ['environment', context.params.id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id })
+    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id}, context.req.headers)
   );
 
   return {
     props: {
       id: context.params.id,
+      authorization: 'x-forwarded-access-token' in context.req.headers ? context.req.headers : null,
       dehydratedState: dehydrate(queryClient),
     },
   };
@@ -47,16 +48,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const EnvironmentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
+> = ({ id, authorization }) => {
   const { user } = useAuth();
   const { data } = useQuery<Query>(
     ['environment', id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id })
+    async () => await api<Query>(GET_ENVIRONMENT, { id }, authorization)
   );
-  const title = `${data.Environment.product.organization.name} Product Environment`;
+  if (data == null) {
+      return false
+  }
+  const title = `${data.Environment.product.name} Product Environment`;
   const client = useQueryClient();
   const mutation = useMutation(
-    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes)
+    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes, authorization)
   );
   const statusBoxColorScheme = data.Environment.active ? 'green' : 'orange';
   const statusText = data.Environment.active ? 'Running' : 'Idle';
@@ -136,7 +140,7 @@ const EnvironmentPage: React.FC<
                   display="flex"
                   alignItems="center"
                 >
-                  {data.Environment.product.organization.name}{' '}
+                  {data.Environment.product.organization?.name}{' '}
                   <Badge
                     px={2}
                     mx={1}

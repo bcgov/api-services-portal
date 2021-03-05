@@ -27,7 +27,7 @@ export const GET_PRODUCT = `
 
 export const GET_LIST = `
     query GetAccessRequests {
-        allAccessRequests {
+        allAccessRequests(sortBy: [createdAt_DESC]) {
           id
           name
           isApproved
