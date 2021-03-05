@@ -1,5 +1,16 @@
 import * as React from 'react';
-
+import {
+    Alert,
+    AlertIcon,
+    Box,
+    Container,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
+  
+  
 const { useEffect, useState } = React;
 
 import { styles } from '../../../shared/styles/devportal.css';
@@ -27,18 +38,31 @@ const RequestsPage = () => {
     useEffect(fetch, []);
 
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Access Requests</h1>
-            <p style={styles.introText}>
-                List of pending access requests to services that you provide!  Access requests can be initiated by an API Owner, or they can be requested by a Developer.
-
+        <>
+        <Head>
+          <title>API Program Services | Access Requests</title>
+        </Head>
+        <Container maxW="6xl">
+          <VStack my={4}>
+            <Alert status="info">
+              <AlertIcon />
+              Access requests can be initiated by an API Owner, or they can be requested by a Developer.
+            </Alert>
+          </VStack>
+  
+          <PageHeader title="Access Requests" actions={false}>
+            <p>
+              <strong>Access Requests</strong> are groups of APIs that are protected in
+              the same way, and are discoverable by Citizens through the BC Data
+              Catalog, or by invitation from an API Manager.
             </p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Requests</h2>
+          </PageHeader>
+  
+          <Box mt={5}>
                 <List data={data} state={state} refetch={fetch} />
-            </div>
-        </div>
+          </Box>
+        </Container>
+        </>
     )
 }
 

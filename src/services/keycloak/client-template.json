@@ -1,5 +1,4 @@
 {
-  "id": "",
   "clientId": "",
   "name": "",
   "description": "",
@@ -36,63 +35,17 @@
     "saml.onetimeuse.condition": "false"
   },
   "authenticationFlowBindingOverrides": {},
-  "fullScopeAllowed": true,
+  "fullScopeAllowed": false,
   "nodeReRegistrationTimeout": -1,
   "protocolMappers": [
-    {
-      "id": "950524f7-eec9-4f28-9cb0-91125e4bc773",
-      "name": "Client ID",
-      "protocol": "openid-connect",
-      "protocolMapper": "oidc-usersessionmodel-note-mapper",
-      "consentRequired": false,
-      "config": {
-        "user.session.note": "clientId",
-        "id.token.claim": "true",
-        "access.token.claim": "true",
-        "claim.name": "clientId",
-        "jsonType.label": "String"
-      }
-    },
-    {
-      "id": "e30af8fb-d8b8-4b10-a82a-08eb3ccecf50",
-      "name": "Client Host",
-      "protocol": "openid-connect",
-      "protocolMapper": "oidc-usersessionmodel-note-mapper",
-      "consentRequired": false,
-      "config": {
-        "user.session.note": "clientHost",
-        "id.token.claim": "true",
-        "access.token.claim": "true",
-        "claim.name": "clientHost",
-        "jsonType.label": "String"
-      }
-    },
-    {
-      "id": "5ecf7e53-22e7-4599-aacc-bdf129123b5c",
-      "name": "Client IP Address",
-      "protocol": "openid-connect",
-      "protocolMapper": "oidc-usersessionmodel-note-mapper",
-      "consentRequired": false,
-      "config": {
-        "user.session.note": "clientAddress",
-        "id.token.claim": "true",
-        "access.token.claim": "true",
-        "claim.name": "clientAddress",
-        "jsonType.label": "String"
-      }
-    }
   ],
   "defaultClientScopes": [
     "web-origins",
     "role_list",
     "profile",
-    "roles",
-    "email"
+    "roles"
   ],
   "optionalClientScopes": [
-    "address",
-    "phone",
-    "offline_access",
     "microprofile-jwt"
   ],
   "access": { "view": true, "configure": true, "manage": true }

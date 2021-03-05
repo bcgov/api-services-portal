@@ -1,9 +1,20 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Button,
+    Box,
+    Container,
+    Stack,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 import {
     useDisclosure
   } from "@chakra-ui/react"
-import { Alert, AlertIcon, Button, ButtonGroup, Input, Textarea, Stack } from "@chakra-ui/react"
 
 import { GET_LIST } from './queries'
 
@@ -49,9 +60,16 @@ const MyApplicationsPage = () => {
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
+    const actions = [
+        (          <Button variant="primary" onClick={onOpen}>Register Application</Button>
+        )
+    ]
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Applications</h1>
+        <>
+        <Head>
+          <title>API Program Services | Applications</title>
+        </Head>
+        <Container maxW="6xl">
             <Stack spacing={10} className="m-5">
                 <Alert status="info">
                     <AlertIcon />
@@ -59,14 +77,23 @@ const MyApplicationsPage = () => {
                 </Alert>
             </Stack>
 
-            <div style={styles.formWrapper}>
-                <Button colorScheme="blue" onClick={onOpen}>Register Application</Button>
+  
+          <PageHeader title="Applications" actions={actions}>
+            <p>
+              <strong>Applications</strong> allow you to access BC Government APIs.
 
-                <List data={data} state={state} refetch={fetch} />
-            </div>       
-            <NewDialog isOpen={isOpen} onClose={onClose} ownerUserId={data == null ? false:data.allTemporaryIdentities[0].userId} onComplete={fetch}/>
+            </p>
+          </PageHeader>
+  
+          <Box mt={5}>
 
-        </div>
+            <List data={data} state={state} refetch={fetch} />
+
+          </Box>
+        </Container>
+        <NewDialog isOpen={isOpen} onClose={onClose} ownerUserId={data == null ? false:data.allTemporaryIdentities[0].userId} onComplete={fetch}/>
+        </>
+
     )
 }
 

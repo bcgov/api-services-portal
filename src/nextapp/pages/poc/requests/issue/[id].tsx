@@ -1,4 +1,14 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Box,
+    Container,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 import { useRouter } from 'next/router'
 
@@ -77,8 +87,17 @@ const FulfillRequest = () => {
 
     `
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Access Request - Approve Request</h1>
+        <>
+        <Head>
+          <title>API Program Services | Access Request Approval</title>
+        </Head>
+        <Container maxW="6xl">
+  
+          <PageHeader title="Access Request Approval" actions={false}>
+          </PageHeader>
+  
+          <Box mt={5}>
+
             <div style={styles.formWrapper}>
             { request == null ? false: (
                 <>
@@ -151,7 +170,9 @@ const FulfillRequest = () => {
                 </>
             )}
             </div>
-        </div>
+            </Box>
+        </Container>
+        </>
     )
 }
 

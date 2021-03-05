@@ -21,7 +21,6 @@ function List({ data, state, refetch }) {
         console.log(JSON.stringify(data, null, 4))
         return (
             <>
-                <Button colorScheme="blue">Register Consumer</Button>
                 <Table variant="simple">
                     <TableCaption>-</TableCaption>
                     <Thead>

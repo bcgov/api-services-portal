@@ -1,4 +1,14 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Box,
+    Container,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 import { useRouter } from 'next/router'
 
@@ -54,8 +64,16 @@ const NewRequest = () => {
     //onChange={(a) => { setApplicationId(a) } } value={applicationId}
     //onChange={setEnvironmentId} value={environmentId}
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>New Access Request</h1>
+        <>
+        <Head>
+          <title>API Program Services | Request Access</title>
+        </Head>
+        <Container maxW="6xl">
+  
+          <PageHeader title="Request Access" actions={false}>
+          </PageHeader>
+  
+          <Box mt={5}>
             <div style={styles.formWrapper}>
             { dataset == null ? false: (
                 <>
@@ -120,7 +138,9 @@ const NewRequest = () => {
                 </>
             )}
             </div>
-        </div>
+            </Box>
+        </Container>
+        </>
     )
 }
 

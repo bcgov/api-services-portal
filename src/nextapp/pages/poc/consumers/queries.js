@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GetConsumers {
-        allConsumers {
+        allConsumers(first:20) {
           id
           username
           customId

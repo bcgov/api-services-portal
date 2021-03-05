@@ -70,7 +70,6 @@ function List({ data, state, refetch }) {
                             </Tag>
                         )) : false}</HStack>   
                         <ButtonGroup>
-                            <Button colorScheme="teal">Try API</Button>
                             { item.authMethod != "public" ? (
                                     <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/new/${item.id}`)}>Request Access</Button>
                             ): false }

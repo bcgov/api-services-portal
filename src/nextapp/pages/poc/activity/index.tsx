@@ -1,9 +1,20 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Button,
+    Box,
+    Container,
+    Stack,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 import {
     useDisclosure
   } from "@chakra-ui/react"
-import { Alert, AlertIcon, Button, ButtonGroup, Input, Textarea, Stack } from "@chakra-ui/react"
 
 import { GET_LIST } from './queries'
 
@@ -48,19 +59,25 @@ const ActivityPage = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Activity</h1>
-            <Stack spacing={10} className="m-5">
-                <Alert status="info">
-                    <AlertIcon />
-                    See activity for your namespace
-                </Alert>
-            </Stack>
+        <>
+        <Head>
+          <title>API Program Services | Activity</title>
+        </Head>
+        <Container maxW="6xl">
+  
+          <PageHeader title="Activity" actions={false}>
+            <p>
+              <strong>Activity</strong> provides details about your services on the Gateway.
 
-            <div style={styles.formWrapper}>
-                <List data={data} state={state} refetch={fetch} />
-            </div>       
-        </div>
+            </p>
+          </PageHeader>
+  
+          <Box mt={5}>
+              <List data={data} state={state} refetch={fetch} />
+          </Box>
+        </Container>
+        </>
+
     )
 }
 

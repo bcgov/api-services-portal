@@ -1,10 +1,18 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Box,
+    Container,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 const { useEffect, useState } = React;
 
 import { styles } from '../../../shared/styles/devportal.css';
-
-import { Alert, AlertIcon } from "@chakra-ui/react"
 
 import graphql from '../../../shared/services/graphql'
 
@@ -24,16 +32,24 @@ const ServiceAccountsPage = () => {
     // useEffect(fetch, []);
 
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Service Accounts</h1>
-            <Alert status="info">
-                <AlertIcon />
-                Service Accounts are credentials for accessing the API Gateway Services.  This is for API Owners to manage the Service Accounts.
-            </Alert>
+        <>
+        <Head>
+          <title>API Program Services | Service Accounts</title>
+        </Head>
+        <Container maxW="6xl">
+  
+          <PageHeader title="Service Accounts" actions={false}>
+            <p>
+              <strong>Service Accounts</strong> are credentials for accessing the API Gateway 
+              Services.  This is for API Owners to manage the Service Accounts.
 
-            <div className="m-10">
-            </div>
-        </div>
+            </p>
+          </PageHeader>
+  
+          <Box mt={5}>
+          </Box>
+        </Container>
+        </>
     )
 }
 
