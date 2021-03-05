@@ -24,7 +24,7 @@ interface AvailableServicesProps {
 }
 
 const AvailableServices: React.FC<AvailableServicesProps> = ({
-  activeIds,
+  activeIds = [],
   dragDataType,
   onAddService,
   namespace,

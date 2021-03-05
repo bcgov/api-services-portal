@@ -8,6 +8,7 @@ const colors = {
   'bc-blue-alt': '#38598A',
   'bc-gray': '#f2f2f2',
   'bc-divider': '#606060',
+  'bc-border-focus': '#3B99FC',
 };
 const theme = extendTheme({
   colors,
@@ -44,7 +45,7 @@ const theme = extendTheme({
             border: '2px solid',
             borderColor: '#606060',
             _focus: {
-              borderColor: '#3B99FC',
+              borderColor: 'bc-border-focus',
             },
           },
         },
@@ -58,7 +59,7 @@ const theme = extendTheme({
             border: '2px solid',
             borderColor: '#606060',
             _focus: {
-              borderColor: '#3B99FC',
+              borderColor: 'bc-border-focus',
             },
           },
         },

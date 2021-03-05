@@ -1,5 +1,10 @@
 import { GraphQLClient } from 'graphql-request';
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import {
+  QueryKey,
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from 'react-query';
 import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
@@ -11,12 +16,20 @@ const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
 });
 
 // NOTE: This can be called at build time
-const api = async <T>(query: string, variables: unknown = {}): Promise<T> => {
+const api = async <T>(
+  query: string,
+  variables: unknown = {},
+  isClient = false
+): Promise<T> => {
   try {
     const data = await apiClient.request<T>(query, variables);
     return data;
   } catch (err) {
-    console.log('Error querying ' + err);
+    if (isClient) {
+      throw err.response.errors;
+    } else {
+      console.error(`Error querying ${err}`);
+    }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
     return {} as T;
@@ -26,11 +39,11 @@ const api = async <T>(query: string, variables: unknown = {}): Promise<T> => {
 
 interface UseApiOptions {
   query: string;
-  variables: unknown;
+  variables?: unknown;
 }
 
 export const useApi = (
-  key: string,
+  key: QueryKey,
   query: UseApiOptions,
   queryOptions: UseQueryOptions = { suspense: true }
 ): UseQueryResult<Query> => {

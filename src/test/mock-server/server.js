@@ -8,6 +8,8 @@ const casual = require('casual-browserify');
 const express = require('express');
 const cors = require('cors');
 
+const schemas = require('./schemas');
+
 const app = express();
 const port = 4000;
 const random = (start, end) =>
@@ -17,196 +19,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const schemaStruct = `
-  type Organization {
-    id: ID!
-    name: String!
-    sector: String
-    bcdcId: String!
-    title: String!
-    tags: String!
-    description: String
-    orgUnits: [OrganizationUnit]
-  }
-
-  type OrganizationUnit {
-    id: ID!
-    name: String!
-    sector: String!
-    title: String!
-    bcdcId: String!
-    tags: String!
-    description: String
-  }
-
-  type Environment {
-    id: ID!
-    name: String!,
-    active: Boolean!,
-    authMethod: String!
-    plugins: [ Plugin ]
-    description: String
-    credentialIssuer: CredentialIssuer
-    services: [ GatewayService ]
-    product: Product
-  }
-
-  type GatewayService {
-    id: ID!
-    name: String!
-    kongRouteId: String!
-    kongServiceId: String!
-    namespace: String!
-    methods: String
-    paths: String
-    host: String!
-    isActive: Boolean!
-    tags: String!
-    plugins: [ Plugin ]
-    updatedAt: String
-    environment: Environment,
-  }
-
-  type CredentialIssuer {
-    id: ID!
-    name: String!
-    description: String
-    authMethod: String
-    mode: String,
-    instruction: String
-    oidcDiscoveryUrl: String
-    initialAccessToken: String
-    clientId: String
-    clientSecret: String
-    contact: User,
-    environments: [ Environment ]
-  }
-
-  type Product {
-    id: ID!
-    name: String!
-    description: String!
-    dataset: Dataset,
-    organization: Organization,
-    organizationUnit: OrganizationUnit,
-    environments: [Environment],
-  }
-
-  type Plugin {
-    name: String!
-    kongPluginId: String
-    config: String!
-  }
-
-  type Dataset {
-    name: String!
-    sector: String
-    license_title: String
-    view_audience: String
-    private: Boolean
-    tags: String
-    contacts: String
-    organization: Organization,
-    organizationUnit: OrganizationUnit,
-    securityClass: String
-    notes: String
-    title: String
-    catalogContent: String
-    isInCatalog: Boolean
-  }
-
-  type User {
-    name: String!
-    username: String!
-    email: String!
-    isAdmin: Boolean!,
-  }
-
-  input EnvironmentWhereUniqueInput {
-    id: ID!
-  }
-
-  input GatewayServiceWhereInput {
-    namespace: String!
-  }
-
-  input ProductWhereUniqueInput {
-    id: ID!
-  }
-
-  type Query {
-    allProducts: [ Product ]
-    allEnvironments: [ Environment ]
-    allGatewayServices(where: GatewayServiceWhereInput): [ GatewayService ]
-    Environment(where: EnvironmentWhereUniqueInput!): Environment
-    Product(where: ProductWhereUniqueInput!): Product
-  }
-
-  input CreateProductInput {
-    name: String!
-  }
-
-  input UpdateProductInput {
-    name: String!
-  }
-
-  input EnvironmentProductInput {
-    id: ID!
-  }
-
-  input CreateEnvironmentOneToManyInput {
-    connect: EnvironmentProductInput
-  }
-
-  input CreateEnvironmentInput {
-    name: String!
-    product: CreateEnvironmentOneToManyInput
-  }
-
-  input GatewayServiceWhereUniqueInput {
-    id: ID!
-  }
-
-  input GatewayServiceRelateToManyInput {
-    disconnectAll: Boolean
-    connect: [GatewayServiceWhereUniqueInput]
-  }
-
-  input UpdateEnvironmentInput {
-    active: Boolean
-    name: String
-    authMethod: String
-    services: GatewayServiceRelateToManyInput
-  }
-
-  type Mutation {
-    createProduct(data: CreateProductInput): Product!
-    updateProduct(id: ID!, data: UpdateProductInput): Product!
-    deleteProduct(id: ID!): Product!
-    createEnvironment(data: CreateEnvironmentInput): Environment!
-    updateEnvironment(id: ID!, data: UpdateEnvironmentInput): Environment!
-    deleteEnvironment(id: ID!): Environment!
-  }
-
-  schema {
-    query: Query
-    mutation: Mutation
-  }
-`;
-
 //const store = createMockStore({ schema: schemaStruct });
 // const allProducts = new MockList(6, (_, { id }) => ({ id }));
 let allProducts = [
   {
     id: casual.uuid,
     name: 'BC Data Catalogue',
-    environments: [{ id: casual.uuid, name: 'test', active: true }],
+    environments: [
+      { id: casual.uuid, name: 'test', active: true, services: [] },
+    ],
   },
 ];
-const schema = makeExecutableSchema({ typeDefs: schemaStruct });
+const allOrganizations = new MockList(8, (_, { id }) => ({ id }));
+const allOrganizationUnits = new MockList(18, (_, { id }) => ({ id }));
+const schema = makeExecutableSchema({ typeDefs: schemas });
 const schemaWithMocks = addMocksToSchema({
   schema,
 });
+
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
     allProducts: () => allProducts,
@@ -218,6 +48,9 @@ const server = mockServer(schemaWithMocks, {
       return result;
     },
     allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
+    allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
+    allOrganizations: () => allOrganizations,
+    allOrganizationUnits: () => allOrganizationUnits,
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -294,7 +127,7 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.words(3),
   }),
   Organization: () => ({
-    name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
+    name: casual.word,
     sector: casual.random_element([
       'Health & Safety',
       'Service',
@@ -354,7 +187,7 @@ const server = mockServer(schemaWithMocks, {
     config: casual.word,
   }),
   Dataset: () => ({
-    name: casual.title,
+    name: casual.uuid,
     sector: casual.word,
     license_title: casual.word,
     view_audience: casual.word,
