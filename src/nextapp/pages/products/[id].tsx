@@ -19,13 +19,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   await queryClient.prefetchQuery(
     ['environment', context.params.id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id})
+    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id}, false, context.req.headers)
   );
 
   return {
     props: {
       id: context.params.id,
-      authorization: 'x-forwarded-access-token' in context.req.headers ? context.req.headers : null,
+      authorization: context.req.headers,
       dehydratedState: dehydrate(queryClient),
     },
   };
@@ -37,7 +37,7 @@ const EnvironmentPage: React.FC<
   const { user } = useAuth();
   const { data } = useQuery<Query>(
     ['environment', id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id }, authorization)
+    async () => await api<Query>(GET_ENVIRONMENT, { id }, false, authorization)
   );
 
   if (!data) {

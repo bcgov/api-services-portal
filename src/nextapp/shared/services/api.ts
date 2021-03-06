@@ -9,18 +9,25 @@ import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
 
-const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 // NOTE: This can be called at build time
 const api = async <T>(
   query: string,
   variables: unknown = {},
-  isClient = false
+  isClient = false,
+  authorization = null
 ): Promise<T> => {
+  const headers = {
+    'Content-Type': 'application/json',
+  }
+  console.log(JSON.stringify(authorization,null,10))
+  if (authorization != null && 'cookie' in authorization) {
+      headers['cookie'] = authorization['cookie']
+  }
+  const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
+    headers: headers,
+  });
+      
   try {
     const data = await apiClient.request<T>(query, variables);
     return data;
