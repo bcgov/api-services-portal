@@ -1,7 +1,9 @@
 const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
-const { byTracking, atTracking } = require('@keystonejs/list-plugins')
+const { byTracking } = require('../components/ByTracking')
+
+const { atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
 const workflow = require('../services/workflow')
