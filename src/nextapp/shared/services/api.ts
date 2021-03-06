@@ -17,15 +17,17 @@ const api = async <T>(
   isClient = false,
   authorization = null
 ): Promise<T> => {
-  const headers = {
-    'Content-Type': 'application/json',
-  }
-  console.log(JSON.stringify(authorization,null,10))
-  if (authorization != null && 'cookie' in authorization) {
-      headers['cookie'] = authorization['cookie']
-  }
-  const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
-    headers: headers,
+//   const headers = {
+//     'Content-Type': 'application/json',
+//   }
+//   console.log(JSON.stringify(authorization,null,10))
+//   if (authorization != null && 'cookie' in authorization) {
+//       headers['cookie'] = authorization['cookie']
+//       headers['x-forwarded-access-token'] = authorization['x-forwarded-access-token']
+//   }
+//   console.log(JSON.stringify(headers,null,10))
+  const apiClient = new GraphQLClient(`http://localhost:4180/admin/api`, {
+    headers: authorization,
   });
       
   try {

@@ -140,6 +140,14 @@ const metadata = {
             // routes: {name: "connectExclusiveList", list: "GatewayRoute", loadFirst: true}
         }
     },
+    'GatewayGroup': {
+        query: 'allGatewayGroups',
+        refKey: 'extRefId',
+        sync: ['name', 'namespace'],
+        transformations: {
+            namespace: {name:"mapNamespace"}
+        }
+    },    
     'GatewayRoute': {
         childOnly: false,
         query: 'allGatewayRoutes',
