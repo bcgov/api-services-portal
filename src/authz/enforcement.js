@@ -34,6 +34,7 @@ const conditions = {
     "matchOneOfOperation": require('./conditions/matchOneOfOperation'),
     "matchOperation": require('./conditions/matchOperation'),
     "matchUserNS": require('./conditions/matchUserNS'),
+    "matchQueryName": require('./conditions/matchQueryName'),
 }
 
 // Use a decision matrix to determine who is allowed to do what
@@ -49,6 +50,7 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
             operation: operation,
             listKey: listKey,
             fieldKey: fieldKey,
+            gqlName: gqlName,
             item: {},
             user: {
                 id: item == null ? null : item.userId,
@@ -100,11 +102,13 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
                 return true
             }
             if (ruleConditionState && rule['result'] === 'deny') {
-                //console.log("--> DENY")
+                console.log("--> DENY")
+                console.log(JSON.stringify(rule, null, 2))
                 return false
             }
         }
-        //console.log("DENIED! " + operation + " listKey = " + listKey)
+        console.log("--> DENY : No RULES FOUND")
+        console.log(JSON.stringify(ctx, null, 2))
         return false
     } catch (err) {
         console.log("Unexpected Error - " + err)
