@@ -70,34 +70,34 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
   );
 };
 
-export async function getStaticPaths() {
-  try {
-    const pagesQuery = gql`
-      {
-        allContents(where: { isComplete: true }) {
-          id
-          title
-          slug
-        }
-      }
-    `;
-    const pages: { allContents: any[] } = await api(pagesQuery);
+// export async function getStaticPaths() {
+//   try {
+//     const pagesQuery = gql`
+//       {
+//         allContents(where: { isComplete: true }) {
+//           id
+//           title
+//           slug
+//         }
+//       }
+//     `;
+//     const pages: { allContents: any[] } = await api(pagesQuery);
 
-    return {
-      paths: pages.allContents.map((page) => ({
-        params: {
-          slug: page.slug,
-        },
-      })),
-      fallback: false,
-    };
-  } catch {
-    return {
-      paths: [],
-      fallback: false,
-    };
-  }
-}
+//     return {
+//       paths: pages.allContents.map((page) => ({
+//         params: {
+//           slug: page.slug,
+//         },
+//       })),
+//       fallback: false,
+//     };
+//   } catch {
+//     return {
+//       paths: [],
+//       fallback: false,
+//     };
+//   }
+// }
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const pages: { allContents: any[] } = await api(pagesQuery);
