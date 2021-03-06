@@ -26,7 +26,7 @@ const api = async <T>(
 //       headers['x-forwarded-access-token'] = authorization['x-forwarded-access-token']
 //   }
 //   console.log(JSON.stringify(headers,null,10))
-  const apiClient = new GraphQLClient(`http://localhost:4180/admin/api`, {
+  const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
     headers: authorization,
   });
       
