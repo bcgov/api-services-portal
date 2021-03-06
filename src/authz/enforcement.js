@@ -69,7 +69,7 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
             const matches = []
             for ( key of Object.keys(rule)) {
                 if (!(['result','ID'].includes(key)) && !(Object.keys(actions).includes(key)) && !(key in conditions)) {
-                    console.log("WARNING! " + key + " not a valid rule!")
+                    //console.log("WARNING! " + key + " not a valid rule!")
                 }
                 if (fieldKey != null && rule['matchFieldKey'] == "") {
                     continue
@@ -93,7 +93,7 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
                     if (rule[akey] != "" && rule[akey] != null) {
                         const result = actions[akey](ctx, rule[akey])
                         if (result) {
-                            //console.log("--> FILTER " + JSON.stringify(result))
+                            console.log("--> FILTER " + JSON.stringify(result))
                             return result
                         }
                     }
@@ -111,6 +111,7 @@ function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, orig
         console.log(JSON.stringify(ctx, null, 2))
         return false
     } catch (err) {
+        console.log("--> DENY : ERROR")
         console.log("Unexpected Error - " + err)
         return false
     }
