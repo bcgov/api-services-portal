@@ -140,8 +140,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       content,
       pages: pages.allContents,
       title: page.title,
-    },
-    revalidate: 1,
+    }
   };
 };
 
