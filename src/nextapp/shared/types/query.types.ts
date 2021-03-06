@@ -2157,6 +2157,154 @@ export type EnvironmentsCreateInput = {
 };
 
 /**  A keystone list  */
+export type GatewayGroup = {
+  __typename?: 'GatewayGroup';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the GatewayGroup List config, or
+   *  2. As an alias to the field set on 'labelField' in the GatewayGroup List config, or
+   *  3. As an alias to a 'name' field on the GatewayGroup List (if one exists), or
+   *  4. As an alias to the 'id' field on the GatewayGroup List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+  extRefId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+  updatedBy?: Maybe<User>;
+  createdBy?: Maybe<User>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type GatewayGroupWhereInput = {
+  AND?: Maybe<Array<Maybe<GatewayGroupWhereInput>>>;
+  OR?: Maybe<Array<Maybe<GatewayGroupWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  name?: Maybe<Scalars['String']>;
+  name_not?: Maybe<Scalars['String']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_starts_with?: Maybe<Scalars['String']>;
+  name_not_starts_with?: Maybe<Scalars['String']>;
+  name_ends_with?: Maybe<Scalars['String']>;
+  name_not_ends_with?: Maybe<Scalars['String']>;
+  name_i?: Maybe<Scalars['String']>;
+  name_not_i?: Maybe<Scalars['String']>;
+  name_contains_i?: Maybe<Scalars['String']>;
+  name_not_contains_i?: Maybe<Scalars['String']>;
+  name_starts_with_i?: Maybe<Scalars['String']>;
+  name_not_starts_with_i?: Maybe<Scalars['String']>;
+  name_ends_with_i?: Maybe<Scalars['String']>;
+  name_not_ends_with_i?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRefId?: Maybe<Scalars['String']>;
+  extRefId_not?: Maybe<Scalars['String']>;
+  extRefId_contains?: Maybe<Scalars['String']>;
+  extRefId_not_contains?: Maybe<Scalars['String']>;
+  extRefId_starts_with?: Maybe<Scalars['String']>;
+  extRefId_not_starts_with?: Maybe<Scalars['String']>;
+  extRefId_ends_with?: Maybe<Scalars['String']>;
+  extRefId_not_ends_with?: Maybe<Scalars['String']>;
+  extRefId_i?: Maybe<Scalars['String']>;
+  extRefId_not_i?: Maybe<Scalars['String']>;
+  extRefId_contains_i?: Maybe<Scalars['String']>;
+  extRefId_not_contains_i?: Maybe<Scalars['String']>;
+  extRefId_starts_with_i?: Maybe<Scalars['String']>;
+  extRefId_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRefId_ends_with_i?: Maybe<Scalars['String']>;
+  extRefId_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRefId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRefId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  updatedBy?: Maybe<UserWhereInput>;
+  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
+  createdBy?: Maybe<UserWhereInput>;
+  createdBy_is_null?: Maybe<Scalars['Boolean']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt_not?: Maybe<Scalars['DateTime']>;
+  updatedAt_lt?: Maybe<Scalars['DateTime']>;
+  updatedAt_lte?: Maybe<Scalars['DateTime']>;
+  updatedAt_gt?: Maybe<Scalars['DateTime']>;
+  updatedAt_gte?: Maybe<Scalars['DateTime']>;
+  updatedAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  updatedAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+  createdAt_not?: Maybe<Scalars['DateTime']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+};
+
+export type GatewayGroupWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortGatewayGroupsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  NameAsc = 'name_ASC',
+  NameDesc = 'name_DESC',
+  ExtRefIdAsc = 'extRefId_ASC',
+  ExtRefIdDesc = 'extRefId_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
+  UpdatedByAsc = 'updatedBy_ASC',
+  UpdatedByDesc = 'updatedBy_DESC',
+  CreatedByAsc = 'createdBy_ASC',
+  CreatedByDesc = 'createdBy_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC'
+}
+
+export type GatewayGroupUpdateInput = {
+  name?: Maybe<Scalars['String']>;
+  extRefId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+};
+
+export type GatewayGroupsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<GatewayGroupUpdateInput>;
+};
+
+export type GatewayGroupCreateInput = {
+  name?: Maybe<Scalars['String']>;
+  extRefId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+};
+
+export type GatewayGroupsCreateInput = {
+  data?: Maybe<GatewayGroupCreateInput>;
+};
+
+/**  A keystone list  */
 export type GatewayMetric = {
   __typename?: 'GatewayMetric';
   /**
@@ -4964,6 +5112,14 @@ export type Query = {
   _allEnvironmentsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Environment list.  */
   _EnvironmentsMeta?: Maybe<_ListMeta>;
+  /**  Search for all GatewayGroup items which match the where clause.  */
+  allGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
+  /**  Search for the GatewayGroup item with the matching ID.  */
+  GatewayGroup?: Maybe<GatewayGroup>;
+  /**  Perform a meta-query on all GatewayGroup items which match the where clause.  */
+  _allGatewayGroupsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the GatewayGroup list.  */
+  _GatewayGroupsMeta?: Maybe<_ListMeta>;
   /**  Search for all GatewayMetric items which match the where clause.  */
   allGatewayMetrics?: Maybe<Array<Maybe<GatewayMetric>>>;
   /**  Search for the GatewayMetric item with the matching ID.  */
@@ -5295,6 +5451,31 @@ export type Query_AllEnvironmentsMetaArgs = {
   where?: Maybe<EnvironmentWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortEnvironmentsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryAllGatewayGroupsArgs = {
+  where?: Maybe<GatewayGroupWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayGroupsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryGatewayGroupArgs = {
+  where: GatewayGroupWhereUniqueInput;
+};
+
+
+export type Query_AllGatewayGroupsMetaArgs = {
+  where?: Maybe<GatewayGroupWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayGroupsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -5740,6 +5921,18 @@ export type Mutation = {
   deleteEnvironment?: Maybe<Environment>;
   /**  Delete multiple Environment items by ID.  */
   deleteEnvironments?: Maybe<Array<Maybe<Environment>>>;
+  /**  Create a single GatewayGroup item.  */
+  createGatewayGroup?: Maybe<GatewayGroup>;
+  /**  Create multiple GatewayGroup items.  */
+  createGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
+  /**  Update a single GatewayGroup item by ID.  */
+  updateGatewayGroup?: Maybe<GatewayGroup>;
+  /**  Update multiple GatewayGroup items by ID.  */
+  updateGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
+  /**  Delete a single GatewayGroup item by ID.  */
+  deleteGatewayGroup?: Maybe<GatewayGroup>;
+  /**  Delete multiple GatewayGroup items by ID.  */
+  deleteGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
   /**  Create a single GatewayMetric item.  */
   createGatewayMetric?: Maybe<GatewayMetric>;
   /**  Create multiple GatewayMetric items.  */
@@ -6178,6 +6371,37 @@ export type MutationDeleteEnvironmentArgs = {
 
 
 export type MutationDeleteEnvironmentsArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationCreateGatewayGroupArgs = {
+  data?: Maybe<GatewayGroupCreateInput>;
+};
+
+
+export type MutationCreateGatewayGroupsArgs = {
+  data?: Maybe<Array<Maybe<GatewayGroupsCreateInput>>>;
+};
+
+
+export type MutationUpdateGatewayGroupArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<GatewayGroupUpdateInput>;
+};
+
+
+export type MutationUpdateGatewayGroupsArgs = {
+  data?: Maybe<Array<Maybe<GatewayGroupsUpdateInput>>>;
+};
+
+
+export type MutationDeleteGatewayGroupArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteGatewayGroupsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 

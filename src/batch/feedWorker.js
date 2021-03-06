@@ -145,7 +145,6 @@ const metadata = {
         refKey: 'extRefId',
         sync: ['name', 'namespace'],
         transformations: {
-            namespace: {name:"mapNamespace"}
         }
     },    
     'GatewayRoute': {

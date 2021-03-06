@@ -11,6 +11,7 @@ const mask = function (plugin) {
             plugin['config'][key] = "****"
         })
     }
+    return plugin
 }
 
 module.exports = mask

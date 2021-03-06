@@ -28,7 +28,7 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --pass-basic-auth=false \
     --pass-access-token=true \
     --set-xauthrequest=true \
-    --skip-jwt-bearer-tokens=true \
+    --skip-jwt-bearer-tokens=false \
     --set-authorization-header=true \
     --pass-authorization-header=true \
     --skip-auth-regex="/home|/public|/docs|/_next|/images" \

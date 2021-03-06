@@ -17,6 +17,7 @@ module.exports = {
     extRefId: {
         type: Text,
         isRequired: true,
+        isUnique: true,
         adminConfig: {
             isReadOnly: false
         }

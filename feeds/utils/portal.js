@@ -3,21 +3,42 @@
 const fs = require('fs')
 const fetch = require('node-fetch')
 
+const checkStatus = require('./checkStatus').checkStatus
+
 const _logFeeds = ['yes', 'on', 'true', 'YES', 'ON', 'TRUE', true].includes(process.env.LOG_FEEDS)
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function portal (baseUrl, logFeeds = _logFeeds) {
 
     return {
-        fireAndForget: (url, payload) => {
+        fireAndForget: async (url, payload, attempts = 3) => {
             if (logFeeds) {
                 fs.appendFile('feeds.log', JSON.stringify({url: url, payload: payload}) + "\n", (err) => {});
             }
-            return fetch(baseUrl + url, {
-                method: 'put',
-                body:    JSON.stringify(payload),
-                headers: { 'Content-Type': 'application/json' },
-            })
-            .then(res => res.json())
+
+            let retry = attempts
+            while (retry <= attempts) {
+                retry != attempts && console.log("Retrying ["+(attempts-retry)+"] " + url)
+                try {
+                    return await fetch(baseUrl + url, {
+                        method: 'put',
+                        body:    JSON.stringify(payload),
+                        headers: { 'Content-Type': 'application/json' },
+                    })
+                    .then(checkStatus)
+                    .then(res => res.json())
+
+                } catch (err) {
+                    retry = retry - 1
+                    if (retry == 0) {
+                        throw err
+                    }
+                    await sleep(500)
+                }
+            }
         }
     }
 }

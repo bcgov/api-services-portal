@@ -102,6 +102,7 @@ for (_list of [
   'CredentialIssuer',
   'Dataset',
   'Environment',
+  'GatewayGroup',
   'GatewayMetric',
   'GatewayRoute',
   'GatewayService',

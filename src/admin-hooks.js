@@ -32,7 +32,7 @@ module.exports = {
         },
         {
             label: 'Kong',
-            children: ['GatewayService', 'GatewayRoute', 'Consumer', 'Plugin'],
+            children: ['GatewayService', 'GatewayRoute', 'Consumer', 'GatewayGroup', 'Plugin'],
         },
         {
             label: 'BCDC',
