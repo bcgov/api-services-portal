@@ -34,6 +34,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
     },
     { suspense: false }
   );
+  // Org unit grab the org and loop child org units
   const organizationUnitsQuery = useApi(
     ['organizationUnits', organization],
     {

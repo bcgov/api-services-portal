@@ -11,7 +11,7 @@ import {
   List,
   ListItem,
   Text,
-  SimpleGrid
+  SimpleGrid,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { FaCheck, FaExclamation } from 'react-icons/fa';
@@ -28,18 +28,25 @@ interface ServicesListProps {
 }
 
 interface ServicesComponentProps {
-    service: GatewayService;
-    index: Number
-  }
+  service: GatewayService;
+  index: Number;
+}
 
-const ServiceComponent: React.FC<ServicesComponentProps> = ({service: d, index}) => {
-    const active = d.environment != null && d.environment!.active == true
-    return (
+const ServiceComponent: React.FC<ServicesComponentProps> = ({
+  service: d,
+  index,
+}) => {
+  const active = d.environment != null && d.environment!.active == true;
+  return (
     <Box
       key={d.id}
-      bg={d.environment == null ? 'red.100' : (active ? 'green.100' : 'yellow.100')}
+      bg={
+        d.environment == null ? 'red.100' : active ? 'green.100' : 'yellow.100'
+      }
       borderRadius={4}
-      borderColor={d.environment == null ? 'red.600' : (active ? 'green.600' : 'yellow.600')}
+      borderColor={
+        d.environment == null ? 'red.600' : active ? 'green.600' : 'yellow.600'
+      }
       borderWidth={1}
       borderTopWidth={3}
       p={4}
@@ -54,7 +61,13 @@ const ServiceComponent: React.FC<ServicesComponentProps> = ({service: d, index})
         pos="absolute"
         top={-3}
         left={-3}
-        bgColor={d.environment == null ? 'red.600' : (active ? 'green.600' : 'yellow.600')}
+        bgColor={
+          d.environment == null
+            ? 'red.600'
+            : active
+            ? 'green.600'
+            : 'yellow.600'
+        }
         borderRadius="50%"
         color="white"
       >
@@ -67,20 +80,14 @@ const ServiceComponent: React.FC<ServicesComponentProps> = ({service: d, index})
           {d.name} - {d.environment?.name}
         </Heading>
         <Text color="green.700" fontSize="xs">
-          {d.routes.map(d => d.hosts)}
+          {d.routes.map((d) => d.hosts)}
         </Text>
       </Box>
       <Box>
         <Box my={2}>
           <Text>HTTPS</Text>
         </Box>
-        <List
-          as="dl"
-          d="flex"
-          flexWrap="wrap"
-          fontSize="sm"
-          color="green.800"
-        >
+        <List as="dl" d="flex" flexWrap="wrap" fontSize="sm" color="green.800">
           <ListItem as="dt" width="50%" fontWeight="bold">
             Security
           </ListItem>
@@ -103,16 +110,14 @@ const ServiceComponent: React.FC<ServicesComponentProps> = ({service: d, index})
             Traffic
           </ListItem>
           <ListItem as="dd" width="100%" textAlign="right">
-              {index}
-            {index < 10 ? <Metric service={d.name}/> : false}
+            {index}
+            {index < 10 ? <Metric service={d.name} /> : false}
           </ListItem>
-
         </List>
-        
       </Box>
     </Box>
-    )
-}
+  );
+};
 
 const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
   const { data } = useQuery<Query>(
@@ -148,14 +153,20 @@ const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
           />
         </Box>
       ) : (
-          <>
-                {data.allGatewayServices.filter(stateFilter).filter(s => s.environment != null).map((d, index) => (
-                    <ServiceComponent index={index} service={d}/>
-                ))}
-                {data.allGatewayServices.filter(stateFilter).filter(s => s.environment == null).map((d, index) => (
-                    <ServiceComponent index={index} service={d}/>
-                ))}
-          </>
+        <>
+          {data.allGatewayServices
+            .filter(stateFilter)
+            .filter((s) => s.environment != null)
+            .map((d, index) => (
+              <ServiceComponent index={index} service={d} />
+            ))}
+          {data.allGatewayServices
+            .filter(stateFilter)
+            .filter((s) => s.environment == null)
+            .map((d, index) => (
+              <ServiceComponent index={index} service={d} />
+            ))}
+        </>
       )}
     </>
   );
