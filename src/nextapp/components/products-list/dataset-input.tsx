@@ -75,9 +75,14 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
                   { suppressRefError: true }
                 )}
                 {...getInputProps()}
-                name="dataset"
                 defaultValue={value}
                 variant="bc-input"
+              />
+              <input
+                type="hidden"
+                name="dataset"
+                defaultValue={value}
+                value={selected?.name}
               />
               <Box
                 {...getMenuProps()}

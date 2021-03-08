@@ -1,50 +1,48 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
+  Badge,
   Box,
-  Button,
-  Center,
   Heading,
   Icon,
-  List,
-  ListItem,
+  Link,
+  Skeleton,
   Text,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
-import { FaCheck, FaExclamation } from 'react-icons/fa';
+import { FaCircle } from 'react-icons/fa';
 import NewProduct from '@/components/new-product';
+import NextLink from 'next/link';
 import { useQuery } from 'react-query';
-import type { Environment, Query } from '@/types/query.types';
+import type { Query } from '@/types/query.types';
 
-import { GET_LIST } from './queries';
+import { LIST_GATEWAY_SERVICES } from '@/shared/queries/gateway-service-queries';
+import MetricGraph from './metric-graph';
+import ClientRequest from '../client-request';
+import EnvironmentBadge from '../environment-badge';
 
 interface ServicesListProps {
-  filter: 'all' | 'up' | 'down';
+  search: string;
 }
 
-const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
+const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
   const { data } = useQuery<Query>(
-    'services',
-    async () => await api(GET_LIST),
+    'gateway-services',
+    async () => await api(LIST_GATEWAY_SERVICES),
     {
       suspense: true,
     }
   );
-  const stateFilter = (d: Environment) => {
-    switch (filter) {
-      case 'up':
-        return d.active;
-      case 'down':
-        return !d.active;
-      case 'all':
-      default:
-        return true;
-    }
-  };
+  const filterServices = React.useCallback(
+    (d) => {
+      return d.name.search(search) >= 0;
+    },
+    [search]
+  );
 
   return (
     <>
-      {data.allProducts.length <= 0 && (
+      {data.allGatewayServices.length <= 0 && (
         <Box gridColumnStart="2" gridColumnEnd="4">
           <EmptyPane
             title="No services created yet."
@@ -53,77 +51,48 @@ const ServicesList: React.FC<ServicesListProps> = ({ filter }) => {
           />
         </Box>
       )}
-      {data.allProducts.map((d) =>
-        d.environments?.filter(stateFilter).map((e) => (
+      {data.allGatewayServices.filter(filterServices).map((d) => (
+        <Box
+          key={d.id}
+          bg="white"
+          borderRadius={4}
+          border="2px solid"
+          borderColor="gray.400"
+          position="relative"
+          overflow="hidden"
+        >
           <Box
-            key={e.id}
-            bg={e.active ? 'green.100' : 'yellow.100'}
-            borderRadius={4}
-            borderColor={e.active ? 'green.600' : 'yellow.600'}
-            borderWidth={1}
-            borderTopWidth={3}
+            as="header"
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={2}
             p={4}
-            position="relative"
+            pb={2}
           >
             <Box
-              width={6}
-              height={6}
-              d="flex"
+              as="hgroup"
+              display="flex"
               alignItems="center"
-              justifyContent="center"
-              pos="absolute"
-              top={-3}
-              left={-3}
-              bgColor={e.active ? 'green.600' : 'yellow.600'}
-              borderRadius="50%"
-              color="white"
+              overflow="hidden"
+              mr={2}
+              maxW="75%"
             >
-              <Center>
-                <Icon as={e.active ? FaCheck : FaExclamation} w={3} h={3} />
-              </Center>
-            </Box>
-            <Box as="header" key={d.name}>
-              <Heading as="h4" size="sm">
-                {d.name} - {e.name}
+              <Heading isTruncated size="sm" lineHeight="1.5">
+                <NextLink passHref href={`/services/${d.id}`}>
+                  <Link>{d.name}</Link>
+                </NextLink>
               </Heading>
-              <Text color="green.700" fontSize="xs">
-                {e.services.map((s) => s.host)}
-              </Text>
             </Box>
-            <Box>
-              <Box my={2}>
-                <Text>HTTPS</Text>
-              </Box>
-              <List
-                as="dl"
-                d="flex"
-                flexWrap="wrap"
-                fontSize="sm"
-                color="green.800"
-              >
-                <ListItem as="dt" width="50%" fontWeight="bold">
-                  Security
-                </ListItem>
-                <ListItem as="dd" width="50%" textAlign="right">
-                  {e.authMethod}
-                </ListItem>
-                <ListItem as="dt" width="50%" fontWeight="bold">
-                  Response
-                </ListItem>
-                <ListItem as="dd" width="50%" textAlign="right">
-                  400ms
-                </ListItem>
-                <ListItem as="dt" width="50%" fontWeight="bold">
-                  Uptime
-                </ListItem>
-                <ListItem as="dd" width="50%" textAlign="right">
-                  99.99%
-                </ListItem>
-              </List>
-            </Box>
+            <EnvironmentBadge data={d.environment} />
           </Box>
-        ))
-      )}
+          <Box p={4} display="flex" minHeight="150px">
+            <ClientRequest fallback={<Skeleton flex={1} />}>
+              <MetricGraph id={d.id} active={d.environment?.active} />
+            </ClientRequest>
+          </Box>
+        </Box>
+      ))}
     </>
   );
 };

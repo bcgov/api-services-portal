@@ -10,6 +10,12 @@ const colors = {
   'bc-divider': '#606060',
   'bc-border-focus': '#3B99FC',
 };
+
+const buttonVariants = {
+  primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
+  secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
+  tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
+};
 const theme = extendTheme({
   colors,
   fonts: {
@@ -30,12 +36,11 @@ const theme = extendTheme({
     },
   },
   components: {
+    IconButton: {
+      variants: buttonVariants,
+    },
     Button: {
-      variants: {
-        primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
-        secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
-        tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
-      },
+      variants: buttonVariants,
     },
     Input: {
       variants: {

@@ -45,6 +45,7 @@
   "cors": "^2.8.5",
   "cross-env": "^7.0.3",
   "csv-parser": "^3.0.0",
+  "d3-scale-chromatic": "^2.0.0",
   "dotenv": "^8.2.0",
   "downshift": "^6.1.0",
   "express-jwt": "^6.0.0",

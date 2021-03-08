@@ -11,7 +11,7 @@ const links: NavLink[] = [
     url: '/poc/api-discovery',
     access: ['developer', 'api-owner'],
   },
-  { name: 'Services', url: '/poc/services', access: ['api-owner'] },
+  { name: 'Services', url: '/services', access: ['api-owner'] },
   { name: 'Consumers', url: '/poc/consumers', access: ['api-owner'] },
   {
     name: 'Access Requests',
