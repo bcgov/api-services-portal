@@ -19,7 +19,7 @@ const Item = ({refetch, accessRequest}) => (
             <Td>{accessRequest.createdAt}</Td>
             <Td>{accessRequest.requestor.name}</Td>
             <Td>{accessRequest.application?.name}</Td>
-            <Td>{accessRequest.productEnvironment?.product.name}</Td>
+            <Td>{accessRequest.productEnvironment?.product?.name}</Td>
             <Td>{accessRequest.productEnvironment?.name}</Td>
             <Td>
                 { accessRequest.isApproved === null ? (

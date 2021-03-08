@@ -81,7 +81,7 @@ function List({ data, state, refetch }) {
                             <HStack className="m-5">
                             <span><b>Access Request for {req.productEnvironment?.product.name} {req.productEnvironment?.name}</b></span>
                             { req.isIssued ? (
-                                <Button size="xs" colorScheme="blue" onClick={() => generateCredential(req.id)}>Generate Credential</Button>
+                                <Button size="xs" variant="secondary" onClick={() => generateCredential(req.id)}>Generate Credential</Button>
 
                             ) : (
                                 <Badge colorScheme="green">PENDING</Badge>
@@ -92,7 +92,7 @@ function List({ data, state, refetch }) {
                     ))}
                     </Td>
                     <Td>{item.name}</Td>
-                    <Td>{item.owner.name} <Button size="xs" colorScheme="green">transfer ownership</Button></Td>
+                    <Td>{item.owner.name}</Td>
                     <Td>
                         <Button colorScheme="red" onClick={() => {
                             graphql(REMOVE, { id: item.id }).then(refetch);

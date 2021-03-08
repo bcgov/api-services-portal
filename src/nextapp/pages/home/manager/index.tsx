@@ -21,12 +21,6 @@ type HomeActions = {
 };
 const actions: HomeActions[] = [
   {
-    title: 'API Manager',
-    url: '/home/manager',
-    icon: FaServer,
-    roles: [],
-  },
-  {
     title: 'API Developer Portal',
     url: '/home/devportal',
     icon: FaServer,

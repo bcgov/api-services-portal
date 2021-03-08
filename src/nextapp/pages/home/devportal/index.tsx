@@ -21,15 +21,15 @@ type HomeActions = {
 };
 const actions: HomeActions[] = [
   {
-    title: 'API Manager',
-    url: '/home/manager',
+    title: 'API Discovery',
+    url: '/poc/api-discovery',
     icon: FaServer,
     roles: [],
   },
   {
-    title: 'API Developer Portal',
-    url: '/home/devportal',
-    icon: FaServer,
+    title: 'Documentation',
+    url: '/docs',
+    icon: FaBook,
     roles: [],
   },
 ];
