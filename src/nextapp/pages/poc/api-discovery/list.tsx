@@ -7,7 +7,7 @@ import { Button, ButtonGroup, Flex, Box, Heading } from "@chakra-ui/react"
 import Card from '../../../components/card';
 import GridLayout from '../../../layouts/grid';
 
-import { Badge, Stack, HStack, Tag, TagLabel, SimpleGrid, VStack } from "@chakra-ui/react"
+import { Badge, Stack, Text, HStack, Tag, TagLabel, SimpleGrid, VStack } from "@chakra-ui/react"
 
 import NameValue from '../../../components/name-value';
 
@@ -65,13 +65,21 @@ function List({ data, state, refetch }) {
                         ) : false }
                         <div><b>Environments</b></div>
                         <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
-                            <Tag key={p.name} size="lg" colorScheme="blue" borderRadius="5px">
-                                <TagLabel>{p.name}</TagLabel>
-                            </Tag>
+                                <Text
+                                display="inline-block"
+                                fontSize="sm"
+                                bgColor="blue.300"
+                                color="white"
+                                textTransform="uppercase"
+                                px={2}
+                                borderRadius={2}
+                            >
+                                {p.name}
+                            </Text>       
                         )) : false}</HStack>   
                         <ButtonGroup>
                             { item.authMethod != "public" ? (
-                                    <Button colorScheme="blue" onClick={(e) => goto(`/poc/requests/new/${item.id}`)}>Request Access</Button>
+                                    <Button variant="primary" onClick={(e) => goto(`/poc/requests/new/${item.id}`)}>Request Access</Button>
                             ): false }
                         </ButtonGroup>
                     </Stack>
