@@ -61,7 +61,7 @@ const ServicesPage: React.FC = () => {
           justifyContent="space-between"
         >
           <Heading as="h3" size="md">
-            7 Day Metrics
+            5 Day Metrics
           </Heading>
           <HStack>
             <SearchInput

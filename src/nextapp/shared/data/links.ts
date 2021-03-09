@@ -1,4 +1,8 @@
+import * as React from 'react';
+import AccessRequestsBadge from '@/components/access-requests-badge';
+
 export interface NavLink {
+  BadgeElement?: React.FC;
   name: string;
   url: string;
   sites: string[];
@@ -39,7 +43,8 @@ const links: NavLink[] = [
   },
   {
     name: 'Access Requests',
-    url: '/poc/requests',
+    url: '/requests',
+    BadgeElement: AccessRequestsBadge,
     access: ['api-owner', 'api-manager', 'credential-admin'],
     sites: ['manager'],
   },

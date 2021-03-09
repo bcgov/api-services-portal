@@ -63,18 +63,36 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
         flexDir={{ base: 'column', sm: 'row' }}
         color="white"
       >
-        {authenticatedLinks.map((link) => (
-          <Box as="li" key={link.url} width={{ base: '100%', sm: 'auto' }}>
+        {authenticatedLinks.map(({ BadgeElement, ...link }) => (
+          <Box
+            as="li"
+            key={link.url}
+            width={{ base: '100%', sm: 'auto' }}
+            pos="relative"
+          >
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
                 aria-current={link.url === active ? 'page' : false}
               >
-                <Box as="span" whiteSpace="nowrap">
+                <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}
                 </Box>
               </Link>
             </NextLink>
+            {BadgeElement && (
+              <Box
+                as="span"
+                pos="absolute"
+                right={2}
+                top={0}
+                bottom={0}
+                display="flex"
+                alignItems="center"
+              >
+                <BadgeElement />
+              </Box>
+            )}
           </Box>
         ))}
       </Container>

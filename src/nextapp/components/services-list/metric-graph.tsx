@@ -25,6 +25,9 @@ import { scaleLinear } from 'd3-scale';
 import formatISO9075 from 'date-fns/formatISO9075';
 import format from 'date-fns/format';
 import { useApi } from '@/shared/services/api';
+// 1. Consumers
+// 2. Requests
+// 3. Update frequency
 
 import { GET_METRICS } from '@/shared/queries/gateway-service-queries';
 

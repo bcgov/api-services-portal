@@ -22,16 +22,28 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const envs = ['prod', 'staging', 'dev', 'sandbox'];
+const namespaces = [
+  'jh-etk-prod',
+  'dss-map',
+  'dss-aps',
+  'dss-loc',
+  'citz-gdx',
+  'dss-dds',
+];
 // Casual Definitions
 casual.define('namespace', () => {
-  return sample([
-    'jh-etk-prod',
-    'dss-map',
-    'dss-aps',
-    'dss-loc',
-    'citz-gdx',
-    'dss-dds',
-  ]);
+  return sample(namespaces);
+});
+casual.define('service', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `service-${ns}-${env}-${casual.word}`;
+});
+casual.define('route', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `route-${ns}-${env}-${casual.word}`;
 });
 
 //const store = createMockStore({ schema: schemaStruct });
@@ -204,11 +216,10 @@ const server = mockServer(schemaWithMocks, {
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
   GatewayService: () => ({
-    name: casual.word,
+    name: casual.service,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
     namespace: casual.namespace,
-    methods: casual.word,
     paths: casual.word,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
@@ -218,9 +229,12 @@ const server = mockServer(schemaWithMocks, {
     routes: () => new MockList(random(1, 3), (_, { id }) => ({ id })),
   }),
   GatewayRoute: () => ({
-    name: casual.word,
+    name: casual.route,
     namespace: casual.namespace,
     kongRouteId: casual.uuid,
+    methods: JSON.stringify([
+      casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
+    ]),
     tags: '["ns.jh-etk-prod"]',
   }),
   CredentialIssuer: () => ({
