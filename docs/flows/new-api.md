@@ -1,11 +1,6 @@
 
 # Onboarding a new API
 
-The USER-JOURNEY.md documentation under `gwa-api` provides the steps required to configure the Gateway and make the API available for discovery.
-
-![New API](./images/NewAPI.png)
-
-
 **websequencediagrams.com**
 
 ```

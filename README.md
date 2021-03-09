@@ -33,6 +33,12 @@ npm run dev
 
 Once running, the `aps portal` application is reachable via `localhost:4180`.
 
+## Database Upgrades
+
+```
+select 'drop table "' || tablename || '" cascade;' from pg_tables where schemaname='public';
+```
+
 ## Design
 
 The application is built around the KeystoneJS V5 and NextJS frameworks.

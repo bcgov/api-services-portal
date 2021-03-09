@@ -32,7 +32,7 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --set-authorization-header=true \
     --pass-authorization-header=true \
     --skip-auth-regex="/home|/public|/docs|/_next|/images" \
-    --whitelist-domain="authz-apps-gov-bc-ca.dev.apsgw.xyz" \
+    --whitelist-domain="auth.server" \
     --upstream="http://${hostip}:3000"
 ```
 
