@@ -1,4 +1,5 @@
 import * as React from 'react';
+const { useState, useEffect } = React;
 import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -15,9 +16,16 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 
+// import { createContext, useContext } from 'react';
+
+// const SiteContext = createContext({site: 'devportal'});
+
 import { AppWrapper } from './context';
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+ 
+  const [site, setSite] = React.useState<string>('devportal');
+
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
 
@@ -30,6 +38,15 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
       },
     });
   }
+
+  const pathname = router?.pathname
+  useEffect(() => {
+    if (pathname == "/home/devportal") {
+        setSite('devportal')
+    } else if (pathname == "/home/manager") {
+        setSite('manager')
+    }
+  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClientRef.current}>
@@ -46,10 +63,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               />
               <link href="/favicon.ico" rel="icon" type="image/x-icon" />
             </Head>
-            <Header>
-              <AuthAction />
+            <Header site={site}>
+              <AuthAction site={site}/>
             </Header>
-            <NavBar links={links} pathname={router?.pathname} />
+            <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
               <AppWrapper router={router}>
                 <Component {...pageProps} />

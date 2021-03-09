@@ -22,13 +22,14 @@ const linkProps = {
 };
 
 interface NavBarProps {
+  site: String;
   links: NavLink[];
   pathname: string | undefined;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
+const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
   const { user } = useAuth();
-  const authenticatedLinks = links.filter(
+  const authenticatedLinks = links.filter(link => link.sites.includes(site)).filter(
     (link) =>
       link.access.length === 0 ||
       user?.roles.some((role) => link.access.includes(role))

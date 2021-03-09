@@ -9,10 +9,11 @@ import styles from './header.module.css';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
+  site: String,
   children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ children }) => {
+const Header: React.FC<HeaderProps> = ({ site, children }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const onNavClick = () => {
     setOpen((state) => !state);
@@ -57,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
           </a>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
-          API Services Portal
+          API { site == "manager" ? "Manager" : "Developer Portal" }
         </Heading>
       </Box>
       <Box as="hgroup">

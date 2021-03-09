@@ -13,7 +13,11 @@ import { FaChevronDown, FaNetworkWired, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
-const Signin: React.FC = () => {
+interface AuthActionProps {
+    site: String;
+}
+
+const Signin: React.FC<AuthActionProps> = ({site}) => {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -29,7 +33,7 @@ const Signin: React.FC = () => {
 
   return (
     <Box d="flex" alignItems="center" justifyContent="flex-end">
-      {user.namespace && (
+      {user.namespace && site == 'manager' && (
         <Box
           p={1}
           px={2}
