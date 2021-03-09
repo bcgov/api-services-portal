@@ -24,6 +24,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    result: {
+        type: Text,
+        isRequired: false,
+    },
     message: {
         type: Markdown,
         isRequired: false,

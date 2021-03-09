@@ -5,6 +5,7 @@ export const GET_LIST = `
           type
           name
           action
+          result
           message
           refId
           namespace

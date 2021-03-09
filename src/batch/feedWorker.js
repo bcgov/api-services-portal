@@ -190,7 +190,7 @@ const metadata = {
     'Activity': {
         query: 'allActivities',
         refKey: 'extRefId',
-        sync: ['type', 'name', 'action', 'message', 'refId', 'namespace', 'actor'],
+        sync: ['type', 'name', 'action', 'result', 'message', 'refId', 'namespace', 'actor'],
         transformations: {
             actor: {name: "connectOne", list: "allUsers", refKey: 'username' },
         }

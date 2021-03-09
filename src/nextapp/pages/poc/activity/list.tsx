@@ -30,19 +30,23 @@ function List({ data, state, refetch }) {
                 <TableCaption>-</TableCaption>
                 <Thead>
                     <Tr>
-                    <Th>Action</Th>
+                    <Th>Namespace</Th>
+                    <Th>Action / Type</Th>
+                    <Th>Result</Th>
                     <Th>At</Th>
                     <Th>By Actor</Th>
-                    <Th>Reference</Th>
+                    <Th>Reference (name, refId, extRefId)</Th>
                     <Th>Message</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
             {data.allActivities.map((item, index) => (
                 <Tr key={item.id} verticalAlign="top">
+                    <Td>{item.namespace}</Td>
                     <Td>{item.action} {item.type}</Td>
+                    <Td>{item.result}</Td>
                     <Td>{item.createdAt}</Td>
-                    <Td>{item.actor!.name}</Td>
+                    <Td>{item.actor?.name}</Td>
                     <Td>{item.name} / {item.refId} / {item.extRefId}</Td>
                     <Td>{item.message}</Td>
                 </Tr>
