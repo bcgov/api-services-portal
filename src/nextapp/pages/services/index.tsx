@@ -14,7 +14,7 @@ import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
 import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
-import SearchInput from '@/components/search-input/search-input';
+import SearchInput from '@/components/search-input';
 import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 
@@ -61,7 +61,7 @@ const ServicesPage: React.FC = () => {
           justifyContent="space-between"
         >
           <Heading as="h3" size="md">
-            Metrics over 7 days
+            7 Day Metrics
           </Heading>
           <HStack>
             <SearchInput
@@ -81,7 +81,7 @@ const ServicesPage: React.FC = () => {
         {user && (
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4} mb={8}>
             <ClientRequest
-              fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+              fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
                 <Skeleton key={d} height="200px" />
               ))}
             >

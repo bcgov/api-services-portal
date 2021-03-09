@@ -11,6 +11,10 @@ const EnvironmentBadge: React.FC<EnvironmentBadgeProps> = ({
   data,
   ...rest
 }) => {
+  if (!data) {
+    return null;
+  }
+
   return (
     <Badge colorScheme={data.active ? 'green' : 'gray'} {...rest}>
       <Icon

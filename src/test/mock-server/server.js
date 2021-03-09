@@ -9,8 +9,11 @@ const times = require('lodash/times');
 const random = require('lodash/random');
 const express = require('express');
 const cors = require('cors');
+const { addHours, parse } = require('date-fns');
 
+const metricsData = require('./metrics-data');
 const schemas = require('./schemas');
+const { sample } = require('lodash');
 
 const app = express();
 const port = 4000;
@@ -18,6 +21,18 @@ const port = 4000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Casual Definitions
+casual.define('namespace', () => {
+  return sample([
+    'jh-etk-prod',
+    'dss-map',
+    'dss-aps',
+    'dss-loc',
+    'citz-gdx',
+    'dss-dds',
+  ]);
+});
 
 //const store = createMockStore({ schema: schemaStruct });
 // const allProducts = new MockList(6, (_, { id }) => ({ id }));
@@ -47,22 +62,31 @@ const server = mockServer(schemaWithMocks, {
       });
       return result;
     },
-    allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
+    allGatewayServices: () => new MockList(108, (_, { id }) => ({ id })),
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
-    allGatewayMetrics: (...args) => {
-      const result = [];
+    allGatewayMetrics: (_query, _, args) => {
+      const result = args.variableValues.days.map((d, index) => {
+        const metrics = metricsData[index];
+        const date = parse(d, 'yyyy-MM-dd', new Date());
+        const values = [];
 
-      times(50, (n) => {
-        result.push({
-          name: casual.name,
-          query: casual.word,
-          day: casual.day_of_year,
-          metric: casual.word,
-          values:
-            '[[1614844800,"17532.050209204997"],[1614848400,"33731.548117154816"],[1614852000,"9551.799163179923"],[1614855600,"12328.368200836827"],[1614859200,"6868.619246861925"],[1614862800,"7182.928870292886"],[1614866400,"17246.861924686174"],[1614870000,"9041.673640167364"],[1614873600,"16066.945606694566"],[1614877200,"12913.939835829853"],[1614880800,"19980.34470244608"],[1614884400,"21010.551831900157"],[1614888000,"28475.638697092596"],[1614891600,"18445.85774058575"],[1614895200,"28171.380753138048"],[1614898800,"22011.70797766982"],[1614902400,"22986.786057675767"],[1614906000,"19009.20502092047"],[1614909600,"25652.887029288675"],[1614913200,"16475.33885573865"],[1614916800,"12444.86013453247"],[1614920400,"10647.369828409091"],[1614924000,"30382.594142259386"],[1614927600,"9677.322175732226"]]',
+        times(24, (n) => {
+          const hour = addHours(date, n);
+
+          if (metrics[n]) {
+            values.push([hour.getTime(), metrics[n]]);
+          }
         });
+
+        return {
+          name: `kong_http_requests_hourly.${d}.{}`,
+          query: 'kong_http_requests_hourly',
+          day: d,
+          metric: '{}',
+          values: JSON.stringify(values),
+        };
       });
 
       return result;
@@ -135,7 +159,7 @@ const server = mockServer(schemaWithMocks, {
     description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
+    namespace: casual.namespace,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     methods: 'GET',
     paths: casual.domain,
@@ -183,18 +207,21 @@ const server = mockServer(schemaWithMocks, {
     name: casual.word,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
+    namespace: casual.namespace,
     methods: casual.word,
     paths: casual.word,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
-    tags: casual.word,
+    tags: '["ns.jh-etk-prod"]',
     updatedAt: casual.date('YYYY-MM-DD'),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     routes: () => new MockList(random(1, 3), (_, { id }) => ({ id })),
   }),
   GatewayRoute: () => ({
     name: casual.word,
+    namespace: casual.namespace,
+    kongRouteId: casual.uuid,
+    tags: '["ns.jh-etk-prod"]',
   }),
   CredentialIssuer: () => ({
     name: casual.title,
@@ -246,7 +273,7 @@ app.get('/admin/session', (_, res) => {
       email: 'villain@doom.net',
       roles: ['api-owner'],
       isAdmin: false,
-      namespace: 'ns.sampler',
+      namespace: 'dss-aps',
       groups: null,
     },
   });

@@ -7,6 +7,7 @@ import {
   Divider,
   Heading,
   Icon,
+  Skeleton,
   Table,
   Tbody,
   Td,
@@ -16,15 +17,19 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
+import isEmpty from 'lodash/isEmpty';
 import PageHeader from '@/components/page-header';
 import { useApi } from '@/shared/services/api';
 import { useRouter } from 'next/router';
+import { dateRange } from '@/components/services-list/utils';
 
 import { GET_GATEWAY_SERVICE } from '@/shared/queries/gateway-service-queries';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 import EnvironmentBadge from '@/components/environment-badge';
+import MetricGraph from '@/components/services-list/metric-graph';
 
 const ServicePage: React.FC = () => {
+  const range = dateRange();
   const router = useRouter();
   const { data } = useApi(
     ['gateway-service', router?.query.id],
@@ -37,13 +42,18 @@ const ServicePage: React.FC = () => {
     { enabled: Boolean(router?.query.id), suspense: false }
   );
   const breadcrumb = [{ href: '/services', text: 'Services' }];
+  const tags: string[] = !isEmpty(data?.GatewayService.tags)
+    ? (JSON.parse(data.GatewayService.tags) as string[])
+    : [];
 
   return (
     <Container maxW="6xl">
       <PageHeader
         actions={
           <Button
+            as="a"
             variant="primary"
+            href="https://grafana.apps.gov.bc.ca/"
             rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
           >
             View Full Metrics
@@ -71,8 +81,16 @@ const ServicePage: React.FC = () => {
           <Heading size="md">Metrics</Heading>
         </Box>
         <Divider />
-        <Box height="200px" p={4}>
-          Chart
+        <Box minHeight="200px" p={4}>
+          {router?.query.id && (
+            <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
+              <MetricGraph
+                days={range}
+                height={240}
+                id={router?.query.id as string}
+              />
+            </ClientRequest>
+          )}
         </Box>
       </Box>
       <Box display="grid" gridGap={4} gridTemplateColumns="repeat(12, 1fr)">
@@ -117,8 +135,10 @@ const ServicePage: React.FC = () => {
             <Box
               as="dl"
               display="grid"
+              fontSize="sm"
               flexWrap="wrap"
               gridColumnGap={4}
+              gridRowGap={2}
               gridTemplateColumns="1fr 2fr"
             >
               <Text as="dt" fontWeight="bold">
@@ -132,7 +152,11 @@ const ServicePage: React.FC = () => {
               <Text as="dt" fontWeight="bold">
                 Tags
               </Text>
-              <Text as="dd">{data?.GatewayService.tags}</Text>
+              <Text as="dd">
+                {tags.map((t) => (
+                  <Badge key={t}>{t}</Badge>
+                ))}
+              </Text>
             </Box>
           </Box>
         </Box>
