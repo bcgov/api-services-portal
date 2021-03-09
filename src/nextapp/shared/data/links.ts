@@ -18,7 +18,7 @@ const links: NavLink[] = [
     access: ['developer', 'api-owner'], sites: ['devportal'] 
   },
   { name: 'Products', url: '/products', access: ['api-owner'], sites: ['manager'] }, 
-  { name: 'Services', url: '/poc/services', access: ['api-owner'], sites: ['manager']  },
+  { name: 'Services', url: '/services', access: ['api-owner'], sites: ['manager']  },
   { name: 'Consumers', url: '/poc/consumers', access: ['api-owner'], sites: ['manager']  },
   {
     name: 'Access Requests',

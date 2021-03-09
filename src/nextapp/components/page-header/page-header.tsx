@@ -12,7 +12,7 @@ import { useRouter } from 'next/router';
 interface PageHeaderProps {
   actions?: React.ReactNode;
   breadcrumb?: { href?: string; text: string }[];
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title: React.ReactNode;
 }
 
