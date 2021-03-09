@@ -18,6 +18,7 @@ type HomeActions = {
   url: string;
   icon: React.ComponentType;
   roles: string[];
+  description: string;
 };
 const actions: HomeActions[] = [
   {
@@ -25,6 +26,7 @@ const actions: HomeActions[] = [
     url: '/home/devportal',
     icon: FaServer,
     roles: [],
+    description: "Looking to discover APIs that you can use in your application?  Jump to the API Developer Portal!"
   },
 ];
 
@@ -46,13 +48,12 @@ const HomePage: React.FC = () => {
             textShadow="0 0 10px rgba(0, 0, 0, 0.8)"
           >
             <Heading fontWeight="normal" marginBottom={4}>
-              BC Government API Program Service
+              BC Government API Manager
             </Heading>
             <Text marginBottom={4}>
-              Discover and access APIs from various ministries and programs
-              across government.
+              Register your API to give you full control of access and to build up a community of yours using your API.
             </Text>
-            <Link fontWeight="bold">{`What's New`}</Link>
+            {/* <Link fontWeight="bold">{`What's New`}</Link> */}
           </Box>
         </Container>
       </Box>
@@ -75,9 +76,7 @@ const HomePage: React.FC = () => {
                   </NextLink>
                 </Heading>
                 <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad
-                  nulla error doloribus ducimus magni iste aut ea quidem
-                  impedit, non suscipit sapiente praesentium
+                  {action.description}
                 </p>
               </Card>
             ))}

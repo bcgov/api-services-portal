@@ -36,7 +36,7 @@ const links: NavLink[] = [
     access: ['credential-admin'], sites: ['manager'] 
   },
   { name: 'Activity', url: '/poc/activity', access: ['api-owner'], sites: ['manager']  },
-  { name: 'Documentation', url: '/docs', access: [], sites: ['manager']  },
+  { name: 'Documentation', url: '/docs', access: [], sites: ['devportal', 'manager']  },
   { name: 'APS Admin', url: '/admin', access: ['aps-admin'], sites: ['manager']  },
   { name: 'POC Products', url: '/poc/packagingv1', access: ['aps-admin'], sites: ['manager']  },
 ];
