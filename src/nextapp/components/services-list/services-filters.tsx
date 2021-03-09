@@ -13,6 +13,7 @@ const ServicesFilters: React.FC<ServicesFiltersProps> = () => {
   const onFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setFilter(event.target.value as Filters);
   };
+
   return (
     <HStack display="flex" bgColor="gray.200" mb={4} p={4}>
       <FormControl>
