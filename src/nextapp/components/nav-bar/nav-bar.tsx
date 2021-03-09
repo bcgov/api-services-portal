@@ -22,7 +22,7 @@ const linkProps = {
 };
 
 interface NavBarProps {
-  site: String;
+  site: string;
   links: NavLink[];
   pathname: string | undefined;
 }
