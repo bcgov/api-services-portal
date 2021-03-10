@@ -7,6 +7,7 @@ module.exports = {
                         allAccessRequests(where: {id: $id}) {
                             productEnvironment {
                                 name
+                                authMethod
                                 credentialIssuer {
                                     id
                                 }

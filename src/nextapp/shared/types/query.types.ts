@@ -1963,6 +1963,7 @@ export type DatasetsCreateInput = {
 export enum EnvironmentAuthMethodType {
   Private = 'private',
   Public = 'public',
+  Jwt = 'jwt',
   Jwt = 'JWT',
   Keys = 'keys'
 }
@@ -3951,6 +3952,7 @@ export type Product = {
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
@@ -3990,6 +3992,24 @@ export type ProductWhereInput = {
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
   id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  appId?: Maybe<Scalars['String']>;
+  appId_not?: Maybe<Scalars['String']>;
+  appId_contains?: Maybe<Scalars['String']>;
+  appId_not_contains?: Maybe<Scalars['String']>;
+  appId_starts_with?: Maybe<Scalars['String']>;
+  appId_not_starts_with?: Maybe<Scalars['String']>;
+  appId_ends_with?: Maybe<Scalars['String']>;
+  appId_not_ends_with?: Maybe<Scalars['String']>;
+  appId_i?: Maybe<Scalars['String']>;
+  appId_not_i?: Maybe<Scalars['String']>;
+  appId_contains_i?: Maybe<Scalars['String']>;
+  appId_not_contains_i?: Maybe<Scalars['String']>;
+  appId_starts_with_i?: Maybe<Scalars['String']>;
+  appId_not_starts_with_i?: Maybe<Scalars['String']>;
+  appId_ends_with_i?: Maybe<Scalars['String']>;
+  appId_not_ends_with_i?: Maybe<Scalars['String']>;
+  appId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  appId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -4065,6 +4085,8 @@ export type ProductWhereUniqueInput = {
 export enum SortProductsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
+  AppIdAsc = 'appId_ASC',
+  AppIdDesc = 'appId_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   NamespaceAsc = 'namespace_ASC',
@@ -4082,6 +4104,7 @@ export enum SortProductsBy {
 }
 
 export type ProductUpdateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
@@ -4097,6 +4120,7 @@ export type ProductsUpdateInput = {
 };
 
 export type ProductCreateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;

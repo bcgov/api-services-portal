@@ -37,7 +37,7 @@ module.exports = {
         fieldPath, // Field hooks only
     }) => {
         if (operation == "create") {
-            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 20)
+            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             return resolvedData
         }
     }

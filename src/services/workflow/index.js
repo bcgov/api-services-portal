@@ -64,6 +64,10 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
     try {
         const requestDetails = operation == 'create' ? null : await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 
+        if (operation == 'create') {
+            // If its create, make sure the App + ProductEnvironment doesn't already exist as a Request
+
+        }
         if (isUpdatingToIssued(existingItem, resolvedData)) {
             assert.strictEqual(requestDetails != null, true, errors.WF01);
             assert.strictEqual(requestDetails.productEnvironment != null, true, errors.WF02);
@@ -75,7 +79,7 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
     
             assert.strictEqual(issuer != null, true, errors.WF05);
 
-            if (issuer.authMethod == 'oidc') {
+            if (issuer.authMethod == 'jwt') {
                 const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
                 assert.strictEqual(openid != null, true, errors.WF06);
             }
@@ -107,18 +111,20 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             console.log(JSON.stringify(existingItem, null ,4))
             const reqId = existingItem.id
 
-            // Find the credential issuer and based on its type, go do the appropriate action
-            const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
-
             const appId = requestDetails.application.appId
 
             const credentialReference = {}
 
-            if (issuer.mode == 'manual') {
-                throw Error('Manual credential issuing not supported yet!')
-            }
+            if (requestDetails.productEnvironment.authMethod == 'jwt') {
 
-            if (issuer.authMethod == 'oidc') {
+                // Find the credential issuer and based on its type, go do the appropriate action
+                const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+
+
+                if (issuer.mode == 'manual') {
+                    throw Error('Manual credential issuing not supported yet!')
+                }
+
                 const token = issuer.initialAccessToken
 
                 const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)

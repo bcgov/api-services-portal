@@ -65,9 +65,9 @@ export const GET_METRICS = gql`
     allGatewayMetrics(
       sortBy: day_ASC
       where: {
-        query: "kong_http_status"
+        query: "kong_http_requests_hourly_service"
         day_in: $days
-        service: { name_contains: $service }
+        service: { name: $service }
       }
     ) {
       query

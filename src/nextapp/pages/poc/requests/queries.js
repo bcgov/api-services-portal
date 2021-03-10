@@ -6,6 +6,7 @@ export const GET_PRODUCT = `
             environments {
                 id
                 name
+                active
                 authMethod
             }
         }
@@ -88,6 +89,7 @@ export const GET_REQUEST = `
           }
           productEnvironment {
             name
+            active
             authMethod
             credentialIssuer {
                 name

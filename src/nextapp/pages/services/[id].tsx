@@ -84,11 +84,13 @@ const ServicePage: React.FC = () => {
         <Box minHeight="200px" p={4}>
           {router?.query.id && (
             <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
+                {data?.GatewayService && (
               <MetricGraph
                 days={range}
                 height={240}
-                id={router?.query.id as string}
+                id={data?.GatewayService.name as string}
               />
+              )}
             </ClientRequest>
           )}
         </Box>

@@ -3,10 +3,17 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
+const { v4: uuidv4 } = require('uuid');
+
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
+    appId: {
+        type: Text,
+        isRequired: true,
+        isUnique: false,
+    },
     name: {
         type: Text,
         isRequired: true,
@@ -31,4 +38,15 @@ module.exports = {
     environments: { type: Relationship, ref: 'Environment.product', many: true },
   },
   access: EnforcementPoint,
+  hooks: {
+    resolveInput: ({
+        operation,
+        resolvedData
+    }) => {
+        if (operation == "create") {
+            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+            return resolvedData
+        }
+    }
+  },
 }

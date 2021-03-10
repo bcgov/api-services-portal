@@ -116,7 +116,7 @@ const NewRequest = () => {
                                 <label><b>Environment</b></label>
                                 <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
                                     <Stack direction="column">
-                                        { dataset.environments.map(e => (
+                                        { dataset.environments.filter(e => e.active).map(e => (
                                             <Radio key={e.id} value={e.id}>{e.name} : {e.authMethod}</Radio>
                                         ))}
                                     </Stack>

@@ -20,7 +20,8 @@ module.exports = {
     authMethod: { type: Select, emptyOption: false, defaultValue: 'public', options: [
         { value: 'private', label: 'Private'},
         { value: 'public', label: 'Public'},
-        { value: 'JWT', label: 'JWT'},
+        { value: 'jwt', label: 'JWT'},
+        { value: 'JWT', label: 'JWT (Demised)'},
         { value: 'keys', label: 'API Keys'},
       ]
     },
