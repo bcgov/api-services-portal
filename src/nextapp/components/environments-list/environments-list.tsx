@@ -37,10 +37,10 @@ const getAuthToken = (method: EnvironmentAuthMethodType) => {
   switch (method) {
     case 'keys':
       return FaKey;
-    case 'JWT':
+    case 'jwt':
       return FaLock;
-    case 'private':
-      return FaUserSecret;
+    // case 'private':
+    //   return FaUserSecret;
     case 'public':
     default:
       return FaLockOpen;
