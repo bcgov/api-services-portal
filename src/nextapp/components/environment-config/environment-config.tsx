@@ -165,9 +165,9 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                 <option value="public">Public</option>
                 <option value="keys">API Keys</option>
                 <option value="private">Private</option>
-                <option value="JWT">JWT</option>
+                <option value="jwt">JWT</option>
               </Select>
-              {authMethod === 'JWT' && (
+              {authMethod === 'jwt' && (
                 <CredentialIssuerSelect environmentId={data.id} />
               )}
               <Box flex={1} />

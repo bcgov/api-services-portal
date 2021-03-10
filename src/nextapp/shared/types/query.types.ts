@@ -1325,7 +1325,7 @@ export type ContentsCreateInput = {
 };
 
 export enum CredentialIssuerAuthMethodType {
-  Oidc = 'oidc',
+  Jwt = 'jwt',
   Keys = 'keys'
 }
 
@@ -1961,9 +1961,8 @@ export type DatasetsCreateInput = {
 };
 
 export enum EnvironmentAuthMethodType {
-  Private = 'private',
   Public = 'public',
-  Oidc = 'oidc',
+  Jwt = 'jwt',
   Keys = 'keys'
 }
 

@@ -18,7 +18,7 @@ module.exports = {
         isRequired: false,
     },
     authMethod: { type: Select, emptyOption: false, default: 'oidc', options: [
-        { value: 'oidc', label: 'OIDC'},
+        { value: 'jwt', label: 'JWT'},
         { value: 'keys', label: 'API Key'},
       ]
     },
