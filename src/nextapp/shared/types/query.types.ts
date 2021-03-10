@@ -1963,8 +1963,7 @@ export type DatasetsCreateInput = {
 export enum EnvironmentAuthMethodType {
   Private = 'private',
   Public = 'public',
-  Jwt = 'jwt',
-  Jwt = 'JWT',
+  Oidc = 'oidc',
   Keys = 'keys'
 }
 
