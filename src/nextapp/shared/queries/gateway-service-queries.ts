@@ -56,11 +56,16 @@ export const GET_GATEWAY_SERVICE = gql`
           }
         }
       }
+      plugins {
+        id
+        name
+      }
       routes {
         id
         name
         namespace
       }
+      updatedAt
     }
   }
 `;

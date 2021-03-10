@@ -1,11 +1,9 @@
 import * as React from 'react';
-const { useState, useEffect } = React;
 import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
-import type { AppProps } from 'next/app';
 import { AuthProvider } from '@/shared/services/auth/auth-context';
 import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
@@ -13,6 +11,8 @@ import theme from '@/shared/theme';
 import links from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import type { AppProps } from 'next/app';
+
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 

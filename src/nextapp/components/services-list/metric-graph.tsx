@@ -83,7 +83,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     }, 0);
     const downtime = 24 - values.length;
     const defaultPeakDate: number = new Date(day).getTime();
-    const peak: number[] = value.reduce(
+    const peak: any = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
           return v;

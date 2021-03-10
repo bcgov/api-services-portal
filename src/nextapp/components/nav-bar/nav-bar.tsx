@@ -29,11 +29,13 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
   const { user } = useAuth();
-  const authenticatedLinks = links.filter(link => link.sites.includes(site)).filter(
-    (link) =>
-      link.access.length === 0 ||
-      user?.roles.some((role) => link.access.includes(role))
-  );
+  const authenticatedLinks = links
+    .filter((link) => link.sites.includes(site))
+    .filter(
+      (link) =>
+        link.access.length === 0 ||
+        user?.roles.some((role) => link.access.includes(role))
+    );
   // Router isn't active SSR, so wait till the client loads before setting
   // current so there's no diff between SSR and Client
   const active = React.useMemo(() => {
@@ -78,21 +80,13 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
                 <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}
                 </Box>
+                {BadgeElement && (
+                  <Box as="span" display="flex" alignItems="center">
+                    <BadgeElement />
+                  </Box>
+                )}
               </Link>
             </NextLink>
-            {BadgeElement && (
-              <Box
-                as="span"
-                pos="absolute"
-                right={2}
-                top={0}
-                bottom={0}
-                display="flex"
-                alignItems="center"
-              >
-                <BadgeElement />
-              </Box>
-            )}
           </Box>
         ))}
       </Container>

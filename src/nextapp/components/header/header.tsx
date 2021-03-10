@@ -9,7 +9,7 @@ import styles from './header.module.css';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
-  site: String,
+  site: string;
   children?: React.ReactNode;
 }
 
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
           </a>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
-          API { site == "manager" ? "Manager" : "Developer Portal" }
+          API {site == 'manager' ? 'Manager' : 'Developer Portal'}
         </Heading>
       </Box>
       <Box as="hgroup">
