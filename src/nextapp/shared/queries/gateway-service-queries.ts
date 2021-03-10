@@ -5,6 +5,7 @@ export const LIST_GATEWAY_SERVICES = gql`
     allGatewayServices(first: 200) {
       id
       name
+      updatedAt
       environment {
         id
         name
@@ -21,6 +22,10 @@ export const LIST_GATEWAY_SERVICES = gql`
         }
       }
       routes {
+        id
+        name
+      }
+      plugins {
         id
         name
       }

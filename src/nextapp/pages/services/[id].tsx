@@ -81,13 +81,14 @@ const ServicePage: React.FC = () => {
           <Heading size="md">Metrics</Heading>
         </Box>
         <Divider />
-        <Box minHeight="200px" p={4}>
+        <Box minHeight="100px" p={4}>
           {router?.query.id && (
             <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
               <MetricGraph
                 days={range}
-                height={240}
+                height={100}
                 id={router?.query.id as string}
+                service={data}
               />
             </ClientRequest>
           )}

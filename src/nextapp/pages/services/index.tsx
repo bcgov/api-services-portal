@@ -47,8 +47,8 @@ const ServicesPage: React.FC = () => {
     <Container maxW="6xl">
       <PageHeader title="Services">
         <p>
-          List of services from the API Owner perspective. This should pull in
-          details from Prometheus and gwa-api Status.
+          Here are all your services. You can view Grafana and Prometheus
+          reports in full by viewing a service.
         </p>
       </PageHeader>
       <Divider my={4} />

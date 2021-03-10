@@ -23,11 +23,15 @@ import '@/shared/styles/global.css';
 import { AppWrapper } from './context';
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
- 
-  const [site, setSite] = React.useState<string>('devportal');
-
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
+  const site: string = React.useMemo(() => {
+    if (router?.pathname === '/home/manager') {
+      return 'manager';
+    }
+
+    return 'devportal';
+  }, [router]);
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -38,15 +42,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
       },
     });
   }
-
-  const pathname = router?.pathname
-  useEffect(() => {
-    if (pathname == "/home/devportal") {
-        setSite('devportal')
-    } else if (pathname == "/home/manager") {
-        setSite('manager')
-    }
-  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClientRef.current}>
@@ -64,7 +59,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               <link href="/favicon.ico" rel="icon" type="image/x-icon" />
             </Head>
             <Header site={site}>
-              <AuthAction site={site}/>
+              <AuthAction site={site} />
             </Header>
             <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>

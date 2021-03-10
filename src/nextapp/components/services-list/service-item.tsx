@@ -56,7 +56,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ data, range }) => {
         {!inView && <Skeleton flex={1} m={4} />}
         {inView && (
           <ClientRequest fallback={<Skeleton flex={1} />}>
-            <MetricGraph alt days={range} id={data.id} />
+            <MetricGraph alt days={range} id={data.id} service={data} />
           </ClientRequest>
         )}
       </Box>

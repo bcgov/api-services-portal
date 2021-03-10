@@ -31,7 +31,7 @@ const links: NavLink[] = [
   },
   {
     name: 'Services',
-    url: '/poc/services',
+    url: '/services',
     access: ['api-owner'],
     sites: ['manager'],
   },
