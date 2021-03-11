@@ -146,7 +146,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
           </Box>
           <Box>
             <ButtonGroup>
-              <Link href={`/products/${e.id}`}>
+              <Link href={`/manager/products/${e.id}`}>
                 <Button size="xs" variant="outline">
                   Edit
                 </Button>

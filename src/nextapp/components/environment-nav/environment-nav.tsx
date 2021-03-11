@@ -19,7 +19,7 @@ interface EnvironmentNavProps {
 const EnvironmentNav: React.FC<EnvironmentNavProps> = ({ data = [], id }) => {
   const router = useRouter();
   const onSelect = (id: string) => () => {
-    router.push(`/products/${id}`);
+    router.push(`/manager/products/${id}`);
   };
 
   return (
