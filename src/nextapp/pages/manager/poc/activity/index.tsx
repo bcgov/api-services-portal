@@ -18,7 +18,7 @@ import {
 
 import { GET_LIST } from './queries'
 
-//import { useAppContext } from '../../context'
+//import { useAppContext } from '@/pages/context'
 
 const { useEffect, useState } = React
 

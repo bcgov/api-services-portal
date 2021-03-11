@@ -3,7 +3,7 @@ import Modal from 'react-modal';
 
 import { GET_LIST } from './queries';
 
-import { useAppContext } from '../../context';
+import { useAppContext } from '@/pages/context';
 
 import { useAuth } from '@/shared/services/auth';
 
