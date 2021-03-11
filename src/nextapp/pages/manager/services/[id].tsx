@@ -41,7 +41,7 @@ const ServicePage: React.FC = () => {
     },
     { enabled: Boolean(router?.query.id), suspense: false }
   );
-  const breadcrumb = [{ href: '/services', text: 'Services' }];
+  const breadcrumb = [{ href: '/manager/services', text: 'Services' }];
   const tags: string[] = !isEmpty(data?.GatewayService.tags)
     ? (JSON.parse(data.GatewayService.tags) as string[])
     : [];
