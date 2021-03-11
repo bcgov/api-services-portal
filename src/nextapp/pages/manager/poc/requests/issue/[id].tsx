@@ -26,7 +26,7 @@ import { Button, ButtonGroup, Input, Textarea, Flex, useToast } from "@chakra-ui
 
 import { useAppContext } from '@/pages/context'
 
-import GenericControl from '@/pages/packaging/controls/generic'
+import GenericControl from '../../packaging/controls/generic'
 
 import Form from '../form'
 import List from '../list'
