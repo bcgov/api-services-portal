@@ -4,6 +4,7 @@ const { transfers } = require('../utils/transfers')
 const { portal } = require('../utils/portal')
 
 const queries = [
+    { query: 'sum(increase(kong_http_status[60m])) by (service,status)', step: 60*60*24, id: 'kong_http_requests_daily_service_status'},
     { query: 'sum(increase(kong_http_status[60m])) by (service)', step: 60*60, id: 'kong_http_requests_hourly_service'},
     { query: 'sum(increase(kong_http_status[60m])) by (namespace)', step: 60*60, id: 'kong_http_requests_hourly_namespace'},
     { query: 'sum(increase(kong_http_status[60m])) by (namespace)', step: 60*60*24, id: 'kong_http_requests_daily_namespace'},
@@ -15,8 +16,8 @@ async function sync({workingPath, url, destinationUrl}) {
     const exceptions = []
     xfer = transfers(workingPath, url, exceptions)
 
-    // run all queries for last 14 days
-    for (var d = 0; d < 14; d++) {
+    // run all queries for last 3 days
+    for (var d = 0; d < 3; d++) {
         const target = moment().add(-d, 'days').format('YYYY-MM-DD')
 
         for ( _query of queries) {

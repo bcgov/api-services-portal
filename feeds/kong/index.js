@@ -8,18 +8,18 @@ async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
     const xfer = transfers(workingPath, url, exceptions)
 
-    // await xfer.copy (`/services`, 'gw-services')
-    // await xfer.copy (`/routes`, 'gw-routes')
-    // await xfer.copy (`/consumers`, 'gw-consumers')
-    // await xfer.copy (`/plugins`, 'gw-plugins')
-    //await xfer.copy (`/acls`, 'gw-acls')
+    await xfer.copy (`/services`, 'gw-services')
+    await xfer.copy (`/routes`, 'gw-routes')
+    await xfer.copy (`/consumers`, 'gw-consumers')
+    await xfer.copy (`/plugins`, 'gw-plugins')
+    await xfer.copy (`/acls`, 'gw-acls')
 
     // Now, send to portal
-    // await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-services', 'name', 'service', '/feed/GatewayService'))
-    // await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
-    // await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/Consumer'))
-    // await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
-    await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-services', 'name', 'service', '/feed/GatewayService'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/Consumer'))
+    await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
+    // await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
 }
 
 function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
