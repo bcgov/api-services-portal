@@ -26,7 +26,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
   const site: string = React.useMemo(() => {
-    if (router?.pathname === '/home/manager') {
+    if (router?.pathname.startsWith('/manager')) {
       return 'manager';
     }
 
@@ -42,15 +42,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
       },
     });
   }
-
-  const pathname = router?.pathname
-  useEffect(() => {
-    if (pathname.startsWith('/devportal')) {
-        setSite('devportal')
-    } else if (pathname.startsWith('/manager')) {
-        setSite('manager')
-    }
-  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClientRef.current}>
