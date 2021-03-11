@@ -5,19 +5,46 @@ const {
   MockList,
 } = require('graphql-tools');
 const casual = require('casual-browserify');
+const times = require('lodash/times');
+const random = require('lodash/random');
 const express = require('express');
 const cors = require('cors');
+const { addHours, parse } = require('date-fns');
 
+const metricsData = require('./metrics-data');
 const schemas = require('./schemas');
+const { sample } = require('lodash');
 
 const app = express();
 const port = 4000;
-const random = (start, end) =>
-  Math.floor(Math.random() * (end - start) + start);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const envs = ['prod', 'staging', 'dev', 'sandbox'];
+const namespaces = [
+  'jh-etk-prod',
+  'dss-map',
+  'dss-aps',
+  'dss-loc',
+  'citz-gdx',
+  'dss-dds',
+];
+// Casual Definitions
+casual.define('namespace', () => {
+  return sample(namespaces);
+});
+casual.define('service', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `service-${ns}-${env}-${casual.word}`;
+});
+casual.define('route', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `route-${ns}-${env}-${casual.word}`;
+});
 
 //const store = createMockStore({ schema: schemaStruct });
 // const allProducts = new MockList(6, (_, { id }) => ({ id }));
@@ -47,10 +74,35 @@ const server = mockServer(schemaWithMocks, {
       });
       return result;
     },
-    allGatewayServices: () => new MockList(8, (_, { id }) => ({ id })),
+    allGatewayServices: () => new MockList(108, (_, { id }) => ({ id })),
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
+    allGatewayMetrics: (_query, _, args) => {
+      const result = args.variableValues.days.map((d, index) => {
+        const metrics = metricsData[index];
+        const date = parse(d, 'yyyy-MM-dd', new Date());
+        const values = [];
+
+        times(24, (n) => {
+          const hour = addHours(date, n);
+
+          if (metrics[n]) {
+            values.push([hour.getTime(), metrics[n]]);
+          }
+        });
+
+        return {
+          name: `kong_http_requests_hourly.${d}.{}`,
+          query: 'kong_http_requests_hourly',
+          day: d,
+          metric: '{}',
+          values: JSON.stringify(values),
+        };
+      });
+
+      return result;
+    },
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -119,7 +171,7 @@ const server = mockServer(schemaWithMocks, {
     description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
+    namespace: casual.namespace,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     methods: 'GET',
     paths: casual.domain,
@@ -149,7 +201,14 @@ const server = mockServer(schemaWithMocks, {
   }),
   Environment: ({ id }) => ({
     id,
-    name: casual.random_element(['dev', 'test', 'prod', 'sandbox', 'other']),
+    name: casual.random_element([
+      'dev',
+      'test',
+      'prod',
+      'sandbox',
+      'other',
+      null,
+    ]),
     active: casual.boolean,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
@@ -157,17 +216,26 @@ const server = mockServer(schemaWithMocks, {
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
   GatewayService: () => ({
-    name: casual.populate('{{word}}.api.gov.bc.ca'),
+    name: casual.service,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
-    methods: casual.word,
+    namespace: casual.namespace,
     paths: casual.word,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
-    tags: casual.word,
+    tags: '["ns.jh-etk-prod"]',
     updatedAt: casual.date('YYYY-MM-DD'),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
+    routes: () => new MockList(random(1, 3), (_, { id }) => ({ id })),
+  }),
+  GatewayRoute: () => ({
+    name: casual.route,
+    namespace: casual.namespace,
+    kongRouteId: casual.uuid,
+    methods: JSON.stringify([
+      casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
+    ]),
+    tags: '["ns.jh-etk-prod"]',
   }),
   CredentialIssuer: () => ({
     name: casual.title,
@@ -219,7 +287,7 @@ app.get('/admin/session', (_, res) => {
       email: 'villain@doom.net',
       roles: ['api-owner'],
       isAdmin: false,
-      namespace: 'ns.sampler',
+      namespace: 'dss-aps',
       groups: null,
     },
   });

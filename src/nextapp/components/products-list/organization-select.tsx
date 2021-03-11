@@ -10,7 +10,7 @@ import type { Product } from '@/shared/types/query.types';
 import { useApi } from '@/shared/services/api';
 import {
   ORGANIZATIONS_LIST,
-  ORGANIZATION_UNITS_LIST,
+  ORGANIZATIONS_OWN_UNITS_LIST,
 } from '@/shared/queries/organization-queries';
 
 interface OrganizationSelectProps {
@@ -38,12 +38,9 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
   const organizationUnitsQuery = useApi(
     ['organizationUnits', organization],
     {
-      query: ORGANIZATION_UNITS_LIST,
+      query: ORGANIZATIONS_OWN_UNITS_LIST,
       variables: {
-        search:
-          organizationsQuery.data?.allOrganizations.find(
-            (org) => org.id === organization
-          )?.id ?? '',
+        id: organization,
       },
     },
     { suspense: false, enabled: !!organization }
@@ -80,7 +77,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
           isDisabled={!organization}
         >
           <option value="">Select an Organization Unit</option>
-          {organizationUnitsQuery.data?.allOrganizationUnits.map((unit) => (
+          {organizationUnitsQuery.data?.Organization?.orgUnits.map((unit) => (
             <option key={unit.id} value={unit.id}>
               {unit.name}
             </option>

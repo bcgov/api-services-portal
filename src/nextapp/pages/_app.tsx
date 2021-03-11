@@ -1,11 +1,9 @@
 import * as React from 'react';
-const { useState, useEffect } = React;
 import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
-import type { AppProps } from 'next/app';
 import { AuthProvider } from '@/shared/services/auth/auth-context';
 import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
@@ -13,6 +11,8 @@ import theme from '@/shared/theme';
 import links from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import type { AppProps } from 'next/app';
+
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 
@@ -23,11 +23,15 @@ import '@/shared/styles/global.css';
 import { AppWrapper } from './context';
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
- 
-  const [site, setSite] = React.useState<string>('devportal');
-
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
+  const site: string = React.useMemo(() => {
+    if (router?.pathname === '/home/manager') {
+      return 'manager';
+    }
+
+    return 'devportal';
+  }, [router]);
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -64,7 +68,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               <link href="/favicon.ico" rel="icon" type="image/x-icon" />
             </Head>
             <Header site={site}>
-              <AuthAction site={site}/>
+              <AuthAction site={site} />
             </Header>
             <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>

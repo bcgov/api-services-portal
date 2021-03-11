@@ -1,4 +1,8 @@
+import * as React from 'react';
+import AccessRequestsBadge from '@/components/access-requests-badge';
+
 export interface NavLink {
+  BadgeElement?: React.FC;
   name: string;
   url: string;
   sites: string[];
@@ -6,7 +10,7 @@ export interface NavLink {
 }
 
 const links: NavLink[] = [
-  { name: 'Home', url: '/home', access: [], sites: ['manager','devportal'] },
+  { name: 'Home', url: '/home', access: [], sites: ['manager', 'devportal'] },
   {
     name: 'API Discovery',
     url: '/devportal/poc/api-discovery',

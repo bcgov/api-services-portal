@@ -5200,8 +5200,8 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
-export type UnauthenticateTemporaryIdentityOutput = {
-  __typename?: 'unauthenticateTemporaryIdentityOutput';
+export type UnauthenticateUserOutput = {
+  __typename?: 'unauthenticateUserOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -5209,12 +5209,12 @@ export type UnauthenticateTemporaryIdentityOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateTemporaryIdentityOutput = {
-  __typename?: 'authenticateTemporaryIdentityOutput';
+export type AuthenticateUserOutput = {
+  __typename?: 'authenticateUserOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
-  item?: Maybe<TemporaryIdentity>;
+  /**  Retrieve information on the newly authenticated User here.  */
+  item?: Maybe<User>;
 };
 
 export type Query = {
@@ -5415,7 +5415,7 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
+  authenticatedUser?: Maybe<User>;
 };
 
 
@@ -6313,10 +6313,10 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
-  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
-  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
-  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
-  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
+  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
+  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
+  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
+  updateAuthenticatedUser?: Maybe<User>;
 };
 
 
@@ -7064,14 +7064,14 @@ export type MutationDeleteUsersArgs = {
 };
 
 
-export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
+export type MutationAuthenticateUserWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
-  data?: Maybe<TemporaryIdentityUpdateInput>;
+export type MutationUpdateAuthenticatedUserArgs = {
+  data?: Maybe<UserUpdateInput>;
 };
 
 
