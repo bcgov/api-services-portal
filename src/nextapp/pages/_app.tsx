@@ -41,9 +41,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
   const pathname = router?.pathname
   useEffect(() => {
-    if (pathname == "/home/devportal") {
+    if (pathname.startsWith('/devportal')) {
         setSite('devportal')
-    } else if (pathname == "/home/manager") {
+    } else if (pathname.startsWith('/manager')) {
         setSite('manager')
     }
   }, [pathname]);

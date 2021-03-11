@@ -43,12 +43,11 @@ module.exports = {
         }
     },
     routes: { type: Relationship, ref: 'GatewayRoute.service', many: true },
-    plugins: { type: Relationship, ref: 'Plugin', many: true },
+    plugins: { type: Relationship, ref: 'GatewayPlugin', many: true },
     environment: { type: Relationship, ref: 'Environment.services', many: false },
   },
   access: EnforcementPoint,
   plugins: [
-    byTracking(),
     atTracking()
   ]
 }

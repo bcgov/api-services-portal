@@ -27,20 +27,13 @@ module.exports = {
     isIssued: {
         type: Checkbox,
         isRequired: false,
-        default: false
+        default: false,
+        access: FieldEnforcementPoint
     },
     isComplete: {
         type: Checkbox,
         isRequired: false,
         default: false
-    },
-    credentialReference: {
-        type: Text,
-        isRequired: false,
-    },
-    credential: {
-        type: Text,
-        isRequired: false,
     },
     requestor: { type: Relationship, isRequired: true, ref: 'User' },
     application: { type: Relationship, isRequired: true, ref: 'Application' },

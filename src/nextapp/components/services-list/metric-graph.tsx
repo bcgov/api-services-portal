@@ -62,7 +62,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     fontWeight: 'bold',
     color: 'gray.400',
   };
-  const values: number[][] = data.allGatewayMetrics.map((metric) => {
+  const values: number[][] = data.allMetrics.map((metric) => {
     return JSON.parse(metric.values);
   });
   const dailies: DailyDatum[] = values.map((value: number[]) => {
@@ -92,7 +92,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   const color = interpolateRdYlGn(uptime);
   const y = scaleLinear().range([0, height]).domain([0, 1]);
 
-  if (data.allGatewayMetrics) {
+  if (data.allMetrics) {
     const max: number = dailies.reduce(
       (memo: number, value: DailyDatum) => Math.max(memo, value.total),
       0

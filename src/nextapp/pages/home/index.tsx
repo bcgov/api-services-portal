@@ -23,14 +23,14 @@ type HomeActions = {
 const actions: HomeActions[] = [
   {
     title: 'API Manager',
-    url: '/home/manager',
+    url: '/manager',
     icon: FaServer,
     roles: [],
     description: "Are you in a Ministry looking to offer APIs to others?  Get started in the API Manager."
   },
   {
     title: 'API Developer Portal',
-    url: '/home/devportal',
+    url: '/devportal',
     icon: FaServer,
     roles: [],
     description: "Have a look at what APIs are available from the BC Government - try now!"

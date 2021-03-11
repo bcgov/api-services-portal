@@ -96,8 +96,8 @@ const metadata = {
             isInCatalog: {name: "alwaysTrue"}
         }
     },
-    'GatewayMetric': {
-        query: 'allGatewayMetrics',
+    'Metric': {
+        query: 'allMetrics',
         refKey: 'name',
         sync: ['query', 'day', 'metric', 'values'],
         transformations: {
@@ -162,9 +162,9 @@ const metadata = {
             plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true},
         }
     },
-    'Plugin': {
+    'GatewayPlugin': {
         childOnly: true,
-        query: 'allPlugins',
+        query: 'allGatewayPlugins',
         refKey: 'kongPluginId',
         sync: ['name', 'tags', 'config'],
         transformations: {
@@ -172,14 +172,23 @@ const metadata = {
             config: {name: "toString"}
         }
     },
-    'Consumer': {
-        query: 'allConsumers',
+    'GatewayConsumer': {
+        query: 'allGatewayConsumers',
         refKey: 'kongConsumerId',
-        sync: ['username', 'tags', 'customId', 'namespace', 'plugins'],
+        sync: ['username', 'tags', 'customId', 'namespace', 'aclGroups', 'plugins'],
         transformations: {
             tags: {name: "toString"},
+            aclGroups: {name: "toString"},
             namespace: {name:"mapNamespace"},
             plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true}
+        }
+    },
+    'Application': {
+        query: 'allApplications',
+        refKey: 'name',
+        sync: [ 'description'],
+        transformations: {
+            owner: {name: "connectOne", list: "allUsers", refKey: 'username' },
         }
     },
     'Content': {

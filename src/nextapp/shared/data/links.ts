@@ -9,36 +9,35 @@ const links: NavLink[] = [
   { name: 'Home', url: '/home', access: [], sites: ['manager','devportal'] },
   {
     name: 'API Discovery',
-    url: '/poc/api-discovery',
+    url: '/devportal/poc/api-discovery',
     access: ['developer', 'api-owner'], sites: ['devportal'] 
   },
   {
     name: 'Applications',
-    url: '/poc/applications',
+    url: '/devportal/poc/applications',
     access: ['developer', 'api-owner'], sites: ['devportal'] 
   },
-  { name: 'Products', url: '/products', access: ['api-owner'], sites: ['manager'] }, 
-  { name: 'Services', url: '/services', access: ['api-owner'], sites: ['manager']  },
-  { name: 'Consumers', url: '/poc/consumers', access: ['api-owner'], sites: ['manager']  },
+  { name: 'Products', url: '/manager/products', access: ['api-owner'], sites: ['manager'] }, 
+  { name: 'Services', url: '/manager/services', access: ['api-owner'], sites: ['manager']  },
+  { name: 'Consumers', url: '/manager/poc/consumers', access: ['api-owner'], sites: ['manager']  },
   {
     name: 'Access Requests',
-    url: '/poc/requests',
+    url: '/manager/poc/requests',
     access: ['api-owner', 'api-manager', 'credential-admin'], sites: ['manager'] 
   },
   {
     name: 'Service Accounts',
-    url: '/poc/service-accounts',
+    url: '/manager/poc/service-accounts',
     access: ['api-owner'], sites: ['manager'] 
   },
   {
     name: 'Credential Issuers',
-    url: '/poc/credential-issuers',
+    url: '/manager/poc/credential-issuers',
     access: ['credential-admin'], sites: ['manager'] 
   },
-  { name: 'Activity', url: '/poc/activity', access: ['api-owner'], sites: ['manager']  },
-  { name: 'Documentation', url: '/docs', access: [], sites: ['devportal', 'manager']  },
-  { name: 'APS Admin', url: '/admin', access: ['aps-admin'], sites: ['manager']  },
-  { name: 'POC Products', url: '/poc/packagingv1', access: ['aps-admin'], sites: ['manager']  },
+  { name: 'Activity', url: '/manager/poc/activity', access: ['api-owner'], sites: ['manager']  },
+  { name: 'Documentation', url: '/devportal/docs', access: [], sites: ['devportal']  },
+  { name: 'APS Admin', url: '/admin', access: ['aps-admin'], sites: ['manager']  }
 ];
 
 export default links;

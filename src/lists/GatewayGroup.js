@@ -32,7 +32,6 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [
-    byTracking(),
     atTracking()
   ]
 }

@@ -23,7 +23,7 @@ module.exports = {
         { value: 'keys', label: 'API Keys'},
       ]
     },
-    plugins: { type: Relationship, ref: 'Plugin', many: true },
+    plugins: { type: Relationship, ref: 'GatewayPlugin', many: true },
     description: {
       type: Text,
       isMultiline: true,

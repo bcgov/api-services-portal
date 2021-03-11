@@ -64,8 +64,6 @@ export type AccessRequest = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  credentialReference?: Maybe<Scalars['String']>;
-  credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
@@ -148,42 +146,6 @@ export type AccessRequestWhereInput = {
   isIssued_not?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isComplete_not?: Maybe<Scalars['Boolean']>;
-  credentialReference?: Maybe<Scalars['String']>;
-  credentialReference_not?: Maybe<Scalars['String']>;
-  credentialReference_contains?: Maybe<Scalars['String']>;
-  credentialReference_not_contains?: Maybe<Scalars['String']>;
-  credentialReference_starts_with?: Maybe<Scalars['String']>;
-  credentialReference_not_starts_with?: Maybe<Scalars['String']>;
-  credentialReference_ends_with?: Maybe<Scalars['String']>;
-  credentialReference_not_ends_with?: Maybe<Scalars['String']>;
-  credentialReference_i?: Maybe<Scalars['String']>;
-  credentialReference_not_i?: Maybe<Scalars['String']>;
-  credentialReference_contains_i?: Maybe<Scalars['String']>;
-  credentialReference_not_contains_i?: Maybe<Scalars['String']>;
-  credentialReference_starts_with_i?: Maybe<Scalars['String']>;
-  credentialReference_not_starts_with_i?: Maybe<Scalars['String']>;
-  credentialReference_ends_with_i?: Maybe<Scalars['String']>;
-  credentialReference_not_ends_with_i?: Maybe<Scalars['String']>;
-  credentialReference_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  credentialReference_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  credential?: Maybe<Scalars['String']>;
-  credential_not?: Maybe<Scalars['String']>;
-  credential_contains?: Maybe<Scalars['String']>;
-  credential_not_contains?: Maybe<Scalars['String']>;
-  credential_starts_with?: Maybe<Scalars['String']>;
-  credential_not_starts_with?: Maybe<Scalars['String']>;
-  credential_ends_with?: Maybe<Scalars['String']>;
-  credential_not_ends_with?: Maybe<Scalars['String']>;
-  credential_i?: Maybe<Scalars['String']>;
-  credential_not_i?: Maybe<Scalars['String']>;
-  credential_contains_i?: Maybe<Scalars['String']>;
-  credential_not_contains_i?: Maybe<Scalars['String']>;
-  credential_starts_with_i?: Maybe<Scalars['String']>;
-  credential_not_starts_with_i?: Maybe<Scalars['String']>;
-  credential_ends_with_i?: Maybe<Scalars['String']>;
-  credential_not_ends_with_i?: Maybe<Scalars['String']>;
-  credential_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  credential_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   requestor?: Maybe<UserWhereInput>;
   requestor_is_null?: Maybe<Scalars['Boolean']>;
   application?: Maybe<ApplicationWhereInput>;
@@ -235,10 +197,6 @@ export enum SortAccessRequestsBy {
   IsIssuedDesc = 'isIssued_DESC',
   IsCompleteAsc = 'isComplete_ASC',
   IsCompleteDesc = 'isComplete_DESC',
-  CredentialReferenceAsc = 'credentialReference_ASC',
-  CredentialReferenceDesc = 'credentialReference_DESC',
-  CredentialAsc = 'credential_ASC',
-  CredentialDesc = 'credential_DESC',
   RequestorAsc = 'requestor_ASC',
   RequestorDesc = 'requestor_DESC',
   ApplicationAsc = 'application_ASC',
@@ -263,8 +221,6 @@ export type AccessRequestUpdateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  credentialReference?: Maybe<Scalars['String']>;
-  credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
@@ -282,8 +238,6 @@ export type AccessRequestCreateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
-  credentialReference?: Maybe<Scalars['String']>;
-  credential?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
@@ -722,8 +676,6 @@ export type Application = {
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   owner?: Maybe<User>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -791,10 +743,6 @@ export type ApplicationWhereInput = {
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -828,10 +776,6 @@ export enum SortApplicationsBy {
   DescriptionDesc = 'description_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -859,241 +803,6 @@ export type ApplicationCreateInput = {
 
 export type ApplicationsCreateInput = {
   data?: Maybe<ApplicationCreateInput>;
-};
-
-export type PluginRelateToManyInput = {
-  create?: Maybe<Array<Maybe<PluginCreateInput>>>;
-  connect?: Maybe<Array<Maybe<PluginWhereUniqueInput>>>;
-  disconnect?: Maybe<Array<Maybe<PluginWhereUniqueInput>>>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
-/**  A keystone list  */
-export type Consumer = {
-  __typename?: 'Consumer';
-  /**
-   * This virtual field will be resolved in one of the following ways (in this order):
-   *  1. Execution of 'labelResolver' set on the Consumer List config, or
-   *  2. As an alias to the field set on 'labelField' in the Consumer List config, or
-   *  3. As an alias to a 'name' field on the Consumer List (if one exists), or
-   *  4. As an alias to the 'id' field on the Consumer List.
-   */
-  _label_?: Maybe<Scalars['String']>;
-  id: Scalars['ID'];
-  username?: Maybe<Scalars['String']>;
-  customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
-  namespace?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  plugins: Array<Plugin>;
-  _pluginsMeta?: Maybe<_QueryMeta>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
-  updatedAt?: Maybe<Scalars['DateTime']>;
-  createdAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-/**  A keystone list  */
-export type ConsumerPluginsArgs = {
-  where?: Maybe<PluginWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-/**  A keystone list  */
-export type Consumer_PluginsMetaArgs = {
-  where?: Maybe<PluginWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-export type ConsumerWhereInput = {
-  AND?: Maybe<Array<Maybe<ConsumerWhereInput>>>;
-  OR?: Maybe<Array<Maybe<ConsumerWhereInput>>>;
-  id?: Maybe<Scalars['ID']>;
-  id_not?: Maybe<Scalars['ID']>;
-  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
-  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
-  username?: Maybe<Scalars['String']>;
-  username_not?: Maybe<Scalars['String']>;
-  username_contains?: Maybe<Scalars['String']>;
-  username_not_contains?: Maybe<Scalars['String']>;
-  username_starts_with?: Maybe<Scalars['String']>;
-  username_not_starts_with?: Maybe<Scalars['String']>;
-  username_ends_with?: Maybe<Scalars['String']>;
-  username_not_ends_with?: Maybe<Scalars['String']>;
-  username_i?: Maybe<Scalars['String']>;
-  username_not_i?: Maybe<Scalars['String']>;
-  username_contains_i?: Maybe<Scalars['String']>;
-  username_not_contains_i?: Maybe<Scalars['String']>;
-  username_starts_with_i?: Maybe<Scalars['String']>;
-  username_not_starts_with_i?: Maybe<Scalars['String']>;
-  username_ends_with_i?: Maybe<Scalars['String']>;
-  username_not_ends_with_i?: Maybe<Scalars['String']>;
-  username_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  username_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  customId?: Maybe<Scalars['String']>;
-  customId_not?: Maybe<Scalars['String']>;
-  customId_contains?: Maybe<Scalars['String']>;
-  customId_not_contains?: Maybe<Scalars['String']>;
-  customId_starts_with?: Maybe<Scalars['String']>;
-  customId_not_starts_with?: Maybe<Scalars['String']>;
-  customId_ends_with?: Maybe<Scalars['String']>;
-  customId_not_ends_with?: Maybe<Scalars['String']>;
-  customId_i?: Maybe<Scalars['String']>;
-  customId_not_i?: Maybe<Scalars['String']>;
-  customId_contains_i?: Maybe<Scalars['String']>;
-  customId_not_contains_i?: Maybe<Scalars['String']>;
-  customId_starts_with_i?: Maybe<Scalars['String']>;
-  customId_not_starts_with_i?: Maybe<Scalars['String']>;
-  customId_ends_with_i?: Maybe<Scalars['String']>;
-  customId_not_ends_with_i?: Maybe<Scalars['String']>;
-  customId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  customId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongConsumerId?: Maybe<Scalars['String']>;
-  kongConsumerId_not?: Maybe<Scalars['String']>;
-  kongConsumerId_contains?: Maybe<Scalars['String']>;
-  kongConsumerId_not_contains?: Maybe<Scalars['String']>;
-  kongConsumerId_starts_with?: Maybe<Scalars['String']>;
-  kongConsumerId_not_starts_with?: Maybe<Scalars['String']>;
-  kongConsumerId_ends_with?: Maybe<Scalars['String']>;
-  kongConsumerId_not_ends_with?: Maybe<Scalars['String']>;
-  kongConsumerId_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_i?: Maybe<Scalars['String']>;
-  kongConsumerId_contains_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_contains_i?: Maybe<Scalars['String']>;
-  kongConsumerId_starts_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_ends_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongConsumerId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  namespace?: Maybe<Scalars['String']>;
-  namespace_not?: Maybe<Scalars['String']>;
-  namespace_contains?: Maybe<Scalars['String']>;
-  namespace_not_contains?: Maybe<Scalars['String']>;
-  namespace_starts_with?: Maybe<Scalars['String']>;
-  namespace_not_starts_with?: Maybe<Scalars['String']>;
-  namespace_ends_with?: Maybe<Scalars['String']>;
-  namespace_not_ends_with?: Maybe<Scalars['String']>;
-  namespace_i?: Maybe<Scalars['String']>;
-  namespace_not_i?: Maybe<Scalars['String']>;
-  namespace_contains_i?: Maybe<Scalars['String']>;
-  namespace_not_contains_i?: Maybe<Scalars['String']>;
-  namespace_starts_with_i?: Maybe<Scalars['String']>;
-  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
-  namespace_ends_with_i?: Maybe<Scalars['String']>;
-  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
-  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  tags?: Maybe<Scalars['String']>;
-  tags_not?: Maybe<Scalars['String']>;
-  tags_contains?: Maybe<Scalars['String']>;
-  tags_not_contains?: Maybe<Scalars['String']>;
-  tags_starts_with?: Maybe<Scalars['String']>;
-  tags_not_starts_with?: Maybe<Scalars['String']>;
-  tags_ends_with?: Maybe<Scalars['String']>;
-  tags_not_ends_with?: Maybe<Scalars['String']>;
-  tags_i?: Maybe<Scalars['String']>;
-  tags_not_i?: Maybe<Scalars['String']>;
-  tags_contains_i?: Maybe<Scalars['String']>;
-  tags_not_contains_i?: Maybe<Scalars['String']>;
-  tags_starts_with_i?: Maybe<Scalars['String']>;
-  tags_not_starts_with_i?: Maybe<Scalars['String']>;
-  tags_ends_with_i?: Maybe<Scalars['String']>;
-  tags_not_ends_with_i?: Maybe<Scalars['String']>;
-  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  /**  condition must be true for all nodes  */
-  plugins_every?: Maybe<PluginWhereInput>;
-  /**  condition must be true for at least 1 node  */
-  plugins_some?: Maybe<PluginWhereInput>;
-  /**  condition must be false for all nodes  */
-  plugins_none?: Maybe<PluginWhereInput>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
-  updatedAt?: Maybe<Scalars['DateTime']>;
-  updatedAt_not?: Maybe<Scalars['DateTime']>;
-  updatedAt_lt?: Maybe<Scalars['DateTime']>;
-  updatedAt_lte?: Maybe<Scalars['DateTime']>;
-  updatedAt_gt?: Maybe<Scalars['DateTime']>;
-  updatedAt_gte?: Maybe<Scalars['DateTime']>;
-  updatedAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
-  updatedAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
-  createdAt?: Maybe<Scalars['DateTime']>;
-  createdAt_not?: Maybe<Scalars['DateTime']>;
-  createdAt_lt?: Maybe<Scalars['DateTime']>;
-  createdAt_lte?: Maybe<Scalars['DateTime']>;
-  createdAt_gt?: Maybe<Scalars['DateTime']>;
-  createdAt_gte?: Maybe<Scalars['DateTime']>;
-  createdAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
-  createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
-};
-
-export type ConsumerWhereUniqueInput = {
-  id: Scalars['ID'];
-};
-
-export enum SortConsumersBy {
-  IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
-  UsernameAsc = 'username_ASC',
-  UsernameDesc = 'username_DESC',
-  CustomIdAsc = 'customId_ASC',
-  CustomIdDesc = 'customId_DESC',
-  KongConsumerIdAsc = 'kongConsumerId_ASC',
-  KongConsumerIdDesc = 'kongConsumerId_DESC',
-  NamespaceAsc = 'namespace_ASC',
-  NamespaceDesc = 'namespace_DESC',
-  TagsAsc = 'tags_ASC',
-  TagsDesc = 'tags_DESC',
-  PluginsAsc = 'plugins_ASC',
-  PluginsDesc = 'plugins_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
-  UpdatedAtAsc = 'updatedAt_ASC',
-  UpdatedAtDesc = 'updatedAt_DESC',
-  CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC'
-}
-
-export type ConsumerUpdateInput = {
-  username?: Maybe<Scalars['String']>;
-  customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
-  namespace?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  plugins?: Maybe<PluginRelateToManyInput>;
-};
-
-export type ConsumersUpdateInput = {
-  id: Scalars['ID'];
-  data?: Maybe<ConsumerUpdateInput>;
-};
-
-export type ConsumerCreateInput = {
-  username?: Maybe<Scalars['String']>;
-  customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
-  namespace?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  plugins?: Maybe<PluginRelateToManyInput>;
-};
-
-export type ConsumersCreateInput = {
-  data?: Maybe<ConsumerCreateInput>;
 };
 
 /**  A keystone list  */
@@ -1966,6 +1675,13 @@ export enum EnvironmentAuthMethodType {
   Keys = 'keys'
 }
 
+export type GatewayPluginRelateToManyInput = {
+  create?: Maybe<Array<Maybe<GatewayPluginCreateInput>>>;
+  connect?: Maybe<Array<Maybe<GatewayPluginWhereUniqueInput>>>;
+  disconnect?: Maybe<Array<Maybe<GatewayPluginWhereUniqueInput>>>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 export type CredentialIssuerRelateToOneInput = {
   create?: Maybe<CredentialIssuerCreateInput>;
   connect?: Maybe<CredentialIssuerWhereUniqueInput>;
@@ -2002,7 +1718,7 @@ export type Environment = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   authMethod?: Maybe<EnvironmentAuthMethodType>;
-  plugins: Array<Plugin>;
+  plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
   description?: Maybe<Scalars['String']>;
   credentialIssuer?: Maybe<CredentialIssuer>;
@@ -2014,9 +1730,9 @@ export type Environment = {
 
 /**  A keystone list  */
 export type EnvironmentPluginsArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2025,9 +1741,9 @@ export type EnvironmentPluginsArgs = {
 
 /**  A keystone list  */
 export type Environment_PluginsMetaArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2087,11 +1803,11 @@ export type EnvironmentWhereInput = {
   authMethod_in?: Maybe<Array<Maybe<EnvironmentAuthMethodType>>>;
   authMethod_not_in?: Maybe<Array<Maybe<EnvironmentAuthMethodType>>>;
   /**  condition must be true for all nodes  */
-  plugins_every?: Maybe<PluginWhereInput>;
+  plugins_every?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be true for at least 1 node  */
-  plugins_some?: Maybe<PluginWhereInput>;
+  plugins_some?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be false for all nodes  */
-  plugins_none?: Maybe<PluginWhereInput>;
+  plugins_none?: Maybe<GatewayPluginWhereInput>;
   description?: Maybe<Scalars['String']>;
   description_not?: Maybe<Scalars['String']>;
   description_contains?: Maybe<Scalars['String']>;
@@ -2151,7 +1867,7 @@ export type EnvironmentUpdateInput = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   authMethod?: Maybe<EnvironmentAuthMethodType>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
   description?: Maybe<Scalars['String']>;
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
@@ -2167,7 +1883,7 @@ export type EnvironmentCreateInput = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   authMethod?: Maybe<EnvironmentAuthMethodType>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
   description?: Maybe<Scalars['String']>;
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
@@ -2176,6 +1892,247 @@ export type EnvironmentCreateInput = {
 
 export type EnvironmentsCreateInput = {
   data?: Maybe<EnvironmentCreateInput>;
+};
+
+/**  A keystone list  */
+export type GatewayConsumer = {
+  __typename?: 'GatewayConsumer';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the GatewayConsumer List config, or
+   *  2. As an alias to the field set on 'labelField' in the GatewayConsumer List config, or
+   *  3. As an alias to a 'name' field on the GatewayConsumer List (if one exists), or
+   *  4. As an alias to the 'id' field on the GatewayConsumer List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  username?: Maybe<Scalars['String']>;
+  customId?: Maybe<Scalars['String']>;
+  kongConsumerId?: Maybe<Scalars['String']>;
+  aclGroups?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  plugins: Array<GatewayPlugin>;
+  _pluginsMeta?: Maybe<_QueryMeta>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+};
+
+
+/**  A keystone list  */
+export type GatewayConsumerPluginsArgs = {
+  where?: Maybe<GatewayPluginWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+/**  A keystone list  */
+export type GatewayConsumer_PluginsMetaArgs = {
+  where?: Maybe<GatewayPluginWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+export type GatewayConsumerWhereInput = {
+  AND?: Maybe<Array<Maybe<GatewayConsumerWhereInput>>>;
+  OR?: Maybe<Array<Maybe<GatewayConsumerWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  username?: Maybe<Scalars['String']>;
+  username_not?: Maybe<Scalars['String']>;
+  username_contains?: Maybe<Scalars['String']>;
+  username_not_contains?: Maybe<Scalars['String']>;
+  username_starts_with?: Maybe<Scalars['String']>;
+  username_not_starts_with?: Maybe<Scalars['String']>;
+  username_ends_with?: Maybe<Scalars['String']>;
+  username_not_ends_with?: Maybe<Scalars['String']>;
+  username_i?: Maybe<Scalars['String']>;
+  username_not_i?: Maybe<Scalars['String']>;
+  username_contains_i?: Maybe<Scalars['String']>;
+  username_not_contains_i?: Maybe<Scalars['String']>;
+  username_starts_with_i?: Maybe<Scalars['String']>;
+  username_not_starts_with_i?: Maybe<Scalars['String']>;
+  username_ends_with_i?: Maybe<Scalars['String']>;
+  username_not_ends_with_i?: Maybe<Scalars['String']>;
+  username_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  username_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  customId?: Maybe<Scalars['String']>;
+  customId_not?: Maybe<Scalars['String']>;
+  customId_contains?: Maybe<Scalars['String']>;
+  customId_not_contains?: Maybe<Scalars['String']>;
+  customId_starts_with?: Maybe<Scalars['String']>;
+  customId_not_starts_with?: Maybe<Scalars['String']>;
+  customId_ends_with?: Maybe<Scalars['String']>;
+  customId_not_ends_with?: Maybe<Scalars['String']>;
+  customId_i?: Maybe<Scalars['String']>;
+  customId_not_i?: Maybe<Scalars['String']>;
+  customId_contains_i?: Maybe<Scalars['String']>;
+  customId_not_contains_i?: Maybe<Scalars['String']>;
+  customId_starts_with_i?: Maybe<Scalars['String']>;
+  customId_not_starts_with_i?: Maybe<Scalars['String']>;
+  customId_ends_with_i?: Maybe<Scalars['String']>;
+  customId_not_ends_with_i?: Maybe<Scalars['String']>;
+  customId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  customId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  kongConsumerId?: Maybe<Scalars['String']>;
+  kongConsumerId_not?: Maybe<Scalars['String']>;
+  kongConsumerId_contains?: Maybe<Scalars['String']>;
+  kongConsumerId_not_contains?: Maybe<Scalars['String']>;
+  kongConsumerId_starts_with?: Maybe<Scalars['String']>;
+  kongConsumerId_not_starts_with?: Maybe<Scalars['String']>;
+  kongConsumerId_ends_with?: Maybe<Scalars['String']>;
+  kongConsumerId_not_ends_with?: Maybe<Scalars['String']>;
+  kongConsumerId_i?: Maybe<Scalars['String']>;
+  kongConsumerId_not_i?: Maybe<Scalars['String']>;
+  kongConsumerId_contains_i?: Maybe<Scalars['String']>;
+  kongConsumerId_not_contains_i?: Maybe<Scalars['String']>;
+  kongConsumerId_starts_with_i?: Maybe<Scalars['String']>;
+  kongConsumerId_not_starts_with_i?: Maybe<Scalars['String']>;
+  kongConsumerId_ends_with_i?: Maybe<Scalars['String']>;
+  kongConsumerId_not_ends_with_i?: Maybe<Scalars['String']>;
+  kongConsumerId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  kongConsumerId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  aclGroups?: Maybe<Scalars['String']>;
+  aclGroups_not?: Maybe<Scalars['String']>;
+  aclGroups_contains?: Maybe<Scalars['String']>;
+  aclGroups_not_contains?: Maybe<Scalars['String']>;
+  aclGroups_starts_with?: Maybe<Scalars['String']>;
+  aclGroups_not_starts_with?: Maybe<Scalars['String']>;
+  aclGroups_ends_with?: Maybe<Scalars['String']>;
+  aclGroups_not_ends_with?: Maybe<Scalars['String']>;
+  aclGroups_i?: Maybe<Scalars['String']>;
+  aclGroups_not_i?: Maybe<Scalars['String']>;
+  aclGroups_contains_i?: Maybe<Scalars['String']>;
+  aclGroups_not_contains_i?: Maybe<Scalars['String']>;
+  aclGroups_starts_with_i?: Maybe<Scalars['String']>;
+  aclGroups_not_starts_with_i?: Maybe<Scalars['String']>;
+  aclGroups_ends_with_i?: Maybe<Scalars['String']>;
+  aclGroups_not_ends_with_i?: Maybe<Scalars['String']>;
+  aclGroups_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  aclGroups_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags?: Maybe<Scalars['String']>;
+  tags_not?: Maybe<Scalars['String']>;
+  tags_contains?: Maybe<Scalars['String']>;
+  tags_not_contains?: Maybe<Scalars['String']>;
+  tags_starts_with?: Maybe<Scalars['String']>;
+  tags_not_starts_with?: Maybe<Scalars['String']>;
+  tags_ends_with?: Maybe<Scalars['String']>;
+  tags_not_ends_with?: Maybe<Scalars['String']>;
+  tags_i?: Maybe<Scalars['String']>;
+  tags_not_i?: Maybe<Scalars['String']>;
+  tags_contains_i?: Maybe<Scalars['String']>;
+  tags_not_contains_i?: Maybe<Scalars['String']>;
+  tags_starts_with_i?: Maybe<Scalars['String']>;
+  tags_not_starts_with_i?: Maybe<Scalars['String']>;
+  tags_ends_with_i?: Maybe<Scalars['String']>;
+  tags_not_ends_with_i?: Maybe<Scalars['String']>;
+  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  /**  condition must be true for all nodes  */
+  plugins_every?: Maybe<GatewayPluginWhereInput>;
+  /**  condition must be true for at least 1 node  */
+  plugins_some?: Maybe<GatewayPluginWhereInput>;
+  /**  condition must be false for all nodes  */
+  plugins_none?: Maybe<GatewayPluginWhereInput>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt_not?: Maybe<Scalars['DateTime']>;
+  updatedAt_lt?: Maybe<Scalars['DateTime']>;
+  updatedAt_lte?: Maybe<Scalars['DateTime']>;
+  updatedAt_gt?: Maybe<Scalars['DateTime']>;
+  updatedAt_gte?: Maybe<Scalars['DateTime']>;
+  updatedAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  updatedAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+  createdAt_not?: Maybe<Scalars['DateTime']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+};
+
+export type GatewayConsumerWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortGatewayConsumersBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  UsernameAsc = 'username_ASC',
+  UsernameDesc = 'username_DESC',
+  CustomIdAsc = 'customId_ASC',
+  CustomIdDesc = 'customId_DESC',
+  KongConsumerIdAsc = 'kongConsumerId_ASC',
+  KongConsumerIdDesc = 'kongConsumerId_DESC',
+  AclGroupsAsc = 'aclGroups_ASC',
+  AclGroupsDesc = 'aclGroups_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
+  TagsAsc = 'tags_ASC',
+  TagsDesc = 'tags_DESC',
+  PluginsAsc = 'plugins_ASC',
+  PluginsDesc = 'plugins_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC'
+}
+
+export type GatewayConsumerUpdateInput = {
+  username?: Maybe<Scalars['String']>;
+  customId?: Maybe<Scalars['String']>;
+  kongConsumerId?: Maybe<Scalars['String']>;
+  aclGroups?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
+};
+
+export type GatewayConsumersUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<GatewayConsumerUpdateInput>;
+};
+
+export type GatewayConsumerCreateInput = {
+  username?: Maybe<Scalars['String']>;
+  customId?: Maybe<Scalars['String']>;
+  kongConsumerId?: Maybe<Scalars['String']>;
+  aclGroups?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
+};
+
+export type GatewayConsumersCreateInput = {
+  data?: Maybe<GatewayConsumerCreateInput>;
 };
 
 /**  A keystone list  */
@@ -2193,8 +2150,6 @@ export type GatewayGroup = {
   name?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2260,10 +2215,6 @@ export type GatewayGroupWhereInput = {
   namespace_not_ends_with_i?: Maybe<Scalars['String']>;
   namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2295,10 +2246,6 @@ export enum SortGatewayGroupsBy {
   ExtRefIdDesc = 'extRefId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2326,31 +2273,38 @@ export type GatewayGroupsCreateInput = {
   data?: Maybe<GatewayGroupCreateInput>;
 };
 
+export type GatewayRouteRelateToOneInput = {
+  create?: Maybe<GatewayRouteCreateInput>;
+  connect?: Maybe<GatewayRouteWhereUniqueInput>;
+  disconnect?: Maybe<GatewayRouteWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
-export type GatewayMetric = {
-  __typename?: 'GatewayMetric';
+export type GatewayPlugin = {
+  __typename?: 'GatewayPlugin';
   /**
    * This virtual field will be resolved in one of the following ways (in this order):
-   *  1. Execution of 'labelResolver' set on the GatewayMetric List config, or
-   *  2. As an alias to the field set on 'labelField' in the GatewayMetric List config, or
-   *  3. As an alias to a 'name' field on the GatewayMetric List (if one exists), or
-   *  4. As an alias to the 'id' field on the GatewayMetric List.
+   *  1. Execution of 'labelResolver' set on the GatewayPlugin List config, or
+   *  2. As an alias to the field set on 'labelField' in the GatewayPlugin List config, or
+   *  3. As an alias to a 'name' field on the GatewayPlugin List (if one exists), or
+   *  4. As an alias to the 'id' field on the GatewayPlugin List.
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  query?: Maybe<Scalars['String']>;
-  day?: Maybe<Scalars['String']>;
-  metric?: Maybe<Scalars['String']>;
-  values?: Maybe<Scalars['String']>;
+  kongPluginId?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayService>;
+  route?: Maybe<GatewayRoute>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
-export type GatewayMetricWhereInput = {
-  AND?: Maybe<Array<Maybe<GatewayMetricWhereInput>>>;
-  OR?: Maybe<Array<Maybe<GatewayMetricWhereInput>>>;
+export type GatewayPluginWhereInput = {
+  AND?: Maybe<Array<Maybe<GatewayPluginWhereInput>>>;
+  OR?: Maybe<Array<Maybe<GatewayPluginWhereInput>>>;
   id?: Maybe<Scalars['ID']>;
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
@@ -2373,80 +2327,64 @@ export type GatewayMetricWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  query?: Maybe<Scalars['String']>;
-  query_not?: Maybe<Scalars['String']>;
-  query_contains?: Maybe<Scalars['String']>;
-  query_not_contains?: Maybe<Scalars['String']>;
-  query_starts_with?: Maybe<Scalars['String']>;
-  query_not_starts_with?: Maybe<Scalars['String']>;
-  query_ends_with?: Maybe<Scalars['String']>;
-  query_not_ends_with?: Maybe<Scalars['String']>;
-  query_i?: Maybe<Scalars['String']>;
-  query_not_i?: Maybe<Scalars['String']>;
-  query_contains_i?: Maybe<Scalars['String']>;
-  query_not_contains_i?: Maybe<Scalars['String']>;
-  query_starts_with_i?: Maybe<Scalars['String']>;
-  query_not_starts_with_i?: Maybe<Scalars['String']>;
-  query_ends_with_i?: Maybe<Scalars['String']>;
-  query_not_ends_with_i?: Maybe<Scalars['String']>;
-  query_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  query_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  day?: Maybe<Scalars['String']>;
-  day_not?: Maybe<Scalars['String']>;
-  day_contains?: Maybe<Scalars['String']>;
-  day_not_contains?: Maybe<Scalars['String']>;
-  day_starts_with?: Maybe<Scalars['String']>;
-  day_not_starts_with?: Maybe<Scalars['String']>;
-  day_ends_with?: Maybe<Scalars['String']>;
-  day_not_ends_with?: Maybe<Scalars['String']>;
-  day_i?: Maybe<Scalars['String']>;
-  day_not_i?: Maybe<Scalars['String']>;
-  day_contains_i?: Maybe<Scalars['String']>;
-  day_not_contains_i?: Maybe<Scalars['String']>;
-  day_starts_with_i?: Maybe<Scalars['String']>;
-  day_not_starts_with_i?: Maybe<Scalars['String']>;
-  day_ends_with_i?: Maybe<Scalars['String']>;
-  day_not_ends_with_i?: Maybe<Scalars['String']>;
-  day_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  day_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  metric?: Maybe<Scalars['String']>;
-  metric_not?: Maybe<Scalars['String']>;
-  metric_contains?: Maybe<Scalars['String']>;
-  metric_not_contains?: Maybe<Scalars['String']>;
-  metric_starts_with?: Maybe<Scalars['String']>;
-  metric_not_starts_with?: Maybe<Scalars['String']>;
-  metric_ends_with?: Maybe<Scalars['String']>;
-  metric_not_ends_with?: Maybe<Scalars['String']>;
-  metric_i?: Maybe<Scalars['String']>;
-  metric_not_i?: Maybe<Scalars['String']>;
-  metric_contains_i?: Maybe<Scalars['String']>;
-  metric_not_contains_i?: Maybe<Scalars['String']>;
-  metric_starts_with_i?: Maybe<Scalars['String']>;
-  metric_not_starts_with_i?: Maybe<Scalars['String']>;
-  metric_ends_with_i?: Maybe<Scalars['String']>;
-  metric_not_ends_with_i?: Maybe<Scalars['String']>;
-  metric_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  metric_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  values?: Maybe<Scalars['String']>;
-  values_not?: Maybe<Scalars['String']>;
-  values_contains?: Maybe<Scalars['String']>;
-  values_not_contains?: Maybe<Scalars['String']>;
-  values_starts_with?: Maybe<Scalars['String']>;
-  values_not_starts_with?: Maybe<Scalars['String']>;
-  values_ends_with?: Maybe<Scalars['String']>;
-  values_not_ends_with?: Maybe<Scalars['String']>;
-  values_i?: Maybe<Scalars['String']>;
-  values_not_i?: Maybe<Scalars['String']>;
-  values_contains_i?: Maybe<Scalars['String']>;
-  values_not_contains_i?: Maybe<Scalars['String']>;
-  values_starts_with_i?: Maybe<Scalars['String']>;
-  values_not_starts_with_i?: Maybe<Scalars['String']>;
-  values_ends_with_i?: Maybe<Scalars['String']>;
-  values_not_ends_with_i?: Maybe<Scalars['String']>;
-  values_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  values_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  kongPluginId?: Maybe<Scalars['String']>;
+  kongPluginId_not?: Maybe<Scalars['String']>;
+  kongPluginId_contains?: Maybe<Scalars['String']>;
+  kongPluginId_not_contains?: Maybe<Scalars['String']>;
+  kongPluginId_starts_with?: Maybe<Scalars['String']>;
+  kongPluginId_not_starts_with?: Maybe<Scalars['String']>;
+  kongPluginId_ends_with?: Maybe<Scalars['String']>;
+  kongPluginId_not_ends_with?: Maybe<Scalars['String']>;
+  kongPluginId_i?: Maybe<Scalars['String']>;
+  kongPluginId_not_i?: Maybe<Scalars['String']>;
+  kongPluginId_contains_i?: Maybe<Scalars['String']>;
+  kongPluginId_not_contains_i?: Maybe<Scalars['String']>;
+  kongPluginId_starts_with_i?: Maybe<Scalars['String']>;
+  kongPluginId_not_starts_with_i?: Maybe<Scalars['String']>;
+  kongPluginId_ends_with_i?: Maybe<Scalars['String']>;
+  kongPluginId_not_ends_with_i?: Maybe<Scalars['String']>;
+  kongPluginId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  kongPluginId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags?: Maybe<Scalars['String']>;
+  tags_not?: Maybe<Scalars['String']>;
+  tags_contains?: Maybe<Scalars['String']>;
+  tags_not_contains?: Maybe<Scalars['String']>;
+  tags_starts_with?: Maybe<Scalars['String']>;
+  tags_not_starts_with?: Maybe<Scalars['String']>;
+  tags_ends_with?: Maybe<Scalars['String']>;
+  tags_not_ends_with?: Maybe<Scalars['String']>;
+  tags_i?: Maybe<Scalars['String']>;
+  tags_not_i?: Maybe<Scalars['String']>;
+  tags_contains_i?: Maybe<Scalars['String']>;
+  tags_not_contains_i?: Maybe<Scalars['String']>;
+  tags_starts_with_i?: Maybe<Scalars['String']>;
+  tags_not_starts_with_i?: Maybe<Scalars['String']>;
+  tags_ends_with_i?: Maybe<Scalars['String']>;
+  tags_not_ends_with_i?: Maybe<Scalars['String']>;
+  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  config?: Maybe<Scalars['String']>;
+  config_not?: Maybe<Scalars['String']>;
+  config_contains?: Maybe<Scalars['String']>;
+  config_not_contains?: Maybe<Scalars['String']>;
+  config_starts_with?: Maybe<Scalars['String']>;
+  config_not_starts_with?: Maybe<Scalars['String']>;
+  config_ends_with?: Maybe<Scalars['String']>;
+  config_not_ends_with?: Maybe<Scalars['String']>;
+  config_i?: Maybe<Scalars['String']>;
+  config_not_i?: Maybe<Scalars['String']>;
+  config_contains_i?: Maybe<Scalars['String']>;
+  config_not_contains_i?: Maybe<Scalars['String']>;
+  config_starts_with_i?: Maybe<Scalars['String']>;
+  config_not_starts_with_i?: Maybe<Scalars['String']>;
+  config_ends_with_i?: Maybe<Scalars['String']>;
+  config_not_ends_with_i?: Maybe<Scalars['String']>;
+  config_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  config_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   service?: Maybe<GatewayServiceWhereInput>;
   service_is_null?: Maybe<Scalars['Boolean']>;
+  route?: Maybe<GatewayRouteWhereInput>;
+  route_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2465,56 +2403,56 @@ export type GatewayMetricWhereInput = {
   createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
 };
 
-export type GatewayMetricWhereUniqueInput = {
+export type GatewayPluginWhereUniqueInput = {
   id: Scalars['ID'];
 };
 
-export enum SortGatewayMetricsBy {
+export enum SortGatewayPluginsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  QueryAsc = 'query_ASC',
-  QueryDesc = 'query_DESC',
-  DayAsc = 'day_ASC',
-  DayDesc = 'day_DESC',
-  MetricAsc = 'metric_ASC',
-  MetricDesc = 'metric_DESC',
-  ValuesAsc = 'values_ASC',
-  ValuesDesc = 'values_DESC',
+  KongPluginIdAsc = 'kongPluginId_ASC',
+  KongPluginIdDesc = 'kongPluginId_DESC',
+  TagsAsc = 'tags_ASC',
+  TagsDesc = 'tags_DESC',
+  ConfigAsc = 'config_ASC',
+  ConfigDesc = 'config_DESC',
   ServiceAsc = 'service_ASC',
   ServiceDesc = 'service_DESC',
+  RouteAsc = 'route_ASC',
+  RouteDesc = 'route_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
   CreatedAtDesc = 'createdAt_DESC'
 }
 
-export type GatewayMetricUpdateInput = {
+export type GatewayPluginUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  query?: Maybe<Scalars['String']>;
-  day?: Maybe<Scalars['String']>;
-  metric?: Maybe<Scalars['String']>;
-  values?: Maybe<Scalars['String']>;
+  kongPluginId?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
+  route?: Maybe<GatewayRouteRelateToOneInput>;
 };
 
-export type GatewayMetricsUpdateInput = {
+export type GatewayPluginsUpdateInput = {
   id: Scalars['ID'];
-  data?: Maybe<GatewayMetricUpdateInput>;
+  data?: Maybe<GatewayPluginUpdateInput>;
 };
 
-export type GatewayMetricCreateInput = {
+export type GatewayPluginCreateInput = {
   name?: Maybe<Scalars['String']>;
-  query?: Maybe<Scalars['String']>;
-  day?: Maybe<Scalars['String']>;
-  metric?: Maybe<Scalars['String']>;
-  values?: Maybe<Scalars['String']>;
+  kongPluginId?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
+  config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
+  route?: Maybe<GatewayRouteRelateToOneInput>;
 };
 
-export type GatewayMetricsCreateInput = {
-  data?: Maybe<GatewayMetricCreateInput>;
+export type GatewayPluginsCreateInput = {
+  data?: Maybe<GatewayPluginCreateInput>;
 };
 
 /**  A keystone list  */
@@ -2537,10 +2475,8 @@ export type GatewayRoute = {
   hosts?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayService>;
-  plugins: Array<Plugin>;
+  plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2548,9 +2484,9 @@ export type GatewayRoute = {
 
 /**  A keystone list  */
 export type GatewayRoutePluginsArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2559,9 +2495,9 @@ export type GatewayRoutePluginsArgs = {
 
 /**  A keystone list  */
 export type GatewayRoute_PluginsMetaArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2703,15 +2639,11 @@ export type GatewayRouteWhereInput = {
   service?: Maybe<GatewayServiceWhereInput>;
   service_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
-  plugins_every?: Maybe<PluginWhereInput>;
+  plugins_every?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be true for at least 1 node  */
-  plugins_some?: Maybe<PluginWhereInput>;
+  plugins_some?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be false for all nodes  */
-  plugins_none?: Maybe<PluginWhereInput>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
+  plugins_none?: Maybe<GatewayPluginWhereInput>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2755,10 +2687,6 @@ export enum SortGatewayRoutesBy {
   ServiceDesc = 'service_DESC',
   PluginsAsc = 'plugins_ASC',
   PluginsDesc = 'plugins_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2774,7 +2702,7 @@ export type GatewayRouteUpdateInput = {
   hosts?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
 };
 
 export type GatewayRoutesUpdateInput = {
@@ -2791,7 +2719,7 @@ export type GatewayRouteCreateInput = {
   hosts?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
 };
 
 export type GatewayRoutesCreateInput = {
@@ -2824,11 +2752,9 @@ export type GatewayService = {
   tags?: Maybe<Scalars['String']>;
   routes: Array<GatewayRoute>;
   _routesMeta?: Maybe<_QueryMeta>;
-  plugins: Array<Plugin>;
+  plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
   environment?: Maybe<Environment>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2858,9 +2784,9 @@ export type GatewayService_RoutesMetaArgs = {
 
 /**  A keystone list  */
 export type GatewayServicePluginsArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2869,9 +2795,9 @@ export type GatewayServicePluginsArgs = {
 
 /**  A keystone list  */
 export type GatewayService_PluginsMetaArgs = {
-  where?: Maybe<PluginWhereInput>;
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -2981,17 +2907,13 @@ export type GatewayServiceWhereInput = {
   /**  condition must be false for all nodes  */
   routes_none?: Maybe<GatewayRouteWhereInput>;
   /**  condition must be true for all nodes  */
-  plugins_every?: Maybe<PluginWhereInput>;
+  plugins_every?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be true for at least 1 node  */
-  plugins_some?: Maybe<PluginWhereInput>;
+  plugins_some?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be false for all nodes  */
-  plugins_none?: Maybe<PluginWhereInput>;
+  plugins_none?: Maybe<GatewayPluginWhereInput>;
   environment?: Maybe<EnvironmentWhereInput>;
   environment_is_null?: Maybe<Scalars['Boolean']>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -3033,10 +2955,6 @@ export enum SortGatewayServicesBy {
   PluginsDesc = 'plugins_DESC',
   EnvironmentAsc = 'environment_ASC',
   EnvironmentDesc = 'environment_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -3050,7 +2968,7 @@ export type GatewayServiceUpdateInput = {
   host?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   routes?: Maybe<GatewayRouteRelateToManyInput>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
   environment?: Maybe<EnvironmentRelateToOneInput>;
 };
 
@@ -3066,7 +2984,7 @@ export type GatewayServiceCreateInput = {
   host?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   routes?: Maybe<GatewayRouteRelateToManyInput>;
-  plugins?: Maybe<PluginRelateToManyInput>;
+  plugins?: Maybe<GatewayPluginRelateToManyInput>;
   environment?: Maybe<EnvironmentRelateToOneInput>;
 };
 
@@ -3306,6 +3224,197 @@ export type MemberRoleCreateInput = {
 
 export type MemberRolesCreateInput = {
   data?: Maybe<MemberRoleCreateInput>;
+};
+
+/**  A keystone list  */
+export type Metric = {
+  __typename?: 'Metric';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the Metric List config, or
+   *  2. As an alias to the field set on 'labelField' in the Metric List config, or
+   *  3. As an alias to a 'name' field on the Metric List (if one exists), or
+   *  4. As an alias to the 'id' field on the Metric List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+  query?: Maybe<Scalars['String']>;
+  day?: Maybe<Scalars['String']>;
+  metric?: Maybe<Scalars['String']>;
+  values?: Maybe<Scalars['String']>;
+  service?: Maybe<GatewayService>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type MetricWhereInput = {
+  AND?: Maybe<Array<Maybe<MetricWhereInput>>>;
+  OR?: Maybe<Array<Maybe<MetricWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  name?: Maybe<Scalars['String']>;
+  name_not?: Maybe<Scalars['String']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_starts_with?: Maybe<Scalars['String']>;
+  name_not_starts_with?: Maybe<Scalars['String']>;
+  name_ends_with?: Maybe<Scalars['String']>;
+  name_not_ends_with?: Maybe<Scalars['String']>;
+  name_i?: Maybe<Scalars['String']>;
+  name_not_i?: Maybe<Scalars['String']>;
+  name_contains_i?: Maybe<Scalars['String']>;
+  name_not_contains_i?: Maybe<Scalars['String']>;
+  name_starts_with_i?: Maybe<Scalars['String']>;
+  name_not_starts_with_i?: Maybe<Scalars['String']>;
+  name_ends_with_i?: Maybe<Scalars['String']>;
+  name_not_ends_with_i?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  query?: Maybe<Scalars['String']>;
+  query_not?: Maybe<Scalars['String']>;
+  query_contains?: Maybe<Scalars['String']>;
+  query_not_contains?: Maybe<Scalars['String']>;
+  query_starts_with?: Maybe<Scalars['String']>;
+  query_not_starts_with?: Maybe<Scalars['String']>;
+  query_ends_with?: Maybe<Scalars['String']>;
+  query_not_ends_with?: Maybe<Scalars['String']>;
+  query_i?: Maybe<Scalars['String']>;
+  query_not_i?: Maybe<Scalars['String']>;
+  query_contains_i?: Maybe<Scalars['String']>;
+  query_not_contains_i?: Maybe<Scalars['String']>;
+  query_starts_with_i?: Maybe<Scalars['String']>;
+  query_not_starts_with_i?: Maybe<Scalars['String']>;
+  query_ends_with_i?: Maybe<Scalars['String']>;
+  query_not_ends_with_i?: Maybe<Scalars['String']>;
+  query_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  query_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  day?: Maybe<Scalars['String']>;
+  day_not?: Maybe<Scalars['String']>;
+  day_contains?: Maybe<Scalars['String']>;
+  day_not_contains?: Maybe<Scalars['String']>;
+  day_starts_with?: Maybe<Scalars['String']>;
+  day_not_starts_with?: Maybe<Scalars['String']>;
+  day_ends_with?: Maybe<Scalars['String']>;
+  day_not_ends_with?: Maybe<Scalars['String']>;
+  day_i?: Maybe<Scalars['String']>;
+  day_not_i?: Maybe<Scalars['String']>;
+  day_contains_i?: Maybe<Scalars['String']>;
+  day_not_contains_i?: Maybe<Scalars['String']>;
+  day_starts_with_i?: Maybe<Scalars['String']>;
+  day_not_starts_with_i?: Maybe<Scalars['String']>;
+  day_ends_with_i?: Maybe<Scalars['String']>;
+  day_not_ends_with_i?: Maybe<Scalars['String']>;
+  day_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  day_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  metric?: Maybe<Scalars['String']>;
+  metric_not?: Maybe<Scalars['String']>;
+  metric_contains?: Maybe<Scalars['String']>;
+  metric_not_contains?: Maybe<Scalars['String']>;
+  metric_starts_with?: Maybe<Scalars['String']>;
+  metric_not_starts_with?: Maybe<Scalars['String']>;
+  metric_ends_with?: Maybe<Scalars['String']>;
+  metric_not_ends_with?: Maybe<Scalars['String']>;
+  metric_i?: Maybe<Scalars['String']>;
+  metric_not_i?: Maybe<Scalars['String']>;
+  metric_contains_i?: Maybe<Scalars['String']>;
+  metric_not_contains_i?: Maybe<Scalars['String']>;
+  metric_starts_with_i?: Maybe<Scalars['String']>;
+  metric_not_starts_with_i?: Maybe<Scalars['String']>;
+  metric_ends_with_i?: Maybe<Scalars['String']>;
+  metric_not_ends_with_i?: Maybe<Scalars['String']>;
+  metric_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  metric_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  values?: Maybe<Scalars['String']>;
+  values_not?: Maybe<Scalars['String']>;
+  values_contains?: Maybe<Scalars['String']>;
+  values_not_contains?: Maybe<Scalars['String']>;
+  values_starts_with?: Maybe<Scalars['String']>;
+  values_not_starts_with?: Maybe<Scalars['String']>;
+  values_ends_with?: Maybe<Scalars['String']>;
+  values_not_ends_with?: Maybe<Scalars['String']>;
+  values_i?: Maybe<Scalars['String']>;
+  values_not_i?: Maybe<Scalars['String']>;
+  values_contains_i?: Maybe<Scalars['String']>;
+  values_not_contains_i?: Maybe<Scalars['String']>;
+  values_starts_with_i?: Maybe<Scalars['String']>;
+  values_not_starts_with_i?: Maybe<Scalars['String']>;
+  values_ends_with_i?: Maybe<Scalars['String']>;
+  values_not_ends_with_i?: Maybe<Scalars['String']>;
+  values_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  values_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  service?: Maybe<GatewayServiceWhereInput>;
+  service_is_null?: Maybe<Scalars['Boolean']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt_not?: Maybe<Scalars['DateTime']>;
+  updatedAt_lt?: Maybe<Scalars['DateTime']>;
+  updatedAt_lte?: Maybe<Scalars['DateTime']>;
+  updatedAt_gt?: Maybe<Scalars['DateTime']>;
+  updatedAt_gte?: Maybe<Scalars['DateTime']>;
+  updatedAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  updatedAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt?: Maybe<Scalars['DateTime']>;
+  createdAt_not?: Maybe<Scalars['DateTime']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+};
+
+export type MetricWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortMetricsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  NameAsc = 'name_ASC',
+  NameDesc = 'name_DESC',
+  QueryAsc = 'query_ASC',
+  QueryDesc = 'query_DESC',
+  DayAsc = 'day_ASC',
+  DayDesc = 'day_DESC',
+  MetricAsc = 'metric_ASC',
+  MetricDesc = 'metric_DESC',
+  ValuesAsc = 'values_ASC',
+  ValuesDesc = 'values_DESC',
+  ServiceAsc = 'service_ASC',
+  ServiceDesc = 'service_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC'
+}
+
+export type MetricUpdateInput = {
+  name?: Maybe<Scalars['String']>;
+  query?: Maybe<Scalars['String']>;
+  day?: Maybe<Scalars['String']>;
+  metric?: Maybe<Scalars['String']>;
+  values?: Maybe<Scalars['String']>;
+  service?: Maybe<GatewayServiceRelateToOneInput>;
+};
+
+export type MetricsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<MetricUpdateInput>;
+};
+
+export type MetricCreateInput = {
+  name?: Maybe<Scalars['String']>;
+  query?: Maybe<Scalars['String']>;
+  day?: Maybe<Scalars['String']>;
+  metric?: Maybe<Scalars['String']>;
+  values?: Maybe<Scalars['String']>;
+  service?: Maybe<GatewayServiceRelateToOneInput>;
+};
+
+export type MetricsCreateInput = {
+  data?: Maybe<MetricCreateInput>;
 };
 
 export type MemberRoleRelateToManyInput = {
@@ -4132,40 +4241,47 @@ export type ProductsCreateInput = {
   data?: Maybe<ProductCreateInput>;
 };
 
-export type GatewayRouteRelateToOneInput = {
-  create?: Maybe<GatewayRouteCreateInput>;
-  connect?: Maybe<GatewayRouteWhereUniqueInput>;
-  disconnect?: Maybe<GatewayRouteWhereUniqueInput>;
+export enum ServiceAccessConsumerTypeType {
+  Client = 'client',
+  User = 'user'
+}
+
+export type GatewayConsumerRelateToOneInput = {
+  create?: Maybe<GatewayConsumerCreateInput>;
+  connect?: Maybe<GatewayConsumerWhereUniqueInput>;
+  disconnect?: Maybe<GatewayConsumerWhereUniqueInput>;
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
 /**  A keystone list  */
-export type Plugin = {
-  __typename?: 'Plugin';
+export type ServiceAccess = {
+  __typename?: 'ServiceAccess';
   /**
    * This virtual field will be resolved in one of the following ways (in this order):
-   *  1. Execution of 'labelResolver' set on the Plugin List config, or
-   *  2. As an alias to the field set on 'labelField' in the Plugin List config, or
-   *  3. As an alias to a 'name' field on the Plugin List (if one exists), or
-   *  4. As an alias to the 'id' field on the Plugin List.
+   *  1. Execution of 'labelResolver' set on the ServiceAccess List config, or
+   *  2. As an alias to the field set on 'labelField' in the ServiceAccess List config, or
+   *  3. As an alias to a 'name' field on the ServiceAccess List (if one exists), or
+   *  4. As an alias to the 'id' field on the ServiceAccess List.
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  config?: Maybe<Scalars['String']>;
-  service?: Maybe<GatewayService>;
-  route?: Maybe<GatewayRoute>;
-  updatedBy?: Maybe<User>;
-  createdBy?: Maybe<User>;
+  active?: Maybe<Scalars['Boolean']>;
+  aclEnabled?: Maybe<Scalars['Boolean']>;
+  consumerType?: Maybe<ServiceAccessConsumerTypeType>;
+  credentialReference?: Maybe<Scalars['String']>;
+  credential?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumer>;
+  application?: Maybe<Application>;
+  productEnvironment?: Maybe<Environment>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
-export type PluginWhereInput = {
-  AND?: Maybe<Array<Maybe<PluginWhereInput>>>;
-  OR?: Maybe<Array<Maybe<PluginWhereInput>>>;
+export type ServiceAccessWhereInput = {
+  AND?: Maybe<Array<Maybe<ServiceAccessWhereInput>>>;
+  OR?: Maybe<Array<Maybe<ServiceAccessWhereInput>>>;
   id?: Maybe<Scalars['ID']>;
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
@@ -4188,68 +4304,74 @@ export type PluginWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongPluginId?: Maybe<Scalars['String']>;
-  kongPluginId_not?: Maybe<Scalars['String']>;
-  kongPluginId_contains?: Maybe<Scalars['String']>;
-  kongPluginId_not_contains?: Maybe<Scalars['String']>;
-  kongPluginId_starts_with?: Maybe<Scalars['String']>;
-  kongPluginId_not_starts_with?: Maybe<Scalars['String']>;
-  kongPluginId_ends_with?: Maybe<Scalars['String']>;
-  kongPluginId_not_ends_with?: Maybe<Scalars['String']>;
-  kongPluginId_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_i?: Maybe<Scalars['String']>;
-  kongPluginId_contains_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_contains_i?: Maybe<Scalars['String']>;
-  kongPluginId_starts_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_ends_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongPluginId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  tags?: Maybe<Scalars['String']>;
-  tags_not?: Maybe<Scalars['String']>;
-  tags_contains?: Maybe<Scalars['String']>;
-  tags_not_contains?: Maybe<Scalars['String']>;
-  tags_starts_with?: Maybe<Scalars['String']>;
-  tags_not_starts_with?: Maybe<Scalars['String']>;
-  tags_ends_with?: Maybe<Scalars['String']>;
-  tags_not_ends_with?: Maybe<Scalars['String']>;
-  tags_i?: Maybe<Scalars['String']>;
-  tags_not_i?: Maybe<Scalars['String']>;
-  tags_contains_i?: Maybe<Scalars['String']>;
-  tags_not_contains_i?: Maybe<Scalars['String']>;
-  tags_starts_with_i?: Maybe<Scalars['String']>;
-  tags_not_starts_with_i?: Maybe<Scalars['String']>;
-  tags_ends_with_i?: Maybe<Scalars['String']>;
-  tags_not_ends_with_i?: Maybe<Scalars['String']>;
-  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  config?: Maybe<Scalars['String']>;
-  config_not?: Maybe<Scalars['String']>;
-  config_contains?: Maybe<Scalars['String']>;
-  config_not_contains?: Maybe<Scalars['String']>;
-  config_starts_with?: Maybe<Scalars['String']>;
-  config_not_starts_with?: Maybe<Scalars['String']>;
-  config_ends_with?: Maybe<Scalars['String']>;
-  config_not_ends_with?: Maybe<Scalars['String']>;
-  config_i?: Maybe<Scalars['String']>;
-  config_not_i?: Maybe<Scalars['String']>;
-  config_contains_i?: Maybe<Scalars['String']>;
-  config_not_contains_i?: Maybe<Scalars['String']>;
-  config_starts_with_i?: Maybe<Scalars['String']>;
-  config_not_starts_with_i?: Maybe<Scalars['String']>;
-  config_ends_with_i?: Maybe<Scalars['String']>;
-  config_not_ends_with_i?: Maybe<Scalars['String']>;
-  config_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  config_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  service?: Maybe<GatewayServiceWhereInput>;
-  service_is_null?: Maybe<Scalars['Boolean']>;
-  route?: Maybe<GatewayRouteWhereInput>;
-  route_is_null?: Maybe<Scalars['Boolean']>;
-  updatedBy?: Maybe<UserWhereInput>;
-  updatedBy_is_null?: Maybe<Scalars['Boolean']>;
-  createdBy?: Maybe<UserWhereInput>;
-  createdBy_is_null?: Maybe<Scalars['Boolean']>;
+  active?: Maybe<Scalars['Boolean']>;
+  active_not?: Maybe<Scalars['Boolean']>;
+  aclEnabled?: Maybe<Scalars['Boolean']>;
+  aclEnabled_not?: Maybe<Scalars['Boolean']>;
+  consumerType?: Maybe<ServiceAccessConsumerTypeType>;
+  consumerType_not?: Maybe<ServiceAccessConsumerTypeType>;
+  consumerType_in?: Maybe<Array<Maybe<ServiceAccessConsumerTypeType>>>;
+  consumerType_not_in?: Maybe<Array<Maybe<ServiceAccessConsumerTypeType>>>;
+  credentialReference?: Maybe<Scalars['String']>;
+  credentialReference_not?: Maybe<Scalars['String']>;
+  credentialReference_contains?: Maybe<Scalars['String']>;
+  credentialReference_not_contains?: Maybe<Scalars['String']>;
+  credentialReference_starts_with?: Maybe<Scalars['String']>;
+  credentialReference_not_starts_with?: Maybe<Scalars['String']>;
+  credentialReference_ends_with?: Maybe<Scalars['String']>;
+  credentialReference_not_ends_with?: Maybe<Scalars['String']>;
+  credentialReference_i?: Maybe<Scalars['String']>;
+  credentialReference_not_i?: Maybe<Scalars['String']>;
+  credentialReference_contains_i?: Maybe<Scalars['String']>;
+  credentialReference_not_contains_i?: Maybe<Scalars['String']>;
+  credentialReference_starts_with_i?: Maybe<Scalars['String']>;
+  credentialReference_not_starts_with_i?: Maybe<Scalars['String']>;
+  credentialReference_ends_with_i?: Maybe<Scalars['String']>;
+  credentialReference_not_ends_with_i?: Maybe<Scalars['String']>;
+  credentialReference_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credentialReference_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credential?: Maybe<Scalars['String']>;
+  credential_not?: Maybe<Scalars['String']>;
+  credential_contains?: Maybe<Scalars['String']>;
+  credential_not_contains?: Maybe<Scalars['String']>;
+  credential_starts_with?: Maybe<Scalars['String']>;
+  credential_not_starts_with?: Maybe<Scalars['String']>;
+  credential_ends_with?: Maybe<Scalars['String']>;
+  credential_not_ends_with?: Maybe<Scalars['String']>;
+  credential_i?: Maybe<Scalars['String']>;
+  credential_not_i?: Maybe<Scalars['String']>;
+  credential_contains_i?: Maybe<Scalars['String']>;
+  credential_not_contains_i?: Maybe<Scalars['String']>;
+  credential_starts_with_i?: Maybe<Scalars['String']>;
+  credential_not_starts_with_i?: Maybe<Scalars['String']>;
+  credential_ends_with_i?: Maybe<Scalars['String']>;
+  credential_not_ends_with_i?: Maybe<Scalars['String']>;
+  credential_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credential_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRoles?: Maybe<Scalars['String']>;
+  clientRoles_not?: Maybe<Scalars['String']>;
+  clientRoles_contains?: Maybe<Scalars['String']>;
+  clientRoles_not_contains?: Maybe<Scalars['String']>;
+  clientRoles_starts_with?: Maybe<Scalars['String']>;
+  clientRoles_not_starts_with?: Maybe<Scalars['String']>;
+  clientRoles_ends_with?: Maybe<Scalars['String']>;
+  clientRoles_not_ends_with?: Maybe<Scalars['String']>;
+  clientRoles_i?: Maybe<Scalars['String']>;
+  clientRoles_not_i?: Maybe<Scalars['String']>;
+  clientRoles_contains_i?: Maybe<Scalars['String']>;
+  clientRoles_not_contains_i?: Maybe<Scalars['String']>;
+  clientRoles_starts_with_i?: Maybe<Scalars['String']>;
+  clientRoles_not_starts_with_i?: Maybe<Scalars['String']>;
+  clientRoles_ends_with_i?: Maybe<Scalars['String']>;
+  clientRoles_not_ends_with_i?: Maybe<Scalars['String']>;
+  clientRoles_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRoles_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumer?: Maybe<GatewayConsumerWhereInput>;
+  consumer_is_null?: Maybe<Scalars['Boolean']>;
+  application?: Maybe<ApplicationWhereInput>;
+  application_is_null?: Maybe<Scalars['Boolean']>;
+  productEnvironment?: Maybe<EnvironmentWhereInput>;
+  productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -4268,60 +4390,72 @@ export type PluginWhereInput = {
   createdAt_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
 };
 
-export type PluginWhereUniqueInput = {
+export type ServiceAccessWhereUniqueInput = {
   id: Scalars['ID'];
 };
 
-export enum SortPluginsBy {
+export enum SortServiceAccessesBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  KongPluginIdAsc = 'kongPluginId_ASC',
-  KongPluginIdDesc = 'kongPluginId_DESC',
-  TagsAsc = 'tags_ASC',
-  TagsDesc = 'tags_DESC',
-  ConfigAsc = 'config_ASC',
-  ConfigDesc = 'config_DESC',
-  ServiceAsc = 'service_ASC',
-  ServiceDesc = 'service_DESC',
-  RouteAsc = 'route_ASC',
-  RouteDesc = 'route_DESC',
-  UpdatedByAsc = 'updatedBy_ASC',
-  UpdatedByDesc = 'updatedBy_DESC',
-  CreatedByAsc = 'createdBy_ASC',
-  CreatedByDesc = 'createdBy_DESC',
+  ActiveAsc = 'active_ASC',
+  ActiveDesc = 'active_DESC',
+  AclEnabledAsc = 'aclEnabled_ASC',
+  AclEnabledDesc = 'aclEnabled_DESC',
+  ConsumerTypeAsc = 'consumerType_ASC',
+  ConsumerTypeDesc = 'consumerType_DESC',
+  CredentialReferenceAsc = 'credentialReference_ASC',
+  CredentialReferenceDesc = 'credentialReference_DESC',
+  CredentialAsc = 'credential_ASC',
+  CredentialDesc = 'credential_DESC',
+  ClientRolesAsc = 'clientRoles_ASC',
+  ClientRolesDesc = 'clientRoles_DESC',
+  ConsumerAsc = 'consumer_ASC',
+  ConsumerDesc = 'consumer_DESC',
+  ApplicationAsc = 'application_ASC',
+  ApplicationDesc = 'application_DESC',
+  ProductEnvironmentAsc = 'productEnvironment_ASC',
+  ProductEnvironmentDesc = 'productEnvironment_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
   CreatedAtDesc = 'createdAt_DESC'
 }
 
-export type PluginUpdateInput = {
+export type ServiceAccessUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  config?: Maybe<Scalars['String']>;
-  service?: Maybe<GatewayServiceRelateToOneInput>;
-  route?: Maybe<GatewayRouteRelateToOneInput>;
+  active?: Maybe<Scalars['Boolean']>;
+  aclEnabled?: Maybe<Scalars['Boolean']>;
+  consumerType?: Maybe<ServiceAccessConsumerTypeType>;
+  credentialReference?: Maybe<Scalars['String']>;
+  credential?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
+  application?: Maybe<ApplicationRelateToOneInput>;
+  productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
 };
 
-export type PluginsUpdateInput = {
+export type ServiceAccessesUpdateInput = {
   id: Scalars['ID'];
-  data?: Maybe<PluginUpdateInput>;
+  data?: Maybe<ServiceAccessUpdateInput>;
 };
 
-export type PluginCreateInput = {
+export type ServiceAccessCreateInput = {
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
-  tags?: Maybe<Scalars['String']>;
-  config?: Maybe<Scalars['String']>;
-  service?: Maybe<GatewayServiceRelateToOneInput>;
-  route?: Maybe<GatewayRouteRelateToOneInput>;
+  active?: Maybe<Scalars['Boolean']>;
+  aclEnabled?: Maybe<Scalars['Boolean']>;
+  consumerType?: Maybe<ServiceAccessConsumerTypeType>;
+  credentialReference?: Maybe<Scalars['String']>;
+  credential?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
+  application?: Maybe<ApplicationRelateToOneInput>;
+  productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
 };
 
-export type PluginsCreateInput = {
-  data?: Maybe<PluginCreateInput>;
+export type ServiceAccessesCreateInput = {
+  data?: Maybe<ServiceAccessCreateInput>;
 };
 
 /**  A keystone list  */
@@ -5117,14 +5251,6 @@ export type Query = {
   _allApplicationsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Application list.  */
   _ApplicationsMeta?: Maybe<_ListMeta>;
-  /**  Search for all Consumer items which match the where clause.  */
-  allConsumers?: Maybe<Array<Maybe<Consumer>>>;
-  /**  Search for the Consumer item with the matching ID.  */
-  Consumer?: Maybe<Consumer>;
-  /**  Perform a meta-query on all Consumer items which match the where clause.  */
-  _allConsumersMeta?: Maybe<_QueryMeta>;
-  /**  Retrieve the meta-data for the Consumer list.  */
-  _ConsumersMeta?: Maybe<_ListMeta>;
   /**  Search for all Content items which match the where clause.  */
   allContents?: Maybe<Array<Maybe<Content>>>;
   /**  Search for the Content item with the matching ID.  */
@@ -5157,6 +5283,14 @@ export type Query = {
   _allEnvironmentsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Environment list.  */
   _EnvironmentsMeta?: Maybe<_ListMeta>;
+  /**  Search for all GatewayConsumer items which match the where clause.  */
+  allGatewayConsumers?: Maybe<Array<Maybe<GatewayConsumer>>>;
+  /**  Search for the GatewayConsumer item with the matching ID.  */
+  GatewayConsumer?: Maybe<GatewayConsumer>;
+  /**  Perform a meta-query on all GatewayConsumer items which match the where clause.  */
+  _allGatewayConsumersMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the GatewayConsumer list.  */
+  _GatewayConsumersMeta?: Maybe<_ListMeta>;
   /**  Search for all GatewayGroup items which match the where clause.  */
   allGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
   /**  Search for the GatewayGroup item with the matching ID.  */
@@ -5165,14 +5299,14 @@ export type Query = {
   _allGatewayGroupsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the GatewayGroup list.  */
   _GatewayGroupsMeta?: Maybe<_ListMeta>;
-  /**  Search for all GatewayMetric items which match the where clause.  */
-  allGatewayMetrics?: Maybe<Array<Maybe<GatewayMetric>>>;
-  /**  Search for the GatewayMetric item with the matching ID.  */
-  GatewayMetric?: Maybe<GatewayMetric>;
-  /**  Perform a meta-query on all GatewayMetric items which match the where clause.  */
-  _allGatewayMetricsMeta?: Maybe<_QueryMeta>;
-  /**  Retrieve the meta-data for the GatewayMetric list.  */
-  _GatewayMetricsMeta?: Maybe<_ListMeta>;
+  /**  Search for all GatewayPlugin items which match the where clause.  */
+  allGatewayPlugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  /**  Search for the GatewayPlugin item with the matching ID.  */
+  GatewayPlugin?: Maybe<GatewayPlugin>;
+  /**  Perform a meta-query on all GatewayPlugin items which match the where clause.  */
+  _allGatewayPluginsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the GatewayPlugin list.  */
+  _GatewayPluginsMeta?: Maybe<_ListMeta>;
   /**  Search for all GatewayRoute items which match the where clause.  */
   allGatewayRoutes?: Maybe<Array<Maybe<GatewayRoute>>>;
   /**  Search for the GatewayRoute item with the matching ID.  */
@@ -5205,6 +5339,14 @@ export type Query = {
   _allMemberRolesMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the MemberRole list.  */
   _MemberRolesMeta?: Maybe<_ListMeta>;
+  /**  Search for all Metric items which match the where clause.  */
+  allMetrics?: Maybe<Array<Maybe<Metric>>>;
+  /**  Search for the Metric item with the matching ID.  */
+  Metric?: Maybe<Metric>;
+  /**  Perform a meta-query on all Metric items which match the where clause.  */
+  _allMetricsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the Metric list.  */
+  _MetricsMeta?: Maybe<_ListMeta>;
   /**  Search for all Namespace items which match the where clause.  */
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   /**  Search for the Namespace item with the matching ID.  */
@@ -5237,14 +5379,14 @@ export type Query = {
   _allProductsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Product list.  */
   _ProductsMeta?: Maybe<_ListMeta>;
-  /**  Search for all Plugin items which match the where clause.  */
-  allPlugins?: Maybe<Array<Maybe<Plugin>>>;
-  /**  Search for the Plugin item with the matching ID.  */
-  Plugin?: Maybe<Plugin>;
-  /**  Perform a meta-query on all Plugin items which match the where clause.  */
-  _allPluginsMeta?: Maybe<_QueryMeta>;
-  /**  Retrieve the meta-data for the Plugin list.  */
-  _PluginsMeta?: Maybe<_ListMeta>;
+  /**  Search for all ServiceAccess items which match the where clause.  */
+  allServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  /**  Search for the ServiceAccess item with the matching ID.  */
+  ServiceAccess?: Maybe<ServiceAccess>;
+  /**  Perform a meta-query on all ServiceAccess items which match the where clause.  */
+  _allServiceAccessesMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the ServiceAccess list.  */
+  _ServiceAccessesMeta?: Maybe<_ListMeta>;
   /**  Search for all TemporaryIdentity items which match the where clause.  */
   allTemporaryIdentities?: Maybe<Array<Maybe<TemporaryIdentity>>>;
   /**  Search for the TemporaryIdentity item with the matching ID.  */
@@ -5377,31 +5519,6 @@ export type Query_AllApplicationsMetaArgs = {
 };
 
 
-export type QueryAllConsumersArgs = {
-  where?: Maybe<ConsumerWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortConsumersBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryConsumerArgs = {
-  where: ConsumerWhereUniqueInput;
-};
-
-
-export type Query_AllConsumersMetaArgs = {
-  where?: Maybe<ConsumerWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortConsumersBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
 export type QueryAllContentsArgs = {
   where?: Maybe<ContentWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -5502,6 +5619,31 @@ export type Query_AllEnvironmentsMetaArgs = {
 };
 
 
+export type QueryAllGatewayConsumersArgs = {
+  where?: Maybe<GatewayConsumerWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayConsumersBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryGatewayConsumerArgs = {
+  where: GatewayConsumerWhereUniqueInput;
+};
+
+
+export type Query_AllGatewayConsumersMetaArgs = {
+  where?: Maybe<GatewayConsumerWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortGatewayConsumersBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
 export type QueryAllGatewayGroupsArgs = {
   where?: Maybe<GatewayGroupWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -5527,25 +5669,25 @@ export type Query_AllGatewayGroupsMetaArgs = {
 };
 
 
-export type QueryAllGatewayMetricsArgs = {
-  where?: Maybe<GatewayMetricWhereInput>;
+export type QueryAllGatewayPluginsArgs = {
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortGatewayMetricsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
 
 
-export type QueryGatewayMetricArgs = {
-  where: GatewayMetricWhereUniqueInput;
+export type QueryGatewayPluginArgs = {
+  where: GatewayPluginWhereUniqueInput;
 };
 
 
-export type Query_AllGatewayMetricsMetaArgs = {
-  where?: Maybe<GatewayMetricWhereInput>;
+export type Query_AllGatewayPluginsMetaArgs = {
+  where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortGatewayMetricsBy>>;
+  sortBy?: Maybe<Array<SortGatewayPluginsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -5652,6 +5794,31 @@ export type Query_AllMemberRolesMetaArgs = {
 };
 
 
+export type QueryAllMetricsArgs = {
+  where?: Maybe<MetricWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortMetricsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryMetricArgs = {
+  where: MetricWhereUniqueInput;
+};
+
+
+export type Query_AllMetricsMetaArgs = {
+  where?: Maybe<MetricWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortMetricsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
 export type QueryAllNamespacesArgs = {
   where?: Maybe<NamespaceWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -5752,25 +5919,25 @@ export type Query_AllProductsMetaArgs = {
 };
 
 
-export type QueryAllPluginsArgs = {
-  where?: Maybe<PluginWhereInput>;
+export type QueryAllServiceAccessesArgs = {
+  where?: Maybe<ServiceAccessWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortServiceAccessesBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
 
 
-export type QueryPluginArgs = {
-  where: PluginWhereUniqueInput;
+export type QueryServiceAccessArgs = {
+  where: ServiceAccessWhereUniqueInput;
 };
 
 
-export type Query_AllPluginsMetaArgs = {
-  where?: Maybe<PluginWhereInput>;
+export type Query_AllServiceAccessesMetaArgs = {
+  where?: Maybe<ServiceAccessWhereInput>;
   search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortPluginsBy>>;
+  sortBy?: Maybe<Array<SortServiceAccessesBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -5906,18 +6073,6 @@ export type Mutation = {
   deleteApplication?: Maybe<Application>;
   /**  Delete multiple Application items by ID.  */
   deleteApplications?: Maybe<Array<Maybe<Application>>>;
-  /**  Create a single Consumer item.  */
-  createConsumer?: Maybe<Consumer>;
-  /**  Create multiple Consumer items.  */
-  createConsumers?: Maybe<Array<Maybe<Consumer>>>;
-  /**  Update a single Consumer item by ID.  */
-  updateConsumer?: Maybe<Consumer>;
-  /**  Update multiple Consumer items by ID.  */
-  updateConsumers?: Maybe<Array<Maybe<Consumer>>>;
-  /**  Delete a single Consumer item by ID.  */
-  deleteConsumer?: Maybe<Consumer>;
-  /**  Delete multiple Consumer items by ID.  */
-  deleteConsumers?: Maybe<Array<Maybe<Consumer>>>;
   /**  Create a single Content item.  */
   createContent?: Maybe<Content>;
   /**  Create multiple Content items.  */
@@ -5966,6 +6121,18 @@ export type Mutation = {
   deleteEnvironment?: Maybe<Environment>;
   /**  Delete multiple Environment items by ID.  */
   deleteEnvironments?: Maybe<Array<Maybe<Environment>>>;
+  /**  Create a single GatewayConsumer item.  */
+  createGatewayConsumer?: Maybe<GatewayConsumer>;
+  /**  Create multiple GatewayConsumer items.  */
+  createGatewayConsumers?: Maybe<Array<Maybe<GatewayConsumer>>>;
+  /**  Update a single GatewayConsumer item by ID.  */
+  updateGatewayConsumer?: Maybe<GatewayConsumer>;
+  /**  Update multiple GatewayConsumer items by ID.  */
+  updateGatewayConsumers?: Maybe<Array<Maybe<GatewayConsumer>>>;
+  /**  Delete a single GatewayConsumer item by ID.  */
+  deleteGatewayConsumer?: Maybe<GatewayConsumer>;
+  /**  Delete multiple GatewayConsumer items by ID.  */
+  deleteGatewayConsumers?: Maybe<Array<Maybe<GatewayConsumer>>>;
   /**  Create a single GatewayGroup item.  */
   createGatewayGroup?: Maybe<GatewayGroup>;
   /**  Create multiple GatewayGroup items.  */
@@ -5978,18 +6145,18 @@ export type Mutation = {
   deleteGatewayGroup?: Maybe<GatewayGroup>;
   /**  Delete multiple GatewayGroup items by ID.  */
   deleteGatewayGroups?: Maybe<Array<Maybe<GatewayGroup>>>;
-  /**  Create a single GatewayMetric item.  */
-  createGatewayMetric?: Maybe<GatewayMetric>;
-  /**  Create multiple GatewayMetric items.  */
-  createGatewayMetrics?: Maybe<Array<Maybe<GatewayMetric>>>;
-  /**  Update a single GatewayMetric item by ID.  */
-  updateGatewayMetric?: Maybe<GatewayMetric>;
-  /**  Update multiple GatewayMetric items by ID.  */
-  updateGatewayMetrics?: Maybe<Array<Maybe<GatewayMetric>>>;
-  /**  Delete a single GatewayMetric item by ID.  */
-  deleteGatewayMetric?: Maybe<GatewayMetric>;
-  /**  Delete multiple GatewayMetric items by ID.  */
-  deleteGatewayMetrics?: Maybe<Array<Maybe<GatewayMetric>>>;
+  /**  Create a single GatewayPlugin item.  */
+  createGatewayPlugin?: Maybe<GatewayPlugin>;
+  /**  Create multiple GatewayPlugin items.  */
+  createGatewayPlugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  /**  Update a single GatewayPlugin item by ID.  */
+  updateGatewayPlugin?: Maybe<GatewayPlugin>;
+  /**  Update multiple GatewayPlugin items by ID.  */
+  updateGatewayPlugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  /**  Delete a single GatewayPlugin item by ID.  */
+  deleteGatewayPlugin?: Maybe<GatewayPlugin>;
+  /**  Delete multiple GatewayPlugin items by ID.  */
+  deleteGatewayPlugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
   /**  Create a single GatewayRoute item.  */
   createGatewayRoute?: Maybe<GatewayRoute>;
   /**  Create multiple GatewayRoute items.  */
@@ -6038,6 +6205,18 @@ export type Mutation = {
   deleteMemberRole?: Maybe<MemberRole>;
   /**  Delete multiple MemberRole items by ID.  */
   deleteMemberRoles?: Maybe<Array<Maybe<MemberRole>>>;
+  /**  Create a single Metric item.  */
+  createMetric?: Maybe<Metric>;
+  /**  Create multiple Metric items.  */
+  createMetrics?: Maybe<Array<Maybe<Metric>>>;
+  /**  Update a single Metric item by ID.  */
+  updateMetric?: Maybe<Metric>;
+  /**  Update multiple Metric items by ID.  */
+  updateMetrics?: Maybe<Array<Maybe<Metric>>>;
+  /**  Delete a single Metric item by ID.  */
+  deleteMetric?: Maybe<Metric>;
+  /**  Delete multiple Metric items by ID.  */
+  deleteMetrics?: Maybe<Array<Maybe<Metric>>>;
   /**  Create a single Namespace item.  */
   createNamespace?: Maybe<Namespace>;
   /**  Create multiple Namespace items.  */
@@ -6086,18 +6265,18 @@ export type Mutation = {
   deleteProduct?: Maybe<Product>;
   /**  Delete multiple Product items by ID.  */
   deleteProducts?: Maybe<Array<Maybe<Product>>>;
-  /**  Create a single Plugin item.  */
-  createPlugin?: Maybe<Plugin>;
-  /**  Create multiple Plugin items.  */
-  createPlugins?: Maybe<Array<Maybe<Plugin>>>;
-  /**  Update a single Plugin item by ID.  */
-  updatePlugin?: Maybe<Plugin>;
-  /**  Update multiple Plugin items by ID.  */
-  updatePlugins?: Maybe<Array<Maybe<Plugin>>>;
-  /**  Delete a single Plugin item by ID.  */
-  deletePlugin?: Maybe<Plugin>;
-  /**  Delete multiple Plugin items by ID.  */
-  deletePlugins?: Maybe<Array<Maybe<Plugin>>>;
+  /**  Create a single ServiceAccess item.  */
+  createServiceAccess?: Maybe<ServiceAccess>;
+  /**  Create multiple ServiceAccess items.  */
+  createServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  /**  Update a single ServiceAccess item by ID.  */
+  updateServiceAccess?: Maybe<ServiceAccess>;
+  /**  Update multiple ServiceAccess items by ID.  */
+  updateServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  /**  Delete a single ServiceAccess item by ID.  */
+  deleteServiceAccess?: Maybe<ServiceAccess>;
+  /**  Delete multiple ServiceAccess items by ID.  */
+  deleteServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
   /**  Create a single TemporaryIdentity item.  */
   createTemporaryIdentity?: Maybe<TemporaryIdentity>;
   /**  Create multiple TemporaryIdentity items.  */
@@ -6265,37 +6444,6 @@ export type MutationDeleteApplicationsArgs = {
 };
 
 
-export type MutationCreateConsumerArgs = {
-  data?: Maybe<ConsumerCreateInput>;
-};
-
-
-export type MutationCreateConsumersArgs = {
-  data?: Maybe<Array<Maybe<ConsumersCreateInput>>>;
-};
-
-
-export type MutationUpdateConsumerArgs = {
-  id: Scalars['ID'];
-  data?: Maybe<ConsumerUpdateInput>;
-};
-
-
-export type MutationUpdateConsumersArgs = {
-  data?: Maybe<Array<Maybe<ConsumersUpdateInput>>>;
-};
-
-
-export type MutationDeleteConsumerArgs = {
-  id: Scalars['ID'];
-};
-
-
-export type MutationDeleteConsumersArgs = {
-  ids?: Maybe<Array<Scalars['ID']>>;
-};
-
-
 export type MutationCreateContentArgs = {
   data?: Maybe<ContentCreateInput>;
 };
@@ -6420,6 +6568,37 @@ export type MutationDeleteEnvironmentsArgs = {
 };
 
 
+export type MutationCreateGatewayConsumerArgs = {
+  data?: Maybe<GatewayConsumerCreateInput>;
+};
+
+
+export type MutationCreateGatewayConsumersArgs = {
+  data?: Maybe<Array<Maybe<GatewayConsumersCreateInput>>>;
+};
+
+
+export type MutationUpdateGatewayConsumerArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<GatewayConsumerUpdateInput>;
+};
+
+
+export type MutationUpdateGatewayConsumersArgs = {
+  data?: Maybe<Array<Maybe<GatewayConsumersUpdateInput>>>;
+};
+
+
+export type MutationDeleteGatewayConsumerArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteGatewayConsumersArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
 export type MutationCreateGatewayGroupArgs = {
   data?: Maybe<GatewayGroupCreateInput>;
 };
@@ -6451,33 +6630,33 @@ export type MutationDeleteGatewayGroupsArgs = {
 };
 
 
-export type MutationCreateGatewayMetricArgs = {
-  data?: Maybe<GatewayMetricCreateInput>;
+export type MutationCreateGatewayPluginArgs = {
+  data?: Maybe<GatewayPluginCreateInput>;
 };
 
 
-export type MutationCreateGatewayMetricsArgs = {
-  data?: Maybe<Array<Maybe<GatewayMetricsCreateInput>>>;
+export type MutationCreateGatewayPluginsArgs = {
+  data?: Maybe<Array<Maybe<GatewayPluginsCreateInput>>>;
 };
 
 
-export type MutationUpdateGatewayMetricArgs = {
+export type MutationUpdateGatewayPluginArgs = {
   id: Scalars['ID'];
-  data?: Maybe<GatewayMetricUpdateInput>;
+  data?: Maybe<GatewayPluginUpdateInput>;
 };
 
 
-export type MutationUpdateGatewayMetricsArgs = {
-  data?: Maybe<Array<Maybe<GatewayMetricsUpdateInput>>>;
+export type MutationUpdateGatewayPluginsArgs = {
+  data?: Maybe<Array<Maybe<GatewayPluginsUpdateInput>>>;
 };
 
 
-export type MutationDeleteGatewayMetricArgs = {
+export type MutationDeleteGatewayPluginArgs = {
   id: Scalars['ID'];
 };
 
 
-export type MutationDeleteGatewayMetricsArgs = {
+export type MutationDeleteGatewayPluginsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 
@@ -6606,6 +6785,37 @@ export type MutationDeleteMemberRolesArgs = {
 };
 
 
+export type MutationCreateMetricArgs = {
+  data?: Maybe<MetricCreateInput>;
+};
+
+
+export type MutationCreateMetricsArgs = {
+  data?: Maybe<Array<Maybe<MetricsCreateInput>>>;
+};
+
+
+export type MutationUpdateMetricArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<MetricUpdateInput>;
+};
+
+
+export type MutationUpdateMetricsArgs = {
+  data?: Maybe<Array<Maybe<MetricsUpdateInput>>>;
+};
+
+
+export type MutationDeleteMetricArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteMetricsArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
 export type MutationCreateNamespaceArgs = {
   data?: Maybe<NamespaceCreateInput>;
 };
@@ -6730,33 +6940,33 @@ export type MutationDeleteProductsArgs = {
 };
 
 
-export type MutationCreatePluginArgs = {
-  data?: Maybe<PluginCreateInput>;
+export type MutationCreateServiceAccessArgs = {
+  data?: Maybe<ServiceAccessCreateInput>;
 };
 
 
-export type MutationCreatePluginsArgs = {
-  data?: Maybe<Array<Maybe<PluginsCreateInput>>>;
+export type MutationCreateServiceAccessesArgs = {
+  data?: Maybe<Array<Maybe<ServiceAccessesCreateInput>>>;
 };
 
 
-export type MutationUpdatePluginArgs = {
+export type MutationUpdateServiceAccessArgs = {
   id: Scalars['ID'];
-  data?: Maybe<PluginUpdateInput>;
+  data?: Maybe<ServiceAccessUpdateInput>;
 };
 
 
-export type MutationUpdatePluginsArgs = {
-  data?: Maybe<Array<Maybe<PluginsUpdateInput>>>;
+export type MutationUpdateServiceAccessesArgs = {
+  data?: Maybe<Array<Maybe<ServiceAccessesUpdateInput>>>;
 };
 
 
-export type MutationDeletePluginArgs = {
+export type MutationDeleteServiceAccessArgs = {
   id: Scalars['ID'];
 };
 
 
-export type MutationDeletePluginsArgs = {
+export type MutationDeleteServiceAccessesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 
