@@ -5,7 +5,7 @@ const { useEffect, useState } = React;
 
 import { GET_AVAIL_SERVICES } from '../queries'
 
-import graphql from '@/../shared/services/graphql'
+import graphql from '@/shared/services/graphql'
 
 import { Badge, Switch, Box, HStack, Input, SimpleGrid } from "@chakra-ui/react"
 

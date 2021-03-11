@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import graphql from '@/../shared/services/graphql'
+import graphql from '@/shared/services/graphql'
 
 import { ADD } from '../queries'
 
