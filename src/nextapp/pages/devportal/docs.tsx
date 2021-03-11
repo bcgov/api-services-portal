@@ -14,10 +14,10 @@ import { FaRegFolderOpen } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import type { GetServerSideProps } from 'next';
 
-import api from '../shared/services/api';
-import Card from '../components/card';
-import GridLayout from '../layouts/grid';
-import PageHeader from '../components/page-header';
+import api from '@/shared/services/api';
+import Card from '@/components/card';
+import GridLayout from '@/layouts/grid';
+import PageHeader from '@/components/page-header';
 
 interface PageData {
   id: string;
