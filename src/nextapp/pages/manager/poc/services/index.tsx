@@ -79,7 +79,7 @@ const ServicesPage: React.FC = () => {
                 <Skeleton key={d} height="200px" />
               ))}
             >
-              <ServicesList search="" />
+              <ServicesList filter={filter} />
             </ClientRequest>
           </SimpleGrid>
         )}

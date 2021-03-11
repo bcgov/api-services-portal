@@ -29,7 +29,7 @@ export const GET_LIST = gql`
 
 export const GET_METRICS = gql`
     query GetMetrics($service: String!, $days: [String!]) {
-        allMetrics(sortBy: day_ASC, where: { 
+        allGatewayMetrics(sortBy: day_ASC, where: { 
                 query: "kong_http_requests_hourly_service", 
                 day_in: $days, 
                 service: { name_contains: $service 

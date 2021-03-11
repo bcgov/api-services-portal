@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
 import { Badge, Tooltip, Stack, HStack, Tag, TagLabel, SimpleGrid, VStack } from "@chakra-ui/react"
-import type { Environment, Query, Metric } from '@/types/query.types';
+import type { Environment, Query, GatewayMetric } from '@/types/query.types';
 import api from '@/shared/services/api';
 
 import { GET_METRICS } from './queries';
@@ -44,7 +44,7 @@ const Metric = ({service}) => {
 
     const color = (v => ranges.filter(r => v <= r.max)[0].color)
 
-    const metrics = data.allMetrics.length == 0 ? [{id:"00", values:JSON.stringify(noData)} as Metric] : data.allMetrics
+    const metrics = data.allGatewayMetrics.length == 0 ? [{id:"00", values:JSON.stringify(noData)} as GatewayMetric] : data.allGatewayMetrics
 
     return (
         <Stack direction="row" spacing={0} align="flex-start" justify="flex-start" style={{backgroundColor:'white',padding:'5px'}}>
