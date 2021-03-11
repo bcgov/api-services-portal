@@ -7,6 +7,7 @@ import {
   Select,
   SimpleGrid,
   Skeleton,
+  Text,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
@@ -79,7 +80,7 @@ const ServicesPage: React.FC = () => {
                 <Skeleton key={d} height="200px" />
               ))}
             >
-              <ServicesList filter={filter} />
+              <ServicesList search="" />
             </ClientRequest>
           </SimpleGrid>
         )}

@@ -81,22 +81,50 @@ const ServicePage: React.FC = () => {
           <Heading size="md">Metrics</Heading>
         </Box>
         <Divider />
-        <Box minHeight="200px" p={4}>
+        <Box minHeight="100px" p={4}>
           {router?.query.id && (
             <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
-                {data?.GatewayService && (
               <MetricGraph
                 days={range}
-                height={240}
-                id={data?.GatewayService.name as string}
+                height={100}
+                id={router?.query.id as string}
+                service={data?.GatewayService}
               />
-              )}
             </ClientRequest>
           )}
         </Box>
       </Box>
       <Box display="grid" gridGap={4} gridTemplateColumns="repeat(12, 1fr)">
-        <Box bgColor="white" gridColumn="span 8">
+        <Box
+          bgColor="white"
+          gridColumn="span 4"
+          display="flex"
+          flexDir="column"
+        >
+          <Box
+            p={4}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Heading size="md">Stats</Heading>
+          </Box>
+          <Divider />
+          <Box p={4} display="flex" alignItems="center" flex={1}>
+            {router?.query.id && (
+              <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
+                <MetricGraph
+                  alt
+                  days={range}
+                  height={100}
+                  id={router?.query.id as string}
+                  service={data?.GatewayService}
+                />
+              </ClientRequest>
+            )}
+          </Box>
+        </Box>
+        <Box bgColor="white" gridColumn="span 4">
           <Box
             p={4}
             display="flex"

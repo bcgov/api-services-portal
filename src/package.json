@@ -62,6 +62,7 @@
   "keystonejs-grapesjs-editor": "^1.0.10",
   "lodash": "^4.17.21",
   "next": "9.5.5",
+  "numeral": "^2.0.6",
   "openid-client": "^4.2.2",
   "postcss": "^7.0.35",
   "react": "^17.0.1",
