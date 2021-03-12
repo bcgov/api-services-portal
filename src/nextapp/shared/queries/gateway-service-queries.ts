@@ -75,7 +75,7 @@ export const GET_METRICS = gql`
     allMetrics(
       sortBy: day_ASC
       where: {
-        query: "kong_http_status"
+        query: "kong_http_requests_hourly_service"
         day_in: $days
         service: { name_contains: $service }
       }
