@@ -44,7 +44,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ data, range }) => {
           maxW="75%"
         >
           <Heading isTruncated size="sm" lineHeight="1.5">
-            <NextLink passHref href={`/services/${data.id}`}>
+            <NextLink passHref href={`/manager/services/${data.id}`}>
               <Link>{data.name}</Link>
             </NextLink>
           </Heading>
@@ -56,7 +56,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ data, range }) => {
         {!inView && <Skeleton flex={1} m={4} />}
         {inView && (
           <ClientRequest fallback={<Skeleton flex={1} />}>
-            <MetricGraph alt days={range} id={data.id} service={data} />
+            <MetricGraph alt days={range} id={data.name} service={data} />
           </ClientRequest>
         )}
       </Box>
