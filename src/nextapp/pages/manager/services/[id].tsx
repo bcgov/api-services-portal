@@ -87,7 +87,7 @@ const ServicePage: React.FC = () => {
               <MetricGraph
                 days={range}
                 height={100}
-                id={router?.query.id as string}
+                id={data?.GatewayService.name}
                 service={data?.GatewayService}
               />
             </ClientRequest>
@@ -117,7 +117,7 @@ const ServicePage: React.FC = () => {
                   alt
                   days={range}
                   height={100}
-                  id={router?.query.id as string}
+                  id={data?.GatewayService.name}
                   service={data?.GatewayService}
                 />
               </ClientRequest>
