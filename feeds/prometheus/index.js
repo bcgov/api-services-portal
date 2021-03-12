@@ -70,7 +70,7 @@ function producer (xfer, destinationUrl) {
         item.metric['day'] = item.target
         item.metric['query'] = item.query.id
 
-        return destination.fireAndForget('/feed/GatewayMetric', item.metric)
+        return destination.fireAndForget('/feed/Metric', item.metric)
         .then ((result) => console.log(`[${name}] OK`, result))
         .catch (err => console.log(`[${name}] ERR ${err}`))
 
