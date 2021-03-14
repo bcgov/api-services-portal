@@ -33,7 +33,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
   return (
     <>
       {data.allGatewayServices.length <= 0 && (
-        <Box gridColumnStart="2" gridColumnEnd="4">
+        <Box gridColumnStart="1" gridColumnEnd="4">
           <EmptyPane
             title="No services created yet."
             message="You need to create a product before services are available"

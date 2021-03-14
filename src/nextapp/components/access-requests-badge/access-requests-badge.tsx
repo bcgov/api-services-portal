@@ -19,6 +19,8 @@ const AccessRequestsBadge: React.FC = () => {
     },
     {
       suspense: false,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
     }
   );
 

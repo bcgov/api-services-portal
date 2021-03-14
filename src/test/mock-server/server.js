@@ -9,7 +9,7 @@ const times = require('lodash/times');
 const random = require('lodash/random');
 const express = require('express');
 const cors = require('cors');
-const { addHours, parse } = require('date-fns');
+const { addHours, parse, formatISO, subDays } = require('date-fns');
 
 const metricsData = require('./metrics-data');
 const schemas = require('./schemas');
@@ -274,6 +274,12 @@ const server = mockServer(schemaWithMocks, {
     email: casual.email,
     isAdmin: false,
   }),
+  DateTime: () => {
+    const subtract = random(0, 20);
+    const date = subDays(new Date(), subtract);
+
+    return formatISO(date);
+  },
 });
 
 app.get('/admin/session', (_, res) => {
