@@ -78,7 +78,7 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
-    allGatewayMetrics: (_query, _, args) => {
+    allMetrics: (_query, _, args) => {
       const result = args.variableValues.days.map((d, index) => {
         const metrics = metricsData[index];
         const date = parse(d, 'yyyy-MM-dd', new Date());
@@ -210,7 +210,7 @@ const server = mockServer(schemaWithMocks, {
       null,
     ]),
     active: casual.boolean,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
@@ -240,7 +240,7 @@ const server = mockServer(schemaWithMocks, {
   CredentialIssuer: () => ({
     name: casual.title,
     description: casual.description,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     mode: casual.word,
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,

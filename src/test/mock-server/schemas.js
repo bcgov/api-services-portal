@@ -3,83 +3,35 @@ directive @cacheControl(
   maxAge: Int
   scope: CacheControlScope
 ) on FIELD_DEFINITION | OBJECT | INTERFACE
-directive @specifiedBy(url: String!) on SCALAR
-input _ksListsMetaInput {
-  key: String
-  auxiliary: Boolean
+input UserRelateToOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: UserWhereUniqueInput
+  disconnectAll: Boolean
 }
 
-type _ListAccess {
-  create: Boolean
-  read: JSON
-  update: JSON
-  delete: JSON
-  auth: JSON
+input ApplicationRelateToOneInput {
+  create: ApplicationCreateInput
+  connect: ApplicationWhereUniqueInput
+  disconnect: ApplicationWhereUniqueInput
+  disconnectAll: Boolean
 }
 
-type _ListInputTypes {
-  whereInput: String
-  whereUniqueInput: String
-  createInput: String
-  createManyInput: String
-  updateInput: String
-  updateManyInput: String
+input EnvironmentRelateToOneInput {
+  create: EnvironmentCreateInput
+  connect: EnvironmentWhereUniqueInput
+  disconnect: EnvironmentWhereUniqueInput
+  disconnectAll: Boolean
 }
 
-type _ListMeta {
-  key: String
-  name: String 
-  description: String
-  label: String
-  singular: String
-  plural: String
-  path: String
-  access: _ListAccess
-  schema: _ListSchema
+input ActivityRelateToManyInput {
+  create: [ActivityCreateInput]
+  connect: [ActivityWhereUniqueInput]
+  disconnect: [ActivityWhereUniqueInput]
+  disconnectAll: Boolean
 }
 
-type _ListMutations {
-  create: String
-  createMany: String
-  update: String
-  updateMany: String
-  delete: String
-  deleteMany: String
-}
-
-type _ListQueries {
-  item: String
-  list: String
-  meta: String
-}
-
-type _ListSchema {
-  type: String
-  queries: _ListQueries
-  mutations: _ListMutations
-  inputTypes: _ListInputTypes
-  fields(where: _ListSchemaFieldsInput): [_ListSchemaFields]
-  relatedFields: [_ListSchemaRelatedFields]
-}
-
-type _ListSchemaFields {
-  path: String
-  name: String 
-  type: String
-}
-
-input _ListSchemaFieldsInput {
-  type: String
-}
-
-type _ListSchemaRelatedFields {
-  type: String
-  fields: [String]
-}
-
-type _QueryMeta {
-  count: Int
-}
+scalar DateTime
 
 type AccessRequest {
   _label_: String
@@ -89,11 +41,8 @@ type AccessRequest {
   isApproved: Boolean
   isIssued: Boolean
   isComplete: Boolean
-  consumerId: String
-  credential: String
   requestor: User
   application: Application
-  consumer: Consumer
   productEnvironment: Environment
   activity(
     where: ActivityWhereInput
@@ -115,45 +64,6 @@ type AccessRequest {
   createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input AccessRequestCreateInput {
-  name: String
-  communication: String
-  isApproved: Boolean
-  isIssued: Boolean
-  isComplete: Boolean
-  consumerId: String
-  credential: String
-  requestor: UserRelateToOneInput
-  application: ApplicationRelateToOneInput
-  consumer: ConsumerRelateToOneInput
-  productEnvironment: EnvironmentRelateToOneInput
-  activity: ActivityRelateToManyInput
-}
-
-input AccessRequestsCreateInput {
-  data: AccessRequestCreateInput
-}
-
-input AccessRequestsUpdateInput {
-  id: ID!
-  data: AccessRequestUpdateInput
-}
-
-input AccessRequestUpdateInput {
-  name: String
-  communication: String
-  isApproved: Boolean
-  isIssued: Boolean
-  isComplete: Boolean
-  consumerId: String
-  credential: String
-  requestor: UserRelateToOneInput
-  application: ApplicationRelateToOneInput
-  consumer: ConsumerRelateToOneInput
-  productEnvironment: EnvironmentRelateToOneInput
-  activity: ActivityRelateToManyInput
 }
 
 input AccessRequestWhereInput {
@@ -205,48 +115,10 @@ input AccessRequestWhereInput {
   isIssued_not: Boolean
   isComplete: Boolean
   isComplete_not: Boolean
-  consumerId: String
-  consumerId_not: String
-  consumerId_contains: String
-  consumerId_not_contains: String
-  consumerId_starts_with: String
-  consumerId_not_starts_with: String
-  consumerId_ends_with: String
-  consumerId_not_ends_with: String
-  consumerId_i: String
-  consumerId_not_i: String
-  consumerId_contains_i: String
-  consumerId_not_contains_i: String
-  consumerId_starts_with_i: String
-  consumerId_not_starts_with_i: String
-  consumerId_ends_with_i: String
-  consumerId_not_ends_with_i: String
-  consumerId_in: [String]
-  consumerId_not_in: [String]
-  credential: String
-  credential_not: String
-  credential_contains: String
-  credential_not_contains: String
-  credential_starts_with: String
-  credential_not_starts_with: String
-  credential_ends_with: String
-  credential_not_ends_with: String
-  credential_i: String
-  credential_not_i: String
-  credential_contains_i: String
-  credential_not_contains_i: String
-  credential_starts_with_i: String
-  credential_not_starts_with_i: String
-  credential_ends_with_i: String
-  credential_not_ends_with_i: String
-  credential_in: [String]
-  credential_not_in: [String]
   requestor: UserWhereInput
   requestor_is_null: Boolean
   application: ApplicationWhereInput
   application_is_null: Boolean
-  consumer: ConsumerWhereInput
-  consumer_is_null: Boolean
   productEnvironment: EnvironmentWhereInput
   productEnvironment_is_null: Boolean
   activity_every: ActivityWhereInput
@@ -278,13 +150,68 @@ input AccessRequestWhereUniqueInput {
   id: ID!
 }
 
-input ActivitiesCreateInput {
-  data: ActivityCreateInput
+enum SortAccessRequestsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  communication_ASC
+  communication_DESC
+  isApproved_ASC
+  isApproved_DESC
+  isIssued_ASC
+  isIssued_DESC
+  isComplete_ASC
+  isComplete_DESC
+  requestor_ASC
+  requestor_DESC
+  application_ASC
+  application_DESC
+  productEnvironment_ASC
+  productEnvironment_DESC
+  activity_ASC
+  activity_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
 }
 
-input ActivitiesUpdateInput {
+input AccessRequestUpdateInput {
+  name: String
+  communication: String
+  isApproved: Boolean
+  isIssued: Boolean
+  isComplete: Boolean
+  requestor: UserRelateToOneInput
+  application: ApplicationRelateToOneInput
+  productEnvironment: EnvironmentRelateToOneInput
+  activity: ActivityRelateToManyInput
+}
+
+input AccessRequestsUpdateInput {
   id: ID!
-  data: ActivityUpdateInput
+  data: AccessRequestUpdateInput
+}
+
+input AccessRequestCreateInput {
+  name: String
+  communication: String
+  isApproved: Boolean
+  isIssued: Boolean
+  isComplete: Boolean
+  requestor: UserRelateToOneInput
+  application: ApplicationRelateToOneInput
+  productEnvironment: EnvironmentRelateToOneInput
+  activity: ActivityRelateToManyInput
+}
+
+input AccessRequestsCreateInput {
+  data: AccessRequestCreateInput
 }
 
 type Activity {
@@ -294,41 +221,13 @@ type Activity {
   type: String
   name: String
   action: String
+  result: String
   message: String
   refId: String
   namespace: String
   actor: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input ActivityCreateInput {
-  extRefId: String
-  type: String
-  name: String
-  action: String
-  message: String
-  refId: String
-  namespace: String
-  actor: UserRelateToOneInput
-}
-
-input ActivityRelateToManyInput {
-  create: [ActivityCreateInput]
-  connect: [ActivityWhereUniqueInput]
-  disconnect: [ActivityWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input ActivityUpdateInput {
-  extRefId: String
-  type: String
-  name: String
-  action: String
-  message: String
-  refId: String
-  namespace: String
-  actor: UserRelateToOneInput
 }
 
 input ActivityWhereInput {
@@ -410,6 +309,24 @@ input ActivityWhereInput {
   action_not_ends_with_i: String
   action_in: [String]
   action_not_in: [String]
+  result: String
+  result_not: String
+  result_contains: String
+  result_not_contains: String
+  result_starts_with: String
+  result_not_starts_with: String
+  result_ends_with: String
+  result_not_ends_with: String
+  result_i: String
+  result_not_i: String
+  result_contains_i: String
+  result_not_contains_i: String
+  result_starts_with_i: String
+  result_not_starts_with_i: String
+  result_ends_with_i: String
+  result_not_ends_with_i: String
+  result_in: [String]
+  result_not_in: [String]
   message: String
   message_not: String
   message_contains: String
@@ -488,6 +405,73 @@ input ActivityWhereUniqueInput {
   id: ID!
 }
 
+enum SortActivitiesBy {
+  id_ASC
+  id_DESC
+  extRefId_ASC
+  extRefId_DESC
+  type_ASC
+  type_DESC
+  name_ASC
+  name_DESC
+  action_ASC
+  action_DESC
+  result_ASC
+  result_DESC
+  message_ASC
+  message_DESC
+  refId_ASC
+  refId_DESC
+  namespace_ASC
+  namespace_DESC
+  actor_ASC
+  actor_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input ActivityUpdateInput {
+  extRefId: String
+  type: String
+  name: String
+  action: String
+  result: String
+  message: String
+  refId: String
+  namespace: String
+  actor: UserRelateToOneInput
+}
+
+input ActivitiesUpdateInput {
+  id: ID!
+  data: ActivityUpdateInput
+}
+
+input ActivityCreateInput {
+  extRefId: String
+  type: String
+  name: String
+  action: String
+  result: String
+  message: String
+  refId: String
+  namespace: String
+  actor: UserRelateToOneInput
+}
+
+input ActivitiesCreateInput {
+  data: ActivityCreateInput
+}
+
+input GatewayServiceRelateToOneInput {
+  create: GatewayServiceCreateInput
+  connect: GatewayServiceWhereUniqueInput
+  disconnect: GatewayServiceWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 type Alert {
   _label_: String
   id: ID!
@@ -497,29 +481,6 @@ type Alert {
   service: GatewayService
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input AlertCreateInput {
-  name: String
-  state: String
-  description: String
-  service: GatewayServiceRelateToOneInput
-}
-
-input AlertsCreateInput {
-  data: AlertCreateInput
-}
-
-input AlertsUpdateInput {
-  id: ID!
-  data: AlertUpdateInput
-}
-
-input AlertUpdateInput {
-  name: String
-  state: String
-  description: String
-  service: GatewayServiceRelateToOneInput
 }
 
 input AlertWhereInput {
@@ -607,6 +568,46 @@ input AlertWhereUniqueInput {
   id: ID!
 }
 
+enum SortAlertsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  state_ASC
+  state_DESC
+  description_ASC
+  description_DESC
+  service_ASC
+  service_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input AlertUpdateInput {
+  name: String
+  state: String
+  description: String
+  service: GatewayServiceRelateToOneInput
+}
+
+input AlertsUpdateInput {
+  id: ID!
+  data: AlertUpdateInput
+}
+
+input AlertCreateInput {
+  name: String
+  state: String
+  description: String
+  service: GatewayServiceRelateToOneInput
+}
+
+input AlertsCreateInput {
+  data: AlertCreateInput
+}
+
 type Application {
   _label_: String
   id: ID!
@@ -614,40 +615,8 @@ type Application {
   name: String
   description: String
   owner: User
-  updatedBy: User
-  createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input ApplicationCreateInput {
-  appId: String
-  name: String
-  description: String
-  owner: UserRelateToOneInput
-}
-
-input ApplicationRelateToOneInput {
-  create: ApplicationCreateInput
-  connect: ApplicationWhereUniqueInput
-  disconnect: ApplicationWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input ApplicationsCreateInput {
-  data: ApplicationCreateInput
-}
-
-input ApplicationsUpdateInput {
-  id: ID!
-  data: ApplicationUpdateInput
-}
-
-input ApplicationUpdateInput {
-  appId: String
-  name: String
-  description: String
-  owner: UserRelateToOneInput
 }
 
 input ApplicationWhereInput {
@@ -713,10 +682,6 @@ input ApplicationWhereInput {
   description_not_in: [String]
   owner: UserWhereInput
   owner_is_null: Boolean
-  updatedBy: UserWhereInput
-  updatedBy_is_null: Boolean
-  createdBy: UserWhereInput
-  createdBy_is_null: Boolean
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -739,242 +704,49 @@ input ApplicationWhereUniqueInput {
   id: ID!
 }
 
-type authenticateUserOutput {
-  token: String
-  item: User
+enum SortApplicationsBy {
+  id_ASC
+  id_DESC
+  appId_ASC
+  appId_DESC
+  name_ASC
+  name_DESC
+  description_ASC
+  description_DESC
+  owner_ASC
+  owner_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
 }
 
-enum CacheControlScope {
-  PUBLIC
-  PRIVATE
+input ApplicationUpdateInput {
+  appId: String
+  name: String
+  description: String
+  owner: UserRelateToOneInput
 }
 
-type Consumer {
-  _label_: String
+input ApplicationsUpdateInput {
   id: ID!
-  username: String
-  customId: String
-  kongConsumerId: String
-  namespace: String
-  tags: String
-  plugins(
-    where: PluginWhereInput
-    search: String
-    sortBy: [SortPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Plugin!]!
-  _pluginsMeta(
-    where: PluginWhereInput
-    search: String
-    sortBy: [SortPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  updatedBy: User
-  createdBy: User
-  updatedAt: DateTime
-  createdAt: DateTime
+  data: ApplicationUpdateInput
 }
 
-input ConsumerCreateInput {
-  username: String
-  customId: String
-  kongConsumerId: String
-  namespace: String
-  tags: String
-  plugins: PluginRelateToManyInput
+input ApplicationCreateInput {
+  appId: String
+  name: String
+  description: String
+  owner: UserRelateToOneInput
 }
 
-input ConsumerRelateToOneInput {
-  create: ConsumerCreateInput
-  connect: ConsumerWhereUniqueInput
-  disconnect: ConsumerWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input ConsumersCreateInput {
-  data: ConsumerCreateInput
-}
-
-input ConsumersUpdateInput {
-  id: ID!
-  data: ConsumerUpdateInput
-}
-
-input ConsumerUpdateInput {
-  username: String
-  customId: String
-  kongConsumerId: String
-  namespace: String
-  tags: String
-  plugins: PluginRelateToManyInput
-}
-
-input ConsumerWhereInput {
-  AND: [ConsumerWhereInput]
-  OR: [ConsumerWhereInput]
-  id: ID
-  id_not: ID
-  id_in: [ID]
-  id_not_in: [ID]
-  username: String
-  username_not: String
-  username_contains: String
-  username_not_contains: String
-  username_starts_with: String
-  username_not_starts_with: String
-  username_ends_with: String
-  username_not_ends_with: String
-  username_i: String
-  username_not_i: String
-  username_contains_i: String
-  username_not_contains_i: String
-  username_starts_with_i: String
-  username_not_starts_with_i: String
-  username_ends_with_i: String
-  username_not_ends_with_i: String
-  username_in: [String]
-  username_not_in: [String]
-  customId: String
-  customId_not: String
-  customId_contains: String
-  customId_not_contains: String
-  customId_starts_with: String
-  customId_not_starts_with: String
-  customId_ends_with: String
-  customId_not_ends_with: String
-  customId_i: String
-  customId_not_i: String
-  customId_contains_i: String
-  customId_not_contains_i: String
-  customId_starts_with_i: String
-  customId_not_starts_with_i: String
-  customId_ends_with_i: String
-  customId_not_ends_with_i: String
-  customId_in: [String]
-  customId_not_in: [String]
-  kongConsumerId: String
-  kongConsumerId_not: String
-  kongConsumerId_contains: String
-  kongConsumerId_not_contains: String
-  kongConsumerId_starts_with: String
-  kongConsumerId_not_starts_with: String
-  kongConsumerId_ends_with: String
-  kongConsumerId_not_ends_with: String
-  kongConsumerId_i: String
-  kongConsumerId_not_i: String
-  kongConsumerId_contains_i: String
-  kongConsumerId_not_contains_i: String
-  kongConsumerId_starts_with_i: String
-  kongConsumerId_not_starts_with_i: String
-  kongConsumerId_ends_with_i: String
-  kongConsumerId_not_ends_with_i: String
-  kongConsumerId_in: [String]
-  kongConsumerId_not_in: [String]
-  namespace: String
-  namespace_not: String
-  namespace_contains: String
-  namespace_not_contains: String
-  namespace_starts_with: String
-  namespace_not_starts_with: String
-  namespace_ends_with: String
-  namespace_not_ends_with: String
-  namespace_i: String
-  namespace_not_i: String
-  namespace_contains_i: String
-  namespace_not_contains_i: String
-  namespace_starts_with_i: String
-  namespace_not_starts_with_i: String
-  namespace_ends_with_i: String
-  namespace_not_ends_with_i: String
-  namespace_in: [String]
-  namespace_not_in: [String]
-  tags: String
-  tags_not: String
-  tags_contains: String
-  tags_not_contains: String
-  tags_starts_with: String
-  tags_not_starts_with: String
-  tags_ends_with: String
-  tags_not_ends_with: String
-  tags_i: String
-  tags_not_i: String
-  tags_contains_i: String
-  tags_not_contains_i: String
-  tags_starts_with_i: String
-  tags_not_starts_with_i: String
-  tags_ends_with_i: String
-  tags_not_ends_with_i: String
-  tags_in: [String]
-  tags_not_in: [String]
-  plugins_every: PluginWhereInput
-  plugins_some: PluginWhereInput
-  plugins_none: PluginWhereInput
-  updatedBy: UserWhereInput
-  updatedBy_is_null: Boolean
-  createdBy: UserWhereInput
-  createdBy_is_null: Boolean
-  updatedAt: DateTime
-  updatedAt_not: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedAt_in: [DateTime]
-  updatedAt_not_in: [DateTime]
-  createdAt: DateTime
-  createdAt_not: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdAt_in: [DateTime]
-  createdAt_not_in: [DateTime]
-}
-
-input ConsumerWhereUniqueInput {
-  id: ID!
+input ApplicationsCreateInput {
+  data: ApplicationCreateInput
 }
 
 type Content {
   _label_: String
   id: ID!
-  title: String
-  description: String
-  content: String
-  externalLink: String
-  githubRepository: String
-  readme: String
-  slug: String
-  order: Int
-  isComplete: Boolean
-}
-
-input ContentCreateInput {
-  title: String
-  description: String
-  content: String
-  externalLink: String
-  githubRepository: String
-  readme: String
-  slug: String
-  order: Int
-  isComplete: Boolean
-}
-
-input ContentsCreateInput {
-  data: ContentCreateInput
-}
-
-input ContentsUpdateInput {
-  id: ID!
-  data: ContentUpdateInput
-}
-
-input ContentUpdateInput {
   title: String
   description: String
   content: String
@@ -1135,6 +907,79 @@ input ContentWhereUniqueInput {
   id: ID!
 }
 
+enum SortContentsBy {
+  id_ASC
+  id_DESC
+  title_ASC
+  title_DESC
+  description_ASC
+  description_DESC
+  content_ASC
+  content_DESC
+  externalLink_ASC
+  externalLink_DESC
+  githubRepository_ASC
+  githubRepository_DESC
+  readme_ASC
+  readme_DESC
+  slug_ASC
+  slug_DESC
+  order_ASC
+  order_DESC
+  isComplete_ASC
+  isComplete_DESC
+}
+
+input ContentUpdateInput {
+  title: String
+  description: String
+  content: String
+  externalLink: String
+  githubRepository: String
+  readme: String
+  slug: String
+  order: Int
+  isComplete: Boolean
+}
+
+input ContentsUpdateInput {
+  id: ID!
+  data: ContentUpdateInput
+}
+
+input ContentCreateInput {
+  title: String
+  description: String
+  content: String
+  externalLink: String
+  githubRepository: String
+  readme: String
+  slug: String
+  order: Int
+  isComplete: Boolean
+}
+
+input ContentsCreateInput {
+  data: ContentCreateInput
+}
+
+enum CredentialIssuerAuthMethodType {
+  jwt
+  keys
+}
+
+enum CredentialIssuerModeType {
+  manual
+  auto
+}
+
+input EnvironmentRelateToManyInput {
+  create: [EnvironmentCreateInput]
+  connect: [EnvironmentWhereUniqueInput]
+  disconnect: [EnvironmentWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
 type CredentialIssuer {
   _label_: String
   id: ID!
@@ -1168,58 +1013,6 @@ type CredentialIssuer {
   createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-enum CredentialIssuerAuthMethodType {
-  oidc
-  keys
-}
-
-input CredentialIssuerCreateInput {
-  name: String
-  description: String
-  authMethod: CredentialIssuerAuthMethodType
-  mode: CredentialIssuerModeType
-  oidcDiscoveryUrl: String
-  initialAccessToken: String
-  clientId: String
-  clientSecret: String
-  contact: UserRelateToOneInput
-  environments: EnvironmentRelateToManyInput
-}
-
-enum CredentialIssuerModeType {
-  manual
-  auto
-}
-
-input CredentialIssuerRelateToOneInput {
-  create: CredentialIssuerCreateInput
-  connect: CredentialIssuerWhereUniqueInput
-  disconnect: CredentialIssuerWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input CredentialIssuersCreateInput {
-  data: CredentialIssuerCreateInput
-}
-
-input CredentialIssuersUpdateInput {
-  id: ID!
-  data: CredentialIssuerUpdateInput
-}
-
-input CredentialIssuerUpdateInput {
-  name: String
-  description: String
-  authMethod: CredentialIssuerAuthMethodType
-  mode: CredentialIssuerModeType
-  oidcDiscoveryUrl: String
-  initialAccessToken: String
-  clientId: String
-  clientSecret: String
-  contact: UserRelateToOneInput
-  environments: EnvironmentRelateToManyInput
 }
 
 input CredentialIssuerWhereInput {
@@ -1376,6 +1169,88 @@ input CredentialIssuerWhereUniqueInput {
   id: ID!
 }
 
+enum SortCredentialIssuersBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  description_ASC
+  description_DESC
+  authMethod_ASC
+  authMethod_DESC
+  mode_ASC
+  mode_DESC
+  oidcDiscoveryUrl_ASC
+  oidcDiscoveryUrl_DESC
+  initialAccessToken_ASC
+  initialAccessToken_DESC
+  clientId_ASC
+  clientId_DESC
+  clientSecret_ASC
+  clientSecret_DESC
+  contact_ASC
+  contact_DESC
+  environments_ASC
+  environments_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input CredentialIssuerUpdateInput {
+  name: String
+  description: String
+  authMethod: CredentialIssuerAuthMethodType
+  mode: CredentialIssuerModeType
+  oidcDiscoveryUrl: String
+  initialAccessToken: String
+  clientId: String
+  clientSecret: String
+  contact: UserRelateToOneInput
+  environments: EnvironmentRelateToManyInput
+}
+
+input CredentialIssuersUpdateInput {
+  id: ID!
+  data: CredentialIssuerUpdateInput
+}
+
+input CredentialIssuerCreateInput {
+  name: String
+  description: String
+  authMethod: CredentialIssuerAuthMethodType
+  mode: CredentialIssuerModeType
+  oidcDiscoveryUrl: String
+  initialAccessToken: String
+  clientId: String
+  clientSecret: String
+  contact: UserRelateToOneInput
+  environments: EnvironmentRelateToManyInput
+}
+
+input CredentialIssuersCreateInput {
+  data: CredentialIssuerCreateInput
+}
+
+input OrganizationRelateToOneInput {
+  create: OrganizationCreateInput
+  connect: OrganizationWhereUniqueInput
+  disconnect: OrganizationWhereUniqueInput
+  disconnectAll: Boolean
+}
+
+input OrganizationUnitRelateToOneInput {
+  create: OrganizationUnitCreateInput
+  connect: OrganizationUnitWhereUniqueInput
+  disconnect: OrganizationUnitWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 type Dataset {
   _label_: String
   id: ID!
@@ -1389,58 +1264,6 @@ type Dataset {
   contacts: String
   organization: Organization
   organizationUnit: OrganizationUnit
-  securityClass: String
-  notes: String
-  title: String
-  catalogContent: String
-  isInCatalog: Boolean
-}
-
-input DatasetCreateInput {
-  name: String
-  bcdc_id: String
-  sector: String
-  license_title: String
-  view_audience: String
-  private: Boolean
-  tags: String
-  contacts: String
-  organization: OrganizationRelateToOneInput
-  organizationUnit: OrganizationUnitRelateToOneInput
-  securityClass: String
-  notes: String
-  title: String
-  catalogContent: String
-  isInCatalog: Boolean
-}
-
-input DatasetRelateToOneInput {
-  create: DatasetCreateInput
-  connect: DatasetWhereUniqueInput
-  disconnect: DatasetWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input DatasetsCreateInput {
-  data: DatasetCreateInput
-}
-
-input DatasetsUpdateInput {
-  id: ID!
-  data: DatasetUpdateInput
-}
-
-input DatasetUpdateInput {
-  name: String
-  bcdc_id: String
-  sector: String
-  license_title: String
-  view_audience: String
-  private: Boolean
-  tags: String
-  contacts: String
-  organization: OrganizationRelateToOneInput
-  organizationUnit: OrganizationUnitRelateToOneInput
   securityClass: String
   notes: String
   title: String
@@ -1667,7 +1490,119 @@ input DatasetWhereUniqueInput {
   id: ID!
 }
 
-scalar DateTime
+enum SortDatasetsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  bcdc_id_ASC
+  bcdc_id_DESC
+  sector_ASC
+  sector_DESC
+  license_title_ASC
+  license_title_DESC
+  view_audience_ASC
+  view_audience_DESC
+  private_ASC
+  private_DESC
+  tags_ASC
+  tags_DESC
+  contacts_ASC
+  contacts_DESC
+  organization_ASC
+  organization_DESC
+  organizationUnit_ASC
+  organizationUnit_DESC
+  securityClass_ASC
+  securityClass_DESC
+  notes_ASC
+  notes_DESC
+  title_ASC
+  title_DESC
+  catalogContent_ASC
+  catalogContent_DESC
+  isInCatalog_ASC
+  isInCatalog_DESC
+}
+
+input DatasetUpdateInput {
+  name: String
+  bcdc_id: String
+  sector: String
+  license_title: String
+  view_audience: String
+  private: Boolean
+  tags: String
+  contacts: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
+  securityClass: String
+  notes: String
+  title: String
+  catalogContent: String
+  isInCatalog: Boolean
+}
+
+input DatasetsUpdateInput {
+  id: ID!
+  data: DatasetUpdateInput
+}
+
+input DatasetCreateInput {
+  name: String
+  bcdc_id: String
+  sector: String
+  license_title: String
+  view_audience: String
+  private: Boolean
+  tags: String
+  contacts: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
+  securityClass: String
+  notes: String
+  title: String
+  catalogContent: String
+  isInCatalog: Boolean
+}
+
+input DatasetsCreateInput {
+  data: DatasetCreateInput
+}
+
+enum EnvironmentAuthMethodType {
+  public
+  jwt
+  keys
+}
+
+input GatewayPluginRelateToManyInput {
+  create: [GatewayPluginCreateInput]
+  connect: [GatewayPluginWhereUniqueInput]
+  disconnect: [GatewayPluginWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
+input CredentialIssuerRelateToOneInput {
+  create: CredentialIssuerCreateInput
+  connect: CredentialIssuerWhereUniqueInput
+  disconnect: CredentialIssuerWhereUniqueInput
+  disconnectAll: Boolean
+}
+
+input GatewayServiceRelateToManyInput {
+  create: [GatewayServiceCreateInput]
+  connect: [GatewayServiceWhereUniqueInput]
+  disconnect: [GatewayServiceWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
+input ProductRelateToOneInput {
+  create: ProductCreateInput
+  connect: ProductWhereUniqueInput
+  disconnect: ProductWhereUniqueInput
+  disconnectAll: Boolean
+}
 
 type Environment {
   _label_: String
@@ -1676,17 +1611,17 @@ type Environment {
   active: Boolean
   authMethod: EnvironmentAuthMethodType
   plugins(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
-  ): [Plugin!]!
+  ): [GatewayPlugin!]!
   _pluginsMeta(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
@@ -1710,58 +1645,6 @@ type Environment {
     skip: Int
   ): _QueryMeta
   product: Product
-}
-
-enum EnvironmentAuthMethodType {
-  private
-  public
-  JWT
-  keys
-}
-
-input EnvironmentCreateInput {
-  name: String
-  active: Boolean
-  authMethod: EnvironmentAuthMethodType
-  plugins: PluginRelateToManyInput
-  description: String
-  credentialIssuer: CredentialIssuerRelateToOneInput
-  services: GatewayServiceRelateToManyInput
-  product: ProductRelateToOneInput
-}
-
-input EnvironmentRelateToManyInput {
-  create: [EnvironmentCreateInput]
-  connect: [EnvironmentWhereUniqueInput]
-  disconnect: [EnvironmentWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input EnvironmentRelateToOneInput {
-  create: EnvironmentCreateInput
-  connect: EnvironmentWhereUniqueInput
-  disconnect: EnvironmentWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input EnvironmentsCreateInput {
-  data: EnvironmentCreateInput
-}
-
-input EnvironmentsUpdateInput {
-  id: ID!
-  data: EnvironmentUpdateInput
-}
-
-input EnvironmentUpdateInput {
-  name: String
-  active: Boolean
-  authMethod: EnvironmentAuthMethodType
-  plugins: PluginRelateToManyInput
-  description: String
-  credentialIssuer: CredentialIssuerRelateToOneInput
-  services: GatewayServiceRelateToManyInput
-  product: ProductRelateToOneInput
 }
 
 input EnvironmentWhereInput {
@@ -1795,9 +1678,9 @@ input EnvironmentWhereInput {
   authMethod_not: EnvironmentAuthMethodType
   authMethod_in: [EnvironmentAuthMethodType]
   authMethod_not_in: [EnvironmentAuthMethodType]
-  plugins_every: PluginWhereInput
-  plugins_some: PluginWhereInput
-  plugins_none: PluginWhereInput
+  plugins_every: GatewayPluginWhereInput
+  plugins_some: GatewayPluginWhereInput
+  plugins_none: GatewayPluginWhereInput
   description: String
   description_not: String
   description_contains: String
@@ -1829,49 +1712,292 @@ input EnvironmentWhereUniqueInput {
   id: ID!
 }
 
-type GatewayMetric {
+enum SortEnvironmentsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  active_ASC
+  active_DESC
+  authMethod_ASC
+  authMethod_DESC
+  plugins_ASC
+  plugins_DESC
+  description_ASC
+  description_DESC
+  credentialIssuer_ASC
+  credentialIssuer_DESC
+  services_ASC
+  services_DESC
+  product_ASC
+  product_DESC
+}
+
+input EnvironmentUpdateInput {
+  name: String
+  active: Boolean
+  authMethod: EnvironmentAuthMethodType
+  plugins: GatewayPluginRelateToManyInput
+  description: String
+  credentialIssuer: CredentialIssuerRelateToOneInput
+  services: GatewayServiceRelateToManyInput
+  product: ProductRelateToOneInput
+}
+
+input EnvironmentsUpdateInput {
+  id: ID!
+  data: EnvironmentUpdateInput
+}
+
+input EnvironmentCreateInput {
+  name: String
+  active: Boolean
+  authMethod: EnvironmentAuthMethodType
+  plugins: GatewayPluginRelateToManyInput
+  description: String
+  credentialIssuer: CredentialIssuerRelateToOneInput
+  services: GatewayServiceRelateToManyInput
+  product: ProductRelateToOneInput
+}
+
+input EnvironmentsCreateInput {
+  data: EnvironmentCreateInput
+}
+
+type GatewayConsumer {
   _label_: String
   id: ID!
-  name: String
-  query: String
-  day: String
-  metric: String
-  values: String
-  service: GatewayService
+  username: String
+  customId: String
+  kongConsumerId: String
+  aclGroups: String
+  namespace: String
+  tags: String
+  plugins(
+    where: GatewayPluginWhereInput
+    search: String
+    sortBy: [SortGatewayPluginsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayPlugin!]!
+  _pluginsMeta(
+    where: GatewayPluginWhereInput
+    search: String
+    sortBy: [SortGatewayPluginsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
   updatedAt: DateTime
   createdAt: DateTime
 }
 
-input GatewayMetricCreateInput {
-  name: String
-  query: String
-  day: String
-  metric: String
-  values: String
-  service: GatewayServiceRelateToOneInput
+input GatewayConsumerWhereInput {
+  AND: [GatewayConsumerWhereInput]
+  OR: [GatewayConsumerWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  username: String
+  username_not: String
+  username_contains: String
+  username_not_contains: String
+  username_starts_with: String
+  username_not_starts_with: String
+  username_ends_with: String
+  username_not_ends_with: String
+  username_i: String
+  username_not_i: String
+  username_contains_i: String
+  username_not_contains_i: String
+  username_starts_with_i: String
+  username_not_starts_with_i: String
+  username_ends_with_i: String
+  username_not_ends_with_i: String
+  username_in: [String]
+  username_not_in: [String]
+  customId: String
+  customId_not: String
+  customId_contains: String
+  customId_not_contains: String
+  customId_starts_with: String
+  customId_not_starts_with: String
+  customId_ends_with: String
+  customId_not_ends_with: String
+  customId_i: String
+  customId_not_i: String
+  customId_contains_i: String
+  customId_not_contains_i: String
+  customId_starts_with_i: String
+  customId_not_starts_with_i: String
+  customId_ends_with_i: String
+  customId_not_ends_with_i: String
+  customId_in: [String]
+  customId_not_in: [String]
+  kongConsumerId: String
+  kongConsumerId_not: String
+  kongConsumerId_contains: String
+  kongConsumerId_not_contains: String
+  kongConsumerId_starts_with: String
+  kongConsumerId_not_starts_with: String
+  kongConsumerId_ends_with: String
+  kongConsumerId_not_ends_with: String
+  kongConsumerId_i: String
+  kongConsumerId_not_i: String
+  kongConsumerId_contains_i: String
+  kongConsumerId_not_contains_i: String
+  kongConsumerId_starts_with_i: String
+  kongConsumerId_not_starts_with_i: String
+  kongConsumerId_ends_with_i: String
+  kongConsumerId_not_ends_with_i: String
+  kongConsumerId_in: [String]
+  kongConsumerId_not_in: [String]
+  aclGroups: String
+  aclGroups_not: String
+  aclGroups_contains: String
+  aclGroups_not_contains: String
+  aclGroups_starts_with: String
+  aclGroups_not_starts_with: String
+  aclGroups_ends_with: String
+  aclGroups_not_ends_with: String
+  aclGroups_i: String
+  aclGroups_not_i: String
+  aclGroups_contains_i: String
+  aclGroups_not_contains_i: String
+  aclGroups_starts_with_i: String
+  aclGroups_not_starts_with_i: String
+  aclGroups_ends_with_i: String
+  aclGroups_not_ends_with_i: String
+  aclGroups_in: [String]
+  aclGroups_not_in: [String]
+  namespace: String
+  namespace_not: String
+  namespace_contains: String
+  namespace_not_contains: String
+  namespace_starts_with: String
+  namespace_not_starts_with: String
+  namespace_ends_with: String
+  namespace_not_ends_with: String
+  namespace_i: String
+  namespace_not_i: String
+  namespace_contains_i: String
+  namespace_not_contains_i: String
+  namespace_starts_with_i: String
+  namespace_not_starts_with_i: String
+  namespace_ends_with_i: String
+  namespace_not_ends_with_i: String
+  namespace_in: [String]
+  namespace_not_in: [String]
+  tags: String
+  tags_not: String
+  tags_contains: String
+  tags_not_contains: String
+  tags_starts_with: String
+  tags_not_starts_with: String
+  tags_ends_with: String
+  tags_not_ends_with: String
+  tags_i: String
+  tags_not_i: String
+  tags_contains_i: String
+  tags_not_contains_i: String
+  tags_starts_with_i: String
+  tags_not_starts_with_i: String
+  tags_ends_with_i: String
+  tags_not_ends_with_i: String
+  tags_in: [String]
+  tags_not_in: [String]
+  plugins_every: GatewayPluginWhereInput
+  plugins_some: GatewayPluginWhereInput
+  plugins_none: GatewayPluginWhereInput
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedAt_in: [DateTime]
+  updatedAt_not_in: [DateTime]
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_in: [DateTime]
+  createdAt_not_in: [DateTime]
 }
 
-input GatewayMetricsCreateInput {
-  data: GatewayMetricCreateInput
-}
-
-input GatewayMetricsUpdateInput {
+input GatewayConsumerWhereUniqueInput {
   id: ID!
-  data: GatewayMetricUpdateInput
 }
 
-input GatewayMetricUpdateInput {
+enum SortGatewayConsumersBy {
+  id_ASC
+  id_DESC
+  username_ASC
+  username_DESC
+  customId_ASC
+  customId_DESC
+  kongConsumerId_ASC
+  kongConsumerId_DESC
+  aclGroups_ASC
+  aclGroups_DESC
+  namespace_ASC
+  namespace_DESC
+  tags_ASC
+  tags_DESC
+  plugins_ASC
+  plugins_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GatewayConsumerUpdateInput {
+  username: String
+  customId: String
+  kongConsumerId: String
+  aclGroups: String
+  namespace: String
+  tags: String
+  plugins: GatewayPluginRelateToManyInput
+}
+
+input GatewayConsumersUpdateInput {
+  id: ID!
+  data: GatewayConsumerUpdateInput
+}
+
+input GatewayConsumerCreateInput {
+  username: String
+  customId: String
+  kongConsumerId: String
+  aclGroups: String
+  namespace: String
+  tags: String
+  plugins: GatewayPluginRelateToManyInput
+}
+
+input GatewayConsumersCreateInput {
+  data: GatewayConsumerCreateInput
+}
+
+type GatewayGroup {
+  _label_: String
+  id: ID!
   name: String
-  query: String
-  day: String
-  metric: String
-  values: String
-  service: GatewayServiceRelateToOneInput
+  extRefId: String
+  namespace: String
+  updatedAt: DateTime
+  createdAt: DateTime
 }
 
-input GatewayMetricWhereInput {
-  AND: [GatewayMetricWhereInput]
-  OR: [GatewayMetricWhereInput]
+input GatewayGroupWhereInput {
+  AND: [GatewayGroupWhereInput]
+  OR: [GatewayGroupWhereInput]
   id: ID
   id_not: ID
   id_in: [ID]
@@ -1894,80 +2020,42 @@ input GatewayMetricWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  query: String
-  query_not: String
-  query_contains: String
-  query_not_contains: String
-  query_starts_with: String
-  query_not_starts_with: String
-  query_ends_with: String
-  query_not_ends_with: String
-  query_i: String
-  query_not_i: String
-  query_contains_i: String
-  query_not_contains_i: String
-  query_starts_with_i: String
-  query_not_starts_with_i: String
-  query_ends_with_i: String
-  query_not_ends_with_i: String
-  query_in: [String]
-  query_not_in: [String]
-  day: String
-  day_not: String
-  day_contains: String
-  day_not_contains: String
-  day_starts_with: String
-  day_not_starts_with: String
-  day_ends_with: String
-  day_not_ends_with: String
-  day_i: String
-  day_not_i: String
-  day_contains_i: String
-  day_not_contains_i: String
-  day_starts_with_i: String
-  day_not_starts_with_i: String
-  day_ends_with_i: String
-  day_not_ends_with_i: String
-  day_in: [String]
-  day_not_in: [String]
-  metric: String
-  metric_not: String
-  metric_contains: String
-  metric_not_contains: String
-  metric_starts_with: String
-  metric_not_starts_with: String
-  metric_ends_with: String
-  metric_not_ends_with: String
-  metric_i: String
-  metric_not_i: String
-  metric_contains_i: String
-  metric_not_contains_i: String
-  metric_starts_with_i: String
-  metric_not_starts_with_i: String
-  metric_ends_with_i: String
-  metric_not_ends_with_i: String
-  metric_in: [String]
-  metric_not_in: [String]
-  values: String
-  values_not: String
-  values_contains: String
-  values_not_contains: String
-  values_starts_with: String
-  values_not_starts_with: String
-  values_ends_with: String
-  values_not_ends_with: String
-  values_i: String
-  values_not_i: String
-  values_contains_i: String
-  values_not_contains_i: String
-  values_starts_with_i: String
-  values_not_starts_with_i: String
-  values_ends_with_i: String
-  values_not_ends_with_i: String
-  values_in: [String]
-  values_not_in: [String]
-  service: GatewayServiceWhereInput
-  service_is_null: Boolean
+  extRefId: String
+  extRefId_not: String
+  extRefId_contains: String
+  extRefId_not_contains: String
+  extRefId_starts_with: String
+  extRefId_not_starts_with: String
+  extRefId_ends_with: String
+  extRefId_not_ends_with: String
+  extRefId_i: String
+  extRefId_not_i: String
+  extRefId_contains_i: String
+  extRefId_not_contains_i: String
+  extRefId_starts_with_i: String
+  extRefId_not_starts_with_i: String
+  extRefId_ends_with_i: String
+  extRefId_not_ends_with_i: String
+  extRefId_in: [String]
+  extRefId_not_in: [String]
+  namespace: String
+  namespace_not: String
+  namespace_contains: String
+  namespace_not_contains: String
+  namespace_starts_with: String
+  namespace_not_starts_with: String
+  namespace_ends_with: String
+  namespace_not_ends_with: String
+  namespace_i: String
+  namespace_not_i: String
+  namespace_contains_i: String
+  namespace_not_contains_i: String
+  namespace_starts_with_i: String
+  namespace_not_starts_with_i: String
+  namespace_ends_with_i: String
+  namespace_not_ends_with_i: String
+  namespace_in: [String]
+  namespace_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -1986,8 +2074,217 @@ input GatewayMetricWhereInput {
   createdAt_not_in: [DateTime]
 }
 
-input GatewayMetricWhereUniqueInput {
+input GatewayGroupWhereUniqueInput {
   id: ID!
+}
+
+enum SortGatewayGroupsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  extRefId_ASC
+  extRefId_DESC
+  namespace_ASC
+  namespace_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GatewayGroupUpdateInput {
+  name: String
+  extRefId: String
+  namespace: String
+}
+
+input GatewayGroupsUpdateInput {
+  id: ID!
+  data: GatewayGroupUpdateInput
+}
+
+input GatewayGroupCreateInput {
+  name: String
+  extRefId: String
+  namespace: String
+}
+
+input GatewayGroupsCreateInput {
+  data: GatewayGroupCreateInput
+}
+
+input GatewayRouteRelateToOneInput {
+  create: GatewayRouteCreateInput
+  connect: GatewayRouteWhereUniqueInput
+  disconnect: GatewayRouteWhereUniqueInput
+  disconnectAll: Boolean
+}
+
+type GatewayPlugin {
+  _label_: String
+  id: ID!
+  name: String
+  kongPluginId: String
+  tags: String
+  config: String
+  service: GatewayService
+  route: GatewayRoute
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+input GatewayPluginWhereInput {
+  AND: [GatewayPluginWhereInput]
+  OR: [GatewayPluginWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  kongPluginId: String
+  kongPluginId_not: String
+  kongPluginId_contains: String
+  kongPluginId_not_contains: String
+  kongPluginId_starts_with: String
+  kongPluginId_not_starts_with: String
+  kongPluginId_ends_with: String
+  kongPluginId_not_ends_with: String
+  kongPluginId_i: String
+  kongPluginId_not_i: String
+  kongPluginId_contains_i: String
+  kongPluginId_not_contains_i: String
+  kongPluginId_starts_with_i: String
+  kongPluginId_not_starts_with_i: String
+  kongPluginId_ends_with_i: String
+  kongPluginId_not_ends_with_i: String
+  kongPluginId_in: [String]
+  kongPluginId_not_in: [String]
+  tags: String
+  tags_not: String
+  tags_contains: String
+  tags_not_contains: String
+  tags_starts_with: String
+  tags_not_starts_with: String
+  tags_ends_with: String
+  tags_not_ends_with: String
+  tags_i: String
+  tags_not_i: String
+  tags_contains_i: String
+  tags_not_contains_i: String
+  tags_starts_with_i: String
+  tags_not_starts_with_i: String
+  tags_ends_with_i: String
+  tags_not_ends_with_i: String
+  tags_in: [String]
+  tags_not_in: [String]
+  config: String
+  config_not: String
+  config_contains: String
+  config_not_contains: String
+  config_starts_with: String
+  config_not_starts_with: String
+  config_ends_with: String
+  config_not_ends_with: String
+  config_i: String
+  config_not_i: String
+  config_contains_i: String
+  config_not_contains_i: String
+  config_starts_with_i: String
+  config_not_starts_with_i: String
+  config_ends_with_i: String
+  config_not_ends_with_i: String
+  config_in: [String]
+  config_not_in: [String]
+  service: GatewayServiceWhereInput
+  service_is_null: Boolean
+  route: GatewayRouteWhereInput
+  route_is_null: Boolean
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedAt_in: [DateTime]
+  updatedAt_not_in: [DateTime]
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_in: [DateTime]
+  createdAt_not_in: [DateTime]
+}
+
+input GatewayPluginWhereUniqueInput {
+  id: ID!
+}
+
+enum SortGatewayPluginsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  kongPluginId_ASC
+  kongPluginId_DESC
+  tags_ASC
+  tags_DESC
+  config_ASC
+  config_DESC
+  service_ASC
+  service_DESC
+  route_ASC
+  route_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GatewayPluginUpdateInput {
+  name: String
+  kongPluginId: String
+  tags: String
+  config: String
+  service: GatewayServiceRelateToOneInput
+  route: GatewayRouteRelateToOneInput
+}
+
+input GatewayPluginsUpdateInput {
+  id: ID!
+  data: GatewayPluginUpdateInput
+}
+
+input GatewayPluginCreateInput {
+  name: String
+  kongPluginId: String
+  tags: String
+  config: String
+  service: GatewayServiceRelateToOneInput
+  route: GatewayRouteRelateToOneInput
+}
+
+input GatewayPluginsCreateInput {
+  data: GatewayPluginCreateInput
 }
 
 type GatewayRoute {
@@ -2002,72 +2299,23 @@ type GatewayRoute {
   tags: String
   service: GatewayService
   plugins(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
-  ): [Plugin!]!
+  ): [GatewayPlugin!]!
   _pluginsMeta(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
   ): _QueryMeta
-  updatedBy: User
-  createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input GatewayRouteCreateInput {
-  name: String
-  kongRouteId: String
-  namespace: String
-  methods: String
-  paths: String
-  hosts: String
-  tags: String
-  service: GatewayServiceRelateToOneInput
-  plugins: PluginRelateToManyInput
-}
-
-input GatewayRouteRelateToManyInput {
-  create: [GatewayRouteCreateInput]
-  connect: [GatewayRouteWhereUniqueInput]
-  disconnect: [GatewayRouteWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input GatewayRouteRelateToOneInput {
-  create: GatewayRouteCreateInput
-  connect: GatewayRouteWhereUniqueInput
-  disconnect: GatewayRouteWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input GatewayRoutesCreateInput {
-  data: GatewayRouteCreateInput
-}
-
-input GatewayRoutesUpdateInput {
-  id: ID!
-  data: GatewayRouteUpdateInput
-}
-
-input GatewayRouteUpdateInput {
-  name: String
-  kongRouteId: String
-  namespace: String
-  methods: String
-  paths: String
-  hosts: String
-  tags: String
-  service: GatewayServiceRelateToOneInput
-  plugins: PluginRelateToManyInput
 }
 
 input GatewayRouteWhereInput {
@@ -2205,13 +2453,9 @@ input GatewayRouteWhereInput {
   tags_not_in: [String]
   service: GatewayServiceWhereInput
   service_is_null: Boolean
-  plugins_every: PluginWhereInput
-  plugins_some: PluginWhereInput
-  plugins_none: PluginWhereInput
-  updatedBy: UserWhereInput
-  updatedBy_is_null: Boolean
-  createdBy: UserWhereInput
-  createdBy_is_null: Boolean
+  plugins_every: GatewayPluginWhereInput
+  plugins_some: GatewayPluginWhereInput
+  plugins_none: GatewayPluginWhereInput
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2232,6 +2476,73 @@ input GatewayRouteWhereInput {
 
 input GatewayRouteWhereUniqueInput {
   id: ID!
+}
+
+enum SortGatewayRoutesBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  kongRouteId_ASC
+  kongRouteId_DESC
+  namespace_ASC
+  namespace_DESC
+  methods_ASC
+  methods_DESC
+  paths_ASC
+  paths_DESC
+  hosts_ASC
+  hosts_DESC
+  tags_ASC
+  tags_DESC
+  service_ASC
+  service_DESC
+  plugins_ASC
+  plugins_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GatewayRouteUpdateInput {
+  name: String
+  kongRouteId: String
+  namespace: String
+  methods: String
+  paths: String
+  hosts: String
+  tags: String
+  service: GatewayServiceRelateToOneInput
+  plugins: GatewayPluginRelateToManyInput
+}
+
+input GatewayRoutesUpdateInput {
+  id: ID!
+  data: GatewayRouteUpdateInput
+}
+
+input GatewayRouteCreateInput {
+  name: String
+  kongRouteId: String
+  namespace: String
+  methods: String
+  paths: String
+  hosts: String
+  tags: String
+  service: GatewayServiceRelateToOneInput
+  plugins: GatewayPluginRelateToManyInput
+}
+
+input GatewayRoutesCreateInput {
+  data: GatewayRouteCreateInput
+}
+
+input GatewayRouteRelateToManyInput {
+  create: [GatewayRouteCreateInput]
+  connect: [GatewayRouteWhereUniqueInput]
+  disconnect: [GatewayRouteWhereUniqueInput]
+  disconnectAll: Boolean
 }
 
 type GatewayService {
@@ -2259,71 +2570,24 @@ type GatewayService {
     skip: Int
   ): _QueryMeta
   plugins(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
-  ): [Plugin!]!
+  ): [GatewayPlugin!]!
   _pluginsMeta(
-    where: PluginWhereInput
+    where: GatewayPluginWhereInput
     search: String
-    sortBy: [SortPluginsBy!]
+    sortBy: [SortGatewayPluginsBy!]
     orderBy: String
     first: Int
     skip: Int
   ): _QueryMeta
   environment: Environment
-  updatedBy: User
-  createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input GatewayServiceCreateInput {
-  name: String
-  kongServiceId: String
-  namespace: String
-  host: String
-  tags: String
-  routes: GatewayRouteRelateToManyInput
-  plugins: PluginRelateToManyInput
-  environment: EnvironmentRelateToOneInput
-}
-
-input GatewayServiceRelateToManyInput {
-  create: [GatewayServiceCreateInput]
-  connect: [GatewayServiceWhereUniqueInput]
-  disconnect: [GatewayServiceWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input GatewayServiceRelateToOneInput {
-  create: GatewayServiceCreateInput
-  connect: GatewayServiceWhereUniqueInput
-  disconnect: GatewayServiceWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input GatewayServicesCreateInput {
-  data: GatewayServiceCreateInput
-}
-
-input GatewayServicesUpdateInput {
-  id: ID!
-  data: GatewayServiceUpdateInput
-}
-
-input GatewayServiceUpdateInput {
-  name: String
-  kongServiceId: String
-  namespace: String
-  host: String
-  tags: String
-  routes: GatewayRouteRelateToManyInput
-  plugins: PluginRelateToManyInput
-  environment: EnvironmentRelateToOneInput
 }
 
 input GatewayServiceWhereInput {
@@ -2426,15 +2690,11 @@ input GatewayServiceWhereInput {
   routes_every: GatewayRouteWhereInput
   routes_some: GatewayRouteWhereInput
   routes_none: GatewayRouteWhereInput
-  plugins_every: PluginWhereInput
-  plugins_some: PluginWhereInput
-  plugins_none: PluginWhereInput
+  plugins_every: GatewayPluginWhereInput
+  plugins_some: GatewayPluginWhereInput
+  plugins_none: GatewayPluginWhereInput
   environment: EnvironmentWhereInput
   environment_is_null: Boolean
-  updatedBy: UserWhereInput
-  updatedBy_is_null: Boolean
-  createdBy: UserWhereInput
-  createdBy_is_null: Boolean
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2457,6 +2717,62 @@ input GatewayServiceWhereUniqueInput {
   id: ID!
 }
 
+enum SortGatewayServicesBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  kongServiceId_ASC
+  kongServiceId_DESC
+  namespace_ASC
+  namespace_DESC
+  host_ASC
+  host_DESC
+  tags_ASC
+  tags_DESC
+  routes_ASC
+  routes_DESC
+  plugins_ASC
+  plugins_DESC
+  environment_ASC
+  environment_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GatewayServiceUpdateInput {
+  name: String
+  kongServiceId: String
+  namespace: String
+  host: String
+  tags: String
+  routes: GatewayRouteRelateToManyInput
+  plugins: GatewayPluginRelateToManyInput
+  environment: EnvironmentRelateToOneInput
+}
+
+input GatewayServicesUpdateInput {
+  id: ID!
+  data: GatewayServiceUpdateInput
+}
+
+input GatewayServiceCreateInput {
+  name: String
+  kongServiceId: String
+  namespace: String
+  host: String
+  tags: String
+  routes: GatewayRouteRelateToManyInput
+  plugins: GatewayPluginRelateToManyInput
+  environment: EnvironmentRelateToOneInput
+}
+
+input GatewayServicesCreateInput {
+  data: GatewayServiceCreateInput
+}
+
 type Group {
   _label_: String
   id: ID!
@@ -2465,23 +2781,6 @@ type Group {
   createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input GroupCreateInput {
-  name: String
-}
-
-input GroupsCreateInput {
-  data: GroupCreateInput
-}
-
-input GroupsUpdateInput {
-  id: ID!
-  data: GroupUpdateInput
-}
-
-input GroupUpdateInput {
-  name: String
 }
 
 input GroupWhereInput {
@@ -2535,7 +2834,37 @@ input GroupWhereUniqueInput {
   id: ID!
 }
 
-scalar JSON
+enum SortGroupsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input GroupUpdateInput {
+  name: String
+}
+
+input GroupsUpdateInput {
+  id: ID!
+  data: GroupUpdateInput
+}
+
+input GroupCreateInput {
+  name: String
+}
+
+input GroupsCreateInput {
+  data: GroupCreateInput
+}
 
 type MemberRole {
   _label_: String
@@ -2547,34 +2876,6 @@ type MemberRole {
   createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input MemberRoleCreateInput {
-  role: String
-  extRefId: String
-  user: UserRelateToOneInput
-}
-
-input MemberRoleRelateToManyInput {
-  create: [MemberRoleCreateInput]
-  connect: [MemberRoleWhereUniqueInput]
-  disconnect: [MemberRoleWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input MemberRolesCreateInput {
-  data: MemberRoleCreateInput
-}
-
-input MemberRolesUpdateInput {
-  id: ID!
-  data: MemberRoleUpdateInput
-}
-
-input MemberRoleUpdateInput {
-  role: String
-  extRefId: String
-  user: UserRelateToOneInput
 }
 
 input MemberRoleWhereInput {
@@ -2648,166 +2949,233 @@ input MemberRoleWhereUniqueInput {
   id: ID!
 }
 
-type Mutation {
-  createAccessRequest(data: AccessRequestCreateInput): AccessRequest
-  createAccessRequests(data: [AccessRequestsCreateInput]): [AccessRequest]
-  updateAccessRequest(id: ID!, data: AccessRequestUpdateInput): AccessRequest
-  updateAccessRequests(data: [AccessRequestsUpdateInput]): [AccessRequest]
-  deleteAccessRequest(id: ID!): AccessRequest
-  deleteAccessRequests(ids: [ID!]): [AccessRequest]
-  createActivity(data: ActivityCreateInput): Activity
-  createActivities(data: [ActivitiesCreateInput]): [Activity]
-  updateActivity(id: ID!, data: ActivityUpdateInput): Activity
-  updateActivities(data: [ActivitiesUpdateInput]): [Activity]
-  deleteActivity(id: ID!): Activity
-  deleteActivities(ids: [ID!]): [Activity]
-  createAlert(data: AlertCreateInput): Alert
-  createAlerts(data: [AlertsCreateInput]): [Alert]
-  updateAlert(id: ID!, data: AlertUpdateInput): Alert
-  updateAlerts(data: [AlertsUpdateInput]): [Alert]
-  deleteAlert(id: ID!): Alert
-  deleteAlerts(ids: [ID!]): [Alert]
-  createApplication(data: ApplicationCreateInput): Application
-  createApplications(data: [ApplicationsCreateInput]): [Application]
-  updateApplication(id: ID!, data: ApplicationUpdateInput): Application
-  updateApplications(data: [ApplicationsUpdateInput]): [Application]
-  deleteApplication(id: ID!): Application
-  deleteApplications(ids: [ID!]): [Application]
-  createConsumer(data: ConsumerCreateInput): Consumer
-  createConsumers(data: [ConsumersCreateInput]): [Consumer]
-  updateConsumer(id: ID!, data: ConsumerUpdateInput): Consumer
-  updateConsumers(data: [ConsumersUpdateInput]): [Consumer]
-  deleteConsumer(id: ID!): Consumer
-  deleteConsumers(ids: [ID!]): [Consumer]
-  createContent(data: ContentCreateInput): Content
-  createContents(data: [ContentsCreateInput]): [Content]
-  updateContent(id: ID!, data: ContentUpdateInput): Content
-  updateContents(data: [ContentsUpdateInput]): [Content]
-  deleteContent(id: ID!): Content
-  deleteContents(ids: [ID!]): [Content]
-  createCredentialIssuer(data: CredentialIssuerCreateInput): CredentialIssuer
-  createCredentialIssuers(
-    data: [CredentialIssuersCreateInput]
-  ): [CredentialIssuer]
-  updateCredentialIssuer(
-    id: ID!
-    data: CredentialIssuerUpdateInput
-  ): CredentialIssuer
-  updateCredentialIssuers(
-    data: [CredentialIssuersUpdateInput]
-  ): [CredentialIssuer]
-  deleteCredentialIssuer(id: ID!): CredentialIssuer
-  deleteCredentialIssuers(ids: [ID!]): [CredentialIssuer]
-  createDataset(data: DatasetCreateInput): Dataset
-  createDatasets(data: [DatasetsCreateInput]): [Dataset]
-  updateDataset(id: ID!, data: DatasetUpdateInput): Dataset
-  updateDatasets(data: [DatasetsUpdateInput]): [Dataset]
-  deleteDataset(id: ID!): Dataset
-  deleteDatasets(ids: [ID!]): [Dataset]
-  createEnvironment(data: EnvironmentCreateInput): Environment
-  createEnvironments(data: [EnvironmentsCreateInput]): [Environment]
-  updateEnvironment(id: ID!, data: EnvironmentUpdateInput): Environment
-  updateEnvironments(data: [EnvironmentsUpdateInput]): [Environment]
-  deleteEnvironment(id: ID!): Environment
-  deleteEnvironments(ids: [ID!]): [Environment]
-  createGatewayMetric(data: GatewayMetricCreateInput): GatewayMetric
-  createGatewayMetrics(data: [GatewayMetricsCreateInput]): [GatewayMetric]
-  updateGatewayMetric(id: ID!, data: GatewayMetricUpdateInput): GatewayMetric
-  updateGatewayMetrics(data: [GatewayMetricsUpdateInput]): [GatewayMetric]
-  deleteGatewayMetric(id: ID!): GatewayMetric
-  deleteGatewayMetrics(ids: [ID!]): [GatewayMetric]
-  createGatewayRoute(data: GatewayRouteCreateInput): GatewayRoute
-  createGatewayRoutes(data: [GatewayRoutesCreateInput]): [GatewayRoute]
-  updateGatewayRoute(id: ID!, data: GatewayRouteUpdateInput): GatewayRoute
-  updateGatewayRoutes(data: [GatewayRoutesUpdateInput]): [GatewayRoute]
-  deleteGatewayRoute(id: ID!): GatewayRoute
-  deleteGatewayRoutes(ids: [ID!]): [GatewayRoute]
-  createGatewayService(data: GatewayServiceCreateInput): GatewayService
-  createGatewayServices(data: [GatewayServicesCreateInput]): [GatewayService]
-  updateGatewayService(id: ID!, data: GatewayServiceUpdateInput): GatewayService
-  updateGatewayServices(data: [GatewayServicesUpdateInput]): [GatewayService]
-  deleteGatewayService(id: ID!): GatewayService
-  deleteGatewayServices(ids: [ID!]): [GatewayService]
-  createGroup(data: GroupCreateInput): Group
-  createGroups(data: [GroupsCreateInput]): [Group]
-  updateGroup(id: ID!, data: GroupUpdateInput): Group
-  updateGroups(data: [GroupsUpdateInput]): [Group]
-  deleteGroup(id: ID!): Group
-  deleteGroups(ids: [ID!]): [Group]
-  createMemberRole(data: MemberRoleCreateInput): MemberRole
-  createMemberRoles(data: [MemberRolesCreateInput]): [MemberRole]
-  updateMemberRole(id: ID!, data: MemberRoleUpdateInput): MemberRole
-  updateMemberRoles(data: [MemberRolesUpdateInput]): [MemberRole]
-  deleteMemberRole(id: ID!): MemberRole
-  deleteMemberRoles(ids: [ID!]): [MemberRole]
-  createNamespace(data: NamespaceCreateInput): Namespace
-  createNamespaces(data: [NamespacesCreateInput]): [Namespace]
-  updateNamespace(id: ID!, data: NamespaceUpdateInput): Namespace
-  updateNamespaces(data: [NamespacesUpdateInput]): [Namespace]
-  deleteNamespace(id: ID!): Namespace
-  deleteNamespaces(ids: [ID!]): [Namespace]
-  createOrganization(data: OrganizationCreateInput): Organization
-  createOrganizations(data: [OrganizationsCreateInput]): [Organization]
-  updateOrganization(id: ID!, data: OrganizationUpdateInput): Organization
-  updateOrganizations(data: [OrganizationsUpdateInput]): [Organization]
-  deleteOrganization(id: ID!): Organization
-  deleteOrganizations(ids: [ID!]): [Organization]
-  createOrganizationUnit(data: OrganizationUnitCreateInput): OrganizationUnit
-  createOrganizationUnits(
-    data: [OrganizationUnitsCreateInput]
-  ): [OrganizationUnit]
-  updateOrganizationUnit(
-    id: ID!
-    data: OrganizationUnitUpdateInput
-  ): OrganizationUnit
-  updateOrganizationUnits(
-    data: [OrganizationUnitsUpdateInput]
-  ): [OrganizationUnit]
-  deleteOrganizationUnit(id: ID!): OrganizationUnit
-  deleteOrganizationUnits(ids: [ID!]): [OrganizationUnit]
-  createProduct(data: ProductCreateInput): Product
-  createProducts(data: [ProductsCreateInput]): [Product]
-  updateProduct(id: ID!, data: ProductUpdateInput): Product
-  updateProducts(data: [ProductsUpdateInput]): [Product]
-  deleteProduct(id: ID!): Product
-  deleteProducts(ids: [ID!]): [Product]
-  createPlugin(data: PluginCreateInput): Plugin
-  createPlugins(data: [PluginsCreateInput]): [Plugin]
-  updatePlugin(id: ID!, data: PluginUpdateInput): Plugin
-  updatePlugins(data: [PluginsUpdateInput]): [Plugin]
-  deletePlugin(id: ID!): Plugin
-  deletePlugins(ids: [ID!]): [Plugin]
-  createTemporaryIdentity(data: TemporaryIdentityCreateInput): TemporaryIdentity
-  createTemporaryIdentities(
-    data: [TemporaryIdentitiesCreateInput]
-  ): [TemporaryIdentity]
-  updateTemporaryIdentity(
-    id: ID!
-    data: TemporaryIdentityUpdateInput
-  ): TemporaryIdentity
-  updateTemporaryIdentities(
-    data: [TemporaryIdentitiesUpdateInput]
-  ): [TemporaryIdentity]
-  deleteTemporaryIdentity(id: ID!): TemporaryIdentity
-  deleteTemporaryIdentities(ids: [ID!]): [TemporaryIdentity]
-  createTodo(data: TodoCreateInput): Todo
-  createTodos(data: [TodosCreateInput]): [Todo]
-  updateTodo(id: ID!, data: TodoUpdateInput): Todo
-  updateTodos(data: [TodosUpdateInput]): [Todo]
-  deleteTodo(id: ID!): Todo
-  deleteTodos(ids: [ID!]): [Todo]
-  createUser(data: UserCreateInput): User
-  createUsers(data: [UsersCreateInput]): [User]
-  updateUser(id: ID!, data: UserUpdateInput): User
-  updateUsers(data: [UsersUpdateInput]): [User]
-  deleteUser(id: ID!): User
-  deleteUsers(ids: [ID!]): [User]
-  authenticateUserWithPassword(
-    email: String
-    password: String
-  ): authenticateUserOutput
-  unauthenticateUser: unauthenticateUserOutput
-  updateAuthenticatedUser(data: UserUpdateInput): User
+enum SortMemberRolesBy {
+  id_ASC
+  id_DESC
+  role_ASC
+  role_DESC
+  extRefId_ASC
+  extRefId_DESC
+  user_ASC
+  user_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input MemberRoleUpdateInput {
+  role: String
+  extRefId: String
+  user: UserRelateToOneInput
+}
+
+input MemberRolesUpdateInput {
+  id: ID!
+  data: MemberRoleUpdateInput
+}
+
+input MemberRoleCreateInput {
+  role: String
+  extRefId: String
+  user: UserRelateToOneInput
+}
+
+input MemberRolesCreateInput {
+  data: MemberRoleCreateInput
+}
+
+type Metric {
+  _label_: String
+  id: ID!
+  name: String
+  query: String
+  day: String
+  metric: String
+  values: String
+  service: GatewayService
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+input MetricWhereInput {
+  AND: [MetricWhereInput]
+  OR: [MetricWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  query: String
+  query_not: String
+  query_contains: String
+  query_not_contains: String
+  query_starts_with: String
+  query_not_starts_with: String
+  query_ends_with: String
+  query_not_ends_with: String
+  query_i: String
+  query_not_i: String
+  query_contains_i: String
+  query_not_contains_i: String
+  query_starts_with_i: String
+  query_not_starts_with_i: String
+  query_ends_with_i: String
+  query_not_ends_with_i: String
+  query_in: [String]
+  query_not_in: [String]
+  day: String
+  day_not: String
+  day_contains: String
+  day_not_contains: String
+  day_starts_with: String
+  day_not_starts_with: String
+  day_ends_with: String
+  day_not_ends_with: String
+  day_i: String
+  day_not_i: String
+  day_contains_i: String
+  day_not_contains_i: String
+  day_starts_with_i: String
+  day_not_starts_with_i: String
+  day_ends_with_i: String
+  day_not_ends_with_i: String
+  day_in: [String]
+  day_not_in: [String]
+  metric: String
+  metric_not: String
+  metric_contains: String
+  metric_not_contains: String
+  metric_starts_with: String
+  metric_not_starts_with: String
+  metric_ends_with: String
+  metric_not_ends_with: String
+  metric_i: String
+  metric_not_i: String
+  metric_contains_i: String
+  metric_not_contains_i: String
+  metric_starts_with_i: String
+  metric_not_starts_with_i: String
+  metric_ends_with_i: String
+  metric_not_ends_with_i: String
+  metric_in: [String]
+  metric_not_in: [String]
+  values: String
+  values_not: String
+  values_contains: String
+  values_not_contains: String
+  values_starts_with: String
+  values_not_starts_with: String
+  values_ends_with: String
+  values_not_ends_with: String
+  values_i: String
+  values_not_i: String
+  values_contains_i: String
+  values_not_contains_i: String
+  values_starts_with_i: String
+  values_not_starts_with_i: String
+  values_ends_with_i: String
+  values_not_ends_with_i: String
+  values_in: [String]
+  values_not_in: [String]
+  service: GatewayServiceWhereInput
+  service_is_null: Boolean
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedAt_in: [DateTime]
+  updatedAt_not_in: [DateTime]
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_in: [DateTime]
+  createdAt_not_in: [DateTime]
+}
+
+input MetricWhereUniqueInput {
+  id: ID!
+}
+
+enum SortMetricsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  query_ASC
+  query_DESC
+  day_ASC
+  day_DESC
+  metric_ASC
+  metric_DESC
+  values_ASC
+  values_DESC
+  service_ASC
+  service_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input MetricUpdateInput {
+  name: String
+  query: String
+  day: String
+  metric: String
+  values: String
+  service: GatewayServiceRelateToOneInput
+}
+
+input MetricsUpdateInput {
+  id: ID!
+  data: MetricUpdateInput
+}
+
+input MetricCreateInput {
+  name: String
+  query: String
+  day: String
+  metric: String
+  values: String
+  service: GatewayServiceRelateToOneInput
+}
+
+input MetricsCreateInput {
+  data: MetricCreateInput
+}
+
+input MemberRoleRelateToManyInput {
+  create: [MemberRoleCreateInput]
+  connect: [MemberRoleWhereUniqueInput]
+  disconnect: [MemberRoleWhereUniqueInput]
+  disconnectAll: Boolean
 }
 
 type Namespace {
@@ -2837,31 +3205,6 @@ type Namespace {
   createdBy: User
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input NamespaceCreateInput {
-  name: String
-  serviceAccounts: String
-  permDomains: String
-  extRefId: String
-  members: MemberRoleRelateToManyInput
-}
-
-input NamespacesCreateInput {
-  data: NamespaceCreateInput
-}
-
-input NamespacesUpdateInput {
-  id: ID!
-  data: NamespaceUpdateInput
-}
-
-input NamespaceUpdateInput {
-  name: String
-  serviceAccounts: String
-  permDomains: String
-  extRefId: String
-  members: MemberRoleRelateToManyInput
 }
 
 input NamespaceWhereInput {
@@ -2972,6 +3315,61 @@ input NamespaceWhereUniqueInput {
   id: ID!
 }
 
+enum SortNamespacesBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  serviceAccounts_ASC
+  serviceAccounts_DESC
+  permDomains_ASC
+  permDomains_DESC
+  extRefId_ASC
+  extRefId_DESC
+  members_ASC
+  members_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input NamespaceUpdateInput {
+  name: String
+  serviceAccounts: String
+  permDomains: String
+  extRefId: String
+  members: MemberRoleRelateToManyInput
+}
+
+input NamespacesUpdateInput {
+  id: ID!
+  data: NamespaceUpdateInput
+}
+
+input NamespaceCreateInput {
+  name: String
+  serviceAccounts: String
+  permDomains: String
+  extRefId: String
+  members: MemberRoleRelateToManyInput
+}
+
+input NamespacesCreateInput {
+  data: NamespaceCreateInput
+}
+
+input OrganizationUnitRelateToManyInput {
+  create: [OrganizationUnitCreateInput]
+  connect: [OrganizationUnitWhereUniqueInput]
+  disconnect: [OrganizationUnitWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
 type Organization {
   _label_: String
   id: ID!
@@ -2999,6 +3397,164 @@ type Organization {
   ): _QueryMeta
 }
 
+input OrganizationWhereInput {
+  AND: [OrganizationWhereInput]
+  OR: [OrganizationWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  sector: String
+  sector_not: String
+  sector_contains: String
+  sector_not_contains: String
+  sector_starts_with: String
+  sector_not_starts_with: String
+  sector_ends_with: String
+  sector_not_ends_with: String
+  sector_i: String
+  sector_not_i: String
+  sector_contains_i: String
+  sector_not_contains_i: String
+  sector_starts_with_i: String
+  sector_not_starts_with_i: String
+  sector_ends_with_i: String
+  sector_not_ends_with_i: String
+  sector_in: [String]
+  sector_not_in: [String]
+  title: String
+  title_not: String
+  title_contains: String
+  title_not_contains: String
+  title_starts_with: String
+  title_not_starts_with: String
+  title_ends_with: String
+  title_not_ends_with: String
+  title_i: String
+  title_not_i: String
+  title_contains_i: String
+  title_not_contains_i: String
+  title_starts_with_i: String
+  title_not_starts_with_i: String
+  title_ends_with_i: String
+  title_not_ends_with_i: String
+  title_in: [String]
+  title_not_in: [String]
+  bcdc_id: String
+  bcdc_id_not: String
+  bcdc_id_contains: String
+  bcdc_id_not_contains: String
+  bcdc_id_starts_with: String
+  bcdc_id_not_starts_with: String
+  bcdc_id_ends_with: String
+  bcdc_id_not_ends_with: String
+  bcdc_id_i: String
+  bcdc_id_not_i: String
+  bcdc_id_contains_i: String
+  bcdc_id_not_contains_i: String
+  bcdc_id_starts_with_i: String
+  bcdc_id_not_starts_with_i: String
+  bcdc_id_ends_with_i: String
+  bcdc_id_not_ends_with_i: String
+  bcdc_id_in: [String]
+  bcdc_id_not_in: [String]
+  tags: String
+  tags_not: String
+  tags_contains: String
+  tags_not_contains: String
+  tags_starts_with: String
+  tags_not_starts_with: String
+  tags_ends_with: String
+  tags_not_ends_with: String
+  tags_i: String
+  tags_not_i: String
+  tags_contains_i: String
+  tags_not_contains_i: String
+  tags_starts_with_i: String
+  tags_not_starts_with_i: String
+  tags_ends_with_i: String
+  tags_not_ends_with_i: String
+  tags_in: [String]
+  tags_not_in: [String]
+  description: String
+  description_not: String
+  description_contains: String
+  description_not_contains: String
+  description_starts_with: String
+  description_not_starts_with: String
+  description_ends_with: String
+  description_not_ends_with: String
+  description_i: String
+  description_not_i: String
+  description_contains_i: String
+  description_not_contains_i: String
+  description_starts_with_i: String
+  description_not_starts_with_i: String
+  description_ends_with_i: String
+  description_not_ends_with_i: String
+  description_in: [String]
+  description_not_in: [String]
+  orgUnits_every: OrganizationUnitWhereInput
+  orgUnits_some: OrganizationUnitWhereInput
+  orgUnits_none: OrganizationUnitWhereInput
+}
+
+input OrganizationWhereUniqueInput {
+  id: ID!
+}
+
+enum SortOrganizationsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  sector_ASC
+  sector_DESC
+  title_ASC
+  title_DESC
+  bcdc_id_ASC
+  bcdc_id_DESC
+  tags_ASC
+  tags_DESC
+  description_ASC
+  description_DESC
+  orgUnits_ASC
+  orgUnits_DESC
+}
+
+input OrganizationUpdateInput {
+  name: String
+  sector: String
+  title: String
+  bcdc_id: String
+  tags: String
+  description: String
+  orgUnits: OrganizationUnitRelateToManyInput
+}
+
+input OrganizationsUpdateInput {
+  id: ID!
+  data: OrganizationUpdateInput
+}
+
 input OrganizationCreateInput {
   name: String
   sector: String
@@ -3009,66 +3565,13 @@ input OrganizationCreateInput {
   orgUnits: OrganizationUnitRelateToManyInput
 }
 
-input OrganizationRelateToOneInput {
-  create: OrganizationCreateInput
-  connect: OrganizationWhereUniqueInput
-  disconnect: OrganizationWhereUniqueInput
-  disconnectAll: Boolean
-}
-
 input OrganizationsCreateInput {
   data: OrganizationCreateInput
-}
-
-input OrganizationsUpdateInput {
-  id: ID!
-  data: OrganizationUpdateInput
 }
 
 type OrganizationUnit {
   _label_: String
   id: ID!
-  name: String
-  sector: String
-  title: String
-  bcdc_id: String
-  tags: String
-  description: String
-}
-
-input OrganizationUnitCreateInput {
-  name: String
-  sector: String
-  title: String
-  bcdc_id: String
-  tags: String
-  description: String
-}
-
-input OrganizationUnitRelateToManyInput {
-  create: [OrganizationUnitCreateInput]
-  connect: [OrganizationUnitWhereUniqueInput]
-  disconnect: [OrganizationUnitWhereUniqueInput]
-  disconnectAll: Boolean
-}
-
-input OrganizationUnitRelateToOneInput {
-  create: OrganizationUnitCreateInput
-  connect: OrganizationUnitWhereUniqueInput
-  disconnect: OrganizationUnitWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input OrganizationUnitsCreateInput {
-  data: OrganizationUnitCreateInput
-}
-
-input OrganizationUnitsUpdateInput {
-  id: ID!
-  data: OrganizationUnitUpdateInput
-}
-
-input OrganizationUnitUpdateInput {
   name: String
   sector: String
   title: String
@@ -3198,301 +3701,61 @@ input OrganizationUnitWhereUniqueInput {
   id: ID!
 }
 
-input OrganizationUpdateInput {
+enum SortOrganizationUnitsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  sector_ASC
+  sector_DESC
+  title_ASC
+  title_DESC
+  bcdc_id_ASC
+  bcdc_id_DESC
+  tags_ASC
+  tags_DESC
+  description_ASC
+  description_DESC
+}
+
+input OrganizationUnitUpdateInput {
   name: String
   sector: String
   title: String
   bcdc_id: String
   tags: String
   description: String
-  orgUnits: OrganizationUnitRelateToManyInput
 }
 
-input OrganizationWhereInput {
-  AND: [OrganizationWhereInput]
-  OR: [OrganizationWhereInput]
-  id: ID
-  id_not: ID
-  id_in: [ID]
-  id_not_in: [ID]
+input OrganizationUnitsUpdateInput {
+  id: ID!
+  data: OrganizationUnitUpdateInput
+}
+
+input OrganizationUnitCreateInput {
   name: String
-  name_not: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  name_i: String
-  name_not_i: String
-  name_contains_i: String
-  name_not_contains_i: String
-  name_starts_with_i: String
-  name_not_starts_with_i: String
-  name_ends_with_i: String
-  name_not_ends_with_i: String
-  name_in: [String]
-  name_not_in: [String]
   sector: String
-  sector_not: String
-  sector_contains: String
-  sector_not_contains: String
-  sector_starts_with: String
-  sector_not_starts_with: String
-  sector_ends_with: String
-  sector_not_ends_with: String
-  sector_i: String
-  sector_not_i: String
-  sector_contains_i: String
-  sector_not_contains_i: String
-  sector_starts_with_i: String
-  sector_not_starts_with_i: String
-  sector_ends_with_i: String
-  sector_not_ends_with_i: String
-  sector_in: [String]
-  sector_not_in: [String]
   title: String
-  title_not: String
-  title_contains: String
-  title_not_contains: String
-  title_starts_with: String
-  title_not_starts_with: String
-  title_ends_with: String
-  title_not_ends_with: String
-  title_i: String
-  title_not_i: String
-  title_contains_i: String
-  title_not_contains_i: String
-  title_starts_with_i: String
-  title_not_starts_with_i: String
-  title_ends_with_i: String
-  title_not_ends_with_i: String
-  title_in: [String]
-  title_not_in: [String]
   bcdc_id: String
-  bcdc_id_not: String
-  bcdc_id_contains: String
-  bcdc_id_not_contains: String
-  bcdc_id_starts_with: String
-  bcdc_id_not_starts_with: String
-  bcdc_id_ends_with: String
-  bcdc_id_not_ends_with: String
-  bcdc_id_i: String
-  bcdc_id_not_i: String
-  bcdc_id_contains_i: String
-  bcdc_id_not_contains_i: String
-  bcdc_id_starts_with_i: String
-  bcdc_id_not_starts_with_i: String
-  bcdc_id_ends_with_i: String
-  bcdc_id_not_ends_with_i: String
-  bcdc_id_in: [String]
-  bcdc_id_not_in: [String]
   tags: String
-  tags_not: String
-  tags_contains: String
-  tags_not_contains: String
-  tags_starts_with: String
-  tags_not_starts_with: String
-  tags_ends_with: String
-  tags_not_ends_with: String
-  tags_i: String
-  tags_not_i: String
-  tags_contains_i: String
-  tags_not_contains_i: String
-  tags_starts_with_i: String
-  tags_not_starts_with_i: String
-  tags_ends_with_i: String
-  tags_not_ends_with_i: String
-  tags_in: [String]
-  tags_not_in: [String]
   description: String
-  description_not: String
-  description_contains: String
-  description_not_contains: String
-  description_starts_with: String
-  description_not_starts_with: String
-  description_ends_with: String
-  description_not_ends_with: String
-  description_i: String
-  description_not_i: String
-  description_contains_i: String
-  description_not_contains_i: String
-  description_starts_with_i: String
-  description_not_starts_with_i: String
-  description_ends_with_i: String
-  description_not_ends_with_i: String
-  description_in: [String]
-  description_not_in: [String]
-  orgUnits_every: OrganizationUnitWhereInput
-  orgUnits_some: OrganizationUnitWhereInput
-  orgUnits_none: OrganizationUnitWhereInput
 }
 
-input OrganizationWhereUniqueInput {
-  id: ID!
+input OrganizationUnitsCreateInput {
+  data: OrganizationUnitCreateInput
 }
 
-type Plugin {
-  _label_: String
-  id: ID!
-  name: String
-  kongPluginId: String
-  tags: String
-  config: String
-  service: GatewayService
-  route: GatewayRoute
-  updatedBy: User
-  createdBy: User
-  updatedAt: DateTime
-  createdAt: DateTime
-}
-
-input PluginCreateInput {
-  name: String
-  kongPluginId: String
-  tags: String
-  config: String
-  service: GatewayServiceRelateToOneInput
-  route: GatewayRouteRelateToOneInput
-}
-
-input PluginRelateToManyInput {
-  create: [PluginCreateInput]
-  connect: [PluginWhereUniqueInput]
-  disconnect: [PluginWhereUniqueInput]
+input DatasetRelateToOneInput {
+  create: DatasetCreateInput
+  connect: DatasetWhereUniqueInput
+  disconnect: DatasetWhereUniqueInput
   disconnectAll: Boolean
-}
-
-input PluginsCreateInput {
-  data: PluginCreateInput
-}
-
-input PluginsUpdateInput {
-  id: ID!
-  data: PluginUpdateInput
-}
-
-input PluginUpdateInput {
-  name: String
-  kongPluginId: String
-  tags: String
-  config: String
-  service: GatewayServiceRelateToOneInput
-  route: GatewayRouteRelateToOneInput
-}
-
-input PluginWhereInput {
-  AND: [PluginWhereInput]
-  OR: [PluginWhereInput]
-  id: ID
-  id_not: ID
-  id_in: [ID]
-  id_not_in: [ID]
-  name: String
-  name_not: String
-  name_contains: String
-  name_not_contains: String
-  name_starts_with: String
-  name_not_starts_with: String
-  name_ends_with: String
-  name_not_ends_with: String
-  name_i: String
-  name_not_i: String
-  name_contains_i: String
-  name_not_contains_i: String
-  name_starts_with_i: String
-  name_not_starts_with_i: String
-  name_ends_with_i: String
-  name_not_ends_with_i: String
-  name_in: [String]
-  name_not_in: [String]
-  kongPluginId: String
-  kongPluginId_not: String
-  kongPluginId_contains: String
-  kongPluginId_not_contains: String
-  kongPluginId_starts_with: String
-  kongPluginId_not_starts_with: String
-  kongPluginId_ends_with: String
-  kongPluginId_not_ends_with: String
-  kongPluginId_i: String
-  kongPluginId_not_i: String
-  kongPluginId_contains_i: String
-  kongPluginId_not_contains_i: String
-  kongPluginId_starts_with_i: String
-  kongPluginId_not_starts_with_i: String
-  kongPluginId_ends_with_i: String
-  kongPluginId_not_ends_with_i: String
-  kongPluginId_in: [String]
-  kongPluginId_not_in: [String]
-  tags: String
-  tags_not: String
-  tags_contains: String
-  tags_not_contains: String
-  tags_starts_with: String
-  tags_not_starts_with: String
-  tags_ends_with: String
-  tags_not_ends_with: String
-  tags_i: String
-  tags_not_i: String
-  tags_contains_i: String
-  tags_not_contains_i: String
-  tags_starts_with_i: String
-  tags_not_starts_with_i: String
-  tags_ends_with_i: String
-  tags_not_ends_with_i: String
-  tags_in: [String]
-  tags_not_in: [String]
-  config: String
-  config_not: String
-  config_contains: String
-  config_not_contains: String
-  config_starts_with: String
-  config_not_starts_with: String
-  config_ends_with: String
-  config_not_ends_with: String
-  config_i: String
-  config_not_i: String
-  config_contains_i: String
-  config_not_contains_i: String
-  config_starts_with_i: String
-  config_not_starts_with_i: String
-  config_ends_with_i: String
-  config_not_ends_with_i: String
-  config_in: [String]
-  config_not_in: [String]
-  service: GatewayServiceWhereInput
-  service_is_null: Boolean
-  route: GatewayRouteWhereInput
-  route_is_null: Boolean
-  updatedBy: UserWhereInput
-  updatedBy_is_null: Boolean
-  createdBy: UserWhereInput
-  createdBy_is_null: Boolean
-  updatedAt: DateTime
-  updatedAt_not: DateTime
-  updatedAt_lt: DateTime
-  updatedAt_lte: DateTime
-  updatedAt_gt: DateTime
-  updatedAt_gte: DateTime
-  updatedAt_in: [DateTime]
-  updatedAt_not_in: [DateTime]
-  createdAt: DateTime
-  createdAt_not: DateTime
-  createdAt_lt: DateTime
-  createdAt_lte: DateTime
-  createdAt_gt: DateTime
-  createdAt_gte: DateTime
-  createdAt_in: [DateTime]
-  createdAt_not_in: [DateTime]
-}
-
-input PluginWhereUniqueInput {
-  id: ID!
 }
 
 type Product {
   _label_: String
   id: ID!
+  appId: String
   name: String
   namespace: String
   description: String
@@ -3517,42 +3780,6 @@ type Product {
   ): _QueryMeta
 }
 
-input ProductCreateInput {
-  name: String
-  namespace: String
-  description: String
-  dataset: DatasetRelateToOneInput
-  organization: OrganizationRelateToOneInput
-  organizationUnit: OrganizationUnitRelateToOneInput
-  environments: EnvironmentRelateToManyInput
-}
-
-input ProductRelateToOneInput {
-  create: ProductCreateInput
-  connect: ProductWhereUniqueInput
-  disconnect: ProductWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input ProductsCreateInput {
-  data: ProductCreateInput
-}
-
-input ProductsUpdateInput {
-  id: ID!
-  data: ProductUpdateInput
-}
-
-input ProductUpdateInput {
-  name: String
-  namespace: String
-  description: String
-  dataset: DatasetRelateToOneInput
-  organization: OrganizationRelateToOneInput
-  organizationUnit: OrganizationUnitRelateToOneInput
-  environments: EnvironmentRelateToManyInput
-}
-
 input ProductWhereInput {
   AND: [ProductWhereInput]
   OR: [ProductWhereInput]
@@ -3560,6 +3787,24 @@ input ProductWhereInput {
   id_not: ID
   id_in: [ID]
   id_not_in: [ID]
+  appId: String
+  appId_not: String
+  appId_contains: String
+  appId_not_contains: String
+  appId_starts_with: String
+  appId_not_starts_with: String
+  appId_ends_with: String
+  appId_not_ends_with: String
+  appId_i: String
+  appId_not_i: String
+  appId_contains_i: String
+  appId_not_contains_i: String
+  appId_starts_with_i: String
+  appId_not_starts_with_i: String
+  appId_ends_with_i: String
+  appId_not_ends_with_i: String
+  appId_in: [String]
+  appId_not_in: [String]
   name: String
   name_not: String
   name_contains: String
@@ -3629,849 +3874,11 @@ input ProductWhereUniqueInput {
   id: ID!
 }
 
-type Query {
-  allAccessRequests(
-    where: AccessRequestWhereInput
-    search: String
-    sortBy: [SortAccessRequestsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [AccessRequest]
-  AccessRequest(where: AccessRequestWhereUniqueInput!): AccessRequest
-  _allAccessRequestsMeta(
-    where: AccessRequestWhereInput
-    search: String
-    sortBy: [SortAccessRequestsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _AccessRequestsMeta: _ListMeta
-  allActivities(
-    where: ActivityWhereInput
-    search: String
-    sortBy: [SortActivitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Activity]
-  Activity(where: ActivityWhereUniqueInput!): Activity
-  _allActivitiesMeta(
-    where: ActivityWhereInput
-    search: String
-    sortBy: [SortActivitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _ActivitiesMeta: _ListMeta
-  allAlerts(
-    where: AlertWhereInput
-    search: String
-    sortBy: [SortAlertsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Alert]
-  Alert(where: AlertWhereUniqueInput!): Alert
-  _allAlertsMeta(
-    where: AlertWhereInput
-    search: String
-    sortBy: [SortAlertsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _AlertsMeta: _ListMeta
-  allApplications(
-    where: ApplicationWhereInput
-    search: String
-    sortBy: [SortApplicationsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Application]
-  Application(where: ApplicationWhereUniqueInput!): Application
-  _allApplicationsMeta(
-    where: ApplicationWhereInput
-    search: String
-    sortBy: [SortApplicationsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _ApplicationsMeta: _ListMeta
-  allConsumers(
-    where: ConsumerWhereInput
-    search: String
-    sortBy: [SortConsumersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Consumer]
-  Consumer(where: ConsumerWhereUniqueInput!): Consumer
-  _allConsumersMeta(
-    where: ConsumerWhereInput
-    search: String
-    sortBy: [SortConsumersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _ConsumersMeta: _ListMeta
-  allContents(
-    where: ContentWhereInput
-    search: String
-    sortBy: [SortContentsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Content]
-  Content(where: ContentWhereUniqueInput!): Content
-  _allContentsMeta(
-    where: ContentWhereInput
-    search: String
-    sortBy: [SortContentsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _ContentsMeta: _ListMeta
-  allCredentialIssuers(
-    where: CredentialIssuerWhereInput
-    search: String
-    sortBy: [SortCredentialIssuersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [CredentialIssuer]
-  CredentialIssuer(where: CredentialIssuerWhereUniqueInput!): CredentialIssuer
-  _allCredentialIssuersMeta(
-    where: CredentialIssuerWhereInput
-    search: String
-    sortBy: [SortCredentialIssuersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _CredentialIssuersMeta: _ListMeta
-  allDatasets(
-    where: DatasetWhereInput
-    search: String
-    sortBy: [SortDatasetsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Dataset]
-  Dataset(where: DatasetWhereUniqueInput!): Dataset
-  _allDatasetsMeta(
-    where: DatasetWhereInput
-    search: String
-    sortBy: [SortDatasetsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _DatasetsMeta: _ListMeta
-  allEnvironments(
-    where: EnvironmentWhereInput
-    search: String
-    sortBy: [SortEnvironmentsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Environment]
-  Environment(where: EnvironmentWhereUniqueInput!): Environment
-  _allEnvironmentsMeta(
-    where: EnvironmentWhereInput
-    search: String
-    sortBy: [SortEnvironmentsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _EnvironmentsMeta: _ListMeta
-  allGatewayMetrics(
-    where: GatewayMetricWhereInput
-    search: String
-    sortBy: [SortGatewayMetricsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [GatewayMetric]
-  GatewayMetric(where: GatewayMetricWhereUniqueInput!): GatewayMetric
-  _allGatewayMetricsMeta(
-    where: GatewayMetricWhereInput
-    search: String
-    sortBy: [SortGatewayMetricsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _GatewayMetricsMeta: _ListMeta
-  allGatewayRoutes(
-    where: GatewayRouteWhereInput
-    search: String
-    sortBy: [SortGatewayRoutesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [GatewayRoute]
-  GatewayRoute(where: GatewayRouteWhereUniqueInput!): GatewayRoute
-  _allGatewayRoutesMeta(
-    where: GatewayRouteWhereInput
-    search: String
-    sortBy: [SortGatewayRoutesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _GatewayRoutesMeta: _ListMeta
-  allGatewayServices(
-    where: GatewayServiceWhereInput
-    search: String
-    sortBy: [SortGatewayServicesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [GatewayService]
-  GatewayService(where: GatewayServiceWhereUniqueInput!): GatewayService
-  _allGatewayServicesMeta(
-    where: GatewayServiceWhereInput
-    search: String
-    sortBy: [SortGatewayServicesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _GatewayServicesMeta: _ListMeta
-  allGroups(
-    where: GroupWhereInput
-    search: String
-    sortBy: [SortGroupsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Group]
-  Group(where: GroupWhereUniqueInput!): Group
-  _allGroupsMeta(
-    where: GroupWhereInput
-    search: String
-    sortBy: [SortGroupsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _GroupsMeta: _ListMeta
-  allMemberRoles(
-    where: MemberRoleWhereInput
-    search: String
-    sortBy: [SortMemberRolesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [MemberRole]
-  MemberRole(where: MemberRoleWhereUniqueInput!): MemberRole
-  _allMemberRolesMeta(
-    where: MemberRoleWhereInput
-    search: String
-    sortBy: [SortMemberRolesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _MemberRolesMeta: _ListMeta
-  allNamespaces(
-    where: NamespaceWhereInput
-    search: String
-    sortBy: [SortNamespacesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Namespace]
-  Namespace(where: NamespaceWhereUniqueInput!): Namespace
-  _allNamespacesMeta(
-    where: NamespaceWhereInput
-    search: String
-    sortBy: [SortNamespacesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _NamespacesMeta: _ListMeta
-  allOrganizations(
-    where: OrganizationWhereInput
-    search: String
-    sortBy: [SortOrganizationsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Organization]
-  Organization(where: OrganizationWhereUniqueInput!): Organization
-  _allOrganizationsMeta(
-    where: OrganizationWhereInput
-    search: String
-    sortBy: [SortOrganizationsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _OrganizationsMeta: _ListMeta
-  allOrganizationUnits(
-    where: OrganizationUnitWhereInput
-    search: String
-    sortBy: [SortOrganizationUnitsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [OrganizationUnit]
-  OrganizationUnit(where: OrganizationUnitWhereUniqueInput!): OrganizationUnit
-  _allOrganizationUnitsMeta(
-    where: OrganizationUnitWhereInput
-    search: String
-    sortBy: [SortOrganizationUnitsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _OrganizationUnitsMeta: _ListMeta
-  allProducts(
-    where: ProductWhereInput
-    search: String
-    sortBy: [SortProductsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Product]
-  Product(where: ProductWhereUniqueInput!): Product
-  _allProductsMeta(
-    where: ProductWhereInput
-    search: String
-    sortBy: [SortProductsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _ProductsMeta: _ListMeta
-  allPlugins(
-    where: PluginWhereInput
-    search: String
-    sortBy: [SortPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Plugin]
-  Plugin(where: PluginWhereUniqueInput!): Plugin
-  _allPluginsMeta(
-    where: PluginWhereInput
-    search: String
-    sortBy: [SortPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _PluginsMeta: _ListMeta
-  allTemporaryIdentities(
-    where: TemporaryIdentityWhereInput
-    search: String
-    sortBy: [SortTemporaryIdentitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [TemporaryIdentity]
-  TemporaryIdentity(
-    where: TemporaryIdentityWhereUniqueInput!
-  ): TemporaryIdentity
-  _allTemporaryIdentitiesMeta(
-    where: TemporaryIdentityWhereInput
-    search: String
-    sortBy: [SortTemporaryIdentitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _TemporaryIdentitiesMeta: _ListMeta
-  allTodos(
-    where: TodoWhereInput
-    search: String
-    sortBy: [SortTodosBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Todo]
-  Todo(where: TodoWhereUniqueInput!): Todo
-  _allTodosMeta(
-    where: TodoWhereInput
-    search: String
-    sortBy: [SortTodosBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _TodosMeta: _ListMeta
-  allUsers(
-    where: UserWhereInput
-    search: String
-    sortBy: [SortUsersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [User]
-  User(where: UserWhereUniqueInput!): User
-  _allUsersMeta(
-    where: UserWhereInput
-    search: String
-    sortBy: [SortUsersBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  _UsersMeta: _ListMeta
-  _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
-  appVersion: String
-  authenticatedUser: User
-}
-
-enum SortAccessRequestsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  communication_ASC
-  communication_DESC
-  isApproved_ASC
-  isApproved_DESC
-  isIssued_ASC
-  isIssued_DESC
-  isComplete_ASC
-  isComplete_DESC
-  consumerId_ASC
-  consumerId_DESC
-  credential_ASC
-  credential_DESC
-  requestor_ASC
-  requestor_DESC
-  application_ASC
-  application_DESC
-  consumer_ASC
-  consumer_DESC
-  productEnvironment_ASC
-  productEnvironment_DESC
-  activity_ASC
-  activity_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortActivitiesBy {
-  id_ASC
-  id_DESC
-  extRefId_ASC
-  extRefId_DESC
-  type_ASC
-  type_DESC
-  name_ASC
-  name_DESC
-  action_ASC
-  action_DESC
-  message_ASC
-  message_DESC
-  refId_ASC
-  refId_DESC
-  namespace_ASC
-  namespace_DESC
-  actor_ASC
-  actor_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortAlertsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  state_ASC
-  state_DESC
-  description_ASC
-  description_DESC
-  service_ASC
-  service_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortApplicationsBy {
+enum SortProductsBy {
   id_ASC
   id_DESC
   appId_ASC
   appId_DESC
-  name_ASC
-  name_DESC
-  description_ASC
-  description_DESC
-  owner_ASC
-  owner_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortConsumersBy {
-  id_ASC
-  id_DESC
-  username_ASC
-  username_DESC
-  customId_ASC
-  customId_DESC
-  kongConsumerId_ASC
-  kongConsumerId_DESC
-  namespace_ASC
-  namespace_DESC
-  tags_ASC
-  tags_DESC
-  plugins_ASC
-  plugins_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortContentsBy {
-  id_ASC
-  id_DESC
-  title_ASC
-  title_DESC
-  description_ASC
-  description_DESC
-  content_ASC
-  content_DESC
-  externalLink_ASC
-  externalLink_DESC
-  githubRepository_ASC
-  githubRepository_DESC
-  readme_ASC
-  readme_DESC
-  slug_ASC
-  slug_DESC
-  order_ASC
-  order_DESC
-  isComplete_ASC
-  isComplete_DESC
-}
-
-enum SortCredentialIssuersBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  description_ASC
-  description_DESC
-  authMethod_ASC
-  authMethod_DESC
-  mode_ASC
-  mode_DESC
-  oidcDiscoveryUrl_ASC
-  oidcDiscoveryUrl_DESC
-  initialAccessToken_ASC
-  initialAccessToken_DESC
-  clientId_ASC
-  clientId_DESC
-  clientSecret_ASC
-  clientSecret_DESC
-  contact_ASC
-  contact_DESC
-  environments_ASC
-  environments_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortDatasetsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
-  sector_ASC
-  sector_DESC
-  license_title_ASC
-  license_title_DESC
-  view_audience_ASC
-  view_audience_DESC
-  private_ASC
-  private_DESC
-  tags_ASC
-  tags_DESC
-  contacts_ASC
-  contacts_DESC
-  organization_ASC
-  organization_DESC
-  organizationUnit_ASC
-  organizationUnit_DESC
-  securityClass_ASC
-  securityClass_DESC
-  notes_ASC
-  notes_DESC
-  title_ASC
-  title_DESC
-  catalogContent_ASC
-  catalogContent_DESC
-  isInCatalog_ASC
-  isInCatalog_DESC
-}
-
-enum SortEnvironmentsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  active_ASC
-  active_DESC
-  authMethod_ASC
-  authMethod_DESC
-  plugins_ASC
-  plugins_DESC
-  description_ASC
-  description_DESC
-  credentialIssuer_ASC
-  credentialIssuer_DESC
-  services_ASC
-  services_DESC
-  product_ASC
-  product_DESC
-}
-
-enum SortGatewayMetricsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  query_ASC
-  query_DESC
-  day_ASC
-  day_DESC
-  metric_ASC
-  metric_DESC
-  values_ASC
-  values_DESC
-  service_ASC
-  service_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortGatewayRoutesBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  kongRouteId_ASC
-  kongRouteId_DESC
-  namespace_ASC
-  namespace_DESC
-  methods_ASC
-  methods_DESC
-  paths_ASC
-  paths_DESC
-  hosts_ASC
-  hosts_DESC
-  tags_ASC
-  tags_DESC
-  service_ASC
-  service_DESC
-  plugins_ASC
-  plugins_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortGatewayServicesBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  kongServiceId_ASC
-  kongServiceId_DESC
-  namespace_ASC
-  namespace_DESC
-  host_ASC
-  host_DESC
-  tags_ASC
-  tags_DESC
-  routes_ASC
-  routes_DESC
-  plugins_ASC
-  plugins_DESC
-  environment_ASC
-  environment_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortGroupsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortMemberRolesBy {
-  id_ASC
-  id_DESC
-  role_ASC
-  role_DESC
-  extRefId_ASC
-  extRefId_DESC
-  user_ASC
-  user_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortNamespacesBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  serviceAccounts_ASC
-  serviceAccounts_DESC
-  permDomains_ASC
-  permDomains_DESC
-  extRefId_ASC
-  extRefId_DESC
-  members_ASC
-  members_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortOrganizationsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  sector_ASC
-  sector_DESC
-  title_ASC
-  title_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
-  tags_ASC
-  tags_DESC
-  description_ASC
-  description_DESC
-  orgUnits_ASC
-  orgUnits_DESC
-}
-
-enum SortOrganizationUnitsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  sector_ASC
-  sector_DESC
-  title_ASC
-  title_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
-  tags_ASC
-  tags_DESC
-  description_ASC
-  description_DESC
-}
-
-enum SortPluginsBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  kongPluginId_ASC
-  kongPluginId_DESC
-  tags_ASC
-  tags_DESC
-  config_ASC
-  config_DESC
-  service_ASC
-  service_DESC
-  route_ASC
-  route_DESC
-  updatedBy_ASC
-  updatedBy_DESC
-  createdBy_ASC
-  createdBy_DESC
-  updatedAt_ASC
-  updatedAt_DESC
-  createdAt_ASC
-  createdAt_DESC
-}
-
-enum SortProductsBy {
-  id_ASC
-  id_DESC
   name_ASC
   name_DESC
   namespace_ASC
@@ -4488,72 +3895,243 @@ enum SortProductsBy {
   environments_DESC
 }
 
-enum SortTemporaryIdentitiesBy {
+input ProductUpdateInput {
+  appId: String
+  name: String
+  namespace: String
+  description: String
+  dataset: DatasetRelateToOneInput
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
+  environments: EnvironmentRelateToManyInput
+}
+
+input ProductsUpdateInput {
+  id: ID!
+  data: ProductUpdateInput
+}
+
+input ProductCreateInput {
+  appId: String
+  name: String
+  namespace: String
+  description: String
+  dataset: DatasetRelateToOneInput
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
+  environments: EnvironmentRelateToManyInput
+}
+
+input ProductsCreateInput {
+  data: ProductCreateInput
+}
+
+enum ServiceAccessConsumerTypeType {
+  client
+  user
+}
+
+input GatewayConsumerRelateToOneInput {
+  create: GatewayConsumerCreateInput
+  connect: GatewayConsumerWhereUniqueInput
+  disconnect: GatewayConsumerWhereUniqueInput
+  disconnectAll: Boolean
+}
+
+type ServiceAccess {
+  _label_: String
+  id: ID!
+  name: String
+  active: Boolean
+  aclEnabled: Boolean
+  consumerType: ServiceAccessConsumerTypeType
+  credentialReference: String
+  credential: String
+  clientRoles: String
+  consumer: GatewayConsumer
+  application: Application
+  productEnvironment: Environment
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+input ServiceAccessWhereInput {
+  AND: [ServiceAccessWhereInput]
+  OR: [ServiceAccessWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  active: Boolean
+  active_not: Boolean
+  aclEnabled: Boolean
+  aclEnabled_not: Boolean
+  consumerType: ServiceAccessConsumerTypeType
+  consumerType_not: ServiceAccessConsumerTypeType
+  consumerType_in: [ServiceAccessConsumerTypeType]
+  consumerType_not_in: [ServiceAccessConsumerTypeType]
+  credentialReference: String
+  credentialReference_not: String
+  credentialReference_contains: String
+  credentialReference_not_contains: String
+  credentialReference_starts_with: String
+  credentialReference_not_starts_with: String
+  credentialReference_ends_with: String
+  credentialReference_not_ends_with: String
+  credentialReference_i: String
+  credentialReference_not_i: String
+  credentialReference_contains_i: String
+  credentialReference_not_contains_i: String
+  credentialReference_starts_with_i: String
+  credentialReference_not_starts_with_i: String
+  credentialReference_ends_with_i: String
+  credentialReference_not_ends_with_i: String
+  credentialReference_in: [String]
+  credentialReference_not_in: [String]
+  credential: String
+  credential_not: String
+  credential_contains: String
+  credential_not_contains: String
+  credential_starts_with: String
+  credential_not_starts_with: String
+  credential_ends_with: String
+  credential_not_ends_with: String
+  credential_i: String
+  credential_not_i: String
+  credential_contains_i: String
+  credential_not_contains_i: String
+  credential_starts_with_i: String
+  credential_not_starts_with_i: String
+  credential_ends_with_i: String
+  credential_not_ends_with_i: String
+  credential_in: [String]
+  credential_not_in: [String]
+  clientRoles: String
+  clientRoles_not: String
+  clientRoles_contains: String
+  clientRoles_not_contains: String
+  clientRoles_starts_with: String
+  clientRoles_not_starts_with: String
+  clientRoles_ends_with: String
+  clientRoles_not_ends_with: String
+  clientRoles_i: String
+  clientRoles_not_i: String
+  clientRoles_contains_i: String
+  clientRoles_not_contains_i: String
+  clientRoles_starts_with_i: String
+  clientRoles_not_starts_with_i: String
+  clientRoles_ends_with_i: String
+  clientRoles_not_ends_with_i: String
+  clientRoles_in: [String]
+  clientRoles_not_in: [String]
+  consumer: GatewayConsumerWhereInput
+  consumer_is_null: Boolean
+  application: ApplicationWhereInput
+  application_is_null: Boolean
+  productEnvironment: EnvironmentWhereInput
+  productEnvironment_is_null: Boolean
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedAt_in: [DateTime]
+  updatedAt_not_in: [DateTime]
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_in: [DateTime]
+  createdAt_not_in: [DateTime]
+}
+
+input ServiceAccessWhereUniqueInput {
+  id: ID!
+}
+
+enum SortServiceAccessesBy {
   id_ASC
   id_DESC
-  jti_ASC
-  jti_DESC
-  sub_ASC
-  sub_DESC
   name_ASC
   name_DESC
-  username_ASC
-  username_DESC
-  email_ASC
-  email_DESC
-  isAdmin_ASC
-  isAdmin_DESC
-  userId_ASC
-  userId_DESC
-  namespace_ASC
-  namespace_DESC
-  groups_ASC
-  groups_DESC
-  roles_ASC
-  roles_DESC
+  active_ASC
+  active_DESC
+  aclEnabled_ASC
+  aclEnabled_DESC
+  consumerType_ASC
+  consumerType_DESC
+  credentialReference_ASC
+  credentialReference_DESC
+  credential_ASC
+  credential_DESC
+  clientRoles_ASC
+  clientRoles_DESC
+  consumer_ASC
+  consumer_DESC
+  application_ASC
+  application_DESC
+  productEnvironment_ASC
+  productEnvironment_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
   createdAt_DESC
 }
 
-enum SortTodosBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  description_ASC
-  description_DESC
-  content_ASC
-  content_DESC
-  grape_ASC
-  grape_DESC
-  yaml_ASC
-  yaml_DESC
-  isComplete_ASC
-  isComplete_DESC
+input ServiceAccessUpdateInput {
+  name: String
+  active: Boolean
+  aclEnabled: Boolean
+  consumerType: ServiceAccessConsumerTypeType
+  credentialReference: String
+  credential: String
+  clientRoles: String
+  consumer: GatewayConsumerRelateToOneInput
+  application: ApplicationRelateToOneInput
+  productEnvironment: EnvironmentRelateToOneInput
 }
 
-enum SortUsersBy {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  username_ASC
-  username_DESC
-  email_ASC
-  email_DESC
-  isAdmin_ASC
-  isAdmin_DESC
-}
-
-input TemporaryIdentitiesCreateInput {
-  data: TemporaryIdentityCreateInput
-}
-
-input TemporaryIdentitiesUpdateInput {
+input ServiceAccessesUpdateInput {
   id: ID!
-  data: TemporaryIdentityUpdateInput
+  data: ServiceAccessUpdateInput
+}
+
+input ServiceAccessCreateInput {
+  name: String
+  active: Boolean
+  aclEnabled: Boolean
+  consumerType: ServiceAccessConsumerTypeType
+  credentialReference: String
+  credential: String
+  clientRoles: String
+  consumer: GatewayConsumerRelateToOneInput
+  application: ApplicationRelateToOneInput
+  productEnvironment: EnvironmentRelateToOneInput
+}
+
+input ServiceAccessesCreateInput {
+  data: ServiceAccessCreateInput
 }
 
 type TemporaryIdentity {
@@ -4571,32 +4149,6 @@ type TemporaryIdentity {
   roles: String
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-input TemporaryIdentityCreateInput {
-  jti: String
-  sub: String
-  name: String
-  username: String
-  email: String
-  isAdmin: Boolean
-  userId: String
-  namespace: String
-  groups: String
-  roles: String
-}
-
-input TemporaryIdentityUpdateInput {
-  jti: String
-  sub: String
-  name: String
-  username: String
-  email: String
-  isAdmin: Boolean
-  userId: String
-  namespace: String
-  groups: String
-  roles: String
 }
 
 input TemporaryIdentityWhereInput {
@@ -4792,36 +4344,73 @@ input TemporaryIdentityWhereUniqueInput {
   id: ID!
 }
 
+enum SortTemporaryIdentitiesBy {
+  id_ASC
+  id_DESC
+  jti_ASC
+  jti_DESC
+  sub_ASC
+  sub_DESC
+  name_ASC
+  name_DESC
+  username_ASC
+  username_DESC
+  email_ASC
+  email_DESC
+  isAdmin_ASC
+  isAdmin_DESC
+  userId_ASC
+  userId_DESC
+  namespace_ASC
+  namespace_DESC
+  groups_ASC
+  groups_DESC
+  roles_ASC
+  roles_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input TemporaryIdentityUpdateInput {
+  jti: String
+  sub: String
+  name: String
+  username: String
+  email: String
+  isAdmin: Boolean
+  userId: String
+  namespace: String
+  groups: String
+  roles: String
+}
+
+input TemporaryIdentitiesUpdateInput {
+  id: ID!
+  data: TemporaryIdentityUpdateInput
+}
+
+input TemporaryIdentityCreateInput {
+  jti: String
+  sub: String
+  name: String
+  username: String
+  email: String
+  isAdmin: Boolean
+  userId: String
+  namespace: String
+  groups: String
+  roles: String
+}
+
+input TemporaryIdentitiesCreateInput {
+  data: TemporaryIdentityCreateInput
+}
+
 type Todo {
   _label_: String
   id: ID!
-  name: String
-  description: String
-  content: String
-  grape: String
-  yaml: String
-  isComplete: Boolean
-}
-
-input TodoCreateInput {
-  name: String
-  description: String
-  content: String
-  grape: String
-  yaml: String
-  isComplete: Boolean
-}
-
-input TodosCreateInput {
-  data: TodoCreateInput
-}
-
-input TodosUpdateInput {
-  id: ID!
-  data: TodoUpdateInput
-}
-
-input TodoUpdateInput {
   name: String
   description: String
   content: String
@@ -4935,11 +4524,49 @@ input TodoWhereUniqueInput {
   id: ID!
 }
 
-type unauthenticateUserOutput {
-  success: Boolean
+enum SortTodosBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  description_ASC
+  description_DESC
+  content_ASC
+  content_DESC
+  grape_ASC
+  grape_DESC
+  yaml_ASC
+  yaml_DESC
+  isComplete_ASC
+  isComplete_DESC
 }
 
-scalar Upload
+input TodoUpdateInput {
+  name: String
+  description: String
+  content: String
+  grape: String
+  yaml: String
+  isComplete: Boolean
+}
+
+input TodosUpdateInput {
+  id: ID!
+  data: TodoUpdateInput
+}
+
+input TodoCreateInput {
+  name: String
+  description: String
+  content: String
+  grape: String
+  yaml: String
+  isComplete: Boolean
+}
+
+input TodosCreateInput {
+  data: TodoCreateInput
+}
 
 type User {
   _label_: String
@@ -4949,38 +4576,6 @@ type User {
   email: String
   isAdmin: Boolean
   password_is_set: Boolean
-}
-
-input UserCreateInput {
-  name: String
-  username: String
-  email: String
-  isAdmin: Boolean
-  password: String
-}
-
-input UserRelateToOneInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-  disconnect: UserWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input UsersCreateInput {
-  data: UserCreateInput
-}
-
-input UsersUpdateInput {
-  id: ID!
-  data: UserUpdateInput
-}
-
-input UserUpdateInput {
-  name: String
-  username: String
-  email: String
-  isAdmin: Boolean
-  password: String
 }
 
 input UserWhereInput {
@@ -5052,4 +4647,755 @@ input UserWhereInput {
 input UserWhereUniqueInput {
   id: ID!
 }
+
+enum SortUsersBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  username_ASC
+  username_DESC
+  email_ASC
+  email_DESC
+  isAdmin_ASC
+  isAdmin_DESC
+}
+
+input UserUpdateInput {
+  name: String
+  username: String
+  email: String
+  isAdmin: Boolean
+  password: String
+}
+
+input UsersUpdateInput {
+  id: ID!
+  data: UserUpdateInput
+}
+
+input UserCreateInput {
+  name: String
+  username: String
+  email: String
+  isAdmin: Boolean
+  password: String
+}
+
+input UsersCreateInput {
+  data: UserCreateInput
+}
+
+scalar JSON
+
+type _ListAccess {
+  create: Boolean
+  read: JSON
+  update: JSON
+  delete: JSON
+  auth: JSON
+}
+
+type _ListQueries {
+  item: String
+  list: String
+  meta: String
+}
+
+type _ListMutations {
+  create: String
+  createMany: String
+  update: String
+  updateMany: String
+  delete: String
+  deleteMany: String
+}
+
+type _ListInputTypes {
+  whereInput: String
+  whereUniqueInput: String
+  createInput: String
+  createManyInput: String
+  updateInput: String
+  updateManyInput: String
+}
+
+type _ListSchemaFields {
+  path: String
+  name: String
+  type: String
+}
+
+type _ListSchemaRelatedFields {
+  type: String
+  fields: [String]
+}
+
+type _ListSchema {
+  type: String
+  queries: _ListQueries
+  mutations: _ListMutations
+  inputTypes: _ListInputTypes
+  fields(where: _ListSchemaFieldsInput): [_ListSchemaFields]
+  relatedFields: [_ListSchemaRelatedFields]
+}
+
+type _ListMeta {
+  key: String
+  name: String
+  description: String
+  label: String
+  singular: String
+  plural: String
+  path: String
+  access: _ListAccess
+  schema: _ListSchema
+}
+
+type _QueryMeta {
+  count: Int
+}
+
+input _ksListsMetaInput {
+  key: String
+  auxiliary: Boolean
+}
+
+input _ListSchemaFieldsInput {
+  type: String
+}
+
+type unauthenticateUserOutput {
+  success: Boolean
+}
+
+type authenticateUserOutput {
+  token: String
+  item: User
+}
+
+type Query {
+  allAccessRequests(
+    where: AccessRequestWhereInput
+    search: String
+    sortBy: [SortAccessRequestsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [AccessRequest]
+  AccessRequest(where: AccessRequestWhereUniqueInput!): AccessRequest
+  _allAccessRequestsMeta(
+    where: AccessRequestWhereInput
+    search: String
+    sortBy: [SortAccessRequestsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _AccessRequestsMeta: _ListMeta
+  allActivities(
+    where: ActivityWhereInput
+    search: String
+    sortBy: [SortActivitiesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Activity]
+  Activity(where: ActivityWhereUniqueInput!): Activity
+  _allActivitiesMeta(
+    where: ActivityWhereInput
+    search: String
+    sortBy: [SortActivitiesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ActivitiesMeta: _ListMeta
+  allAlerts(
+    where: AlertWhereInput
+    search: String
+    sortBy: [SortAlertsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Alert]
+  Alert(where: AlertWhereUniqueInput!): Alert
+  _allAlertsMeta(
+    where: AlertWhereInput
+    search: String
+    sortBy: [SortAlertsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _AlertsMeta: _ListMeta
+  allApplications(
+    where: ApplicationWhereInput
+    search: String
+    sortBy: [SortApplicationsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Application]
+  Application(where: ApplicationWhereUniqueInput!): Application
+  _allApplicationsMeta(
+    where: ApplicationWhereInput
+    search: String
+    sortBy: [SortApplicationsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ApplicationsMeta: _ListMeta
+  allContents(
+    where: ContentWhereInput
+    search: String
+    sortBy: [SortContentsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Content]
+  Content(where: ContentWhereUniqueInput!): Content
+  _allContentsMeta(
+    where: ContentWhereInput
+    search: String
+    sortBy: [SortContentsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ContentsMeta: _ListMeta
+  allCredentialIssuers(
+    where: CredentialIssuerWhereInput
+    search: String
+    sortBy: [SortCredentialIssuersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [CredentialIssuer]
+  CredentialIssuer(where: CredentialIssuerWhereUniqueInput!): CredentialIssuer
+  _allCredentialIssuersMeta(
+    where: CredentialIssuerWhereInput
+    search: String
+    sortBy: [SortCredentialIssuersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _CredentialIssuersMeta: _ListMeta
+  allDatasets(
+    where: DatasetWhereInput
+    search: String
+    sortBy: [SortDatasetsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Dataset]
+  Dataset(where: DatasetWhereUniqueInput!): Dataset
+  _allDatasetsMeta(
+    where: DatasetWhereInput
+    search: String
+    sortBy: [SortDatasetsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _DatasetsMeta: _ListMeta
+  allEnvironments(
+    where: EnvironmentWhereInput
+    search: String
+    sortBy: [SortEnvironmentsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Environment]
+  Environment(where: EnvironmentWhereUniqueInput!): Environment
+  _allEnvironmentsMeta(
+    where: EnvironmentWhereInput
+    search: String
+    sortBy: [SortEnvironmentsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _EnvironmentsMeta: _ListMeta
+  allGatewayConsumers(
+    where: GatewayConsumerWhereInput
+    search: String
+    sortBy: [SortGatewayConsumersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayConsumer]
+  GatewayConsumer(where: GatewayConsumerWhereUniqueInput!): GatewayConsumer
+  _allGatewayConsumersMeta(
+    where: GatewayConsumerWhereInput
+    search: String
+    sortBy: [SortGatewayConsumersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GatewayConsumersMeta: _ListMeta
+  allGatewayGroups(
+    where: GatewayGroupWhereInput
+    search: String
+    sortBy: [SortGatewayGroupsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayGroup]
+  GatewayGroup(where: GatewayGroupWhereUniqueInput!): GatewayGroup
+  _allGatewayGroupsMeta(
+    where: GatewayGroupWhereInput
+    search: String
+    sortBy: [SortGatewayGroupsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GatewayGroupsMeta: _ListMeta
+  allGatewayPlugins(
+    where: GatewayPluginWhereInput
+    search: String
+    sortBy: [SortGatewayPluginsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayPlugin]
+  GatewayPlugin(where: GatewayPluginWhereUniqueInput!): GatewayPlugin
+  _allGatewayPluginsMeta(
+    where: GatewayPluginWhereInput
+    search: String
+    sortBy: [SortGatewayPluginsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GatewayPluginsMeta: _ListMeta
+  allGatewayRoutes(
+    where: GatewayRouteWhereInput
+    search: String
+    sortBy: [SortGatewayRoutesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayRoute]
+  GatewayRoute(where: GatewayRouteWhereUniqueInput!): GatewayRoute
+  _allGatewayRoutesMeta(
+    where: GatewayRouteWhereInput
+    search: String
+    sortBy: [SortGatewayRoutesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GatewayRoutesMeta: _ListMeta
+  allGatewayServices(
+    where: GatewayServiceWhereInput
+    search: String
+    sortBy: [SortGatewayServicesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [GatewayService]
+  GatewayService(where: GatewayServiceWhereUniqueInput!): GatewayService
+  _allGatewayServicesMeta(
+    where: GatewayServiceWhereInput
+    search: String
+    sortBy: [SortGatewayServicesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GatewayServicesMeta: _ListMeta
+  allGroups(
+    where: GroupWhereInput
+    search: String
+    sortBy: [SortGroupsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Group]
+  Group(where: GroupWhereUniqueInput!): Group
+  _allGroupsMeta(
+    where: GroupWhereInput
+    search: String
+    sortBy: [SortGroupsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _GroupsMeta: _ListMeta
+  allMemberRoles(
+    where: MemberRoleWhereInput
+    search: String
+    sortBy: [SortMemberRolesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [MemberRole]
+  MemberRole(where: MemberRoleWhereUniqueInput!): MemberRole
+  _allMemberRolesMeta(
+    where: MemberRoleWhereInput
+    search: String
+    sortBy: [SortMemberRolesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _MemberRolesMeta: _ListMeta
+  allMetrics(
+    where: MetricWhereInput
+    search: String
+    sortBy: [SortMetricsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Metric]
+  Metric(where: MetricWhereUniqueInput!): Metric
+  _allMetricsMeta(
+    where: MetricWhereInput
+    search: String
+    sortBy: [SortMetricsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _MetricsMeta: _ListMeta
+  allNamespaces(
+    where: NamespaceWhereInput
+    search: String
+    sortBy: [SortNamespacesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Namespace]
+  Namespace(where: NamespaceWhereUniqueInput!): Namespace
+  _allNamespacesMeta(
+    where: NamespaceWhereInput
+    search: String
+    sortBy: [SortNamespacesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _NamespacesMeta: _ListMeta
+  allOrganizations(
+    where: OrganizationWhereInput
+    search: String
+    sortBy: [SortOrganizationsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Organization]
+  Organization(where: OrganizationWhereUniqueInput!): Organization
+  _allOrganizationsMeta(
+    where: OrganizationWhereInput
+    search: String
+    sortBy: [SortOrganizationsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _OrganizationsMeta: _ListMeta
+  allOrganizationUnits(
+    where: OrganizationUnitWhereInput
+    search: String
+    sortBy: [SortOrganizationUnitsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [OrganizationUnit]
+  OrganizationUnit(where: OrganizationUnitWhereUniqueInput!): OrganizationUnit
+  _allOrganizationUnitsMeta(
+    where: OrganizationUnitWhereInput
+    search: String
+    sortBy: [SortOrganizationUnitsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _OrganizationUnitsMeta: _ListMeta
+  allProducts(
+    where: ProductWhereInput
+    search: String
+    sortBy: [SortProductsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Product]
+  Product(where: ProductWhereUniqueInput!): Product
+  _allProductsMeta(
+    where: ProductWhereInput
+    search: String
+    sortBy: [SortProductsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ProductsMeta: _ListMeta
+  allServiceAccesses(
+    where: ServiceAccessWhereInput
+    search: String
+    sortBy: [SortServiceAccessesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [ServiceAccess]
+  ServiceAccess(where: ServiceAccessWhereUniqueInput!): ServiceAccess
+  _allServiceAccessesMeta(
+    where: ServiceAccessWhereInput
+    search: String
+    sortBy: [SortServiceAccessesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ServiceAccessesMeta: _ListMeta
+  allTemporaryIdentities(
+    where: TemporaryIdentityWhereInput
+    search: String
+    sortBy: [SortTemporaryIdentitiesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [TemporaryIdentity]
+  TemporaryIdentity(
+    where: TemporaryIdentityWhereUniqueInput!
+  ): TemporaryIdentity
+  _allTemporaryIdentitiesMeta(
+    where: TemporaryIdentityWhereInput
+    search: String
+    sortBy: [SortTemporaryIdentitiesBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _TemporaryIdentitiesMeta: _ListMeta
+  allTodos(
+    where: TodoWhereInput
+    search: String
+    sortBy: [SortTodosBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Todo]
+  Todo(where: TodoWhereUniqueInput!): Todo
+  _allTodosMeta(
+    where: TodoWhereInput
+    search: String
+    sortBy: [SortTodosBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _TodosMeta: _ListMeta
+  allUsers(
+    where: UserWhereInput
+    search: String
+    sortBy: [SortUsersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [User]
+  User(where: UserWhereUniqueInput!): User
+  _allUsersMeta(
+    where: UserWhereInput
+    search: String
+    sortBy: [SortUsersBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _UsersMeta: _ListMeta
+  _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
+  appVersion: String
+  authenticatedUser: User
+}
+
+type Mutation {
+  createAccessRequest(data: AccessRequestCreateInput): AccessRequest
+  createAccessRequests(data: [AccessRequestsCreateInput]): [AccessRequest]
+  updateAccessRequest(id: ID!, data: AccessRequestUpdateInput): AccessRequest
+  updateAccessRequests(data: [AccessRequestsUpdateInput]): [AccessRequest]
+  deleteAccessRequest(id: ID!): AccessRequest
+  deleteAccessRequests(ids: [ID!]): [AccessRequest]
+  createActivity(data: ActivityCreateInput): Activity
+  createActivities(data: [ActivitiesCreateInput]): [Activity]
+  updateActivity(id: ID!, data: ActivityUpdateInput): Activity
+  updateActivities(data: [ActivitiesUpdateInput]): [Activity]
+  deleteActivity(id: ID!): Activity
+  deleteActivities(ids: [ID!]): [Activity]
+  createAlert(data: AlertCreateInput): Alert
+  createAlerts(data: [AlertsCreateInput]): [Alert]
+  updateAlert(id: ID!, data: AlertUpdateInput): Alert
+  updateAlerts(data: [AlertsUpdateInput]): [Alert]
+  deleteAlert(id: ID!): Alert
+  deleteAlerts(ids: [ID!]): [Alert]
+  createApplication(data: ApplicationCreateInput): Application
+  createApplications(data: [ApplicationsCreateInput]): [Application]
+  updateApplication(id: ID!, data: ApplicationUpdateInput): Application
+  updateApplications(data: [ApplicationsUpdateInput]): [Application]
+  deleteApplication(id: ID!): Application
+  deleteApplications(ids: [ID!]): [Application]
+  createContent(data: ContentCreateInput): Content
+  createContents(data: [ContentsCreateInput]): [Content]
+  updateContent(id: ID!, data: ContentUpdateInput): Content
+  updateContents(data: [ContentsUpdateInput]): [Content]
+  deleteContent(id: ID!): Content
+  deleteContents(ids: [ID!]): [Content]
+  createCredentialIssuer(data: CredentialIssuerCreateInput): CredentialIssuer
+  createCredentialIssuers(
+    data: [CredentialIssuersCreateInput]
+  ): [CredentialIssuer]
+  updateCredentialIssuer(
+    id: ID!
+    data: CredentialIssuerUpdateInput
+  ): CredentialIssuer
+  updateCredentialIssuers(
+    data: [CredentialIssuersUpdateInput]
+  ): [CredentialIssuer]
+  deleteCredentialIssuer(id: ID!): CredentialIssuer
+  deleteCredentialIssuers(ids: [ID!]): [CredentialIssuer]
+  createDataset(data: DatasetCreateInput): Dataset
+  createDatasets(data: [DatasetsCreateInput]): [Dataset]
+  updateDataset(id: ID!, data: DatasetUpdateInput): Dataset
+  updateDatasets(data: [DatasetsUpdateInput]): [Dataset]
+  deleteDataset(id: ID!): Dataset
+  deleteDatasets(ids: [ID!]): [Dataset]
+  createEnvironment(data: EnvironmentCreateInput): Environment
+  createEnvironments(data: [EnvironmentsCreateInput]): [Environment]
+  updateEnvironment(id: ID!, data: EnvironmentUpdateInput): Environment
+  updateEnvironments(data: [EnvironmentsUpdateInput]): [Environment]
+  deleteEnvironment(id: ID!): Environment
+  deleteEnvironments(ids: [ID!]): [Environment]
+  createGatewayConsumer(data: GatewayConsumerCreateInput): GatewayConsumer
+  createGatewayConsumers(data: [GatewayConsumersCreateInput]): [GatewayConsumer]
+  updateGatewayConsumer(
+    id: ID!
+    data: GatewayConsumerUpdateInput
+  ): GatewayConsumer
+  updateGatewayConsumers(data: [GatewayConsumersUpdateInput]): [GatewayConsumer]
+  deleteGatewayConsumer(id: ID!): GatewayConsumer
+  deleteGatewayConsumers(ids: [ID!]): [GatewayConsumer]
+  createGatewayGroup(data: GatewayGroupCreateInput): GatewayGroup
+  createGatewayGroups(data: [GatewayGroupsCreateInput]): [GatewayGroup]
+  updateGatewayGroup(id: ID!, data: GatewayGroupUpdateInput): GatewayGroup
+  updateGatewayGroups(data: [GatewayGroupsUpdateInput]): [GatewayGroup]
+  deleteGatewayGroup(id: ID!): GatewayGroup
+  deleteGatewayGroups(ids: [ID!]): [GatewayGroup]
+  createGatewayPlugin(data: GatewayPluginCreateInput): GatewayPlugin
+  createGatewayPlugins(data: [GatewayPluginsCreateInput]): [GatewayPlugin]
+  updateGatewayPlugin(id: ID!, data: GatewayPluginUpdateInput): GatewayPlugin
+  updateGatewayPlugins(data: [GatewayPluginsUpdateInput]): [GatewayPlugin]
+  deleteGatewayPlugin(id: ID!): GatewayPlugin
+  deleteGatewayPlugins(ids: [ID!]): [GatewayPlugin]
+  createGatewayRoute(data: GatewayRouteCreateInput): GatewayRoute
+  createGatewayRoutes(data: [GatewayRoutesCreateInput]): [GatewayRoute]
+  updateGatewayRoute(id: ID!, data: GatewayRouteUpdateInput): GatewayRoute
+  updateGatewayRoutes(data: [GatewayRoutesUpdateInput]): [GatewayRoute]
+  deleteGatewayRoute(id: ID!): GatewayRoute
+  deleteGatewayRoutes(ids: [ID!]): [GatewayRoute]
+  createGatewayService(data: GatewayServiceCreateInput): GatewayService
+  createGatewayServices(data: [GatewayServicesCreateInput]): [GatewayService]
+  updateGatewayService(id: ID!, data: GatewayServiceUpdateInput): GatewayService
+  updateGatewayServices(data: [GatewayServicesUpdateInput]): [GatewayService]
+  deleteGatewayService(id: ID!): GatewayService
+  deleteGatewayServices(ids: [ID!]): [GatewayService]
+  createGroup(data: GroupCreateInput): Group
+  createGroups(data: [GroupsCreateInput]): [Group]
+  updateGroup(id: ID!, data: GroupUpdateInput): Group
+  updateGroups(data: [GroupsUpdateInput]): [Group]
+  deleteGroup(id: ID!): Group
+  deleteGroups(ids: [ID!]): [Group]
+  createMemberRole(data: MemberRoleCreateInput): MemberRole
+  createMemberRoles(data: [MemberRolesCreateInput]): [MemberRole]
+  updateMemberRole(id: ID!, data: MemberRoleUpdateInput): MemberRole
+  updateMemberRoles(data: [MemberRolesUpdateInput]): [MemberRole]
+  deleteMemberRole(id: ID!): MemberRole
+  deleteMemberRoles(ids: [ID!]): [MemberRole]
+  createMetric(data: MetricCreateInput): Metric
+  createMetrics(data: [MetricsCreateInput]): [Metric]
+  updateMetric(id: ID!, data: MetricUpdateInput): Metric
+  updateMetrics(data: [MetricsUpdateInput]): [Metric]
+  deleteMetric(id: ID!): Metric
+  deleteMetrics(ids: [ID!]): [Metric]
+  createNamespace(data: NamespaceCreateInput): Namespace
+  createNamespaces(data: [NamespacesCreateInput]): [Namespace]
+  updateNamespace(id: ID!, data: NamespaceUpdateInput): Namespace
+  updateNamespaces(data: [NamespacesUpdateInput]): [Namespace]
+  deleteNamespace(id: ID!): Namespace
+  deleteNamespaces(ids: [ID!]): [Namespace]
+  createOrganization(data: OrganizationCreateInput): Organization
+  createOrganizations(data: [OrganizationsCreateInput]): [Organization]
+  updateOrganization(id: ID!, data: OrganizationUpdateInput): Organization
+  updateOrganizations(data: [OrganizationsUpdateInput]): [Organization]
+  deleteOrganization(id: ID!): Organization
+  deleteOrganizations(ids: [ID!]): [Organization]
+  createOrganizationUnit(data: OrganizationUnitCreateInput): OrganizationUnit
+  createOrganizationUnits(
+    data: [OrganizationUnitsCreateInput]
+  ): [OrganizationUnit]
+  updateOrganizationUnit(
+    id: ID!
+    data: OrganizationUnitUpdateInput
+  ): OrganizationUnit
+  updateOrganizationUnits(
+    data: [OrganizationUnitsUpdateInput]
+  ): [OrganizationUnit]
+  deleteOrganizationUnit(id: ID!): OrganizationUnit
+  deleteOrganizationUnits(ids: [ID!]): [OrganizationUnit]
+  createProduct(data: ProductCreateInput): Product
+  createProducts(data: [ProductsCreateInput]): [Product]
+  updateProduct(id: ID!, data: ProductUpdateInput): Product
+  updateProducts(data: [ProductsUpdateInput]): [Product]
+  deleteProduct(id: ID!): Product
+  deleteProducts(ids: [ID!]): [Product]
+  createServiceAccess(data: ServiceAccessCreateInput): ServiceAccess
+  createServiceAccesses(data: [ServiceAccessesCreateInput]): [ServiceAccess]
+  updateServiceAccess(id: ID!, data: ServiceAccessUpdateInput): ServiceAccess
+  updateServiceAccesses(data: [ServiceAccessesUpdateInput]): [ServiceAccess]
+  deleteServiceAccess(id: ID!): ServiceAccess
+  deleteServiceAccesses(ids: [ID!]): [ServiceAccess]
+  createTemporaryIdentity(data: TemporaryIdentityCreateInput): TemporaryIdentity
+  createTemporaryIdentities(
+    data: [TemporaryIdentitiesCreateInput]
+  ): [TemporaryIdentity]
+  updateTemporaryIdentity(
+    id: ID!
+    data: TemporaryIdentityUpdateInput
+  ): TemporaryIdentity
+  updateTemporaryIdentities(
+    data: [TemporaryIdentitiesUpdateInput]
+  ): [TemporaryIdentity]
+  deleteTemporaryIdentity(id: ID!): TemporaryIdentity
+  deleteTemporaryIdentities(ids: [ID!]): [TemporaryIdentity]
+  createTodo(data: TodoCreateInput): Todo
+  createTodos(data: [TodosCreateInput]): [Todo]
+  updateTodo(id: ID!, data: TodoUpdateInput): Todo
+  updateTodos(data: [TodosUpdateInput]): [Todo]
+  deleteTodo(id: ID!): Todo
+  deleteTodos(ids: [ID!]): [Todo]
+  createUser(data: UserCreateInput): User
+  createUsers(data: [UsersCreateInput]): [User]
+  updateUser(id: ID!, data: UserUpdateInput): User
+  updateUsers(data: [UsersUpdateInput]): [User]
+  deleteUser(id: ID!): User
+  deleteUsers(ids: [ID!]): [User]
+  authenticateUserWithPassword(
+    email: String
+    password: String
+  ): authenticateUserOutput
+  unauthenticateUser: unauthenticateUserOutput
+  updateAuthenticatedUser(data: UserUpdateInput): User
+}
+
+scalar Upload
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
 `;

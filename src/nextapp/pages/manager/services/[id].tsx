@@ -15,31 +15,59 @@ import {
   Th,
   Thead,
   Tr,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import isEmpty from 'lodash/isEmpty';
 import PageHeader from '@/components/page-header';
-import { useApi } from '@/shared/services/api';
-import { useRouter } from 'next/router';
+import api, { useApi } from '@/shared/services/api';
 import { dateRange } from '@/components/services-list/utils';
-
 import { GET_GATEWAY_SERVICE } from '@/shared/queries/gateway-service-queries';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 import EnvironmentBadge from '@/components/environment-badge';
 import MetricGraph from '@/components/services-list/metric-graph';
+import { dehydrate } from 'react-query/hydration';
+import { QueryClient } from 'react-query';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { Query } from '@/shared/types/query.types';
 
-const ServicePage: React.FC = () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery(
+    ['gateway-service', context.params.id],
+    async () =>
+      await api<Query>(
+        GET_GATEWAY_SERVICE,
+        { id: context.params.id },
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
+  );
+
+  return {
+    props: {
+      id: context.params.id,
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
+};
+
+const ServicePage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ id }) => {
   const range = dateRange();
-  const router = useRouter();
   const { data } = useApi(
-    ['gateway-service', router?.query.id],
+    ['gateway-service', id],
     {
       query: GET_GATEWAY_SERVICE,
       variables: {
-        id: router?.query.id,
+        id,
       },
     },
-    { enabled: Boolean(router?.query.id), suspense: false }
+    { enabled: Boolean(id), suspense: false }
   );
   const breadcrumb = [{ href: '/manager/services', text: 'Services' }];
   const tags: string[] = !isEmpty(data?.GatewayService.tags)
@@ -82,7 +110,7 @@ const ServicePage: React.FC = () => {
         </Box>
         <Divider />
         <Box minHeight="100px" p={4}>
-          {router?.query.id && (
+          {id && (
             <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
               <MetricGraph
                 days={range}
@@ -111,7 +139,7 @@ const ServicePage: React.FC = () => {
           </Box>
           <Divider />
           <Box p={4} display="flex" alignItems="center" flex={1}>
-            {router?.query.id && (
+            {id && (
               <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
                 <MetricGraph
                   alt
@@ -183,9 +211,13 @@ const ServicePage: React.FC = () => {
                 Tags
               </Text>
               <Text as="dd">
-                {tags.map((t) => (
-                  <Badge key={t}>{t}</Badge>
-                ))}
+                <Wrap>
+                  {tags.map((t) => (
+                    <WrapItem key={t}>
+                      <Badge>{t}</Badge>
+                    </WrapItem>
+                  ))}
+                </Wrap>
               </Text>
             </Box>
           </Box>
