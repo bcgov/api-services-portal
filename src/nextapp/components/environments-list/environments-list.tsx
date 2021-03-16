@@ -17,7 +17,6 @@ import Link from 'next/link';
 import { useMutation, useQueryClient } from 'react-query';
 import type {
   Mutation,
-  EnvironmentAuthMethodType,
   Environment,
 } from '@/types/query.types';
 import {
@@ -33,7 +32,7 @@ import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import EditEnvironment from './edit-environment';
 
-const getAuthToken = (method: EnvironmentAuthMethodType) => {
+const getAuthToken = (method: string) => {
   switch (method) {
     case 'kong-api-key-acl':
       return FaKey;
