@@ -57,6 +57,22 @@ jobs:
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.6'
+
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+        insecure_skip_tls_verify: true
+
+        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+
     - name: 'Get Helm'
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
