@@ -170,8 +170,8 @@ const metadata = {
         transformations: {
             tags: {name: "toString"},
             config: {name: "toString"},
-            service: {name: "connectOne", list: "allGatewayServices", refKey: 'kongServiceId' },
-            route: {name: "connectOne", list: "allGatewayRoutes", refKey: 'kongRouteId' },
+            service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'kongServiceId' },
+            route: {name: "connectOne", key: "route.id", list: "allGatewayRoutes", refKey: 'kongRouteId' },
         }
     },
     'GatewayConsumer': {
