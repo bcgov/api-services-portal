@@ -8,6 +8,7 @@ import {
   Container,
   Divider,
   Heading,
+  Link,
   Table,
   Tbody,
   Td,
@@ -23,6 +24,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
+import NextLink from 'next/link';
 
 const query = gql`
   query GetConsumers {
@@ -113,14 +115,20 @@ const ConsumersPage: React.FC<
             <Tbody>
               {data.allGatewayConsumers.map((d) => (
                 <Tr key={d.id}>
-                  <Td>{d.username}</Td>
+                  <Td>
+                    <NextLink passHref href={`/manager/consumers/${d.id}`}>
+                      <Link>{d.username}</Link>
+                    </NextLink>
+                  </Td>
                   <Td>{d.customId}</Td>
-                  <Td>Controls</Td>
+                  <Td>{d.plugins.map((d) => d.name).join(', ')}</Td>
                   <Td>{d.tags}</Td>
                   <Td>{`${formatDistanceToNow(new Date(d.createdAt))} ago`}</Td>
                   <Td textAlign="right">
                     <ButtonGroup size="sm">
-                      <Button colorScheme="blue">Edit</Button>
+                      <NextLink href={`/manager/consumers/${d.id}`}>
+                        <Button colorScheme="blue">Edit</Button>
+                      </NextLink>
                       <Button colorScheme="red">Disable</Button>
                     </ButtonGroup>
                   </Td>
