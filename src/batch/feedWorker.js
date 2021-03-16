@@ -219,8 +219,11 @@ const putFeedWorker = async (keystone, req, res) => {
     const json = req.body
     console.log(JSON.stringify(json, null, 4))
 
+
     assert.strictEqual(entity in metadata, true)
     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
+
+    assert.strictEqual(typeof eid == 'string', true, 'Unique ID is not a string! ' + JSON.stringify(req.params) + " :: " + JSON.stringify(req.body))
 
     const result = await syncRecords(keystone, entity, eid, json)
     res.status(result.status).json(result)
