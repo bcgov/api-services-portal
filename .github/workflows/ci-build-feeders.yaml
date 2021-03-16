@@ -78,6 +78,13 @@ jobs:
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
         tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
+    - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+      id: set-deploy-id
+
+    - name: Get deploy ID
+      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
     - name: 'Deploy Feeder'
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
