@@ -47,6 +47,7 @@ module.exports = {
             resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             return resolvedData
         }
+        return resolvedData
     }
   },
 }
