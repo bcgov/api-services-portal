@@ -115,6 +115,10 @@ jobs:
 
         containerPort: 6000
 
+        serviceAccount:
+          create: true
+          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+
         env:
           KONG_ADMIN_URL:
             value: 'http://kong-kong-admin:8001'
