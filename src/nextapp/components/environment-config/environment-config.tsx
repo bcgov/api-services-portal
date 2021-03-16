@@ -16,7 +16,6 @@ import {
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import {
   Environment,
-  EnvironmentFlowType,
   EnvironmentUpdateInput,
 } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
@@ -30,7 +29,7 @@ interface EnvironmentConfigProps {
 const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
-  const [flow, setFlow] = React.useState<EnvironmentFlowType>(
+  const [flow, setFlow] = React.useState<string>(
     data.flow
   );
   const statusText = data.active ? 'Running' : 'Idle';
@@ -53,7 +52,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     const formData = new FormData(event.target);
     const payload: EnvironmentUpdateInput = {
       active: Boolean(formData.get('active')),
-      flow: formData.get('flow') as EnvironmentFlowType,
+      flow: formData.get('flow') as string,
     };
 
     if (formData.has('credentialIssuer')) {
@@ -78,7 +77,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     }
   };
   const onAuthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setFlow(event.target.value as EnvironmentFlowType);
+    setFlow(event.target.value as string);
   };
   const onReset = React.useCallback(() => {
     if (flow !== data.flow) {
