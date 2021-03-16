@@ -201,7 +201,7 @@ jobs:
             value: s3cr3t
             secure: true
           FEEDER_URL:
-            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder:6000'
+            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder'
           GITHUB_API_TOKEN:
             value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
             secure: true

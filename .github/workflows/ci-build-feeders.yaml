@@ -56,3 +56,58 @@ jobs:
 
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
+
+    - name: 'Deploy Feeder'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo "
+        podAnnotations:
+          sha: $GITHUB_SHA
+
+        replicaCount: 1
+
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
+
+        image:
+          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/data-feeder
+          tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext:
+          fsGroup: ${{ secrets.RUNNING_UID_GID }}
+
+        securityContext:
+          runAsUser: ${{ secrets.RUNNING_UID_GID }}
+
+        containerPort: 6000
+
+        env:
+          SESSION_SECRET:
+            value: '234873290483290'
+            secure: true
+          AUTH_STRATEGY:
+            value: Oauth2Proxy
+          KONG_URL:
+            value: '${{ secrets.KONG_URL_DEV}}'
+          GITHUB_API_TOKEN:
+            value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
+            secure: true
+          OIDC_ISSUER:  
+            value: '${{ secrets.OIDC_ISSUER }}'
+          JWKS_URL:
+            value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
+          EXTERNAL_URL:
+            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
+          NEXT_PUBLIC_API_ROOT:
+            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
+
+        " > values.yaml
+        
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
