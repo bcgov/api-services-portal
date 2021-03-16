@@ -88,25 +88,14 @@ jobs:
         containerPort: 6000
 
         env:
-          SESSION_SECRET:
-            value: '234873290483290'
-            secure: true
-          AUTH_STRATEGY:
-            value: Oauth2Proxy
-          KONG_URL:
-            value: '${{ secrets.KONG_URL_DEV}}'
-          GITHUB_API_TOKEN:
-            value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
-            secure: true
-          OIDC_ISSUER:  
-            value: '${{ secrets.OIDC_ISSUER }}'
-          JWKS_URL:
-            value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
-          EXTERNAL_URL:
-            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
-          NEXT_PUBLIC_API_ROOT:
-            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
-
+          KONG_ADMIN_URL:
+            value: 'http://kong-kong-admin:8001'
+          CKAN_URL:
+            value: 'https://catalog.data.gov.bc.ca'
+          PROM_URL:
+            value: 'http://prometheus-server'
+          DESTINATION_URL:
+            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
         " > values.yaml
         
         helm repo add bcgov http://bcgov.github.io/helm-charts
