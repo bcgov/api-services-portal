@@ -24,7 +24,7 @@ module.exports = {
         { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
-    clientRegistration: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
+    clientRegistration: { type: Select, emptyOption: true, dataType: 'string', options: [
         { value: 'anonymous', label: 'Anonymous'},
         { value: 'managed', label: 'Managed'},
         { value: 'iat', label: 'Initial Access Token'}

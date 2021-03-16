@@ -81,7 +81,7 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
             if (issuer.mode == 'manual') {
                 throw Error('Manual credential issuing not supported yet!')
             }
-            if (issuer.clientRegistration == 'anonymous') {
+            if (issuer.flow == 'client-credentials' && issuer.clientRegistration == 'anonymous') {
                 throw Error('Anonymous client registration not supported yet!')
             }
 
