@@ -57,6 +57,11 @@ jobs:
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
+    - name: 'Get Helm'
+      run: |
+        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+
     - name: 'Deploy Feeder'
       run: |
         export PATH=$PATH:`pwd`/linux-amd64
