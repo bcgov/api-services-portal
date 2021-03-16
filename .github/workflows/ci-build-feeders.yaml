@@ -120,6 +120,10 @@ jobs:
           name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
 
         env:
+          LOG_FEEDS:
+            value: 'false'
+          WORKING_PATH:
+            value: '/tmp'
           KONG_ADMIN_URL:
             value: 'http://kong-kong-admin:8001'
           CKAN_URL:
