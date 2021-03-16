@@ -16,7 +16,7 @@ import {
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import {
   Environment,
-  EnvironmentAuthMethodType,
+  EnvironmentFlowType,
   EnvironmentUpdateInput,
 } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
@@ -30,8 +30,8 @@ interface EnvironmentConfigProps {
 const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
-  const [authMethod, setAuthMethod] = React.useState<EnvironmentAuthMethodType>(
-    data.authMethod
+  const [flow, setFlow] = React.useState<EnvironmentFlowType>(
+    data.flow
   );
   const statusText = data.active ? 'Running' : 'Idle';
   const statusBoxColorScheme = data.active ? 'green' : 'orange';
@@ -53,7 +53,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     const formData = new FormData(event.target);
     const payload: EnvironmentUpdateInput = {
       active: Boolean(formData.get('active')),
-      authMethod: formData.get('authMethod') as EnvironmentAuthMethodType,
+      flow: formData.get('flow') as EnvironmentFlowType,
     };
 
     if (formData.has('credentialIssuer')) {
@@ -78,14 +78,21 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     }
   };
   const onAuthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setAuthMethod(event.target.value as EnvironmentAuthMethodType);
+    setFlow(event.target.value as EnvironmentFlowType);
   };
   const onReset = React.useCallback(() => {
-    if (authMethod !== data.authMethod) {
-      setAuthMethod(data.authMethod);
+    if (flow !== data.flow) {
+      setFlow(data.flow);
     }
     setChanged(false);
-  }, [authMethod, data, setAuthMethod, setChanged]);
+  }, [flow, data, setFlow, setChanged]);
+
+  const flowTypes = [
+    { value: 'public', label: 'Public'},
+    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
+    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
+    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
+  ]
 
   return (
     <form onChange={onChange} onSubmit={onSubmit} onReset={onReset}>
@@ -157,17 +164,14 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                 size="sm"
                 variant="filled"
                 width="auto"
-                id="authMethod"
-                name="authMethod"
-                value={authMethod}
+                id="flow"
+                name="flow"
+                value={flow}
                 onChange={onAuthChange}
               >
-                <option value="public">Public</option>
-                <option value="keys">API Keys</option>
-                <option value="private">Private</option>
-                <option value="jwt">JWT</option>
+                {flowTypes.map(f => (<option value={f.value}>{f.label}</option>))}
               </Select>
-              {authMethod === 'jwt' && (
+              {flow === 'client-credentials' && (
                 <CredentialIssuerSelect environmentId={data.id} />
               )}
               <Box flex={1} />

@@ -33,6 +33,12 @@ interface EditEnvironmentProps {
 
 const EditEnvironment: React.FC<EditEnvironmentProps> = ({ data }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const flowTypes = [
+    { value: 'public', label: 'Public'},
+    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
+    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
+    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
+  ]
 
   return (
     <>
@@ -71,11 +77,8 @@ const EditEnvironment: React.FC<EditEnvironmentProps> = ({ data }) => {
                     </FormControl>
                     <FormControl isRequired>
                       <FormLabel>Auth Method</FormLabel>
-                      <Select defaultValue={data.authMethod}>
-                        <option value="public">Public</option>
-                        <option value="keys">API Keys</option>
-                        <option value="private">Private</option>
-                        <option value="jwt">JWT</option>
+                      <Select defaultValue={data.flow}>
+                          {flowTypes.map(f => (<option value={f.value}>{f.label}</option>))}
                       </Select>
                     </FormControl>
                   </VStack>

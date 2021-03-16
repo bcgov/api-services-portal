@@ -17,19 +17,20 @@ module.exports = {
         defaultValue: false,
         access: FieldEnforcementPoint
     },
-    authMethod: { type: Select, emptyOption: false, defaultValue: 'public', options: [
+    flow: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
         { value: 'public', label: 'Public'},
-        { value: 'jwt', label: 'JWT'},
-        { value: 'keys', label: 'API Keys'},
+        { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
+        { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
+        { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
+    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
     plugins: { type: Relationship, ref: 'GatewayPlugin', many: true },
     description: {
       type: Text,
       isMultiline: true,
       isRequired: false,
     },
-    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
     services: { type: Relationship, ref: 'GatewayService.environment', many: true },
     product: { type: Relationship, ref: 'Product.environments', many: false },
   },

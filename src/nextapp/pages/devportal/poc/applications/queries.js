@@ -25,7 +25,27 @@ export const GET_LIST = `
                   name
               }
             }
-          }
+        }
+        allServiceAccesses(where: { active: true }) {
+            id
+            name
+            active
+            consumer {
+              kongConsumerId
+            }
+            application {
+              appId
+            }
+            productEnvironment {
+              name
+              credentialIssuer {
+                instruction
+              }
+              product {
+                name
+              }
+            }
+        }
   
     }
 `
@@ -49,7 +69,7 @@ export const REMOVE = `
 
 export const GEN_CREDENTIAL = `
     mutation GenCredential($id: ID!) {
-        updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+        updateServiceAccess(id: $id, data: { credential: "NEW" }) {
             credential
         }
     }

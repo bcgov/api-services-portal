@@ -25,8 +25,8 @@ function List({ data, state, refetch }) {
                     <TableCaption>-</TableCaption>
                     <Thead>
                         <Tr>
-                        <Th>Name</Th>
-                        <Th>Custom ID</Th>
+                        <Th>Active? / Username / Custom ID</Th>
+                        <Th>Services</Th>
                         <Th>Controls</Th>
                         <Th>Tags</Th>
                         <Th>Created At</Th>
@@ -34,24 +34,25 @@ function List({ data, state, refetch }) {
                         </Tr>
                     </Thead>
                     <Tbody>
-                {data.allGatewayConsumers.map((item, index) => (
-                    <Tr key={item.customId}>
-                        <Td>{item.username}</Td>
-                        <Td>{item.customId}</Td>
+                {data.allServiceAccesses.map((item, index) => (
+                    <Tr key={item.id}>
+                        <Td>{item.active ? "[A]":"[I]"} {item.consumer.username}<br/>{item.consumer.customId}</Td>
+                        <Td>{item.productEnvironment.product.name} - {item.productEnvironment.name}</Td>
                         <Td>
-                            <HStack spacing={4}>{Array.isArray(item.plugins) ? item.plugins.map(p => (
+                            { item.aclEnabled ? (<p>ACL Disabled</p>) : <p>ACL Enabled</p> }
+                            <HStack spacing={4}>{Array.isArray(item.plugins) ? item.consumer.plugins.map(p => (
                                 <Tag key={p.name} size="lg" colorScheme="orange" borderRadius="5px">
                                     <TagLabel>{p.name}</TagLabel>
                                 </Tag>
                             )) : false}</HStack>     
                         </Td>
-                        <Td><HStack spacing={4}>{Array.isArray(item.tags) ? item.tags.map(tag => (
+                        <Td><HStack spacing={4}>{Array.isArray(item.tags) ? item.consumer.tags.map(tag => (
                             <Tag key={tag} size="lg" colorScheme="red" borderRadius="full">
                                 <TagLabel>{tag}</TagLabel>
                             </Tag>
                         )) : false}</HStack></Td>
                         <Td>{item.createdAt}</Td>
-                        <Td><Button colorScheme="blue">Edit</Button> | <Button colorScheme="red">Disable</Button></Td>
+                        <Td><Button colorScheme="blue">Edit</Button> | <Button colorScheme="red">Revoke Access</Button></Td>
                     </Tr>
                 ))}
                     </Tbody>

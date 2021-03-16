@@ -6,7 +6,7 @@ export const GET_LIST = `
           environments {
             name
             active
-            authMethod
+            flow
             services {
                 name
                 host

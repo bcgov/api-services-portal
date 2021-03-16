@@ -49,6 +49,7 @@ const NewRequest = () => {
     };
     useEffect(fetch, [context]);
 
+    const requestor = (data ? data.allTemporaryIdentities[0] : null)
     const dataset = (data ? data.allProducts[0] : data)
 
     const refetch = () => {
@@ -57,7 +58,7 @@ const NewRequest = () => {
 
     
     const create = () => {
-        graphql(ADD, { name: dataset.name + " FOR " + data.allTemporaryIdentities[0].name, requestor: data.allTemporaryIdentities[0].userId, applicationId: applicationId, productEnvironmentId: environmentId }).then(refetch);
+        graphql(ADD, { name: dataset.name + " FOR " + data.allTemporaryIdentities[0].name, controls: "{}", requestor: data.allTemporaryIdentities[0].userId, applicationId: applicationId, productEnvironmentId: environmentId }).then(refetch);
     }
     //onChange={(a) => { setApplicationId(a) } } value={applicationId}
     //onChange={setEnvironmentId} value={environmentId}
@@ -73,30 +74,12 @@ const NewRequest = () => {
   
           <Box mt={5}>
             <div style={styles.formWrapper}>
+
             { dataset == null ? false: (
                 <>
-                <h2 style={styles.h2}>Which application will be using this API?</h2>
-                { data.allApplications != null ? (
-                <div className="flex">
-                    <Flex direction="column" className="m-5">
-                    { data.allApplications == null || data.allApplications.length == 0 ? (
-                            <span>To get started, you must <Link colorScheme="blue" size="sm" href="/poc/applications">Register an Application</Link> first.</span>
-                        ) : (
-                            <>
-                                <label><b>Application</b></label>
-                                <RadioGroup isRequired={true} onChange={setApplicationId} defaultValue={applicationId}>
-                                    <Stack direction="column">
-                                        { data.allApplications.map(e => (
-                                            <Radio key={e.id} value={e.id}>{e.name}</Radio>
-                                        ))}
-                                    </Stack>
-                                </RadioGroup>
-                            </>
-                                
-                        ) }
-                    </Flex>
-                </div>
-                ): false}
+                { data.allApplications == null || data.allApplications.length == 0 ? (
+                                    <span>To get started, you must <Link colorScheme="blue" size="sm" href="/devportal/poc/applications">Register an Application</Link> first.</span>
+                                ) : false }
                 { data.allApplications != null && data.allApplications.length > 0 && (
                     <>
                         <h2 style={styles.h2}>APIs</h2>
@@ -115,13 +98,43 @@ const NewRequest = () => {
                                 <RadioGroup isRequired={true} onChange={setEnvironmentId} value={environmentId}>
                                     <Stack direction="column">
                                         { dataset.environments.filter(e => e.active).map(e => (
-                                            <Radio key={e.id} value={e.id}>{e.name} : {e.authMethod}</Radio>
+                                            <Radio key={e.id} value={e.id}>{e.name} : {e.flow}</Radio>
                                         ))}
                                     </Stack>
                                 </RadioGroup>
                             </Flex>
                         </div>
                         ): false}
+
+                        <h2 style={styles.h2}>This API is Protected with the OAuth Flow, so requesting as yourself.</h2>
+                        <div className="flex">
+                            <NameValue name="Name" value={requestor.name} width="250px"/>
+                            <NameValue name="Username" value={requestor.username} width="250px"/>
+                            <NameValue name="Email" value={requestor.email} width="350px"/>
+                        </div>
+                        <h2 style={styles.h2}>OR Select which application will be using this API?</h2>
+
+
+                        <Flex direction="column" className="m-5">
+                        { data.allApplications == null || data.allApplications.length == 0 ? (
+                                <span>To get started, you must <Link colorScheme="blue" size="sm" href="/poc/applications">Register an Application</Link> first.</span>
+                            ) : (
+                                <>
+                                    <label><b>Application</b></label>
+                                    <RadioGroup isRequired={true} onChange={setApplicationId} defaultValue={applicationId}>
+                                        <Stack direction="column">
+                                            { data.allApplications.map(e => (
+                                                <Radio key={e.id} value={e.id}>{e.name}</Radio>
+                                            ))}
+                                        </Stack>
+                                    </RadioGroup>
+                                </>
+                                    
+                            ) }
+                        </Flex>
+
+                        <h2 style={styles.h2}>All terms and conditions agreed?</h2>
+
                         <h2 style={styles.h2}>Additional Instruction</h2>
                         <div className="flex m-5">
                             <Textarea name="other" placeholder="Additional instructions for the API Manager"/>
@@ -133,6 +146,7 @@ const NewRequest = () => {
                         </ButtonGroup>
                     </>
                 )}
+
                 </>
             )}
             </div>

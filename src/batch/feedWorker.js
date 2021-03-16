@@ -136,7 +136,7 @@ const metadata = {
         transformations: {
             tags: {name:"toString"},
             namespace: {name:"mapNamespace"},
-            plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true},
+            plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true},
             // routes: {name: "connectExclusiveList", list: "GatewayRoute", loadFirst: true}
         }
     },
@@ -159,7 +159,7 @@ const metadata = {
             hosts: {name: "toString"},
             namespace: {name:"mapNamespace"},
             service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'kongServiceId' },
-            plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true},
+            plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true},
         }
     },
     'GatewayPlugin': {
@@ -169,7 +169,9 @@ const metadata = {
         sync: ['name', 'tags', 'config'],
         transformations: {
             tags: {name: "toString"},
-            config: {name: "toString"}
+            config: {name: "toString"},
+            service: {name: "connectOne", list: "allGatewayServices", refKey: 'kongServiceId' },
+            route: {name: "connectOne", list: "allGatewayRoutes", refKey: 'kongRouteId' },
         }
     },
     'GatewayConsumer': {
@@ -180,7 +182,7 @@ const metadata = {
             tags: {name: "toString"},
             aclGroups: {name: "toString"},
             namespace: {name:"mapNamespace"},
-            plugins: {name: "connectExclusiveList", list: "Plugin", syncFirst: true}
+            plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true}
         }
     },
     'Application': {

@@ -64,6 +64,7 @@ export type AccessRequest = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  controls?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
@@ -146,6 +147,24 @@ export type AccessRequestWhereInput = {
   isIssued_not?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isComplete_not?: Maybe<Scalars['Boolean']>;
+  controls?: Maybe<Scalars['String']>;
+  controls_not?: Maybe<Scalars['String']>;
+  controls_contains?: Maybe<Scalars['String']>;
+  controls_not_contains?: Maybe<Scalars['String']>;
+  controls_starts_with?: Maybe<Scalars['String']>;
+  controls_not_starts_with?: Maybe<Scalars['String']>;
+  controls_ends_with?: Maybe<Scalars['String']>;
+  controls_not_ends_with?: Maybe<Scalars['String']>;
+  controls_i?: Maybe<Scalars['String']>;
+  controls_not_i?: Maybe<Scalars['String']>;
+  controls_contains_i?: Maybe<Scalars['String']>;
+  controls_not_contains_i?: Maybe<Scalars['String']>;
+  controls_starts_with_i?: Maybe<Scalars['String']>;
+  controls_not_starts_with_i?: Maybe<Scalars['String']>;
+  controls_ends_with_i?: Maybe<Scalars['String']>;
+  controls_not_ends_with_i?: Maybe<Scalars['String']>;
+  controls_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  controls_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   requestor?: Maybe<UserWhereInput>;
   requestor_is_null?: Maybe<Scalars['Boolean']>;
   application?: Maybe<ApplicationWhereInput>;
@@ -197,6 +216,8 @@ export enum SortAccessRequestsBy {
   IsIssuedDesc = 'isIssued_DESC',
   IsCompleteAsc = 'isComplete_ASC',
   IsCompleteDesc = 'isComplete_DESC',
+  ControlsAsc = 'controls_ASC',
+  ControlsDesc = 'controls_DESC',
   RequestorAsc = 'requestor_ASC',
   RequestorDesc = 'requestor_DESC',
   ApplicationAsc = 'application_ASC',
@@ -221,6 +242,7 @@ export type AccessRequestUpdateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  controls?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
@@ -238,6 +260,7 @@ export type AccessRequestCreateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  controls?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
@@ -1033,16 +1056,6 @@ export type ContentsCreateInput = {
   data?: Maybe<ContentCreateInput>;
 };
 
-export enum CredentialIssuerAuthMethodType {
-  Jwt = 'jwt',
-  Keys = 'keys'
-}
-
-export enum CredentialIssuerModeType {
-  Manual = 'manual',
-  Auto = 'auto'
-}
-
 export type EnvironmentRelateToManyInput = {
   create?: Maybe<Array<Maybe<EnvironmentCreateInput>>>;
   connect?: Maybe<Array<Maybe<EnvironmentWhereUniqueInput>>>;
@@ -1064,8 +1077,9 @@ export type CredentialIssuer = {
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  authMethod?: Maybe<CredentialIssuerAuthMethodType>;
-  mode?: Maybe<CredentialIssuerModeType>;
+  flow?: Maybe<Scalars['String']>;
+  clientRegistration?: Maybe<Scalars['String']>;
+  mode?: Maybe<Scalars['String']>;
   instruction?: Maybe<Scalars['String']>;
   oidcDiscoveryUrl?: Maybe<Scalars['String']>;
   initialAccessToken?: Maybe<Scalars['String']>;
@@ -1145,14 +1159,36 @@ export type CredentialIssuerWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  authMethod?: Maybe<CredentialIssuerAuthMethodType>;
-  authMethod_not?: Maybe<CredentialIssuerAuthMethodType>;
-  authMethod_in?: Maybe<Array<Maybe<CredentialIssuerAuthMethodType>>>;
-  authMethod_not_in?: Maybe<Array<Maybe<CredentialIssuerAuthMethodType>>>;
-  mode?: Maybe<CredentialIssuerModeType>;
-  mode_not?: Maybe<CredentialIssuerModeType>;
-  mode_in?: Maybe<Array<Maybe<CredentialIssuerModeType>>>;
-  mode_not_in?: Maybe<Array<Maybe<CredentialIssuerModeType>>>;
+  flow?: Maybe<Scalars['String']>;
+  flow_not?: Maybe<Scalars['String']>;
+  flow_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  flow_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRegistration?: Maybe<Scalars['String']>;
+  clientRegistration_not?: Maybe<Scalars['String']>;
+  clientRegistration_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRegistration_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  mode?: Maybe<Scalars['String']>;
+  mode_not?: Maybe<Scalars['String']>;
+  mode_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  mode_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  instruction?: Maybe<Scalars['String']>;
+  instruction_not?: Maybe<Scalars['String']>;
+  instruction_contains?: Maybe<Scalars['String']>;
+  instruction_not_contains?: Maybe<Scalars['String']>;
+  instruction_starts_with?: Maybe<Scalars['String']>;
+  instruction_not_starts_with?: Maybe<Scalars['String']>;
+  instruction_ends_with?: Maybe<Scalars['String']>;
+  instruction_not_ends_with?: Maybe<Scalars['String']>;
+  instruction_i?: Maybe<Scalars['String']>;
+  instruction_not_i?: Maybe<Scalars['String']>;
+  instruction_contains_i?: Maybe<Scalars['String']>;
+  instruction_not_contains_i?: Maybe<Scalars['String']>;
+  instruction_starts_with_i?: Maybe<Scalars['String']>;
+  instruction_not_starts_with_i?: Maybe<Scalars['String']>;
+  instruction_ends_with_i?: Maybe<Scalars['String']>;
+  instruction_not_ends_with_i?: Maybe<Scalars['String']>;
+  instruction_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  instruction_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   oidcDiscoveryUrl?: Maybe<Scalars['String']>;
   oidcDiscoveryUrl_not?: Maybe<Scalars['String']>;
   oidcDiscoveryUrl_contains?: Maybe<Scalars['String']>;
@@ -1266,10 +1302,14 @@ export enum SortCredentialIssuersBy {
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
-  AuthMethodAsc = 'authMethod_ASC',
-  AuthMethodDesc = 'authMethod_DESC',
+  FlowAsc = 'flow_ASC',
+  FlowDesc = 'flow_DESC',
+  ClientRegistrationAsc = 'clientRegistration_ASC',
+  ClientRegistrationDesc = 'clientRegistration_DESC',
   ModeAsc = 'mode_ASC',
   ModeDesc = 'mode_DESC',
+  InstructionAsc = 'instruction_ASC',
+  InstructionDesc = 'instruction_DESC',
   OidcDiscoveryUrlAsc = 'oidcDiscoveryUrl_ASC',
   OidcDiscoveryUrlDesc = 'oidcDiscoveryUrl_DESC',
   InitialAccessTokenAsc = 'initialAccessToken_ASC',
@@ -1295,8 +1335,10 @@ export enum SortCredentialIssuersBy {
 export type CredentialIssuerUpdateInput = {
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  authMethod?: Maybe<CredentialIssuerAuthMethodType>;
-  mode?: Maybe<CredentialIssuerModeType>;
+  flow?: Maybe<Scalars['String']>;
+  clientRegistration?: Maybe<Scalars['String']>;
+  mode?: Maybe<Scalars['String']>;
+  instruction?: Maybe<Scalars['String']>;
   oidcDiscoveryUrl?: Maybe<Scalars['String']>;
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
@@ -1313,8 +1355,10 @@ export type CredentialIssuersUpdateInput = {
 export type CredentialIssuerCreateInput = {
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
-  authMethod?: Maybe<CredentialIssuerAuthMethodType>;
-  mode?: Maybe<CredentialIssuerModeType>;
+  flow?: Maybe<Scalars['String']>;
+  clientRegistration?: Maybe<Scalars['String']>;
+  mode?: Maybe<Scalars['String']>;
+  instruction?: Maybe<Scalars['String']>;
   oidcDiscoveryUrl?: Maybe<Scalars['String']>;
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
@@ -1669,23 +1713,17 @@ export type DatasetsCreateInput = {
   data?: Maybe<DatasetCreateInput>;
 };
 
-export enum EnvironmentAuthMethodType {
-  Public = 'public',
-  Jwt = 'jwt',
-  Keys = 'keys'
-}
+export type CredentialIssuerRelateToOneInput = {
+  create?: Maybe<CredentialIssuerCreateInput>;
+  connect?: Maybe<CredentialIssuerWhereUniqueInput>;
+  disconnect?: Maybe<CredentialIssuerWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
 
 export type GatewayPluginRelateToManyInput = {
   create?: Maybe<Array<Maybe<GatewayPluginCreateInput>>>;
   connect?: Maybe<Array<Maybe<GatewayPluginWhereUniqueInput>>>;
   disconnect?: Maybe<Array<Maybe<GatewayPluginWhereUniqueInput>>>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
-export type CredentialIssuerRelateToOneInput = {
-  create?: Maybe<CredentialIssuerCreateInput>;
-  connect?: Maybe<CredentialIssuerWhereUniqueInput>;
-  disconnect?: Maybe<CredentialIssuerWhereUniqueInput>;
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
@@ -1717,11 +1755,11 @@ export type Environment = {
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
-  authMethod?: Maybe<EnvironmentAuthMethodType>;
+  flow?: Maybe<Scalars['String']>;
+  credentialIssuer?: Maybe<CredentialIssuer>;
   plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
   description?: Maybe<Scalars['String']>;
-  credentialIssuer?: Maybe<CredentialIssuer>;
   services: Array<GatewayService>;
   _servicesMeta?: Maybe<_QueryMeta>;
   product?: Maybe<Product>;
@@ -1798,10 +1836,12 @@ export type EnvironmentWhereInput = {
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   active?: Maybe<Scalars['Boolean']>;
   active_not?: Maybe<Scalars['Boolean']>;
-  authMethod?: Maybe<EnvironmentAuthMethodType>;
-  authMethod_not?: Maybe<EnvironmentAuthMethodType>;
-  authMethod_in?: Maybe<Array<Maybe<EnvironmentAuthMethodType>>>;
-  authMethod_not_in?: Maybe<Array<Maybe<EnvironmentAuthMethodType>>>;
+  flow?: Maybe<Scalars['String']>;
+  flow_not?: Maybe<Scalars['String']>;
+  flow_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  flow_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credentialIssuer?: Maybe<CredentialIssuerWhereInput>;
+  credentialIssuer_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   plugins_every?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -1826,8 +1866,6 @@ export type EnvironmentWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  credentialIssuer?: Maybe<CredentialIssuerWhereInput>;
-  credentialIssuer_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   services_every?: Maybe<GatewayServiceWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -1849,14 +1887,14 @@ export enum SortEnvironmentsBy {
   NameDesc = 'name_DESC',
   ActiveAsc = 'active_ASC',
   ActiveDesc = 'active_DESC',
-  AuthMethodAsc = 'authMethod_ASC',
-  AuthMethodDesc = 'authMethod_DESC',
+  FlowAsc = 'flow_ASC',
+  FlowDesc = 'flow_DESC',
+  CredentialIssuerAsc = 'credentialIssuer_ASC',
+  CredentialIssuerDesc = 'credentialIssuer_DESC',
   PluginsAsc = 'plugins_ASC',
   PluginsDesc = 'plugins_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
-  CredentialIssuerAsc = 'credentialIssuer_ASC',
-  CredentialIssuerDesc = 'credentialIssuer_DESC',
   ServicesAsc = 'services_ASC',
   ServicesDesc = 'services_DESC',
   ProductAsc = 'product_ASC',
@@ -1866,10 +1904,10 @@ export enum SortEnvironmentsBy {
 export type EnvironmentUpdateInput = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
-  authMethod?: Maybe<EnvironmentAuthMethodType>;
+  flow?: Maybe<Scalars['String']>;
+  credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
   description?: Maybe<Scalars['String']>;
-  credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
   product?: Maybe<ProductRelateToOneInput>;
 };
@@ -1882,10 +1920,10 @@ export type EnvironmentsUpdateInput = {
 export type EnvironmentCreateInput = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
-  authMethod?: Maybe<EnvironmentAuthMethodType>;
+  flow?: Maybe<Scalars['String']>;
+  credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
   description?: Maybe<Scalars['String']>;
-  credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
   product?: Maybe<ProductRelateToOneInput>;
 };
@@ -2294,6 +2332,7 @@ export type GatewayPlugin = {
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   kongPluginId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayService>;
@@ -2345,6 +2384,24 @@ export type GatewayPluginWhereInput = {
   kongPluginId_not_ends_with_i?: Maybe<Scalars['String']>;
   kongPluginId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   kongPluginId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   tags?: Maybe<Scalars['String']>;
   tags_not?: Maybe<Scalars['String']>;
   tags_contains?: Maybe<Scalars['String']>;
@@ -2414,6 +2471,8 @@ export enum SortGatewayPluginsBy {
   NameDesc = 'name_DESC',
   KongPluginIdAsc = 'kongPluginId_ASC',
   KongPluginIdDesc = 'kongPluginId_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   TagsAsc = 'tags_ASC',
   TagsDesc = 'tags_DESC',
   ConfigAsc = 'config_ASC',
@@ -2431,6 +2490,7 @@ export enum SortGatewayPluginsBy {
 export type GatewayPluginUpdateInput = {
   name?: Maybe<Scalars['String']>;
   kongPluginId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
@@ -2445,6 +2505,7 @@ export type GatewayPluginsUpdateInput = {
 export type GatewayPluginCreateInput = {
   name?: Maybe<Scalars['String']>;
   kongPluginId?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
@@ -5200,8 +5261,8 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -5209,12 +5270,12 @@ export type UnauthenticateUserOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -5415,7 +5476,7 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -6313,10 +6374,10 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -7064,14 +7125,14 @@ export type MutationDeleteUsersArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 

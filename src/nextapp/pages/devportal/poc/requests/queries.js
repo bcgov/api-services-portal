@@ -7,7 +7,7 @@ export const GET_PRODUCT = `
                 id
                 name
                 active
-                authMethod
+                flow
             }
         }
 
@@ -28,8 +28,8 @@ export const GET_PRODUCT = `
 
 
 export const ADD = `
-    mutation AddAccessRequest($name: String!, $requestor: ID!, $applicationId: ID!, $productEnvironmentId: ID!) {
-        createAccessRequest(data: { name: $name, 
+    mutation AddAccessRequest($name: String!, $controls: String, $requestor: ID!, $applicationId: ID!, $productEnvironmentId: ID!) {
+        createAccessRequest(data: { name: $name, controls: $controls,
             requestor: { connect: { id: $requestor } }, 
             application: { connect: { id: $applicationId } }
             productEnvironment: { connect: { id: $productEnvironmentId } }

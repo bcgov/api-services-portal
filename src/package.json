@@ -17,8 +17,9 @@
   "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
   "lint": "eslint .",
   "lint-ts": "eslint ./nextapp --ext .ts,.tsx --quiet & tsc -p ./nextapp/tsconfig.json --noEmit",
-  "test": "jest --config ./jest.config.js --coverage",
+  "test": "jest --config ./jest.config.js --coverage --detectOpenHandles",
   "test:watch": "jest -w --coverage",
+  "test:node": "node_modules/.bin/mocha",
   "generate": "graphql-codegen"
  },
  "dependencies": {

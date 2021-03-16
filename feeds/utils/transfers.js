@@ -8,7 +8,6 @@ function transfers (workingPath, baseUrl, exceptions) {
     fs.mkdirSync(workingPath, { recursive: true })
 
     return {
-
         copy: async function (_url, filename, index = 0) {
             console.log("Fetching " + baseUrl + _url)
             const out = workingPath + '/' + filename + '-' + index + '.json'
@@ -30,6 +29,22 @@ function transfers (workingPath, baseUrl, exceptions) {
             })
             .catch (err => {
                 console.log("COPY ERROR " + filename + " - " + err)
+                exceptions.push({relativeUrl:url, filename:filename, error:"" + err})
+            })
+        },
+
+        copyOne: async function (_url, filename, index = 0) {
+            console.log("Fetching " + baseUrl + _url)
+            const out = workingPath + '/' + filename + '-' + index + '.json'
+            return fetch (baseUrl + _url)
+            .then (checkStatus)
+            .then (data => data.json())
+            .then (json => {
+                fs.writeFileSync(out, JSON.stringify({data: [ json ] }, null, 4), null);
+                console.log("WROTE "+  filename)
+            })
+            .catch (err => {
+                console.log("COPYONE ERROR " + filename + " - " + err)
                 exceptions.push({relativeUrl:url, filename:filename, error:"" + err})
             })
         },

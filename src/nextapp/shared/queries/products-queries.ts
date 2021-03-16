@@ -102,7 +102,7 @@ export const GET_ENVIRONMENT = gql`
       id
       name
       active
-      authMethod
+      flow
       product {
         organization {
           name
@@ -142,7 +142,7 @@ export const GET_LIST = gql`
         id
         name
         active
-        authMethod
+        flow
         credentialIssuer {
           name
         }

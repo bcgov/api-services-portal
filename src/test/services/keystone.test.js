@@ -20,8 +20,11 @@ describe("KeystoneJS", function() {
             if (q.query.indexOf('CreateNewConsumer') != -1) {
                 return {data: {createConsumer: { id: 'CONSUMER-001' } } }
             }
-            if (q.query.indexOf('UpdateConsumerInAccessRequest') != -1) {
-                return {data: {updateAccessRequest: { id: 'REQUEST-001' } } }
+            if (q.query.indexOf('CreateServiceAccess') != -1) {
+                return {data: {createServiceAccess: { id: 'SVC-ACCESS-002' } } }
+            }
+            if (q.query.indexOf('UpdateConsumerInServiceAccess') != -1) {
+                return {data: {updateServiceAccess: { id: 'SVC-ACCESS-001' } } }
             }
         }  
     }
@@ -55,11 +58,19 @@ describe("KeystoneJS", function() {
         })
     })
 
-    // linkConsumerToAccessRequest
-    describe('test linkCredRefsToAccessRequest', function () {
+    // addServiceAccess
+    describe('test addServiceAccess', function () {
         it('it should be successful', async function () {
-            const result = await keystone.linkCredRefsToAccessRequest(context, 'REQUEST-01', {apiKey:"sss"})
-            expect(result.id).toBe('REQUEST-001')
+            const result = await keystone.addServiceAccess(context, 'App8.Prod8.Env', true, true, 'client', null, null)
+            expect(result).toBe('SVC-ACCESS-002')
+        })
+    })
+    
+    // linkCredRefsToServiceAccess
+    describe('test linkCredRefsToServiceAccess', function () {
+        it('it should be successful', async function () {
+            const result = await keystone.linkCredRefsToServiceAccess(context, 'SVC-ACCESS-01', {apiKey:"sss"})
+            expect(result.id).toBe('SVC-ACCESS-001')
         })
     })
 })

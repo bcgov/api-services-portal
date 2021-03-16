@@ -1,5 +1,18 @@
 # Process Flows
 
+# Credential Issuers
+
+| Flow                           | Mode      | Registration            | Management                                             |
+|--------------------------------|-----------|-------------------------|--------------------------------------------------------|
+| Oauth2 Client Credentials Flow | Automatic | Anonymous Client Reg    | manage-clients (delete, activate, role assignment)     |
+| Oauth2 Client Credentials Flow | Automatic | Managed (create-client) | Registration Token (delete, activate, role assignment) |
+| Oauth2 Client Credentials Flow | Automatic | Initial Access Token    | Registration Token (delete, activate, role assignment) |
+| Oauth2 Authorization Code Flow | Automatic | N/A                     | manage-users (role assignment)                         |
+| Oauth2 Client Credentials Flow | Manual    | Anonymous Client Reg    | N/A                                                    |
+| Oauth2 Client Credentials Flow | Manual    | Managed (create-client) | N/A                                                    |
+| Oauth2 Client Credentials Flow | Manual    | Initial Access Token    | N/A                                                    |
+| Oauth2 Authorization Code Flow | Manual    | N/A                     | N/A                                                    |
+| Kong API Key with ACL Flow     | Automatic | Via Portal              | Via Portal                                             |
 
 ## Onboarding a new API
 

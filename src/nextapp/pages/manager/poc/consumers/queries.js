@@ -1,15 +1,32 @@
 export const GET_LIST = `
     query GetConsumers {
-        allGatewayConsumers(first:20) {
-          id
-          username
-          aclGroups
-          customId
-          plugins {
+        allServiceAccesses(first:100, sortBy:[updatedAt_DESC]) {
+          name
+          active
+          aclEnabled
+          consumerType
+          productEnvironment {
+            name
+            product {
               name
+            }
           }
-          tags
+          consumer {
+            id
+            username
+            aclGroups
+            customId
+            plugins {
+                name
+            }
+            tags
+          }
+          application {
+            appId
+            name
+          }
           createdAt
+          updatedAt
         }
     }
 `

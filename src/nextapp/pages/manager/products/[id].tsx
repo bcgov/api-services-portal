@@ -41,7 +41,7 @@ const EnvironmentPage: React.FC<
   );
   const title = `${data.Environment?.product.organization?.name} Product Environment`;
   const breadcrumb = [
-    { href: '/products', text: 'Products' },
+    { href: '/manager/products', text: 'Products' },
     {
       text: title,
     },

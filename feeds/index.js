@@ -58,6 +58,15 @@ app.get('/sync/:source/', (req, res) => {
     res.send({state:'processing'})
 })
 
+app.put('/forceSync/:source/:scope/:scopeKey', async (req, res) => {
+    const source = req.params.source
+    const scope = req.params.scope
+    const scopeKey = req.params.scopeKey
+    assert.strictEqual(source in sources, true, 'Invalid source ' + source)
+    await sources[source].scopedSync(config[source], scope, scopeKey)
+    res.send({state:'synced'})
+})
+
 // Replay an existing feeds file
 app.get('/replay/', (req, res) => {
     replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL})

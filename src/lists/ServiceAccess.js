@@ -8,6 +8,13 @@ const { atTracking } = require('@keystonejs/list-plugins')
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
 const workflow = require('../services/workflow')
 
+// const regenerateApiKey = async function(context, consumer) {
+//     const kongConsumerId = await lookupKongConsumerIdByName(context, appId)
+
+//     const apiKey = await kongApi.genKeyForConsumer (kongConsumerId)
+//     return apiKey.apiKey
+// }
+
 module.exports = {
   fields: {
     name: {
@@ -50,4 +57,17 @@ module.exports = {
   plugins: [
     atTracking()
   ],
+  hooks: {
+    afterChange: (async function ({
+        operation,
+        existingItem,
+        originalInput,
+        updatedItem,
+        context,
+        listKey,
+        fieldPath, // exists only for field hooks
+      }) {
+        await workflow.RegenerateCredential(context, operation, existingItem, originalInput, updatedItem)
+    })
+  }
 }

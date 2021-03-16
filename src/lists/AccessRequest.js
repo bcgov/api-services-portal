@@ -35,8 +35,12 @@ module.exports = {
         isRequired: false,
         default: false
     },
+    controls: {
+        type: Text,
+        isRequired: true,
+    },
     requestor: { type: Relationship, isRequired: true, ref: 'User' },
-    application: { type: Relationship, isRequired: true, ref: 'Application' },
+    application: { type: Relationship, isRequired: false, ref: 'Application' },
     productEnvironment: { type: Relationship, isRequired: true, ref: 'Environment' },
     activity: { type: Relationship, ref: 'Activity', many: true },
   },

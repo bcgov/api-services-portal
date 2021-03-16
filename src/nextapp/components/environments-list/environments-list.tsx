@@ -35,11 +35,13 @@ import EditEnvironment from './edit-environment';
 
 const getAuthToken = (method: EnvironmentAuthMethodType) => {
   switch (method) {
-    case 'keys':
+    case 'kong-api-key-acl':
       return FaKey;
-    case 'jwt':
+    case 'authorization-code':
       return FaLock;
-    // case 'private':
+    case 'client-credentials':
+      return FaLock;
+      // case 'private':
     //   return FaUserSecret;
     case 'public':
     default:
@@ -129,8 +131,8 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
                 colorScheme="green"
                 px={3}
               >
-                <TagLeftIcon as={getAuthToken(e.authMethod)} />
-                {e.authMethod.toUpperCase()}
+                <TagLeftIcon as={getAuthToken(e.flow)} />
+                {e.flow.toUpperCase()}
               </Tag>
               {e.services.map((s) => (
                 <Tag

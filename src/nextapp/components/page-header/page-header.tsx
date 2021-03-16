@@ -31,8 +31,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           <Box as="hgroup" mb={2}>
             <Breadcrumb fontSize="sm" color="gray.500">
               <BreadcrumbItem>
-                <NextLink passHref href="/">
-                  <BreadcrumbLink>Dashboard</BreadcrumbLink>
+                <NextLink passHref href="/manager">
+                  <BreadcrumbLink>API Manager</BreadcrumbLink>
                 </NextLink>
               </BreadcrumbItem>
               {breadcrumb.length > 0 &&

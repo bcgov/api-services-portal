@@ -1,3 +1,4 @@
+const { Groups } = require('keycloak-admin/lib/resources/groups')
 const fetch = require('node-fetch')
 
 const checkStatus = require('./checkStatus')
@@ -34,40 +35,41 @@ module.exports = function (kongUrl) {
             }
         },
 
-        createKongConsumer: async function (consumerId, customId) {
+        createKongConsumer: async function (username, customId) {
             let body = {
-                username: consumerId,
+                username: username,
                 tags: ['aps-portal-poc']
             }
             if (customId) {
                 body['custom_id'] = customId
             }
             console.log("CALLING " + `${kongUrl}/consumers`);
-            let response = await fetch(`${kongUrl}/consumers`, {
-                method: 'post',
-                body:    JSON.stringify(body),
-                headers: { 
-                    'Content-Type': 'application/json' },
-            })
-            .then(res => res.json())
-            .catch (err => {
-                console.log("KONG CONSUMER " + err)
+            try {
+                let response = await fetch(`${kongUrl}/consumers`, {
+                    method: 'post',
+                    body:    JSON.stringify(body),
+                    headers: { 
+                        'Content-Type': 'application/json' },
+                })
+                .then(res => res.json())
+                console.log("[createKongConsumer] KONG RESPONSE = "+ JSON.stringify(response, null, 3))
+                return {
+                    id: response['id'],
+                    username: response['username'],
+                    custom_id: response['custom_id']
+                }
+            } catch (err) {
+                console.log("[createKongConsumer] ERROR " + err)
                 throw(err)
-            });
-            console.log("KONG RESPONSE = "+ JSON.stringify(response, null, 3))
-            return {
-                id: response['id'],
-                username: response['username'],
-                custom_id: response['custom_id']
-            }
+            };
         },
 
-        addKeyAuthToConsumer: async function (consumerUuid) {
+        addKeyAuthToConsumer: async function (consumerPK) {
             const body = {
             }
-            console.log("CALLING with " + consumerUuid);
+            console.log("CALLING with " + consumerPK);
 
-            const response = await fetch(`${kongUrl}/consumers/${consumerUuid}/key-auth`, {
+            const response = await fetch(`${kongUrl}/consumers/${consumerPK}/key-auth`, {
                 method: 'post',
                 body:    JSON.stringify(body),
                 headers: { 
@@ -81,21 +83,68 @@ module.exports = function (kongUrl) {
             
             console.log(JSON.stringify(response, null, 3));
             return {
+                keyAuthPK: response['id'],
                 apiKey: response['key']
             }
         },
 
-        genKeyForConsumer: async function (consumerUuid) {
+        addPluginToConsumer: async function (consumerPK, plugin) {
+            const body = {
+            }
+            console.log("CALLING with " + consumerPK);
+
+            const response = await fetch(`${kongUrl}/consumers/${consumerPK}/plugins`, {
+                method: 'post',
+                body:    JSON.stringify(plugin),
+                headers: { 
+                    'Content-Type': 'application/json' },
+            })
+            .then(res => res.json())
+            .catch (err => {
+                console.log("KONG PLUGINS " + err)
+                throw(err)
+            });
+            
+            console.log(JSON.stringify(response, null, 3));
+            return {
+                id: response['id']
+            }
+        },
+
+        updateConsumerPlugin: async function (consumerPK, pluginPK, plugin) {
             const { v4: uuidv4 } = require('uuid');
 
             const body = {
                 key: uuidv4().replace(/-/g,'')
             }
-            console.log("CALLING with " + consumerUuid);
+            console.log("CALLING with " + consumerPK + " " + pluginPK);
 
-            const authId = await this.getKeyAuth(consumerUuid)
+            const response = await fetch(`${kongUrl}/consumers/${consumerPK}/plugins/${pluginPK}`, {
+                method: 'put',
+                body:    JSON.stringify(body),
+                headers: { 
+                    'Content-Type': 'application/json' },
+            })
+            .then(res => res.json())
+            .catch (err => {
+                console.log("KONG CONSUMER PLUGIN " + err)
+                throw(err)
+            });
+            
+            console.log(JSON.stringify(response, null, 3));
+            return {
+            }
+        },
 
-            const response = await fetch(`${kongUrl}/consumers/${consumerUuid}/key-auth/${authId}`, {
+        genKeyForConsumerKeyAuth: async function (consumerPK, keyAuthPK) {
+            const { v4: uuidv4 } = require('uuid');
+
+            const body = {
+                key: uuidv4().replace(/-/g,'')
+            }
+            console.log("CALLING with " + consumerPK);
+
+            const response = await fetch(`${kongUrl}/consumers/${consumerPK}/key-auth/${keyAuthPK}`, {
                 method: 'put',
                 body:    JSON.stringify(body),
                 headers: { 
@@ -126,7 +175,44 @@ module.exports = function (kongUrl) {
                 throw(err)
             })
             console.log("KONG RESPONSE = "+ JSON.stringify(response, null, 3))
+            return response['data'].map(c => c.id)
+        },
+
+        getConsumerACLByNamespace: async function (consumerPK, namespace) {
+            let response = await fetch(`${kongUrl}/consumers/${consumerPK}/acls?tags=ns.${namespace}`, {
+                method: 'get',
+                headers: { 
+                    'Content-Type': 'application/json' },
+            })
+            .then(res => res.json())
+            .catch (err => {
+                console.log("KONG CONSUMER ACLS " + err)
+                throw(err)
+            })
+            console.log("KONG RESPONSE = "+ JSON.stringify(response, null, 3))
             return response['data']
+        },      
+
+        updateConsumerACLByNamespace: async function (consumerPK, namespace, aclGroups) {
+            const acls = await this.getConsumerACLByNamespace (consumerPK, namespace)
+            // delete any aclGroups that are not passed in
+            const result = {D:[], C:[]}
+
+            for (const acl of acls.filter(acl => !aclGroups.includes(acl.group))) {
+                await fetch(`${kongUrl}/consumers/${consumerPK}/acls/${acl.id}`, { method: 'delete' })
+                result.D.push(acl.group)
+            }
+
+            // add any aclGroups that are not already in Kong
+            for (const group of aclGroups.filter(group => acls.filter(acl => acl.group == group).length == 0)) {
+                await fetch(`${kongUrl}/consumers/${consumerPK}/acls`, { 
+                    method: 'post',
+                    body: JSON.stringify({ group: group, tags: "ns." + namespace }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                result.C.push(group)
+            }
+            return result
         },
 
         getConsumerNamespace: function (consumer) {
@@ -143,20 +229,20 @@ module.exports = function (kongUrl) {
             return this.getConsumerNamespace(consumer) != null
         },
 
-        getKeyAuth: async function (consumerUuid) {
-            const response = await fetch(`${kongUrl}/consumers/${consumerUuid}/key-auth`, {
-                method: 'get',
-                headers: { 
-                    'Content-Type': 'application/json' },
-            })
-            .then(res => res.json())
-            .catch (err => {
-                console.log("KONG KEYAUTH " + err)
-                throw(err)
-            });
-            console.log(JSON.stringify(response))
-            return response.data[0].id
-        }
+        // getKeyAuth: async function (consumerPK, keyAuthPK) {
+        //     const response = await fetch(`${kongUrl}/consumers/${consumerPK}/key-auth/${keyAuthPK}`, {
+        //         method: 'get',
+        //         headers: { 
+        //             'Content-Type': 'application/json' },
+        //     })
+        //     .then(res => res.json())
+        //     .catch (err => {
+        //         console.log("KONG KEYAUTH " + err)
+        //         throw(err)
+        //     });
+        //     console.log(JSON.stringify(response))
+        //     return response.data.id
+        // }
     }
 
 }

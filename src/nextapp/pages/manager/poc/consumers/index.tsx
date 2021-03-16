@@ -49,7 +49,7 @@ const ConsumersPage = () => {
   
           <PageHeader title="Consumers" actions={actions}>
             <p>
-              <strong>Consumers</strong> are Applications that have access to your Products.
+              <strong>Consumers</strong> are Applications or Users that have access to your Services.
 
             </p>
           </PageHeader>

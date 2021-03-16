@@ -59,8 +59,6 @@ module.exports = {
                         id
                 } }`,
             variables: { name, namespace, type, action, refId, message, userId },
-        }).catch (err => {
-            console.log("Activity : recording activity failed " + err)
         })
   }
 }

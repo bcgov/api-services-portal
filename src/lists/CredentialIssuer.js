@@ -17,19 +17,27 @@ module.exports = {
         type: Markdown,
         isRequired: false,
     },
-    authMethod: { type: Select, emptyOption: false, default: 'oidc', options: [
-        { value: 'jwt', label: 'JWT'},
-        { value: 'keys', label: 'API Key'},
+    flow: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
+        { value: 'public', label: 'Public'},
+        { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
+        { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
+        { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
-    mode: { type: Select, emptyOption: false, default: 'auto', options: [
+    clientRegistration: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
+        { value: 'anonymous', label: 'Anonymous'},
+        { value: 'managed', label: 'Managed'},
+        { value: 'iat', label: 'Initial Access Token'}
+      ]
+    },
+    mode: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'manual', options: [
         { value: 'manual', label: 'Manual'},
         { value: 'auto', label: 'Automatic'},
       ]
     },
     instruction: {
-        type: Virtual,
-        resolver: item => `For OIDC, modes: Manual: will provide client id/secret in Request or direct.  Auto: Client Registration (Initial Access Token).  For API Key, the Key is generated, but option to be manual or automatic.`
+        type: Markdown,
+        isRequired: false,
     },
     oidcDiscoveryUrl: {
         type: Url,

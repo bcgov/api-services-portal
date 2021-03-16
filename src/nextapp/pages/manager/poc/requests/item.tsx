@@ -22,7 +22,7 @@ const Item = ({refetch, accessRequest}) => (
             <Td>{accessRequest.productEnvironment?.product?.name}</Td>
             <Td>{accessRequest.productEnvironment?.name}</Td>
             <Td>
-                { accessRequest.isApproved === null ? (
+                { accessRequest.isApproved === null || accessRequest.isApproved === false ? (
                     <HStack spacing={4}>
                         <Button colorScheme="blue" onClick={(e) => goto(`/manager/poc/requests/issue/${accessRequest.id}`)}>Approve</Button>
                         {/* <Button colorScheme="blue" onClick={() => {

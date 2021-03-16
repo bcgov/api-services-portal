@@ -11,30 +11,12 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    kongPluginId: {
-        type: Text,
-        isRequired: false,
-    },
-    namespace: {
-        type: Text,
-        isRequired: false,
-        adminConfig: {
-            isReadOnly: true
-        }
-    },
-    tags: {
-        type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
-    },
     config: {
         type: Text,
         isRequired: true,
     },
-    service: { type: Relationship, ref: 'GatewayService', many: false },
-    route: { type: Relationship, ref: 'GatewayRoute', many: false }
+    service: { type: Relationship, ref: 'GatewayService', isRequired: false, many: false },
+    route: { type: Relationship, ref: 'GatewayRoute', isRequired: false, many: false }
   },
   access: EnforcementPoint,
   plugins: [

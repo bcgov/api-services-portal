@@ -22,7 +22,7 @@ export const GET_LIST = gql`
         id
         name
         active
-        authMethod
+        flow
         services {
           id
           name

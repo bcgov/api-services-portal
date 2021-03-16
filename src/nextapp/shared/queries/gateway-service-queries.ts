@@ -10,7 +10,7 @@ export const LIST_GATEWAY_SERVICES = gql`
         id
         name
         active
-        authMethod
+        flow
         product {
           name
           organization {
@@ -45,7 +45,7 @@ export const GET_GATEWAY_SERVICE = gql`
         id
         name
         active
-        authMethod
+        flow
         product {
           name
           organization {

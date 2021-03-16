@@ -78,7 +78,7 @@ function List({ data, state, refetch }) {
                             </Text>       
                         )) : false}</HStack>   
                         <ButtonGroup>
-                            { item.authMethod != "public" ? (
+                            { item.flow != "public" ? (
                                     <Button variant="primary" onClick={(e) => goto(`/devportal/poc/requests/new/${item.id}`)}>Request Access</Button>
                             ): false }
                         </ButtonGroup>

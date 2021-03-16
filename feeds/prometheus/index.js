@@ -9,6 +9,7 @@ const queries = [
     { query: 'sum(increase(kong_http_status[60m])) by (namespace)', step: 60*60, id: 'kong_http_requests_hourly_namespace'},
     { query: 'sum(increase(kong_http_status[60m])) by (namespace)', step: 60*60*24, id: 'kong_http_requests_daily_namespace'},
     { query: 'sum(increase(kong_http_status[60m]))', step: 60*60*24, id: 'kong_http_requests_daily'},
+    { query: 'sum(increase(konglog_service_consumer_counter[60m])) by (consumer,service)', step: 60*60*24, id: 'konglog_service_consumer_daily'},
 ]
 
 async function sync({workingPath, url, destinationUrl}) {

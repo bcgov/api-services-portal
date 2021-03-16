@@ -9,10 +9,12 @@ let rules = {
 
 refreshRules()
 
-fs.watch(rules.rulePath, (eventType, filename) => {
-    console.log("Watch Detected: " + eventType)
-    refreshRules()
-})
+if (process.env.NODE_ENV == 'development') {
+    fs.watch(rules.rulePath, (eventType, filename) => {
+        console.log("Watch Detected: " + eventType)
+        refreshRules()
+    })
+}
 
 const { filterByOwner, filterByRequestor } = require('./actions/filterByUser')
 

@@ -2,7 +2,58 @@ const fs = require('fs')
 const { transfers } = require('../utils/transfers')
 const { portal } = require('../utils/portal')
 
+const {v4: uuidv4} = require('uuid');
+
+const assert = require('assert').strict;
+
 const mask = require('./mask')
+
+async function scopedSync({url, workingPath, destinationUrl}, scope, scopeKey) {
+    if (scope == 'consumer') {
+        await scopedSyncByConsumer({url, workingPath, destinationUrl}, scopeKey)
+    } else if (scope == 'namespace') {
+        await scopedSyncByNamespace({url, workingPath, destinationUrl}, scopeKey)
+    } else {
+        throw Error('Scoped Sync not supported for ' + scope)
+    }
+}
+
+async function scopedSyncByNamespace({url, workingPath, destinationUrl}, namespace) {
+    const exceptions = []
+    const scopedDir = `${workingPath}/${uuidv4()}`
+    const xfer = transfers(scopedDir, url, exceptions)
+
+    await xfer.copy (`/services?tag=ns.${namespace}`, 'gw-services')
+    await xfer.copy (`/routes?tag=ns.${namespace}`, 'gw-routes')
+    await xfer.copy (`/consumers?tag=ns.${namespace}`, 'gw-consumers')
+    await xfer.copy (`/plugins?tag=ns.${namespace}`, 'gw-plugins')
+    await xfer.copy (`/acls?tag=ns.${namespace}`, 'gw-acls')
+
+    // Now, send to portal
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-services', 'name', 'service', '/feed/GatewayService'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/GatewayConsumer'))
+    await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
+    // await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
+
+    fs.rmdirSync(scopedDir, { recursive: true})
+}
+
+async function scopedSyncByConsumer({url, workingPath, destinationUrl}, scopeKey) {
+    const exceptions = []
+    const scopedDir = `${workingPath}/${uuidv4()}`
+    const xfer = transfers(scopedDir, url, exceptions)
+
+    // limit by a tag
+    await xfer.copyOne (`/consumers/${scopeKey}`, `gw-consumers`)
+    await xfer.copy (`/consumers/${scopeKey}/plugins`, 'gw-plugins')
+    await xfer.copy (`/consumers/${scopeKey}/acls`, 'gw-acls')
+
+    // Consumer + aclGroups + plugins
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/GatewayConsumer'))
+
+    fs.rmdirSync(scopedDir, { recursive: true})
+}
 
 async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
@@ -17,7 +68,7 @@ async function sync({url, workingPath, destinationUrl}) {
     // Now, send to portal
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-services', 'name', 'service', '/feed/GatewayService'))
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
-    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/Consumer'))
+    await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/GatewayConsumer'))
     await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
     // await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
 }
@@ -26,6 +77,7 @@ function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
     const destination = portal(destinationUrl)
     const items = xfer.get_json_content(file)['data']
     const allPlugins = xfer.get_json_content ('gw-plugins')['data'].map(mask)
+    const allACLs = type == 'consumer' ? xfer.get_json_content ('gw-acls')['data'] : null
     let index = 0
     return () => {
         if (index == items.length) {
@@ -38,6 +90,9 @@ function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
         item['plugins'] = findAllPlugins (allPlugins, type, item['id'])
         console.log(nm + ` with ${item['plugins'].length} plugins`)
 
+        if (type == 'consumer') {
+            item['aclGroups'] = allACLs.filter(acl => acl.consumer.id == item['id']).map(acl => acl.group)
+        }
         return destination.fireAndForget(feedPath, item)
         .then ((result) => console.log(`[${nm}] OK`, result))
         .catch (err => console.log(`[${nm}] ERR ${err}`))
@@ -71,6 +126,9 @@ function loadGroupsProducer (xfer, destinationUrl, feedPath) {
             return null
         }
         const item = items[index]
+        if (item['namespace'] == null) {
+            item['namespace'] = 'unknown'
+        }
         index++
         const nm = `${item['namespace']}.${item['name']}`
 
@@ -134,5 +192,6 @@ function findAllPlugins (allPlugins, type, serviceOrRouteId) {
 }
 
 module.exports = {
-    sync: sync
+    sync: sync,
+    scopedSync: scopedSync
 }

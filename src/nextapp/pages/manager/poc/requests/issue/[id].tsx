@@ -121,10 +121,12 @@ const FulfillRequest = () => {
                 <div className="flex">
                     { request.productEnvironment.credentialIssuer != null ? (
                         <>
-                        <NameValue name="Auth Method" value={request.productEnvironment.credentialIssuer.authMethod} width="150px"/>
+                        <NameValue name="Auth Flow" value={request.productEnvironment.credentialIssuer.flow} width="150px"/>
                         <NameValue name="Mode" value={request.productEnvironment.credentialIssuer.mode} width="150px"/>
                         </>
                     ):false}
+                </div>
+                <div className="flex">
 
                     <Flex direction="column" className="m-5">
                         <GenericControl meta={{name: "Rate Limiting", config: [ 

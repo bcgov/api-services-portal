@@ -7,7 +7,7 @@ export const GET_PRODUCT = `
                 id
                 name
                 active
-                authMethod
+                flow
             }
         }
 
@@ -45,9 +45,11 @@ export const GET_LIST = `
           }
           productEnvironment {
               name
-              authMethod
+              flow
               credentialIssuer {
                   name
+                  flow
+                  mode
               }
               product {
                 name
@@ -90,9 +92,11 @@ export const GET_REQUEST = `
           productEnvironment {
             name
             active
-            authMethod
+            flow
             credentialIssuer {
                 name
+                flow
+                mode
             }
             product {
               name
