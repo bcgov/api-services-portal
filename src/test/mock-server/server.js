@@ -53,7 +53,13 @@ let allProducts = [
     id: casual.uuid,
     name: 'BC Data Catalogue',
     environments: [
-      { id: casual.uuid, name: 'test', active: true, services: [] },
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
     ],
   },
 ];
@@ -78,7 +84,7 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
-    allGatewayMetrics: (_query, _, args) => {
+    allMetrics: (_query, _, args) => {
       const result = args.variableValues.days.map((d, index) => {
         const metrics = metricsData[index];
         const date = parse(d, 'yyyy-MM-dd', new Date());
@@ -211,6 +217,7 @@ const server = mockServer(schemaWithMocks, {
     ]),
     active: casual.boolean,
     authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    flow: casual.word,
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),

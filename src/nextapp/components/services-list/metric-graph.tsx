@@ -97,8 +97,8 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     const requests = [];
     times(24, (h) => {
-      const timestampKey = addHours(firstDateValue, h).getTime();
-      const request = value.find((v) => v[0] === timestampKey / 1000);
+      const timestampKey = addHours(firstDateValue, h).getTime() / 1000;
+      const request = value.find((v) => v[0] === timestampKey);
 
       if (request) {
         requests.push(request);
@@ -200,7 +200,9 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}
-                  label={`${index + 1}:00 - ${round(r[1])} requests`}
+                  label={`${format(new Date(r[0] * 1000), 'HH:00')} - ${round(
+                    r[1]
+                  )} requests`}
                 >
                   <Box
                     minW={1}
@@ -215,7 +217,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               ))}
             </Box>
             <Text textAlign="center" fontSize="xs" mt={2} color="gray.500">
-              {format(new Date(d.day), 'E, LLL do, yyyy')}
+              {d.dayFormatted}
             </Text>
           </Box>
         ))}
