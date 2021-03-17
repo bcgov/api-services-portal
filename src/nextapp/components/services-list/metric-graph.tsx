@@ -8,6 +8,7 @@ import {
   Box,
   CircularProgress,
   CircularProgressLabel,
+  Divider,
   Stat,
   StatGroup,
   StatLabel,
@@ -19,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
-import formatISO9075 from 'date-fns/formatISO9075';
+import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/differenceInDays';
 import mean from 'lodash/mean';
@@ -37,6 +38,7 @@ import { GatewayService } from '@/shared/types/query.types';
 
 interface DailyDatum {
   day: string;
+  dayFormatted: string;
   downtime: number;
   requests: number[];
   total: number;
@@ -75,14 +77,15 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return JSON.parse(metric.values);
   });
   const dailies: DailyDatum[] = values.map((value: number[]) => {
-    const day = formatISO9075(new Date(value[0][0]), {
+    const firstDateValue = new Date(value[0][0] * 1000);
+    const day = formatISO(firstDateValue, {
       representation: 'date',
     });
     const total: number = value.reduce((memo: number, v) => {
       return memo + Number(v[1]);
     }, 0);
     const downtime = 24 - values.length;
-    const defaultPeakDate: number = new Date(day).getTime();
+    const defaultPeakDate: number = firstDateValue.getTime();
     const peak: any = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
@@ -94,9 +97,10 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     );
 
     const requests = [];
+
     times(24, (h) => {
-      const timestampKey = addHours(new Date(day), h).getTime();
-      const request = value.find((v) => v[0] === timestampKey);
+      const timestampKey = addHours(new Date(firstDateValue), h).getTime();
+      const request = value.find((v) => v[0] === timestampKey / 1000);
 
       if (request) {
         requests.push(request);
@@ -107,6 +111,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     return {
       day,
+      dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
       downtime,
       total,
       peak,
@@ -129,7 +134,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
       }
       return memo;
     }, 0);
-    y.domain([0, max]);
+    y.domain([0, max + 1000]);
   }
 
   if (alt) {
@@ -193,7 +198,30 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               display="grid"
               gridTemplateColumns="repeat(24, 1fr)"
               gridGap={0.5}
+              position="relative"
+              role="group"
             >
+              <Box
+                position="absolute"
+                left={0}
+                right={0}
+                className="peak-text"
+                display="none"
+                _groupHover={{
+                  display: 'block',
+                }}
+                style={{ bottom: y(d.peak[1]) }}
+              >
+                <Text
+                  fontSize="xs"
+                  position="relative"
+                  textAlign="center"
+                  color="gray.600"
+                  px={2}
+                  bgColor="whiteAlpha.50"
+                >{`Peak: ${round(d.peak[1], 4)}`}</Text>
+                <Divider />
+              </Box>
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}
@@ -212,7 +240,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               ))}
             </Box>
             <Text textAlign="center" fontSize="xs" mt={2} color="gray.500">
-              {format(new Date(d.day), 'E, LLL do, yyyy')}
+              {d.dayFormatted}
             </Text>
           </Box>
         ))}

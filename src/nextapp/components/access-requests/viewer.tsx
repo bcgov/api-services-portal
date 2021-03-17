@@ -9,7 +9,6 @@ import {
   Icon,
   Modal,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -17,12 +16,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  FaCheckCircle,
-  FaHourglass,
-  FaHourglassStart,
-  FaMicroscope,
-} from 'react-icons/fa';
+import { FaCheckCircle, FaHourglassStart, FaMicroscope } from 'react-icons/fa';
 import { AccessRequest } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
