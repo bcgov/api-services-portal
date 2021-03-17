@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
-import formatISO9075 from 'date-fns/formatISO9075';
+import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/differenceInDays';
 import mean from 'lodash/mean';
@@ -37,6 +37,7 @@ import { GatewayService } from '@/shared/types/query.types';
 
 interface DailyDatum {
   day: string;
+  dayFormatted: string;
   downtime: number;
   requests: number[];
   total: number;
@@ -75,14 +76,15 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return JSON.parse(metric.values);
   });
   const dailies: DailyDatum[] = values.map((value: number[]) => {
-    const day = formatISO9075(new Date(value[0][0]), {
+    const firstDateValue = new Date(value[0][0] * 1000);
+    const day = formatISO(firstDateValue, {
       representation: 'date',
     });
     const total: number = value.reduce((memo: number, v) => {
       return memo + Number(v[1]);
     }, 0);
     const downtime = 24 - values.length;
-    const defaultPeakDate: number = new Date(day).getTime();
+    const defaultPeakDate: number = firstDateValue.getTime();
     const peak: any = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
@@ -95,7 +97,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     const requests = [];
     times(24, (h) => {
-      const timestampKey = addHours(new Date(day), h).getTime();
+      const timestampKey = addHours(firstDateValue, h).getTime() / 1000;
       const request = value.find((v) => v[0] === timestampKey);
 
       if (request) {
@@ -107,6 +109,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     return {
       day,
+      dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
       downtime,
       total,
       peak,
@@ -197,7 +200,9 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}
-                  label={`${index + 1}:00 - ${round(r[1])} requests`}
+                  label={`${format(new Date(r[0] * 1000), 'HH:00')} - ${round(
+                    r[1]
+                  )} requests`}
                 >
                   <Box
                     minW={1}
@@ -212,7 +217,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               ))}
             </Box>
             <Text textAlign="center" fontSize="xs" mt={2} color="gray.500">
-              {format(new Date(d.day), 'E, LLL do, yyyy')}
+              {d.dayFormatted}
             </Text>
           </Box>
         ))}
