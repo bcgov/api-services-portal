@@ -75,7 +75,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return JSON.parse(metric.values);
   });
   const dailies: DailyDatum[] = values.map((value: number[]) => {
-    const day = formatISO9075(new Date(value[0][0] * 1000), {
+    const day = formatISO9075(new Date(value[0][0]), {
       representation: 'date',
     });
     const total: number = value.reduce((memo: number, v) => {
