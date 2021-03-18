@@ -185,6 +185,15 @@ const metadata = {
             plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true}
         }
     },
+    'ServiceAccess': {
+        query: 'allServiceAccesses',
+        refKey: 'name',
+        sync: ['active', 'aclEnabled', 'consumerType'],
+        transformations: {
+            consumer: {name: "connectOne", list: "allGatewayConsumers", refKey: 'username' },
+            productEnvironment: {name: "connectOne", list: "allEnvironments", refKey: 'id' },
+        }
+    },
     'Application': {
         query: 'allApplications',
         refKey: 'name',
