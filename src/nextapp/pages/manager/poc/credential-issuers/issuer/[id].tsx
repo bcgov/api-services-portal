@@ -60,7 +60,7 @@ const UpdateIssuer = () => {
 
     const products = issuer == null ? null : [...new Set(issuer.environments.map(g => g.product.name))]
 
-    const breadcrumb = [{ href: '/manager/credential-issuers', text: 'Credential Issuers' }];
+    const breadcrumb = [{ href: '/manager/poc/credential-issuers', text: 'Credential Issuers' }];
 
     const refetch = () => {
         window.location.href = "/manager/poc/credential-issuers"

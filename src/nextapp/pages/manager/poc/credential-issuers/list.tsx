@@ -24,10 +24,10 @@ function List({ data, state, refetch }) {
             <TableCaption>-</TableCaption>
             <Thead>
                 <Tr>
+                <Th>Name</Th>
                 <Th>Owner</Th>
                 <Th>Flow</Th>
                 <Th>Mode</Th>
-                <Th>Authorization</Th>
                 <Th>Products Using</Th>
                 </Tr>
             </Thead>
