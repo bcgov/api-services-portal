@@ -1,8 +1,10 @@
 //import Item from './item'
 
-import { styles } from '@/shared/styles/devportal.css';
+import { Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagLabel } from "@chakra-ui/react"
 
 import NameValue from '@/components/name-value';
+
+import Item from './item'
 
 function List({ data, state, refetch }) {
     switch (state) {
@@ -18,17 +20,23 @@ function List({ data, state, refetch }) {
         }
         console.log(JSON.stringify(data, null, 4))
         return (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <Table variant="simple">
+            <TableCaption>-</TableCaption>
+            <Thead>
+                <Tr>
+                <Th>Owner</Th>
+                <Th>Flow</Th>
+                <Th>Mode</Th>
+                <Th>Authorization</Th>
+                <Th>Products Using</Th>
+                </Tr>
+            </Thead>
+            <Tbody>
             {data.allCredentialIssuers.map((item, index) => (
-                <li key={item.name} style={styles.listItem}>
-                    <NameValue name="Name" value={item.name} width="300px"/>
-                    <NameValue name="Auth Method" value={item.authMethod} width="200px"/>
-                    <NameValue name="Mode" value={item.mode} width="150px"/>
-                    <NameValue name="Contact" value={item.contact.name} width="200px"/>
-                    <NameValue name="API Families Using" value={item.environments.map(g => g.name)} width="400px"/>
-                </li>
+              <Item issuer={item} refetch={refetch} key={index} />
             ))}
-          </ul>
+            </Tbody>
+            </Table>
         );
       }
     }

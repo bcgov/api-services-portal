@@ -57,7 +57,7 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
-    contact: { type: Relationship, ref: 'User', many: false },
+    owner: { type: Relationship, ref: 'User', isRequired: true, many: false },
     environments: { type: Relationship, ref: 'Environment.credentialIssuer', many: true }
   },
   access: EnforcementPoint,

@@ -1,4 +1,15 @@
 import * as React from 'react';
+import {
+    Alert,
+    AlertIcon,
+    Box,
+    Button,
+    Container,
+    VStack,
+    Skeleton,
+  } from '@chakra-ui/react';
+import Head from 'next/head';
+import PageHeader from '@/components/page-header';
 
 const { useEffect, useState } = React;
 
@@ -24,22 +35,30 @@ const CredentialIssuerPage = () => {
     
     useEffect(fetch, []);
 
+    const actions = [
+        (                <Button variant="primary">New Issuer</Button>
+        )
+    ]
+
     return (
-        <div style={styles.app}>
-            <h1 style={styles.mainHeading}>Credential Issuers</h1>
-            <p style={styles.introText}>
-                There will be many different providers of credentials on the API Gateway - different OIDC Providers and API Key generators.  This page is exclusively for the credential providers to define how the credentials will be created.
+        <>
+        <Head>
+          <title>API Program Services | Credential Issuers</title>
+        </Head>
+        <Container maxW="6xl">
+  
+          <PageHeader title="Consumers" actions={actions}>
+            <p>
+              <strong>Credential Issuers</strong> describe the type of authentication and authorization that protects APIs.
+
             </p>
-            <hr style={styles.divider}/>
-                <p style={styles.note}>NOTE: Access to this feature will be restricted to the CredentialAdmin role.</p>
-            <hr style={styles.divider} />
-            <div style={styles.formWrapper}>
-                <h2 style={styles.appHeading}>Issuers</h2>
-
-                <List data={data} state={state} refetch={fetch} />
-
-            </div>
-        </div>
+          </PageHeader>
+  
+          <Box mt={5}>
+              <List data={data} state={state} refetch={fetch} />
+          </Box>
+        </Container>
+        </>        
     )
 }
 

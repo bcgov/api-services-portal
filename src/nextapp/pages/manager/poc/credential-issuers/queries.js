@@ -3,9 +3,9 @@ export const GET_LIST = `
         allCredentialIssuers {
           id
           name
-          authMethod
+          flow
           mode
-          contact {
+          owner {
               name
               username
           }
@@ -17,6 +17,34 @@ export const GET_LIST = `
           }
         }
     }
+`
+
+export const GET_ISSUER = `
+    query GetCredentialIssuer($id: ID!) {
+        allCredentialIssuers(where: { id: $id }) {
+            id
+            name
+            flow
+            mode
+            clientId
+            clientRegistration
+            oidcDiscoveryUrl
+            owner {
+                name
+                username
+                email
+            }
+            environments {
+                name
+                product {
+                    name
+                }
+            }
+        }
+    }
+`
+
+export const UPDATE_ISSUER = `
 `
 
 const empty = () => false

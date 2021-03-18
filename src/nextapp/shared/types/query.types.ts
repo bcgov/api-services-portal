@@ -1085,7 +1085,7 @@ export type CredentialIssuer = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
-  contact?: Maybe<User>;
+  owner?: Maybe<User>;
   environments: Array<Environment>;
   _environmentsMeta?: Maybe<_QueryMeta>;
   updatedBy?: Maybe<User>;
@@ -1261,8 +1261,8 @@ export type CredentialIssuerWhereInput = {
   clientSecret_not_ends_with_i?: Maybe<Scalars['String']>;
   clientSecret_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   clientSecret_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  contact?: Maybe<UserWhereInput>;
-  contact_is_null?: Maybe<Scalars['Boolean']>;
+  owner?: Maybe<UserWhereInput>;
+  owner_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   environments_every?: Maybe<EnvironmentWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -1318,8 +1318,8 @@ export enum SortCredentialIssuersBy {
   ClientIdDesc = 'clientId_DESC',
   ClientSecretAsc = 'clientSecret_ASC',
   ClientSecretDesc = 'clientSecret_DESC',
-  ContactAsc = 'contact_ASC',
-  ContactDesc = 'contact_DESC',
+  OwnerAsc = 'owner_ASC',
+  OwnerDesc = 'owner_DESC',
   EnvironmentsAsc = 'environments_ASC',
   EnvironmentsDesc = 'environments_DESC',
   UpdatedByAsc = 'updatedBy_ASC',
@@ -1343,7 +1343,7 @@ export type CredentialIssuerUpdateInput = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
-  contact?: Maybe<UserRelateToOneInput>;
+  owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -1363,7 +1363,7 @@ export type CredentialIssuerCreateInput = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
-  contact?: Maybe<UserRelateToOneInput>;
+  owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -5261,8 +5261,8 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -5270,12 +5270,12 @@ export type UnauthenticateUserOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -5476,7 +5476,7 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -6374,10 +6374,10 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -7125,14 +7125,14 @@ export type MutationDeleteUsersArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 
