@@ -78,6 +78,9 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
+    allAccessRequests: () => new MockList(0, (_, { id }) => ({ id })),
+    allGatewayConsumers: () => new MockList(0, (_, { id }) => ({ id })),
+    allPlugins: () => new MockList(0, (_, { id }) => ({ id })),
     allMetrics: (_query, _, args) => {
       const result = args.variableValues.days.map((d, index) => {
         const metrics = metricsData[index];
@@ -267,6 +270,12 @@ const server = mockServer(schemaWithMocks, {
     title: casual.word,
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
+  }),
+  AccessRequest: () => ({
+    name: 'Gateway Administration API FOR APSO_F APSO_L',
+    isApproved: true,
+    isIssued: true,
+    isComplete: false,
   }),
   User: () => ({
     name: casual.name,

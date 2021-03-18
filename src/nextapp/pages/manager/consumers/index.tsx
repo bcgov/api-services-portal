@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Center,
   Container,
   Divider,
   Heading,
@@ -15,6 +16,9 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -25,6 +29,7 @@ import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
+import NewConsumer from '@/components/new-consumer';
 
 const query = gql`
   query GetConsumers {
@@ -85,12 +90,16 @@ const ConsumersPage: React.FC<
         }`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader
-          actions={<Button variant="primary">Create Consumer</Button>}
-          title="Consumers"
-        />
+        <PageHeader actions={<NewConsumer />} title="Consumers" />
         <Box mb={4}>
-          <AccessRequests />
+          {data?.allAccessRequests.length === 0 && (
+            <Alert status="info">
+              <AlertIcon />
+              Once you add consumers to your API, access requests will be listed
+              here.
+            </Alert>
+          )}
+          {data?.allAccessRequests.length > 0 && <AccessRequests />}
         </Box>
         <Box bgColor="white">
           <Box
@@ -113,6 +122,25 @@ const ConsumersPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
+              {data.allGatewayConsumers.length === 0 && (
+                <Tr>
+                  <Td colSpan={5}>
+                    <Center>
+                      <Box m={8} textAlign="center">
+                        <Heading mb={2} size="md">
+                          Create your first consumer
+                        </Heading>
+                        <Text color="gray.600">
+                          Consumers access your API under restrictions you set
+                        </Text>
+                        <Box mt={4}>
+                          <NewConsumer />
+                        </Box>
+                      </Box>
+                    </Center>
+                  </Td>
+                </Tr>
+              )}
               {data.allGatewayConsumers.map((d) => (
                 <Tr key={d.id}>
                   <Td>

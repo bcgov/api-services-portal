@@ -21,10 +21,21 @@ import {
   TabPanel,
   Badge,
   Text,
+  Avatar,
+  Grid,
+  GridItem,
+  List,
+  ListItem,
+  ListIcon,
 } from '@chakra-ui/react';
-import { FaCheckCircle, FaHourglassStart } from 'react-icons/fa';
+import {
+  FaCheckCircle,
+  FaHourglassStart,
+  FaPaperPlane,
+  FaStamp,
+} from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import format from 'date-fns/format';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -37,6 +48,7 @@ const query = gql`
     AccessRequest(where: { id: $id }) {
       id
       name
+      createdAt
       requestor {
         name
       }
@@ -98,6 +110,10 @@ const AccessRequestPage: React.FC<
     },
     { suspense: false }
   );
+  const isComplete =
+    data.AccessRequest.isIssued &&
+    data.AccessRequest.isApproved &&
+    data.AccessRequest.isComplete;
 
   return (
     <>
@@ -105,54 +121,125 @@ const AccessRequestPage: React.FC<
         <title>{`Access Request | ${data.AccessRequest.name}`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title={data.AccessRequest.name}>
-          <Heading size="md">
-            {data?.AccessRequest.isApproved && (
-              <Icon as={FaCheckCircle} color="green.500" />
-            )}
-            {data?.AccessRequest.isIssued && (
-              <Icon as={FaHourglassStart} color="gray.500" />
-            )}
-            {data?.AccessRequest.isComplete && (
-              <Icon as={FaCheckCircle} color="cyan.500" />
-            )}
-            {data?.AccessRequest.requestor.name}
-          </Heading>
+        <PageHeader
+          actions={
+            <Button leftIcon={<Icon as={FaStamp} />} variant="primary">
+              Approve
+            </Button>
+          }
+          title={
+            <>
+              <Text as="span" color="gray.400">
+                Request:
+              </Text>{' '}
+              {data.AccessRequest.name}
+            </>
+          }
+        >
+          <Box color="gray.500" mb={4} display="flex" alignItems="center">
+            <Badge
+              colorScheme={isComplete ? 'green' : 'orange'}
+              fontSize="1rem"
+              px={2}
+              mr={4}
+              variant="outline"
+            >
+              {isComplete ? 'Complete' : 'Pending'}
+            </Badge>
+            <Box flex={1}>
+              <Text fontSize="sm">
+                {'Requesting access to '}
+                <Text as="strong" fontWeight="bold">
+                  {data?.AccessRequest.application.name}
+                </Text>
+                {' on '}{' '}
+                <Text as="time">
+                  {format(
+                    new Date(data?.AccessRequest.createdAt),
+                    'LLL do, yyyy'
+                  )}
+                </Text>
+              </Text>
+            </Box>
+          </Box>
         </PageHeader>
-        <Tabs>
-          <TabList>
-            <Tab>Details</Tab>
-            <Tab>Activity</Tab>
-          </TabList>
-
-          <TabPanels>
-            <TabPanel>
-              <Box as="header">
-                <Box display="grid" gridTemplateColumns="1fr 1fr">
-                  <Box>
-                    <Heading size="sm">Communication</Heading>
-                    <Text>{data?.AccessRequest.communication}</Text>
-                  </Box>
-                  <Box>
-                    <Heading size="sm">Application</Heading>
-                    {data?.AccessRequest.application.name}
-                    <Badge>{data?.AccessRequest.productEnvironment.name}</Badge>
-                  </Box>
+        <Divider mb={4} />
+        <Grid templateColumns="repeat(12, 1fr)">
+          <GridItem colSpan={8}>
+            {data?.AccessRequest.activity.map((a) => (
+              <Box key={a.id} bgColor="white" mb={2}>
+                <Box
+                  as="header"
+                  p={2}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Heading size="xs">{a.name}</Heading>
+                  <Text as="time" fontSize="small" color="gray.400">
+                    {format(new Date(a.createdAt), 'LLL do, yyyy')}
+                  </Text>
                 </Box>
-              </Box>
-            </TabPanel>
-            <TabPanel>
-              {data?.AccessRequest.activity.map((a) => (
-                <Box key={a.id}>
-                  <Heading size="xs">
-                    {a.name} = {a.action}
-                  </Heading>
+                <Divider />
+                <Box p={2}>
                   <Text>{a.message}</Text>
                 </Box>
-              ))}
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+              </Box>
+            ))}
+          </GridItem>
+          <GridItem as="aside" colStart={10} colSpan={3}>
+            <Box>
+              <Heading size="sm">Requestor</Heading>
+              <Text mb={3}>
+                <Avatar
+                  name={data?.AccessRequest.requestor.name}
+                  size="xs"
+                  mr={2}
+                />
+                {data?.AccessRequest.requestor.name}
+              </Text>
+              <Heading size="sm">Product</Heading>
+              <Text mb={3}>{data?.AccessRequest.productEnvironment.name}</Text>
+              <Heading size="sm">Application</Heading>
+              <Text>{data?.AccessRequest.application.name}</Text>
+            </Box>
+            <Divider my={4} />
+            <Box>
+              <Heading mb={2} size="sm">
+                Status
+              </Heading>
+              <List spacing={2} fontSize="sm">
+                <ListItem>
+                  <ListIcon
+                    as={FaStamp}
+                    color={
+                      data?.AccessRequest.isApproved ? 'green.500' : 'gray.500'
+                    }
+                  />
+                  Approved
+                </ListItem>
+                <ListItem>
+                  <ListIcon
+                    as={FaPaperPlane}
+                    color={
+                      data?.AccessRequest.isIssued ? 'green.500' : 'gray.500'
+                    }
+                  />
+                  Issued
+                </ListItem>
+                <ListItem>
+                  <ListIcon
+                    as={FaCheckCircle}
+                    color={
+                      data?.AccessRequest.isComplete ? 'green.500' : 'gray.500'
+                    }
+                  />
+                  Completed
+                </ListItem>
+              </List>
+            </Box>
+          </GridItem>
+        </Grid>
       </Container>
     </>
   );

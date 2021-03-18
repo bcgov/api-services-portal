@@ -1,12 +1,17 @@
 import * as React from 'react';
 import {
+  Avatar,
   Badge,
   Box,
   Button,
   ButtonGroup,
   Divider,
+  Flex,
   Heading,
   Icon,
+  List,
+  ListIcon,
+  ListItem,
   Modal,
   ModalBody,
   ModalContent,
@@ -16,7 +21,13 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { FaCheckCircle, FaHourglassStart, FaMicroscope } from 'react-icons/fa';
+import {
+  FaCheckCircle,
+  FaHourglassStart,
+  FaMicroscope,
+  FaPaperPlane,
+  FaStamp,
+} from 'react-icons/fa';
 import { AccessRequest } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
@@ -89,7 +100,7 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
       >
         Review
       </Button>
-      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="3xl">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader display="flex" justifyContent="space-between">
@@ -104,43 +115,69 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
             </NextLink>
           </ModalHeader>
           <ModalBody>
-            <Box as="header">
-              <Heading size="md">
-                {data?.AccessRequest.isApproved && (
-                  <Icon as={FaCheckCircle} color="green.500" />
-                )}
-                {data?.AccessRequest.isIssued && (
-                  <Icon as={FaHourglassStart} color="gray.500" />
-                )}
-                {data?.AccessRequest.isComplete && (
-                  <Icon as={FaCheckCircle} color="cyan.500" />
-                )}
-                {data?.AccessRequest.requestor.name}
-              </Heading>
-              <Box display="grid" gridTemplateColumns="1fr 1fr">
+            <Flex>
+              <Box flex={1}>
                 <Box>
-                  <Heading size="sm">Communication</Heading>
-                  <Text>{data?.AccessRequest.communication}</Text>
+                  <Heading size="sm">Requestor</Heading>
+                  <Text mb={3}>
+                    <Avatar
+                      name={data?.AccessRequest.requestor.name}
+                      size="xs"
+                      mr={2}
+                    />
+                    {data?.AccessRequest.requestor.name}
+                  </Text>
+                </Box>
+                <Box>
+                  <Heading size="sm">Product</Heading>
+                  <Text mb={3}>
+                    {data?.AccessRequest.productEnvironment.name}
+                  </Text>
                 </Box>
                 <Box>
                   <Heading size="sm">Application</Heading>
-                  {data?.AccessRequest.application.name}
-                  <Badge>{data?.AccessRequest.productEnvironment.name}</Badge>
+                  <Text>{data?.AccessRequest.application.name}</Text>
                 </Box>
               </Box>
-              <Divider my={4} />
-              <Box>
-                <Heading size="sm">Latest Activity</Heading>
-                {data?.AccessRequest.activity.map((a) => (
-                  <Box key={a.id}>
-                    <Heading size="xs">
-                      {a.name} = {a.action}
-                    </Heading>
-                    <Text>{a.message}</Text>
-                  </Box>
-                ))}
+              <Box flex={1}>
+                <Heading mb={2} size="sm">
+                  Status
+                </Heading>
+                <List spacing={2} fontSize="sm">
+                  <ListItem>
+                    <ListIcon
+                      as={FaStamp}
+                      color={
+                        data?.AccessRequest.isApproved
+                          ? 'green.500'
+                          : 'gray.500'
+                      }
+                    />
+                    Approved
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon
+                      as={FaPaperPlane}
+                      color={
+                        data?.AccessRequest.isIssued ? 'green.500' : 'gray.500'
+                      }
+                    />
+                    Issued
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon
+                      as={FaCheckCircle}
+                      color={
+                        data?.AccessRequest.isComplete
+                          ? 'green.500'
+                          : 'gray.500'
+                      }
+                    />
+                    Completed
+                  </ListItem>
+                </List>
               </Box>
-            </Box>
+            </Flex>
           </ModalBody>
           <ModalFooter justifyContent="space-between">
             <ButtonGroup>
