@@ -55,15 +55,15 @@ module.exports = {
         assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Consumer Username")
         const result = await context.executeGraphQL({
             query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
-                        allConsumers(where: $where) {
+                        allGatewayConsumers(where: $where) {
                             kongConsumerId
                         }
                     }`,
             variables: { where: { username: name } },
         })
         console.log("lookupKongConsumerIdByName [" + name+ "] " + JSON.stringify(result))
-        assert.strictEqual(result.data.allConsumers.length, 1, "Unexpected data returned for Consumer lookup")
-        return result.data.allConsumers[0].kongConsumerId
+        assert.strictEqual(result.data.allGatewayConsumers.length, 1, "Unexpected data returned for Consumer lookup")
+        return result.data.allGatewayConsumers[0].kongConsumerId
     }, 
     // lookupGatewayServiceIdByName: async function (context, name) {
     //     assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Service Name")

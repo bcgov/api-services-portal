@@ -30,7 +30,7 @@ const setup = () => {
         }
         if (q.query.indexOf('CreateNewConsumer') != -1) {
           context.Consumer = q.variables;
-          return { data: { createConsumer: { id: 'CONSUMER-001' } } };
+          return { data: { createGatewayConsumer: { id: 'CONSUMER-001' } } };
         } else if (q.query.indexOf('CreateServiceAccess') != -1) {
           context.ServiceAccess = q.variables;
           return { data: { createServiceAccess: { id: 'SVC-ACCESS-002' } } };
@@ -70,7 +70,7 @@ const setup = () => {
         }
       ),
       rest.put(
-        'http://feeder.local/forceSync/:namespace/:source/:scope/:scopeKey',
+        'http://feeder.local/forceSync/:source/:scope/:scopeKey',
         (req, res, ctx) => {
           context.OUTPUTS.push({source: 'feeder', path: req.params, content: req.body})
           return res(

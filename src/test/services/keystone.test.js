@@ -12,13 +12,13 @@ describe("KeystoneJS", function() {
                 return {data: {allAccessRequests: [ { credentialReference: "", application: { appId: "APP-01"}, productEnvironment: { name: 'ENV-NAME', credentialIssuer: { id: 'ISSUER-01'} }} ] } }
             }
             if (q.query.indexOf('FindConsumerByUsername') != -1) {
-                return {data: {allConsumers: [ { kongConsumerId: 'CONSUMER-001' } ] } }
+                return {data: {allGatewayConsumers: [ { kongConsumerId: 'CONSUMER-001' } ] } }
             }
             if (q.query.indexOf('GetCredentialIssuerById') != -1) {
                 return {data: {allCredentialIssuers: [ { name: 'ISSUER-001' } ] } }
             }
             if (q.query.indexOf('CreateNewConsumer') != -1) {
-                return {data: {createConsumer: { id: 'CONSUMER-001' } } }
+                return {data: {createGatewayConsumer: { id: 'CONSUMER-001' } } }
             }
             if (q.query.indexOf('CreateServiceAccess') != -1) {
                 return {data: {createServiceAccess: { id: 'SVC-ACCESS-002' } } }
@@ -61,7 +61,7 @@ describe("KeystoneJS", function() {
     // addServiceAccess
     describe('test addServiceAccess', function () {
         it('it should be successful', async function () {
-            const result = await keystone.addServiceAccess(context, 'App8.Prod8.Env', true, true, 'client', null, null)
+            const result = await keystone.addServiceAccess(context, 'App8.Prod8.Env', true, true, 'client', null, null, null, { id: "PROD-ENV-01"}, null)
             expect(result).toBe('SVC-ACCESS-002')
         })
     })

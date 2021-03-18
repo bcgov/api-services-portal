@@ -73,7 +73,7 @@ describe('Client Credential Flow', function () {
           },
         },
         FindConsumerByUsername: {
-          data: { allConsumers: [{ kongConsumerId: 'CONSUMER-001' }] },
+          data: { allGatewayConsumers: [{ kongConsumerId: 'CONSUMER-001' }] },
         },
         GetCredentialIssuerById: {
           data: {
@@ -117,28 +117,37 @@ describe('Client Credential Flow', function () {
             aclEnabled: false,
             consumerType: 'client',
             credentialReference: null,
-            clientRoles: '[\"Read\",\"Write\"]',
+            clientRoles: '["Read","Write"]',
             consumer: {
               connect: {
                 id: 'CONSUMER-001',
               },
             },
+            productEnvironment: {
+              connect: {},
+            },
+            application: {
+              connect: {},
+            },
           },
           serviceAccessId: 'SVC-ACCESS-002',
-          credRefAsString: '{"clientId":"APP-01-ID1"}',
+          credRefAsString:
+            '{"clientId":"APP-01-ID1","registrationAccessToken":"token-123"}',
         },
         Consumer: {
-          username: 'APP-01',
-          kongConsumerId: 'KONG-CONSUMER-001',
+          username: 'APP-01-ID1',
+          kongConsumerId: 'KONG-CONSUMER-002',
         },
-        Activity: [{
-          name: 'update AccessRequest[undefined]',
-          namespace: 'ns-1',
-          type: 'AccessRequest',
-          action: 'update',
-          message: 'Changes to {}',
-          userId: 'auser',
-        }],
+        Activity: [
+          {
+            name: 'update AccessRequest[undefined]',
+            namespace: 'ns-1',
+            type: 'AccessRequest',
+            action: 'update',
+            message: 'Changes to {}',
+            userId: 'auser',
+          },
+        ],
         OUTPUTS: [
           {
             source: 'keycloak',
@@ -198,12 +207,19 @@ describe('Client Credential Flow', function () {
             },
           },
           {
+            source: 'kong',
+            type: 'POST consumer',
+            content: {
+              username: 'APP-01-ID1',
+              tags: ['aps-portal-poc'],
+            },
+          },
+          {
             source: 'feeder',
             path: {
-              namespace: 'ns-test',
               source: 'kong',
               scope: 'consumer',
-              scopeKey: 'KONG-CONSUMER-001',
+              scopeKey: 'KONG-CONSUMER-002',
             },
             content: '',
           },
