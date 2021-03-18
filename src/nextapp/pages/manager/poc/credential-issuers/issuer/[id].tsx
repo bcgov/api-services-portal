@@ -141,7 +141,7 @@ const UpdateIssuer = () => {
                                         <AlertIcon />
                                         <Box>
                                             <b>Manual</b> issuing of the credential means that this owner ({issuer.owner.name}) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means. 
-                                            <br/><b>Automatic</b> issuing of the credential means that this owner ({issuer.owner.name}) has provided appropriate credentials below to allow the API Manager to manage of Clients on the particular OIDC Provider.
+                                            <br/><b>Automatic</b> issuing of the credential means that this owner ({issuer.owner.name}) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.
                                         </Box>
                                     </Alert>
                             )}
@@ -312,7 +312,7 @@ const UpdateIssuer = () => {
                         </Tr>
                         </Thead>
                         <Tbody>
-                        {products.map((prod) => (
+                        {products.map((prod: string) => (
                             <Tr key={prod}>
                             <Td>{prod}</Td>
                             <Td>{issuer.environments.filter(t => t.product.name == prod).map((t) => (
