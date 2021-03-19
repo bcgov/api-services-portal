@@ -170,8 +170,8 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
               >
                 {flowTypes.map(f => (<option value={f.value}>{f.label}</option>))}
               </Select>
-              {flow === 'client-credentials' && (
-                <CredentialIssuerSelect environmentId={data.id} />
+              {flow === 'client-credentials' || flow === 'authorization-code' && (
+                <CredentialIssuerSelect environmentId={data.id} flow={flow} />
               )}
               <Box flex={1} />
               <Box>

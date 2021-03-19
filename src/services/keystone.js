@@ -1,6 +1,30 @@
 const assert = require('assert').strict;
 
 module.exports = {
+    lookupServices: async function lookupServices (context, services) {
+        const result = await context.executeGraphQL({
+            query: `query GetServices($services: [ID]) {
+                        allGatewayServices(where: {id_in: $services}) {
+                                name
+                                plugins {
+                                    name
+                                    config
+                                }
+                                routes {
+                                    name
+                                    plugins {
+                                        name
+                                        config
+                                    }
+                                }
+s                        }
+                    }`,
+            variables: { services: services },
+        })
+        console.log("lookupServices " + JSON.stringify(result))
+        return result.data.allGatewayServices
+    },
+
     lookupProductEnvironmentServices: async function lookupProductEnvironmentServices (context, id) {
         const result = await context.executeGraphQL({
             query: `query GetProductEnvironmentServices($id: ID!) {

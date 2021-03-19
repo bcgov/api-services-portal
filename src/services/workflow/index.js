@@ -29,7 +29,7 @@ For API Key and Basic Auth can be added to Kong
 */
 const assert = require('assert').strict;
 
-const { lookupProductEnvironmentServices, lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
+const { lookupServices, lookupProductEnvironmentServices, lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
 
 const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession } = require('../keycloak');
 
@@ -116,6 +116,8 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
         try {
             const envServices = await lookupProductEnvironmentServices(context, existingItem.id)
 
+            const resolvedServices = ('services' in resolvedData) ? await lookupServices(context, resolvedData['services']) : null
+
             const flow = envServices.flow
             const issuer = envServices.credentialIssuer
 
@@ -128,7 +130,8 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
             if (flow == 'kong-api-key-acl') {
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => ['acl', 'key-auth'].includes(plugin.name)).length != 2
 
-                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+                // If we are changing the service list, then use that to look for violations, otherwise use what is current
+                const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing either the acl or key-auth plugin.")
@@ -136,7 +139,8 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
             } else if (flow == 'client-credentials') {
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
 
-                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+                // If we are changing the service list, then use that to look for violations, otherwise use what is current
+                const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete jwt-keycloak plugin.")
@@ -144,7 +148,8 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
             } else if (flow == 'authorization-code') {
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
 
-                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+                // If we are changing the service list, then use that to look for violations, otherwise use what is current
+                const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete oidc plugin.")

@@ -4,8 +4,8 @@ import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 const query = gql`
-  query GET {
-    allCredentialIssuers {
+  query GET($flow: String) {
+    allCredentialIssuers(where: { flow: $flow}) {
       id
       name
     }
@@ -14,13 +14,15 @@ const query = gql`
 
 interface CredentialIssuerSelectProps {
   environmentId: string;
+  flow: string;
 }
 
-const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = () => {
+const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow}) => {
+  const variables = { flow : flow}
   const { data, isLoading, isSuccess } = useApi(
     'environment-credential-users',
     {
-      query,
+      query, variables
     },
     {
       suspense: false,
