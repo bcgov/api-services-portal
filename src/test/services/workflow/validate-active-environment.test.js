@@ -20,7 +20,7 @@ describe('Validate Active Environment', function () {
     ctx.context.IN = {
         GetProductEnvironmentServices: {
           data: {
-            allProductEnvironments: [
+            allEnvironments: [
               {
                 name: 'ENV-NAME-1',
                 flow: 'kong-api-key-acl',
@@ -68,8 +68,8 @@ describe('Validate Active Environment', function () {
     it('it should succeed', async function () {
       const params = {
         existingItem: {
-          id: 'REQUEST-1',
-          isIssued: null,
+            id: 'ENV-1',
+            active: true
         },
         originalInput: {},
         resolvedInput: {},
@@ -93,14 +93,14 @@ describe('Validate Active Environment', function () {
     it('it should fail validation with missing acl plugin', async function () {
         const params = {
           existingItem: {
-            id: 'REQUEST-1',
-            isIssued: null,
-          },
+            id: 'ENV-1',
+            active: true
+        },
           originalInput: {},
           resolvedInput: {},
         };
   
-        ctx.context.IN.GetProductEnvironmentServices.data.allProductEnvironments[0].services[0].plugins = []
+        ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0].services[0].plugins = []
 
         await workflow.ValidateActiveEnvironment(
           ctx.context,
@@ -116,7 +116,7 @@ describe('Validate Active Environment', function () {
             {
               source: 'validation',
               content:
-                'Failed validation.  Services [SERVICE-1] is missing either the acl or key-auth plugin.',
+                '[SERVICE-1] missing or incomplete acl or key-auth plugin.',
             },
           ],
         };
@@ -131,14 +131,14 @@ describe('Validate Active Environment', function () {
     it('it should succeed', async function () {
       const params = {
         existingItem: {
-          id: 'REQUEST-1',
-          isIssued: null,
+            id: 'ENV-1',
+            active: true
         },
         originalInput: {},
         resolvedInput: {},
       };
 
-      const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allProductEnvironments[0]
+      const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0]
       prodEnv.flow = 'client-credentials'
       prodEnv.credentialIssuer = {
         oidcDiscoveryUrl: "http://provider/realm/.well-known/openid-configuration"
@@ -163,14 +163,14 @@ describe('Validate Active Environment', function () {
     it('it should fail validation with missing acl plugin', async function () {
         const params = {
           existingItem: {
-            id: 'REQUEST-1',
-            isIssued: null,
+            id: 'ENV-1',
+            active: true
           },
           originalInput: {},
           resolvedInput: {},
         };
   
-        const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allProductEnvironments[0]
+        const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0]
         prodEnv.flow = 'client-credentials'
         prodEnv.services[0].plugins = []
   
@@ -188,7 +188,7 @@ describe('Validate Active Environment', function () {
             {
               source: 'validation',
               content:
-                'Failed validation.  Services [SERVICE-1] is missing or has an incomplete jwt-keycloak plugin.',
+                '[SERVICE-1] missing or incomplete jwt-keycloak plugin.',
             },
           ],
         };
@@ -204,14 +204,14 @@ describe('Validate Active Environment', function () {
     it('it should succeed', async function () {
       const params = {
         existingItem: {
-          id: 'REQUEST-1',
-          isIssued: null,
+            id: 'ENV-1',
+            active: true
         },
         originalInput: {},
         resolvedInput: {},
       };
 
-      const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allProductEnvironments[0]
+      const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0]
       prodEnv.flow = 'authorization-code'
       prodEnv.credentialIssuer = {
         oidcDiscoveryUrl: "http://provider/realm/.well-known/openid-configuration"
@@ -236,14 +236,14 @@ describe('Validate Active Environment', function () {
     it('it should fail validation with missing oidc plugin', async function () {
         const params = {
           existingItem: {
-            id: 'REQUEST-1',
-            isIssued: null,
+            id: 'ENV-1',
+            active: true
           },
           originalInput: {},
           resolvedInput: {},
         };
   
-        const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allProductEnvironments[0]
+        const prodEnv = ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0]
         prodEnv.flow = 'authorization-code'
         prodEnv.credentialIssuer = {
             oidcDiscoveryUrl: "http://provider/realm/.well-known/openid-configuration"
@@ -264,7 +264,7 @@ describe('Validate Active Environment', function () {
             {
               source: 'validation',
               content:
-                'Failed validation.  Services [SERVICE-1] is missing or has an incomplete oidc plugin.',
+                '[SERVICE-1] missing or incomplete oidc plugin.',
             },
           ],
         };

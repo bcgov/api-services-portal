@@ -17,7 +17,7 @@ module.exports = {
                                         config
                                     }
                                 }
-s                        }
+                        }
                     }`,
             variables: { services: services },
         })

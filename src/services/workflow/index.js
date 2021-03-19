@@ -134,7 +134,7 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
-                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing either the acl or key-auth plugin.")
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete acl or key-auth plugin.")
                 }
             } else if (flow == 'client-credentials') {
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
@@ -143,7 +143,7 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
-                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete jwt-keycloak plugin.")
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
@@ -152,7 +152,7 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
-                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete oidc plugin.")
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete oidc plugin.")
                 }
             } else if (flow == 'public') {
             } else {
