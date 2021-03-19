@@ -90,29 +90,21 @@ app.use((err, req, res, next) => {
     }
 })
 
-// function kongCron(source, frequencyMinutes) {
-//     sources[source].sync(config[source])
-//     console.log(`[KONG] SLEEPING FOR ${frequencyMinutes} minutes`)
-//     setTimeout(kongCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
-// }
+const runTimedJob = function(source, frequencyMinutes, params) {
+    console.log(`[${source}] STARTING JOB FOR ${source} - every ${frequencyMinutes} minutes - params ${JSON.stringify(params)}`)
+    const job = (source, frequencyMinutes) => {
+        sources[source].sync(config[source], params)
+        console.log(`[${source}] SLEEPING FOR ${frequencyMinutes} minutes`)
+        setTimeout(job, frequencyMinutes * 60 * 1000, source, frequencyMinutes, params)
+    }
+    setTimeout(job, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
+}
 
-// kongCron('kong', 15)
-
-// function prometheusCron(source, frequencyMinutes) {
-//     sources[source].sync(config[source])
-//     console.log(`[PROM] SLEEPING FOR ${frequencyMinutes} minutes`)
-//     setTimeout(prometheusCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
-// }
-
-// prometheusCron('prometheus', 10)
-
-// function ckanCron(source='ckan', frequencyMinutes=6*60) {
-//     sources[source].sync(config[source])
-//     console.log(`[CKAN] SLEEPING FOR ${frequencyMinutes} minutes`)
-//     setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
-// }
-
-// ckanCron()
+if (process.env.SCHEDULE == 'true') {
+    runTimedJob ('prometheus', 120, {numDays:1})
+    runTimedJob ('prometheus', (24 * 60) + 5, {numDays:5})
+    runTimedJob ('kong', (1 * 60), {})
+}
 
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)

@@ -34,7 +34,7 @@ async function scopedSyncByNamespace({url, workingPath, destinationUrl}, namespa
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/GatewayConsumer'))
     await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
-    // await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
+    await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
 
     fs.rmdirSync(scopedDir, { recursive: true})
 }
@@ -70,7 +70,8 @@ async function sync({url, workingPath, destinationUrl}) {
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-routes', 'name', 'route', '/feed/GatewayRoute'))
     await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-consumers', 'username', 'consumer', '/feed/GatewayConsumer'))
     await xfer.concurrentWork(loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup'))
-    // await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
+    //await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-products', 'name', 'product', '/feed/Product'))
+    //await xfer.concurrentWork(loadServiceAccessProducer(xfer, destinationUrl, 'gw-consumers', '/feed/ServiceAccess'))
 }
 
 function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
@@ -87,11 +88,21 @@ function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
         const item = items[index]
         index++
         const nm = item[name]
-        item['plugins'] = findAllPlugins (allPlugins, type, item['id'])
-        console.log(nm + ` with ${item['plugins'].length} plugins`)
 
+        item['plugins'] = findAllPlugins (allPlugins, type, item['id'], type == 'consumer')
+
+        // if (item['plugins'].length == 0) {
+        //     return new Promise ((resolve, reject) => resolve())
+        // }
+        console.log(nm + ` with ${item['plugins'].length} plugins`)
+        
         if (type == 'consumer') {
             item['aclGroups'] = allACLs.filter(acl => acl.consumer.id == item['id']).map(acl => acl.group)
+        } else {
+            item['plugins'].map(p => { 
+                p['service'] = null
+                p['route'] = null
+            })
         }
         return destination.fireAndForget(feedPath, item)
         .then ((result) => console.log(`[${nm}] OK`, result))
@@ -109,7 +120,7 @@ function toNamespace (tags) {
 
 function loadGroupsProducer (xfer, destinationUrl, feedPath) {
     const destination = portal(destinationUrl)
-    const allPlugins = xfer.get_json_content ('gw-plugins')['data'].map(mask)
+    const allPlugins = xfer.get_json_content ('gw-plugins')['data'].map(mask).filter(p => p.enabled)
     const items = []
     allPlugins
         .filter(p => p.name == 'acl')
@@ -140,28 +151,47 @@ function loadGroupsProducer (xfer, destinationUrl, feedPath) {
     }
 }
 
-function loadAppsProducer (xfer, destinationUrl, file, name, type, feedPath) {
+/* Initial Load of Service and Routes
+   Use a mapping file to map Service -> Product Name
+
+*/
+function loadServiceAccessProducer (xfer, destinationUrl, file, feedPath) {
     const destination = portal(destinationUrl)
     const items = []
     const allACLS = xfer.get_json_content ('gw-acls')['data']
+
+    const allPlugins = xfer.get_json_content ('gw-plugins')['data'].map(mask)
+    const nsGroups = []
+    allPlugins
+        .filter(p => p.name == 'acl')
+        .map(p => { 
+            return p.config.allow.map(a => { 
+                nsGroups.push({ namespace: toNamespace(p.tags), name: a, service: p.service, route: p.route })
+            })
+    })
+
     xfer.get_json_content(file)['data'].map (item => {
         // Create an application of any Consumer that has atleast one ACL Group
         const acls = allACLS
             .filter(acl => acl.group != 'idir' && acl.group != 'gwa_github_developer')
             .filter(acl => acl.consumer.id == item.id)
-        if (item.username.endsWith('@sm-idir') 
+        
+        const consumerType =  (item.username.endsWith('@sm-idir') 
             || item.username.endsWith('@idir')
-            || item.username.endsWith('@github')) {
-            return
-        }
+            || item.username.endsWith('@github')) ? 'user' : 'client'
+
         if (acls.length > 0) {
             const acl_groups = acls.map(acl => acl.group).join(', ')
+            // need to have it so that a ServiceAccess is created by each namespace that it relates to
+            // 
             items.push({
-                owner: 'apsowner',
-                description: 'Legacy - generated because this Consumer has an ACL '+acl_groups,
-                id: 'legacy_' + item.username
+                id: 'mig-' + item.username + '-' + item.id,
+                active: true,
+                aclEnabled: true,
+                consumerType: consumerType,
+                consumer: item.username,
+                productEnvironment: '6053d7858bd8930018423480'
             })
-        } else {
         }
     });
 
@@ -181,11 +211,14 @@ function loadAppsProducer (xfer, destinationUrl, file, name, type, feedPath) {
     }
 }
 
-function findAllPlugins (allPlugins, type, serviceOrRouteId) {
+function findAllPlugins (allPlugins, type, consumerOrServiceOrRouteId, includeConsumers=false) {
     const childs = []
     allPlugins.map(plugin => {
-        if (plugin[type] != null && serviceOrRouteId === plugin[type]['id']) {
-            childs.push(plugin)
+        if (plugin[type] != null && consumerOrServiceOrRouteId === plugin[type]['id']) {
+            if (plugin['consumer'] == null || includeConsumers) {
+                childs.push(plugin)
+            }
+
         }
     })
     return childs
