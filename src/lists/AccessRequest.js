@@ -39,6 +39,11 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    additionalDetails: {
+        type: Text,
+        isMultiline: true,
+        isRequired: false,
+    },  
     requestor: { type: Relationship, isRequired: true, ref: 'User' },
     application: { type: Relationship, isRequired: false, ref: 'Application' },
     productEnvironment: { type: Relationship, isRequired: true, ref: 'Environment' },

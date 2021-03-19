@@ -43,6 +43,10 @@ module.exports = {
     password: {
         type: Password,
         required: false
+    },
+    // JSON: { reference: "LegalReference", agreedTimestamp: "2020-01-01-1:1:1+0000"}
+    legalsAgreed: {
+        type: Text,
     }
   },
   // List-level access controls

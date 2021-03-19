@@ -35,6 +35,10 @@ module.exports = {
         { value: 'auto', label: 'Automatic'},
       ]
     },
+    authPlugin: {
+        type: Text,
+        isRequired: false,
+    },
     instruction: {
         type: Markdown,
         isRequired: false,

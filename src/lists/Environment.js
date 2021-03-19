@@ -26,9 +26,9 @@ module.exports = {
         { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
+    legal: { type: Relationship, ref: 'Legal' },
     credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
-    plugins: { type: Relationship, ref: 'GatewayPlugin', many: true },
-    description: {
+    additionalDetailsToRequest: {
       type: Text,
       isMultiline: true,
       isRequired: false,
