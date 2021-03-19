@@ -108,6 +108,7 @@ for (_list of [
   'GatewayRoute',
   'GatewayService',
   'Group',
+  'Legal',
   'MemberRole',
   'Metric',
   'Namespace',
