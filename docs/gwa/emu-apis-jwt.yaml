@@ -1,0 +1,30 @@
+services:
+- name: aps-portal-ref-jwt
+  host: httpbin.org
+  tags: [ ns.aps-portal-ref ]
+  port: 443
+  protocol: https
+  retries: 5
+  routes:
+  - name: aps-portal-ref-jwt
+    tags: [ ns.aps-portal-ref ]
+    hosts:
+    - aps-portal-ref.api.gov.bc.ca
+    paths:
+    - /jwt-protected
+    strip_path: true
+    https_redirect_status_code: 426
+    path_handling: v0
+    protocols: [ http ]
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.aps-portal-ref ]
+    enabled: true
+    protocols: [ http, https ]
+    config:
+      consumer_match: true
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+      allowed_iss:
+      - https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
+      well_known_template: "https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky/.well-known/openid-configuration"
