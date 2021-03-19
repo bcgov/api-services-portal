@@ -192,6 +192,7 @@ const metadata = {
         transformations: {
             consumer: {name: "connectOne", list: "allGatewayConsumers", refKey: 'username' },
             productEnvironment: {name: "connectOne", list: "allEnvironments", refKey: 'id' },
+            
         }
     },
     'Application': {
@@ -200,6 +201,22 @@ const metadata = {
         sync: [ 'description'],
         transformations: {
             owner: {name: "connectOne", list: "allUsers", refKey: 'username' },
+        }
+    },
+    'Product': {
+        query: 'allProducts',
+        refKey: 'appId',
+        sync: [ 'name', 'namespace'],
+        transformations: {
+            environments: {name: "connectExclusiveList", list: "Environment", syncFirst: true}
+        }
+    },
+    'Environment': {
+        query: 'allEnvironments',
+        refKey: 'name',
+        sync: [ 'active', 'flow'],
+        transformations: {
+            // services: {name: "connectExclusiveList", list: "GatewayService", syncFirst: false},
         }
     },
     'Content': {

@@ -29,7 +29,7 @@ For API Key and Basic Auth can be added to Kong
 */
 const assert = require('assert').strict;
 
-const { lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
+const { lookupProductEnvironmentServices, lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
 
 const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession } = require('../keycloak');
 
@@ -109,6 +109,62 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
         addValidationError(err.message)
     }
 }
+
+const wfValidateActiveEnvironment = async (context, operation, existingItem, originalInput, resolvedData, addValidationError) => {
+    if (('active' in originalInput && originalInput['active'] == true) 
+            || ('active' in existingItem && existingItem['active'] == true)) {
+        try {
+            const envServices = await lookupProductEnvironmentServices(context, existingItem.id)
+
+            const flow = envServices.flow
+            const issuer = envServices.credentialIssuer
+
+            // The Credential Issuer says what plugins are expected
+            // Loop through the Services to make sure the plugin is configured correctly
+
+            // for "kong-api-key-acl", make sure there is an 'acl' and 'key-auth' plugin on all Services of this environment
+            // for "client-credentials", make sure there is an 'jwt-keycloak' plugin on all Services of this environment
+            // for "authorization-code", make sure there is an 'oidc' plugin on all Services of this environment
+            if (flow == 'kong-api-key-acl') {
+                const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => ['acl', 'key-auth'].includes(plugin.name)).length != 2
+
+                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+
+                if (missing.length != 0) {
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing either the acl or key-auth plugin.")
+                }
+            } else if (flow == 'client-credentials') {
+                const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
+
+                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+
+                if (missing.length != 0) {
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete jwt-keycloak plugin.")
+                }
+            } else if (flow == 'authorization-code') {
+                const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
+
+                const missing = envServices.services.filter(isServiceMissingAllPlugins)
+
+                if (missing.length != 0) {
+                    addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or has an incomplete oidc plugin.")
+                }
+            } else if (flow == 'public') {
+            } else {
+                addValidationError("Unexpected error when trying to validate the environment.")
+            }
+
+        } catch (err) {
+            console.log(err)
+            if(err instanceof assert.AssertionError) {
+                addValidationError(err.message)
+            } else {
+                addValidationError('Unexpected error validating environment')
+            }
+        }
+    }
+}
+
 
 const wfRegenerateCredential = async (context, operation, existingItem, originalInput, updatedItem) => {
     const kongApi = new kong(process.env.KONG_URL)
@@ -265,5 +321,6 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
 module.exports = {
     Apply: wfApply,
     Validate: wfValidate,
+    ValidateActiveEnvironment: wfValidateActiveEnvironment,
     RegenerateCredential: wfRegenerateCredential
 }

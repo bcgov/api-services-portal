@@ -51,7 +51,10 @@ const setup = () => {
         'https://provider/auth/realms/my-realm/.well-known/openid-configuration',
         (req, res, ctx) => {
           return res(
-            ctx.json({ issuer: 'https://provider/auth/realms/my-realm' })
+            ctx.json({ 
+                issuer: 'https://provider/auth/realms/my-realm', 
+                token_introspection_endpoint: 'https://provider/auth/realms/my-realm/protocol/openid-connect/token/introspect'
+            })
           );
         }
       ),      
@@ -216,7 +219,8 @@ const setup = () => {
 
     return {
         context: context,
-        server: server
+        server: server,
+        addValidationError: (err => context.OUTPUTS.push({source: 'validation', content: err}) )
     }
 }
 

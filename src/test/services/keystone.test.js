@@ -8,6 +8,32 @@ describe("KeystoneJS", function() {
 
     const context = {
         executeGraphQL: (q) => {
+            if (q.query.indexOf('GetProductEnvironmentServices') != -1) {
+                return {data: {allEnvironments: [ { name: 'ENV-NAME-1',
+                    services: [
+                        {
+                            name: "SERVICE-1",
+                            plugins: [
+                                {
+                                    name: "acl",
+                                    config: {}
+                                }
+                            ],
+                            routes: [
+                                {
+                                    name: "SERVICE-ROUTE-1",
+                                    plugins: [
+                                        {
+                                            name: "rate-limiting",
+                                            config: {}
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                 } ] } }
+            }
             if (q.query.indexOf('GetSpecificEnvironment') != -1) {
                 return {data: {allAccessRequests: [ { credentialReference: "", application: { appId: "APP-01"}, productEnvironment: { name: 'ENV-NAME', credentialIssuer: { id: 'ISSUER-01'} }} ] } }
             }
@@ -28,6 +54,14 @@ describe("KeystoneJS", function() {
             }
         }  
     }
+
+    describe('test lookupProductEnvironmentServices', function () {
+        it('it should be successful', async function () {
+            const result = await keystone.lookupProductEnvironmentServices(context, 'PROD-ENV-ID-1')
+            expect(result.name).toBe('ENV-NAME-1')
+            expect(result.services.length).toBe(1)
+        })
+    })
 
     describe('test lookupEnvironmentAndApplicationByAccessRequest', function () {
         it('it should be successful', async function () {

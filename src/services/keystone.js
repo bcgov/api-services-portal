@@ -1,7 +1,39 @@
 const assert = require('assert').strict;
 
 module.exports = {
-    
+    lookupProductEnvironmentServices: async function lookupProductEnvironmentServices (context, id) {
+        const result = await context.executeGraphQL({
+            query: `query GetProductEnvironmentServices($id: ID!) {
+                        allEnvironments(where: {id: $id}) {
+                            id
+                            name
+                            flow
+                            credentialIssuer {
+                                flow
+                                oidcDiscoveryUrl
+                            }
+                            services {
+                                name
+                                plugins {
+                                    name
+                                    config
+                                }
+                                routes {
+                                    name
+                                    plugins {
+                                        name
+                                        config
+                                    }
+                                }
+                            }
+                        }
+                    }`,
+            variables: { id: id },
+        })
+        console.log("lookupProductEnvironmentServices " + JSON.stringify(result))
+        return result.data.allEnvironments[0]
+    },
+
     lookupCredentialReferenceByServiceAccess: async function lookupEnvironmentAndApplicationByAccessRequest (context, id) {
         const result = await context.executeGraphQL({
             query: `query GetSpecificServiceAccess($id: ID!) {

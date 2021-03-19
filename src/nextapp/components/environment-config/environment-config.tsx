@@ -70,7 +70,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     } catch (err) {
       toast({
         title: 'Environment Update Failed',
-        description: err.map((e: Error) => e.message).join(', '),
+        description: err.map((e) => e.data?.messages ? e.data.messages.join(',') : e.message).join(', '),
         isClosable: true,
         status: 'error',
       });
@@ -121,7 +121,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             display="flex"
             alignItems="center"
           >
-            {data?.product.organization?.name}{' '}
+            {data?.product?.organization?.name}{' '}
             <Badge
               px={2}
               mx={1}
