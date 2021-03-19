@@ -2,12 +2,17 @@ const {
   Text,
   Checkbox,
   Slug,
+  Select,
   Url,
   Float,
   Integer,
 } = require('@keystonejs/fields');
-const { Markdown } = require('@keystonejs/fields-markdown');
+
 const slugify = require('slugify');
+
+const { byTracking } = require('../components/ByTracking')
+
+const { atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
@@ -28,9 +33,9 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
-    document: { type: Select, emptyOption: false, isRequired: true, default: 'general', options: [
+    document: { type: Select, emptyOption: false, dataType: 'string', isRequired: true, default: 'general', options: [
         { value: 'general', label: 'General'},
-        { value: 'terms-conditions', label: 'Terms and Conditions'},
+        { value: 'terms-of-use', label: 'Terms of Use'},
         { value: 'privacy', label: 'Privacy Agreement'},
       ]
     },
@@ -50,4 +55,9 @@ module.exports = {
     },
   },
   access: EnforcementPoint,
+  plugins: [
+    byTracking(),
+    atTracking()
+  ]
+
 };
