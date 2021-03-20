@@ -27,7 +27,9 @@ function SecretInput({value, defaultShow, instruction}) {
     return show ? (
         <Alert status="warning">
             <VStack>
-                <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>{instruction}</ReactMarkdownWithHtml>
+                { instruction != null && (
+                    <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>{instruction}</ReactMarkdownWithHtml>
+                )}
                 <InputGroup size="md">
                     <Input
                     pr="4.5rem"
@@ -104,7 +106,7 @@ function List({ data, state, refetch }) {
                             { cred != "" && reqId == req.id && ( 
                                 <>
                                     <article className={tmpstyles.markdownBody}>
-                                        <SecretInput value={cred} defaultShow={true} instruction={req.productEnvironment.credentialIssuer.instruction}/> 
+                                        <SecretInput value={cred} defaultShow={true} instruction={req.productEnvironment.credentialIssuer?.instruction}/> 
                                     </article>
                                 </>
                             )}

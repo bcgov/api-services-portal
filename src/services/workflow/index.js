@@ -74,7 +74,7 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
     
             if (requestDetails.flow == 'client-credentials' || requestDetails.flow == 'authorization-code') {
                 assert.strictEqual(requestDetails.productEnvironment.credentialIssuer != null, true, errors.WF03);
-                
+
                 // Find the credential issuer and based on its type, go do the appropriate action
                 const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
         
@@ -231,6 +231,8 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             const clientId = appId + '-' + extraIdentifier
             const consumerType = requestDetails.application == null ? 'user' : 'client'
 
+            const nickname = appId
+
             var consumerPK = null
             var kongConsumerPK = null
 
@@ -254,12 +256,12 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
                 credentialReference['clientId'] = clientId
                 credentialReference['registrationAccessToken'] = client.registrationAccessToken
 
-                const consumer = await kongApi.createOrGetConsumer (clientId, '')
+                const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
                 consumerPK = await addKongConsumer(context, clientId, consumer.id)
                 kongConsumerPK = consumer.id
             } else if (flow == 'kong-api-key-acl') {
                 // kong consumer could already exist - create if doesn't exist
-                const consumer = await kongApi.createOrGetConsumer (clientId, '')
+                const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
                 const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
                 credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
                 credentialReference['keyAuthId'] = apiKey.keyAuthPK
