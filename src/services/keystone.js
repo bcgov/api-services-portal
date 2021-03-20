@@ -22,6 +22,8 @@ module.exports = {
             variables: { services: services },
         })
         console.log("lookupServices " + JSON.stringify(result))
+        result.data.allGatewayServices.map(svc =>
+            svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
         return result.data.allGatewayServices
     },
 
@@ -55,6 +57,8 @@ module.exports = {
             variables: { id: id },
         })
         console.log("lookupProductEnvironmentServices " + JSON.stringify(result))
+        result.data.allEnvironments[0].services.map(svc =>
+            svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
         return result.data.allEnvironments[0]
     },
 
