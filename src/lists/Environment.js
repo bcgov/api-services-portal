@@ -19,6 +19,11 @@ module.exports = {
         defaultValue: false,
         access: FieldEnforcementPoint
     },
+    approval: {
+        type: Checkbox,
+        isRequired: true,
+        defaultValue: false,
+    },
     flow: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
         { value: 'public', label: 'Public'},
         { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
@@ -26,6 +31,7 @@ module.exports = {
         { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
+    
     legal: { type: Relationship, ref: 'Legal' },
     credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
     additionalDetailsToRequest: {

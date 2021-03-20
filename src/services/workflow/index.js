@@ -73,18 +73,20 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
             assert.strictEqual(requestDetails.productEnvironment != null, true, errors.WF02);
             assert.strictEqual(requestDetails.productEnvironment.credentialIssuer != null, true, errors.WF03);
     
-            // Find the credential issuer and based on its type, go do the appropriate action
-            const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
-    
-            assert.strictEqual(issuer != null, true, errors.WF05);
+            if (requestDetails.flow == 'client-credentials' || requestDetails.flow == 'authorization-code') {
+                // Find the credential issuer and based on its type, go do the appropriate action
+                const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+        
+                assert.strictEqual(issuer != null, true, errors.WF05);
 
-            if (issuer.mode == 'manual') {
-                throw Error('Manual credential issuing not supported yet!')
+                if (issuer.mode == 'manual') {
+                    throw Error('Manual credential issuing not supported yet!')
+                }
+                if (issuer.flow == 'client-credentials' && issuer.clientRegistration == 'anonymous') {
+                    throw Error('Anonymous client registration not supported yet!')
+                }
             }
-            if (issuer.flow == 'client-credentials' && issuer.clientRegistration == 'anonymous') {
-                throw Error('Anonymous client registration not supported yet!')
-            }
-
+            
             if (issuer.flow == 'client-credentials') {
 
                 assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
