@@ -85,25 +85,25 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
                 if (issuer.flow == 'client-credentials' && issuer.clientRegistration == 'anonymous') {
                     throw Error('Anonymous client registration not supported yet!')
                 }
-            }
             
-            if (issuer.flow == 'client-credentials') {
+                if (issuer.flow == 'client-credentials') {
 
-                assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
-                const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-                assert.strictEqual(openid != null, true, errors.WF06);
+                    assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
+                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                    assert.strictEqual(openid != null, true, errors.WF06);
 
-                assert.strictEqual(['anonymous', 'managed', 'iat'].includes(issuer.clientRegistration), true, errors.WF08)
-                assert.strictEqual(issuer.clientRegistration == 'managed' && (isBlank(issuer.clientId) || isBlank(issuer.clientSecret)), false, errors.WF09)
-                assert.strictEqual(issuer.clientRegistration == 'iat' && isBlank(issuer.initialAccessToken), false, errors.WF10)
-            } else if (issuer.flow == 'authorization-code') {
-                assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
-                const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-                assert.strictEqual(openid != null, true, errors.WF06);
+                    assert.strictEqual(['anonymous', 'managed', 'iat'].includes(issuer.clientRegistration), true, errors.WF08)
+                    assert.strictEqual(issuer.clientRegistration == 'managed' && (isBlank(issuer.clientId) || isBlank(issuer.clientSecret)), false, errors.WF09)
+                    assert.strictEqual(issuer.clientRegistration == 'iat' && isBlank(issuer.initialAccessToken), false, errors.WF10)
+                } else if (issuer.flow == 'authorization-code') {
+                    assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
+                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                    assert.strictEqual(openid != null, true, errors.WF06);
+                }
+
+                // make sure the flow to valid based on whether an Application was specified or if its for the Requestor
+                assert.strictEqual(issuer.flow == 'client-credentials' && requestDetails.application == null, false, errors.WF07);
             }
-
-            // make sure the flow to valid based on whether an Application was specified or if its for the Requestor
-            assert.strictEqual(issuer.flow == 'client-credentials' && requestDetails.application == null, false, errors.WF07);
         }
     } catch (err) {
         console.log(err)
