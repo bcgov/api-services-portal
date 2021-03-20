@@ -112,7 +112,7 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
 
 const wfValidateActiveEnvironment = async (context, operation, existingItem, originalInput, resolvedData, addValidationError) => {
     if (('active' in originalInput && originalInput['active'] == true) 
-            || ('active' in existingItem && existingItem['active'] == true) && !('active' in originalInput && originalInput['active'] == false)) {
+            || (operation == 'update' && 'active' in existingItem && existingItem['active'] == true) && !('active' in originalInput && originalInput['active'] == false)) {
         try {
             const envServices = await lookupProductEnvironmentServices(context, existingItem.id)
 
