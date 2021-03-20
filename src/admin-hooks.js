@@ -16,7 +16,7 @@ module.exports = {
         },
         {
             label: 'Products',
-            children: ['Product', 'Environment', 'CredentialIssuer', 'Content'],
+            children: ['Product', 'Environment', 'CredentialIssuer', 'Content', 'Legal'],
         },
         {
             label: 'Monitoring',
@@ -28,7 +28,7 @@ module.exports = {
         },
         {
             label: 'Keycloak',
-            children: ['Namespace', 'Group', 'MemberRole', 'User'],
+            children: ['Namespace', 'MemberRole', 'User', 'Group'],
         },
         {
             label: 'Kong',

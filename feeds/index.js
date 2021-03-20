@@ -73,14 +73,6 @@ app.get('/replay/', (req, res) => {
     res.send({state:'processing'})
 })
 
-
-// List of entities
-
-// Tell the feeder to resync the entity within the scope (i.e./ GatewayService for namespace xyz)
-app.get('/hint/:entity/:scope', (req, res) => {
-
-})
-
 app.use((err, req, res, next) => {
     if (err) {
         console.error(err.stack)

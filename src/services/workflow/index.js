@@ -71,9 +71,10 @@ const wfValidate = async (context, operation, existingItem, originalInput, resol
         if (isUpdatingToIssued(existingItem, resolvedData)) {
             assert.strictEqual(requestDetails != null, true, errors.WF01);
             assert.strictEqual(requestDetails.productEnvironment != null, true, errors.WF02);
-            assert.strictEqual(requestDetails.productEnvironment.credentialIssuer != null, true, errors.WF03);
     
             if (requestDetails.flow == 'client-credentials' || requestDetails.flow == 'authorization-code') {
+                assert.strictEqual(requestDetails.productEnvironment.credentialIssuer != null, true, errors.WF03);
+                
                 // Find the credential issuer and based on its type, go do the appropriate action
                 const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
         
