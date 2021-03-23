@@ -122,6 +122,9 @@ module.exports = {
                                 id
                                 appId
                             }
+                            serviceAccess {
+                                id
+                            }
                             controls
                         }
                     }`,
@@ -247,5 +250,19 @@ module.exports = {
         console.log("FINISHED")
         console.log("UPDATE SERVICE ACCESS " + JSON.stringify(result,null, 4))
         return result.data.updateServiceAccess
-    }
+    },
+
+    linkServiceAccessToRequest: async function (context, serviceAccessId, requestId) {
+        const result = await context.executeGraphQL({
+            query: `mutation LinkServiceAccessToRequest($serviceAccessId: ID!, $requestId: ID!) {
+                        updateAccessRequest(id: $requestId, data: { serviceAccess: { connect: { id: $requestId } } } ) {
+                            id
+                        }
+                    }`,
+            variables: { serviceAccessId, requestId },
+        })
+        console.log("FINISHED")
+        console.log("UPDATE ACCESS REQUEST " + JSON.stringify(result,null, 4))
+        return result.data.updateAccessRequest
+    }    
 }

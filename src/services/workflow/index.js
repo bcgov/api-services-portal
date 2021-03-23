@@ -218,6 +218,8 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
             const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
             await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newApiKey.consumerPK, productEnvironment, application )
 
+            await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
+
             const backToUser = {
                 apiKey: newApiKey.apiKey.apiKey
             }
@@ -247,7 +249,9 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
             // Create a ServiceAccess record
             const consumerType = 'client'
             const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
-            await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application )
+            const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application )
+
+            await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
 
             const backToUser = {
                 flow: productEnvironment.flow,
@@ -264,6 +268,17 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
 
 const wfPrepareServiceAccess = async (context) => {
 
+}
+
+/**
+ * When deleting a ServiceAccess record, also delete the related
+ * - Kong Consumer
+ * - Keycloak Client
+ * - Access Request
+ * 
+ * @param {*} context 
+ */
+const wfDeleteServiceAccess = async (context) => {
 }
 
 const wfApply = async (context, operation, existingItem, originalInput, updatedItem) => {
@@ -395,5 +410,6 @@ module.exports = {
     Validate: wfValidate,
     ValidateActiveEnvironment: wfValidateActiveEnvironment,
     RegenerateCredential: wfRegenerateCredential,
-    PrepareServiceAccess: wfPrepareServiceAccess
+    PrepareServiceAccess: wfPrepareServiceAccess,
+    DeleteServiceAccess: wfDeleteServiceAccess
 }
