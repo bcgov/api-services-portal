@@ -37,7 +37,9 @@ function List({ data, state, refetch }) {
         }
         const products = [...new Set(data.allServiceAccesses.map((item, index) => item.productEnvironment.product.name))]
 
-        return products.sort().map (product => (
+        return (
+            <>
+            {products.sort().map (product => (
                 <Box bgColor="white"  mb={4}>
 
                     <Box display="flex" alignItems="center" p={2}>
@@ -112,9 +114,10 @@ function List({ data, state, refetch }) {
                         </Table>
 
                 </Box>
-            )
+            ))}
+            </>
         )
-      }
+    }
     }
     return (<></>)
   }
