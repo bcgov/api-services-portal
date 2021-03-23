@@ -46,6 +46,10 @@ const Authorization = ({fetch, issuer}) => {
 
     const toggle = () => setEdit(!edit);
 
+    if (issuer == null || typeof(issuer) == "undefined") {
+        return (<></>)
+    }
+    
     const applyChanges = () => {
         setEdit(false)
         graphql(UPDATE_ISSUER_AUTHZ, { 
