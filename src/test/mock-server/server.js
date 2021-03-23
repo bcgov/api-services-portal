@@ -78,9 +78,9 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
-    allAccessRequests: () => new MockList(0, (_, { id }) => ({ id })),
-    allGatewayConsumers: () => new MockList(0, (_, { id }) => ({ id })),
-    allPlugins: () => new MockList(0, (_, { id }) => ({ id })),
+    allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),
+    allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
+    allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
     allMetrics: (_query, _, args) => {
       const result = args.variableValues.days.map((d, index) => {
         const metrics = metricsData[index];
@@ -252,11 +252,36 @@ const server = mockServer(schemaWithMocks, {
     clientSecret: casual.uuid,
     environments: () => new MockList(2, (_, { id }) => ({ id })),
   }),
-  Plugin: () => ({
-    name: casual.title,
-    kongPluginId: casual.uuid,
-    config: casual.word,
+  GatewayConsumer: () => ({
+    username: casual.username,
+    customId: casual.word,
+    tags: JSON.stringify(casual.array_of_words(2)),
+    createdAt: formatISO(new Date()).toString(),
   }),
+  GatewayPlugin: () => {
+    const random = sample([true, false, null]);
+    const isService = random === true;
+    const isRoute = random === false;
+
+    return {
+      name: casual.random_element(['rate-limiting', 'ip-restriction']),
+      service: () => {
+        if (isService) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      route: (...args) => {
+        if (isRoute) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      kongPluginId: casual.uuid,
+      config: casual.word,
+      tags: JSON.stringify(casual.array_of_words(2)),
+    };
+  },
   Dataset: () => ({
     name: casual.uuid,
     sector: casual.word,

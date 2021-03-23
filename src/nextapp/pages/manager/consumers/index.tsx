@@ -19,6 +19,8 @@ import {
   Text,
   Alert,
   AlertIcon,
+  IconButton,
+  Icon,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -29,7 +31,8 @@ import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
-import NewConsumer from '@/components/new-consumer';
+import { FaPen, FaStop } from 'react-icons/fa';
+import TagsList from '@/components/tags-list';
 
 const query = gql`
   query GetConsumers {
@@ -90,7 +93,7 @@ const ConsumersPage: React.FC<
         }`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader actions={<NewConsumer />} title="Consumers" />
+        <PageHeader title="Consumers" />
         <Box mb={4}>
           {data?.allAccessRequests.length === 0 && (
             <Alert status="info">
@@ -101,7 +104,7 @@ const ConsumersPage: React.FC<
           )}
           {data?.allAccessRequests.length > 0 && <AccessRequests />}
         </Box>
-        <Box bgColor="white">
+        <Box bgColor="white" mb={4}>
           <Box
             p={4}
             display="flex"
@@ -133,9 +136,6 @@ const ConsumersPage: React.FC<
                         <Text color="gray.600">
                           Consumers access your API under restrictions you set
                         </Text>
-                        <Box mt={4}>
-                          <NewConsumer />
-                        </Box>
                       </Box>
                     </Center>
                   </Td>
@@ -150,14 +150,27 @@ const ConsumersPage: React.FC<
                   </Td>
                   <Td>{d.customId}</Td>
                   <Td>{d.plugins.map((d) => d.name).join(', ')}</Td>
-                  <Td>{d.tags}</Td>
+                  <Td>
+                    <TagsList data={d.tags} />
+                  </Td>
                   <Td>{`${formatDistanceToNow(new Date(d.createdAt))} ago`}</Td>
                   <Td textAlign="right">
                     <ButtonGroup size="sm">
                       <NextLink href={`/manager/consumers/${d.id}`}>
-                        <Button colorScheme="blue">Edit</Button>
+                        <Button
+                          variant="outline"
+                          color="bc-blue-alt"
+                          leftIcon={<Icon as={FaPen} />}
+                        >
+                          Edit
+                        </Button>
                       </NextLink>
-                      <Button colorScheme="red">Disable</Button>
+                      <IconButton
+                        aria-label="disable consumer button"
+                        icon={<Icon as={FaStop} />}
+                        variant="outline"
+                        colorScheme="red"
+                      />
                     </ButtonGroup>
                   </Td>
                 </Tr>

@@ -21,7 +21,7 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import NextLink from 'next/link';
-import AccessRequestViewer from './viewer';
+// import AccessRequestViewer from './viewer';
 
 const query = gql`
   query GetPendingAccessRequests {
@@ -36,6 +36,8 @@ const query = gql`
 `;
 
 const AccessRequests: React.FC = () => {
+  const initialSlice = 4;
+  const [sliceIndex, setSliceIndex] = React.useState<number>(initialSlice);
   const { data } = useApi(
     'allPendingAccessRequests',
     {
@@ -43,7 +45,16 @@ const AccessRequests: React.FC = () => {
     },
     { suspense: false }
   );
+  const total = data?.allAccessRequests.length ?? 0;
+  const isShowingAll = total > initialSlice && sliceIndex !== initialSlice;
   const color = data?.allAccessRequests.length === 0 ? 'blue' : 'yellow';
+  const handleShowMore = React.useCallback(
+    () =>
+      setSliceIndex((s) =>
+        s === initialSlice ? data.allAccessRequests.length : initialSlice
+      ),
+    [data, setSliceIndex]
+  );
 
   return (
     <Box
@@ -57,7 +68,7 @@ const AccessRequests: React.FC = () => {
         bgColor={`${color}.300`}
         color={`${color}.700`}
         py={2}
-        px={6}
+        px={4}
         display="flex"
         alignItems="center"
       >
@@ -88,31 +99,47 @@ const AccessRequests: React.FC = () => {
               </Td>
             </Tr>
           )}
-          {data?.allAccessRequests.map((d, index, arr) => (
+          {data?.allAccessRequests.slice(0, sliceIndex).map((d) => (
             <Tr key={d.id}>
               <Td borderColor="yellow.300" width="5">
                 <Icon as={FaUser} color="yellow.700" />
               </Td>
               <Td borderColor="yellow.300">
                 <NextLink passHref href={`/manager/requests/${d.id}`}>
-                  <Link>{d.name}</Link>
+                  <Link>
+                    <Text as="span" fontWeight="bold">
+                      {d.requestor.name}
+                    </Text>{' '}
+                    is requesting access to{' '}
+                    <Text as="span" fontWeight="bold">
+                      {d.name}
+                    </Text>
+                  </Link>
                 </NextLink>
               </Td>
-              <Td borderColor="yellow.300">{d.requestor.name}</Td>
+              <Td borderColor="yellow.300"></Td>
               <Td textAlign="right" borderColor="yellow.300">
-                <AccessRequestViewer
-                  index={index}
-                  request={d}
-                  total={arr.length}
-                />
+                <NextLink passHref href={`/manager/requests/${d.id}`}>
+                  <Button
+                    leftIcon={<Icon as={FaMicroscope} />}
+                    size="sm"
+                    variant="secondary"
+                  >
+                    Review
+                  </Button>
+                </NextLink>
               </Td>
             </Tr>
           ))}
           {data?.allAccessRequests.length > 4 && (
             <Tr>
               <Td colSpan={4} textAlign="center">
-                <Button size="sm" variant="secondary">
-                  {`View ${data.allAccessRequests.length - 4} More`}
+                <Button size="sm" variant="secondary" onClick={handleShowMore}>
+                  {isShowingAll
+                    ? 'Show less'
+                    : `Show ${
+                        data.allAccessRequests.length - initialSlice
+                      } More`}
                 </Button>
               </Td>
             </Tr>

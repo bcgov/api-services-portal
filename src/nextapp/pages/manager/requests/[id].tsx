@@ -2,18 +2,10 @@ import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
   Box,
-  Button,
-  ButtonGroup,
   Container,
   Divider,
   Heading,
   Icon,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   Tabs,
   TabList,
   TabPanels,
@@ -24,16 +16,9 @@ import {
   Avatar,
   Grid,
   GridItem,
-  List,
-  ListItem,
-  ListIcon,
+  HStack,
 } from '@chakra-ui/react';
-import {
-  FaCheckCircle,
-  FaHourglassStart,
-  FaPaperPlane,
-  FaStamp,
-} from 'react-icons/fa';
+import { FaRegClock } from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
 import format from 'date-fns/format';
 import { dehydrate } from 'react-query/hydration';
@@ -42,6 +27,10 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
+import ControlsList from '@/components/controls-list';
+import IpRestriction from '@/components/controls/ip-restriction';
+import RateLimiting from '@/components/controls/rate-limiting';
+import ModelIcon from '@/components/model-icon/model-icon';
 
 const query = gql`
   query GetAccessRequest($id: ID!) {
@@ -57,6 +46,17 @@ const query = gql`
       }
       productEnvironment {
         name
+        plugins {
+          id
+          name
+          config
+          service {
+            name
+          }
+          route {
+            name
+          }
+        }
       }
       activity {
         id
@@ -122,18 +122,11 @@ const AccessRequestPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={
-            <Button leftIcon={<Icon as={FaStamp} />} variant="primary">
-              Approve
-            </Button>
-          }
           title={
-            <>
-              <Text as="span" color="gray.400">
-                Request:
-              </Text>{' '}
+            <Box as="span" display="flex" alignItems="center">
+              <ModelIcon model="request" size="sm" mr={2} />
               {data.AccessRequest.name}
-            </>
+            </Box>
           }
         >
           <Box color="gray.500" mb={4} display="flex" alignItems="center">
@@ -163,83 +156,83 @@ const AccessRequestPage: React.FC<
             </Box>
           </Box>
         </PageHeader>
-        <Divider mb={4} />
-        <Grid templateColumns="repeat(12, 1fr)">
-          <GridItem colSpan={8}>
-            {data?.AccessRequest.activity.map((a) => (
-              <Box key={a.id} bgColor="white" mb={2}>
-                <Box
-                  as="header"
-                  p={2}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Heading size="xs">{a.name}</Heading>
-                  <Text as="time" fontSize="small" color="gray.400">
-                    {format(new Date(a.createdAt), 'LLL do, yyyy')}
-                  </Text>
-                </Box>
-                <Divider />
-                <Box p={2}>
-                  <Text>{a.message}</Text>
-                </Box>
+        <Tabs>
+          <TabList mb={6}>
+            <Tab>Controls</Tab>
+            <Tab>Activity</Tab>
+          </TabList>
+          <Grid templateColumns="repeat(12, 1fr)">
+            <GridItem colSpan={8}>
+              <TabPanels>
+                <TabPanel p={0}>
+                  <HStack
+                    bgColor="white"
+                    spacing={4}
+                    p={4}
+                    borderRadius={4}
+                    mb={4}
+                  >
+                    <IpRestriction />
+                    <RateLimiting />
+                  </HStack>
+                  <ControlsList
+                    data={data?.AccessRequest.productEnvironment.plugins}
+                  />
+                </TabPanel>
+                <TabPanel p={0}>
+                  {data?.AccessRequest.activity.map((a) => (
+                    <Box key={a.id} bgColor="white" mb={2}>
+                      <Box
+                        as="header"
+                        p={2}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Heading size="xs" display="flex" alignItems="center">
+                          <Icon as={FaRegClock} color="gray.400" mr={2} />{' '}
+                          {a.name}
+                        </Heading>
+                        <Text as="time" fontSize="small" color="gray.400">
+                          {format(new Date(a.createdAt), 'LLL do, yyyy')}
+                        </Text>
+                      </Box>
+                      <Divider />
+                      <Box p={2}>
+                        <Text>{a.message}</Text>
+                      </Box>
+                    </Box>
+                  ))}
+                </TabPanel>
+              </TabPanels>
+            </GridItem>
+            <GridItem as="aside" colStart={10} colSpan={3}>
+              <Box>
+                <Heading size="sm" mb={2}>
+                  Requestor
+                </Heading>
+                <Text mb={3}>
+                  <Avatar
+                    name={data?.AccessRequest.requestor.name}
+                    size="xs"
+                    mr={2}
+                  />
+                  {data?.AccessRequest.requestor.name}
+                </Text>
+                <Heading size="sm" mb={2}>
+                  Product
+                </Heading>
+                <Text mb={3}>
+                  {data?.AccessRequest.productEnvironment.name}
+                </Text>
+                <Heading size="sm" mb={2}>
+                  Application
+                </Heading>
+                <Text>{data?.AccessRequest.application.name}</Text>
               </Box>
-            ))}
-          </GridItem>
-          <GridItem as="aside" colStart={10} colSpan={3}>
-            <Box>
-              <Heading size="sm">Requestor</Heading>
-              <Text mb={3}>
-                <Avatar
-                  name={data?.AccessRequest.requestor.name}
-                  size="xs"
-                  mr={2}
-                />
-                {data?.AccessRequest.requestor.name}
-              </Text>
-              <Heading size="sm">Product</Heading>
-              <Text mb={3}>{data?.AccessRequest.productEnvironment.name}</Text>
-              <Heading size="sm">Application</Heading>
-              <Text>{data?.AccessRequest.application.name}</Text>
-            </Box>
-            <Divider my={4} />
-            <Box>
-              <Heading mb={2} size="sm">
-                Status
-              </Heading>
-              <List spacing={2} fontSize="sm">
-                <ListItem>
-                  <ListIcon
-                    as={FaStamp}
-                    color={
-                      data?.AccessRequest.isApproved ? 'green.500' : 'gray.500'
-                    }
-                  />
-                  Approved
-                </ListItem>
-                <ListItem>
-                  <ListIcon
-                    as={FaPaperPlane}
-                    color={
-                      data?.AccessRequest.isIssued ? 'green.500' : 'gray.500'
-                    }
-                  />
-                  Issued
-                </ListItem>
-                <ListItem>
-                  <ListIcon
-                    as={FaCheckCircle}
-                    color={
-                      data?.AccessRequest.isComplete ? 'green.500' : 'gray.500'
-                    }
-                  />
-                  Completed
-                </ListItem>
-              </List>
-            </Box>
-          </GridItem>
-        </Grid>
+            </GridItem>
+          </Grid>
+        </Tabs>
       </Container>
     </>
   );

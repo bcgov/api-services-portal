@@ -1,31 +1,25 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
+  Avatar,
   Box,
-  Button,
-  ButtonGroup,
   Container,
   Divider,
   Heading,
-  Icon,
-  Table,
-  Tbody,
-  Td,
+  HStack,
   Text,
-  Th,
-  Thead,
-  Tr,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
-import { FaPen, FaPlug } from 'react-icons/fa';
-import PluginEditor from '@/components/plugin-editor';
+import ControlsList from '@/components/controls-list';
+import IpRestriction from '@/components/controls/ip-restriction';
+import RateLimiting from '@/components/controls/rate-limiting';
+import ModelIcon from '@/components/model-icon/model-icon';
 
 const query = gql`
   query GetConsumer($id: ID!) {
@@ -33,17 +27,19 @@ const query = gql`
       id
       username
       aclGroups
-      namespace
       customId
       kongConsumerId
+      namespace
       plugins {
         id
         name
         config
         service {
+          id
           name
         }
         route {
+          id
           name
         }
       }
@@ -84,6 +80,7 @@ const ConsumersPage: React.FC<
     ['consumer', id],
     {
       query,
+      variables: { id },
     },
     { suspense: false }
   );
@@ -91,48 +88,53 @@ const ConsumersPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers | ${data.GatewayConsumer.username}`}</title>
+        <title>{`Consumers | ${data?.GatewayConsumer.username}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={<Button variant="primary">Add Plugin/Control</Button>}
           breadcrumb={[{ href: '/manager/consumers', text: 'Consumers' }]}
-          title={data.GatewayConsumer.username}
+          title={
+            <Box as="span" display="flex" alignItems="center">
+              <ModelIcon model="consumer" size="sm" mr={2} />
+              {data?.GatewayConsumer.username}
+            </Box>
+          }
         >
-          <Text>
-            in{' '}
+          <Text fontSize="sm">
+            <Text as="span" mr={1} fontWeight="bold">
+              Namespace
+            </Text>
             <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
               {data.GatewayConsumer.namespace}
             </Text>
-            {` / ${data.GatewayConsumer.kongConsumerId}`}
+            <Text as="span" ml={3} mr={1} fontWeight="bold">
+              Kong Consumer ID
+            </Text>
+            <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
+              {data?.GatewayConsumer.kongConsumerId}
+            </Text>
           </Text>
         </PageHeader>
-        <Box bgColor="white" boxShadow="0 2px 5px rgba(0, 0, 0, 0.1)">
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Plugin</Th>
-                <Th>Route</Th>
-                <Th colSpan={2}>Service</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.GatewayConsumer.plugins.map((d) => (
-                <Tr key={d.id}>
-                  <Td>
-                    <Icon as={FaPlug} mr={4} boxSize="1.5rem" />
-                    {d.name}
-                  </Td>
-                  <Td>{d.route.name}</Td>
-                  <Td>{d.service.name}</Td>
-                  <Td>
-                    <PluginEditor config={d.config} />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+        <Box as="header" bgColor="white" p={4}>
+          <Heading size="md">Add Controls</Heading>
         </Box>
+        <Divider />
+        <HStack
+          bgColor="white"
+          spacing={4}
+          p={4}
+          borderRadius={4}
+          mb={4}
+          justify="stretch"
+        >
+          <IpRestriction />
+          <RateLimiting />
+        </HStack>
+        <ControlsList
+          data={data?.GatewayConsumer.plugins.filter(
+            (p) => p.route || p.service
+          )}
+        />
       </Container>
     </>
   );

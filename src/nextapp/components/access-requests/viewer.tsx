@@ -1,17 +1,12 @@
 import * as React from 'react';
 import {
   Avatar,
-  Badge,
   Box,
   Button,
   ButtonGroup,
-  Divider,
   Flex,
   Heading,
   Icon,
-  List,
-  ListIcon,
-  ListItem,
   Modal,
   ModalBody,
   ModalContent,
@@ -21,17 +16,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  FaCheckCircle,
-  FaHourglassStart,
-  FaMicroscope,
-  FaPaperPlane,
-  FaStamp,
-} from 'react-icons/fa';
+import { FaMicroscope } from 'react-icons/fa';
 import { AccessRequest } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
 import { useApi } from '@/shared/services/api';
+import ControlsList from '../controls-list';
 
 const query = gql`
   query GetAccessRequest($id: ID!) {
@@ -48,6 +38,7 @@ const query = gql`
       }
       productEnvironment {
         name
+        plugins
       }
       application {
         name
@@ -116,6 +107,9 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
           </ModalHeader>
           <ModalBody>
             <Flex>
+              <ControlsList
+                data={data?.AccessRequest.productEnvironment.plugins ?? []}
+              />
               <Box flex={1}>
                 <Box>
                   <Heading size="sm">Requestor</Heading>
@@ -143,39 +137,6 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
                 <Heading mb={2} size="sm">
                   Status
                 </Heading>
-                <List spacing={2} fontSize="sm">
-                  <ListItem>
-                    <ListIcon
-                      as={FaStamp}
-                      color={
-                        data?.AccessRequest.isApproved
-                          ? 'green.500'
-                          : 'gray.500'
-                      }
-                    />
-                    Approved
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon
-                      as={FaPaperPlane}
-                      color={
-                        data?.AccessRequest.isIssued ? 'green.500' : 'gray.500'
-                      }
-                    />
-                    Issued
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon
-                      as={FaCheckCircle}
-                      color={
-                        data?.AccessRequest.isComplete
-                          ? 'green.500'
-                          : 'gray.500'
-                      }
-                    />
-                    Completed
-                  </ListItem>
-                </List>
               </Box>
             </Flex>
           </ModalBody>
