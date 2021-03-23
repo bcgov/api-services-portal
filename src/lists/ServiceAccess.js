@@ -67,7 +67,7 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) {
-        await workflow.RegenerateCredential(context, operation, existingItem, originalInput, updatedItem)
+        //await workflow.RegenerateCredential(context, operation, existingItem, originalInput, updatedItem)
     })
   }
 }

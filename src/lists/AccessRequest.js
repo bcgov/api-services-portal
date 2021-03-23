@@ -35,6 +35,10 @@ module.exports = {
         isRequired: false,
         default: false
     },
+    credential: {
+        type: Text,
+        isRequired: false,
+    },
     controls: {
         type: Text,
         isRequired: true,
@@ -91,6 +95,10 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) {
+        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(existingItem, null, 3));
+        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(originalInput, null, 3));
+        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(updatedItem, null, 3));
+
         await workflow.Apply(context, operation, existingItem, originalInput, updatedItem)
     })
   }

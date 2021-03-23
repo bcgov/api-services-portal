@@ -10,10 +10,16 @@ export interface NavLink {
 }
 
 const links: NavLink[] = [
-  { name: 'Home', url: '/home', access: [], sites: ['manager', 'devportal'] },
+  { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
+  { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
     name: 'API Discovery',
     url: '/devportal/poc/api-discovery',
+    access: ['developer', 'api-owner'], sites: ['devportal'] 
+  },
+  {
+    name: 'API Access',
+    url: '/devportal/poc/access',
     access: ['developer', 'api-owner'], sites: ['devportal'] 
   },
   {
@@ -29,13 +35,13 @@ const links: NavLink[] = [
     url: '/manager/poc/requests',
     access: ['api-owner', 'api-manager', 'credential-admin'], sites: ['manager'] 
   },
+//   {
+//     name: 'Service Accounts',
+//     url: '/manager/poc/service-accounts',
+//     access: ['api-owner'], sites: ['manager'] 
+//   },
   {
-    name: 'Service Accounts',
-    url: '/manager/poc/service-accounts',
-    access: ['api-owner'], sites: ['manager'] 
-  },
-  {
-    name: 'Credential Issuers',
+    name: 'Authorization Settings',
     url: '/manager/poc/credential-issuers',
     access: ['credential-admin'], sites: ['manager'] 
   },

@@ -5,7 +5,7 @@ const checkStatus = require('./checkStatus')
 
 module.exports = function (feederUrl) {
     return {
-        forceSync: async function (namespace, source, scope, scopeKey) {
+        forceSync: async function (source, scope, scopeKey) {
             console.log("FORCE SYNC " + `${feederUrl}/forceSync/${source}/${scope}/${scopeKey}`)
             return await fetch(`${feederUrl}/forceSync/${source}/${scope}/${scopeKey}`, {
                 method: 'put',

@@ -51,6 +51,7 @@ module.exports = function (kongUrl) {
                     headers: { 
                         'Content-Type': 'application/json' },
                 })
+                .then(checkStatus)
                 .then(res => res.json())
                 console.log("[createKongConsumer] KONG RESPONSE = "+ JSON.stringify(response, null, 3))
                 return {

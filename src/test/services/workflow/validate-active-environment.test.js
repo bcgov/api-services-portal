@@ -30,11 +30,11 @@ describe('Validate Active Environment', function () {
                     plugins: [
                       {
                         name: 'acl',
-                        config: {},
+                        config: '{}',
                       },
                       {
                         name: 'key-auth',
-                        config: {},
+                        config: '{}',
                       },
                     ],
                     routes: [
@@ -43,7 +43,7 @@ describe('Validate Active Environment', function () {
                         plugins: [
                           {
                             name: 'rate-limiting',
-                            config: {},
+                            config: '{}',
                           },
                         ],
                       },
@@ -143,7 +143,7 @@ describe('Validate Active Environment', function () {
       prodEnv.credentialIssuer = {
         oidcDiscoveryUrl: "http://provider/realm/.well-known/openid-configuration"
       }
-      prodEnv.services[0].plugins = [{ name: "jwt-keycloak", config: { well_known_template: "http://provider/realm/.well-known/openid-configuration"} }]
+      prodEnv.services[0].plugins = [{ name: "jwt-keycloak", config: JSON.stringify({ well_known_template: "http://provider/realm/.well-known/openid-configuration"}) }]
 
       await workflow.ValidateActiveEnvironment(
         ctx.context,
@@ -216,7 +216,7 @@ describe('Validate Active Environment', function () {
       prodEnv.credentialIssuer = {
         oidcDiscoveryUrl: "http://provider/realm/.well-known/openid-configuration"
       }
-      prodEnv.services[0].plugins = [{ name: "oidc", config: { discovery: "http://provider/realm/.well-known/openid-configuration"} }]
+      prodEnv.services[0].plugins = [{ name: "oidc", config: JSON.stringify({ discovery: "http://provider/realm/.well-known/openid-configuration"}) }]
 
       await workflow.ValidateActiveEnvironment(
         ctx.context,

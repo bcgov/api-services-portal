@@ -59,7 +59,7 @@
   "graphql-tools": "^7.0.2",
   "isomorphic-unfetch": "^3.1.0",
   "jwks-rsa": "^1.12.1",
-  "keycloak-admin": "^1.14.5",
+  "keycloak-admin": "^1.14.10",
   "keystonejs-grapesjs-editor": "^1.0.10",
   "lodash": "^4.17.21",
   "next": "9.5.5",

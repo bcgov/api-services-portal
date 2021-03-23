@@ -29,6 +29,9 @@ export const GET_ISSUER = `
             clientId
             clientRegistration
             oidcDiscoveryUrl
+            apiKeyName
+            clientRoles
+            availableScopes
             owner {
                 name
                 username
@@ -45,6 +48,14 @@ export const GET_ISSUER = `
 `
 
 export const UPDATE_ISSUER = `
+`
+
+export const UPDATE_ISSUER_AUTHZ = `
+    mutation UpdateAuthorization($id: ID!, $clientRoles: String!, $availableScopes: String!) {
+        updateCredentialIssuer (id: $id, data: { clientRoles: $clientRoles, availableScopes: $availableScopes }) {
+            id
+        }
+    }
 `
 
 const empty = () => false

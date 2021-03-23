@@ -52,8 +52,8 @@ const NewRequest = () => {
     const requestor = (data ? data.allTemporaryIdentities[0] : null)
     const dataset = (data ? data.allProducts[0] : data)
 
-    const refetch = () => {
-        window.location.href = "/devportal/poc/applications"
+    const refetch = (data) => {
+        window.location.href = `/devportal/poc/access/${data.data.createAccessRequest.id}`
     }
 
     

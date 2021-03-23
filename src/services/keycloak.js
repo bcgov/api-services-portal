@@ -28,9 +28,10 @@ module.exports = {
             token: response['access_token']
         }
     },
-    clientRegistration: async function (issuer, accessToken, clientId, clientSecret) {
+    
+    clientRegistration: async function (issuer, accessToken, clientId, clientSecret, enabled=false) {
         const body = Object.assign(JSON.parse(JSON.stringify(clientTemplate)), {
-            enabled: true,
+            enabled: enabled,
             clientId: clientId,
             secret: clientSecret
         })

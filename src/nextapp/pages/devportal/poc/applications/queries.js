@@ -26,7 +26,7 @@ export const GET_LIST = `
               }
             }
         }
-        allServiceAccesses(where: { active: true }) {
+        allServiceAccesses(where: {  }) {
             id
             name
             active
@@ -66,15 +66,6 @@ export const REMOVE = `
         }
     }
 `
-
-export const GEN_CREDENTIAL = `
-    mutation GenCredential($id: ID!) {
-        updateServiceAccess(id: $id, data: { credential: "NEW" }) {
-            credential
-        }
-    }
-`
-
 
 const empty = () => false
 export default empty

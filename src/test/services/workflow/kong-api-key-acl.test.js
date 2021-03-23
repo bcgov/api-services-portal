@@ -27,7 +27,7 @@ describe('Kong API Key with ACL Flow', function () {
             allAccessRequests: [
               {
                 credentialReference: '',
-                application: { appId: 'APP-01' },
+                application: { appId: 'APP-02' },
                 productEnvironment: {
                   name: 'ENV-NAME',
                   flow: 'kong-api-key-acl',
@@ -83,7 +83,7 @@ describe('Kong API Key with ACL Flow', function () {
       const expected = {
         ServiceAccess: {
           data: {
-            name: 'APP-01.ID1.ENV-NAME',
+            name: 'APP-02.ID1.ENV-NAME',
             active: false,
             aclEnabled: true,
             consumerType: 'client',
@@ -106,7 +106,7 @@ describe('Kong API Key with ACL Flow', function () {
             '{"apiKey":"SxFd9hzOTTxRhi2BHx75jIj2MSs=","keyAuthId":"001"}',
         },
         Consumer: {
-          username: 'APP-01-ID1',
+          username: 'APP-02-ID1',
           kongConsumerId: 'KONG-CONSUMER-002',
         },
         Activity: [
@@ -124,8 +124,9 @@ describe('Kong API Key with ACL Flow', function () {
             source: 'kong',
             type: 'POST consumer',
             content: {
-              username: 'APP-01-ID1',
+              username: 'APP-02',
               tags: ['aps-portal-poc'],
+              custom_id: 'APP-02-ID1',
             },
           },
           {

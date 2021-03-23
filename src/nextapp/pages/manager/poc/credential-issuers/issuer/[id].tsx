@@ -39,6 +39,8 @@ import { ButtonGroup, Input, Textarea, Flex, useToast } from "@chakra-ui/react"
 
 import { useAppContext } from '@/pages/context'
 
+import AuthorizationSection from './authorization'
+
 const UpdateIssuer = () => {
     const context = useAppContext()
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
@@ -56,11 +58,16 @@ const UpdateIssuer = () => {
     };
     useEffect(fetch, [context]);
 
-    const issuer = (data ? data.allCredentialIssuers[0] : data)
+    const issuer = (data ? data.allCredentialIssuers[0] : null)
+
+    if (issuer != null) {
+        issuer.availableScopes = issuer.availableScopes ? JSON.parse(issuer.availableScopes) : []
+        issuer.clientRoles = issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
+    }
 
     const products = issuer == null ? null : [...new Set(issuer.environments.map(g => g.product.name))]
 
-    const breadcrumb = [{ href: '/manager/poc/credential-issuers', text: 'Credential Issuers' }];
+    const breadcrumb = [{ href: '/manager/poc/credential-issuers', text: 'Authorization Settings' }];
 
     const refetch = () => {
         window.location.href = "/manager/poc/credential-issuers"
@@ -89,7 +96,7 @@ const UpdateIssuer = () => {
     return (
         <>
         <Head>
-          <title>API Program Services | Credential Issuer</title>
+          <title>API Program Services | Authorization Settings</title>
         </Head>
         <Container maxW="6xl">
   
@@ -131,7 +138,14 @@ const UpdateIssuer = () => {
                                 Flow
                             </Text>
                             <Text as="dd">{issuer.flow}</Text>
-                            <Box></Box>
+                            <Alert status="info">
+                                <AlertIcon />
+                                <Box>
+                                    <b>client-credentials</b> implements the OAuth2 Client Credential Flow 
+                                    <br/><b>authorization-code</b> implements the OAuth2 Authorization Code Flow 
+                                    <br/><b>kong-api-key-acl</b> implements Kong's API Key and ACL flow
+                                </Box>
+                            </Alert>
                             <Text as="dt" fontWeight="bold">
                                 Mode
                             </Text>
@@ -147,9 +161,54 @@ const UpdateIssuer = () => {
                             )}
 
                     </Box>
+                    { issuer.flow == 'client-credentials' && (
+                    <Box
+                            as="dl"
+                            display="grid"
+                            fontSize="sm"
+                            flexWrap="wrap"
+                            gridColumnGap={4}
+                            gridRowGap={2}
+                            gridTemplateColumns="1fr 2fr 3fr"
+                            >
+                                <Text as="dt" fontWeight="bold">
+                                    Identity Provider (idP)
+                                </Text>
+                                <Text as="dd">keycloak</Text>
+                                <Box></Box>
+                                <Text as="dt" fontWeight="bold">
+                                    Discovery URL
+                                </Text>
+                                <Text as="dd">{issuer.oidcDiscoveryUrl}</Text>
+                                <Box></Box>
+                    </Box>
+                    )}
+                    { issuer.flow == 'kong-api-key-acl' && (
+                    <Box
+                            as="dl"
+                            display="grid"
+                            fontSize="sm"
+                            flexWrap="wrap"
+                            gridColumnGap={4}
+                            gridRowGap={2}
+                            gridTemplateColumns="1fr 2fr 3fr"
+                            >
+                                <Text as="dt" fontWeight="bold">
+                                    Key Name
+                                </Text>
+                                <Text as="dd">{issuer.apiKeyName}</Text>
+                                <Box></Box>
+                    </Box>
+                    )}                    
+
                 </Box>
 
             </Box>
+
+            { issuer.flow == 'client-credentials' && (
+                <AuthorizationSection fetch={fetch} issuer={issuer}/>
+            )}           
+
 
             { issuer.flow == 'kong-api-key-acl' && (
                 <Box bgColor="white" mb={4}>
@@ -182,7 +241,8 @@ const UpdateIssuer = () => {
                     alignItems="center"
                     justifyContent="space-between"
                     >
-                        <Heading size="md">OAuth2 Client Credential Flow</Heading>
+                        <Heading size="md">Client Registration</Heading>
+                        <Button size="xs" variant="secondary">Edit</Button>
                     </Box>
                     <Divider />
                     <Box p={4}>
@@ -197,29 +257,17 @@ const UpdateIssuer = () => {
                             gridTemplateColumns="1fr 2fr 3fr"
                             >
                                 <Text as="dt" fontWeight="bold">
-                                    OIDC Provider
-                                </Text>
-                                <Text as="dd">keycloak</Text>
-                                <Box></Box>
-                                <Text as="dt" fontWeight="bold">
-                                    Discovery URL
-                                </Text>
-                                <Text as="dd">{issuer.oidcDiscoveryUrl}</Text>
-                                <Box></Box>
-                                <Text as="dt" fontWeight="bold">
                                     Client Registration
                                 </Text>
                                 <Text as="dd">{issuer.clientRegistration}</Text>
-                                { issuer.clientRegistration == 'iat' && issuer.mode == 'auto' && (
-                                    <Alert status="info">
-                                        <AlertIcon />
-                                        <Box>
-                                            <b>Anonymous</b> registration allows the API Manager to create a client on the OIDC Provider without requiring any authentication.
-                                            <br/><b>Initial Access Token</b> is created on the OIDC Provider and has the authorization to create clients.
-                                            <br/><b>Managed</b> is where the Credential Issuer Owner has provided sufficient access for the API Manager to create new clients on the OIDC Provider.
-                                        </Box>
-                                    </Alert>
-                                )}
+                                <Alert status="info">
+                                    <AlertIcon />
+                                    <Box>
+                                        <b>Anonymous</b> registration allows the API Manager to create a client on the OIDC Provider without requiring any authentication.
+                                        <br/><b>Initial Access Token</b> is created on the OIDC Provider and has the authorization to create clients.
+                                        <br/><b>Managed</b> is where the Credential Issuer Owner has provided sufficient access for the API Manager to create new clients on the OIDC Provider.
+                                    </Box>
+                                </Alert>
                                 { issuer.clientRegistration == 'iat' && issuer.mode == 'auto' && (
                                     <>
                                         <Text as="dt" fontWeight="bold">
@@ -240,7 +288,7 @@ const UpdateIssuer = () => {
                                         <Text as="dt" fontWeight="bold">
                                             Client Secret
                                         </Text>
-                                        -- secret --
+                                        <Text as="dd">{issuer.clientSecret}</Text>
                                         <Box></Box>
                                     </>
 
@@ -273,16 +321,6 @@ const UpdateIssuer = () => {
                             gridTemplateColumns="1fr 2fr 3fr"
                             >
                                 <Text as="dt" fontWeight="bold">
-                                    OIDC Provider
-                                </Text>
-                                <Text as="dd">keycloak</Text>
-                                <Box></Box>
-                                <Text as="dt" fontWeight="bold">
-                                    Discovery URL
-                                </Text>
-                                <Text as="dd">{issuer.oidcDiscoveryUrl}</Text>
-                                <Box></Box>
-                                <Text as="dt" fontWeight="bold">
                                     Client ID
                                 </Text>
                                 <Text as="dd">{issuer.clientID}</Text>
@@ -291,6 +329,8 @@ const UpdateIssuer = () => {
                     </Box>
                 </Box>                
             )}
+
+ 
 
             <Box display="grid" gridGap={4} gridTemplateColumns="repeat(12, 1fr)">
  
@@ -301,7 +341,7 @@ const UpdateIssuer = () => {
                         alignItems="center"
                         justifyContent="space-between"
                     >
-                        <Heading size="md">Products Using This Issuer</Heading>
+                        <Heading size="md">Protected Services</Heading>
                     </Box>
                     <Divider />
                     <Table variant="simple">
@@ -331,7 +371,7 @@ const UpdateIssuer = () => {
                     alignItems="center"
                     justifyContent="space-between"
                 >
-                    <Heading size="md">Owner</Heading>
+                    <Heading size="md">Resource Owner</Heading>
                 </Box>
                 <Divider />
                 <Box p={4}>

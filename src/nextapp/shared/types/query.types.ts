@@ -64,6 +64,7 @@ export type AccessRequest = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  credential?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
@@ -148,6 +149,24 @@ export type AccessRequestWhereInput = {
   isIssued_not?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isComplete_not?: Maybe<Scalars['Boolean']>;
+  credential?: Maybe<Scalars['String']>;
+  credential_not?: Maybe<Scalars['String']>;
+  credential_contains?: Maybe<Scalars['String']>;
+  credential_not_contains?: Maybe<Scalars['String']>;
+  credential_starts_with?: Maybe<Scalars['String']>;
+  credential_not_starts_with?: Maybe<Scalars['String']>;
+  credential_ends_with?: Maybe<Scalars['String']>;
+  credential_not_ends_with?: Maybe<Scalars['String']>;
+  credential_i?: Maybe<Scalars['String']>;
+  credential_not_i?: Maybe<Scalars['String']>;
+  credential_contains_i?: Maybe<Scalars['String']>;
+  credential_not_contains_i?: Maybe<Scalars['String']>;
+  credential_starts_with_i?: Maybe<Scalars['String']>;
+  credential_not_starts_with_i?: Maybe<Scalars['String']>;
+  credential_ends_with_i?: Maybe<Scalars['String']>;
+  credential_not_ends_with_i?: Maybe<Scalars['String']>;
+  credential_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  credential_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   controls?: Maybe<Scalars['String']>;
   controls_not?: Maybe<Scalars['String']>;
   controls_contains?: Maybe<Scalars['String']>;
@@ -235,6 +254,8 @@ export enum SortAccessRequestsBy {
   IsIssuedDesc = 'isIssued_DESC',
   IsCompleteAsc = 'isComplete_ASC',
   IsCompleteDesc = 'isComplete_DESC',
+  CredentialAsc = 'credential_ASC',
+  CredentialDesc = 'credential_DESC',
   ControlsAsc = 'controls_ASC',
   ControlsDesc = 'controls_DESC',
   AdditionalDetailsAsc = 'additionalDetails_ASC',
@@ -263,6 +284,7 @@ export type AccessRequestUpdateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  credential?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
@@ -282,6 +304,7 @@ export type AccessRequestCreateInput = {
   isApproved?: Maybe<Scalars['Boolean']>;
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  credential?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
@@ -1109,6 +1132,9 @@ export type CredentialIssuer = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  availableScopes?: Maybe<Scalars['String']>;
+  apiKeyName?: Maybe<Scalars['String']>;
   owner?: Maybe<User>;
   environments: Array<Environment>;
   _environmentsMeta?: Maybe<_QueryMeta>;
@@ -1303,6 +1329,60 @@ export type CredentialIssuerWhereInput = {
   clientSecret_not_ends_with_i?: Maybe<Scalars['String']>;
   clientSecret_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   clientSecret_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRoles?: Maybe<Scalars['String']>;
+  clientRoles_not?: Maybe<Scalars['String']>;
+  clientRoles_contains?: Maybe<Scalars['String']>;
+  clientRoles_not_contains?: Maybe<Scalars['String']>;
+  clientRoles_starts_with?: Maybe<Scalars['String']>;
+  clientRoles_not_starts_with?: Maybe<Scalars['String']>;
+  clientRoles_ends_with?: Maybe<Scalars['String']>;
+  clientRoles_not_ends_with?: Maybe<Scalars['String']>;
+  clientRoles_i?: Maybe<Scalars['String']>;
+  clientRoles_not_i?: Maybe<Scalars['String']>;
+  clientRoles_contains_i?: Maybe<Scalars['String']>;
+  clientRoles_not_contains_i?: Maybe<Scalars['String']>;
+  clientRoles_starts_with_i?: Maybe<Scalars['String']>;
+  clientRoles_not_starts_with_i?: Maybe<Scalars['String']>;
+  clientRoles_ends_with_i?: Maybe<Scalars['String']>;
+  clientRoles_not_ends_with_i?: Maybe<Scalars['String']>;
+  clientRoles_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientRoles_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  availableScopes?: Maybe<Scalars['String']>;
+  availableScopes_not?: Maybe<Scalars['String']>;
+  availableScopes_contains?: Maybe<Scalars['String']>;
+  availableScopes_not_contains?: Maybe<Scalars['String']>;
+  availableScopes_starts_with?: Maybe<Scalars['String']>;
+  availableScopes_not_starts_with?: Maybe<Scalars['String']>;
+  availableScopes_ends_with?: Maybe<Scalars['String']>;
+  availableScopes_not_ends_with?: Maybe<Scalars['String']>;
+  availableScopes_i?: Maybe<Scalars['String']>;
+  availableScopes_not_i?: Maybe<Scalars['String']>;
+  availableScopes_contains_i?: Maybe<Scalars['String']>;
+  availableScopes_not_contains_i?: Maybe<Scalars['String']>;
+  availableScopes_starts_with_i?: Maybe<Scalars['String']>;
+  availableScopes_not_starts_with_i?: Maybe<Scalars['String']>;
+  availableScopes_ends_with_i?: Maybe<Scalars['String']>;
+  availableScopes_not_ends_with_i?: Maybe<Scalars['String']>;
+  availableScopes_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  availableScopes_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  apiKeyName?: Maybe<Scalars['String']>;
+  apiKeyName_not?: Maybe<Scalars['String']>;
+  apiKeyName_contains?: Maybe<Scalars['String']>;
+  apiKeyName_not_contains?: Maybe<Scalars['String']>;
+  apiKeyName_starts_with?: Maybe<Scalars['String']>;
+  apiKeyName_not_starts_with?: Maybe<Scalars['String']>;
+  apiKeyName_ends_with?: Maybe<Scalars['String']>;
+  apiKeyName_not_ends_with?: Maybe<Scalars['String']>;
+  apiKeyName_i?: Maybe<Scalars['String']>;
+  apiKeyName_not_i?: Maybe<Scalars['String']>;
+  apiKeyName_contains_i?: Maybe<Scalars['String']>;
+  apiKeyName_not_contains_i?: Maybe<Scalars['String']>;
+  apiKeyName_starts_with_i?: Maybe<Scalars['String']>;
+  apiKeyName_not_starts_with_i?: Maybe<Scalars['String']>;
+  apiKeyName_ends_with_i?: Maybe<Scalars['String']>;
+  apiKeyName_not_ends_with_i?: Maybe<Scalars['String']>;
+  apiKeyName_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  apiKeyName_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
@@ -1362,6 +1442,12 @@ export enum SortCredentialIssuersBy {
   ClientIdDesc = 'clientId_DESC',
   ClientSecretAsc = 'clientSecret_ASC',
   ClientSecretDesc = 'clientSecret_DESC',
+  ClientRolesAsc = 'clientRoles_ASC',
+  ClientRolesDesc = 'clientRoles_DESC',
+  AvailableScopesAsc = 'availableScopes_ASC',
+  AvailableScopesDesc = 'availableScopes_DESC',
+  ApiKeyNameAsc = 'apiKeyName_ASC',
+  ApiKeyNameDesc = 'apiKeyName_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
   EnvironmentsAsc = 'environments_ASC',
@@ -1388,6 +1474,9 @@ export type CredentialIssuerUpdateInput = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  availableScopes?: Maybe<Scalars['String']>;
+  apiKeyName?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
@@ -1409,6 +1498,9 @@ export type CredentialIssuerCreateInput = {
   initialAccessToken?: Maybe<Scalars['String']>;
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
+  clientRoles?: Maybe<Scalars['String']>;
+  availableScopes?: Maybe<Scalars['String']>;
+  apiKeyName?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
@@ -1799,8 +1891,10 @@ export type Environment = {
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
+  approval?: Maybe<Scalars['Boolean']>;
   flow?: Maybe<Scalars['String']>;
   legal?: Maybe<Legal>;
   credentialIssuer?: Maybe<CredentialIssuer>;
@@ -1839,6 +1933,24 @@ export type EnvironmentWhereInput = {
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
   id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  appId?: Maybe<Scalars['String']>;
+  appId_not?: Maybe<Scalars['String']>;
+  appId_contains?: Maybe<Scalars['String']>;
+  appId_not_contains?: Maybe<Scalars['String']>;
+  appId_starts_with?: Maybe<Scalars['String']>;
+  appId_not_starts_with?: Maybe<Scalars['String']>;
+  appId_ends_with?: Maybe<Scalars['String']>;
+  appId_not_ends_with?: Maybe<Scalars['String']>;
+  appId_i?: Maybe<Scalars['String']>;
+  appId_not_i?: Maybe<Scalars['String']>;
+  appId_contains_i?: Maybe<Scalars['String']>;
+  appId_not_contains_i?: Maybe<Scalars['String']>;
+  appId_starts_with_i?: Maybe<Scalars['String']>;
+  appId_not_starts_with_i?: Maybe<Scalars['String']>;
+  appId_ends_with_i?: Maybe<Scalars['String']>;
+  appId_not_ends_with_i?: Maybe<Scalars['String']>;
+  appId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  appId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -1859,6 +1971,8 @@ export type EnvironmentWhereInput = {
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   active?: Maybe<Scalars['Boolean']>;
   active_not?: Maybe<Scalars['Boolean']>;
+  approval?: Maybe<Scalars['Boolean']>;
+  approval_not?: Maybe<Scalars['Boolean']>;
   flow?: Maybe<Scalars['String']>;
   flow_not?: Maybe<Scalars['String']>;
   flow_in?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -1902,10 +2016,14 @@ export type EnvironmentWhereUniqueInput = {
 export enum SortEnvironmentsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
+  AppIdAsc = 'appId_ASC',
+  AppIdDesc = 'appId_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   ActiveAsc = 'active_ASC',
   ActiveDesc = 'active_DESC',
+  ApprovalAsc = 'approval_ASC',
+  ApprovalDesc = 'approval_DESC',
   FlowAsc = 'flow_ASC',
   FlowDesc = 'flow_DESC',
   LegalAsc = 'legal_ASC',
@@ -1923,6 +2041,7 @@ export enum SortEnvironmentsBy {
 export type EnvironmentUpdateInput = {
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
+  approval?: Maybe<Scalars['Boolean']>;
   flow?: Maybe<Scalars['String']>;
   legal?: Maybe<LegalRelateToOneInput>;
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
@@ -1937,8 +2056,10 @@ export type EnvironmentsUpdateInput = {
 };
 
 export type EnvironmentCreateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
+  approval?: Maybe<Scalars['Boolean']>;
   flow?: Maybe<Scalars['String']>;
   legal?: Maybe<LegalRelateToOneInput>;
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;

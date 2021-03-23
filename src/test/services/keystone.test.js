@@ -16,7 +16,7 @@ describe("KeystoneJS", function() {
                             plugins: [
                                 {
                                     name: "acl",
-                                    config: {}
+                                    config: '{}'
                                 }
                             ],
                             routes: [
@@ -25,7 +25,7 @@ describe("KeystoneJS", function() {
                                     plugins: [
                                         {
                                             name: "rate-limiting",
-                                            config: {}
+                                            config: '{}'
                                         }
                                     ]
                                 }

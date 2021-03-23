@@ -1,6 +1,20 @@
 const assert = require('assert').strict;
 
 module.exports = {
+    lookupApplication: async function lookupApplication (context, id) {
+        const result = await context.executeGraphQL({
+            query: `query GetApplicationById($id: ID!) {
+                        allApplications(where: {id: $id}) {
+                            id
+                            appId
+                        }
+                    }`,
+            variables: { id: id },
+        })
+        console.log("GetApplicationById " + JSON.stringify(result))
+        return result.data.allApplications[0]
+    },
+
     lookupServices: async function lookupServices (context, services) {
         const result = await context.executeGraphQL({
             query: `query GetServices($services: [ID]) {
@@ -31,10 +45,15 @@ module.exports = {
         const result = await context.executeGraphQL({
             query: `query GetProductEnvironmentServices($id: ID!) {
                         allEnvironments(where: {id: $id}) {
+                            appId
                             id
                             name
                             flow
+                            product {
+                                namespace
+                            }
                             credentialIssuer {
+                                id
                                 flow
                                 oidcDiscoveryUrl
                             }
@@ -193,13 +212,14 @@ module.exports = {
 
     addServiceAccess: async function(context, name, active, aclEnabled, consumerType, credentialReference, clientRoles, consumerPK, productEnvironment, application) {
         // This should actually go away and the "Feeders" should be used
-        const data = { name, active, aclEnabled, consumerType, credentialReference }
-        data.clientRoles = JSON.stringify(clientRoles)
+        const data = { name, active, aclEnabled, consumerType }
+        data.clientRoles = JSON.stringify(clientRoles == null ? []:clientRoles)
         data.consumer = { connect: { id: consumerPK } }
         data.productEnvironment = { connect: { id: productEnvironment.id } }
         application != null && (data.application = { connect: { id: application.id } })
+        credentialReference != null && (data.credentialReference = JSON.stringify(credentialReference))
 
-        console.log("KEYSTONE SERVICE ACCESS DATA " + JSON.stringify(data))
+        console.log("KEYSTONE SERVICE ACCESS DATA " + JSON.stringify(data, null, 4))
 
         const result = await context.executeGraphQL({
             query: `mutation CreateServiceAccess($data: ServiceAccessCreateInput) {

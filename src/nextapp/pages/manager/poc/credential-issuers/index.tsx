@@ -43,13 +43,13 @@ const CredentialIssuerPage = () => {
     return (
         <>
         <Head>
-          <title>API Program Services | Credential Issuers</title>
+          <title>API Program Services | Authorization Settings</title>
         </Head>
         <Container maxW="6xl">
   
-          <PageHeader title="Consumers" actions={actions}>
+          <PageHeader title="Authorization Settings" actions={actions}>
             <p>
-              <strong>Credential Issuers</strong> describe the type of authentication and authorization that protects APIs.
+              <strong>Authorization Settings</strong> describe the type of authentication and authorization that protects your APIs.
 
             </p>
           </PageHeader>

@@ -136,7 +136,7 @@ describe('Client Credential Flow', function () {
         },
         Consumer: {
           username: 'APP-01-ID1',
-          kongConsumerId: 'KONG-CONSUMER-002',
+          kongConsumerId: 'KONG-CONSUMER-001',
         },
         Activity: [
           {
@@ -207,19 +207,11 @@ describe('Client Credential Flow', function () {
             },
           },
           {
-            source: 'kong',
-            type: 'POST consumer',
-            content: {
-              username: 'APP-01-ID1',
-              tags: ['aps-portal-poc'],
-            },
-          },
-          {
             source: 'feeder',
             path: {
               source: 'kong',
               scope: 'consumer',
-              scopeKey: 'KONG-CONSUMER-002',
+              scopeKey: 'KONG-CONSUMER-001',
             },
             content: '',
           },

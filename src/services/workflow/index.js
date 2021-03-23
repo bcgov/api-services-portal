@@ -29,9 +29,12 @@ For API Key and Basic Auth can be added to Kong
 */
 const assert = require('assert').strict;
 
-const { lookupServices, lookupProductEnvironmentServices, lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
+const { lookupApplication, lookupServices, lookupProductEnvironmentServices, lookupEnvironmentAndApplicationByAccessRequest, lookupCredentialReferenceByServiceAccess, lookupKongConsumerIdByName, lookupCredentialIssuerById, linkCredRefsToServiceAccess, addKongConsumer, addServiceAccess } = require('../keystone')
 
 const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession } = require('../keycloak');
+
+const { registerClient } = require('./client-credentials')
+const { registerApiKey } = require('./kong-api-key')
 
 const {v4: uuidv4} = require('uuid');
 
@@ -44,6 +47,7 @@ const isBlank = (val => val == null || typeof(val) == 'undefined' || val == "")
 const { recordActivity } = require('../../lists/Activity')
 
 
+const isRequested = (existingItem, updatedItem) => existingItem == null
 const isUpdatingToApproved = (existingItem, updatedItem) => existingItem && (existingItem.isApproved == null || existingItem.isApproved == false) && updatedItem.isApproved
 const isUpdatingToIssued = (existingItem, updatedItem) => existingItem && (existingItem.isIssued == null || existingItem.isIssued == false) && updatedItem.isIssued
 
@@ -176,23 +180,89 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
 
 const wfRegenerateCredential = async (context, operation, existingItem, originalInput, updatedItem) => {
     const kongApi = new kong(process.env.KONG_URL)
-    const serviceAccess = operation == 'create' ? null : await lookupCredentialReferenceByServiceAccess(context, existingItem.id)
+    const feederApi = new feeder(process.env.FEEDER_URL)
+
 
     if (originalInput.credential == "NEW") {
-        const flow = serviceAccess.productEnvironment.flow
+        const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
+
+        const flow = requestDetails.productEnvironment.flow
         // throw error if this is not an authMethod = 'api-key'
 
-        const credentialReference = serviceAccess.credentialReference
 
         // Need additional info about the particular productEnvironment to get the right api key
         // at the moment, just taking the first one! :(
 
         if (flow == 'kong-api-key-acl') {
-            const apiKey = await kongApi.genKeyForConsumerKeyAuth (serviceAccess.consumer.kongConsumerId, credentialReference.keyAuthId)
-            
-            updatedItem['credential'] = apiKey.apiKey
+            const productEnvironment = await lookupProductEnvironmentServices(context, requestDetails.productEnvironment.id)
+
+            const application = await lookupApplication(context, requestDetails.application.id)
+
+            //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+            const clientId = application.appId + '-' + productEnvironment.appId
+
+            const nickname = clientId
+
+            const newApiKey = await registerApiKey (context, clientId, nickname) 
+
+            console.log(JSON.stringify(newApiKey, null, 4))
+
+            // Call /feeds to sync the Consumer with KeystoneJS
+            await feederApi.forceSync('kong', 'consumer', newApiKey.consumer.id)
+
+            const credentialReference = {
+                keyAuthPK: newApiKey.apiKey.keyAuthPK
+            }
+            // Create a ServiceAccess record
+            const consumerType = 'client'
+            const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
+            await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newApiKey.consumerPK, productEnvironment, application )
+
+            const backToUser = {
+                apiKey: newApiKey.apiKey.apiKey
+            }
+            updatedItem['credential'] = JSON.stringify(backToUser)
+        }
+        if (flow == 'client-credentials') {
+            const productEnvironment = await lookupProductEnvironmentServices(context, requestDetails.productEnvironment.id)
+
+            const application = await lookupApplication(context, requestDetails.application.id)
+
+            //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+            const clientId = application.appId + '-' + productEnvironment.appId
+
+            const nickname = clientId
+
+            const newClient = await registerClient (context, productEnvironment.credentialIssuer.id, clientId, nickname) 
+
+            console.log(JSON.stringify(newClient, null, 4))
+
+            // Call /feeds to sync the Consumer with KeystoneJS
+            await feederApi.forceSync('kong', 'consumer', newClient.consumer.id)
+
+            const credentialReference = {
+                id: newClient.client.id,
+                clientId: newClient.client.clientId,
+            }
+            // Create a ServiceAccess record
+            const consumerType = 'client'
+            const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
+            await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application )
+
+            const backToUser = {
+                flow: productEnvironment.flow,
+                clientId: newClient.client.clientId,
+                clientSecret: newClient.client.clientSecret,
+                tokenEndpoint: newClient.openid.token_endpoint
+            }
+
+            updatedItem['credential'] = JSON.stringify(backToUser)
+            console.log(JSON.stringify(backToUser, null, 4))
         }
     }
+}
+
+const wfPrepareServiceAccess = async (context) => {
 
 }
 
@@ -200,20 +270,12 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
     const kongApi = new kong(process.env.KONG_URL)
     const feederApi = new feeder(process.env.FEEDER_URL)
 
-    const requestDetails = operation == 'create' ? null : await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
-
     try {
-        if (originalInput.credential == "NEW") {
-            const appId = requestDetails.application.appId
-            // throw error if this is not an authMethod = 'api-key'
+        await wfRegenerateCredential(context, operation, existingItem, originalInput, updatedItem)
 
-            //const credentialReference = JSON.stringify(requestDetails.credentialReference)
+        if (isUpdatingToIssued(existingItem, updatedItem)) {
+            const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 
-            // Need additional info about the particular productEnvironment to get the right api key
-            // at the moment, just taking the first one! :(
-            updatedItem['credential'] = await regenerateApiKey (context, appId)
-
-        } else if (isUpdatingToIssued(existingItem, updatedItem)) {
             console.log(JSON.stringify(existingItem, null ,4))
             const reqId = existingItem.id
 
@@ -314,7 +376,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             }
 
             // Call /feeds to sync the Consumer with KeystoneJS
-            await feederApi.forceSync(ns, 'kong', 'consumer', kongConsumerPK)
+            await feederApi.forceSync('kong', 'consumer', kongConsumerPK)
         }
 
         const refId = updatedItem.id
@@ -332,5 +394,6 @@ module.exports = {
     Apply: wfApply,
     Validate: wfValidate,
     ValidateActiveEnvironment: wfValidateActiveEnvironment,
-    RegenerateCredential: wfRegenerateCredential
+    RegenerateCredential: wfRegenerateCredential,
+    PrepareServiceAccess: wfPrepareServiceAccess
 }

@@ -61,6 +61,19 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    clientRoles: {
+        type: Text,
+        isRequired: false,
+    },
+    availableScopes: {
+        type: Text,
+        isRequired: false,
+    },
+    apiKeyName: {
+        type: Text,
+        isRequired: false,
+        defaultValue: 'X-API-KEY'
+    },
     owner: { type: Relationship, ref: 'User', isRequired: true, many: false },
     environments: { type: Relationship, ref: 'Environment.credentialIssuer', many: true }
   },
