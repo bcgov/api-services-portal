@@ -110,7 +110,7 @@ const ServicePage: React.FC<
         </Box>
         <Divider />
         <Box minHeight="100px" p={4}>
-          {id && (
+          {id && data && (
             <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
               <MetricGraph
                 days={range}
@@ -139,7 +139,7 @@ const ServicePage: React.FC<
           </Box>
           <Divider />
           <Box p={4} display="flex" alignItems="center" flex={1}>
-            {id && (
+            {id && data && (
               <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
                 <MetricGraph
                   alt

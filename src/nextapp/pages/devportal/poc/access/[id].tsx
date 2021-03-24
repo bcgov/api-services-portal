@@ -130,6 +130,7 @@ const MyApplicationsPage = () => {
 
     useEffect(fetch, [context]);
 
+    const cancelRequest = (id) => {}
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 

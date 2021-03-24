@@ -300,18 +300,20 @@ const wfDeleteAccess = async (context, operation, keys) => {
         const applicationId = keys.application
 
         await deleteRecord(context, 'AccessRequest', { application: { id: applicationId }}, ['id'])
-        .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id }', 'productEnvironment { credentialIssuer { id } }']))
-        .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
-                            .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
-                                .then((async () => {
-                                    const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
-                                    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
-                    
-                                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+        .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id }', 'productEnvironment { credentialIssuer { id } }'])
+            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
+                .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
+                    .then((async () => {
+                        const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
+                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+        
+                        const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
 
-                                    // Need extra privilege to delete clients!
-                                    //return await deleteClientRegistration(openid.issuer, token, con.customId)
-                                })))
+                        // Need extra privilege to delete clients!
+                        //return await deleteClientRegistration(openid.issuer, token, con.customId)
+                    }))
+                )
+            )
         )
     } else {
         const serviceAccessId = keys.serviceAccess

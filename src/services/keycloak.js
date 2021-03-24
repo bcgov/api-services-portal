@@ -7,19 +7,17 @@ const clientTemplate = require('./keycloak/client-template.json')
 
 module.exports = {
     getKeycloakSession: async function (issuer, clientId, clientSecret) {
-        const body = {
-            grant_type: 'client_credentials',
-            client_id: clientId,
-            client_secret: clientSecret,
-            scope: 'profile'
-        }
-        console.log("GET KEYCLOAK SESSION " + JSON.stringify(body, null, 4))
+        const params = new URLSearchParams();
+        params.append('grant_type', 'client_credentials');
+        params.append('client_id', clientId);
+        params.append('client_secret', clientSecret);
+    
         const response = await fetch(`${issuer}/protocol/openid-connect/token`, {
             method: 'post',
-            body:    body,
+            body:    params,
             headers: { 
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
         })
         .then(checkStatus)

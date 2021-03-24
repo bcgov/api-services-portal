@@ -406,14 +406,14 @@ const UpdateIssuer = () => {
 
           )}
   
-          <Box mt={5}>
+          {/* <Box mt={5}>
 
             
                 <ButtonGroup variant="outline" spacing="6" className="m-5">
                     <Button colorScheme="blue" onClick={() => fulfill()}>Update</Button>
                     <Button>Cancel</Button>
                 </ButtonGroup>
-            </Box>
+            </Box> */}
         </Container>
         </>
     )

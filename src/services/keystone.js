@@ -90,6 +90,9 @@ module.exports = {
                                 id
                                 name
                                 flow
+                                credentialIssuer {
+                                    id
+                                }
                             }
                             consumer {
                                 id
