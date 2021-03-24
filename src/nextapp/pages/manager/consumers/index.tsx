@@ -150,7 +150,7 @@ const ConsumersPage: React.FC<
                     </NextLink>
                   </Td>
                   <Td>{d.customId}</Td>
-                  <Td>{d.plugins.map((d) => d.name).join(', ')}</Td>
+                  <Td>{d.plugins?.map((d) => d.name).join(', ')}</Td>
                   <Td>
                     <TagsList data={d.tags} />
                   </Td>
