@@ -14,10 +14,7 @@ import {
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
-import {
-  Environment,
-  EnvironmentUpdateInput,
-} from '@/types/query.types';
+import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
@@ -29,16 +26,15 @@ interface EnvironmentConfigProps {
 const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
-  const [flow, setFlow] = React.useState<string>(
-    data.flow
-  );
+  const [flow, setFlow] = React.useState<string>(data.flow);
   const statusText = data.active ? 'Running' : 'Idle';
   const statusBoxColorScheme = data.active ? 'green' : 'orange';
 
   // Updates
   const client = useQueryClient();
   const mutation = useMutation(
-    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes, true)
+    async (changes: unknown) =>
+      await api(UPDATE_ENVIRONMENT, changes, { ssr: false })
   );
 
   // Events
@@ -70,7 +66,11 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     } catch (err) {
       toast({
         title: 'Environment Update Failed',
-        description: err.map((e) => e.data?.messages ? e.data.messages.join(',') : e.message).join(', '),
+        description: err
+          .map((e) =>
+            e.data?.messages ? e.data.messages.join(',') : e.message
+          )
+          .join(', '),
         isClosable: true,
         status: 'error',
       });
@@ -87,11 +87,11 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   }, [flow, data, setFlow, setChanged]);
 
   const flowTypes = [
-    { value: 'public', label: 'Public'},
-    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
-    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
-    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
-  ]
+    { value: 'public', label: 'Public' },
+    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
+    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
+    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
+  ];
 
   return (
     <form onChange={onChange} onSubmit={onSubmit} onReset={onReset}>
@@ -149,8 +149,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             )}
           </Heading>
           <Box>
-            <Text mb={4}>
-            </Text>
+            <Text mb={4}></Text>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>
                 Authentication
@@ -164,9 +163,12 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                 value={flow}
                 onChange={onAuthChange}
               >
-                {flowTypes.map(f => (<option value={f.value}>{f.label}</option>))}
+                {flowTypes.map((f) => (
+                  <option value={f.value}>{f.label}</option>
+                ))}
               </Select>
-              {(flow === 'client-credentials' || flow === 'authorization-code') && (
+              {(flow === 'client-credentials' ||
+                flow === 'authorization-code') && (
                 <CredentialIssuerSelect environmentId={data.id} flow={flow} />
               )}
               <Box flex={1} />

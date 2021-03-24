@@ -12,14 +12,32 @@ import { apiHost } from '../config';
 
 interface ApiOptions {
   ssr?: boolean;
-  authorization?: HeadersInit;
+  headers?: any;
+}
+
+interface ApiErrorMessage {
+  message: string;
+  name: string;
+  time_thrown: string;
+  data: {
+    messages: string[];
+    errors: unknown[];
+    listKey: string;
+    operation: string;
+  };
+  path: string[];
+  uid: string;
+}
+
+interface ApiResponse extends Query {
+  errors?: ApiErrorMessage;
 }
 
 // NOTE: This can be called at build time
-const api = async <T>(
+const api = async <T extends ApiResponse>(
   query: string,
   variables: unknown = {},
-  options = {}
+  options: ApiOptions = {}
 ): Promise<T> => {
   const settings = {
     ssr: true,
@@ -35,6 +53,11 @@ const api = async <T>(
 
   try {
     const data = await apiClient.request<T>(query, variables);
+
+    if (data.errors) {
+      throw data.errors;
+    }
+
     return data;
   } catch (err) {
     if (settings.ssr) {

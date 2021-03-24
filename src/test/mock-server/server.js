@@ -144,6 +144,9 @@ const server = mockServer(schemaWithMocks, {
       return res;
     },
     updateEnvironment: ({ id, data }) => {
+      // throw new Error({
+      //   errors: [{ message: 'something broke', name: 'ValidationError' }],
+      // });
       allProducts.forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
 
@@ -157,7 +160,6 @@ const server = mockServer(schemaWithMocks, {
           }
         }
       });
-
       return { id, ...data };
     },
     deleteEnvironment: ({ id }) => {

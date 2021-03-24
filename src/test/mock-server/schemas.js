@@ -24,10 +24,10 @@ input EnvironmentRelateToOneInput {
   disconnectAll: Boolean
 }
 
-input ActivityRelateToManyInput {
-  create: [ActivityCreateInput]
-  connect: [ActivityWhereUniqueInput]
-  disconnect: [ActivityWhereUniqueInput]
+input ServiceAccessRelateToOneInput {
+  create: ServiceAccessCreateInput
+  connect: ServiceAccessWhereUniqueInput
+  disconnect: ServiceAccessWhereUniqueInput
   disconnectAll: Boolean
 }
 
@@ -41,26 +41,13 @@ type AccessRequest {
   isApproved: Boolean
   isIssued: Boolean
   isComplete: Boolean
+  credential: String
   controls: String
+  additionalDetails: String
   requestor: User
   application: Application
   productEnvironment: Environment
-  activity(
-    where: ActivityWhereInput
-    search: String
-    sortBy: [SortActivitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [Activity!]!
-  _activityMeta(
-    where: ActivityWhereInput
-    search: String
-    sortBy: [SortActivitiesBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
+  serviceAccess: ServiceAccess
   updatedBy: User
   createdBy: User
   updatedAt: DateTime
@@ -116,6 +103,24 @@ input AccessRequestWhereInput {
   isIssued_not: Boolean
   isComplete: Boolean
   isComplete_not: Boolean
+  credential: String
+  credential_not: String
+  credential_contains: String
+  credential_not_contains: String
+  credential_starts_with: String
+  credential_not_starts_with: String
+  credential_ends_with: String
+  credential_not_ends_with: String
+  credential_i: String
+  credential_not_i: String
+  credential_contains_i: String
+  credential_not_contains_i: String
+  credential_starts_with_i: String
+  credential_not_starts_with_i: String
+  credential_ends_with_i: String
+  credential_not_ends_with_i: String
+  credential_in: [String]
+  credential_not_in: [String]
   controls: String
   controls_not: String
   controls_contains: String
@@ -134,15 +139,32 @@ input AccessRequestWhereInput {
   controls_not_ends_with_i: String
   controls_in: [String]
   controls_not_in: [String]
+  additionalDetails: String
+  additionalDetails_not: String
+  additionalDetails_contains: String
+  additionalDetails_not_contains: String
+  additionalDetails_starts_with: String
+  additionalDetails_not_starts_with: String
+  additionalDetails_ends_with: String
+  additionalDetails_not_ends_with: String
+  additionalDetails_i: String
+  additionalDetails_not_i: String
+  additionalDetails_contains_i: String
+  additionalDetails_not_contains_i: String
+  additionalDetails_starts_with_i: String
+  additionalDetails_not_starts_with_i: String
+  additionalDetails_ends_with_i: String
+  additionalDetails_not_ends_with_i: String
+  additionalDetails_in: [String]
+  additionalDetails_not_in: [String]
   requestor: UserWhereInput
   requestor_is_null: Boolean
   application: ApplicationWhereInput
   application_is_null: Boolean
   productEnvironment: EnvironmentWhereInput
   productEnvironment_is_null: Boolean
-  activity_every: ActivityWhereInput
-  activity_some: ActivityWhereInput
-  activity_none: ActivityWhereInput
+  serviceAccess: ServiceAccessWhereInput
+  serviceAccess_is_null: Boolean
   updatedBy: UserWhereInput
   updatedBy_is_null: Boolean
   createdBy: UserWhereInput
@@ -182,16 +204,20 @@ enum SortAccessRequestsBy {
   isIssued_DESC
   isComplete_ASC
   isComplete_DESC
+  credential_ASC
+  credential_DESC
   controls_ASC
   controls_DESC
+  additionalDetails_ASC
+  additionalDetails_DESC
   requestor_ASC
   requestor_DESC
   application_ASC
   application_DESC
   productEnvironment_ASC
   productEnvironment_DESC
-  activity_ASC
-  activity_DESC
+  serviceAccess_ASC
+  serviceAccess_DESC
   updatedBy_ASC
   updatedBy_DESC
   createdBy_ASC
@@ -208,11 +234,13 @@ input AccessRequestUpdateInput {
   isApproved: Boolean
   isIssued: Boolean
   isComplete: Boolean
+  credential: String
   controls: String
+  additionalDetails: String
   requestor: UserRelateToOneInput
   application: ApplicationRelateToOneInput
   productEnvironment: EnvironmentRelateToOneInput
-  activity: ActivityRelateToManyInput
+  serviceAccess: ServiceAccessRelateToOneInput
 }
 
 input AccessRequestsUpdateInput {
@@ -226,11 +254,13 @@ input AccessRequestCreateInput {
   isApproved: Boolean
   isIssued: Boolean
   isComplete: Boolean
+  credential: String
   controls: String
+  additionalDetails: String
   requestor: UserRelateToOneInput
   application: ApplicationRelateToOneInput
   productEnvironment: EnvironmentRelateToOneInput
-  activity: ActivityRelateToManyInput
+  serviceAccess: ServiceAccessRelateToOneInput
 }
 
 input AccessRequestsCreateInput {
@@ -1001,12 +1031,16 @@ type CredentialIssuer {
   flow: String
   clientRegistration: String
   mode: String
+  authPlugin: String
   instruction: String
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
-  contact: User
+  clientRoles: String
+  availableScopes: String
+  apiKeyName: String
+  owner: User
   environments(
     where: EnvironmentWhereInput
     search: String
@@ -1084,6 +1118,24 @@ input CredentialIssuerWhereInput {
   mode_not: String
   mode_in: [String]
   mode_not_in: [String]
+  authPlugin: String
+  authPlugin_not: String
+  authPlugin_contains: String
+  authPlugin_not_contains: String
+  authPlugin_starts_with: String
+  authPlugin_not_starts_with: String
+  authPlugin_ends_with: String
+  authPlugin_not_ends_with: String
+  authPlugin_i: String
+  authPlugin_not_i: String
+  authPlugin_contains_i: String
+  authPlugin_not_contains_i: String
+  authPlugin_starts_with_i: String
+  authPlugin_not_starts_with_i: String
+  authPlugin_ends_with_i: String
+  authPlugin_not_ends_with_i: String
+  authPlugin_in: [String]
+  authPlugin_not_in: [String]
   instruction: String
   instruction_not: String
   instruction_contains: String
@@ -1174,8 +1226,62 @@ input CredentialIssuerWhereInput {
   clientSecret_not_ends_with_i: String
   clientSecret_in: [String]
   clientSecret_not_in: [String]
-  contact: UserWhereInput
-  contact_is_null: Boolean
+  clientRoles: String
+  clientRoles_not: String
+  clientRoles_contains: String
+  clientRoles_not_contains: String
+  clientRoles_starts_with: String
+  clientRoles_not_starts_with: String
+  clientRoles_ends_with: String
+  clientRoles_not_ends_with: String
+  clientRoles_i: String
+  clientRoles_not_i: String
+  clientRoles_contains_i: String
+  clientRoles_not_contains_i: String
+  clientRoles_starts_with_i: String
+  clientRoles_not_starts_with_i: String
+  clientRoles_ends_with_i: String
+  clientRoles_not_ends_with_i: String
+  clientRoles_in: [String]
+  clientRoles_not_in: [String]
+  availableScopes: String
+  availableScopes_not: String
+  availableScopes_contains: String
+  availableScopes_not_contains: String
+  availableScopes_starts_with: String
+  availableScopes_not_starts_with: String
+  availableScopes_ends_with: String
+  availableScopes_not_ends_with: String
+  availableScopes_i: String
+  availableScopes_not_i: String
+  availableScopes_contains_i: String
+  availableScopes_not_contains_i: String
+  availableScopes_starts_with_i: String
+  availableScopes_not_starts_with_i: String
+  availableScopes_ends_with_i: String
+  availableScopes_not_ends_with_i: String
+  availableScopes_in: [String]
+  availableScopes_not_in: [String]
+  apiKeyName: String
+  apiKeyName_not: String
+  apiKeyName_contains: String
+  apiKeyName_not_contains: String
+  apiKeyName_starts_with: String
+  apiKeyName_not_starts_with: String
+  apiKeyName_ends_with: String
+  apiKeyName_not_ends_with: String
+  apiKeyName_i: String
+  apiKeyName_not_i: String
+  apiKeyName_contains_i: String
+  apiKeyName_not_contains_i: String
+  apiKeyName_starts_with_i: String
+  apiKeyName_not_starts_with_i: String
+  apiKeyName_ends_with_i: String
+  apiKeyName_not_ends_with_i: String
+  apiKeyName_in: [String]
+  apiKeyName_not_in: [String]
+  owner: UserWhereInput
+  owner_is_null: Boolean
   environments_every: EnvironmentWhereInput
   environments_some: EnvironmentWhereInput
   environments_none: EnvironmentWhereInput
@@ -1218,6 +1324,8 @@ enum SortCredentialIssuersBy {
   clientRegistration_DESC
   mode_ASC
   mode_DESC
+  authPlugin_ASC
+  authPlugin_DESC
   instruction_ASC
   instruction_DESC
   oidcDiscoveryUrl_ASC
@@ -1228,8 +1336,14 @@ enum SortCredentialIssuersBy {
   clientId_DESC
   clientSecret_ASC
   clientSecret_DESC
-  contact_ASC
-  contact_DESC
+  clientRoles_ASC
+  clientRoles_DESC
+  availableScopes_ASC
+  availableScopes_DESC
+  apiKeyName_ASC
+  apiKeyName_DESC
+  owner_ASC
+  owner_DESC
   environments_ASC
   environments_DESC
   updatedBy_ASC
@@ -1248,12 +1362,16 @@ input CredentialIssuerUpdateInput {
   flow: String
   clientRegistration: String
   mode: String
+  authPlugin: String
   instruction: String
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
-  contact: UserRelateToOneInput
+  clientRoles: String
+  availableScopes: String
+  apiKeyName: String
+  owner: UserRelateToOneInput
   environments: EnvironmentRelateToManyInput
 }
 
@@ -1268,12 +1386,16 @@ input CredentialIssuerCreateInput {
   flow: String
   clientRegistration: String
   mode: String
+  authPlugin: String
   instruction: String
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
-  contact: UserRelateToOneInput
+  clientRoles: String
+  availableScopes: String
+  apiKeyName: String
+  owner: UserRelateToOneInput
   environments: EnvironmentRelateToManyInput
 }
 
@@ -1614,17 +1736,17 @@ input DatasetsCreateInput {
   data: DatasetCreateInput
 }
 
+input LegalRelateToOneInput {
+  create: LegalCreateInput
+  connect: LegalWhereUniqueInput
+  disconnect: LegalWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 input CredentialIssuerRelateToOneInput {
   create: CredentialIssuerCreateInput
   connect: CredentialIssuerWhereUniqueInput
   disconnect: CredentialIssuerWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input GatewayPluginRelateToManyInput {
-  create: [GatewayPluginCreateInput]
-  connect: [GatewayPluginWhereUniqueInput]
-  disconnect: [GatewayPluginWhereUniqueInput]
   disconnectAll: Boolean
 }
 
@@ -1645,27 +1767,14 @@ input ProductRelateToOneInput {
 type Environment {
   _label_: String
   id: ID!
+  appId: String
   name: String
   active: Boolean
+  approval: Boolean
   flow: String
+  legal: Legal
   credentialIssuer: CredentialIssuer
-  plugins(
-    where: GatewayPluginWhereInput
-    search: String
-    sortBy: [SortGatewayPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): [GatewayPlugin!]!
-  _pluginsMeta(
-    where: GatewayPluginWhereInput
-    search: String
-    sortBy: [SortGatewayPluginsBy!]
-    orderBy: String
-    first: Int
-    skip: Int
-  ): _QueryMeta
-  description: String
+  additionalDetailsToRequest: String
   services(
     where: GatewayServiceWhereInput
     search: String
@@ -1692,6 +1801,24 @@ input EnvironmentWhereInput {
   id_not: ID
   id_in: [ID]
   id_not_in: [ID]
+  appId: String
+  appId_not: String
+  appId_contains: String
+  appId_not_contains: String
+  appId_starts_with: String
+  appId_not_starts_with: String
+  appId_ends_with: String
+  appId_not_ends_with: String
+  appId_i: String
+  appId_not_i: String
+  appId_contains_i: String
+  appId_not_contains_i: String
+  appId_starts_with_i: String
+  appId_not_starts_with_i: String
+  appId_ends_with_i: String
+  appId_not_ends_with_i: String
+  appId_in: [String]
+  appId_not_in: [String]
   name: String
   name_not: String
   name_contains: String
@@ -1712,33 +1839,34 @@ input EnvironmentWhereInput {
   name_not_in: [String]
   active: Boolean
   active_not: Boolean
+  approval: Boolean
+  approval_not: Boolean
   flow: String
   flow_not: String
   flow_in: [String]
   flow_not_in: [String]
+  legal: LegalWhereInput
+  legal_is_null: Boolean
   credentialIssuer: CredentialIssuerWhereInput
   credentialIssuer_is_null: Boolean
-  plugins_every: GatewayPluginWhereInput
-  plugins_some: GatewayPluginWhereInput
-  plugins_none: GatewayPluginWhereInput
-  description: String
-  description_not: String
-  description_contains: String
-  description_not_contains: String
-  description_starts_with: String
-  description_not_starts_with: String
-  description_ends_with: String
-  description_not_ends_with: String
-  description_i: String
-  description_not_i: String
-  description_contains_i: String
-  description_not_contains_i: String
-  description_starts_with_i: String
-  description_not_starts_with_i: String
-  description_ends_with_i: String
-  description_not_ends_with_i: String
-  description_in: [String]
-  description_not_in: [String]
+  additionalDetailsToRequest: String
+  additionalDetailsToRequest_not: String
+  additionalDetailsToRequest_contains: String
+  additionalDetailsToRequest_not_contains: String
+  additionalDetailsToRequest_starts_with: String
+  additionalDetailsToRequest_not_starts_with: String
+  additionalDetailsToRequest_ends_with: String
+  additionalDetailsToRequest_not_ends_with: String
+  additionalDetailsToRequest_i: String
+  additionalDetailsToRequest_not_i: String
+  additionalDetailsToRequest_contains_i: String
+  additionalDetailsToRequest_not_contains_i: String
+  additionalDetailsToRequest_starts_with_i: String
+  additionalDetailsToRequest_not_starts_with_i: String
+  additionalDetailsToRequest_ends_with_i: String
+  additionalDetailsToRequest_not_ends_with_i: String
+  additionalDetailsToRequest_in: [String]
+  additionalDetailsToRequest_not_in: [String]
   services_every: GatewayServiceWhereInput
   services_some: GatewayServiceWhereInput
   services_none: GatewayServiceWhereInput
@@ -1753,18 +1881,22 @@ input EnvironmentWhereUniqueInput {
 enum SortEnvironmentsBy {
   id_ASC
   id_DESC
+  appId_ASC
+  appId_DESC
   name_ASC
   name_DESC
   active_ASC
   active_DESC
+  approval_ASC
+  approval_DESC
   flow_ASC
   flow_DESC
+  legal_ASC
+  legal_DESC
   credentialIssuer_ASC
   credentialIssuer_DESC
-  plugins_ASC
-  plugins_DESC
-  description_ASC
-  description_DESC
+  additionalDetailsToRequest_ASC
+  additionalDetailsToRequest_DESC
   services_ASC
   services_DESC
   product_ASC
@@ -1774,10 +1906,11 @@ enum SortEnvironmentsBy {
 input EnvironmentUpdateInput {
   name: String
   active: Boolean
+  approval: Boolean
   flow: String
+  legal: LegalRelateToOneInput
   credentialIssuer: CredentialIssuerRelateToOneInput
-  plugins: GatewayPluginRelateToManyInput
-  description: String
+  additionalDetailsToRequest: String
   services: GatewayServiceRelateToManyInput
   product: ProductRelateToOneInput
 }
@@ -1788,18 +1921,27 @@ input EnvironmentsUpdateInput {
 }
 
 input EnvironmentCreateInput {
+  appId: String
   name: String
   active: Boolean
+  approval: Boolean
   flow: String
+  legal: LegalRelateToOneInput
   credentialIssuer: CredentialIssuerRelateToOneInput
-  plugins: GatewayPluginRelateToManyInput
-  description: String
+  additionalDetailsToRequest: String
   services: GatewayServiceRelateToManyInput
   product: ProductRelateToOneInput
 }
 
 input EnvironmentsCreateInput {
   data: EnvironmentCreateInput
+}
+
+input GatewayPluginRelateToManyInput {
+  create: [GatewayPluginCreateInput]
+  connect: [GatewayPluginWhereUniqueInput]
+  disconnect: [GatewayPluginWhereUniqueInput]
+  disconnectAll: Boolean
 }
 
 type GatewayConsumer {
@@ -2927,6 +3069,197 @@ input GroupsCreateInput {
   data: GroupCreateInput
 }
 
+type Legal {
+  _label_: String
+  id: ID!
+  title: String
+  description: String
+  link: String
+  document: String
+  reference: String
+  version: Int
+  isActive: Boolean
+  updatedBy: User
+  createdBy: User
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+input LegalWhereInput {
+  AND: [LegalWhereInput]
+  OR: [LegalWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  title: String
+  title_not: String
+  title_contains: String
+  title_not_contains: String
+  title_starts_with: String
+  title_not_starts_with: String
+  title_ends_with: String
+  title_not_ends_with: String
+  title_i: String
+  title_not_i: String
+  title_contains_i: String
+  title_not_contains_i: String
+  title_starts_with_i: String
+  title_not_starts_with_i: String
+  title_ends_with_i: String
+  title_not_ends_with_i: String
+  title_in: [String]
+  title_not_in: [String]
+  description: String
+  description_not: String
+  description_contains: String
+  description_not_contains: String
+  description_starts_with: String
+  description_not_starts_with: String
+  description_ends_with: String
+  description_not_ends_with: String
+  description_i: String
+  description_not_i: String
+  description_contains_i: String
+  description_not_contains_i: String
+  description_starts_with_i: String
+  description_not_starts_with_i: String
+  description_ends_with_i: String
+  description_not_ends_with_i: String
+  description_in: [String]
+  description_not_in: [String]
+  link: String
+  link_not: String
+  link_contains: String
+  link_not_contains: String
+  link_starts_with: String
+  link_not_starts_with: String
+  link_ends_with: String
+  link_not_ends_with: String
+  link_i: String
+  link_not_i: String
+  link_contains_i: String
+  link_not_contains_i: String
+  link_starts_with_i: String
+  link_not_starts_with_i: String
+  link_ends_with_i: String
+  link_not_ends_with_i: String
+  link_in: [String]
+  link_not_in: [String]
+  document: String
+  document_not: String
+  document_in: [String]
+  document_not_in: [String]
+  reference: String
+  reference_not: String
+  reference_contains: String
+  reference_not_contains: String
+  reference_starts_with: String
+  reference_not_starts_with: String
+  reference_ends_with: String
+  reference_not_ends_with: String
+  reference_i: String
+  reference_not_i: String
+  reference_contains_i: String
+  reference_not_contains_i: String
+  reference_starts_with_i: String
+  reference_not_starts_with_i: String
+  reference_ends_with_i: String
+  reference_not_ends_with_i: String
+  reference_in: [String]
+  reference_not_in: [String]
+  version: Int
+  version_not: Int
+  version_lt: Int
+  version_lte: Int
+  version_gt: Int
+  version_gte: Int
+  version_in: [Int]
+  version_not_in: [Int]
+  isActive: Boolean
+  isActive_not: Boolean
+  updatedBy: UserWhereInput
+  updatedBy_is_null: Boolean
+  createdBy: UserWhereInput
+  createdBy_is_null: Boolean
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedAt_in: [DateTime]
+  updatedAt_not_in: [DateTime]
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_in: [DateTime]
+  createdAt_not_in: [DateTime]
+}
+
+input LegalWhereUniqueInput {
+  id: ID!
+}
+
+enum SortLegalsBy {
+  id_ASC
+  id_DESC
+  title_ASC
+  title_DESC
+  description_ASC
+  description_DESC
+  link_ASC
+  link_DESC
+  document_ASC
+  document_DESC
+  reference_ASC
+  reference_DESC
+  version_ASC
+  version_DESC
+  isActive_ASC
+  isActive_DESC
+  updatedBy_ASC
+  updatedBy_DESC
+  createdBy_ASC
+  createdBy_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input LegalUpdateInput {
+  title: String
+  description: String
+  link: String
+  document: String
+  reference: String
+  version: Int
+  isActive: Boolean
+}
+
+input LegalsUpdateInput {
+  id: ID!
+  data: LegalUpdateInput
+}
+
+input LegalCreateInput {
+  title: String
+  description: String
+  link: String
+  document: String
+  reference: String
+  version: Int
+  isActive: Boolean
+}
+
+input LegalsCreateInput {
+  data: LegalCreateInput
+}
+
 type MemberRole {
   _label_: String
   id: ID!
@@ -3008,7 +3341,6 @@ input MemberRoleWhereInput {
 
 input MemberRoleWhereUniqueInput {
   id: ID!
-  data: GroupUpdateInput
 }
 
 enum SortMemberRolesBy {
@@ -4638,6 +4970,7 @@ type User {
   email: String
   isAdmin: Boolean
   password_is_set: Boolean
+  legalsAgreed: String
 }
 
 input UserWhereInput {
@@ -4704,6 +5037,24 @@ input UserWhereInput {
   isAdmin: Boolean
   isAdmin_not: Boolean
   password_is_set: Boolean
+  legalsAgreed: String
+  legalsAgreed_not: String
+  legalsAgreed_contains: String
+  legalsAgreed_not_contains: String
+  legalsAgreed_starts_with: String
+  legalsAgreed_not_starts_with: String
+  legalsAgreed_ends_with: String
+  legalsAgreed_not_ends_with: String
+  legalsAgreed_i: String
+  legalsAgreed_not_i: String
+  legalsAgreed_contains_i: String
+  legalsAgreed_not_contains_i: String
+  legalsAgreed_starts_with_i: String
+  legalsAgreed_not_starts_with_i: String
+  legalsAgreed_ends_with_i: String
+  legalsAgreed_not_ends_with_i: String
+  legalsAgreed_in: [String]
+  legalsAgreed_not_in: [String]
 }
 
 input UserWhereUniqueInput {
@@ -4721,6 +5072,8 @@ enum SortUsersBy {
   email_DESC
   isAdmin_ASC
   isAdmin_DESC
+  legalsAgreed_ASC
+  legalsAgreed_DESC
 }
 
 input UserUpdateInput {
@@ -4729,6 +5082,7 @@ input UserUpdateInput {
   email: String
   isAdmin: Boolean
   password: String
+  legalsAgreed: String
 }
 
 input UsersUpdateInput {
@@ -4742,6 +5096,7 @@ input UserCreateInput {
   email: String
   isAdmin: Boolean
   password: String
+  legalsAgreed: String
 }
 
 input UsersCreateInput {
@@ -5089,6 +5444,24 @@ type Query {
     skip: Int
   ): _QueryMeta
   _GroupsMeta: _ListMeta
+  allLegals(
+    where: LegalWhereInput
+    search: String
+    sortBy: [SortLegalsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Legal]
+  Legal(where: LegalWhereUniqueInput!): Legal
+  _allLegalsMeta(
+    where: LegalWhereInput
+    search: String
+    sortBy: [SortLegalsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _LegalsMeta: _ListMeta
   allMemberRoles(
     where: MemberRoleWhereInput
     search: String
@@ -5371,6 +5744,12 @@ type Mutation {
   updateGroups(data: [GroupsUpdateInput]): [Group]
   deleteGroup(id: ID!): Group
   deleteGroups(ids: [ID!]): [Group]
+  createLegal(data: LegalCreateInput): Legal
+  createLegals(data: [LegalsCreateInput]): [Legal]
+  updateLegal(id: ID!, data: LegalUpdateInput): Legal
+  updateLegals(data: [LegalsUpdateInput]): [Legal]
+  deleteLegal(id: ID!): Legal
+  deleteLegals(ids: [ID!]): [Legal]
   createMemberRole(data: MemberRoleCreateInput): MemberRole
   createMemberRoles(data: [MemberRolesCreateInput]): [MemberRole]
   updateMemberRole(id: ID!, data: MemberRoleUpdateInput): MemberRole

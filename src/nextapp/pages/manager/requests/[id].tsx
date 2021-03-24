@@ -96,11 +96,10 @@ const AccessRequestPage: React.FC<
     { suspense: false }
   );
   const isComplete =
-    data.AccessRequest?.isIssued &&
-    data.AccessRequest?.isApproved;
+    data.AccessRequest?.isIssued && data.AccessRequest?.isApproved;
 
-  const controls = JSON.parse(data?.AccessRequest?.controls)
-  const plugins = 'plugins' in controls ? controls.plugins : []
+  const controls = JSON.parse(data?.AccessRequest?.controls);
+  const plugins = 'plugins' in controls ? controls.plugins : [];
 
   return data.AccessRequest ? (
     <>
@@ -162,9 +161,7 @@ const AccessRequestPage: React.FC<
                     <IpRestriction />
                     <RateLimiting />
                   </HStack>
-                  <ControlsList
-                    data={plugins}
-                  />
+                  <ControlsList data={plugins} />
                 </TabPanel>
                 <TabPanel p={0}>
                   {/* {data?.AccessRequest.activity.map((a) => (
@@ -223,8 +220,7 @@ const AccessRequestPage: React.FC<
       </Container>
     </>
   ) : (
-    <>
-    </>
+    <></>
   );
 };
 

@@ -13,7 +13,7 @@ import {
   Skeleton,
   WrapItem,
   InputRightElement,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import { FaRegTimesCircle, FaSearch, FaWrench } from 'react-icons/fa';
@@ -38,36 +38,40 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
   const dataTransferType = 'application/service';
   const [search, setSearch] = React.useState<string>('');
 
-  const toast = useToast()
+  const toast = useToast();
 
   // Mutations
   const client = useQueryClient();
   const mutation = useMutation(
-    async (changes: unknown) => await api(UPDATE_ENVIRONMENT, changes, true)
+    async (changes: unknown) =>
+      await api(UPDATE_ENVIRONMENT, changes, { ssr: false })
   );
 
   const onServicesChange = React.useCallback(
     async (payload: { id: string }[]) => {
       try {
         await mutation.mutateAsync({
-            id: environmentId,
-            data: {
+          id: environmentId,
+          data: {
             services: {
-                disconnectAll: true,
-                connect: payload,
+              disconnectAll: true,
+              connect: payload,
             },
-            },
+          },
         });
         client.invalidateQueries(['environment', environmentId]);
-    } catch (err) {
+      } catch (err) {
         toast({
           title: 'Services Update Failed',
-          description: err.map((e) => e.data?.messages ? e.data.messages.join(',') : e.message).join(', '),
+          description: err
+            .map((e) =>
+              e.data?.messages ? e.data.messages.join(',') : e.message
+            )
+            .join(', '),
           isClosable: true,
           status: 'error',
         });
       }
-  
     },
     [environmentId, mutation]
   );
