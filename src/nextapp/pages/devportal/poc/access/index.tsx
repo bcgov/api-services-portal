@@ -91,11 +91,11 @@ const MyApplicationsPage = () => {
           </PageHeader>
   
           <Box mt={5}>
-            { data && data.allServiceAccesses.length == 0 && (
+            { data && data.allServiceAccesses.filter(s => s.productEnvironment != null).length == 0 && (
                 <Box gridColumnStart="1" gridColumnEnd="4">
                 <EmptyPane
                     title="No Access to any APIs Yet."
-                    message="You need to request access from the API Discovery"
+                    message="Go find an API to try in our API Directory!"
                     action={false}
                 />
                 </Box>                

@@ -84,7 +84,7 @@ const ConsumersPage: React.FC<
   );
 
 
-  return data ? (
+  return (
     <>
       <Head>
         <title>{`Consumers ${
@@ -142,7 +142,7 @@ const ConsumersPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allGatewayConsumers.map((d) => (
+              {data.allGatewayConsumers?.map((d) => (
                 <Tr key={d.id}>
                   <Td>
                     <NextLink passHref href={`/manager/consumers/${d.id}`}>
@@ -181,7 +181,7 @@ const ConsumersPage: React.FC<
         </Box>
       </Container>
     </>
-  ) : ( <></> );
+  )
 };
 
 export default ConsumersPage;
