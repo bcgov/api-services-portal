@@ -68,6 +68,18 @@ module.exports = {
         fieldPath, // exists only for field hooks
       }) {
         //await workflow.RegenerateCredential(context, operation, existingItem, originalInput, updatedItem)
+    }),
+    beforeDelete: (async function ({
+        operation,
+        existingItem,
+        context,
+        listKey,
+        fieldPath, // exists only for field hooks
+      }) {
+        console.log("BEFORE DELETE SERVICE ACCESS " + operation + " " + JSON.stringify(existingItem, null, 3));
+
+        await workflow.DeleteAccess(context, operation, {serviceAccess: existingItem.id})
     })
+
   }
 }

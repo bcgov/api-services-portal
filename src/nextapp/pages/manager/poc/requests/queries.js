@@ -43,6 +43,9 @@ export const GET_LIST = `
           application {
               name
           }
+          serviceAccess {
+              id
+          }
           productEnvironment {
               name
               flow

@@ -21,6 +21,8 @@ export MONGO_URL=mongodb://$hostip:17017/keystonedb3
 export MONGO_USER=""
 export MONGO_PASSWORD=""
 
+export FEEDER_URL=http://localhost:6000
+
 export KONG_URL=""
 export OIDC_ISSUER=""
 export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs

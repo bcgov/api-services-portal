@@ -51,6 +51,7 @@ const Item = ({refetch, accessRequest}) => (
                 { accessRequest.isComplete == true ? (
                     <p>CLOSED</p>
                 ): false }
+                { accessRequest.serviceAccess?.id}
           </Td>
         </Tr>
 

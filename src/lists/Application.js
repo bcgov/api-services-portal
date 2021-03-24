@@ -7,6 +7,8 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { v4: uuidv4 } = require('uuid');
 
+const workflow = require('../services/workflow')
+
 module.exports = {
   fields: {
     appId: {
@@ -40,7 +42,19 @@ module.exports = {
             resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             return resolvedData
         }
-    }
+    },
+    beforeDelete: (async function ({
+        operation,
+        existingItem,
+        context,
+        listKey,
+        fieldPath, // exists only for field hooks
+      }) {
+        console.log("BEFORE DELETE APP " + operation + " " + JSON.stringify(existingItem, null, 3));
+
+        await workflow.DeleteAccess(context, operation, {application: existingItem.id})
+    })
+
   },
   plugins: [
     atTracking()

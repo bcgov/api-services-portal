@@ -244,6 +244,18 @@ module.exports = function (kongUrl) {
         //     console.log(JSON.stringify(response))
         //     return response.data.id
         // }
-    }
 
+        deleteConsumer: async function (consumerId) {
+            let response = await fetch(`${kongUrl}/consumers/${consumerId}`, {
+                method: 'delete',
+                headers: { 
+                    'Content-Type': 'application/json' },
+            })
+            .then(checkStatus)
+            .catch (err => {
+                console.log("KONG CONSUMER DELETION " + err)
+                throw(err)
+            })
+        },        
+    }
 }

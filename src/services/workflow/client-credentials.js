@@ -28,7 +28,7 @@ async function registerClient (context, credentialIssuerPK, newClientId, nicknam
     // token is NULL if 'iat'
     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
     // issuer.initialAccessToken if 'iat'
-    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
@@ -38,7 +38,7 @@ async function registerClient (context, credentialIssuerPK, newClientId, nicknam
 
     const consumer = await kongApi.createKongConsumer (nickname, newClientId)
 
-    const consumerPK = await addKongConsumer(context, newClientId, consumer.id)
+    const consumerPK = await addKongConsumer(context, nickname, newClientId, consumer.id)
 
     return {
         openid,

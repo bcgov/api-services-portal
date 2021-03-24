@@ -46,6 +46,13 @@ export type ActivityRelateToManyInput = {
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
+export type ServiceAccessRelateToOneInput = {
+  create?: Maybe<ServiceAccessCreateInput>;
+  connect?: Maybe<ServiceAccessWhereUniqueInput>;
+  disconnect?: Maybe<ServiceAccessWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 
 /**  A keystone list  */
 export type AccessRequest = {
@@ -72,6 +79,7 @@ export type AccessRequest = {
   productEnvironment?: Maybe<Environment>;
   activity: Array<Activity>;
   _activityMeta?: Maybe<_QueryMeta>;
+  serviceAccess?: Maybe<ServiceAccess>;
   updatedBy?: Maybe<User>;
   createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -215,6 +223,8 @@ export type AccessRequestWhereInput = {
   activity_some?: Maybe<ActivityWhereInput>;
   /**  condition must be false for all nodes  */
   activity_none?: Maybe<ActivityWhereInput>;
+  serviceAccess?: Maybe<ServiceAccessWhereInput>;
+  serviceAccess_is_null?: Maybe<Scalars['Boolean']>;
   updatedBy?: Maybe<UserWhereInput>;
   updatedBy_is_null?: Maybe<Scalars['Boolean']>;
   createdBy?: Maybe<UserWhereInput>;
@@ -268,6 +278,8 @@ export enum SortAccessRequestsBy {
   ProductEnvironmentDesc = 'productEnvironment_DESC',
   ActivityAsc = 'activity_ASC',
   ActivityDesc = 'activity_DESC',
+  ServiceAccessAsc = 'serviceAccess_ASC',
+  ServiceAccessDesc = 'serviceAccess_DESC',
   UpdatedByAsc = 'updatedBy_ASC',
   UpdatedByDesc = 'updatedBy_DESC',
   CreatedByAsc = 'createdBy_ASC',
@@ -291,6 +303,7 @@ export type AccessRequestUpdateInput = {
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
   activity?: Maybe<ActivityRelateToManyInput>;
+  serviceAccess?: Maybe<ServiceAccessRelateToOneInput>;
 };
 
 export type AccessRequestsUpdateInput = {
@@ -311,6 +324,7 @@ export type AccessRequestCreateInput = {
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
   activity?: Maybe<ActivityRelateToManyInput>;
+  serviceAccess?: Maybe<ServiceAccessRelateToOneInput>;
 };
 
 export type AccessRequestsCreateInput = {

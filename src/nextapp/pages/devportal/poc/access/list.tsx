@@ -23,7 +23,7 @@ import tmpstyles from '../../docs/docs.module.css';
 const { useEffect, useState } = React
 
 
-function List({ data, state, refetch }) {
+function List({ data, state, refetch, cancelRequest }) {
     switch (state) {
       case 'loading': {
         return <p>Loading...</p>;
@@ -58,9 +58,9 @@ function List({ data, state, refetch }) {
                     <Table variant="simple">
                             <Thead>
                             <Tr>
-                                <Th>Environment</Th>
-                                <Th>Endpoints</Th>
-                                <Th>Application</Th>
+                                <Th width="25%">Environment</Th>
+                                <Th width="50%">Endpoints</Th>
+                                <Th></Th>
                             </Tr>
                             </Thead>
                             <Tbody>
@@ -69,7 +69,17 @@ function List({ data, state, refetch }) {
                                 <Tr>
                                     <Td>
                                         <Box p={4}>
-                                            <EnvironmentBadge data={item.productEnvironment} />
+                                            <Text
+                                                display="inline-block"
+                                                fontSize="sm"
+                                                bgColor="blue.300"
+                                                color="white"
+                                                textTransform="uppercase"
+                                                px={2}
+                                                borderRadius={2}
+                                            >
+                                                {item.productEnvironment.name}
+                                            </Text> 
                                         </Box>
                                     </Td>
                                     <Td>
@@ -102,8 +112,11 @@ function List({ data, state, refetch }) {
                                     
                                         <HStack className="m-5">
                                             { item.active == false && (
-                                                <p>PENDING APPROVAL</p>
+                                                <Tag size="sm" colorScheme="green" borderRadius="5px">
+                                                    <TagLabel>PENDING APPROVAL</TagLabel>
+                                                </Tag>
                                             )}
+                                            <Button variant="secondary" size="xs" onClick={() => cancelRequest(item.id)}>Cancel Request</Button>
                                         </HStack>
 
                                     </Td>

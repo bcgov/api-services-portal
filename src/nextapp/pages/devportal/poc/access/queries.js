@@ -108,5 +108,14 @@ export const GEN_CREDENTIAL = `
     }
 `
 
+export const CANCEL_ACCESS = `
+    mutation CancelAccess($id: ID!) {
+        deleteServiceAccess(id: $id) {
+            id
+        }
+    }
+`
+
+
 const empty = () => false
 export default empty

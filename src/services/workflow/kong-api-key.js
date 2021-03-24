@@ -24,7 +24,7 @@ async function registerApiKey (context, newClientId, nickname) {
 
     const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
 
-    const consumerPK = await addKongConsumer(context, newClientId, consumer.id)
+    const consumerPK = await addKongConsumer(context, nickname, newClientId, consumer.id)
 
     return {
         apiKey,

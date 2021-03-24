@@ -16,7 +16,7 @@ import {
     useDisclosure
   } from "@chakra-ui/react"
 
-import { GET_LIST } from './queries'
+import { GET_LIST, CANCEL_ACCESS } from './queries'
 
 //import { useAppContext } from '@/pages/context'
 
@@ -56,6 +56,17 @@ const MyApplicationsPage = () => {
     
     useEffect(fetch, []);
 
+    const cancelRequest = (id) => {
+        graphql(CANCEL_ACCESS, {id})
+        .then(({ data }) => {
+            fetch()
+        })
+        .catch((err) => {
+            console.log(err)
+            fetch()
+        });
+    };
+    
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     const actions = [
@@ -79,7 +90,7 @@ const MyApplicationsPage = () => {
   
           <Box mt={5}>
 
-            <List data={data} state={state} refetch={fetch} />
+            <List data={data} state={state} refetch={fetch} cancelRequest={cancelRequest} />
 
           </Box>
         </Container>

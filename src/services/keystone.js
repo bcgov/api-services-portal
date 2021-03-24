@@ -81,16 +81,18 @@ module.exports = {
         return result.data.allEnvironments[0]
     },
 
-    lookupCredentialReferenceByServiceAccess: async function lookupEnvironmentAndApplicationByAccessRequest (context, id) {
+    lookupCredentialReferenceByServiceAccess: async function lookupCredentialReferenceByServiceAccess (context, id) {
         const result = await context.executeGraphQL({
             query: `query GetSpecificServiceAccess($id: ID!) {
                         allServiceAccesses(where: {id: $id}) {
+                            id
                             productEnvironment {
                                 id
                                 name
                                 flow
                             }
                             consumer {
+                                id
                                 kongConsumerId
                             }
                             credentialReference
@@ -107,7 +109,9 @@ module.exports = {
         const result = await context.executeGraphQL({
             query: `query GetSpecificEnvironment($id: ID!) {
                         allAccessRequests(where: {id: $id}) {
+                            id
                             productEnvironment {
+                                appId
                                 id
                                 name
                                 flow
@@ -195,18 +199,18 @@ module.exports = {
         return result.data.allCredentialIssuers[0]    
     },
 
-    addKongConsumer: async function(context, username, kongConsumerId) {
+    addKongConsumer: async function(context, username, customId, kongConsumerId) {
         console.log("CALLING " + username + " " + kongConsumerId)
 
         // This should actually go away and the "Feeders" should be used
         const result = await context.executeGraphQL({
-            query: `mutation CreateNewConsumer($username: String, $kongConsumerId: String) {
-                        createGatewayConsumer(data: { username: $username, kongConsumerId: $kongConsumerId, tags: "[]" }) {
+            query: `mutation CreateNewConsumer($username: String, $customId: String, $kongConsumerId: String) {
+                        createGatewayConsumer(data: { username: $username, customId: $customId, kongConsumerId: $kongConsumerId, tags: "[]" }) {
                             id
                             kongConsumerId
                         }
                     }`,
-            variables: { username, kongConsumerId },
+            variables: { username, customId, kongConsumerId },
         })
         //{"data":{"createConsumer":{"id":"6004b65c2a7e02414bb3ccb5"}}}
         console.log("KEYSTONE CONSUMER " + JSON.stringify(result))
@@ -261,8 +265,41 @@ module.exports = {
                     }`,
             variables: { serviceAccessId, requestId },
         })
-        console.log("FINISHED")
+        console.log("FINISHED LINKING " + serviceAccessId + " TO REQUEST " + requestId)
         console.log("UPDATE ACCESS REQUEST " + JSON.stringify(result,null, 4))
         return result.data.updateAccessRequest
-    }    
+    }, 
+
+    deleteRecord: async function (context, entity, where, returnedFields) {
+
+        const qlName = entity.endsWith('s') ? `all${entity}es` : `all${entity}s`
+        const find = await context.executeGraphQL({
+            query: `query Find${entity}($where: ${entity}WhereInput) {
+                        ${qlName}(where: $where ) {
+                            id
+                        }
+                    }`,
+            variables: { where },
+        })
+        console.log(JSON.stringify(find, null, 4))
+        if (find.data[qlName].length > 1) {
+            throw Error('Too many records returned!')
+        } else if (find.data[qlName].length == 0) {
+            console.log("Already deleted")
+            return null
+        } else {
+            const id = find.data[qlName][0].id
+            const result = await context.executeGraphQL({
+                query: `mutation Delete${entity}($id: ID!) {
+                            delete${entity}( id: $id ) {
+                                ${returnedFields.join(' ')}
+                            }
+                        }`,
+                variables: { id },
+            })
+            console.log("FINISHED DELETING ID=" + id + " FROM WHERE " + JSON.stringify(where))
+            console.log("DELETED " + JSON.stringify(result,null, 4))
+            return result.data[`delete${entity}`]
+        }
+    }
 }

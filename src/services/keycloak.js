@@ -13,9 +13,10 @@ module.exports = {
             client_secret: clientSecret,
             scope: 'profile'
         }
+        console.log("GET KEYCLOAK SESSION " + JSON.stringify(body, null, 4))
         const response = await fetch(`${issuer}/protocol/openid-connect/token`, {
             method: 'post',
-            body:    JSON.stringify(body),
+            body:    body,
             headers: { 
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -24,11 +25,9 @@ module.exports = {
         .then(checkStatus)
         .then(res => res.json())
         console.log(JSON.stringify(response, null, 3));
-        return {
-            token: response['access_token']
-        }
+        return response['access_token']
     },
-    
+
     clientRegistration: async function (issuer, accessToken, clientId, clientSecret, enabled=false) {
         const body = Object.assign(JSON.parse(JSON.stringify(clientTemplate)), {
             enabled: enabled,
@@ -60,6 +59,50 @@ module.exports = {
             registrationAccessToken: response['registrationAccessToken']
         }
     },
+
+    updateClientRegistration: async function (issuer, accessToken, clientId, vars) {
+        const headers = { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Origin': '',
+        }
+        accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken)
+
+        console.log(JSON.stringify(body, null, 4))
+
+        const response = await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
+            method: 'put',
+            body:    JSON.stringify(body),
+            headers: headers
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        console.log(JSON.stringify(response, null, 3));
+        return {
+            id: response['id'],
+            clientId: response['clientId'],
+            enabled: response['enabled'],
+        }
+    },
+
+    deleteClientRegistration: async function (issuer, accessToken, clientId) {
+        const headers = { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Origin': '',
+        }
+        accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken)
+
+        const response = await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
+            method: 'delete',
+            headers: headers
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        console.log(JSON.stringify(response, null, 3));
+        return {
+        }
+    },    
     
     getOpenidFromDiscovery: async function (url) {
         return fetch(url, {
