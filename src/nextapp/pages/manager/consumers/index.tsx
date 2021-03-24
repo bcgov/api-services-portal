@@ -48,7 +48,7 @@ const query = gql`
       createdAt
     }
 
-    allAccessRequests(where: { isComplete_not: true }) {
+    allAccessRequests(where: { isIssued_not: true }) {
       id
     }
   }
@@ -82,7 +82,6 @@ const ConsumersPage: React.FC<
     },
     { suspense: false }
   );
-
 
   return (
     <>
