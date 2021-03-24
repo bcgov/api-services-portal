@@ -5,6 +5,7 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from 'react-query';
+import omit from 'lodash/omit';
 import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
@@ -28,7 +29,7 @@ const api = async <T>(
   const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
     headers: {
       'Content-Type': 'application/json',
-      ...settings.headers,
+      ...omit(settings.headers, ['host']),
     },
   });
 
@@ -53,6 +54,7 @@ interface UseApiOptions {
   variables?: unknown;
 }
 
+/** Convenience hook to use `api` without having to turn off SSR in every React component */
 export const useApi = (
   key: QueryKey,
   query: UseApiOptions,
