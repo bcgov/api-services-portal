@@ -70,7 +70,7 @@ const ServicePage: React.FC<
     { enabled: Boolean(id), suspense: false }
   );
   const breadcrumb = [{ href: '/manager/services', text: 'Services' }];
-  const tags: string[] = !isEmpty(data?.GatewayService.tags)
+  const tags: string[] = !isEmpty(data?.GatewayService?.tags)
     ? (JSON.parse(data.GatewayService.tags) as string[])
     : [];
 
