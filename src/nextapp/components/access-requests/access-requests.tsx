@@ -25,7 +25,7 @@ import NextLink from 'next/link';
 
 const query = gql`
   query GetPendingAccessRequests {
-    allAccessRequests(where: { isComplete_not: true }) {
+    allAccessRequests(where: { isIssued_not: true }) {
       id
       name
       requestor {

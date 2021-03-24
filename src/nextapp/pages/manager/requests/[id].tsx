@@ -37,37 +37,22 @@ const query = gql`
     AccessRequest(where: { id: $id }) {
       id
       name
+      isApproved
+      isIssued
+      controls
       createdAt
       requestor {
         name
+        username
       }
       application {
         name
       }
       productEnvironment {
         name
-        plugins {
-          id
-          name
-          config
-          service {
-            name
-          }
-          route {
-            name
-          }
-        }
-      }
-      activity {
-        id
-        name
-        action
-        result
-        message
-        actor {
+        product {
           name
         }
-        createdAt
       }
     }
   }
@@ -111,11 +96,13 @@ const AccessRequestPage: React.FC<
     { suspense: false }
   );
   const isComplete =
-    data.AccessRequest.isIssued &&
-    data.AccessRequest.isApproved &&
-    data.AccessRequest.isComplete;
+    data.AccessRequest?.isIssued &&
+    data.AccessRequest?.isApproved;
 
-  return (
+  const controls = JSON.parse(data?.AccessRequest?.controls)
+  const plugins = 'plugins' in controls ? controls.plugins : []
+
+  return data.AccessRequest ? (
     <>
       <Head>
         <title>{`Access Request | ${data.AccessRequest.name}`}</title>
@@ -143,7 +130,7 @@ const AccessRequestPage: React.FC<
               <Text fontSize="sm">
                 {'Requesting access to '}
                 <Text as="strong" fontWeight="bold">
-                  {data?.AccessRequest.application.name}
+                  {data?.AccessRequest.productEnvironment?.product.name}
                 </Text>
                 {' on '}{' '}
                 <Text as="time">
@@ -176,11 +163,11 @@ const AccessRequestPage: React.FC<
                     <RateLimiting />
                   </HStack>
                   <ControlsList
-                    data={data?.AccessRequest.productEnvironment.plugins}
+                    data={plugins}
                   />
                 </TabPanel>
                 <TabPanel p={0}>
-                  {data?.AccessRequest.activity.map((a) => (
+                  {/* {data?.AccessRequest.activity.map((a) => (
                     <Box key={a.id} bgColor="white" mb={2}>
                       <Box
                         as="header"
@@ -202,7 +189,7 @@ const AccessRequestPage: React.FC<
                         <Text>{a.message}</Text>
                       </Box>
                     </Box>
-                  ))}
+                  ))} */}
                 </TabPanel>
               </TabPanels>
             </GridItem>
@@ -220,7 +207,7 @@ const AccessRequestPage: React.FC<
                   {data?.AccessRequest.requestor.name}
                 </Text>
                 <Heading size="sm" mb={2}>
-                  Product
+                  Environment
                 </Heading>
                 <Text mb={3}>
                   {data?.AccessRequest.productEnvironment.name}
@@ -228,12 +215,15 @@ const AccessRequestPage: React.FC<
                 <Heading size="sm" mb={2}>
                   Application
                 </Heading>
-                <Text>{data?.AccessRequest.application.name}</Text>
+                <Text>{data?.AccessRequest.application?.name}</Text>
               </Box>
             </GridItem>
           </Grid>
         </Tabs>
       </Container>
+    </>
+  ) : (
+    <>
     </>
   );
 };

@@ -51,7 +51,6 @@ module.exports = {
     requestor: { type: Relationship, isRequired: true, ref: 'User' },
     application: { type: Relationship, isRequired: false, ref: 'Application' },
     productEnvironment: { type: Relationship, isRequired: true, ref: 'Environment' },
-    activity: { type: Relationship, ref: 'Activity', many: true },
     serviceAccess: { type: Relationship, isRequired: false, ref: 'ServiceAccess' },
   },
   access: EnforcementPoint,

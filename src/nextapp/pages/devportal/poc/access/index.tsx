@@ -16,6 +16,8 @@ import {
     useDisclosure
   } from "@chakra-ui/react"
 
+import EmptyPane from '@/components/empty-pane';
+
 import { GET_LIST, CANCEL_ACCESS } from './queries'
 
 //import { useAppContext } from '@/pages/context'
@@ -89,7 +91,15 @@ const MyApplicationsPage = () => {
           </PageHeader>
   
           <Box mt={5}>
-
+            { data && data.allServiceAccesses.length == 0 && (
+                <Box gridColumnStart="1" gridColumnEnd="4">
+                <EmptyPane
+                    title="No Access to any APIs Yet."
+                    message="You need to request access from the API Discovery"
+                    action={false}
+                />
+                </Box>                
+            )}
             <List data={data} state={state} refetch={fetch} cancelRequest={cancelRequest} />
 
           </Box>

@@ -45,7 +45,7 @@ const EnvironmentPage: React.FC<
     query: GET_ENVIRONMENT,
     variables: { id },
   });
-  const title = `${data.Environment?.product.organization?.name} Product Environment`;
+  const title = `${data.Environment?.product.name} Environment`;
   const breadcrumb = [
     { href: '/manager/products', text: 'Products' },
     {
@@ -78,10 +78,6 @@ const EnvironmentPage: React.FC<
         >
           <>
             <Text>
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias
-              sunt facere aliquam harum dolorem error soluta, iusto ad vel
-              nesciunt sequi et excepturi ex modi dignissimos, iste
-              reprehenderit. Commodi, minus!
             </Text>
           </>
         </PageHeader>

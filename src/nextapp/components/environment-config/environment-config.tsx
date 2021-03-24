@@ -121,7 +121,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             display="flex"
             alignItems="center"
           >
-            {data?.product?.organization?.name}{' '}
+            {data?.product?.name}{' '}
             <Badge
               px={2}
               mx={1}
@@ -150,10 +150,6 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
           </Heading>
           <Box>
             <Text mb={4}>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius a
-              facere velit ullam ea! Minima, nemo voluptatibus, expedita, libero
-              quae itaque eos qui sapiente commodi repudiandae provident
-              laboriosam odio voluptates.
             </Text>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>

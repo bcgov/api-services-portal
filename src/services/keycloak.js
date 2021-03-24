@@ -66,11 +66,15 @@ module.exports = {
         }
         accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken)
 
-        console.log(JSON.stringify(body, null, 4))
+        console.log("UPDATING " + `${issuer}/clients-registrations/default/${clientId}`)
 
+        console.log(JSON.stringify(vars, null, 4))
+
+        vars['clientId'] = clientId
+        
         const response = await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
             method: 'put',
-            body:    JSON.stringify(body),
+            body:    JSON.stringify(vars),
             headers: headers
         })
         .then(checkStatus)
@@ -91,15 +95,11 @@ module.exports = {
         }
         accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken)
 
-        const response = await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
+        await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
             method: 'delete',
             headers: headers
         })
         .then(checkStatus)
-        .then(res => res.json())
-        console.log(JSON.stringify(response, null, 3));
-        return {
-        }
     },    
     
     getOpenidFromDiscovery: async function (url) {

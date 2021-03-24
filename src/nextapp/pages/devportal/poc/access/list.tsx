@@ -58,7 +58,7 @@ function List({ data, state, refetch, cancelRequest }) {
                     <Table variant="simple">
                             <Thead>
                             <Tr>
-                                <Th width="25%">Environment</Th>
+                                <Th width="15%">Environment</Th>
                                 <Th width="50%">Endpoints</Th>
                                 <Th></Th>
                             </Tr>
@@ -116,7 +116,7 @@ function List({ data, state, refetch, cancelRequest }) {
                                                     <TagLabel>PENDING APPROVAL</TagLabel>
                                                 </Tag>
                                             )}
-                                            <Button variant="secondary" size="xs" onClick={() => cancelRequest(item.id)}>Cancel Request</Button>
+                                            <Button variant="secondary" size="xs" onClick={() => cancelRequest(item.id)}>{item.active ? "Revoke Access":"Cancel Request"}</Button>
                                         </HStack>
 
                                     </Td>

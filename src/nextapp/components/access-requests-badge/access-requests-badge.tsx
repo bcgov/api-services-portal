@@ -5,7 +5,7 @@ import { useApi } from '@/shared/services/api';
 
 const query = gql`
   query GET {
-    allAccessRequests(where: { isComplete_not: true }) {
+    allAccessRequests(where: { isIssued_not: true }) {
       id
     }
   }

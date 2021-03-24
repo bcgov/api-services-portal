@@ -39,13 +39,6 @@ export type EnvironmentRelateToOneInput = {
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
-export type ActivityRelateToManyInput = {
-  create?: Maybe<Array<Maybe<ActivityCreateInput>>>;
-  connect?: Maybe<Array<Maybe<ActivityWhereUniqueInput>>>;
-  disconnect?: Maybe<Array<Maybe<ActivityWhereUniqueInput>>>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
 export type ServiceAccessRelateToOneInput = {
   create?: Maybe<ServiceAccessCreateInput>;
   connect?: Maybe<ServiceAccessWhereUniqueInput>;
@@ -77,35 +70,11 @@ export type AccessRequest = {
   requestor?: Maybe<User>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
-  activity: Array<Activity>;
-  _activityMeta?: Maybe<_QueryMeta>;
   serviceAccess?: Maybe<ServiceAccess>;
   updatedBy?: Maybe<User>;
   createdBy?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-/**  A keystone list  */
-export type AccessRequestActivityArgs = {
-  where?: Maybe<ActivityWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortActivitiesBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-/**  A keystone list  */
-export type AccessRequest_ActivityMetaArgs = {
-  where?: Maybe<ActivityWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortActivitiesBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
 };
 
 export type AccessRequestWhereInput = {
@@ -217,12 +186,6 @@ export type AccessRequestWhereInput = {
   application_is_null?: Maybe<Scalars['Boolean']>;
   productEnvironment?: Maybe<EnvironmentWhereInput>;
   productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
-  /**  condition must be true for all nodes  */
-  activity_every?: Maybe<ActivityWhereInput>;
-  /**  condition must be true for at least 1 node  */
-  activity_some?: Maybe<ActivityWhereInput>;
-  /**  condition must be false for all nodes  */
-  activity_none?: Maybe<ActivityWhereInput>;
   serviceAccess?: Maybe<ServiceAccessWhereInput>;
   serviceAccess_is_null?: Maybe<Scalars['Boolean']>;
   updatedBy?: Maybe<UserWhereInput>;
@@ -276,8 +239,6 @@ export enum SortAccessRequestsBy {
   ApplicationDesc = 'application_DESC',
   ProductEnvironmentAsc = 'productEnvironment_ASC',
   ProductEnvironmentDesc = 'productEnvironment_DESC',
-  ActivityAsc = 'activity_ASC',
-  ActivityDesc = 'activity_DESC',
   ServiceAccessAsc = 'serviceAccess_ASC',
   ServiceAccessDesc = 'serviceAccess_DESC',
   UpdatedByAsc = 'updatedBy_ASC',
@@ -302,7 +263,6 @@ export type AccessRequestUpdateInput = {
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  activity?: Maybe<ActivityRelateToManyInput>;
   serviceAccess?: Maybe<ServiceAccessRelateToOneInput>;
 };
 
@@ -323,7 +283,6 @@ export type AccessRequestCreateInput = {
   requestor?: Maybe<UserRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  activity?: Maybe<ActivityRelateToManyInput>;
   serviceAccess?: Maybe<ServiceAccessRelateToOneInput>;
 };
 

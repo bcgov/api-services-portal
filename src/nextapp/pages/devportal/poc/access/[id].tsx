@@ -162,7 +162,7 @@ const MyApplicationsPage = () => {
                 </Box>
             )}
 
-            <List data={data} state={state} refetch={fetch} />
+            <List data={data} state={state} refetch={fetch} cancelRequest={cancelRequest}/>
 
           </Box>
         </Container>

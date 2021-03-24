@@ -96,6 +96,7 @@ module.exports = {
                             }
                             consumer {
                                 id
+                                customId
                                 kongConsumerId
                             }
                             credentialReference
@@ -131,6 +132,11 @@ module.exports = {
                             }
                             serviceAccess {
                                 id
+                                consumer {
+                                    id
+                                    customId
+                                    kongConsumerId
+                                }
                             }
                             controls
                         }
@@ -154,6 +160,22 @@ module.exports = {
         assert.strictEqual(result.data.allGatewayConsumers.length, 1, "Unexpected data returned for Consumer lookup")
         return result.data.allGatewayConsumers[0].kongConsumerId
     }, 
+
+    lookupKongConsumerByCustomId: async function (context, name) {
+        assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Consumer CustomId")
+        const result = await context.executeGraphQL({
+            query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
+                        allGatewayConsumers(where: $where) {
+                            id
+                            kongConsumerId
+                        }
+                    }`,
+            variables: { where: { customId: name } },
+        })
+        console.log("lookupKongConsumerIdByName [" + name+ "] " + JSON.stringify(result))
+        assert.strictEqual(result.data.allGatewayConsumers.length, 1, "Unexpected data returned for Consumer lookup")
+        return result.data.allGatewayConsumers[0]
+    },     
     // lookupGatewayServiceIdByName: async function (context, name) {
     //     assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Service Name")
     //     const result = await context.executeGraphQL({
@@ -244,6 +266,20 @@ module.exports = {
         return result.data.createServiceAccess.id        
     },
 
+    markActiveTheServiceAccess: async function (context, serviceAccessId) {
+        const result = await context.executeGraphQL({
+            query: `mutation UpdateConsumerInServiceAccess($serviceAccessId: ID!) {
+                        updateServiceAccess(id: $serviceAccessId, data: { active: true } ) {
+                            id
+                        }
+                    }`,
+            variables: { serviceAccessId },
+        })
+        console.log("FINISHED")
+        console.log("UPDATE SERVICE ACCESS TO ACTIVE " + JSON.stringify(result,null, 4))
+        return result.data.updateServiceAccess
+    },
+
     linkCredRefsToServiceAccess: async function (context, serviceAccessId, credentialReference) {
         const credRefAsString = JSON.stringify(credentialReference)
         const result = await context.executeGraphQL({
@@ -262,7 +298,7 @@ module.exports = {
     linkServiceAccessToRequest: async function (context, serviceAccessId, requestId) {
         const result = await context.executeGraphQL({
             query: `mutation LinkServiceAccessToRequest($serviceAccessId: ID!, $requestId: ID!) {
-                        updateAccessRequest(id: $requestId, data: { serviceAccess: { connect: { id: $requestId } } } ) {
+                        updateAccessRequest(id: $requestId, data: { serviceAccess: { connect: { id: $serviceAccessId } } } ) {
                             id
                         }
                     }`,
@@ -270,6 +306,7 @@ module.exports = {
         })
         console.log("FINISHED LINKING " + serviceAccessId + " TO REQUEST " + requestId)
         console.log("UPDATE ACCESS REQUEST " + JSON.stringify(result,null, 4))
+        assert.strictEqual('errors' in result, false, 'Error linking service access to request')
         return result.data.updateAccessRequest
     }, 
 

@@ -39,12 +39,13 @@ const {
   lookupKongConsumerIdByName,
   lookupCredentialIssuerById,
   linkCredRefsToServiceAccess,
+  markActiveTheServiceAccess,
   addKongConsumer,
   addServiceAccess,
   linkServiceAccessToRequest,
 } = require('../keystone');
 
-const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession, deleteClientRegistration } = require('../keycloak');
+const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession, updateClientRegistration, deleteClientRegistration } = require('../keycloak');
 
 const { registerClient } = require('./client-credentials')
 const { registerApiKey } = require('./kong-api-key')
@@ -229,7 +230,7 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
             // Create a ServiceAccess record
             const consumerType = 'client'
             const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
-            await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newApiKey.consumerPK, productEnvironment, application )
+            const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newApiKey.consumerPK, productEnvironment, application )
 
             await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
 
@@ -305,32 +306,38 @@ const wfDeleteAccess = async (context, operation, keys) => {
                 .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
                     .then((async () => {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
-                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
-        
                         const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-
+                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
                         // Need extra privilege to delete clients!
-                        //return await deleteClientRegistration(openid.issuer, token, con.customId)
+                        return await deleteClientRegistration(openid.issuer, token, con.customId)
                     }))
                 )
             )
         )
+
     } else {
         const serviceAccessId = keys.serviceAccess
 
+        assert.strictEqual(serviceAccessId != null && typeof(serviceAccessId) != "undefined", true)
+
         const svc = await lookupCredentialReferenceByServiceAccess (context, serviceAccessId)
+        console.log(JSON.stringify(svc, null, 4))
 
-        deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
-        .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
-            .then((async () => {
-                const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
-                const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+        const flow = svc.productEnvironment.flow
 
-                const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+        await deleteRecord(context, 'AccessRequest', { serviceAccess: { id: serviceAccessId }}, ['id'])
+        svc.consumer != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
 
-                return await deleteClientRegistration(openid.issuer, token, con.customId)
-            }))
-        )        
+        svc.consumer != null && kongApi.deleteConsumer(svc.consumer.kongConsumerId)
+                .then((async () => {
+                    if (flow == "client-credentials") {
+                        const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
+                        const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+
+                        await deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
+                    }
+                }))
     }
 }
 
@@ -350,6 +357,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             const ns = requestDetails.productEnvironment.product.namespace
             const controls = 'controls' in requestDetails ? JSON.parse(requestDetails.controls) : {}
             const aclEnabled = (requestDetails.productEnvironment.flow == 'kong-api-key-acl')
+
 
             // If the authentication part hasn't been done, do it now
             if (requestDetails.serviceAccess == null) {
@@ -421,9 +429,13 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             } else {
                 // get the KongConsumerPK 
                 // kongConsumerPK 
+                kongConsumerPK = requestDetails.serviceAccess.consumer.kongConsumerId
+
 
                 // update the clientRegistration to 'active'
                 if (flow == 'client-credentials') {
+                    const clientId = requestDetails.serviceAccess.consumer.customId
+
                     // Find the credential issuer and based on its type, go do the appropriate action
                     const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
 
@@ -436,6 +448,8 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
 
 
                     await updateClientRegistration (openid.issuer, token, clientId, {enabled: true})
+
+                    await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
                 }
             }
 

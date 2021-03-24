@@ -36,7 +36,7 @@ import TagsList from '@/components/tags-list';
 
 const query = gql`
   query GetConsumers {
-    allGatewayConsumers(first: 20) {
+    allGatewayConsumers(first: 20, sortBy: updatedAt_DESC) {
       id
       username
       aclGroups
