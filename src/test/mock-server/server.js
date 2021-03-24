@@ -9,7 +9,7 @@ const times = require('lodash/times');
 const random = require('lodash/random');
 const express = require('express');
 const cors = require('cors');
-const { addHours, parse } = require('date-fns');
+const { addHours, parse, formatISO, subDays } = require('date-fns');
 
 const metricsData = require('./metrics-data');
 const schemas = require('./schemas');
@@ -84,6 +84,9 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
+    allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),
+    allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
+    allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
     allMetrics: (_query, _, args) => {
       const result = args.variableValues.days.map((d, index) => {
         const metrics = metricsData[index];
@@ -216,8 +219,7 @@ const server = mockServer(schemaWithMocks, {
       null,
     ]),
     active: casual.boolean,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
-    flow: casual.word,
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
@@ -247,7 +249,7 @@ const server = mockServer(schemaWithMocks, {
   CredentialIssuer: () => ({
     name: casual.title,
     description: casual.description,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     mode: casual.word,
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,
@@ -256,11 +258,36 @@ const server = mockServer(schemaWithMocks, {
     clientSecret: casual.uuid,
     environments: () => new MockList(2, (_, { id }) => ({ id })),
   }),
-  Plugin: () => ({
-    name: casual.title,
-    kongPluginId: casual.uuid,
-    config: casual.word,
+  GatewayConsumer: () => ({
+    username: casual.username,
+    customId: casual.word,
+    tags: JSON.stringify(casual.array_of_words(2)),
+    createdAt: formatISO(new Date()).toString(),
   }),
+  GatewayPlugin: () => {
+    const random = sample([true, false, null]);
+    const isService = random === true;
+    const isRoute = random === false;
+
+    return {
+      name: casual.random_element(['rate-limiting', 'ip-restriction']),
+      service: () => {
+        if (isService) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      route: (...args) => {
+        if (isRoute) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      kongPluginId: casual.uuid,
+      config: casual.word,
+      tags: JSON.stringify(casual.array_of_words(2)),
+    };
+  },
   Dataset: () => ({
     name: casual.uuid,
     sector: casual.word,
@@ -275,12 +302,24 @@ const server = mockServer(schemaWithMocks, {
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
   }),
+  AccessRequest: () => ({
+    name: 'Gateway Administration API FOR APSO_F APSO_L',
+    isApproved: true,
+    isIssued: true,
+    isComplete: false,
+  }),
   User: () => ({
     name: casual.name,
     username: casual.username,
     email: casual.email,
     isAdmin: false,
   }),
+  DateTime: () => {
+    const subtract = random(0, 20);
+    const date = subDays(new Date(), subtract);
+
+    return formatISO(date);
+  },
 });
 
 app.get('/admin/session', (_, res) => {

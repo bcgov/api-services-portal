@@ -9,35 +9,37 @@ import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
 
+interface ApiOptions {
+  ssr?: boolean;
+  authorization?: HeadersInit;
+}
 
 // NOTE: This can be called at build time
 const api = async <T>(
   query: string,
   variables: unknown = {},
-  isClient = false,
-  authorization = null
+  options = {}
 ): Promise<T> => {
-//   const headers = {
-//     'Content-Type': 'application/json',
-//   }
-//   console.log(JSON.stringify(authorization,null,10))
-//   if (authorization != null && 'cookie' in authorization) {
-//       headers['cookie'] = authorization['cookie']
-//       headers['x-forwarded-access-token'] = authorization['x-forwarded-access-token']
-//   }
-//   console.log(JSON.stringify(headers,null,10))
+  const settings = {
+    ssr: true,
+    headers: {},
+    ...options,
+  };
   const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
-    headers: authorization,
+    headers: {
+      'Content-Type': 'application/json',
+      ...settings.headers,
+    },
   });
-      
+
   try {
     const data = await apiClient.request<T>(query, variables);
     return data;
   } catch (err) {
-    if (isClient) {
-      throw err.response.errors;
-    } else {
+    if (settings.ssr) {
       console.error(`Error querying ${err}`);
+    } else {
+      throw err.response.errors;
     }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
@@ -58,7 +60,7 @@ export const useApi = (
 ): UseQueryResult<Query> => {
   return useQuery<Query>(
     key,
-    async () => await api<Query>(query.query, query.variables),
+    async () => await api<Query>(query.query, query.variables, { ssr: false }),
     queryOptions
   );
 };

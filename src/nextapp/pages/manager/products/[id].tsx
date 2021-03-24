@@ -1,6 +1,6 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
-import { Box, Center, Container, Badge, Text } from '@chakra-ui/react';
+import api, { useApi } from '@/shared/services/api';
+import { Box, Container, Badge, Text } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import PageHeader from '@/components/page-header';
 import ServicesManager from '@/components/services-manager';
@@ -9,7 +9,7 @@ import Head from 'next/head';
 import { Query } from '@/types/query.types';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient } from 'react-query';
 import EnvironmentConfig from '@/components/environment-config';
 import EnvironmentNav from '@/components/environment-nav';
 import { dehydrate } from 'react-query/hydration';
@@ -19,13 +19,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   await queryClient.prefetchQuery(
     ['environment', context.params.id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id: context.params.id}, false, context.req.headers)
+    async () =>
+      await api<Query>(
+        GET_ENVIRONMENT,
+        { id: context.params.id },
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
     props: {
       id: context.params.id,
-      authorization: context.req.headers,
       dehydratedState: dehydrate(queryClient),
     },
   };
@@ -33,12 +39,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const EnvironmentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id, authorization }) => {
+> = ({ id }) => {
   const { user } = useAuth();
-  const { data } = useQuery<Query>(
-    ['environment', id],
-    async () => await api<Query>(GET_ENVIRONMENT, { id }, false, authorization)
-  );
+  const { data } = useApi(['environment', id], {
+    query: GET_ENVIRONMENT,
+    variables: { id },
+  });
   const title = `${data.Environment?.product.organization?.name} Product Environment`;
   const breadcrumb = [
     { href: '/manager/products', text: 'Products' },

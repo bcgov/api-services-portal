@@ -8,6 +8,7 @@ import {
   Box,
   CircularProgress,
   CircularProgressLabel,
+  Divider,
   Stat,
   StatGroup,
   StatLabel,
@@ -96,9 +97,10 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     );
 
     const requests = [];
+
     times(24, (h) => {
-      const timestampKey = addHours(firstDateValue, h).getTime() / 1000;
-      const request = value.find((v) => v[0] === timestampKey);
+      const timestampKey = addHours(new Date(firstDateValue), h).getTime();
+      const request = value.find((v) => v[0] === timestampKey / 1000);
 
       if (request) {
         requests.push(request);
@@ -132,7 +134,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
       }
       return memo;
     }, 0);
-    y.domain([0, max]);
+    y.domain([0, max + 1000]);
   }
 
   if (alt) {
@@ -196,7 +198,30 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               display="grid"
               gridTemplateColumns="repeat(24, 1fr)"
               gridGap={0.5}
+              position="relative"
+              role="group"
             >
+              <Box
+                position="absolute"
+                left={0}
+                right={0}
+                className="peak-text"
+                display="none"
+                _groupHover={{
+                  display: 'block',
+                }}
+                style={{ bottom: y(d.peak[1]) }}
+              >
+                <Text
+                  fontSize="xs"
+                  position="relative"
+                  textAlign="center"
+                  color="gray.600"
+                  px={2}
+                  bgColor="whiteAlpha.50"
+                >{`Peak: ${round(d.peak[1], 4)}`}</Text>
+                <Divider />
+              </Box>
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}

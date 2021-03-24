@@ -3008,6 +3008,7 @@ input MemberRoleWhereInput {
 
 input MemberRoleWhereUniqueInput {
   id: ID!
+  data: GroupUpdateInput
 }
 
 enum SortMemberRolesBy {
