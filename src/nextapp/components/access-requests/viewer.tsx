@@ -28,6 +28,7 @@ const query = gql`
     AccessRequest(where: { id: $id }) {
       id
       name
+      controls
       communication
       isApproved
       isIssued
@@ -38,7 +39,6 @@ const query = gql`
       }
       productEnvironment {
         name
-        plugins
       }
       application {
         name
@@ -81,6 +81,8 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
     }
   );
 
+  const plugins = [] // JSON.parse(data?.AccessRequest.controls).plugins     data?.AccessRequest.productEnvironment.
+
   return (
     <>
       <Button
@@ -108,7 +110,7 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
           <ModalBody>
             <Flex>
               <ControlsList
-                data={data?.AccessRequest.productEnvironment.plugins ?? []}
+                data={plugins ?? []}
               />
               <Box flex={1}>
                 <Box>
