@@ -25,7 +25,7 @@ import NextLink from 'next/link';
 
 const query = gql`
   query GetPendingAccessRequests {
-    allAccessRequests(where: { isIssued_not: true }) {
+    allAccessRequests(where: { isComplete_not: true }) {
       id
       name
       requestor {
@@ -107,10 +107,14 @@ const AccessRequests: React.FC = () => {
               <Td borderColor="yellow.300">
                 <NextLink passHref href={`/manager/requests/${d.id}`}>
                   <Link>
-                    <Text as="span" fontWeight="bold">
-                      {d.requestor.name}
-                    </Text>{' '}
-                    is requesting access to{' '}
+                    {d.requestor && (
+                      <>
+                        <Text as="span" fontWeight="bold">
+                          {d.requestor?.name}
+                        </Text>{' '}
+                        is requesting access to{' '}
+                      </>
+                    )}
                     <Text as="span" fontWeight="bold">
                       {d.name}
                     </Text>
