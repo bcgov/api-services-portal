@@ -41,6 +41,26 @@ import { useAppContext } from '@/pages/context'
 
 import AuthorizationSection from './authorization'
 
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+// import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+// import yamlfmt from 'react-syntax-highlighter/dist/esm/languages/hljs/yaml';
+// //import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
+
+// SyntaxHighlighter.registerLanguage('yaml', yamlfmt);
+
+// import SyntaxHighlighter from 'react-syntax-highlighter';
+// import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
+const YamlViewer = ({doc}) => {
+    return (
+      <SyntaxHighlighter language="yaml">
+        {doc}
+      </SyntaxHighlighter>
+    );
+  };
+
 const UpdateIssuer = () => {
     const context = useAppContext()
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
@@ -61,8 +81,10 @@ const UpdateIssuer = () => {
     const issuer = (data ? data.allCredentialIssuers[0] : null)
 
     if (issuer != null) {
-        issuer.availableScopes = issuer.availableScopes ? JSON.parse(issuer.availableScopes) : []
-        issuer.clientRoles = issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
+        issuer.availableScopes = []
+        issuer.clientRoles = []
+        // issuer.availableScopes = issuer.availableScopes ? JSON.parse(issuer.availableScopes) : []
+        // issuer.clientRoles = issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
     }
 
     const products = issuer == null ? null : [...new Set(issuer.environments.map(g => g.product.name))]
@@ -93,6 +115,51 @@ const UpdateIssuer = () => {
         })
     }
 
+    var pluginYaml = `
+services:
+- name: my-service
+  plugins:
+  - name: acl
+    config:
+      allow: [ P08.D08 ]
+  - name: key-auth
+    config:
+      key_names: [ X-API-KEY ]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false
+    `
+    if (issuer != null && issuer.flow == 'client-credentials') {
+        pluginYaml = `
+services:
+- name: my-service
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.<NS> ]
+    config:
+      client_roles: null
+      allowed_iss:
+      - https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      claims_to_verify:
+      - exp
+      consumer_match_claim_custom_id: true
+      cookie_names: []
+      scope: null
+      uri_param_names:
+      - jwt
+      roles: null
+      consumer_match: true
+      well_known_template: ${issuer.oidcDiscoveryUrl}
+      consumer_match_ignore_not_found: false
+      anonymous: null
+      algorithm: RS256
+      realm_roles: null
+      consumer_match_claim: azp
+    `
+    }
     return (
         <>
         <Head>
@@ -331,6 +398,30 @@ const UpdateIssuer = () => {
             )}
 
  
+            <Box bgColor="white" mb={4}>
+                <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                >
+                    <Heading size="md">Gateway Plugin Setup</Heading>
+                </Box>
+                <Divider />
+                <Box p={4}>
+
+                    <Box
+                        as="dl"
+                        display="grid"
+                        fontSize="sm"
+                        flexWrap="wrap"
+                        gridColumnGap={4}
+                        gridRowGap={2}
+                        >
+                            <YamlViewer doc={pluginYaml}/>
+                    </Box>
+                </Box>
+            </Box>   
 
             <Box display="grid" gridGap={4} gridTemplateColumns="repeat(12, 1fr)">
  

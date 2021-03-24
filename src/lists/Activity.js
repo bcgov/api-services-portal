@@ -46,6 +46,26 @@ module.exports = {
   plugins: [
     atTracking()
   ],
+  hooks: {
+    afterChange: (async function ({
+        operation,
+        existingItem,
+        originalInput,
+        updatedItem,
+        context,
+        listKey,
+        fieldPath, // exists only for field hooks
+      }) {
+        console.log("ACTIVITY " + operation + " " + JSON.stringify(originalInput, null, 3));
+        console.log("ACTIVITY " + operation + " " + JSON.stringify(updatedItem, null, 3));
+
+        if (updatedItem.action == 'publish' && updatedItem.type == 'GatewayConfig') {
+            const feeder = require('../services/feeder');
+            const feederApi = new feeder(process.env.FEEDER_URL)
+            feederApi.forceSync('kong', 'namespace', updatedItem.namespace)
+        }
+    })
+  },
   recordActivity: (context, action, type, refId, message) => {
         console.log("Record Activity")
         const userId = context.authedItem.userId
