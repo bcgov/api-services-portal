@@ -83,7 +83,8 @@ const ConsumersPage: React.FC<
     { suspense: false }
   );
 
-  return (
+
+  return data ? (
     <>
       <Head>
         <title>{`Consumers ${
@@ -180,7 +181,7 @@ const ConsumersPage: React.FC<
         </Box>
       </Container>
     </>
-  );
+  ) : ( <></> );
 };
 
 export default ConsumersPage;
