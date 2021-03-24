@@ -62,7 +62,9 @@ module.exports = {
         if (updatedItem.action == 'publish' && updatedItem.type == 'GatewayConfig') {
             const feeder = require('../services/feeder');
             const feederApi = new feeder(process.env.FEEDER_URL)
-            feederApi.forceSync('kong', 'namespace', updatedItem.namespace)
+            feederApi.forceSync('kong', 'namespace', updatedItem.namespace).catch (err => {
+                console.log("Capture and log error " + err)
+            })
         }
     })
   },

@@ -340,7 +340,7 @@ services:
                                         <Text as="dt" fontWeight="bold">
                                             Initial Access Token
                                         </Text>
-                                        -- secret --
+                                        <Text as="dd">**********</Text>
                                         <Box></Box>
                                     </>
 
@@ -355,7 +355,7 @@ services:
                                         <Text as="dt" fontWeight="bold">
                                             Client Secret
                                         </Text>
-                                        <Text as="dd">{issuer.clientSecret}</Text>
+                                        <Text as="dd">**********</Text>
                                         <Box></Box>
                                     </>
 
