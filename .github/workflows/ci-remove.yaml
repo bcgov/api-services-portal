@@ -35,16 +35,6 @@ jobs:
         insecure_skip_tls_verify: true
 
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
-        
-    - name: 'Delete Network Security Policy'
-      run: |
-        echo """
-        kind: NetworkSecurityPolicy
-        apiVersion: security.devops.gov.bc.ca/v1alpha1
-        metadata:
-          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-        """ > nsp.yaml
-        oc delete -f nsp.yaml
 
     - name: 'Get Helm'
       run: |
