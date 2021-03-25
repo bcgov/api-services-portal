@@ -38,7 +38,7 @@ function dot (value, _key) {
 }
 
 const transformations = {
-    "toString": (keystone, transformInfo, currentData, inputData, key) => currentData != null && (inputData[key] ==  null || currentData[key] === JSON.stringify(inputData[key])) ? null:JSON.stringify(inputData[key]),
+    "toString": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? null:JSON.stringify(inputData[key]),
     "mapNamespace": (keystone, transformInfo, currentData, inputData, key) => {
         if (inputData['tags'] != null) {
             const val = inputData['tags'].filter(tag => tag.startsWith('ns.') && tag.indexOf('.', 3) == -1).map(tag => tag.substring(3))[0]
