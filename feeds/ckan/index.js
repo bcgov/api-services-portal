@@ -61,6 +61,7 @@ function loadDatasetProducer (xfer, workingPath, destinationUrl) {
         }
         const file = fileList[index]
         const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'packages' + '/' + file))['result']
+        data['tags'] = data['tags'].map(tag => tag.name)
         index++
 
         console.log(new Date() + " : " + data['name'])

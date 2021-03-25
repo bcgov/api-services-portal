@@ -89,8 +89,9 @@ const metadata = {
     'Dataset': {
         query: 'allDatasets',
         refKey: 'bcdc_id',
-        sync: ['name', 'sector', 'license_title', 'view_audience', 'notes', 'title', 'organization', 'organizationUnit', 'isInCatalog'],
+        sync: ['name', 'sector', 'license_title', 'view_audience', 'notes', 'title', 'organization', 'organizationUnit', 'isInCatalog', 'tags'],
         transformations: {
+            tags: {name: "toString"},
             organization: {name: "connectOne", key: 'org', list: "allOrganizations", refKey: 'bcdc_id' },
             organizationUnit: {name: "connectOne", key: 'sub_org', list: "allOrganizationUnits", refKey: 'bcdc_id'},
             isInCatalog: {name: "alwaysTrue"}
