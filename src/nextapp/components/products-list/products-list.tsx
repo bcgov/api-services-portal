@@ -1,5 +1,6 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
+import { useAuth } from '@/shared/services/auth';
 import { Box, ButtonGroup, Center, Heading, Icon } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import EnvironmentsList from '@/components/environments-list';
@@ -13,9 +14,10 @@ import { GET_LIST } from './queries';
 import EditProduct from './edit-product';
 
 const ProductsList: React.FC = () => {
+  const { user } = useAuth();
   const { data } = useQuery<Query>(
     'products',
-    async () => await api(GET_LIST),
+    async () => await api(GET_LIST, { namespace: user.namespace } ),
     {
       suspense: true,
     }

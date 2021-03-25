@@ -2,6 +2,8 @@
 
 const KcAdminClient = require('keycloak-admin').default;
 
+const fetch = require('node-fetch')
+
 const config = {
     baseUrl: 'https://dev.oidc.gov.bc.ca/auth',
     realmName: 'xtmke7ky',
@@ -39,4 +41,56 @@ async function doit() {
     // console.log(JSON.stringify(users, null, 4))
 }
 
-doit()
+async function old_way () {
+    const issuer = "https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky"
+    const body = {
+        grant_type: 'client_credentials',
+        client_id: 'ADM',
+        client_secret: '7a4f5f4f-df84-4524-b0f3-9f7c53b5b3bd',
+        scope: 'profile'
+    }
+
+    const params = new URLSearchParams();
+    params.append('grant_type', 'client_credentials');
+    params.append('client_id', 'ADM');
+    params.append('client_secret', '7a4f5f4f-df84-4524-b0f3-9f7c53b5b3bd');
+
+    console.log("GET KEYCLOAK SESSION " + JSON.stringify(body, null, 4))
+    const response = await fetch(`${issuer}/protocol/openid-connect/token`, {
+        method: 'post',
+        body:    params,
+        headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+    })
+    .then(res => res.json())
+    console.log(JSON.stringify(response, null, 3));
+
+    const clientId = "07289A68D5DA4BA1-6F984240"
+    const accessToken = response.access_token
+    const vars = { enabled: true, clientId: clientId}
+    
+    const headers = { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Origin': '',
+    }
+    accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken)
+
+    console.log("UPDATING " + `${issuer}/clients-registrations/default/${clientId}`)
+
+    console.log(JSON.stringify(vars, null, 4))
+
+    const re = await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
+        method: 'put',
+        body:    JSON.stringify(vars),
+        headers: headers
+    })
+    .then(res => res.json())
+    console.log(JSON.stringify(re, null, 3));
+
+}
+
+//doit()
+old_way()

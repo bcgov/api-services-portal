@@ -17,12 +17,15 @@ if (process.env.NODE_ENV == 'development') {
 }
 
 const { filterByOwner, filterByRequestor } = require('./actions/filterByUser')
+const { rewireTypes } = require('@graphql-tools/utils')
 
 const actions = {
+    "filterByActiveOrProductNS": require('./actions/filterByActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
     "filterByOwner": filterByOwner,
     "filterByRequestor": filterByRequestor,
     "filterByPackageNS": require('./actions/filterByPackageNS'),
+    "filterByProductNSOrActiveEnvironment": require('./actions/filterByProductNSOrActiveEnvironment'),
     "filterByUserNS": require('./actions/filterByUserNS'),
     "filterByActive": require('./actions/filterByActive'),
     "filterByActiveEnvironment": require('./actions/filterByActiveEnvironment'),

@@ -1,8 +1,12 @@
 # Upgrade Procedure
 
+
 ## Backup database
 
 ```
+export NS=""
+kubectl exec -ti -n $NS service/patroni-spilo -- /bin/bash
+
 pg_dump -d keystonejs > /tmp/db
 ```
 
@@ -23,6 +27,8 @@ GRANT ALL ON SCHEMA public TO keystonejsuser;
 Keystonejs:
 
 ```
+kubectl exec -ti -n $NS service/bcgov-aps-portal-generic-api -c generic-api -- /bin/sh
+
 npm run create-tables
 ```
 
@@ -31,6 +37,8 @@ npm run create-tables
 Patroni:
 
 ```
+kubectl exec -ti -n $NS service/patroni-spilo -- /bin/bash
+
 psql -d keystonejs -f /tmp/db
 ```
 
