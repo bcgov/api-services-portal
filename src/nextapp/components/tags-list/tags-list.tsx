@@ -6,7 +6,7 @@ interface TagsListProps {
 }
 
 const TagsList: React.FC<TagsListProps> = ({ data }) => {
-  const tags = JSON.parse(data) as string[];
+  const tags = (data == null || data == "") ? [] : JSON.parse(data) as string[];
 
   return (
     <Wrap spacing={2}>
