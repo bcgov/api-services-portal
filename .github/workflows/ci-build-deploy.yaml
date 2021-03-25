@@ -80,23 +80,6 @@ jobs:
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
-    - name: 'Setup Network Security Policy'
-      run: |
-        echo """
-        kind: NetworkSecurityPolicy
-        apiVersion: security.devops.gov.bc.ca/v1alpha1
-        metadata:
-          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-        spec:
-          description: |
-            allow the backend to talk to mongodb
-          source:
-            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
-        """ > nsp.yaml
-        oc apply -f nsp.yaml
-
     - name: 'Get Helm'
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
