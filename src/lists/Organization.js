@@ -4,6 +4,8 @@ const { Content } = require('@keystonejs/fields-content');
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
+const { externallySourced } = require('../components/ExternalSource')
+
 const { EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
@@ -20,10 +22,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    bcdc_id: {
-        type: Text,
-        isRequired: true,
-    },
+    // bcdc_id: {
+    //     type: Text,
+    //     isRequired: true,
+    // },
     tags: {
         type: Text,
         isRequired: true,
@@ -35,4 +37,7 @@ module.exports = {
     orgUnits: { type: Relationship, ref: "OrganizationUnit", many: true }
   },
   access: EnforcementPoint,
+  plugins: [
+    externallySourced(),
+  ]
 }

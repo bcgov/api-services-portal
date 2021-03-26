@@ -3,7 +3,27 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
+const { externallySourced } = require('../components/ExternalSource')
+
 const { EnforcementPoint } = require('../authz/enforcement')
+
+
+/*
+
+Application Owner:
+- Org/Unit
+- Principal Contact: Name, Email, Phone
+
+Org / Org Unit
+
+Who can access this API? Government, Public, Named..
+Security Classification: LOW-PUBLIC
+License: Open Government License
+
+Principal Contact (Name, Email Phone)
+Requestor (if not Principal Contact) (Name, Email, Phone, Role (businessExport, custodian, distributor, pointOfContact, Organization/Unit))
+
+*/
 
 module.exports = {
   fields: {
@@ -11,10 +31,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    bcdc_id: {
-        type: Text,
-        isRequired: false,
-    },
+    // bcdc_id: {
+    //     type: Text,
+    //     isRequired: false,
+    // },
     sector: {
         type: Text,
         isRequired: false,
@@ -24,6 +44,18 @@ module.exports = {
         isRequired: false,
     },
     view_audience: {
+        type: Text,
+        isRequired: false,
+    },
+    download_audience: {
+        type: Text,
+        isRequired: false,
+    },
+    record_publish_date: {
+        type: Text,
+        isRequired: false,
+    },
+    security_class: {
         type: Text,
         isRequired: false,
     },
@@ -42,10 +74,6 @@ module.exports = {
     },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    securityClass: {
-        type: Text,
-        isRequired: false,
-    },
     notes: {
       type: Text,
       isRequired: false,
@@ -65,4 +93,7 @@ module.exports = {
     }
   },
   access: EnforcementPoint,
+  plugins: [
+    externallySourced({isRequired: false}),
+  ]
 }

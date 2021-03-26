@@ -64,6 +64,7 @@ function producer (xfer, numDays, destinationUrl) {
             return null
         }
         const item = work[index]
+        xfer.inject_hash_and_source('prometheus', item)
         index++
 
         const name = JSON.stringify(item.metric['metric'])

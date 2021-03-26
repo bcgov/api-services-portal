@@ -1,6 +1,8 @@
 const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 
+const { externallySourced } = require('../components/ExternalSource')
+
 const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
 const { EnforcementPoint } = require('../authz/enforcement')
@@ -11,10 +13,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
-    kongPluginId: {
-        type: Text,
-        isRequired: false,
-    },
+    // kongPluginId: {
+    //     type: Text,
+    //     isRequired: false,
+    // },
     namespace: {
         type: Text,
         isRequired: false,
@@ -38,6 +40,7 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [
+    externallySourced(),
     atTracking()
   ]
 }

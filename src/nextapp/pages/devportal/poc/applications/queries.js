@@ -31,7 +31,7 @@ export const GET_LIST = `
             name
             active
             consumer {
-              kongConsumerId
+              extForeignKey
             }
             application {
               appId

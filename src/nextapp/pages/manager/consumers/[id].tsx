@@ -28,7 +28,7 @@ const query = gql`
       username
       aclGroups
       customId
-      kongConsumerId
+      extForeignKey
       namespace
       plugins {
         id
@@ -111,7 +111,7 @@ const ConsumersPage: React.FC<
               Kong Consumer ID
             </Text>
             <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-              {data?.GatewayConsumer.kongConsumerId}
+              {data?.GatewayConsumer.extForeignKey}
             </Text>
           </Text>
         </PageHeader>

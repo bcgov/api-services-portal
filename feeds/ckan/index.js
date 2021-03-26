@@ -10,15 +10,15 @@ async function sync({url, workingPath, destinationUrl}) {
     const exceptions = []
     const xfer = transfers(workingPath, url, exceptions)
 
-    await xfer.copy ('/api/action/group_list?limit=100&offset=0', 'group-keys')
-    await xfer.copy ('/api/action/organization_list?limit=100&offset=0', 'organization-keys')
-    await xfer.copy ('/api/action/package_list?limit=100&offset=0', 'package-keys')
+    // await xfer.copy ('/api/action/group_list?limit=100&offset=0', 'group-keys')
+    // await xfer.copy ('/api/action/organization_list?limit=100&offset=0', 'organization-keys')
+    // await xfer.copy ('/api/action/package_list?limit=100&offset=0', 'package-keys')
 
-    await xfer.concurrentWork (getCkanDataProducer(xfer, 'group-keys', '/api/action/group_show', 'groups/'))
-    await xfer.concurrentWork (getCkanDataProducer(xfer, 'package-keys', '/api/action/package_show', 'packages/'), 10)
-    await xfer.concurrentWork (getCkanDataProducer(xfer, 'organization-keys', '/api/action/organization_show', 'orgs/'))
-    console.log("Exceptions? " + (exceptions.length == 0 ? "NO":"YES!"))
-    console.log(JSON.stringify(exceptions, null, 4))
+    // await xfer.concurrentWork (getCkanDataProducer(xfer, 'group-keys', '/api/action/group_show', 'groups/'))
+    // await xfer.concurrentWork (getCkanDataProducer(xfer, 'package-keys', '/api/action/package_show', 'packages/'), 10)
+    // await xfer.concurrentWork (getCkanDataProducer(xfer, 'organization-keys', '/api/action/organization_show', 'orgs/'))
+    // console.log("Exceptions? " + (exceptions.length == 0 ? "NO":"YES!"))
+    // console.log(JSON.stringify(exceptions, null, 4))
 
     // Now, send to portal
     await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl))
@@ -35,6 +35,7 @@ function loadOrgProducer (xfer, workingPath, destinationUrl) {
             return null
         }
         const file = fileList[index]
+
         const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'orgs' + '/' + file))['result']
         index++
 
@@ -42,8 +43,12 @@ function loadOrgProducer (xfer, workingPath, destinationUrl) {
             return new Promise ((resolve, reject) => resolve())
         }
 
+        xfer.inject_hash_and_source('ckan', data)
+
         console.log(new Date() + " : " + data['name'])
         data['orgUnits'] = findAllChildren (xfer, data['name'])
+        data['orgUnits'].map(orgUnit => xfer.inject_hash_and_source('ckan', orgUnit))
+
         return destination.fireAndForget('/feed/Organization', data)
         .then ((result) => console.log(`[${data['name']}] OK`, result))
         .catch (err => console.log(`[${data['name']}] ERR ${err}`))
@@ -60,6 +65,8 @@ function loadDatasetProducer (xfer, workingPath, destinationUrl) {
             return null
         }
         const file = fileList[index]
+        xfer.inject_hash_and_source('ckan', file)
+
         const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'packages' + '/' + file))['result']
         data['tags'] = data['tags'].map(tag => tag.name)
         index++

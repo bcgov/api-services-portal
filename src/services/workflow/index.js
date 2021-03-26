@@ -302,8 +302,8 @@ const wfDeleteAccess = async (context, operation, keys) => {
 
         await deleteRecord(context, 'AccessRequest', { application: { id: applicationId }}, ['id'])
         .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id }', 'productEnvironment { credentialIssuer { id } }'])
-            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
-                .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
+            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'extForeignKey', 'customId'])
+                .then((con) => kongApi.deleteConsumer(con.extForeignKey)
                     .then((async () => {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
                         const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
@@ -326,9 +326,9 @@ const wfDeleteAccess = async (context, operation, keys) => {
         const flow = svc.productEnvironment.flow
 
         await deleteRecord(context, 'AccessRequest', { serviceAccess: { id: serviceAccessId }}, ['id'])
-        svc.consumer != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
+        svc.consumer != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'extForeignKey', 'customId'])
 
-        svc.consumer != null && kongApi.deleteConsumer(svc.consumer.kongConsumerId)
+        svc.consumer != null && kongApi.deleteConsumer(svc.consumer.extForeignKey)
                 .then((async () => {
                     if (flow == "client-credentials") {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
@@ -429,7 +429,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
             } else {
                 // get the KongConsumerPK 
                 // kongConsumerPK 
-                kongConsumerPK = requestDetails.serviceAccess.consumer.kongConsumerId
+                kongConsumerPK = requestDetails.serviceAccess.consumer.extForeignKey
 
 
                 // update the clientRegistration to 'active'
@@ -472,7 +472,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
                     ]
                 }
             */
-            // Convert the service or route name to a kongServiceId or kongRouteId
+            // Convert the service or route name to a extForeignKey
             if ('plugins' in controls) {
                 for ( const plugin of controls.plugins) {
                     // assume the service and route IDs are Kong's unique IDs for them

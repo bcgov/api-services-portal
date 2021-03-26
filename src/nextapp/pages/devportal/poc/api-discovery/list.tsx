@@ -48,7 +48,7 @@ function List({ data, state, refetch }) {
                                     {item.dataset.notes.length > 175 ? item.dataset.notes.substring(0,175) + "..." : item.dataset.notes}
                                 </div>
                                 <SimpleGrid columns={2}>
-                                    {[{l:'Sector',f:'sector'},{l:'License',f:'license_title'}].map(rec => (
+                                    {[{l:'Sector',f:'sector'},{l:'License',f:'license_title'},{l:'Who can Access?',f:'view_audience'},{l:'Security Class',f:'security_class'},{l:'First Published?',f:'record_publish_date'}].map(rec => (
                                         <>
                                             <div style={{textAlign:'right', paddingRight:'20px'}}><b>{rec.l}</b></div>
                                             <div>{item.dataset[rec.f]}</div>
@@ -56,8 +56,8 @@ function List({ data, state, refetch }) {
                                     ))}
                                 </SimpleGrid>       
                                 <Stack direction="row" wrap="wrap" spacing={1} shouldWrapChildren={true}>{Array.isArray(JSON.parse(item.dataset.tags)) ? JSON.parse(item.dataset.tags).map(p => (
-                                    <Tag key={p.name} size="sm" colorScheme="orange" borderRadius="5px">
-                                        <TagLabel>{p.name}</TagLabel>
+                                    <Tag key={p} size="sm" colorScheme="orange" borderRadius="5px">
+                                        <TagLabel>{p}</TagLabel>
                                     </Tag>
                                 )) : false}</Stack>   
                          

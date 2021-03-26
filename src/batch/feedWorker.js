@@ -38,6 +38,7 @@ function dot (value, _key) {
 }
 
 const transformations = {
+    "toStringDefaultArray": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? '[]':JSON.stringify(inputData[key]),
     "toString": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? null:JSON.stringify(inputData[key]),
     "mapNamespace": (keystone, transformInfo, currentData, inputData, key) => {
         if (inputData['tags'] != null) {
@@ -49,6 +50,9 @@ const transformations = {
     },
     "connectExclusiveList": (keystone, transformInfo, currentData, inputData, fieldKey) => {
         console.log("IDs = "+ inputData[fieldKey + "_ids"])
+        // if (inputData[fieldKey + "_ids"].difference(currentData[fieldKey]).length == 0) {
+        //     return null
+        // }
         return {
             disconnectAll: true,
             connect: inputData[fieldKey + "_ids"].map(id => { return { id: id}})
@@ -70,9 +74,9 @@ const transformations = {
 
 const metadata = {
     'Organization': {
-        sync: ['name', 'sector', 'title', 'tags', 'description', 'orgUnits'],
-        refKey: 'bcdc_id',
         query: 'allOrganizations',
+        refKey: 'extForeignKey',
+        sync: ['name', 'sector', 'title', 'tags', 'description', 'orgUnits', 'extSource', 'extRecordHash'],
         transformations: {
             tags: {name: "toString"},
             orgUnits: {name: "connectExclusiveList", list: "OrganizationUnit", syncFirst: true},
@@ -80,20 +84,20 @@ const metadata = {
     },
     'OrganizationUnit': {
         query: 'allOrganizationUnits',
-        refKey: 'bcdc_id',
-        sync: ['name', 'sector', 'title', 'tags', 'description'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'sector', 'title', 'tags', 'description', 'extSource', 'extRecordHash'],
         transformations: {
-            tags: {name: "toString"},
+            tags: {name: "toStringDefaultArray"},
         }
     },
     'Dataset': {
         query: 'allDatasets',
-        refKey: 'bcdc_id',
-        sync: ['name', 'sector', 'license_title', 'view_audience', 'notes', 'title', 'organization', 'organizationUnit', 'isInCatalog', 'tags'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'sector', 'license_title', 'security_class', 'view_audience', 'download_audience', 'record_publish_date', 'notes', 'title', 'organization', 'organizationUnit', 'isInCatalog', 'tags', 'extSource', 'extRecordHash'],
         transformations: {
             tags: {name: "toString"},
-            organization: {name: "connectOne", key: 'org', list: "allOrganizations", refKey: 'bcdc_id' },
-            organizationUnit: {name: "connectOne", key: 'sub_org', list: "allOrganizationUnits", refKey: 'bcdc_id'},
+            organization: {name: "connectOne", key: 'org', list: "allOrganizations", refKey: 'extForeignKey' },
+            organizationUnit: {name: "connectOne", key: 'sub_org', list: "allOrganizationUnits", refKey: 'extForeignKey'},
             isInCatalog: {name: "alwaysTrue"}
         }
     },
@@ -132,10 +136,10 @@ const metadata = {
     },
     'GatewayService': {
         query: 'allGatewayServices',
-        refKey: 'kongServiceId',
-        sync: ['name', 'namespace', 'host', 'tags', 'plugins'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'namespace', 'host', 'tags', 'plugins', 'extSource', 'extRecordHash'],
         transformations: {
-            tags: {name:"toString"},
+            tags: {name:"toStringDefaultArray"},
             namespace: {name:"mapNamespace"},
             plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true},
             // routes: {name: "connectExclusiveList", list: "GatewayRoute", loadFirst: true}
@@ -143,45 +147,45 @@ const metadata = {
     },
     'GatewayGroup': {
         query: 'allGatewayGroups',
-        refKey: 'extRefId',
-        sync: ['name', 'namespace'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'namespace', 'extSource', 'extRecordHash'],
         transformations: {
         }
     },    
     'GatewayRoute': {
         childOnly: false,
         query: 'allGatewayRoutes',
-        refKey: 'kongRouteId',
-        sync: ['name', 'namespace', 'methods', 'paths', 'hosts', 'tags', 'plugins'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'namespace', 'methods', 'paths', 'hosts', 'tags', 'plugins', 'extSource', 'extRecordHash'],
         transformations: {
-            tags: {name: "toString"},
-            methods: {name: "toString"},
-            paths: {name: "toString"},
-            hosts: {name: "toString"},
+            tags: {name: "toStringDefaultArray"},
+            methods: {name: "toStringDefaultArray"},
+            paths: {name: "toStringDefaultArray"},
+            hosts: {name: "toStringDefaultArray"},
             namespace: {name:"mapNamespace"},
-            service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'kongServiceId' },
+            service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'extForeignKey' },
             plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true},
         }
     },
     'GatewayPlugin': {
         childOnly: true,
         query: 'allGatewayPlugins',
-        refKey: 'kongPluginId',
-        sync: ['name', 'tags', 'config'],
+        refKey: 'extForeignKey',
+        sync: ['name', 'tags', 'config', 'extSource', 'extRecordHash'],
         transformations: {
-            tags: {name: "toString"},
+            tags: {name: "toStringDefaultArray"},
             config: {name: "toString"},
-            service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'kongServiceId' },
-            route: {name: "connectOne", key: "route.id", list: "allGatewayRoutes", refKey: 'kongRouteId' },
+            service: {name: "connectOne", key: "service.id", list: "allGatewayServices", refKey: 'extForeignKey' },
+            route: {name: "connectOne", key: "route.id", list: "allGatewayRoutes", refKey: 'extForeignKey' },
         }
     },
     'GatewayConsumer': {
         query: 'allGatewayConsumers',
-        refKey: 'kongConsumerId',
-        sync: ['username', 'tags', 'customId', 'namespace', 'aclGroups', 'plugins'],
+        refKey: 'extForeignKey',
+        sync: ['username', 'tags', 'customId', 'namespace', 'aclGroups', 'plugins', 'extSource', 'extRecordHash'],
         transformations: {
-            tags: {name: "toString"},
-            aclGroups: {name: "toString"},
+            tags: {name: "toStringDefaultArray"},
+            aclGroups: {name: "toStringDefaultArray"},
             namespace: {name:"mapNamespace"},
             plugins: {name: "connectExclusiveList", list: "GatewayPlugin", syncFirst: true}
         }
@@ -409,7 +413,7 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
 
                 const transformMutation = await transformations[transformInfo.name](keystone, transformInfo, localRecord, json, transformKey)
                 if (transformMutation != null) {
-                    console.log(" -- Updated [" + transformKey + "] to " + JSON.stringify(transformMutation))
+                    console.log(" -- Updated [" + transformKey + "] " + JSON.stringify(data[transformKey]) + " to " + JSON.stringify(transformMutation))
                     data[transformKey] = transformMutation
                 }
             }

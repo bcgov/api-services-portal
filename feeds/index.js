@@ -69,7 +69,12 @@ app.put('/forceSync/:source/:scope/:scopeKey', async (req, res) => {
 
 // Replay an existing feeds file
 app.get('/replay/', (req, res) => {
-    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL})
+    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, source: null})
+    res.send({state:'processing'})
+})
+
+app.get('/replay/:source', (req, res) => {
+    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, source: source})
     res.send({state:'processing'})
 })
 

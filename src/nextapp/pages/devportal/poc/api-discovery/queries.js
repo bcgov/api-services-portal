@@ -18,6 +18,10 @@ export const GET_LIST = `
             notes
             sector
             license_title
+            view_audience
+            security_class
+            record_publish_date
+
             tags
             organization {
               title

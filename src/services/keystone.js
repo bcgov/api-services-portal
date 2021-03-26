@@ -97,7 +97,7 @@ module.exports = {
                             consumer {
                                 id
                                 customId
-                                kongConsumerId
+                                extForeignKey
                             }
                             credentialReference
                         }
@@ -135,7 +135,7 @@ module.exports = {
                                 consumer {
                                     id
                                     customId
-                                    kongConsumerId
+                                    extForeignKey
                                 }
                             }
                             controls
@@ -151,14 +151,14 @@ module.exports = {
         const result = await context.executeGraphQL({
             query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
                         allGatewayConsumers(where: $where) {
-                            kongConsumerId
+                            extForeignKey
                         }
                     }`,
             variables: { where: { username: name } },
         })
         console.log("lookupKongConsumerIdByName [" + name+ "] " + JSON.stringify(result))
         assert.strictEqual(result.data.allGatewayConsumers.length, 1, "Unexpected data returned for Consumer lookup")
-        return result.data.allGatewayConsumers[0].kongConsumerId
+        return result.data.allGatewayConsumers[0].extForeignKey
     }, 
 
     lookupKongConsumerByCustomId: async function (context, name) {
@@ -167,7 +167,7 @@ module.exports = {
             query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
                         allGatewayConsumers(where: $where) {
                             id
-                            kongConsumerId
+                            extForeignKey
                         }
                     }`,
             variables: { where: { customId: name } },
@@ -181,28 +181,28 @@ module.exports = {
     //     const result = await context.executeGraphQL({
     //         query: `query FindGatewayServiceByName($where: GatewayServiceWhereInput) {
     //                     allGatewayServices(where: $where) {
-    //                         kongServiceId
+    //                         extForeignKey
     //                     }
     //                 }`,
     //         variables: { where: { name: name } },
     //     })
     //     console.log("lookupGatewayServiceIdByName [" + name+ "] " + JSON.stringify(result))
     //     assert.strictEqual(result.data.allGatewayServices.length, 1, "Unexpected data returned for Gateway Service lookup")
-    //     return result.data.allGatewayServices[0].kongServiceId
+    //     return result.data.allGatewayServices[0].extForeignKey
     // },    
     // lookupGatewayRouteIdByName: async function (context, name) {
     //     assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Route Name")
     //     const result = await context.executeGraphQL({
     //         query: `query FindGatewayRouteByName($where: GatewayRouteWhereInput) {
     //                     allGatewayServices(where: $where) {
-    //                         kongServiceId
+    //                         extForeignKey
     //                     }
     //                 }`,
     //         variables: { where: { name: name } },
     //     })
     //     console.log("lookupGatewayServiceIdByName [" + name+ "] " + JSON.stringify(result))
     //     assert.strictEqual(result.data.allGatewayServices.length, 1, "Unexpected data returned for Gateway Service lookup")
-    //     return result.data.allGatewayServices[0].kongServiceId
+    //     return result.data.allGatewayServices[0].extForeignKey
     // },
     lookupCredentialIssuerById: async function (context, id) {
         const result = await context.executeGraphQL({
@@ -224,18 +224,18 @@ module.exports = {
         return result.data.allCredentialIssuers[0]    
     },
 
-    addKongConsumer: async function(context, username, customId, kongConsumerId) {
-        console.log("CALLING " + username + " " + kongConsumerId)
+    addKongConsumer: async function(context, username, customId, extForeignKey) {
+        console.log("CALLING " + username + " " + extForeignKey)
 
         // This should actually go away and the "Feeders" should be used
         const result = await context.executeGraphQL({
-            query: `mutation CreateNewConsumer($username: String, $customId: String, $kongConsumerId: String) {
-                        createGatewayConsumer(data: { username: $username, customId: $customId, kongConsumerId: $kongConsumerId, tags: "[]" }) {
+            query: `mutation CreateNewConsumer($username: String, $customId: String, $extForeignKey: String) {
+                        createGatewayConsumer(data: { username: $username, customId: $customId, extForeignKey: $extForeignKey, extSource: "kong", extRecordHash: "00000", tags: "[]" }) {
                             id
-                            kongConsumerId
+                            extForeignKey
                         }
                     }`,
-            variables: { username, customId, kongConsumerId },
+            variables: { username, customId, extForeignKey },
         })
         //{"data":{"createConsumer":{"id":"6004b65c2a7e02414bb3ccb5"}}}
         console.log("KEYSTONE CONSUMER " + JSON.stringify(result))
