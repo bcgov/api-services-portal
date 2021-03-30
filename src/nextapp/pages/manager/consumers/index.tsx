@@ -21,6 +21,9 @@ import {
   AlertIcon,
   IconButton,
   Icon,
+  Badge,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -31,7 +34,7 @@ import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
-import { FaPen, FaStop } from 'react-icons/fa';
+import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
 
 const query = gql`
@@ -117,8 +120,7 @@ const ConsumersPage: React.FC<
           <Table variant="simple">
             <Thead>
               <Tr>
-                <Th>Name</Th>
-                <Th>Custom ID</Th>
+                <Th>Name/Id</Th>
                 <Th>Controls</Th>
                 <Th>Tags</Th>
                 <Th colSpan={2}>Created</Th>
@@ -145,11 +147,31 @@ const ConsumersPage: React.FC<
                 <Tr key={d.id}>
                   <Td>
                     <NextLink passHref href={`/manager/consumers/${d.id}`}>
-                      <Link>{d.username}</Link>
+                      <Link>{d.customId ?? d.username}</Link>
                     </NextLink>
                   </Td>
-                  <Td>{d.customId}</Td>
-                  <Td>{d.plugins?.map((d) => d.name).join(', ')}</Td>
+                  <Td>
+                    <Wrap>
+                      {d.plugins?.length === 0 ? (
+                        <NextLink href={`/manager/consumers/${d.id}`}>
+                          <Button
+                            leftIcon={<Icon as={FaPlusCircle} />}
+                            size="xs"
+                            variant="ghost"
+                            color="gray"
+                          >
+                            Add Controls
+                          </Button>
+                        </NextLink>
+                      ) : (
+                        d.plugins.map((d) => (
+                          <WrapItem key={d.id}>
+                            <Badge variant="outline">{d.name}</Badge>
+                          </WrapItem>
+                        ))
+                      )}
+                    </Wrap>
+                  </Td>
                   <Td>
                     <TagsList data={d.tags} />
                   </Td>
@@ -180,7 +202,7 @@ const ConsumersPage: React.FC<
         </Box>
       </Container>
     </>
-  )
+  );
 };
 
 export default ConsumersPage;

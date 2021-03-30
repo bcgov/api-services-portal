@@ -98,9 +98,9 @@ const AccessRequestPage: React.FC<
   const isComplete =
     data.AccessRequest?.isIssued && data.AccessRequest?.isApproved;
 
-  const controls = JSON.parse(data?.AccessRequest?.controls);
-  const plugins = 'plugins' in controls ? controls.plugins : [];
-
+  const { plugins } = data?.AccessRequest?.controls
+    ? JSON.parse(data.AccessRequest.controls)
+    : [];
   return data.AccessRequest ? (
     <>
       <Head>

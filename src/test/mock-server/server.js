@@ -262,9 +262,12 @@ const server = mockServer(schemaWithMocks, {
   }),
   GatewayConsumer: () => ({
     username: casual.username,
-    customId: casual.word,
-    tags: JSON.stringify(casual.array_of_words(2)),
+    customId: () => sample([casual.word, null, null, null]),
+    tags: JSON.stringify(casual.array_of_words(random(0, 2))),
+    namespace: () => sample([null, ...namespaces]),
+    plugins: () => new MockList(random(0, 2), (_, { id }) => ({ id })),
     createdAt: formatISO(new Date()).toString(),
+    kongConsumerId: casual.uuid,
   }),
   GatewayPlugin: () => {
     const random = sample([true, false, null]);
@@ -279,7 +282,7 @@ const server = mockServer(schemaWithMocks, {
         }
         return null;
       },
-      route: (...args) => {
+      route: () => {
         if (isRoute) {
           return { id: casual.uuid };
         }
@@ -309,6 +312,18 @@ const server = mockServer(schemaWithMocks, {
     isApproved: true,
     isIssued: true,
     isComplete: false,
+    controls: JSON.stringify({
+      plugins: [
+        {
+          name: casual.random_element(['rate-limiting', 'ip-restriction']),
+          service: { id: casual.uuid, name: 'my-test-service' },
+          route: null,
+          kongPluginId: casual.uuid,
+          config: casual.word,
+          tags: JSON.stringify(casual.array_of_words(2)),
+        },
+      ],
+    }),
   }),
   User: () => ({
     name: casual.name,

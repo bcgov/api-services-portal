@@ -76,8 +76,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id }) => {
+  const queryKey = ['consumer', id];
   const { data } = useApi(
-    ['consumer', id],
+    queryKey,
     {
       query,
       variables: { id },
@@ -105,7 +106,7 @@ const ConsumersPage: React.FC<
               Namespace
             </Text>
             <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-              {data.GatewayConsumer.namespace}
+              {data.GatewayConsumer.namespace ?? '-'}
             </Text>
             <Text as="span" ml={3} mr={1} fontWeight="bold">
               Kong Consumer ID
@@ -127,8 +128,8 @@ const ConsumersPage: React.FC<
           mb={4}
           justify="stretch"
         >
-          <IpRestriction />
-          <RateLimiting />
+          <IpRestriction queryKey={queryKey} mode="create" />
+          <RateLimiting queryKey={queryKey} mode="create" />
         </HStack>
         <ControlsList
           data={data?.GatewayConsumer.plugins.filter(
