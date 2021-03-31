@@ -5,8 +5,6 @@ const KcAdminClient = require('keycloak-admin').default;
 const fetch = require('node-fetch')
 
 const config = {
-    baseUrl: 'https://dev.oidc.gov.bc.ca/auth',
-    realmName: 'xtmke7ky',
 }
 
 async function doit() {
@@ -21,21 +19,34 @@ async function doit() {
     // const res = await kcAdminClient.clients.find({clientId:"DE8398521611406C-6F984240"})
     // console.log(JSON.stringify(res, null, 4))
 
-    const res = await kcAdminClient.clients.listRoles({id:'8876e278-b533-464f-8e51-5b432f3d75e5'})
+    // const res = await kcAdminClient.clients.listRoles({id:'8876e278-b533-464f-8e51-5b432f3d75e5'})
 
-    console.log(JSON.stringify(res, null, 4))
+    // console.log(JSON.stringify(res, null, 4))
 
-    await kcAdminClient.clients.delRole({id:'8876e278-b533-464f-8e51-5b432f3d75e5', roleName: "blah"})
+    // await kcAdminClient.clients.delRole({id:'8876e278-b533-464f-8e51-5b432f3d75e5', roleName: "blah"})
 
-    const result  = await kcAdminClient.clients.createRole({id:'8876e278-b533-464f-8e51-5b432f3d75e5', name: "blah"})
+    // const result  = await kcAdminClient.clients.createRole({id:'8876e278-b533-464f-8e51-5b432f3d75e5', name: "blah"})
+    // console.log(JSON.stringify(result, null, 4))
+
+    const result  = await kcAdminClient.clientScopes.listDefaultOptionalClientScopes()
     console.log(JSON.stringify(result, null, 4))
+    const scopeToId = result.reduce(function(map, obj) {
+        map[obj.name] = obj.id;
+        return map;
+    }, {});
 
+    const result1  = await kcAdminClient.clients.listOptionalClientScopes({id:'88913504-fc63-4c94-a15f-6688705c1677'})
+    console.log(JSON.stringify(result1, null, 4))
 
-    const result2  = await kcAdminClient.clients.getServiceAccountUser({id:'8876e278-b533-464f-8e51-5b432f3d75e5'})
+    console.log(scopeToId['PatientRecord.Read'])
+    const result2  = await kcAdminClient.clients.addOptionalClientScope({id:'88913504-fc63-4c94-a15f-6688705c1677', clientScopeId: scopeToId['PatientRecord.Read']})
     console.log(JSON.stringify(result2, null, 4))
 
-    const result3  = await kcAdminClient.users.listRoleMappings({id:result2.id})
-    console.log(JSON.stringify(result3, null, 4))
+    // const result2  = await kcAdminClient.clients.getServiceAccountUser({id:'8876e278-b533-464f-8e51-5b432f3d75e5'})
+    // console.log(JSON.stringify(result2, null, 4))
+
+    // const result3  = await kcAdminClient.users.listRoleMappings({id:result2.id})
+    // console.log(JSON.stringify(result3, null, 4))
 
     // const users = await kcAdminClient.users.find();
     // console.log(JSON.stringify(users, null, 4))
@@ -92,5 +103,7 @@ async function old_way () {
 
 }
 
-//doit()
-old_way()
+doit().catch (err => {
+    console.log(err)
+})
+//old_way()

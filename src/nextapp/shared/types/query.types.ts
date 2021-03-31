@@ -702,6 +702,20 @@ export type AlertsCreateInput = {
   data?: Maybe<AlertCreateInput>;
 };
 
+export type OrganizationRelateToOneInput = {
+  create?: Maybe<OrganizationCreateInput>;
+  connect?: Maybe<OrganizationWhereUniqueInput>;
+  disconnect?: Maybe<OrganizationWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
+export type OrganizationUnitRelateToOneInput = {
+  create?: Maybe<OrganizationUnitCreateInput>;
+  connect?: Maybe<OrganizationUnitWhereUniqueInput>;
+  disconnect?: Maybe<OrganizationUnitWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type Application = {
   __typename?: 'Application';
@@ -717,6 +731,8 @@ export type Application = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<Organization>;
+  organizationUnit?: Maybe<OrganizationUnit>;
   owner?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -783,6 +799,10 @@ export type ApplicationWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  organization?: Maybe<OrganizationWhereInput>;
+  organization_is_null?: Maybe<Scalars['Boolean']>;
+  organizationUnit?: Maybe<OrganizationUnitWhereInput>;
+  organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -816,6 +836,10 @@ export enum SortApplicationsBy {
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  OrganizationAsc = 'organization_ASC',
+  OrganizationDesc = 'organization_DESC',
+  OrganizationUnitAsc = 'organizationUnit_ASC',
+  OrganizationUnitDesc = 'organizationUnit_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
@@ -828,6 +852,8 @@ export type ApplicationUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
 };
 
@@ -840,6 +866,8 @@ export type ApplicationCreateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
 };
 
@@ -1480,20 +1508,6 @@ export type CredentialIssuerCreateInput = {
 
 export type CredentialIssuersCreateInput = {
   data?: Maybe<CredentialIssuerCreateInput>;
-};
-
-export type OrganizationRelateToOneInput = {
-  create?: Maybe<OrganizationCreateInput>;
-  connect?: Maybe<OrganizationWhereUniqueInput>;
-  disconnect?: Maybe<OrganizationWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
-export type OrganizationUnitRelateToOneInput = {
-  create?: Maybe<OrganizationUnitCreateInput>;
-  connect?: Maybe<OrganizationUnitWhereUniqueInput>;
-  disconnect?: Maybe<OrganizationUnitWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
 /**  A keystone list  */
@@ -4143,6 +4157,8 @@ export type Namespace = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<Organization>;
+  organizationUnit?: Maybe<OrganizationUnit>;
   members: Array<MemberRole>;
   _membersMeta?: Maybe<_QueryMeta>;
   updatedBy?: Maybe<User>;
@@ -4252,6 +4268,10 @@ export type NamespaceWhereInput = {
   extRefId_not_ends_with_i?: Maybe<Scalars['String']>;
   extRefId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   extRefId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  organization?: Maybe<OrganizationWhereInput>;
+  organization_is_null?: Maybe<Scalars['Boolean']>;
+  organizationUnit?: Maybe<OrganizationUnitWhereInput>;
+  organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   members_every?: Maybe<MemberRoleWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -4295,6 +4315,10 @@ export enum SortNamespacesBy {
   PermDomainsDesc = 'permDomains_DESC',
   ExtRefIdAsc = 'extRefId_ASC',
   ExtRefIdDesc = 'extRefId_DESC',
+  OrganizationAsc = 'organization_ASC',
+  OrganizationDesc = 'organization_DESC',
+  OrganizationUnitAsc = 'organizationUnit_ASC',
+  OrganizationUnitDesc = 'organizationUnit_DESC',
   MembersAsc = 'members_ASC',
   MembersDesc = 'members_DESC',
   UpdatedByAsc = 'updatedBy_ASC',
@@ -4312,6 +4336,8 @@ export type NamespaceUpdateInput = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   members?: Maybe<MemberRoleRelateToManyInput>;
 };
 
@@ -4325,6 +4351,8 @@ export type NamespaceCreateInput = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   members?: Maybe<MemberRoleRelateToManyInput>;
 };
 

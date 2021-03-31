@@ -32,8 +32,10 @@ import NextLink from 'next/link';
 import { styles } from '@/shared/styles/devportal.css';
 
 import graphql from '@/shared/services/graphql'
+import toArray from '@/shared/services/toarray'
 
 import NameValue from '@/components/name-value';
+import YamlViewer from '@/components/yaml-viewer'
 
 import { ButtonGroup, Input, Textarea, Flex, useToast } from "@chakra-ui/react"
 
@@ -41,25 +43,6 @@ import { useAppContext } from '@/pages/context'
 
 import AuthorizationSection from './authorization'
 
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-// import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import yamlfmt from 'react-syntax-highlighter/dist/esm/languages/hljs/yaml';
-// //import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
-
-// SyntaxHighlighter.registerLanguage('yaml', yamlfmt);
-
-// import SyntaxHighlighter from 'react-syntax-highlighter';
-// import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-
-const YamlViewer = ({doc}) => {
-    return (
-      <SyntaxHighlighter language="yaml">
-        {doc}
-      </SyntaxHighlighter>
-    );
-  };
 
 const UpdateIssuer = () => {
     const context = useAppContext()
@@ -69,6 +52,7 @@ const UpdateIssuer = () => {
         if (context['router'] != null && id) {
             graphql(GET_ISSUER, { id : id })
             .then(({ data }) => {
+                toArray (data.allCredentialIssuers[0], ['availableScopes', 'clientRoles'])
                 setState({ state: 'loaded', data });
             })
             .catch((err) => {
@@ -78,14 +62,7 @@ const UpdateIssuer = () => {
     };
     useEffect(fetch, [context]);
 
-    const issuer = (data ? data.allCredentialIssuers[0] : null)
-
-    if (issuer != null) {
-        issuer.availableScopes = []
-        issuer.clientRoles = []
-        // issuer.availableScopes = issuer.availableScopes ? JSON.parse(issuer.availableScopes) : []
-        // issuer.clientRoles = issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
-    }
+    const issuer = (data != null ? data.allCredentialIssuers[0] : null)
 
     const products = issuer == null ? null : [...new Set(issuer.environments.map(g => g.product.name))]
 

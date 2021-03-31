@@ -1,5 +1,54 @@
 const assert = require('assert').strict;
 
+const deleteRecords = async function (context, entity, where, multiple=false, returnedFields) {
+
+    const qlName = entity.endsWith('s') ? `all${entity}es` : `all${entity}s`
+    const find = await context.executeGraphQL({
+        query: `query Find${entity}($where: ${entity}WhereInput) {
+                    ${qlName}(where: $where ) {
+                        id
+                    }
+                }`,
+        variables: { where },
+    })
+    console.log(JSON.stringify(find, null, 4))
+    if (find.data[qlName].length > 1) {
+        if (multiple == false) {
+            throw Error('Too many records returned!')
+        }
+        const ids = find.data[qlName].map(r => r.id)
+        const qlDeleteName = entity.endsWith('s') ? `delete${entity}es` : `delete${entity}s`
+        const result = await context.executeGraphQL({
+            query: `mutation Delete${entity}($ids: [ID]!) {
+                        ${qlDeleteName}( ids: $ids ) {
+                            ${returnedFields.join(' ')}
+                        }
+                    }`,
+            variables: { ids },
+        })
+        console.log("FINISHED DELETING IDS=" + ids + " FROM WHERE " + JSON.stringify(where))
+        console.log("DELETED " + JSON.stringify(result,null, 4))
+        return result.data[`${qlDeleteName}`]
+
+    } else if (find.data[qlName].length == 0) {
+        console.log("Already deleted")
+        return null
+    } else {
+        const id = find.data[qlName][0].id
+        const result = await context.executeGraphQL({
+            query: `mutation Delete${entity}($id: ID!) {
+                        delete${entity}( id: $id ) {
+                            ${returnedFields.join(' ')}
+                        }
+                    }`,
+            variables: { id },
+        })
+        console.log("FINISHED DELETING ID=" + id + " FROM WHERE " + JSON.stringify(where))
+        console.log("DELETED " + JSON.stringify(result,null, 4))
+        return result.data[`delete${entity}`]
+    }
+}
+
 module.exports = {
     lookupApplication: async function lookupApplication (context, id) {
         const result = await context.executeGraphQL({
@@ -310,36 +359,8 @@ module.exports = {
         return result.data.updateAccessRequest
     }, 
 
+    deleteRecords: deleteRecords,
     deleteRecord: async function (context, entity, where, returnedFields) {
-
-        const qlName = entity.endsWith('s') ? `all${entity}es` : `all${entity}s`
-        const find = await context.executeGraphQL({
-            query: `query Find${entity}($where: ${entity}WhereInput) {
-                        ${qlName}(where: $where ) {
-                            id
-                        }
-                    }`,
-            variables: { where },
-        })
-        console.log(JSON.stringify(find, null, 4))
-        if (find.data[qlName].length > 1) {
-            throw Error('Too many records returned!')
-        } else if (find.data[qlName].length == 0) {
-            console.log("Already deleted")
-            return null
-        } else {
-            const id = find.data[qlName][0].id
-            const result = await context.executeGraphQL({
-                query: `mutation Delete${entity}($id: ID!) {
-                            delete${entity}( id: $id ) {
-                                ${returnedFields.join(' ')}
-                            }
-                        }`,
-                variables: { id },
-            })
-            console.log("FINISHED DELETING ID=" + id + " FROM WHERE " + JSON.stringify(where))
-            console.log("DELETED " + JSON.stringify(result,null, 4))
-            return result.data[`delete${entity}`]
-        }
-    }
+        return deleteRecords(context, entity, where, false, returnedFields)
+    },
 }

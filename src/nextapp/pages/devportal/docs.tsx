@@ -38,8 +38,8 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
         <title>API Program Services | Documentation</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="APS Documentation">
-          <p>This is some content</p>
+        <PageHeader title="API Guides and Documentation">
+          <p></p>
         </PageHeader>
         {pages.length === 0 && (
           <Center my={12}>
@@ -74,7 +74,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
             {pages.map((d) => (
               <Card key={d.id}>
                 <Heading as="h3" size="md" mb={2}>
-                  <NextLink passHref href={`/docs/${d.slug}`}>
+                  <NextLink passHref href={`/devportal/docs/${d.slug}`}>
                     <Link _hover={{ textDecor: 'underline' }}>{d.title}</Link>
                   </NextLink>
                 </Heading>

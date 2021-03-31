@@ -1,5 +1,7 @@
 //import Item from './item'
 
+import { FaAngleDoubleRight } from 'react-icons/fa';
+
 import { styles } from '@/shared/styles/devportal.css';
 
 import { Button, ButtonGroup, Flex, Box, Heading } from "@chakra-ui/react"
@@ -32,14 +34,18 @@ function List({ data, state, refetch }) {
             {data.allProducts.filter(p => p.environments.filter(e => e.active).length > 0).map((item, index) => (
                 <Card key={item.id}>
                     <Heading size="md" mb={2}>
-                        {item.name}
+                            {item.name}
                     </Heading>
+                    { (item.dataset != null || item.organization) && (
+                    <Box m={2}>
+                        <Text fontSize="sm">
+                            <p>{(item.dataset != null ? item.dataset.organization.title : (item.organization ? item.organization.title : "-"))}</p>
+                            <p>> {(item.dataset != null ? item.dataset.organizationUnit.title : (item.organizationUnit ? item.organizationUnit.title : "-"))}</p>
+                        </Text>
+                    </Box>
+                    )}
+
                     <Stack direction="column" spacing={4} align="flex-start" justify="flex-start">
-                        { (item.dataset == null) ? (
-                            <NameValue name="Organization" value={(item.organization ? item.organization.title : "-") + " / " + (item.organizationUnit ? item.organizationUnit.title : "-")} width="300px"/>
-                        ) : (
-                            <NameValue name="Organization" value={(item.dataset.organization ? item.dataset.organization.title : "-") + " / " + (item.dataset.organizationUnit ? item.dataset.organizationUnit.title : "-")} width="300px"/>
-                        )}
                         {/* <NameValue name="Service Routes" value={item.services.map(s => ( <div>{s.name} : <a href={s.host}>{s.host}</a></div> )) } width="400px"/> */}
                         { (item.dataset != null) ? (
                             <>
@@ -54,6 +60,21 @@ function List({ data, state, refetch }) {
                                             <div>{item.dataset[rec.f]}</div>
                                         </>
                                     ))}
+                                    <div style={{textAlign:'right', paddingRight:'20px'}}><b>Environments</b></div>
+                                    <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
+                                            <Text
+                                            display="inline-block"
+                                            fontSize="sm"
+                                            bgColor="blue.300"
+                                            color="white"
+                                            textTransform="uppercase"
+                                            px={2}
+                                            borderRadius={2}
+                                        >
+                                            {p.name}
+                                        </Text>       
+                                    )) : false}</HStack>   
+
                                 </SimpleGrid>       
                                 <Stack direction="row" wrap="wrap" spacing={1} shouldWrapChildren={true}>{Array.isArray(JSON.parse(item.dataset.tags)) ? JSON.parse(item.dataset.tags).map(p => (
                                     <Tag key={p} size="sm" colorScheme="orange" borderRadius="5px">
@@ -62,21 +83,26 @@ function List({ data, state, refetch }) {
                                 )) : false}</Stack>   
                          
                             </>
-                        ) : false }
-                        <div><b>Environments</b></div>
-                        <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
-                                <Text
-                                display="inline-block"
-                                fontSize="sm"
-                                bgColor="blue.300"
-                                color="white"
-                                textTransform="uppercase"
-                                px={2}
-                                borderRadius={2}
-                            >
-                                {p.name}
-                            </Text>       
-                        )) : false}</HStack>   
+                        ) : (
+                            <SimpleGrid columns={2}>
+                            <div style={{textAlign:'right', paddingRight:'20px'}}><b>Environments</b></div>
+                                <HStack spacing={4}>{Array.isArray(item.environments) ? item.environments.filter(e => e.active).map(p => (
+                                        <Text
+                                        display="inline-block"
+                                        fontSize="sm"
+                                        bgColor="blue.300"
+                                        color="white"
+                                        textTransform="uppercase"
+                                        px={2}
+                                        borderRadius={2}
+                                    >
+                                        {p.name}
+                                    </Text>       
+                                )) : false}</HStack>   
+                            </SimpleGrid>
+                                
+                        ) }
+
                         <ButtonGroup>
                             { item.flow != "public" ? (
                                     <Button variant="primary" onClick={(e) => goto(`/devportal/poc/requests/new/${item.id}`)}>Request Access</Button>

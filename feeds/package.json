@@ -6,10 +6,11 @@
         "dotenv": "^8.2.0",
         "es6-promise-pool": "^2.5.0",
         "express": "^4.17.1",
+        "js-yaml": "^4.0.0",
         "moment": "^2.29.1",
+        "multer": "^1.4.2",
         "node-fetch": "^2.6.1",
-        "uuid": "^8.3.2",
-        "yaml": "1.10.0"
+        "uuid": "^8.3.2"
     },
     "scripts": {
         "start": "node index.js"

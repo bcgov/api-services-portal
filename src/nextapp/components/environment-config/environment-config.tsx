@@ -1,6 +1,10 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
   Box,
   Button,
   Heading,
@@ -10,6 +14,7 @@ import {
   Switch,
   ButtonGroup,
   Icon,
+  VStack,
   useToast,
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
@@ -18,6 +23,7 @@ import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
+import YamlViewer from '../yaml-viewer';
 
 interface EnvironmentConfigProps {
   data: Environment;
@@ -191,6 +197,20 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
           </Box>
         </Box>
       </Box>
+      { flow === 'kong-api-key-acl' && (
+        <Box p={2}>
+            <Alert status="warning" mb={4}>
+                <AlertIcon />
+                <AlertTitle mr={2}>Plugins Configuration</AlertTitle>
+                <AlertDescription>
+                    <Box>Ensure that services associated with this environment have the following acl plugin:</Box>
+                    <YamlViewer doc={`plugins:\n- name: acl\n  config:\n    allow: [ ${data.appId} ]`}/>
+
+                </AlertDescription>
+            </Alert>
+        </Box>
+
+      )}
     </form>
   );
 };

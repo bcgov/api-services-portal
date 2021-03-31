@@ -21,7 +21,7 @@ async function sync({url, workingPath, destinationUrl}) {
     // console.log(JSON.stringify(exceptions, null, 4))
 
     // Now, send to portal
-    await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl))
+    // await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl))
     await xfer.concurrentWork(loadDatasetProducer(xfer, workingPath, destinationUrl))
 }
 

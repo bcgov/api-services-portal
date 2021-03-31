@@ -1,11 +1,16 @@
 const express = require('express')
 const fetch = require('node-fetch')
-const YAML = require('yaml')
+const YAML = require('js-yaml')
 const assert = require('assert').strict;
+var multer  = require('multer')
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage })
+
 const app = express()
 const port = 6000
 
 const replay = require('./utils/replay')
+const push = require('./utils/push')
 
 assert.strictEqual('WORKING_PATH' in process.env, true, 'WORKING_PATH must be set')
 assert.strictEqual('DESTINATION_URL' in process.env, true, 'DESTINATION_URL must be set')
@@ -76,6 +81,15 @@ app.get('/replay/', (req, res) => {
 app.get('/replay/:source', (req, res) => {
     replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, source: source})
     res.send({state:'processing'})
+})
+
+
+// curl http://localhost:6000/push -F "yaml=@values.yaml"
+app.post('/push', upload.single('yaml'), async (req, res) => {
+    const data = YAML.loadAll(req.file.buffer.toString('utf-8'))
+    await push({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, items: data})
+    .then(() => res.send({state:'pushed'}))
+    .catch (err => { console.log(err); res.status(400).send({state:'failed'})})
 })
 
 app.use((err, req, res, next) => {

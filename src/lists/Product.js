@@ -44,6 +44,10 @@ module.exports = {
         resolvedData
     }) => {
         if (operation == "create") {
+            // If an AppId is provided then don't bother creating one
+            if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
+                return resolvedData
+            }
             resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             return resolvedData
         }

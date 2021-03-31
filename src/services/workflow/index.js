@@ -31,6 +31,7 @@ const assert = require('assert').strict;
 
 const {
   deleteRecord,
+  deleteRecords,
   lookupApplication,
   lookupServices,
   lookupProductEnvironmentServices,
@@ -300,16 +301,16 @@ const wfDeleteAccess = async (context, operation, keys) => {
     if ('application' in keys) {
         const applicationId = keys.application
 
-        await deleteRecord(context, 'AccessRequest', { application: { id: applicationId }}, ['id'])
-        .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id }', 'productEnvironment { credentialIssuer { id } }'])
-            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'extForeignKey', 'customId'])
-                .then((con) => kongApi.deleteConsumer(con.extForeignKey)
+        await deleteRecords(context, 'AccessRequest', { application: { id: applicationId }}, true, ['id'])
+        .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id extForeignKey customId }', 'productEnvironment { credentialIssuer { id } }'])
+            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id'])
+                .then((con) => svc != null && kongApi.deleteConsumer(svc.consumer.extForeignKey)
                     .then((async () => {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
                         const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
                         const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
                         // Need extra privilege to delete clients!
-                        return await deleteClientRegistration(openid.issuer, token, con.customId)
+                        return await deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
                     }))
                 )
             )
@@ -446,9 +447,14 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
                     // issuer.initialAccessToken if 'iat'
                     const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
+                    const controls = JSON.parse(requestDetails.controls)
+                    const defaultClientScopes = controls.defaultClientScopes;
+                    
+                    await updateClientRegistration (openid.issuer, token, clientId, {enabled: true, defaultClientScopes})
 
-                    await updateClientRegistration (openid.issuer, token, clientId, {enabled: true})
-
+                    await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
+                } else if (flow == 'kong-api-key-acl') {
+                    // update the Consumer ACL group membership to requestDetails.productEnvironment.appId
                     await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
                 }
             }

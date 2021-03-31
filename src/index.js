@@ -188,8 +188,11 @@ module.exports = {
     const express = require('express')
     app.use(express.json())
 
-    app.put('/feed/:entity', (req, res) => PutFeed(keystone, req, res).catch (err => res.json({result: 'error', error: "" + err})))
-    app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.json({result: 'error', error: "" + err})))
+    app.put('/feed/:entity', (req, res) => PutFeed(keystone, req, res).catch (err => {
+        console.log(err)
+        res.status(400).json({result: 'error', error: "" + err})
+    }))
+    app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.status(400).json({result: 'error', error: "" + err})))
     app.delete('/feed/:entity/:id', (req, res) => DeleteFeed(keystone, req, res))
   },
   distDir,

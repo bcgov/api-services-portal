@@ -26,7 +26,7 @@ module.exports = {
     },
     description: {
       type: Text,
-      isRequired: true,
+      isRequired: false,
       access: FieldEnforcementPoint
     },
     link: {
@@ -43,7 +43,7 @@ module.exports = {
       type: Slug,
       isRequired: true,
       isUnique: true,
-      generate: ({ resolvedData }) => resolvedData.document + "-" + resolvedData.version,
+      generate: ({ resolvedData }) => slugify(resolvedData.title + "-" + resolvedData.version).toLowerCase(),
     },
     version: {
       type: Integer,
