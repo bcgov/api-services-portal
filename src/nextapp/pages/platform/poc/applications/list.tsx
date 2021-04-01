@@ -4,8 +4,6 @@ import { styles } from '@/shared/styles/devportal.css';
 
 import graphql from '@/shared/services/graphql'
 
-import { REMOVE } from './queries'
-
 import { Alert, AlertDescription, AlertTitle, AlertIcon, Box, Badge, CloseButton, Input, InputGroup, InputRightElement, Link, Button, ButtonGroup, Text, Spacer } from "@chakra-ui/react"
 import { HStack, Table, Thead, Tbody, Tr, Th, Td, TableCaption, VStack } from "@chakra-ui/react"
 
