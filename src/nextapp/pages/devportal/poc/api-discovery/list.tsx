@@ -40,7 +40,7 @@ function List({ data, state, refetch }) {
                     <Box m={2}>
                         <Text fontSize="sm">
                             <p>{(item.dataset != null ? item.dataset.organization.title : (item.organization ? item.organization.title : "-"))}</p>
-                            <p>> {(item.dataset != null ? item.dataset.organizationUnit.title : (item.organizationUnit ? item.organizationUnit.title : "-"))}</p>
+                            <p>&gt; {(item.dataset != null ? item.dataset.organizationUnit.title : (item.organizationUnit ? item.organizationUnit.title : "-"))}</p>
                         </Text>
                     </Box>
                     )}
