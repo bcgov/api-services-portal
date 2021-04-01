@@ -6,7 +6,7 @@ import {
 
 const ScopeChoice = ({scopes, selectedScopes}) => {
 
-    const [checkedItems, setCheckedItems] = React.useState(scopes.map(s => selectedScopes.includes(s)))
+    const [checkedItems, setCheckedItems] = React.useState(scopes?.map(s => selectedScopes.includes(s)))
 
     const toggle =  (scope, toggle) => {
         toggle ? selectedScopes.push(scope) : selectedScopes.splice(selectedScopes.indexOf(scope), 1)
@@ -16,7 +16,7 @@ const ScopeChoice = ({scopes, selectedScopes}) => {
     return (
        <Stack pl={6} mt={1} spacing={1}>
             {
-                scopes.map((scope,index) => (
+                scopes?.map((scope,index) => (
                     <Checkbox key={index}
                         value={scope}
                         isChecked={checkedItems[index]} onChange={(e) => toggle(scope, e.target.checked)}

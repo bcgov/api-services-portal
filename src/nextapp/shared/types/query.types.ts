@@ -893,6 +893,7 @@ export type Content = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
@@ -1013,6 +1014,24 @@ export type ContentWhereInput = {
   readme_not_ends_with_i?: Maybe<Scalars['String']>;
   readme_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   readme_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags?: Maybe<Scalars['String']>;
+  tags_not?: Maybe<Scalars['String']>;
+  tags_contains?: Maybe<Scalars['String']>;
+  tags_not_contains?: Maybe<Scalars['String']>;
+  tags_starts_with?: Maybe<Scalars['String']>;
+  tags_not_starts_with?: Maybe<Scalars['String']>;
+  tags_ends_with?: Maybe<Scalars['String']>;
+  tags_not_ends_with?: Maybe<Scalars['String']>;
+  tags_i?: Maybe<Scalars['String']>;
+  tags_not_i?: Maybe<Scalars['String']>;
+  tags_contains_i?: Maybe<Scalars['String']>;
+  tags_not_contains_i?: Maybe<Scalars['String']>;
+  tags_starts_with_i?: Maybe<Scalars['String']>;
+  tags_not_starts_with_i?: Maybe<Scalars['String']>;
+  tags_ends_with_i?: Maybe<Scalars['String']>;
+  tags_not_ends_with_i?: Maybe<Scalars['String']>;
+  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   slug?: Maybe<Scalars['String']>;
   slug_not?: Maybe<Scalars['String']>;
   slug_contains?: Maybe<Scalars['String']>;
@@ -1062,6 +1081,8 @@ export enum SortContentsBy {
   GithubRepositoryDesc = 'githubRepository_DESC',
   ReadmeAsc = 'readme_ASC',
   ReadmeDesc = 'readme_DESC',
+  TagsAsc = 'tags_ASC',
+  TagsDesc = 'tags_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
   OrderAsc = 'order_ASC',
@@ -1077,6 +1098,7 @@ export type ContentUpdateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
@@ -1094,6 +1116,7 @@ export type ContentCreateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
