@@ -14,14 +14,15 @@ const links: NavLink[] = [
   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
     name: 'API Discovery',
-    url: '/devportal/poc/api-discovery',
+    url: '/devportal/api-discovery',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },
   {
     name: 'API Access',
-    url: '/devportal/poc/access',
-    access: ['developer', 'api-owner'], sites: ['devportal'] 
+    url: '/devportal/access',
+    access: ['developer', 'api-owner'],
+    sites: ['devportal'],
   },
   {
     name: 'Applications',
@@ -54,11 +55,11 @@ const links: NavLink[] = [
     access: ['api-owner', 'api-manager', 'credential-admin'],
     sites: ['manager'],
   },
-//   {
-//     name: 'Service Accounts',
-//     url: '/manager/poc/service-accounts',
-//     access: ['api-owner'], sites: ['manager'] 
-//   },
+  //   {
+  //     name: 'Service Accounts',
+  //     url: '/manager/poc/service-accounts',
+  //     access: ['api-owner'], sites: ['manager']
+  //   },
   {
     name: 'Authorization Settings',
     url: '/manager/poc/credential-issuers',

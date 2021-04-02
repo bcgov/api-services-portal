@@ -70,6 +70,18 @@ const theme = extendTheme({
         },
       },
     },
+    Textarea: {
+      variants: {
+        'bc-input': {
+          bg: 'white',
+          border: '2px solid',
+          borderColor: '#606060',
+          _focus: {
+            borderColor: 'bc-border-focus',
+          },
+        },
+      },
+    },
   },
 });
 

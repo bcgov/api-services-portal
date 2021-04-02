@@ -37,26 +37,6 @@ import NextLink from 'next/link';
 import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
 
-const query = gql`
-  query GetConsumers {
-    allGatewayConsumers(first: 20, sortBy: updatedAt_DESC) {
-      id
-      username
-      aclGroups
-      customId
-      plugins {
-        name
-      }
-      tags
-      createdAt
-    }
-
-    allAccessRequests(where: { isIssued_not: true }) {
-      id
-    }
-  }
-`;
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
 
@@ -206,3 +186,23 @@ const ConsumersPage: React.FC<
 };
 
 export default ConsumersPage;
+
+const query = gql`
+  query GetConsumers {
+    allGatewayConsumers(first: 20, sortBy: updatedAt_DESC) {
+      id
+      username
+      aclGroups
+      customId
+      plugins {
+        name
+      }
+      tags
+      createdAt
+    }
+
+    allAccessRequests(where: { isIssued_not: true }) {
+      id
+    }
+  }
+`;

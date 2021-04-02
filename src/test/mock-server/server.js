@@ -348,7 +348,7 @@ app.get('/admin/session', (_, res) => {
       name: 'Viktor Vaughn',
       username: 'vikvaughn',
       email: 'villain@doom.net',
-      roles: ['api-owner'],
+      roles: ['api-owner', 'developer'],
       isAdmin: false,
       namespace: 'dss-aps',
       groups: null,
