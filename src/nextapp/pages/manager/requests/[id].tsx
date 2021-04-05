@@ -3,9 +3,7 @@ import api, { useApi } from '@/shared/services/api';
 import {
   Box,
   Container,
-  Divider,
   Heading,
-  Icon,
   Tabs,
   TabList,
   TabPanels,
@@ -18,7 +16,6 @@ import {
   GridItem,
   HStack,
 } from '@chakra-ui/react';
-import { FaRegClock } from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
 import format from 'date-fns/format';
 import { dehydrate } from 'react-query/hydration';
@@ -85,8 +82,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const AccessRequestPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id }) => {
+  const queryKey = ['accessRequest', id];
   const { data } = useApi(
-    ['accessRequest', id],
+    queryKey,
     {
       query,
       variables: {
@@ -158,8 +156,8 @@ const AccessRequestPage: React.FC<
                     borderRadius={4}
                     mb={4}
                   >
-                    <IpRestriction />
-                    <RateLimiting />
+                    <IpRestriction mode="create" queryKey={queryKey} />
+                    <RateLimiting mode="create" queryKey={queryKey} />
                   </HStack>
                   <ControlsList data={plugins} />
                 </TabPanel>

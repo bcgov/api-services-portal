@@ -5,16 +5,11 @@ import {
   Button,
   Box,
   Container,
-  Stack,
   VStack,
-  Skeleton,
   Text,
   Flex,
   ButtonGroup,
-  FormControl,
-  FormLabel,
   Link,
-  Divider,
   Textarea,
   Checkbox,
   HStack,
@@ -23,18 +18,20 @@ import {
   Select,
   Icon,
   StackDivider,
+  useToast,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
-import { QueryClient } from 'react-query';
+import { QueryClient, useQueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import api, { useApi } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
 import { FaBook, FaCog } from 'react-icons/fa';
+import { useRouter } from 'next/router';
 
 const queryKey = 'newAccessRequest';
 
@@ -65,6 +62,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const NewRequestsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id }) => {
+  const router = useRouter();
+  const client = useQueryClient();
+  const toast = useToast();
   const { data } = useApi(
     queryKey,
     {
@@ -77,6 +77,40 @@ const NewRequestsPage: React.FC<
   );
   const dataset = data?.allProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    if (!form.checkValidity()) {
+      return;
+    }
+
+    try {
+      const payload = {
+        name: `${dataset.name} FOR ${data.allTemporaryIdentities[0].name}`,
+        controls: '{}',
+        requestor: data.allTemporaryIdentities[0].userId,
+        applicationId: formData.get('applicationId'),
+        productEnvironmentId: formData.get('environmentId'),
+      };
+      await api(mutation, payload);
+      client.invalidateQueries('allAccessRequests');
+      toast({
+        title: 'Request submitted',
+        description: 'Check back to see if it has been accepted soon',
+        status: 'success',
+      });
+      router?.push('/devportal/access');
+    } catch (err) {
+      toast({
+        title: 'Unable to make request',
+        description: err.message,
+        status: 'error',
+      });
+    }
+  };
+  const handleCancel = () => router?.back();
 
   return (
     <>
@@ -104,88 +138,95 @@ const NewRequestsPage: React.FC<
             perspiciatis ducimus veniam dignissimos!
           </Text>
         </PageHeader>
-        <FieldsetBox title="APIs">
-          <HStack divider={<StackDivider />} spacing={4}>
-            <VStack flex={1}>
-              <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
-              <Box>
-                <Text fontWeight="bold" color="bc-blue-alt">
-                  {data.allProducts.map((d) => d.name)}
-                </Text>
-              </Box>
-            </VStack>
-            <Box flex={1}>
-              <Heading size="sm" mb={2}>
-                OAuth Flow
-              </Heading>
-              <Flex>
-                <Avatar name={requestor.name} />
-                <Box ml={2}>
-                  <Text fontWeight="bold">
-                    {requestor.name}{' '}
-                    <Text as="span" fontWeight="normal" color="gray.400">
-                      {requestor.username}
-                    </Text>
+        <form onSubmit={handleSubmit}>
+          <FieldsetBox title="APIs">
+            <HStack divider={<StackDivider />} spacing={4}>
+              <VStack flex={1}>
+                <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
+                <Box>
+                  <Text fontWeight="bold" color="bc-blue-alt">
+                    {data.allProducts.map((d) => d.name)}
                   </Text>
-                  <Text fontSize="xs">{requestor.email}</Text>
                 </Box>
-              </Flex>
-            </Box>
-            <Box flex={1}>
-              <Heading size="sm" mb={3}>
-                OR select an application to consume the API
-              </Heading>
-              <Select name="applicationId">
-                <option>Available Application</option>
-                {data.allApplications.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </Select>
-            </Box>
-          </HStack>
-        </FieldsetBox>
-        <FieldsetBox title={`Which ${dataset?.name} API Environment?`}>
-          <RadioGroup
-            defaultValue=""
-            name="environmentId"
-            options={dataset?.environments
-              .filter((e) => e.active)
-              .map((e) => ({
-                value: e.id,
-                icon: FaBook,
-                label: (
-                  <Box>
-                    <Text fontWeight="bold">{e.name}</Text>
-                    <Text fontSize="sm" color="gray.400">
-                      {e.flow}
+              </VStack>
+              <Box flex={1}>
+                <Heading size="sm" mb={2}>
+                  OAuth Flow
+                </Heading>
+                <Flex>
+                  <Avatar name={requestor.name} />
+                  <Box ml={2}>
+                    <Text fontWeight="bold">
+                      {requestor.name}{' '}
+                      <Text as="span" fontWeight="normal" color="gray.400">
+                        {requestor.username}
+                      </Text>
                     </Text>
+                    <Text fontSize="xs">{requestor.email}</Text>
                   </Box>
-                ),
-              }))}
-          />
-        </FieldsetBox>
-        <FieldsetBox title="Additional Information & Terms">
-          <Textarea
-            name="other"
-            placeholder="Write any additional instructions for the API Manager"
-            variant="bc-input"
-          />
-          <Box mt={4} p={4} bgColor="blue.50" borderRadius={4}>
-            <Checkbox colorScheme="blue">
-              I agree to the terms and agreements of this API
-            </Checkbox>
+                </Flex>
+              </Box>
+              <Box flex={1}>
+                <Heading size="sm" mb={3}>
+                  OR select an application to consume the API
+                </Heading>
+                <Select name="applicationId">
+                  <option value="">Available Application</option>
+                  {data.allApplications.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </Select>
+              </Box>
+            </HStack>
+          </FieldsetBox>
+          <FieldsetBox
+            isRequired
+            title={`Which ${dataset?.name} API Environment?`}
+          >
+            <RadioGroup
+              defaultValue=""
+              name="environmentId"
+              options={dataset?.environments
+                .filter((e) => e.active)
+                .map((e) => ({
+                  value: e.id,
+                  icon: FaBook,
+                  label: (
+                    <Box>
+                      <Text fontWeight="bold">{e.name}</Text>
+                      <Text fontSize="sm" color="gray.400">
+                        {e.flow}
+                      </Text>
+                    </Box>
+                  ),
+                }))}
+            />
+          </FieldsetBox>
+          <FieldsetBox isRequired title="Additional Information & Terms">
+            <Textarea
+              name="other"
+              placeholder="Write any additional instructions for the API Manager"
+              variant="bc-input"
+            />
+            <Box mt={4} p={4} bgColor="blue.50" borderRadius={4}>
+              <Checkbox colorScheme="blue">
+                I agree to the terms and agreements of this API
+              </Checkbox>
+            </Box>
+          </FieldsetBox>
+          <Box mt={4} bgColor="white">
+            <Flex justify="flex-end" p={4}>
+              <ButtonGroup>
+                <Button onClick={handleCancel}>Cancel</Button>
+                <Button type="submit" variant="primary">
+                  Submit
+                </Button>
+              </ButtonGroup>
+            </Flex>
           </Box>
-        </FieldsetBox>
-        <Box mt={4} bgColor="white">
-          <Flex justify="flex-end" p={4}>
-            <ButtonGroup>
-              <Button>Cancel</Button>
-              <Button variant="primary">Submit</Button>
-            </ButtonGroup>
-          </Flex>
-        </Box>
+        </form>
       </Container>
     </>
   );
@@ -215,6 +256,28 @@ const query = gql`
       name
       username
       email
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation AddAccessRequest(
+    $name: String!
+    $controls: String
+    $requestor: ID!
+    $applicationId: ID!
+    $productEnvironmentId: ID!
+  ) {
+    createAccessRequest(
+      data: {
+        name: $name
+        controls: $controls
+        requestor: { connect: { id: $requestor } }
+        application: { connect: { id: $applicationId } }
+        productEnvironment: { connect: { id: $productEnvironmentId } }
+      }
+    ) {
+      id
     }
   }
 `;

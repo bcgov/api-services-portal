@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  useDisclosure,
   FormControl,
   FormLabel,
   Select,
@@ -47,12 +46,15 @@ const ControlTypeSelect: React.FC = () => {
         return [];
     }
   }, [data, control, isLoading]);
+  const onChange = (value: string) => {
+    setControl(value);
+  };
 
   return (
     <>
       <FormControl id="type" mb={4}>
         <FormLabel>Type</FormLabel>
-        <RadioGroup onChange={setControl} value={control}>
+        <RadioGroup onChange={onChange} value={control}>
           <Stack spacing={4} direction="row">
             <Radio name="type" value="route">
               Route
