@@ -1,8 +1,16 @@
 import * as React from 'react';
-import { Box, Icon, useRadio } from '@chakra-ui/react';
+import { Box, Icon, useRadio, UseRadioProps } from '@chakra-ui/react';
 import { FaCheckCircle } from 'react-icons/fa';
+import { IconType } from 'react-icons/lib';
 
-const RadioCard: React.FC<any> = (props) => {
+interface RadioCardProps extends UseRadioProps {
+  icon?: IconType;
+}
+
+const RadioCard: React.FC<RadioCardProps> = ({
+  icon = FaCheckCircle,
+  ...props
+}) => {
   const { getInputProps, getCheckboxProps } = useRadio(props);
   const input = getInputProps();
   const checkbox = getCheckboxProps();
@@ -13,13 +21,15 @@ const RadioCard: React.FC<any> = (props) => {
       <Box
         {...checkbox}
         cursor="pointer"
+        color="gray.600"
         borderWidth="2px"
         borderRadius="md"
         borderColor="gray.200"
+        display="flex"
+        alignItems="center"
         _checked={{
-          bg: 'teal.600',
-          color: 'white',
-          borderColor: 'teal.600',
+          borderColor: 'bc-blue-alt',
+          color: 'bc-blue-alt',
         }}
         _hover={{
           borderColor: 'gray.400',
@@ -30,8 +40,14 @@ const RadioCard: React.FC<any> = (props) => {
         px={5}
         py={3}
       >
-        <Icon as={FaCheckCircle} mr={2} />
-        {props.children}
+        <Icon
+          as={icon}
+          mr={4}
+          className="radio-card-icon"
+          color="currentColor"
+          boxSize="5"
+        />
+        <Box>{props.children}</Box>
       </Box>
     </Box>
   );

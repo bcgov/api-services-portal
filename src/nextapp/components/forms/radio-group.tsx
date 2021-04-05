@@ -1,29 +1,41 @@
 import * as React from 'react';
 import { useRadioGroup, Wrap, WrapItem } from '@chakra-ui/react';
+import { IconType } from 'react-icons/lib';
 
 import RadioCard from './radio-card';
 
-interface RadioGroupProps {
-  options: any[];
+interface RadioCardOption {
+  value: string;
+  id?: string;
+  label: React.ReactNode;
+  icon?: IconType;
 }
 
-const RadioGroup: React.FC<RadioGroupProps> = ({ options }) => {
-  const { getRootProps, getRadioProps } = useRadioGroup({
-    name: 'framework',
-    defaultValue: 'react',
-    onChange: console.log,
-  });
+interface RadioGroupProps {
+  defaultValue?: string;
+  name: string;
+  options: RadioCardOption[];
+}
 
+const RadioGroup: React.FC<RadioGroupProps> = ({
+  defaultValue = '',
+  name,
+  options,
+}) => {
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name,
+    defaultValue,
+  });
   const group = getRootProps();
 
   return (
     <Wrap {...group} spacing={2}>
-      {options.map((value) => {
-        const radio = getRadioProps({ value });
+      {options.map((option) => {
+        const radio = getRadioProps({ value: option.value });
         return (
-          <WrapItem key={value.id}>
-            <RadioCard key={value.id} {...radio}>
-              {value.label}
+          <WrapItem key={option.id}>
+            <RadioCard {...radio} icon={option.icon}>
+              {option.label}
             </RadioCard>
           </WrapItem>
         );

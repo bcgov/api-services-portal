@@ -21,6 +21,8 @@ import {
   Heading,
   Avatar,
   Select,
+  Icon,
+  StackDivider,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -32,6 +34,7 @@ import { Query } from '@/shared/types/query.types';
 import api, { useApi } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
+import { FaBook, FaCog } from 'react-icons/fa';
 
 const queryKey = 'newAccessRequest';
 
@@ -102,19 +105,29 @@ const NewRequestsPage: React.FC<
           </Text>
         </PageHeader>
         <FieldsetBox title="APIs">
-          <HStack>
-            <Box flex={1}>{data.allProducts.map((d) => d.name)}</Box>
+          <HStack divider={<StackDivider />} spacing={4}>
+            <VStack flex={1}>
+              <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
+              <Box>
+                <Text fontWeight="bold" color="bc-blue-alt">
+                  {data.allProducts.map((d) => d.name)}
+                </Text>
+              </Box>
+            </VStack>
             <Box flex={1}>
               <Heading size="sm" mb={2}>
-                Your Details
+                OAuth Flow
               </Heading>
               <Flex>
                 <Avatar name={requestor.name} />
                 <Box ml={2}>
-                  <Text>
-                    {requestor.name} ({requestor.username})
+                  <Text fontWeight="bold">
+                    {requestor.name}{' '}
+                    <Text as="span" fontWeight="normal" color="gray.400">
+                      {requestor.username}
+                    </Text>
                   </Text>
-                  <Text>{requestor.email}</Text>
+                  <Text fontSize="xs">{requestor.email}</Text>
                 </Box>
               </Flex>
             </Box>
@@ -122,11 +135,11 @@ const NewRequestsPage: React.FC<
               <Heading size="sm" mb={3}>
                 OR select an application to consume the API
               </Heading>
-              <Select>
+              <Select name="applicationId">
                 <option>Available Application</option>
                 {data.allApplications.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.name}{' '}
+                    {a.name}
                   </option>
                 ))}
               </Select>
@@ -135,11 +148,21 @@ const NewRequestsPage: React.FC<
         </FieldsetBox>
         <FieldsetBox title={`Which ${dataset?.name} API Environment?`}>
           <RadioGroup
+            defaultValue=""
+            name="environmentId"
             options={dataset?.environments
               .filter((e) => e.active)
               .map((e) => ({
                 value: e.id,
-                label: `${e.name}: ${e.flow}`,
+                icon: FaBook,
+                label: (
+                  <Box>
+                    <Text fontWeight="bold">{e.name}</Text>
+                    <Text fontSize="sm" color="gray.400">
+                      {e.flow}
+                    </Text>
+                  </Box>
+                ),
               }))}
           />
         </FieldsetBox>
