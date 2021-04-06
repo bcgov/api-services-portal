@@ -22,11 +22,11 @@ type HomeActions = {
 };
 const actions: HomeActions[] = [
   {
-    title: 'API Manager',
+    title: 'API Provider Console',
     url: '/manager',
     icon: FaServer,
     roles: [],
-    description: "Are you in a Ministry looking to offer APIs to others?  Get started in the API Manager."
+    description: "Are you in a Ministry looking to offer APIs to others?  Get started in the API Provider Console."
   },
 ];
 

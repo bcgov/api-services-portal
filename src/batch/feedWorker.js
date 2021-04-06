@@ -266,6 +266,7 @@ const metadata = {
         sync: ['type', 'name', 'action', 'result', 'message', 'refId', 'namespace', 'actor'],
         transformations: {
             actor: {name: "connectOne", list: "allUsers", refKey: 'username' },
+            blob: {name: "connectOne", list: "allBlobs", refKey: 'ref' },
         }
     },
     'User': {

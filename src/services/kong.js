@@ -76,6 +76,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG KEYAUTH " + err)
@@ -100,6 +101,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG PLUGINS " + err)
@@ -126,6 +128,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG CONSUMER PLUGIN " + err)
@@ -151,6 +154,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG KEYAUTH " + err)
@@ -170,6 +174,7 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG CONSUMER " + err)
@@ -185,34 +190,41 @@ module.exports = function (kongUrl) {
                 headers: { 
                     'Content-Type': 'application/json' },
             })
+            .then(checkStatus)
             .then(res => res.json())
             .catch (err => {
                 console.log("KONG CONSUMER ACLS " + err)
                 throw(err)
             })
-            console.log("KONG RESPONSE = "+ JSON.stringify(response, null, 3))
+            console.log("KONG getConsumerACLByNamespace RESPONSE = "+ JSON.stringify(response, null, 3))
             return response['data']
         },      
 
-        updateConsumerACLByNamespace: async function (consumerPK, namespace, aclGroups) {
+        updateConsumerACLByNamespace: async function (consumerPK, namespace, aclGroups, onlyAdd = false) {
             const acls = await this.getConsumerACLByNamespace (consumerPK, namespace)
             // delete any aclGroups that are not passed in
             const result = {D:[], C:[]}
 
-            for (const acl of acls.filter(acl => !aclGroups.includes(acl.group))) {
-                await fetch(`${kongUrl}/consumers/${consumerPK}/acls/${acl.id}`, { method: 'delete' })
-                result.D.push(acl.group)
+            if (onlyAdd == false) {
+                for (const acl of acls.filter(acl => !aclGroups.includes(acl.group))) {
+                    await fetch(`${kongUrl}/consumers/${consumerPK}/acls/${acl.id}`, { method: 'delete' })
+                    .then(checkStatus)
+                    result.D.push(acl.group)
+                }
             }
 
             // add any aclGroups that are not already in Kong
             for (const group of aclGroups.filter(group => acls.filter(acl => acl.group == group).length == 0)) {
                 await fetch(`${kongUrl}/consumers/${consumerPK}/acls`, { 
                     method: 'post',
-                    body: JSON.stringify({ group: group, tags: "ns." + namespace }),
+                    body: JSON.stringify({ group: group, tags: ["ns." + namespace] }),
                     headers: { 'Content-Type': 'application/json' }
                 })
+                .then(checkStatus)
                 result.C.push(group)
             }
+            console.log("UPDATE TO CONSUMER ACL: " + consumerPK + " : " + JSON.stringify(result));
+
             return result
         },
 

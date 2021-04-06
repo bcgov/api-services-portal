@@ -290,6 +290,13 @@ export type AccessRequestsCreateInput = {
   data?: Maybe<AccessRequestCreateInput>;
 };
 
+export type BlobRelateToOneInput = {
+  create?: Maybe<BlobCreateInput>;
+  connect?: Maybe<BlobWhereUniqueInput>;
+  disconnect?: Maybe<BlobWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type Activity = {
   __typename?: 'Activity';
@@ -311,6 +318,7 @@ export type Activity = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
+  blob?: Maybe<Blob>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -468,6 +476,8 @@ export type ActivityWhereInput = {
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   actor?: Maybe<UserWhereInput>;
   actor_is_null?: Maybe<Scalars['Boolean']>;
+  blob?: Maybe<BlobWhereInput>;
+  blob_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -511,6 +521,8 @@ export enum SortActivitiesBy {
   NamespaceDesc = 'namespace_DESC',
   ActorAsc = 'actor_ASC',
   ActorDesc = 'actor_DESC',
+  BlobAsc = 'blob_ASC',
+  BlobDesc = 'blob_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -527,6 +539,7 @@ export type ActivityUpdateInput = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
+  blob?: Maybe<BlobRelateToOneInput>;
 };
 
 export type ActivitiesUpdateInput = {
@@ -544,6 +557,7 @@ export type ActivityCreateInput = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
+  blob?: Maybe<BlobRelateToOneInput>;
 };
 
 export type ActivitiesCreateInput = {
@@ -873,6 +887,99 @@ export type ApplicationCreateInput = {
 
 export type ApplicationsCreateInput = {
   data?: Maybe<ApplicationCreateInput>;
+};
+
+/**  A keystone list  */
+export type Blob = {
+  __typename?: 'Blob';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the Blob List config, or
+   *  2. As an alias to the field set on 'labelField' in the Blob List config, or
+   *  3. As an alias to a 'name' field on the Blob List (if one exists), or
+   *  4. As an alias to the 'id' field on the Blob List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobWhereInput = {
+  AND?: Maybe<Array<Maybe<BlobWhereInput>>>;
+  OR?: Maybe<Array<Maybe<BlobWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  ref?: Maybe<Scalars['String']>;
+  ref_not?: Maybe<Scalars['String']>;
+  ref_contains?: Maybe<Scalars['String']>;
+  ref_not_contains?: Maybe<Scalars['String']>;
+  ref_starts_with?: Maybe<Scalars['String']>;
+  ref_not_starts_with?: Maybe<Scalars['String']>;
+  ref_ends_with?: Maybe<Scalars['String']>;
+  ref_not_ends_with?: Maybe<Scalars['String']>;
+  ref_i?: Maybe<Scalars['String']>;
+  ref_not_i?: Maybe<Scalars['String']>;
+  ref_contains_i?: Maybe<Scalars['String']>;
+  ref_not_contains_i?: Maybe<Scalars['String']>;
+  ref_starts_with_i?: Maybe<Scalars['String']>;
+  ref_not_starts_with_i?: Maybe<Scalars['String']>;
+  ref_ends_with_i?: Maybe<Scalars['String']>;
+  ref_not_ends_with_i?: Maybe<Scalars['String']>;
+  ref_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  ref_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  blob?: Maybe<Scalars['String']>;
+  blob_not?: Maybe<Scalars['String']>;
+  blob_contains?: Maybe<Scalars['String']>;
+  blob_not_contains?: Maybe<Scalars['String']>;
+  blob_starts_with?: Maybe<Scalars['String']>;
+  blob_not_starts_with?: Maybe<Scalars['String']>;
+  blob_ends_with?: Maybe<Scalars['String']>;
+  blob_not_ends_with?: Maybe<Scalars['String']>;
+  blob_i?: Maybe<Scalars['String']>;
+  blob_not_i?: Maybe<Scalars['String']>;
+  blob_contains_i?: Maybe<Scalars['String']>;
+  blob_not_contains_i?: Maybe<Scalars['String']>;
+  blob_starts_with_i?: Maybe<Scalars['String']>;
+  blob_not_starts_with_i?: Maybe<Scalars['String']>;
+  blob_ends_with_i?: Maybe<Scalars['String']>;
+  blob_not_ends_with_i?: Maybe<Scalars['String']>;
+  blob_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  blob_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type BlobWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortBlobsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  RefAsc = 'ref_ASC',
+  RefDesc = 'ref_DESC',
+  BlobAsc = 'blob_ASC',
+  BlobDesc = 'blob_DESC'
+}
+
+export type BlobUpdateInput = {
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<BlobUpdateInput>;
+};
+
+export type BlobCreateInput = {
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobsCreateInput = {
+  data?: Maybe<BlobCreateInput>;
 };
 
 /**  A keystone list  */
@@ -6120,6 +6227,14 @@ export type Query = {
   _allApplicationsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Application list.  */
   _ApplicationsMeta?: Maybe<_ListMeta>;
+  /**  Search for all Blob items which match the where clause.  */
+  allBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Search for the Blob item with the matching ID.  */
+  Blob?: Maybe<Blob>;
+  /**  Perform a meta-query on all Blob items which match the where clause.  */
+  _allBlobsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the Blob list.  */
+  _BlobsMeta?: Maybe<_ListMeta>;
   /**  Search for all Content items which match the where clause.  */
   allContents?: Maybe<Array<Maybe<Content>>>;
   /**  Search for the Content item with the matching ID.  */
@@ -6390,6 +6505,31 @@ export type Query_AllApplicationsMetaArgs = {
   where?: Maybe<ApplicationWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortApplicationsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryAllBlobsArgs = {
+  where?: Maybe<BlobWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortBlobsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryBlobArgs = {
+  where: BlobWhereUniqueInput;
+};
+
+
+export type Query_AllBlobsMetaArgs = {
+  where?: Maybe<BlobWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortBlobsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -6975,6 +7115,18 @@ export type Mutation = {
   deleteApplication?: Maybe<Application>;
   /**  Delete multiple Application items by ID.  */
   deleteApplications?: Maybe<Array<Maybe<Application>>>;
+  /**  Create a single Blob item.  */
+  createBlob?: Maybe<Blob>;
+  /**  Create multiple Blob items.  */
+  createBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Update a single Blob item by ID.  */
+  updateBlob?: Maybe<Blob>;
+  /**  Update multiple Blob items by ID.  */
+  updateBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Delete a single Blob item by ID.  */
+  deleteBlob?: Maybe<Blob>;
+  /**  Delete multiple Blob items by ID.  */
+  deleteBlobs?: Maybe<Array<Maybe<Blob>>>;
   /**  Create a single Content item.  */
   createContent?: Maybe<Content>;
   /**  Create multiple Content items.  */
@@ -7354,6 +7506,37 @@ export type MutationDeleteApplicationArgs = {
 
 
 export type MutationDeleteApplicationsArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationCreateBlobArgs = {
+  data?: Maybe<BlobCreateInput>;
+};
+
+
+export type MutationCreateBlobsArgs = {
+  data?: Maybe<Array<Maybe<BlobsCreateInput>>>;
+};
+
+
+export type MutationUpdateBlobArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<BlobUpdateInput>;
+};
+
+
+export type MutationUpdateBlobsArgs = {
+  data?: Maybe<Array<Maybe<BlobsUpdateInput>>>;
+};
+
+
+export type MutationDeleteBlobArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteBlobsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 

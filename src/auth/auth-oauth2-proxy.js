@@ -85,7 +85,7 @@ class Oauth2ProxyAuthStrategy {
                         console.log("Looks like a different credential.. ")
                         console.log("Looks like a different credential.. " + jti + " != " + req.user.jti)
                         await this._sessionManager.endAuthedSession(req);
-                        res.redirect('/admin/signin')
+                        res.redirect('/admin/signout')
                         // this.register_user(req, res)
                         return
                     }

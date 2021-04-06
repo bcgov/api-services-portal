@@ -19,6 +19,7 @@ const { Strategy, Issuer, Client } = require('openid-client');
 const { staticRoute, staticPath, distDir } = require('./config');
 
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
+const Tasked = require('./services/tasked')
 
 const apiPath = '/admin/api';
 const PROJECT_NAME = 'APS Service Portal';
@@ -98,6 +99,7 @@ for (_list of [
   'Activity',
   'Alert',
   'Application',
+  'Blob',
   'Content',
   'CredentialIssuer',
   'Dataset',
@@ -162,6 +164,7 @@ const authStrategy =
       });
 
 const { pages } = require('./admin-hooks.js');
+const tasked = require('./services/tasked');
 
 module.exports = {
   keystone,
@@ -194,6 +197,11 @@ module.exports = {
     }))
     app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.status(400).json({result: 'error', error: "" + err})))
     app.delete('/feed/:entity/:id', (req, res) => DeleteFeed(keystone, req, res))
+    app.put('/tasked/:id', async (req, res) => {
+        tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
+        await tasked.start()
+        res.status(200).json({result: 'ok'})
+    })
   },
   distDir,
 };

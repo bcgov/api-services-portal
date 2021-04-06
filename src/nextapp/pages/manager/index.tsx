@@ -48,10 +48,10 @@ const HomePage: React.FC = () => {
             textShadow="0 0 10px rgba(0, 0, 0, 0.8)"
           >
             <Heading fontWeight="normal" marginBottom={4}>
-              BC Government API Manager
+              BC Government API Provider Console
             </Heading>
             <Text marginBottom={4}>
-              Register your API to give you full control of access and to build up a community of yours using your API.
+              Register your API to give you full control of access and to build up a community of users using your API.
             </Text>
             {/* <Link fontWeight="bold">{`What's New`}</Link> */}
           </Box>
