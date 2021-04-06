@@ -1,26 +1,96 @@
 import * as React from 'react';
+import api from '@/shared/services/api';
 import {
   FormControl,
   FormLabel,
   HStack,
   Input,
   Select,
+  useToast,
 } from '@chakra-ui/react';
 import { FaTrafficLight } from 'react-icons/fa';
+import { QueryKey, useMutation, useQueryClient } from 'react-query';
+import { serializeFormData } from '@/shared/services/utils';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
-import { QueryKey, useQueryClient } from 'react-query';
+import { FULFILL_REQUEST } from './queries';
+
+type ControlsPayload = {
+  name: string;
+  route?: {
+    id: string;
+  };
+  service?: {
+    id: string;
+  };
+  config: {
+    second: string;
+    minute: string;
+    hour: string;
+    day: string;
+    policy: string;
+  };
+};
 
 interface IpRestrictionProps {
+  id: string;
   mode: 'edit' | 'create';
   queryKey: QueryKey;
 }
 
-const IpRestriction: React.FC<IpRestrictionProps> = ({ mode, queryKey }) => {
+const IpRestriction: React.FC<IpRestrictionProps> = ({
+  id,
+  mode,
+  queryKey,
+}) => {
   const client = useQueryClient();
+  const mutation = useMutation((payload: { id: string; controls: string }) =>
+    api(FULFILL_REQUEST, payload)
+  );
+  const toast = useToast();
   const onSubmit = async (formData: FormData) => {
-    client.invalidateQueries(queryKey);
+    try {
+      const controls: ControlsPayload = {
+        name: 'rate-limiting',
+        config: {
+          second: formData.get('second') as string,
+          minute: formData.get('minute') as string,
+          hour: formData.get('hour') as string,
+          day: formData.get('day') as string,
+          policy: formData.get('policy') as string,
+        },
+      };
+
+      if (formData.has('route')) {
+        controls.route = {
+          id: formData.get('route') as string,
+        };
+      }
+
+      if (formData.has('service')) {
+        controls.service = {
+          id: formData.get('service') as string,
+        };
+      }
+
+      const payload = {
+        id,
+        controls: JSON.stringify(controls),
+      };
+      await mutation.mutateAsync(payload);
+      client.invalidateQueries(queryKey);
+      toast({
+        title: 'Control Updated',
+        status: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: 'Control Update Failed',
+        description: err?.message,
+        status: 'error',
+      });
+    }
   };
 
   return (
@@ -35,24 +105,24 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({ mode, queryKey }) => {
       <HStack spacing={4} mb={4}>
         <FormControl id="second">
           <FormLabel>Second</FormLabel>
-          <Input variant="bc-input" placeholder="00" />
+          <Input variant="bc-input" name="second" placeholder="00" />
         </FormControl>
         <FormControl id="minute">
           <FormLabel>Minute</FormLabel>
-          <Input variant="bc-input" placeholder="00" />
+          <Input variant="bc-input" name="minute" placeholder="00" />
         </FormControl>
         <FormControl id="hour">
           <FormLabel>Hour</FormLabel>
-          <Input variant="bc-input" placeholder="00" />
+          <Input variant="bc-input" name="hour" placeholder="00" />
         </FormControl>
         <FormControl id="day">
           <FormLabel>Day</FormLabel>
-          <Input variant="bc-input" placeholder="00" />
+          <Input variant="bc-input" name="day" placeholder="00" />
         </FormControl>
       </HStack>
       <FormControl id="policy">
         <FormLabel>Policy</FormLabel>
-        <Select variant="bc-input">
+        <Select name="redis_database" variant="bc-input">
           <option value="local">Local</option>
           <option value="redis">Redis</option>
         </Select>

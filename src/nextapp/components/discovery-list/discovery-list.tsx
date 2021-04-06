@@ -10,7 +10,7 @@ interface DiscoveryListProps {
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
   return (
-    <Grid spacing={4} templateColumns="repeat(2, 1fr)">
+    <Grid gap={4} templateColumns="repeat(2, 1fr)">
       {data.map((p) => (
         <GridItem key={p.id}>
           <DiscoveryListItem data={p} />

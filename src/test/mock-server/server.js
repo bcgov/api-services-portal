@@ -62,6 +62,52 @@ let allProducts = [
       },
     ],
   },
+  {
+    id: casual.uuid,
+    name: 'Geocoder Service API',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
+  {
+    id: casual.uuid,
+    name: 'eRx API',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'sandbox',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+      {
+        id: casual.uuid,
+        name: 'prod',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
+  {
+    id: casual.uuid,
+    name: 'Wildfire Data',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
 ];
 const allOrganizations = new MockList(8, (_, { id }) => ({ id }));
 const allOrganizationUnits = new MockList(18, (_, { id }) => ({ id }));

@@ -156,8 +156,8 @@ const AccessRequestPage: React.FC<
                     borderRadius={4}
                     mb={4}
                   >
-                    <IpRestriction mode="create" queryKey={queryKey} />
-                    <RateLimiting mode="create" queryKey={queryKey} />
+                    <IpRestriction id={id} mode="create" queryKey={queryKey} />
+                    <RateLimiting id={id} mode="create" queryKey={queryKey} />
                   </HStack>
                   <ControlsList data={plugins} />
                 </TabPanel>

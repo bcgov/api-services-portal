@@ -4,23 +4,84 @@ import {
   FormLabel,
   FormHelperText,
   Input,
+  useToast,
 } from '@chakra-ui/react';
 import { FaDoorClosed } from 'react-icons/fa';
-import { useApi } from '@/shared/services/api';
-import { useQueryClient, QueryKey } from 'react-query';
+import api, { useApi } from '@/shared/services/api';
+import { useQueryClient, QueryKey, useMutation } from 'react-query';
+import { serializeFormData } from '@/shared/services/utils';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
+import { FULFILL_REQUEST } from './queries';
+
+type ControlsPayload = {
+  name: string;
+  route?: {
+    id: string;
+  };
+  service?: {
+    id: string;
+  };
+  config: {
+    allow: string;
+  };
+};
 
 interface IpRestrictionProps {
+  id: string;
   mode: 'edit' | 'create';
   queryKey: QueryKey;
 }
 
-const IpRestriction: React.FC<IpRestrictionProps> = ({ mode, queryKey }) => {
+const IpRestriction: React.FC<IpRestrictionProps> = ({
+  id,
+  mode,
+  queryKey,
+}) => {
   const client = useQueryClient();
+  const mutation = useMutation((payload: { id: string; controls: string }) =>
+    api(FULFILL_REQUEST, payload)
+  );
+  const toast = useToast();
   const onSubmit = async (formData: FormData) => {
-    client.invalidateQueries(queryKey);
+    try {
+      const controls: ControlsPayload = {
+        name: 'ip-restriction',
+        config: {
+          allow: formData.get('allow') as string,
+        },
+      };
+
+      if (formData.has('route')) {
+        controls.route = {
+          id: formData.get('route') as string,
+        };
+      }
+
+      if (formData.has('service')) {
+        controls.service = {
+          id: formData.get('service') as string,
+        };
+      }
+
+      const payload = {
+        id,
+        controls: JSON.stringify(controls),
+      };
+      await mutation.mutateAsync(payload);
+      client.invalidateQueries(queryKey);
+      toast({
+        title: 'Control Updated',
+        status: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: 'Control Update Failed',
+        description: err?.message,
+        status: 'error',
+      });
+    }
   };
 
   return (
@@ -32,9 +93,9 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({ mode, queryKey }) => {
       title="IP Restrition"
     >
       <ControlTypeSelect />
-      <FormControl id="allowed">
+      <FormControl isRequired id="allow">
         <FormLabel>Allowed IPs</FormLabel>
-        <Input isRequired variant="bc-input" />
+        <Input variant="bc-input" name="allow" />
         <FormHelperText>
           Comma-separated list, i.e. 1.1.1.1, 0.0.0.0
         </FormHelperText>

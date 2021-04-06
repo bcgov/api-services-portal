@@ -81,7 +81,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         </Box>
       </Box>
       <Divider />
-      <Wrap p={4} spacing={2}>
+      <Wrap p={4} spacing={2} bgColor="gray.50">
         <WrapItem>
           <Text fontWeight="bold" textTransform="uppercase" color="gray.600">
             Environments

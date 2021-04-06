@@ -145,7 +145,7 @@ const NewRequestsPage: React.FC<
                 <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
                 <Box>
                   <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allProducts.map((d) => d.name)}
+                    {data.allProducts.find((d) => d.id === id)?.name}
                   </Text>
                 </Box>
               </VStack>

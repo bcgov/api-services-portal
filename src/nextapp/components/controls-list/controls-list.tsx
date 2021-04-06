@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Box,
-  Button,
   ButtonGroup,
   Divider,
   Grid,
@@ -12,7 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { GatewayPlugin } from '@/shared/types/query.types';
-import { FaDoorClosed, FaPen, FaTrafficLight, FaTrash } from 'react-icons/fa';
+import { FaDoorClosed, FaTrafficLight, FaTrash } from 'react-icons/fa';
 
 import ModelIcon from '../model-icon/model-icon';
 import IpRestriction from '../controls/ip-restriction';
@@ -80,10 +79,18 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
               <GridItem pr={2}>
                 <ButtonGroup>
                   {d.name === 'ip-restriction' && (
-                    <IpRestriction queryKey={['consumer', d.id]} mode="edit" />
+                    <IpRestriction
+                      id={d.id}
+                      queryKey={['consumer', d.id]}
+                      mode="edit"
+                    />
                   )}
                   {d.name === 'rate-limiting' && (
-                    <RateLimiting queryKey={['consumer', d.id]} mode="edit" />
+                    <RateLimiting
+                      id={d.id}
+                      queryKey={['consumer', d.id]}
+                      mode="edit"
+                    />
                   )}
                   <IconButton
                     aria-label="remove control button"
@@ -116,10 +123,18 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
               <GridItem pr={2}>
                 <ButtonGroup>
                   {d.name === 'ip-restriction' && (
-                    <IpRestriction queryKey={['consumer', d.id]} mode="edit" />
+                    <IpRestriction
+                      id={d.id}
+                      queryKey={['consumer', d.id]}
+                      mode="edit"
+                    />
                   )}
                   {d.name === 'rate-limiting' && (
-                    <RateLimiting queryKey={['consumer', d.id]} mode="edit" />
+                    <RateLimiting
+                      id={d.id}
+                      queryKey={['consumer', d.id]}
+                      mode="edit"
+                    />
                   )}
                   <IconButton
                     aria-label="remove control button"

@@ -67,7 +67,12 @@ const ControlTypeSelect: React.FC = () => {
       </FormControl>
       <FormControl id="allowed" mb={4}>
         <FormLabel>{startCase(control)}</FormLabel>
-        <Select isRequired isDisabled={isLoading} variant="bc-input">
+        <Select
+          isRequired
+          isDisabled={isLoading}
+          name={control}
+          variant="bc-input"
+        >
           {options.map((o) => (
             <option key={o.id} value={o.id}>
               {o.name}

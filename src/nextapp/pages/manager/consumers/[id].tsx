@@ -1,7 +1,6 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
-  Avatar,
   Box,
   Container,
   Divider,
@@ -128,8 +127,8 @@ const ConsumersPage: React.FC<
           mb={4}
           justify="stretch"
         >
-          <IpRestriction queryKey={queryKey} mode="create" />
-          <RateLimiting queryKey={queryKey} mode="create" />
+          <IpRestriction id={id} queryKey={queryKey} mode="create" />
+          <RateLimiting id={id} queryKey={queryKey} mode="create" />
         </HStack>
         <ControlsList
           data={data?.GatewayConsumer.plugins.filter(
