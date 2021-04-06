@@ -4,7 +4,7 @@ const filterByProductNSOrActiveEnvironment = (context, value) => {
         console.log("Action: filterByProductNSOrActiveEnvironment = " + namespace)
     }
     
-    return { OR: [ { productEnvironment: { product: { namespace: namespace } } } , { productEnvironment: { active: true } } ]
+    return { OR: [ { productEnvironment: { product: { namespace: namespace } } } , { productEnvironment: { active: true } } ] }
 }
 
 module.exports = filterByProductNSOrActiveEnvironment
