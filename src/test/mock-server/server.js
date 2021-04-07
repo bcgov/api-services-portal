@@ -118,7 +118,8 @@ const schemaWithMocks = addMocksToSchema({
 
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
-    allProducts: () => allProducts,
+    // allProducts: () => allProducts,
+    allProducts: () => new MockList(8, (_, { id }) => ({ id })),
     allEnvironments: () => {
       const result = [];
       allProducts.forEach((p) => {
@@ -236,14 +237,35 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.words(3),
   }),
   Organization: () => ({
-    name: casual.word,
+    name: casual.random_element([
+      'Ministry of Advanced Education and Skills Training',
+      'Ministry of Agriculture, Food and Fisheries',
+      'Ministry of Attorney General',
+      'Ministry of Citizens Services',
+      'Ministry of Education',
+      'Ministry of Health',
+      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
+      'Ministry of Indigenous Relations and Reconciliation',
+    ]),
     sector: casual.random_element([
       'Health & Safety',
       'Service',
       'Social Services',
+      'Natural Resources',
+      'Econony',
+      'Finance',
     ]),
     bcdcId: casual.uuid,
-    title: casual.word,
+    title: casual.random_element([
+      'Ministry of Advanced Education and Skills Training',
+      'Ministry of Agriculture, Food and Fisheries',
+      'Ministry of Attorney General',
+      'Ministry of Citizens Services',
+      'Ministry of Education',
+      'Ministry of Health',
+      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
+      'Ministry of Indigenous Relations and Reconciliation',
+    ]),
     tags: casual.words(3),
     description: casual.description,
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
@@ -266,6 +288,7 @@ const server = mockServer(schemaWithMocks, {
       'other',
       null,
     ]),
+    approval: casual.boolean,
     active: casual.boolean,
     authMethod: casual.random_element(['jwt', 'public', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
@@ -340,18 +363,40 @@ const server = mockServer(schemaWithMocks, {
     };
   },
   Dataset: () => ({
-    name: casual.uuid,
-    sector: casual.word,
-    license_title: casual.word,
-    view_audience: casual.word,
+    name: casual.random_element([
+      'BC Gov News API Service',
+      'WorkBC Job Postings - API Web Service',
+      'BC Roads Map Service - Web Mercator',
+      'British Columbia Geographical Names Web Service - BCGNWS',
+      'Open511-DriveBC API',
+      'Historic City of Vancouver Fire Insurance Map',
+      'BC Laws API',
+      'BC Web Map Library',
+    ]),
+    sector: casual.random_element([
+      'Health & Safety',
+      'Service',
+      'Social Services',
+      'Natural Resources',
+      'Econony',
+      'Finance',
+    ]),
+    license_title: 'Open Government License - British Columbia',
+    view_audience: casual.random_element(['public', 'private']),
     private: casual.coin_flip,
-    tags: casual.word,
+    tags: JSON.stringify(casual.array_of_words(random(2, 8))),
     contacts: casual.word,
-    securityClass: casual.word,
-    notes: casual.short_description,
+    securityClass: casual.random_element([
+      'LOW-PUBLIC',
+      'HIGH-PUBLIC',
+      'LOW-INTERNAL',
+      'HIGH-INTERNAL',
+    ]),
+    notes: casual.description,
     title: casual.word,
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
+    record_publish_date: casual.date('YYYY-MM-DD'),
   }),
   AccessRequest: () => ({
     name: 'Gateway Administration API FOR APSO_F APSO_L',
@@ -370,6 +415,10 @@ const server = mockServer(schemaWithMocks, {
         },
       ],
     }),
+  }),
+  Legal: () => ({
+    description: 'This API comes with a set of terms you should follow',
+    link: 'http://www2.gov.bc.ca/gov/content/home/copyright',
   }),
   User: () => ({
     name: casual.name,

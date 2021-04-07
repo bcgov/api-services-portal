@@ -1,16 +1,6 @@
 import * as React from 'react';
-import {
-  Alert,
-  AlertIcon,
-  Button,
-  Box,
-  Container,
-  Stack,
-  VStack,
-  Skeleton,
-  Text,
-} from '@chakra-ui/react';
-import EmptyPane from '@/components/empty-pane';
+import { Box, Container, Text } from '@chakra-ui/react';
+// import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
@@ -83,6 +73,8 @@ const query = gql`
         notes
         sector
         license_title
+        securityClass
+        view_audience
         tags
         organization {
           title

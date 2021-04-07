@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, GridItem } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { Product } from '@/shared/types/query.types';
 
 import DiscoveryListItem from './discovery-list-item';
@@ -10,13 +10,11 @@ interface DiscoveryListProps {
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
   return (
-    <Grid gap={4} templateColumns="repeat(2, 1fr)">
+    <VStack spacing={4}>
       {data.map((p) => (
-        <GridItem key={p.id}>
-          <DiscoveryListItem data={p} />
-        </GridItem>
+        <DiscoveryListItem key={p.id} data={p} />
       ))}
-    </Grid>
+    </VStack>
   );
 };
 

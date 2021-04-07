@@ -207,14 +207,31 @@ const NewRequestsPage: React.FC<
           <FieldsetBox isRequired title="Additional Information & Terms">
             <Textarea
               name="other"
-              placeholder="Write any additional instructions for the API Manager"
+              placeholder="Write any additional instructions for the reviewer"
               variant="bc-input"
             />
-            <Box mt={4} p={4} bgColor="blue.50" borderRadius={4}>
-              <Checkbox colorScheme="blue">
-                I agree to the terms and agreements of this API
-              </Checkbox>
-            </Box>
+            {dataset.environments[0]?.legal && (
+              <Flex
+                justify="space-between"
+                mt={4}
+                p={4}
+                bgColor="blue.50"
+                borderRadius={4}
+              >
+                <Checkbox colorScheme="blue">
+                  {dataset.environments[0]?.legal.description}
+                </Checkbox>
+                <Link
+                  fontWeight="bold"
+                  href={dataset.environments[0]?.legal.link}
+                  colorScheme="blue"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Legal
+                </Link>
+              </Flex>
+            )}
           </FieldsetBox>
           <Box mt={4} bgColor="white">
             <Flex justify="flex-end" p={4}>
@@ -244,6 +261,10 @@ const query = gql`
         name
         active
         flow
+        legal {
+          description
+          link
+        }
       }
     }
     allApplications {
