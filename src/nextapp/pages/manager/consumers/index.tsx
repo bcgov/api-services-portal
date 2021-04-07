@@ -107,7 +107,7 @@ const ConsumersPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-              {data.allGatewayConsumers.length === 0 && (
+              {data.allServiceAccesses.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -123,7 +123,7 @@ const ConsumersPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allGatewayConsumers?.map((d) => (
+              {data.allServiceAccesses?.filter(d => d.consumer != null).map(d => d.consumer).map((d) => (
                 <Tr key={d.id}>
                   <Td>
                     <NextLink passHref href={`/manager/consumers/${d.id}`}>
@@ -189,16 +189,18 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
-    allGatewayConsumers(first: 200, sortBy: updatedAt_DESC) {
-      id
-      username
-      aclGroups
-      customId
-      plugins {
-        name
-      }
-      tags
-      createdAt
+    allServiceAccesses(first: 200, sortBy: updatedAt_DESC) {
+        consumer {
+            id
+            username
+            aclGroups
+            customId
+            plugins {
+                name
+            }
+            tags
+            createdAt
+        }
     }
 
     allAccessRequests(where: { isIssued_not: true }) {
