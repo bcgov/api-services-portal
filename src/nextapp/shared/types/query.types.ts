@@ -290,6 +290,13 @@ export type AccessRequestsCreateInput = {
   data?: Maybe<AccessRequestCreateInput>;
 };
 
+export type BlobRelateToOneInput = {
+  create?: Maybe<BlobCreateInput>;
+  connect?: Maybe<BlobWhereUniqueInput>;
+  disconnect?: Maybe<BlobWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type Activity = {
   __typename?: 'Activity';
@@ -311,6 +318,7 @@ export type Activity = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
+  blob?: Maybe<Blob>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -468,6 +476,8 @@ export type ActivityWhereInput = {
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   actor?: Maybe<UserWhereInput>;
   actor_is_null?: Maybe<Scalars['Boolean']>;
+  blob?: Maybe<BlobWhereInput>;
+  blob_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -511,6 +521,8 @@ export enum SortActivitiesBy {
   NamespaceDesc = 'namespace_DESC',
   ActorAsc = 'actor_ASC',
   ActorDesc = 'actor_DESC',
+  BlobAsc = 'blob_ASC',
+  BlobDesc = 'blob_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -527,6 +539,7 @@ export type ActivityUpdateInput = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
+  blob?: Maybe<BlobRelateToOneInput>;
 };
 
 export type ActivitiesUpdateInput = {
@@ -544,6 +557,7 @@ export type ActivityCreateInput = {
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
+  blob?: Maybe<BlobRelateToOneInput>;
 };
 
 export type ActivitiesCreateInput = {
@@ -702,6 +716,20 @@ export type AlertsCreateInput = {
   data?: Maybe<AlertCreateInput>;
 };
 
+export type OrganizationRelateToOneInput = {
+  create?: Maybe<OrganizationCreateInput>;
+  connect?: Maybe<OrganizationWhereUniqueInput>;
+  disconnect?: Maybe<OrganizationWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
+export type OrganizationUnitRelateToOneInput = {
+  create?: Maybe<OrganizationUnitCreateInput>;
+  connect?: Maybe<OrganizationUnitWhereUniqueInput>;
+  disconnect?: Maybe<OrganizationUnitWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type Application = {
   __typename?: 'Application';
@@ -717,6 +745,8 @@ export type Application = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<Organization>;
+  organizationUnit?: Maybe<OrganizationUnit>;
   owner?: Maybe<User>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -783,6 +813,10 @@ export type ApplicationWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  organization?: Maybe<OrganizationWhereInput>;
+  organization_is_null?: Maybe<Scalars['Boolean']>;
+  organizationUnit?: Maybe<OrganizationUnitWhereInput>;
+  organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -816,6 +850,10 @@ export enum SortApplicationsBy {
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  OrganizationAsc = 'organization_ASC',
+  OrganizationDesc = 'organization_DESC',
+  OrganizationUnitAsc = 'organizationUnit_ASC',
+  OrganizationUnitDesc = 'organizationUnit_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
@@ -828,6 +866,8 @@ export type ApplicationUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
 };
 
@@ -840,11 +880,106 @@ export type ApplicationCreateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
 };
 
 export type ApplicationsCreateInput = {
   data?: Maybe<ApplicationCreateInput>;
+};
+
+/**  A keystone list  */
+export type Blob = {
+  __typename?: 'Blob';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the Blob List config, or
+   *  2. As an alias to the field set on 'labelField' in the Blob List config, or
+   *  3. As an alias to a 'name' field on the Blob List (if one exists), or
+   *  4. As an alias to the 'id' field on the Blob List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobWhereInput = {
+  AND?: Maybe<Array<Maybe<BlobWhereInput>>>;
+  OR?: Maybe<Array<Maybe<BlobWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  ref?: Maybe<Scalars['String']>;
+  ref_not?: Maybe<Scalars['String']>;
+  ref_contains?: Maybe<Scalars['String']>;
+  ref_not_contains?: Maybe<Scalars['String']>;
+  ref_starts_with?: Maybe<Scalars['String']>;
+  ref_not_starts_with?: Maybe<Scalars['String']>;
+  ref_ends_with?: Maybe<Scalars['String']>;
+  ref_not_ends_with?: Maybe<Scalars['String']>;
+  ref_i?: Maybe<Scalars['String']>;
+  ref_not_i?: Maybe<Scalars['String']>;
+  ref_contains_i?: Maybe<Scalars['String']>;
+  ref_not_contains_i?: Maybe<Scalars['String']>;
+  ref_starts_with_i?: Maybe<Scalars['String']>;
+  ref_not_starts_with_i?: Maybe<Scalars['String']>;
+  ref_ends_with_i?: Maybe<Scalars['String']>;
+  ref_not_ends_with_i?: Maybe<Scalars['String']>;
+  ref_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  ref_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  blob?: Maybe<Scalars['String']>;
+  blob_not?: Maybe<Scalars['String']>;
+  blob_contains?: Maybe<Scalars['String']>;
+  blob_not_contains?: Maybe<Scalars['String']>;
+  blob_starts_with?: Maybe<Scalars['String']>;
+  blob_not_starts_with?: Maybe<Scalars['String']>;
+  blob_ends_with?: Maybe<Scalars['String']>;
+  blob_not_ends_with?: Maybe<Scalars['String']>;
+  blob_i?: Maybe<Scalars['String']>;
+  blob_not_i?: Maybe<Scalars['String']>;
+  blob_contains_i?: Maybe<Scalars['String']>;
+  blob_not_contains_i?: Maybe<Scalars['String']>;
+  blob_starts_with_i?: Maybe<Scalars['String']>;
+  blob_not_starts_with_i?: Maybe<Scalars['String']>;
+  blob_ends_with_i?: Maybe<Scalars['String']>;
+  blob_not_ends_with_i?: Maybe<Scalars['String']>;
+  blob_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  blob_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type BlobWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortBlobsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  RefAsc = 'ref_ASC',
+  RefDesc = 'ref_DESC',
+  BlobAsc = 'blob_ASC',
+  BlobDesc = 'blob_DESC'
+}
+
+export type BlobUpdateInput = {
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<BlobUpdateInput>;
+};
+
+export type BlobCreateInput = {
+  ref?: Maybe<Scalars['String']>;
+  blob?: Maybe<Scalars['String']>;
+};
+
+export type BlobsCreateInput = {
+  data?: Maybe<BlobCreateInput>;
 };
 
 /**  A keystone list  */
@@ -865,6 +1000,7 @@ export type Content = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
@@ -985,6 +1121,24 @@ export type ContentWhereInput = {
   readme_not_ends_with_i?: Maybe<Scalars['String']>;
   readme_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   readme_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags?: Maybe<Scalars['String']>;
+  tags_not?: Maybe<Scalars['String']>;
+  tags_contains?: Maybe<Scalars['String']>;
+  tags_not_contains?: Maybe<Scalars['String']>;
+  tags_starts_with?: Maybe<Scalars['String']>;
+  tags_not_starts_with?: Maybe<Scalars['String']>;
+  tags_ends_with?: Maybe<Scalars['String']>;
+  tags_not_ends_with?: Maybe<Scalars['String']>;
+  tags_i?: Maybe<Scalars['String']>;
+  tags_not_i?: Maybe<Scalars['String']>;
+  tags_contains_i?: Maybe<Scalars['String']>;
+  tags_not_contains_i?: Maybe<Scalars['String']>;
+  tags_starts_with_i?: Maybe<Scalars['String']>;
+  tags_not_starts_with_i?: Maybe<Scalars['String']>;
+  tags_ends_with_i?: Maybe<Scalars['String']>;
+  tags_not_ends_with_i?: Maybe<Scalars['String']>;
+  tags_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  tags_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   slug?: Maybe<Scalars['String']>;
   slug_not?: Maybe<Scalars['String']>;
   slug_contains?: Maybe<Scalars['String']>;
@@ -1034,6 +1188,8 @@ export enum SortContentsBy {
   GithubRepositoryDesc = 'githubRepository_DESC',
   ReadmeAsc = 'readme_ASC',
   ReadmeDesc = 'readme_DESC',
+  TagsAsc = 'tags_ASC',
+  TagsDesc = 'tags_DESC',
   SlugAsc = 'slug_ASC',
   SlugDesc = 'slug_DESC',
   OrderAsc = 'order_ASC',
@@ -1049,6 +1205,7 @@ export type ContentUpdateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
@@ -1066,6 +1223,7 @@ export type ContentCreateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
@@ -1482,20 +1640,6 @@ export type CredentialIssuersCreateInput = {
   data?: Maybe<CredentialIssuerCreateInput>;
 };
 
-export type OrganizationRelateToOneInput = {
-  create?: Maybe<OrganizationCreateInput>;
-  connect?: Maybe<OrganizationWhereUniqueInput>;
-  disconnect?: Maybe<OrganizationWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
-export type OrganizationUnitRelateToOneInput = {
-  create?: Maybe<OrganizationUnitCreateInput>;
-  connect?: Maybe<OrganizationUnitWhereUniqueInput>;
-  disconnect?: Maybe<OrganizationUnitWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
 /**  A keystone list  */
 export type Dataset = {
   __typename?: 'Dataset';
@@ -1509,20 +1653,24 @@ export type Dataset = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   license_title?: Maybe<Scalars['String']>;
   view_audience?: Maybe<Scalars['String']>;
+  download_audience?: Maybe<Scalars['String']>;
+  record_publish_date?: Maybe<Scalars['String']>;
+  security_class?: Maybe<Scalars['String']>;
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
-  securityClass?: Maybe<Scalars['String']>;
   notes?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type DatasetWhereInput = {
@@ -1550,24 +1698,6 @@ export type DatasetWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id?: Maybe<Scalars['String']>;
-  bcdc_id_not?: Maybe<Scalars['String']>;
-  bcdc_id_contains?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_i?: Maybe<Scalars['String']>;
-  bcdc_id_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   sector?: Maybe<Scalars['String']>;
   sector_not?: Maybe<Scalars['String']>;
   sector_contains?: Maybe<Scalars['String']>;
@@ -1622,6 +1752,60 @@ export type DatasetWhereInput = {
   view_audience_not_ends_with_i?: Maybe<Scalars['String']>;
   view_audience_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   view_audience_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  download_audience?: Maybe<Scalars['String']>;
+  download_audience_not?: Maybe<Scalars['String']>;
+  download_audience_contains?: Maybe<Scalars['String']>;
+  download_audience_not_contains?: Maybe<Scalars['String']>;
+  download_audience_starts_with?: Maybe<Scalars['String']>;
+  download_audience_not_starts_with?: Maybe<Scalars['String']>;
+  download_audience_ends_with?: Maybe<Scalars['String']>;
+  download_audience_not_ends_with?: Maybe<Scalars['String']>;
+  download_audience_i?: Maybe<Scalars['String']>;
+  download_audience_not_i?: Maybe<Scalars['String']>;
+  download_audience_contains_i?: Maybe<Scalars['String']>;
+  download_audience_not_contains_i?: Maybe<Scalars['String']>;
+  download_audience_starts_with_i?: Maybe<Scalars['String']>;
+  download_audience_not_starts_with_i?: Maybe<Scalars['String']>;
+  download_audience_ends_with_i?: Maybe<Scalars['String']>;
+  download_audience_not_ends_with_i?: Maybe<Scalars['String']>;
+  download_audience_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  download_audience_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  record_publish_date?: Maybe<Scalars['String']>;
+  record_publish_date_not?: Maybe<Scalars['String']>;
+  record_publish_date_contains?: Maybe<Scalars['String']>;
+  record_publish_date_not_contains?: Maybe<Scalars['String']>;
+  record_publish_date_starts_with?: Maybe<Scalars['String']>;
+  record_publish_date_not_starts_with?: Maybe<Scalars['String']>;
+  record_publish_date_ends_with?: Maybe<Scalars['String']>;
+  record_publish_date_not_ends_with?: Maybe<Scalars['String']>;
+  record_publish_date_i?: Maybe<Scalars['String']>;
+  record_publish_date_not_i?: Maybe<Scalars['String']>;
+  record_publish_date_contains_i?: Maybe<Scalars['String']>;
+  record_publish_date_not_contains_i?: Maybe<Scalars['String']>;
+  record_publish_date_starts_with_i?: Maybe<Scalars['String']>;
+  record_publish_date_not_starts_with_i?: Maybe<Scalars['String']>;
+  record_publish_date_ends_with_i?: Maybe<Scalars['String']>;
+  record_publish_date_not_ends_with_i?: Maybe<Scalars['String']>;
+  record_publish_date_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  record_publish_date_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  security_class?: Maybe<Scalars['String']>;
+  security_class_not?: Maybe<Scalars['String']>;
+  security_class_contains?: Maybe<Scalars['String']>;
+  security_class_not_contains?: Maybe<Scalars['String']>;
+  security_class_starts_with?: Maybe<Scalars['String']>;
+  security_class_not_starts_with?: Maybe<Scalars['String']>;
+  security_class_ends_with?: Maybe<Scalars['String']>;
+  security_class_not_ends_with?: Maybe<Scalars['String']>;
+  security_class_i?: Maybe<Scalars['String']>;
+  security_class_not_i?: Maybe<Scalars['String']>;
+  security_class_contains_i?: Maybe<Scalars['String']>;
+  security_class_not_contains_i?: Maybe<Scalars['String']>;
+  security_class_starts_with_i?: Maybe<Scalars['String']>;
+  security_class_not_starts_with_i?: Maybe<Scalars['String']>;
+  security_class_ends_with_i?: Maybe<Scalars['String']>;
+  security_class_not_ends_with_i?: Maybe<Scalars['String']>;
+  security_class_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  security_class_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   private?: Maybe<Scalars['Boolean']>;
   private_not?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
@@ -1664,24 +1848,6 @@ export type DatasetWhereInput = {
   organization_is_null?: Maybe<Scalars['Boolean']>;
   organizationUnit?: Maybe<OrganizationUnitWhereInput>;
   organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
-  securityClass?: Maybe<Scalars['String']>;
-  securityClass_not?: Maybe<Scalars['String']>;
-  securityClass_contains?: Maybe<Scalars['String']>;
-  securityClass_not_contains?: Maybe<Scalars['String']>;
-  securityClass_starts_with?: Maybe<Scalars['String']>;
-  securityClass_not_starts_with?: Maybe<Scalars['String']>;
-  securityClass_ends_with?: Maybe<Scalars['String']>;
-  securityClass_not_ends_with?: Maybe<Scalars['String']>;
-  securityClass_i?: Maybe<Scalars['String']>;
-  securityClass_not_i?: Maybe<Scalars['String']>;
-  securityClass_contains_i?: Maybe<Scalars['String']>;
-  securityClass_not_contains_i?: Maybe<Scalars['String']>;
-  securityClass_starts_with_i?: Maybe<Scalars['String']>;
-  securityClass_not_starts_with_i?: Maybe<Scalars['String']>;
-  securityClass_ends_with_i?: Maybe<Scalars['String']>;
-  securityClass_not_ends_with_i?: Maybe<Scalars['String']>;
-  securityClass_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  securityClass_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   notes?: Maybe<Scalars['String']>;
   notes_not?: Maybe<Scalars['String']>;
   notes_contains?: Maybe<Scalars['String']>;
@@ -1738,6 +1904,60 @@ export type DatasetWhereInput = {
   catalogContent_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
   isInCatalog_not?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type DatasetWhereUniqueInput = {
@@ -1749,14 +1969,18 @@ export enum SortDatasetsBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  BcdcIdAsc = 'bcdc_id_ASC',
-  BcdcIdDesc = 'bcdc_id_DESC',
   SectorAsc = 'sector_ASC',
   SectorDesc = 'sector_DESC',
   LicenseTitleAsc = 'license_title_ASC',
   LicenseTitleDesc = 'license_title_DESC',
   ViewAudienceAsc = 'view_audience_ASC',
   ViewAudienceDesc = 'view_audience_DESC',
+  DownloadAudienceAsc = 'download_audience_ASC',
+  DownloadAudienceDesc = 'download_audience_DESC',
+  RecordPublishDateAsc = 'record_publish_date_ASC',
+  RecordPublishDateDesc = 'record_publish_date_DESC',
+  SecurityClassAsc = 'security_class_ASC',
+  SecurityClassDesc = 'security_class_DESC',
   PrivateAsc = 'private_ASC',
   PrivateDesc = 'private_DESC',
   TagsAsc = 'tags_ASC',
@@ -1767,8 +1991,6 @@ export enum SortDatasetsBy {
   OrganizationDesc = 'organization_DESC',
   OrganizationUnitAsc = 'organizationUnit_ASC',
   OrganizationUnitDesc = 'organizationUnit_DESC',
-  SecurityClassAsc = 'securityClass_ASC',
-  SecurityClassDesc = 'securityClass_DESC',
   NotesAsc = 'notes_ASC',
   NotesDesc = 'notes_DESC',
   TitleAsc = 'title_ASC',
@@ -1776,25 +1998,35 @@ export enum SortDatasetsBy {
   CatalogContentAsc = 'catalogContent_ASC',
   CatalogContentDesc = 'catalogContent_DESC',
   IsInCatalogAsc = 'isInCatalog_ASC',
-  IsInCatalogDesc = 'isInCatalog_DESC'
+  IsInCatalogDesc = 'isInCatalog_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type DatasetUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   license_title?: Maybe<Scalars['String']>;
   view_audience?: Maybe<Scalars['String']>;
+  download_audience?: Maybe<Scalars['String']>;
+  record_publish_date?: Maybe<Scalars['String']>;
+  security_class?: Maybe<Scalars['String']>;
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
-  securityClass?: Maybe<Scalars['String']>;
   notes?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type DatasetsUpdateInput = {
@@ -1804,20 +2036,24 @@ export type DatasetsUpdateInput = {
 
 export type DatasetCreateInput = {
   name?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   license_title?: Maybe<Scalars['String']>;
   view_audience?: Maybe<Scalars['String']>;
+  download_audience?: Maybe<Scalars['String']>;
+  record_publish_date?: Maybe<Scalars['String']>;
+  security_class?: Maybe<Scalars['String']>;
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
-  securityClass?: Maybe<Scalars['String']>;
   notes?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type DatasetsCreateInput = {
@@ -2066,12 +2302,14 @@ export type GatewayConsumer = {
   id: Scalars['ID'];
   username?: Maybe<Scalars['String']>;
   customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
   aclGroups?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2141,24 +2379,6 @@ export type GatewayConsumerWhereInput = {
   customId_not_ends_with_i?: Maybe<Scalars['String']>;
   customId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   customId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongConsumerId?: Maybe<Scalars['String']>;
-  kongConsumerId_not?: Maybe<Scalars['String']>;
-  kongConsumerId_contains?: Maybe<Scalars['String']>;
-  kongConsumerId_not_contains?: Maybe<Scalars['String']>;
-  kongConsumerId_starts_with?: Maybe<Scalars['String']>;
-  kongConsumerId_not_starts_with?: Maybe<Scalars['String']>;
-  kongConsumerId_ends_with?: Maybe<Scalars['String']>;
-  kongConsumerId_not_ends_with?: Maybe<Scalars['String']>;
-  kongConsumerId_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_i?: Maybe<Scalars['String']>;
-  kongConsumerId_contains_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_contains_i?: Maybe<Scalars['String']>;
-  kongConsumerId_starts_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_ends_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongConsumerId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongConsumerId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   aclGroups?: Maybe<Scalars['String']>;
   aclGroups_not?: Maybe<Scalars['String']>;
   aclGroups_contains?: Maybe<Scalars['String']>;
@@ -2219,6 +2439,60 @@ export type GatewayConsumerWhereInput = {
   plugins_some?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be false for all nodes  */
   plugins_none?: Maybe<GatewayPluginWhereInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2248,8 +2522,6 @@ export enum SortGatewayConsumersBy {
   UsernameDesc = 'username_DESC',
   CustomIdAsc = 'customId_ASC',
   CustomIdDesc = 'customId_DESC',
-  KongConsumerIdAsc = 'kongConsumerId_ASC',
-  KongConsumerIdDesc = 'kongConsumerId_DESC',
   AclGroupsAsc = 'aclGroups_ASC',
   AclGroupsDesc = 'aclGroups_DESC',
   NamespaceAsc = 'namespace_ASC',
@@ -2258,6 +2530,12 @@ export enum SortGatewayConsumersBy {
   TagsDesc = 'tags_DESC',
   PluginsAsc = 'plugins_ASC',
   PluginsDesc = 'plugins_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2267,11 +2545,13 @@ export enum SortGatewayConsumersBy {
 export type GatewayConsumerUpdateInput = {
   username?: Maybe<Scalars['String']>;
   customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
   aclGroups?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayConsumersUpdateInput = {
@@ -2282,11 +2562,13 @@ export type GatewayConsumersUpdateInput = {
 export type GatewayConsumerCreateInput = {
   username?: Maybe<Scalars['String']>;
   customId?: Maybe<Scalars['String']>;
-  kongConsumerId?: Maybe<Scalars['String']>;
   aclGroups?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayConsumersCreateInput = {
@@ -2306,8 +2588,10 @@ export type GatewayGroup = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  extRefId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2337,24 +2621,6 @@ export type GatewayGroupWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  extRefId?: Maybe<Scalars['String']>;
-  extRefId_not?: Maybe<Scalars['String']>;
-  extRefId_contains?: Maybe<Scalars['String']>;
-  extRefId_not_contains?: Maybe<Scalars['String']>;
-  extRefId_starts_with?: Maybe<Scalars['String']>;
-  extRefId_not_starts_with?: Maybe<Scalars['String']>;
-  extRefId_ends_with?: Maybe<Scalars['String']>;
-  extRefId_not_ends_with?: Maybe<Scalars['String']>;
-  extRefId_i?: Maybe<Scalars['String']>;
-  extRefId_not_i?: Maybe<Scalars['String']>;
-  extRefId_contains_i?: Maybe<Scalars['String']>;
-  extRefId_not_contains_i?: Maybe<Scalars['String']>;
-  extRefId_starts_with_i?: Maybe<Scalars['String']>;
-  extRefId_not_starts_with_i?: Maybe<Scalars['String']>;
-  extRefId_ends_with_i?: Maybe<Scalars['String']>;
-  extRefId_not_ends_with_i?: Maybe<Scalars['String']>;
-  extRefId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  extRefId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace?: Maybe<Scalars['String']>;
   namespace_not?: Maybe<Scalars['String']>;
   namespace_contains?: Maybe<Scalars['String']>;
@@ -2373,6 +2639,60 @@ export type GatewayGroupWhereInput = {
   namespace_not_ends_with_i?: Maybe<Scalars['String']>;
   namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2400,10 +2720,14 @@ export enum SortGatewayGroupsBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  ExtRefIdAsc = 'extRefId_ASC',
-  ExtRefIdDesc = 'extRefId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2412,8 +2736,10 @@ export enum SortGatewayGroupsBy {
 
 export type GatewayGroupUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  extRefId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayGroupsUpdateInput = {
@@ -2423,8 +2749,10 @@ export type GatewayGroupsUpdateInput = {
 
 export type GatewayGroupCreateInput = {
   name?: Maybe<Scalars['String']>;
-  extRefId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayGroupsCreateInput = {
@@ -2451,12 +2779,14 @@ export type GatewayPlugin = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayService>;
   route?: Maybe<GatewayRoute>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2486,24 +2816,6 @@ export type GatewayPluginWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongPluginId?: Maybe<Scalars['String']>;
-  kongPluginId_not?: Maybe<Scalars['String']>;
-  kongPluginId_contains?: Maybe<Scalars['String']>;
-  kongPluginId_not_contains?: Maybe<Scalars['String']>;
-  kongPluginId_starts_with?: Maybe<Scalars['String']>;
-  kongPluginId_not_starts_with?: Maybe<Scalars['String']>;
-  kongPluginId_ends_with?: Maybe<Scalars['String']>;
-  kongPluginId_not_ends_with?: Maybe<Scalars['String']>;
-  kongPluginId_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_i?: Maybe<Scalars['String']>;
-  kongPluginId_contains_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_contains_i?: Maybe<Scalars['String']>;
-  kongPluginId_starts_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_ends_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongPluginId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongPluginId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace?: Maybe<Scalars['String']>;
   namespace_not?: Maybe<Scalars['String']>;
   namespace_contains?: Maybe<Scalars['String']>;
@@ -2562,6 +2874,60 @@ export type GatewayPluginWhereInput = {
   service_is_null?: Maybe<Scalars['Boolean']>;
   route?: Maybe<GatewayRouteWhereInput>;
   route_is_null?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2589,8 +2955,6 @@ export enum SortGatewayPluginsBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  KongPluginIdAsc = 'kongPluginId_ASC',
-  KongPluginIdDesc = 'kongPluginId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
   TagsAsc = 'tags_ASC',
@@ -2601,6 +2965,12 @@ export enum SortGatewayPluginsBy {
   ServiceDesc = 'service_DESC',
   RouteAsc = 'route_ASC',
   RouteDesc = 'route_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2609,12 +2979,14 @@ export enum SortGatewayPluginsBy {
 
 export type GatewayPluginUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
   route?: Maybe<GatewayRouteRelateToOneInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayPluginsUpdateInput = {
@@ -2624,12 +2996,14 @@ export type GatewayPluginsUpdateInput = {
 
 export type GatewayPluginCreateInput = {
   name?: Maybe<Scalars['String']>;
-  kongPluginId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
   route?: Maybe<GatewayRouteRelateToOneInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayPluginsCreateInput = {
@@ -2649,7 +3023,6 @@ export type GatewayRoute = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  kongRouteId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   methods?: Maybe<Scalars['String']>;
   paths?: Maybe<Scalars['String']>;
@@ -2658,6 +3031,9 @@ export type GatewayRoute = {
   service?: Maybe<GatewayService>;
   plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -2709,24 +3085,6 @@ export type GatewayRouteWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongRouteId?: Maybe<Scalars['String']>;
-  kongRouteId_not?: Maybe<Scalars['String']>;
-  kongRouteId_contains?: Maybe<Scalars['String']>;
-  kongRouteId_not_contains?: Maybe<Scalars['String']>;
-  kongRouteId_starts_with?: Maybe<Scalars['String']>;
-  kongRouteId_not_starts_with?: Maybe<Scalars['String']>;
-  kongRouteId_ends_with?: Maybe<Scalars['String']>;
-  kongRouteId_not_ends_with?: Maybe<Scalars['String']>;
-  kongRouteId_i?: Maybe<Scalars['String']>;
-  kongRouteId_not_i?: Maybe<Scalars['String']>;
-  kongRouteId_contains_i?: Maybe<Scalars['String']>;
-  kongRouteId_not_contains_i?: Maybe<Scalars['String']>;
-  kongRouteId_starts_with_i?: Maybe<Scalars['String']>;
-  kongRouteId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongRouteId_ends_with_i?: Maybe<Scalars['String']>;
-  kongRouteId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongRouteId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongRouteId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace?: Maybe<Scalars['String']>;
   namespace_not?: Maybe<Scalars['String']>;
   namespace_contains?: Maybe<Scalars['String']>;
@@ -2825,6 +3183,60 @@ export type GatewayRouteWhereInput = {
   plugins_some?: Maybe<GatewayPluginWhereInput>;
   /**  condition must be false for all nodes  */
   plugins_none?: Maybe<GatewayPluginWhereInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -2852,8 +3264,6 @@ export enum SortGatewayRoutesBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  KongRouteIdAsc = 'kongRouteId_ASC',
-  KongRouteIdDesc = 'kongRouteId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
   MethodsAsc = 'methods_ASC',
@@ -2868,6 +3278,12 @@ export enum SortGatewayRoutesBy {
   ServiceDesc = 'service_DESC',
   PluginsAsc = 'plugins_ASC',
   PluginsDesc = 'plugins_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -2876,7 +3292,6 @@ export enum SortGatewayRoutesBy {
 
 export type GatewayRouteUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  kongRouteId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   methods?: Maybe<Scalars['String']>;
   paths?: Maybe<Scalars['String']>;
@@ -2884,6 +3299,9 @@ export type GatewayRouteUpdateInput = {
   tags?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayRoutesUpdateInput = {
@@ -2893,7 +3311,6 @@ export type GatewayRoutesUpdateInput = {
 
 export type GatewayRouteCreateInput = {
   name?: Maybe<Scalars['String']>;
-  kongRouteId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   methods?: Maybe<Scalars['String']>;
   paths?: Maybe<Scalars['String']>;
@@ -2901,6 +3318,9 @@ export type GatewayRouteCreateInput = {
   tags?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayRoutesCreateInput = {
@@ -2927,7 +3347,6 @@ export type GatewayService = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
-  kongServiceId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   host?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
@@ -2936,6 +3355,9 @@ export type GatewayService = {
   plugins: Array<GatewayPlugin>;
   _pluginsMeta?: Maybe<_QueryMeta>;
   environment?: Maybe<Environment>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -3009,24 +3431,6 @@ export type GatewayServiceWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongServiceId?: Maybe<Scalars['String']>;
-  kongServiceId_not?: Maybe<Scalars['String']>;
-  kongServiceId_contains?: Maybe<Scalars['String']>;
-  kongServiceId_not_contains?: Maybe<Scalars['String']>;
-  kongServiceId_starts_with?: Maybe<Scalars['String']>;
-  kongServiceId_not_starts_with?: Maybe<Scalars['String']>;
-  kongServiceId_ends_with?: Maybe<Scalars['String']>;
-  kongServiceId_not_ends_with?: Maybe<Scalars['String']>;
-  kongServiceId_i?: Maybe<Scalars['String']>;
-  kongServiceId_not_i?: Maybe<Scalars['String']>;
-  kongServiceId_contains_i?: Maybe<Scalars['String']>;
-  kongServiceId_not_contains_i?: Maybe<Scalars['String']>;
-  kongServiceId_starts_with_i?: Maybe<Scalars['String']>;
-  kongServiceId_not_starts_with_i?: Maybe<Scalars['String']>;
-  kongServiceId_ends_with_i?: Maybe<Scalars['String']>;
-  kongServiceId_not_ends_with_i?: Maybe<Scalars['String']>;
-  kongServiceId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  kongServiceId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace?: Maybe<Scalars['String']>;
   namespace_not?: Maybe<Scalars['String']>;
   namespace_contains?: Maybe<Scalars['String']>;
@@ -3095,6 +3499,60 @@ export type GatewayServiceWhereInput = {
   plugins_none?: Maybe<GatewayPluginWhereInput>;
   environment?: Maybe<EnvironmentWhereInput>;
   environment_is_null?: Maybe<Scalars['Boolean']>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -3122,8 +3580,6 @@ export enum SortGatewayServicesBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
-  KongServiceIdAsc = 'kongServiceId_ASC',
-  KongServiceIdDesc = 'kongServiceId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
   HostAsc = 'host_ASC',
@@ -3136,6 +3592,12 @@ export enum SortGatewayServicesBy {
   PluginsDesc = 'plugins_DESC',
   EnvironmentAsc = 'environment_ASC',
   EnvironmentDesc = 'environment_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -3144,13 +3606,15 @@ export enum SortGatewayServicesBy {
 
 export type GatewayServiceUpdateInput = {
   name?: Maybe<Scalars['String']>;
-  kongServiceId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   host?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   routes?: Maybe<GatewayRouteRelateToManyInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
   environment?: Maybe<EnvironmentRelateToOneInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayServicesUpdateInput = {
@@ -3160,13 +3624,15 @@ export type GatewayServicesUpdateInput = {
 
 export type GatewayServiceCreateInput = {
   name?: Maybe<Scalars['String']>;
-  kongServiceId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   host?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   routes?: Maybe<GatewayRouteRelateToManyInput>;
   plugins?: Maybe<GatewayPluginRelateToManyInput>;
   environment?: Maybe<EnvironmentRelateToOneInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type GatewayServicesCreateInput = {
@@ -3821,6 +4287,8 @@ export type Namespace = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<Organization>;
+  organizationUnit?: Maybe<OrganizationUnit>;
   members: Array<MemberRole>;
   _membersMeta?: Maybe<_QueryMeta>;
   updatedBy?: Maybe<User>;
@@ -3930,6 +4398,10 @@ export type NamespaceWhereInput = {
   extRefId_not_ends_with_i?: Maybe<Scalars['String']>;
   extRefId_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   extRefId_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  organization?: Maybe<OrganizationWhereInput>;
+  organization_is_null?: Maybe<Scalars['Boolean']>;
+  organizationUnit?: Maybe<OrganizationUnitWhereInput>;
+  organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   members_every?: Maybe<MemberRoleWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -3973,6 +4445,10 @@ export enum SortNamespacesBy {
   PermDomainsDesc = 'permDomains_DESC',
   ExtRefIdAsc = 'extRefId_ASC',
   ExtRefIdDesc = 'extRefId_DESC',
+  OrganizationAsc = 'organization_ASC',
+  OrganizationDesc = 'organization_DESC',
+  OrganizationUnitAsc = 'organizationUnit_ASC',
+  OrganizationUnitDesc = 'organizationUnit_DESC',
   MembersAsc = 'members_ASC',
   MembersDesc = 'members_DESC',
   UpdatedByAsc = 'updatedBy_ASC',
@@ -3990,6 +4466,8 @@ export type NamespaceUpdateInput = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   members?: Maybe<MemberRoleRelateToManyInput>;
 };
 
@@ -4003,6 +4481,8 @@ export type NamespaceCreateInput = {
   serviceAccounts?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Scalars['String']>;
   extRefId?: Maybe<Scalars['String']>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   members?: Maybe<MemberRoleRelateToManyInput>;
 };
 
@@ -4032,11 +4512,13 @@ export type Organization = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   orgUnits: Array<OrganizationUnit>;
   _orgUnitsMeta?: Maybe<_QueryMeta>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 
@@ -4122,24 +4604,6 @@ export type OrganizationWhereInput = {
   title_not_ends_with_i?: Maybe<Scalars['String']>;
   title_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   title_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id?: Maybe<Scalars['String']>;
-  bcdc_id_not?: Maybe<Scalars['String']>;
-  bcdc_id_contains?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_i?: Maybe<Scalars['String']>;
-  bcdc_id_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   tags?: Maybe<Scalars['String']>;
   tags_not?: Maybe<Scalars['String']>;
   tags_contains?: Maybe<Scalars['String']>;
@@ -4182,6 +4646,60 @@ export type OrganizationWhereInput = {
   orgUnits_some?: Maybe<OrganizationUnitWhereInput>;
   /**  condition must be false for all nodes  */
   orgUnits_none?: Maybe<OrganizationUnitWhereInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type OrganizationWhereUniqueInput = {
@@ -4197,24 +4715,30 @@ export enum SortOrganizationsBy {
   SectorDesc = 'sector_DESC',
   TitleAsc = 'title_ASC',
   TitleDesc = 'title_DESC',
-  BcdcIdAsc = 'bcdc_id_ASC',
-  BcdcIdDesc = 'bcdc_id_DESC',
   TagsAsc = 'tags_ASC',
   TagsDesc = 'tags_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
   OrgUnitsAsc = 'orgUnits_ASC',
-  OrgUnitsDesc = 'orgUnits_DESC'
+  OrgUnitsDesc = 'orgUnits_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type OrganizationUpdateInput = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   orgUnits?: Maybe<OrganizationUnitRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type OrganizationsUpdateInput = {
@@ -4226,10 +4750,12 @@ export type OrganizationCreateInput = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   orgUnits?: Maybe<OrganizationUnitRelateToManyInput>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type OrganizationsCreateInput = {
@@ -4251,9 +4777,11 @@ export type OrganizationUnit = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type OrganizationUnitWhereInput = {
@@ -4317,24 +4845,6 @@ export type OrganizationUnitWhereInput = {
   title_not_ends_with_i?: Maybe<Scalars['String']>;
   title_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   title_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id?: Maybe<Scalars['String']>;
-  bcdc_id_not?: Maybe<Scalars['String']>;
-  bcdc_id_contains?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with?: Maybe<Scalars['String']>;
-  bcdc_id_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_i?: Maybe<Scalars['String']>;
-  bcdc_id_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_contains_i?: Maybe<Scalars['String']>;
-  bcdc_id_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_starts_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_not_ends_with_i?: Maybe<Scalars['String']>;
-  bcdc_id_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  bcdc_id_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   tags?: Maybe<Scalars['String']>;
   tags_not?: Maybe<Scalars['String']>;
   tags_contains?: Maybe<Scalars['String']>;
@@ -4371,6 +4881,60 @@ export type OrganizationUnitWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource?: Maybe<Scalars['String']>;
+  extSource_not?: Maybe<Scalars['String']>;
+  extSource_contains?: Maybe<Scalars['String']>;
+  extSource_not_contains?: Maybe<Scalars['String']>;
+  extSource_starts_with?: Maybe<Scalars['String']>;
+  extSource_not_starts_with?: Maybe<Scalars['String']>;
+  extSource_ends_with?: Maybe<Scalars['String']>;
+  extSource_not_ends_with?: Maybe<Scalars['String']>;
+  extSource_i?: Maybe<Scalars['String']>;
+  extSource_not_i?: Maybe<Scalars['String']>;
+  extSource_contains_i?: Maybe<Scalars['String']>;
+  extSource_not_contains_i?: Maybe<Scalars['String']>;
+  extSource_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_not_starts_with_i?: Maybe<Scalars['String']>;
+  extSource_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_not_ends_with_i?: Maybe<Scalars['String']>;
+  extSource_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extSource_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extForeignKey_not?: Maybe<Scalars['String']>;
+  extForeignKey_contains?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with?: Maybe<Scalars['String']>;
+  extForeignKey_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_i?: Maybe<Scalars['String']>;
+  extForeignKey_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_contains_i?: Maybe<Scalars['String']>;
+  extForeignKey_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_starts_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_not_ends_with_i?: Maybe<Scalars['String']>;
+  extForeignKey_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extForeignKey_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash?: Maybe<Scalars['String']>;
+  extRecordHash_not?: Maybe<Scalars['String']>;
+  extRecordHash_contains?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with?: Maybe<Scalars['String']>;
+  extRecordHash_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_i?: Maybe<Scalars['String']>;
+  extRecordHash_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_contains_i?: Maybe<Scalars['String']>;
+  extRecordHash_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_starts_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_not_ends_with_i?: Maybe<Scalars['String']>;
+  extRecordHash_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  extRecordHash_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type OrganizationUnitWhereUniqueInput = {
@@ -4386,21 +4950,27 @@ export enum SortOrganizationUnitsBy {
   SectorDesc = 'sector_DESC',
   TitleAsc = 'title_ASC',
   TitleDesc = 'title_DESC',
-  BcdcIdAsc = 'bcdc_id_ASC',
-  BcdcIdDesc = 'bcdc_id_DESC',
   TagsAsc = 'tags_ASC',
   TagsDesc = 'tags_DESC',
   DescriptionAsc = 'description_ASC',
-  DescriptionDesc = 'description_DESC'
+  DescriptionDesc = 'description_DESC',
+  ExtSourceAsc = 'extSource_ASC',
+  ExtSourceDesc = 'extSource_DESC',
+  ExtForeignKeyAsc = 'extForeignKey_ASC',
+  ExtForeignKeyDesc = 'extForeignKey_DESC',
+  ExtRecordHashAsc = 'extRecordHash_ASC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type OrganizationUnitUpdateInput = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type OrganizationUnitsUpdateInput = {
@@ -4412,9 +4982,11 @@ export type OrganizationUnitCreateInput = {
   name?: Maybe<Scalars['String']>;
   sector?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
-  bcdc_id?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  extSource?: Maybe<Scalars['String']>;
+  extForeignKey?: Maybe<Scalars['String']>;
+  extRecordHash?: Maybe<Scalars['String']>;
 };
 
 export type OrganizationUnitsCreateInput = {
@@ -5655,6 +6227,14 @@ export type Query = {
   _allApplicationsMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the Application list.  */
   _ApplicationsMeta?: Maybe<_ListMeta>;
+  /**  Search for all Blob items which match the where clause.  */
+  allBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Search for the Blob item with the matching ID.  */
+  Blob?: Maybe<Blob>;
+  /**  Perform a meta-query on all Blob items which match the where clause.  */
+  _allBlobsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the Blob list.  */
+  _BlobsMeta?: Maybe<_ListMeta>;
   /**  Search for all Content items which match the where clause.  */
   allContents?: Maybe<Array<Maybe<Content>>>;
   /**  Search for the Content item with the matching ID.  */
@@ -5925,6 +6505,31 @@ export type Query_AllApplicationsMetaArgs = {
   where?: Maybe<ApplicationWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortApplicationsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryAllBlobsArgs = {
+  where?: Maybe<BlobWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortBlobsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryBlobArgs = {
+  where: BlobWhereUniqueInput;
+};
+
+
+export type Query_AllBlobsMetaArgs = {
+  where?: Maybe<BlobWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortBlobsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -6510,6 +7115,18 @@ export type Mutation = {
   deleteApplication?: Maybe<Application>;
   /**  Delete multiple Application items by ID.  */
   deleteApplications?: Maybe<Array<Maybe<Application>>>;
+  /**  Create a single Blob item.  */
+  createBlob?: Maybe<Blob>;
+  /**  Create multiple Blob items.  */
+  createBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Update a single Blob item by ID.  */
+  updateBlob?: Maybe<Blob>;
+  /**  Update multiple Blob items by ID.  */
+  updateBlobs?: Maybe<Array<Maybe<Blob>>>;
+  /**  Delete a single Blob item by ID.  */
+  deleteBlob?: Maybe<Blob>;
+  /**  Delete multiple Blob items by ID.  */
+  deleteBlobs?: Maybe<Array<Maybe<Blob>>>;
   /**  Create a single Content item.  */
   createContent?: Maybe<Content>;
   /**  Create multiple Content items.  */
@@ -6889,6 +7506,37 @@ export type MutationDeleteApplicationArgs = {
 
 
 export type MutationDeleteApplicationsArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationCreateBlobArgs = {
+  data?: Maybe<BlobCreateInput>;
+};
+
+
+export type MutationCreateBlobsArgs = {
+  data?: Maybe<Array<Maybe<BlobsCreateInput>>>;
+};
+
+
+export type MutationUpdateBlobArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<BlobUpdateInput>;
+};
+
+
+export type MutationUpdateBlobsArgs = {
+  data?: Maybe<Array<Maybe<BlobsUpdateInput>>>;
+};
+
+
+export type MutationDeleteBlobArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteBlobsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 

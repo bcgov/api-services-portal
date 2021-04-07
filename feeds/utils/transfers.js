@@ -134,6 +134,14 @@ function transfers (workingPath, baseUrl, exceptions) {
                 map[item[idKey]] = item
             }
             return map
+        },
+
+        inject_hash_and_source: function (source, payload) {
+            const crypto = require('crypto')
+            const body = JSON.stringify(payload)
+
+            payload['extSource'] = source
+            payload['extRecordHash'] = crypto.createHash('sha256').update(body).digest('hex')
         }
     }
 }

@@ -3,6 +3,7 @@ import {
     Alert,
     AlertIcon,
     Box,
+    Checkbox, CheckboxGroup,
     Container,
     VStack,
     Skeleton,
@@ -18,7 +19,11 @@ import { FULFILL_REQUEST, GET_REQUEST } from './../queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 
+import ScopeChoice from './scopes'
+
 import graphql from '@/shared/services/graphql'
+import toArray from '@/shared/services/toarray'
+import toObject from '@/shared/services/toobject'
 
 import NameValue from '@/components/name-value';
 
@@ -40,6 +45,7 @@ const FulfillRequest = () => {
         if (context['router'] != null && id) {
             graphql(GET_REQUEST, { id : id })
             .then(({ data }) => {
+                toObject(data.allAccessRequests[0], ['controls'])
                 setState({ state: 'loaded', data });
             })
             .catch((err) => {
@@ -67,8 +73,11 @@ const FulfillRequest = () => {
         })
     }
 
+    const selectedScopes = request?.controls.defaultClientScopes == null ? []: request?.controls.defaultClientScopes
+
     const fulfill = () => {
-        graphql(FULFILL_REQUEST, { id: request.id })
+        request.controls.defaultClientScopes = selectedScopes
+        graphql(FULFILL_REQUEST, { id: request.id, controls: JSON.stringify(request.controls) })
         .then(refetch)
         .catch (err => {
             errorToast(JSON.stringify(err.message))
@@ -79,6 +88,9 @@ const FulfillRequest = () => {
         console.log(JSON.stringify(request, null, 4))
         request.consumerId = evt.target.value
     }
+
+    toArray(request?.productEnvironment?.credentialIssuer, ['availableScopes'])
+
 
     const comms = `
         To {{RequestorName}},
@@ -105,11 +117,14 @@ const FulfillRequest = () => {
                 <div className="flex">
                     <NameValue name="Product" value={request.productEnvironment.product.name} width="200px"/>
                     <NameValue name="Environment" value={request.productEnvironment.name} width="150px"/>
+                    <NameValue name="ACL ID" value={request.productEnvironment.appId} width="150px"/>
                 </div>
                 <h2 style={styles.h2}>What application will be using this API?</h2>
                 <div className="flex">
                     <NameValue name="ID" value={request.application.appId} width="250px"/>
                     <NameValue name="Application" value={request.application.name} width="150px"/>
+                    <NameValue name="Consumer Username" value={request.serviceAccess?.consumer?.username} width="150px"/>
+                    <NameValue name="Consumer Custom ID" value={request.serviceAccess?.consumer?.customId} width="150px"/>
                 </div>
                 <h2 style={styles.h2}>Requestor</h2>
                 <div className="flex">
@@ -160,6 +175,17 @@ const FulfillRequest = () => {
                         </>
                     )}
                 </Flex> */}
+                <h2 style={styles.h2}>Available Scopes</h2>
+                { request?.productEnvironment?.credentialIssuer != null && (
+                <ScopeChoice selectedScopes={selectedScopes} scopes={request?.productEnvironment?.credentialIssuer.availableScopes}/>
+                )}
+
+                <h2 style={styles.h2}>Nickname</h2>
+                <p>Nickname is a unique identifier that you can assign to the Consumer</p>
+
+                <h2 style={styles.h2}>Additional Information Provided by Requestor</h2>
+                <p>{request?.additionalDetails}</p>
+
                 <h2 style={styles.h2}>Communication to {request.requestor.name}</h2>
                 <div className="flex m-5">
                     <Textarea placeholder="Communication" name="communication" defaultValue={comms} style={{height:"200px"}}/>

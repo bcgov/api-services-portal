@@ -81,7 +81,8 @@ export const GET_REQUEST = `
           name
           isApproved
           isIssued
-          isComplete
+          controls
+          additionalDetails
           createdAt
           requestor {
             name
@@ -92,14 +93,22 @@ export const GET_REQUEST = `
             appId
             name
           }
+          serviceAccess {
+            consumer {
+              username
+              customId
+            }
+          }
           productEnvironment {
             name
+            appId
             active
             flow
             credentialIssuer {
                 name
                 flow
                 mode
+                availableScopes
             }
             product {
               name
@@ -162,8 +171,8 @@ export const REJECT = `
 `
 
 export const FULFILL_REQUEST = `
-    mutation FulfillRequest($id: ID!) {
-        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true }) {
+    mutation FulfillRequest($id: ID!, $controls: String!) {
+        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, controls: $controls }) {
             id
         }
     }

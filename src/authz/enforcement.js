@@ -21,6 +21,7 @@ const { rewireTypes } = require('@graphql-tools/utils')
 
 const actions = {
     "filterByActiveOrProductNS": require('./actions/filterByActiveOrProductNS'),
+    "filterByEnvActiveOrProductNS": require('./actions/filterByEnvActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
     "filterByOwner": filterByOwner,
     "filterByRequestor": filterByRequestor,

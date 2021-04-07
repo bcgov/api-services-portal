@@ -35,6 +35,7 @@ function loadOrgProducer (xfer, workingPath, destinationUrl) {
             return null
         }
         const file = fileList[index]
+
         const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'orgs' + '/' + file))['result']
         index++
 
@@ -42,8 +43,12 @@ function loadOrgProducer (xfer, workingPath, destinationUrl) {
             return new Promise ((resolve, reject) => resolve())
         }
 
+        xfer.inject_hash_and_source('ckan', data)
+
         console.log(new Date() + " : " + data['name'])
         data['orgUnits'] = findAllChildren (xfer, data['name'])
+        data['orgUnits'].map(orgUnit => xfer.inject_hash_and_source('ckan', orgUnit))
+
         return destination.fireAndForget('/feed/Organization', data)
         .then ((result) => console.log(`[${data['name']}] OK`, result))
         .catch (err => console.log(`[${data['name']}] ERR ${err}`))
@@ -60,6 +65,8 @@ function loadDatasetProducer (xfer, workingPath, destinationUrl) {
             return null
         }
         const file = fileList[index]
+        xfer.inject_hash_and_source('ckan', file)
+
         const data = JSON.parse(fs.readFileSync(workingPath + "/" + 'packages' + '/' + file))['result']
         data['tags'] = data['tags'].map(tag => tag.name)
         index++

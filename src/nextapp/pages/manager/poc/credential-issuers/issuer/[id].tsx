@@ -31,9 +31,11 @@ import NextLink from 'next/link';
 
 import { styles } from '@/shared/styles/devportal.css';
 
-import graphql from '@/shared/services/graphql';
+import graphql from '@/shared/services/graphql'
+import toArray from '@/shared/services/toarray'
 
 import NameValue from '@/components/name-value';
+import YamlViewer from '@/components/yaml-viewer'
 
 import { ButtonGroup, Input, Textarea, Flex, useToast } from '@chakra-ui/react';
 
@@ -41,48 +43,25 @@ import { useAppContext } from '@/pages/context';
 
 import AuthorizationSection from './authorization';
 
-// @ts-ignore
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// @ts-ignore
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-// import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import yamlfmt from 'react-syntax-highlighter/dist/esm/languages/hljs/yaml';
-// //import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
-
-// SyntaxHighlighter.registerLanguage('yaml', yamlfmt);
-
-// import SyntaxHighlighter from 'react-syntax-highlighter';
-// import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-
-const YamlViewer = ({ doc }) => {
-  return <SyntaxHighlighter language="yaml">{doc}</SyntaxHighlighter>;
-};
-
 const UpdateIssuer = () => {
-  const context = useAppContext();
-  const [{ state, data }, setState] = useState({
-    state: 'loading',
-    data: null,
-  });
-  const fetch = () => {
-    const {
-      router: {
-        pathname,
-        query: { id },
-      },
-    } = context;
-    if (context['router'] != null && id) {
-      graphql(GET_ISSUER, { id: id })
-        .then(({ data }) => {
-          setState({ state: 'loaded', data });
-        })
-        .catch((err) => {
-          setState({ state: 'error', data: null });
-        });
-    }
-  };
-  useEffect(fetch, [context]);
+    const context = useAppContext()
+    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
+    const fetch = () => {
+        const { router: { pathname, query: { id } } } = context
+        if (context['router'] != null && id) {
+            graphql(GET_ISSUER, { id : id })
+            .then(({ data }) => {
+                toArray (data.allCredentialIssuers[0], ['availableScopes', 'clientRoles'])
+                setState({ state: 'loaded', data });
+            })
+            .catch((err) => {
+                setState({ state: 'error', data: null });
+            });
+        }
+    };
+    useEffect(fetch, [context]);
+
+    const issuer = (data != null ? data.allCredentialIssuers[0] : null)
 
   const issuer = data ? data.allCredentialIssuers[0] : null;
 

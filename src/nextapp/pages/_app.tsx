@@ -29,7 +29,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     if (router?.pathname.startsWith('/manager')) {
       return 'manager';
     }
-
+    if (router?.pathname.startsWith('/platform')) {
+        return 'platform';
+      }
+  
     return 'devportal';
   }, [router]);
 

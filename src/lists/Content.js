@@ -36,6 +36,13 @@ module.exports = {
       type: Text,
       isRequired: false,
     },
+    tags: {
+        type: Text,
+        isRequired: true,
+        adminConfig: {
+            isReadOnly: false
+        }
+    },    
     slug: {
       type: Slug,
       generate: ({ resolvedData }) => slugify(resolvedData.title).toLowerCase(),

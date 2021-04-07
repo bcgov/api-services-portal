@@ -103,6 +103,7 @@ export const GET_ENVIRONMENT = gql`
       name
       active
       flow
+      appId
       product {
         name
         organization {

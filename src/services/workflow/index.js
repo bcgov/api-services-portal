@@ -31,6 +31,7 @@ const assert = require('assert').strict;
 
 const {
   deleteRecord,
+  deleteRecords,
   lookupApplication,
   lookupServices,
   lookupProductEnvironmentServices,
@@ -52,8 +53,10 @@ const { registerApiKey } = require('./kong-api-key')
 
 const {v4: uuidv4} = require('uuid');
 
+const kcadmin = require('../kcadmin');
 const kong = require('../kong');
 const feeder = require('../feeder');
+const Tasked = require('../tasked')
 
 const isBlank = (val => val == null || typeof(val) == 'undefined' || val == "")
 
@@ -300,19 +303,27 @@ const wfDeleteAccess = async (context, operation, keys) => {
     if ('application' in keys) {
         const applicationId = keys.application
 
-        await deleteRecord(context, 'AccessRequest', { application: { id: applicationId }}, ['id'])
-        .then((app) => deleteRecord(context, 'ServiceAccess', { application: { id: applicationId }}, ['id', 'consumer { id }', 'productEnvironment { credentialIssuer { id } }'])
-            .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
-                .then((con) => kongApi.deleteConsumer(con.kongConsumerId)
-                    .then((async () => {
-                        const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
-                        const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
-                        // Need extra privilege to delete clients!
-                        return await deleteClientRegistration(openid.issuer, token, con.customId)
-                    }))
-                )
-            )
+        /*
+        */
+        // const tasks = new Tasked(process.env.WORKING_PATH)
+        // .add('AccessRequest', async (ctx, v) => { deleteRecords(context, 'AccessRequest', { application: { id: applicationId }}, true, ['id']) })
+        // .add('task2', async (ctx, v) => { return { answer: ctx.task1.out}}, 'goodbye')
+        // .add('task3', async () => true, 'hi')
+        // await tasks.start()
+
+        await deleteRecords(context, 'AccessRequest', { application: { id: applicationId }}, true, ['id'])
+        .then((app) => deleteRecords(context, 'ServiceAccess', { application: { id: applicationId }}, true, ['id'])
+            // .then((svc) => svc != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id'])
+            //     .then((con) => svc != null && kongApi.deleteConsumer(svc.consumer.extForeignKey)
+            //         .then((async () => {
+            //             const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
+            //             const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+            //             const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+            //             // Need extra privilege to delete clients!
+            //             return await deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
+            //         }))
+            //     )
+            // )
         )
 
     } else {
@@ -325,10 +336,13 @@ const wfDeleteAccess = async (context, operation, keys) => {
 
         const flow = svc.productEnvironment.flow
 
-        await deleteRecord(context, 'AccessRequest', { serviceAccess: { id: serviceAccessId }}, ['id'])
-        svc.consumer != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'kongConsumerId', 'customId'])
+        // const tasks = new Tasked(process.env.WORKING_PATH)
+        // .add('AccessRequest', async (ctx, v) => { deleteRecords(context, 'AccessRequest', { application: { id: applicationId }}, true, ['id']) })
 
-        svc.consumer != null && kongApi.deleteConsumer(svc.consumer.kongConsumerId)
+        await deleteRecord(context, 'AccessRequest', { serviceAccess: { id: serviceAccessId }}, ['id'])
+        svc.consumer != null && deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, ['id', 'extForeignKey', 'customId'])
+
+        svc.consumer != null && kongApi.deleteConsumer(svc.consumer.extForeignKey)
                 .then((async () => {
                     if (flow == "client-credentials") {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
@@ -361,75 +375,77 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
 
             // If the authentication part hasn't been done, do it now
             if (requestDetails.serviceAccess == null) {
+                assert.strictEqual(requestDetails.serviceAccess == null, false, 'Service Access is Missing!')
 
-                const appId = requestDetails.application == null ? null : requestDetails.application.appId
 
-                const clientRoles = 'clientRoles' in controls ? controls['clientRoles'] : [] // get them from the Product (Environment?)
+                // const appId = requestDetails.application == null ? null : requestDetails.application.appId
 
-                const credentialReference = {}
+                // const clientRoles = 'clientRoles' in controls ? controls['clientRoles'] : [] // get them from the Product (Environment?)
 
-                const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
-                const clientId = appId + '-' + requestDetails.productEnvironment.appId
-                const consumerType = requestDetails.application == null ? 'user' : 'client'
+                // const credentialReference = {}
 
-                const nickname = appId
+                // const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+                // const clientId = appId + '-' + requestDetails.productEnvironment.appId
+                // const consumerType = requestDetails.application == null ? 'user' : 'client'
 
-                var consumerPK = null
-                var kongConsumerPK = null
+                // const nickname = appId
 
-                if (flow == 'client-credentials') {
+                // var consumerPK = null
+                // var kongConsumerPK = null
 
-                    // Find the credential issuer and based on its type, go do the appropriate action
-                    const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+                // if (flow == 'client-credentials') {
 
-                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                //     // Find the credential issuer and based on its type, go do the appropriate action
+                //     const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
 
-                    // token is NULL if 'iat'
-                    // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
-                    // issuer.initialAccessToken if 'iat'
-                    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+                //     const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
 
-                    // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
+                //     // token is NULL if 'iat'
+                //     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
+                //     // issuer.initialAccessToken if 'iat'
+                //     const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
-                    // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-                    const client = await clientRegistration(openid.issuer, token, clientId, uuidv4())
-                    assert.strictEqual(client.clientId, clientId)
-                    credentialReference['clientId'] = clientId
-                    credentialReference['registrationAccessToken'] = client.registrationAccessToken
+                //     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
-                    const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
-                    consumerPK = await addKongConsumer(context, nickname, clientId, consumer.id)
-                    kongConsumerPK = consumer.id
-                } else if (flow == 'kong-api-key-acl') {
-                    // kong consumer could already exist - create if doesn't exist
-                    const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
-                    const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
-                    credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
-                    credentialReference['keyAuthId'] = apiKey.keyAuthPK
+                //     // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
+                //     const client = await clientRegistration(openid.issuer, token, clientId, uuidv4())
+                //     assert.strictEqual(client.clientId, clientId)
+                //     credentialReference['clientId'] = clientId
+                //     credentialReference['registrationAccessToken'] = client.registrationAccessToken
 
-                    consumerPK = await addKongConsumer(context, nickname, clientId, consumer.id)
-                    kongConsumerPK = consumer.id
-                } else if (flow == 'authorization-code' && consumerType == 'user') {
-                    // lookup consumerPK and kongConsumerPK
-                    // they need to already exist or create (?)
-                    credentialReference = {}
-                    // acl could be enabled here
+                //     const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
+                //     consumerPK = await addKongConsumer(context, nickname, clientId, consumer.id)
+                //     kongConsumerPK = consumer.id
+                // } else if (flow == 'kong-api-key-acl') {
+                //     // kong consumer could already exist - create if doesn't exist
+                //     const consumer = await kongApi.createOrGetConsumer (nickname, clientId)
+                //     const apiKey = await kongApi.addKeyAuthToConsumer (consumer.id)
+                //     credentialReference['apiKey'] = require('crypto').createHash('sha1').update(apiKey.apiKey).digest('base64')
+                //     credentialReference['keyAuthId'] = apiKey.keyAuthPK
+
+                //     consumerPK = await addKongConsumer(context, nickname, clientId, consumer.id)
+                //     kongConsumerPK = consumer.id
+                // } else if (flow == 'authorization-code' && consumerType == 'user') {
+                //     // lookup consumerPK and kongConsumerPK
+                //     // they need to already exist or create (?)
+                //     credentialReference = {}
+                //     // acl could be enabled here
                     
-                } else {
-                    throw Error(`Flow ${flow} for ${consumerType} not supported at this time`)
-                }
+                // } else {
+                //     throw Error(`Flow ${flow} for ${consumerType} not supported at this time`)
+                // }
 
-                // Create a ServiceAccess record
-                const serviceAccessName = appId + "." + extraIdentifier + "." + requestDetails.productEnvironment.name
-                const serviceAccessPK = await addServiceAccess(context, serviceAccessName, false, aclEnabled, consumerType, null, clientRoles, consumerPK, requestDetails.productEnvironment, requestDetails.application )
+                // // Create a ServiceAccess record
+                // const serviceAccessName = appId + "." + extraIdentifier + "." + requestDetails.productEnvironment.name
+                // const serviceAccessPK = await addServiceAccess(context, serviceAccessName, false, aclEnabled, consumerType, null, clientRoles, consumerPK, requestDetails.productEnvironment, requestDetails.application )
 
-                // Link new Credential to Access Request for reference and mark active
-                await linkCredRefsToServiceAccess(context, serviceAccessPK, credentialReference)
+                // // Link new Credential to Access Request for reference and mark active
+                // await linkCredRefsToServiceAccess(context, serviceAccessPK, credentialReference)
 
             } else {
                 // get the KongConsumerPK 
                 // kongConsumerPK 
-                kongConsumerPK = requestDetails.serviceAccess.consumer.kongConsumerId
+                kongConsumerPK = requestDetails.serviceAccess.consumer.extForeignKey
 
 
                 // update the clientRegistration to 'active'
@@ -446,8 +462,26 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
                     // issuer.initialAccessToken if 'iat'
                     const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
-
+                    const controls = JSON.parse(requestDetails.controls)
+                    const defaultClientScopes = controls.defaultClientScopes;
+                    
                     await updateClientRegistration (openid.issuer, token, clientId, {enabled: true})
+
+                    // https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
+                    console.log("S = "+openid.issuer.indexOf('/realms'))
+                    const baseUrl = openid.issuer.substr(0, openid.issuer.indexOf('/realms'))
+                    const realm = openid.issuer.substr(openid.issuer.lastIndexOf('/')+1)
+                    console.log("B="+baseUrl+", R="+realm)
+
+                    // Only valid for 'managed' client registration
+                    const kcadminApi = new kcadmin(baseUrl, realm)
+                    await kcadminApi.login(issuer.clientId, issuer.clientSecret)
+                    await kcadminApi.syncAndApply (clientId, defaultClientScopes, [])
+
+                    await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
+                } else if (flow == 'kong-api-key-acl') {
+                    // update the Consumer ACL group membership to requestDetails.productEnvironment.appId
+                    await kongApi.updateConsumerACLByNamespace (kongConsumerPK, ns, [ requestDetails.productEnvironment.appId ], true)
 
                     await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
                 }
@@ -455,7 +489,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
 
             // Update the ACLs in Kong if they are enabled
             if (aclEnabled && 'aclGroups' in controls) {
-                await kongApi.updateConsumerACLByNamespace(kongConsumerPK, ns, controls.aclGroups)
+                await kongApi.updateConsumerACLByNamespace(kongConsumerPK, ns, controls.aclGroups, true)
             }
 
             // Add the controls to the Consumer for Services/Routes that are part of the ProductEnvironment
@@ -472,7 +506,7 @@ const wfApply = async (context, operation, existingItem, originalInput, updatedI
                     ]
                 }
             */
-            // Convert the service or route name to a kongServiceId or kongRouteId
+            // Convert the service or route name to a extForeignKey
             if ('plugins' in controls) {
                 for ( const plugin of controls.plugins) {
                     // assume the service and route IDs are Kong's unique IDs for them

@@ -86,10 +86,14 @@ function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
             return null
         }
         const item = items[index]
+        xfer.inject_hash_and_source('kong', item)
+
         index++
         const nm = item[name]
 
         item['plugins'] = findAllPlugins (allPlugins, type, item['id'], type == 'consumer')
+
+        item['plugins'].map(plugin => xfer.inject_hash_and_source('kong', plugin))
 
         // if (item['plugins'].length == 0) {
         //     return new Promise ((resolve, reject) => resolve())
@@ -137,6 +141,7 @@ function loadGroupsProducer (xfer, destinationUrl, feedPath) {
             return null
         }
         const item = items[index]
+        xfer.inject_hash_and_source('kong', item)
         if (item['namespace'] == null) {
             item['namespace'] = 'unknown'
         }
