@@ -96,7 +96,23 @@ module.exports = {
                     return result
                 },
                 access: EnforcementPoint,
+              },
+              {
+                schema: 'updateGatewayConsumerPlugin(id: ID!, pluginPK: ID!, plugin: String!): GatewayConsumer',
+                resolver: async (item, args, context, info, { query, access }) => {
+                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
+                    const kongApi = new kong(process.env.KONG_URL)
+                    const feederApi = new feeder(process.env.FEEDER_URL)
+
+                    const kongConsumerPK = await lookupKongConsumerId (context, args.id)
+                    
+                    const result = await kongApi.updateConsumerPlugin (kongConsumerPK, pluginPK, JSON.parse(args.plugin) )
+
+                    await feederApi.forceSync('kong', 'consumer', kongConsumerPK)
+                    return result
+                },
+                access: EnforcementPoint,
               }
             ]
           });

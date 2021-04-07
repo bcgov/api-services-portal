@@ -196,10 +196,10 @@ module.exports = {
     const express = require('express')
     app.use(express.json())
 
-    app.get('/', (req, res, next) => {
-        console.log(req.path)
-        req.path == "/" ? res.redirect('/home') : next()
-    })
+    // app.get('/', (req, res, next) => {
+    //     console.log(req.path)
+    //     req.path == "/" ? res.redirect('/home') : next()
+    // })
     app.put('/feed/:entity', (req, res) => PutFeed(keystone, req, res).catch (err => {
         console.log(err)
         res.status(400).json({result: 'error', error: "" + err})
