@@ -7387,6 +7387,7 @@ export type Mutation = {
   deleteUsers?: Maybe<Array<Maybe<User>>>;
   createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
+  deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
   authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
   unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
@@ -8208,8 +8209,14 @@ export type MutationCreateGatewayConsumerPluginArgs = {
 
 export type MutationUpdateGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
-  pluginPK: Scalars['ID'];
+  pluginExtForeignKey: Scalars['String'];
   plugin: Scalars['String'];
+};
+
+
+export type MutationDeleteGatewayConsumerPluginArgs = {
+  id: Scalars['ID'];
+  pluginExtForeignKey: Scalars['String'];
 };
 
 

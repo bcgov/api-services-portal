@@ -200,13 +200,16 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
       { flow === 'kong-api-key-acl' && (
         <Box p={2}>
             <Alert status="warning" mb={4}>
-                <AlertIcon />
-                <AlertTitle mr={2}>Plugins Configuration</AlertTitle>
-                <AlertDescription>
-                    <Box>Ensure that services associated with this environment have the following acl plugin:</Box>
-                    <YamlViewer doc={`plugins:\n- name: acl\n  config:\n    allow: [ ${data.appId} ]`}/>
+                
+                <AlertIcon boxSize="40px" mr={5} />
+                <Box flex="1">
+                    <AlertTitle mt={4} mb={1} fontSize="lg">Plugin Configuration</AlertTitle>
+                    <AlertDescription maxWidth="sm">
+                        <Box>Ensure that services associated with this environment have the following plugins:</Box>
+                        <YamlViewer doc={`plugins:\n- name: key-auth\n  tags: [ ns.${data.product.namespace} ]\n  protocols: [ http, https ]\n  config:\n    key_names: ["X-API-KEY"]\n    run_on_preflight: true\n    hide_credentials: true\n    key_in_body: false\n- name: acl\n  tags: [ ns.${data.product.namespace} ]\n  config:\n    hide_groups_header: true\n    allow: [ ${data.appId} ]`}/>
 
-                </AlertDescription>
+                    </AlertDescription>
+                </Box>
             </Alert>
         </Box>
 

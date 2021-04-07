@@ -106,6 +106,7 @@ export const GET_ENVIRONMENT = gql`
       appId
       product {
         name
+        namespace
         organization {
           name
         }

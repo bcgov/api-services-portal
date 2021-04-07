@@ -16,6 +16,7 @@ export const GET_LIST = `
             }
             productEnvironment {
               name
+              flow
               credentialIssuer {
                 instruction
               }
@@ -42,6 +43,7 @@ export const GET_LIST = `
             }
             productEnvironment {
                 name
+                flow
                 credentialIssuer {
                   instruction
                 }

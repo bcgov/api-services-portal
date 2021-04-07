@@ -167,6 +167,9 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
+                    console.log(JSON.stringify(issuer, null, 5))
+                    resolvedServices ? console.log("VALIDATION FAILURE(resolvedServices) " + JSON.stringify(resolvedServices, null, 5)) :
+                    console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
