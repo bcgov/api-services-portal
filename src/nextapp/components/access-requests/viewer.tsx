@@ -81,7 +81,7 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
     }
   );
 
-  const plugins = [] // JSON.parse(data?.AccessRequest.controls).plugins     data?.AccessRequest.productEnvironment.
+  const plugins = []; // JSON.parse(data?.AccessRequest.controls).plugins     data?.AccessRequest.productEnvironment.
 
   return (
     <>
@@ -110,6 +110,7 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
           <ModalBody>
             <Flex>
               <ControlsList
+                consumerId={index.toString()}
                 data={plugins ?? []}
               />
               <Box flex={1}>
