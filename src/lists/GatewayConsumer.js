@@ -98,7 +98,7 @@ module.exports = {
                 access: EnforcementPoint,
               },
               {
-                schema: 'updateGatewayConsumerPlugin(id: ID!, pluginPK: ID!, plugin: String!): GatewayConsumer',
+                schema: 'updateGatewayConsumerPlugin(id: ID!, pluginExtForeignKey: String!, plugin: String!): GatewayConsumer',
                 resolver: async (item, args, context, info, { query, access }) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
@@ -107,13 +107,30 @@ module.exports = {
 
                     const kongConsumerPK = await lookupKongConsumerId (context, args.id)
                     
-                    const result = await kongApi.updateConsumerPlugin (kongConsumerPK, pluginPK, JSON.parse(args.plugin) )
+                    const result = await kongApi.updateConsumerPlugin (kongConsumerPK, args.pluginExtForeignKey, JSON.parse(args.plugin) )
 
                     await feederApi.forceSync('kong', 'consumer', kongConsumerPK)
                     return result
                 },
                 access: EnforcementPoint,
-              }
+              },
+              {
+                schema: 'deleteGatewayConsumerPlugin(id: ID!, pluginExtForeignKey: String!): GatewayConsumer',
+                resolver: async (item, args, context, info, { query, access }) => {
+                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
+
+                    const kongApi = new kong(process.env.KONG_URL)
+                    const feederApi = new feeder(process.env.FEEDER_URL)
+
+                    const kongConsumerPK = await lookupKongConsumerId (context, args.id)
+                    
+                    const result = await kongApi.deleteConsumerPlugin (kongConsumerPK, args.pluginExtForeignKey )
+
+                    await feederApi.forceSync('kong', 'consumer', kongConsumerPK)
+                    return result
+                },
+                access: EnforcementPoint,
+              }              
             ]
           });
       }
