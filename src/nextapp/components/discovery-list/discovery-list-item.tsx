@@ -94,7 +94,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
           </GridItem>
           <GridItem>
             <Heading size="xs">Security Class</Heading>
-            <Text fontSize="sm">{data.dataset.securityClass}</Text>
+            <Text fontSize="sm">{data.dataset.security_class}</Text>
           </GridItem>
           <GridItem>
             <Heading size="xs">First Published</Heading>

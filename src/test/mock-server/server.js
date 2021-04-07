@@ -408,7 +408,7 @@ const server = mockServer(schemaWithMocks, {
     private: casual.coin_flip,
     tags: JSON.stringify(casual.array_of_words(random(2, 8))),
     contacts: casual.word,
-    securityClass: casual.random_element([
+    security_class: casual.random_element([
       'LOW-PUBLIC',
       'HIGH-PUBLIC',
       'LOW-INTERNAL',
