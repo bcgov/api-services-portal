@@ -340,11 +340,33 @@ const server = mockServer(schemaWithMocks, {
   }),
   GatewayPlugin: () => {
     const random = sample([true, false, null]);
+    const name = casual.random_element(['rate-limiting', 'ip-restriction']);
     const isService = random === true;
     const isRoute = random === false;
+    let config = '';
+
+    switch (name) {
+      case 'rate-limiting':
+        config = JSON.stringify({
+          second: 12,
+          minute: 12,
+          hour: 12,
+          day: 12,
+          policy: casual.random_element(['local', 'redis']),
+        });
+        break;
+      case 'ip-restriction':
+        config = JSON.stringify({
+          allow: ['2.2.2.2'],
+          deny: null,
+        });
+        break;
+      default:
+        config = '';
+    }
 
     return {
-      name: casual.random_element(['rate-limiting', 'ip-restriction']),
+      name,
       service: () => {
         if (isService) {
           return { id: casual.uuid };
@@ -358,7 +380,7 @@ const server = mockServer(schemaWithMocks, {
         return null;
       },
       kongPluginId: casual.uuid,
-      config: casual.word,
+      config,
       tags: JSON.stringify(casual.array_of_words(2)),
     };
   },

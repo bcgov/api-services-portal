@@ -267,6 +267,13 @@ input AccessRequestsCreateInput {
   data: AccessRequestCreateInput
 }
 
+input BlobRelateToOneInput {
+  create: BlobCreateInput
+  connect: BlobWhereUniqueInput
+  disconnect: BlobWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 type Activity {
   _label_: String
   id: ID!
@@ -279,6 +286,7 @@ type Activity {
   refId: String
   namespace: String
   actor: User
+  blob: Blob
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -436,6 +444,8 @@ input ActivityWhereInput {
   namespace_not_in: [String]
   actor: UserWhereInput
   actor_is_null: Boolean
+  blob: BlobWhereInput
+  blob_is_null: Boolean
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -479,6 +489,8 @@ enum SortActivitiesBy {
   namespace_DESC
   actor_ASC
   actor_DESC
+  blob_ASC
+  blob_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -495,6 +507,7 @@ input ActivityUpdateInput {
   refId: String
   namespace: String
   actor: UserRelateToOneInput
+  blob: BlobRelateToOneInput
 }
 
 input ActivitiesUpdateInput {
@@ -512,6 +525,7 @@ input ActivityCreateInput {
   refId: String
   namespace: String
   actor: UserRelateToOneInput
+  blob: BlobRelateToOneInput
 }
 
 input ActivitiesCreateInput {
@@ -661,12 +675,28 @@ input AlertsCreateInput {
   data: AlertCreateInput
 }
 
+input OrganizationRelateToOneInput {
+  create: OrganizationCreateInput
+  connect: OrganizationWhereUniqueInput
+  disconnect: OrganizationWhereUniqueInput
+  disconnectAll: Boolean
+}
+
+input OrganizationUnitRelateToOneInput {
+  create: OrganizationUnitCreateInput
+  connect: OrganizationUnitWhereUniqueInput
+  disconnect: OrganizationUnitWhereUniqueInput
+  disconnectAll: Boolean
+}
+
 type Application {
   _label_: String
   id: ID!
   appId: String
   name: String
   description: String
+  organization: Organization
+  organizationUnit: OrganizationUnit
   owner: User
   updatedAt: DateTime
   createdAt: DateTime
@@ -733,6 +763,10 @@ input ApplicationWhereInput {
   description_not_ends_with_i: String
   description_in: [String]
   description_not_in: [String]
+  organization: OrganizationWhereInput
+  organization_is_null: Boolean
+  organizationUnit: OrganizationUnitWhereInput
+  organizationUnit_is_null: Boolean
   owner: UserWhereInput
   owner_is_null: Boolean
   updatedAt: DateTime
@@ -766,6 +800,10 @@ enum SortApplicationsBy {
   name_DESC
   description_ASC
   description_DESC
+  organization_ASC
+  organization_DESC
+  organizationUnit_ASC
+  organizationUnit_DESC
   owner_ASC
   owner_DESC
   updatedAt_ASC
@@ -778,6 +816,8 @@ input ApplicationUpdateInput {
   appId: String
   name: String
   description: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
   owner: UserRelateToOneInput
 }
 
@@ -790,11 +830,97 @@ input ApplicationCreateInput {
   appId: String
   name: String
   description: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
   owner: UserRelateToOneInput
 }
 
 input ApplicationsCreateInput {
   data: ApplicationCreateInput
+}
+
+type Blob {
+  _label_: String
+  id: ID!
+  ref: String
+  blob: String
+}
+
+input BlobWhereInput {
+  AND: [BlobWhereInput]
+  OR: [BlobWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  ref: String
+  ref_not: String
+  ref_contains: String
+  ref_not_contains: String
+  ref_starts_with: String
+  ref_not_starts_with: String
+  ref_ends_with: String
+  ref_not_ends_with: String
+  ref_i: String
+  ref_not_i: String
+  ref_contains_i: String
+  ref_not_contains_i: String
+  ref_starts_with_i: String
+  ref_not_starts_with_i: String
+  ref_ends_with_i: String
+  ref_not_ends_with_i: String
+  ref_in: [String]
+  ref_not_in: [String]
+  blob: String
+  blob_not: String
+  blob_contains: String
+  blob_not_contains: String
+  blob_starts_with: String
+  blob_not_starts_with: String
+  blob_ends_with: String
+  blob_not_ends_with: String
+  blob_i: String
+  blob_not_i: String
+  blob_contains_i: String
+  blob_not_contains_i: String
+  blob_starts_with_i: String
+  blob_not_starts_with_i: String
+  blob_ends_with_i: String
+  blob_not_ends_with_i: String
+  blob_in: [String]
+  blob_not_in: [String]
+}
+
+input BlobWhereUniqueInput {
+  id: ID!
+}
+
+enum SortBlobsBy {
+  id_ASC
+  id_DESC
+  ref_ASC
+  ref_DESC
+  blob_ASC
+  blob_DESC
+}
+
+input BlobUpdateInput {
+  ref: String
+  blob: String
+}
+
+input BlobsUpdateInput {
+  id: ID!
+  data: BlobUpdateInput
+}
+
+input BlobCreateInput {
+  ref: String
+  blob: String
+}
+
+input BlobsCreateInput {
+  data: BlobCreateInput
 }
 
 type Content {
@@ -806,6 +932,7 @@ type Content {
   externalLink: String
   githubRepository: String
   readme: String
+  tags: String
   slug: String
   order: Int
   isComplete: Boolean
@@ -926,6 +1053,24 @@ input ContentWhereInput {
   readme_not_ends_with_i: String
   readme_in: [String]
   readme_not_in: [String]
+  tags: String
+  tags_not: String
+  tags_contains: String
+  tags_not_contains: String
+  tags_starts_with: String
+  tags_not_starts_with: String
+  tags_ends_with: String
+  tags_not_ends_with: String
+  tags_i: String
+  tags_not_i: String
+  tags_contains_i: String
+  tags_not_contains_i: String
+  tags_starts_with_i: String
+  tags_not_starts_with_i: String
+  tags_ends_with_i: String
+  tags_not_ends_with_i: String
+  tags_in: [String]
+  tags_not_in: [String]
   slug: String
   slug_not: String
   slug_contains: String
@@ -975,6 +1120,8 @@ enum SortContentsBy {
   githubRepository_DESC
   readme_ASC
   readme_DESC
+  tags_ASC
+  tags_DESC
   slug_ASC
   slug_DESC
   order_ASC
@@ -990,6 +1137,7 @@ input ContentUpdateInput {
   externalLink: String
   githubRepository: String
   readme: String
+  tags: String
   slug: String
   order: Int
   isComplete: Boolean
@@ -1007,6 +1155,7 @@ input ContentCreateInput {
   externalLink: String
   githubRepository: String
   readme: String
+  tags: String
   slug: String
   order: Int
   isComplete: Boolean
@@ -1403,38 +1552,28 @@ input CredentialIssuersCreateInput {
   data: CredentialIssuerCreateInput
 }
 
-input OrganizationRelateToOneInput {
-  create: OrganizationCreateInput
-  connect: OrganizationWhereUniqueInput
-  disconnect: OrganizationWhereUniqueInput
-  disconnectAll: Boolean
-}
-
-input OrganizationUnitRelateToOneInput {
-  create: OrganizationUnitCreateInput
-  connect: OrganizationUnitWhereUniqueInput
-  disconnect: OrganizationUnitWhereUniqueInput
-  disconnectAll: Boolean
-}
-
 type Dataset {
   _label_: String
   id: ID!
   name: String
-  bcdc_id: String
   sector: String
   license_title: String
   view_audience: String
+  download_audience: String
+  record_publish_date: String
+  security_class: String
   private: Boolean
   tags: String
   contacts: String
   organization: Organization
   organizationUnit: OrganizationUnit
-  securityClass: String
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input DatasetWhereInput {
@@ -1462,24 +1601,6 @@ input DatasetWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  bcdc_id: String
-  bcdc_id_not: String
-  bcdc_id_contains: String
-  bcdc_id_not_contains: String
-  bcdc_id_starts_with: String
-  bcdc_id_not_starts_with: String
-  bcdc_id_ends_with: String
-  bcdc_id_not_ends_with: String
-  bcdc_id_i: String
-  bcdc_id_not_i: String
-  bcdc_id_contains_i: String
-  bcdc_id_not_contains_i: String
-  bcdc_id_starts_with_i: String
-  bcdc_id_not_starts_with_i: String
-  bcdc_id_ends_with_i: String
-  bcdc_id_not_ends_with_i: String
-  bcdc_id_in: [String]
-  bcdc_id_not_in: [String]
   sector: String
   sector_not: String
   sector_contains: String
@@ -1534,6 +1655,60 @@ input DatasetWhereInput {
   view_audience_not_ends_with_i: String
   view_audience_in: [String]
   view_audience_not_in: [String]
+  download_audience: String
+  download_audience_not: String
+  download_audience_contains: String
+  download_audience_not_contains: String
+  download_audience_starts_with: String
+  download_audience_not_starts_with: String
+  download_audience_ends_with: String
+  download_audience_not_ends_with: String
+  download_audience_i: String
+  download_audience_not_i: String
+  download_audience_contains_i: String
+  download_audience_not_contains_i: String
+  download_audience_starts_with_i: String
+  download_audience_not_starts_with_i: String
+  download_audience_ends_with_i: String
+  download_audience_not_ends_with_i: String
+  download_audience_in: [String]
+  download_audience_not_in: [String]
+  record_publish_date: String
+  record_publish_date_not: String
+  record_publish_date_contains: String
+  record_publish_date_not_contains: String
+  record_publish_date_starts_with: String
+  record_publish_date_not_starts_with: String
+  record_publish_date_ends_with: String
+  record_publish_date_not_ends_with: String
+  record_publish_date_i: String
+  record_publish_date_not_i: String
+  record_publish_date_contains_i: String
+  record_publish_date_not_contains_i: String
+  record_publish_date_starts_with_i: String
+  record_publish_date_not_starts_with_i: String
+  record_publish_date_ends_with_i: String
+  record_publish_date_not_ends_with_i: String
+  record_publish_date_in: [String]
+  record_publish_date_not_in: [String]
+  security_class: String
+  security_class_not: String
+  security_class_contains: String
+  security_class_not_contains: String
+  security_class_starts_with: String
+  security_class_not_starts_with: String
+  security_class_ends_with: String
+  security_class_not_ends_with: String
+  security_class_i: String
+  security_class_not_i: String
+  security_class_contains_i: String
+  security_class_not_contains_i: String
+  security_class_starts_with_i: String
+  security_class_not_starts_with_i: String
+  security_class_ends_with_i: String
+  security_class_not_ends_with_i: String
+  security_class_in: [String]
+  security_class_not_in: [String]
   private: Boolean
   private_not: Boolean
   tags: String
@@ -1576,24 +1751,6 @@ input DatasetWhereInput {
   organization_is_null: Boolean
   organizationUnit: OrganizationUnitWhereInput
   organizationUnit_is_null: Boolean
-  securityClass: String
-  securityClass_not: String
-  securityClass_contains: String
-  securityClass_not_contains: String
-  securityClass_starts_with: String
-  securityClass_not_starts_with: String
-  securityClass_ends_with: String
-  securityClass_not_ends_with: String
-  securityClass_i: String
-  securityClass_not_i: String
-  securityClass_contains_i: String
-  securityClass_not_contains_i: String
-  securityClass_starts_with_i: String
-  securityClass_not_starts_with_i: String
-  securityClass_ends_with_i: String
-  securityClass_not_ends_with_i: String
-  securityClass_in: [String]
-  securityClass_not_in: [String]
   notes: String
   notes_not: String
   notes_contains: String
@@ -1650,6 +1807,60 @@ input DatasetWhereInput {
   catalogContent_not_in: [String]
   isInCatalog: Boolean
   isInCatalog_not: Boolean
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
 }
 
 input DatasetWhereUniqueInput {
@@ -1661,14 +1872,18 @@ enum SortDatasetsBy {
   id_DESC
   name_ASC
   name_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
   sector_ASC
   sector_DESC
   license_title_ASC
   license_title_DESC
   view_audience_ASC
   view_audience_DESC
+  download_audience_ASC
+  download_audience_DESC
+  record_publish_date_ASC
+  record_publish_date_DESC
+  security_class_ASC
+  security_class_DESC
   private_ASC
   private_DESC
   tags_ASC
@@ -1679,8 +1894,6 @@ enum SortDatasetsBy {
   organization_DESC
   organizationUnit_ASC
   organizationUnit_DESC
-  securityClass_ASC
-  securityClass_DESC
   notes_ASC
   notes_DESC
   title_ASC
@@ -1689,24 +1902,34 @@ enum SortDatasetsBy {
   catalogContent_DESC
   isInCatalog_ASC
   isInCatalog_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
 }
 
 input DatasetUpdateInput {
   name: String
-  bcdc_id: String
   sector: String
   license_title: String
   view_audience: String
+  download_audience: String
+  record_publish_date: String
+  security_class: String
   private: Boolean
   tags: String
   contacts: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
-  securityClass: String
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input DatasetsUpdateInput {
@@ -1716,20 +1939,24 @@ input DatasetsUpdateInput {
 
 input DatasetCreateInput {
   name: String
-  bcdc_id: String
   sector: String
   license_title: String
   view_audience: String
+  download_audience: String
+  record_publish_date: String
+  security_class: String
   private: Boolean
   tags: String
   contacts: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
-  securityClass: String
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input DatasetsCreateInput {
@@ -1949,7 +2176,6 @@ type GatewayConsumer {
   id: ID!
   username: String
   customId: String
-  kongConsumerId: String
   aclGroups: String
   namespace: String
   tags: String
@@ -1969,6 +2195,9 @@ type GatewayConsumer {
     first: Int
     skip: Int
   ): _QueryMeta
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2016,24 +2245,6 @@ input GatewayConsumerWhereInput {
   customId_not_ends_with_i: String
   customId_in: [String]
   customId_not_in: [String]
-  kongConsumerId: String
-  kongConsumerId_not: String
-  kongConsumerId_contains: String
-  kongConsumerId_not_contains: String
-  kongConsumerId_starts_with: String
-  kongConsumerId_not_starts_with: String
-  kongConsumerId_ends_with: String
-  kongConsumerId_not_ends_with: String
-  kongConsumerId_i: String
-  kongConsumerId_not_i: String
-  kongConsumerId_contains_i: String
-  kongConsumerId_not_contains_i: String
-  kongConsumerId_starts_with_i: String
-  kongConsumerId_not_starts_with_i: String
-  kongConsumerId_ends_with_i: String
-  kongConsumerId_not_ends_with_i: String
-  kongConsumerId_in: [String]
-  kongConsumerId_not_in: [String]
   aclGroups: String
   aclGroups_not: String
   aclGroups_contains: String
@@ -2091,6 +2302,60 @@ input GatewayConsumerWhereInput {
   plugins_every: GatewayPluginWhereInput
   plugins_some: GatewayPluginWhereInput
   plugins_none: GatewayPluginWhereInput
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2120,8 +2385,6 @@ enum SortGatewayConsumersBy {
   username_DESC
   customId_ASC
   customId_DESC
-  kongConsumerId_ASC
-  kongConsumerId_DESC
   aclGroups_ASC
   aclGroups_DESC
   namespace_ASC
@@ -2130,6 +2393,12 @@ enum SortGatewayConsumersBy {
   tags_DESC
   plugins_ASC
   plugins_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -2139,11 +2408,13 @@ enum SortGatewayConsumersBy {
 input GatewayConsumerUpdateInput {
   username: String
   customId: String
-  kongConsumerId: String
   aclGroups: String
   namespace: String
   tags: String
   plugins: GatewayPluginRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayConsumersUpdateInput {
@@ -2154,11 +2425,13 @@ input GatewayConsumersUpdateInput {
 input GatewayConsumerCreateInput {
   username: String
   customId: String
-  kongConsumerId: String
   aclGroups: String
   namespace: String
   tags: String
   plugins: GatewayPluginRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayConsumersCreateInput {
@@ -2169,8 +2442,10 @@ type GatewayGroup {
   _label_: String
   id: ID!
   name: String
-  extRefId: String
   namespace: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2200,24 +2475,6 @@ input GatewayGroupWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  extRefId: String
-  extRefId_not: String
-  extRefId_contains: String
-  extRefId_not_contains: String
-  extRefId_starts_with: String
-  extRefId_not_starts_with: String
-  extRefId_ends_with: String
-  extRefId_not_ends_with: String
-  extRefId_i: String
-  extRefId_not_i: String
-  extRefId_contains_i: String
-  extRefId_not_contains_i: String
-  extRefId_starts_with_i: String
-  extRefId_not_starts_with_i: String
-  extRefId_ends_with_i: String
-  extRefId_not_ends_with_i: String
-  extRefId_in: [String]
-  extRefId_not_in: [String]
   namespace: String
   namespace_not: String
   namespace_contains: String
@@ -2236,6 +2493,60 @@ input GatewayGroupWhereInput {
   namespace_not_ends_with_i: String
   namespace_in: [String]
   namespace_not_in: [String]
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2263,10 +2574,14 @@ enum SortGatewayGroupsBy {
   id_DESC
   name_ASC
   name_DESC
-  extRefId_ASC
-  extRefId_DESC
   namespace_ASC
   namespace_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -2275,8 +2590,10 @@ enum SortGatewayGroupsBy {
 
 input GatewayGroupUpdateInput {
   name: String
-  extRefId: String
   namespace: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayGroupsUpdateInput {
@@ -2286,8 +2603,10 @@ input GatewayGroupsUpdateInput {
 
 input GatewayGroupCreateInput {
   name: String
-  extRefId: String
   namespace: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayGroupsCreateInput {
@@ -2305,12 +2624,14 @@ type GatewayPlugin {
   _label_: String
   id: ID!
   name: String
-  kongPluginId: String
   namespace: String
   tags: String
   config: String
   service: GatewayService
   route: GatewayRoute
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2340,24 +2661,6 @@ input GatewayPluginWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  kongPluginId: String
-  kongPluginId_not: String
-  kongPluginId_contains: String
-  kongPluginId_not_contains: String
-  kongPluginId_starts_with: String
-  kongPluginId_not_starts_with: String
-  kongPluginId_ends_with: String
-  kongPluginId_not_ends_with: String
-  kongPluginId_i: String
-  kongPluginId_not_i: String
-  kongPluginId_contains_i: String
-  kongPluginId_not_contains_i: String
-  kongPluginId_starts_with_i: String
-  kongPluginId_not_starts_with_i: String
-  kongPluginId_ends_with_i: String
-  kongPluginId_not_ends_with_i: String
-  kongPluginId_in: [String]
-  kongPluginId_not_in: [String]
   namespace: String
   namespace_not: String
   namespace_contains: String
@@ -2416,6 +2719,60 @@ input GatewayPluginWhereInput {
   service_is_null: Boolean
   route: GatewayRouteWhereInput
   route_is_null: Boolean
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2443,8 +2800,6 @@ enum SortGatewayPluginsBy {
   id_DESC
   name_ASC
   name_DESC
-  kongPluginId_ASC
-  kongPluginId_DESC
   namespace_ASC
   namespace_DESC
   tags_ASC
@@ -2455,6 +2810,12 @@ enum SortGatewayPluginsBy {
   service_DESC
   route_ASC
   route_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -2463,12 +2824,14 @@ enum SortGatewayPluginsBy {
 
 input GatewayPluginUpdateInput {
   name: String
-  kongPluginId: String
   namespace: String
   tags: String
   config: String
   service: GatewayServiceRelateToOneInput
   route: GatewayRouteRelateToOneInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayPluginsUpdateInput {
@@ -2478,12 +2841,14 @@ input GatewayPluginsUpdateInput {
 
 input GatewayPluginCreateInput {
   name: String
-  kongPluginId: String
   namespace: String
   tags: String
   config: String
   service: GatewayServiceRelateToOneInput
   route: GatewayRouteRelateToOneInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayPluginsCreateInput {
@@ -2494,7 +2859,6 @@ type GatewayRoute {
   _label_: String
   id: ID!
   name: String
-  kongRouteId: String
   namespace: String
   methods: String
   paths: String
@@ -2517,6 +2881,9 @@ type GatewayRoute {
     first: Int
     skip: Int
   ): _QueryMeta
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2546,24 +2913,6 @@ input GatewayRouteWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  kongRouteId: String
-  kongRouteId_not: String
-  kongRouteId_contains: String
-  kongRouteId_not_contains: String
-  kongRouteId_starts_with: String
-  kongRouteId_not_starts_with: String
-  kongRouteId_ends_with: String
-  kongRouteId_not_ends_with: String
-  kongRouteId_i: String
-  kongRouteId_not_i: String
-  kongRouteId_contains_i: String
-  kongRouteId_not_contains_i: String
-  kongRouteId_starts_with_i: String
-  kongRouteId_not_starts_with_i: String
-  kongRouteId_ends_with_i: String
-  kongRouteId_not_ends_with_i: String
-  kongRouteId_in: [String]
-  kongRouteId_not_in: [String]
   namespace: String
   namespace_not: String
   namespace_contains: String
@@ -2659,6 +3008,60 @@ input GatewayRouteWhereInput {
   plugins_every: GatewayPluginWhereInput
   plugins_some: GatewayPluginWhereInput
   plugins_none: GatewayPluginWhereInput
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2686,8 +3089,6 @@ enum SortGatewayRoutesBy {
   id_DESC
   name_ASC
   name_DESC
-  kongRouteId_ASC
-  kongRouteId_DESC
   namespace_ASC
   namespace_DESC
   methods_ASC
@@ -2702,6 +3103,12 @@ enum SortGatewayRoutesBy {
   service_DESC
   plugins_ASC
   plugins_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -2710,7 +3117,6 @@ enum SortGatewayRoutesBy {
 
 input GatewayRouteUpdateInput {
   name: String
-  kongRouteId: String
   namespace: String
   methods: String
   paths: String
@@ -2718,6 +3124,9 @@ input GatewayRouteUpdateInput {
   tags: String
   service: GatewayServiceRelateToOneInput
   plugins: GatewayPluginRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayRoutesUpdateInput {
@@ -2727,7 +3136,6 @@ input GatewayRoutesUpdateInput {
 
 input GatewayRouteCreateInput {
   name: String
-  kongRouteId: String
   namespace: String
   methods: String
   paths: String
@@ -2735,6 +3143,9 @@ input GatewayRouteCreateInput {
   tags: String
   service: GatewayServiceRelateToOneInput
   plugins: GatewayPluginRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayRoutesCreateInput {
@@ -2752,7 +3163,6 @@ type GatewayService {
   _label_: String
   id: ID!
   name: String
-  kongServiceId: String
   namespace: String
   host: String
   tags: String
@@ -2789,6 +3199,9 @@ type GatewayService {
     skip: Int
   ): _QueryMeta
   environment: Environment
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -2818,24 +3231,6 @@ input GatewayServiceWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
-  kongServiceId: String
-  kongServiceId_not: String
-  kongServiceId_contains: String
-  kongServiceId_not_contains: String
-  kongServiceId_starts_with: String
-  kongServiceId_not_starts_with: String
-  kongServiceId_ends_with: String
-  kongServiceId_not_ends_with: String
-  kongServiceId_i: String
-  kongServiceId_not_i: String
-  kongServiceId_contains_i: String
-  kongServiceId_not_contains_i: String
-  kongServiceId_starts_with_i: String
-  kongServiceId_not_starts_with_i: String
-  kongServiceId_ends_with_i: String
-  kongServiceId_not_ends_with_i: String
-  kongServiceId_in: [String]
-  kongServiceId_not_in: [String]
   namespace: String
   namespace_not: String
   namespace_contains: String
@@ -2898,6 +3293,60 @@ input GatewayServiceWhereInput {
   plugins_none: GatewayPluginWhereInput
   environment: EnvironmentWhereInput
   environment_is_null: Boolean
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -2925,8 +3374,6 @@ enum SortGatewayServicesBy {
   id_DESC
   name_ASC
   name_DESC
-  kongServiceId_ASC
-  kongServiceId_DESC
   namespace_ASC
   namespace_DESC
   host_ASC
@@ -2939,6 +3386,12 @@ enum SortGatewayServicesBy {
   plugins_DESC
   environment_ASC
   environment_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -2947,13 +3400,15 @@ enum SortGatewayServicesBy {
 
 input GatewayServiceUpdateInput {
   name: String
-  kongServiceId: String
   namespace: String
   host: String
   tags: String
   routes: GatewayRouteRelateToManyInput
   plugins: GatewayPluginRelateToManyInput
   environment: EnvironmentRelateToOneInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayServicesUpdateInput {
@@ -2963,13 +3418,15 @@ input GatewayServicesUpdateInput {
 
 input GatewayServiceCreateInput {
   name: String
-  kongServiceId: String
   namespace: String
   host: String
   tags: String
   routes: GatewayRouteRelateToManyInput
   plugins: GatewayPluginRelateToManyInput
   environment: EnvironmentRelateToOneInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input GatewayServicesCreateInput {
@@ -3579,6 +4036,8 @@ type Namespace {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  organization: Organization
+  organizationUnit: OrganizationUnit
   members(
     where: MemberRoleWhereInput
     search: String
@@ -3680,6 +4139,10 @@ input NamespaceWhereInput {
   extRefId_not_ends_with_i: String
   extRefId_in: [String]
   extRefId_not_in: [String]
+  organization: OrganizationWhereInput
+  organization_is_null: Boolean
+  organizationUnit: OrganizationUnitWhereInput
+  organizationUnit_is_null: Boolean
   members_every: MemberRoleWhereInput
   members_some: MemberRoleWhereInput
   members_none: MemberRoleWhereInput
@@ -3720,6 +4183,10 @@ enum SortNamespacesBy {
   permDomains_DESC
   extRefId_ASC
   extRefId_DESC
+  organization_ASC
+  organization_DESC
+  organizationUnit_ASC
+  organizationUnit_DESC
   members_ASC
   members_DESC
   updatedBy_ASC
@@ -3737,6 +4204,8 @@ input NamespaceUpdateInput {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
   members: MemberRoleRelateToManyInput
 }
 
@@ -3750,6 +4219,8 @@ input NamespaceCreateInput {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  organization: OrganizationRelateToOneInput
+  organizationUnit: OrganizationUnitRelateToOneInput
   members: MemberRoleRelateToManyInput
 }
 
@@ -3770,7 +4241,6 @@ type Organization {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
   orgUnits(
@@ -3789,6 +4259,9 @@ type Organization {
     first: Int
     skip: Int
   ): _QueryMeta
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationWhereInput {
@@ -3852,24 +4325,6 @@ input OrganizationWhereInput {
   title_not_ends_with_i: String
   title_in: [String]
   title_not_in: [String]
-  bcdc_id: String
-  bcdc_id_not: String
-  bcdc_id_contains: String
-  bcdc_id_not_contains: String
-  bcdc_id_starts_with: String
-  bcdc_id_not_starts_with: String
-  bcdc_id_ends_with: String
-  bcdc_id_not_ends_with: String
-  bcdc_id_i: String
-  bcdc_id_not_i: String
-  bcdc_id_contains_i: String
-  bcdc_id_not_contains_i: String
-  bcdc_id_starts_with_i: String
-  bcdc_id_not_starts_with_i: String
-  bcdc_id_ends_with_i: String
-  bcdc_id_not_ends_with_i: String
-  bcdc_id_in: [String]
-  bcdc_id_not_in: [String]
   tags: String
   tags_not: String
   tags_contains: String
@@ -3909,6 +4364,60 @@ input OrganizationWhereInput {
   orgUnits_every: OrganizationUnitWhereInput
   orgUnits_some: OrganizationUnitWhereInput
   orgUnits_none: OrganizationUnitWhereInput
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
 }
 
 input OrganizationWhereUniqueInput {
@@ -3924,24 +4433,30 @@ enum SortOrganizationsBy {
   sector_DESC
   title_ASC
   title_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
   tags_ASC
   tags_DESC
   description_ASC
   description_DESC
   orgUnits_ASC
   orgUnits_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
 }
 
 input OrganizationUpdateInput {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
   orgUnits: OrganizationUnitRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationsUpdateInput {
@@ -3953,10 +4468,12 @@ input OrganizationCreateInput {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
   orgUnits: OrganizationUnitRelateToManyInput
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationsCreateInput {
@@ -3969,9 +4486,11 @@ type OrganizationUnit {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationUnitWhereInput {
@@ -4035,24 +4554,6 @@ input OrganizationUnitWhereInput {
   title_not_ends_with_i: String
   title_in: [String]
   title_not_in: [String]
-  bcdc_id: String
-  bcdc_id_not: String
-  bcdc_id_contains: String
-  bcdc_id_not_contains: String
-  bcdc_id_starts_with: String
-  bcdc_id_not_starts_with: String
-  bcdc_id_ends_with: String
-  bcdc_id_not_ends_with: String
-  bcdc_id_i: String
-  bcdc_id_not_i: String
-  bcdc_id_contains_i: String
-  bcdc_id_not_contains_i: String
-  bcdc_id_starts_with_i: String
-  bcdc_id_not_starts_with_i: String
-  bcdc_id_ends_with_i: String
-  bcdc_id_not_ends_with_i: String
-  bcdc_id_in: [String]
-  bcdc_id_not_in: [String]
   tags: String
   tags_not: String
   tags_contains: String
@@ -4089,6 +4590,60 @@ input OrganizationUnitWhereInput {
   description_not_ends_with_i: String
   description_in: [String]
   description_not_in: [String]
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
 }
 
 input OrganizationUnitWhereUniqueInput {
@@ -4104,21 +4659,27 @@ enum SortOrganizationUnitsBy {
   sector_DESC
   title_ASC
   title_DESC
-  bcdc_id_ASC
-  bcdc_id_DESC
   tags_ASC
   tags_DESC
   description_ASC
   description_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
 }
 
 input OrganizationUnitUpdateInput {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationUnitsUpdateInput {
@@ -4130,9 +4691,11 @@ input OrganizationUnitCreateInput {
   name: String
   sector: String
   title: String
-  bcdc_id: String
   tags: String
   description: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
 }
 
 input OrganizationUnitsCreateInput {
@@ -5264,6 +5827,24 @@ type Query {
     skip: Int
   ): _QueryMeta
   _ApplicationsMeta: _ListMeta
+  allBlobs(
+    where: BlobWhereInput
+    search: String
+    sortBy: [SortBlobsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Blob]
+  Blob(where: BlobWhereUniqueInput!): Blob
+  _allBlobsMeta(
+    where: BlobWhereInput
+    search: String
+    sortBy: [SortBlobsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _BlobsMeta: _ListMeta
   allContents(
     where: ContentWhereInput
     search: String
@@ -5674,6 +6255,12 @@ type Mutation {
   updateApplications(data: [ApplicationsUpdateInput]): [Application]
   deleteApplication(id: ID!): Application
   deleteApplications(ids: [ID!]): [Application]
+  createBlob(data: BlobCreateInput): Blob
+  createBlobs(data: [BlobsCreateInput]): [Blob]
+  updateBlob(id: ID!, data: BlobUpdateInput): Blob
+  updateBlobs(data: [BlobsUpdateInput]): [Blob]
+  deleteBlob(id: ID!): Blob
+  deleteBlobs(ids: [ID!]): [Blob]
   createContent(data: ContentCreateInput): Content
   createContents(data: [ContentsCreateInput]): [Content]
   updateContent(id: ID!, data: ContentUpdateInput): Content

@@ -29,12 +29,14 @@ type ControlsPayload = {
 };
 
 interface IpRestrictionProps {
+  data?: any;
   id: string;
   mode: 'edit' | 'create';
   queryKey: QueryKey;
 }
 
 const IpRestriction: React.FC<IpRestrictionProps> = ({
+  data,
   id,
   mode,
   queryKey,
@@ -44,6 +46,12 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
     api(FULFILL_REQUEST, payload)
   );
   const toast = useToast();
+  const config = data?.config
+    ? JSON.parse(data.config)
+    : {
+        allow: [],
+      };
+
   const onSubmit = async (formData: FormData) => {
     try {
       const controls: ControlsPayload = {
@@ -92,10 +100,17 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       onSubmit={onSubmit}
       title="IP Restrition"
     >
-      <ControlTypeSelect />
+      <ControlTypeSelect
+        serviceId={data?.service?.id}
+        routeId={data?.route?.id}
+      />
       <FormControl isRequired id="allow">
         <FormLabel>Allowed IPs</FormLabel>
-        <Input variant="bc-input" name="allow" />
+        <Input
+          variant="bc-input"
+          name="allow"
+          defaultValue={config.allow?.join(',')}
+        />
         <FormHelperText>
           Comma-separated list, i.e. 1.1.1.1, 0.0.0.0
         </FormHelperText>

@@ -127,6 +127,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
                       id={d.id}
                       queryKey={['consumer', d.id]}
                       mode="edit"
+                      data={d}
                     />
                   )}
                   {d.name === 'rate-limiting' && (
@@ -134,6 +135,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
                       id={d.id}
                       queryKey={['consumer', d.id]}
                       mode="edit"
+                      data={d}
                     />
                   )}
                   <IconButton
