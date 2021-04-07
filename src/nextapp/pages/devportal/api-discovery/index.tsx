@@ -73,7 +73,7 @@ const query = gql`
         notes
         sector
         license_title
-        securityClass
+        security_class
         view_audience
         tags
         organization {

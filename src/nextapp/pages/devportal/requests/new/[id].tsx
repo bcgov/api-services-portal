@@ -145,7 +145,7 @@ const NewRequestsPage: React.FC<
                 <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
                 <Box>
                   <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allProducts.find((d) => d.id === id)?.name}
+                    {data.allProducts.find((d) => d.id === id)?.name ?? 'API'}
                   </Text>
                 </Box>
               </VStack>
@@ -168,10 +168,10 @@ const NewRequestsPage: React.FC<
               </Box>
               <Box flex={1}>
                 <Heading size="sm" mb={3}>
-                  OR select an application to consume the API
+                  Select an application to consume the API
                 </Heading>
                 <Select name="applicationId">
-                  <option value="">Available Application</option>
+                  <option value="">No Application Selected</option>
                   {data.allApplications.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name}

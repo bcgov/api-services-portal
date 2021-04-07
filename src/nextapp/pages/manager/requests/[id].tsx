@@ -2,6 +2,7 @@ import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
   Box,
+  Button,
   Container,
   Heading,
   Tabs,
@@ -15,6 +16,8 @@ import {
   Grid,
   GridItem,
   HStack,
+  ButtonGroup,
+  Icon,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import format from 'date-fns/format';
@@ -28,32 +31,7 @@ import ControlsList from '@/components/controls-list';
 import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
-
-const query = gql`
-  query GetAccessRequest($id: ID!) {
-    AccessRequest(where: { id: $id }) {
-      id
-      name
-      isApproved
-      isIssued
-      controls
-      createdAt
-      requestor {
-        name
-        username
-      }
-      application {
-        name
-      }
-      productEnvironment {
-        name
-        product {
-          name
-        }
-      }
-    }
-  }
-`;
+import RequestActions from '@/components/request-actions';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -99,6 +77,7 @@ const AccessRequestPage: React.FC<
   const { plugins } = data?.AccessRequest?.controls
     ? JSON.parse(data.AccessRequest.controls)
     : [];
+
   return data.AccessRequest ? (
     <>
       <Head>
@@ -106,6 +85,9 @@ const AccessRequestPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
+          actions={
+            !isComplete && <RequestActions id={id} queryKey={queryKey} />
+          }
           title={
             <Box as="span" display="flex" alignItems="center">
               <ModelIcon model="request" size="sm" mr={2} />
@@ -119,7 +101,6 @@ const AccessRequestPage: React.FC<
               fontSize="1rem"
               px={2}
               mr={4}
-              variant="outline"
             >
               {isComplete ? 'Complete' : 'Pending'}
             </Badge>
@@ -144,6 +125,7 @@ const AccessRequestPage: React.FC<
           <TabList mb={6}>
             <Tab>Controls</Tab>
             <Tab>Activity</Tab>
+            <Tab>Comments</Tab>
           </TabList>
           <Grid templateColumns="repeat(12, 1fr)">
             <GridItem colSpan={8}>
@@ -159,7 +141,7 @@ const AccessRequestPage: React.FC<
                     <IpRestriction id={id} mode="create" queryKey={queryKey} />
                     <RateLimiting id={id} mode="create" queryKey={queryKey} />
                   </HStack>
-                  <ControlsList data={plugins} />
+                  <ControlsList consumerId={id} data={plugins} />
                 </TabPanel>
                 <TabPanel p={0}>
                   {/* {data?.AccessRequest.activity.map((a) => (
@@ -186,6 +168,7 @@ const AccessRequestPage: React.FC<
                     </Box>
                   ))} */}
                 </TabPanel>
+                <TabPanel>Coming Soon...</TabPanel>
               </TabPanels>
             </GridItem>
             <GridItem as="aside" colStart={10} colSpan={3}>
@@ -223,3 +206,29 @@ const AccessRequestPage: React.FC<
 };
 
 export default AccessRequestPage;
+
+const query = gql`
+  query GetAccessRequest($id: ID!) {
+    AccessRequest(where: { id: $id }) {
+      id
+      name
+      isApproved
+      isIssued
+      controls
+      createdAt
+      requestor {
+        name
+        username
+      }
+      application {
+        name
+      }
+      productEnvironment {
+        name
+        product {
+          name
+        }
+      }
+    }
+  }
+`;

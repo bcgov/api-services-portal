@@ -184,9 +184,6 @@ const query = gql`
       id
       name
       active
-      consumer {
-        kongConsumerId
-      }
       application {
         appId
       }
