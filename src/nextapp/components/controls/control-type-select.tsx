@@ -15,12 +15,12 @@ import { GatewayRoute, GatewayService } from '@/shared/types/query.types';
 const query = gql`
   query GetControlContent {
     allGatewayRoutes {
-      id
       name
+      extForeignKey
     }
     allGatewayServices {
-      id
       name
+      extForeignKey
     }
   }
 `;
@@ -33,8 +33,8 @@ const ControlTypeSelect: React.FC = () => {
     { suspense: false }
   );
   const options:
-    | Pick<GatewayService, 'id' | 'name'>[]
-    | Pick<GatewayRoute, 'id' | 'name'>[] = React.useMemo(() => {
+    | Pick<GatewayService, 'extForeignKey' | 'name'>[]
+    | Pick<GatewayRoute, 'extForeignKey' | 'name'>[] = React.useMemo(() => {
     if (isLoading) return [];
 
     switch (control) {
@@ -74,7 +74,7 @@ const ControlTypeSelect: React.FC = () => {
           variant="bc-input"
         >
           {options.map((o) => (
-            <option key={o.id} value={o.id}>
+            <option key={o.extForeignKey} value={o.extForeignKey}>
               {o.name}
             </option>
           ))}

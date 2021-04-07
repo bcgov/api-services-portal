@@ -7,6 +7,10 @@ import {
   Heading,
   Icon,
   Link,
+  SimpleGrid,
+  Stack,
+  Tag,
+  TagLabel,
   Text,
   Wrap,
   WrapItem,
@@ -71,12 +75,34 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
           <Heading as="dt" size="sm">
             Organization
           </Heading>
-          <Text as="dd">{data.organization.title}</Text>
+          <Text as="dd">{data.organization?.title}</Text>
           <Heading as="dt" size="sm">
             Description
           </Heading>
           <Text as="dd">
             {data.description ?? <Text as="em">No description added</Text>}
+            {data.dataset != null && (
+                <>
+                                                <div><b><a href={`https://catalogue.data.gov.bc.ca/dataset/${data.dataset.name}`} target="_blank" rel="noreferrer">{data.dataset.title} <Badge>BCDC</Badge></a></b></div>
+                                                <div>
+                                                    {data.dataset.notes.length > 175 ? data.dataset.notes.substring(0,175) + "..." : data.dataset.notes}
+                                                </div>
+                                                <SimpleGrid columns={2}>
+                                                    {[{l:'Sector',f:'sector'},{l:'License',f:'license_title'},{l:'Who can Access?',f:'view_audience'},{l:'Security Class',f:'security_class'},{l:'First Published?',f:'record_publish_date'}].map(rec => (
+                                                        <>
+                                                            <div style={{textAlign:'right', paddingRight:'20px'}}><b>{rec.l}</b></div>
+                                                            <div>{data.dataset[rec.f]}</div>
+                                                        </>
+                                                    ))}  
+                
+                                                </SimpleGrid>       
+                                                <Stack direction="row" wrap="wrap" spacing={1} shouldWrapChildren={true}>{Array.isArray(JSON.parse(data.dataset.tags)) ? JSON.parse(data.dataset.tags).map(p => (
+                                                    <Tag key={p} size="sm" colorScheme="orange" borderRadius="5px">
+                                                        <TagLabel>{p}</TagLabel>
+                                                    </Tag>
+                                                )) : false}</Stack>
+                    </>
+            )}
           </Text>
         </Box>
       </Box>

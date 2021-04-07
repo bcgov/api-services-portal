@@ -18,6 +18,7 @@ import { FULFILL_REQUEST } from './queries';
 
 type ControlsPayload = {
   name: string;
+  protocols: string[];
   route?: {
     id: string;
   };
@@ -25,10 +26,10 @@ type ControlsPayload = {
     id: string;
   };
   config: {
-    second: string;
-    minute: string;
-    hour: string;
-    day: string;
+    second: number;
+    minute: number;
+    hour: number;
+    day: number;
     policy: string;
   };
 };
@@ -49,15 +50,17 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
     api(FULFILL_REQUEST, payload)
   );
   const toast = useToast();
+  const numOrNull = ((value: FormDataEntryValue) => Number(value) == 0 ? null : Number(value))
   const onSubmit = async (formData: FormData) => {
     try {
       const controls: ControlsPayload = {
         name: 'rate-limiting',
+        protocols: ['http', 'https'],
         config: {
-          second: formData.get('second') as string,
-          minute: formData.get('minute') as string,
-          hour: formData.get('hour') as string,
-          day: formData.get('day') as string,
+          second: numOrNull(formData.get('second')) as number,
+          minute: numOrNull(formData.get('minute')) as number,
+          hour: numOrNull(formData.get('hour')) as number,
+          day: numOrNull(formData.get('day')) as number,
           policy: formData.get('policy') as string,
         },
       };
@@ -122,7 +125,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       </HStack>
       <FormControl id="policy">
         <FormLabel>Policy</FormLabel>
-        <Select name="redis_database" variant="bc-input">
+        <Select name="policy" variant="bc-input">
           <option value="local">Local</option>
           <option value="redis">Redis</option>
         </Select>

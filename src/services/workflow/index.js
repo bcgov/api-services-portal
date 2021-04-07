@@ -199,7 +199,6 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
     const kongApi = new kong(process.env.KONG_URL)
     const feederApi = new feeder(process.env.FEEDER_URL)
 
-
     if (originalInput.credential == "NEW") {
         const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 

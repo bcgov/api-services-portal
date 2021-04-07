@@ -63,8 +63,7 @@ const UpdateIssuer = () => {
 
     const issuer = (data != null ? data.allCredentialIssuers[0] : null)
 
-  const issuer = data ? data.allCredentialIssuers[0] : null;
-
+  
   if (issuer != null) {
     issuer.availableScopes = [];
     issuer.clientRoles = [];

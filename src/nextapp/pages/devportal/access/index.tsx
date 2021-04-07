@@ -50,7 +50,7 @@ const ApiAccessPage: React.FC<
 
         <PageHeader title="API Access" />
 
-        <Box mt={5}>{data.allAccessRequests.map((d) => d.id)}</Box>
+        <Box mt={5}>{data.allAccessRequests?.map((d) => d.id)}</Box>
       </Container>
     </>
   );
@@ -69,7 +69,7 @@ const query = gql`
       name
       active
       consumer {
-        kongConsumerId
+        extForeignKey
       }
       application {
         appId

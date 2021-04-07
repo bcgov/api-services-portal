@@ -24,7 +24,7 @@ type ControlsPayload = {
     id: string;
   };
   config: {
-    allow: string;
+    allow: string[];
   };
 };
 
@@ -49,7 +49,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       const controls: ControlsPayload = {
         name: 'ip-restriction',
         config: {
-          allow: formData.get('allow') as string,
+          allow: [formData.get('allow') as string],
         },
       };
 

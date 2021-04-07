@@ -35,7 +35,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
 
   return (
     <>
-      {data.map((d) => (
+      {data?.map((d) => (
         <Box
           key={d.id}
           mb={4}

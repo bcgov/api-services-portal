@@ -74,7 +74,7 @@ const ApplicationsPage: React.FC<
     },
     { suspense: false }
   );
-  const userId = get(data, 'allTemporaryIdentities[0].id');
+  const userId = get(data, 'allTemporaryIdentities[0].userId');
 
   return (
     <>
@@ -185,7 +185,7 @@ const query = gql`
       name
       active
       consumer {
-        kongConsumerId
+        extForeignKey
       }
       application {
         appId

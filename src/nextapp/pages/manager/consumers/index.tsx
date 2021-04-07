@@ -189,7 +189,7 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
-    allGatewayConsumers(first: 20, sortBy: updatedAt_DESC) {
+    allGatewayConsumers(first: 200, sortBy: updatedAt_DESC) {
       id
       username
       aclGroups

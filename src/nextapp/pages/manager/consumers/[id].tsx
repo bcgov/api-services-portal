@@ -22,7 +22,7 @@ import ModelIcon from '@/components/model-icon/model-icon';
 
 const query = gql`
   query GetConsumer($id: ID!) {
-    GatewayConsumer(where: { id: $id }) {
+    getGatewayConsumerPlugins(id: $id) {
       id
       username
       aclGroups
@@ -85,10 +85,12 @@ const ConsumersPage: React.FC<
     { suspense: false }
   );
 
-  return (
+  const consumer = data?.getGatewayConsumerPlugins
+
+  return consumer && (
     <>
       <Head>
-        <title>{`Consumers | ${data?.GatewayConsumer.username}`}</title>
+        <title>{`Consumers | ${consumer.username}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -96,7 +98,7 @@ const ConsumersPage: React.FC<
           title={
             <Box as="span" display="flex" alignItems="center">
               <ModelIcon model="consumer" size="sm" mr={2} />
-              {data?.GatewayConsumer.username}
+              {consumer.username}
             </Box>
           }
         >
@@ -105,13 +107,13 @@ const ConsumersPage: React.FC<
               Namespace
             </Text>
             <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-              {data.GatewayConsumer.namespace ?? '-'}
+              {consumer.namespace ?? '-'}
             </Text>
             <Text as="span" ml={3} mr={1} fontWeight="bold">
               Kong Consumer ID
             </Text>
             <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-              {data?.GatewayConsumer.extForeignKey}
+              {consumer.extForeignKey}
             </Text>
           </Text>
         </PageHeader>
@@ -131,7 +133,7 @@ const ConsumersPage: React.FC<
           <RateLimiting id={id} queryKey={queryKey} mode="create" />
         </HStack>
         <ControlsList
-          data={data?.GatewayConsumer.plugins.filter(
+          data={consumer.plugins.filter(
             (p) => p.route || p.service
           )}
         />

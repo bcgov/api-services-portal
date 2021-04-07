@@ -195,10 +195,60 @@ module.exports = {
         console.log("lookupEnvironmentAndApplicationByAccessRequest " + JSON.stringify(result))
         return result.data.allAccessRequests[0]
     },
+
+
+    lookupConsumerPlugins: async function lookupConsumerPlugins (context, id) {
+        const result = await context.executeGraphQL({
+            query: `query GetConsumerPlugins($id: ID!) {
+                        allGatewayConsumers(where: {id: $id}) {
+                            id
+                            username
+                            aclGroups
+                            customId
+                            extForeignKey
+                            namespace
+                            plugins {
+                              id
+                              name
+                              config
+                              service {
+                                id
+                                name
+                              }
+                              route {
+                                id
+                                name
+                              }
+                            }
+                            tags
+                            createdAt
+                      
+                        }
+                    }`,
+            variables: { id: id },
+        })
+        console.log("GetConsumerPlugins " + JSON.stringify(result))
+        return result.data.allGatewayConsumers[0]
+    },
+
+    lookupKongConsumerId: async function (context, id) {
+        const result = await context.executeGraphQL({
+            query: `query FindConsumerByUsername($where: GatewayConsumerWhereInput) {
+                        allGatewayConsumers(where: $where) {
+                            extForeignKey
+                        }
+                    }`,
+            variables: { where: { id: id } },
+        })
+        console.log("lookupKongConsumerId [" + id+ "] " + JSON.stringify(result))
+        assert.strictEqual(result.data.allGatewayConsumers.length, 1, "Unexpected data returned for Consumer lookup")
+        return result.data.allGatewayConsumers[0].extForeignKey
+    }, 
+
     lookupKongConsumerIdByName: async function (context, name) {
         assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Consumer Username")
         const result = await context.executeGraphQL({
-            query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
+            query: `query FindConsumerByUsername($where: GatewayConsumerWhereInput) {
                         allGatewayConsumers(where: $where) {
                             extForeignKey
                         }
@@ -213,7 +263,7 @@ module.exports = {
     lookupKongConsumerByCustomId: async function (context, name) {
         assert.strictEqual(name != null && typeof name != 'undefined' && name != "", true, "Invalid Consumer CustomId")
         const result = await context.executeGraphQL({
-            query: `query FindConsumerByUsername($where: ConsumerWhereInput) {
+            query: `query FindConsumerByUsername($where: GatewayConsumerWhereInput) {
                         allGatewayConsumers(where: $where) {
                             id
                             extForeignKey
