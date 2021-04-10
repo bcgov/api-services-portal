@@ -9,6 +9,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
+import AccessList from '@/components/access-list';
 
 const queryKey = 'allAccessRequests';
 
@@ -50,7 +51,9 @@ const ApiAccessPage: React.FC<
 
         <PageHeader title="API Access" />
 
-        <Box mt={5}>{data.allAccessRequests.map((d) => d.id)}</Box>
+        <Box mt={5}>
+          <AccessList data={data.allServiceAccesses} queryKey={queryKey} />
+        </Box>
       </Container>
     </>
   );

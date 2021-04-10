@@ -422,7 +422,7 @@ const server = mockServer(schemaWithMocks, {
   }),
   AccessRequest: () => ({
     name: 'Gateway Administration API FOR APSO_F APSO_L',
-    isApproved: true,
+    isApproved: casual.boolean,
     isIssued: true,
     isComplete: false,
     controls: JSON.stringify({
