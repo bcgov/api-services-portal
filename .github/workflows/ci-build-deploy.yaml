@@ -90,6 +90,14 @@ jobs:
         export PATH=$PATH:`pwd`/linux-amd64
 
         echo '
+        image:
+          registry: ${{ env.REGISTRY }}
+          repository: bcgov/aps-portal/mongodb
+          tag: 4.4-ea993071
+          pullPolicy: IfNotPresent
+          pullSecrets:
+            - dev-github-read-packages-creds
+
         auth:
             rootPassword: "s3cr3t"
 
