@@ -94,14 +94,14 @@ const NewRequestsPage: React.FC<
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
       };
-      await api(mutation, payload);
+      const result = await api(mutation, payload);
       client.invalidateQueries('allAccessRequests');
       toast({
         title: 'Request submitted',
         description: 'Check back to see if it has been accepted soon',
         status: 'success',
       });
-      router?.push('/devportal/access');
+      router?.push(`/devportal/poc/access/${result.createAccessRequest.id}`);
     } catch (err) {
       toast({
         title: 'Unable to make request',
