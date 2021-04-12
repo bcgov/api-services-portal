@@ -17,18 +17,7 @@ interface ControlTypeSelectProps {
   serviceId?: string;
 }
 
-const query = gql`
-  query GetControlContent {
-    allGatewayRoutes {
-      name
-      extForeignKey
-    }
-    allGatewayServices {
-      name
-      extForeignKey
-    }
-  }
-`;
+
 
 const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
   routeId,
@@ -100,12 +89,12 @@ export default ControlTypeSelect;
 const query = gql`
   query GetControlContent {
     allGatewayRoutes {
-      id
       name
+      extForeignKey
     }
     allGatewayServices {
-      id
       name
+      extForeignKey
     }
   }
 `;
