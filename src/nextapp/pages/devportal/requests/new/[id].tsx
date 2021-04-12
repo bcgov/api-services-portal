@@ -101,7 +101,8 @@ const NewRequestsPage: React.FC<
         description: 'Check back to see if it has been accepted soon',
         status: 'success',
       });
-      router?.push(`/devportal/poc/access/${result.createAccessRequest.id}`);
+      // ${result.createAccessRequest.id}
+      router?.push(`/devportal/poc/access/000`);
     } catch (err) {
       toast({
         title: 'Unable to make request',
