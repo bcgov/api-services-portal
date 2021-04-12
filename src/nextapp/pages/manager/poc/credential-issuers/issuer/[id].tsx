@@ -72,6 +72,7 @@ const UpdateIssuer = () => {
   };
   useEffect(fetch, [context]);
 
+  const issuer = data ? data.allCredentialIssuers[0] : null;
   
   if (issuer != null) {
     issuer.availableScopes = [];

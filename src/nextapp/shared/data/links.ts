@@ -14,13 +14,13 @@ const links: NavLink[] = [
   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
     name: 'API Discovery',
-    url: '/devportal/poc/api-discovery',
+    url: '/devportal/api-discovery',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },
   {
     name: 'API Access',
-    url: '/devportal/poc/access',
+    url: '/devportal/access',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },

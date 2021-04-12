@@ -51,18 +51,24 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
           <Heading isTruncated size="md" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
-            <Link
-              href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                data.dataset.name
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {data.dataset.name}
-            </Link>
-            <Badge color="bc-blue-alt" ml={2}>
-              BCDC
-            </Badge>
+            { data.dataset ? (
+                <>
+                    <Link
+                    href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
+                        data.dataset.name
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    >
+                    {data.dataset.name}
+                    </Link>
+                    <Badge color="bc-blue-alt" ml={2}>
+                    BCDC
+                    </Badge>
+                </>
+            ) : (
+                <span>{ data.name }</span>
+            )}
           </Heading>
         </Box>
         <NextLink href={`/devportal/requests/new/${data.id}`}>
@@ -72,6 +78,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         </NextLink>
       </Box>
       <Divider />
+      { data.dataset && (
       <Box p={4}>
         <Heading size="sm" mb={2}>
           {data.dataset.organization.title}
@@ -106,9 +113,10 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
           </GridItem>
         </Grid>
       </Box>
+      )}
       <Divider />
       <Flex p={4} bgColor="gray.50" justify="space-between">
-        <TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />
+        {data.dataset && (<TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />)}
         <Wrap spacing={2}>
           {data.environments.map((e) => (
             <WrapItem key={e.id}>
