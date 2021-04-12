@@ -122,7 +122,12 @@ for (_list of [
   'Todo',
   'User',
 ]) {
-  keystone.createList(_list, require('./lists/' + _list));
+  const list = require('./lists/' + _list)
+  if ('extensions' in list) {
+      console.log("Registering Extension!")
+      list.extensions.map (ext => ext(keystone))
+  }
+  keystone.createList(_list, list);
 }
 const strategyType = process.env.AUTH_STRATEGY || 'Password';
 console.log('Auth Strategy: ' + strategyType);
@@ -191,6 +196,10 @@ module.exports = {
     const express = require('express')
     app.use(express.json())
 
+    // app.get('/', (req, res, next) => {
+    //     console.log(req.path)
+    //     req.path == "/" ? res.redirect('/home') : next()
+    // })
     app.put('/feed/:entity', (req, res) => PutFeed(keystone, req, res).catch (err => {
         console.log(err)
         res.status(400).json({result: 'error', error: "" + err})

@@ -73,8 +73,9 @@ const query = gql`
         notes
         sector
         license_title
-        security_class
         view_audience
+        security_class
+        record_publish_date
         tags
         organization {
           title

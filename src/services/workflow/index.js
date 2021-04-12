@@ -167,6 +167,9 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
+                    console.log(JSON.stringify(issuer, null, 5))
+                    resolvedServices ? console.log("VALIDATION FAILURE(resolvedServices) " + JSON.stringify(resolvedServices, null, 5)) :
+                    console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
@@ -198,7 +201,6 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
 const wfRegenerateCredential = async (context, operation, existingItem, originalInput, updatedItem) => {
     const kongApi = new kong(process.env.KONG_URL)
     const feederApi = new feeder(process.env.FEEDER_URL)
-
 
     if (originalInput.credential == "NEW") {
         const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)

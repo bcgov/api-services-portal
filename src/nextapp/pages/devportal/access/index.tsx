@@ -71,6 +71,9 @@ const query = gql`
       id
       name
       active
+      consumer {
+        extForeignKey
+      }
       application {
         appId
       }

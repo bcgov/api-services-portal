@@ -140,6 +140,19 @@ module.exports = function (kongUrl) {
             }
         },
 
+        deleteConsumerPlugin: async function (consumerPK, pluginPK) {
+            await fetch(`${kongUrl}/consumers/${consumerPK}/plugins/${pluginPK}`, {
+                method: 'delete',
+                headers: { 
+                    'Content-Type': 'application/json' },
+            })
+            .then(checkStatus)
+            .catch (err => {
+                console.log("KONG CONSUMER PLUGIN DELETION " + err)
+                throw(err)
+            })
+        },        
+
         genKeyForConsumerKeyAuth: async function (consumerPK, keyAuthPK) {
             const { v4: uuidv4 } = require('uuid');
 
