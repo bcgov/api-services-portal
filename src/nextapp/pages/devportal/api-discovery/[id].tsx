@@ -5,34 +5,39 @@ import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
 import api, { useApi } from '@/shared/services/api';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
-import DiscoveryList from '@/components/discovery-list';
-
-const queryKey = ['allProducts', 'discovery'];
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params;
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
-    queryKey,
+    ['Product', id],
     async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        { id },
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
     props: {
+      id,
       dehydratedState: dehydrate(queryClient),
     },
   };
 };
 
-const ApiDiscoveryPage: React.FC = () => {
-  const { data } = useApi(queryKey, { query }, { suspense: false });
+const ApiPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ id }) => {
+  const { data } = useApi(['Product', id], { query }, { suspense: false });
 
   return (
     <>
@@ -40,22 +45,20 @@ const ApiDiscoveryPage: React.FC = () => {
         <title>API Program Services | API Discovery</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="Discover our APIs">
+        <PageHeader title={`API: ${data.Product?.name}`}>
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>
-        <Box mt={5}>
-          <DiscoveryList data={data.allProducts} />
-        </Box>
+        <Box mt={5}>Hi</Box>
       </Container>
     </>
   );
 };
 
-export default ApiDiscoveryPage;
+export default ApiPage;
 
 const query = gql`
-  query GetServices {
-    allProducts {
+  query GetProduct($id: ID!) {
+    Product(where: { id: $id }) {
       id
       name
       environments {
@@ -73,9 +76,8 @@ const query = gql`
         notes
         sector
         license_title
-        view_audience
         security_class
-        record_publish_date
+        view_audience
         tags
         organization {
           title

@@ -31,11 +31,11 @@ import NextLink from 'next/link';
 
 import { styles } from '@/shared/styles/devportal.css';
 
-import graphql from '@/shared/services/graphql'
-import toArray from '@/shared/services/toarray'
+import graphql from '@/shared/services/graphql';
+import toArray from '@/shared/services/toarray';
 
 import NameValue from '@/components/name-value';
-import YamlViewer from '@/components/yaml-viewer'
+import YamlViewer from '@/components/yaml-viewer';
 
 import { ButtonGroup, Input, Textarea, Flex, useToast } from '@chakra-ui/react';
 
@@ -44,24 +44,33 @@ import { useAppContext } from '@/pages/context';
 import AuthorizationSection from './authorization';
 
 const UpdateIssuer = () => {
-    const context = useAppContext()
-    const [{ state, data }, setState] = useState({ state: 'loading', data: null });
-    const fetch = () => {
-        const { router: { pathname, query: { id } } } = context
-        if (context['router'] != null && id) {
-            graphql(GET_ISSUER, { id : id })
-            .then(({ data }) => {
-                toArray (data.allCredentialIssuers[0], ['availableScopes', 'clientRoles'])
-                setState({ state: 'loaded', data });
-            })
-            .catch((err) => {
-                setState({ state: 'error', data: null });
-            });
-        }
-    };
-    useEffect(fetch, [context]);
-
-    const issuer = (data != null ? data.allCredentialIssuers[0] : null)
+  const context = useAppContext();
+  const [{ state, data }, setState] = useState({
+    state: 'loading',
+    data: null,
+  });
+  const fetch = () => {
+    const {
+      router: {
+        pathname,
+        query: { id },
+      },
+    } = context;
+    if (context['router'] != null && id) {
+      graphql(GET_ISSUER, { id: id })
+        .then(({ data }) => {
+          toArray(data.allCredentialIssuers[0], [
+            'availableScopes',
+            'clientRoles',
+          ]);
+          setState({ state: 'loaded', data });
+        })
+        .catch((err) => {
+          setState({ state: 'error', data: null });
+        });
+    }
+  };
+  useEffect(fetch, [context]);
 
   
   if (issuer != null) {

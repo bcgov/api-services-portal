@@ -34,13 +34,15 @@ type ControlsPayload = {
   };
 };
 
-interface IpRestrictionProps {
+interface RateLimitingProps {
+  data?: any;
   id: string;
   mode: 'edit' | 'create';
   queryKey: QueryKey;
 }
 
-const IpRestriction: React.FC<IpRestrictionProps> = ({
+const RateLimiting: React.FC<RateLimitingProps> = ({
+  data,
   id,
   mode,
   queryKey,
@@ -50,7 +52,19 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
     api(FULFILL_REQUEST, payload)
   );
   const toast = useToast();
+  const config = data?.config
+    ? JSON.parse(data.config)
+    : {
+        second: '',
+        minute: '',
+        hour: '',
+        day: '',
+        policy: 'local',
+      };
+
+
   const numOrNull = ((value: FormDataEntryValue) => Number(value) == 0 ? null : Number(value))
+
   const onSubmit = async (formData: FormData) => {
     try {
       const controls: ControlsPayload = {
@@ -104,28 +118,51 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       onSubmit={onSubmit}
       title="Rate Limiting"
     >
-      <ControlTypeSelect />
+      <ControlTypeSelect
+        serviceId={data?.service?.id}
+        routeId={data?.route?.id}
+      />
       <HStack spacing={4} mb={4}>
         <FormControl id="second">
           <FormLabel>Second</FormLabel>
-          <Input variant="bc-input" name="second" placeholder="00" />
+          <Input
+            variant="bc-input"
+            name="second"
+            placeholder="00"
+            defaultValue={config.second}
+          />
         </FormControl>
         <FormControl id="minute">
           <FormLabel>Minute</FormLabel>
-          <Input variant="bc-input" name="minute" placeholder="00" />
+          <Input
+            variant="bc-input"
+            name="minute"
+            placeholder="00"
+            defaultValue={config.minute}
+          />
         </FormControl>
         <FormControl id="hour">
           <FormLabel>Hour</FormLabel>
-          <Input variant="bc-input" name="hour" placeholder="00" />
+          <Input
+            variant="bc-input"
+            name="hour"
+            placeholder="00"
+            defaultValue={config.hour}
+          />
         </FormControl>
         <FormControl id="day">
           <FormLabel>Day</FormLabel>
-          <Input variant="bc-input" name="day" placeholder="00" />
+          <Input
+            variant="bc-input"
+            name="day"
+            placeholder="00"
+            defaultValue={config.day}
+          />
         </FormControl>
       </HStack>
       <FormControl id="policy">
         <FormLabel>Policy</FormLabel>
-        <Select name="policy" variant="bc-input">
+        <Select name="policy" variant="bc-input" defaultValue={config.policy}>
           <option value="local">Local</option>
           <option value="redis">Redis</option>
         </Select>
@@ -134,4 +171,4 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
   );
 };
 
-export default IpRestriction;
+export default RateLimiting;

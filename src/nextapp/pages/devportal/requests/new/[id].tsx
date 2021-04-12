@@ -145,7 +145,7 @@ const NewRequestsPage: React.FC<
                 <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
                 <Box>
                   <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allProducts.find((d) => d.id === id)?.name}
+                    {data.allProducts.find((d) => d.id === id)?.name ?? 'API'}
                   </Text>
                 </Box>
               </VStack>
@@ -168,10 +168,10 @@ const NewRequestsPage: React.FC<
               </Box>
               <Box flex={1}>
                 <Heading size="sm" mb={3}>
-                  OR select an application to consume the API
+                  Select an application to consume the API
                 </Heading>
                 <Select name="applicationId">
-                  <option value="">Available Application</option>
+                  <option value="">No Application Selected</option>
                   {data.allApplications.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name}
@@ -207,14 +207,31 @@ const NewRequestsPage: React.FC<
           <FieldsetBox isRequired title="Additional Information & Terms">
             <Textarea
               name="other"
-              placeholder="Write any additional instructions for the API Manager"
+              placeholder="Write any additional instructions for the reviewer"
               variant="bc-input"
             />
-            <Box mt={4} p={4} bgColor="blue.50" borderRadius={4}>
-              <Checkbox colorScheme="blue">
-                I agree to the terms and agreements of this API
-              </Checkbox>
-            </Box>
+            {dataset.environments[0]?.legal && (
+              <Flex
+                justify="space-between"
+                mt={4}
+                p={4}
+                bgColor="blue.50"
+                borderRadius={4}
+              >
+                <Checkbox colorScheme="blue">
+                  {dataset.environments[0]?.legal.description}
+                </Checkbox>
+                <Link
+                  fontWeight="bold"
+                  href={dataset.environments[0]?.legal.link}
+                  colorScheme="blue"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Legal
+                </Link>
+              </Flex>
+            )}
           </FieldsetBox>
           <Box mt={4} bgColor="white">
             <Flex justify="flex-end" p={4}>
@@ -244,6 +261,10 @@ const query = gql`
         name
         active
         flow
+        legal {
+          description
+          link
+        }
       }
     }
     allApplications {

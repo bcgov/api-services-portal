@@ -20,34 +20,6 @@ import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 
-const query = gql`
-  query GetConsumer($id: ID!) {
-    getGatewayConsumerPlugins(id: $id) {
-      id
-      username
-      aclGroups
-      customId
-      extForeignKey
-      namespace
-      plugins {
-        id
-        name
-        config
-        service {
-          id
-          name
-        }
-        route {
-          id
-          name
-        }
-      }
-      tags
-      createdAt
-    }
-  }
-`;
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
@@ -133,6 +105,7 @@ const ConsumersPage: React.FC<
           <RateLimiting id={id} queryKey={queryKey} mode="create" />
         </HStack>
         <ControlsList
+          consumerId={id}
           data={consumer.plugins.filter(
             (p) => p.route || p.service
           )}
@@ -143,3 +116,32 @@ const ConsumersPage: React.FC<
 };
 
 export default ConsumersPage;
+
+const query = gql`
+  query GetConsumer($id: ID!) {
+    getGatewayConsumerPlugins(id: $id) {
+      id
+      username
+      aclGroups
+      customId
+      extForeignKey
+      namespace
+      plugins {
+        id
+        name
+        config
+        service {
+          id
+          name
+        }
+        route {
+          id
+          name
+        }
+      }
+      tags
+      createdAt
+    }
+  }
+`
+

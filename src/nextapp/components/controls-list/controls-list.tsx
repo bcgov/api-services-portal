@@ -16,12 +16,14 @@ import { FaDoorClosed, FaTrafficLight, FaTrash } from 'react-icons/fa';
 import ModelIcon from '../model-icon/model-icon';
 import IpRestriction from '../controls/ip-restriction';
 import RateLimiting from '../controls/rate-limiting';
+import DeleteControl from './delete-control';
 
 interface ControlsListProps {
+  consumerId: string;
   data: GatewayPlugin[];
 }
 
-const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
+const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
   const getIcon = React.useCallback((name: string) => {
     switch (name) {
       case 'rate-limiting':
@@ -127,6 +129,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
                       id={d.id}
                       queryKey={['consumer', d.id]}
                       mode="edit"
+                      data={d}
                     />
                   )}
                   {d.name === 'rate-limiting' && (
@@ -134,15 +137,10 @@ const ControlsList: React.FC<ControlsListProps> = ({ data }) => {
                       id={d.id}
                       queryKey={['consumer', d.id]}
                       mode="edit"
+                      data={d}
                     />
                   )}
-                  <IconButton
-                    aria-label="remove control button"
-                    icon={<Icon as={FaTrash} />}
-                    variant="outline"
-                    size="xs"
-                    colorScheme="red"
-                  />
+                  <DeleteControl consumerId={consumerId} id={d.id} />
                 </ButtonGroup>
               </GridItem>
             </Grid>

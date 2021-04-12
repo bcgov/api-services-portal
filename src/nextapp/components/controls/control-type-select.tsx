@@ -12,6 +12,11 @@ import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { GatewayRoute, GatewayService } from '@/shared/types/query.types';
 
+interface ControlTypeSelectProps {
+  routeId?: string;
+  serviceId?: string;
+}
+
 const query = gql`
   query GetControlContent {
     allGatewayRoutes {
@@ -25,8 +30,13 @@ const query = gql`
   }
 `;
 
-const ControlTypeSelect: React.FC = () => {
-  const [control, setControl] = React.useState<string>('route');
+const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
+  routeId,
+  serviceId,
+}) => {
+  const defaultScope = routeId ? 'route' : 'service';
+  const defaultScopeId = routeId ?? serviceId;
+  const [control, setControl] = React.useState<string>(defaultScope);
   const { data, isLoading } = useApi(
     ['consumerControlsOptions'],
     { query },
@@ -52,15 +62,15 @@ const ControlTypeSelect: React.FC = () => {
 
   return (
     <>
-      <FormControl id="type" mb={4}>
-        <FormLabel>Type</FormLabel>
+      <FormControl id="scope" mb={4}>
+        <FormLabel>Scope</FormLabel>
         <RadioGroup onChange={onChange} value={control}>
           <Stack spacing={4} direction="row">
-            <Radio name="type" value="route">
-              Route
-            </Radio>
-            <Radio name="type" value="service">
+            <Radio name="scope" value="service">
               Service
+            </Radio>
+            <Radio name="scope" value="route">
+              Route
             </Radio>
           </Stack>
         </RadioGroup>
@@ -72,6 +82,7 @@ const ControlTypeSelect: React.FC = () => {
           isDisabled={isLoading}
           name={control}
           variant="bc-input"
+          defaultValue={defaultScopeId}
         >
           {options.map((o) => (
             <option key={o.extForeignKey} value={o.extForeignKey}>
@@ -85,3 +96,16 @@ const ControlTypeSelect: React.FC = () => {
 };
 
 export default ControlTypeSelect;
+
+const query = gql`
+  query GetControlContent {
+    allGatewayRoutes {
+      id
+      name
+    }
+    allGatewayServices {
+      id
+      name
+    }
+  }
+`;

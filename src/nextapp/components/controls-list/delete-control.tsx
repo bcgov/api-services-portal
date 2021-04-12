@@ -18,11 +18,12 @@ import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { useMutation, useQueryClient } from 'react-query';
 
-interface DeleteApplicationProps {
+interface DeleteControlProps {
+  consumerId: string;
   id: string;
 }
 
-const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
+const DeleteControl: React.FC<DeleteControlProps> = ({ consumerId, id }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
@@ -32,15 +33,15 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(id);
-      queryClient.invalidateQueries('allApplications');
+      queryClient.invalidateQueries(['consumer', id]);
       toast({
-        title: 'Application deleted',
+        title: 'Control removed',
         status: 'success',
       });
       onClose();
     } catch {
       toast({
-        title: 'Application delete failed',
+        title: 'Control could not be removed',
         status: 'error',
       });
     }
@@ -49,11 +50,12 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
   return (
     <>
       <IconButton
-        aria-label="delete application button"
+        aria-label="remove control button"
         icon={<Icon as={FaTrash} />}
-        onClick={onOpen}
         variant="outline"
-        size="sm"
+        size="xs"
+        onClick={onOpen}
+        colorScheme="red"
       />
       <AlertDialog
         isCentered
@@ -64,11 +66,10 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
       >
         <AlertDialogOverlay />
         <AlertDialogContent>
-          <AlertDialogHeader>Delete Application</AlertDialogHeader>
+          <AlertDialogHeader>Delete Control</AlertDialogHeader>
           <AlertDialogCloseButton />
           <AlertDialogBody>
-            Are you sure you want to delete this application? It cannot be
-            undone.
+            Are you sure you want to remove this control? It cannot be undone.
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button ref={cancelRef} onClick={onClose}>
@@ -84,13 +85,13 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
   );
 };
 
-export default DeleteApplication;
+export default DeleteControl;
 
 const mutation = gql`
   mutation Remove($id: ID!) {
-    deleteApplication(id: $id) {
-      name
+    deleteGatewayPlugin(id: $id) {
       id
+      name
     }
   }
 `;

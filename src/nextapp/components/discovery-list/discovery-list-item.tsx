@@ -4,6 +4,9 @@ import {
   Box,
   Button,
   Divider,
+  Flex,
+  Grid,
+  GridItem,
   Heading,
   Icon,
   Link,
@@ -17,7 +20,9 @@ import {
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { Product } from '@/shared/types/query.types';
-import { FaBook } from 'react-icons/fa';
+import { FaBook, FaChevronRight } from 'react-icons/fa';
+import kebabCase from 'lodash/kebabCase';
+import TagsList from '../tags-list';
 
 interface DiscoveryListItemProps {
   data: Product;
@@ -32,6 +37,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       borderColor="gray.400"
       position="relative"
       overflow="hidden"
+      width="100%"
     >
       <Box
         as="header"
@@ -42,18 +48,21 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         p={4}
         pb={2}
       >
-        <Box
-          as="hgroup"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          overflow="hidden"
-          mr={2}
-          maxW="75%"
-        >
+        <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
           <Heading isTruncated size="md" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
-            {data.name}
+            <Link
+              href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
+                data.dataset.name
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {data.dataset.name}
+            </Link>
+            <Badge color="bc-blue-alt" ml={2}>
+              BCDC
+            </Badge>
           </Heading>
         </Box>
         <NextLink href={`/devportal/requests/new/${data.id}`}>
@@ -64,63 +73,52 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       </Box>
       <Divider />
       <Box p={4}>
-        <Box
-          as="dl"
-          sx={{
-            '& dd': {
-              mb: 2,
-            },
-          }}
-        >
-          <Heading as="dt" size="sm">
-            Organization
-          </Heading>
-          <Text as="dd">{data.organization?.title}</Text>
-          <Heading as="dt" size="sm">
-            Description
-          </Heading>
-          <Text as="dd">
-            {data.description ?? <Text as="em">No description added</Text>}
-            {data.dataset != null && (
-                <>
-                                                <div><b><a href={`https://catalogue.data.gov.bc.ca/dataset/${data.dataset.name}`} target="_blank" rel="noreferrer">{data.dataset.title} <Badge>BCDC</Badge></a></b></div>
-                                                <div>
-                                                    {data.dataset.notes.length > 175 ? data.dataset.notes.substring(0,175) + "..." : data.dataset.notes}
-                                                </div>
-                                                <SimpleGrid columns={2}>
-                                                    {[{l:'Sector',f:'sector'},{l:'License',f:'license_title'},{l:'Who can Access?',f:'view_audience'},{l:'Security Class',f:'security_class'},{l:'First Published?',f:'record_publish_date'}].map(rec => (
-                                                        <>
-                                                            <div style={{textAlign:'right', paddingRight:'20px'}}><b>{rec.l}</b></div>
-                                                            <div>{data.dataset[rec.f]}</div>
-                                                        </>
-                                                    ))}  
-                
-                                                </SimpleGrid>       
-                                                <Stack direction="row" wrap="wrap" spacing={1} shouldWrapChildren={true}>{Array.isArray(JSON.parse(data.dataset.tags)) ? JSON.parse(data.dataset.tags).map(p => (
-                                                    <Tag key={p} size="sm" colorScheme="orange" borderRadius="5px">
-                                                        <TagLabel>{p}</TagLabel>
-                                                    </Tag>
-                                                )) : false}</Stack>
-                    </>
-            )}
+        <Heading size="sm" mb={2}>
+          {data.dataset.organization.title}
+          <Icon as={FaChevronRight} boxSize="2" mx={2} />
+          <Text as="span" fontWeight="normal" color="gray.600">
+            {data.dataset?.organizationUnit?.title}
           </Text>
-        </Box>
+        </Heading>
+        <Text>
+          {data.dataset.notes ?? <Text as="em">No description added</Text>}
+        </Text>
+        <Grid gap={4} templateColumns="repeat(5, 1fr)" my={4} color="gray.500">
+          <GridItem>
+            <Heading size="xs">Sector</Heading>
+            <Text fontSize="sm">{data.dataset.sector}</Text>
+          </GridItem>
+          <GridItem>
+            <Heading size="xs">License</Heading>
+            <Text fontSize="sm">{data.dataset.license_title}</Text>
+          </GridItem>
+          <GridItem>
+            <Heading size="xs">Who Can Access?</Heading>
+            <Text fontSize="sm">{data.dataset.view_audience}</Text>
+          </GridItem>
+          <GridItem>
+            <Heading size="xs">Security Class</Heading>
+            <Text fontSize="sm">{data.dataset.security_class}</Text>
+          </GridItem>
+          <GridItem>
+            <Heading size="xs">First Published</Heading>
+            <Text fontSize="sm">-</Text>
+          </GridItem>
+        </Grid>
       </Box>
       <Divider />
-      <Wrap p={4} spacing={2} bgColor="gray.50">
-        <WrapItem>
-          <Text fontWeight="bold" textTransform="uppercase" color="gray.600">
-            Environments
-          </Text>
-        </WrapItem>
-        {data.environments.map((e) => (
-          <WrapItem key={e.id}>
-            <Badge colorScheme="green" fontSize="md">
-              {e.name}
-            </Badge>
-          </WrapItem>
-        ))}
-      </Wrap>
+      <Flex p={4} bgColor="gray.50" justify="space-between">
+        <TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />
+        <Wrap spacing={2}>
+          {data.environments.map((e) => (
+            <WrapItem key={e.id}>
+              <Badge colorScheme="green" fontSize="md">
+                {e.name}
+              </Badge>
+            </WrapItem>
+          ))}
+        </Wrap>
+      </Flex>
     </Box>
   );
 };
