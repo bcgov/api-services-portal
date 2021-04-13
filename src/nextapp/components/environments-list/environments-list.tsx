@@ -15,10 +15,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from 'react-query';
-import type {
-  Mutation,
-  Environment,
-} from '@/types/query.types';
+import type { Mutation, Environment } from '@/types/query.types';
 import {
   FaCube,
   FaKey,
@@ -31,22 +28,7 @@ import {
 import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import EditEnvironment from './edit-environment';
-
-const getAuthToken = (method: string) => {
-  switch (method) {
-    case 'kong-api-key-acl':
-      return FaKey;
-    case 'authorization-code':
-      return FaLock;
-    case 'client-credentials':
-      return FaLock;
-      // case 'private':
-    //   return FaUserSecret;
-    case 'public':
-    default:
-      return FaLockOpen;
-  }
-};
+import { getAuthToken } from '@/shared/services/utils';
 
 interface EnvironmentsListProps {
   data: Environment[];
