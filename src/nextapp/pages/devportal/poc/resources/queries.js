@@ -6,7 +6,9 @@ export const GET_PERMISSIONS = `
             ownerName
             requester
             requesterName
+            resource
             resourceName
+            scope
             scopeName
             granted
         }
@@ -73,8 +75,8 @@ export const REVOKE_ACCESS = `
 `
 
 export const GRANT_ACCESS = `
-    mutation GrantAccess($credIssuerId: ID!, $tickets: [String]!) {
-        approvePermissions(credIssuerId: $credIssuerId, ids: $tickets)
+    mutation GrantAccess($credIssuerId: ID!, $resourceId: String!, $requesterId: String!, $scopes: [String]!) {
+        approvePermissions(credIssuerId: $credIssuerId, resourceId: $resourceId, requesterId: $requesterId, scopes: $scopes)
     }
 `
 

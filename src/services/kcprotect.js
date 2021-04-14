@@ -37,14 +37,15 @@ module.exports = function (issuerUrl, accessToken) {
     }
 
 
-    const getPermissionTicket = async function getPermissionTicket(id) {
-        const url = `${issuerUrl}/authz/protection/permission/ticket?id=${id}`
+    const getPermissionTicket = async function getPermissionTicket(resourceId, requesterId, scopeId) {
+        const url = `${issuerUrl}/authz/protection/permission/ticket?resourceId=${resourceId}&requester=${requesterId}&scopeId=${scopeId}`
+        console.log(url)
         const result = await fetch (url, {
             method: 'get', 
             headers: {'Authorization': `Bearer ${accessToken}` }
         }).then(checkStatus).then(res => res.json())
         console.log(JSON.stringify(result, null, 4))
-        return result
+        return result[0]
     }
 
 
@@ -61,8 +62,8 @@ module.exports = function (issuerUrl, accessToken) {
     }
 
 
-    const approvePermission = async function updatePermission(ticketId) {
-        const perm = await getPermissionTicket (ticketId)
+    const approvePermission = async function updatePermission(resourceId, requesterId, scopeId) {
+        const perm = await getPermissionTicket (resourceId, requesterId, scopeId)
         perm.granted = true
         await updatePermissionGrantedFlag (perm)
     }

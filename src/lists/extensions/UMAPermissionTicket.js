@@ -11,6 +11,7 @@ const KCAdmin = require('../../services/kcadmin')
 const typeUMAPermissionTicket = `
 type UMAPermissionTicket {
     id: String!,
+    scope: String!,
     scopeName: String!,
     resource: String!,
     resourceName: String!,
@@ -126,7 +127,7 @@ module.exports = {
                 access: EnforcementPoint,
               },              
               {
-                schema: 'approvePermissions(credIssuerId: ID!, ids: [String]! ): Boolean',
+                schema: 'approvePermissions(credIssuerId: ID!, resourceId: String!, requesterId: String!, scopes: [String]! ): Boolean',
                 resolver: async (item, args, context, info, { query, access }) => {
                     console.log(JSON.stringify(args))
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
@@ -147,8 +148,8 @@ module.exports = {
 
                     const accessToken = await tokenExchange (openid.issuer, issuer.clientId, issuer.clientSecret, subjectToken)
                     const kcprotectApi = new KCProtect (openid.issuer, accessToken)
-                    for (ticketId of args.ids) {
-                        await kcprotectApi.approvePermission (ticketId)
+                    for (scope of args.scopes) {
+                        await kcprotectApi.approvePermission (args.resourceId, args.requesterId, scope)
                     }
                     return true
 

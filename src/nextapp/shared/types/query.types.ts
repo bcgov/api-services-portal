@@ -6466,6 +6466,7 @@ export type UmaResourceSet = {
 export type UmaPermissionTicket = {
   __typename?: 'UMAPermissionTicket';
   id: Scalars['String'];
+  scope: Scalars['String'];
   scopeName: Scalars['String'];
   resource: Scalars['String'];
   resourceName: Scalars['String'];
@@ -8636,7 +8637,9 @@ export type MutationRevokePermissionsArgs = {
 
 export type MutationApprovePermissionsArgs = {
   credIssuerId: Scalars['ID'];
-  ids: Array<Maybe<Scalars['String']>>;
+  resourceId: Scalars['String'];
+  requesterId: Scalars['String'];
+  scopes: Array<Maybe<Scalars['String']>>;
 };
 
 

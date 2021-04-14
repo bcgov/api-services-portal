@@ -12,7 +12,7 @@ function tagit (tags, color, revokeAccess) {
             <Tag key={tag.id} size="md" colorScheme={color} borderRadius="full">
                 <TagLabel>{tag.name}</TagLabel>
                 { revokeAccess != null && (
-                    <TagCloseButton onClick={() => revokeAccess([tag.id])}/>
+                    <TagCloseButton onClick={() => revokeAccess([tag.ticketId])}/>
                 )}
             </Tag>
     ))}</HStack>)
@@ -33,9 +33,9 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
         const list = data.filter(item => item.owner == loginUserSub).filter(item => granted == item.granted).reduce((accum, currentItem) => {
             const key = `${currentItem.resourceName} - ${currentItem.requesterName}`
             if (accum.filter(a => a.key == key).length == 0) {
-                accum.push({...{key: key, scopes: [{id: currentItem.id, name: currentItem.scopeName}] }, ...currentItem})
+                accum.push({...{key: key, scopes: [{ticketId: currentItem.id, id: currentItem.scope, name: currentItem.scopeName}] }, ...currentItem})
             } else {
-                accum.filter(a => a.key == key)[0].scopes.push({id: currentItem.id, name: currentItem.scopeName})
+                accum.filter(a => a.key == key)[0].scopes.push({ticketId: currentItem.id, id: currentItem.scope, name: currentItem.scopeName})
             }
             return accum
         }, [])
@@ -59,7 +59,7 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                                 {granted ? (
                                     <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.scopes.map(s => s.id))}>Revoke All</Button>
                                 ) : (
-                                    <Button colorScheme="red" size="md" onClick={() => grantAccess(item.scopes.map(s => s.id))}>Grant Access</Button>
+                                    <Button colorScheme="red" size="md" onClick={() => grantAccess(item)}>Grant Access</Button>
                                 )} 
                             </Td>
                         </Tr>

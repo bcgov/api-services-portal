@@ -82,8 +82,9 @@ const ResourcesPage = () => {
         }        
     }
 
-    const grantAccess = async (ticketIds) => {
-        graphql(GRANT_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+    const grantAccess = async (item) => {
+        console.log(JSON.stringify(item))
+        graphql(GRANT_ACCESS, { credIssuerId: credIssuerId, resourceId: item.resource, requesterId: item.requester, scopes: item.scopes.map(s => s.id) })
         .then(fetch)
         .catch (err => {
             console.log(err)

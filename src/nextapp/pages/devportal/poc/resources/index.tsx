@@ -74,7 +74,7 @@ const ResourcesPage = () => {
             ]}
             title={
                 <Box as="span" display="flex" alignItems="center">
-                <ModelIcon model="resources" size="sm" mr={2} />
+                <ModelIcon model="resource" size="sm" mr={2} />
                     API Resources
                 </Box>
             }
