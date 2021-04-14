@@ -54,7 +54,7 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                     {list.sort(item => item.requesterName).map((item, index) => (
                         <Tr key={item.id}>
                             <Td>{item.requesterName}</Td>
-                            <Td>{tagit(item.scopes, 'blue', null)}</Td>
+                            <Td>{tagit(item.scopes, 'blue', granted ? revokeAccess : null)}</Td>
                             <Td>
                                 {granted ? (
                                     <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.scopes.map(s => s.id))}>Revoke All</Button>
