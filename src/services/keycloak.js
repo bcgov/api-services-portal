@@ -26,6 +26,27 @@ module.exports = {
         return response['access_token']
     },
 
+    tokenExchange: async function (issuer, clientId, clientSecret, subjectToken) {
+        const params = new URLSearchParams();
+        params.append('grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange');
+        params.append('client_id', clientId);
+        params.append('client_secret', clientSecret);
+        params.append('subject_token', subjectToken);
+    
+        const response = await fetch(`${issuer}/protocol/openid-connect/token`, {
+            method: 'post',
+            body:    params,
+            headers: { 
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        console.log(JSON.stringify(response, null, 3));
+        return response['access_token']
+    },  
+
     clientRegistration: async function (issuer, accessToken, clientId, clientSecret, enabled=false) {
         const body = Object.assign(JSON.parse(JSON.stringify(clientTemplate)), {
             enabled: enabled,

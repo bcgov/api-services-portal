@@ -90,6 +90,13 @@ const links: NavLink[] = [
     access: ['aps-admin'],
     sites: ['platform','manager'],
   },
+  {
+    name: 'Resources',
+    url: '/devportal/poc/resources',
+    access: ['api-owner'],
+    sites: ['devportal'],
+  },
+
 ];
 
 export default links;

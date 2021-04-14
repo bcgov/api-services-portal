@@ -5,6 +5,17 @@ module.exports = function (baseUrl, realmName) {
     const config = {baseUrl, realmName}
     const kcAdminClient = new KcAdminClient(config);
 
+    const lookupUserByUsername = async function lookupUserByUsername (username) {
+        console.log("Finding "+ username)
+        const users = await kcAdminClient.users.find({ username : username })
+        console.log("lookupUserByUsername : " + JSON.stringify(users))
+        if (users.length == null) {
+            return null
+        } else {
+            return users[0].id
+        }
+    }
+
     const syncScopes = async function syncScopes(clientId, desiredSetOfScopes, optional) {
         const listAllFunction = optional ? kcAdminClient.clientScopes.listDefaultOptionalClientScopes : kcAdminClient.clientScopes.listDefaultClientScopes
         const allScopes  = await listAllFunction()
@@ -67,6 +78,7 @@ module.exports = function (baseUrl, realmName) {
             await applyChanges(clientPK, changesOptional, true)
         },
         syncScopes: syncScopes,
-        applyChanges: applyChanges
+        applyChanges: applyChanges,
+        lookupUserByUsername: lookupUserByUsername
     }
 }

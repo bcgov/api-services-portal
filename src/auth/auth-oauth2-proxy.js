@@ -149,13 +149,15 @@ class Oauth2ProxyAuthStrategy {
         const groups = JSON.stringify(oauthUser['groups'])
         let roles = JSON.stringify(allRoles)
         console.log(JSON.stringify(oauthUser, null, 4))
-        try {
-            roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
-        } catch (e) {
-            console.log(e)
+        if ('realm_access' in oauthUser) {
+            try {
+                roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
+            } catch (e) {
+                console.log(e)
 
+            }
         }
-
+        
         /*
             A bit about namespace:
               We are moving away from the namespace being part of the JWT to where the namespace list is provided in the JWT

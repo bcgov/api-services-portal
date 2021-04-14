@@ -23,6 +23,10 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    resourceId: {
+        type: Text,
+        isRequired: false,
+    },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     members: { type: Relationship, isRequired: true, ref: 'MemberRole', many: true }

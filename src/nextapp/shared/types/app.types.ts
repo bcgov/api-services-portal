@@ -1,4 +1,5 @@
 export interface UserData {
+  sub: string;
   name: string;
   username: string;
   roles: string[];
