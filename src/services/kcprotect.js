@@ -4,6 +4,18 @@ const checkStatus = require('./checkStatus')
 // keycloak Protection API
 module.exports = function (issuerUrl, accessToken) {
 
+    const listUmaPolicies = async function listUmaPolicies(params = {}) {
+        const query = Object.keys(params).filter(pk => params[pk]).map(pk => { return `${pk}=${params[pk]}` })
+        const url = `${issuerUrl}/authz/protection/uma-policy?${query.join('&')}`
+        console.log("QUERY = "+url)
+        const result = await fetch (url, {
+            method: 'get', 
+            headers: {'Authorization': `Bearer ${accessToken}` }
+        }).then(checkStatus).then(res => res.json())
+        console.log(JSON.stringify(result, null, 4))
+        return result
+    }
+
     /*
         scopeId
         resourceId
@@ -167,6 +179,7 @@ module.exports = function (issuerUrl, accessToken) {
         createPermission: createPermission,
         createOrUpdatePermission: createOrUpdatePermission,
         deletePermission: deletePermission,
-        approvePermission: approvePermission
+        approvePermission: approvePermission,
+        listUmaPolicies: listUmaPolicies
     }
 }

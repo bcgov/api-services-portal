@@ -25,6 +25,12 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
+    name: 'Resources',
+    url: '/devportal/poc/resources',
+    access: ['api-owner'],
+    sites: ['devportal'],
+  },
+  {
     name: 'Applications',
     url: '/devportal/applications',
     access: ['developer', 'api-owner'],
@@ -89,12 +95,6 @@ const links: NavLink[] = [
     url: '/platform/poc/applications',
     access: ['aps-admin'],
     sites: ['platform','manager'],
-  },
-  {
-    name: 'Resources',
-    url: '/devportal/poc/resources',
-    access: ['api-owner'],
-    sites: ['devportal'],
   },
 
 ];

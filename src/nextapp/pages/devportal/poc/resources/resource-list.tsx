@@ -1,18 +1,23 @@
 import * as React from 'react';
 import {
+    Alert,
+    AlertDescription,
     Box,
     Divider,
+    Heading,
   } from '@chakra-ui/react';
 
 const { useEffect, useState } = React;
 
-import { GET_RESOURCES } from './queries'
+import { GET_RESOURCES, REVOKE_ACCESS } from './queries'
 
 import ResourcesList from './resources'
 
 import graphql from '@/shared/services/graphql'
 
 import { useAuth } from '@/shared/services/auth';
+
+import Waiting from './waiting'
 
 const ResourcesPage = ({credIssuerId, resourceType}) => {
     const { user } = useAuth();
@@ -30,13 +35,55 @@ const ResourcesPage = ({credIssuerId, resourceType}) => {
     
     useEffect(fetch, [user]);
 
+    const revokeAccess = async (ticketIds) => {
+        graphql(REVOKE_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+        .then(fetch)
+        .catch (err => {
+            console.log(err)
+        })
+    }
+
     return (
+        <>
           <Box bgColor="white" mb={4}>
             <Divider />    
             <Box p={2}>        
                 <ResourcesList type={resourceType} credIssuerId={credIssuerId} data={data?.getResourceSet} state={state}/>
             </Box>
           </Box>
+          
+            <Box bgColor="white" mb={4}>
+                    <Box
+                        p={4}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <Heading size="md">Your requests waiting approval</Heading>
+                    </Box>
+                    <Divider />
+                    {data && (
+                        <Waiting data={data.getPermissionTickets} granted={false} state={state} revokeAccess={revokeAccess} loginUserSub={user?.sub}/>
+                    )}
+            </Box>      
+            <Box bgColor="white" mb={4}>
+                    <Box
+                        p={4}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <Heading size="md">Resources shared with me</Heading>
+                    </Box>
+                    <Divider />
+                    {data && (
+                        <Waiting data={data.getPermissionTickets} granted={true} state={state} revokeAccess={()=>false} loginUserSub={user?.sub}/>
+                    )}
+            </Box>    
+
+        </>
+
+          
     )
 }
 

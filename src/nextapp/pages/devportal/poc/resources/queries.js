@@ -12,15 +12,33 @@ export const GET_PERMISSIONS = `
             scopeName
             granted
         }
+
+        getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+            id
+            name
+            description
+            type
+            logic
+            decisionStrategy
+            owner
+            clients
+            users
+            scopes
+        }
+
         CredentialIssuer(where: {id: $credIssuerId}) {
             clientId
             resourceType
             availableScopes
         }
+
         getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
             id
             name
             type
+            resource_scopes {
+                name
+            }
         }
     }
 `
@@ -57,6 +75,19 @@ export const GET_RESOURCES = `
             name
             type
         }
+
+        getPermissionTickets(credIssuerId: $credIssuerId) {
+            id
+            owner
+            ownerName
+            requester
+            requesterName
+            resource
+            resourceName
+            scope
+            scopeName
+            granted
+        }        
     }
 `
 

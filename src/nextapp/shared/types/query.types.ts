@@ -6453,6 +6453,11 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type UmaScope = {
+  __typename?: 'UMAScope';
+  name: Scalars['String'];
+};
+
 export type UmaResourceSet = {
   __typename?: 'UMAResourceSet';
   id: Scalars['String'];
@@ -6460,7 +6465,9 @@ export type UmaResourceSet = {
   type: Scalars['String'];
   owner: Scalars['String'];
   ownerManagedAccess?: Maybe<Scalars['Boolean']>;
-  resourceScopes: Scalars['String'];
+  uris?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resource_scopes?: Maybe<Array<Maybe<UmaScope>>>;
+  scopes?: Maybe<Array<Maybe<UmaScope>>>;
 };
 
 export type UmaPermissionTicket = {
@@ -6481,6 +6488,20 @@ export type UmaPermissionTicketInput = {
   resourceId: Scalars['String'];
   username: Scalars['String'];
   granted?: Maybe<Scalars['Boolean']>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type UmaPolicy = {
+  __typename?: 'UMAPolicy';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  type: Scalars['String'];
+  logic: Scalars['String'];
+  decisionStrategy: Scalars['String'];
+  owner: Scalars['String'];
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
@@ -6722,7 +6743,8 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
-  getResourceSet?: Maybe<Array<Maybe<ResourceSet>>>;
+  getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
+  getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
@@ -7419,6 +7441,12 @@ export type QueryGetResourceSetArgs = {
   credIssuerId: Scalars['ID'];
   owner?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
+  resourceId?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetUmaPoliciesArgs = {
+  credIssuerId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
 };
 

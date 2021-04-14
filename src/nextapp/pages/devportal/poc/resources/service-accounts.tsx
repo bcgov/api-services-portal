@@ -6,7 +6,7 @@ import { Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, Tag
 
 import NameValue from '@/components/name-value';
 
-import Scopes from './scope-item';
+import Scopes from './scope-item'
 
 function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess }) {
     switch (state) {
@@ -22,24 +22,16 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
         }
         const list = data
             .filter(item => item.owner == loginUserSub)
-            .filter(item => granted == item.granted)
-            .reduce((accum, currentItem) => {
-                const key = `${currentItem.resourceName} - ${currentItem.requesterName}`
-                if (accum.filter(a => a.key == key).length == 0) {
-                    accum.push({...{key: key, scopes: [{ticketId: currentItem.id, id: currentItem.scope, name: currentItem.scopeName}] }, ...currentItem})
-                } else {
-                    accum.filter(a => a.key == key)[0].scopes.push({ticketId: currentItem.id, id: currentItem.scope, name: currentItem.scopeName})
-                }
-                return accum
-            }, [])
-            .sort((a,b) => a.requesterName.localeCompare(b.requesterName))
+            .filter(item => item.users == null)
+            .map(item => { item._scopes = item.scopes.map(s => { return { ticketId:null, id:s, name:s } }); return item})
+            .sort((a,b) => a.name.localeCompare(b.name))
         return (
             <>
                 <Table variant="simple">
                     <TableCaption>-</TableCaption>
                     <Thead>
                         <Tr>
-                        <Th>User</Th>
+                        <Th>Client</Th>
                         <Th>Permission</Th>
                         <Th>Action</Th>
                         </Tr>
@@ -47,13 +39,13 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                     <Tbody>
                     {list.map((item, index) => (
                         <Tr key={item.id}>
-                            <Td>{item.requesterName}</Td>
-                            <Td><Scopes scopes={item.scopes} color='blue' revokeAccess={granted ? revokeAccess : null}/></Td>
+                            <Td>{item.clients.join(',')}</Td>
+                            <Td><Scopes scopes={item._scopes} color='blue' revokeAccess={null}/></Td>
                             <Td>
                                 {granted ? (
                                     <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.scopes.map(s => s.ticketId))}>Revoke All</Button>
                                 ) : (
-                                    <Button colorScheme="red" size="sm" onClick={() => grantAccess(item)}>Approve</Button>
+                                    <Button colorScheme="red" size="sm" onClick={() => grantAccess(item)}>Grant Access</Button>
                                 )} 
                             </Td>
                         </Tr>

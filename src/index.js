@@ -237,7 +237,7 @@ module.exports = {
         console.log("Reset " + req.headers['x-forwarded-access-token'])
         req.headers['authorization'] = "Bearer " + req.headers['x-forwarded-access-token']
         next()
-    }), keycloak.enforcer(['namespace-dds-map:viewer'], {
+    }), keycloak.enforcer(['dds-map:viewer'], {
         resource_server_id: 'gwa-api'
       }), function (req, res) {
         res.send("Settings resource accessed")

@@ -7,6 +7,11 @@ const KCProtect = require('../../services/kcprotect')
 const { getOpenidFromDiscovery, getKeycloakSession } = require('../../services/keycloak')
 const keystoneApi = require('../../services/keystone')
 
+const typeUMAScope = `
+type UMAScope {
+    name: String!
+}`
+
 const typeUMAResourceSet = `
 type UMAResourceSet {
     id: String!,
@@ -14,7 +19,9 @@ type UMAResourceSet {
     type: String!,
     owner: String!,
     ownerManagedAccess: Boolean,
-    resourceScopes: String!
+    uris: [String]
+    resource_scopes: [UMAScope]
+    scopes: [UMAScope]
 }
 `
 module.exports = {
@@ -22,11 +29,12 @@ module.exports = {
       (keystone) => {
         keystone.extendGraphQLSchema({
             types: [
+                { type: typeUMAScope },
                 { type: typeUMAResourceSet },
             ],            
             queries: [
               {
-                schema: 'getResourceSet(credIssuerId: ID!, owner: String, type: String, resourceId: String): [ResourceSet]',
+                schema: 'getResourceSet(credIssuerId: ID!, owner: String, type: String, resourceId: String): [UMAResourceSet]',
                 resolver: async (item, args, context, info, { query, access }) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
@@ -38,8 +46,9 @@ module.exports = {
                         const res = await kcprotectApi.getResourceSet (args.resourceId)
                         console.log(JSON.stringify(res))
                         return [ res ]
+                    } else {
+                        return await kcprotectApi.listResources ({owner: args.owner, type: args.type})
                     }
-                    return await kcprotectApi.listResources ({owner: args.owner, type: args.type})
                 },
                 access: EnforcementPoint,
               },

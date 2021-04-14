@@ -27,7 +27,7 @@ import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, GRANT_ACCESS, REVOKE
 import { styles } from '@/shared/styles/devportal.css';
 
 import Permissions from '../permissions'
-import Waiting from '../waiting'
+import ServiceAccounts from '../service-accounts'
 
 import graphql from '@/shared/services/graphql'
 
@@ -58,7 +58,7 @@ const ResourcesPage = () => {
         // (                <Button variant="primary">Add Resource</Button>
         // )
     ]
-    const availableScopes = data?.CredentialIssuer == null ? [] : JSON.parse(data?.CredentialIssuer.availableScopes)
+    const availableScopes = data?.getResourceSet == null ? [] : data?.getResourceSet[0].resource_scopes
     const form = React.useRef<HTMLFormElement>();
     const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -125,40 +125,7 @@ const ResourcesPage = () => {
             </p>
           </PageHeader>
 
-          <Box bgColor="white" mb={4}>
-            <Alert>
-                <AlertDescription>
-                <Box bgColor="white" mb={4}>
-                    <Box
-                        p={4}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Heading size="md">Your requests waiting approval</Heading>
-                    </Box>
-                    <Divider />
-                    {data && (
-                        <Waiting data={data.getPermissionTickets} granted={false} state={state} refetch={fetch} loginUserSub={user?.sub}/>
-                    )}
-                </Box>      
-                <Box bgColor="white" mb={4}>
-                    <Box
-                        p={4}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Heading size="md">Resources shared with me</Heading>
-                    </Box>
-                    <Divider />
-                    {data && (
-                        <Waiting data={data.getPermissionTickets} granted={true} state={state} refetch={fetch} loginUserSub={user?.sub}/>
-                    )}
-                </Box>    
-                </AlertDescription>  
-            </Alert>  
-          </Box>
+
 
           <Box bgColor="white" mb={4}>
             <Box
@@ -198,6 +165,21 @@ const ResourcesPage = () => {
                 alignItems="center"
                 justifyContent="space-between"
             >
+                <Heading size="md">Service Accounts with access to this resource</Heading>
+            </Box>
+            <Divider />
+              {data && (
+                  <ServiceAccounts data={data.getUmaPolicies} granted={true} state={state} revokeAccess={revokeAccess} grantAccess={()=>false} loginUserSub={user?.sub}/>
+              )}
+          </Box>
+
+          <Box bgColor="white" mb={4}>
+            <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+            >
                 <Heading size="md">Share with others</Heading>
             </Box>
             <Divider />
@@ -211,7 +193,7 @@ const ResourcesPage = () => {
                         <FormLabel>Scopes</FormLabel>
                         <Stack pl={6} mt={1} spacing={1}>
                             {availableScopes.map (scope => (
-                            <Checkbox name="scopes" variant="bc-input" value={scope}>{scope}</Checkbox>
+                            <Checkbox name="scopes" variant="bc-input" value={scope.name}>{scope.name}</Checkbox>
                             ))}
                         </Stack>
                     </FormControl>
@@ -222,7 +204,7 @@ const ResourcesPage = () => {
                         </Stack>
                     </FormControl>
 
-                    <Button colorScheme="red" onClick={() => grantUserAccess()}>Grant Access</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => grantUserAccess()}>Grant Access</Button>
                 </form>
             </Box>
           </Box>          
