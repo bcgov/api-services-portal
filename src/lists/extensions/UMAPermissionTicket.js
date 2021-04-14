@@ -25,6 +25,7 @@ const typeUMAPermissionTicketInput = `
 input UMAPermissionTicketInput {
     resourceId: String!,
     username: String!,
+    granted: Boolean,
     scopes: [String]!
 }
 `
@@ -82,10 +83,11 @@ module.exports = {
                     const subjectToken = context.req.headers['x-forwarded-access-token']
 
                     const scopes = args.data.scopes
+                    const granted = 'granted' in args.data ? args.data['granted'] : true
                     const accessToken = await tokenExchange (openid.issuer, issuer.clientId, issuer.clientSecret, subjectToken)
                     const kcprotectApi = new KCProtect (openid.issuer, accessToken)
                     for (scope of scopes) {
-                        const permission = await kcprotectApi.createOrUpdatePermission (args.data.resourceId, userId, true, scope)
+                        const permission = await kcprotectApi.createOrUpdatePermission (args.data.resourceId, userId, granted, scope)
                         console.log(JSON.stringify(permission))
                         result.push({ id: permission.id })
                     }

@@ -73,8 +73,8 @@ export const REVOKE_ACCESS = `
 `
 
 export const GRANT_ACCESS = `
-    mutation GrantAccess($credIssuerId: ID!, $ticket: String!) {
-        approvePermission(credIssuerId: $credIssuerId, id: $ticket)
+    mutation GrantAccess($credIssuerId: ID!, $tickets: [String]!) {
+        approvePermissions(credIssuerId: $credIssuerId, ids: $tickets)
     }
 `
 

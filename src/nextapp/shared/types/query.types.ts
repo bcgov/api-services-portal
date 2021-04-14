@@ -6479,6 +6479,7 @@ export type UmaPermissionTicket = {
 export type UmaPermissionTicketInput = {
   resourceId: Scalars['String'];
   username: Scalars['String'];
+  granted?: Maybe<Scalars['Boolean']>;
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
@@ -7757,7 +7758,7 @@ export type Mutation = {
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
-  approvePermission?: Maybe<Scalars['Boolean']>;
+  approvePermissions?: Maybe<Scalars['Boolean']>;
   /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
   authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
   unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
@@ -8633,9 +8634,9 @@ export type MutationRevokePermissionsArgs = {
 };
 
 
-export type MutationApprovePermissionArgs = {
+export type MutationApprovePermissionsArgs = {
   credIssuerId: Scalars['ID'];
-  id: Scalars['String'];
+  ids: Array<Maybe<Scalars['String']>>;
 };
 
 

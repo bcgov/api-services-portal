@@ -22,7 +22,7 @@ import ModelIcon from '@/components/model-icon/model-icon';
 
 const { useEffect, useState } = React;
 
-import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, REVOKE_ACCESS } from '../queries'
+import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, GRANT_ACCESS, REVOKE_ACCESS } from '../queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 
@@ -62,7 +62,7 @@ const ResourcesPage = () => {
     const form = React.useRef<HTMLFormElement>();
     const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      //createApplication();
+      grantUserAccess()
     };
 
     const grantUserAccess = async () => {
@@ -70,10 +70,11 @@ const ResourcesPage = () => {
         if (form.current.checkValidity()) {
             const username = data.get('username') as string;
             const scopes = data.getAll('scopes') as string[];
+            const granted = data.get('granted') as string;
             console.log("Name = "+username)
             console.log("Scopes = "+scopes)
 
-            graphql(GRANT_USER_ACCESS, { credIssuerId: credIssuerId, data: { resourceId: id, username: username, scopes: scopes } })
+            graphql(GRANT_USER_ACCESS, { credIssuerId: credIssuerId, data: { resourceId: id, username: username, granted: granted == "TRUE", scopes: scopes } })
             .then(fetch)
             .catch (err => {
                 console.log(err)
@@ -81,8 +82,12 @@ const ResourcesPage = () => {
         }        
     }
 
-    const grantAccess = async (item) => {
-
+    const grantAccess = async (ticketIds) => {
+        graphql(GRANT_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+        .then(fetch)
+        .catch (err => {
+            console.log(err)
+        })
     }
 
     const revokeAccess = async (ticketIds) => {
@@ -208,6 +213,13 @@ const ResourcesPage = () => {
                             ))}
                         </Stack>
                     </FormControl>
+                    <FormControl mb={4}>
+                        <FormLabel>Grant</FormLabel>
+                        <Stack pl={6} mt={1} spacing={1}>
+                            <Checkbox name="granted" variant="bc-input" value="true">TRUE</Checkbox>
+                        </Stack>
+                    </FormControl>
+
                     <Button colorScheme="red" onClick={() => grantUserAccess()}>Grant Access</Button>
                 </form>
             </Box>

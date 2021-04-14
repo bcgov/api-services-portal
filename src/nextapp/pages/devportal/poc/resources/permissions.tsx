@@ -47,7 +47,6 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                         <Tr>
                         <Th>User</Th>
                         <Th>Permission</Th>
-                        <Th>Owner</Th>
                         <Th>Action</Th>
                         </Tr>
                     </Thead>
@@ -56,7 +55,6 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                         <Tr key={item.id}>
                             <Td>{item.requesterName}</Td>
                             <Td>{tagit(item.scopes, 'blue', null)}</Td>
-                            <Td>{item.ownerName}</Td>
                             <Td>
                                 {granted ? (
                                     <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.scopes.map(s => s.id))}>Revoke All</Button>

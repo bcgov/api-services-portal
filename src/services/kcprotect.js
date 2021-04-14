@@ -38,7 +38,7 @@ module.exports = function (issuerUrl, accessToken) {
 
 
     const getPermissionTicket = async function getPermissionTicket(id) {
-        const url = `${issuerUrl}/authz/protection/permission/ticket/${id}`
+        const url = `${issuerUrl}/authz/protection/permission/ticket?id=${id}`
         const result = await fetch (url, {
             method: 'get', 
             headers: {'Authorization': `Bearer ${accessToken}` }
