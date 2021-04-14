@@ -69,6 +69,10 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    resourceType: {
+        type: Text,
+        isRequired: false,
+    },
     apiKeyName: {
         type: Text,
         isRequired: false,

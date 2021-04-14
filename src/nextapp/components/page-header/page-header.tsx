@@ -32,7 +32,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             <Breadcrumb fontSize="sm" color="gray.500">
               <BreadcrumbItem>
                 <NextLink passHref href="/manager">
-                  <BreadcrumbLink>API Manager</BreadcrumbLink>
+                  <BreadcrumbLink>API</BreadcrumbLink>
                 </NextLink>
               </BreadcrumbItem>
               {breadcrumb.length > 0 &&

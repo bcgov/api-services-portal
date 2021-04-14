@@ -9,6 +9,8 @@ const { generate } = require('@graphql-codegen/cli');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 
+var Keycloak = require("keycloak-connect");
+
 const initialiseData = require('./initial-data');
 const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
@@ -117,6 +119,7 @@ for (_list of [
   'Organization',
   'OrganizationUnit',
   'Product',
+  'ResourceSet',
   'ServiceAccess',
   'TemporaryIdentity',
   'Todo',
@@ -128,6 +131,16 @@ for (_list of [
       list.extensions.map (ext => ext(keystone))
   }
   keystone.createList(_list, list);
+}
+for (_list of [
+    'UMAResourceSet',
+    'UMAPermissionTicket',
+  ]) {
+    const list = require('./lists/extensions/' + _list)
+    if ('extensions' in list) {
+        console.log("Registering Extension!")
+        list.extensions.map (ext => ext(keystone))
+    }
 }
 const strategyType = process.env.AUTH_STRATEGY || 'Password';
 console.log('Auth Strategy: ' + strategyType);
@@ -211,6 +224,25 @@ module.exports = {
         await tasked.start()
         res.status(200).json({result: 'ok'})
     })
+
+    var keycloak = new Keycloak({
+        cookies: false
+    }, { 
+        clientId: "gwa-api",
+        secret: "66919256-e415-47a8-b468-40b0d8161f85",
+        authServerUrl: "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth", 
+        realm: "aps-v2"});
+    
+    app.get('/protected', ((req, res, next) => {
+        console.log("Reset " + req.headers['x-forwarded-access-token'])
+        req.headers['authorization'] = "Bearer " + req.headers['x-forwarded-access-token']
+        next()
+    }), keycloak.enforcer(['namespace-dds-map:viewer'], {
+        resource_server_id: 'gwa-api'
+      }), function (req, res) {
+        res.send("Settings resource accessed")
+     })
+
   },
   distDir,
 };

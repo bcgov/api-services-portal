@@ -19,7 +19,7 @@ import { FULFILL_REQUEST, GET_REQUEST } from './../queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 
-import ScopeChoice from './scopes'
+import ScopeChoice from './scope-selector'
 
 import graphql from '@/shared/services/graphql'
 import toArray from '@/shared/services/toarray'
