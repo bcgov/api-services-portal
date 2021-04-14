@@ -73,8 +73,9 @@ const ResourcesPage = () => {
             const granted = data.get('granted') as string;
             console.log("Name = "+username)
             console.log("Scopes = "+scopes)
+            console.log("Granted = "+granted)
 
-            graphql(GRANT_USER_ACCESS, { credIssuerId: credIssuerId, data: { resourceId: id, username: username, granted: granted == "TRUE", scopes: scopes } })
+            graphql(GRANT_USER_ACCESS, { credIssuerId: credIssuerId, data: { resourceId: id, username: username, granted: granted == "Y", scopes: scopes } })
             .then(fetch)
             .catch (err => {
                 console.log(err)
@@ -217,7 +218,7 @@ const ResourcesPage = () => {
                     <FormControl mb={4}>
                         <FormLabel>Grant</FormLabel>
                         <Stack pl={6} mt={1} spacing={1}>
-                            <Checkbox name="granted" variant="bc-input" value="true">TRUE</Checkbox>
+                            <Checkbox name="granted" variant="bc-input" value="Y">TRUE</Checkbox>
                         </Stack>
                     </FormControl>
 
