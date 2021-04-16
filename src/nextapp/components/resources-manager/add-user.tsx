@@ -46,16 +46,16 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Resource Sharing Controls</ModalHeader>
+          <ModalHeader>Add User</ModalHeader>
           <ModalBody>
             <form onSubmit={handleSubmit}>
               <VStack spacing={4}>
                 <FormControl isRequired>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <Input
-                    name="userEmail"
-                    type="email"
-                    placeholder="Enter user email"
+                    name="username"
+                    type="text"
+                    placeholder="Enter username of team member you'd like to add"
                   />
                 </FormControl>
                 <FormControl>

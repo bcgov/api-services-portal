@@ -1,6 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
+  useMutation,
   useQuery,
   UseQueryOptions,
   UseQueryResult,
@@ -88,6 +89,17 @@ export const useApi = (
     async () => await api<Query>(query.query, query.variables, { ssr: false }),
     queryOptions
   );
+};
+
+export const useApiMutation = <T>(
+  mutation: string,
+  queryOptions: UseQueryOptions = { suspense: true }
+) => {
+  const mutate = useMutation(
+    async (variables: T) =>
+      await api<Query>(mutation, variables, { ssr: false })
+  );
+  return mutate;
 };
 
 export default api;

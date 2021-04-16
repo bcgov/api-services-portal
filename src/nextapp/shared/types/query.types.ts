@@ -1,11 +1,7 @@
 export type Maybe<T> = T | null;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]: Maybe<T[SubKey]> };
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -20,6 +16,7 @@ export type Scalars = {
   /** The `Upload` scalar type represents a file upload. */
   Upload: any;
 };
+
 
 export type UserRelateToOneInput = {
   create?: Maybe<UserCreateInput>;
@@ -48,6 +45,7 @@ export type ServiceAccessRelateToOneInput = {
   disconnect?: Maybe<ServiceAccessWhereUniqueInput>;
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
+
 
 /**  A keystone list  */
 export type AccessRequest = {
@@ -250,7 +248,7 @@ export enum SortAccessRequestsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type AccessRequestUpdateInput = {
@@ -528,7 +526,7 @@ export enum SortActivitiesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type ActivityUpdateInput = {
@@ -692,7 +690,7 @@ export enum SortAlertsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type AlertUpdateInput = {
@@ -861,7 +859,7 @@ export enum SortApplicationsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type ApplicationUpdateInput = {
@@ -962,7 +960,7 @@ export enum SortBlobsBy {
   RefAsc = 'ref_ASC',
   RefDesc = 'ref_DESC',
   BlobAsc = 'blob_ASC',
-  BlobDesc = 'blob_DESC',
+  BlobDesc = 'blob_DESC'
 }
 
 export type BlobUpdateInput = {
@@ -1197,7 +1195,7 @@ export enum SortContentsBy {
   OrderAsc = 'order_ASC',
   OrderDesc = 'order_DESC',
   IsCompleteAsc = 'isComplete_ASC',
-  IsCompleteDesc = 'isComplete_DESC',
+  IsCompleteDesc = 'isComplete_DESC'
 }
 
 export type ContentUpdateInput = {
@@ -1278,6 +1276,7 @@ export type CredentialIssuer = {
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
+
 /**  A keystone list  */
 export type CredentialIssuerEnvironmentsArgs = {
   where?: Maybe<EnvironmentWhereInput>;
@@ -1287,6 +1286,7 @@ export type CredentialIssuerEnvironmentsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type CredentialIssuer_EnvironmentsMetaArgs = {
@@ -1611,7 +1611,7 @@ export enum SortCredentialIssuersBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type CredentialIssuerUpdateInput = {
@@ -2027,7 +2027,7 @@ export enum SortDatasetsBy {
   ExtForeignKeyAsc = 'extForeignKey_ASC',
   ExtForeignKeyDesc = 'extForeignKey_DESC',
   ExtRecordHashAsc = 'extRecordHash_ASC',
-  ExtRecordHashDesc = 'extRecordHash_DESC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type DatasetUpdateInput = {
@@ -2136,6 +2136,7 @@ export type Environment = {
   product?: Maybe<Product>;
 };
 
+
 /**  A keystone list  */
 export type EnvironmentServicesArgs = {
   where?: Maybe<GatewayServiceWhereInput>;
@@ -2145,6 +2146,7 @@ export type EnvironmentServicesArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type Environment_ServicesMetaArgs = {
@@ -2265,7 +2267,7 @@ export enum SortEnvironmentsBy {
   ServicesAsc = 'services_ASC',
   ServicesDesc = 'services_DESC',
   ProductAsc = 'product_ASC',
-  ProductDesc = 'product_DESC',
+  ProductDesc = 'product_DESC'
 }
 
 export type EnvironmentUpdateInput = {
@@ -2335,6 +2337,7 @@ export type GatewayConsumer = {
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
+
 /**  A keystone list  */
 export type GatewayConsumerPluginsArgs = {
   where?: Maybe<GatewayPluginWhereInput>;
@@ -2344,6 +2347,7 @@ export type GatewayConsumerPluginsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type GatewayConsumer_PluginsMetaArgs = {
@@ -2558,7 +2562,7 @@ export enum SortGatewayConsumersBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GatewayConsumerUpdateInput = {
@@ -2750,7 +2754,7 @@ export enum SortGatewayGroupsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GatewayGroupUpdateInput = {
@@ -2993,7 +2997,7 @@ export enum SortGatewayPluginsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GatewayPluginUpdateInput = {
@@ -3057,6 +3061,7 @@ export type GatewayRoute = {
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
+
 /**  A keystone list  */
 export type GatewayRoutePluginsArgs = {
   where?: Maybe<GatewayPluginWhereInput>;
@@ -3066,6 +3071,7 @@ export type GatewayRoutePluginsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type GatewayRoute_PluginsMetaArgs = {
@@ -3304,7 +3310,7 @@ export enum SortGatewayRoutesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GatewayRouteUpdateInput = {
@@ -3379,6 +3385,7 @@ export type GatewayService = {
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
+
 /**  A keystone list  */
 export type GatewayServiceRoutesArgs = {
   where?: Maybe<GatewayRouteWhereInput>;
@@ -3388,6 +3395,7 @@ export type GatewayServiceRoutesArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type GatewayService_RoutesMetaArgs = {
@@ -3399,6 +3407,7 @@ export type GatewayService_RoutesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 /**  A keystone list  */
 export type GatewayServicePluginsArgs = {
   where?: Maybe<GatewayPluginWhereInput>;
@@ -3408,6 +3417,7 @@ export type GatewayServicePluginsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type GatewayService_PluginsMetaArgs = {
@@ -3614,7 +3624,7 @@ export enum SortGatewayServicesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GatewayServiceUpdateInput = {
@@ -3734,7 +3744,7 @@ export enum SortGroupsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type GroupUpdateInput = {
@@ -3922,7 +3932,7 @@ export enum SortLegalsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type LegalUpdateInput = {
@@ -4062,7 +4072,7 @@ export enum SortMemberRolesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type MemberRoleUpdateInput = {
@@ -4247,7 +4257,7 @@ export enum SortMetricsBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type MetricUpdateInput = {
@@ -4311,6 +4321,7 @@ export type Namespace = {
   createdAt?: Maybe<Scalars['DateTime']>;
 };
 
+
 /**  A keystone list  */
 export type NamespaceMembersArgs = {
   where?: Maybe<MemberRoleWhereInput>;
@@ -4320,6 +4331,7 @@ export type NamespaceMembersArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type Namespace_MembersMetaArgs = {
@@ -4490,7 +4502,7 @@ export enum SortNamespacesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type NamespaceUpdateInput = {
@@ -4555,6 +4567,7 @@ export type Organization = {
   extRecordHash?: Maybe<Scalars['String']>;
 };
 
+
 /**  A keystone list  */
 export type OrganizationOrgUnitsArgs = {
   where?: Maybe<OrganizationUnitWhereInput>;
@@ -4564,6 +4577,7 @@ export type OrganizationOrgUnitsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type Organization_OrgUnitsMetaArgs = {
@@ -4758,7 +4772,7 @@ export enum SortOrganizationsBy {
   ExtForeignKeyAsc = 'extForeignKey_ASC',
   ExtForeignKeyDesc = 'extForeignKey_DESC',
   ExtRecordHashAsc = 'extRecordHash_ASC',
-  ExtRecordHashDesc = 'extRecordHash_DESC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type OrganizationUpdateInput = {
@@ -4991,7 +5005,7 @@ export enum SortOrganizationUnitsBy {
   ExtForeignKeyAsc = 'extForeignKey_ASC',
   ExtForeignKeyDesc = 'extForeignKey_DESC',
   ExtRecordHashAsc = 'extRecordHash_ASC',
-  ExtRecordHashDesc = 'extRecordHash_DESC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type OrganizationUnitUpdateInput = {
@@ -5055,6 +5069,7 @@ export type Product = {
   _environmentsMeta?: Maybe<_QueryMeta>;
 };
 
+
 /**  A keystone list  */
 export type ProductEnvironmentsArgs = {
   where?: Maybe<EnvironmentWhereInput>;
@@ -5064,6 +5079,7 @@ export type ProductEnvironmentsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
 };
+
 
 /**  A keystone list  */
 export type Product_EnvironmentsMetaArgs = {
@@ -5190,7 +5206,7 @@ export enum SortProductsBy {
   OrganizationUnitAsc = 'organizationUnit_ASC',
   OrganizationUnitDesc = 'organizationUnit_DESC',
   EnvironmentsAsc = 'environments_ASC',
-  EnvironmentsDesc = 'environments_DESC',
+  EnvironmentsDesc = 'environments_DESC'
 }
 
 export type ProductUpdateInput = {
@@ -5421,7 +5437,7 @@ export enum SortResourceSetsBy {
   ExtForeignKeyAsc = 'extForeignKey_ASC',
   ExtForeignKeyDesc = 'extForeignKey_DESC',
   ExtRecordHashAsc = 'extRecordHash_ASC',
-  ExtRecordHashDesc = 'extRecordHash_DESC',
+  ExtRecordHashDesc = 'extRecordHash_DESC'
 }
 
 export type ResourceSetUpdateInput = {
@@ -5457,7 +5473,7 @@ export type ResourceSetsCreateInput = {
 
 export enum ServiceAccessConsumerTypeType {
   Client = 'client',
-  User = 'user',
+  User = 'user'
 }
 
 export type GatewayConsumerRelateToOneInput = {
@@ -5634,7 +5650,7 @@ export enum SortServiceAccessesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type ServiceAccessUpdateInput = {
@@ -5917,7 +5933,7 @@ export enum SortTemporaryIdentitiesBy {
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
-  CreatedAtDesc = 'createdAt_DESC',
+  CreatedAtDesc = 'createdAt_DESC'
 }
 
 export type TemporaryIdentityUpdateInput = {
@@ -6094,7 +6110,7 @@ export enum SortTodosBy {
   YamlAsc = 'yaml_ASC',
   YamlDesc = 'yaml_DESC',
   IsCompleteAsc = 'isComplete_ASC',
-  IsCompleteDesc = 'isComplete_DESC',
+  IsCompleteDesc = 'isComplete_DESC'
 }
 
 export type TodoUpdateInput = {
@@ -6244,7 +6260,7 @@ export enum SortUsersBy {
   IsAdminAsc = 'isAdmin_ASC',
   IsAdminDesc = 'isAdmin_DESC',
   LegalsAgreedAsc = 'legalsAgreed_ASC',
-  LegalsAgreedDesc = 'legalsAgreed_DESC',
+  LegalsAgreedDesc = 'legalsAgreed_DESC'
 }
 
 export type UserUpdateInput = {
@@ -6273,6 +6289,7 @@ export type UserCreateInput = {
 export type UsersCreateInput = {
   data?: Maybe<UserCreateInput>;
 };
+
 
 export type _ListAccess = {
   __typename?: '_ListAccess';
@@ -6391,6 +6408,7 @@ export type _ListSchema = {
   relatedFields?: Maybe<Array<Maybe<_ListSchemaRelatedFields>>>;
 };
 
+
 export type _ListSchemaFieldsArgs = {
   where?: Maybe<_ListSchemaFieldsInput>;
 };
@@ -6466,8 +6484,8 @@ export type UmaPermissionTicketInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UnauthenticateTemporaryIdentityOutput = {
-  __typename?: 'unauthenticateTemporaryIdentityOutput';
+export type UnauthenticateUserOutput = {
+  __typename?: 'unauthenticateUserOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -6711,6 +6729,7 @@ export type Query = {
   authenticatedUser?: Maybe<User>;
 };
 
+
 export type QueryAllAccessRequestsArgs = {
   where?: Maybe<AccessRequestWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6720,9 +6739,11 @@ export type QueryAllAccessRequestsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAccessRequestArgs = {
   where: AccessRequestWhereUniqueInput;
 };
+
 
 export type Query_AllAccessRequestsMetaArgs = {
   where?: Maybe<AccessRequestWhereInput>;
@@ -6733,6 +6754,7 @@ export type Query_AllAccessRequestsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllActivitiesArgs = {
   where?: Maybe<ActivityWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6742,9 +6764,11 @@ export type QueryAllActivitiesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryActivityArgs = {
   where: ActivityWhereUniqueInput;
 };
+
 
 export type Query_AllActivitiesMetaArgs = {
   where?: Maybe<ActivityWhereInput>;
@@ -6755,6 +6779,7 @@ export type Query_AllActivitiesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllAlertsArgs = {
   where?: Maybe<AlertWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6764,9 +6789,11 @@ export type QueryAllAlertsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAlertArgs = {
   where: AlertWhereUniqueInput;
 };
+
 
 export type Query_AllAlertsMetaArgs = {
   where?: Maybe<AlertWhereInput>;
@@ -6777,6 +6804,7 @@ export type Query_AllAlertsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllApplicationsArgs = {
   where?: Maybe<ApplicationWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6786,9 +6814,11 @@ export type QueryAllApplicationsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryApplicationArgs = {
   where: ApplicationWhereUniqueInput;
 };
+
 
 export type Query_AllApplicationsMetaArgs = {
   where?: Maybe<ApplicationWhereInput>;
@@ -6799,6 +6829,7 @@ export type Query_AllApplicationsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllBlobsArgs = {
   where?: Maybe<BlobWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6808,9 +6839,11 @@ export type QueryAllBlobsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryBlobArgs = {
   where: BlobWhereUniqueInput;
 };
+
 
 export type Query_AllBlobsMetaArgs = {
   where?: Maybe<BlobWhereInput>;
@@ -6821,6 +6854,7 @@ export type Query_AllBlobsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllContentsArgs = {
   where?: Maybe<ContentWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6830,9 +6864,11 @@ export type QueryAllContentsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryContentArgs = {
   where: ContentWhereUniqueInput;
 };
+
 
 export type Query_AllContentsMetaArgs = {
   where?: Maybe<ContentWhereInput>;
@@ -6843,6 +6879,7 @@ export type Query_AllContentsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllCredentialIssuersArgs = {
   where?: Maybe<CredentialIssuerWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6852,9 +6889,11 @@ export type QueryAllCredentialIssuersArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryCredentialIssuerArgs = {
   where: CredentialIssuerWhereUniqueInput;
 };
+
 
 export type Query_AllCredentialIssuersMetaArgs = {
   where?: Maybe<CredentialIssuerWhereInput>;
@@ -6865,6 +6904,7 @@ export type Query_AllCredentialIssuersMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllDatasetsArgs = {
   where?: Maybe<DatasetWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6874,9 +6914,11 @@ export type QueryAllDatasetsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryDatasetArgs = {
   where: DatasetWhereUniqueInput;
 };
+
 
 export type Query_AllDatasetsMetaArgs = {
   where?: Maybe<DatasetWhereInput>;
@@ -6887,6 +6929,7 @@ export type Query_AllDatasetsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllEnvironmentsArgs = {
   where?: Maybe<EnvironmentWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6896,9 +6939,11 @@ export type QueryAllEnvironmentsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryEnvironmentArgs = {
   where: EnvironmentWhereUniqueInput;
 };
+
 
 export type Query_AllEnvironmentsMetaArgs = {
   where?: Maybe<EnvironmentWhereInput>;
@@ -6909,6 +6954,7 @@ export type Query_AllEnvironmentsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGatewayConsumersArgs = {
   where?: Maybe<GatewayConsumerWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6918,9 +6964,11 @@ export type QueryAllGatewayConsumersArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGatewayConsumerArgs = {
   where: GatewayConsumerWhereUniqueInput;
 };
+
 
 export type Query_AllGatewayConsumersMetaArgs = {
   where?: Maybe<GatewayConsumerWhereInput>;
@@ -6931,6 +6979,7 @@ export type Query_AllGatewayConsumersMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGatewayGroupsArgs = {
   where?: Maybe<GatewayGroupWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6940,9 +6989,11 @@ export type QueryAllGatewayGroupsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGatewayGroupArgs = {
   where: GatewayGroupWhereUniqueInput;
 };
+
 
 export type Query_AllGatewayGroupsMetaArgs = {
   where?: Maybe<GatewayGroupWhereInput>;
@@ -6953,6 +7004,7 @@ export type Query_AllGatewayGroupsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGatewayPluginsArgs = {
   where?: Maybe<GatewayPluginWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6962,9 +7014,11 @@ export type QueryAllGatewayPluginsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGatewayPluginArgs = {
   where: GatewayPluginWhereUniqueInput;
 };
+
 
 export type Query_AllGatewayPluginsMetaArgs = {
   where?: Maybe<GatewayPluginWhereInput>;
@@ -6975,6 +7029,7 @@ export type Query_AllGatewayPluginsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGatewayRoutesArgs = {
   where?: Maybe<GatewayRouteWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -6984,9 +7039,11 @@ export type QueryAllGatewayRoutesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGatewayRouteArgs = {
   where: GatewayRouteWhereUniqueInput;
 };
+
 
 export type Query_AllGatewayRoutesMetaArgs = {
   where?: Maybe<GatewayRouteWhereInput>;
@@ -6997,6 +7054,7 @@ export type Query_AllGatewayRoutesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGatewayServicesArgs = {
   where?: Maybe<GatewayServiceWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7006,9 +7064,11 @@ export type QueryAllGatewayServicesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGatewayServiceArgs = {
   where: GatewayServiceWhereUniqueInput;
 };
+
 
 export type Query_AllGatewayServicesMetaArgs = {
   where?: Maybe<GatewayServiceWhereInput>;
@@ -7019,6 +7079,7 @@ export type Query_AllGatewayServicesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllGroupsArgs = {
   where?: Maybe<GroupWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7028,9 +7089,11 @@ export type QueryAllGroupsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryGroupArgs = {
   where: GroupWhereUniqueInput;
 };
+
 
 export type Query_AllGroupsMetaArgs = {
   where?: Maybe<GroupWhereInput>;
@@ -7041,6 +7104,7 @@ export type Query_AllGroupsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllLegalsArgs = {
   where?: Maybe<LegalWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7050,9 +7114,11 @@ export type QueryAllLegalsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryLegalArgs = {
   where: LegalWhereUniqueInput;
 };
+
 
 export type Query_AllLegalsMetaArgs = {
   where?: Maybe<LegalWhereInput>;
@@ -7063,6 +7129,7 @@ export type Query_AllLegalsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllMemberRolesArgs = {
   where?: Maybe<MemberRoleWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7072,9 +7139,11 @@ export type QueryAllMemberRolesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryMemberRoleArgs = {
   where: MemberRoleWhereUniqueInput;
 };
+
 
 export type Query_AllMemberRolesMetaArgs = {
   where?: Maybe<MemberRoleWhereInput>;
@@ -7085,6 +7154,7 @@ export type Query_AllMemberRolesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllMetricsArgs = {
   where?: Maybe<MetricWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7094,9 +7164,11 @@ export type QueryAllMetricsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryMetricArgs = {
   where: MetricWhereUniqueInput;
 };
+
 
 export type Query_AllMetricsMetaArgs = {
   where?: Maybe<MetricWhereInput>;
@@ -7107,6 +7179,7 @@ export type Query_AllMetricsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllNamespacesArgs = {
   where?: Maybe<NamespaceWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7116,9 +7189,11 @@ export type QueryAllNamespacesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryNamespaceArgs = {
   where: NamespaceWhereUniqueInput;
 };
+
 
 export type Query_AllNamespacesMetaArgs = {
   where?: Maybe<NamespaceWhereInput>;
@@ -7129,6 +7204,7 @@ export type Query_AllNamespacesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllOrganizationsArgs = {
   where?: Maybe<OrganizationWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7138,9 +7214,11 @@ export type QueryAllOrganizationsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryOrganizationArgs = {
   where: OrganizationWhereUniqueInput;
 };
+
 
 export type Query_AllOrganizationsMetaArgs = {
   where?: Maybe<OrganizationWhereInput>;
@@ -7151,6 +7229,7 @@ export type Query_AllOrganizationsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllOrganizationUnitsArgs = {
   where?: Maybe<OrganizationUnitWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7160,9 +7239,11 @@ export type QueryAllOrganizationUnitsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryOrganizationUnitArgs = {
   where: OrganizationUnitWhereUniqueInput;
 };
+
 
 export type Query_AllOrganizationUnitsMetaArgs = {
   where?: Maybe<OrganizationUnitWhereInput>;
@@ -7173,6 +7254,7 @@ export type Query_AllOrganizationUnitsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllProductsArgs = {
   where?: Maybe<ProductWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7182,9 +7264,11 @@ export type QueryAllProductsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryProductArgs = {
   where: ProductWhereUniqueInput;
 };
+
 
 export type Query_AllProductsMetaArgs = {
   where?: Maybe<ProductWhereInput>;
@@ -7195,6 +7279,7 @@ export type Query_AllProductsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllResourceSetsArgs = {
   where?: Maybe<ResourceSetWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7204,9 +7289,11 @@ export type QueryAllResourceSetsArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryResourceSetArgs = {
   where: ResourceSetWhereUniqueInput;
 };
+
 
 export type Query_AllResourceSetsMetaArgs = {
   where?: Maybe<ResourceSetWhereInput>;
@@ -7217,6 +7304,7 @@ export type Query_AllResourceSetsMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllServiceAccessesArgs = {
   where?: Maybe<ServiceAccessWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7226,9 +7314,11 @@ export type QueryAllServiceAccessesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryServiceAccessArgs = {
   where: ServiceAccessWhereUniqueInput;
 };
+
 
 export type Query_AllServiceAccessesMetaArgs = {
   where?: Maybe<ServiceAccessWhereInput>;
@@ -7239,6 +7329,7 @@ export type Query_AllServiceAccessesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllTemporaryIdentitiesArgs = {
   where?: Maybe<TemporaryIdentityWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7248,9 +7339,11 @@ export type QueryAllTemporaryIdentitiesArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryTemporaryIdentityArgs = {
   where: TemporaryIdentityWhereUniqueInput;
 };
+
 
 export type Query_AllTemporaryIdentitiesMetaArgs = {
   where?: Maybe<TemporaryIdentityWhereInput>;
@@ -7261,6 +7354,7 @@ export type Query_AllTemporaryIdentitiesMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllTodosArgs = {
   where?: Maybe<TodoWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7270,9 +7364,11 @@ export type QueryAllTodosArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryTodoArgs = {
   where: TodoWhereUniqueInput;
 };
+
 
 export type Query_AllTodosMetaArgs = {
   where?: Maybe<TodoWhereInput>;
@@ -7283,6 +7379,7 @@ export type Query_AllTodosMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryAllUsersArgs = {
   where?: Maybe<UserWhereInput>;
   search?: Maybe<Scalars['String']>;
@@ -7292,9 +7389,11 @@ export type QueryAllUsersArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type QueryUserArgs = {
   where: UserWhereUniqueInput;
 };
+
 
 export type Query_AllUsersMetaArgs = {
   where?: Maybe<UserWhereInput>;
@@ -7305,13 +7404,16 @@ export type Query_AllUsersMetaArgs = {
   skip?: Maybe<Scalars['Int']>;
 };
 
+
 export type Query_KsListsMetaArgs = {
   where?: Maybe<_KsListsMetaInput>;
 };
 
+
 export type QueryGetGatewayConsumerPluginsArgs = {
   id: Scalars['ID'];
 };
+
 
 export type QueryGetResourceSetArgs = {
   credIssuerId: Scalars['ID'];
@@ -7319,6 +7421,7 @@ export type QueryGetResourceSetArgs = {
   type?: Maybe<Scalars['String']>;
   resourceId?: Maybe<Scalars['String']>;
 };
+
 
 export type QueryGetPermissionTicketsArgs = {
   credIssuerId: Scalars['ID'];
@@ -7657,691 +7760,855 @@ export type Mutation = {
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
-  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
-  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
-  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
+  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
+  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
+  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
+  updateAuthenticatedUser?: Maybe<User>;
 };
+
 
 export type MutationCreateAccessRequestArgs = {
   data?: Maybe<AccessRequestCreateInput>;
 };
 
+
 export type MutationCreateAccessRequestsArgs = {
   data?: Maybe<Array<Maybe<AccessRequestsCreateInput>>>;
 };
+
 
 export type MutationUpdateAccessRequestArgs = {
   id: Scalars['ID'];
   data?: Maybe<AccessRequestUpdateInput>;
 };
 
+
 export type MutationUpdateAccessRequestsArgs = {
   data?: Maybe<Array<Maybe<AccessRequestsUpdateInput>>>;
 };
+
 
 export type MutationDeleteAccessRequestArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteAccessRequestsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateActivityArgs = {
   data?: Maybe<ActivityCreateInput>;
 };
 
+
 export type MutationCreateActivitiesArgs = {
   data?: Maybe<Array<Maybe<ActivitiesCreateInput>>>;
 };
+
 
 export type MutationUpdateActivityArgs = {
   id: Scalars['ID'];
   data?: Maybe<ActivityUpdateInput>;
 };
 
+
 export type MutationUpdateActivitiesArgs = {
   data?: Maybe<Array<Maybe<ActivitiesUpdateInput>>>;
 };
+
 
 export type MutationDeleteActivityArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteActivitiesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateAlertArgs = {
   data?: Maybe<AlertCreateInput>;
 };
 
+
 export type MutationCreateAlertsArgs = {
   data?: Maybe<Array<Maybe<AlertsCreateInput>>>;
 };
+
 
 export type MutationUpdateAlertArgs = {
   id: Scalars['ID'];
   data?: Maybe<AlertUpdateInput>;
 };
 
+
 export type MutationUpdateAlertsArgs = {
   data?: Maybe<Array<Maybe<AlertsUpdateInput>>>;
 };
+
 
 export type MutationDeleteAlertArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteAlertsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateApplicationArgs = {
   data?: Maybe<ApplicationCreateInput>;
 };
 
+
 export type MutationCreateApplicationsArgs = {
   data?: Maybe<Array<Maybe<ApplicationsCreateInput>>>;
 };
+
 
 export type MutationUpdateApplicationArgs = {
   id: Scalars['ID'];
   data?: Maybe<ApplicationUpdateInput>;
 };
 
+
 export type MutationUpdateApplicationsArgs = {
   data?: Maybe<Array<Maybe<ApplicationsUpdateInput>>>;
 };
+
 
 export type MutationDeleteApplicationArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteApplicationsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateBlobArgs = {
   data?: Maybe<BlobCreateInput>;
 };
 
+
 export type MutationCreateBlobsArgs = {
   data?: Maybe<Array<Maybe<BlobsCreateInput>>>;
 };
+
 
 export type MutationUpdateBlobArgs = {
   id: Scalars['ID'];
   data?: Maybe<BlobUpdateInput>;
 };
 
+
 export type MutationUpdateBlobsArgs = {
   data?: Maybe<Array<Maybe<BlobsUpdateInput>>>;
 };
+
 
 export type MutationDeleteBlobArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteBlobsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateContentArgs = {
   data?: Maybe<ContentCreateInput>;
 };
 
+
 export type MutationCreateContentsArgs = {
   data?: Maybe<Array<Maybe<ContentsCreateInput>>>;
 };
+
 
 export type MutationUpdateContentArgs = {
   id: Scalars['ID'];
   data?: Maybe<ContentUpdateInput>;
 };
 
+
 export type MutationUpdateContentsArgs = {
   data?: Maybe<Array<Maybe<ContentsUpdateInput>>>;
 };
+
 
 export type MutationDeleteContentArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteContentsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateCredentialIssuerArgs = {
   data?: Maybe<CredentialIssuerCreateInput>;
 };
 
+
 export type MutationCreateCredentialIssuersArgs = {
   data?: Maybe<Array<Maybe<CredentialIssuersCreateInput>>>;
 };
+
 
 export type MutationUpdateCredentialIssuerArgs = {
   id: Scalars['ID'];
   data?: Maybe<CredentialIssuerUpdateInput>;
 };
 
+
 export type MutationUpdateCredentialIssuersArgs = {
   data?: Maybe<Array<Maybe<CredentialIssuersUpdateInput>>>;
 };
+
 
 export type MutationDeleteCredentialIssuerArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteCredentialIssuersArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateDatasetArgs = {
   data?: Maybe<DatasetCreateInput>;
 };
 
+
 export type MutationCreateDatasetsArgs = {
   data?: Maybe<Array<Maybe<DatasetsCreateInput>>>;
 };
+
 
 export type MutationUpdateDatasetArgs = {
   id: Scalars['ID'];
   data?: Maybe<DatasetUpdateInput>;
 };
 
+
 export type MutationUpdateDatasetsArgs = {
   data?: Maybe<Array<Maybe<DatasetsUpdateInput>>>;
 };
+
 
 export type MutationDeleteDatasetArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteDatasetsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateEnvironmentArgs = {
   data?: Maybe<EnvironmentCreateInput>;
 };
 
+
 export type MutationCreateEnvironmentsArgs = {
   data?: Maybe<Array<Maybe<EnvironmentsCreateInput>>>;
 };
+
 
 export type MutationUpdateEnvironmentArgs = {
   id: Scalars['ID'];
   data?: Maybe<EnvironmentUpdateInput>;
 };
 
+
 export type MutationUpdateEnvironmentsArgs = {
   data?: Maybe<Array<Maybe<EnvironmentsUpdateInput>>>;
 };
+
 
 export type MutationDeleteEnvironmentArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteEnvironmentsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayConsumerArgs = {
   data?: Maybe<GatewayConsumerCreateInput>;
 };
 
+
 export type MutationCreateGatewayConsumersArgs = {
   data?: Maybe<Array<Maybe<GatewayConsumersCreateInput>>>;
 };
+
 
 export type MutationUpdateGatewayConsumerArgs = {
   id: Scalars['ID'];
   data?: Maybe<GatewayConsumerUpdateInput>;
 };
 
+
 export type MutationUpdateGatewayConsumersArgs = {
   data?: Maybe<Array<Maybe<GatewayConsumersUpdateInput>>>;
 };
+
 
 export type MutationDeleteGatewayConsumerArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGatewayConsumersArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayGroupArgs = {
   data?: Maybe<GatewayGroupCreateInput>;
 };
 
+
 export type MutationCreateGatewayGroupsArgs = {
   data?: Maybe<Array<Maybe<GatewayGroupsCreateInput>>>;
 };
+
 
 export type MutationUpdateGatewayGroupArgs = {
   id: Scalars['ID'];
   data?: Maybe<GatewayGroupUpdateInput>;
 };
 
+
 export type MutationUpdateGatewayGroupsArgs = {
   data?: Maybe<Array<Maybe<GatewayGroupsUpdateInput>>>;
 };
+
 
 export type MutationDeleteGatewayGroupArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGatewayGroupsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayPluginArgs = {
   data?: Maybe<GatewayPluginCreateInput>;
 };
 
+
 export type MutationCreateGatewayPluginsArgs = {
   data?: Maybe<Array<Maybe<GatewayPluginsCreateInput>>>;
 };
+
 
 export type MutationUpdateGatewayPluginArgs = {
   id: Scalars['ID'];
   data?: Maybe<GatewayPluginUpdateInput>;
 };
 
+
 export type MutationUpdateGatewayPluginsArgs = {
   data?: Maybe<Array<Maybe<GatewayPluginsUpdateInput>>>;
 };
+
 
 export type MutationDeleteGatewayPluginArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGatewayPluginsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayRouteArgs = {
   data?: Maybe<GatewayRouteCreateInput>;
 };
 
+
 export type MutationCreateGatewayRoutesArgs = {
   data?: Maybe<Array<Maybe<GatewayRoutesCreateInput>>>;
 };
+
 
 export type MutationUpdateGatewayRouteArgs = {
   id: Scalars['ID'];
   data?: Maybe<GatewayRouteUpdateInput>;
 };
 
+
 export type MutationUpdateGatewayRoutesArgs = {
   data?: Maybe<Array<Maybe<GatewayRoutesUpdateInput>>>;
 };
+
 
 export type MutationDeleteGatewayRouteArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGatewayRoutesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayServiceArgs = {
   data?: Maybe<GatewayServiceCreateInput>;
 };
 
+
 export type MutationCreateGatewayServicesArgs = {
   data?: Maybe<Array<Maybe<GatewayServicesCreateInput>>>;
 };
+
 
 export type MutationUpdateGatewayServiceArgs = {
   id: Scalars['ID'];
   data?: Maybe<GatewayServiceUpdateInput>;
 };
 
+
 export type MutationUpdateGatewayServicesArgs = {
   data?: Maybe<Array<Maybe<GatewayServicesUpdateInput>>>;
 };
+
 
 export type MutationDeleteGatewayServiceArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGatewayServicesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGroupArgs = {
   data?: Maybe<GroupCreateInput>;
 };
 
+
 export type MutationCreateGroupsArgs = {
   data?: Maybe<Array<Maybe<GroupsCreateInput>>>;
 };
+
 
 export type MutationUpdateGroupArgs = {
   id: Scalars['ID'];
   data?: Maybe<GroupUpdateInput>;
 };
 
+
 export type MutationUpdateGroupsArgs = {
   data?: Maybe<Array<Maybe<GroupsUpdateInput>>>;
 };
+
 
 export type MutationDeleteGroupArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteGroupsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateLegalArgs = {
   data?: Maybe<LegalCreateInput>;
 };
 
+
 export type MutationCreateLegalsArgs = {
   data?: Maybe<Array<Maybe<LegalsCreateInput>>>;
 };
+
 
 export type MutationUpdateLegalArgs = {
   id: Scalars['ID'];
   data?: Maybe<LegalUpdateInput>;
 };
 
+
 export type MutationUpdateLegalsArgs = {
   data?: Maybe<Array<Maybe<LegalsUpdateInput>>>;
 };
+
 
 export type MutationDeleteLegalArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteLegalsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateMemberRoleArgs = {
   data?: Maybe<MemberRoleCreateInput>;
 };
 
+
 export type MutationCreateMemberRolesArgs = {
   data?: Maybe<Array<Maybe<MemberRolesCreateInput>>>;
 };
+
 
 export type MutationUpdateMemberRoleArgs = {
   id: Scalars['ID'];
   data?: Maybe<MemberRoleUpdateInput>;
 };
 
+
 export type MutationUpdateMemberRolesArgs = {
   data?: Maybe<Array<Maybe<MemberRolesUpdateInput>>>;
 };
+
 
 export type MutationDeleteMemberRoleArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteMemberRolesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateMetricArgs = {
   data?: Maybe<MetricCreateInput>;
 };
 
+
 export type MutationCreateMetricsArgs = {
   data?: Maybe<Array<Maybe<MetricsCreateInput>>>;
 };
+
 
 export type MutationUpdateMetricArgs = {
   id: Scalars['ID'];
   data?: Maybe<MetricUpdateInput>;
 };
 
+
 export type MutationUpdateMetricsArgs = {
   data?: Maybe<Array<Maybe<MetricsUpdateInput>>>;
 };
+
 
 export type MutationDeleteMetricArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteMetricsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateNamespaceArgs = {
   data?: Maybe<NamespaceCreateInput>;
 };
 
+
 export type MutationCreateNamespacesArgs = {
   data?: Maybe<Array<Maybe<NamespacesCreateInput>>>;
 };
+
 
 export type MutationUpdateNamespaceArgs = {
   id: Scalars['ID'];
   data?: Maybe<NamespaceUpdateInput>;
 };
 
+
 export type MutationUpdateNamespacesArgs = {
   data?: Maybe<Array<Maybe<NamespacesUpdateInput>>>;
 };
+
 
 export type MutationDeleteNamespaceArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteNamespacesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateOrganizationArgs = {
   data?: Maybe<OrganizationCreateInput>;
 };
 
+
 export type MutationCreateOrganizationsArgs = {
   data?: Maybe<Array<Maybe<OrganizationsCreateInput>>>;
 };
+
 
 export type MutationUpdateOrganizationArgs = {
   id: Scalars['ID'];
   data?: Maybe<OrganizationUpdateInput>;
 };
 
+
 export type MutationUpdateOrganizationsArgs = {
   data?: Maybe<Array<Maybe<OrganizationsUpdateInput>>>;
 };
+
 
 export type MutationDeleteOrganizationArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteOrganizationsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateOrganizationUnitArgs = {
   data?: Maybe<OrganizationUnitCreateInput>;
 };
 
+
 export type MutationCreateOrganizationUnitsArgs = {
   data?: Maybe<Array<Maybe<OrganizationUnitsCreateInput>>>;
 };
+
 
 export type MutationUpdateOrganizationUnitArgs = {
   id: Scalars['ID'];
   data?: Maybe<OrganizationUnitUpdateInput>;
 };
 
+
 export type MutationUpdateOrganizationUnitsArgs = {
   data?: Maybe<Array<Maybe<OrganizationUnitsUpdateInput>>>;
 };
+
 
 export type MutationDeleteOrganizationUnitArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteOrganizationUnitsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateProductArgs = {
   data?: Maybe<ProductCreateInput>;
 };
 
+
 export type MutationCreateProductsArgs = {
   data?: Maybe<Array<Maybe<ProductsCreateInput>>>;
 };
+
 
 export type MutationUpdateProductArgs = {
   id: Scalars['ID'];
   data?: Maybe<ProductUpdateInput>;
 };
 
+
 export type MutationUpdateProductsArgs = {
   data?: Maybe<Array<Maybe<ProductsUpdateInput>>>;
 };
+
 
 export type MutationDeleteProductArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteProductsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateResourceSetArgs = {
   data?: Maybe<ResourceSetCreateInput>;
 };
 
+
 export type MutationCreateResourceSetsArgs = {
   data?: Maybe<Array<Maybe<ResourceSetsCreateInput>>>;
 };
+
 
 export type MutationUpdateResourceSetArgs = {
   id: Scalars['ID'];
   data?: Maybe<ResourceSetUpdateInput>;
 };
 
+
 export type MutationUpdateResourceSetsArgs = {
   data?: Maybe<Array<Maybe<ResourceSetsUpdateInput>>>;
 };
+
 
 export type MutationDeleteResourceSetArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteResourceSetsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateServiceAccessArgs = {
   data?: Maybe<ServiceAccessCreateInput>;
 };
 
+
 export type MutationCreateServiceAccessesArgs = {
   data?: Maybe<Array<Maybe<ServiceAccessesCreateInput>>>;
 };
+
 
 export type MutationUpdateServiceAccessArgs = {
   id: Scalars['ID'];
   data?: Maybe<ServiceAccessUpdateInput>;
 };
 
+
 export type MutationUpdateServiceAccessesArgs = {
   data?: Maybe<Array<Maybe<ServiceAccessesUpdateInput>>>;
 };
+
 
 export type MutationDeleteServiceAccessArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteServiceAccessesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateTemporaryIdentityArgs = {
   data?: Maybe<TemporaryIdentityCreateInput>;
 };
 
+
 export type MutationCreateTemporaryIdentitiesArgs = {
   data?: Maybe<Array<Maybe<TemporaryIdentitiesCreateInput>>>;
 };
+
 
 export type MutationUpdateTemporaryIdentityArgs = {
   id: Scalars['ID'];
   data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
+
 export type MutationUpdateTemporaryIdentitiesArgs = {
   data?: Maybe<Array<Maybe<TemporaryIdentitiesUpdateInput>>>;
 };
+
 
 export type MutationDeleteTemporaryIdentityArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteTemporaryIdentitiesArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateTodoArgs = {
   data?: Maybe<TodoCreateInput>;
 };
 
+
 export type MutationCreateTodosArgs = {
   data?: Maybe<Array<Maybe<TodosCreateInput>>>;
 };
+
 
 export type MutationUpdateTodoArgs = {
   id: Scalars['ID'];
   data?: Maybe<TodoUpdateInput>;
 };
 
+
 export type MutationUpdateTodosArgs = {
   data?: Maybe<Array<Maybe<TodosUpdateInput>>>;
 };
+
 
 export type MutationDeleteTodoArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteTodosArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateUserArgs = {
   data?: Maybe<UserCreateInput>;
 };
 
+
 export type MutationCreateUsersArgs = {
   data?: Maybe<Array<Maybe<UsersCreateInput>>>;
 };
+
 
 export type MutationUpdateUserArgs = {
   id: Scalars['ID'];
   data?: Maybe<UserUpdateInput>;
 };
 
+
 export type MutationUpdateUsersArgs = {
   data?: Maybe<Array<Maybe<UsersUpdateInput>>>;
 };
+
 
 export type MutationDeleteUserArgs = {
   id: Scalars['ID'];
 };
 
+
 export type MutationDeleteUsersArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
+
 
 export type MutationCreateGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
   plugin: Scalars['String'];
 };
+
 
 export type MutationUpdateGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
@@ -8349,20 +8616,24 @@ export type MutationUpdateGatewayConsumerPluginArgs = {
   plugin: Scalars['String'];
 };
 
+
 export type MutationDeleteGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
   pluginExtForeignKey: Scalars['String'];
 };
+
 
 export type MutationGrantPermissionsArgs = {
   credIssuerId: Scalars['ID'];
   data: UmaPermissionTicketInput;
 };
 
+
 export type MutationRevokePermissionsArgs = {
   credIssuerId: Scalars['ID'];
   ids: Array<Maybe<Scalars['String']>>;
 };
+
 
 export type MutationApprovePermissionsArgs = {
   credIssuerId: Scalars['ID'];
@@ -8371,16 +8642,19 @@ export type MutationApprovePermissionsArgs = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
+
+export type MutationAuthenticateUserWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
+
 
 export type MutationUpdateAuthenticatedUserArgs = {
   data?: Maybe<UserUpdateInput>;
 };
 
+
 export enum CacheControlScope {
   Public = 'PUBLIC',
-  Private = 'PRIVATE',
+  Private = 'PRIVATE'
 }

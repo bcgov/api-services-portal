@@ -19,12 +19,9 @@ import {
   Tag,
   Flex,
   Text,
-  Input,
-  Box,
-  ButtonGroup,
 } from '@chakra-ui/react';
-import { FaMinusCircle, FaPlusCircle } from 'react-icons/fa';
-import ShareResourceDialog from './add-user';
+import { FaCheck } from 'react-icons/fa';
+import AccessButton from '../access-button';
 
 interface ResourcesManagerDialogProps {
   open: boolean;
@@ -44,8 +41,8 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
           <Table variant="simple">
             <Thead>
               <Tr>
-                <Th>User</Th>
-                <Th colSpan={2}>Permission</Th>
+                <Th>Requestor</Th>
+                <Th colSpan={2}>Permissions</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -69,7 +66,7 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
                       <Tag
                         key={d}
                         variant="solid"
-                        colorScheme="green"
+                        colorScheme="cyan"
                         whiteSpace="nowrap"
                       >
                         {d}
@@ -77,22 +74,17 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
                     ))}
                   </HStack>
                 </Td>
-                <Td textAlign="right">
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    leftIcon={<Icon as={FaMinusCircle} />}
-                  >
-                    Revoke Access
-                  </Button>
+                <Td isNumeric>
+                  <AccessButton scope="" />
                 </Td>
               </Tr>
             </Tbody>
           </Table>
         </ModalBody>
-        <ModalFooter justifyContent="space-between">
-          <ShareResourceDialog />
-          <Button onClick={onClose}>Done</Button>
+        <ModalFooter>
+          <Button onClick={onClose} variant="primary">
+            Done
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

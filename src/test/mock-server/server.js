@@ -469,6 +469,7 @@ app.get('/admin/session', (_, res) => {
       isAdmin: false,
       namespace: 'dss-aps',
       groups: null,
+      sub: 'sub',
     },
   });
 });
