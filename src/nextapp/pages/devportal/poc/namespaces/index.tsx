@@ -28,8 +28,6 @@ import { styles } from '@/shared/styles/devportal.css'
 
 import graphql from '@/shared/services/graphql'
 
-import List from './list'
-
 const customStyles = {
     content : {
       top                   : '30%',
