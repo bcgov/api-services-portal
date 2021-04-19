@@ -37,6 +37,12 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
+    name: 'Namespaces',
+    url: '/devportal/poc/namespaces',
+    access: ['developer', 'api-owner'],
+    sites: ['devportal'],
+  },
+  {
     name: 'Products',
     url: '/manager/products',
     access: ['api-owner'],

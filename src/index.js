@@ -18,6 +18,8 @@ const MongoStore = require('connect-mongo')(session);
 
 const { Strategy, Issuer, Client } = require('openid-client');
 
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
 const { staticRoute, staticPath, distDir } = require('./config');
 
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
@@ -90,7 +92,8 @@ const keystone = new Keystone({
   cookieSecret: process.env.COOKIE_SECRET,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Default to true in production
-    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    //maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    maxAge: 1000 * 60, // 1 minute
     sameSite: true,
   },
   //   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
@@ -160,7 +163,7 @@ const authStrategy =
           onAuthenticated: ({ token, item, isNewItem }, req, res) => {
             console.log('Token = ' + token);
             console.log('Redirecting to /home');
-            res.redirect(302, '/admin/home');
+            res.redirect(302, '/home');
           },
         },
         hooks: {
@@ -206,6 +209,22 @@ module.exports = {
     new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: (app) => {
+
+    const apiProxy = createProxyMiddleware('/api', { 
+        target: process.env.GWA_API_URL, 
+        pathRewrite: { '^/api/': '/v2/' },
+        onProxyReq: (proxyReq, req) => { 
+            proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
+        onError:(err, req, res, target) => {
+            console.log(err)
+            res.writeHead(500, {
+              'Content-Type': 'text/plain',
+            });
+            res.end('error reaching api');
+        }
+    })
+    app.use('/api', apiProxy)
+
     const express = require('express')
     app.use(express.json())
 
@@ -224,25 +243,6 @@ module.exports = {
         await tasked.start()
         res.status(200).json({result: 'ok'})
     })
-
-    var keycloak = new Keycloak({
-        cookies: false
-    }, { 
-        clientId: "gwa-api",
-        secret: "66919256-e415-47a8-b468-40b0d8161f85",
-        authServerUrl: "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth", 
-        realm: "aps-v2"});
-    
-    app.get('/protected', ((req, res, next) => {
-        console.log("Reset " + req.headers['x-forwarded-access-token'])
-        req.headers['authorization'] = "Bearer " + req.headers['x-forwarded-access-token']
-        next()
-    }), keycloak.enforcer(['dds-map:viewer'], {
-        resource_server_id: 'gwa-api'
-      }), function (req, res) {
-        res.send("Settings resource accessed")
-     })
-
   },
   distDir,
 };

@@ -170,7 +170,7 @@ jobs:
             client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
             oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
             redirect-url: https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-            skip-auth-regex: '/home|/public|/docs|/_next|/images|/feed|^[/]$'
+            skip-auth-regex: '/home|/public|/docs|/_next|/images|/feed|/signout'
             whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
             skip-provider-button: 'true'
 
@@ -204,6 +204,8 @@ jobs:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
           NEXT_PUBLIC_API_ROOT:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
+          GWA_API_URL:
+            value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
 
         " > values.yaml
         

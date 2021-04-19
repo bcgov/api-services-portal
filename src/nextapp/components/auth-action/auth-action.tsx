@@ -25,7 +25,7 @@ const Signin: React.FC<AuthActionProps> = ({site}) => {
 
   if (!user) {
     return (
-      <Button color="secondary" href="/oauth2/sign_in">
+      <Button color="secondary" href="/admin/signin">
         Login
       </Button>
     );

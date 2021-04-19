@@ -15,7 +15,9 @@ export interface UserSessionResult {
 
 export const getSession = async (): Promise<UserData> => {
   try {
-    const req = await fetch(`${apiHost}/admin/session`);
+    const req = await fetch(`${apiHost}/admin/session`, {
+        headers: { 'Accept': 'application/json' }
+    });
 
     if (req.ok) {
       const json = await req.json();

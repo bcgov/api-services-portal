@@ -12,7 +12,9 @@ const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 
 const proxy = process.env.EXTERNAL_URL
-const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy)
+const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy + "/signout")
+
+const toJson = (val) => val ? JSON.parse(val) : null;
 
 class Oauth2ProxyAuthStrategy {
     constructor(keystone, listKey, config) {
@@ -59,6 +61,7 @@ class Oauth2ProxyAuthStrategy {
             requestProperty: 'oauth_user', 
             getToken: (req) => ('x-forwarded-access-token' in req.headers) ? req.headers['x-forwarded-access-token'] : null
         })
+        // X-Auth-Request-Access-Token
 
         const checkExpired = (err, req, res, next) => {
             console.log("CHECK EXPIRED!! " + err);
@@ -67,16 +70,19 @@ class Oauth2ProxyAuthStrategy {
                 if (err.name === 'UnauthorizedError') {
                     console.log("CODE = "+err.code);
                     console.log("INNER = "+err.inner);
-                    res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
+                    return res.status(403).json({error:'unauthorized_provider_access'})
+                    //res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
                 }
-                next(err)
+                return res.status(403).json({error:'unexpected_error'})
+
+                // next(err)
             } else {
                 //
                 next();
             }
         }
 
-        app.get('/', [verifyJWT, checkExpired], async (req, res, next) => {
+        const detectSessionMismatch = async function (err, req, res, next) {
             if (req.oauth_user) {
                 const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
                 console.log("SESSION USER = " + req.user)
@@ -85,29 +91,21 @@ class Oauth2ProxyAuthStrategy {
                         console.log("Looks like a different credential.. ")
                         console.log("Looks like a different credential.. " + jti + " != " + req.user.jti)
                         await this._sessionManager.endAuthedSession(req);
-                        res.redirect('/admin/signout')
-                        // this.register_user(req, res)
-                        return
+                        return res.status(403).json({error:'invalid_session'})
                     }
-                } else {
-                    res.redirect('/admin/signin')
-                    return
-                    // this.register_user(req,res)
-                    // return
                 }
             }
-            next();
-        });
+        }
 
-        app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
-            res.redirect('/home')
-        })
+        // app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
+        //     res.redirect('/home')
+        // })
 
-        app.get('/admin/session', async (req, res, next) => {
-            const toJson = (val) => val ? JSON.parse(val) : null;
+        app.get('/admin/session', [detectSessionMismatch], async (req, res, next) => {
 
             const response = req && req.user ? {anonymous: false, user: req.user } : {anonymous:true}
             if (response.anonymous == false) {
+                console.log(JSON.stringify(response.user, null, 5))
                 response.user.groups = toJson(response.user.groups)
                 response.user.roles = toJson(response.user.roles)
             }
@@ -116,10 +114,8 @@ class Oauth2ProxyAuthStrategy {
 
         app.get('/admin/signout', [verifyJWT, checkExpired], async (req, res, next) => {
             console.log("Signing out")
-            if (req.oauth_user) {
-                if (req.user) {
-                    await this._sessionManager.endAuthedSession(req);
-                }
+            if (req.user) {
+                await this._sessionManager.endAuthedSession(req);
             }
             res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
         })
@@ -221,6 +217,9 @@ class Oauth2ProxyAuthStrategy {
         }
 
         const user = results[0]
+        user.groups = toJson(user.groups)
+        user.roles = toJson(user.roles)
+
         console.log("USER = "+JSON.stringify(user, null, 4))
         await this._authenticateItem(user, null, operation === 'create', req, res, next);
     }
@@ -271,6 +270,10 @@ class Oauth2ProxyAuthStrategy {
         return { success: false, message };
       }
       const item = results[0];
+      console.log("_getItem with toJson..")
+      item.groups = toJson(item.groups)
+      item.roles = toJson(item.roles)
+
       return { success: true, item };
     }
   
