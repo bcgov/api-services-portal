@@ -131,16 +131,20 @@ class Oauth2ProxyAuthStrategy {
             // Switch namespace
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
-            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, process.env.GWA_RES_SVR_CLIENT_ID, subjectToken, req.params['ns']).catch (err => {
+            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
                 res.json({switch:false})
             }) 
-
-            const rpt = jwtDecoder(accessToken)
-            console.log("ANSWER = "+JSON.stringify(rpt,null, 5))
-            const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
-            await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
-            res.json({switch:true})
-
+            console.log("TOKEN = "+accessToken)
+            try {
+                const rpt = jwtDecoder(accessToken)
+                console.log("ANSWER = "+JSON.stringify(rpt,null, 5))
+                const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+                await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
+                res.json({switch:true})
+            } catch (err) {
+                console.log(err)
+                res.json({switch:false})
+            }
         })
 
         return app

@@ -47,8 +47,7 @@ module.exports = {
         return response['access_token']
     },  
 
-    getRequestingPartyToken: async function (issuer, clientId, subjectToken, resourceId) {
-        const clientSecret = "66919256-e415-47a8-b468-40b0d8161f85"
+    getRequestingPartyToken: async function (issuer, clientId, clientSecret, subjectToken, resourceId) {
         const basicAuth = Buffer.from(clientId + ":" + clientSecret, 'utf-8').toString('base64')
         const params = new URLSearchParams();
         params.append('grant_type', 'urn:ietf:params:oauth:grant-type:uma-ticket');
