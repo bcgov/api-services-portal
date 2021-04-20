@@ -223,7 +223,7 @@ module.exports = {
             res.end('error reaching api');
         }
     })
-    app.use('/api', apiProxy)
+    app.all(/^\/api/, apiProxy)
 
     const express = require('express')
     app.use(express.json())
