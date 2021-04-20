@@ -99,6 +99,20 @@ export const GRANT_USER_ACCESS = `
     }
 `
 
+export const CREATE_UMA_POLICY = `
+    mutation GrantSAAccess($credIssuerId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
+        createUmaPolicy(credIssuerId: $credIssuerId, resourceId: $resourceId, data: $data) {
+            id
+        }
+    }
+`
+export const DELETE_UMA_POLICY = `
+    mutation RevokeSAAccess($credIssuerId: ID!, $policyId: String!) {
+        deleteUmaPolicy(credIssuerId: $credIssuerId, policyId: $policyId)
+    }
+`
+
+
 export const REVOKE_ACCESS = `
     mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {
         revokePermissions(credIssuerId: $credIssuerId, ids: $tickets)

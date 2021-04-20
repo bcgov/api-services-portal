@@ -42,10 +42,8 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                             <Td><Scopes scopes={item._scopes} color='blue' revokeAccess={null}/></Td>
                             <Td>
                                 {granted ? (
-                                    <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.scopes.map(s => s.ticketId))}>Revoke All</Button>
-                                ) : (
-                                    <Button colorScheme="red" size="sm" onClick={() => grantAccess(item)}>Grant Access</Button>
-                                )} 
+                                    <Button colorScheme="red" size="sm" onClick={() => revokeAccess(item.id)}>Revoke</Button>
+                                ) : false} 
                             </Td>
                         </Tr>
                     ))}

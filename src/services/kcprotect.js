@@ -17,6 +17,36 @@ module.exports = function (issuerUrl, accessToken) {
     }
 
     /*
+        : authz/protection/uma-policy/2185e5e9-f2d9-409e-bf36-d2df1a805bf2
+        : Requires a token exchange
+
+        "name": "Owner for dds-loc 4",
+        "description": "Owner",
+        "scopes": ["Namespace.Manage"],
+        "users": ["portalref","apsowner"]
+    */
+    const createUmaPolicy = async function createUmaPolicy(rid, body) {
+        const url = `${issuerUrl}/authz/protection/uma-policy/${rid}`
+        console.log("QUERY = "+url)
+        const result = await fetch (url, {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
+        }).then(checkStatus).then(res => res.json())
+        console.log(JSON.stringify(result, null, 4))
+        return result
+    }
+
+    const deleteUmaPolicy = async function deleteUmaPolicy(policyId) {
+        const url = `${issuerUrl}/authz/protection/uma-policy/${policyId}`
+        console.log("QUERY = "+url)
+        await fetch (url, {
+            method: 'delete',
+            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
+        }).then(checkStatus)
+    }
+
+    /*
         scopeId
         resourceId
         owner
@@ -180,6 +210,9 @@ module.exports = function (issuerUrl, accessToken) {
         createOrUpdatePermission: createOrUpdatePermission,
         deletePermission: deletePermission,
         approvePermission: approvePermission,
-        listUmaPolicies: listUmaPolicies
+        listUmaPolicies: listUmaPolicies,
+        createUmaPolicy: createUmaPolicy,
+        deleteUmaPolicy: deleteUmaPolicy
+        
     }
 }
