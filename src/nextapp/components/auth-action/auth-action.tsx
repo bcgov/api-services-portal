@@ -33,7 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({site}) => {
 
   return (
     <Box d="flex" alignItems="center" justifyContent="flex-end">
-      {user.namespace && site == 'manager' && (
+      {user.namespace && (
         <Box
           p={1}
           px={2}

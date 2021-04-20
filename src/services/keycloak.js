@@ -47,6 +47,32 @@ module.exports = {
         return response['access_token']
     },  
 
+    getRequestingPartyToken: async function (issuer, clientId, subjectToken, resourceId) {
+        const clientSecret = "66919256-e415-47a8-b468-40b0d8161f85"
+        const basicAuth = Buffer.from(clientId + ":" + clientSecret, 'utf-8').toString('base64')
+        const params = new URLSearchParams();
+        params.append('grant_type', 'urn:ietf:params:oauth:grant-type:uma-ticket');
+        params.append('client_id', clientId);
+        // params.append('client_secret', clientSecret);
+        params.append('subject_token', subjectToken);
+        params.append('audience', clientId);
+        params.append('permission', resourceId);
+    
+        const response = await fetch(`${issuer}/protocol/openid-connect/token`, {
+            method: 'post',
+            body:    params,
+            headers: { 
+                'Authorization': `Basic ${basicAuth}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        console.log(JSON.stringify(response, null, 3));
+        return response['access_token']
+    },  
+
     clientRegistration: async function (issuer, accessToken, clientId, clientSecret, enabled=false) {
         const body = Object.assign(JSON.parse(JSON.stringify(clientTemplate)), {
             enabled: enabled,

@@ -18,6 +18,8 @@ import {
 
 import { GET_LIST } from './queries'
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 //import { useAppContext } from '@/pages/context'
 
 const { useEffect, useState } = React
@@ -65,7 +67,7 @@ const ActivityPage = () => {
         </Head>
         <Container maxW="6xl">
   
-          <PageHeader title="Activity" actions={false}>
+          <PageHeader title="Activity" actions={false} breadcrumb={breadcrumbs()}>
             <p>
               <strong>Activity</strong> provides details about your services on the Gateway.
 

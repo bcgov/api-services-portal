@@ -13,6 +13,8 @@ import PageHeader from '@/components/page-header';
 import ProductsList from '@/components/products-list';
 import NewProduct from '@/components/new-product';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 const PackagingPage: React.FC = () => {
   const actionElements = <NewProduct />;
 
@@ -22,15 +24,8 @@ const PackagingPage: React.FC = () => {
         <title>API Program Services | Products</title>
       </Head>
       <Container maxW="6xl">
-        <VStack my={4}>
-          <Alert status="info">
-            <AlertIcon />
-            API Owner can define environments and which Services are for which
-            environment.
-          </Alert>
-        </VStack>
 
-        <PageHeader title="Products" actions={actionElements}>
+        <PageHeader title="Products" actions={actionElements} breadcrumb={breadcrumbs()}>
           <p>
             <strong>Products</strong> are groups of APIs that are protected in
             the same way, and are discoverable by Citizens through the BC Data

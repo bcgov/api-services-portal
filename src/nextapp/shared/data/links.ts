@@ -10,8 +10,8 @@ export interface NavLink {
 }
 
 const links: NavLink[] = [
-  { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
-  { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
+//   { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
+//   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
     name: 'API Discovery',
     url: '/devportal/api-discovery',
@@ -25,7 +25,7 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
-    name: 'Resources',
+    name: 'My Resources',
     url: '/devportal/poc/resources',
     access: ['api-owner'],
     sites: ['devportal'],

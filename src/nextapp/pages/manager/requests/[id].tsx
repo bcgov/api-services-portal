@@ -33,6 +33,8 @@ import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import RequestActions from '@/components/request-actions';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
@@ -74,6 +76,7 @@ const AccessRequestPage: React.FC<
   const isComplete =
     data.AccessRequest?.isIssued && data.AccessRequest?.isApproved;
 
+  const breadcrumb = breadcrumbs([{ href: '/manager/consumers', text: 'Consumer Requests' }]);
   const { plugins } = data?.AccessRequest?.controls
     ? JSON.parse(data.AccessRequest.controls)
     : [];
@@ -85,6 +88,7 @@ const AccessRequestPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
+          breadcrumb={breadcrumb}
           actions={
             !isComplete && <RequestActions id={id} queryKey={queryKey} />
           }
@@ -188,7 +192,7 @@ const AccessRequestPage: React.FC<
                   Environment
                 </Heading>
                 <Text mb={3}>
-                  {data?.AccessRequest.productEnvironment.name}
+                  {data?.AccessRequest.productEnvironment?.name}
                 </Text>
                 <Heading size="sm" mb={2}>
                   Application

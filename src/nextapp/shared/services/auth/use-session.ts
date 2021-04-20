@@ -18,14 +18,17 @@ export const getSession = async (): Promise<UserData> => {
     const req = await fetch(`${apiHost}/admin/session`, {
         headers: { 'Accept': 'application/json' }
     });
-
     if (req.ok) {
       const json = await req.json();
       return json.user;
     }
+    if (req.status == 401) {
+        throw new Error(req.statusText)
+    }
+    
     return undefined;
   } catch (err) {
-    throw new Error(err);
+      throw new Error(err);
   }
 };
 

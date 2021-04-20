@@ -10,9 +10,12 @@ const querystring = require('querystring')
 
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
+const jwtDecoder = require('jwt-decode');
 
 const proxy = process.env.EXTERNAL_URL
 const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy + "/signout")
+
+const { getRequestingPartyToken } = require('../services/keycloak')
 
 const toJson = (val) => val ? JSON.parse(val) : null;
 
@@ -123,7 +126,54 @@ class Oauth2ProxyAuthStrategy {
         app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
             this.register_user(req,res)
         })
+
+        app.get('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
+            // Switch namespace
+            // - Get a Requestor Party Token for the particular Resource
+            const subjectToken = req.headers['x-forwarded-access-token']
+            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, 'gwa-api', subjectToken, req.params['ns']).catch (err => {
+                res.json({switch:false})
+            }) 
+
+            const rpt = jwtDecoder(accessToken)
+            console.log("ANSWER = "+JSON.stringify(rpt,null, 5))
+            const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+            await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
+            res.json({switch:true})
+
+        })
+
         return app
+    }
+
+    async assign_namespace(jti, umaAuthDetails) {
+        const namespace = umaAuthDetails['rsname']
+        const scopes = umaAuthDetails['scopes']
+        const _roles = []
+        if (scopes.includes('Namespace.Manage')) {
+            _roles.push('api-owner')
+        } else {
+            // For now, make everyone an api-owner if they have access to a namespace
+            _roles.push('api-owner')
+        }
+        const roles = JSON.stringify(_roles)
+
+        const users = this.keystone.getListByKey(this.listKey)
+        let results = await users.adapter.find({ 'jti': jti })
+        let tempId = results[0]['id']
+
+        const { errors } = await this.keystone.executeGraphQL({
+            context: this.keystone.createContext({ skipAccessControl: true }),
+            query: `mutation ($tempId: ID!, $namespace: String, $roles: String) {
+                    updateTemporaryIdentity(id: $tempId, data: {namespace: $namespace, roles: $roles }) {
+                        id
+                } }`,
+            variables: { tempId, namespace, roles },
+        })
+        if (errors) {
+            console.log("NO! Something went wrong " + errors)
+        }
+
     }
 
     async register_user(req, res, next) {

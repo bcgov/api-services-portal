@@ -14,6 +14,8 @@ import EnvironmentConfig from '@/components/environment-config';
 import EnvironmentNav from '@/components/environment-nav';
 import { dehydrate } from 'react-query/hydration';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
 
@@ -66,7 +68,7 @@ const EnvironmentPage: React.FC<
               data={data.Environment?.product?.environments}
             />
           }
-          breadcrumb={breadcrumb}
+          breadcrumb={breadcrumbs([{ href: '/manager/products', text: 'Products' }, { text: title }])}
           title={
             <>
               Edit Environment{' '}

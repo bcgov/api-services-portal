@@ -22,7 +22,6 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
         }
         const list = data
             .filter(item => item.owner == loginUserSub)
-            .filter(item => item.users == null)
             .map(item => { item._scopes = item.scopes.map(s => { return { ticketId:null, id:s, name:s } }); return item})
             .sort((a,b) => a.name.localeCompare(b.name))
         return (
@@ -31,7 +30,7 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                     <TableCaption>-</TableCaption>
                     <Thead>
                         <Tr>
-                        <Th>Client</Th>
+                        <Th>Subject</Th>
                         <Th>Permission</Th>
                         <Th>Action</Th>
                         </Tr>
@@ -39,7 +38,7 @@ function List({ data, state, granted, loginUserSub, grantAccess, revokeAccess })
                     <Tbody>
                     {list.map((item, index) => (
                         <Tr key={item.id}>
-                            <Td>{item.clients.join(',')}</Td>
+                            <Td>{item.clients != null ? "[C] " + item.clients.join(',') : "[U] " + item.users.join(',')}</Td>
                             <Td><Scopes scopes={item._scopes} color='blue' revokeAccess={null}/></Td>
                             <Td>
                                 {granted ? (

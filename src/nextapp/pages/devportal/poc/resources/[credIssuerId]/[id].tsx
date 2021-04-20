@@ -165,7 +165,7 @@ const ResourcesPage = () => {
                 alignItems="center"
                 justifyContent="space-between"
             >
-                <Heading size="md">Service Accounts with access to this resource</Heading>
+                <Heading size="md">Service Accounts and People with access to this resource</Heading>
             </Box>
             <Divider />
               {data && (

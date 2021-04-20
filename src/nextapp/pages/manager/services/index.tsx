@@ -18,6 +18,8 @@ import SearchInput from '@/components/search-input';
 import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 // export const getServerSideProps = withAuth(async (context) => {
 //   const { user } = context;
 
@@ -45,7 +47,7 @@ const ServicesPage: React.FC = () => {
 
   return (
     <Container maxW="6xl">
-      <PageHeader title="Services">
+      <PageHeader title="Services" breadcrumb={breadcrumbs()}>
         <p>
           List of services from the API Owner perspective. This should pull in
           details from Prometheus and gwa-api Status.

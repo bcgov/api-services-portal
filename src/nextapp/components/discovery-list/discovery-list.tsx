@@ -11,7 +11,7 @@ interface DiscoveryListProps {
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
   return (
     <VStack spacing={4}>
-      {data.map((p) => (
+      {data?.map((p) => (
         <DiscoveryListItem key={p.id} data={p} />
       ))}
     </VStack>

@@ -21,6 +21,8 @@ import graphql from '@/shared/services/graphql'
 
 import List from './list'
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 const CredentialIssuerPage = () => {
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     const fetch = () => {
@@ -43,13 +45,13 @@ const CredentialIssuerPage = () => {
     return (
         <>
         <Head>
-          <title>API Program Services | Authorization Settings</title>
+          <title>API Program Services | Authorization Profiles</title>
         </Head>
         <Container maxW="6xl">
   
-          <PageHeader title="Authorization Settings" actions={actions}>
+          <PageHeader title="Authorization Profiles" actions={actions} breadcrumb={breadcrumbs()}>
             <p>
-              <strong>Authorization Settings</strong> describe the type of authentication and authorization that protects your APIs.
+              <strong>Authorization Profiles</strong> describe the type of authentication and authorization that protects your APIs.
 
             </p>
           </PageHeader>

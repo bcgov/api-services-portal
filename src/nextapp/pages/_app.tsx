@@ -26,12 +26,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
   const site: string = React.useMemo(() => {
-    if (router?.pathname.startsWith('/manager')) {
-      return 'manager';
-    }
+    //if (router?.pathname.startsWith('/manager')) {
+    //  return 'manager';
+    //}
     if (router?.pathname.startsWith('/platform')) {
         return 'platform';
-      }
+    }
   
     return 'devportal';
   }, [router]);
