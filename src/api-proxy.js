@@ -17,8 +17,8 @@ class ApiProxyApp {
         pathRewrite: { '^/api/': '/v2/' },
         onProxyReq: (proxyReq, req) => {
             console.log(req.headers)
-            proxyReq.removeHeader("host");
             proxyReq.removeHeader("cookie");
+            proxyReq.removeHeader("Cookie");
             proxyReq.setHeader('Accept', 'application/json')
             proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
         onError:(err, req, res, target) => {
