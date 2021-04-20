@@ -15,7 +15,8 @@ class ApiProxyApp {
         target: this._gwaApiUrl, 
         changeOrigin: true,
         pathRewrite: { '^/api/': '/v2/' },
-        onProxyReq: (proxyReq, req) => { 
+        onProxyReq: (proxyReq, req) => {
+            console.log(req.headers)
             proxyReq.setHeader('Accept', 'application/json')
             proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
         onError:(err, req, res, target) => {
