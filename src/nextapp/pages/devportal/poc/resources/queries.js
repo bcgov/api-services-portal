@@ -12,15 +12,33 @@ export const GET_PERMISSIONS = `
             scopeName
             granted
         }
+
+        getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+            id
+            name
+            description
+            type
+            logic
+            decisionStrategy
+            owner
+            clients
+            users
+            scopes
+        }
+
         CredentialIssuer(where: {id: $credIssuerId}) {
             clientId
             resourceType
             availableScopes
         }
+
         getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
             id
             name
             type
+            resource_scopes {
+                name
+            }
         }
     }
 `
@@ -57,6 +75,19 @@ export const GET_RESOURCES = `
             name
             type
         }
+
+        getPermissionTickets(credIssuerId: $credIssuerId) {
+            id
+            owner
+            ownerName
+            requester
+            requesterName
+            resource
+            resourceName
+            scope
+            scopeName
+            granted
+        }        
     }
 `
 
@@ -67,6 +98,20 @@ export const GRANT_USER_ACCESS = `
         }
     }
 `
+
+export const CREATE_UMA_POLICY = `
+    mutation GrantSAAccess($credIssuerId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
+        createUmaPolicy(credIssuerId: $credIssuerId, resourceId: $resourceId, data: $data) {
+            id
+        }
+    }
+`
+export const DELETE_UMA_POLICY = `
+    mutation RevokeSAAccess($credIssuerId: ID!, $policyId: String!) {
+        deleteUmaPolicy(credIssuerId: $credIssuerId, policyId: $policyId)
+    }
+`
+
 
 export const REVOKE_ACCESS = `
     mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {

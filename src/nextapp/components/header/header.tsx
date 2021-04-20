@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
         alignItems="center"
         flexGrow={{ base: 1, sm: 0 }}
       >
-        <Link href={site == 'manager' ? '/manager' : '/devportal'}>
+        <Link href={site == 'manager' ? '/home' : '/home'}>
           <a>
             <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
               <img src="/images/bc_logo_header.svg" width={154} height={43} />
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
           </a>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
-          API {site == 'manager' ? 'Provider Console' : 'Developer Portal'}
+          API {site == 'manager' ? 'Provider Console' : 'Services Portal'}
         </Heading>
       </Box>
       <Box as="hgroup">

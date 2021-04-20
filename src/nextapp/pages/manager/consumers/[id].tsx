@@ -20,6 +20,8 @@ import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
@@ -66,7 +68,7 @@ const ConsumersPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          breadcrumb={[{ href: '/manager/consumers', text: 'Consumers' }]}
+          breadcrumb={breadcrumbs([{ href: '/manager/consumers', text: 'Consumers' }])}
           title={
             <Box as="span" display="flex" alignItems="center">
               <ModelIcon model="consumer" size="sm" mr={2} />

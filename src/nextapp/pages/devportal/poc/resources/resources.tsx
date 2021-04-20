@@ -8,14 +8,6 @@ import NextLink from 'next/link';
 
 import NameValue from '@/components/name-value';
 
-function tagit (tags, color) {
-    return (
-        <HStack spacing={4}>{tags?.map(tag => (
-            <Tag key={tag} size="lg" colorScheme={color} borderRadius="full">
-                <TagLabel>{tag}</TagLabel>
-            </Tag>
-    ))}</HStack>)
-}
 
 function List({ data, credIssuerId, type, state}) {
 

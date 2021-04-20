@@ -25,7 +25,7 @@ const Signin: React.FC<AuthActionProps> = ({site}) => {
 
   if (!user) {
     return (
-      <Button color="secondary" href="/oauth2/sign_in">
+      <Button color="secondary" href="/admin/signin">
         Login
       </Button>
     );
@@ -33,7 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({site}) => {
 
   return (
     <Box d="flex" alignItems="center" justifyContent="flex-end">
-      {user.namespace && site == 'manager' && (
+      {user.namespace && (
         <Box
           p={1}
           px={2}

@@ -28,7 +28,7 @@ function List({ data, state, refetch }) {
                 <Th>Owner</Th>
                 <Th>Flow</Th>
                 <Th>Mode</Th>
-                <Th>Products Using</Th>
+                <Th>Action</Th>
                 </Tr>
             </Thead>
             <Tbody>

@@ -6453,6 +6453,11 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type UmaScope = {
+  __typename?: 'UMAScope';
+  name: Scalars['String'];
+};
+
 export type UmaResourceSet = {
   __typename?: 'UMAResourceSet';
   id: Scalars['String'];
@@ -6460,7 +6465,9 @@ export type UmaResourceSet = {
   type: Scalars['String'];
   owner: Scalars['String'];
   ownerManagedAccess?: Maybe<Scalars['Boolean']>;
-  resourceScopes: Scalars['String'];
+  uris?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resource_scopes?: Maybe<Array<Maybe<UmaScope>>>;
+  scopes?: Maybe<Array<Maybe<UmaScope>>>;
 };
 
 export type UmaPermissionTicket = {
@@ -6484,8 +6491,30 @@ export type UmaPermissionTicketInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UmaPolicy = {
+  __typename?: 'UMAPolicy';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  type: Scalars['String'];
+  logic: Scalars['String'];
+  decisionStrategy: Scalars['String'];
+  owner: Scalars['String'];
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type UmaPolicyInput = {
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -6722,7 +6751,8 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
-  getResourceSet?: Maybe<Array<Maybe<ResourceSet>>>;
+  getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
+  getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
@@ -7423,6 +7453,12 @@ export type QueryGetResourceSetArgs = {
 };
 
 
+export type QueryGetUmaPoliciesArgs = {
+  credIssuerId: Scalars['ID'];
+  resourceId?: Maybe<Scalars['String']>;
+};
+
+
 export type QueryGetPermissionTicketsArgs = {
   credIssuerId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
@@ -7760,10 +7796,12 @@ export type Mutation = {
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  createUmaPolicy?: Maybe<UmaPolicy>;
+  deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -8643,7 +8681,20 @@ export type MutationApprovePermissionsArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationCreateUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  resourceId?: Maybe<Scalars['String']>;
+  data: UmaPolicyInput;
+};
+
+
+export type MutationDeleteUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  policyId: Scalars['String'];
+};
+
+
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };

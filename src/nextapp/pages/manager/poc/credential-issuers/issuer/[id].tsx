@@ -43,6 +43,8 @@ import { useAppContext } from '@/pages/context';
 
 import AuthorizationSection from './authorization';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 const UpdateIssuer = () => {
   const context = useAppContext();
   const [{ state, data }, setState] = useState({
@@ -86,9 +88,9 @@ const UpdateIssuer = () => {
       ? null
       : [...new Set(issuer.environments.map((g) => g.product.name))];
 
-  const breadcrumb = [
-    { href: '/manager/poc/credential-issuers', text: 'Authorization Settings' },
-  ];
+  const breadcrumb = breadcrumbs([
+    { href: '/manager/poc/credential-issuers', text: 'Authorization Profiles' },
+  ]);
 
   const refetch = () => {
     window.location.href = '/manager/poc/credential-issuers';

@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GetCredentialIssuers {
-        allCredentialIssuers {
+        allCredentialIssuers(orderBy: "name_ASC") {
           id
           name
           flow

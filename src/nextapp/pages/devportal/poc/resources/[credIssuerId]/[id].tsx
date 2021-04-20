@@ -22,12 +22,12 @@ import ModelIcon from '@/components/model-icon/model-icon';
 
 const { useEffect, useState } = React;
 
-import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, GRANT_ACCESS, REVOKE_ACCESS } from '../queries'
+import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, CREATE_UMA_POLICY, DELETE_UMA_POLICY, GRANT_ACCESS, REVOKE_ACCESS } from '../queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 
 import Permissions from '../permissions'
-import Waiting from '../waiting'
+import ServiceAccounts from '../service-accounts'
 
 import graphql from '@/shared/services/graphql'
 
@@ -58,13 +58,18 @@ const ResourcesPage = () => {
         // (                <Button variant="primary">Add Resource</Button>
         // )
     ]
-    const availableScopes = data?.CredentialIssuer == null ? [] : JSON.parse(data?.CredentialIssuer.availableScopes)
+    const availableScopes = data?.getResourceSet == null ? [] : data?.getResourceSet[0].resource_scopes
     const form = React.useRef<HTMLFormElement>();
+    const saForm = React.useRef<HTMLFormElement>();
     const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       grantUserAccess()
     };
-
+    const onSubmitSA = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        grantServiceAccountAccess()
+      };
+  
     const grantUserAccess = async () => {
         const data = new FormData(form.current);
         if (form.current.checkValidity()) {
@@ -83,6 +88,24 @@ const ResourcesPage = () => {
         }        
     }
 
+    const grantServiceAccountAccess = async () => {
+        const data = new FormData(saForm.current);
+        if (saForm.current.checkValidity()) {
+            const serviceAccountId = data.get('serviceAccountId') as string;
+            const scopes = data.getAll('scopes') as string[];
+            const granted = data.get('granted') as string;
+            console.log("Name = "+serviceAccountId)
+            console.log("Scopes = "+scopes)
+            console.log("Granted = "+granted)
+
+            graphql(CREATE_UMA_POLICY, { credIssuerId: credIssuerId, resourceId: id, data: { name: `Service Acct ${serviceAccountId}`, description: `Service Acct ${serviceAccountId}`, clients: [ serviceAccountId ], scopes: scopes } })
+            .then(fetch)
+            .catch (err => {
+                console.log(err)
+            })
+        }        
+    }
+
     const grantAccess = async (item) => {
         console.log(JSON.stringify(item))
         graphql(GRANT_ACCESS, { credIssuerId: credIssuerId, resourceId: item.resource, requesterId: item.requester, scopes: item.scopes.map(s => s.id) })
@@ -94,6 +117,14 @@ const ResourcesPage = () => {
 
     const revokeAccess = async (ticketIds) => {
         graphql(REVOKE_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+        .then(fetch)
+        .catch (err => {
+            console.log(err)
+        })
+    }
+
+    const revokeSAAccess = async (policyId) => {
+        graphql(DELETE_UMA_POLICY, { credIssuerId: credIssuerId, policyId: policyId })
         .then(fetch)
         .catch (err => {
             console.log(err)
@@ -125,40 +156,7 @@ const ResourcesPage = () => {
             </p>
           </PageHeader>
 
-          <Box bgColor="white" mb={4}>
-            <Alert>
-                <AlertDescription>
-                <Box bgColor="white" mb={4}>
-                    <Box
-                        p={4}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Heading size="md">Your requests waiting approval</Heading>
-                    </Box>
-                    <Divider />
-                    {data && (
-                        <Waiting data={data.getPermissionTickets} granted={false} state={state} refetch={fetch} loginUserSub={user?.sub}/>
-                    )}
-                </Box>      
-                <Box bgColor="white" mb={4}>
-                    <Box
-                        p={4}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Heading size="md">Resources shared with me</Heading>
-                    </Box>
-                    <Divider />
-                    {data && (
-                        <Waiting data={data.getPermissionTickets} granted={true} state={state} refetch={fetch} loginUserSub={user?.sub}/>
-                    )}
-                </Box>    
-                </AlertDescription>  
-            </Alert>  
-          </Box>
+
 
           <Box bgColor="white" mb={4}>
             <Box
@@ -198,6 +196,57 @@ const ResourcesPage = () => {
                 alignItems="center"
                 justifyContent="space-between"
             >
+                <Heading size="md">Service Accounts and People with access to this resource</Heading>
+            </Box>
+            <Divider />
+              {data && (
+                  <ServiceAccounts data={data.getUmaPolicies} granted={true} state={state} revokeAccess={revokeSAAccess} grantAccess={()=>false} loginUserSub={user?.sub}/>
+              )}
+          </Box>
+
+          <Box bgColor="white" mb={4}>
+            <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+            >
+                <Heading size="md">Share with a service account</Heading>
+            </Box>
+            <Divider />
+            <Box p={4}>
+                <form ref={saForm} onSubmit={onSubmitSA}>
+                    <FormControl isRequired mb={4}>
+                        <FormLabel>Service Account</FormLabel>
+                        <Input placeholder=" Service Account ID" name="serviceAccountId" variant="bc-input" />
+                    </FormControl>
+                    <FormControl mb={4}>
+                        <FormLabel>Scopes</FormLabel>
+                        <Stack pl={6} mt={1} spacing={1}>
+                            {availableScopes.map (scope => (
+                            <Checkbox name="scopes" variant="bc-input" value={scope.name}>{scope.name}</Checkbox>
+                            ))}
+                        </Stack>
+                    </FormControl>
+                    <FormControl mb={4}>
+                        <FormLabel>Grant</FormLabel>
+                        <Stack pl={6} mt={1} spacing={1}>
+                            <Checkbox name="granted" variant="bc-input" value="Y" defaultChecked>TRUE</Checkbox>
+                        </Stack>
+                    </FormControl>
+
+                    <Button colorScheme="red" size="sm" onClick={() => grantServiceAccountAccess()}>Grant SA Access</Button>
+                </form>
+            </Box>
+          </Box>
+
+          <Box bgColor="white" mb={4}>
+            <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+            >
                 <Heading size="md">Share with others</Heading>
             </Box>
             <Divider />
@@ -211,18 +260,18 @@ const ResourcesPage = () => {
                         <FormLabel>Scopes</FormLabel>
                         <Stack pl={6} mt={1} spacing={1}>
                             {availableScopes.map (scope => (
-                            <Checkbox name="scopes" variant="bc-input" value={scope}>{scope}</Checkbox>
+                            <Checkbox name="scopes" variant="bc-input" value={scope.name}>{scope.name}</Checkbox>
                             ))}
                         </Stack>
                     </FormControl>
                     <FormControl mb={4}>
                         <FormLabel>Grant</FormLabel>
                         <Stack pl={6} mt={1} spacing={1}>
-                            <Checkbox name="granted" variant="bc-input" value="Y">TRUE</Checkbox>
+                            <Checkbox name="granted" variant="bc-input" value="Y" defaultChecked>TRUE</Checkbox>
                         </Stack>
                     </FormControl>
 
-                    <Button colorScheme="red" onClick={() => grantUserAccess()}>Grant Access</Button>
+                    <Button colorScheme="red" size="sm" onClick={() => grantUserAccess()}>Grant Access</Button>
                 </form>
             </Box>
           </Box>          

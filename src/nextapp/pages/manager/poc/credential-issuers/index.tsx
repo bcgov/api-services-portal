@@ -4,7 +4,9 @@ import {
     AlertIcon,
     Box,
     Button,
+    Divider,
     Container,
+    Heading,
     VStack,
     Skeleton,
   } from '@chakra-ui/react';
@@ -21,6 +23,8 @@ import graphql from '@/shared/services/graphql'
 
 import List from './list'
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 const CredentialIssuerPage = () => {
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     const fetch = () => {
@@ -36,26 +40,36 @@ const CredentialIssuerPage = () => {
     useEffect(fetch, []);
 
     const actions = [
-        (                <Button variant="primary">New Issuer</Button>
+        (                <Button variant="primary">New Profile</Button>
         )
     ]
 
     return (
         <>
         <Head>
-          <title>API Program Services | Authorization Settings</title>
+          <title>API Program Services | Authorization Profiles</title>
         </Head>
         <Container maxW="6xl">
   
-          <PageHeader title="Authorization Settings" actions={actions}>
+          <PageHeader title="Authorization Profiles" actions={actions} breadcrumb={breadcrumbs()}>
             <p>
-              <strong>Authorization Settings</strong> describe the type of authentication and authorization that protects your APIs.
+              <strong>Authorization Profiles</strong> describe the type of authorization that protects your APIs.
 
             </p>
           </PageHeader>
   
-          <Box mt={5}>
-              <List data={data} state={state} refetch={fetch} />
+
+          <Box bgColor="white" mb={4}>
+            <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+            >
+                <Heading size="md">All Profiles</Heading>
+            </Box>
+            <Divider />
+            <List data={data} state={state} refetch={fetch} />
           </Box>
         </Container>
         </>        

@@ -32,6 +32,8 @@ import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { Query } from '@/shared/types/query.types';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
 
@@ -69,7 +71,7 @@ const ServicePage: React.FC<
     },
     { enabled: Boolean(id), suspense: false }
   );
-  const breadcrumb = [{ href: '/manager/services', text: 'Services' }];
+  const breadcrumb = breadcrumbs([{ href: '/manager/services', text: 'Services' }]);
   const tags: string[] = !isEmpty(data?.GatewayService?.tags)
     ? (JSON.parse(data.GatewayService.tags) as string[])
     : [];

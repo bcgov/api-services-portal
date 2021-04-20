@@ -113,7 +113,7 @@ const ApplicationsPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-              {data.allApplications.length === 0 && (
+              {data.allApplications?.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>

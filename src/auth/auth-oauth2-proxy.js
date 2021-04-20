@@ -10,9 +10,14 @@ const querystring = require('querystring')
 
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
+const jwtDecoder = require('jwt-decode');
 
 const proxy = process.env.EXTERNAL_URL
-const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy)
+const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy + "/signout")
+
+const { getRequestingPartyToken } = require('../services/keycloak')
+
+const toJson = (val) => val ? JSON.parse(val) : null;
 
 class Oauth2ProxyAuthStrategy {
     constructor(keystone, listKey, config) {
@@ -59,6 +64,7 @@ class Oauth2ProxyAuthStrategy {
             requestProperty: 'oauth_user', 
             getToken: (req) => ('x-forwarded-access-token' in req.headers) ? req.headers['x-forwarded-access-token'] : null
         })
+        // X-Auth-Request-Access-Token
 
         const checkExpired = (err, req, res, next) => {
             console.log("CHECK EXPIRED!! " + err);
@@ -67,16 +73,19 @@ class Oauth2ProxyAuthStrategy {
                 if (err.name === 'UnauthorizedError') {
                     console.log("CODE = "+err.code);
                     console.log("INNER = "+err.inner);
-                    res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
+                    return res.status(403).json({error:'unauthorized_provider_access'})
+                    //res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
                 }
-                next(err)
+                return res.status(403).json({error:'unexpected_error'})
+
+                // next(err)
             } else {
                 //
                 next();
             }
         }
 
-        app.get('/', [verifyJWT, checkExpired], async (req, res, next) => {
+        const detectSessionMismatch = async function (err, req, res, next) {
             if (req.oauth_user) {
                 const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
                 console.log("SESSION USER = " + req.user)
@@ -85,29 +94,21 @@ class Oauth2ProxyAuthStrategy {
                         console.log("Looks like a different credential.. ")
                         console.log("Looks like a different credential.. " + jti + " != " + req.user.jti)
                         await this._sessionManager.endAuthedSession(req);
-                        res.redirect('/admin/signout')
-                        // this.register_user(req, res)
-                        return
+                        return res.status(403).json({error:'invalid_session'})
                     }
-                } else {
-                    res.redirect('/admin/signin')
-                    return
-                    // this.register_user(req,res)
-                    // return
                 }
             }
-            next();
-        });
+        }
 
-        app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
-            res.redirect('/home')
-        })
+        // app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
+        //     res.redirect('/home')
+        // })
 
-        app.get('/admin/session', async (req, res, next) => {
-            const toJson = (val) => val ? JSON.parse(val) : null;
+        app.get('/admin/session', [detectSessionMismatch], async (req, res, next) => {
 
             const response = req && req.user ? {anonymous: false, user: req.user } : {anonymous:true}
             if (response.anonymous == false) {
+                console.log(JSON.stringify(response.user, null, 5))
                 response.user.groups = toJson(response.user.groups)
                 response.user.roles = toJson(response.user.roles)
             }
@@ -116,10 +117,8 @@ class Oauth2ProxyAuthStrategy {
 
         app.get('/admin/signout', [verifyJWT, checkExpired], async (req, res, next) => {
             console.log("Signing out")
-            if (req.oauth_user) {
-                if (req.user) {
-                    await this._sessionManager.endAuthedSession(req);
-                }
+            if (req.user) {
+                await this._sessionManager.endAuthedSession(req);
             }
             res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
         })
@@ -127,7 +126,54 @@ class Oauth2ProxyAuthStrategy {
         app.get('/admin/signin', [verifyJWT, checkExpired], async (req, res, next) => {
             this.register_user(req,res)
         })
+
+        app.get('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
+            // Switch namespace
+            // - Get a Requestor Party Token for the particular Resource
+            const subjectToken = req.headers['x-forwarded-access-token']
+            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, 'gwa-api', subjectToken, req.params['ns']).catch (err => {
+                res.json({switch:false})
+            }) 
+
+            const rpt = jwtDecoder(accessToken)
+            console.log("ANSWER = "+JSON.stringify(rpt,null, 5))
+            const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
+            await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
+            res.json({switch:true})
+
+        })
+
         return app
+    }
+
+    async assign_namespace(jti, umaAuthDetails) {
+        const namespace = umaAuthDetails['rsname']
+        const scopes = umaAuthDetails['scopes']
+        const _roles = []
+        if (scopes.includes('Namespace.Manage')) {
+            _roles.push('api-owner')
+        } else {
+            // For now, make everyone an api-owner if they have access to a namespace
+            _roles.push('api-owner')
+        }
+        const roles = JSON.stringify(_roles)
+
+        const users = this.keystone.getListByKey(this.listKey)
+        let results = await users.adapter.find({ 'jti': jti })
+        let tempId = results[0]['id']
+
+        const { errors } = await this.keystone.executeGraphQL({
+            context: this.keystone.createContext({ skipAccessControl: true }),
+            query: `mutation ($tempId: ID!, $namespace: String, $roles: String) {
+                    updateTemporaryIdentity(id: $tempId, data: {namespace: $namespace, roles: $roles }) {
+                        id
+                } }`,
+            variables: { tempId, namespace, roles },
+        })
+        if (errors) {
+            console.log("NO! Something went wrong " + errors)
+        }
+
     }
 
     async register_user(req, res, next) {
@@ -221,6 +267,9 @@ class Oauth2ProxyAuthStrategy {
         }
 
         const user = results[0]
+        user.groups = toJson(user.groups)
+        user.roles = toJson(user.roles)
+
         console.log("USER = "+JSON.stringify(user, null, 4))
         await this._authenticateItem(user, null, operation === 'create', req, res, next);
     }
@@ -271,6 +320,10 @@ class Oauth2ProxyAuthStrategy {
         return { success: false, message };
       }
       const item = results[0];
+      console.log("_getItem with toJson..")
+      item.groups = toJson(item.groups)
+      item.roles = toJson(item.roles)
+
       return { success: true, item };
     }
   

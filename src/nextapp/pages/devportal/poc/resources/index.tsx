@@ -84,6 +84,7 @@ const ResourcesPage = () => {
 
 
             {data?.allServiceAccesses.filter(item => item.productEnvironment.credentialIssuer != null).map(item => (
+                <>
                 <Box bgColor="white" mb={4}>
                     <Box
                         p={4}
@@ -97,6 +98,9 @@ const ResourcesPage = () => {
                         <ResourcesList credIssuerId={item.productEnvironment.credentialIssuer.id} resourceType={item.productEnvironment.credentialIssuer.resourceType}/>
                     </Box>
                 </Box>
+
+
+                </>
             ))}
 
         </Container>

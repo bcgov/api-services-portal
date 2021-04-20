@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Avatar, AvatarProps, Box, BoxProps } from '@chakra-ui/react';
 
-type ModelType = 'resource' | 'route' | 'service' | 'application' | 'consumer' | 'request';
+type ModelType = 'namespace' | 'resource' | 'route' | 'service' | 'application' | 'consumer' | 'request';
 
 interface ModelIconProps extends BoxProps {
   model: ModelType;
@@ -14,6 +14,7 @@ const colorSchemes: Record<ModelType, string> = {
   service: 'blue',
   application: 'orange',
   consumer: 'purple',
+  namespace: 'teal',
   request: 'teal',
 };
 

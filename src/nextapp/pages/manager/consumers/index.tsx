@@ -37,6 +37,8 @@ import NextLink from 'next/link';
 import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
 
+import breadcrumbs from '@/components/ns-breadcrumb'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
 
@@ -76,7 +78,7 @@ const ConsumersPage: React.FC<
         }`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="Consumers" />
+        <PageHeader title="Consumers" breadcrumb={breadcrumbs([])}/>
         <Box mb={4}>
           {data?.allAccessRequests.length === 0 && (
             <Alert status="info">

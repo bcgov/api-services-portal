@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Heading size="md">Unauthorized</Heading>
               <Text>You do not have permission to view this page.</Text>
             </Box>
-            <Button href="/">Go to Home Page</Button>
+            <Button href="/admin/signin">Go to Home Page</Button>
           </Box>
         </Center>
       ) : (
