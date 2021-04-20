@@ -206,7 +206,7 @@ module.exports = {
       },
     }),
     new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
-    //new NextApp({ dir: 'nextapp' }),
+    new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: (app) => {
     const express = require('express')
