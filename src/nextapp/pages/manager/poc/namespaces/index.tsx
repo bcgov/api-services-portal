@@ -111,8 +111,9 @@ const NamespacesPage = () => {
         })
         .then (async (response) => { if (!response.ok) { const pay = await response.json(); console.log(JSON.stringify(pay)); throw Error (pay.error) } return response })
         .then(data => {
-            setNsMgmtShow(false)
-            fetcher()
+            // setNsMgmtShow(false)
+            // fetcher()
+            window.location.href = "/manager/poc/namespaces"
         }).catch (err => {
             console.log(err)
         })

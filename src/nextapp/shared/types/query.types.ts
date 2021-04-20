@@ -6466,6 +6466,28 @@ export type ServiceAccountInput = {
   scopes?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
+export type UmaPolicy = {
+  __typename?: 'UMAPolicy';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  type: Scalars['String'];
+  logic: Scalars['String'];
+  decisionStrategy: Scalars['String'];
+  owner: Scalars['String'];
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type UmaPolicyInput = {
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
 export type UmaScope = {
   __typename?: 'UMAScope';
   name: Scalars['String'];
@@ -6743,6 +6765,7 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   getServiceAccounts?: Maybe<Array<Maybe<ServiceAccount>>>;
+  getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
@@ -7441,6 +7464,12 @@ export type QueryGetServiceAccountsArgs = {
 };
 
 
+export type QueryGetUmaPoliciesArgs = {
+  credIssuerId: Scalars['ID'];
+  resourceId?: Maybe<Scalars['String']>;
+};
+
+
 export type QueryGetResourceSetArgs = {
   credIssuerId: Scalars['ID'];
   owner?: Maybe<Scalars['String']>;
@@ -7785,6 +7814,8 @@ export type Mutation = {
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   createServiceAccount?: Maybe<ServiceAccount>;
   deleteServiceAccount?: Maybe<Scalars['Boolean']>;
+  createUmaPolicy?: Maybe<UmaPolicy>;
+  deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
@@ -8653,6 +8684,19 @@ export type MutationDeleteGatewayConsumerPluginArgs = {
 
 export type MutationDeleteServiceAccountArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationCreateUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  resourceId?: Maybe<Scalars['String']>;
+  data: UmaPolicyInput;
+};
+
+
+export type MutationDeleteUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  policyId: Scalars['String'];
 };
 
 

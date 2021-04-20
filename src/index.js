@@ -136,6 +136,7 @@ for (_list of [
 }
 for (_list of [
     'ServiceAccount',
+    'UMAPolicy',
     'UMAResourceSet',
     'UMAPermissionTicket',
   ]) {
@@ -229,6 +230,16 @@ module.exports = {
         tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
         res.status(200).json({result: 'ok'})
+    })
+
+    app.get('/create/:slug', async (req, res) => {
+        const wf = require('./services/workflow')
+        const authContext =  keystone.createContext({ skipAccessControl: true })
+
+        const productEnvironmentSlug = req.params['slug']
+
+        const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, 'smashing')
+        res.status(200).json(result)
     })
   },
   distDir,

@@ -130,6 +130,46 @@ module.exports = {
         return result.data.allEnvironments[0]
     },
 
+    lookupProductEnvironmentServicesBySlug: async function lookupProductEnvironmentServicesBySlug (context, appId) {
+        const result = await context.executeGraphQL({
+            query: `query GetProductEnvironmentServicesBySlug($appId: String!) {
+                        allEnvironments(where: {appId: $appId}) {
+                            appId
+                            id
+                            name
+                            flow
+                            product {
+                                namespace
+                            }
+                            credentialIssuer {
+                                id
+                                flow
+                                oidcDiscoveryUrl
+                            }
+                            services {
+                                name
+                                plugins {
+                                    name
+                                    config
+                                }
+                                routes {
+                                    name
+                                    plugins {
+                                        name
+                                        config
+                                    }
+                                }
+                            }
+                        }
+                    }`,
+            variables: { appId: appId },
+        })
+        console.log("lookupProductEnvironmentServicesBySlug " + JSON.stringify(result))
+        result.data.allEnvironments[0].services.map(svc =>
+            svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
+        return result.data.allEnvironments[0]
+    },
+
     lookupCredentialReferenceByServiceAccess: async function lookupCredentialReferenceByServiceAccess (context, id) {
         const result = await context.executeGraphQL({
             query: `query GetSpecificServiceAccess($id: ID!) {
