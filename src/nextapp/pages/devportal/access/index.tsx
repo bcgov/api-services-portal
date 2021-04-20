@@ -11,7 +11,7 @@ import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import AccessList from '@/components/access-list';
 
-const queryKey = 'allAccessRequests';
+const queryKey = 'allServiceAccesses';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -62,63 +62,28 @@ const ApiAccessPage: React.FC<
 export default ApiAccessPage;
 
 const query = gql`
-  query GET {
-    allTemporaryIdentities {
-      id
-      userId
-    }
-    allServiceAccesses(where: {}) {
+  query GetProducts {
+    allServiceAccesses {
       id
       name
       active
-      consumer {
-        extForeignKey
-      }
-      application {
-        appId
-      }
       productEnvironment {
         name
+        flow
+        services {
+          id
+          name
+        }
         credentialIssuer {
-          instruction
+          id
+          name
+          flow
+          clientId
+          availableScopes
+          resourceType
         }
         product {
           name
-        }
-        services {
-          name
-          routes {
-            name
-            hosts
-            methods
-            paths
-          }
-        }
-      }
-    }
-    allAccessRequests(where: { isComplete: null }) {
-      id
-      name
-      isIssued
-      application {
-        appId
-      }
-      productEnvironment {
-        name
-        credentialIssuer {
-          instruction
-        }
-        product {
-          name
-        }
-        services {
-          name
-          routes {
-            name
-            hosts
-            methods
-            paths
-          }
         }
       }
     }

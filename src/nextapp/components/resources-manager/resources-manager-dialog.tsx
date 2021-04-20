@@ -75,7 +75,13 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
                   </HStack>
                 </Td>
                 <Td isNumeric>
-                  <AccessButton scope="" />
+                  <AccessButton
+                    id="123"
+                    requesterId="123"
+                    resourceId="123"
+                    scope="granted"
+                    tickets={['123']}
+                  />
                 </Td>
               </Tr>
             </Tbody>

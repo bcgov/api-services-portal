@@ -5,17 +5,40 @@ import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 
 interface AccessButtonProps {
+  id: string;
+  requesterId: string;
+  resourceId: string;
   scope: string;
+  tickets: string[];
 }
 
-const AccessButton: React.FC<AccessButtonProps> = ({ scope }) => {
+const AccessButton: React.FC<AccessButtonProps> = ({
+  id,
+  requesterId,
+  resourceId,
+  scope,
+  tickets,
+}) => {
   const toast = useToast();
-  const grant = useApiMutation(grantMutation);
-  const revoke = useApiMutation(revokeMutation);
+  const grant = useApiMutation<{
+    credIssuerId: string;
+    resourceId: string;
+    requesterId: string;
+    scopes: string[];
+  }>(grantMutation);
+  const revoke = useApiMutation<{ credIssuerId: string; tickets: string[] }>(
+    revokeMutation
+  );
 
   const handleGrant = async () => {
     try {
-      await grant.mutateAsync();
+      const payload = {
+        credIssuerId: id,
+        resourceId,
+        requesterId,
+        scopes: tickets,
+      };
+      await grant.mutateAsync(payload);
       toast({
         title: 'Access Granted',
         status: 'success',
@@ -29,7 +52,8 @@ const AccessButton: React.FC<AccessButtonProps> = ({ scope }) => {
   };
   const handleRevoke = async () => {
     try {
-      await revoke.mutateAsync();
+      const payload = { credIssuerId: id, tickets };
+      await revoke.mutateAsync(payload);
       toast({
         title: 'Access Revoked',
         status: 'success',
@@ -72,17 +96,6 @@ const AccessButton: React.FC<AccessButtonProps> = ({ scope }) => {
 };
 
 export default AccessButton;
-
-const grantUserMutation = gql`
-  mutation GrantUserAccess(
-    $credIssuerId: ID!
-    $data: UMAPermissionTicketInput!
-  ) {
-    grantPermissions(credIssuerId: $credIssuerId, data: $data) {
-      id
-    }
-  }
-`;
 
 const revokeMutation = gql`
   mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {

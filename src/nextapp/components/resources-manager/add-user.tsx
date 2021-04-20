@@ -18,7 +18,8 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
-import { FaMinusCircle, FaPlusCircle } from 'react-icons/fa';
+import { FaPlusCircle } from 'react-icons/fa';
+import { gql } from 'graphql-request';
 
 interface ShareResourceDialogProps {}
 
@@ -87,3 +88,14 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
 };
 
 export default ShareResourceDialog;
+
+const grantUserMutation = gql`
+  mutation GrantUserAccess(
+    $credIssuerId: ID!
+    $data: UMAPermissionTicketInput!
+  ) {
+    grantPermissions(credIssuerId: $credIssuerId, data: $data) {
+      id
+    }
+  }
+`;

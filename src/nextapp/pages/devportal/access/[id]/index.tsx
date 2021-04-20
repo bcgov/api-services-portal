@@ -7,8 +7,6 @@ import {
   Box,
   Container,
   Divider,
-  Grid,
-  GridItem,
   Heading,
   Link,
   Stack,
@@ -17,6 +15,7 @@ import {
   Td,
   Th,
   Thead,
+  Tooltip,
   Tr,
 } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
@@ -29,13 +28,14 @@ import NextLink from 'next/link';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
+import { getSession } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
-import { getSession, useAuth } from '@/shared/services/auth';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
+  const { issuer } = context.query;
   const queryClient = new QueryClient();
-  const queryKey = ['allAccessRequests', id];
+  const queryKey = ['allAccessRequests', id, issuer];
   const user = await getSession();
 
   await queryClient.prefetchQuery(
@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id },
+        { id, owner: user.sub },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -60,10 +60,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-const ApiAccessPage: React.FC<
+const ApiAccessServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey, user }) => {
   const router = useRouter();
+  const params = router?.query;
   const { data } = useApi(
     queryKey,
     { query, variables: { id, owner: user?.sub } },
@@ -104,7 +105,7 @@ const ApiAccessPage: React.FC<
             <Thead>
               <Tr>
                 <Th>Resource</Th>
-                <Th>Application</Th>
+                <Th>Type</Th>
                 <Th>Shared With</Th>
               </Tr>
             </Thead>
@@ -112,33 +113,26 @@ const ApiAccessPage: React.FC<
               {data.getResourceSet?.map((r) => (
                 <Tr key={r.id}>
                   <Td width="50%">
-                    <NextLink href={`${router?.asPath}/123`}>
+                    <NextLink
+                      passHref
+                      href={`/devportal/resources/${r.id}?issuer=${params?.issuer}`}
+                    >
                       <Link color="bc-link">{r.name}</Link>
                     </NextLink>
                   </Td>
                   <Td>{r.type}</Td>
                   <Td>
                     <AvatarGroup size="sm" max={6}>
-                      <Avatar
-                        name="Ryan Florence"
-                        src="https://bit.ly/ryan-florence"
-                      />
-                      <Avatar
-                        name="Segun Adebayo"
-                        src="https://bit.ly/sage-adebayo"
-                      />
-                      <Avatar
-                        name="Kent Dodds"
-                        src="https://bit.ly/kent-c-dodds"
-                      />
-                      <Avatar
-                        name="Prosper Otemuyiwa"
-                        src="https://bit.ly/prosper-baba"
-                      />
-                      <Avatar
-                        name="Christian Nwamba"
-                        src="https://bit.ly/code-beast"
-                      />
+                      {data.getPermissionTickets
+                        ?.filter((p) => p.resourceName === r.name)
+                        .map((p) => (
+                          <Avatar
+                            key={p.id}
+                            name={p.requesterName}
+                            size="sm"
+                            title={p.requesterName}
+                          />
+                        ))}
                     </AvatarGroup>
                   </Td>
                 </Tr>
@@ -151,7 +145,7 @@ const ApiAccessPage: React.FC<
   );
 };
 
-export default ApiAccessPage;
+export default ApiAccessServicePage;
 
 const query = gql`
   query GetResources($id: ID!, $owner: String!, $resourceType: String) {

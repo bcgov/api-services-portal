@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Box,
   Button,
+  ButtonGroup,
   Divider,
   Flex,
   Grid,
@@ -9,12 +10,19 @@ import {
   Heading,
   HStack,
   Icon,
+  Link,
   Tag,
   Text,
   useToast,
 } from '@chakra-ui/react';
 import { ServiceAccess } from '@/shared/types/query.types';
-import { FaCheck, FaFolder, FaHourglass, FaMinusCircle } from 'react-icons/fa';
+import {
+  FaCheck,
+  FaChevronRight,
+  FaFolder,
+  FaHourglass,
+  FaMinusCircle,
+} from 'react-icons/fa';
 import CircleIcon from '../circle-icon';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
@@ -36,7 +44,10 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
   const revoke = useMutation((id) => api(mutation, { id }));
   const toast = useToast();
   const handleRevoke = React.useCallback(
-    (id) => async () => {
+    (id) => async (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+
       try {
         await revoke.mutateAsync(id);
         client.invalidateQueries(queryKey);
@@ -52,9 +63,10 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
         });
       }
     },
-    [revoke, toast]
+    [client, queryKey, revoke, toast]
   );
 
+  console.log(data);
   return (
     <Box bgColor="white" mb={4}>
       <Flex as="header" align="center" justify="space-between" p={4}>
@@ -65,73 +77,77 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
       </Flex>
       <Divider />
       {data.map((d, index, arr) => (
-        <NextLink key={d.id} href={`/devportal/access/${d.id}`}>
-          <Grid
-            px={4}
-            py={2}
-            gap={4}
-            templateColumns="30px 1fr 200px"
-            borderColor="blue.100"
-            borderBottomWidth={index === arr.length - 1 ? 0 : 1}
-            bgColor="blue.50"
-            cursor="pointer"
-            _hover={{
-              bgColor: 'blue.100',
-            }}
+        <Flex
+          key={d.id}
+          px={4}
+          py={2}
+          borderColor="blue.100"
+          borderBottomWidth={index === arr.length - 1 ? 0 : 1}
+          bgColor="blue.50"
+        >
+          <NextLink
+            href={`/devportal/access/${d.id}?issuer=${d.productEnvironment.credentialIssuer.id}`}
           >
-            <GridItem>
-              {d.active && (
-                <CircleIcon label="Approved" color="green">
-                  <Icon as={FaCheck} />
-                </CircleIcon>
-              )}
-              {!d.active && (
-                <CircleIcon label="Pending" color="orange">
-                  <Icon as={FaHourglass} />
-                </CircleIcon>
-              )}
-            </GridItem>
-            <GridItem display="flex" alignItems="center">
-              <Text
-                display="inline-block"
-                fontSize="sm"
-                bgColor="blue.300"
-                color="white"
-                textTransform="uppercase"
-                px={2}
-                borderRadius={2}
-              >
-                {d.productEnvironment.name}
-              </Text>
-              <HStack ml={3}>
-                {d.productEnvironment.services?.map((s) => (
-                  <Tag
-                    key={s.id}
-                    borderRadius="full"
-                    variant="subtle"
-                    colorScheme="cyan"
-                  >
-                    {s.name}
-                  </Tag>
-                ))}
-              </HStack>
-            </GridItem>
-            <GridItem
-              display="flex"
-              alignItems="center"
-              justifyContent="flex-end"
+            <Link flex={1} display="flex" _hover={{ textDecoration: 'none' }}>
+              <Box mr={2}>
+                {d.active && (
+                  <CircleIcon label="Approved" color="green">
+                    <Icon as={FaCheck} />
+                  </CircleIcon>
+                )}
+                {!d.active && (
+                  <CircleIcon label="Pending" color="orange">
+                    <Icon as={FaHourglass} />
+                  </CircleIcon>
+                )}
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Text
+                  display="inline-block"
+                  fontSize="sm"
+                  bgColor="blue.300"
+                  color="white"
+                  textTransform="uppercase"
+                  px={2}
+                  borderRadius={2}
+                >
+                  {d.productEnvironment.name}
+                </Text>
+                <HStack ml={3}>
+                  {!d.productEnvironment.services?.length && (
+                    <Tag
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme="orange"
+                    >
+                      No services
+                    </Tag>
+                  )}
+                  {d.productEnvironment.services?.map((s) => (
+                    <Tag
+                      key={s.id}
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme="cyan"
+                    >
+                      {s.name}
+                    </Tag>
+                  ))}
+                </HStack>
+              </Box>
+            </Link>
+          </NextLink>
+          <Box display="flex" alignItems="center" justifyContent="flex-end">
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Icon as={FaMinusCircle} />}
+              onClick={handleRevoke(d.id)}
             >
-              <Button
-                variant="secondary"
-                size="sm"
-                leftIcon={<Icon as={FaMinusCircle} />}
-                onClick={handleRevoke(d.id)}
-              >
-                {d.active ? 'Revoke Access' : 'Cancel Request'}
-              </Button>
-            </GridItem>
-          </Grid>
-        </NextLink>
+              {d.active ? 'Revoke Access' : 'Cancel Request'}
+            </Button>
+          </Box>
+        </Flex>
       ))}
     </Box>
   );
