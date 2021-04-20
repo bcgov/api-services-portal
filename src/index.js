@@ -8,6 +8,7 @@ const { generate } = require('@graphql-codegen/cli');
 //const { AdminUIApp } = require('@keystone-next/admin-ui');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
+const { ApiProxyApp } = require('./api-proxy');
 
 var Keycloak = require("keycloak-connect");
 
@@ -17,8 +18,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 const { Strategy, Issuer, Client } = require('openid-client');
-
-const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
@@ -206,25 +205,10 @@ module.exports = {
         return true;
       },
     }),
+    new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
     new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: (app) => {
-
-    const apiProxy = createProxyMiddleware('/api', { 
-        target: process.env.GWA_API_URL, 
-        pathRewrite: { '^/api/': '/v2/' },
-        onProxyReq: (proxyReq, req) => { 
-            proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
-        onError:(err, req, res, target) => {
-            console.log(err)
-            res.writeHead(500, {
-              'Content-Type': 'text/plain',
-            });
-            res.end('error reaching api');
-        }
-    })
-    app.all(/^\/api/, apiProxy)
-
     const express = require('express')
     app.use(express.json())
 

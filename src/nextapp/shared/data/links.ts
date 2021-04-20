@@ -14,7 +14,7 @@ const links: NavLink[] = [
 //   { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
 //   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
-    name: 'API Discovery',
+    name: 'Discovery',
     url: '/devportal/api-discovery',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
