@@ -131,7 +131,7 @@ class Oauth2ProxyAuthStrategy {
             // Switch namespace
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
-            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, 'gwa-api', subjectToken, req.params['ns']).catch (err => {
+            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, process.env.GWA_RES_SVR_CLIENT_ID, subjectToken, req.params['ns']).catch (err => {
                 res.json({switch:false})
             }) 
 
