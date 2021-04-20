@@ -39,8 +39,8 @@ const links: NavLink[] = [
   },
   {
     name: 'Namespaces',
-    url: '/devportal/poc/namespaces',
-    altUrls: [ '/manager/services', '/manager/services/[id]', '/manager/products', '/manager/products/[id]', '/manager/consumers', '/manager/consumers/[id]', '/manager/requests/[id]', '/manager/poc/credential-issuers', '/manager/poc/credential-issuers/[id]' ],
+    url: '/manager/poc/namespaces',
+    altUrls: [ '/manager/services', '/manager/services/[id]', '/manager/products', '/manager/products/[id]', '/manager/consumers', '/manager/consumers/[id]', '/manager/requests/[id]', '/manager/poc/credential-issuers', '/manager/poc/credential-issuers/[id]', '/manager/poc/service-accounts' ],
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },

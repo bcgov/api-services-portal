@@ -16,14 +16,14 @@ class ApiProxyApp {
         changeOrigin: true,
         pathRewrite: { '^/api/': '/v2/' },
         onProxyReq: (proxyReq, req) => {
-            console.log(req.headers)
+            // console.log(req.headers)
+            // proxyReq.removeHeader("cookie");
             proxyReq.removeHeader("cookie");
-            proxyReq.removeHeader("Cookie");
             proxyReq.setHeader('Accept', 'application/json')
             proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
         onError:(err, req, res, target) => {
             console.log(err)
-            res.writeHead(500, {
+            res.writeHead(400, {
               'Content-Type': 'text/plain',
             });
             res.end('error reaching api');

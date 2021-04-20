@@ -135,6 +135,7 @@ for (_list of [
   keystone.createList(_list, list);
 }
 for (_list of [
+    'ServiceAccount',
     'UMAResourceSet',
     'UMAPermissionTicket',
   ]) {

@@ -68,6 +68,8 @@ const NamespacesPage = () => {
         fetch ('/api/namespaces')
         .then(response => response.json())
         .then((data) => {
+            
+            data.length == 0 && setNsMgmtShow(true)
             setState({ state: 'loaded', data });
         })
         .catch((err) => {
@@ -146,10 +148,13 @@ const NamespacesPage = () => {
                 <ModelIcon model="namespace" size="sm" mr={2} />
                 {user.namespace} { nsMgmtShow == false && <Button m={3} variant="secondary" size="xs" onClick={() => setNsMgmtShow(true)}>change</Button> }
             </Box>
-            ):(
-             <></>
+            ):user && (
+                <Box as="span" display="flex" alignItems="center">
+                    <ModelIcon model="namespace" size="sm" mr={2} />
+                    { nsMgmtShow == false && <Button m={3} variant="secondary" size="xs" onClick={() => setNsMgmtShow(true)}>select namespace</Button> }
+                </Box>
             )}
-            breadcrumb={[{ href: '/devportal/poc/namespaces', text: 'Namespaces' }]}
+            breadcrumb={[{ href: '/manager/poc/namespaces', text: 'Namespaces' }]}
             actions={actions}>
           </PageHeader>
   
@@ -161,8 +166,10 @@ const NamespacesPage = () => {
                 <Button variant="primary" onClick={() => setNsMgmtShow(false)}>Cancel</Button>
               </Stack>
           </Box>
-          ): (
+          ): false}
+          { nsMgmtShow == false && user && user.namespace && (
             <Navigation/>
+
           )}
         </Container>
         <NewDialog isOpen={isOpen} onClose={onClose} onComplete={fetcher}/>

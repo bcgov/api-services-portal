@@ -32,6 +32,7 @@ export const GET_ISSUER = `
             apiKeyName
             clientRoles
             availableScopes
+            resourceType
             owner {
                 name
                 username
@@ -51,8 +52,8 @@ export const UPDATE_ISSUER = `
 `
 
 export const UPDATE_ISSUER_AUTHZ = `
-    mutation UpdateAuthorization($id: ID!, $clientRoles: String!, $availableScopes: String!) {
-        updateCredentialIssuer (id: $id, data: { clientRoles: $clientRoles, availableScopes: $availableScopes }) {
+    mutation UpdateAuthorization($id: ID!, $clientRoles: String!, $availableScopes: String!, $resourceType: String!) {
+        updateCredentialIssuer (id: $id, data: { clientRoles: $clientRoles, availableScopes: $availableScopes, resourceType: $resourceType }) {
             id
         }
     }
