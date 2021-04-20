@@ -13,6 +13,7 @@ class ApiProxyApp {
     const app = express();
     const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
+        changeOrigin: true,
         pathRewrite: { '^/vapi/': '/v2/' },
         onProxyReq: (proxyReq, req) => { 
             proxyReq.setHeader('Accept', 'application/json')
