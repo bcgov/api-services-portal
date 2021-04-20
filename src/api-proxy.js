@@ -11,7 +11,7 @@ class ApiProxyApp {
 
   prepareMiddleware() {
     const app = express();
-    const apiProxy = createProxyMiddleware('/api', { 
+    const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
         pathRewrite: { '^/api/': '/v2/' },
         onProxyReq: (proxyReq, req) => { 

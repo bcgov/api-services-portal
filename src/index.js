@@ -222,6 +222,8 @@ module.exports = {
     }))
     app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.status(400).json({result: 'error', error: "" + err})))
     app.delete('/feed/:entity/:id', (req, res) => DeleteFeed(keystone, req, res))
+
+    // Added for handling failed calls that require orchestrating multiple changes
     app.put('/tasked/:id', async (req, res) => {
         tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
