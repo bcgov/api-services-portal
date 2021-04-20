@@ -55,7 +55,7 @@ const HomePage: React.FC = () => {
             textShadow="0 0 10px rgba(0, 0, 0, 0.8)"
           >
             <Heading fontWeight="normal" marginBottom={4}>
-              BC Government API Program Services
+              BC Government API Services Portal
             </Heading>
             <Text marginBottom={4}>
               Discover and access APIs from various ministries and programs

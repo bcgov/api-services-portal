@@ -75,7 +75,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
-                aria-current={link.url === active ? 'page' : false}
+                aria-current={link.url === active || link.altUrls?.includes (active) ? 'page' : false}
               >
                 <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}

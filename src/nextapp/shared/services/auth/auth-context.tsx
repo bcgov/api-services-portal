@@ -43,5 +43,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-export const refreshSession = (): UserSessionResult => React.setContext(authContext)
 export const useAuth = (): UserSessionResult => React.useContext(authContext);
