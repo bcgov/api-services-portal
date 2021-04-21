@@ -313,7 +313,7 @@ const wfCreateServiceAccount = async (context, productEnvironmentSlug, namespace
     // Create a ServiceAccess record
     const consumerType = 'client'
     const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
-    const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application )
+    const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application, namespace)
 
     //await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
 

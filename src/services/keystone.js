@@ -381,7 +381,7 @@ module.exports = {
         return result.data.createGatewayConsumer.id        
     },
 
-    addServiceAccess: async function(context, name, active, aclEnabled, consumerType, credentialReference, clientRoles, consumerPK, productEnvironment, application) {
+    addServiceAccess: async function(context, name, active, aclEnabled, consumerType, credentialReference, clientRoles, consumerPK, productEnvironment, application, namespace = null) {
         // This should actually go away and the "Feeders" should be used
         const data = { name, active, aclEnabled, consumerType }
         data.clientRoles = JSON.stringify(clientRoles == null ? []:clientRoles)
@@ -389,6 +389,7 @@ module.exports = {
         data.productEnvironment = { connect: { id: productEnvironment.id } }
         application != null && (data.application = { connect: { id: application.id } })
         credentialReference != null && (data.credentialReference = JSON.stringify(credentialReference))
+        data.namespace = namespace
 
         console.log("KEYSTONE SERVICE ACCESS DATA " + JSON.stringify(data, null, 4))
 

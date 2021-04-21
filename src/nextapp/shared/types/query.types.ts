@@ -5496,6 +5496,7 @@ export type ServiceAccess = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -5534,6 +5535,24 @@ export type ServiceAccessWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   active?: Maybe<Scalars['Boolean']>;
   active_not?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
@@ -5629,6 +5648,8 @@ export enum SortServiceAccessesBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   ActiveAsc = 'active_ASC',
   ActiveDesc = 'active_DESC',
   AclEnabledAsc = 'aclEnabled_ASC',
@@ -5655,6 +5676,7 @@ export enum SortServiceAccessesBy {
 
 export type ServiceAccessUpdateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -5673,6 +5695,7 @@ export type ServiceAccessesUpdateInput = {
 
 export type ServiceAccessCreateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -6457,6 +6480,7 @@ export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
   name: Scalars['String'];
+  credentials?: Maybe<Scalars['String']>;
 };
 
 export type ServiceAccountInput = {
@@ -6764,7 +6788,6 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
-  getServiceAccounts?: Maybe<Array<Maybe<ServiceAccount>>>;
   getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
@@ -7459,11 +7482,6 @@ export type QueryGetGatewayConsumerPluginsArgs = {
 };
 
 
-export type QueryGetServiceAccountsArgs = {
-  ns: Scalars['String'];
-};
-
-
 export type QueryGetUmaPoliciesArgs = {
   credIssuerId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
@@ -7813,7 +7831,6 @@ export type Mutation = {
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   createServiceAccount?: Maybe<ServiceAccount>;
-  deleteServiceAccount?: Maybe<Scalars['Boolean']>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
@@ -8679,11 +8696,6 @@ export type MutationUpdateGatewayConsumerPluginArgs = {
 export type MutationDeleteGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
   pluginExtForeignKey: Scalars['String'];
-};
-
-
-export type MutationDeleteServiceAccountArgs = {
-  id: Scalars['String'];
 };
 
 

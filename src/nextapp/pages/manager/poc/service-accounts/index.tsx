@@ -20,6 +20,7 @@ import {
   Select,
   Icon,
   StackDivider,
+  Progress,
   Table,
   Thead,
   Tr,
@@ -44,7 +45,11 @@ import { FaTrash } from 'react-icons/fa';
 
 const queryKey = 'getServiceAccounts';
 
+const { useEffect, useState } = React
+
 import breadcrumbs from '@/components/ns-breadcrumb'
+
+import ViewSecret from '@/components/view-secret'
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -76,18 +81,23 @@ const ApplicationsPage: React.FC<
     { suspense: false }
   );
 
+  const [{cred, pending}, setCred] = useState({cred:null, pending:false});
+
   const queryClient = useQueryClient();
 
   const doDelete = (id) => {
+    setCred({cred: null, pending:false})
     api(DELETE, { id: id}
     ).then (d => {
         queryClient.invalidateQueries(queryKey);
     })
   }
   const doCreate = () => {
+    setCred({cred: null, pending:true})
     api(CREATE, {}
         ).then (d => {
             queryClient.invalidateQueries(queryKey);
+            setCred ({cred: JSON.parse(d.createServiceAccount.credentials), pending:false})
         })
   }
 
@@ -108,7 +118,16 @@ const ApplicationsPage: React.FC<
         >
           <Text>Service Accounts allow you to access BC Government APIs via the API or Command Line.</Text>
         </PageHeader>
+        { cred != null && ( 
+            <Box m={4}>
+                <ViewSecret cred={cred} defaultShow={true} instruction={null}/> 
+            </Box>
+        )}
+        { pending && (
+            <Progress size="xs" isIndeterminate />            
+        )}
         <Box bgColor="white" mb={4}>
+          
           <Box
             p={4}
             display="flex"
@@ -122,14 +141,35 @@ const ApplicationsPage: React.FC<
             <Thead>
               <Tr>
                 <Th>ID</Th>
+                <Th>Created At</Th>
                 <Th textAlign="right">Action</Th>
               </Tr>
             </Thead>
             <Tbody>
+            {data.allServiceAccesses?.length === 0 && (
+                <Tr>
+                  <Td colSpan={5}>
+                    <Center>
+                      <Box m={8} textAlign="center">
+                        <Heading mb={2} size="md">
+                          Create your first Service Account
+                        </Heading>
+                        <Text color="gray.600">
+                          Service Accounts can be used to access our API for functions like publish gateway configuration.
+                        </Text>
+                        <Box mt={4}>
+                          {actions[0]}
+                        </Box>
+                      </Box>
+                    </Center>
+                  </Td>
+                </Tr>
+              )}  
               
-              {data.getServiceAccounts?.map((d) => (
+              {data.allServiceAccesses?.map((d) => (
                 <Tr key={d.id}>
                   <Td>{d.name}</Td>
+                  <Td>{d.createdAt}</Td>
                   <Td textAlign="right">
                     <Button colorScheme="red" onClick={() => doDelete(d.id)}>Delete</Button>
                   </Td>
@@ -146,10 +186,11 @@ const ApplicationsPage: React.FC<
 export default ApplicationsPage;
 
 const query = gql`
-  query GET($ns: String!) {
-    getServiceAccounts(ns: $ns) {
+  query GET {
+    allServiceAccesses(orderBy: "createdAt_DESC", where: { consumerType: client, namespace_not: null, application_is_null: true }) {
       id
       name
+      createdAt
     }
     allTemporaryIdentities {
       id
@@ -159,8 +200,10 @@ const query = gql`
 `;
 
 const DELETE = gql`
-  mutation DeleteServiceAccount($id: String!) {
-    deleteServiceAccount(id: $id)
+  mutation DeleteServiceAccount($id: ID!) {
+    deleteServiceAccess(id: $id) {
+        id
+    }
   }
 `;
 
@@ -169,6 +212,7 @@ const CREATE = gql`
     createServiceAccount {
         id
         name
+        credentials
     }
   }
 `;

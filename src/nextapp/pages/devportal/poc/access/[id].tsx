@@ -38,6 +38,8 @@ import List from './list'
 
 import EnvironmentBadge from '@/components/environment-badge';
 
+import ViewSecret from '@/components/view-secret'
+
 const customStyles = {
     content : {
       top                   : '30%',
@@ -50,41 +52,6 @@ const customStyles = {
     }
 };
 
-function ViewSecret({cred, defaultShow, instruction}) {
-    const [show, setShow] = React.useState(defaultShow)
-    const handleClick = () => setShow(!show)
-  
-    useEffect (() => setShow(true), [cred])
-
-    return show ? (
-        <Alert
-        status="warning" p={4}
-        >
-            <AlertIcon/>
-            <Box flex="1">
-                <AlertTitle>
-                    Your new credentials:
-                </AlertTitle>
-                <AlertDescription>
-                    Take note of these credentials, you will only see them once.
-                    { instruction != null && (
-                            <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>{instruction}</ReactMarkdownWithHtml>
-                    )}
-                    {[
-                        {name:'apiKey', label:'API Key'}, 
-                        {name:'clientId', label:'Client ID'}, 
-                        {name:'clientSecret', label:'Client Secret'},
-                        {name:'tokenEndpoint', label:'Token Endpoint'}
-                    ].filter(c => c.name in cred).map(c => (
-                        <Box><strong>{c.label} :</strong> {cred[c.name]}</Box>
-                    ))}
-                </AlertDescription>
-            </Box>
-            <CloseButton position="absolute" right="8px" top="8px" onClick={handleClick}/>
-        </Alert>
-
-    ) : ( <></> )
-}
 
 const MyApplicationsPage = () => {
     const context = useAppContext()
