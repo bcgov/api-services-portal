@@ -43,6 +43,8 @@ import api, { useApi } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
 import { FaTrash } from 'react-icons/fa';
 
+import graphql from '@/shared/services/graphql'
+
 const queryKey = 'getServiceAccounts';
 
 const { useEffect, useState } = React
@@ -88,16 +90,16 @@ const ApplicationsPage: React.FC<
   const doDelete = (id) => {
     setCred({cred: null, pending:false})
     api(DELETE, { id: id}
-    ).then (d => {
+    ).then (() => {
         queryClient.invalidateQueries(queryKey);
     })
   }
   const doCreate = () => {
     setCred({cred: null, pending:true})
-    api(CREATE, {}
-        ).then (d => {
+    graphql(CREATE, {}
+        ).then (({data}) => {
             queryClient.invalidateQueries(queryKey);
-            setCred ({cred: JSON.parse(d.createServiceAccount.credentials), pending:false})
+            setCred ({cred: JSON.parse(data.createServiceAccount.credentials), pending:false})
         })
   }
 
