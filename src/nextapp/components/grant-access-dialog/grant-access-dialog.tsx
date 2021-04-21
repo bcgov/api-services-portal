@@ -9,7 +9,6 @@ import {
   ModalFooter,
   ModalOverlay,
   ModalHeader,
-  HStack,
   Input,
   ButtonGroup,
   FormControl,
@@ -39,32 +38,27 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
   data,
   resourceId,
 }) => {
-  const [errors, setErrors] = React.useState<string | null>(null);
   const grant = useApiMutation(mutation);
   const toast = useToast();
   const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const handleGrantAccess = async () => {
-    try {
-      const formData = new FormData(formRef?.current);
-      const scopes = formData.getAll('scopes') as string[];
+    const formData = new FormData(formRef?.current);
+    const scopes = formData.getAll('scopes') as string[];
 
-      await grant.mutateAsync({
-        credIssuerId,
-        data: {
-          username: formData.get('username') as string,
-          resourceId,
-          scopes,
-        },
-      });
-      toast({
-        title: 'Access Granted',
-        status: 'success',
-      });
-      onClose();
-    } catch (err) {
-      setErrors(err?.message);
-    }
+    await grant.mutateAsync({
+      credIssuerId,
+      data: {
+        username: formData.get('username') as string,
+        resourceId,
+        scopes,
+      },
+    });
+    toast({
+      title: 'Access Granted',
+      status: 'success',
+    });
+    onClose();
   };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -17,7 +17,6 @@ import groupBy from 'lodash/groupBy';
 import { gql } from 'graphql-request';
 import type { UmaPermissionTicket } from '@/types/query.types';
 
-import AccessButton from '../access-button';
 import InlinePermissionsList from '../inline-permissions-list';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';

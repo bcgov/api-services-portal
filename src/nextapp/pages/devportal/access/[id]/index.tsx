@@ -124,7 +124,7 @@ const ApiAccessServicePage: React.FC<
                   <Td>
                     <AvatarGroup size="sm" max={6}>
                       {data.getPermissionTickets
-                        ?.filter((p) => p.resourceName === r.name)
+                        ?.filter((p) => p.scopeName === r.name)
                         .map((p) => (
                           <Avatar
                             key={p.id}

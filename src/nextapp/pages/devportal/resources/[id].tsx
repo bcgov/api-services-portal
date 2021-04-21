@@ -54,12 +54,14 @@ const ApiAccessResourcePage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={<ResourcesManager id={resourceId} />}
-          breadcrumb={[
-            { href: '/devportal/access', text: 'API Access' },
-            { text: 'Resources' },
-          ]}
-          title="Resources"
+          actions={
+            <ResourcesManager
+              data={data.getPermissionTickets?.filter((p) => !p.granted)}
+              id={resourceId}
+            />
+          }
+          breadcrumb={[{ href: '/devportal/access', text: 'My Resources' }]}
+          title="My Resource"
         />
         <Box bgColor="white" my={4}>
           <Box
@@ -83,7 +85,7 @@ const ApiAccessResourcePage: React.FC<
             />
           )}
           <ResourcesList
-            data={data?.getPermissionTickets}
+            data={data?.getPermissionTickets.filter((p) => p.granted)}
             resourceId={resourceId}
             credIssuerId={credIssuerId}
             queryKey={queryKey}

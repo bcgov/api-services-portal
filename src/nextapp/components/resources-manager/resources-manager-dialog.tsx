@@ -15,23 +15,62 @@ import {
   Td,
   Avatar,
   Icon,
-  HStack,
-  Tag,
   Flex,
   Text,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuOptionGroup,
+  MenuItemOption,
 } from '@chakra-ui/react';
-import { FaCheck } from 'react-icons/fa';
-import AccessButton from '../access-button';
+import { FaCheck, FaPlusCircle } from 'react-icons/fa';
+import groupBy from 'lodash/groupBy';
+import { UmaPermissionTicket } from '@/shared/types/query.types';
+
+interface PermissionItem {
+  id: string;
+  scope: string;
+  scopeName: string;
+}
+
+interface UserItem {
+  username: string;
+  permissions: PermissionItem[];
+}
 
 interface ResourcesManagerDialogProps {
+  data: UmaPermissionTicket[];
   open: boolean;
   onClose: () => void;
 }
 
 const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
+  data,
   open,
   onClose,
 }) => {
+  const groupedByRequester = groupBy(data, 'requester');
+  const users = React.useMemo<UserItem[]>(() => {
+    const result = [];
+    const usernames = Object.keys(groupedByRequester);
+
+    usernames.forEach((u) => {
+      const permissions = groupedByRequester[u];
+
+      result.push({
+        username: u,
+        permissions: permissions.map((p) => ({
+          id: p.id,
+          scope: p.scope,
+          scopeName: p.scopeName,
+        })),
+      });
+    });
+
+    return result;
+  }, [groupedByRequester]);
+
   return (
     <Modal isOpen={open} onClose={onClose} scrollBehavior="inside" size="4xl">
       <ModalOverlay />
@@ -42,48 +81,50 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
             <Thead>
               <Tr>
                 <Th>Requestor</Th>
-                <Th colSpan={2}>Permissions</Th>
+                <Th isNumeric>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
-              <Tr>
-                <Td>
-                  <Flex align="center">
-                    <Avatar name="Joshua Jones" size="xs" mr={2} />
-                    <Text
-                      fontSize="sm"
-                      whiteSpace="nowrap"
-                      textOverflow="ellipsis"
-                      overflow="hidden"
-                    >
-                      joshua@general-metrics.com
-                    </Text>
-                  </Flex>
-                </Td>
-                <Td width="50%">
-                  <HStack shouldWrapChildren spacing={2}>
-                    {['api-owner', 'credential-admin'].map((d) => (
-                      <Tag
-                        key={d}
-                        variant="solid"
-                        colorScheme="cyan"
+              {users.map((u) => (
+                <Tr key={u.username}>
+                  <Td>
+                    <Flex align="center">
+                      <Avatar name={u.username} size="xs" mr={2} />
+                      <Text
+                        fontSize="sm"
                         whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                        overflow="hidden"
                       >
-                        {d}
-                      </Tag>
-                    ))}
-                  </HStack>
-                </Td>
-                <Td isNumeric>
-                  <AccessButton
-                    id="123"
-                    requesterId="123"
-                    resourceId="123"
-                    scope="granted"
-                    tickets={['123']}
-                  />
-                </Td>
-              </Tr>
+                        {u.username}
+                      </Text>
+                    </Flex>
+                  </Td>
+                  <Td isNumeric>
+                    <Menu closeOnSelect={false}>
+                      <MenuButton
+                        as={Button}
+                        rightIcon={<Icon as={FaPlusCircle} />}
+                        variant="primary"
+                      >
+                        Grant Access
+                      </MenuButton>
+                      <MenuList>
+                        <MenuOptionGroup type="checkbox">
+                          {u.permissions.map((p) => (
+                            <MenuItemOption
+                              key={p.scopeName}
+                              value={p.scopeName}
+                            >
+                              {p.scopeName}
+                            </MenuItemOption>
+                          ))}
+                        </MenuOptionGroup>
+                      </MenuList>
+                    </Menu>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </ModalBody>

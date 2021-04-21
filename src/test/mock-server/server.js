@@ -39,6 +39,7 @@ const devs = [
   'Greg Lawrance',
 ];
 const owners = ['Craig Rigdon', 'Aidan Cope'];
+const permissionTypes = ['View', 'Publish', 'Manage', 'Delete', 'Create'];
 // Casual Definitions
 casual.define('namespace', () => {
   return sample(namespaces);
@@ -450,34 +451,32 @@ const server = mockServer(schemaWithMocks, {
   }),
   UMAResourceSet: () => {
     const ns = sample(namespaces);
-    const permission = sample([
-      'View',
-      'Publish',
-      'Manage',
-      'Delete',
-      'Create',
-    ]);
+    const permission = sample(permissionTypes);
 
     return {
       id: casual.uuid,
       name: `${ns}.${permission}`,
       owner: casual.random_element(owners),
+      type: casual.word,
     };
   },
   UMAPermissionTicket: () => {
     const requesterName = casual.random_element(devs);
     const requester = snakeCase(requesterName).toUpperCase();
+    const ns = sample(namespaces);
+    const permission = sample(permissionTypes);
+
     return {
       id: casual.uuid,
       scope: casual.word,
-      scopeName: casual.word,
+      scopeName: `${ns}.${permission}`,
       resource: casual.word,
       resourceName: casual.word,
       requester,
       requesterName,
       owner: casual.username,
       ownerName: casual.random_element(owners),
-      granted: true,
+      granted: casual.coin_flip,
     };
   },
   Legal: () => ({
