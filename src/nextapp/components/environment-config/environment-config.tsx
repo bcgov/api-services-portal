@@ -158,7 +158,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             <Text mb={4}></Text>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>
-                Authentication
+                Authorization
               </Text>
               <Select
                 size="sm"
