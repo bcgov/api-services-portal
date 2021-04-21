@@ -116,7 +116,7 @@ const ApplicationsPage: React.FC<
         <PageHeader
           breadcrumb={breadcrumbs()}
           actions={actions}
-          title="My Service Accounts"
+          title="Service Accounts"
         >
           <Text>Service Accounts allow you to access BC Government APIs via the Gateway API or the Gateway CLI.</Text>
         </PageHeader>
