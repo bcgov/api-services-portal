@@ -26,15 +26,15 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
-    name: 'My Resources',
-    url: '/devportal/poc/resources',
-    access: ['api-owner'],
-    sites: ['devportal'],
-  },
-  {
     name: 'Applications',
     url: '/devportal/applications',
     access: ['developer', 'api-owner'],
+    sites: ['devportal'],
+  },
+  {
+    name: 'My Resources',
+    url: '/devportal/poc/resources',
+    access: ['api-owner'],
     sites: ['devportal'],
   },
   {

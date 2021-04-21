@@ -435,6 +435,12 @@ const wfDeleteAccess = async (context, operation, keys) => {
                         const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
                         const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
+                        // TODO
+                        // Delete the Policies that are associated with the client!!
+                        // Use the kcprotect service to find the UMA Policies that have this client ID
+                        // and then delete each one
+
+
                         await deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
                     }
                 }))
