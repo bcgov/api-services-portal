@@ -2,12 +2,11 @@ import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import { Box, Container, Divider, Heading, Text } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
+import GrantAccessDialog from '@/components/grant-access-dialog';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
-import ShareResourceDialog from '@/components/resources-manager/add-user';
 import ResourcesManager from '@/components/resources-manager';
 import ResourcesList from '@/components/resources-list';
-import ClientRequest from '@/components/client-request';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { getSession } from '@/shared/services/auth';
@@ -46,7 +45,7 @@ const ApiAccessResourcePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey, variables }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
-  const { resourceId } = variables;
+  const { credIssuerId, resourceId } = variables;
 
   return (
     <>
@@ -70,7 +69,11 @@ const ApiAccessResourcePage: React.FC<
             justifyContent="space-between"
           >
             <Heading size="md">Users with Access</Heading>
-            <ShareResourceDialog />
+            <GrantAccessDialog
+              credIssuerId={credIssuerId}
+              data={data.getResourceSet}
+              resourceId={resourceId}
+            />
           </Box>
           <Divider />
           {!resourceId && (
@@ -79,14 +82,12 @@ const ApiAccessResourcePage: React.FC<
               title="No Resources"
             />
           )}
-          {resourceId && (
-            <ClientRequest fallback={<Text>Loading...</Text>}>
-              <ResourcesList
-                data={data?.getPermissionTickets}
-                resourceId={resourceId}
-              />
-            </ClientRequest>
-          )}
+          <ResourcesList
+            data={data?.getPermissionTickets}
+            resourceId={resourceId}
+            credIssuerId={credIssuerId}
+            queryKey={queryKey}
+          />
         </Box>
       </Container>
     </>
@@ -109,6 +110,7 @@ const query = gql`
       scopeName
       granted
     }
+
     getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {
       id
       name
@@ -121,11 +123,13 @@ const query = gql`
       users
       scopes
     }
+
     CredentialIssuer(where: { id: $credIssuerId }) {
       clientId
       resourceType
       availableScopes
     }
+
     getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
       id
       name

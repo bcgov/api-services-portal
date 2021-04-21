@@ -6013,13 +6013,19 @@ input _ListSchemaFieldsInput {
   type: String
 }
 
+type UMAScope {
+  name: String!
+}
+
 type UMAResourceSet {
   id: String!
   name: String!
   type: String!
   owner: String!
   ownerManagedAccess: Boolean
-  resourceScopes: String!
+  uris: [String]
+  resource_scopes: [UMAScope]
+  scopes: [UMAScope]
 }
 
 type UMAPermissionTicket {
@@ -6039,6 +6045,27 @@ input UMAPermissionTicketInput {
   resourceId: String!
   username: String!
   granted: Boolean
+  scopes: [String]!
+}
+
+type UMAPolicy {
+  id: String!
+  name: String!
+  description: String
+  type: String!
+  logic: String!
+  decisionStrategy: String!
+  owner: String!
+  users: [String]
+  clients: [String]
+  scopes: [String]!
+}
+
+input UMAPolicyInput {
+  name: String!
+  description: String
+  users: [String]
+  clients: [String]
   scopes: [String]!
 }
 
@@ -6547,7 +6574,8 @@ type Query {
     owner: String
     type: String
     resourceId: String
-  ): [ResourceSet]
+  ): [UMAResourceSet]
+  getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
   getPermissionTickets(
     credIssuerId: ID!
     resourceId: String
@@ -6764,6 +6792,12 @@ type Mutation {
     requesterId: String!
     scopes: [String]!
   ): Boolean
+  createUmaPolicy(
+    credIssuerId: ID!
+    resourceId: String
+    data: UMAPolicyInput!
+  ): UMAPolicy
+  deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean
   authenticateUserWithPassword(
     email: String
     password: String

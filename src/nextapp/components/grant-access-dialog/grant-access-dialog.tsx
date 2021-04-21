@@ -17,17 +17,56 @@ import {
   Icon,
   useDisclosure,
   VStack,
+  useToast,
+  Box,
+  Text,
+  WrapItem,
+  Wrap,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
+import { UmaResourceSet } from '@/shared/types/query.types';
+import { useApiMutation } from '@/shared/services/api';
 
-interface ShareResourceDialogProps {}
+interface ShareResourceDialogProps {
+  credIssuerId: string;
+  data: UmaResourceSet[];
+  resourceId: string;
+}
 
-const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
+const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
+  credIssuerId,
+  data,
+  resourceId,
+}) => {
+  const [errors, setErrors] = React.useState<string | null>(null);
+  const grant = useApiMutation(mutation);
+  const toast = useToast();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // const formData = new FormData(event.currentTarget);
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const scopeValues = formData.getAll('scopes') as string[];
+      const scopes = scopeValues.map((s) => ({ name: s }));
+
+      await grant.mutateAsync({
+        credIssuerId,
+        data: {
+          username: formData.get('username') as string,
+          resourceId,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access Granted',
+        status: 'success',
+      });
+      onClose();
+    } catch (err) {
+      setErrors(err?.message);
+    }
   };
 
   return (
@@ -47,10 +86,15 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add User</ModalHeader>
+          <ModalHeader>Grant User Access</ModalHeader>
           <ModalBody>
+            {errors && (
+              <Box bgColor="red.500" px={4} py={2} color="white">
+                <Text>{errors}</Text>
+              </Box>
+            )}
             <form onSubmit={handleSubmit}>
-              <VStack spacing={4}>
+              <VStack spacing={4} overflow="hidden">
                 <FormControl isRequired>
                   <FormLabel>Username</FormLabel>
                   <Input
@@ -62,14 +106,15 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
                 <FormControl>
                   <FormLabel>Permissions</FormLabel>
                   <CheckboxGroup>
-                    <HStack spacing={4}>
-                      <Checkbox value="credential-admin">
-                        Credential Admin
-                      </Checkbox>
-                      <Checkbox value="viewer">Viewer</Checkbox>
-                      <Checkbox value="api-owner">Api Owner</Checkbox>
-                      <Checkbox value="client-manager">Client Manager</Checkbox>
-                    </HStack>
+                    <Wrap spacing={4}>
+                      {data.map((r) => (
+                        <WrapItem key={r.id}>
+                          <Checkbox value={r.name} name="scopes">
+                            {r.name}
+                          </Checkbox>
+                        </WrapItem>
+                      ))}
+                    </Wrap>
                   </CheckboxGroup>
                 </FormControl>
               </VStack>
@@ -89,7 +134,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = () => {
 
 export default ShareResourceDialog;
 
-const grantUserMutation = gql`
+const mutation = gql`
   mutation GrantUserAccess(
     $credIssuerId: ID!
     $data: UMAPermissionTicketInput!

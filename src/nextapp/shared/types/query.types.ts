@@ -6513,8 +6513,8 @@ export type UmaPolicyInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UnauthenticateTemporaryIdentityOutput = {
-  __typename?: 'unauthenticateTemporaryIdentityOutput';
+export type UnauthenticateUserOutput = {
+  __typename?: 'unauthenticateUserOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -7798,10 +7798,10 @@ export type Mutation = {
   approvePermissions?: Maybe<Scalars['Boolean']>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
-  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
-  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
-  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
+  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
+  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
+  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
+  updateAuthenticatedUser?: Maybe<User>;
 };
 
 
@@ -8694,7 +8694,7 @@ export type MutationDeleteUmaPolicyArgs = {
 };
 
 
-export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
+export type MutationAuthenticateUserWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
