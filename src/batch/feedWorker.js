@@ -258,6 +258,7 @@ const metadata = {
         transformations: {
             availableScopes: {name: "toStringDefaultArray"},
             clientRoles: {name: "toStringDefaultArray"},
+            owner: {name: "connectOne", list: "allUsers", refKey: 'username' },
         }
     },
     'Content': {
