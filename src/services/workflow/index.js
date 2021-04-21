@@ -139,12 +139,11 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
     if (('active' in originalInput && originalInput['active'] == true) 
             || (operation == 'update' && 'active' in existingItem && existingItem['active'] == true) && !('active' in originalInput && originalInput['active'] == false)) {
         try {
-            const envServices = await lookupProductEnvironmentServices(context, existingItem.id)
+            const envServices = existingItem == null ? null : await lookupProductEnvironmentServices(context, existingItem.id)
 
             const resolvedServices = ('services' in resolvedData) ? await lookupServices(context, resolvedData['services']) : null
 
-            const flow = envServices.flow
-            const issuer = envServices.credentialIssuer
+            const flow = existingItem == null ? resolvedData['flow'] : envServices.flow
 
             // The Credential Issuer says what plugins are expected
             // Loop through the Services to make sure the plugin is configured correctly
@@ -162,6 +161,7 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete acl or key-auth plugin.")
                 }
             } else if (flow == 'client-credentials') {
+                const issuer = envServices.credentialIssuer
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -170,10 +170,11 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 if (missing.length != 0) {
                     console.log(JSON.stringify(issuer, null, 5))
                     resolvedServices ? console.log("VALIDATION FAILURE(resolvedServices) " + JSON.stringify(resolvedServices, null, 5)) :
-                    console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
+                    //console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
+                const issuer = envServices.credentialIssuer
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current

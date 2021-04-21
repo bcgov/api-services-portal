@@ -12,6 +12,7 @@ module.exports = {
     name: {
         type: Text,
         isRequired: true,
+        isUnique: true
     },
     description: {
         type: Markdown,

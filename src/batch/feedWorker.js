@@ -219,7 +219,7 @@ const metadata = {
         transformations: {
             application: {name: "connectOne", list: "allApplications", refKey: 'appId' },
             consumer: {name: "connectOne", list: "allGatewayConsumers", refKey: 'username' },
-            productEnvironment: {name: "connectOne", list: "allEnvironments", refKey: 'id' },
+            productEnvironment: {name: "connectOne", list: "allEnvironments", refKey: 'appId' },
         }
     },
     'Application': {
@@ -248,12 +248,25 @@ const metadata = {
         transformations: {
             services: {name: "connectMany", list: "allGatewayServices", refKey: "name"},
             legal: {name: "connectOne", list: "allLegals", refKey: 'reference' },
+            credentialIssuer: {name: "connectOne", list: "allCredentialIssuers", refKey: 'name' },
+        }
+    },
+    'CredentialIssuer': {
+        query: 'allCredentialIssuers',
+        refKey: 'name',
+        sync: ['name', 'description', 'flow', 'clientRegistration', 'mode', 'authPlugin', 'instruction', 'oidcDiscoveryUrl', 'initialAccessToken', 'clientId', 'clientSecret', 'clientRoles', 'availableScopes', 'resourceType', 'apiKeyName', 'owner'],
+        transformations: {
+            availableScopes: {name: "toStringDefaultArray"},
+            clientRoles: {name: "toStringDefaultArray"},
         }
     },
     'Content': {
         query: 'allContents',
         refKey: 'externalLink',
-        sync: ['title', 'description', 'content', 'githubRepository', 'readme', 'order', 'isComplete']
+        sync: ['title', 'description', 'content', 'githubRepository', 'readme', 'order', 'isComplete', 'tags'],
+        transformations: {
+            tags: {name: "toStringDefaultArray"}
+        }
     },
     'Legal': {
         query: 'allLegals',
