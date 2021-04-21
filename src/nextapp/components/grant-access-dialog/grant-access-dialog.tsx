@@ -42,14 +42,12 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
   const [errors, setErrors] = React.useState<string | null>(null);
   const grant = useApiMutation(mutation);
   const toast = useToast();
+  const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleGrantAccess = async () => {
     try {
-      const formData = new FormData(event.currentTarget);
-      const scopeValues = formData.getAll('scopes') as string[];
-      const scopes = scopeValues.map((s) => ({ name: s }));
+      const formData = new FormData(formRef?.current);
+      const scopes = formData.getAll('scopes') as string[];
 
       await grant.mutateAsync({
         credIssuerId,
@@ -66,6 +64,15 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       onClose();
     } catch (err) {
       setErrors(err?.message);
+    }
+  };
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleGrantAccess();
+  };
+  const handleSubmitClick = () => {
+    if (formRef?.current.checkValidity()) {
+      handleGrantAccess();
     }
   };
 
@@ -88,12 +95,12 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
         <ModalContent>
           <ModalHeader>Grant User Access</ModalHeader>
           <ModalBody>
-            {errors && (
-              <Box bgColor="red.500" px={4} py={2} color="white">
-                <Text>{errors}</Text>
+            {grant.isError && (
+              <Box bgColor="red.500" px={4} py={2} color="white" my={3}>
+                <Text>Access cannot be granted</Text>
               </Box>
             )}
-            <form onSubmit={handleSubmit}>
+            <form ref={formRef} onSubmit={handleSubmit}>
               <VStack spacing={4} overflow="hidden">
                 <FormControl isRequired>
                   <FormLabel>Username</FormLabel>
@@ -123,7 +130,9 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
           <ModalFooter>
             <ButtonGroup>
               <Button onClick={onClose}>Cancel</Button>
-              <Button variant="primary">Share</Button>
+              <Button variant="primary" onClick={handleSubmitClick}>
+                Share
+              </Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>
