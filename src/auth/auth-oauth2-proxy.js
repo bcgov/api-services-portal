@@ -160,6 +160,10 @@ class Oauth2ProxyAuthStrategy {
             // For now, make everyone an api-owner if they have access to a namespace
             _roles.push('api-owner')
         }
+        if (scopes.includes('Namespace.Manage')) {
+            _roles.push('credential-admin')
+        }
+
         const roles = JSON.stringify(_roles)
 
         const users = this.keystone.getListByKey(this.listKey)

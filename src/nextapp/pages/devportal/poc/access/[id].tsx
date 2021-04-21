@@ -63,19 +63,19 @@ const MyApplicationsPage = () => {
 
     const fetch = () => {
         const { router: { pathname, query: { id } } } = context
-        console.log("ID="+id)
-        graphql(GET_LIST, {})
-        .then(({ data }) => {
-            setState({ state: 'loaded', data });            
-            if (context['router'] != null && id) {
-                console.log("ID="+id)
-                setRequest(data.allAccessRequests.filter(r => r.id == id))
-                generateCredential(id)
-            }
-        })
-        .catch((err) => {
-            setState({ state: 'error', data: null });
-        });
+
+        if (context['router'] != null && id) {
+            generateCredential(id).then(() => {
+                graphql(GET_LIST, {})
+                .then(({ data }) => {
+                    setState({ state: 'loaded', data });            
+                    setRequest(data.allAccessRequests.filter(r => r.id == id))
+                })
+            })
+            .catch((err) => {
+                setState({ state: 'error', data: null });
+            })
+        }
         // if (context['router'] != null && id) {
 
         //     graphql(GET_REQUEST, { id: id }).then(data => {
@@ -88,7 +88,7 @@ const MyApplicationsPage = () => {
     const [{cred,reqId}, setCred] = useState({cred:null, reqId:null});
 
     const generateCredential = (reqId) => {
-        graphql(GEN_CREDENTIAL, { id: reqId }).then(data => {
+        return graphql(GEN_CREDENTIAL, { id: reqId }).then(data => {
             if (data.data.updateAccessRequest.credential != "NEW") {
                 setCred({cred: JSON.parse(data.data.updateAccessRequest.credential), reqId: reqId})
             }
