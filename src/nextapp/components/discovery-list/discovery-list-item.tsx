@@ -60,7 +60,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
                     target="_blank"
                     rel="noreferrer"
                     >
-                    {data.dataset.name}
+                    {data.dataset.title}
                     </Link>
                     <Badge color="bc-blue-alt" ml={2}>
                     BCDC
