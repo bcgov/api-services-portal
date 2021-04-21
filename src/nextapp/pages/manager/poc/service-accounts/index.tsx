@@ -118,7 +118,7 @@ const ApplicationsPage: React.FC<
           actions={actions}
           title="My Service Accounts"
         >
-          <Text>Service Accounts allow you to access BC Government APIs via the API or Command Line.</Text>
+          <Text>Service Accounts allow you to access BC Government APIs via the Gateway API or the Gateway CLI.</Text>
         </PageHeader>
         { cred != null && ( 
             <Box m={4}>

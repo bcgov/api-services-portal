@@ -205,7 +205,7 @@ const query = gql`
         }
     }
 
-    allAccessRequests(where: { isIssued_not: true }) {
+    allAccessRequests(where: { isComplete_not: true }) {
       id
     }
   }
