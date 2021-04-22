@@ -99,8 +99,10 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
 //   }
 // }
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  const pages: { allContents: any[] } = await api(pagesQuery);
+export const getServerSideProps: GetServerSideProps = async ({ req, params }) => {
+  const pages: { allContents: any[] } = await api(pagesQuery, null, {
+    headers: req.headers as HeadersInit,
+  });
   const page = pages.allContents.find((page) => page.slug === params.slug);
   let content = page.content;
 
