@@ -6559,12 +6559,12 @@ export type UnauthenticateTemporaryIdentityOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -6793,7 +6793,7 @@ export type Query = {
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -8732,14 +8732,14 @@ export type MutationApprovePermissionsArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 
