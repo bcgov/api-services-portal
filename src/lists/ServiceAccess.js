@@ -22,6 +22,10 @@ module.exports = {
         isRequired: true,
         isUnique: true
     },
+    namespace: {
+        type: Text,
+        isRequired: false,
+    },
     active: {
         type: Checkbox,
         isRequired: true,

@@ -35,6 +35,7 @@ const {
   lookupApplication,
   lookupServices,
   lookupProductEnvironmentServices,
+  lookupProductEnvironmentServicesBySlug,
   lookupEnvironmentAndApplicationByAccessRequest,
   lookupCredentialReferenceByServiceAccess,
   lookupKongConsumerIdByName,
@@ -138,12 +139,11 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
     if (('active' in originalInput && originalInput['active'] == true) 
             || (operation == 'update' && 'active' in existingItem && existingItem['active'] == true) && !('active' in originalInput && originalInput['active'] == false)) {
         try {
-            const envServices = await lookupProductEnvironmentServices(context, existingItem.id)
+            const envServices = existingItem == null ? null : await lookupProductEnvironmentServices(context, existingItem.id)
 
             const resolvedServices = ('services' in resolvedData) ? await lookupServices(context, resolvedData['services']) : null
 
-            const flow = envServices.flow
-            const issuer = envServices.credentialIssuer
+            const flow = existingItem == null ? resolvedData['flow'] : envServices.flow
 
             // The Credential Issuer says what plugins are expected
             // Loop through the Services to make sure the plugin is configured correctly
@@ -161,6 +161,7 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete acl or key-auth plugin.")
                 }
             } else if (flow == 'client-credentials') {
+                const issuer = envServices.credentialIssuer
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -169,10 +170,11 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
                 if (missing.length != 0) {
                     console.log(JSON.stringify(issuer, null, 5))
                     resolvedServices ? console.log("VALIDATION FAILURE(resolvedServices) " + JSON.stringify(resolvedServices, null, 5)) :
-                    console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
+                    //console.log("VALIDATION FAILURE(envServices) " + JSON.stringify(envServices, null, 5)) 
                     addValidationError("[" + missing.map(s => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
+                const issuer = envServices.credentialIssuer
                 const isServiceMissingAllPlugins = (svc) => svc.plugins.filter(plugin => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -196,7 +198,6 @@ const wfValidateActiveEnvironment = async (context, operation, existingItem, ori
         }
     }
 }
-
 
 const wfRegenerateCredential = async (context, operation, existingItem, originalInput, updatedItem) => {
     const kongApi = new kong(process.env.KONG_URL)
@@ -285,9 +286,93 @@ const wfRegenerateCredential = async (context, operation, existingItem, original
     }
 }
 
-const wfPrepareServiceAccess = async (context) => {
+const wfCreateServiceAccount = async (context, productEnvironmentSlug, namespace) => {
+    const kongApi = new kong(process.env.KONG_URL)
+    const feederApi = new feeder(process.env.FEEDER_URL)
 
+    const productEnvironment = await lookupProductEnvironmentServicesBySlug(context, productEnvironmentSlug)
+
+    const application = null
+//    const application = await lookupApplication(context, requestDetails.application.id)
+
+    const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 12)
+    const clientId = ('sa-' + namespace + '-' + productEnvironment.appId + '-' + extraIdentifier).toLowerCase()
+
+    const nickname = clientId
+
+    const newClient = await registerClient (context, productEnvironment.credentialIssuer.id, clientId, nickname) 
+
+    console.log(JSON.stringify(newClient, null, 4))
+
+    // Call /feeds to sync the Consumer with KeystoneJS
+    await feederApi.forceSync('kong', 'consumer', newClient.consumer.id)
+
+    const credentialReference = {
+        id: newClient.client.id,
+        clientId: newClient.client.clientId,
+    }
+    // Create a ServiceAccess record
+    const consumerType = 'client'
+    const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
+    const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application, namespace)
+
+    //await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
+
+    const backToUser = {
+        flow: productEnvironment.flow,
+        clientId: newClient.client.clientId,
+        clientSecret: newClient.client.clientSecret,
+        tokenEndpoint: newClient.openid.token_endpoint
+    }
+
+    //updatedItem['credential'] = JSON.stringify(backToUser)
+    console.log(JSON.stringify(backToUser, null, 4))    
+    /*
+        {
+            "flow": "client-credentials",
+            "clientId": "sa-abc-42da4f15-xxxx",
+            "clientSecret": "xxxx",
+            "tokenEndpoint": "https://auth/auth/realms/realm/protocol/openid-connect/token"
+        }   
+    */   
+
+
+    //const clientId = requestDetails.serviceAccess.consumer.customId
+
+    // Find the credential issuer and based on its type, go do the appropriate action
+    const issuer = await lookupCredentialIssuerById(context, productEnvironment.credentialIssuer.id)
+
+    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+
+    // token is NULL if 'iat'
+    // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
+    // issuer.initialAccessToken if 'iat'
+    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+
+    const controls = JSON.parse('{"defaultClientScopes": []}')
+    const defaultClientScopes = controls.defaultClientScopes;
+    
+    await updateClientRegistration (openid.issuer, token, clientId, {enabled: true})
+
+    // https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
+    console.log("S = "+openid.issuer.indexOf('/realms'))
+    const baseUrl = openid.issuer.substr(0, openid.issuer.indexOf('/realms'))
+    const realm = openid.issuer.substr(openid.issuer.lastIndexOf('/')+1)
+    console.log("B="+baseUrl+", R="+realm)
+
+    // Only valid for 'managed' client registration
+    const kcadminApi = new kcadmin(baseUrl, realm)
+    await kcadminApi.login(issuer.clientId, issuer.clientSecret)
+
+    // Sync Scopes
+    await kcadminApi.syncAndApply (clientId, defaultClientScopes, [])
+
+    await markActiveTheServiceAccess (context, serviceAccessId)    
+
+    return backToUser
 }
+
+
 
 /**
  * When deleting a ServiceAccess record, also delete the related
@@ -350,6 +435,12 @@ const wfDeleteAccess = async (context, operation, keys) => {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
                         const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
                         const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+
+                        // TODO
+                        // Delete the Policies that are associated with the client!!
+                        // Use the kcprotect service to find the UMA Policies that have this client ID
+                        // and then delete each one
+
 
                         await deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
                     }
@@ -536,6 +627,6 @@ module.exports = {
     Validate: wfValidate,
     ValidateActiveEnvironment: wfValidateActiveEnvironment,
     RegenerateCredential: wfRegenerateCredential,
-    PrepareServiceAccess: wfPrepareServiceAccess,
-    DeleteAccess: wfDeleteAccess
+    DeleteAccess: wfDeleteAccess,
+    CreateServiceAccount: wfCreateServiceAccount
 }

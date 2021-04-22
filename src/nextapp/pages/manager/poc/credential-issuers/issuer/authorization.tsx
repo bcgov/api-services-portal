@@ -10,6 +10,7 @@ import {
     Divider,
     Heading,
     Icon,
+    Input,
     Skeleton,
     Table,
     Tbody,
@@ -40,6 +41,18 @@ const ListArray = ({value, edit, onChange}) => {
         )
 }
 
+const ToggleEdit = ({value, edit, onChange}) => {
+
+    const display = value && typeof(value) != 'undefined' ? value : ""
+
+    return edit ? 
+        (
+            <Input defaultValue={display} onChange={(e) => onChange(e.target.value)}/>
+        ) : (
+            <Text as="dd">{display}</Text>
+        )
+}
+
 const Authorization = ({fetch, issuer}) => {
 
     const [edit , setEdit] = useState(false);
@@ -55,7 +68,8 @@ const Authorization = ({fetch, issuer}) => {
         graphql(UPDATE_ISSUER_AUTHZ, { 
             id: issuer.id, 
             availableScopes: JSON.stringify(issuer.availableScopes.filter(s => s != "")), 
-            clientRoles: JSON.stringify(issuer.clientRoles.filter(s => s != "")) 
+            clientRoles: JSON.stringify(issuer.clientRoles.filter(s => s != "")) ,
+            resourceType: issuer.resourceType
         })
         .then(fetch)
         .catch (err => {
@@ -125,6 +139,14 @@ const Authorization = ({fetch, issuer}) => {
                                     If your APIs are protected by Roles, provide the full list of Client Roles that will be used to manage access to the APIs that are protected with this Authorization configuration.
                                 </Box>
                             </Alert>
+                            <Text as="dt" fontWeight="bold">
+                                UMA Resource Type
+                            </Text>
+                            <Box>
+                                <ToggleEdit value={issuer.resourceType} edit={edit} onChange={(v) => { issuer.resourceType = v }}/>
+                            </Box>
+                            <Box/>
+
                     </Box>
                 </Box>
         </Box>     

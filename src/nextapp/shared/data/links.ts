@@ -14,7 +14,7 @@ const links: NavLink[] = [
 //   { name: 'Home', url: '/manager', access: [], sites: ['manager'] },
 //   { name: 'Home', url: '/devportal', access: [], sites: ['devportal'] },
   {
-    name: 'API Discovery',
+    name: 'Discovery',
     url: '/devportal/api-discovery',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
@@ -26,21 +26,21 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
-    name: 'My Resources',
-    url: '/devportal/poc/resources',
-    access: ['api-owner'],
-    sites: ['devportal'],
-  },
-  {
     name: 'Applications',
     url: '/devportal/applications',
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },
   {
+    name: 'My Resources',
+    url: '/devportal/poc/resources',
+    access: ['api-owner'],
+    sites: ['devportal'],
+  },
+  {
     name: 'Namespaces',
-    url: '/devportal/poc/namespaces',
-    altUrls: [ '/manager/services', '/manager/services/[id]', '/manager/products', '/manager/products/[id]', '/manager/consumers', '/manager/consumers/[id]', '/manager/requests/[id]', '/manager/poc/credential-issuers', '/manager/poc/credential-issuers/[id]' ],
+    url: '/manager/poc/namespaces',
+    altUrls: [ '/manager/services', '/manager/services/[id]', '/manager/products', '/manager/products/[id]', '/manager/consumers', '/manager/consumers/[id]', '/manager/requests/[id]', '/manager/poc/credential-issuers', '/manager/poc/credential-issuers/[id]', '/manager/poc/service-accounts' ],
     access: ['developer', 'api-owner'],
     sites: ['devportal'],
   },

@@ -75,13 +75,6 @@ const UpdateIssuer = () => {
   useEffect(fetch, [context]);
 
   const issuer = data ? data.allCredentialIssuers[0] : null;
-  
-  if (issuer != null) {
-    issuer.availableScopes = [];
-    issuer.clientRoles = [];
-    // issuer.availableScopes = issuer.availableScopes ? JSON.parse(issuer.availableScopes) : []
-    // issuer.clientRoles = issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
-  }
 
   const products =
     issuer == null

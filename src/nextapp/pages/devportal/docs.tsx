@@ -88,7 +88,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   try {
     const pagesQuery = gql`
       {
@@ -100,7 +100,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
         }
       }
     `;
-    const pages: { allContents: any[] } = await api(pagesQuery);
+    const pages: { allContents: any[] } = await api(pagesQuery, null, {
+        headers: req.headers as HeadersInit,
+    });
 
     return {
       props: {

@@ -20,14 +20,14 @@ type HomeActions = {
 
   const actions: HomeActions[] = [
     {
-        title: 'Gateway Setup',
+        title: 'Gateway Services',
         url: '/manager/services',
         icon: FaServer,
         roles: [],
         description: "View your current gateway configuration, metrics and traffic patterns"
     },
     {
-      title: 'Directory Setup',
+      title: 'Products',
       url: '/manager/products',
       icon: FaServer,
       roles: [],
@@ -49,6 +49,13 @@ type HomeActions = {
             icon: FaServer,
             roles: [],
             description: "Manage authorization servers used to protect your APIs"
+        },
+        {
+            title: 'Service Accounts',
+            url: '/manager/poc/service-accounts',
+            icon: FaServer,
+            roles: [],
+            description: "Manage service accounts for performing functions on the namespace"
         },
         {
             title: 'Activity',

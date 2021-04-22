@@ -28,6 +28,7 @@ import { gql } from 'graphql-request';
 import { QueryClient, useQueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import api, { useApi } from '@/shared/services/api';
+import graphql from '@/shared/services/graphql';
 import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
 import { FaBook, FaCog } from 'react-icons/fa';
@@ -94,15 +95,14 @@ const NewRequestsPage: React.FC<
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
       };
-      const result = await api(mutation, payload);
+      const result = await graphql(mutation, payload);
       client.invalidateQueries('allAccessRequests');
       toast({
         title: 'Request submitted',
         description: 'Check back to see if it has been accepted soon',
         status: 'success',
       });
-      // ${result.createAccessRequest.id}
-      router?.push(`/devportal/poc/access/000`);
+      router?.push(`/devportal/poc/access/${result.data.createAccessRequest.id}`);
     } catch (err) {
       toast({
         title: 'Unable to make request',
@@ -220,7 +220,7 @@ const NewRequestsPage: React.FC<
                 borderRadius={4}
               >
                 <Checkbox colorScheme="blue">
-                  {dataset.environments[0]?.legal.description}
+                  {dataset.environments[0]?.legal.title}
                 </Checkbox>
                 <Link
                   fontWeight="bold"
@@ -263,6 +263,7 @@ const query = gql`
         active
         flow
         legal {
+          title
           description
           link
         }

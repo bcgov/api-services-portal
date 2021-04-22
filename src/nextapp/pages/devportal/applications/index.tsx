@@ -101,7 +101,7 @@ const ApplicationsPage: React.FC<
             alignItems="center"
             justifyContent="space-between"
           >
-            <Heading size="md">All Consumers</Heading>
+            <Heading size="md">All Applications</Heading>
           </Box>
           <Divider />
           <Table variant="simple">

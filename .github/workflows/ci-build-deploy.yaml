@@ -206,6 +206,8 @@ jobs:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
           GWA_API_URL:
             value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
+          GWA_RES_SVR_CLIENT_ID:
+            value: 'gwa-api'
 
         " > values.yaml
         

@@ -28,6 +28,7 @@ const actions = {
     "filterByPackageNS": require('./actions/filterByPackageNS'),
     "filterByProductNSOrActiveEnvironment": require('./actions/filterByProductNSOrActiveEnvironment'),
     "filterByUserNS": require('./actions/filterByUserNS'),
+    "filterByUserNSOrNull": require('./actions/filterByUserNSOrNull'),
     "filterByActive": require('./actions/filterByActive'),
     "filterByActiveEnvironment": require('./actions/filterByActiveEnvironment'),
 }

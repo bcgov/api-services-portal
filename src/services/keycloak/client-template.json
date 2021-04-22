@@ -7,7 +7,7 @@
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
   "redirectUris": ["https://*"],
-  "webOrigins": ["https://*"],
+  "webOrigins": ["*"],
   "notBefore": 0,
   "bearerOnly": false,
   "consentRequired": false,

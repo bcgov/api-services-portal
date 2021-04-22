@@ -25,7 +25,7 @@ export const GET_PERMISSIONS = `
             users
             scopes
         }
-
+        
         CredentialIssuer(where: {id: $credIssuerId}) {
             clientId
             resourceType

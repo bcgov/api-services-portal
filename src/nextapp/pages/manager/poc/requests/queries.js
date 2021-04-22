@@ -172,7 +172,7 @@ export const REJECT = `
 
 export const FULFILL_REQUEST = `
     mutation FulfillRequest($id: ID!, $controls: String!) {
-        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, controls: $controls }) {
+        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }) {
             id
         }
     }

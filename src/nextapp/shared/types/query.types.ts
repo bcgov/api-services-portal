@@ -5496,6 +5496,7 @@ export type ServiceAccess = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -5534,6 +5535,24 @@ export type ServiceAccessWhereInput = {
   name_not_ends_with_i?: Maybe<Scalars['String']>;
   name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   active?: Maybe<Scalars['Boolean']>;
   active_not?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
@@ -5629,6 +5648,8 @@ export enum SortServiceAccessesBy {
   IdDesc = 'id_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   ActiveAsc = 'active_ASC',
   ActiveDesc = 'active_DESC',
   AclEnabledAsc = 'aclEnabled_ASC',
@@ -5655,6 +5676,7 @@ export enum SortServiceAccessesBy {
 
 export type ServiceAccessUpdateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -5673,6 +5695,7 @@ export type ServiceAccessesUpdateInput = {
 
 export type ServiceAccessCreateInput = {
   name?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   aclEnabled?: Maybe<Scalars['Boolean']>;
   consumerType?: Maybe<ServiceAccessConsumerTypeType>;
@@ -6453,6 +6476,42 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type ServiceAccount = {
+  __typename?: 'ServiceAccount';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  credentials?: Maybe<Scalars['String']>;
+};
+
+export type ServiceAccountInput = {
+  __typename?: 'ServiceAccountInput';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  scopes?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type UmaPolicy = {
+  __typename?: 'UMAPolicy';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  type: Scalars['String'];
+  logic: Scalars['String'];
+  decisionStrategy: Scalars['String'];
+  owner: Scalars['String'];
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type UmaPolicyInput = {
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
 export type UmaScope = {
   __typename?: 'UMAScope';
   name: Scalars['String'];
@@ -6491,30 +6550,8 @@ export type UmaPermissionTicketInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UmaPolicy = {
-  __typename?: 'UMAPolicy';
-  id: Scalars['String'];
-  name: Scalars['String'];
-  description?: Maybe<Scalars['String']>;
-  type: Scalars['String'];
-  logic: Scalars['String'];
-  decisionStrategy: Scalars['String'];
-  owner: Scalars['String'];
-  users?: Maybe<Array<Maybe<Scalars['String']>>>;
-  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
-  scopes: Array<Maybe<Scalars['String']>>;
-};
-
-export type UmaPolicyInput = {
-  name: Scalars['String'];
-  description?: Maybe<Scalars['String']>;
-  users?: Maybe<Array<Maybe<Scalars['String']>>>;
-  clients?: Maybe<Array<Maybe<Scalars['String']>>>;
-  scopes: Array<Maybe<Scalars['String']>>;
-};
-
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -6751,8 +6788,8 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
-  getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
+  getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
@@ -7445,16 +7482,16 @@ export type QueryGetGatewayConsumerPluginsArgs = {
 };
 
 
-export type QueryGetResourceSetArgs = {
+export type QueryGetUmaPoliciesArgs = {
   credIssuerId: Scalars['ID'];
-  owner?: Maybe<Scalars['String']>;
-  type?: Maybe<Scalars['String']>;
   resourceId?: Maybe<Scalars['String']>;
 };
 
 
-export type QueryGetUmaPoliciesArgs = {
+export type QueryGetResourceSetArgs = {
   credIssuerId: Scalars['ID'];
+  owner?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
   resourceId?: Maybe<Scalars['String']>;
 };
 
@@ -7793,15 +7830,16 @@ export type Mutation = {
   createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
+  createServiceAccount?: Maybe<ServiceAccount>;
+  createUmaPolicy?: Maybe<UmaPolicy>;
+  deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
-  createUmaPolicy?: Maybe<UmaPolicy>;
-  deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -8661,6 +8699,19 @@ export type MutationDeleteGatewayConsumerPluginArgs = {
 };
 
 
+export type MutationCreateUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  resourceId?: Maybe<Scalars['String']>;
+  data: UmaPolicyInput;
+};
+
+
+export type MutationDeleteUmaPolicyArgs = {
+  credIssuerId: Scalars['ID'];
+  policyId: Scalars['String'];
+};
+
+
 export type MutationGrantPermissionsArgs = {
   credIssuerId: Scalars['ID'];
   data: UmaPermissionTicketInput;
@@ -8678,19 +8729,6 @@ export type MutationApprovePermissionsArgs = {
   resourceId: Scalars['String'];
   requesterId: Scalars['String'];
   scopes: Array<Maybe<Scalars['String']>>;
-};
-
-
-export type MutationCreateUmaPolicyArgs = {
-  credIssuerId: Scalars['ID'];
-  resourceId?: Maybe<Scalars['String']>;
-  data: UmaPolicyInput;
-};
-
-
-export type MutationDeleteUmaPolicyArgs = {
-  credIssuerId: Scalars['ID'];
-  policyId: Scalars['String'];
 };
 
 

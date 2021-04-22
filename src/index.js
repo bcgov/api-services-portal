@@ -8,6 +8,7 @@ const { generate } = require('@graphql-codegen/cli');
 //const { AdminUIApp } = require('@keystone-next/admin-ui');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
+const { ApiProxyApp } = require('./api-proxy');
 
 var Keycloak = require("keycloak-connect");
 
@@ -17,8 +18,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 const { Strategy, Issuer, Client } = require('openid-client');
-
-const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
@@ -136,6 +135,8 @@ for (_list of [
   keystone.createList(_list, list);
 }
 for (_list of [
+    'ServiceAccount',
+    'UMAPolicy',
     'UMAResourceSet',
     'UMAPermissionTicket',
   ]) {
@@ -206,25 +207,10 @@ module.exports = {
         return true;
       },
     }),
+    new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
     new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: (app) => {
-
-    const apiProxy = createProxyMiddleware('/api', { 
-        target: process.env.GWA_API_URL, 
-        pathRewrite: { '^/api/': '/v2/' },
-        onProxyReq: (proxyReq, req) => { 
-            proxyReq.setHeader('Authorization', `Bearer ${req.header('x-forwarded-access-token')}`) },
-        onError:(err, req, res, target) => {
-            console.log(err)
-            res.writeHead(500, {
-              'Content-Type': 'text/plain',
-            });
-            res.end('error reaching api');
-        }
-    })
-    app.all(/^\/api/, apiProxy)
-
     const express = require('express')
     app.use(express.json())
 
@@ -238,10 +224,22 @@ module.exports = {
     }))
     app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.status(400).json({result: 'error', error: "" + err})))
     app.delete('/feed/:entity/:id', (req, res) => DeleteFeed(keystone, req, res))
+
+    // Added for handling failed calls that require orchestrating multiple changes
     app.put('/tasked/:id', async (req, res) => {
         tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
         res.status(200).json({result: 'ok'})
+    })
+
+    app.get('/create/:slug', async (req, res) => {
+        const wf = require('./services/workflow')
+        const authContext =  keystone.createContext({ skipAccessControl: true })
+
+        const productEnvironmentSlug = req.params['slug']
+
+        const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, 'smashing')
+        res.status(200).json(result)
     })
   },
   distDir,
