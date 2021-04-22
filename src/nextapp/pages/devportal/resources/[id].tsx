@@ -17,16 +17,17 @@ import { gql } from 'graphql-request';
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const { issuer } = context.query;
+  const { headers } = context.req;
   const queryClient = new QueryClient();
   const queryKey = ['resource', id, issuer];
   const variables = { credIssuerId: issuer, resourceId: id };
-  const user = await getSession();
+  const user = await getSession(headers as HeadersInit);
 
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
       await api<Query>(query, variables, {
-        headers: context.req.headers as HeadersInit,
+        headers: headers as HeadersInit,
       })
   );
 

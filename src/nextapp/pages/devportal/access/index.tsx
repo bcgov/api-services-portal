@@ -68,6 +68,7 @@ const query = gql`
       name
       active
       productEnvironment {
+        id
         name
         flow
         services {

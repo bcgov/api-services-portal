@@ -86,7 +86,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           bgColor="blue.50"
         >
           <NextLink
-            href={`/devportal/access/${d.id}?issuer=${d.productEnvironment.credentialIssuer.id}`}
+            href={`/devportal/access/${d.productEnvironment.id}?issuer=${d.productEnvironment.credentialIssuer?.id}`}
           >
             <Link flex={1} display="flex" _hover={{ textDecoration: 'none' }}>
               <Box mr={2}>

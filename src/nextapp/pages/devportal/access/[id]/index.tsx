@@ -28,24 +28,25 @@ import NextLink from 'next/link';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
-import { getSession } from '@/shared/services/auth';
+import { getSession, useSession, useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
+  const { headers } = context.req;
   const { issuer } = context.query;
   const queryClient = new QueryClient();
   const queryKey = ['allAccessRequests', id, issuer];
-  const user = await getSession();
+  const user = await getSession(headers as HeadersInit);
 
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
       await api<Query>(
         query,
-        { id, owner: user.sub },
+        { id: issuer, envId: id, owner: user?.sub },
         {
-          headers: context.req.headers as HeadersInit,
+          headers: headers as HeadersInit,
         }
       )
   );
@@ -54,24 +55,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       dehydratedState: dehydrate(queryClient),
       id,
+      issuer,
       queryKey,
-      user,
     },
   };
 };
 
 const ApiAccessServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id, queryKey, user }) => {
+> = ({ id, issuer, queryKey, user }) => {
   const router = useRouter();
   const params = router?.query;
   const { data } = useApi(
     queryKey,
-    { query, variables: { id, owner: user?.sub } },
+    { query, variables: { id: issuer, envId: id, owner: user?.sub } },
     { suspense: false }
   );
 
-  return (
+  return data ? (
     <>
       <Head>
         <title>{`API Program Services | API Access | ${data.Environment?.name}`}</title>
@@ -142,13 +143,13 @@ const ApiAccessServicePage: React.FC<
         </Box>
       </Container>
     </>
-  );
+  ) : <></>;
 };
 
 export default ApiAccessServicePage;
 
 const query = gql`
-  query GetResources($id: ID!, $owner: String!, $resourceType: String) {
+  query GetResources($id: ID!, $envId: ID!, $owner: String, $resourceType: String) {
     getResourceSet(credIssuerId: $id, owner: $owner, type: $resourceType) {
       id
       name
@@ -168,7 +169,7 @@ const query = gql`
       granted
     }
 
-    Environment(where: { id: $id }) {
+    Environment(where: { id: $envId }) {
       name
       credentialIssuer {
         instruction

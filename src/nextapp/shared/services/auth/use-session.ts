@@ -13,10 +13,10 @@ export interface UserSessionResult {
   error?: Error;
 }
 
-export const getSession = async (): Promise<UserData> => {
+export const getSession = async (headers:HeadersInit = { 'Accept': 'application/json' }): Promise<UserData> => {
   try {
     const req = await fetch(`${apiHost}/admin/session`, {
-        headers: { 'Accept': 'application/json' }
+        headers: headers
     });
     if (req.ok) {
       const json = await req.json();
