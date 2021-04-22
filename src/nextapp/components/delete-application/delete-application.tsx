@@ -1,4 +1,4 @@
-import api from '@/shared/services/api';
+import { useApiMutation } from '@/shared/services/api';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -16,7 +16,7 @@ import {
 import { gql } from 'graphql-request';
 import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 
 interface DeleteApplicationProps {
   id: string;
@@ -26,12 +26,12 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const deleteMutation = useMutation((id: string) => api(mutation, { id }));
+  const deleteMutation = useApiMutation<{ id: string }>(mutation);
   const cancelRef = React.useRef();
 
   const handleDelete = async () => {
     try {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync({ id });
       queryClient.invalidateQueries('allApplications');
       toast({
         title: 'Application deleted',

@@ -7,6 +7,7 @@ const {
 const casual = require('casual-browserify');
 const times = require('lodash/times');
 const random = require('lodash/random');
+const snakeCase = require('lodash/snakeCase');
 const express = require('express');
 const cors = require('cors');
 const { addHours, parse, formatISO, subDays } = require('date-fns');
@@ -31,6 +32,14 @@ const namespaces = [
   'citz-gdx',
   'dss-dds',
 ];
+const devs = [
+  'Joshua Jones',
+  'Ashwin Lunkad',
+  'Johnathan Brammall',
+  'Greg Lawrance',
+];
+const owners = ['Craig Rigdon', 'Aidan Cope'];
+const permissionTypes = ['View', 'Publish', 'Manage', 'Delete', 'Create'];
 // Casual Definitions
 casual.define('namespace', () => {
   return sample(namespaces);
@@ -159,6 +168,8 @@ const server = mockServer(schemaWithMocks, {
 
       return result;
     },
+    getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
+    getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -438,6 +449,36 @@ const server = mockServer(schemaWithMocks, {
       ],
     }),
   }),
+  UMAResourceSet: () => {
+    const ns = sample(namespaces);
+    const permission = sample(permissionTypes);
+
+    return {
+      id: casual.uuid,
+      name: `${ns}.${permission}`,
+      owner: casual.random_element(owners),
+      type: casual.word,
+    };
+  },
+  UMAPermissionTicket: () => {
+    const requesterName = casual.random_element(devs);
+    const requester = snakeCase(requesterName).toUpperCase();
+    const ns = sample(namespaces);
+    const permission = sample(permissionTypes);
+
+    return {
+      id: casual.uuid,
+      scope: casual.word,
+      scopeName: `${ns}.${permission}`,
+      resource: casual.word,
+      resourceName: casual.word,
+      requester,
+      requesterName,
+      owner: casual.username,
+      ownerName: casual.random_element(owners),
+      granted: casual.coin_flip,
+    };
+  },
   Legal: () => ({
     description: 'This API comes with a set of terms you should follow',
     link: 'http://www2.gov.bc.ca/gov/content/home/copyright',
@@ -469,6 +510,7 @@ app.get('/admin/session', (_, res) => {
       isAdmin: false,
       namespace: 'dss-aps',
       groups: null,
+      sub: 'sub',
     },
   });
 });

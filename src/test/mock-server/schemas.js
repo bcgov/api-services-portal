@@ -1188,6 +1188,7 @@ type CredentialIssuer {
   clientSecret: String
   clientRoles: String
   availableScopes: String
+  resourceType: String
   apiKeyName: String
   owner: User
   environments(
@@ -1411,6 +1412,24 @@ input CredentialIssuerWhereInput {
   availableScopes_not_ends_with_i: String
   availableScopes_in: [String]
   availableScopes_not_in: [String]
+  resourceType: String
+  resourceType_not: String
+  resourceType_contains: String
+  resourceType_not_contains: String
+  resourceType_starts_with: String
+  resourceType_not_starts_with: String
+  resourceType_ends_with: String
+  resourceType_not_ends_with: String
+  resourceType_i: String
+  resourceType_not_i: String
+  resourceType_contains_i: String
+  resourceType_not_contains_i: String
+  resourceType_starts_with_i: String
+  resourceType_not_starts_with_i: String
+  resourceType_ends_with_i: String
+  resourceType_not_ends_with_i: String
+  resourceType_in: [String]
+  resourceType_not_in: [String]
   apiKeyName: String
   apiKeyName_not: String
   apiKeyName_contains: String
@@ -1489,6 +1508,8 @@ enum SortCredentialIssuersBy {
   clientRoles_DESC
   availableScopes_ASC
   availableScopes_DESC
+  resourceType_ASC
+  resourceType_DESC
   apiKeyName_ASC
   apiKeyName_DESC
   owner_ASC
@@ -1519,6 +1540,7 @@ input CredentialIssuerUpdateInput {
   clientSecret: String
   clientRoles: String
   availableScopes: String
+  resourceType: String
   apiKeyName: String
   owner: UserRelateToOneInput
   environments: EnvironmentRelateToManyInput
@@ -1543,6 +1565,7 @@ input CredentialIssuerCreateInput {
   clientSecret: String
   clientRoles: String
   availableScopes: String
+  resourceType: String
   apiKeyName: String
   owner: UserRelateToOneInput
   environments: EnvironmentRelateToManyInput
@@ -4036,6 +4059,7 @@ type Namespace {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  resourceId: String
   organization: Organization
   organizationUnit: OrganizationUnit
   members(
@@ -4139,6 +4163,24 @@ input NamespaceWhereInput {
   extRefId_not_ends_with_i: String
   extRefId_in: [String]
   extRefId_not_in: [String]
+  resourceId: String
+  resourceId_not: String
+  resourceId_contains: String
+  resourceId_not_contains: String
+  resourceId_starts_with: String
+  resourceId_not_starts_with: String
+  resourceId_ends_with: String
+  resourceId_not_ends_with: String
+  resourceId_i: String
+  resourceId_not_i: String
+  resourceId_contains_i: String
+  resourceId_not_contains_i: String
+  resourceId_starts_with_i: String
+  resourceId_not_starts_with_i: String
+  resourceId_ends_with_i: String
+  resourceId_not_ends_with_i: String
+  resourceId_in: [String]
+  resourceId_not_in: [String]
   organization: OrganizationWhereInput
   organization_is_null: Boolean
   organizationUnit: OrganizationUnitWhereInput
@@ -4183,6 +4225,8 @@ enum SortNamespacesBy {
   permDomains_DESC
   extRefId_ASC
   extRefId_DESC
+  resourceId_ASC
+  resourceId_DESC
   organization_ASC
   organization_DESC
   organizationUnit_ASC
@@ -4204,6 +4248,7 @@ input NamespaceUpdateInput {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  resourceId: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
   members: MemberRoleRelateToManyInput
@@ -4219,6 +4264,7 @@ input NamespaceCreateInput {
   serviceAccounts: String
   permDomains: String
   extRefId: String
+  resourceId: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
   members: MemberRoleRelateToManyInput
@@ -4881,6 +4927,228 @@ input ProductCreateInput {
 
 input ProductsCreateInput {
   data: ProductCreateInput
+}
+
+type ResourceSet {
+  _label_: String
+  id: ID!
+  name: String
+  displayName: String
+  type: String
+  uri: String
+  scopes: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
+}
+
+input ResourceSetWhereInput {
+  AND: [ResourceSetWhereInput]
+  OR: [ResourceSetWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  displayName: String
+  displayName_not: String
+  displayName_contains: String
+  displayName_not_contains: String
+  displayName_starts_with: String
+  displayName_not_starts_with: String
+  displayName_ends_with: String
+  displayName_not_ends_with: String
+  displayName_i: String
+  displayName_not_i: String
+  displayName_contains_i: String
+  displayName_not_contains_i: String
+  displayName_starts_with_i: String
+  displayName_not_starts_with_i: String
+  displayName_ends_with_i: String
+  displayName_not_ends_with_i: String
+  displayName_in: [String]
+  displayName_not_in: [String]
+  type: String
+  type_not: String
+  type_contains: String
+  type_not_contains: String
+  type_starts_with: String
+  type_not_starts_with: String
+  type_ends_with: String
+  type_not_ends_with: String
+  type_i: String
+  type_not_i: String
+  type_contains_i: String
+  type_not_contains_i: String
+  type_starts_with_i: String
+  type_not_starts_with_i: String
+  type_ends_with_i: String
+  type_not_ends_with_i: String
+  type_in: [String]
+  type_not_in: [String]
+  uri: String
+  uri_not: String
+  uri_contains: String
+  uri_not_contains: String
+  uri_starts_with: String
+  uri_not_starts_with: String
+  uri_ends_with: String
+  uri_not_ends_with: String
+  uri_i: String
+  uri_not_i: String
+  uri_contains_i: String
+  uri_not_contains_i: String
+  uri_starts_with_i: String
+  uri_not_starts_with_i: String
+  uri_ends_with_i: String
+  uri_not_ends_with_i: String
+  uri_in: [String]
+  uri_not_in: [String]
+  scopes: String
+  scopes_not: String
+  scopes_contains: String
+  scopes_not_contains: String
+  scopes_starts_with: String
+  scopes_not_starts_with: String
+  scopes_ends_with: String
+  scopes_not_ends_with: String
+  scopes_i: String
+  scopes_not_i: String
+  scopes_contains_i: String
+  scopes_not_contains_i: String
+  scopes_starts_with_i: String
+  scopes_not_starts_with_i: String
+  scopes_ends_with_i: String
+  scopes_not_ends_with_i: String
+  scopes_in: [String]
+  scopes_not_in: [String]
+  extSource: String
+  extSource_not: String
+  extSource_contains: String
+  extSource_not_contains: String
+  extSource_starts_with: String
+  extSource_not_starts_with: String
+  extSource_ends_with: String
+  extSource_not_ends_with: String
+  extSource_i: String
+  extSource_not_i: String
+  extSource_contains_i: String
+  extSource_not_contains_i: String
+  extSource_starts_with_i: String
+  extSource_not_starts_with_i: String
+  extSource_ends_with_i: String
+  extSource_not_ends_with_i: String
+  extSource_in: [String]
+  extSource_not_in: [String]
+  extForeignKey: String
+  extForeignKey_not: String
+  extForeignKey_contains: String
+  extForeignKey_not_contains: String
+  extForeignKey_starts_with: String
+  extForeignKey_not_starts_with: String
+  extForeignKey_ends_with: String
+  extForeignKey_not_ends_with: String
+  extForeignKey_i: String
+  extForeignKey_not_i: String
+  extForeignKey_contains_i: String
+  extForeignKey_not_contains_i: String
+  extForeignKey_starts_with_i: String
+  extForeignKey_not_starts_with_i: String
+  extForeignKey_ends_with_i: String
+  extForeignKey_not_ends_with_i: String
+  extForeignKey_in: [String]
+  extForeignKey_not_in: [String]
+  extRecordHash: String
+  extRecordHash_not: String
+  extRecordHash_contains: String
+  extRecordHash_not_contains: String
+  extRecordHash_starts_with: String
+  extRecordHash_not_starts_with: String
+  extRecordHash_ends_with: String
+  extRecordHash_not_ends_with: String
+  extRecordHash_i: String
+  extRecordHash_not_i: String
+  extRecordHash_contains_i: String
+  extRecordHash_not_contains_i: String
+  extRecordHash_starts_with_i: String
+  extRecordHash_not_starts_with_i: String
+  extRecordHash_ends_with_i: String
+  extRecordHash_not_ends_with_i: String
+  extRecordHash_in: [String]
+  extRecordHash_not_in: [String]
+}
+
+input ResourceSetWhereUniqueInput {
+  id: ID!
+}
+
+enum SortResourceSetsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  displayName_ASC
+  displayName_DESC
+  type_ASC
+  type_DESC
+  uri_ASC
+  uri_DESC
+  scopes_ASC
+  scopes_DESC
+  extSource_ASC
+  extSource_DESC
+  extForeignKey_ASC
+  extForeignKey_DESC
+  extRecordHash_ASC
+  extRecordHash_DESC
+}
+
+input ResourceSetUpdateInput {
+  name: String
+  displayName: String
+  type: String
+  uri: String
+  scopes: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
+}
+
+input ResourceSetsUpdateInput {
+  id: ID!
+  data: ResourceSetUpdateInput
+}
+
+input ResourceSetCreateInput {
+  name: String
+  displayName: String
+  type: String
+  uri: String
+  scopes: String
+  extSource: String
+  extForeignKey: String
+  extRecordHash: String
+}
+
+input ResourceSetsCreateInput {
+  data: ResourceSetCreateInput
 }
 
 enum ServiceAccessConsumerTypeType {
@@ -5745,6 +6013,62 @@ input _ListSchemaFieldsInput {
   type: String
 }
 
+type UMAScope {
+  name: String!
+}
+
+type UMAResourceSet {
+  id: String!
+  name: String!
+  type: String!
+  owner: String!
+  ownerManagedAccess: Boolean
+  uris: [String]
+  resource_scopes: [UMAScope]
+  scopes: [UMAScope]
+}
+
+type UMAPermissionTicket {
+  id: String!
+  scope: String!
+  scopeName: String!
+  resource: String!
+  resourceName: String!
+  requester: String!
+  requesterName: String!
+  owner: String!
+  ownerName: String!
+  granted: Boolean!
+}
+
+input UMAPermissionTicketInput {
+  resourceId: String!
+  username: String!
+  granted: Boolean
+  scopes: [String]!
+}
+
+type UMAPolicy {
+  id: String!
+  name: String!
+  description: String
+  type: String!
+  logic: String!
+  decisionStrategy: String!
+  owner: String!
+  users: [String]
+  clients: [String]
+  scopes: [String]!
+}
+
+input UMAPolicyInput {
+  name: String!
+  description: String
+  users: [String]
+  clients: [String]
+  scopes: [String]!
+}
+
 type unauthenticateUserOutput {
   success: Boolean
 }
@@ -6151,6 +6475,24 @@ type Query {
     skip: Int
   ): _QueryMeta
   _ProductsMeta: _ListMeta
+  allResourceSets(
+    where: ResourceSetWhereInput
+    search: String
+    sortBy: [SortResourceSetsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [ResourceSet]
+  ResourceSet(where: ResourceSetWhereUniqueInput!): ResourceSet
+  _allResourceSetsMeta(
+    where: ResourceSetWhereInput
+    search: String
+    sortBy: [SortResourceSetsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _ResourceSetsMeta: _ListMeta
   allServiceAccesses(
     where: ServiceAccessWhereInput
     search: String
@@ -6226,6 +6568,18 @@ type Query {
   ): _QueryMeta
   _UsersMeta: _ListMeta
   _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
+  getGatewayConsumerPlugins(id: ID!): GatewayConsumer
+  getResourceSet(
+    credIssuerId: ID!
+    owner: String
+    type: String
+    resourceId: String
+  ): [UMAResourceSet]
+  getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
+  getPermissionTickets(
+    credIssuerId: ID!
+    resourceId: String
+  ): [UMAPermissionTicket]
   appVersion: String
   authenticatedUser: User
 }
@@ -6380,6 +6734,12 @@ type Mutation {
   updateProducts(data: [ProductsUpdateInput]): [Product]
   deleteProduct(id: ID!): Product
   deleteProducts(ids: [ID!]): [Product]
+  createResourceSet(data: ResourceSetCreateInput): ResourceSet
+  createResourceSets(data: [ResourceSetsCreateInput]): [ResourceSet]
+  updateResourceSet(id: ID!, data: ResourceSetUpdateInput): ResourceSet
+  updateResourceSets(data: [ResourceSetsUpdateInput]): [ResourceSet]
+  deleteResourceSet(id: ID!): ResourceSet
+  deleteResourceSets(ids: [ID!]): [ResourceSet]
   createServiceAccess(data: ServiceAccessCreateInput): ServiceAccess
   createServiceAccesses(data: [ServiceAccessesCreateInput]): [ServiceAccess]
   updateServiceAccess(id: ID!, data: ServiceAccessUpdateInput): ServiceAccess
@@ -6411,6 +6771,33 @@ type Mutation {
   updateUsers(data: [UsersUpdateInput]): [User]
   deleteUser(id: ID!): User
   deleteUsers(ids: [ID!]): [User]
+  createGatewayConsumerPlugin(id: ID!, plugin: String!): GatewayConsumer
+  updateGatewayConsumerPlugin(
+    id: ID!
+    pluginExtForeignKey: String!
+    plugin: String!
+  ): GatewayConsumer
+  deleteGatewayConsumerPlugin(
+    id: ID!
+    pluginExtForeignKey: String!
+  ): GatewayConsumer
+  grantPermissions(
+    credIssuerId: ID!
+    data: UMAPermissionTicketInput!
+  ): [UMAPermissionTicket]
+  revokePermissions(credIssuerId: ID!, ids: [String]!): Boolean
+  approvePermissions(
+    credIssuerId: ID!
+    resourceId: String!
+    requesterId: String!
+    scopes: [String]!
+  ): Boolean
+  createUmaPolicy(
+    credIssuerId: ID!
+    resourceId: String
+    data: UMAPolicyInput!
+  ): UMAPolicy
+  deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean
   authenticateUserWithPassword(
     email: String
     password: String
