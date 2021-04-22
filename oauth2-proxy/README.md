@@ -24,15 +24,15 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --validate-url="${OIDC_ISSUER}/protocol/openid-connect/userinfo" \
     --redirect-url="http://localhost:4180/oauth2/callback" \
     --cookie-secure=False \
-    --cookie-refresh=1h \
+    --cookie-refresh=15m \
     --pass-basic-auth=false \
     --pass-access-token=true \
     --set-xauthrequest=true \
     --skip-jwt-bearer-tokens=false \
     --set-authorization-header=true \
     --pass-authorization-header=true \
-    --skip-auth-regex="/home|/public|/docs|/_next|/images" \
-    --whitelist-domain="auth.server" \
+    --skip-auth-regex="/home|/public|/docs|/_next|/images|/devportal|/manager|/signout" \
+    --whitelist-domain="${OIDC_ISSUER_HOSTNAME}" \
     --upstream="http://${hostip}:3000"
 ```
 
