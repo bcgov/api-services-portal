@@ -220,7 +220,7 @@ const NewRequestsPage: React.FC<
                 borderRadius={4}
               >
                 <Checkbox colorScheme="blue">
-                  {dataset.environments[0]?.legal.description}
+                  {dataset.environments[0]?.legal.title}
                 </Checkbox>
                 <Link
                   fontWeight="bold"
@@ -263,6 +263,7 @@ const query = gql`
         active
         flow
         legal {
+          title
           description
           link
         }
