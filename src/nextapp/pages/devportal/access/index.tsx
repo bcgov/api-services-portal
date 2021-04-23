@@ -84,6 +84,7 @@ const query = gql`
           resourceType
         }
         product {
+          id
           name
         }
       }

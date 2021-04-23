@@ -4,9 +4,11 @@ import {
   AlertIcon,
   Avatar,
   AvatarGroup,
+  Button,
   Box,
   Container,
   Divider,
+  Flex,
   Heading,
   Link,
   Stack,
@@ -30,13 +32,17 @@ import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import { getSession, useSession, useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
+import { identity } from 'lodash';
+
+const { useEffect, useState } = React;
+
+import Resources from './resources';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const { headers } = context.req;
-  const { issuer } = context.query;
   const queryClient = new QueryClient();
-  const queryKey = ['allAccessRequests', id, issuer];
+  const queryKey = ['allProductEnvironments', id];
   const user = await getSession(headers as HeadersInit);
 
   await queryClient.prefetchQuery(
@@ -44,7 +50,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id: issuer, envId: id, owner: user?.sub },
+        { id },
         {
           headers: headers as HeadersInit,
         }
@@ -55,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       dehydratedState: dehydrate(queryClient),
       id,
-      issuer,
+      user,
       queryKey,
     },
   };
@@ -63,14 +69,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const ApiAccessServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id, issuer, queryKey, user }) => {
+> = ({ id, user, queryKey }) => {
   const router = useRouter();
   const params = router?.query;
   const { data } = useApi(
     queryKey,
-    { query, variables: { id: issuer, envId: id, owner: user?.sub } },
+    { query, variables: { id } },
     { suspense: false }
   );
+
+  const [ env, setEnv ] = useState(data.Product?.environments == null ? null : data.Product?.environments[0]);
 
   return data ? (
     <>
@@ -78,69 +86,24 @@ const ApiAccessServicePage: React.FC<
         <title>{`API Program Services | API Access | ${data.Environment?.name}`}</title>
       </Head>
       <Container maxW="6xl">
-        <Stack spacing={10} my={4}>
-          <Alert status="info">
-            <AlertIcon />
-            List of the BC Government Service APIs that you have access to.
-          </Alert>
-        </Stack>
-
         <PageHeader
           breadcrumb={[
             { href: '/devportal/access', text: 'API Access' },
-            { text: data.Environment?.product.name },
+            { text: data.Product?.name },
           ]}
-          title={`${data.Environment?.name} Environment Access`}
+          title={`${data.Product?.name} Resources`}
         />
-        <Box bgColor="white" my={4}>
-          <Box
-            p={4}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Heading size="md">Resources</Heading>
-          </Box>
-          <Divider />
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Resource</Th>
-                <Th>Type</Th>
-                <Th>Shared With</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.getResourceSet?.map((r) => (
-                <Tr key={r.id}>
-                  <Td width="50%">
-                    <NextLink
-                      passHref
-                      href={`/devportal/resources/${r.id}?issuer=${params?.issuer}`}
-                    >
-                      <Link color="bc-link">{r.name}</Link>
-                    </NextLink>
-                  </Td>
-                  <Td>{r.type}</Td>
-                  <Td>
-                    <AvatarGroup size="sm" max={6}>
-                      {data.getPermissionTickets
-                        ?.filter((p) => p.scopeName === r.name)
-                        .map((p) => (
-                          <Avatar
-                            key={p.id}
-                            name={p.requesterName}
-                            size="sm"
-                            title={p.requesterName}
-                          />
-                        ))}
-                    </AvatarGroup>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+        <Box>
+            <Flex>
+                {data.Product?.environments.map(env => (
+                    <Button>{env.name}</Button>
+                ))}
+            </Flex>
+            {env && (
+            <Resources credIssuerId={env.credentialIssuer.id} resourceType={env.credentialIssuer.resourceType} environment={env} owner={user?.sub}/>
+            )}
         </Box>
+
       </Container>
     </>
   ) : <></>;
@@ -149,41 +112,15 @@ const ApiAccessServicePage: React.FC<
 export default ApiAccessServicePage;
 
 const query = gql`
-  query GetResources($id: ID!, $envId: ID!, $owner: String, $resourceType: String) {
-    getResourceSet(credIssuerId: $id, owner: $owner, type: $resourceType) {
-      id
-      name
-      type
-    }
+  query GetEnvironmentsByProduct($id: ID!) {
 
-    getPermissionTickets(credIssuerId: $id) {
-      id
-      owner
-      ownerName
-      requester
-      requesterName
-      resource
-      resourceName
-      scope
-      scopeName
-      granted
-    }
-
-    Environment(where: { id: $envId }) {
+    Product(where: { id: $id } ) {
       name
-      credentialIssuer {
-        instruction
-      }
-      product {
+      environments {
         name
-      }
-      services {
-        name
-        routes {
-          name
-          hosts
-          methods
-          paths
+        credentialIssuer {
+            id
+            resourceType
         }
       }
     }

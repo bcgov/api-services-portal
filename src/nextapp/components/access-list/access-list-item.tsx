@@ -11,11 +11,12 @@ import {
   HStack,
   Icon,
   Link,
+  Spacer,
   Tag,
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { ServiceAccess } from '@/shared/types/query.types';
+import { ServiceAccess, Product } from '@/shared/types/query.types';
 import {
   FaCheck,
   FaChevronRight,
@@ -31,7 +32,7 @@ import api from '@/shared/services/api';
 
 interface AccessListItemProps {
   data: ServiceAccess[];
-  product: string;
+  product: Product;
   queryKey: QueryKey;
 }
 
@@ -72,8 +73,14 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
       <Flex as="header" align="center" justify="space-between" p={4}>
         <Flex as="hgroup" align="center">
           <Icon as={FaFolder} color="bc-blue-alt" mr={2} boxSize="6" />
-          <Heading size="md">{product}</Heading>
+          <Heading size="md">{product.name}</Heading>
         </Flex>
+        <Spacer/>
+        <NextLink
+          href={`/devportal/access/${product.id}`}
+        >
+            <Button size="sm" variant="secondary" display="flex">Resources</Button>
+        </NextLink>
       </Flex>
       <Divider />
       {data.map((d, index, arr) => (
@@ -85,10 +92,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           borderBottomWidth={index === arr.length - 1 ? 0 : 1}
           bgColor="blue.50"
         >
-          <NextLink
-            href={`/devportal/access/${d.productEnvironment.id}?issuer=${d.productEnvironment.credentialIssuer?.id}`}
-          >
-            <Link flex={1} display="flex" _hover={{ textDecoration: 'none' }}>
+        <Flex flex={1}>
               <Box mr={2}>
                 {d.active && (
                   <CircleIcon label="Approved" color="green">
@@ -135,8 +139,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
                   ))}
                 </HStack>
               </Box>
-            </Link>
-          </NextLink>
+          </Flex>
           <Box display="flex" alignItems="center" justifyContent="flex-end">
             <Button
               variant="secondary"
