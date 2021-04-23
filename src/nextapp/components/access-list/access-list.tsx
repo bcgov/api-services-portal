@@ -13,9 +13,8 @@ interface AccessListProps {
 
 const AccessList: React.FC<AccessListProps> = ({ data, queryKey }) => {
   const productsDict = groupBy(data, (d) => d.productEnvironment?.product.id);
-  const products = reduce(data, (result, value, key) => {
-      console.log(JSON.stringify(value)+  " : " + key)
-    result.filter(a => a.id == value.productEnvironment?.product.id).length == 0 && result.push(value.productEnvironment?.product)
+  const products = reduce(data, (result, value) => {
+    result.some(a => a.id == value.productEnvironment?.product.id) == false && result.push(value.productEnvironment?.product)
     return result
   }, [])
   return (

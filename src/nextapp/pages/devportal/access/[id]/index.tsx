@@ -89,18 +89,17 @@ const ApiAccessServicePage: React.FC<
         <PageHeader
           breadcrumb={[
             { href: '/devportal/access', text: 'API Access' },
-            { text: data.Product?.name },
           ]}
           title={`${data.Product?.name} Resources`}
         />
         <Box>
-            <Flex>
-                {data.Product?.environments.map(env => (
-                    <Button>{env.name}</Button>
+            <Flex p={4}>
+                {data.Product?.environments.filter(env => env.credentialIssuer != null).map(env => (
+                    <Button onClick={() => setEnv(env)}>{env.name}</Button>
                 ))}
             </Flex>
             {env && (
-            <Resources credIssuerId={env.credentialIssuer.id} resourceType={env.credentialIssuer.resourceType} environment={env} owner={user?.sub}/>
+            <Resources credIssuerId={env.credentialIssuer.id} resourceType={env.credentialIssuer.resourceType} environment={env.name} owner={user?.sub}/>
             )}
         </Box>
 

@@ -9,6 +9,7 @@ import {
   Divider,
   Heading,
   Link,
+  Progress,
   Stack,
   Table,
   Tbody,
@@ -45,10 +46,19 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, reso
         { suspense: false }
     );
     
-    if (!data) { return <></> }
     return (
-
-    <Box bgColor="white" my={4}>
+    <>
+    {data?.getResourceSet == null && <Progress size="xs" isIndeterminate />}     
+    <Box bgColor="white" mb={4}>
+        <Box
+            p={4}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Heading size="md">Resources for {environment}</Heading>
+        </Box>
+        <Divider />
         <Table variant="simple">
         <Thead>
           <Tr>
@@ -58,7 +68,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, reso
           </Tr>
         </Thead>
         <Tbody>
-          {data.getResourceSet?.map((r) => (
+          {data?.getResourceSet?.map((r) => (
             <Tr key={r.id}>
               <Td width="50%">
                 <NextLink
@@ -88,6 +98,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, reso
         </Tbody>
       </Table>
       </Box>
+    </>
     )
 }
 
