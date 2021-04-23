@@ -65,7 +65,7 @@ const NamespacesPage = () => {
     const [{ state, data}, setState] = useState({ state: 'loading', data: null });
 
     const fetcher = () => {
-        fetch ('/api/namespaces')
+        fetch ('/gw/api/namespaces')
         .then(response => response.json())
         .then((data) => {
             
@@ -91,7 +91,7 @@ const NamespacesPage = () => {
             })
         } 
 
-        fetch(`/api/namespaces/${item.name}`, {
+        fetch(`/gw/api/namespaces/${item.name}`, {
             method: 'DELETE',
             headers: { 'Accept': 'application/json'},
             body: JSON.stringify({ name: name })

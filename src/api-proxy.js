@@ -14,7 +14,7 @@ class ApiProxyApp {
     const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
         changeOrigin: true,
-        pathRewrite: { '^/api/': '/v2/' },
+        pathRewrite: { '^/gw/api/': '/v2/' },
         onProxyReq: (proxyReq, req) => {
             // console.log(req.headers)
             // proxyReq.removeHeader("cookie");
@@ -29,7 +29,7 @@ class ApiProxyApp {
             res.end('error reaching api');
         }
     })
-    app.all(/^\/api/, apiProxy)
+    app.all(/^\/gw\/api\//, apiProxy)
     return app;
   }
 }

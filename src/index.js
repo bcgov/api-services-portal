@@ -208,6 +208,7 @@ module.exports = {
       },
     }),
     new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
+    new NextApp({ dir: 'nextapi' }),
     new NextApp({ dir: 'nextapp' }),
   ],
   configureExpress: (app) => {

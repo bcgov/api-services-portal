@@ -41,7 +41,7 @@ const NewDialog = ({isOpen, onClose, onComplete}) => {
         })
     }    
     const create = () => {
-        fetch('/api/namespaces', {
+        fetch('/gw/api/namespaces', {
             method: 'POST',
             headers: { 'Accept': 'application/json'},
             body: JSON.stringify({ name: name })
