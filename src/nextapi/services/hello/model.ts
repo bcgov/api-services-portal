@@ -1,4 +1,4 @@
 export interface Hello {
     name: string
-    accessRequestIds: [string]
+    accessRequestIds: object
 }

@@ -1,7 +1,7 @@
 import api from '@/shared/services/api'
 import { Service, ServiceContext } from '@/services/context'
 
-import Hello from './hello'
+import { Hello } from './model'
 
 export class HelloService extends Service {
     constructor(context: ServiceContext) {
@@ -14,7 +14,7 @@ export class HelloService extends Service {
             return { error: 'Failed to call API'}
         })
 
-        return { name : "Hello again " + userName, accessRequestIds: data.allAccessRequests}
+        return { name : "Hello again " + userName, accessRequestIds: data}
     }
 }
 
