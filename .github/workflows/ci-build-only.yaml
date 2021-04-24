@@ -2,7 +2,7 @@ name: Build and Deploy Refactor
 
 on:
   push:
-    branches: [ refactor/* refactor ]
+    branch: refactor
 
 env:
   REGISTRY: docker.pkg.github.com
