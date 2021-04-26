@@ -94,7 +94,6 @@
   "slugify": "^1.4.6",
   "swr": "^0.3.9",
   "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
-  "tsc": "^1.20150623.0",
   "typography": "^0.16.19",
   "uuid": "^8.3.2",
   "winston": "^3.3.3"
