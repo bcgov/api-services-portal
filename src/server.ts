@@ -1,4 +1,7 @@
+/// <reference types="node" />
+/// <reference types="express" />
 import express from "express";
+import { AnyCnameRecord } from "node:dns";
 const { Keystone } = require('@keystonejs/keystone');
 const { Checkbox, Password, Select } = require('@keystonejs/fields');
 //import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
@@ -146,7 +149,7 @@ const keystone = new Keystone({
   }
   const strategyType = process.env.AUTH_STRATEGY || 'Password';
   console.log('Auth Strategy: ' + strategyType);
-  
+
   const authStrategy =
     strategyType === 'Password'
       ? keystone.createAuthStrategy({
@@ -209,6 +212,43 @@ const apps = [
 
 const dev = process.env.NODE_ENV !== 'production'
 
+const configureExpress = (app:any) => {
+    const express = require('express')
+    app.use(express.json())
+
+    // app.get('/', (req, res, next) => {
+    //     console.log(req.path)
+    //     req.path == "/" ? res.redirect('/home') : next()
+    // })
+    app.put('/feed/:entity', (req : any, res : any) => PutFeed(keystone, req, res).catch ((err : any) => {
+        console.log(err)
+        res.status(400).json({result: 'error', error: "" + err})
+    }))
+    app.put('/feed/:entity/:id', (req : any, res : any) => PutFeed(keystone, req, res).catch ((err : any) => res.status(400).json({result: 'error', error: "" + err})))
+    app.delete('/feed/:entity/:id', (req : any, res : any) => DeleteFeed(keystone, req, res))
+
+    // Added for handling failed calls that require orchestrating multiple changes
+    app.put('/tasked/:id', async (req : any, res : any) => {
+        const tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
+        await tasked.start()
+        res.status(200).json({result: 'ok'})
+    })
+
+    app.get('/ok', async (req: any, res: any) => {
+        res.json({answer: await new HelloService().getHello("name")})
+    })
+
+    // app.get('/create/:slug', async (req, res) => {
+    //     const wf = require('./services/workflow')
+    //     const authContext =  keystone.createContext({ skipAccessControl: true })
+
+    //     const productEnvironmentSlug = req.params['slug']
+
+    //     const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, 'smashing')
+    //     res.status(200).json(result)
+    // })
+}
+
 // keystone
 //   .prepare({
 //     apps,
@@ -269,4 +309,4 @@ const dev = process.env.NODE_ENV !== 'production'
 
 //   });
 
-  export { keystone, apps, dev }
+  export { keystone, apps, dev, configureExpress }
