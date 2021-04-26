@@ -10,8 +10,6 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import AccessButton from '../grant-access-button';
-
 interface ResourcesListItemProps {
   resourceId: string;
 }
@@ -44,15 +42,7 @@ const ResourcesListItem: React.FC<ResourcesListItemProps> = ({
           ))}
         </HStack>
       </Td>
-      <Td isNumeric>
-        <AccessButton
-          id="123"
-          requesterId="123"
-          resourceId={resourceId}
-          scope="granted"
-          tickets={['123']}
-        />
-      </Td>
+      <Td isNumeric></Td>
     </Tr>
   );
 };
