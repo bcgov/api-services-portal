@@ -20,7 +20,7 @@ import type { UmaPermissionTicket } from '@/types/query.types';
 import InlinePermissionsList from '../inline-permissions-list';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
-import { FaMinusCircle } from 'react-icons/fa';
+import { FaCheck, FaMinusCircle } from 'react-icons/fa';
 
 interface PermissionItem {
   id: string;
@@ -41,6 +41,7 @@ interface RevokeVariables {
 interface ResourcesListProps {
   credIssuerId: string;
   data: UmaPermissionTicket[];
+  enableRevoke?: boolean;
   resourceId: string;
   queryKey: QueryKey;
 }
@@ -48,12 +49,19 @@ interface ResourcesListProps {
 const ResourcesList: React.FC<ResourcesListProps> = ({
   credIssuerId,
   data,
+  enableRevoke,
   resourceId,
   queryKey,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
-  const revoke = useApiMutation<RevokeVariables>(mutation);
+  const grant = useApiMutation<{
+    credIssuerId: string;
+    resourceId: string;
+    requesterId: string;
+    scopes: string[];
+  }>(grantMutation);
+  const revoke = useApiMutation<RevokeVariables>(revokeMutation);
   const groupedByRequester = groupBy(data, 'requester');
   const users = React.useMemo<UserItem[]>(() => {
     const result = [];
@@ -75,6 +83,27 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
     return result;
   }, [groupedByRequester]);
 
+  // Events
+  const handleGrant = (permissions: PermissionItem[]) => async () => {
+    try {
+      const payload = {
+        credIssuerId,
+        resourceId,
+        requesterId: '123',
+        scopes: permissions.map((p) => p.id),
+      };
+      await grant.mutateAsync(payload);
+      toast({
+        title: 'Access Granted',
+        status: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: 'Access Granted Failed',
+        status: 'error',
+      });
+    }
+  };
   const handleRevoke = async (id: string | string[]) => {
     try {
       const tickets = Array.isArray(id) ? id : [id];
@@ -124,21 +153,36 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
             </Td>
             <Td width="50%">
               <InlinePermissionsList
+                enableRevoke={enableRevoke}
                 data={d.permissions}
                 onRevoke={handleRevoke}
               />
             </Td>
             <Td isNumeric>
-              <Button
-                colorScheme="red"
-                isLoading={revoke.isLoading}
-                loadingText="Revoking..."
-                size="sm"
-                leftIcon={<Icon as={FaMinusCircle} />}
-                onClick={handleRevokeAll(d.permissions)}
-              >
-                Revoke Access
-              </Button>
+              {enableRevoke && (
+                <Button
+                  colorScheme="red"
+                  isLoading={revoke.isLoading}
+                  loadingText="Revoking..."
+                  size="sm"
+                  leftIcon={<Icon as={FaMinusCircle} />}
+                  onClick={handleRevokeAll(d.permissions)}
+                >
+                  Grant Access
+                </Button>
+              )}
+              {!enableRevoke && (
+                <Button
+                  colorScheme="green"
+                  isLoading={grant.isLoading}
+                  loadingText="Revoking..."
+                  size="sm"
+                  leftIcon={<Icon as={FaCheck} />}
+                  onClick={handleGrant(d.permissions)}
+                >
+                  Grant Access
+                </Button>
+              )}
             </Td>
           </Tr>
         ))}
@@ -149,8 +193,24 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
 
 export default ResourcesList;
 
-const mutation = gql`
+const revokeMutation = gql`
   mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {
     revokePermissions(credIssuerId: $credIssuerId, ids: $tickets)
+  }
+`;
+
+const grantMutation = gql`
+  mutation GrantAccess(
+    $credIssuerId: ID!
+    $resourceId: String!
+    $requesterId: String!
+    $scopes: [String]!
+  ) {
+    approvePermissions(
+      credIssuerId: $credIssuerId
+      resourceId: $resourceId
+      requesterId: $requesterId
+      scopes: $scopes
+    )
   }
 `;

@@ -47,6 +47,7 @@ const ApiAccessResourcePage: React.FC<
 > = ({ queryKey, variables }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
   const { credIssuerId, resourceId } = variables;
+  const requests = data.getPermissionTickets?.filter((p) => !p.granted);
 
   return (
     <>
@@ -56,10 +57,14 @@ const ApiAccessResourcePage: React.FC<
       <Container maxW="6xl">
         <PageHeader
           actions={
-            <ResourcesManager
-              data={data.getPermissionTickets?.filter((p) => !p.granted)}
-              id={resourceId}
-            />
+            requests.length > 0 && (
+              <ResourcesManager
+                data={requests}
+                resourceId={resourceId}
+                credIssuerId={credIssuerId}
+                queryKey={queryKey}
+              />
+            )
           }
           breadcrumb={[{ href: '/devportal/access', text: 'My Resources' }]}
           title="My Resource"
@@ -86,6 +91,7 @@ const ApiAccessResourcePage: React.FC<
             />
           )}
           <ResourcesList
+            enableRevoke
             data={data?.getPermissionTickets.filter((p) => p.granted)}
             resourceId={resourceId}
             credIssuerId={credIssuerId}

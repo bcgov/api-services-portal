@@ -10,7 +10,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 
-import AccessButton from '../access-button';
+import AccessButton from '../grant-access-button';
 
 interface ResourcesListItemProps {
   resourceId: string;

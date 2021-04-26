@@ -3,26 +3,41 @@ import { Badge, Button, Icon, useDisclosure } from '@chakra-ui/react';
 import ResourcesManagerDialog from './resources-manager-dialog';
 import { UmaPermissionTicket } from '@/shared/types/query.types';
 import { FaUserPlus } from 'react-icons/fa';
+import { QueryKey } from 'react-query';
 
 interface ResourcesManagerProps {
-  id: string;
+  credIssuerId: string;
   data: UmaPermissionTicket[];
+  queryKey: QueryKey;
+  resourceId: string;
 }
 
-const ResourcesManager: React.FC<ResourcesManagerProps> = ({ data, id }) => {
+const ResourcesManager: React.FC<ResourcesManagerProps> = ({
+  credIssuerId,
+  data,
+  queryKey,
+  resourceId,
+}) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
 
   return (
     <>
       <Button
-        onClick={onOpen}
         colorScheme="green"
         leftIcon={<Icon as={FaUserPlus} />}
+        onClick={onOpen}
         rightIcon={<Badge colorScheme="green">{data.length}</Badge>}
       >
         Access Requests
       </Button>
-      <ResourcesManagerDialog data={data} open={isOpen} onClose={onClose} />
+      <ResourcesManagerDialog
+        credIssuerId={credIssuerId}
+        data={data}
+        open={isOpen}
+        onClose={onClose}
+        queryKey={queryKey}
+        resourceId={resourceId}
+      />
     </>
   );
 };

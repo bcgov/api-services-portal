@@ -40,6 +40,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
 }) => {
   const grant = useApiMutation(mutation);
   const toast = useToast();
+  const title = 'Grant User Access';
   const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const handleGrantAccess = async () => {
@@ -77,7 +78,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
         onClick={onOpen}
         variant="primary"
       >
-        Add User
+        {title}
       </Button>
       <Modal
         isOpen={isOpen}
@@ -87,7 +88,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Grant User Access</ModalHeader>
+          <ModalHeader>{title}</ModalHeader>
           <ModalBody>
             {grant.isError && (
               <Box bgColor="red.500" px={4} py={2} color="white" my={3}>

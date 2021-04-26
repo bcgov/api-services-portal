@@ -5167,6 +5167,7 @@ type ServiceAccess {
   _label_: String
   id: ID!
   name: String
+  namespace: String
   active: Boolean
   aclEnabled: Boolean
   consumerType: ServiceAccessConsumerTypeType
@@ -5205,6 +5206,24 @@ input ServiceAccessWhereInput {
   name_not_ends_with_i: String
   name_in: [String]
   name_not_in: [String]
+  namespace: String
+  namespace_not: String
+  namespace_contains: String
+  namespace_not_contains: String
+  namespace_starts_with: String
+  namespace_not_starts_with: String
+  namespace_ends_with: String
+  namespace_not_ends_with: String
+  namespace_i: String
+  namespace_not_i: String
+  namespace_contains_i: String
+  namespace_not_contains_i: String
+  namespace_starts_with_i: String
+  namespace_not_starts_with_i: String
+  namespace_ends_with_i: String
+  namespace_not_ends_with_i: String
+  namespace_in: [String]
+  namespace_not_in: [String]
   active: Boolean
   active_not: Boolean
   aclEnabled: Boolean
@@ -5300,6 +5319,8 @@ enum SortServiceAccessesBy {
   id_DESC
   name_ASC
   name_DESC
+  namespace_ASC
+  namespace_DESC
   active_ASC
   active_DESC
   aclEnabled_ASC
@@ -5326,6 +5347,7 @@ enum SortServiceAccessesBy {
 
 input ServiceAccessUpdateInput {
   name: String
+  namespace: String
   active: Boolean
   aclEnabled: Boolean
   consumerType: ServiceAccessConsumerTypeType
@@ -5344,6 +5366,7 @@ input ServiceAccessesUpdateInput {
 
 input ServiceAccessCreateInput {
   name: String
+  namespace: String
   active: Boolean
   aclEnabled: Boolean
   consumerType: ServiceAccessConsumerTypeType
@@ -6013,6 +6036,39 @@ input _ListSchemaFieldsInput {
   type: String
 }
 
+type ServiceAccount {
+  id: String!
+  name: String!
+  credentials: String
+}
+
+type ServiceAccountInput {
+  id: String!
+  name: String!
+  scopes: [String]
+}
+
+type UMAPolicy {
+  id: String!
+  name: String!
+  description: String
+  type: String!
+  logic: String!
+  decisionStrategy: String!
+  owner: String!
+  users: [String]
+  clients: [String]
+  scopes: [String]!
+}
+
+input UMAPolicyInput {
+  name: String!
+  description: String
+  users: [String]
+  clients: [String]
+  scopes: [String]!
+}
+
 type UMAScope {
   name: String!
 }
@@ -6045,27 +6101,6 @@ input UMAPermissionTicketInput {
   resourceId: String!
   username: String!
   granted: Boolean
-  scopes: [String]!
-}
-
-type UMAPolicy {
-  id: String!
-  name: String!
-  description: String
-  type: String!
-  logic: String!
-  decisionStrategy: String!
-  owner: String!
-  users: [String]
-  clients: [String]
-  scopes: [String]!
-}
-
-input UMAPolicyInput {
-  name: String!
-  description: String
-  users: [String]
-  clients: [String]
   scopes: [String]!
 }
 
@@ -6569,13 +6604,13 @@ type Query {
   _UsersMeta: _ListMeta
   _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
   getGatewayConsumerPlugins(id: ID!): GatewayConsumer
+  getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
   getResourceSet(
     credIssuerId: ID!
     owner: String
     type: String
     resourceId: String
   ): [UMAResourceSet]
-  getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
   getPermissionTickets(
     credIssuerId: ID!
     resourceId: String
@@ -6781,6 +6816,13 @@ type Mutation {
     id: ID!
     pluginExtForeignKey: String!
   ): GatewayConsumer
+  createServiceAccount: ServiceAccount
+  createUmaPolicy(
+    credIssuerId: ID!
+    resourceId: String
+    data: UMAPolicyInput!
+  ): UMAPolicy
+  deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean
   grantPermissions(
     credIssuerId: ID!
     data: UMAPermissionTicketInput!
@@ -6792,12 +6834,6 @@ type Mutation {
     requesterId: String!
     scopes: [String]!
   ): Boolean
-  createUmaPolicy(
-    credIssuerId: ID!
-    resourceId: String
-    data: UMAPolicyInput!
-  ): UMAPolicy
-  deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean
   authenticateUserWithPassword(
     email: String
     password: String
