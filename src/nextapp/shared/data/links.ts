@@ -102,7 +102,7 @@ const links: NavLink[] = [
     name: 'Applications',
     url: '/platform/poc/applications',
     access: ['aps-admin'],
-    sites: ['platform','manager'],
+    sites: ['platform','devportal'],
   },
 
 ];

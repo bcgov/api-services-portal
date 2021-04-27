@@ -25,7 +25,7 @@ import { useRouter } from 'next/router';
 
 const { useEffect, useState } = React;
 
-import { UPDATE_ISSUER, GET_ISSUER } from './../queries';
+import { DELETE_ISSUER, UPDATE_ISSUER, GET_ISSUER } from './../queries';
 
 import NextLink from 'next/link';
 
@@ -90,9 +90,9 @@ const UpdateIssuer = () => {
   };
 
   const toast = useToast();
-  const errorToast = (message) => {
+  const errorToast = (title, message) => {
     toast({
-      title: 'Failed to update issuer',
+      title: title,
       description: message,
       status: 'error',
       duration: 9000,
@@ -100,11 +100,19 @@ const UpdateIssuer = () => {
     });
   };
 
+  const deleteIssuer = () => {
+    graphql(DELETE_ISSUER, { id: issuer.id })
+      .then(refetch)
+      .catch((err) => {
+        errorToast('Failed to delete issuer', JSON.stringify(err.message));
+      });
+  };
+
   const fulfill = () => {
     graphql(UPDATE_ISSUER, { id: issuer.id })
       .then(refetch)
       .catch((err) => {
-        errorToast(JSON.stringify(err.message));
+        errorToast('Failed to update issuer', JSON.stringify(err.message));
       });
   };
 
@@ -153,6 +161,11 @@ services:
       consumer_match_claim: azp
     `;
   }
+
+  const actions = [
+    ( <Button colorScheme="red" onClick={deleteIssuer}>Delete Profile</Button>
+    )
+  ]
   return (
     <>
       <Head>
@@ -163,6 +176,7 @@ services:
           actions={false}
           breadcrumb={breadcrumb}
           title={<Box as="span">{issuer?.name}</Box>}
+          actions={actions}
         />
 
         {issuer != null && (

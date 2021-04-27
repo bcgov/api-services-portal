@@ -14,6 +14,7 @@ const { generate } = require('@graphql-codegen/cli');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
+const { ApiHealthApp } = require('./api-health');
 
 var Keycloak = require("keycloak-connect");
 
@@ -29,6 +30,8 @@ const { staticRoute, staticPath, distDir } = require('./config');
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
 const { Retry } = require('./servicests/tasked')
 
+const { loadRulesAndWatch } = require('./authz/enforcement')
+
 const apiPath = '/admin/api';
 const PROJECT_NAME = 'APS Service Portal';
 
@@ -43,8 +46,8 @@ const knexAdapterConfig = {
             database : process.env.KNEX_DATABASE
           }        
     }
-  };
-  
+};
+
 const { MongooseAdapter } = require('@keystonejs/adapter-mongoose');
 const mongooseAdapterConfig = {
   mongoUri: process.env.MONGO_URL,
@@ -78,6 +81,10 @@ const adapter = process.env.ADAPTER ? process.env.ADAPTER : "mongoose"
 
 require('dotenv').config();
 
+loadRulesAndWatch(process.env.NODE_ENV)
+
+const state = { connected : false }
+
 const keystone = new Keystone({
     onConnect(keystone: any) {
       if (process.env.NODE_ENV === 'development') {
@@ -87,6 +94,7 @@ const keystone = new Keystone({
         initialiseData(keystone);
       }
       console.log("CONNECTED!")
+      state.connected = true
     },
     adapter: adapter == "knex" ? new KnexAdapter(knexAdapterConfig) : new MongooseAdapter(mongooseAdapterConfig),
     cookieSecret: process.env.COOKIE_SECRET,
@@ -190,8 +198,8 @@ const { pages } = require('./admin-hooks.js');
 //const tasked = require('./services/tasked');
 
 const apps = [
+    new ApiHealthApp(state),
     new GraphQLApp(),
-    new StaticApp({ path: '/site', src: 'public' }),
     new AdminUIApp({
       name: PROJECT_NAME,
       adminPath: '/admin',
@@ -237,8 +245,6 @@ const configureExpress = (app:any) => {
     app.get('/ok', async (req: any, res: any) => {
         res.json({answer: await new HelloService().getHello("name")})
     })
-
 }
 
-
-  export { keystone, apps, dev, configureExpress }
+export { keystone, apps, dev, configureExpress }
