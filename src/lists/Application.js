@@ -7,7 +7,7 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { v4: uuidv4 } = require('uuid');
 
-const workflow = require('../services/workflow')
+const { DeleteAccess } = require('../servicests/workflow')
 
 module.exports = {
   fields: {
@@ -58,7 +58,7 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE APP " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await workflow.DeleteAccess(context, operation, {application: existingItem.id})
+        await DeleteAccess(context, operation, {application: existingItem.id})
     })
 
   },

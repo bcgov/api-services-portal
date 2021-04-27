@@ -15,7 +15,7 @@ const jwtDecoder = require('jwt-decode');
 const proxy = process.env.EXTERNAL_URL
 const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy + "/signout")
 
-const { getRequestingPartyToken } = require('../services/keycloak')
+const { UMA2TokenService } = require('../servicests/uma2TokenService')
 
 const toJson = (val) => val ? JSON.parse(val) : null;
 
@@ -131,7 +131,7 @@ class Oauth2ProxyAuthStrategy {
             // Switch namespace
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
-            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
+            const accessToken = await new UMA2TokenService(process.env.OIDC_ISSUER).getRequestingPartyToken(process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
                 res.json({switch:false})
             }) 
             console.log("TOKEN = "+accessToken)

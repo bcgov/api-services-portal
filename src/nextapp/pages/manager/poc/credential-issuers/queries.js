@@ -59,5 +59,21 @@ export const UPDATE_ISSUER_AUTHZ = `
     }
 `
 
+export const CREATE_ISSUER = `
+    mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {
+        createCredentialIssuer (data: $data) {
+            id
+        }
+    }
+`
+
+export const DELETE_ISSUER = `
+    mutation CreateAuthzProfile($id: ID!) {
+        deleteCredentialIssuer (id: $id) {
+            id
+        }
+    }
+`
+
 const empty = () => false
 export default empty

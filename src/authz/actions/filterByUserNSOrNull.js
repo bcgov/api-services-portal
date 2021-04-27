@@ -3,9 +3,7 @@ const actionFilterNS = (context, value) => {
     if (process.env.RULE_DEBUG) { 
         console.log("Action: Filter By User NS" + namespace)
     }
-    const _filter = { OR: [ { namespace: namespace } , {namespace: null} ] }
-    console.log("FILTER: " + JSON.stringify(_filter))
-    return _filter
+    return { OR: [ { namespace: namespace } , {namespace: null} ] }
 }
 
 module.exports = actionFilterNS
