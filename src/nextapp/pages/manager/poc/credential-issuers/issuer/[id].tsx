@@ -173,7 +173,6 @@ services:
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={false}
           breadcrumb={breadcrumb}
           title={<Box as="span">{issuer?.name}</Box>}
           actions={actions}
