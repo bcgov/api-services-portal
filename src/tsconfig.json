@@ -9,10 +9,9 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
-            "*": [
-                "node_modules/*"
-            ]
-        }
+            "@/logger": ["logger"],
+            "@/services/*": ["servicests/*"],
+        },
     },
     "include": [
         "**/*.ts"
@@ -20,7 +19,6 @@
   "exclude": [
     "node_modules",
     "nextapp",
-    "dist/nextapp",
-    "nextapi"
+    "dist"
   ]
 }

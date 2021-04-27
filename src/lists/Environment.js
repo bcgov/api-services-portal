@@ -5,7 +5,7 @@ const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
 const {v4: uuidv4} = require('uuid');
 
-const workflow = require('../services/workflow')
+const workflow = require('../servicests/workflow')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 

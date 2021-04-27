@@ -1,11 +1,4 @@
-const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
-const { Markdown } = require('@keystonejs/fields-markdown')
-
 const { EnforcementPoint } = require('../../authz/enforcement')
-
-const KCProtect = require('../../services/kcprotect')
-const { getOpenidFromDiscovery, getKeycloakSession } = require('../../services/keycloak')
-const keystoneApi = require('../../services/keystone')
 
 const typeServiceAccount = `
 type ServiceAccount {
@@ -23,9 +16,12 @@ type ServiceAccountInput {
 }
 `
 
+import { IssuerMisconfigError } from '../../servicests/issuerMisconfigError'
+import { CreateServiceAccount } from '../../servicests/workflow'
+
 module.exports = {
   extensions: [
-      (keystone) => {
+      (keystone : any) => {
         keystone.extendGraphQLSchema({
             types: [
                 { type: typeServiceAccount },
@@ -37,12 +33,19 @@ module.exports = {
             mutations: [
                 {
                     schema: 'createServiceAccount: ServiceAccount',
-                    resolver: async (item, args, context, info, { query, access }) => {
-                        const wf = require('../../services/workflow')
+                    resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
                         const authContext =  keystone.createContext({ skipAccessControl: true })
                 
                         const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG
-                        const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, context.req.user.namespace)
+                        const result = await CreateServiceAccount(authContext, productEnvironmentSlug, context.req.user.namespace)
+                        /*
+                        .catch ((err:any) => {
+                            if (err instanceof IssuerMisconfigError) {
+                                context.res.status(403).json(err.errors)
+                            } else {
+                                throw err
+                            }
+                        })*/
                         return { id: result.clientId, name: result.clientId, credentials: JSON.stringify(result)}
                     },
                     access: EnforcementPoint,

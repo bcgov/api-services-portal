@@ -3,8 +3,11 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-const KCProtect = require('../../services/kcprotect')
-const { getOpenidFromDiscovery, getKeycloakSession } = require('../../services/keycloak')
+import { UMAResourceRegistrationService, ResourceSetQuery } from '../../servicests/uma2ResourceRegistrationService'
+
+import { getOpenidFromDiscovery } from '../../servicests/keycloakApi'
+import { KeycloakTokenService } from '../../servicests/keycloakTokenService'
+
 const keystoneApi = require('../../services/keystone')
 
 const typeUMAScope = `
@@ -26,7 +29,7 @@ type UMAResourceSet {
 `
 module.exports = {
   extensions: [
-      (keystone) => {
+      (keystone : any) => {
         keystone.extendGraphQLSchema({
             types: [
                 { type: typeUMAScope },
@@ -35,19 +38,19 @@ module.exports = {
             queries: [
               {
                 schema: 'getResourceSet(credIssuerId: ID!, owner: String, type: String, resourceId: String): [UMAResourceSet]',
-                resolver: async (item, args, context, info, { query, access }) => {
+                resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
                     const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
                     const oidc = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    const accessToken = await getKeycloakSession (oidc.issuer, issuer.clientId, issuer.clientSecret)
-                    const kcprotectApi = new KCProtect (oidc.issuer, accessToken)
+                    const accessToken = await new KeycloakTokenService(oidc.issuer).getKeycloakSession (issuer.clientId, issuer.clientSecret)
+                    const kcprotectApi = new UMAResourceRegistrationService (oidc.issuer, accessToken)
                     if (args.resourceId != null) {
                         const res = await kcprotectApi.getResourceSet (args.resourceId)
                         console.log(JSON.stringify(res))
                         return [ res ]
                     } else {
-                        return await kcprotectApi.listResources ({owner: args.owner, type: args.type})
+                        return await kcprotectApi.listResources({owner: args.owner, type: args.type} as ResourceSetQuery)
                     }
                 },
                 access: EnforcementPoint,

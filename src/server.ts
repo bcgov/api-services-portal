@@ -27,7 +27,7 @@ const { Strategy, Issuer, Client } = require('openid-client');
 const { staticRoute, staticPath, distDir } = require('./config');
 
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
-const Tasked = require('./services/tasked')
+const { Retry } = require('./servicests/tasked')
 
 const apiPath = '/admin/api';
 const PROJECT_NAME = 'APS Service Portal';
@@ -187,7 +187,7 @@ const keystone = new Keystone({
         });
   
 const { pages } = require('./admin-hooks.js');
-const tasked = require('./services/tasked');
+//const tasked = require('./services/tasked');
 
 const apps = [
     new GraphQLApp(),
@@ -229,7 +229,7 @@ const configureExpress = (app:any) => {
 
     // Added for handling failed calls that require orchestrating multiple changes
     app.put('/tasked/:id', async (req : any, res : any) => {
-        const tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
+        const tasked = new Retry(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
         res.status(200).json({result: 'ok'})
     })
@@ -238,75 +238,7 @@ const configureExpress = (app:any) => {
         res.json({answer: await new HelloService().getHello("name")})
     })
 
-    // app.get('/create/:slug', async (req, res) => {
-    //     const wf = require('./services/workflow')
-    //     const authContext =  keystone.createContext({ skipAccessControl: true })
-
-    //     const productEnvironmentSlug = req.params['slug']
-
-    //     const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, 'smashing')
-    //     res.status(200).json(result)
-    // })
 }
 
-// keystone
-//   .prepare({
-//     apps,
-//     dev,
-//     distDir,  
-//     // configureExpress: (app:any) => {
-//     //     const express = require('express')
-//     //     app.use(express.json())
-    
-//     //     // app.get('/', (req, res, next) => {
-//     //     //     console.log(req.path)
-//     //     //     req.path == "/" ? res.redirect('/home') : next()
-//     //     // })
-//     //     // app.put('/feed/:entity', (req, res) => PutFeed(keystone, req, res).catch (err => {
-//     //     //     console.log(err)
-//     //     //     res.status(400).json({result: 'error', error: "" + err})
-//     //     // }))
-//     //     // app.put('/feed/:entity/:id', (req, res) => PutFeed(keystone, req, res).catch (err => res.status(400).json({result: 'error', error: "" + err})))
-//     //     // app.delete('/feed/:entity/:id', (req, res) => DeleteFeed(keystone, req, res))
-    
-//     //     // // Added for handling failed calls that require orchestrating multiple changes
-//     //     // app.put('/tasked/:id', async (req, res) => {
-//     //     //     const tasked = new Tasked(process.env.WORKING_PATH, req.params['id'])
-//     //     //     await tasked.start()
-//     //     //     res.status(200).json({result: 'ok'})
-//     //     // })
-    
-//     //     app.get('/ok', async (req: any, res: any) => {
-//     //         console.log(new HelloService().getHello("name"))
-//     //     })
-    
-//     //     // app.get('/create/:slug', async (req, res) => {
-//     //     //     const wf = require('./services/workflow')
-//     //     //     const authContext =  keystone.createContext({ skipAccessControl: true })
-    
-//     //     //     const productEnvironmentSlug = req.params['slug']
-    
-//     //     //     const result = await wf.CreateServiceAccount(authContext, productEnvironmentSlug, 'smashing')
-//     //     //     res.status(200).json(result)
-//     //     // })
-//     //   },
-//   })
-//   .then(async ({middlewares}: any) => {
-//     console.log("Waiting to connect...")
-//     await keystone.connect();
-//     console.log("Connected!")
-//     const app = express();
-//     console.log("Listing on 3000")
-//     app.use(middlewares).listen(3000);
-
-//     app.get('/ok', async (req: any, res: any) => {
-//         console.log(new HelloService().getHello("name"))
-
-//         res.json({answer: await new HelloService().getHello("name")})
-
-//     })
-//     console.log("OK")
-
-//   });
 
   export { keystone, apps, dev, configureExpress }

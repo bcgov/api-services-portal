@@ -6,7 +6,8 @@ const { byTracking } = require('../components/ByTracking')
 const { atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
-const workflow = require('../services/workflow')
+
+const { DeleteAccess } = require('../servicests/workflow')
 
 // const regenerateApiKey = async function(context, consumer) {
 //     const kongConsumerId = await lookupKongConsumerIdByName(context, appId)
@@ -82,7 +83,7 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE SERVICE ACCESS " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await workflow.DeleteAccess(context, operation, {serviceAccess: existingItem.id})
+        await DeleteAccess(context, operation, {serviceAccess: existingItem.id})
     })
 
   }
