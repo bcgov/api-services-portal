@@ -119,12 +119,12 @@ const CreateIssuer = () => {
     }
   }
 
-  const [issuer, setIssuer] = React.useState({ name: "", flow: "", clientRegistration: "", mode: "", availableScopes: [], clientRoles: [], owner: (user == null ? {}:user) });
+  const [issuer, setIssuer] = React.useState({ name: "", flow: "", clientRegistration: "", mode: "", availableScopes: [], clientRoles: [], owner: (user == null ? { name:"", username:"", email:""}:user) });
 
   const flow = issuer.flow
 
   useEffect(() => {
-      setIssuer ( { ...issuer, ... { owner : (user == null ? {}:user) }})
+      setIssuer ( { ...issuer, ... { owner : (user == null ? { name:"", username:"", email:""}:user) }})
   }, [ user ])
 
   const fulfill = (object) => {
