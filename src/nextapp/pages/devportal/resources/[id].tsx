@@ -6,7 +6,7 @@ import GrantAccessDialog from '@/components/grant-access-dialog';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ResourcesManager from '@/components/resources-manager';
-import ResourcesList from '@/components/resources-list';
+import UsersAccessList from '@/components/users-access-list';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { getSession } from '@/shared/services/auth';
@@ -90,7 +90,7 @@ const ApiAccessResourcePage: React.FC<
               title="No Resources"
             />
           )}
-          <ResourcesList
+          <UsersAccessList
             enableRevoke
             data={data?.getPermissionTickets.filter((p) => p.granted)}
             resourceId={resourceId}

@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { UmaPermissionTicket } from '@/shared/types/query.types';
 import { QueryKey } from 'react-query';
-import ResourcesList from '../resources-list';
+import UsersAccessList from '../users-access-list';
 
 interface ResourcesManagerDialogProps {
   credIssuerId: string;
@@ -35,7 +35,7 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
       <ModalContent>
         <ModalHeader>Resource Sharing Controls</ModalHeader>
         <ModalBody p={0}>
-          <ResourcesList
+          <UsersAccessList
             credIssuerId={credIssuerId}
             data={data}
             queryKey={queryKey}

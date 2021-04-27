@@ -41,7 +41,7 @@ interface RevokeVariables {
   tickets: string[];
 }
 
-interface ResourcesListProps {
+interface UsersAccessListProps {
   credIssuerId: string;
   data: UmaPermissionTicket[];
   enableRevoke?: boolean;
@@ -49,7 +49,7 @@ interface ResourcesListProps {
   queryKey: QueryKey;
 }
 
-const ResourcesList: React.FC<ResourcesListProps> = ({
+const UsersAccessList: React.FC<UsersAccessListProps> = ({
   credIssuerId,
   data,
   enableRevoke,
@@ -197,7 +197,7 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
   );
 };
 
-export default ResourcesList;
+export default UsersAccessList;
 
 const revokeMutation = gql`
   mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {
