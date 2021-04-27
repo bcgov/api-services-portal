@@ -13,8 +13,11 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react';
+import flow from 'lodash/flow';
 import groupBy from 'lodash/groupBy';
 import { gql } from 'graphql-request';
+import head from 'lodash/head';
+import uniq from 'lodash/uniq';
 import type { UmaPermissionTicket } from '@/types/query.types';
 
 import InlinePermissionsList from '../inline-permissions-list';
@@ -69,9 +72,11 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
 
     usernames.forEach((u) => {
       const permissions = groupedByRequester[u];
+      const username = getUserName(permissions);
 
       result.push({
-        username: u,
+        id: u,
+        username,
         permissions: permissions.map((p) => ({
           id: p.id,
           scope: p.scope,
@@ -164,11 +169,12 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
                   colorScheme="red"
                   isLoading={revoke.isLoading}
                   loadingText="Revoking..."
-                  size="sm"
+                  size="xs"
                   leftIcon={<Icon as={FaMinusCircle} />}
                   onClick={handleRevokeAll(d.permissions)}
+                  variant="outline"
                 >
-                  Grant Access
+                  Revoke Access
                 </Button>
               )}
               {!enableRevoke && (
@@ -176,7 +182,7 @@ const ResourcesList: React.FC<ResourcesListProps> = ({
                   colorScheme="green"
                   isLoading={grant.isLoading}
                   loadingText="Revoking..."
-                  size="sm"
+                  size="xs"
                   leftIcon={<Icon as={FaCheck} />}
                   onClick={handleGrant(d.permissions)}
                 >
@@ -214,3 +220,12 @@ const grantMutation = gql`
     )
   }
 `;
+
+const getUserName = (permissions: UmaPermissionTicket[]): string => {
+  const parse = flow(
+    (value: UmaPermissionTicket[]) => value.map((v) => v.requesterName),
+    (value: string[]) => uniq(value),
+    (value: string[]) => head(value)
+  );
+  return parse(permissions);
+};
