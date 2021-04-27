@@ -1,24 +1,14 @@
 import * as React from 'react';
 import {
-  Alert,
-  AlertIcon,
-  Avatar,
-  AvatarGroup,
   Button,
   Box,
   Container,
+  Text,
   Divider,
-  Flex,
   Heading,
-  Link,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tooltip,
-  Tr,
+  Wrap,
+  WrapItem,
+  Center,
 } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
@@ -26,17 +16,14 @@ import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
 import api, { useApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import NextLink from 'next/link';
 import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { Environment, Query } from '@/shared/types/query.types';
+import ResourcesList from '@/components/resources-list';
 import { dehydrate } from 'react-query/hydration';
-import { getSession, useSession, useAuth } from '@/shared/services/auth';
-import { useRouter } from 'next/router';
-import { identity } from 'lodash';
-
-const { useEffect, useState } = React;
-
-import Resources from './resources';
+import { getSession } from '@/shared/services/auth';
+import ClientRequest from '@/components/client-request';
+import ResourcesListLoading from '@/components/resources-list/resources-list-loading';
+import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -70,56 +57,109 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiAccessServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, user, queryKey }) => {
-  const router = useRouter();
-  const params = router?.query;
   const { data } = useApi(
     queryKey,
     { query, variables: { id } },
     { suspense: false }
   );
+  const defaultEnvironment = data.Product?.environments[0] ?? null;
+  const [
+    selectedEnvironment,
+    setSelectedEnvironment,
+  ] = React.useState<Environment | null>(defaultEnvironment);
 
-  const [ env, setEnv ] = useState(data.Product?.environments == null ? null : data.Product?.environments[0]);
+  const handleSelectEnvironment = React.useCallback(
+    (environment: Environment) => () => {
+      setSelectedEnvironment(environment);
+    },
+    [setSelectedEnvironment]
+  );
 
-  return data ? (
+  return (
     <>
       <Head>
         <title>{`API Program Services | API Access | ${data.Environment?.name}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          breadcrumb={[
-            { href: '/devportal/access', text: 'API Access' },
-          ]}
+          breadcrumb={[{ href: '/devportal/access', text: 'API Access' }]}
           title={`${data.Product?.name} Resources`}
         />
         <Box>
-            <Flex p={4}>
-                {data.Product?.environments.filter(env => env.credentialIssuer != null).map(env => (
-                    <Button onClick={() => setEnv(env)}>{env.name}</Button>
-                ))}
-            </Flex>
-            {env && (
-            <Resources credIssuerId={env.credentialIssuer.id} resourceType={env.credentialIssuer.resourceType} environment={env.name} owner={user?.sub}/>
+          <Box bgColor="white" mb={4}>
+            <Box
+              p={4}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Heading size="md">{`Resources for ${selectedEnvironment.name}`}</Heading>
+            </Box>
+            <Divider />
+            {data.Product?.environments.length > 1 && (
+              <>
+                <Wrap px={4} py={2} bgColor="gray.50" spacing={4}>
+                  <WrapItem display="flex" alignItems="center">
+                    <Text>Filter by Environment</Text>
+                  </WrapItem>
+                  {data.Product?.environments
+                    .filter((e) => e.credentialIssuer)
+                    .map((e) => (
+                      <WrapItem key={e.id}>
+                        <Button
+                          borderRadius="full"
+                          variant={
+                            e === selectedEnvironment ? 'solid' : 'outline'
+                          }
+                          colorScheme="green"
+                          size="sm"
+                          onClick={handleSelectEnvironment(e)}
+                        >
+                          {e.name}
+                        </Button>
+                      </WrapItem>
+                    ))}
+                </Wrap>
+                <Divider />
+              </>
             )}
+            {selectedEnvironment && (
+              <ClientRequest fallback={<ResourcesListLoading />}>
+                <ResourcesList
+                  credIssuerId={selectedEnvironment.credentialIssuer.id}
+                  resourceType={
+                    selectedEnvironment.credentialIssuer.resourceType
+                  }
+                  owner={user?.sub}
+                />
+              </ClientRequest>
+            )}
+            {!selectedEnvironment && (
+              <Box p={4} minHeight={200}>
+                <EmptyPane
+                  title="You have no Product Environments"
+                  message="You will not be able to set permissions"
+                />
+              </Box>
+            )}
+          </Box>
         </Box>
-
       </Container>
     </>
-  ) : <></>;
+  );
 };
 
 export default ApiAccessServicePage;
 
 const query = gql`
   query GetEnvironmentsByProduct($id: ID!) {
-
-    Product(where: { id: $id } ) {
+    Product(where: { id: $id }) {
       name
       environments {
         name
         credentialIssuer {
-            id
-            resourceType
+          id
+          resourceType
         }
       }
     }

@@ -40,6 +40,10 @@ const devs = [
 ];
 const owners = ['Craig Rigdon', 'Aidan Cope'];
 const permissionTypes = ['View', 'Publish', 'Manage', 'Delete', 'Create'];
+const requesters = devs.map((d) => ({
+  requesterName: d,
+  requester: casual.uuid,
+}));
 // Casual Definitions
 casual.define('namespace', () => {
   return sample(namespaces);
@@ -461,8 +465,7 @@ const server = mockServer(schemaWithMocks, {
     };
   },
   UMAPermissionTicket: () => {
-    const requesterName = casual.random_element(devs);
-    const requester = snakeCase(requesterName).toUpperCase();
+    const { requester, requesterName } = sample(requesters);
     const ns = sample(namespaces);
     const permission = sample(permissionTypes);
 
