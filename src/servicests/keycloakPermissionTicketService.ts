@@ -48,6 +48,7 @@ export class KeycloakPermissionTicketService {
     public async listPermissions (query : PermissionTicketQuery) : Promise<PermissionTicket[]> {
         const requestQuery = querystring.stringify(query as any)
         const url = `${this.issuerUrl}/authz/protection/permission/ticket?${requestQuery}`
+        logger.debug("[listPermissions] QUERY %s", url)
         const result = await fetch (url, {
             method: 'get', 
             headers: headers(this.accessToken) as any
@@ -55,7 +56,7 @@ export class KeycloakPermissionTicketService {
         .then(checkStatus)
         .then(res => res.json())
         .then(json => json as PermissionTicket[])
-        logger.debug(JSON.stringify(result, null, 4))
+        logger.debug("[listPermissions] RESULT %j", result)
         return result
     }
 

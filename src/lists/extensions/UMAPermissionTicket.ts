@@ -3,7 +3,7 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-import { KeycloakPermissionTicketService, PermissionTicket } from '../../servicests/keycloakPermissionTicketService'
+import { KeycloakPermissionTicketService, PermissionTicket, PermissionTicketQuery } from '../../servicests/keycloakPermissionTicketService'
 
 import { getOpenidFromDiscovery } from '../../servicests/keycloakApi'
 import { KeycloakTokenService } from '../../servicests/keycloakTokenService'
@@ -51,14 +51,17 @@ module.exports = {
 
                     const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
                     const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
 
                     const subjectToken = context.req.headers['x-forwarded-access-token']
                     const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
                     // const accessToken = await getKeycloakSession (openid.issuer, issuer.clientId, issuer.clientSecret)
                     const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
                 
-                    return await kcprotectApi.listPermissions ({resourceId: args.resourceId, returnNames: true})
+                    const params : PermissionTicketQuery = {returnNames: true}
+                    if (args.resourceId != null) {
+                        params.resourceId = args.resourceId
+                    }
+                    return await kcprotectApi.listPermissions (params)
                 },
                 access: EnforcementPoint,
               },
