@@ -14,6 +14,11 @@ module.exports = {
         isRequired: true,
         isUnique: true
     },
+    namespace: {
+        type: Text,
+        isRequired: true,
+        access: FieldEnforcementPoint
+    },
     description: {
         type: Markdown,
         isRequired: false,
@@ -66,6 +71,11 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    clientAuthenticator: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'client-secret', options: [
+        { value: 'client-secret', label: 'Client ID and Secret'},
+        { value: 'client-jwt', label: 'Signed JWT'},
+      ]
+    },
     availableScopes: {
         type: Text,
         isRequired: false,
@@ -79,12 +89,24 @@ module.exports = {
         isRequired: false,
         defaultValue: 'X-API-KEY'
     },
-    owner: { type: Relationship, ref: 'User', isRequired: true, many: false },
+    owner: { type: Relationship, ref: 'User', isRequired: true, many: false, access: { update: false } },
     environments: { type: Relationship, ref: 'Environment.credentialIssuer', many: true }
   },
   access: EnforcementPoint,
   plugins: [
     byTracking(),
     atTracking()
-  ]
+  ],
+  hooks: {
+    resolveInput: ({
+        operation,
+        resolvedData,
+        context,
+    }) => {
+        if (operation == "create") {
+            resolvedData['owner'] = context.authedItem.userId
+            return resolvedData
+        }
+    }
+  }  
 }

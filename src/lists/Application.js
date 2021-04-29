@@ -9,6 +9,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const { DeleteAccess } = require('../servicests/workflow')
 
+const { DefaultOwnerValue } = require('../components/DefaultOwnerValue');
+const e = require('express');
+
 module.exports = {
   fields: {
     appId: {
@@ -25,9 +28,14 @@ module.exports = {
         isRequired: true,
         multiLine: true
     },
+    certificate: {
+        type: Text,
+        isRequired: false,
+        multiLine: true
+    },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    owner: { type: Relationship, isRequired: true, ref: 'User' },
+    owner: { type: Relationship, isRequired: true, ref: 'User', access: { update: false } },
   },
   access: EnforcementPoint,
   hooks: {
@@ -43,9 +51,11 @@ module.exports = {
         if (operation == "create") {
             // If an AppId is provided then don't bother creating one
             if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
-                return resolvedData
+            } else {
+                resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             }
-            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+
+            resolvedData['owner'] = context.authedItem.userId
             return resolvedData
         }
     },
@@ -64,5 +74,27 @@ module.exports = {
   },
   plugins: [
     atTracking()
-  ]
+  ],
+  extensions: [
+    (keystone) => {
+      keystone.extendGraphQLSchema({
+        types: [{ type: 'type ApplicationSummary { appId: String, name: String }' }],
+        queries: [
+            {
+              schema: 'allApplicationNames: [ApplicationSummary]',
+              resolver: async (item, args, context, info, other) => {
+                  const noauthContext =  keystone.createContext({ skipAccessControl: true })
+                  console.log(JSON.stringify(item, null, 5))
+                  console.log(JSON.stringify(args, null, 5))
+                  console.log(JSON.stringify(info, null, 5))
+                  console.log(JSON.stringify(other, null, 5))
+                  //context.executeGraphQL()
+                  return []
+              },
+              access: EnforcementPoint,
+            },
+          ]
+      })
+    }
+  ],
 }

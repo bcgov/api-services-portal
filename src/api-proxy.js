@@ -9,7 +9,7 @@ class ApiProxyApp {
     this._gwaApiUrl = gwaApiUrl;
   }
 
-  prepareMiddleware() {
+  prepareMiddleware({ keystone }) {
     const app = express();
     const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
@@ -30,6 +30,16 @@ class ApiProxyApp {
         }
     })
     app.all(/^\/gw\/api\//, apiProxy)
+
+
+    async function call (user, q, vars = {}) {
+        return await keystone.executeGraphQL({
+            context: keystone.createContext({authentication : { item : user }}),
+            query: q,
+            variables: vars
+        })
+    }
+
     return app;
   }
 }

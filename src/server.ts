@@ -32,6 +32,8 @@ const { Retry } = require('./servicests/tasked')
 
 const { loadRulesAndWatch } = require('./authz/enforcement')
 
+const { logger } = require('./logger')
+
 const apiPath = '/admin/api';
 const PROJECT_NAME = 'APS Service Portal';
 
@@ -107,6 +109,7 @@ const keystone = new Keystone({
     //   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
   });
 
+  const yamlReport = []
   for (const _list of [
     'AccessRequest',
     'Activity',
@@ -122,18 +125,13 @@ const keystone = new Keystone({
     'GatewayPlugin',
     'GatewayRoute',
     'GatewayService',
-    'Group',
     'Legal',
-    'MemberRole',
     'Metric',
-    'Namespace',
     'Organization',
     'OrganizationUnit',
     'Product',
-    'ResourceSet',
     'ServiceAccess',
     'TemporaryIdentity',
-    'Todo',
     'User',
   ]) {
     const list = require('./lists/' + _list)
@@ -141,8 +139,17 @@ const keystone = new Keystone({
         console.log("Registering Extension!")
         list.extensions.map ((ext:any) => ext(keystone))
     }
+    logger.info(" %s", _list)
+    
+    for (  const entry of Object.entries(list.fields) ) {
+        logger.info("      %s", entry[0])
+    }
+    const out = { list: _list, fields: Object.keys(list.fields).sort()}
+    yamlReport.push(out)
     keystone.createList(_list, list);
   }
+  const report = require('js-yaml').dump(yamlReport)
+
   for (const _list of [
       'ServiceAccount',
       'UMAPolicy',
@@ -245,6 +252,8 @@ const configureExpress = (app:any) => {
     app.get('/ok', async (req: any, res: any) => {
         res.json({answer: await new HelloService().getHello("name")})
     })
+
+    
 }
 
 export { keystone, apps, dev, configureExpress }

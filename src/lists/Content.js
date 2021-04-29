@@ -45,7 +45,6 @@ module.exports = {
     },    
     slug: {
       type: Slug,
-      generate: ({ resolvedData }) => slugify(resolvedData.title).toLowerCase(),
       adminConfig: {
         isReadOnly: true, //slug can be created automatically and you may want to show this as read only
       },
@@ -59,4 +58,14 @@ module.exports = {
       defaultValue: false,
     },
   },
-};
+  hooks: {
+    resolveInput: ({
+        operation,
+        resolvedData,
+        context,
+    }) => {
+        resolvedData['slug'] = slugify(resolvedData['title']).toLowerCase()
+        return resolvedData
+    }
+  }
+}

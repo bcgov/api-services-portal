@@ -31,3 +31,38 @@ Actions can be: "allow" and "deny", but they can also be GraphQLWhere clauses (i
 
 * Rules for fields are only evaluated if the `matchFieldKey` is specified
 
+
+## Permission Rules
+
+| Lists                                                     | Approach             |
+|-----------------------------------------------------------|----------------------|
+| AccessRequest                                             |                      |
+| Activity, Blob                                            | Allow create if namespaced, readonly namespaced, no update, no delete |
+| Alert, Metric                                             | readonly             |
+| Application, CredentialIssuer                             | Individual ownership |
+| Content                                                   |                      |
+| Dataset, Organization, Organization Unit                  | readonly             |
+| Environment                                               |                      |
+| GatewayConsumer                                           | no access            |
+| GatewayGroup, GatewayPlugin, GatewayRoute, GatewayService | readonly namespaced  |
+| Legal                                                     | readonly             |
+| Product                                                   |                      |
+| ServiceAccess                                             |                      |
+| TemporaryIdentity                                         | readonly by self, no edit |
+| User                                                      |                      |
+
+ServiceAccess:
+* Read: User must be an api-owner for the related namespace OR owner of related Application
+
+GatewayConsumer:
+* Read: no
+
+AccessRequest is the entry point for Developers to see information about ServiceAccess and Consumer information.
+* Have a MyAccessRequests
+* Allow Create Access Request
+* No access to ServiceAccess and GatewayConsumer
+
+Products:
+* For a Developer, Products and Environments have no access
+* Have a ProductDirectory call to get details about the Product and Environment
+

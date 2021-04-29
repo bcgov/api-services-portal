@@ -8,7 +8,7 @@ class ApiHealthApp {
   
     prepareMiddleware() {
       const app = express();
-      app.get('/xx/health', (req, res) => {
+      app.get('/health', (req, res) => {
           if (this.state.connected) {
               res.json({status: 'ready'})
           } else {

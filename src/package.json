@@ -24,7 +24,7 @@
   "ks-build": "cross-env NODE_ENV=production keystone build --entry=dist/server.js --out=dist2",
   "start": "cross-env NODE_ENV=development keystone start --entry=dist/server.js",
   "build": "npm-run-all copy-assets ts-build ks-build copy-keystone-admin-assets",
-  "create-tables": "cross-env CREATE_TABLES=true keystone create-tables",
+  "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
   "lint": "eslint .",
   "lint-ts": "eslint ./nextapp --ext .ts,.tsx --quiet & tsc -p ./nextapp/tsconfig.json --noEmit",
   "test": "cross-env NODE_ENV=test jest --config ./jest.config.js --coverage --detectOpenHandles",

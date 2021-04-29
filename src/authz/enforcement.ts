@@ -47,6 +47,7 @@ const actions : any = {
     "filterByActiveOrProductNS": require('./actions/filterByActiveOrProductNS'),
     "filterByEnvActiveOrProductNS": require('./actions/filterByEnvActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
+    "filterByNamespaceOrAppOwner": require('./actions/filterByNamespaceOrAppOwner'),
     "filterByOwner": filterByOwner,
     "filterByOwnerOrRelated": require('./actions/filterByOwnerOrRelated'),
     "filterByRequestor": filterByRequestor,
@@ -60,6 +61,7 @@ const actions : any = {
 
 const conditions : any = {
     "matchOneOfRole": require('./conditions/matchOneOfRole'),
+    "matchOneOfListKey": require('./conditions/matchOneOfListKey'),
     "inRole": require('./conditions/inRole'),
     "matchFieldKey": require('./conditions/matchFieldKey'),
     "matchListKey": require('./conditions/matchListKey'),
@@ -77,7 +79,7 @@ export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemI
         if (fs.statSync(rules.rulePath).mtimeMs != rules.ts) {
             refreshRules()
         }
-        const roles = item == null ? ['guest']:item.roles
+        const roles = item == null ? ['guest']: JSON.parse(item.roles)
         const ctx = {
             operation: operation,
             listKey: listKey,

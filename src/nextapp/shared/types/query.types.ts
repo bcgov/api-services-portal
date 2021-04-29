@@ -745,6 +745,7 @@ export type Application = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
   owner?: Maybe<User>;
@@ -813,6 +814,24 @@ export type ApplicationWhereInput = {
   description_not_ends_with_i?: Maybe<Scalars['String']>;
   description_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  certificate?: Maybe<Scalars['String']>;
+  certificate_not?: Maybe<Scalars['String']>;
+  certificate_contains?: Maybe<Scalars['String']>;
+  certificate_not_contains?: Maybe<Scalars['String']>;
+  certificate_starts_with?: Maybe<Scalars['String']>;
+  certificate_not_starts_with?: Maybe<Scalars['String']>;
+  certificate_ends_with?: Maybe<Scalars['String']>;
+  certificate_not_ends_with?: Maybe<Scalars['String']>;
+  certificate_i?: Maybe<Scalars['String']>;
+  certificate_not_i?: Maybe<Scalars['String']>;
+  certificate_contains_i?: Maybe<Scalars['String']>;
+  certificate_not_contains_i?: Maybe<Scalars['String']>;
+  certificate_starts_with_i?: Maybe<Scalars['String']>;
+  certificate_not_starts_with_i?: Maybe<Scalars['String']>;
+  certificate_ends_with_i?: Maybe<Scalars['String']>;
+  certificate_not_ends_with_i?: Maybe<Scalars['String']>;
+  certificate_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  certificate_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   organizationUnit?: Maybe<OrganizationUnitWhereInput>;
@@ -850,6 +869,8 @@ export enum SortApplicationsBy {
   NameDesc = 'name_DESC',
   DescriptionAsc = 'description_ASC',
   DescriptionDesc = 'description_DESC',
+  CertificateAsc = 'certificate_ASC',
+  CertificateDesc = 'certificate_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   OrganizationUnitAsc = 'organizationUnit_ASC',
@@ -866,9 +887,9 @@ export type ApplicationUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
-  owner?: Maybe<UserRelateToOneInput>;
 };
 
 export type ApplicationsUpdateInput = {
@@ -880,6 +901,7 @@ export type ApplicationCreateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
@@ -1264,6 +1286,7 @@ export type CredentialIssuer = {
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
   clientRoles?: Maybe<Scalars['String']>;
+  clientAuthenticator?: Maybe<Scalars['String']>;
   availableScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
@@ -1479,6 +1502,10 @@ export type CredentialIssuerWhereInput = {
   clientRoles_not_ends_with_i?: Maybe<Scalars['String']>;
   clientRoles_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   clientRoles_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientAuthenticator?: Maybe<Scalars['String']>;
+  clientAuthenticator_not?: Maybe<Scalars['String']>;
+  clientAuthenticator_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientAuthenticator_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   availableScopes?: Maybe<Scalars['String']>;
   availableScopes_not?: Maybe<Scalars['String']>;
   availableScopes_contains?: Maybe<Scalars['String']>;
@@ -1594,6 +1621,8 @@ export enum SortCredentialIssuersBy {
   ClientSecretDesc = 'clientSecret_DESC',
   ClientRolesAsc = 'clientRoles_ASC',
   ClientRolesDesc = 'clientRoles_DESC',
+  ClientAuthenticatorAsc = 'clientAuthenticator_ASC',
+  ClientAuthenticatorDesc = 'clientAuthenticator_DESC',
   AvailableScopesAsc = 'availableScopes_ASC',
   AvailableScopesDesc = 'availableScopes_DESC',
   ResourceTypeAsc = 'resourceType_ASC',
@@ -1627,10 +1656,10 @@ export type CredentialIssuerUpdateInput = {
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
   clientRoles?: Maybe<Scalars['String']>;
+  clientAuthenticator?: Maybe<Scalars['String']>;
   availableScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
-  owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -1652,6 +1681,7 @@ export type CredentialIssuerCreateInput = {
   clientId?: Maybe<Scalars['String']>;
   clientSecret?: Maybe<Scalars['String']>;
   clientRoles?: Maybe<Scalars['String']>;
+  clientAuthenticator?: Maybe<Scalars['String']>;
   availableScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
@@ -6476,6 +6506,12 @@ export type _ListSchemaFieldsInput = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type ApplicationSummary = {
+  __typename?: 'ApplicationSummary';
+  appId?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+};
+
 export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
@@ -6550,8 +6586,8 @@ export type UmaPermissionTicketInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -6559,12 +6595,12 @@ export type UnauthenticateUserOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -6787,13 +6823,14 @@ export type Query = {
   _UsersMeta?: Maybe<_ListMeta>;
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
+  allApplicationNames?: Maybe<Array<Maybe<ApplicationSummary>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -7836,10 +7873,10 @@ export type Mutation = {
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -8732,14 +8769,14 @@ export type MutationApprovePermissionsArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 
