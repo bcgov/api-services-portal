@@ -44,6 +44,7 @@ const { filterByOwner, filterByRequestor } = require('./actions/filterByUser')
 const { rewireTypes } = require('@graphql-tools/utils')
 
 const actions : any = {
+    "noop": require('./actions/noop'),
     "filterByActiveOrProductNS": require('./actions/filterByActiveOrProductNS'),
     "filterByEnvActiveOrProductNS": require('./actions/filterByEnvActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),

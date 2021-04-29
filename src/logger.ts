@@ -8,20 +8,7 @@ const enumerateErrorFormat = winston.format((info) => {
     return info;
   });
 
-export const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'debug',
-    format: winston.format.combine(
-      enumerateErrorFormat(),
-      process.env.NODE_ENV === 'production' ? winston.format.uncolorize() : winston.format.colorize(),
-      winston.format.splat(),
-      winston.format.printf(({ level, message }) => `${level}: ${message}`)
-    ),
-    transports: [
-      new winston.transports.Console({
-        stderrLevels: ['error'],
-      }),
-    ],
-});
+export const logger = Logger('general')
 
 export function Logger (category: string) {
     return winston.createLogger({

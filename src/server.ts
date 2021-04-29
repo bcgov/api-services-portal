@@ -205,7 +205,7 @@ const { pages } = require('./admin-hooks.js');
 //const tasked = require('./services/tasked');
 
 const apps = [
-    new ApiHealthApp(state),
+    //new ApiHealthApp(state),
     new GraphQLApp(),
     new AdminUIApp({
       name: PROJECT_NAME,
