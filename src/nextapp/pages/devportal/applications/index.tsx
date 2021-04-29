@@ -89,7 +89,7 @@ const ApplicationsPage: React.FC<
           </Alert>
         )}
         <PageHeader
-          actions={<NewApplication userId={"000000000000"} />}
+          actions={<NewApplication userId={userId} />}
           title="My Applications"
         >
           <Text>Applications allow you to access BC Government APIs.</Text>

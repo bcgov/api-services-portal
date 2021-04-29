@@ -5,7 +5,7 @@ const { byTracking } = require('../components/ByTracking')
 
 const { atTracking } = require('@keystonejs/list-plugins')
 
-const { EnforcementPoint } = require('../authz/enforcement')
+const { EnforcementPoint, FieldEnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
