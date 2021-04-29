@@ -27,7 +27,7 @@ ID,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchFieldKey,
 ,,Environment,create,,,,api-owner,,allow,
 ,,Environment,,"update,delete",,,api-owner,,allow,
 ,,Environment,read,,,,developer,,allow,filterByActive
-,,GatewayConsumer,,"read,update,delete",,,api-owner,,allow,filterByUserNS
+,,GatewayConsumer,,"read,update,delete",,,api-owner,,allow,noop
 ,,GatewayConsumer,create,,,,api-owner,,allow,
 ,,GatewayGroup,read,,,,api-owner,,allow,
 ,,GatewayGroup,,"update,delete,create",,,api-owner,,allow,
@@ -57,7 +57,7 @@ ID,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchFieldKey,
 ,,Product,read,,,,api-owner,,allow,filterByProductNSOrActiveEnvironment
 ,,Product,create,,,,api-owner,,allow,
 ,,Product,,"update,delete",,,api-owner,,allow,filterByUserNS
-,,Product,read,,,,developer,,allow,filterByActiveEnvironment
+,,Product,read,,,,developer,,allow,noop
 ,,ServiceAccess,create,,,,api-owner,,allow,
 ,,ServiceAccess,,"update,delete",,,api-owner,,allow,
 ,,ServiceAccess,read,,,,api-owner,,allow,filterByNamespaceOrAppOwner
