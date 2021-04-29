@@ -106,7 +106,7 @@ const NamespacesPage = () => {
 
     const doSelect = (item) => {
         fetch(`/admin/switch/${item._id}`, {
-            method: 'GET',
+            method: 'PUT',
             headers: { 'Accept': 'application/json'}
         })
         .then (async (response) => { if (!response.ok) { const pay = await response.json(); console.log(JSON.stringify(pay)); throw Error (pay.error) } return response })

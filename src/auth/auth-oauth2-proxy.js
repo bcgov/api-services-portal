@@ -120,7 +120,7 @@ class Oauth2ProxyAuthStrategy {
             this.register_user(req,res)
         })
 
-        app.get('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
+        app.put('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
             // Switch namespace
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
