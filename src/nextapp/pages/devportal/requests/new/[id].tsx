@@ -133,10 +133,6 @@ const NewRequestsPage: React.FC<
         )}
         <PageHeader title="New Access Request">
           <Text>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias ipsum
-            sapiente eligendi. Ea sapiente quae quos. Eveniet doloribus
-            temporibus inventore expedita totam corporis ut, tenetur molestiae
-            perspiciatis ducimus veniam dignissimos!
           </Text>
         </PageHeader>
         <form onSubmit={handleSubmit}>
