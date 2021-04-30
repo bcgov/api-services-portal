@@ -133,7 +133,7 @@ const query = gql`
       scopes
     }
 
-    CredentialIssuer(where: { id: $credIssuerId }) {
+    CredentialIssuerSummary(where: { id: $credIssuerId }) {
       clientId
       resourceType
       availableScopes

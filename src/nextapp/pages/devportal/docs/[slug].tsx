@@ -10,9 +10,19 @@ import gh from '@/shared/services/github';
 
 import styles from './docs.module.css';
 
-const pagesQuery = gql`
-  {
-    allContents(where: { isComplete: true }) {
+const navigationQuery = gql`
+  query {
+    allDiscoverableContents(where: { isComplete: true }) {
+      id
+      title
+      slug
+    }
+  }
+`;
+
+const documentQuery = gql`
+  query Content($slug: String!) {
+    allDiscoverableContents(where: { slug: $slug, isComplete: true }) {
       id
       title
       slug
@@ -70,77 +80,19 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
   );
 };
 
-// export async function getStaticPaths() {
-//   try {
-//     const pagesQuery = gql`
-//       {
-//         allContents(where: { isComplete: true }) {
-//           id
-//           title
-//           slug
-//         }
-//       }
-//     `;
-//     const pages: { allContents: any[] } = await api(pagesQuery);
-
-//     return {
-//       paths: pages.allContents.map((page) => ({
-//         params: {
-//           slug: page.slug,
-//         },
-//       })),
-//       fallback: false,
-//     };
-//   } catch {
-//     return {
-//       paths: [],
-//       fallback: false,
-//     };
-//   }
-// }
-
 export const getServerSideProps: GetServerSideProps = async ({ req, params }) => {
-  const pages: { allContents: any[] } = await api(pagesQuery, null, {
+  const nav: { allDiscoverableContents: any[] } = await api(navigationQuery, null, {
+        headers: req.headers as HeadersInit,
+  });
+  const pages: { allDiscoverableContents: any[] } = await api(documentQuery, {slug: params.slug}, {
     headers: req.headers as HeadersInit,
   });
-  const page = pages.allContents.find((page) => page.slug === params.slug);
-  let content = page.content;
-
-  if (page.readme) {
-    const repoQuery = gql`
-      query README($readme: String!, $repo: String!, $owner: String!) {
-        repository(name: $repo, owner: $owner) {
-          object(expression: $readme) {
-            ... on Blob {
-              text
-            }
-          }
-        }
-      }
-    `;
-    console.log("QUERY = "+JSON.stringify({
-        readme: `master:${page.readme}`,
-        repo: page.githubRepository ? page.githubRepository.split('/')[1] : "gwa-api",
-        owner: page.githubRepository ? page.githubRepository.split('/')[0] : "bcgov",
-      }));
-
-    const repo = await gh(repoQuery, {
-      readme: `master:${page.readme}`,
-      repo: page.githubRepository ? page.githubRepository.split('/')[1] : "gwa-api",
-      owner: page.githubRepository ? page.githubRepository.split('/')[0] : "bcgov",
-    });
-    
-    if ('text' in repo.repository.object) {
-        content = repo.repository.object.text;
-    } else {
-        content = "Unable to retrieve content at this time.  Try again later."
-    }
-  }
+  const page = pages.allDiscoverableContents.find((page) => page.slug === params.slug);
 
   return {
     props: {
-      content,
-      pages: pages.allContents,
+      content: page.content,
+      pages: nav.allDiscoverableContents,
       title: page.title,
     }
   };

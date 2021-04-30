@@ -890,6 +890,7 @@ export type ApplicationUpdateInput = {
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
+  owner?: Maybe<UserRelateToOneInput>;
 };
 
 export type ApplicationsUpdateInput = {
@@ -1682,6 +1683,7 @@ export type CredentialIssuerUpdateInput = {
   availableScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
+  owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -2324,6 +2326,7 @@ export enum SortEnvironmentsBy {
 }
 
 export type EnvironmentUpdateInput = {
+  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   approval?: Maybe<Scalars['Boolean']>;
@@ -5925,6 +5928,12 @@ export type Query = {
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   allApplicationNames?: Maybe<Array<Maybe<ApplicationSummary>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
+  allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
+  DiscoverableProduct?: Maybe<Product>;
+  myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  myApplications?: Maybe<Array<Maybe<Application>>>;
+  CredentialIssuerSummary?: Maybe<CredentialIssuer>;
+  allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
@@ -6491,6 +6500,36 @@ export type Query_KsListsMetaArgs = {
 
 export type QueryGetGatewayConsumerPluginsArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryAllDiscoverableProductsArgs = {
+  where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryDiscoverableProductArgs = {
+  where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryMyServiceAccessesArgs = {
+  where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryMyApplicationsArgs = {
+  where?: Maybe<ApplicationWhereInput>;
+};
+
+
+export type QueryCredentialIssuerSummaryArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
+};
+
+
+export type QueryAllDiscoverableContentsArgs = {
+  where?: Maybe<ContentWhereInput>;
 };
 
 

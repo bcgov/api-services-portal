@@ -78,7 +78,7 @@ const ApiAccessServicePage: React.FC<
   return (
     <>
       <Head>
-        <title>{`API Program Services | API Access | ${data.Environment?.name}`}</title>
+        <title>{`API Program Services | API Access | ${selectedEnvironment?.name}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -93,7 +93,7 @@ const ApiAccessServicePage: React.FC<
               alignItems="center"
               justifyContent="space-between"
             >
-              <Heading size="md">{`Resources for ${selectedEnvironment.name}`}</Heading>
+              <Heading size="md">{`Resources for ${selectedEnvironment?.name}`}</Heading>
             </Box>
             <Divider />
             {data.Product?.environments.length > 1 && (
@@ -123,7 +123,7 @@ const ApiAccessServicePage: React.FC<
                 <Divider />
               </>
             )}
-            {selectedEnvironment && (
+            {selectedEnvironment && selectedEnvironment.credentialIssuer != null && (
               <ClientRequest fallback={<ResourcesListLoading />}>
                 <ResourcesList
                   credIssuerId={selectedEnvironment.credentialIssuer.id}

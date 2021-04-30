@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Alert, AlertIcon, Box, Container, Stack } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
+import EmptyPane from '@/components/empty-pane';
 import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
 import api, { useApi } from '@/shared/services/api';
@@ -42,17 +43,24 @@ const ApiAccessPage: React.FC<
         <title>API Program Services | API Access</title>
       </Head>
       <Container maxW="6xl">
-        <Stack spacing={10} my={4}>
-          <Alert status="info">
-            <AlertIcon />
-            List of the BC Government Service APIs that you have access to.
-          </Alert>
-        </Stack>
 
         <PageHeader title="API Access" />
 
+        <Stack spacing={10} my={4}>
+        <Alert status="info">
+            <AlertIcon />
+            List of the BC Government Service APIs that you have access to.
+        </Alert>
+        </Stack>
         <Box mt={5}>
-          <AccessList data={data.allServiceAccesses} queryKey={queryKey} />
+
+          <AccessList data={data.myServiceAccesses} queryKey={queryKey} />
+          {data.myServiceAccesses.length == 0 && (
+            <EmptyPane
+            message="Go to the Directory to find one today!"
+            title="Not using any APIs yet?"
+          />              
+          )}
         </Box>
       </Container>
     </>
@@ -62,8 +70,8 @@ const ApiAccessPage: React.FC<
 export default ApiAccessPage;
 
 const query = gql`
-  query GetProducts {
-    allServiceAccesses {
+  query GetMyServiceAccesses {
+    myServiceAccesses {
       id
       name
       active
@@ -79,8 +87,6 @@ const query = gql`
           id
           name
           flow
-          clientId
-          availableScopes
           resourceType
         }
         product {

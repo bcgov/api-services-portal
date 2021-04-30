@@ -83,7 +83,7 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE SERVICE ACCESS " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await DeleteAccess(context, operation, {serviceAccess: existingItem.id})
+        await DeleteAccess(context.createContext({skipAccessControl:true}), operation, {serviceAccess: existingItem.id})
     })
 
   }

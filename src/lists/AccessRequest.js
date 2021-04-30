@@ -100,7 +100,7 @@ module.exports = {
         console.log("AFTER CHG AR " + operation + " " + JSON.stringify(originalInput, null, 3));
         console.log("AFTER CHG AR " + operation + " " + JSON.stringify(updatedItem, null, 3));
 
-        await Apply(context, operation, existingItem, originalInput, updatedItem)
+        await Apply(context.createContext({skipAccessControl:true}), operation, existingItem, originalInput, updatedItem)
     })
   }
 }

@@ -76,7 +76,7 @@ const NewRequestsPage: React.FC<
     },
     { suspense: false }
   );
-  const dataset = data?.allProducts[0];
+  const dataset = data?.allDiscoverableProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -142,7 +142,7 @@ const NewRequestsPage: React.FC<
                 <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
                 <Box>
                   <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allProducts.find((d) => d.id === id)?.name ?? 'API'}
+                    {data.allDiscoverableProducts.find((d) => d.id === id)?.name ?? 'API'}
                   </Text>
                 </Box>
               </VStack>
@@ -169,7 +169,7 @@ const NewRequestsPage: React.FC<
                 </Heading>
                 <Select name="applicationId">
                   <option value="">No Application Selected</option>
-                  {data.allApplications.map((a) => (
+                  {data.myApplications.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name}
                     </option>
@@ -250,7 +250,7 @@ export default NewRequestsPage;
 
 const query = gql`
   query Get($id: ID!) {
-    allProducts(where: { id: $id }) {
+    allDiscoverableProducts(where: { id: $id }) {
       id
       name
       environments {
@@ -265,7 +265,7 @@ const query = gql`
         }
       }
     }
-    allApplications {
+    myApplications {
       id
       name
     }

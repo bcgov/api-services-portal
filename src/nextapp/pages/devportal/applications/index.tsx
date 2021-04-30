@@ -113,7 +113,7 @@ const ApplicationsPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-              {data.allApplications?.length === 0 && (
+              {data.myApplications?.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -132,7 +132,7 @@ const ApplicationsPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allApplications?.map((d) => (
+              {data.myApplications?.map((d) => (
                 <Tr key={d.id}>
                   <Td>{d.appId}</Td>
                   <Td>{d.name}</Td>
@@ -153,8 +153,8 @@ const ApplicationsPage: React.FC<
 export default ApplicationsPage;
 
 const query = gql`
-  query GET {
-    allApplications {
+  query {
+    myApplications {
       id
       appId
       name
@@ -165,40 +165,6 @@ const query = gql`
     allTemporaryIdentities {
       id
       userId
-    }
-    allAccessRequests(where: { isComplete: null }) {
-      id
-      name
-      isIssued
-      application {
-        appId
-      }
-      productEnvironment {
-        name
-        product {
-          name
-        }
-      }
-    }
-    allServiceAccesses(where: {}) {
-      id
-      name
-      active
-      consumer {
-        extForeignKey
-      }
-      application {
-        appId
-      }
-      productEnvironment {
-        name
-        credentialIssuer {
-          instruction
-        }
-        product {
-          name
-        }
-      }
     }
   }
 `;

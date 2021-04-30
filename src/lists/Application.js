@@ -12,6 +12,8 @@ const { DeleteAccess } = require('../servicests/workflow')
 const { DefaultOwnerValue } = require('../components/DefaultOwnerValue');
 const e = require('express');
 
+var { GraphQLSchema, GraphQLResolveInfo } = require('graphql');
+
 module.exports = {
   fields: {
     appId: {
@@ -68,7 +70,7 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE APP " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await DeleteAccess(context, operation, {application: existingItem.id})
+        await DeleteAccess(context.createContext({skipAccessControl:true}), operation, {application: existingItem.id})
     })
 
   },
@@ -84,12 +86,13 @@ module.exports = {
               schema: 'allApplicationNames: [ApplicationSummary]',
               resolver: async (item, args, context, info, other) => {
                   const noauthContext =  keystone.createContext({ skipAccessControl: true })
-                  console.log(JSON.stringify(item, null, 5))
-                  console.log(JSON.stringify(args, null, 5))
-                  console.log(JSON.stringify(info, null, 5))
-                  console.log(JSON.stringify(other, null, 5))
-                  //context.executeGraphQL()
-                  return []
+                  console.log(JSON.stringify(context.schemaName))
+                  console.log(JSON.stringify(context.gqlNames))
+                  console.log(JSON.stringify(Object.keys(keystone)))
+                  const a = keystone.getListByKey('Application')
+                  const theResult = await a.listQuery(args, context, a.gqlNames.listQueryName, info)
+
+                  return theResult
               },
               access: EnforcementPoint,
             },

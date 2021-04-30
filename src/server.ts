@@ -30,6 +30,8 @@ const { staticRoute, staticPath, distDir } = require('./config');
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
 const { Retry } = require('./servicests/tasked')
 
+const { FieldEnforcementPoint, EnforcementPoint } = require('./authz/enforcement')
+
 const { loadRulesAndWatch } = require('./authz/enforcement')
 
 const { logger } = require('./logger')
@@ -141,8 +143,10 @@ const keystone = new Keystone({
     }
     logger.info(" %s", _list)
     
+    list.access = EnforcementPoint
     for (  const entry of Object.entries(list.fields) ) {
         logger.info("      %s", entry[0])
+        list.fields[entry[0]].access = FieldEnforcementPoint
     }
     const out = { list: _list, fields: Object.keys(list.fields).sort()}
     yamlReport.push(out)
@@ -151,6 +155,7 @@ const keystone = new Keystone({
   const report = require('js-yaml').dump(yamlReport)
 
   for (const _list of [
+      'AliasedQueries',
       'ServiceAccount',
       'UMAPolicy',
       'UMAResourceSet',
@@ -252,6 +257,7 @@ const configureExpress = (app:any) => {
     app.get('/ok', async (req: any, res: any) => {
         res.json({answer: await new HelloService().getHello("name")})
     })
+
 
     
 }

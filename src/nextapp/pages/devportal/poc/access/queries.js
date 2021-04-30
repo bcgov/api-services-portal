@@ -8,9 +8,6 @@ export const GET_LIST = `
             id
             name
             active
-            consumer {
-              extForeignKey
-            }
             application {
               appId
             }

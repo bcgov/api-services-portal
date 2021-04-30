@@ -24,8 +24,9 @@ interface RuleEntry {
     matchQueryName?: string
     matchListKey?: string
     matchOperation?: string
+    matchNotOneOfFieldKey?: string
+    matchOneOfFieldKey?: string
     matchOneOfOperation?: string[]
-    matchFieldKey?: string
     matchUserNS?: string
     inRole?: string
     matchOneOfRole?: string[]
@@ -45,15 +46,18 @@ const { rewireTypes } = require('@graphql-tools/utils')
 
 const actions : any = {
     "noop": require('./actions/noop'),
+    "filterByAppOwner": require('./actions/filterByAppOwner'),
     "filterByActiveOrProductNS": require('./actions/filterByActiveOrProductNS'),
     "filterByEnvActiveOrProductNS": require('./actions/filterByEnvActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
     "filterByNamespaceOrAppOwner": require('./actions/filterByNamespaceOrAppOwner'),
     "filterByOwner": filterByOwner,
     "filterByOwnerOrRelated": require('./actions/filterByOwnerOrRelated'),
+    "filterBySelf": require('./actions/filterBySelf'),
     "filterByRequestor": filterByRequestor,
     "filterByPackageNS": require('./actions/filterByPackageNS'),
     "filterByProductNSOrActiveEnvironment": require('./actions/filterByProductNSOrActiveEnvironment'),
+    "filterByTemporaryIdentity": require('./actions/filterByTemporaryIdentity'),
     "filterByUserNS": require('./actions/filterByUserNS'),
     "filterByUserNSOrNull": require('./actions/filterByUserNSOrNull'),
     "filterByActive": require('./actions/filterByActive'),
@@ -61,6 +65,8 @@ const actions : any = {
 }
 
 const conditions : any = {
+    "matchNotOneOfFieldKey": require('./conditions/matchNotOneOfFieldKey'),
+    "matchOneOfFieldKey": require('./conditions/matchOneOfFieldKey'),
     "matchOneOfRole": require('./conditions/matchOneOfRole'),
     "matchOneOfListKey": require('./conditions/matchOneOfListKey'),
     "inRole": require('./conditions/inRole'),
@@ -71,6 +77,8 @@ const conditions : any = {
     "matchUserNS": require('./conditions/matchUserNS'),
     "matchQueryName": require('./conditions/matchQueryName'),
 }
+
+export const FieldEnforcementPoint = EnforcementPoint
 
 // Use a decision matrix to determine who is allowed to do what
 export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, originalInput, authentication: { item } } : any) {
@@ -88,6 +96,7 @@ export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemI
             gqlName: gqlName,
             item: {},
             user: {
+                tid: item == null ? null : item.id, 
                 id: item == null ? null : item.userId,
                 roles: roles,
                 namespace: item == null ? null : item.namespace,
@@ -101,15 +110,22 @@ export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemI
         }
 
         for ( const rule  of rules.cache) {
+            if (fieldKey != null 
+                && rule['matchOneOfFieldKey'] == null 
+                && rule['matchNotOneOfFieldKey'] == null) {
+                continue
+            }
+            if (fieldKey == null 
+                && (rule['matchOneOfFieldKey'] != null 
+                || rule['matchNotOneOfFieldKey'] != null)) {
+                continue
+            }
             const result = ((ruleConditionState) => {
                 const matches = []
                 for ( const key of Object.keys(rule)) {
                     const value : any = (rule as any)[key]
                     if (!(['result','ID', 'filters'].includes(key)) && !(Object.keys(actions).includes(key)) && !(key in conditions)) {
                         logger.warn("WARNING! '%s' not a valid rule!", key)
-                    }
-                    if (fieldKey != null && rule['matchFieldKey'] == "") {
-                        continue
                     }
 
                     if (key != "result" && key in conditions && value != "" && value != null) {
@@ -121,6 +137,9 @@ export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemI
                             matches.push(key)
                         }
                     }
+                }
+                if (matches.length == 0) {
+                    return "NA"
                 }
                 if (ruleConditionState && rule.result === RuleResult.Allow) {
                     if (rule.filters != null) {
@@ -170,7 +189,7 @@ function refreshRules() {
     fs.createReadStream(rules.rulePath)
     .pipe(csv())
     .on('data', (data) => {
-        ['matchOneOfOperation', 'matchOneOfRole', 'filters'].map((f: string) => {
+        ['matchOneOfOperation', 'matchOneOfRole', 'matchOneOfFieldKey', 'matchNotOneOfFieldKey', 'filters'].map((f: string) => {
             data[f] = convertToArray(data[f])
         })
         results.push(data)
