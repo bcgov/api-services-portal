@@ -22,13 +22,12 @@ module.exports = {
                 }
             }
 
-            
-            keystone.extendGraphQLSchema({
-                types: [
-                    { type: typeServiceAccount },
-                    { type: typeServiceAccountInput },
-                ]
-            })
+            // keystone.extendGraphQLSchema({
+            //     types: [
+            //         { type: typeServiceAccount },
+            //         { type: typeServiceAccountInput },
+            //     ]
+            // })
         }
     ]
   }
