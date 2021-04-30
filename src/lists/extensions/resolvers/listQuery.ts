@@ -18,7 +18,8 @@ export const ListQuery = (keystone: any, alias : AliasConfig) => {
                     const gqlName = a.gqlNames.listQueryName
                     const noauthContext = context.createContext({ skipAccessControl: true })
                     return await a.listQuery(mergeWhereClause(args,accessAnswer), noauthContext, gqlName, info)
-                }
+                },
+                access: EnforcementPoint
             }
         ]
     }

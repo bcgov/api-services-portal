@@ -109,7 +109,7 @@ function List({ data, state, refetch, cancelRequest }) {
         if (!data) {
               return <p>Ooops, something went wrong!</p>
         }
-        const products = [...new Set(data.allServiceAccesses.map((item, index) => item.productEnvironment?.product.name).filter(p => p != null))]
+        const products = [...new Set(data.myServiceAccesses.map((item, index) => item.productEnvironment?.product.name).filter(p => p != null))]
 
         return (
             <>
@@ -139,7 +139,7 @@ function List({ data, state, refetch, cancelRequest }) {
                             </Thead>
                             <Tbody>
 
-                            {data.allServiceAccesses.filter(access => access.productEnvironment?.product.name == product).map((item, index) => {
+                            {data.myServiceAccesses.filter(access => access.productEnvironment?.product.name == product).map((item, index) => {
                                 
                                 const [show, setShow] = React.useState(false)
                                 

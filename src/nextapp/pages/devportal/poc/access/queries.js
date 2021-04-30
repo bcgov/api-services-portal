@@ -4,7 +4,7 @@ export const GET_LIST = `
             id
             userId
         }
-        allServiceAccesses(where: {  }) {
+        myServiceAccesses(where: {  }) {
             id
             name
             active

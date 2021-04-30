@@ -36,6 +36,7 @@ module.exports = {
   access: EnforcementPoint,
   hooks: {
     resolveInput: ({
+        context,
         operation,
         resolvedData
     }) => {
