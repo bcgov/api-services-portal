@@ -7,7 +7,7 @@ const { atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
 
-const { DeleteAccess } = require('../servicests/workflow')
+const { DeleteAccess } = require('../services/workflow')
 
 // const regenerateApiKey = async function(context, consumer) {
 //     const kongConsumerId = await lookupKongConsumerIdByName(context, appId)

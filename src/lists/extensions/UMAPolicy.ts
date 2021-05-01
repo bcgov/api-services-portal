@@ -1,15 +1,10 @@
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-import { UMAPolicyService, Policy, PolicyQuery } from '../../servicests/uma2PolicyService'
+import { UMAPolicyService, Policy, PolicyQuery } from '../../services/uma2'
 
-//const KCProtect = require('../../services/kcprotect')
-
-import { getOpenidFromDiscovery } from '../../servicests/keycloakApi'
-import { KeycloakTokenService } from '../../servicests/keycloakTokenService'
+import { KeycloakTokenService, getOpenidFromDiscovery } from '../../services/keycloak'
 
 const keystoneApi = require('../../services/keystone')
-//const KCAdmin = require('../../services/kcadmin')
-
 
 const typeUMAPolicy = `
 type UMAPolicy {

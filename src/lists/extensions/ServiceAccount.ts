@@ -16,8 +16,8 @@ type ServiceAccountInput {
 }
 `
 
-import { IssuerMisconfigError } from '../../servicests/issuerMisconfigError'
-import { CreateServiceAccount } from '../../servicests/workflow'
+import { IssuerMisconfigError } from '../../services/issuerMisconfigError'
+import { CreateServiceAccount } from '../../services/workflow'
 
 module.exports = {
   extensions: [

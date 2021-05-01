@@ -3,12 +3,9 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-import { KeycloakPermissionTicketService, PermissionTicket, PermissionTicketQuery } from '../../servicests/keycloakPermissionTicketService'
+import { KeycloakPermissionTicketService, PermissionTicket, PermissionTicketQuery } from '../../services/keycloak'
 
-import { getOpenidFromDiscovery } from '../../servicests/keycloakApi'
-import { KeycloakTokenService } from '../../servicests/keycloakTokenService'
-import { KeycloakUserService } from '../../servicests/keycloakUserService'
-import { KeycloakClientService } from '../../servicests/keycloakClientService'
+import { getOpenidFromDiscovery, KeycloakTokenService, KeycloakUserService, KeycloakClientService } from '../../services/keycloak'
 
 const keystoneApi = require('../../services/keystone')
 

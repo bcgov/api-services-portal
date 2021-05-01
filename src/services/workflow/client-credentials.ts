@@ -1,11 +1,12 @@
 const { lookupCredentialIssuerById, addKongConsumer } = require('../keystone')
 
-const { clientRegistration, getOpenidFromDiscovery, getKeycloakSession } = require('../keycloak');
+import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery } from '../keycloak'
 
-const {v4: uuidv4} = require('uuid');
+import { KongConsumerService } from '../kong'
 
-const assert = require('assert').strict;
+import {v4 as uuidv4} from 'uuid'
 
+import { strict as assert } from 'assert'
 
 /**
  * Steps:
@@ -16,9 +17,8 @@ const assert = require('assert').strict;
  * @param {*} credentialIssuerPK 
  * @param {*} newClientId 
  */
-async function registerClient (context, credentialIssuerPK, newClientId, nickname) {
-    const kong = require('../kong');
-    const kongApi = new kong(process.env.KONG_URL)
+export async function registerClient (context: any, credentialIssuerPK: string, newClientId: string, nickname: string) {
+    const kongApi = new KongConsumerService(process.env.KONG_URL)
 
     // Find the credential issuer and based on its type, go do the appropriate action
     const issuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
@@ -28,12 +28,14 @@ async function registerClient (context, credentialIssuerPK, newClientId, nicknam
     // token is NULL if 'iat'
     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
     // issuer.initialAccessToken if 'iat'
-    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await getKeycloakSession(openid.issuer, issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+    const kctoksvc = new KeycloakTokenService(openid.issuer)
+
+    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await kctoksvc.getKeycloakSession(issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
 
     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
     // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-    const client = await clientRegistration(openid.issuer, token, newClientId, uuidv4(), false)
+    const client = await new KeycloakClientService(null, null).clientRegistration(openid.issuer, token, newClientId, uuidv4(), false)
     assert.strictEqual(client.clientId, newClientId)
 
     const consumer = await kongApi.createKongConsumer (nickname, newClientId)
@@ -46,8 +48,4 @@ async function registerClient (context, credentialIssuerPK, newClientId, nicknam
         consumer,
         consumerPK
     }
-}
-
-module.exports = {
-    registerClient: registerClient,
 }

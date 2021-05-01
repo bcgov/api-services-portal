@@ -1,19 +1,20 @@
 /// <reference types="node" />
 /// <reference types="express" />
 import express from "express";
+import request from "graphql-request";
 import { AnyCnameRecord } from "node:dns";
 const { Keystone } = require('@keystonejs/keystone');
 const { Checkbox, Password, Select } = require('@keystonejs/fields');
 //import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
-const { GraphQLApp } = require('@keystonejs/app-graphql');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
 const { generate } = require('@graphql-codegen/cli');
 //const { AdminUIApp } = require('@keystone-next/admin-ui');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
+const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
 
 var Keycloak = require("keycloak-connect");
@@ -28,7 +29,7 @@ const { Strategy, Issuer, Client } = require('openid-client');
 const { staticRoute, staticPath, distDir } = require('./config');
 
 const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
-const { Retry } = require('./servicests/tasked')
+const { Retry } = require('./services/tasked')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('./authz/enforcement')
 
@@ -36,7 +37,7 @@ const { loadRulesAndWatch } = require('./authz/enforcement')
 
 const { logger } = require('./logger')
 
-const apiPath = '/admin/api';
+const apiPath = '/gql/api';
 const PROJECT_NAME = 'APS Service Portal';
 
 const { KnexAdapter } = require('@keystonejs/adapter-knex');
@@ -58,9 +59,6 @@ const mongooseAdapterConfig = {
   user: process.env.MONGO_USER,
   pass: process.env.MONGO_PASSWORD,
 };
-
-//import { HelloService } from './services/test'
-import { HelloService } from './servicests/test'
 
 // GraphQL TypeScript codegen. Will output a `types.d.ts` file to `./src`
 async function generateTypes() {
@@ -146,7 +144,7 @@ const keystone = new Keystone({
     list.access = EnforcementPoint
     for (  const entry of Object.entries(list.fields) ) {
         logger.info("      %s", entry[0])
-        list.fields[entry[0]].access = FieldEnforcementPoint
+        //list.fields[entry[0]].access = FieldEnforcementPoint
     }
     const out = { list: _list, fields: Object.keys(list.fields).sort()}
     yamlReport.push(out)
@@ -209,9 +207,13 @@ const keystone = new Keystone({
 const { pages } = require('./admin-hooks.js');
 //const tasked = require('./services/tasked');
 
+const { checkWhitelist, loadWhitelistAndWatch, addToWhitelist } = require('./authz/whitelist')
+
 const apps = [
     //new ApiHealthApp(state),
-    new GraphQLApp(),
+    new ApiGraphqlWhitelistApp({
+        apiPath
+    }),
     new AdminUIApp({
       name: PROJECT_NAME,
       adminPath: '/admin',
@@ -252,14 +254,7 @@ const configureExpress = (app:any) => {
         const tasked = new Retry(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
         res.status(200).json({result: 'ok'})
-    })
-
-    app.get('/ok', async (req: any, res: any) => {
-        res.json({answer: await new HelloService().getHello("name")})
-    })
-
-
-    
+    })    
 }
 
 export { keystone, apps, dev, configureExpress }

@@ -9,8 +9,8 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { lookupConsumerPlugins, lookupKongConsumerId } = require('../services/keystone')
 
-const { KongConsumerService } = require('../servicests/kongConsumerService')
-const { FeederService } = require('../servicests/feederService')
+const { KongConsumerService } = require('../services/kong')
+const { FeederService } = require('../services/feeder')
 
 module.exports = {
   fields: {

@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { checkStatus } from './checkStatus'
+import { checkStatus } from '../checkStatus'
 
 export function headers( accessToken : string): HeadersInit {
     const headers : HeadersInit = {

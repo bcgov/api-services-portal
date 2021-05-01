@@ -1,6 +1,6 @@
-import { checkStatus } from './checkStatus'
+import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../logger'
+import { logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from './keycloakApi'
 

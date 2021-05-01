@@ -46,7 +46,7 @@ const api = async <T extends ApiResponse>(
     headers: {},
     ...options,
   };
-  const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
+  const apiClient = new GraphQLClient(`${apiHost}/gql/api`, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

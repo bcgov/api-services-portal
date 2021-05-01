@@ -17,7 +17,7 @@ const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout
 
 const { Logger } = require('../logger')
 
-const { UMA2TokenService } = require('../servicests/uma2TokenService')
+const { UMA2TokenService } = require('../services/uma2')
 
 const toJson = (val) => val ? JSON.parse(val) : null;
 

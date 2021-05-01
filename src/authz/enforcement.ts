@@ -65,6 +65,7 @@ const actions : any = {
 }
 
 const conditions : any = {
+    "matchOneOfBaseQueryName": require('./conditions/matchOneOfBaseQueryName'),
     "matchNotOneOfFieldKey": require('./conditions/matchNotOneOfFieldKey'),
     "matchOneOfFieldKey": require('./conditions/matchOneOfFieldKey'),
     "matchOneOfRole": require('./conditions/matchOneOfRole'),
@@ -81,9 +82,10 @@ const conditions : any = {
 export const FieldEnforcementPoint = EnforcementPoint
 
 // Use a decision matrix to determine who is allowed to do what
-export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemId, originalInput, authentication: { item } } : any) {
+export function EnforcementPoint (params : any) {
+    const { listKey, fieldKey, gqlName, operation, itemId, itemIds, originalInput, authentication: { item }, context } = params
 
-    logger.debug("*** ACCESS *** (" +  gqlName + ") L=" + listKey + " F=" + fieldKey + " [" + (itemId == null ? "":itemId) + "] " + operation + " by " + (item == null ? "ANON":item.username))
+    logger.debug("*** ACCESS *** (" +  gqlName + "):(" + context.baseQueryName + ") L=" + listKey + " F=" + fieldKey + " [" + (itemId == null ? "":itemId) + ", " + itemIds + "] " + operation + " by " + (item == null ? "ANON":item.username))
     try {
         if (fs.statSync(rules.rulePath).mtimeMs != rules.ts) {
             refreshRules()
@@ -94,6 +96,7 @@ export function EnforcementPoint ({ listKey, fieldKey, gqlName, operation, itemI
             listKey: listKey,
             fieldKey: fieldKey,
             gqlName: gqlName,
+            baseQueryName: context.baseQueryName,
             item: {},
             user: {
                 tid: item == null ? null : item.id, 
@@ -189,7 +192,7 @@ function refreshRules() {
     fs.createReadStream(rules.rulePath)
     .pipe(csv())
     .on('data', (data) => {
-        ['matchOneOfOperation', 'matchOneOfRole', 'matchOneOfFieldKey', 'matchNotOneOfFieldKey', 'filters'].map((f: string) => {
+        ['matchOneOfBaseQueryName', 'matchOneOfOperation', 'matchOneOfRole', 'matchOneOfFieldKey', 'matchNotOneOfFieldKey', 'filters'].map((f: string) => {
             data[f] = convertToArray(data[f])
         })
         results.push(data)

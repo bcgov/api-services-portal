@@ -11,6 +11,7 @@ class ApiProxyApp {
 
   prepareMiddleware({ keystone }) {
     const app = express();
+    
     const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
         changeOrigin: true,
@@ -34,11 +35,19 @@ class ApiProxyApp {
 
     async function call (user, q, vars = {}) {
         return await keystone.executeGraphQL({
-            context: keystone.createContext({authentication : { item : user }}),
+            context: keystone.createContext({authentication : { item : user }, skipAccessControl: true}),
             query: q,
             variables: vars
         })
     }
+
+    app.use(express.json());
+    app.post('/graphql/api', async (req, res) => {
+        const result = await call(req.user, req.body.query, 'variables' in req.body ? req.body.variables : {})
+        res.json(result)
+    })
+
+    
     return app;
   }
 }

@@ -1,10 +1,10 @@
-import { checkStatus } from './checkStatus'
+import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../logger'
+import { logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from './keycloakApi'
 
-import { clientTemplate } from './keycloak/client-template'
+import { clientTemplate } from './templates/client-template'
 
 import { default as KcAdminClient } from 'keycloak-admin'
 
@@ -28,7 +28,7 @@ export class KeycloakUserService {
         }
     }    
 
-    public async login (clientId: string, clientSecret: string) {
+    public async login (clientId: string, clientSecret: string) : Promise<KeycloakUserService> {
         await this.kcAdminClient.auth({
             grantType: 'client_credentials',
             clientId: clientId,
@@ -37,5 +37,6 @@ export class KeycloakUserService {
             console.log("Login failed " + err)
             throw(err)
         })
+        return this
     }
 }

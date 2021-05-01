@@ -62,9 +62,7 @@ const query = gql`
         name
         active
         flow
-        services {
-          name
-        }
+        
       }
       dataset {
         name

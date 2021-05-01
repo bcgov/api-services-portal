@@ -132,13 +132,7 @@ const query = gql`
       users
       scopes
     }
-
-    CredentialIssuerSummary(where: { id: $credIssuerId }) {
-      clientId
-      resourceType
-      availableScopes
-    }
-
+    
     getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
       id
       name

@@ -1,10 +1,6 @@
-import { checkStatus } from './checkStatus'
+import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../logger'
-import querystring from 'querystring'
-import { headers } from './keycloakApi'
-
-import { clientTemplate } from './keycloak/client-template'
+import { logger } from '../../logger'
 
 export interface ClientRegResponse {
     id: string,

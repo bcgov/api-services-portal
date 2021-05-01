@@ -7,7 +7,7 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { v4: uuidv4 } = require('uuid');
 
-const { DeleteAccess } = require('../servicests/workflow')
+const { DeleteAccess } = require('../services/workflow')
 
 const { DefaultOwnerValue } = require('../components/DefaultOwnerValue');
 const e = require('express');

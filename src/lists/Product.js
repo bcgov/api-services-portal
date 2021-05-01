@@ -29,7 +29,7 @@ module.exports = {
       isRequired: false,
     },
     dataset: { type: Relationship, ref: 'Dataset' },
-    organization: { type: Relationship, ref: 'Organization' },
+    organization: { type: Relationship, ref: 'Organization', many: false },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     environments: { type: Relationship, ref: 'Environment.product', many: true },
   },

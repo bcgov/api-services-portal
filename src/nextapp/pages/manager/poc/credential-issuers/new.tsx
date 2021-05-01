@@ -109,6 +109,7 @@ const CreateIssuer = () => {
             console.log(pair[0]+ ', '+ pair[1]);
       }
       var object = {};
+      object['namespace'] = user.namespace
       data.forEach((value, key) => object[key] = value);
       console.log(JSON.stringify(object, null, 5))
       fulfill(object)

@@ -1,6 +1,6 @@
 const { addKongConsumer } = require('../../services/keystone')
 
-const { KongConsumerService } = require('../kongConsumerService')
+import { KongConsumerService } from '../kong'
 
 /**
  * Steps:

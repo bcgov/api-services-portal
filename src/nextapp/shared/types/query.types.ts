@@ -890,7 +890,6 @@ export type ApplicationUpdateInput = {
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
-  owner?: Maybe<UserRelateToOneInput>;
 };
 
 export type ApplicationsUpdateInput = {
@@ -1683,7 +1682,6 @@ export type CredentialIssuerUpdateInput = {
   availableScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
-  owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -2326,7 +2324,6 @@ export enum SortEnvironmentsBy {
 }
 
 export type EnvironmentUpdateInput = {
-  appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   active?: Maybe<Scalars['Boolean']>;
   approval?: Maybe<Scalars['Boolean']>;
@@ -5653,6 +5650,11 @@ export type ApplicationSummary = {
   __typename?: 'ApplicationSummary';
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+};
+
+export type JsonResponse = {
+  __typename?: 'JsonResponse';
+  json?: Maybe<Scalars['JSON']>;
 };
 
 export type ServiceAccount = {

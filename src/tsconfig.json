@@ -10,7 +10,7 @@
         "baseUrl": ".",
         "paths": {
             "@/logger": ["logger"],
-            "@/services/*": ["servicests/*"],
+            "@/services/*": ["services/*"],
         },
     },
     "include": [

@@ -7,7 +7,7 @@ const { atTracking } = require('@keystonejs/list-plugins')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
-const { Apply, Validate } = require('../servicests/workflow')
+const { Apply, Validate } = require('../services/workflow')
 
 module.exports = {
   fields: {

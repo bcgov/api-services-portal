@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node'
 
 import YAML from 'yaml'
 
-import { UMAPolicyService, Policy } from '../../servicests/uma2PolicyService'
+import { UMAPolicyService, Policy } from '../../services/uma2'
 
 describe("Tasked", function() {
 

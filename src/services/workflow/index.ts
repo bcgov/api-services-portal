@@ -45,20 +45,17 @@ const {
   addKongConsumer,
   addServiceAccess,
   linkServiceAccessToRequest,
-} = require('../../services/keystone');
+} = require('../keystone');
 
 import { registerClient } from './client-credentials'
 import { registerApiKey } from './kong-api-key'
 
 import {v4 as uuidv4} from 'uuid'
 
-import { getOpenidFromDiscovery } from '../keycloakApi'
+import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery } from '../keycloak'
 
-import { KeycloakTokenService } from '../keycloakTokenService'
-import { KeycloakClientService } from '../keycloakClientService'
-
-import { KongConsumerService } from '../kongConsumerService'
-import { FeederService } from '../feederService'
+import { KongConsumerService } from '../kong'
+import { FeederService } from '../feeder'
 
 import { NewCredential } from './types'
 

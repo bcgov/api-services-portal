@@ -1,10 +1,6 @@
-import { checkStatus } from './checkStatus'
+import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../logger'
-import querystring from 'querystring'
-import { headers } from './keycloakApi'
-
-import { clientTemplate } from './keycloak/client-template'
+import { logger } from '../../logger'
 
 export interface Token {
     access_token: string,
@@ -38,7 +34,8 @@ export class KeycloakTokenService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        logger.debug("[getKeycloakSession] RESULT = %s", JSON.stringify(response, null, 3));
+        const masked = {access_token:null, refresh_token:null, ...response}
+        logger.debug("[getKeycloakSession] RESULT = %j", masked);
         return response['access_token']
     }
 

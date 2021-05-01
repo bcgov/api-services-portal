@@ -3,10 +3,9 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-import { UMAResourceRegistrationService, ResourceSetQuery } from '../../servicests/uma2ResourceRegistrationService'
+import { UMAResourceRegistrationService, ResourceSetQuery } from '../../services/uma2'
 
-import { getOpenidFromDiscovery } from '../../servicests/keycloakApi'
-import { KeycloakTokenService } from '../../servicests/keycloakTokenService'
+import { KeycloakTokenService, getOpenidFromDiscovery } from '../../services/keycloak'
 
 const keystoneApi = require('../../services/keystone')
 
