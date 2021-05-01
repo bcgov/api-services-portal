@@ -12,9 +12,6 @@
      "34ee04d6606f3146f6ae3efbde3fa8a3": {
           "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n"
      },
-     "b3ac613649f34f9ed58e458d8c4e0be8": {
-          "query": "\n  query {\n    myApplications {\n      id\n      appId\n      name\n      owner {\n        name\n      }\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n"
-     },
      "869946a26aaff1ff57516f887d259257": {
           "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(\n      data: {\n        name: $name\n        description: $description\n      }\n    ) {\n      id\n    }\n  }\n"
      },
@@ -167,5 +164,32 @@
      },
      "8d9178bbb517008260143d6d1ad3e48e": {
           "query": "\n  mutation GrantUserAccess(\n    $credIssuerId: ID!\n    $data: UMAPermissionTicketInput!\n  ) {\n    grantPermissions(credIssuerId: $credIssuerId, data: $data) {\n      id\n    }\n  }\n"
+     },
+     "f7010c1f5b042f81a053149d6edb7a97": {
+          "query": "{\n  allDiscoverableProducts(where: {environments_some: {active: true}}) {\n    name\n    environments(where: {active: true}) {\n      name\n    }\n    organization {\n      title\n    }\n  }\n  myApplications {\n    id\n    name\n  }\n}\n"
+     },
+     "0f881afe8034802d5fc2a7fdf8ee53b3": {
+          "query": "{\n  allDiscoverableProducts(where: {environments_some: {active: true}}) {\n    name\n    environments(where: {active: true}) {\n      name\n    }\n    organization {\n      title\n      name\n    }\n  }\n  myApplications {\n    id\n    name\n  }\n}\n",
+          "added": "2021-05-01T17:44:10.807Z"
+     },
+     "b3ac613649f34f9ed58e458d8c4e0be8": {
+          "query": "\n  query {\n    myApplications {\n      id\n      appId\n      name\n      owner {\n        name\n      }\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-01T17:51:07.471Z"
+     },
+     "5561d1afeb4febb005966d7efc725737": {
+          "query": "\n  mutation Update($id: ID!, $active: Boolean) {\n    updateEnvironment(id: $id, data: { active: $active }) {\n      name\n      id\n      active\n    }\n  }\n",
+          "added": "2021-05-01T17:56:15.429Z"
+     },
+     "e387e4dfe77a0d5207a7364b6ec1f3b8": {
+          "query": "\n    mutation FulfillRequest($id: ID!, $controls: String!) {\n        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }) {\n            id\n        }\n    }\n",
+          "added": "2021-05-01T17:58:35.147Z"
+     },
+     "fc522a4bb2d6f449ad51225bdd4356a3": {
+          "query": "\n    query GetAccessRequests {\n        allAccessRequests(sortBy: [createdAt_DESC]) {\n          id\n          name\n          isApproved\n          isIssued\n          isComplete\n          createdAt\n          requestor {\n            name\n            username\n            email\n          }\n          application {\n              name\n          }\n          serviceAccess {\n              id\n          }\n          productEnvironment {\n              name\n              flow\n              credentialIssuer {\n                  name\n                  flow\n                  mode\n              }\n              product {\n                name\n                organization {\n                    name\n                    title\n                }\n                organizationUnit {\n                    name\n                    title\n                }\n              }\n              services {\n                  name\n                  host\n              }\n          }\n        }\n    }\n",
+          "added": "2021-05-01T17:58:43.603Z"
+     },
+     "270ce32ff612cd6b50909442791afc2c": {
+          "query": "\n  mutation Approve($id: ID!) {\n    updateAccessRequest(\n      id: $id\n      data: { isApproved: false, isComplete: true }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-01T17:59:33.903Z"
      }
 }

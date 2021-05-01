@@ -53,7 +53,7 @@ API Owner Role Rules,,,ServiceAccess,create,,,,,api-owner,,allow,
 API Owner Role Rules,,,ServiceAccess,,"update,delete",,,,api-owner,,allow,
 API Owner Role Rules,,,ServiceAccess,read,,,,,api-owner,,allow,filterByNamespaceOrAppOwner
 API Owner Role Rules,,,TemporaryIdentity,read,,,,,api-owner,,allow,filterByTemporaryIdentity
-API Owner Role Rules,,,User,read,,,,,api-owner,,allow,filterBySelf
+API Owner Role Rules,,,User,read,,,,,api-owner,,allow,
 API Owner Role Rules,,getGatewayConsumerPlugins,,,,,,,api-owner,,allow,
 API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,allow,
 API Owner Role Rules,,getPermissionTickets,,,,,,,api-owner,,allow,

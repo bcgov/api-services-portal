@@ -4,6 +4,8 @@ const { GraphQLPlaygroundApp } = require('@keystonejs/app-graphql-playground');
 
 const { GraphQLApp, validation } = require('@keystonejs/app-graphql');
 
+const { parse, print } = require("graphql/language")
+
 const {
   checkWhitelist,
   loadWhitelistAndWatch,
@@ -47,6 +49,12 @@ class ApiGraphqlWhitelistApp {
     }
 
     app.use(this._apiPath, (req, res, next) => {
+       try {
+        const p = parse(req.body.query)
+        //console.log(print(p))
+      } catch (err) {
+        console.log("ERR parsing query " + err)
+      }
       if (checkWhitelist(req.body.query)) {
         next();
       } else if (process.env.NODE_ENV === 'production') {
