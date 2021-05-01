@@ -60,7 +60,7 @@ class ApiGraphqlWhitelistApp {
       } else if (process.env.NODE_ENV === 'production') {
         res.status(403).json({ error: 'invalid_query' });
       } else {
-        addToWhitelist(req.body.operation, req.body.query);
+        addToWhitelist(req.headers['referer'], req.body.operation, req.body.query);
         next();
       }
     });

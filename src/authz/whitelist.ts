@@ -15,9 +15,9 @@ function refreshWhitelist() {
     whitelist.list = JSON.parse(rawdata.toString());    
 }
 
-export function addToWhitelist (operation: string, query: string) {
+export function addToWhitelist (referer: string, operation: string, query: string) {
     var hash = crypto.createHash('md5').update(query).digest('hex');
-    whitelist.list[hash] = { operation: operation, query: query, added: new Date().toISOString() }
+    whitelist.list[hash] = { referer, operation, query, added: new Date().toISOString() }
     logger.info("ADD : [%s] %j", hash, query)
     fs.writeFileSync(whitelistPath, JSON.stringify(whitelist.list, null, 5))
 }

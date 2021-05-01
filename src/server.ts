@@ -229,7 +229,7 @@ const apps = [
       },
     }),
     new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
-    new NextApp({ dir: 'nextapp' }),
+    //new NextApp({ dir: 'nextapp' }),
 ]
 
 const dev = process.env.NODE_ENV !== 'production'
