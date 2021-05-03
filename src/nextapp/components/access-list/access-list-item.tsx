@@ -72,16 +72,18 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Heading size="md">{product.name}</Heading>
         </Flex>
         <Spacer />
-        <NextLink href={`/devportal/access/${product.id}`}>
-          <Button
-            size="sm"
-            variant="primary"
-            display="flex"
-            rightIcon={<Icon as={FaChevronRight} />}
-          >
-            Manage Resources
-          </Button>
-        </NextLink>
+        {data.filter(e => e.productEnvironment.credentialIssuer?.resourceType).length > 0 && (
+            <NextLink href={`/devportal/access/${product.id}`}>
+            <Button
+                size="sm"
+                variant="primary"
+                display="flex"
+                rightIcon={<Icon as={FaChevronRight} />}
+            >
+                Manage Resources
+            </Button>
+            </NextLink>
+        )}
       </Flex>
       <Divider />
       {data.map((d, index, arr) => (

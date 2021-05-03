@@ -112,7 +112,7 @@ const ApplicationsPage: React.FC<
         <title>API Program Services | Service Accounts</title>
       </Head>
       <Container maxW="6xl">
-        
+
         <PageHeader
           breadcrumb={breadcrumbs()}
           actions={actions}
@@ -148,7 +148,7 @@ const ApplicationsPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-            {data.allServiceAccesses?.length === 0 && (
+            {data.allNamespaceServiceAccounts?.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -168,7 +168,7 @@ const ApplicationsPage: React.FC<
                 </Tr>
               )}  
               
-              {data.allServiceAccesses?.map((d) => (
+              {data.allNamespaceServiceAccounts?.map((d) => (
                 <Tr key={d.id}>
                   <Td>{d.name}</Td>
                   <Td>{d.createdAt}</Td>
@@ -189,7 +189,7 @@ export default ApplicationsPage;
 
 const query = gql`
   query GET {
-    allServiceAccesses(orderBy: "createdAt_DESC", where: { consumerType: client, namespace_not: null, application_is_null: true }) {
+    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {
       id
       name
       createdAt

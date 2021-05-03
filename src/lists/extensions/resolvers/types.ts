@@ -6,7 +6,6 @@ export interface AliasConfig {
     gqlName: string,
     list: string,
     type: SchemaType
-    filter: Function
 }
 
 export interface AliasType {

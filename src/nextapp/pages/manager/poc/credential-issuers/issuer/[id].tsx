@@ -61,7 +61,7 @@ const UpdateIssuer = () => {
     if (context['router'] != null && id) {
       graphql(GET_ISSUER, { id: id })
         .then(({ data }) => {
-          toArray(data.allCredentialIssuers[0], [
+          toArray(data.CredentialIssuer, [
             'availableScopes',
             'clientRoles',
           ]);
@@ -74,7 +74,7 @@ const UpdateIssuer = () => {
   };
   useEffect(fetch, [context]);
 
-  const issuer = data ? data.allCredentialIssuers[0] : null;
+  const issuer = data ? data.CredentialIssuer : null;
 
   const products =
     issuer == null

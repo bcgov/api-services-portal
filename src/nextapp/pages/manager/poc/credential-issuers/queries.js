@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GetCredentialIssuers {
-        allCredentialIssuers(orderBy: "name_ASC") {
+        allCredentialIssuersByNamespace {
           id
           name
           flow
@@ -21,7 +21,7 @@ export const GET_LIST = `
 
 export const GET_ISSUER = `
     query GetCredentialIssuer($id: ID!) {
-        allCredentialIssuers(where: { id: $id }) {
+        CredentialIssuer(where: { id: $id }) {
             id
             name
             flow

@@ -14,16 +14,15 @@ import { GET_LIST } from './queries';
 import EditProduct from './edit-product';
 
 const ProductsList: React.FC = () => {
-  const { user } = useAuth();
   const { data } = useQuery<Query>(
     'products',
-    async () => await api(GET_LIST, { namespace: user.namespace } ),
+    async () => await api(GET_LIST, { } ),
     {
       suspense: true,
     }
   );
 
-  if (data.allProducts.length === 0) {
+  if (data.allProductsByNamespace.length === 0) {
     return (
       <EmptyPane
         title="Make your first Product"
@@ -35,7 +34,7 @@ const ProductsList: React.FC = () => {
 
   return (
     <Box width="100%">
-      {data.allProducts.map((d) => (
+      {data.allProductsByNamespace.map((d) => (
         <Box key={d.id} mb={8} className="product-item">
           <Box
             as="header"
@@ -65,7 +64,7 @@ const ProductsList: React.FC = () => {
               <Box>
                 <ButtonGroup
                   size="sm"
-                  opacity={data.allProducts.length > 1 ? 0 : 1}
+                  opacity={data.allProductsByNamespace.length > 1 ? 0 : 1}
                   transition="opacity ease-in 0.2s"
                   position="relative"
                   sx={{

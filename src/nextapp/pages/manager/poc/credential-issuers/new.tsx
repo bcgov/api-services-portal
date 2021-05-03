@@ -209,7 +209,7 @@ const CreateIssuer = () => {
                 alignItems="center"
                 justifyContent="space-between"
                 >
-                    <Heading size="md">Resource Owner</Heading>
+                    <Heading size="md">Access Administrator</Heading>
                 </Box>
                 <Divider />
                 <Box p={4}>

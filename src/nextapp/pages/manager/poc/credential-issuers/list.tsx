@@ -32,7 +32,7 @@ function List({ data, state, refetch }) {
                 </Tr>
             </Thead>
             <Tbody>
-            {data.allCredentialIssuers.map((item, index) => (
+            {data.allCredentialIssuersByNamespace.map((item, index) => (
               <Item issuer={item} refetch={refetch} key={index} />
             ))}
             </Tbody>

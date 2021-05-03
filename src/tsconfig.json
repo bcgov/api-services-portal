@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "esModuleInterop": true,
         "target": "es6",
         "noImplicitAny": true,
@@ -9,16 +11,23 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
-            "@/logger": ["logger"],
-            "@/services/*": ["services/*"],
+            "@/logger": [
+                "logger"
+            ],
+            "@/services/*": [
+                "services/*"
+            ],
+            "@/controllers/*": [
+                "controllers/*"
+            ],
         },
     },
     "include": [
         "**/*.ts"
     ],
-  "exclude": [
-    "node_modules",
-    "nextapp",
-    "dist"
-  ]
+    "exclude": [
+        "node_modules",
+        "nextapp",
+        "dist"
+    ],
 }

@@ -5652,11 +5652,6 @@ export type ApplicationSummary = {
   name?: Maybe<Scalars['String']>;
 };
 
-export type JsonResponse = {
-  __typename?: 'JsonResponse';
-  json?: Maybe<Scalars['JSON']>;
-};
-
 export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
@@ -5931,6 +5926,12 @@ export type Query = {
   allApplicationNames?: Maybe<Array<Maybe<ApplicationSummary>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
+  allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
+  allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
+  allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
+  allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
+  allCredentialIssuersByNamespace?: Maybe<Array<Maybe<CredentialIssuer>>>;
+  allNamespaceServiceAccounts?: Maybe<Array<Maybe<ServiceAccess>>>;
   DiscoverableProduct?: Maybe<Product>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
@@ -6506,7 +6507,58 @@ export type QueryGetGatewayConsumerPluginsArgs = {
 
 
 export type QueryAllDiscoverableProductsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryAllGatewayServicesByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<GatewayServiceWhereInput>;
+};
+
+
+export type QueryAllProductsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryAllAccessRequestsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<AccessRequestWhereInput>;
+};
+
+
+export type QueryAllServiceAccessesByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryAllCredentialIssuersByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<CredentialIssuerWhereInput>;
+};
+
+
+export type QueryAllNamespaceServiceAccountsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<ServiceAccessWhereInput>;
 };
 
 
@@ -6516,11 +6568,17 @@ export type QueryDiscoverableProductArgs = {
 
 
 export type QueryMyServiceAccessesArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ServiceAccessWhereInput>;
 };
 
 
 export type QueryMyApplicationsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ApplicationWhereInput>;
 };
 
@@ -6531,6 +6589,9 @@ export type QueryCredentialIssuerSummaryArgs = {
 
 
 export type QueryAllDiscoverableContentsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ContentWhereInput>;
 };
 

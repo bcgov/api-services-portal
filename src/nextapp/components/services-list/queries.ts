@@ -2,7 +2,7 @@ import { gql } from 'graphql-request';
 
 export const GET_LIST = gql`
   query GetServices {
-    allGatewayServices(first:200) {
+    allGatewayServicesByNamespace(first:200) {
         id
         name
         environment {

@@ -191,5 +191,85 @@
      "270ce32ff612cd6b50909442791afc2c": {
           "query": "\n  mutation Approve($id: ID!) {\n    updateAccessRequest(\n      id: $id\n      data: { isApproved: false, isComplete: true }\n    ) {\n      id\n    }\n  }\n",
           "added": "2021-05-01T17:59:33.903Z"
+     },
+     "da4627820b7d026bff6c2e0ad74d6993": {
+          "referer": "http://localhost:4180/devportal/access",
+          "query": "\n  mutation CancelAccess($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
+          "added": "2021-05-03T03:51:18.805Z"
+     },
+     "57ccbeb6ab6385f4d9157ec71d0af66b": {
+          "referer": "http://localhost:4180/manager/services",
+          "query": "\n  query GetServices {\n    allGatewayServicesByNamespace(first: 200) {\n      id\n      name\n      updatedAt\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      routes {\n        id\n        name\n      }\n      plugins {\n        id\n        name\n      }\n    }\n  }\n",
+          "added": "2021-05-03T04:06:59.242Z"
+     },
+     "1b4e9f470ad0cbd09765e61f3a3191f3": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200, sortBy: updatedAt_DESC) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-03T04:15:00.918Z"
+     },
+     "627ab65d15887b4073ae0a42af759ee5": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET($namespace: String!) {\n    allProductsByNamespace(where: { namespace: $namespace }) {\n      id\n      name\n      description\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-03T04:22:20.770Z"
+     },
+     "ca3396cb109a027586f8a88fcafab178": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-03T04:24:57.504Z"
+     },
+     "ef9b39b6026c6e986bbbde767554b33e": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-03T04:40:49.957Z"
+     },
+     "762f7f4b9177e5529396855275a8b882": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetPendingAccessRequests {\n    allAccessRequestsByNamespace(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n      }\n    }\n  }\n",
+          "added": "2021-05-03T04:40:56.037Z"
+     },
+     "2cbccd27ed2332806aecc26ceef80130": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {\n    allServiceAccessesByNamespace(orderBy: \"createdAt_DESC\", where: { consumerType: client, namespace_not: null, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-03T04:56:47.774Z"
+     },
+     "5d18a6f55463ea75b85fe2be5bc4716e": {
+          "referer": "http://localhost:4180/manager/poc/namespaces",
+          "query": "\n  query GET {\n    allServiceAccessesByNamespace(where: { consumerType: client, namespace_not: null, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-03T04:57:01.498Z"
+     },
+     "bcc7104dcd32b65018369a958321227f": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {\n    allServiceAccessesByNamespace(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-03T04:57:58.781Z"
+     },
+     "0f0729e54266db6ca0bf4faab9b669cf": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-03T05:01:05.655Z"
+     },
+     "66c93863f727adee6fe73f330e337456": {
+          "referer": "http://localhost:4180/manager/poc/activity",
+          "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n          }\n        }\n    }\n",
+          "added": "2021-05-03T05:02:23.332Z"
+     },
+     "ce126df31b7c93cde098d4a414f5e867": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers",
+          "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace(orderBy: \"name_ASC\") {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+          "added": "2021-05-03T05:22:03.167Z"
+     },
+     "fa743ec5f90e1b2c1897efdf67f7c8a1": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers",
+          "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace(first:20) {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+          "added": "2021-05-03T05:22:43.164Z"
+     },
+     "c039b050c3d605fbb834577d1092c90e": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers",
+          "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+          "added": "2021-05-03T05:24:17.055Z"
+     },
+     "fbe730b4789ce693f47d4e2ff3a56bef": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/issuer/608f892d7aa28b3ee36d727c",
+          "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientRegistration\n            oidcDiscoveryUrl\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceType\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+          "added": "2021-05-03T05:27:43.598Z"
      }
 }

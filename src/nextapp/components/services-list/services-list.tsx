@@ -32,7 +32,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
 
   return (
     <>
-      {data.allGatewayServices.length <= 0 && (
+      {data.allGatewayServicesByNamespace.length <= 0 && (
         <Box gridColumnStart="1" gridColumnEnd="4">
           <EmptyPane
             title="No services created yet."
@@ -41,7 +41,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
           />
         </Box>
       )}
-      {data.allGatewayServices.filter(filterServices).map((d) => (
+      {data.allGatewayServicesByNamespace.filter(filterServices).map((d) => (
         <ServiceItem key={d.id} data={d} range={range} />
       ))}
     </>

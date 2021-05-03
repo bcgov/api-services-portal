@@ -16,6 +16,7 @@ const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
+const { ApiOpenapiApp } = require('./api-openapi');
 
 var Keycloak = require("keycloak-connect");
 
@@ -211,6 +212,7 @@ const { checkWhitelist, loadWhitelistAndWatch, addToWhitelist } = require('./aut
 
 const apps = [
     //new ApiHealthApp(state),
+    new ApiOpenapiApp(),
     new ApiGraphqlWhitelistApp({
         apiPath
     }),
@@ -254,7 +256,8 @@ const configureExpress = (app:any) => {
         const tasked = new Retry(process.env.WORKING_PATH, req.params['id'])
         await tasked.start()
         res.status(200).json({result: 'ok'})
-    })    
+    })   
+    
 }
 
 export { keystone, apps, dev, configureExpress }
