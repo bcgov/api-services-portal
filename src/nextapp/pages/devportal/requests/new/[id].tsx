@@ -201,8 +201,8 @@ const NewRequestsPage: React.FC<
                 }))}
             />
           </FieldsetBox>
-          <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != null ? true:false} title="Additional Information & Terms">
-            {dataset.environments[0]?.additionalDetailsToRequest != null && (
+          <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != "" ? true:false} title="Additional Information & Terms">
+            {dataset.environments[0]?.additionalDetailsToRequest != "" && (
                 <Box p={4}>
                     <pre>{dataset.environments[0]?.additionalDetailsToRequest}</pre>
                 </Box>

@@ -181,8 +181,8 @@ const keystone = new Keystone({
           config: {
             onAuthenticated: ({ token, item, isNewItem }:any, req:any, res:any) => {
               console.log('Token = ' + token);
-              console.log('Redirecting to /home');
-              res.redirect(302, '/home');
+              console.log('Redirecting to /');
+              res.redirect(302, '/');
             },
           },
           hooks: {

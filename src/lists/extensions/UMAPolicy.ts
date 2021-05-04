@@ -2,9 +2,8 @@ const { EnforcementPoint } = require('../../authz/enforcement')
 
 import { UMAPolicyService, Policy, PolicyQuery } from '../../services/uma2'
 
-import { KeycloakTokenService, getOpenidFromDiscovery } from '../../services/keycloak'
-
-const keystoneApi = require('../../services/keystone')
+import { doTokenExchangeForCredentialIssuer } from './Common'
+import type { TokenExchangeResult } from './Common'
 
 const typeUMAPolicy = `
 type UMAPolicy {
@@ -41,20 +40,13 @@ module.exports = {
             ],            
             queries: [
                 {
-                    schema: 'getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]',
+                    schema: 'getUmaPolicies(prodEnvId: ID!, resourceId: String): [UMAPolicy]',
                     resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                        const noauthContext =  keystone.createContext({ skipAccessControl: true })
-    
-                        const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                        const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-
                         const subjectToken = context.req.headers['x-forwarded-access-token']
-                        const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-    
-//                        const accessToken = await getKeycloakSession (openid.issuer, issuer.clientId, issuer.clientSecret)
-                        const kcprotectApi = new UMAPolicyService (openid.issuer, accessToken)
+                        const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                        
+                        const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
                     
-
                         return await kcprotectApi.listPolicies ({resource: args.resourceId} as PolicyQuery)
                     },
                     access: EnforcementPoint,
@@ -63,36 +55,24 @@ module.exports = {
             mutations: [
             
               {
-                schema: 'createUmaPolicy(credIssuerId: ID!, resourceId: String, data: UMAPolicyInput!): UMAPolicy',
+                schema: 'createUmaPolicy(prodEnvId: ID!, resourceId: String, data: UMAPolicyInput!): UMAPolicy',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
-
                     const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-                    // const accessToken = await getKeycloakSession (openid.issuer, issuer.clientId, issuer.clientSecret)
-                    const kcprotectApi = new UMAPolicyService (openid.issuer, accessToken)
+                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+
+                    const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
                 
                     return await kcprotectApi.createUmaPolicy (args.resourceId, args.data as Policy)
                 },
                 access: EnforcementPoint,
               },   
               {
-                schema: 'deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean',
+                schema: 'deleteUmaPolicy(prodEnvId: ID!, policyId: String!): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
-
                     const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-                    // const accessToken = await getKeycloakSession (openid.issuer, issuer.clientId, issuer.clientSecret)
-                    const kcprotectApi = new UMAPolicyService (openid.issuer, accessToken)
+                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+
+                    const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
                 
                     await kcprotectApi.deleteUmaPolicy (args.policyId)
                     return true

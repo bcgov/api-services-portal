@@ -205,7 +205,6 @@ const IssuerPage = () => {
           title={<Box as="span">{issuer?.name}</Box>}
         />
         <form ref={form} onSubmit={onSubmit}>
-        <pre>{JSON.stringify(data, null, 4)}</pre>
         <Box
             display="grid"
             gridGap={4}

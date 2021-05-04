@@ -17,21 +17,21 @@ import { useApi } from '@/shared/services/api';
 import NextLink from 'next/link';
 
 interface ResourcesProps {
-  credIssuerId: string;
+  prodEnvId: string;
   owner: string;
   resourceType: string;
 }
 
 const ResourcesComponent: React.FC<ResourcesProps> = ({
-  credIssuerId,
+  prodEnvId,
   owner,
   resourceType,
 }) => {
   const { data } = useApi(
-    ['allProductEnvironments', credIssuerId, owner, resourceType],
+    ['allProductEnvironments', prodEnvId, owner, resourceType],
     {
       query,
-      variables: { credIssuerId, owner, resourceType },
+      variables: { prodEnvId, owner, resourceType },
     }
   );
 
@@ -52,7 +52,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({
               <Td width="50%">
                 <NextLink
                   passHref
-                  href={`/devportal/resources/${r.id}?issuer=${credIssuerId}`}
+                  href={`/devportal/resources/${r.id}?peid=${prodEnvId}`}
                 >
                   <Link color="bc-link">{r.name}</Link>
                 </NextLink>
@@ -84,12 +84,12 @@ export default ResourcesComponent;
 
 const query = gql`
   query GetResources(
-    $credIssuerId: ID!
+    $prodEnvId: ID!
     $owner: String
     $resourceType: String
   ) {
     getResourceSet(
-      credIssuerId: $credIssuerId
+      prodEnvId: $prodEnvId
       owner: $owner
       type: $resourceType
     ) {
@@ -98,7 +98,7 @@ const query = gql`
       type
     }
 
-    getPermissionTickets(credIssuerId: $credIssuerId) {
+    getPermissionTickets(prodEnvId: $prodEnvId) {
       id
       owner
       ownerName

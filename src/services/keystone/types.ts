@@ -6643,13 +6643,13 @@ export type QueryAllDiscoverableContentsArgs = {
 
 
 export type QueryGetUmaPoliciesArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
 };
 
 
 export type QueryGetResourceSetArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   owner?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
   resourceId?: Maybe<Scalars['String']>;
@@ -6657,7 +6657,7 @@ export type QueryGetResourceSetArgs = {
 
 
 export type QueryGetPermissionTicketsArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
 };
 
@@ -7645,32 +7645,32 @@ export type MutationDeleteGatewayConsumerPluginArgs = {
 
 
 export type MutationCreateUmaPolicyArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   resourceId?: Maybe<Scalars['String']>;
   data: UmaPolicyInput;
 };
 
 
 export type MutationDeleteUmaPolicyArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   policyId: Scalars['String'];
 };
 
 
 export type MutationGrantPermissionsArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   data: UmaPermissionTicketInput;
 };
 
 
 export type MutationRevokePermissionsArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   ids: Array<Maybe<Scalars['String']>>;
 };
 
 
 export type MutationApprovePermissionsArgs = {
-  credIssuerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
   resourceId: Scalars['String'];
   requesterId: Scalars['String'];
   scopes: Array<Maybe<Scalars['String']>>;

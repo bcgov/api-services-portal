@@ -6,14 +6,14 @@ import { FaUserPlus } from 'react-icons/fa';
 import { QueryKey } from 'react-query';
 
 interface ResourcesManagerProps {
-  credIssuerId: string;
+  prodEnvId: string;
   data: UmaPermissionTicket[];
   queryKey: QueryKey;
   resourceId: string;
 }
 
 const ResourcesManager: React.FC<ResourcesManagerProps> = ({
-  credIssuerId,
+  prodEnvId,
   data,
   queryKey,
   resourceId,
@@ -31,7 +31,7 @@ const ResourcesManager: React.FC<ResourcesManagerProps> = ({
         Access Requests
       </Button>
       <ResourcesManagerDialog
-        credIssuerId={credIssuerId}
+        prodEnvId={prodEnvId}
         data={data}
         open={isOpen}
         onClose={onClose}

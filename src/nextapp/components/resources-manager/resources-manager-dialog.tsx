@@ -13,7 +13,7 @@ import { QueryKey } from 'react-query';
 import UsersAccessList from '../users-access-list';
 
 interface ResourcesManagerDialogProps {
-  credIssuerId: string;
+  prodEnvId: string;
   data: UmaPermissionTicket[];
   open: boolean;
   onClose: () => void;
@@ -22,7 +22,7 @@ interface ResourcesManagerDialogProps {
 }
 
 const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
-  credIssuerId,
+  prodEnvId,
   data,
   open,
   onClose,
@@ -36,7 +36,7 @@ const ResourcesManagerDialog: React.FC<ResourcesManagerDialogProps> = ({
         <ModalHeader>Resource Sharing Controls</ModalHeader>
         <ModalBody p={0}>
           <UsersAccessList
-            credIssuerId={credIssuerId}
+            prodEnvId={prodEnvId}
             data={data}
             queryKey={queryKey}
             resourceId={resourceId}

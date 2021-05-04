@@ -38,11 +38,11 @@ const ResourcesPage = () => {
     const { user } = useAuth();
     const context = useAppContext()
     if (context['router'] == null) { return false }
-    const { router: { pathname, query: { credIssuerId, id } } } = context
+    const { router: { pathname, query: { prodEnvId, id } } } = context
 
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     const fetch = () => {
-        graphql(GET_PERMISSIONS, {resourceId: id, credIssuerId: credIssuerId, owner: user?.sub})
+        graphql(GET_PERMISSIONS, {resourceId: id, prodEnvId: prodEnvId, owner: user?.sub})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -80,7 +80,7 @@ const ResourcesPage = () => {
             console.log("Scopes = "+scopes)
             console.log("Granted = "+granted)
 
-            graphql(GRANT_USER_ACCESS, { credIssuerId: credIssuerId, data: { resourceId: id, username: username, granted: granted == "Y", scopes: scopes } })
+            graphql(GRANT_USER_ACCESS, { prodEnvId: prodEnvId, data: { resourceId: id, username: username, granted: granted == "Y", scopes: scopes } })
             .then(fetch)
             .catch (err => {
                 console.log(err)
@@ -98,7 +98,7 @@ const ResourcesPage = () => {
             console.log("Scopes = "+scopes)
             console.log("Granted = "+granted)
 
-            graphql(CREATE_UMA_POLICY, { credIssuerId: credIssuerId, resourceId: id, data: { name: `Service Acct ${serviceAccountId}`, description: `Service Acct ${serviceAccountId}`, clients: [ serviceAccountId ], scopes: scopes } })
+            graphql(CREATE_UMA_POLICY, { prodEnvId: prodEnvId, resourceId: id, data: { name: `Service Acct ${serviceAccountId}`, description: `Service Acct ${serviceAccountId}`, clients: [ serviceAccountId ], scopes: scopes } })
             .then(fetch)
             .catch (err => {
                 console.log(err)
@@ -108,7 +108,7 @@ const ResourcesPage = () => {
 
     const grantAccess = async (item) => {
         console.log(JSON.stringify(item))
-        graphql(GRANT_ACCESS, { credIssuerId: credIssuerId, resourceId: item.resource, requesterId: item.requester, scopes: item.scopes.map(s => s.id) })
+        graphql(GRANT_ACCESS, { prodEnvId: prodEnvId, resourceId: item.resource, requesterId: item.requester, scopes: item.scopes.map(s => s.id) })
         .then(fetch)
         .catch (err => {
             console.log(err)
@@ -116,7 +116,7 @@ const ResourcesPage = () => {
     }
 
     const revokeAccess = async (ticketIds) => {
-        graphql(REVOKE_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+        graphql(REVOKE_ACCESS, { prodEnvId: prodEnvId, tickets: ticketIds })
         .then(fetch)
         .catch (err => {
             console.log(err)
@@ -124,7 +124,7 @@ const ResourcesPage = () => {
     }
 
     const revokeSAAccess = async (policyId) => {
-        graphql(DELETE_UMA_POLICY, { credIssuerId: credIssuerId, policyId: policyId })
+        graphql(DELETE_UMA_POLICY, { prodEnvId: prodEnvId, policyId: policyId })
         .then(fetch)
         .catch (err => {
             console.log(err)

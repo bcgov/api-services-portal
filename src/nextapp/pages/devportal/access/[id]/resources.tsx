@@ -33,16 +33,16 @@ import { getSession, useSession, useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
 interface ResourcesProps {
-    credIssuerId: string;
+    prodEnvId: string;
     owner: string;
     resourceType: string;
     environment: string;
 }
 
-const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, resourceType, environment}) => {
+const ResourcesComponent: React.FC<ResourcesProps> = ({prodEnvId, owner, resourceType, environment}) => {
     const { data } = useApi(
         'allProductResources',
-        { query, variables: { credIssuerId, owner, resourceType } },
+        { query, variables: { prodEnvId, owner, resourceType } },
         { suspense: false }
     );
     
@@ -73,7 +73,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, reso
               <Td width="50%">
                 <NextLink
                   passHref
-                  href={`/devportal/resources/${r.id}?issuer=${credIssuerId}`}
+                  href={`/devportal/resources/${r.id}?peid=${prodEnvId}`}
                 >
                   <Link color="bc-link">{r.name}</Link>
                 </NextLink>
@@ -106,14 +106,14 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({credIssuerId, owner, reso
 export default ResourcesComponent;
 
 const query = gql`
-  query GetResources($credIssuerId: ID!, $owner: String, $resourceType: String) {
-    getResourceSet(credIssuerId: $credIssuerId, owner: $owner, type: $resourceType) {
+  query GetResources($prodEnvId: ID!, $owner: String, $resourceType: String) {
+    getResourceSet(prodEnvId: $prodEnvId, owner: $owner, type: $resourceType) {
       id
       name
       type
     }
 
-    getPermissionTickets(credIssuerId: $credIssuerId) {
+    getPermissionTickets(prodEnvId: $prodEnvId) {
       id
       owner
       ownerName

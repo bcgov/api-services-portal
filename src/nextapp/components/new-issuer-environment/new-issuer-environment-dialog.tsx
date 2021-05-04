@@ -53,6 +53,7 @@ const NewIssuerEnvironmentDialog: React.FC<NewIssuerEnvironmentDialog> = ({
         var object : any = {};
         data.forEach((value, key) => object[key] = value);
         onCreate(object)
+        onClose()
     }
   };
 
@@ -175,7 +176,7 @@ const NewIssuerEnvironmentDialog: React.FC<NewIssuerEnvironmentDialog> = ({
           <ButtonGroup>
             <Button onClick={onClose}>Cancel</Button>
             <Button variant="primary" onClick={addEnvironmentConfig}>
-              Create
+              Add
             </Button>
           </ButtonGroup>
         </ModalFooter>

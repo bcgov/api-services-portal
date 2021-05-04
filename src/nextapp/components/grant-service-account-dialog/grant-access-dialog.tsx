@@ -26,6 +26,7 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import { UmaResourceSet } from '@/shared/types/query.types';
 import { useApiMutation } from '@/shared/services/api';
+import id from 'date-fns/esm/locale/id/index.js';
 
 interface ShareResourceDialogProps {
   prodEnvId: string;
@@ -40,19 +41,23 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
 }) => {
   const grant = useApiMutation(mutation);
   const toast = useToast();
-  const title = 'Grant User Access';
+  const title = 'Grant Service Account Access';
   const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const handleGrantAccess = async () => {
     const formData = new FormData(formRef?.current);
     const scopes = formData.getAll('scopes') as string[];
 
+    const serviceAccountId = formData.get('serviceAccountId') as string
+
     await grant.mutateAsync({
       prodEnvId,
+      resourceId,
       data: {
-        username: formData.get('username') as string,
-        resourceId,
-        scopes,
+        name: `Service Acct ${serviceAccountId}`,
+        description: `Service Acct ${serviceAccountId}`,
+        clients: [ serviceAccountId ],
+        scopes: scopes
       },
     });
     toast({
@@ -98,11 +103,11 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
             <form ref={formRef} onSubmit={handleSubmit}>
               <VStack spacing={4} overflow="hidden">
                 <FormControl isRequired>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Service Account</FormLabel>
                   <Input
-                    name="username"
+                    name="serviceAccountId"
                     type="text"
-                    placeholder="Enter username of team member you'd like to add"
+                    placeholder="Enter service account you'd like to add"
                   />
                 </FormControl>
                 <FormControl>
@@ -139,12 +144,12 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
 export default ShareResourceDialog;
 
 const mutation = gql`
-  mutation GrantUserAccess(
-    $prodEnvId: ID!
-    $data: UMAPermissionTicketInput!
-  ) {
-    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
-      id
+  mutation GrantSAAccess(
+      $prodEnvId: ID!, 
+      $resourceId: String!, 
+      $data: UMAPolicyInput!) {
+    createUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {
+        id
     }
   }
 `;

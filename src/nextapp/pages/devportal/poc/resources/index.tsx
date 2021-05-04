@@ -95,7 +95,7 @@ const ResourcesPage = () => {
                         <Heading size="md">{item.productEnvironment.product.name} - {item.productEnvironment.name}</Heading>
                     </Box>
                     <Box p={0}>
-                        <ResourcesList credIssuerId={item.productEnvironment.credentialIssuer.id} resourceType={item.productEnvironment.credentialIssuer.resourceType}/>
+                        <ResourcesList prodEnvId={item.productEnvironment.id} resourceType={item.productEnvironment.credentialIssuer.resourceType}/>
                     </Box>
                 </Box>
 
