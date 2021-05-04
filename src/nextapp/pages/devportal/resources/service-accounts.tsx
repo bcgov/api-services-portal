@@ -12,9 +12,7 @@ interface RevokeVariables {
   }
 
 function List({ prodEnvId, data, queryKey }) {
-        const list = data
-            ?.map(item => { item._scopes = item.scopes.map(s => { return { ticketId:null, id:s, name:s } }); return item})
-            .sort((a,b) => a.name.localeCompare(b.name))
+        const list = data?.sort((a,b) => a.name.localeCompare(b.name))
 
         const toast = useToast();
         const client = useQueryClient();
@@ -48,7 +46,7 @@ function List({ prodEnvId, data, queryKey }) {
                         </Tr>
                     </Thead>
                     <Tbody>
-                    {list.filter(p => p.users == null).map((item, index) => (
+                    {list?.filter(p => p.users == null).map((item, index) => (
                         <Tr key={item.id}>
                             <Td>{item.clients != null ? item.clients.join(',') : item.users.join(',')}</Td>
                             <Td>
