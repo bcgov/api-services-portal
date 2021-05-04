@@ -209,7 +209,7 @@ const { pages } = require('./admin-hooks.js');
 const { checkWhitelist, loadWhitelistAndWatch, addToWhitelist } = require('./authz/whitelist')
 
 const apps = [
-    //new ApiHealthApp(state),
+    new ApiHealthApp(state),
     new ApiOpenapiApp(),
     new ApiGraphqlWhitelistApp({
         apiPath
