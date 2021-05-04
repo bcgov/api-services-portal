@@ -82,10 +82,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                 <MenuOptionGroup title="Change Namespaces">
                   {data
                     .filter((n) => n.name !== user.namespace)
-                    .map((n) => {
-                      n.id = n._id;
-                      return n;
-                    })
                     .map((n) => (
                       <MenuItem
                         key={n.id}

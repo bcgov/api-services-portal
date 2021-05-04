@@ -1,6 +1,6 @@
 export const GET_PERMISSIONS = `
-    query GetPermissions($resourceId: String, $credIssuerId: ID!) {
-        getPermissionTickets(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+    query GetPermissions($resourceId: String, $prodEnvId: ID!) {
+        getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {
             id
             owner
             ownerName
@@ -13,7 +13,7 @@ export const GET_PERMISSIONS = `
             granted
         }
 
-        getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+        getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {
             id
             name
             description
@@ -26,13 +26,17 @@ export const GET_PERMISSIONS = `
             scopes
         }
         
-        CredentialIssuer(where: {id: $credIssuerId}) {
-            clientId
-            resourceType
-            availableScopes
+        Environment(where: {id: $prodEnvId}) {
+            credentialIssuer {
+                resourceType
+                resourceScopes
+            }
+            product {
+                name
+            }
         }
 
-        getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
+        getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {
             id
             name
             type
@@ -69,14 +73,14 @@ export const GET_ACCESS_LIST = `
 `
 
 export const GET_RESOURCES = `
-    query GetResources($credIssuerId: ID!, $owner: String!, $resourceType: String) {
-        getResourceSet(credIssuerId: $credIssuerId, owner: $owner, type: $resourceType) {
+    query GetResources($prodEnvId: ID!, $owner: String!, $resourceType: String) {
+        getResourceSet(prodEnvId: $prodEnvId, owner: $owner, type: $resourceType) {
             id
             name
             type
         }
 
-        getPermissionTickets(credIssuerId: $credIssuerId) {
+        getPermissionTickets(prodEnvId: $prodEnvId) {
             id
             owner
             ownerName
@@ -92,36 +96,36 @@ export const GET_RESOURCES = `
 `
 
 export const GRANT_USER_ACCESS = `
-    mutation GrantUserAccess($credIssuerId: ID!, $data: UMAPermissionTicketInput!) {
-        grantPermissions(credIssuerId: $credIssuerId, data: $data) {
+    mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+        grantPermissions(prodEnvId: $prodEnvId, data: $data) {
             id
         }
     }
 `
 
 export const CREATE_UMA_POLICY = `
-    mutation GrantSAAccess($credIssuerId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
-        createUmaPolicy(credIssuerId: $credIssuerId, resourceId: $resourceId, data: $data) {
+    mutation GrantSAAccess($prodEnvId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
+        createUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {
             id
         }
     }
 `
 export const DELETE_UMA_POLICY = `
-    mutation RevokeSAAccess($credIssuerId: ID!, $policyId: String!) {
-        deleteUmaPolicy(credIssuerId: $credIssuerId, policyId: $policyId)
+    mutation RevokeSAAccess($prodEnvId: ID!, $policyId: String!) {
+        deleteUmaPolicy(prodEnvId: $prodEnvId, policyId: $policyId)
     }
 `
 
 
 export const REVOKE_ACCESS = `
-    mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {
-        revokePermissions(credIssuerId: $credIssuerId, ids: $tickets)
+    mutation RevokeAccess($prodEnvId: ID!, $tickets: [String]!) {
+        revokePermissions(prodEnvId: $prodEnvId, ids: $tickets)
     }
 `
 
 export const GRANT_ACCESS = `
-    mutation GrantAccess($credIssuerId: ID!, $resourceId: String!, $requesterId: String!, $scopes: [String]!) {
-        approvePermissions(credIssuerId: $credIssuerId, resourceId: $resourceId, requesterId: $requesterId, scopes: $scopes)
+    mutation GrantAccess($prodEnvId: ID!, $resourceId: String!, $requesterId: String!, $scopes: [String]!) {
+        approvePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, requesterId: $requesterId, scopes: $scopes)
     }
 `
 

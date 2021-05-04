@@ -357,6 +357,25 @@ module.exports = {
         return result.data.CredentialIssuer
     },
 
+    lookupEnvironmentAndIssuerById: async function (context, id) {
+        const result = await context.executeGraphQL({
+            query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
+                        Environment(where: {id: $id}) {
+                            name
+                            credentialIssuer {
+                                name
+                                flow
+                                mode
+                                environmentDetails
+                            }
+                        }
+                    }`,
+            variables: { id: id },
+        })
+        console.log("lookupEnvironmentAndIssuerById " + JSON.stringify(result))
+        return result.data.Environment
+    },
+
     addKongConsumer: async function(context, username, customId, extForeignKey) {
         console.log("CALLING " + username + " " + extForeignKey)
 

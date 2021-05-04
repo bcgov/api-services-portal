@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
         alignItems="center"
         flexGrow={{ base: 1, sm: 0 }}
       >
-        <Link href={site == 'manager' ? '/home' : '/home'}>
+        <Link href={site == 'manager' ? '/' : '/'}>
           <a>
             <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
               <img src="/images/bc_logo_header.svg" width={154} height={43} />

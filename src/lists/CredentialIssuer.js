@@ -41,7 +41,7 @@ module.exports = {
         { value: 'auto', label: 'Automatic'},
       ]
     },
-    clientAuthenticator: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'client-secret', options: [
+    clientAuthenticator: { type: Select, emptyOption: true, dataType: 'string', options: [
         { value: 'client-secret', label: 'Client ID and Secret'},
         { value: 'client-jwt', label: 'Signed JWT'},
       ]

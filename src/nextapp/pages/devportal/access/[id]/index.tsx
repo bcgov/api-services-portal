@@ -126,7 +126,7 @@ const ApiAccessServicePage: React.FC<
             {selectedEnvironment && selectedEnvironment.credentialIssuer != null && (
               <ClientRequest fallback={<ResourcesListLoading />}>
                 <ResourcesList
-                  credIssuerId={selectedEnvironment.credentialIssuer.id}
+                  prodEnvId={selectedEnvironment.id}
                   resourceType={
                     selectedEnvironment.credentialIssuer.resourceType
                   }
@@ -156,6 +156,7 @@ const query = gql`
     Product(where: { id: $id }) {
       name
       environments {
+        id
         name
         credentialIssuer {
           id

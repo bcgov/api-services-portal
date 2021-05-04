@@ -37,12 +37,12 @@ interface UserItem {
 }
 
 interface RevokeVariables {
-  credIssuerId: string;
+  prodEnvId: string;
   tickets: string[];
 }
 
 interface UsersAccessListProps {
-  credIssuerId: string;
+  prodEnvId: string;
   data: UmaPermissionTicket[];
   enableRevoke?: boolean;
   resourceId: string;
@@ -50,7 +50,7 @@ interface UsersAccessListProps {
 }
 
 const UsersAccessList: React.FC<UsersAccessListProps> = ({
-  credIssuerId,
+  prodEnvId,
   data,
   enableRevoke,
   resourceId,
@@ -59,7 +59,7 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
   const toast = useToast();
   const client = useQueryClient();
   const grant = useApiMutation<{
-    credIssuerId: string;
+    prodEnvId: string;
     resourceId: string;
     requesterId: string;
     scopes: string[];
@@ -92,7 +92,7 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
   const handleGrant = (permissions: PermissionItem[]) => async () => {
     try {
       const payload = {
-        credIssuerId,
+        prodEnvId,
         resourceId,
         requesterId: '123',
         scopes: permissions.map((p) => p.id),
@@ -112,7 +112,7 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
   const handleRevoke = async (id: string | string[]) => {
     try {
       const tickets = Array.isArray(id) ? id : [id];
-      await revoke.mutateAsync({ credIssuerId, tickets });
+      await revoke.mutateAsync({ prodEnvId, tickets });
       toast({
         title: 'Access Revoked',
         status: 'success',
@@ -200,20 +200,20 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
 export default UsersAccessList;
 
 const revokeMutation = gql`
-  mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {
-    revokePermissions(credIssuerId: $credIssuerId, ids: $tickets)
+  mutation RevokeAccess($prodEnvId: ID!, $tickets: [String]!) {
+    revokePermissions(prodEnvId: $prodEnvId, ids: $tickets)
   }
 `;
 
 const grantMutation = gql`
   mutation GrantAccess(
-    $credIssuerId: ID!
+    $prodEnvId: ID!
     $resourceId: String!
     $requesterId: String!
     $scopes: [String]!
   ) {
     approvePermissions(
-      credIssuerId: $credIssuerId
+      prodEnvId: $prodEnvId
       resourceId: $resourceId
       requesterId: $requesterId
       scopes: $scopes

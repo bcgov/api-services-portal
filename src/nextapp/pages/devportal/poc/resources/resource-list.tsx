@@ -19,12 +19,12 @@ import { useAuth } from '@/shared/services/auth';
 
 import Waiting from './waiting'
 
-const ResourcesPage = ({credIssuerId, resourceType}) => {
+const ResourcesPage = ({prodEnvId, resourceType}) => {
     const { user } = useAuth();
 
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     const fetch = () => {
-        graphql(GET_RESOURCES, {credIssuerId: credIssuerId, resourceType: resourceType, owner: user?.sub})
+        graphql(GET_RESOURCES, {prodEnvId: prodEnvId, resourceType: resourceType, owner: user?.sub})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })
@@ -36,7 +36,7 @@ const ResourcesPage = ({credIssuerId, resourceType}) => {
     useEffect(fetch, [user]);
 
     const revokeAccess = async (ticketIds) => {
-        graphql(REVOKE_ACCESS, { credIssuerId: credIssuerId, tickets: ticketIds })
+        graphql(REVOKE_ACCESS, { prodEnvId: prodEnvId, tickets: ticketIds })
         .then(fetch)
         .catch (err => {
             console.log(err)
@@ -48,7 +48,7 @@ const ResourcesPage = ({credIssuerId, resourceType}) => {
           <Box bgColor="white" mb={4}>
             <Divider />    
             <Box p={2}>        
-                <ResourcesList type={resourceType} credIssuerId={credIssuerId} data={data?.getResourceSet} state={state}/>
+                <ResourcesList type={resourceType} prodEnvId={prodEnvId} data={data?.getResourceSet} state={state}/>
             </Box>
           </Box>
           

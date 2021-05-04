@@ -9,7 +9,7 @@ import NextLink from 'next/link';
 import NameValue from '@/components/name-value';
 
 
-function List({ data, credIssuerId, type, state}) {
+function List({ data, prodEnvId, type, state}) {
 
     const grantAccess = (id) => {
 
@@ -44,7 +44,7 @@ function List({ data, credIssuerId, type, state}) {
                         <Tr key={item.id}>
                             <Td>
                                 <Box>
-                                    <NextLink passHref href={`/devportal/poc/resources/${credIssuerId}/${item.id}`}>
+                                    <NextLink passHref href={`/devportal/poc/resources/${prodEnvId}/${item.id}`}>
                                         <Link>{item.name}</Link>
                                     </NextLink>
                                 </Box>

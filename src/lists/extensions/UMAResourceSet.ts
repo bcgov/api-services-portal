@@ -5,7 +5,9 @@ const { EnforcementPoint } = require('../../authz/enforcement')
 
 import { UMAResourceRegistrationService, ResourceSetQuery } from '../../services/uma2'
 
-import { KeycloakTokenService, getOpenidFromDiscovery } from '../../services/keycloak'
+import { KeycloakTokenService, getOpenidFromIssuer } from '../../services/keycloak'
+
+import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from '../../services/workflow/types'
 
 const keystoneApi = require('../../services/keystone')
 
@@ -36,14 +38,17 @@ module.exports = {
             ],            
             queries: [
               {
-                schema: 'getResourceSet(credIssuerId: ID!, owner: String, type: String, resourceId: String): [UMAResourceSet]',
+                schema: 'getResourceSet(prodEnvId: ID!, owner: String, type: String, resourceId: String): [UMAResourceSet]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const oidc = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    const accessToken = await new KeycloakTokenService(oidc.issuer).getKeycloakSession (issuer.clientId, issuer.clientSecret)
-                    const kcprotectApi = new UMAResourceRegistrationService (oidc.issuer, accessToken)
+                    const prodEnv = await keystoneApi.lookupEnvironmentAndIssuerById(noauthContext, args.prodEnvId)
+                    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
+                    
+                    const openid = await getOpenidFromIssuer (issuerEnvConfig.issuerUrl)
+
+                    const accessToken = await new KeycloakTokenService(openid.issuer).getKeycloakSession (issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
+                    const kcprotectApi = new UMAResourceRegistrationService (openid.issuer, accessToken)
                     if (args.resourceId != null) {
                         const res = await kcprotectApi.getResourceSet (args.resourceId)
                         console.log(JSON.stringify(res))

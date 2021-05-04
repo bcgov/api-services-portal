@@ -5,7 +5,12 @@ const { EnforcementPoint } = require('../../authz/enforcement')
 
 import { KeycloakPermissionTicketService, PermissionTicket, PermissionTicketQuery } from '../../services/keycloak'
 
-import { getOpenidFromDiscovery, KeycloakTokenService, KeycloakUserService, KeycloakClientService } from '../../services/keycloak'
+import { getOpenidFromIssuer, KeycloakTokenService, KeycloakUserService, KeycloakClientService } from '../../services/keycloak'
+
+import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from '../../services/workflow/types'
+
+import { doTokenExchangeForCredentialIssuer } from './Common'
+import type { TokenExchangeResult } from './Common'
 
 const keystoneApi = require('../../services/keystone')
 
@@ -42,18 +47,13 @@ module.exports = {
             ],            
             queries: [
               {
-                schema: 'getPermissionTickets(credIssuerId: ID!, resourceId: String): [UMAPermissionTicket]',
+                schema: 'getPermissionTickets(prodEnvId: ID!, resourceId: String): [UMAPermissionTicket]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
 
                     const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-                    // const accessToken = await getKeycloakSession (openid.issuer, issuer.clientId, issuer.clientSecret)
-                    const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
+                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+
+                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
                 
                     const params : PermissionTicketQuery = {returnNames: true}
                     if (args.resourceId != null) {
@@ -66,19 +66,17 @@ module.exports = {
             ],
             mutations: [
               {
-                schema: 'grantPermissions(credIssuerId: ID!, data: UMAPermissionTicketInput! ): [UMAPermissionTicket]',
+                schema: 'grantPermissions(prodEnvId: ID!, data: UMAPermissionTicketInput! ): [UMAPermissionTicket]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    console.log(JSON.stringify(args))
-                    // {"credIssuerId":"6074cda8c5a2c5b516835ba0","data":{"username":"ds","scopes":["a","c"]}}
-
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
+                    const prodEnv = await keystoneApi.lookupEnvironmentAndIssuerById(noauthContext, args.prodEnvId)
+                    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
+                    
+                    const openid = await getOpenidFromIssuer (issuerEnvConfig.issuerUrl)
 
                     const kcadminApi = new KeycloakUserService (openid.issuer)
-                    await kcadminApi.login(issuer.clientId, issuer.clientSecret)
+                    await kcadminApi.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
 
                     const userId = await kcadminApi.lookupUserByUsername(args.data.username)
 
@@ -91,7 +89,7 @@ module.exports = {
 
                     const scopes = args.data.scopes
                     const granted = 'granted' in args.data ? args.data['granted'] : true
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
+                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuerEnvConfig.clientId, issuerEnvConfig.clientSecret, subjectToken)
                     const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
                     for (const scope of scopes) {
                         const permission = await kcprotectApi.createOrUpdatePermission (args.data.resourceId, userId, granted, scope)
@@ -103,25 +101,12 @@ module.exports = {
                 access: EnforcementPoint,
               },
               {
-                schema: 'revokePermissions(credIssuerId: ID!, ids: [String]! ): Boolean',
+                schema: 'revokePermissions(prodEnvId: ID!, ids: [String]! ): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    console.log(JSON.stringify(args))
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
-
-                    //const kcadminApi = new KeycloakClientService (openid.issuer, null)
-                    //await kcadminApi.login(issuer.clientId, issuer.clientSecret)
-
-                    const result = []
-
-                    console.log(JSON.stringify(context.req.headers, null, 4))
                     const subjectToken = context.req.headers['x-forwarded-access-token']
+                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
 
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-                    const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
+                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
                     for (const permId of args.ids) {
                         await kcprotectApi.deletePermission (permId)
                     }
@@ -131,25 +116,12 @@ module.exports = {
                 access: EnforcementPoint,
               },              
               {
-                schema: 'approvePermissions(credIssuerId: ID!, resourceId: String!, requesterId: String!, scopes: [String]! ): Boolean',
+                schema: 'approvePermissions(prodEnvId: ID!, resourceId: String!, requesterId: String!, scopes: [String]! ): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    console.log(JSON.stringify(args))
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
-                    const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
-                    console.log(JSON.stringify(openid, null, 5))
-
-                    // const kcadminApi = new KeycloakClientService (openid.issuer, null)
-                    // await kcadminApi.login(issuer.clientId, issuer.clientSecret)
-
-                    const result = []
-
-                    console.log(JSON.stringify(context.req.headers, null, 4))
                     const subjectToken = context.req.headers['x-forwarded-access-token']
+                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
 
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuer.clientId, issuer.clientSecret, subjectToken)
-                    const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
+                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
                     for (const scope of args.scopes) {
                         await kcprotectApi.approvePermission (args.resourceId, args.requesterId, scope)
                     }

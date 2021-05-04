@@ -23,18 +23,13 @@ const links: NavLink[] = [
     name: 'API Access',
     url: '/devportal/access',
     access: ['developer', 'api-owner'],
+    altUrls: ['/devportal/access/[id]', '/devportal/resources/[id]'],
     sites: ['devportal'],
   },
   {
     name: 'Applications',
     url: '/devportal/applications',
     access: ['developer', 'api-owner'],
-    sites: ['devportal'],
-  },
-  {
-    name: 'My Resources',
-    url: '/devportal/poc/resources',
-    access: ['api-owner'],
     sites: ['devportal'],
   },
   {
