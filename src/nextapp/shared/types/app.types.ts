@@ -8,3 +8,8 @@ export interface UserData {
   groups: string | null;
   userId: string;
 }
+
+export interface NamespaceData {
+  id: string;
+  name: string;
+}

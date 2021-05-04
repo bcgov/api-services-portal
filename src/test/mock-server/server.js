@@ -32,6 +32,8 @@ const namespaces = [
   'citz-gdx',
   'dss-dds',
 ];
+const namespacesJson = namespaces.map((n) => ({ name: n, id: casual.uuid }));
+let namespace = sample(namespacesJson);
 const devs = [
   'Joshua Jones',
   'Ashwin Lunkad',
@@ -511,16 +513,33 @@ app.get('/admin/session', (_, res) => {
       email: 'villain@doom.net',
       roles: ['api-owner', 'developer'],
       isAdmin: false,
-      namespace: 'dss-aps',
+      namespace: namespace ? namespace.name : null,
       groups: null,
       sub: 'sub',
     },
   });
 });
 
-app.post('/admin/api', async (req, res) => {
+app.post('/gql/api', async (req, res) => {
   const response = await server.query(req.body.query, req.body.variables);
   res.json(response);
 });
+
+app.put('/admin/switch/:id', (req, res) => {
+  const next = namespaces.find((n) => n.id === req.params.id);
+  namespace = next;
+  res.json({ status: 'ok' });
+});
+
+app
+  .route('/v2/namespaces')
+  .get((req, res) => {
+    res.json(namespacesJson);
+  })
+  .post((req, res) => {
+    const namespace = { name: req.body.name, id: casual.uuid };
+    namespacesJson.push(namespace);
+    res.json(namespace);
+  });
 
 app.listen(port, () => console.log(`Mock server running on port ${port}`));
