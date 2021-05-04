@@ -5,7 +5,6 @@ const actionFilterBy = (field) => (context, value) => {
     }
     const _filter = { }
     _filter[field] = { id : userId }
-    console.log("FILTER: " + JSON.stringify(_filter))
     return _filter
 }
 

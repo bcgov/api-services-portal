@@ -2,7 +2,7 @@ import { gql } from 'graphql-request';
 
 export const GET_LIST = gql`
   query GET {
-    allProducts {
+    allProductsByNamespace {
       id
       name
       description
@@ -22,7 +22,7 @@ export const GET_LIST = gql`
         id
         name
         active
-        authMethod
+        flow
         services {
           id
           name

@@ -1,4 +1,8 @@
-# API Developer and Management Portal
+# API Services Portal
+
+## Introduction
+
+The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs.  It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
 
 ## Running the Project.
 
@@ -21,25 +25,102 @@ export MONGO_URL=mongodb://$hostip:17017/keystonedb3
 export MONGO_USER=""
 export MONGO_PASSWORD=""
 
+export FEEDER_URL=http://localhost:6000
+
 export KONG_URL=""
 export OIDC_ISSUER=""
 export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs
 
+export NEXT_PUBLIC_API_ROOT=http://localhost:4180
 export EXTERNAL_URL="http://localhost:4180"
+
+export GWA_API_URL=http://localhost:2000
 
 npm run dev
 ```
 
-Once running, the `aps portal` application is reachable via `localhost:4180`.
+Once running, the `api services portal` application is reachable via `localhost:4180`.
+
 
 ## Design
 
+The `API Services Portal` is a React application using the Chakra UI component library, and using two frameworks: KeystoneJS V5, and NextJS.
+
+The application is divided up into the following six components:
+### 1. Data Model
+
+The KeystoneJS lists define the aggregated data model that makes up this application.
+
+Source: `src/lists/*`
+### 2. UI
+
+The actual pages and components for the `API Services Portal`.
+
+Source: `src/nextapp/*`
+### 3. Authentication
+
+Support for an OAuth2-Proxy was added to allow authenticating with an OAuth2 flow.  A Token is passed on to the KeystoneJS backend and our middleware verifies the token and starts a session.
+
+Source: `src/auth/auth-oauth2-proxy.js`
+
+### 4. Authorization
+
+A decision matrix and authorization rules engine is implemented to centralize the rules around access to data.
+
+It uses Permissions retrieved for the logged in user and a particular `Namespace` Resource.  The Requesting Party Token (RPT) holding the permissions will be maintained in the KeystoneJS Session and refreshed accordingly.
+
+Switching namespaces will result in getting a new RPT that has the relevant permission for the user for the `Namespace`.
+
+| Function                                   | Access                                                                              |
+|--------------------------------------------|-------------------------------------------------------------------------------------|
+| Discover APIs                              | Guest                                                                               |
+| API Access (Request Access)                | Authenticated                                                                       |
+| API Access (Revoke, Documentation)         | Authenticated and Service Access (by Consumer for user or app)                      |
+| Documentation (public)                     | Guest                                                                               |
+| Documentation (private)                    | Authenticated and Service Access (by Consumer for user or app)                      |
+| My Resources (Grant/Revoke/Approve/Reject) | Authenticated and `Resource Owner` for UMA `Namespace` Resource                     |
+| My Resources (Create Service Account)      | Authenticated and `Resource Owner` for UMA `Namespace` Resource                     |
+| Applications (Ministry)                    | Authenticated with IDIR or Github                                                   |
+| Applications (Business)                    | Authenticated with BCeID                                                            |
+| Namespaces                                 | Authenticated and `any` UMA `Namespace` Resource Permission                         |
+| Namespaces (Create Namespace)              | Authenticated                                                                       |
+| Namespaces (Delete Namespace)              | Authenticated and UMA `Namespace` Resource Permission `Namespace.Manage` (or Owner) |
+| Products (and Environments)                | UMA `Namespace` Resource Permission `Namespace.Manage` or `Namespace.View`          |
+| Services (View Config and Metrics)         | UMA `Namespace` Resource Permission `Namespace.Manage` or `Namespace.View`          |
+| Consumers (Pending Approval)               | UMA `Namespace` Resource Permission `Access.Manage`                                 |
+| Consumers (Service Access)                 | UMA `Namespace` Resource Permission `Access.Manage`                                 |
+| Authorization Profiles (Credential Issuer) | UMA `Namespace` Resource Permission `Namespace.Manage`                              |
+| Activity                                   | UMA `Namespace` Resource Permission `Namespace.Manage` or `Namespace.View`          |
+| Publish Gateway Config                     | UMA `Namespace` Resource Permission `GatewayConfig.Publish`                         |
+| Delete Gateway Config                      | UMA `Namespace` Resource Permission `GatewayConfig.Publish`                         |
+| Namespace Profile (Org and Contacts)       | UMA `Namespace` Resource Permission `Namespace.Admin`                               |
+
+Source: `src/authz`
+### 5. Ingestor
+
+An ingestion framework for adding content from external sources.
+
+Source: `src/batch/feedWorker.js`
+
+### 6. Feeders
+
+A set of feeders that live close to the external sources for reading and sending data to the Ingestor
+
+Currently support feeders:
+* CKAN (Comprehensive Knowledge Archive Network)
+* Kong
+* Prometheus
+
+Source: `feeds`
+
+## User Journeys
 Roles:
 
-- **Credential Admin**: Application for authenticating with an OIDC Auth provider for the purposes of client registration. The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
-- **API Manager**: The API Manager makes APIs available for consumption with supporting documentation. They approve requests for access.
 - **API Owner**: Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
 - **Developer**: A Developer discovers APIs, requests access if required and consumes them.
+- **Credential Admin**: Application for authenticating with an OIDC Auth provider for the purposes of client registration. The Credential Issuer will generate the new credentials and provide a mechanism for the Developer to retrieve them.
+- **API Manager**: The API Manager makes APIs available for consumption with supporting documentation. They approve requests for access.
+- **Pilot Tester**: This role enables features that are still being reviewed and not quite ready for broader use.
 
 Typical Flow:
 

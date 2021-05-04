@@ -15,11 +15,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from 'react-query';
-import type {
-  Mutation,
-  EnvironmentAuthMethodType,
-  Environment,
-} from '@/types/query.types';
+import type { Mutation, Environment } from '@/types/query.types';
 import {
   FaCube,
   FaKey,
@@ -32,20 +28,7 @@ import {
 import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import EditEnvironment from './edit-environment';
-
-const getAuthToken = (method: EnvironmentAuthMethodType) => {
-  switch (method) {
-    case 'keys':
-      return FaKey;
-    case 'JWT':
-      return FaLock;
-    case 'private':
-      return FaUserSecret;
-    case 'public':
-    default:
-      return FaLockOpen;
-  }
-};
+import { getAuthToken } from '@/shared/services/utils';
 
 interface EnvironmentsListProps {
   data: Environment[];
@@ -129,8 +112,8 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
                 colorScheme="green"
                 px={3}
               >
-                <TagLeftIcon as={getAuthToken(e.authMethod)} />
-                {e.authMethod.toUpperCase()}
+                <TagLeftIcon as={getAuthToken(e.flow)} />
+                {e.flow.toUpperCase()}
               </Tag>
               {e.services.map((s) => (
                 <Tag
@@ -146,7 +129,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
           </Box>
           <Box>
             <ButtonGroup>
-              <Link href={`/products/${e.id}`}>
+              <Link href={`/manager/products/${e.id}`}>
                 <Button size="xs" variant="outline">
                   Edit
                 </Button>

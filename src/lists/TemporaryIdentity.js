@@ -4,7 +4,6 @@ const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => {
-    console.log("IsAdmin?" + user.isAdmin)
     return Boolean(user && user.isAdmin);
 }
 

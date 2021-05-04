@@ -1,27 +1,13 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Center,
-  Heading,
-  Icon,
-} from '@chakra-ui/react';
+import { useAuth } from '@/shared/services/auth';
+import { Box, ButtonGroup, Center, Heading, Icon } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import EnvironmentsList from '@/components/environments-list';
 import NewProduct from '@/components/new-product';
 import { useQuery } from 'react-query';
 import type { Query } from '@/types/query.types';
-import {
-  FaLayerGroup,
-  FaPenSquare,
-  FaPlusCircle,
-  FaTrash,
-  FaCube,
-  FaFolder,
-  FaFolderOpen,
-} from 'react-icons/fa';
+import { FaPlusCircle, FaFolder, FaFolderOpen } from 'react-icons/fa';
 
 import AddEnvironment from './add-environment';
 import { GET_LIST } from './queries';
@@ -30,13 +16,13 @@ import EditProduct from './edit-product';
 const ProductsList: React.FC = () => {
   const { data } = useQuery<Query>(
     'products',
-    async () => await api(GET_LIST),
+    async () => await api(GET_LIST, { } ),
     {
       suspense: true,
     }
   );
 
-  if (data.allProducts.length === 0) {
+  if (data.allProductsByNamespace.length === 0) {
     return (
       <EmptyPane
         title="Make your first Product"
@@ -48,7 +34,7 @@ const ProductsList: React.FC = () => {
 
   return (
     <Box width="100%">
-      {data.allProducts.map((d) => (
+      {data.allProductsByNamespace.map((d) => (
         <Box key={d.id} mb={8} className="product-item">
           <Box
             as="header"
@@ -78,8 +64,9 @@ const ProductsList: React.FC = () => {
               <Box>
                 <ButtonGroup
                   size="sm"
-                  opacity={data.allProducts.length > 1 ? 0 : 1}
+                  opacity={data.allProductsByNamespace.length > 1 ? 0 : 1}
                   transition="opacity ease-in 0.2s"
+                  position="relative"
                   sx={{
                     '.product-item:hover &': {
                       opacity: 1,
@@ -91,12 +78,20 @@ const ProductsList: React.FC = () => {
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
-                      <Button
-                        variant="tertiary"
-                        leftIcon={<Icon as={FaPlusCircle} />}
+                      <Box
+                        as="span"
+                        display="flex"
+                        alignItems="center"
+                        bgColor="bc-link"
+                        py={1}
+                        px={2}
+                        height="100%"
+                        color="white"
+                        borderRadius={4}
                       >
+                        <Icon as={FaPlusCircle} mr={2} />
                         Add Env
-                      </Button>
+                      </Box>
                     </AddEnvironment>
                   )}
                   <EditProduct data={d} />
@@ -115,7 +110,7 @@ const ProductsList: React.FC = () => {
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
                     >
-                      <Button variant="primary">Add Environment</Button>
+                      Add Environment
                     </AddEnvironment>
                   </Center>
                 </Box>

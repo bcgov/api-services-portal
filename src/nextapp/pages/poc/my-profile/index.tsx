@@ -2,9 +2,9 @@ import * as React from 'react';
 
 const { useEffect, useState } = React;
 
-import { styles } from '../../../shared/styles/devportal.css';
+import { styles } from '@/shared/styles/devportal.css';
 
-import graphql from '../../../shared/services/graphql'
+import graphql from '@/shared/services/graphql'
 
 const MyProfilePage = () => {
 

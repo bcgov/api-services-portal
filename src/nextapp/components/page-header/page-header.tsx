@@ -12,7 +12,7 @@ import { useRouter } from 'next/router';
 interface PageHeaderProps {
   actions?: React.ReactNode;
   breadcrumb?: { href?: string; text: string }[];
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title: React.ReactNode;
 }
 
@@ -31,8 +31,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           <Box as="hgroup" mb={2}>
             <Breadcrumb fontSize="sm" color="gray.500">
               <BreadcrumbItem>
-                <NextLink passHref href="/">
-                  <BreadcrumbLink>Dashboard</BreadcrumbLink>
+                <NextLink passHref href="/manager">
+                  <BreadcrumbLink>API</BreadcrumbLink>
                 </NextLink>
               </BreadcrumbItem>
               {breadcrumb.length > 0 &&
@@ -48,6 +48,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         )}
         <Box
           as="hgroup"
+          display="flex"
           flexDirection={{ base: 'column', sm: 'row' }}
           alignItems={{ base: 'flex-start', sm: 'center' }}
           justifyContent="space-between"

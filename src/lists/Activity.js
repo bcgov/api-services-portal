@@ -24,6 +24,10 @@ module.exports = {
         type: Text,
         isRequired: true,
     },
+    result: {
+        type: Text,
+        isRequired: false,
+    },
     message: {
         type: Markdown,
         isRequired: false,
@@ -36,12 +40,35 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
-    actor: { type: Relationship, ref: 'User' }
+    actor: { type: Relationship, ref: 'User' },
+    blob: { type: Relationship, ref: 'Blob' }
   },
   access: EnforcementPoint,
   plugins: [
     atTracking()
   ],
+  hooks: {
+    afterChange: (async function ({
+        operation,
+        existingItem,
+        originalInput,
+        updatedItem,
+        context,
+        listKey,
+        fieldPath, // exists only for field hooks
+      }) {
+        console.log("ACTIVITY " + operation + " " + JSON.stringify(originalInput, null, 3));
+        console.log("ACTIVITY " + operation + " " + JSON.stringify(updatedItem, null, 3));
+
+        if (updatedItem.action == 'publish' && updatedItem.type == 'GatewayConfig') {
+            const feeder = require('../services/feeder');
+            const feederApi = new feeder(process.env.FEEDER_URL)
+            feederApi.forceSync('kong', 'namespace', updatedItem.namespace).catch (err => {
+                console.log("Capture and log error " + err)
+            })
+        }
+    })
+  },
   recordActivity: (context, action, type, refId, message) => {
         console.log("Record Activity")
         const userId = context.authedItem.userId
@@ -55,8 +82,6 @@ module.exports = {
                         id
                 } }`,
             variables: { name, namespace, type, action, refId, message, userId },
-        }).catch (err => {
-            console.log("Activity : recording activity failed " + err)
         })
   }
 }

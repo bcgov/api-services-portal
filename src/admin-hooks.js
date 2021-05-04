@@ -12,27 +12,27 @@ module.exports = {
         },
         {
             label: 'Workflow',
-            children: ['AccessRequest', 'Application', 'Activity'],
+            children: ['AccessRequest', 'Application', 'ServiceAccess', 'Activity'],
         },
         {
             label: 'Products',
-            children: ['Product', 'Environment', 'CredentialIssuer', 'Content'],
+            children: ['Product', 'Environment', 'CredentialIssuer', 'Content', 'Legal'],
         },
         {
             label: 'Monitoring',
-            children: ['Alert', 'GatewayMetric'],
+            children: ['Alert', 'Metric'],
         },
         {
             label: 'Session',
-            children: ['TemporaryIdentity', 'User'],
+            children: ['TemporaryIdentity'],
         },
         {
             label: 'Keycloak',
-            children: ['Namespace', 'Group'],
+            children: ['User'],
         },
         {
             label: 'Kong',
-            children: ['GatewayService', 'GatewayRoute', 'Consumer', 'Plugin'],
+            children: ['GatewayService', 'GatewayRoute', 'GatewayConsumer', 'GatewayGroup', 'GatewayPlugin'],
         },
         {
             label: 'BCDC',

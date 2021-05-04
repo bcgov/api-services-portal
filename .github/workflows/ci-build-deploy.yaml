@@ -80,23 +80,6 @@ jobs:
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
 
-    - name: 'Setup Network Security Policy'
-      run: |
-        echo """
-        kind: NetworkSecurityPolicy
-        apiVersion: security.devops.gov.bc.ca/v1alpha1
-        metadata:
-          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-        spec:
-          description: |
-            allow the backend to talk to mongodb
-          source:
-            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          destination:
-            - - app.kubernetes.io/instance=proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
-        """ > nsp.yaml
-        oc apply -f nsp.yaml
-
     - name: 'Get Helm'
       run: |
         curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
@@ -107,6 +90,14 @@ jobs:
         export PATH=$PATH:`pwd`/linux-amd64
 
         echo '
+        image:
+          registry: ${{ env.REGISTRY }}
+          repository: bcgov-dss/api-serv-infra/mongodb
+          tag: 4.4-ea993071
+          pullPolicy: IfNotPresent
+          pullSecrets:
+            - dev-github-read-packages-creds
+
         auth:
             rootPassword: "s3cr3t"
 
@@ -179,8 +170,8 @@ jobs:
             client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
             oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
             redirect-url: https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-            skip-auth-regex: '/home|/public|/docs|/_next|/images|/feed'
-            whitelist-domain: authz-apps-gov-bc-ca.dev.apsgw.xyz
+            skip-auth-regex: '/home|/public|/docs|/_next|/images|/feed|/signout'
+            whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
             skip-provider-button: 'true'
 
 
@@ -200,6 +191,8 @@ jobs:
           MONGO_PASSWORD:
             value: s3cr3t
             secure: true
+          FEEDER_URL:
+            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
           GITHUB_API_TOKEN:
             value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
             secure: true
@@ -211,6 +204,10 @@ jobs:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
           NEXT_PUBLIC_API_ROOT:
             value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
+          GWA_API_URL:
+            value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
+          GWA_RES_SVR_CLIENT_ID:
+            value: 'gwa-api'
 
         " > values.yaml
         

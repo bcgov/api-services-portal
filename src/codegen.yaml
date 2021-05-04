@@ -3,3 +3,6 @@ generates:
   ./nextapp/shared/types/query.types.ts:
     plugins:
       - typescript
+  ./apis/shared/types/query.types.ts:
+    plugins:
+      - typescript

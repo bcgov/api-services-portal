@@ -1,8 +1,8 @@
-FROM node:alpine
+FROM node:15.14.0-alpine3.13
 
 WORKDIR /app
 
-COPY src/package*.json ./
+COPY src/*.json ./
 RUN npm install
 
 COPY src ./

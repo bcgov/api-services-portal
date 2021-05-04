@@ -56,3 +56,83 @@ jobs:
 
     - name: Push
       run: docker push ${{ steps.docker_meta.outputs.tags }} 
+
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.6'
+
+    - name: Authenticate and set context
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+        insecure_skip_tls_verify: true
+
+        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+
+    - name: 'Get Helm'
+      run: |
+        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+
+    - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+      id: set-deploy-id
+
+    - name: Get deploy ID
+      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+
+    - name: 'Deploy Feeder'
+      run: |
+        export PATH=$PATH:`pwd`/linux-amd64
+
+        echo "
+        podAnnotations:
+          sha: $GITHUB_SHA
+
+        replicaCount: 1
+
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
+
+        image:
+          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/data-feeder
+          tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+          pullPolicy: Always
+
+        imagePullSecrets:
+          - name: dev-github-read-packages-creds
+
+        podSecurityContext:
+          fsGroup: ${{ secrets.RUNNING_UID_GID }}
+
+        securityContext:
+          runAsUser: ${{ secrets.RUNNING_UID_GID }}
+
+        containerPort: 6000
+
+        serviceAccount:
+          create: true
+          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+
+        env:
+          LOG_FEEDS:
+            value: 'false'
+          WORKING_PATH:
+            value: '/tmp'
+          KONG_ADMIN_URL:
+            value: 'http://kong-kong-admin:8001'
+          CKAN_URL:
+            value: 'https://catalog.data.gov.bc.ca'
+          PROM_URL:
+            value: 'http://prometheus-server'
+          DESTINATION_URL:
+            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
+        " > values.yaml
+        
+        helm repo add bcgov http://bcgov.github.io/helm-charts
+        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api

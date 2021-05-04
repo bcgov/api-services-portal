@@ -1,9 +1,10 @@
 module.exports = {
   verbose: true,
-  testMatch: ['**/?(*.)+(test.{ts,tsx})'],
-  collectCoverageFrom: ['nextapp/**/*.{ts,tsx}'],
+  testEnvironment: 'node',
+  testMatch: ['**/?(*.)+(test.{ts,js,jsx})'],
+  collectCoverageFrom: ['services/**/*.js'],
   coveragePathIgnorePatterns: ['.*/__mocks__/.*', '.*/@types/.*'],
   coverageDirectory: '__coverage__',
   coverageReporters: ['lcov', 'text-summary'],
-  moduleDirectories: ['node_modules', 'nextapp/test'],
+  moduleDirectories: ['node_modules', 'nextapp/test', 'test'],
 };

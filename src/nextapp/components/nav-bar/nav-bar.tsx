@@ -22,17 +22,20 @@ const linkProps = {
 };
 
 interface NavBarProps {
+  site: string;
   links: NavLink[];
   pathname: string | undefined;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
+const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
   const { user } = useAuth();
-  const authenticatedLinks = links.filter(
-    (link) =>
-      link.access.length === 0 ||
-      user?.roles.some((role) => link.access.includes(role))
-  );
+  const authenticatedLinks = links
+    .filter((link) => link.sites.includes(site))
+    .filter(
+      (link) =>
+        link.access.length === 0 ||
+        user?.roles.some((role) => link.access.includes(role))
+    );
   // Router isn't active SSR, so wait till the client loads before setting
   // current so there's no diff between SSR and Client
   const active = React.useMemo(() => {
@@ -62,16 +65,26 @@ const NavBar: React.FC<NavBarProps> = ({ links, pathname }) => {
         flexDir={{ base: 'column', sm: 'row' }}
         color="white"
       >
-        {authenticatedLinks.map((link) => (
-          <Box as="li" key={link.url} width={{ base: '100%', sm: 'auto' }}>
+        {authenticatedLinks.map(({ BadgeElement, ...link }) => (
+          <Box
+            as="li"
+            key={link.url}
+            width={{ base: '100%', sm: 'auto' }}
+            pos="relative"
+          >
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
-                aria-current={link.url === active ? 'page' : false}
+                aria-current={link.url === active || link.altUrls?.includes (active) ? 'page' : false}
               >
-                <Box as="span" whiteSpace="nowrap">
+                <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}
                 </Box>
+                {BadgeElement && (
+                  <Box as="span" display="flex" alignItems="center">
+                    <BadgeElement />
+                  </Box>
+                )}
               </Link>
             </NextLink>
           </Box>

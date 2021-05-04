@@ -9,6 +9,34 @@ export const ADD_PRODUCT = gql`
   }
 `;
 
+export const UPDATE_PRODUCT = gql`
+  mutation Update($id: ID!, $data: ProductUpdateInput) {
+    updateProduct(id: $id, data: $data) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PRODUCT = gql`
+  mutation Remove($id: ID!) {
+    deleteProduct(id: $id) {
+      id
+    }
+  }
+`;
+
+export const GET_PRODUCT = gql`
+  query GET($id: ID!) {
+    Product(where: { id: $id }) {
+      id
+      environments {
+        name
+        id
+      }
+    }
+  }
+`;
+
 export const ADD_ENVIRONMENT = gql`
   mutation Add($name: String!, $product: ID!) {
     createEnvironment(
@@ -20,12 +48,21 @@ export const ADD_ENVIRONMENT = gql`
   }
 `;
 
+export const UPDATE_ENVIRONMENT = gql`
+  mutation Update($id: ID!, $data: EnvironmentUpdateInput) {
+    updateEnvironment(id: $id, data: $data) {
+      name
+      id
+    }
+  }
+`;
+
 export const UPDATE_ENVIRONMENT_ACTIVE = gql`
   mutation Update($id: ID!, $active: Boolean) {
     updateEnvironment(id: $id, data: { active: $active }) {
       name
       id
-      isActive
+      active
     }
   }
 `;
@@ -62,18 +99,35 @@ export const GET_ENVIRONMENT_LIST = gql`
 export const GET_ENVIRONMENT = gql`
   query GET($id: ID!) {
     Environment(where: { id: $id }) {
+      id
       name
       active
-      authMethod
+      flow
+      appId
+      legal {
+          id
+          title
+          reference
+      }
+      credentialIssuer {
+          id
+      }
+      approval
+      additionalDetailsToRequest
       product {
+        name
+        namespace
         organization {
           name
+        }
+        environments {
+          name
+          id
         }
       }
       services {
         name
         id
-        isActive
       }
     }
   }
@@ -100,13 +154,8 @@ export const GET_LIST = gql`
       environments {
         id
         name
-        isActive
-        authMethod
-        services {
-          id
-          name
-          host
-        }
+        active
+        flow
         credentialIssuer {
           name
         }

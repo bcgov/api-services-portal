@@ -1,0 +1,33 @@
+services:
+- name: aps-portal-ref-acl
+  host: httpbin.org
+  tags: [ ns.aps-portal-ref ]
+  port: 443
+  protocol: https
+  retries: 5
+  routes:
+  - name: aps-portal-ref-acl
+    tags: [ ns.aps-portal-ref ]
+    hosts:
+    - aps-portal-ref.api.gov.bc.ca
+    paths:
+    - /acl-protected
+    strip_path: true
+    https_redirect_status_code: 426
+    path_handling: v0
+  plugins:
+  - name: acl
+    tags: [ ns.aps-portal-ref ]
+    enabled: true
+    config:
+      allow: [ portal_ref_user ]
+      hide_groups_header: true
+  - name: key-auth
+    tags: [ ns.aps-portal-ref ]
+    enabled: true
+    protocols: [ http, https ]
+    config:
+      key_names: [ X-API-KEY ]
+      run_on_preflight: true
+      hide_credentials: true
+      key_in_body: false

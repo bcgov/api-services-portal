@@ -5,204 +5,196 @@ const {
   MockList,
 } = require('graphql-tools');
 const casual = require('casual-browserify');
+const times = require('lodash/times');
+const random = require('lodash/random');
+const snakeCase = require('lodash/snakeCase');
 const express = require('express');
 const cors = require('cors');
+const { addHours, parse, formatISO, subDays } = require('date-fns');
+
+const metricsData = require('./metrics-data');
+const schemas = require('./schemas');
+const { sample } = require('lodash');
 
 const app = express();
 const port = 4000;
-const random = (start, end) =>
-  Math.floor(Math.random() * (end - start) + start);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const schemaStruct = `
-  type Organization {
-    id: ID!
-    name: String!
-    sector: String
-    bcdcId: String!
-    title: String!
-    tags: String!
-    description: String
-    orgUnits: [OrganizationUnit]
-  }
-
-  type OrganizationUnit {
-    id: ID!
-    name: String!
-    sector: String!
-    title: String!
-    bcdcId: String!
-    tags: String!
-    description: String
-  }
-
-  type Environment {
-    id: ID!
-    name: String!,
-    active: Boolean!,
-    authMethod: String!
-    plugins: [ Plugin ]
-    description: String
-    credentialIssuer: CredentialIssuer
-    services: [ ServiceRoute ]
-    package: Package
-  }
-
-  type ServiceRoute {
-    id: ID!
-    name: String!
-    kongRouteId: String!
-    kongServiceId: String!
-    namespace: String!
-    methods: String
-    paths: String
-    host: String!
-    isActive: Boolean!
-    tags: String!
-    plugins: [ Plugin ]
-    environment: Environment,
-  }
-
-  type CredentialIssuer {
-    id: ID!
-    name: String!
-    description: String
-    authMethod: String
-    mode: String,
-    instruction: String
-    oidcDiscoveryUrl: String
-    initialAccessToken: String
-    clientId: String
-    clientSecret: String
-    contact: User,
-    environments: [ Environment ]
-  }
-
-  type Package {
-    id: ID!
-    name: String!
-    description: String!
-    dataset: Dataset,
-    organization: Organization,
-    organizationUnit: OrganizationUnit,
-    environments: [Environment],
-  }
-
-  type Plugin {
-    name: String!
-    kongPluginId: String
-    config: String!
-  }
-
-  type Dataset {
-    name: String!
-    sector: String
-    license_title: String
-    view_audience: String
-    private: Boolean
-    tags: String
-    contacts: String
-    organization: Organization,
-    organizationUnit: OrganizationUnit,
-    securityClass: String
-    notes: String
-    title: String
-    catalogContent: String
-    isInCatalog: Boolean
-  }
-
-  type User {
-    name: String!
-    username: String!
-    email: String!
-    isAdmin: Boolean!,
-  }
-
-  input EnvironmentWhereUniqueInput {
-    id: ID!
-  }
-
-  input ServiceRouteWhereInput {
-    namespace: String!
-  }
-
-  type Query {
-    allPackages: [ Package ]
-    allEnvironments: [ Environment ]
-    allServiceRoutes(where: ServiceRouteWhereInput): [ ServiceRoute ]
-    Environment(where: EnvironmentWhereUniqueInput!): Environment
-  }
-
-  input CreatePackageInput {
-    name: String!
-  }
-
-  input EnvironmentPackageInput {
-    id: ID!
-  }
-
-  input CreateEnvironmentOneToManyInput {
-    connect: EnvironmentPackageInput
-  }
-
-  input CreateEnvironmentInput {
-    name: String!
-    package: CreateEnvironmentOneToManyInput
-  }
-
-  input UpdateEnvironmentInput {
-    active: Boolean
-  }
-
-  type Mutation {
-    createPackage(data: CreatePackageInput): Package!
-    createEnvironment(data: CreateEnvironmentInput): Environment!
-    updateEnvironment(id: ID!, data: UpdateEnvironmentInput): Environment!
-    deleteEnvironment(id: ID!): Environment!
-  }
-
-  schema {
-    query: Query
-    mutation: Mutation
-  }
-`;
+const envs = ['prod', 'staging', 'dev', 'sandbox'];
+const namespaces = [
+  'jh-etk-prod',
+  'dss-map',
+  'dss-aps',
+  'dss-loc',
+  'citz-gdx',
+  'dss-dds',
+];
+const namespacesJson = namespaces.map((n) => ({ name: n, id: casual.uuid }));
+let namespace = sample(namespacesJson);
+const devs = [
+  'Joshua Jones',
+  'Ashwin Lunkad',
+  'Johnathan Brammall',
+  'Greg Lawrance',
+];
+const owners = ['Craig Rigdon', 'Aidan Cope'];
+const permissionTypes = ['View', 'Publish', 'Manage', 'Delete', 'Create'];
+const requesters = devs.map((d) => ({
+  requesterName: d,
+  requester: casual.uuid,
+}));
+// Casual Definitions
+casual.define('namespace', () => {
+  return sample(namespaces);
+});
+casual.define('service', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `service-${ns}-${env}-${casual.word}`;
+});
+casual.define('route', () => {
+  const ns = sample(namespaces);
+  const env = sample(envs);
+  return `route-${ns}-${env}-${casual.word}`;
+});
 
 //const store = createMockStore({ schema: schemaStruct });
-// const allPackages = new MockList(6, (_, { id }) => ({ id }));
-const allPackages = [
+// const allProducts = new MockList(6, (_, { id }) => ({ id }));
+let allProducts = [
   {
     id: casual.uuid,
     name: 'BC Data Catalogue',
-    environments: [{ id: casual.uuid, name: 'test', active: true }],
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
+  {
+    id: casual.uuid,
+    name: 'Geocoder Service API',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
+  {
+    id: casual.uuid,
+    name: 'eRx API',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'sandbox',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+      {
+        id: casual.uuid,
+        name: 'prod',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
+  },
+  {
+    id: casual.uuid,
+    name: 'Wildfire Data',
+    environments: [
+      {
+        id: casual.uuid,
+        name: 'test',
+        active: true,
+        services: [],
+        flow: 'flow',
+      },
+    ],
   },
 ];
-const schema = makeExecutableSchema({ typeDefs: schemaStruct });
+const allOrganizations = new MockList(8, (_, { id }) => ({ id }));
+const allOrganizationUnits = new MockList(18, (_, { id }) => ({ id }));
+const schema = makeExecutableSchema({ typeDefs: schemas });
 const schemaWithMocks = addMocksToSchema({
   schema,
 });
+
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
-    allPackages: () => allPackages,
+    // allProducts: () => allProducts,
+    allProducts: () => new MockList(8, (_, { id }) => ({ id })),
     allEnvironments: () => {
       const result = [];
-      allPackages.forEach((p) => {
+      allProducts.forEach((p) => {
         p.environments.forEach((e) => result.push(e));
       });
       return result;
     },
-    allServiceRoutes: () => new MockList(8, (_, { id }) => ({ id })),
+    allGatewayServices: () => new MockList(108, (_, { id }) => ({ id })),
+    allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
+    allOrganizations: () => allOrganizations,
+    allOrganizationUnits: () => allOrganizationUnits,
+    allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),
+    allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
+    allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
+    allMetrics: (_query, _, args) => {
+      const result = args.variableValues.days.map((d, index) => {
+        const metrics = metricsData[index];
+        const date = parse(d, 'yyyy-MM-dd', new Date());
+        const values = [];
+
+        times(24, (n) => {
+          const hour = addHours(date, n);
+
+          if (metrics[n]) {
+            values.push([hour.getTime(), metrics[n]]);
+          }
+        });
+
+        return {
+          name: `kong_http_requests_hourly.${d}.{}`,
+          query: 'kong_http_requests_hourly',
+          day: d,
+          metric: '{}',
+          values: JSON.stringify(values),
+        };
+      });
+
+      return result;
+    },
+    getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
+    getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
   }),
   Mutation: () => ({
-    createPackage: ({ data }) => {
+    createProduct: ({ data }) => {
       const id = casual.uuid;
-      allPackages.push({ id, name: data.name, environments: [] });
+      allProducts.push({ id, name: data.name, environments: [] });
       return { id, name: data.name };
     },
+    updateProduct: ({ id, data }) => {
+      return {
+        id,
+        ...data,
+      };
+    },
+    deleteProduct: ({ id }) => {
+      allProducts = allProducts.filter((d) => d.id !== id);
+      return allProducts;
+    },
     createEnvironment: ({ data }) => {
-      const parent = allPackages.find((d) => d.id === data.package.connect.id);
+      const parent = allProducts.find((d) => d.id === data.product.connect.id);
       const res = {
         id: casual.uuid,
         name: data.name,
@@ -216,23 +208,28 @@ const server = mockServer(schemaWithMocks, {
       return res;
     },
     updateEnvironment: ({ id, data }) => {
-      allPackages.forEach((p) => {
+      // throw new Error({
+      //   errors: [{ message: 'something broke', name: 'ValidationError' }],
+      // });
+      allProducts.forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
 
         if (environmentIds.includes(id)) {
           const environmentIndex = environmentIds.indexOf(id);
           if (environmentIndex >= 0) {
-            p.environments[environmentIndex].active = data.active;
+            p.environments[environmentIndex] = {
+              ...p.environments[environmentIndex],
+              ...data,
+            };
           }
         }
       });
-
-      return { id, active: data.active };
+      return { id, ...data };
     },
     deleteEnvironment: ({ id }) => {
       let name = '';
 
-      allPackages.forEach((p) => {
+      allProducts.forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
         const environmentIndex = environmentIds.indexOf(id);
         if (environmentIndex >= 0) {
@@ -244,31 +241,48 @@ const server = mockServer(schemaWithMocks, {
       return { id, name };
     },
   }),
-  Package: () => ({
+  Product: () => ({
     name: casual.title,
     description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
+    namespace: casual.namespace,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     methods: 'GET',
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
-    environments: (...args) => {
-      console.log(args);
-      return [];
-    },
   }),
   Organization: () => ({
-    name: casual.random_element(['Health Authority', 'DataBC', 'Elections BC']),
+    name: casual.random_element([
+      'Ministry of Advanced Education and Skills Training',
+      'Ministry of Agriculture, Food and Fisheries',
+      'Ministry of Attorney General',
+      'Ministry of Citizens Services',
+      'Ministry of Education',
+      'Ministry of Health',
+      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
+      'Ministry of Indigenous Relations and Reconciliation',
+    ]),
     sector: casual.random_element([
       'Health & Safety',
       'Service',
       'Social Services',
+      'Natural Resources',
+      'Econony',
+      'Finance',
     ]),
     bcdcId: casual.uuid,
-    title: casual.word,
+    title: casual.random_element([
+      'Ministry of Advanced Education and Skills Training',
+      'Ministry of Agriculture, Food and Fisheries',
+      'Ministry of Attorney General',
+      'Ministry of Citizens Services',
+      'Ministry of Education',
+      'Ministry of Health',
+      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
+      'Ministry of Indigenous Relations and Reconciliation',
+    ]),
     tags: casual.words(3),
     description: casual.description,
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
@@ -281,30 +295,49 @@ const server = mockServer(schemaWithMocks, {
     tags: casual.word,
     description: casual.short_description,
   }),
-  Environment: () => ({
-    name: casual.random_element(['dev', 'test', 'prod']),
+  Environment: ({ id }) => ({
+    id,
+    name: casual.random_element([
+      'dev',
+      'test',
+      'prod',
+      'sandbox',
+      'other',
+      null,
+    ]),
+    approval: casual.boolean,
     active: casual.boolean,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
   }),
-  ServiceRoute: () => ({
-    name: casual.populate('{{domain}}.api.gov.bc.ca'),
+  GatewayService: () => ({
+    name: casual.service,
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
-    namespace: casual.word,
-    methods: casual.word,
+    namespace: casual.namespace,
     paths: casual.word,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
     isActive: casual.boolean,
-    tags: casual.word,
+    tags: '["ns.jh-etk-prod"]',
+    updatedAt: casual.date('YYYY-MM-DD'),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
+    routes: () => new MockList(random(1, 3), (_, { id }) => ({ id })),
+  }),
+  GatewayRoute: () => ({
+    name: casual.route,
+    namespace: casual.namespace,
+    kongRouteId: casual.uuid,
+    methods: JSON.stringify([
+      casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
+    ]),
+    tags: '["ns.jh-etk-prod"]',
   }),
   CredentialIssuer: () => ({
     name: casual.title,
     description: casual.description,
-    authMethod: casual.random_element(['JWT', 'public', 'private', 'keys']),
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
     mode: casual.word,
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,
@@ -313,24 +346,147 @@ const server = mockServer(schemaWithMocks, {
     clientSecret: casual.uuid,
     environments: () => new MockList(2, (_, { id }) => ({ id })),
   }),
-  Plugin: () => ({
-    name: casual.title,
-    kongPluginId: casual.uuid,
-    config: casual.word,
+  GatewayConsumer: () => ({
+    username: casual.username,
+    customId: () => sample([casual.word, null, null, null]),
+    tags: JSON.stringify(casual.array_of_words(random(0, 2))),
+    namespace: () => sample([null, ...namespaces]),
+    plugins: () => new MockList(random(0, 2), (_, { id }) => ({ id })),
+    createdAt: formatISO(new Date()).toString(),
+    kongConsumerId: casual.uuid,
   }),
+  GatewayPlugin: () => {
+    const random = sample([true, false, null]);
+    const name = casual.random_element(['rate-limiting', 'ip-restriction']);
+    const isService = random === true;
+    const isRoute = random === false;
+    let config = '';
+
+    switch (name) {
+      case 'rate-limiting':
+        config = JSON.stringify({
+          second: 12,
+          minute: 12,
+          hour: 12,
+          day: 12,
+          policy: casual.random_element(['local', 'redis']),
+        });
+        break;
+      case 'ip-restriction':
+        config = JSON.stringify({
+          allow: ['2.2.2.2'],
+          deny: null,
+        });
+        break;
+      default:
+        config = '';
+    }
+
+    return {
+      name,
+      service: () => {
+        if (isService) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      route: () => {
+        if (isRoute) {
+          return { id: casual.uuid };
+        }
+        return null;
+      },
+      kongPluginId: casual.uuid,
+      config,
+      tags: JSON.stringify(casual.array_of_words(2)),
+    };
+  },
   Dataset: () => ({
-    name: casual.title,
-    sector: casual.word,
-    license_title: casual.word,
-    view_audience: casual.word,
+    name: casual.random_element([
+      'BC Gov News API Service',
+      'WorkBC Job Postings - API Web Service',
+      'BC Roads Map Service - Web Mercator',
+      'British Columbia Geographical Names Web Service - BCGNWS',
+      'Open511-DriveBC API',
+      'Historic City of Vancouver Fire Insurance Map',
+      'BC Laws API',
+      'BC Web Map Library',
+    ]),
+    sector: casual.random_element([
+      'Health & Safety',
+      'Service',
+      'Social Services',
+      'Natural Resources',
+      'Econony',
+      'Finance',
+    ]),
+    license_title: 'Open Government License - British Columbia',
+    view_audience: casual.random_element(['public', 'private']),
     private: casual.coin_flip,
-    tags: casual.word,
+    tags: JSON.stringify(casual.array_of_words(random(2, 8))),
     contacts: casual.word,
-    securityClass: casual.word,
-    notes: casual.short_description,
+    security_class: casual.random_element([
+      'LOW-PUBLIC',
+      'HIGH-PUBLIC',
+      'LOW-INTERNAL',
+      'HIGH-INTERNAL',
+    ]),
+    notes: casual.description,
     title: casual.word,
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
+    record_publish_date: casual.date('YYYY-MM-DD'),
+  }),
+  AccessRequest: () => ({
+    name: 'Gateway Administration API FOR APSO_F APSO_L',
+    isApproved: casual.boolean,
+    isIssued: true,
+    isComplete: false,
+    controls: JSON.stringify({
+      plugins: [
+        {
+          name: casual.random_element(['rate-limiting', 'ip-restriction']),
+          service: { id: casual.uuid, name: 'my-test-service' },
+          route: null,
+          kongPluginId: casual.uuid,
+          config: casual.word,
+          tags: JSON.stringify(casual.array_of_words(2)),
+        },
+      ],
+    }),
+  }),
+  UMAResourceSet: () => {
+    const ns = sample(namespaces);
+    const permission = sample(permissionTypes);
+
+    return {
+      id: casual.uuid,
+      name: `${ns}.${permission}`,
+      owner: casual.random_element(owners),
+      type: casual.word,
+    };
+  },
+  UMAPermissionTicket: () => {
+    const { requester, requesterName } = sample(requesters);
+    const ns = sample(namespaces);
+    const permission = sample(permissionTypes);
+
+    return {
+      id: casual.uuid,
+      scope: casual.word,
+      scopeName: `${ns}.${permission}`,
+      resource: casual.word,
+      resourceName: casual.word,
+      requester,
+      requesterName,
+      owner: casual.username,
+      ownerName: casual.random_element(owners),
+      granted: casual.coin_flip,
+    };
+  },
+  Legal: () => ({
+    description: 'This API comes with a set of terms you should follow',
+    link: 'http://www2.gov.bc.ca/gov/content/home/copyright',
   }),
   User: () => ({
     name: casual.name,
@@ -338,6 +494,12 @@ const server = mockServer(schemaWithMocks, {
     email: casual.email,
     isAdmin: false,
   }),
+  DateTime: () => {
+    const subtract = random(0, 20);
+    const date = subDays(new Date(), subtract);
+
+    return formatISO(date);
+  },
 });
 
 app.get('/admin/session', (_, res) => {
@@ -349,17 +511,35 @@ app.get('/admin/session', (_, res) => {
       name: 'Viktor Vaughn',
       username: 'vikvaughn',
       email: 'villain@doom.net',
-      roles: ['api-owner'],
+      roles: ['api-owner', 'developer'],
       isAdmin: false,
-      namespace: 'ns.sampler',
+      namespace: namespace ? namespace.name : null,
       groups: null,
+      sub: 'sub',
     },
   });
 });
 
-app.post('/admin/api', async (req, res) => {
+app.post('/gql/api', async (req, res) => {
   const response = await server.query(req.body.query, req.body.variables);
   res.json(response);
 });
+
+app.put('/admin/switch/:id', (req, res) => {
+  const next = namespaces.find((n) => n.id === req.params.id);
+  namespace = next;
+  res.json({ status: 'ok' });
+});
+
+app
+  .route('/v2/namespaces')
+  .get((req, res) => {
+    res.json(namespacesJson);
+  })
+  .post((req, res) => {
+    const namespace = { name: req.body.name, id: casual.uuid };
+    namespacesJson.push(namespace);
+    res.json(namespace);
+  });
 
 app.listen(port, () => console.log(`Mock server running on port ${port}`));

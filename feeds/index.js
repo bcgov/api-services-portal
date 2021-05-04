@@ -1,9 +1,16 @@
 const express = require('express')
 const fetch = require('node-fetch')
-const YAML = require('yaml')
+const YAML = require('js-yaml')
 const assert = require('assert').strict;
+var multer  = require('multer')
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage })
+
 const app = express()
 const port = 6000
+
+const replay = require('./utils/replay')
+const push = require('./utils/push')
 
 assert.strictEqual('WORKING_PATH' in process.env, true, 'WORKING_PATH must be set')
 assert.strictEqual('DESTINATION_URL' in process.env, true, 'DESTINATION_URL must be set')
@@ -56,11 +63,33 @@ app.get('/sync/:source/', (req, res) => {
     res.send({state:'processing'})
 })
 
-// List of entities
+app.put('/forceSync/:source/:scope/:scopeKey', async (req, res) => {
+    const source = req.params.source
+    const scope = req.params.scope
+    const scopeKey = req.params.scopeKey
+    assert.strictEqual(source in sources, true, 'Invalid source ' + source)
+    await sources[source].scopedSync(config[source], scope, scopeKey)
+    res.send({state:'synced'})
+})
 
-// Tell the feeder to resync the entity within the scope (i.e./ GatewayService for namespace xyz)
-app.get('/hint/:entity/:scope', (req, res) => {
+// Replay an existing feeds file
+app.get('/replay/', (req, res) => {
+    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, source: null})
+    res.send({state:'processing'})
+})
 
+app.get('/replay/:source', (req, res) => {
+    replay({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, source: source})
+    res.send({state:'processing'})
+})
+
+
+// curl http://localhost:6000/push -F "yaml=@values.yaml"
+app.post('/push', upload.single('yaml'), async (req, res) => {
+    const data = YAML.loadAll(req.file.buffer.toString('utf-8'))
+    await push({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, items: data})
+    .then(() => res.send({state:'pushed'}))
+    .catch (err => { console.log(err); res.status(400).send({state:'failed'})})
 })
 
 app.use((err, req, res, next) => {
@@ -72,29 +101,21 @@ app.use((err, req, res, next) => {
     }
 })
 
-function kongCron(source, frequencyMinutes) {
-    sources[source].sync(config[source])
-    console.log(`[KONG] SLEEPING FOR ${frequencyMinutes} minutes`)
-    setTimeout(kongCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
+const runTimedJob = function(source, frequencyMinutes, params) {
+    console.log(`[${source}] STARTING JOB FOR ${source} - every ${frequencyMinutes} minutes - params ${JSON.stringify(params)}`)
+    const job = (source, frequencyMinutes) => {
+        sources[source].sync(config[source], params)
+        console.log(`[${source}] SLEEPING FOR ${frequencyMinutes} minutes`)
+        setTimeout(job, frequencyMinutes * 60 * 1000, source, frequencyMinutes, params)
+    }
+    setTimeout(job, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
 }
 
-kongCron('kong', 15)
-
-function prometheusCron(source, frequencyMinutes) {
-    sources[source].sync(config[source])
-    console.log(`[PROM] SLEEPING FOR ${frequencyMinutes} minutes`)
-    setTimeout(prometheusCron, frequencyMinutes * 60 * 1000, source, frequencyMinutes)
+if (process.env.SCHEDULE == 'true') {
+    runTimedJob ('prometheus', 120, {numDays:1})
+    runTimedJob ('prometheus', (24 * 60) + 5, {numDays:5})
+    runTimedJob ('kong', (1 * 60), {})
 }
-
-prometheusCron('prometheus', 10)
-
-// function ckanCron(source='ckan', frequencyMinutes=6*60) {
-//     sources[source].sync(config[source])
-//     console.log(`[CKAN] SLEEPING FOR ${frequencyMinutes} minutes`)
-//     setTimeout(ckanCron, frequencyMinutes * 60 * 1000)
-// }
-
-// ckanCron()
 
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)

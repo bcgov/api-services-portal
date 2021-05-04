@@ -1,0 +1,33 @@
+services:
+- name: aps-portal-ref-oidc
+  host: httpbin.org
+  tags: [ ns.aps-portal-ref ]
+  port: 443
+  protocol: https
+  retries: 5
+  routes:
+  - name: aps-portal-ref-oidc
+    tags: [ ns.aps-portal-ref ]
+    hosts:
+    - aps-portal-ref.api.gov.bc.ca
+    paths:
+    - /oidc-protected
+    strip_path: true
+    https_redirect_status_code: 426
+    path_handling: v0
+    protocols: [ http ]
+  plugins:
+  - name: oidc
+    tags: [ ns.aps-portal-ref ]
+    enabled: true
+    protocols: [ http, https ]
+    config:
+      response_type: code
+      bearer_only: "yes"
+      realm: kong
+      scope: openid
+      client_id: "XX-EE768DFE804B4938-36C86859"
+      client_secret: "0ec915ea-33b4-4e84-bc38-5fe75df92331"
+      token_endpoint_auth_method: client_secret_post
+      introspection_endpoint: "https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky/protocol/openid-connect/token/introspect"
+      discovery: "https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky/.well-known/openid-configuration"

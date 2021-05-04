@@ -9,10 +9,11 @@ import styles from './header.module.css';
 import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
+  site: string;
   children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ children }) => {
+const Header: React.FC<HeaderProps> = ({ site, children }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const onNavClick = () => {
     setOpen((state) => !state);
@@ -46,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
         alignItems="center"
         flexGrow={{ base: 1, sm: 0 }}
       >
-        <Link href="/home">
+        <Link href={site == 'manager' ? '/' : '/'}>
           <a>
             <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
               <img src="/images/bc_logo_header.svg" width={154} height={43} />
@@ -57,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
           </a>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
-          API Services Portal
+          API {site == 'manager' ? 'Provider Console' : 'Services Portal'}
         </Heading>
       </Box>
       <Box as="hgroup">

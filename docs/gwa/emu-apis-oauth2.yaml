@@ -1,0 +1,26 @@
+services:
+- name: aps-portal-ref-oauth2
+  host: httpbin.org
+  tags: [ ns.aps-portal-ref ]
+  port: 443
+  protocol: https
+  retries: 5
+  routes:
+  - name: aps-portal-ref-oauth2
+    tags: [ ns.aps-portal-ref ]
+    hosts:
+    - aps-portal-ref.api.gov.bc.ca
+    paths:
+    - /oauth2-protected
+    strip_path: true
+    https_redirect_status_code: 426
+    path_handling: v0
+    protocols: [ http ]
+  plugins:
+  - name: oauth2
+    tags: [ ns.aps-portal-ref ]
+    enabled: true
+    protocols: [ http, https ]
+    config:
+      scopes: [openid]
+      enable_authorization_code: yes

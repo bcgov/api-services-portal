@@ -1,8 +1,9 @@
 
 const graphql = function (query, variables = {}) {
-    return fetch('/admin/api', {
+    return fetch('/gql/api', {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

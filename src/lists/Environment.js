@@ -3,10 +3,23 @@ const { Markdown } = require('@keystonejs/fields-markdown')
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
 const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
+const {v4: uuidv4} = require('uuid');
+
+const { ValidateActiveEnvironment } = require('../services/workflow')
+
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
+    appId: {
+        type: Text,
+        isRequired: true,
+        isUnique: true,
+        access: {
+            create: true,
+            update: false
+        }
+    },
     name: {
         type: Text,
         isRequired: true,
@@ -17,26 +30,50 @@ module.exports = {
         defaultValue: false,
         access: FieldEnforcementPoint
     },
-    authMethod: { type: Select, emptyOption: false, defaultValue: 'public', options: [
-        { value: 'private', label: 'Private'},
+    approval: {
+        type: Checkbox,
+        isRequired: true,
+        defaultValue: false,
+    },
+    flow: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'public', options: [
         { value: 'public', label: 'Public'},
-        { value: 'JWT', label: 'JWT'},
-        { value: 'keys', label: 'API Keys'},
+        { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow'},
+        { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow'},
+        { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow'},
       ]
     },
-    plugins: { type: Relationship, ref: 'Plugin', many: true },
-    description: {
+    
+    legal: { type: Relationship, ref: 'Legal' },
+    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
+    additionalDetailsToRequest: {
       type: Text,
       isMultiline: true,
       isRequired: false,
     },
-    credentialIssuer: { type: Relationship, ref: 'CredentialIssuer.environments' },
     services: { type: Relationship, ref: 'GatewayService.environment', many: true },
     product: { type: Relationship, ref: 'Product.environments', many: false },
   },
   access: EnforcementPoint,
   hooks: {
-    validateInput: ({
+    resolveInput: (async function ({
+        operation,
+        existingItem,
+        originalInput,
+        resolvedData,
+        context,
+        listKey,
+        fieldPath, // Field hooks only
+    }) {
+        if (operation == 'create') {
+            // If an AppId is provided then don't bother creating one
+            if ('appId' in resolvedData && resolvedData['appId'].length == 8) {
+                return resolvedData
+            }
+            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
+        }
+        return resolvedData
+    }),
+    validateInput: (async function ({
         operation,
         existingItem,
         originalInput,
@@ -46,23 +83,11 @@ module.exports = {
         addValidationError, // List hooks only
         listKey,
         fieldPath, // Field hooks only
-    }) => {
+    }) {
         console.log("VALIDATE " + operation + " " + JSON.stringify(existingItem, null, 3));
         console.log("VALIDATE " + operation + " " + JSON.stringify(originalInput, null, 3));
         console.log("VALIDATE " + operation + " " + JSON.stringify(resolvedData, null, 3));
-        if ('active' in originalInput) {
-            // do validation
-            if (Object.keys(originalInput).length != 1) {
-                addValidationError("You can not update other data when changing the active status")
-            } else {
-                // validations:
-                // - there is at least on service associated with it
-                // - if prod, that it has a BCDC record
-                if (originalInput['active'] == true && existingItem['name'] == "dev") {
-                    addValidationError("Failed validation.  Not able to activate because of a good reason!")
-                }
-            }
-        }
-    }
-  }
+        await ValidateActiveEnvironment(context, operation, existingItem, originalInput, resolvedData, addValidationError)
+    })
+}
 }

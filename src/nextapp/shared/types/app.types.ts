@@ -1,4 +1,5 @@
 export interface UserData {
+  sub: string;
   name: string;
   username: string;
   roles: string[];
@@ -6,4 +7,9 @@ export interface UserData {
   email: string;
   groups: string | null;
   userId: string;
+}
+
+export interface NamespaceData {
+  id: string;
+  name: string;
 }
