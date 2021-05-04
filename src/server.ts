@@ -108,7 +108,7 @@ const keystone = new Keystone({
       maxAge: 1000 * 60 * 15, // 15 minute
       sameSite: true,
     },
-    sessionStore: (process.env.SESSION_STORE === 'redis' ? new RedisStore(redis.createClient({ url: process.env.REDIS_URL, pass: process.env.REDIS_PASSWORD })) : null)
+    sessionStore: (process.env.SESSION_STORE === 'redis' ? new RedisStore({client:redis.createClient({ url: process.env.REDIS_URL, password: process.env.REDIS_PASSWORD })}) : null)
   });
 
   const yamlReport = []
