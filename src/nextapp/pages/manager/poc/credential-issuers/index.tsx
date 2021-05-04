@@ -36,11 +36,15 @@ const CredentialIssuerPage = () => {
             setState({ state: 'error', data: null });
         });
     };
+
+    const openNewProfile = () => {
+        window.location.href = `/manager/poc/credential-issuers/new`;
+      };
     
     useEffect(fetch, []);
 
     const actions = [
-        (                <Button variant="primary">New Profile</Button>
+        (                <Button variant="primary" onClick={openNewProfile}>New Profile</Button>
         )
     ]
 

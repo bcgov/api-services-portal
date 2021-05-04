@@ -76,7 +76,7 @@ const NewRequestsPage: React.FC<
     },
     { suspense: false }
   );
-  const dataset = data?.allProducts[0];
+  const dataset = data?.allDiscoverableProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -133,10 +133,6 @@ const NewRequestsPage: React.FC<
         )}
         <PageHeader title="New Access Request">
           <Text>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias ipsum
-            sapiente eligendi. Ea sapiente quae quos. Eveniet doloribus
-            temporibus inventore expedita totam corporis ut, tenetur molestiae
-            perspiciatis ducimus veniam dignissimos!
           </Text>
         </PageHeader>
         <form onSubmit={handleSubmit}>
@@ -146,7 +142,7 @@ const NewRequestsPage: React.FC<
                 <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
                 <Box>
                   <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allProducts.find((d) => d.id === id)?.name ?? 'API'}
+                    {data.allDiscoverableProducts.find((d) => d.id === id)?.name ?? 'API'}
                   </Text>
                 </Box>
               </VStack>
@@ -173,7 +169,7 @@ const NewRequestsPage: React.FC<
                 </Heading>
                 <Select name="applicationId">
                   <option value="">No Application Selected</option>
-                  {data.allApplications.map((a) => (
+                  {data.myApplications.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name}
                     </option>
@@ -205,10 +201,15 @@ const NewRequestsPage: React.FC<
                 }))}
             />
           </FieldsetBox>
-          <FieldsetBox isRequired title="Additional Information & Terms">
+          <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != "" ? true:false} title="Additional Information & Terms">
+            {dataset.environments[0]?.additionalDetailsToRequest != "" && (
+                <Box p={4}>
+                    <pre>{dataset.environments[0]?.additionalDetailsToRequest}</pre>
+                </Box>
+            )}
             <Textarea
               name="other"
-              placeholder="Write any additional instructions for the reviewer"
+              placeholder=""
               variant="bc-input"
             />
             {dataset.environments[0]?.legal && (
@@ -254,7 +255,7 @@ export default NewRequestsPage;
 
 const query = gql`
   query Get($id: ID!) {
-    allProducts(where: { id: $id }) {
+    allDiscoverableProducts(where: { id: $id }) {
       id
       name
       environments {
@@ -262,6 +263,7 @@ const query = gql`
         name
         active
         flow
+        additionalDetailsToRequest
         legal {
           title
           description
@@ -269,7 +271,7 @@ const query = gql`
         }
       }
     }
-    allApplications {
+    myApplications {
       id
       name
     }

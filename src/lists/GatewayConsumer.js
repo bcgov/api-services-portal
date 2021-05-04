@@ -9,8 +9,8 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { lookupConsumerPlugins, lookupKongConsumerId } = require('../services/keystone')
 
-const kong = require('../services/kong')
-const feeder = require('../services/feeder')
+const { KongConsumerService } = require('../services/kong')
+const { FeederService } = require('../services/feeder')
 
 module.exports = {
   fields: {
@@ -85,8 +85,8 @@ module.exports = {
                 resolver: async (item, args, context, info, { query, access }) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
-                    const kongApi = new kong(process.env.KONG_URL)
-                    const feederApi = new feeder(process.env.FEEDER_URL)
+                    const kongApi = new KongConsumerService(process.env.KONG_URL)
+                    const feederApi = new FeederService(process.env.FEEDER_URL)
 
                     const kongConsumerPK = await lookupKongConsumerId (context, args.id)
                     
@@ -102,8 +102,8 @@ module.exports = {
                 resolver: async (item, args, context, info, { query, access }) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
-                    const kongApi = new kong(process.env.KONG_URL)
-                    const feederApi = new feeder(process.env.FEEDER_URL)
+                    const kongApi = new KongConsumerService(process.env.KONG_URL)
+                    const feederApi = new FeederService(process.env.FEEDER_URL)
 
                     const kongConsumerPK = await lookupKongConsumerId (context, args.id)
                     
@@ -119,8 +119,8 @@ module.exports = {
                 resolver: async (item, args, context, info, { query, access }) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
-                    const kongApi = new kong(process.env.KONG_URL)
-                    const feederApi = new feeder(process.env.FEEDER_URL)
+                    const kongApi = new KongConsumerService(process.env.KONG_URL)
+                    const feederApi = new FeederService(process.env.FEEDER_URL)
 
                     const kongConsumerPK = await lookupKongConsumerId (context, args.id)
                     

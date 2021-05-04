@@ -15,10 +15,13 @@ const jwtDecoder = require('jwt-decode');
 const proxy = process.env.EXTERNAL_URL
 const authLogoutUrl = process.env.OIDC_ISSUER + "/protocol/openid-connect/logout?redirect_uri=" + querystring.escape(proxy + "/signout")
 
-const { getRequestingPartyToken } = require('../services/keycloak')
+const { Logger } = require('../logger')
+
+const { UMA2TokenService } = require('../services/uma2')
 
 const toJson = (val) => val ? JSON.parse(val) : null;
 
+const logger = Logger('auth')
 class Oauth2ProxyAuthStrategy {
     constructor(keystone, listKey, config) {
       this.keystone = keystone;
@@ -67,20 +70,16 @@ class Oauth2ProxyAuthStrategy {
         // X-Auth-Request-Access-Token
 
         const checkExpired = (err, req, res, next) => {
-            console.log("CHECK EXPIRED!! " + err);
+            logger.debug("CHECK EXPIRED!! " + err);
 
             if (err) {
                 if (err.name === 'UnauthorizedError') {
-                    console.log("CODE = "+err.code);
-                    console.log("INNER = "+err.inner);
+                    logger.debug("CODE = "+err.code);
+                    logger.debug("INNER = "+err.inner);
                     return res.status(403).json({error:'unauthorized_provider_access'})
-                    //res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl))
                 }
                 return res.status(403).json({error:'unexpected_error'})
-
-                // next(err)
             } else {
-                //
                 next();
             }
         }
@@ -88,11 +87,10 @@ class Oauth2ProxyAuthStrategy {
         const detectSessionMismatch = async function (err, req, res, next) {
             if (req.oauth_user) {
                 const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
-                console.log("SESSION USER = " + req.user)
+                logger.debug("SESSION USER = %j", req.user)
                 if (req.user) {
                     if (jti != req.user.jti) {
-                        console.log("Looks like a different credential.. ")
-                        console.log("Looks like a different credential.. " + jti + " != " + req.user.jti)
+                        logger.debug("Looks like a different credential.. %s", jti)
                         await this._sessionManager.endAuthedSession(req);
                         return res.status(403).json({error:'invalid_session'})
                     }
@@ -100,15 +98,11 @@ class Oauth2ProxyAuthStrategy {
             }
         }
 
-        // app.get('/admin/home', [verifyJWT, checkExpired], async (req, res, next) => {
-        //     res.redirect('/home')
-        // })
-
         app.get('/admin/session', [detectSessionMismatch], async (req, res, next) => {
 
             const response = req && req.user ? {anonymous: false, user: req.user } : {anonymous:true}
             if (response.anonymous == false) {
-                console.log(JSON.stringify(response.user, null, 5))
+                logger.debug("Session %j", response.user)
                 response.user.groups = toJson(response.user.groups)
                 response.user.roles = toJson(response.user.roles)
             }
@@ -116,7 +110,6 @@ class Oauth2ProxyAuthStrategy {
         })
 
         app.get('/admin/signout', [verifyJWT, checkExpired], async (req, res, next) => {
-            console.log("Signing out")
             if (req.user) {
                 await this._sessionManager.endAuthedSession(req);
             }
@@ -127,26 +120,23 @@ class Oauth2ProxyAuthStrategy {
             this.register_user(req,res)
         })
 
-        app.get('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
+        app.put('/admin/switch/:ns', [verifyJWT, checkExpired], async (req, res, next) => {
             // Switch namespace
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
-            const accessToken = await getRequestingPartyToken(process.env.OIDC_ISSUER, process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
+            const accessToken = await new UMA2TokenService(process.env.OIDC_ISSUER).getRequestingPartyToken(process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
                 res.json({switch:false})
             }) 
-            console.log("TOKEN = "+accessToken)
             try {
                 const rpt = jwtDecoder(accessToken)
-                console.log("ANSWER = "+JSON.stringify(rpt,null, 5))
                 const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
                 await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
                 res.json({switch:true})
             } catch (err) {
-                console.log(err)
+                logger.error("Error evaluating new access token %s", err)
                 res.json({switch:false})
             }
         })
-
         return app
     }
 
@@ -179,7 +169,7 @@ class Oauth2ProxyAuthStrategy {
             variables: { tempId, namespace, roles },
         })
         if (errors) {
-            console.log("NO! Something went wrong " + errors)
+            logger.error("assign_namespace - NO! Something went wrong %j", errors)
         }
 
     }
@@ -201,14 +191,22 @@ class Oauth2ProxyAuthStrategy {
         const email = oauthUser['email']
         const namespace = oauthUser['namespace']
         const groups = JSON.stringify(oauthUser['groups'])
-        let roles = JSON.stringify(allRoles)
-        console.log(JSON.stringify(oauthUser, null, 4))
+        let roles = JSON.stringify([])
         if ('realm_access' in oauthUser) {
             try {
                 roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
             } catch (e) {
-                console.log(e)
-
+                logger.error("register_user - error parsing realm_acccess roles %s - defaulting roles to none", e)
+            }
+        }
+        if ('resource_access' in oauthUser) {
+            try {
+                const clientId = process.env.GWA_RES_SVR_CLIENT_ID
+                logger.debug("register_user - Getting resources for [%s]", clientId)
+                roles = JSON.stringify(oauthUser['resource_access'][clientId].roles.filter(r => allRoles.includes(r)))
+                logger.debug("register_user - Roles = %s", roles)
+            } catch (e) {
+                logger.error("register_user - error parsing realm_acccess roles %s - defaulting roles to none", e)
             }
         }
         
@@ -244,10 +242,9 @@ class Oauth2ProxyAuthStrategy {
                 variables: { name, email, username },
             })
             if (errors) {
-                console.log("NO! Something went wrong creating user " + errors)
+                logger.error("register_user - NO! Something went wrong creating user " + errors)
                 throw new Error("Error creating user " + errors)
             }
-            console.log("USER CREATE " + JSON.stringify(data, null, 4))
 
             userId = data.createUser.id
         }
@@ -255,10 +252,9 @@ class Oauth2ProxyAuthStrategy {
         let results = await users.adapter.find({ 'jti': jti })
 
         var operation = "update"
-        console.log("Auth "+jti+sub);
 
         if (results.length == 0) {
-            console.log("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
+            logger.debug("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
             const { errors } = await this.keystone.executeGraphQL({
                 context: this.keystone.createContext({ skipAccessControl: true }),
                 query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $userId: String) {
@@ -268,7 +264,7 @@ class Oauth2ProxyAuthStrategy {
                 variables: { jti, sub, name, email, username, namespace, groups, roles, userId },
             })
             if (errors) {
-                console.log("NO! Something went wrong " + errors)
+                logger.error("register_user - NO! Something went wrong %j", errors)
             }
             results = await users.adapter.find({ ['jti']: jti })       
             operation = "create"
@@ -278,7 +274,7 @@ class Oauth2ProxyAuthStrategy {
         user.groups = toJson(user.groups)
         user.roles = toJson(user.roles)
 
-        console.log("USER = "+JSON.stringify(user, null, 4))
+        logger.debug("[register_user] USER = %j", user)
         await this._authenticateItem(user, null, operation === 'create', req, res, next);
     }
 
@@ -287,8 +283,6 @@ class Oauth2ProxyAuthStrategy {
             item,
             list: this._getList(),
         });
-        // console.log("Created session " + JSON.stringify(req.session, null, 3))
-
         req.session.oauth_user = req.oauth_user
         
         this._onAuthenticated({ token, item, isNewItem }, req, res, next);
@@ -298,66 +292,66 @@ class Oauth2ProxyAuthStrategy {
         return this.keystone.lists[this.listKey];
     }
 
-    async _getItem(list, args, secretFieldInstance) {
-      // Match by identity
-      const { identityField } = this.config;
-      const identity = args[identityField];
-      const results = await list.adapter.find({ [identityField]: identity });
-      // If we failed to match an identity and we're protecting existing identities then combat timing
-      // attacks by creating an arbitrary hash (should take about as long has comparing an existing one)
-      if (results.length !== 1 && this.config.protectIdentities) {
-        // TODO: This should call `secretFieldInstance.compare()` to ensure it's
-        // always consistent.
-        // This may still leak if the workfactor for the password field has changed
-        const hash = await secretFieldInstance.generateHash(
-          'simulated-password-to-counter-timing-attack'
-        );
-        await secretFieldInstance.compare('', hash);
-        return { success: false, message: '[passwordAuth:failure] Authentication failed' };
-      }
+    // async _getItem(list, args, secretFieldInstance) {
+    //   // Match by identity
+    //   const { identityField } = this.config;
+    //   const identity = args[identityField];
+    //   const results = await list.adapter.find({ [identityField]: identity });
+    //   // If we failed to match an identity and we're protecting existing identities then combat timing
+    //   // attacks by creating an arbitrary hash (should take about as long has comparing an existing one)
+    //   if (results.length !== 1 && this.config.protectIdentities) {
+    //     // TODO: This should call `secretFieldInstance.compare()` to ensure it's
+    //     // always consistent.
+    //     // This may still leak if the workfactor for the password field has changed
+    //     const hash = await secretFieldInstance.generateHash(
+    //       'simulated-password-to-counter-timing-attack'
+    //     );
+    //     await secretFieldInstance.compare('', hash);
+    //     return { success: false, message: '[passwordAuth:failure] Authentication failed' };
+    //   }
   
-      // Identity failures with helpful errors
-      if (results.length === 0) {
-        const key = '[passwordAuth:identity:notFound]';
-        const message = `${key} The ${identityField} provided didn't identify any ${list.plural}`;
-        return { success: false, message };
-      }
-      if (results.length > 1) {
-        const key = '[passwordAuth:identity:multipleFound]';
-        const message = `${key} The ${identityField} provided identified ${results.length} ${list.plural}`;
-        return { success: false, message };
-      }
-      const item = results[0];
-      console.log("_getItem with toJson..")
-      item.groups = toJson(item.groups)
-      item.roles = toJson(item.roles)
+    //   // Identity failures with helpful errors
+    //   if (results.length === 0) {
+    //     const key = '[passwordAuth:identity:notFound]';
+    //     const message = `${key} The ${identityField} provided didn't identify any ${list.plural}`;
+    //     return { success: false, message };
+    //   }
+    //   if (results.length > 1) {
+    //     const key = '[passwordAuth:identity:multipleFound]';
+    //     const message = `${key} The ${identityField} provided identified ${results.length} ${list.plural}`;
+    //     return { success: false, message };
+    //   }
+    //   const item = results[0];
+    //   console.log("_getItem with toJson..")
+    //   item.groups = toJson(item.groups)
+    //   item.roles = toJson(item.roles)
 
-      return { success: true, item };
-    }
+    //   return { success: true, item };
+    // }
   
-    async _matchItem(item, args, secretFieldInstance) {
-      const { secretField } = this.config;
-      const secret = args[secretField];
-      if (item[secretField]) {
-        const success = await secretFieldInstance.compare(secret, item[secretField]);
-        return {
-          success,
-          message: success
-            ? 'Authentication successful'
-            : `[passwordAuth:secret:mismatch] The ${secretField} provided is incorrect`,
-        };
-      }
+    // async _matchItem(item, args, secretFieldInstance) {
+    //   const { secretField } = this.config;
+    //   const secret = args[secretField];
+    //   if (item[secretField]) {
+    //     const success = await secretFieldInstance.compare(secret, item[secretField]);
+    //     return {
+    //       success,
+    //       message: success
+    //         ? 'Authentication successful'
+    //         : `[passwordAuth:secret:mismatch] The ${secretField} provided is incorrect`,
+    //     };
+    //   }
   
-      const hash = await secretFieldInstance.generateHash(
-        'simulated-password-to-counter-timing-attack'
-      );
-      await secretFieldInstance.compare(secret, hash);
-      return {
-        success: false,
-        message:
-          '[passwordAuth:secret:notSet] The item identified has no secret set so can not be authenticated',
-      };
-    }
+    //   const hash = await secretFieldInstance.generateHash(
+    //     'simulated-password-to-counter-timing-attack'
+    //   );
+    //   await secretFieldInstance.compare(secret, hash);
+    //   return {
+    //     success: false,
+    //     message:
+    //       '[passwordAuth:secret:notSet] The item identified has no secret set so can not be authenticated',
+    //   };
+    // }
   
     getAdminMeta() {
       const { listKey, gqlNames } = this;

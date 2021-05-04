@@ -58,7 +58,7 @@ export default ApiPage;
 
 const query = gql`
   query GetProduct($id: ID!) {
-    Product(where: { id: $id }) {
+    DiscoverableProduct(where: { id: $id }) {
       id
       name
       environments {

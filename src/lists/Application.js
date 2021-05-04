@@ -7,7 +7,12 @@ const { EnforcementPoint } = require('../authz/enforcement')
 
 const { v4: uuidv4 } = require('uuid');
 
-const workflow = require('../services/workflow')
+const { DeleteAccess } = require('../services/workflow')
+
+const { DefaultOwnerValue } = require('../components/DefaultOwnerValue');
+const e = require('express');
+
+var { GraphQLSchema, GraphQLResolveInfo } = require('graphql');
 
 module.exports = {
   fields: {
@@ -25,9 +30,14 @@ module.exports = {
         isRequired: true,
         multiLine: true
     },
+    certificate: {
+        type: Text,
+        isRequired: false,
+        multiLine: true
+    },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    owner: { type: Relationship, isRequired: true, ref: 'User' },
+    owner: { type: Relationship, isRequired: true, ref: 'User', access: { update: false } },
   },
   access: EnforcementPoint,
   hooks: {
@@ -43,9 +53,11 @@ module.exports = {
         if (operation == "create") {
             // If an AppId is provided then don't bother creating one
             if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
-                return resolvedData
+            } else {
+                resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             }
-            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+
+            resolvedData['owner'] = context.authedItem.userId
             return resolvedData
         }
     },
@@ -58,11 +70,34 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE APP " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await workflow.DeleteAccess(context, operation, {application: existingItem.id})
+        await DeleteAccess(context.createContext({skipAccessControl:true}), operation, {application: existingItem.id})
     })
 
   },
   plugins: [
     atTracking()
-  ]
+  ],
+  extensions: [
+    (keystone) => {
+      keystone.extendGraphQLSchema({
+        types: [{ type: 'type ApplicationSummary { appId: String, name: String }' }],
+        queries: [
+            {
+              schema: 'allApplicationNames: [ApplicationSummary]',
+              resolver: async (item, args, context, info, other) => {
+                  const noauthContext =  keystone.createContext({ skipAccessControl: true })
+                  console.log(JSON.stringify(context.schemaName))
+                  console.log(JSON.stringify(context.gqlNames))
+                  console.log(JSON.stringify(Object.keys(keystone)))
+                  const a = keystone.getListByKey('Application')
+                  const theResult = await a.listQuery(args, context, a.gqlNames.listQueryName, info)
+
+                  return theResult
+              },
+              access: EnforcementPoint,
+            },
+          ]
+      })
+    }
+  ],
 }

@@ -7,11 +7,13 @@ interface InlinePermissionsListProps {
     scope: string;
     scopeName: string;
   }[];
+  enableRevoke: boolean;
   onRevoke: (id: string) => void;
 }
 
 const InlinePermissionsList: React.FC<InlinePermissionsListProps> = ({
   data,
+  enableRevoke,
   onRevoke,
 }) => {
   const handleRevoke = React.useCallback(
@@ -26,7 +28,7 @@ const InlinePermissionsList: React.FC<InlinePermissionsListProps> = ({
       {data.map((p) => (
         <Tag key={p.id} variant="solid" colorScheme="cyan" whiteSpace="nowrap">
           {p.scopeName}
-          <TagCloseButton onClick={handleRevoke(p.id)} />
+          {enableRevoke && <TagCloseButton onClick={handleRevoke(p.id)} />}
         </Tag>
       ))}
     </HStack>

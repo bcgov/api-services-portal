@@ -3,10 +3,11 @@ import api, { useApi } from '@/shared/services/api';
 import { Box, Container, Divider, Heading, Text } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import GrantAccessDialog from '@/components/grant-access-dialog';
+import GrantServiceAccountDialog from '@/components/grant-service-account-dialog';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ResourcesManager from '@/components/resources-manager';
-import ResourcesList from '@/components/resources-list';
+import UsersAccessList from '@/components/users-access-list';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { getSession } from '@/shared/services/auth';
@@ -14,13 +15,15 @@ import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
 
+import ServiceAccounts from './service-accounts'
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
-  const { issuer } = context.query;
+  const { peid } = context.query;
   const { headers } = context.req;
   const queryClient = new QueryClient();
-  const queryKey = ['resource', id, issuer];
-  const variables = { credIssuerId: issuer, resourceId: id };
+  const queryKey = ['resource', id, peid];
+  const variables = { prodEnvId: peid, resourceId: id };
   const user = await getSession(headers as HeadersInit);
 
   await queryClient.prefetchQuery(
@@ -46,7 +49,10 @@ const ApiAccessResourcePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey, variables }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
-  const { credIssuerId, resourceId } = variables;
+  const { prodEnvId, resourceId } = variables;
+  const requests = data.getPermissionTickets?.filter((p) => !p.granted);
+
+  const resource = data.getResourceSet?.[0]
 
   return (
     <>
@@ -56,15 +62,22 @@ const ApiAccessResourcePage: React.FC<
       <Container maxW="6xl">
         <PageHeader
           actions={
-            <ResourcesManager
-              data={data.getPermissionTickets?.filter((p) => !p.granted)}
-              id={resourceId}
-            />
+            requests.length > 0 && (
+              <ResourcesManager
+                data={requests}
+                resourceId={resourceId}
+                prodEnvId={prodEnvId}
+                queryKey={queryKey}
+              />
+            )
           }
-          breadcrumb={[{ href: '/devportal/access', text: 'My Resources' }]}
-          title="My Resource"
+          breadcrumb={[
+            { href: '/devportal/access', text: 'API Access' },
+            { href: '/devportal/access/' + data?.Environment?.product.id, text: `${data?.Environment?.product.name} Resources` },
+          ]}
+          title={`${resource.type} ${resource.name}`}
         />
-        <Box bgColor="white" my={4}>
+        <Box bgColor="white" my={4} mb={4}>
           <Box
             p={4}
             display="flex"
@@ -73,8 +86,8 @@ const ApiAccessResourcePage: React.FC<
           >
             <Heading size="md">Users with Access</Heading>
             <GrantAccessDialog
-              credIssuerId={credIssuerId}
-              data={data.getResourceSet}
+              prodEnvId={prodEnvId}
+              resource={resource}
               resourceId={resourceId}
             />
           </Box>
@@ -85,12 +98,32 @@ const ApiAccessResourcePage: React.FC<
               title="No Resources"
             />
           )}
-          <ResourcesList
+          <UsersAccessList
+            enableRevoke
             data={data?.getPermissionTickets.filter((p) => p.granted)}
             resourceId={resourceId}
-            credIssuerId={credIssuerId}
+            prodEnvId={prodEnvId}
             queryKey={queryKey}
           />
+
+        </Box>
+
+        <Box bgColor="white" my={4} mb={4}>
+          <Box
+            p={4}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Heading size="md">Service Accounts with Access</Heading>
+            <GrantServiceAccountDialog
+              prodEnvId={prodEnvId}
+              resource={resource}
+              resourceId={resourceId}
+            />
+          </Box>
+          <Divider />
+          <ServiceAccounts prodEnvId={prodEnvId} data={data?.getUmaPolicies} queryKey={queryKey}/>
         </Box>
       </Container>
     </>
@@ -100,8 +133,8 @@ const ApiAccessResourcePage: React.FC<
 export default ApiAccessResourcePage;
 
 const query = gql`
-  query GetPermissions($resourceId: String, $credIssuerId: ID!) {
-    getPermissionTickets(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+  query GetPermissions($resourceId: String, $prodEnvId: ID!) {
+    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {
       id
       owner
       ownerName
@@ -114,7 +147,7 @@ const query = gql`
       granted
     }
 
-    getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {
+    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {
       id
       name
       description
@@ -127,17 +160,19 @@ const query = gql`
       scopes
     }
 
-    CredentialIssuer(where: { id: $credIssuerId }) {
-      clientId
-      resourceType
-      availableScopes
-    }
-
-    getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {
+    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
       type
       resource_scopes {
+        name
+      }
+    }
+    
+    Environment(where: { id: $prodEnvId }) {
+      name
+      product {
+        id
         name
       }
     }

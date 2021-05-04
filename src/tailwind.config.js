@@ -3,6 +3,9 @@ module.exports = {
     './nextapp/components/**/*.{js,ts,jsx,tsx}',
     './nextapp/pages/**/*.{js,ts,jsx,tsx}',
     './nextapp/shared/**/*.{js,ts,jsx,tsx}',
+    './apis/api/**/*.{js,ts,jsx,tsx}',
+    './apis/services/**/*.{js,ts,jsx,tsx}',
+    './apis/shared/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'media', // 'media' or 'class'
   theme: {

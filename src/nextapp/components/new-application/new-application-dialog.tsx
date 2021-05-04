@@ -108,12 +108,11 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
 export default NewApplicationDialog;
 
 const mutation = gql`
-  mutation Add($name: String!, $owner: ID!, $description: String) {
+  mutation Add($name: String!, $description: String) {
     createApplication(
       data: {
         name: $name
         description: $description
-        owner: { connect: { id: $owner } }
       }
     ) {
       id

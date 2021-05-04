@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request';
 
 export const GET_LIST = gql`
-  query GET($namespace: String!) {
-    allProducts(where: { namespace: $namespace }) {
+  query GET {
+    allProductsByNamespace {
       id
       name
       description

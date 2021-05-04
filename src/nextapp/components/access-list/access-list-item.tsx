@@ -2,26 +2,24 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ButtonGroup,
   Divider,
   Flex,
-  Grid,
-  GridItem,
   Heading,
   HStack,
   Icon,
-  Link,
+  Spacer,
   Tag,
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { ServiceAccess } from '@/shared/types/query.types';
+import { ServiceAccess, Product } from '@/shared/types/query.types';
 import {
   FaCheck,
   FaChevronRight,
   FaFolder,
   FaHourglass,
   FaMinusCircle,
+  FaTimes,
 } from 'react-icons/fa';
 import CircleIcon from '../circle-icon';
 import { gql } from 'graphql-request';
@@ -31,7 +29,7 @@ import api from '@/shared/services/api';
 
 interface AccessListItemProps {
   data: ServiceAccess[];
-  product: string;
+  product: Product;
   queryKey: QueryKey;
 }
 
@@ -66,14 +64,26 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
     [client, queryKey, revoke, toast]
   );
 
-  console.log(data);
   return (
     <Box bgColor="white" mb={4}>
       <Flex as="header" align="center" justify="space-between" p={4}>
         <Flex as="hgroup" align="center">
           <Icon as={FaFolder} color="bc-blue-alt" mr={2} boxSize="6" />
-          <Heading size="md">{product}</Heading>
+          <Heading size="md">{product.name}</Heading>
         </Flex>
+        <Spacer />
+        {data.filter(e => e.productEnvironment.credentialIssuer?.resourceType).length > 0 && (
+            <NextLink href={`/devportal/access/${product.id}`}>
+            <Button
+                size="sm"
+                variant="primary"
+                display="flex"
+                rightIcon={<Icon as={FaChevronRight} />}
+            >
+                Manage Resources
+            </Button>
+            </NextLink>
+        )}
       </Flex>
       <Divider />
       {data.map((d, index, arr) => (
@@ -85,63 +95,61 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           borderBottomWidth={index === arr.length - 1 ? 0 : 1}
           bgColor="blue.50"
         >
-          <NextLink
-            href={`/devportal/access/${d.productEnvironment.id}?issuer=${d.productEnvironment.credentialIssuer?.id}`}
-          >
-            <Link flex={1} display="flex" _hover={{ textDecoration: 'none' }}>
-              <Box mr={2}>
-                {d.active && (
-                  <CircleIcon label="Approved" color="green">
-                    <Icon as={FaCheck} />
-                  </CircleIcon>
+          <Flex flex={1}>
+            <Box mr={2}>
+              {d.active && (
+                <CircleIcon label="Approved" color="green">
+                  <Icon as={FaCheck} />
+                </CircleIcon>
+              )}
+              {!d.active && (
+                <CircleIcon label="Pending" color="orange">
+                  <Icon as={FaHourglass} />
+                </CircleIcon>
+              )}
+            </Box>
+            <Box display="flex" alignItems="center">
+              <Text
+                display="inline-block"
+                fontSize="sm"
+                bgColor="blue.300"
+                color="white"
+                textTransform="uppercase"
+                px={2}
+                borderRadius={2}
+              >
+                {d.productEnvironment.name}
+              </Text>
+              <HStack ml={3}>
+                {!d.productEnvironment.services?.length && (
+                  <Tag
+                    borderRadius="full"
+                    variant="subtle"
+                    colorScheme="orange"
+                  >
+                    No services
+                  </Tag>
                 )}
-                {!d.active && (
-                  <CircleIcon label="Pending" color="orange">
-                    <Icon as={FaHourglass} />
-                  </CircleIcon>
-                )}
-              </Box>
-              <Box display="flex" alignItems="center">
-                <Text
-                  display="inline-block"
-                  fontSize="sm"
-                  bgColor="blue.300"
-                  color="white"
-                  textTransform="uppercase"
-                  px={2}
-                  borderRadius={2}
-                >
-                  {d.productEnvironment.name}
-                </Text>
-                <HStack ml={3}>
-                  {!d.productEnvironment.services?.length && (
-                    <Tag
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme="orange"
-                    >
-                      No services
-                    </Tag>
-                  )}
-                  {d.productEnvironment.services?.map((s) => (
-                    <Tag
-                      key={s.id}
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme="cyan"
-                    >
-                      {s.name}
-                    </Tag>
-                  ))}
-                </HStack>
-              </Box>
-            </Link>
-          </NextLink>
+                {d.productEnvironment.services?.map((s) => (
+                  <Tag
+                    key={s.id}
+                    borderRadius="full"
+                    variant="subtle"
+                    colorScheme="cyan"
+                  >
+                    {s.name}
+                  </Tag>
+                ))}
+              </HStack>
+            </Box>
+          </Flex>
           <Box display="flex" alignItems="center" justifyContent="flex-end">
             <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<Icon as={FaMinusCircle} />}
+              color={d.active ? 'red' : 'orange'}
+              variant="outline"
+              bgColor="white"
+              size="xs"
+              leftIcon={<Icon as={d.active ? FaMinusCircle : FaTimes} />}
               onClick={handleRevoke(d.id)}
             >
               {d.active ? 'Revoke Access' : 'Cancel Request'}

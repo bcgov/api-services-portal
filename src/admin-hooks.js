@@ -28,7 +28,7 @@ module.exports = {
         },
         {
             label: 'Keycloak',
-            children: ['Namespace', 'MemberRole', 'User', 'Group'],
+            children: ['User'],
         },
         {
             label: 'Kong',

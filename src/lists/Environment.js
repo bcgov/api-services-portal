@@ -5,7 +5,7 @@ const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
 const {v4: uuidv4} = require('uuid');
 
-const workflow = require('../services/workflow')
+const { ValidateActiveEnvironment } = require('../services/workflow')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
@@ -87,7 +87,7 @@ module.exports = {
         console.log("VALIDATE " + operation + " " + JSON.stringify(existingItem, null, 3));
         console.log("VALIDATE " + operation + " " + JSON.stringify(originalInput, null, 3));
         console.log("VALIDATE " + operation + " " + JSON.stringify(resolvedData, null, 3));
-        await workflow.ValidateActiveEnvironment(context, operation, existingItem, originalInput, resolvedData, addValidationError)
+        await ValidateActiveEnvironment(context, operation, existingItem, originalInput, resolvedData, addValidationError)
     })
 }
 }

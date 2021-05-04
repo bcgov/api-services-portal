@@ -5,7 +5,7 @@ const { byTracking } = require('../components/ByTracking')
 
 const { atTracking } = require('@keystonejs/list-plugins')
 
-const { EnforcementPoint } = require('../authz/enforcement')
+const { EnforcementPoint, FieldEnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {
   fields: {
@@ -13,6 +13,11 @@ module.exports = {
         type: Text,
         isRequired: true,
         isUnique: true
+    },
+    namespace: {
+        type: Text,
+        isRequired: true,
+        access: FieldEnforcementPoint
     },
     description: {
         type: Markdown,
@@ -36,6 +41,11 @@ module.exports = {
         { value: 'auto', label: 'Automatic'},
       ]
     },
+    clientAuthenticator: { type: Select, emptyOption: true, dataType: 'string', options: [
+        { value: 'client-secret', label: 'Client ID and Secret'},
+        { value: 'client-jwt', label: 'Signed JWT'},
+      ]
+    },
     authPlugin: {
         type: Text,
         isRequired: false,
@@ -43,6 +53,10 @@ module.exports = {
     instruction: {
         type: Markdown,
         isRequired: false,
+    },
+    environmentDetails: {
+        type: Text,
+        isRequired: true
     },
     oidcDiscoveryUrl: {
         type: Url,
@@ -62,11 +76,15 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    availableScopes: {
+        type: Text,
+        isRequired: false,
+    },
     clientRoles: {
         type: Text,
         isRequired: false,
     },
-    availableScopes: {
+    resourceScopes: {
         type: Text,
         isRequired: false,
     },
@@ -79,12 +97,24 @@ module.exports = {
         isRequired: false,
         defaultValue: 'X-API-KEY'
     },
-    owner: { type: Relationship, ref: 'User', isRequired: true, many: false },
+    owner: { type: Relationship, ref: 'User', isRequired: true, many: false, access: { update: false } },
     environments: { type: Relationship, ref: 'Environment.credentialIssuer', many: true }
   },
   access: EnforcementPoint,
   plugins: [
     byTracking(),
     atTracking()
-  ]
+  ],
+  hooks: {
+    resolveInput: ({
+        operation,
+        resolvedData,
+        context,
+    }) => {
+        if (operation == "create") {
+            resolvedData['owner'] = context.authedItem.userId
+        }
+        return resolvedData
+    }
+  }  
 }

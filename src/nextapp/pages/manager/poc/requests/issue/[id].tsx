@@ -141,7 +141,7 @@ const FulfillRequest = () => {
                         </>
                     ):false}
                 </div>
-                <div className="flex">
+                {/* <div className="flex">
 
                     <Flex direction="column" className="m-5">
                         <GenericControl meta={{name: "Rate Limiting", config: [ 
@@ -151,7 +151,7 @@ const FulfillRequest = () => {
                         ]}}/>
                         <GenericControl meta={{name: "IP Restrictions", config: [ {label: "Allow", placeholder: "IP list to allow", value: ""}, {label: "Deny", placeholder: "IP list to deny", value: ""}]}}/>
                     </Flex>
-                </div>
+                </div> */}
 
                 {/* <h2 style={styles.h2}>Consumer Details</h2>
                 <Flex direction="column" className="m-5">
@@ -179,17 +179,6 @@ const FulfillRequest = () => {
                 { request?.productEnvironment?.credentialIssuer != null && (
                 <ScopeChoice selectedScopes={selectedScopes} scopes={request?.productEnvironment?.credentialIssuer.availableScopes}/>
                 )}
-
-                <h2 style={styles.h2}>Nickname</h2>
-                <p>Nickname is a unique identifier that you can assign to the Consumer</p>
-
-                <h2 style={styles.h2}>Additional Information Provided by Requestor</h2>
-                <p>{request?.additionalDetails}</p>
-
-                <h2 style={styles.h2}>Communication to {request.requestor.name}</h2>
-                <div className="flex m-5">
-                    <Textarea placeholder="Communication" name="communication" defaultValue={comms} style={{height:"200px"}}/>
-                </div>
 
                 <ButtonGroup variant="outline" spacing="6" className="m-5">
                     <Button colorScheme="blue" onClick={() => fulfill()}>Approve</Button>

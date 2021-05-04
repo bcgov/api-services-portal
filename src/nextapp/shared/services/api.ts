@@ -46,7 +46,7 @@ const api = async <T extends ApiResponse>(
     headers: {},
     ...options,
   };
-  const apiClient = new GraphQLClient(`${apiHost}/admin/api`, {
+  const apiClient = new GraphQLClient(`${apiHost}/gql/api`, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -102,6 +102,34 @@ export const useApiMutation = <T>(
       await api<Query>(mutation, variables, { ssr: false })
   );
   return mutate;
+};
+
+/**
+ * GWA API
+ *
+ * This is a standard REST API, used for a few specific use cases
+ * TODO: Rename api and this restApi functions to be more specific
+ */
+export const restApi = async <T>(url: string, options = {}): Promise<T> => {
+  try {
+    const config = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...options,
+    };
+    const response = await fetch(url, config);
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw response.statusText;
+    }
+
+    return json;
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 export default api;

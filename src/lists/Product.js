@@ -21,10 +21,6 @@ module.exports = {
     namespace: {
         type: Text,
         isRequired: true,
-        defaultValue: ({ context, originalInput }) => {
-            console.log("DEFAULT VALUE = "+context['authedItem']['namespace']);
-            return context['authedItem'] == null ? null : context['authedItem']['namespace']
-        },
         access: FieldEnforcementPoint
     },
     description: {
@@ -33,13 +29,14 @@ module.exports = {
       isRequired: false,
     },
     dataset: { type: Relationship, ref: 'Dataset' },
-    organization: { type: Relationship, ref: 'Organization' },
+    organization: { type: Relationship, ref: 'Organization', many: false },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
     environments: { type: Relationship, ref: 'Environment.product', many: true },
   },
   access: EnforcementPoint,
   hooks: {
     resolveInput: ({
+        context,
         operation,
         resolvedData
     }) => {
@@ -47,8 +44,10 @@ module.exports = {
             // If an AppId is provided then don't bother creating one
             if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
                 return resolvedData
+            } else {
+                resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
             }
-            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+            resolvedData['namespace'] = context['authedItem']['namespace']
             return resolvedData
         }
         return resolvedData

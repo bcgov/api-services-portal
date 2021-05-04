@@ -44,7 +44,7 @@ const ApiDiscoveryPage: React.FC = () => {
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>
         <Box mt={5}>
-          <DiscoveryList data={data.allProducts} />
+          <DiscoveryList data={data.allDiscoverableProducts} />
         </Box>
       </Container>
     </>
@@ -54,18 +54,15 @@ const ApiDiscoveryPage: React.FC = () => {
 export default ApiDiscoveryPage;
 
 const query = gql`
-  query GetServices {
-    allProducts {
+  query GetProducts {
+    allDiscoverableProducts {
       id
       name
       environments {
         name
         active
         flow
-        services {
-          name
-          host
-        }
+        
       }
       dataset {
         name

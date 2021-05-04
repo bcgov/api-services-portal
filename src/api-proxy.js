@@ -9,12 +9,13 @@ class ApiProxyApp {
     this._gwaApiUrl = gwaApiUrl;
   }
 
-  prepareMiddleware() {
+  prepareMiddleware({ keystone }) {
     const app = express();
+    
     const apiProxy = createProxyMiddleware({ 
         target: this._gwaApiUrl, 
         changeOrigin: true,
-        pathRewrite: { '^/api/': '/v2/' },
+        pathRewrite: { '^/gw/api/': '/v2/' },
         onProxyReq: (proxyReq, req) => {
             // console.log(req.headers)
             // proxyReq.removeHeader("cookie");
@@ -29,7 +30,24 @@ class ApiProxyApp {
             res.end('error reaching api');
         }
     })
-    app.all(/^\/api/, apiProxy)
+    app.all(/^\/gw\/api\//, apiProxy)
+
+
+    async function call (user, q, vars = {}) {
+        return await keystone.executeGraphQL({
+            context: keystone.createContext({authentication : { item : user }, skipAccessControl: true}),
+            query: q,
+            variables: vars
+        })
+    }
+
+    app.use(express.json());
+    app.post('/graphql/api', async (req, res) => {
+        const result = await call(req.user, req.body.query, 'variables' in req.body ? req.body.variables : {})
+        res.json(result)
+    })
+
+    
     return app;
   }
 }

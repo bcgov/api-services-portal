@@ -6,18 +6,18 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Text,
 } from '@chakra-ui/react';
 import Button from '@/components/button';
-import { FaChevronDown, FaNetworkWired, FaUserCircle } from 'react-icons/fa';
+import { FaChevronDown, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
+import NamespaceMenu from '../namespace-menu';
 
 interface AuthActionProps {
-    site: String;
+  site: string;
 }
 
-const Signin: React.FC<AuthActionProps> = ({site}) => {
+const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -33,21 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({site}) => {
 
   return (
     <Box d="flex" alignItems="center" justifyContent="flex-end">
-      {user.namespace && (
-        <Box
-          p={1}
-          px={2}
-          mr={4}
-          borderRadius={4}
-          borderColor="bc-blue-alt"
-          borderWidth={1}
-          display="flex"
-          alignItems="center"
-        >
-          <Icon as={FaNetworkWired} mr={2} color="rgba(255, 255, 255, 0.75)" />
-          <Text fontSize="xs">{user.namespace}</Text>
-        </Box>
-      )}
+      {user.namespace && <NamespaceMenu user={user} />}
       <Box
         as="span"
         d="flex"

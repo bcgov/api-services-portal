@@ -5,8 +5,9 @@ const { byTracking } = require('../components/ByTracking')
 
 const { atTracking } = require('@keystonejs/list-plugins')
 
-const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement');
-const workflow = require('../services/workflow')
+const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
+
+const { Apply, Validate } = require('../services/workflow')
 
 module.exports = {
   fields: {
@@ -73,7 +74,7 @@ module.exports = {
         console.log("VALIDATE AR " + operation + " " + JSON.stringify(existingItem, null, 3));
         console.log("VALIDATE AR " + operation + " " + JSON.stringify(originalInput, null, 3));
         console.log("VALIDATE AR " + operation + " " + JSON.stringify(resolvedData, null, 3));
-        await workflow.Validate(context, operation, existingItem, originalInput, resolvedData, addValidationError)
+        await Validate(context, operation, existingItem, originalInput, resolvedData, addValidationError)
     }),
     beforeChange: ({
         operation,
@@ -99,7 +100,7 @@ module.exports = {
         console.log("AFTER CHG AR " + operation + " " + JSON.stringify(originalInput, null, 3));
         console.log("AFTER CHG AR " + operation + " " + JSON.stringify(updatedItem, null, 3));
 
-        await workflow.Apply(context, operation, existingItem, originalInput, updatedItem)
+        await Apply(context.createContext({skipAccessControl:true}), operation, existingItem, originalInput, updatedItem)
     })
   }
 }

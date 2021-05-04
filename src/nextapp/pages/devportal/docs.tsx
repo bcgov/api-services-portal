@@ -92,7 +92,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   try {
     const pagesQuery = gql`
       {
-        allContents(where: { isComplete: true }) {
+        allDiscoverableContents(where: { isComplete: true }) {
           id
           title
           slug

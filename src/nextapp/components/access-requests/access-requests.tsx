@@ -25,7 +25,7 @@ import NextLink from 'next/link';
 
 const query = gql`
   query GetPendingAccessRequests {
-    allAccessRequests(where: { isIssued_not: true }) {
+    allAccessRequestsByNamespace(where: { isIssued_not: true }) {
       id
       name
       requestor {
@@ -45,13 +45,13 @@ const AccessRequests: React.FC = () => {
     },
     { suspense: false }
   );
-  const total = data?.allAccessRequests.length ?? 0;
+  const total = data?.allAccessRequestsByNamespace.length ?? 0;
   const isShowingAll = total > initialSlice && sliceIndex !== initialSlice;
-  const color = data?.allAccessRequests.length === 0 ? 'blue' : 'yellow';
+  const color = data?.allAccessRequestsByNamespace.length === 0 ? 'blue' : 'yellow';
   const handleShowMore = React.useCallback(
     () =>
       setSliceIndex((s) =>
-        s === initialSlice ? data.allAccessRequests.length : initialSlice
+        s === initialSlice ? data.allAccessRequestsByNamespace.length : initialSlice
       ),
     [data, setSliceIndex]
   );
@@ -77,7 +77,7 @@ const AccessRequests: React.FC = () => {
       </Box>
       <Table size="sm" variant="simple" borderRadius={4}>
         <Tbody>
-          {data?.allAccessRequests.length === 0 && (
+          {data?.allAccessRequestsByNamespace.length === 0 && (
             <Tr>
               <Td colSpan={4}>
                 <Center>
@@ -99,7 +99,7 @@ const AccessRequests: React.FC = () => {
               </Td>
             </Tr>
           )}
-          {data?.allAccessRequests.slice(0, sliceIndex).map((d) => (
+          {data?.allAccessRequestsByNamespace.slice(0, sliceIndex).map((d) => (
             <Tr key={d.id}>
               <Td borderColor="yellow.300" width="5">
                 <Icon as={FaUser} color="yellow.700" />
@@ -135,14 +135,14 @@ const AccessRequests: React.FC = () => {
               </Td>
             </Tr>
           ))}
-          {data?.allAccessRequests.length > 4 && (
+          {data?.allAccessRequestsByNamespace.length > 4 && (
             <Tr>
               <Td colSpan={4} textAlign="center">
                 <Button size="sm" variant="secondary" onClick={handleShowMore}>
                   {isShowingAll
                     ? 'Show less'
                     : `Show ${
-                        data.allAccessRequests.length - initialSlice
+                        data.allAccessRequestsByNamespace.length - initialSlice
                       } More`}
                 </Button>
               </Td>

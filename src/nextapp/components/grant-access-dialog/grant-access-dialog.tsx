@@ -28,18 +28,19 @@ import { UmaResourceSet } from '@/shared/types/query.types';
 import { useApiMutation } from '@/shared/services/api';
 
 interface ShareResourceDialogProps {
-  credIssuerId: string;
-  data: UmaResourceSet[];
+  prodEnvId: string;
+  resource: UmaResourceSet;
   resourceId: string;
 }
 
 const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
-  credIssuerId,
-  data,
+  prodEnvId,
+  resource,
   resourceId,
 }) => {
   const grant = useApiMutation(mutation);
   const toast = useToast();
+  const title = 'Grant User Access';
   const formRef = React.useRef<HTMLFormElement>();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const handleGrantAccess = async () => {
@@ -47,7 +48,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
     const scopes = formData.getAll('scopes') as string[];
 
     await grant.mutateAsync({
-      credIssuerId,
+      prodEnvId,
       data: {
         username: formData.get('username') as string,
         resourceId,
@@ -77,7 +78,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
         onClick={onOpen}
         variant="primary"
       >
-        Add User
+        {title}
       </Button>
       <Modal
         isOpen={isOpen}
@@ -87,7 +88,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Grant User Access</ModalHeader>
+          <ModalHeader>{title}</ModalHeader>
           <ModalBody>
             {grant.isError && (
               <Box bgColor="red.500" px={4} py={2} color="white" my={3}>
@@ -108,8 +109,8 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
                   <FormLabel>Permissions</FormLabel>
                   <CheckboxGroup>
                     <Wrap spacing={4}>
-                      {data.map((r) => (
-                        <WrapItem key={r.id}>
+                      {resource.resource_scopes.map((r) => (
+                        <WrapItem key={r.name}>
                           <Checkbox value={r.name} name="scopes">
                             {r.name}
                           </Checkbox>
@@ -139,10 +140,10 @@ export default ShareResourceDialog;
 
 const mutation = gql`
   mutation GrantUserAccess(
-    $credIssuerId: ID!
+    $prodEnvId: ID!
     $data: UMAPermissionTicketInput!
   ) {
-    grantPermissions(credIssuerId: $credIssuerId, data: $data) {
+    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
       id
     }
   }

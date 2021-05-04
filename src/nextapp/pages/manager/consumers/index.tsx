@@ -72,22 +72,22 @@ const ConsumersPage: React.FC<
     <>
       <Head>
         <title>{`Consumers ${
-          data?.allAccessRequests.length > 0
-            ? `(${data?.allAccessRequests.length})`
+          data?.allAccessRequestsByNamespace.length > 0
+            ? `(${data?.allAccessRequestsByNamespace.length})`
             : ''
         }`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader title="Consumers" breadcrumb={breadcrumbs([])}/>
         <Box mb={4}>
-          {data?.allAccessRequests.length === 0 && (
+          {data?.allAccessRequestsByNamespace.length === 0 && (
             <Alert status="info">
               <AlertIcon />
               Once you add consumers to your API, access requests will be listed
               here.
             </Alert>
           )}
-          {data?.allAccessRequests.length > 0 && <AccessRequests />}
+          {data?.allAccessRequestsByNamespace.length > 0 && <AccessRequests />}
         </Box>
         <Box bgColor="white" mb={4}>
           <Box
@@ -109,7 +109,7 @@ const ConsumersPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-              {data.allServiceAccesses.length === 0 && (
+              {data.allServiceAccessesByNamespace.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -125,7 +125,7 @@ const ConsumersPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allServiceAccesses?.filter(d => d.consumer != null).map(d => d.consumer).map((d) => (
+              {data.allServiceAccessesByNamespace?.filter(d => d.consumer != null).map(d => d.consumer).map((d) => (
                 <Tr key={d.id}>
                   <Td>
                     <NextLink passHref href={`/manager/consumers/${d.id}`}>
@@ -191,7 +191,7 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
-    allServiceAccesses(first: 200, sortBy: updatedAt_DESC) {
+    allServiceAccessesByNamespace(first: 200) {
         consumer {
             id
             username
@@ -205,7 +205,7 @@ const query = gql`
         }
     }
 
-    allAccessRequests(where: { isComplete_not: true }) {
+    allAccessRequestsByNamespace(where: { isComplete_not: true }) {
       id
     }
   }

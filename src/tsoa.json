@@ -1,0 +1,18 @@
+{
+    "entryFile": "server.ts",
+    "noImplicitAdditionalProperties": "throw-on-extras",
+    "controllerPathGlobs": ["**/*Controller.ts"],
+    "spec": {
+      "outputDirectory": "controllers",
+      "specVersion": 3,
+      "basePath": "/ds/api",
+      "yaml": true
+    },
+    "routes": {
+      "routesDir": "controllers",
+      "basePath": "/ds/api"
+    },
+    "ignore": [
+        "**/node_modules/**"
+    ]
+}

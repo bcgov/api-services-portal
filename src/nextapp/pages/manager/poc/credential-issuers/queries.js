@@ -1,6 +1,6 @@
 export const GET_LIST = `
     query GetCredentialIssuers {
-        allCredentialIssuers(orderBy: "name_ASC") {
+        allCredentialIssuersByNamespace {
           id
           name
           flow
@@ -21,19 +21,20 @@ export const GET_LIST = `
 
 export const GET_ISSUER = `
     query GetCredentialIssuer($id: ID!) {
-        allCredentialIssuers(where: { id: $id }) {
+        CredentialIssuer(where: { id: $id }) {
             id
             name
             flow
             mode
-            clientId
-            clientRegistration
-            oidcDiscoveryUrl
             apiKeyName
+            clientAuthenticator
             clientRoles
             availableScopes
+            resourceScopes
             resourceType
+            environmentDetails
             owner {
+                id
                 name
                 username
                 email
@@ -49,11 +50,32 @@ export const GET_ISSUER = `
 `
 
 export const UPDATE_ISSUER = `
+    mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {
+        updateCredentialIssuer (id: $id, data: $data) {
+            id
+        }
+    }
 `
 
 export const UPDATE_ISSUER_AUTHZ = `
     mutation UpdateAuthorization($id: ID!, $clientRoles: String!, $availableScopes: String!, $resourceType: String!) {
         updateCredentialIssuer (id: $id, data: { clientRoles: $clientRoles, availableScopes: $availableScopes, resourceType: $resourceType }) {
+            id
+        }
+    }
+`
+
+export const CREATE_ISSUER = `
+    mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {
+        createCredentialIssuer (data: $data) {
+            id
+        }
+    }
+`
+
+export const DELETE_ISSUER = `
+    mutation CreateAuthzProfile($id: ID!) {
+        deleteCredentialIssuer (id: $id) {
             id
         }
     }
