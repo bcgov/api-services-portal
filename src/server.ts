@@ -27,7 +27,6 @@ const MongoStore = require('connect-mongo')(session);
 
 const redis = require('redis')
 let RedisStore = require('connect-redis')(session)
-let redisClient = redis.createClient()
 
 const { Strategy, Issuer, Client } = require('openid-client');
 
