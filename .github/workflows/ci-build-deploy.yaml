@@ -209,6 +209,11 @@ jobs:
           GWA_RES_SVR_CLIENT_ID:
             value: 'gwa-api'
 
+        readinessProbe:
+          exec:
+            command:
+            - sh -c 'state=$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".loading | ascii_downcase\"); if [ \"$loading\" == \"true\" ]; then exit 1; fi'
+
         " > values.yaml
         
         helm repo add bcgov http://bcgov.github.io/helm-charts
