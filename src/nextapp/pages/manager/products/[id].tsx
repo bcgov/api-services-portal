@@ -84,7 +84,7 @@ const EnvironmentPage: React.FC<
           </>
         </PageHeader>
         <Box>
-          <EnvironmentConfig data={data.Environment} />}  
+          <EnvironmentConfig data={data.Environment} />
         </Box>
         <Box my={5}>
           {user?.namespace && (

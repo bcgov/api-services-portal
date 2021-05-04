@@ -122,7 +122,7 @@ const ApplicationsPage: React.FC<
         </PageHeader>
         { cred != null && ( 
             <Box m={4}>
-                <ViewSecret cred={cred} defaultShow={true} instruction={null}/> 
+                <ViewSecret cred={cred} defaultShow={true} instruction={null} onClose={() => true}/> 
             </Box>
         )}
         { pending && (
