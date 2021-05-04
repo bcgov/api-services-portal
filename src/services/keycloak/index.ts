@@ -9,4 +9,4 @@ export type { Token } from './tokenService'
 
 export { KeycloakUserService } from './userService'
 
-export { getOpenidFromDiscovery } from './keycloakApi'
+export { getOpenidFromDiscovery, getOpenidFromIssuer } from './keycloakApi'

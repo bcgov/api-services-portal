@@ -6,7 +6,9 @@ import NameValue from '@/components/name-value';
 
 import Item from './item'
 
-function List({ data, state, refetch }) {
+import IssuerEnvironmentItem from './issuer-environment-item'
+
+function List({ data, state, doDelete }) {
     switch (state) {
       case 'loading': {
         return <p>Loading...</p>;
@@ -24,17 +26,20 @@ function List({ data, state, refetch }) {
             <TableCaption>-</TableCaption>
             <Thead>
                 <Tr>
-                <Th>Name</Th>
-                <Th>Flow</Th>
-                <Th>Mode</Th>
-                <Th>Administrator</Th>
+                <Th>Environment</Th>
+                <Th>Issuer</Th>
+                <Th>Registration</Th>
+                <Th>Client ID</Th>
                 <Th>Action</Th>
                 </Tr>
             </Thead>
             <Tbody>
-            {data.allCredentialIssuersByNamespace.map((item, index) => (
-              <Item issuer={item} refetch={refetch} key={index} />
+            {data.map((item, index) => (
+              <IssuerEnvironmentItem environment={item} key={index} doDelete={() => doDelete(index)}/>
             ))}
+            {data.length == 0 && (
+                <Tr><Td colSpan={5}>none created</Td></Tr>
+            )}
             </Tbody>
             </Table>
         );

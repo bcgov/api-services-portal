@@ -104,7 +104,6 @@ module.exports = {
                             credentialIssuer {
                                 id
                                 flow
-                                oidcDiscoveryUrl
                             }
                             services {
                                 name
@@ -144,7 +143,6 @@ module.exports = {
                             credentialIssuer {
                                 id
                                 flow
-                                oidcDiscoveryUrl
                             }
                             services {
                                 name
@@ -346,21 +344,17 @@ module.exports = {
     lookupCredentialIssuerById: async function (context, id) {
         const result = await context.executeGraphQL({
             query: `query GetCredentialIssuerById($id: ID!) {
-                        allCredentialIssuers(where: {id: $id}) {
+                        CredentialIssuer(where: {id: $id}) {
                             name
                             flow
                             mode
-                            oidcDiscoveryUrl
-                            initialAccessToken
-                            clientRegistration
-                            clientId
-                            clientSecret
+                            environmentDetails
                         }
                     }`,
             variables: { id: id },
         })
         console.log("lookupCredentialIssuerById " + JSON.stringify(result))
-        return result.data.allCredentialIssuers[0]    
+        return result.data.CredentialIssuer
     },
 
     addKongConsumer: async function(context, username, customId, extForeignKey) {

@@ -63,21 +63,19 @@ const mongooseAdapterConfig = {
 
 // GraphQL TypeScript codegen. Will output a `types.d.ts` file to `./src`
 async function generateTypes() {
-  try {
-    const generatedFiles = await generate(
-      {
-        schema: `http://localhost:3000${apiPath}`,
-        generates: {
-          [process.cwd() + '/nextapp/shared/types/query.types.ts']: {
-            plugins: ['typescript'],
-          },
-        },
-      },
-      true
-    );
-  } catch (err) {
-    throw new Error(err);
-  }
+    await Promise.all(['/nextapp/shared/types/query.types.ts', '/services/keystone/types.ts'].map (async (path:string) => {
+        await generate(
+            {
+              schema: `http://localhost:3000${apiPath}`,
+              generates: {
+                [process.cwd() + path]: {
+                  plugins: ['typescript'],
+                },
+              },
+            },
+            true
+          )      
+    }))
 }
 
 const adapter = process.env.ADAPTER ? process.env.ADAPTER : "mongoose"

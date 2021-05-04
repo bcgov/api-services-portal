@@ -41,6 +41,11 @@ module.exports = {
         { value: 'auto', label: 'Automatic'},
       ]
     },
+    clientAuthenticator: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'client-secret', options: [
+        { value: 'client-secret', label: 'Client ID and Secret'},
+        { value: 'client-jwt', label: 'Signed JWT'},
+      ]
+    },
     authPlugin: {
         type: Text,
         isRequired: false,
@@ -48,6 +53,10 @@ module.exports = {
     instruction: {
         type: Markdown,
         isRequired: false,
+    },
+    environmentDetails: {
+        type: Text,
+        isRequired: true
     },
     oidcDiscoveryUrl: {
         type: Url,
@@ -67,16 +76,15 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    availableScopes: {
+        type: Text,
+        isRequired: false,
+    },
     clientRoles: {
         type: Text,
         isRequired: false,
     },
-    clientAuthenticator: { type: Select, emptyOption: false, dataType: 'string', defaultValue: 'client-secret', options: [
-        { value: 'client-secret', label: 'Client ID and Secret'},
-        { value: 'client-jwt', label: 'Signed JWT'},
-      ]
-    },
-    availableScopes: {
+    resourceScopes: {
         type: Text,
         isRequired: false,
     },
@@ -105,8 +113,8 @@ module.exports = {
     }) => {
         if (operation == "create") {
             resolvedData['owner'] = context.authedItem.userId
-            return resolvedData
         }
+        return resolvedData
     }
   }  
 }

@@ -13,9 +13,9 @@ import gfm from 'remark-gfm';
 
 const { useEffect, useState } = React
 
-function ViewSecret({cred, defaultShow, instruction}) {
+function ViewSecret({cred, defaultShow, instruction, onClose}) {
     const [show, setShow] = React.useState(defaultShow)
-    const handleClick = () => setShow(!show)
+    const handleClick = () => { setShow(!show); onClose() }
   
     useEffect (() => setShow(true), [cred])
 
@@ -37,6 +37,8 @@ function ViewSecret({cred, defaultShow, instruction}) {
                         {name:'apiKey', label:'API Key'}, 
                         {name:'clientId', label:'Client ID'}, 
                         {name:'clientSecret', label:'Client Secret'},
+                        {name:'privateKey', label:'Signing Key'},
+                        {name:'certificate', label:'Signing Certificate'},
                         {name:'tokenEndpoint', label:'Token Endpoint'}
                     ].filter(c => c.name in cred).map(c => (
                         <Box><strong>{c.label} :</strong> {cred[c.name]}</Box>

@@ -47,6 +47,7 @@ module.exports = {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
 
                     const issuer = await keystoneApi.lookupCredentialIssuerById(noauthContext, args.credIssuerId)
+                    
                     const openid = await getOpenidFromDiscovery (issuer.oidcDiscoveryUrl)
 
                     const subjectToken = context.req.headers['x-forwarded-access-token']

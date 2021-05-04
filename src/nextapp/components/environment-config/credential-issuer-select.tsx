@@ -5,9 +5,10 @@ import { gql } from 'graphql-request';
 
 const query = gql`
   query GET($flow: String) {
-    allCredentialIssuers(where: { flow: $flow}) {
+    allCredentialIssuersByNamespace(where: { flow: $flow}) {
       id
       name
+      environmentDetails
     }
   }
 `;
@@ -15,9 +16,10 @@ const query = gql`
 interface CredentialIssuerSelectProps {
   environmentId: string;
   flow: string;
+  value?: string;
 }
 
-const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow}) => {
+const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow, value}) => {
   const variables = { flow : flow}
   const { data, isLoading, isSuccess } = useApi(
     'environment-credential-users',
@@ -29,20 +31,25 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow}) =
     }
   );
 
+  if (isLoading) {
+    return <></>
+  }
+
   return (
     <Select
       size="sm"
-      id="credentialIssuer"
       name="credentialIssuer"
       variant="filled"
       width="auto"
       ml={3}
       isLoading={isLoading}
       isDisabled={!isSuccess}
+      defaultValue={value}
     >
-      {data?.allCredentialIssuers.map((d) => (
+      <option></option>
+      {data?.allCredentialIssuersByNamespace.map((d) => (
         <option key={d.id} value={d.id}>
-          {d.name}
+          {d.name} ({JSON.parse(d.environmentDetails).map (e => e.environment).join(',')})
         </option>
       ))}
     </Select>

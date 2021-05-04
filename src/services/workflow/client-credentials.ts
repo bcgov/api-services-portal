@@ -1,12 +1,16 @@
 const { lookupCredentialIssuerById, addKongConsumer } = require('../keystone')
 
-import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery } from '../keycloak'
+import { KeycloakClientService, KeycloakTokenService, getOpenidFromIssuer } from '../keycloak'
 
 import { KongConsumerService } from '../kong'
 
 import {v4 as uuidv4} from 'uuid'
 
 import { strict as assert } from 'assert'
+
+import { CredentialIssuer } from '../keystone/types'
+import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
+
 
 /**
  * Steps:
@@ -17,20 +21,22 @@ import { strict as assert } from 'assert'
  * @param {*} credentialIssuerPK 
  * @param {*} newClientId 
  */
-export async function registerClient (context: any, credentialIssuerPK: string, newClientId: string, nickname: string) {
+export async function registerClient (context: any, environment: string, credentialIssuerPK: string, newClientId: string, nickname: string) {
     const kongApi = new KongConsumerService(process.env.KONG_URL)
 
     // Find the credential issuer and based on its type, go do the appropriate action
-    const issuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
+    const issuer: CredentialIssuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
 
-    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, environment)
+
+    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
 
     // token is NULL if 'iat'
     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
     // issuer.initialAccessToken if 'iat'
     const kctoksvc = new KeycloakTokenService(openid.issuer)
 
-    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await kctoksvc.getKeycloakSession(issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+    const token = issuerEnvConfig.clientRegistration == 'anonymous' ? null : (issuerEnvConfig.clientRegistration == 'managed' ? await kctoksvc.getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret) : issuerEnvConfig.initialAccessToken)
 
     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 

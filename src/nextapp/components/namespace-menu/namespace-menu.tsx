@@ -41,7 +41,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   const handleNamespaceChange = React.useCallback(
     (id: string) => async () => {
       try {
-        await restApi(`/admin/switch/${id}`);
+        await restApi(`/admin/switch/${id}`, {method: 'PUT'});
         client.invalidateQueries();
       } catch (err) {
         toast({
@@ -82,6 +82,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                 <MenuOptionGroup title="Change Namespaces">
                   {data
                     .filter((n) => n.name !== user.namespace)
+                    .map((n) => { n.id = n._id; return n})
                     .map((n) => (
                       <MenuItem
                         key={n.id}

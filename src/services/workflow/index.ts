@@ -52,12 +52,14 @@ import { registerApiKey } from './kong-api-key'
 
 import {v4 as uuidv4} from 'uuid'
 
-import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery } from '../keycloak'
+import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery, getOpenidFromIssuer } from '../keycloak'
 
 import { KongConsumerService } from '../kong'
 import { FeederService } from '../feeder'
 
-import { NewCredential } from './types'
+import { NewCredential, RequestControls } from './types'
+
+import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
 
 //const Tasked = require('../tasked')
 
@@ -101,28 +103,31 @@ export const Validate = async (context: any, operation: any, existingItem: any, 
 
                 // Find the credential issuer and based on its type, go do the appropriate action
                 const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
-        
+
                 assert.strictEqual(issuer != null, true, errors.WF05);
 
+                const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, requestDetails.productEnvironment.name)
+                
                 if (issuer.mode == 'manual') {
                     throw Error('Manual credential issuing not supported yet!')
                 }
-                if (issuer.flow == 'client-credentials' && issuer.clientRegistration == 'anonymous') {
+                if (issuer.flow == 'client-credentials' && issuerEnvConfig.clientRegistration == 'anonymous') {
                     throw Error('Anonymous client registration not supported yet!')
                 }
             
                 if (issuer.flow == 'client-credentials') {
+                    const clientRegistration = issuerEnvConfig.clientRegistration
 
-                    assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
-                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                    //assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
+                    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
                     assert.strictEqual(openid != null, true, errors.WF06);
 
-                    assert.strictEqual(['anonymous', 'managed', 'iat'].includes(issuer.clientRegistration), true, errors.WF08)
-                    assert.strictEqual(issuer.clientRegistration == 'managed' && (isBlank(issuer.clientId) || isBlank(issuer.clientSecret)), false, errors.WF09)
-                    assert.strictEqual(issuer.clientRegistration == 'iat' && isBlank(issuer.initialAccessToken), false, errors.WF10)
+                    assert.strictEqual(['anonymous', 'managed', 'iat'].includes(clientRegistration), true, errors.WF08)
+                    assert.strictEqual(clientRegistration == 'managed' && (isBlank(issuerEnvConfig.clientId) || isBlank(issuerEnvConfig.clientSecret)), false, errors.WF09)
+                    assert.strictEqual(clientRegistration == 'iat' && isBlank(issuerEnvConfig.initialAccessToken), false, errors.WF10)
                 } else if (issuer.flow == 'authorization-code') {
-                    assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
-                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                    //assert.strictEqual(issuer.oidcDiscoveryUrl != null && issuer.oidcDiscoveryUrl != "", true, errors.WF06);
+                    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
                     assert.strictEqual(openid != null, true, errors.WF06);
                 }
 
@@ -251,7 +256,7 @@ const regenerateCredential = async (context: any, accessRequestId: string) : Pro
 
         const nickname = clientId
 
-        const newClient = await registerClient (context, productEnvironment.credentialIssuer.id, clientId, nickname) 
+        const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId, nickname) 
 
         console.log(JSON.stringify(newClient, null, 4))
 
@@ -292,7 +297,7 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
 
     const nickname = clientId
 
-    const newClient = await registerClient (context, productEnvironment.credentialIssuer.id, clientId, nickname) 
+    const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId, nickname) 
 
     console.log(JSON.stringify(newClient, null, 4))
 
@@ -334,15 +339,17 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
     // Find the credential issuer and based on its type, go do the appropriate action
     const issuer = await lookupCredentialIssuerById(context, productEnvironment.credentialIssuer.id)
 
-    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, productEnvironment.name)
+
+    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
 
     // token is NULL if 'iat'
     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
     // issuer.initialAccessToken if 'iat'
-    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+    const token = issuerEnvConfig.clientRegistration == 'anonymous' ? null : (issuerEnvConfig.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret) : issuerEnvConfig.initialAccessToken)
 
-    const controls = JSON.parse('{"defaultClientScopes": []}')
-    const defaultClientScopes = controls.defaultClientScopes;
+    const controls: RequestControls = JSON.parse('{"defaultClientScopes": []}')
+    //const defaultClientScopes = controls.defaultClientScopes;
     
     const kcClientService = new KeycloakClientService(openid.issuer, null)
     await kcClientService.updateClientRegistration (token, clientId, {clientId, enabled: true})
@@ -355,10 +362,10 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
 
     // // Only valid for 'managed' client registration
     // const kcadminApi = new KeycloakClientService(baseUrl, realm)
-    await kcClientService.login(issuer.clientId, issuer.clientSecret)
+    await kcClientService.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
 
     // Sync Scopes
-    await kcClientService.syncAndApply (clientId, defaultClientScopes, [])
+    await kcClientService.syncAndApply (clientId, controls.defaultClientScopes, [])
 
     await markActiveTheServiceAccess (context, serviceAccessId)    
 
@@ -426,8 +433,9 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
                 .then((async () => {
                     if (flow == "client-credentials") {
                         const issuer = await lookupCredentialIssuerById(context, svc.productEnvironment.credentialIssuer.id)
-                        const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
-                        const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+                        const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, svc.productEnvironment.name)
+                        const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
+                        const token = issuerEnvConfig.clientRegistration == 'anonymous' ? null : (issuerEnvConfig.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret) : issuerEnvConfig.initialAccessToken)
 
                         // TODO
                         // Delete the Policies that are associated with the client!!
@@ -460,10 +468,10 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
 
             const flow = requestDetails.productEnvironment.flow
             const ns = requestDetails.productEnvironment.product.namespace
-            const controls = 'controls' in requestDetails ? JSON.parse(requestDetails.controls) : {}
+            const controls: RequestControls = 'controls' in requestDetails ? JSON.parse(requestDetails.controls) : {}
             const aclEnabled = (requestDetails.productEnvironment.flow == 'kong-api-key-acl')
 
-            let kongConsumerPK;
+            let kongConsumerPK : string;
 
             // If the authentication part hasn't been done, do it now
             if (requestDetails.serviceAccess == null) {
@@ -546,16 +554,17 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
 
                     // Find the credential issuer and based on its type, go do the appropriate action
                     const issuer = await lookupCredentialIssuerById(context, requestDetails.productEnvironment.credentialIssuer.id)
+                    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, requestDetails.productEnvironment.name)
 
-                    const openid = await getOpenidFromDiscovery(issuer.oidcDiscoveryUrl)
+                    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
 
                     // token is NULL if 'iat'
                     // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
                     // issuer.initialAccessToken if 'iat'
-                    const token = issuer.clientRegistration == 'anonymous' ? null : (issuer.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuer.clientId, issuer.clientSecret) : issuer.initialAccessToken)
+                    const token = issuerEnvConfig.clientRegistration == 'anonymous' ? null : (issuerEnvConfig.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret) : issuerEnvConfig.initialAccessToken)
 
-                    const controls = JSON.parse(requestDetails.controls)
-                    const defaultClientScopes = controls.defaultClientScopes;
+                    const controls: RequestControls= JSON.parse(requestDetails.controls)
+                    //const defaultClientScopes = controls.defaultClientScopes;
                     
                     const kcClientService = new KeycloakClientService(openid.issuer, null)
 
@@ -569,8 +578,8 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
 
                     // Only valid for 'managed' client registration
                     // const kcadminApi = new KeycloakClientService(baseUrl, realm)
-                    await kcClientService.login(issuer.clientId, issuer.clientSecret)
-                    await kcClientService.syncAndApply (clientId, defaultClientScopes, [])
+                    await kcClientService.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
+                    await kcClientService.syncAndApply (clientId, controls.defaultClientScopes, [])
 
                     await markActiveTheServiceAccess (context, requestDetails.serviceAccess.id)
                 } else if (flow == 'kong-api-key-acl') {

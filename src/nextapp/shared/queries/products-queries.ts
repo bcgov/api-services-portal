@@ -104,6 +104,16 @@ export const GET_ENVIRONMENT = gql`
       active
       flow
       appId
+      legal {
+          id
+          title
+          reference
+      }
+      credentialIssuer {
+          id
+      }
+      approval
+      additionalDetailsToRequest
       product {
         name
         namespace

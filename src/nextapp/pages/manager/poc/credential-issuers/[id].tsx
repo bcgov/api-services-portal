@@ -31,7 +31,7 @@ import { useRouter } from 'next/router';
 
 const { useEffect, useState } = React;
 
-import { CREATE_ISSUER } from './queries';
+import { CREATE_ISSUER, UPDATE_ISSUER, GET_ISSUER } from './queries';
 
 import NextLink from 'next/link';
 
@@ -67,10 +67,45 @@ const ListArray = ({name, value, edit, onChange}) => {
         )
 }
 
-const CreateIssuer = () => {
+const IssuerPage = () => {
+    const { user } = useAuth()
+    const context = useAppContext();
+    const [issuer, setIssuer] = React.useState({ id:"", name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", apiKeyName: "X-API-KEY", owner: (user == null ? { id:"", name:"", username:"", email:""}:{...user,...{id:user.userId}}) , environments: []});
+    const [{ state, data }, setState] = useState({
+        state: 'loading',
+        data: null,
+    });
+    const fetch = () => {
+        const {
+          router: {
+            pathname,
+            query: { id },
+          },
+        } = context;
+        if (context['router'] != null && id) {
+          graphql(GET_ISSUER, { id: id })
+            .then(({ data }) => {
+              toArray(data.CredentialIssuer, [
+                'availableScopes',
+                'clientRoles',
+                'resourceScopes',
+                'environmentDetails'
+              ]);
+              setState({ state: 'loaded', data });
+              setIssuer(data.CredentialIssuer)
+            })
+            .catch((err) => {
+              setState({ state: 'error', data: null });
+            });
+        }
+      };
+    useEffect(fetch, [context]);
+    
+    const products =
+    issuer == null
+      ? null
+      : [...new Set(issuer.environments.map((g) => g.product.name))];
 
-
-  const { user } = useAuth()
   
   console.log(JSON.stringify(user))
   //useEffect(() => { setState({state: 'loaded', data: issuer})}, [ issuer ])
@@ -120,12 +155,11 @@ const CreateIssuer = () => {
     }
   }
 
-  const [issuer, setIssuer] = React.useState({ name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", apiKeyName: "X-API-KEY", owner: (user == null ? { name:"", username:"", email:""}:user) });
 
   const flow = issuer.flow
 
   useEffect(() => {
-      setIssuer ( { ...issuer, ... { owner : (user == null ? { name:"", username:"", email:""}:user) }})
+      setIssuer ( { ...issuer, ... { owner : (user == null ? { id:"", name:"", username:"", email:""}:{...user,...{id:user.userId}}) }})
   }, [ user ])
 
   const addNewIssuerEnvironment = (object) => {
@@ -141,20 +175,24 @@ const CreateIssuer = () => {
   }
 
   const fulfill = (object) => {
-    const vars = { data : {...object, ...{ 
+    const vars = { id: issuer.id, data : {...object, ...{ 
         availableScopes: JSON.stringify(issuer.availableScopes),
+        resourceScopes: JSON.stringify(issuer.resourceScopes),
         clientRoles: JSON.stringify(issuer.clientRoles),
         environmentDetails: JSON.stringify(issuer.environmentDetails),
-        owner: { connect: { id: user.userId }}
+        // owner: { connect: { id: issuer.owner.id }}
     } } }
 
-    graphql(CREATE_ISSUER, vars)
-      .then((data) => refetch(data.data.createCredentialIssuer.id))
+    graphql(UPDATE_ISSUER, vars)
+      .then((data) => refetch(data.data.updateCredentialIssuer.id))
       .catch((err) => {
         errorToast(JSON.stringify(err.message));
       });
   };
 
+  if (state === 'loading') {
+      return <></>
+  }
   return (
     <>
       <Head>
@@ -167,8 +205,7 @@ const CreateIssuer = () => {
           title={<Box as="span">{issuer?.name}</Box>}
         />
         <form ref={form} onSubmit={onSubmit}>
-
-
+        <pre>{JSON.stringify(data, null, 4)}</pre>
         <Box
             display="grid"
             gridGap={4}
@@ -206,6 +243,7 @@ const CreateIssuer = () => {
                                 placeholder="Name"
                                 name="name"
                                 variant="bc-input"
+                                defaultValue={issuer.name}
                             />
                         </FormControl> 
                         <Box></Box>
@@ -276,7 +314,7 @@ const CreateIssuer = () => {
                 >
                     <FormControl as="fieldset" isRequired>
                         <FormLabel as="legend">Flow</FormLabel>
-                        <RadioGroup defaultValue={issuer.flow} onChange={(e : string) => setIssuer({...issuer, ...{flow:e}})}>
+                        <RadioGroup value={issuer.flow} onChange={(e : string) => setIssuer({...issuer, ...{flow:e}})}>
                             <Stack>
                                 <Radio name="flow" value="client-credentials">
                                     Client Credential flow
@@ -312,7 +350,7 @@ const CreateIssuer = () => {
                     <>
                         <FormControl as="fieldset" isRequired>
                             <FormLabel as="legend">Client Authenticator</FormLabel>
-                            <RadioGroup defaultValue={issuer.clientAuthenticator} onChange={(e : string) => setIssuer({...issuer, ...{clientAuthenticator:e}})}>
+                            <RadioGroup value={issuer.clientAuthenticator} onChange={(e : string) => setIssuer({...issuer, ...{clientAuthenticator:e}})}>
                                 <Stack>
                                     <Radio name="clientAuthenticator" value="client-secret">
                                     Client ID and Secret
@@ -397,7 +435,7 @@ const CreateIssuer = () => {
                         >
                             <FormControl as="fieldset" isRequired>
                                 <FormLabel as="legend">Mode</FormLabel>
-                                <RadioGroup defaultValue={issuer.mode} onChange={(e : string) => setIssuer({...issuer, ...{mode:e}})}>
+                                <RadioGroup value={issuer.mode} onChange={(e : string) => setIssuer({...issuer, ...{mode:e}})}>
                                     <Stack>
                                         <Radio name="mode" value="manual">
                                             Manual
@@ -445,7 +483,7 @@ const CreateIssuer = () => {
                                     isDisabled={false}
                                 >
                                     <FormLabel>Roles</FormLabel>
-                                    <ListArray name="clientRoles" value={issuer.clientRoles} edit={true} onChange={(value : string[]) => setIssuer({...issuer, ...{clientRoles:value}})}/>
+                                    <Textarea name="clientRoles" defaultValue={issuer.clientRoles.join('\n')} onChange={(e : any) => setIssuer({...issuer, ...{clientRoles:e.target.value.split('\n')}})}/>
                             </FormControl>    
                             <Alert status="info">
                                 <AlertIcon />
@@ -463,6 +501,7 @@ const CreateIssuer = () => {
                                     placeholder="Resource Type"
                                     name="resourceType"
                                     variant="bc-input"
+                                    value={issuer.resourceType}
                                     onChange={(e : any) => setIssuer({...issuer, ...{resourceType:e.target.value}})}
                                 />
                             </FormControl>    
@@ -473,7 +512,7 @@ const CreateIssuer = () => {
                                 isDisabled={false}
                             >
                                 <FormLabel>Resource Scopes</FormLabel>
-                                <Textarea name="availableScopes" defaultValue={issuer.resourceScopes} onChange={(e : any) => setIssuer({...issuer, ...{resourceScopes:e.target.value.split('\n')}})}/>
+                                <Textarea name="resourceScopes" defaultValue={issuer.resourceScopes.join('\n')} onChange={(e : any) => setIssuer({...issuer, ...{resourceScopes:e.target.value.split('\n')}})}/>
 
                             </FormControl>
                             <Alert status="info">
@@ -565,13 +604,48 @@ const CreateIssuer = () => {
 
             
                 <ButtonGroup variant="outline" spacing="6" className="m-5">
-                    <Button colorScheme="blue" onClick={createProfile}>Create</Button>
+                    <Button colorScheme="blue" onClick={createProfile}>Update</Button>
                     <Button>Cancel</Button>
                 </ButtonGroup>
-            </Box>
+        </Box>
+        {false && 
+        <Box bgColor="white" gridColumn="span 8">
+                <Box
+                  p={4}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Heading size="md">Protected Services</Heading>
+                </Box>
+                <Divider />
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>Product</Th>
+                      <Th>Environments</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {products.map((prod: string) => (
+                      <Tr key={prod}>
+                        <Td>{prod}</Td>
+                        <Td>
+                          {issuer.environments
+                            .filter((t) => t.product.name == prod)
+                            .map((t) => (
+                              <Badge key={t.name}>{t.name}</Badge>
+                            ))}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
+        }
       </Container>
     </>
   );
 };
 
-export default CreateIssuer;
+export default IssuerPage;

@@ -26,14 +26,15 @@ export const GET_ISSUER = `
             name
             flow
             mode
-            clientId
-            clientRegistration
-            oidcDiscoveryUrl
             apiKeyName
+            clientAuthenticator
             clientRoles
             availableScopes
+            resourceScopes
             resourceType
+            environmentDetails
             owner {
+                id
                 name
                 username
                 email
@@ -49,6 +50,11 @@ export const GET_ISSUER = `
 `
 
 export const UPDATE_ISSUER = `
+    mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {
+        updateCredentialIssuer (id: $id, data: $data) {
+            id
+        }
+    }
 `
 
 export const UPDATE_ISSUER_AUTHZ = `

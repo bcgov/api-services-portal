@@ -331,11 +331,11 @@ components:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 resourceType:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                availableScopes:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
-                clientAuthenticator:
+                resourceScopes:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 clientRoles:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                availableScopes:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 clientSecret:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
@@ -345,9 +345,13 @@ components:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 oidcDiscoveryUrl:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                environmentDetails:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 instruction:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 authPlugin:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                clientAuthenticator:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 mode:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'

@@ -201,10 +201,15 @@ const NewRequestsPage: React.FC<
                 }))}
             />
           </FieldsetBox>
-          <FieldsetBox isRequired title="Additional Information & Terms">
+          <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != null ? true:false} title="Additional Information & Terms">
+            {dataset.environments[0]?.additionalDetailsToRequest != null && (
+                <Box p={4}>
+                    <pre>{dataset.environments[0]?.additionalDetailsToRequest}</pre>
+                </Box>
+            )}
             <Textarea
               name="other"
-              placeholder="Write any additional instructions for the reviewer"
+              placeholder=""
               variant="bc-input"
             />
             {dataset.environments[0]?.legal && (
@@ -258,6 +263,7 @@ const query = gql`
         name
         active
         flow
+        additionalDetailsToRequest
         legal {
           title
           description

@@ -20,6 +20,9 @@
             "@/controllers/*": [
                 "controllers/*"
             ],
+            "@/types": [
+                "services/keystone/types.ts"
+            ]
         },
     },
     "include": [

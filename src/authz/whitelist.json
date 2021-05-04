@@ -271,5 +271,80 @@
           "referer": "http://localhost:4180/manager/poc/credential-issuers/issuer/608f892d7aa28b3ee36d727c",
           "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientRegistration\n            oidcDiscoveryUrl\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceType\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
           "added": "2021-05-03T05:27:43.598Z"
+     },
+     "afb6752f2404a9e442c8830f47b1290d": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($flow: String) {\n    allCredentialIssuersByNamespace(where: { flow: $flow}) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-03T21:31:04.049Z"
+     },
+     "18eee5343281a196598afaaa92d07d3a": {
+          "referer": "http://localhost:4180/devportal/requests/new/608d963a0eac350a840c5032",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-03T22:27:56.512Z"
+     },
+     "5113980c0b07afe1f73d33e0d910483c": {
+          "referer": "http://localhost:4180/manager/consumers/60907a60b9eaf28737811b68",
+          "query": "\n  query GetControlContent {\n    allGatewayServicesByNamespace {\n      name\n      extForeignKey\n      routes {\n        name\n        extForeignKey\n      }\n    }\n  }\n",
+          "added": "2021-05-03T22:43:23.802Z"
+     },
+     "5473c4e41e5fc59d9acd22fbfa413cf0": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+          "added": "2021-05-03T22:45:25.519Z"
+     },
+     "c6794f580490706e453e4f2122f6b6ef": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+          "added": "2021-05-03T22:48:34.130Z"
+     },
+     "938f6cb6a17ca50d63d2e3b07b6ee259": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n    allLegals {\n        id\n        title\n        reference\n    }\n  }\n",
+          "added": "2021-05-04T02:37:02.723Z"
+     },
+     "241b17af5a14298c47cd72c45603c2af": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($flow: String) {\n    allLegals {\n      id\n      title\n      reference\n    }\n  }\n",
+          "added": "2021-05-04T02:40:11.782Z"
+     },
+     "1af923113867cf18699bf9fd48ed9c8d": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET {\n    allLegals {\n      id\n      title\n      reference\n    }\n  }\n",
+          "added": "2021-05-04T02:40:33.167Z"
+     },
+     "40235fd96287814fea547af0c9421ead": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      credentialIssuer {\n          id\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+          "added": "2021-05-04T03:30:56.003Z"
+     },
+     "5454858e3bace6259f2c4cf260d138ae": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+          "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientSecret\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+          "added": "2021-05-04T04:17:43.565Z"
+     },
+     "88375d8583bdf9825bfeab3b4874e3f8": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+          "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+          "added": "2021-05-04T04:18:42.431Z"
+     },
+     "1361e818c2e03e1f0217de58ed9512e9": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+          "query": "\n    mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {\n        updateCredentialIssuer (id: $id, data: $data) {\n            id\n        }\n    }\n",
+          "added": "2021-05-04T04:28:51.350Z"
+     },
+     "c31548fe29ec8603691b8179e7f9e6d9": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+          "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+          "added": "2021-05-04T04:32:19.426Z"
+     },
+     "b1e92b051e98f539460355efcdec561d": {
+          "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+          "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientAuthenticator\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+          "added": "2021-05-04T04:43:58.652Z"
+     },
+     "c79882ca813f2e28692cf91ced827993": {
+          "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+          "query": "\n  query GET($flow: String) {\n    allCredentialIssuersByNamespace(where: { flow: $flow}) {\n      id\n      name\n      environmentDetails\n    }\n  }\n",
+          "added": "2021-05-04T05:10:30.959Z"
      }
 }

@@ -7,6 +7,9 @@ import {
     Button,
     Box,
     Container,
+    Divider,
+    Heading,
+    Icon,
     Stack,
     VStack,
     Skeleton,
@@ -20,6 +23,8 @@ import {
   } from "@chakra-ui/react"
 
 import { GET_LIST, GET_REQUEST, GEN_CREDENTIAL } from './queries'
+
+import { FaPlusCircle, FaFolder, FaFolderOpen } from 'react-icons/fa';
 
 import { useAppContext } from '@/pages/context'
 
@@ -69,7 +74,7 @@ const MyApplicationsPage = () => {
                 graphql(GET_LIST, {})
                 .then(({ data }) => {
                     setState({ state: 'loaded', data });            
-                    setRequest(data.allAccessRequests.filter(r => r.id == id))
+                    setRequest(data.allAccessRequests.filter(r => r.id == id)[0])
                 })
             })
             .catch((err) => {
@@ -86,6 +91,10 @@ const MyApplicationsPage = () => {
     };
     
     const [{cred,reqId}, setCred] = useState({cred:null, reqId:null});
+
+    const onSecretClose = () => {
+        window.location.href = `/devportal/access`
+    }
 
     const generateCredential = (reqId) => {
         return graphql(GEN_CREDENTIAL, { id: reqId }).then(data => {
@@ -122,14 +131,31 @@ const MyApplicationsPage = () => {
   
           <Box mt={5}>
             { request != null && cred != null && ( 
-                <Box m={4}>
+
+            <Box bgColor="white"  mb={4}>
+
+                <Box display="flex" alignItems="center" p={2}>
+                    <Icon
+                    as={FaFolderOpen}
+                    color={'bc-blue-alt'}
+                    mr={4}
+                    boxSize="1.5rem"
+                    />
+                    <Heading as="h4" size="md">
+                        {request.productEnvironment?.product.name}
+                    </Heading>
+                </Box>                    
+                <Divider />
+
+                <Box p={4}>
                     <article className={tmpstyles.markdownBody}>
-                        <ViewSecret cred={cred} defaultShow={true} instruction={request[0].productEnvironment?.credentialIssuer?.instruction}/> 
+                        <ViewSecret cred={cred} defaultShow={true} onClose={onSecretClose} instruction={request.productEnvironment?.credentialIssuer?.instruction}/> 
                     </article>
                 </Box>
+            </Box>
             )}
 
-            <List data={data} state={state} refetch={fetch} cancelRequest={cancelRequest}/>
+            {/* <List data={data} state={state} refetch={fetch} cancelRequest={cancelRequest}/> */}
 
           </Box>
         </Container>

@@ -38,9 +38,9 @@ const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
 
     switch (control) {
       case 'service':
-        return data?.allGatewayServices;
+        return data?.allGatewayServicesByNamespace;
       case 'route':
-        return data?.allGatewayRoutes;
+        return [];
       default:
         return [];
     }
@@ -88,13 +88,13 @@ export default ControlTypeSelect;
 
 const query = gql`
   query GetControlContent {
-    allGatewayRoutes {
+    allGatewayServicesByNamespace {
       name
       extForeignKey
-    }
-    allGatewayServices {
-      name
-      extForeignKey
+      routes {
+        name
+        extForeignKey
+      }
     }
   }
 `;

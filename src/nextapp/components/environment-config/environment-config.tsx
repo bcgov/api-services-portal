@@ -7,10 +7,13 @@ import {
   AlertDescription,
   Box,
   Button,
+  Checkbox,
   Heading,
+  Input,
   Select,
   Badge,
   Text,
+  Textarea,
   Switch,
   ButtonGroup,
   Icon,
@@ -23,6 +26,7 @@ import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
+import LegalSelect from './legal-select'
 import YamlViewer from '../yaml-viewer';
 
 interface EnvironmentConfigProps {
@@ -55,13 +59,19 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     const payload: EnvironmentUpdateInput = {
       active: Boolean(formData.get('active')),
       flow: formData.get('flow') as string,
+      approval: Boolean(formData.get('approval')) as boolean,
+      additionalDetailsToRequest: formData.get('additionalDetailsToRequest') as string
     };
 
-    if (formData.has('credentialIssuer')) {
-      payload.credentialIssuer = {
-        connect: { id: formData.get('credentialIssuer') as string },
-      };
-    }
+    ['credentialIssuer', 'legal'].map((fieldName:string) => {
+        if (formData.has(fieldName) && formData.get(fieldName) != "") {
+            payload[fieldName] = {
+                connect: { id: formData.get(fieldName) as string },
+            };
+        } else {
+            payload[fieldName] = { disconnectAll: true }
+        }
+    })
 
     try {
       await mutation.mutateAsync({
@@ -156,6 +166,25 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
           </Heading>
           <Box>
             <Text mb={4}></Text>
+            <Box>
+              <Text fontWeight="bold" mr={4}>
+                <Checkbox name="approval" value="true" defaultIsChecked={data.approval}>Approval Required?</Checkbox>
+              </Text>
+            </Box>
+
+            <Box display="flex" alignItems="center">
+              <Text fontWeight="bold" mr={4}>
+                Terms of Use?
+              </Text>
+              <LegalSelect value={data.legal?.id}/>
+            </Box>
+            <Box alignItems="center">
+              <Text fontWeight="bold" mr={4}>
+                Optional Instructions for Requester
+              </Text>
+              <Textarea size="sm" defaultValue={data.additionalDetailsToRequest}
+                variant="filled" name="additionalDetailsToRequest"></Textarea>
+            </Box>
             <Box display="flex" alignItems="center">
               <Text fontWeight="bold" mr={4}>
                 Authorization
@@ -175,7 +204,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
               </Select>
               {(flow === 'client-credentials' ||
                 flow === 'authorization-code') && (
-                <CredentialIssuerSelect environmentId={data.id} flow={flow} />
+                <CredentialIssuerSelect value={data.credentialIssuer?.id} environmentId={data.id} flow={flow} />
               )}
               <Box flex={1} />
               <Box>
