@@ -206,7 +206,7 @@ class Oauth2ProxyAuthStrategy {
                 roles = JSON.stringify(oauthUser['resource_access'][clientId].roles.filter(r => allRoles.includes(r)))
                 logger.debug("register_user - Roles = %s", roles)
             } catch (e) {
-                logger.error("register_user - error parsing realm_acccess roles %s - defaulting roles to none", e)
+                logger.error("register_user - error parsing resource_access roles %s - defaulting roles to none", e)
             }
         }
         
