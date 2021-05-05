@@ -1211,6 +1211,11 @@ type CredentialIssuer {
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   availableScopes: String
   clientRoles: String
   resourceScopes: String
@@ -1442,6 +1447,31 @@ input CredentialIssuerWhereInput {
   clientSecret_not_ends_with_i: String
   clientSecret_in: [String]
   clientSecret_not_in: [String]
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientRoles_not: String
+  clientRoles_contains: String
+  clientRoles_not_contains: String
+  clientRoles_starts_with: String
+  clientRoles_not_starts_with: String
+  clientRoles_ends_with: String
+  clientRoles_not_ends_with: String
+  clientRoles_i: String
+  clientRoles_not_i: String
+  clientRoles_contains_i: String
+  clientRoles_not_contains_i: String
+  clientRoles_starts_with_i: String
+  clientRoles_not_starts_with_i: String
+  clientRoles_ends_with_i: String
+  clientRoles_not_ends_with_i: String
+  clientRoles_in: [String]
+  clientRoles_not_in: [String]
+  clientAuthenticator: String
+  clientAuthenticator_not: String
+  clientAuthenticator_in: [String]
+  clientAuthenticator_not_in: [String]
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   availableScopes: String
   availableScopes_not: String
   availableScopes_contains: String
@@ -1594,6 +1624,13 @@ enum SortCredentialIssuersBy {
   clientId_DESC
   clientSecret_ASC
   clientSecret_DESC
+<<<<<<< HEAD
+=======
+  clientRoles_ASC
+  clientRoles_DESC
+  clientAuthenticator_ASC
+  clientAuthenticator_DESC
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   availableScopes_ASC
   availableScopes_DESC
   clientRoles_ASC
@@ -1633,6 +1670,11 @@ input CredentialIssuerUpdateInput {
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   availableScopes: String
   clientRoles: String
   resourceScopes: String
@@ -1661,6 +1703,11 @@ input CredentialIssuerCreateInput {
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   availableScopes: String
   clientRoles: String
   resourceScopes: String
@@ -5313,6 +5360,13 @@ type ApplicationSummary {
   name: String
 }
 
+<<<<<<< HEAD
+=======
+type JsonResponse {
+  json: JSON
+}
+
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
 type ServiceAccount {
   id: String!
   name: String!
@@ -5792,6 +5846,7 @@ type Query {
   _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
   allApplicationNames: [ApplicationSummary]
   getGatewayConsumerPlugins(id: ID!): GatewayConsumer
+<<<<<<< HEAD
   allDiscoverableProducts(
     first: Int
     skip: Int
@@ -5854,6 +5909,14 @@ type Query {
     orderBy: String
     where: ContentWhereInput
   ): [Content]
+=======
+  allDiscoverableProducts(where: ProductWhereInput): [Product]
+  DiscoverableProduct(where: ProductWhereInput): Product
+  myServiceAccesses(where: ServiceAccessWhereInput): [ServiceAccess]
+  myApplications(where: ApplicationWhereInput): [Application]
+  CredentialIssuerSummary(where: CredentialIssuerWhereInput): CredentialIssuer
+  allDiscoverableContents(where: ContentWhereInput): [Content]
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
   getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
   getResourceSet(
     credIssuerId: ID!
