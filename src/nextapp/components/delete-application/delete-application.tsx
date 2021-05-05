@@ -50,10 +50,7 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
     <>
       <IconButton
         aria-label="delete application button"
-<<<<<<< HEAD
-=======
         colorScheme="red"
->>>>>>> dev
         icon={<Icon as={FaTrash} />}
         onClick={onOpen}
         variant="outline"
