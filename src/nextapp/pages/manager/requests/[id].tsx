@@ -170,7 +170,7 @@ const AccessRequestPage: React.FC<
                 <TabPanel p={0}>
                     <FormControl>
                         <FormLabel>Scopes</FormLabel>
-                        <CheckboxGroup onChange={(d) => setScopes(d)}>
+                        <CheckboxGroup onChange={(d: string[]) => setScopes(d)}>
                             <Wrap spacing={4}>
                             {availableScopes.map((r) => (
                                 <WrapItem key={r}>
