@@ -100,7 +100,7 @@ const NamespacesPage: React.FC = () => {
               </Box>
             )
           }
-          breadcrumb={[{ href: '/manager/poc/namespaces', text: 'Namespaces' }]}
+          breadcrumb={[{ href: '/manager/namespaces', text: 'Namespaces' }]}
         ></PageHeader>
         <Box mb={8}>
           <Flex as="header" align="center" mb={4}>

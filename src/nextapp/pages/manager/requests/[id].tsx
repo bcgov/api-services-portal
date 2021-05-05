@@ -96,9 +96,16 @@ const AccessRequestPage: React.FC<
     ? JSON.parse(data?.AccessRequest.productEnvironment.credentialIssuer?.availableScopes)
     : []
 
+  const clientRoles = data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles
+    ? JSON.parse(data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles)
+    : []
+
   const setScopes = (scopes: string[]) => {
       controls['defaultClientScopes'] = scopes
   }
+  const setRoles = (roles: string[]) => {
+    controls['roles'] = roles
+}
 
   return data.AccessRequest ? (
     <>
@@ -148,8 +155,8 @@ const AccessRequestPage: React.FC<
           <TabList mb={6}>
             <Tab>Controls</Tab>
             <Tab>Permissions</Tab>
-            <Tab>Activity</Tab>
             <Tab>Comments</Tab>
+            <Tab>Activity</Tab>
           </TabList>
           <Grid templateColumns="repeat(12, 1fr)">
             <GridItem colSpan={8}>
@@ -182,6 +189,28 @@ const AccessRequestPage: React.FC<
                             </Wrap>
                         </CheckboxGroup>
                     </FormControl>
+                    <FormControl>
+                        <FormLabel>Roles</FormLabel>
+                        <CheckboxGroup onChange={(d: string[]) => setRoles(d)}>
+                            <Wrap spacing={4}>
+                            {clientRoles.map((r) => (
+                                <WrapItem key={r}>
+                                    <Checkbox value={r} name="clientRoles">
+                                        {r}
+                                    </Checkbox>
+                                </WrapItem>
+                            ))}
+                            </Wrap>
+                        </CheckboxGroup>
+                    </FormControl>
+                </TabPanel>
+                <TabPanel>
+                    <Box bgColor="white" p={5}>
+                    <FormControl>
+                        <FormLabel>Requestor Comments:</FormLabel>
+                        <Box>{data?.AccessRequest.additionalDetails}</Box>
+                    </FormControl>
+                    </Box>
                 </TabPanel>
                 <TabPanel p={0}>
                   {/* {data?.AccessRequest.activity.map((a) => (
@@ -208,7 +237,6 @@ const AccessRequestPage: React.FC<
                     </Box>
                   ))} */}
                 </TabPanel>
-                <TabPanel>Coming Soon...</TabPanel>
               </TabPanels>
             </GridItem>
             <GridItem as="aside" colStart={10} colSpan={3}>
@@ -255,6 +283,7 @@ const query = gql`
       isApproved
       isIssued
       controls
+      additionalDetails
       createdAt
       requestor {
         name
@@ -270,6 +299,7 @@ const query = gql`
         }
         credentialIssuer {
           availableScopes
+          clientRoles
         }
       }
     }

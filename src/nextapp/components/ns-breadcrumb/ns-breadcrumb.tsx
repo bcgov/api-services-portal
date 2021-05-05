@@ -6,8 +6,8 @@ const Breadcrumb = (crumbs = []) => {
     const { user } = useAuth();
     
     return user ? [
-        { href: '/manager/poc/namespaces', text: 'Namespaces' },
-        { href: '/manager/poc/namespaces', text: user.namespace },
+        { href: '/manager/namespaces', text: 'Namespaces' },
+        { href: '/manager/namespaces', text: user.namespace },
     ].concat(crumbs) : []
 }
 

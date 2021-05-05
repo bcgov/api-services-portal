@@ -411,5 +411,20 @@
           "referer": "http://localhost:4180/manager/products",
           "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n      }\n    }\n  }\n",
           "added": "2021-05-05T16:06:08.199Z"
+     },
+     "08ea470b98ac8542f103fff6c1f35492": {
+          "referer": "http://localhost:4180/manager/requests/606418fdb391bd7bfd1d6193",
+          "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-05T17:18:37.806Z"
+     },
+     "b1429527c4b1b450366f693247b7120e": {
+          "referer": "http://localhost:4180/devportal/requests/new/605e7afa2420523942b05f9a",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n  ) {\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-05T17:24:39.378Z"
+     },
+     "3f0ca27697b28bff1965c71ba90ce1c7": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-05T17:31:13.555Z"
      }
 }
