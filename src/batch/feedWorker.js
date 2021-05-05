@@ -244,7 +244,7 @@ const metadata = {
     'Environment': {
         query: 'allEnvironments',
         refKey: 'appId',
-        sync: [ 'name', 'active', 'flow'],
+        sync: [ 'name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
         transformations: {
             services: {name: "connectMany", list: "allGatewayServices", refKey: "name"},
             legal: {name: "connectOne", list: "allLegals", refKey: 'reference' },
@@ -254,10 +254,12 @@ const metadata = {
     'CredentialIssuer': {
         query: 'allCredentialIssuers',
         refKey: 'name',
-        sync: ['name', 'description', 'flow', 'clientRegistration', 'mode', 'authPlugin', 'instruction', 'oidcDiscoveryUrl', 'initialAccessToken', 'clientId', 'clientSecret', 'clientRoles', 'availableScopes', 'resourceType', 'apiKeyName', 'owner'],
+        sync: ['name', 'description', 'flow', 'clientRegistration', 'mode', 'authPlugin', 'clientAuthenticator', 'instruction', 'environmentDetails', 'oidcDiscoveryUrl', 'initialAccessToken', 'clientId', 'clientSecret', 'clientRoles', 'availableScopes', 'resourceScopes', 'resourceType', 'apiKeyName', 'owner'],
         transformations: {
             availableScopes: {name: "toStringDefaultArray"},
+            resourceScopes: {name: "toStringDefaultArray"},
             clientRoles: {name: "toStringDefaultArray"},
+            environmentDetails: {name: "toString"},
             owner: {name: "connectOne", list: "allUsers", refKey: 'username' },
         }
     },
