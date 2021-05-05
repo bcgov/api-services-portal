@@ -406,5 +406,10 @@
           "referer": "http://localhost:4180/manager/requests/609231a5681d3210b7707bbe",
           "query": "\n  mutation FulfillRequest($id: ID!, $controls: String!) {\n    updateAccessRequest(\n        id: $id, \n        data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }\n    ) {\n        id\n    }\n  }\n",
           "added": "2021-05-05T06:18:03.288Z"
+     },
+     "08c0b2daa3e2c3226afe1ac150ae917f": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n      }\n    }\n  }\n",
+          "added": "2021-05-05T16:06:08.199Z"
      }
 }
