@@ -81,7 +81,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       { data.dataset && (
       <Box p={4}>
         <Heading size="sm" mb={2}>
-          {data.dataset.organization.title}
+          {data.dataset?.organization?.title}
           <Icon as={FaChevronRight} boxSize="2" mx={2} />
           <Text as="span" fontWeight="normal" color="gray.600">
             {data.dataset?.organizationUnit?.title}
