@@ -26,10 +26,10 @@ import {
   FaLayerGroup,
   FaServer,
   FaShieldAlt,
-  FaTrash,
   FaUserPlus,
   FaUserShield,
 } from 'react-icons/fa';
+import NamespaceActions from '@/components/namespace-actions';
 
 const actions = [
   {
@@ -91,6 +91,7 @@ const NamespacesPage: React.FC = () => {
       </Head>
       <Container maxW="6xl">
         <PageHeader
+          actions={<NamespaceActions name={user?.namespace} />}
           title={
             user?.namespace && (
               <Box as="span" display="flex" alignItems="center">
