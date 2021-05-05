@@ -13,3 +13,9 @@ export interface NamespaceData {
   id: string;
   name: string;
 }
+
+export interface RequestControls {
+    defaultClientScopes?: string[]
+    aclGroups?: string[]
+//    plugins?: ConsumerPlugin[]
+}

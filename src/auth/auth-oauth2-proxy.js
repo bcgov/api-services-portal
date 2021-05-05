@@ -125,22 +125,24 @@ class Oauth2ProxyAuthStrategy {
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
             const accessToken = await new UMA2TokenService(process.env.OIDC_ISSUER).getRequestingPartyToken(process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
-                res.json({switch:false})
+                res.status(400).json({switch:false, error:"rpt_fail"})
             }) 
             try {
                 const rpt = jwtDecoder(accessToken)
                 const jti = req['oauth_user']['jti'] // JWT ID - Unique Identifier for the token
-                await this.assign_namespace(jti, rpt['authorization']['permissions'][0])
+                // The oauth2_proxy is handling the refresh token; so there can be a new jti
+                logger.info("[ns-switch] %s -> %s : %s", req.user.jti, jti, req.user.jti === jti ? "SAME TOKEN":"REFRESHED TOKEN!")
+                await this.assign_namespace(req.user.jti, jti, rpt['authorization']['permissions'][0])
                 res.json({switch:true})
             } catch (err) {
                 logger.error("Error evaluating new access token %s", err)
-                res.json({switch:false})
+                res.status(400).json({switch:false, error:"ns_assign_fail"})
             }
         })
         return app
     }
 
-    async assign_namespace(jti, umaAuthDetails) {
+    async assign_namespace(jti, newJti, umaAuthDetails) {
         const namespace = umaAuthDetails['rsname']
         const scopes = umaAuthDetails['scopes']
         const _roles = []
@@ -162,11 +164,11 @@ class Oauth2ProxyAuthStrategy {
 
         const { errors } = await this.keystone.executeGraphQL({
             context: this.keystone.createContext({ skipAccessControl: true }),
-            query: `mutation ($tempId: ID!, $namespace: String, $roles: String) {
-                    updateTemporaryIdentity(id: $tempId, data: {namespace: $namespace, roles: $roles }) {
+            query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String) {
+                    updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles }) {
                         id
                 } }`,
-            variables: { tempId, namespace, roles },
+            variables: { tempId, newJti, namespace, roles },
         })
         if (errors) {
             logger.error("assign_namespace - NO! Something went wrong %j", errors)
@@ -191,7 +193,7 @@ class Oauth2ProxyAuthStrategy {
         const email = oauthUser['email']
         const namespace = oauthUser['namespace']
         const groups = JSON.stringify(oauthUser['groups'])
-        let roles = JSON.stringify([])
+        let roles = JSON.stringify(['developer']) // authenticated user gets developer role automatically
         if ('realm_access' in oauthUser) {
             try {
                 roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))

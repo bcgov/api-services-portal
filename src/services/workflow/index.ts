@@ -628,6 +628,8 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
         await recordActivity (context, action, 'AccessRequest', refId, message)
     } catch (err) {
         console.log("WORKFLOW ERR - "+err)
+        await recordActivity (context, operation, 'AccessRequest', updatedItem.id, "Failed to Apply Workflow - " + err, "failed")
+        .catch((e:any) => {console.log("Activity Recording Error " + e)})
         throw (err)
     }
 }

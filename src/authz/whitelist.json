@@ -396,5 +396,15 @@
           "referer": "http://localhost:4180/devportal/resources/2a9640cc-c89e-44d5-826a-458b4460b91a?peid=606393b601ac0b48cfadcb0c",
           "query": "\n  mutation RevokeSAAccess(\n      $prodEnvId: ID!, \n      $policyId: String!) {\n    deleteUmaPolicy(prodEnvId: $prodEnvId, policyId: $policyId)\n}\n",
           "added": "2021-05-04T19:28:41.943Z"
+     },
+     "8473d241baf6d7d70afcb43dce12e21f": {
+          "referer": "http://localhost:4180/manager/requests/609231a5681d3210b7707bbe",
+          "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-05T06:06:10.473Z"
+     },
+     "af09f8310abb04f6c77fdd6f1ad8f77c": {
+          "referer": "http://localhost:4180/manager/requests/609231a5681d3210b7707bbe",
+          "query": "\n  mutation FulfillRequest($id: ID!, $controls: String!) {\n    updateAccessRequest(\n        id: $id, \n        data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }\n    ) {\n        id\n    }\n  }\n",
+          "added": "2021-05-05T06:18:03.288Z"
      }
 }

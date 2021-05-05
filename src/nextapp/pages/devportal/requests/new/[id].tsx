@@ -148,7 +148,7 @@ const NewRequestsPage: React.FC<
               </VStack>
               <Box flex={1}>
                 <Heading size="sm" mb={2}>
-                  OAuth Flow
+                  Requestor
                 </Heading>
                 <Flex>
                   <Avatar name={requestor.name} />

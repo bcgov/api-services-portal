@@ -120,6 +120,7 @@ const ApiAccessResourcePage: React.FC<
               prodEnvId={prodEnvId}
               resource={resource}
               resourceId={resourceId}
+              queryKey={queryKey}
             />
           </Box>
           <Divider />
