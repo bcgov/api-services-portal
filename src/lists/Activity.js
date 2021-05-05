@@ -69,7 +69,7 @@ module.exports = {
         }
     })
   },
-  recordActivity: (context, action, type, refId, message) => {
+  recordActivity: (context, action, type, refId, message, result = "") => {
         console.log("Record Activity")
         const userId = context.authedItem.userId
         const namespace = context.authedItem.namespace
@@ -77,11 +77,11 @@ module.exports = {
         console.log("USERID="+userId+" NAME=" + name)
 
         return context.executeGraphQL({
-            query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $userId: String) {
-                    createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, actor: { connect: { id : $userId }} }) {
+            query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $userId: String) {
+                    createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, actor: { connect: { id : $userId }} }) {
                         id
                 } }`,
-            variables: { name, namespace, type, action, refId, message, userId },
+            variables: { name, namespace, type, action, refId, message, result, userId },
         })
   }
 }

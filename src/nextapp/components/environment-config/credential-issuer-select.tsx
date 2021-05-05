@@ -49,7 +49,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow, va
       <option></option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
         <option key={d.id} value={d.id}>
-          {d.name} ({JSON.parse(d.environmentDetails).map (e => e.environment).join(',')})
+          {d.name} ({JSON.parse(d.environmentDetails).map ((e:any) => e.environment).join(',')})
         </option>
       ))}
     </Select>

@@ -1203,15 +1203,33 @@ type CredentialIssuer {
   flow: String
   clientRegistration: String
   mode: String
+<<<<<<< HEAD
   authPlugin: String
   instruction: String
+=======
+  clientAuthenticator: String
+  authPlugin: String
+  instruction: String
+  environmentDetails: String
+>>>>>>> dev
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
   clientRoles: String
   clientAuthenticator: String
   availableScopes: String
+=======
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+  availableScopes: String
+  clientRoles: String
+  resourceScopes: String
+>>>>>>> dev
   resourceType: String
   apiKeyName: String
   owner: User
@@ -1310,6 +1328,13 @@ input CredentialIssuerWhereInput {
   mode_not: String
   mode_in: [String]
   mode_not_in: [String]
+<<<<<<< HEAD
+=======
+  clientAuthenticator: String
+  clientAuthenticator_not: String
+  clientAuthenticator_in: [String]
+  clientAuthenticator_not_in: [String]
+>>>>>>> dev
   authPlugin: String
   authPlugin_not: String
   authPlugin_contains: String
@@ -1346,6 +1371,27 @@ input CredentialIssuerWhereInput {
   instruction_not_ends_with_i: String
   instruction_in: [String]
   instruction_not_in: [String]
+<<<<<<< HEAD
+=======
+  environmentDetails: String
+  environmentDetails_not: String
+  environmentDetails_contains: String
+  environmentDetails_not_contains: String
+  environmentDetails_starts_with: String
+  environmentDetails_not_starts_with: String
+  environmentDetails_ends_with: String
+  environmentDetails_not_ends_with: String
+  environmentDetails_i: String
+  environmentDetails_not_i: String
+  environmentDetails_contains_i: String
+  environmentDetails_not_contains_i: String
+  environmentDetails_starts_with_i: String
+  environmentDetails_not_starts_with_i: String
+  environmentDetails_ends_with_i: String
+  environmentDetails_not_ends_with_i: String
+  environmentDetails_in: [String]
+  environmentDetails_not_in: [String]
+>>>>>>> dev
   oidcDiscoveryUrl: String
   oidcDiscoveryUrl_not: String
   oidcDiscoveryUrl_contains: String
@@ -1418,6 +1464,11 @@ input CredentialIssuerWhereInput {
   clientSecret_not_ends_with_i: String
   clientSecret_in: [String]
   clientSecret_not_in: [String]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> dev
   clientRoles: String
   clientRoles_not: String
   clientRoles_contains: String
@@ -1440,6 +1491,10 @@ input CredentialIssuerWhereInput {
   clientAuthenticator_not: String
   clientAuthenticator_in: [String]
   clientAuthenticator_not_in: [String]
+<<<<<<< HEAD
+=======
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+>>>>>>> dev
   availableScopes: String
   availableScopes_not: String
   availableScopes_contains: String
@@ -1458,6 +1513,45 @@ input CredentialIssuerWhereInput {
   availableScopes_not_ends_with_i: String
   availableScopes_in: [String]
   availableScopes_not_in: [String]
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientRoles_not: String
+  clientRoles_contains: String
+  clientRoles_not_contains: String
+  clientRoles_starts_with: String
+  clientRoles_not_starts_with: String
+  clientRoles_ends_with: String
+  clientRoles_not_ends_with: String
+  clientRoles_i: String
+  clientRoles_not_i: String
+  clientRoles_contains_i: String
+  clientRoles_not_contains_i: String
+  clientRoles_starts_with_i: String
+  clientRoles_not_starts_with_i: String
+  clientRoles_ends_with_i: String
+  clientRoles_not_ends_with_i: String
+  clientRoles_in: [String]
+  clientRoles_not_in: [String]
+  resourceScopes: String
+  resourceScopes_not: String
+  resourceScopes_contains: String
+  resourceScopes_not_contains: String
+  resourceScopes_starts_with: String
+  resourceScopes_not_starts_with: String
+  resourceScopes_ends_with: String
+  resourceScopes_not_ends_with: String
+  resourceScopes_i: String
+  resourceScopes_not_i: String
+  resourceScopes_contains_i: String
+  resourceScopes_not_contains_i: String
+  resourceScopes_starts_with_i: String
+  resourceScopes_not_starts_with_i: String
+  resourceScopes_ends_with_i: String
+  resourceScopes_not_ends_with_i: String
+  resourceScopes_in: [String]
+  resourceScopes_not_in: [String]
+>>>>>>> dev
   resourceType: String
   resourceType_not: String
   resourceType_contains: String
@@ -1540,10 +1634,20 @@ enum SortCredentialIssuersBy {
   clientRegistration_DESC
   mode_ASC
   mode_DESC
+<<<<<<< HEAD
+=======
+  clientAuthenticator_ASC
+  clientAuthenticator_DESC
+>>>>>>> dev
   authPlugin_ASC
   authPlugin_DESC
   instruction_ASC
   instruction_DESC
+<<<<<<< HEAD
+=======
+  environmentDetails_ASC
+  environmentDetails_DESC
+>>>>>>> dev
   oidcDiscoveryUrl_ASC
   oidcDiscoveryUrl_DESC
   initialAccessToken_ASC
@@ -1552,12 +1656,27 @@ enum SortCredentialIssuersBy {
   clientId_DESC
   clientSecret_ASC
   clientSecret_DESC
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> dev
   clientRoles_ASC
   clientRoles_DESC
   clientAuthenticator_ASC
   clientAuthenticator_DESC
+<<<<<<< HEAD
   availableScopes_ASC
   availableScopes_DESC
+=======
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+  availableScopes_ASC
+  availableScopes_DESC
+  clientRoles_ASC
+  clientRoles_DESC
+  resourceScopes_ASC
+  resourceScopes_DESC
+>>>>>>> dev
   resourceType_ASC
   resourceType_DESC
   apiKeyName_ASC
@@ -1583,15 +1702,33 @@ input CredentialIssuerUpdateInput {
   flow: String
   clientRegistration: String
   mode: String
+<<<<<<< HEAD
   authPlugin: String
   instruction: String
+=======
+  clientAuthenticator: String
+  authPlugin: String
+  instruction: String
+  environmentDetails: String
+>>>>>>> dev
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
   clientRoles: String
   clientAuthenticator: String
   availableScopes: String
+=======
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+  availableScopes: String
+  clientRoles: String
+  resourceScopes: String
+>>>>>>> dev
   resourceType: String
   apiKeyName: String
   environments: EnvironmentRelateToManyInput
@@ -1609,15 +1746,33 @@ input CredentialIssuerCreateInput {
   flow: String
   clientRegistration: String
   mode: String
+<<<<<<< HEAD
   authPlugin: String
   instruction: String
+=======
+  clientAuthenticator: String
+  authPlugin: String
+  instruction: String
+  environmentDetails: String
+>>>>>>> dev
   oidcDiscoveryUrl: String
   initialAccessToken: String
   clientId: String
   clientSecret: String
+<<<<<<< HEAD
   clientRoles: String
   clientAuthenticator: String
   availableScopes: String
+=======
+<<<<<<< HEAD
+=======
+  clientRoles: String
+  clientAuthenticator: String
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+  availableScopes: String
+  clientRoles: String
+  resourceScopes: String
+>>>>>>> dev
   resourceType: String
   apiKeyName: String
   owner: UserRelateToOneInput
@@ -5267,10 +5422,19 @@ type ApplicationSummary {
   name: String
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> dev
 type JsonResponse {
   json: JSON
 }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+>>>>>>> dev
 type ServiceAccount {
   id: String!
   name: String!
@@ -5750,12 +5914,83 @@ type Query {
   _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
   allApplicationNames: [ApplicationSummary]
   getGatewayConsumerPlugins(id: ID!): GatewayConsumer
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  allDiscoverableProducts(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ProductWhereInput
+  ): [Product]
+  allGatewayServicesByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: GatewayServiceWhereInput
+  ): [GatewayService]
+  allProductsByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ProductWhereInput
+  ): [Product]
+  allAccessRequestsByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: AccessRequestWhereInput
+  ): [AccessRequest]
+  allServiceAccessesByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ServiceAccessWhereInput
+  ): [ServiceAccess]
+  allCredentialIssuersByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: CredentialIssuerWhereInput
+  ): [CredentialIssuer]
+  allNamespaceServiceAccounts(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ServiceAccessWhereInput
+  ): [ServiceAccess]
+  DiscoverableProduct(where: ProductWhereInput): Product
+  myServiceAccesses(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ServiceAccessWhereInput
+  ): [ServiceAccess]
+  myApplications(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ApplicationWhereInput
+  ): [Application]
+  CredentialIssuerSummary(where: CredentialIssuerWhereInput): CredentialIssuer
+  allDiscoverableContents(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ContentWhereInput
+  ): [Content]
+=======
+>>>>>>> dev
   allDiscoverableProducts(where: ProductWhereInput): [Product]
   DiscoverableProduct(where: ProductWhereInput): Product
   myServiceAccesses(where: ServiceAccessWhereInput): [ServiceAccess]
   myApplications(where: ApplicationWhereInput): [Application]
   CredentialIssuerSummary(where: CredentialIssuerWhereInput): CredentialIssuer
   allDiscoverableContents(where: ContentWhereInput): [Content]
+<<<<<<< HEAD
+=======
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+>>>>>>> dev
   getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
   getResourceSet(
     credIssuerId: ID!

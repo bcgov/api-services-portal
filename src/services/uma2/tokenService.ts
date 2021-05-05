@@ -45,7 +45,7 @@ export class UMA2TokenService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        logger.debug("[getRequestingPartyToken] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[getRequestingPartyToken] RESULT = %j", response);
         return response['access_token']
     }
 }

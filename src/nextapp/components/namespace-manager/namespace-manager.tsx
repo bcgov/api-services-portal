@@ -88,6 +88,13 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                 isDisabled={mutation.isLoading}
                 size="xs"
                 colorScheme="red"
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                variant="outline"
+=======
+>>>>>>> 110fd95acee9f6f43ddf3107ad623e01b548b48a
+>>>>>>> dev
                 onClick={handleDelete(n.name)}
               >
                 <Icon as={FaTrash} />

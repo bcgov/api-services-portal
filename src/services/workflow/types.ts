@@ -13,6 +13,7 @@ export interface NewCredential {
 
 export interface RequestControls {
     defaultClientScopes?: string[]
+    roles?: string[]
     aclGroups?: string[]
     plugins?: ConsumerPlugin[]
 }

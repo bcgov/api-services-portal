@@ -1,10 +1,11 @@
 
-import { Button, Table, Thead, Tbody, Tr, Th, Td, TableCaption, HStack, Tag, TagCloseButton, TagLabel, useToast } from "@chakra-ui/react"
+import { Button, Icon, Table, Thead, Tbody, Tr, Th, Td, TableCaption, useToast } from "@chakra-ui/react"
 import { gql } from 'graphql-request';
 
 import InlinePermissionsList from '@/components/inline-permissions-list';
 import { useApiMutation } from '@/shared/services/api';
 import { QueryKey, useQueryClient } from 'react-query';
+import { FaCheck, FaMinusCircle } from 'react-icons/fa';
 
 interface RevokeVariables {
     prodEnvId: string;
@@ -42,7 +43,7 @@ function List({ prodEnvId, data, queryKey }) {
                         <Tr>
                         <Th>Subject</Th>
                         <Th>Permission</Th>
-                        <Th>Action</Th>
+                        <Th isNumeric>Actions</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -56,8 +57,18 @@ function List({ prodEnvId, data, queryKey }) {
                                     onRevoke={()=>false}
                                 />
                             </Td>
-                            <Td>
-                                <Button colorScheme="red" size="sm" onClick={() => handleRevoke(item.id)}>Revoke</Button>
+                            <Td isNumeric>
+                                <Button
+                                  colorScheme="red"
+                                  isLoading={revoke.isLoading}
+                                  loadingText="Revoking..."
+                                  size="xs"
+                                  leftIcon={<Icon as={FaMinusCircle} />}
+                                  onClick={() => handleRevoke(item.id)}
+                                  variant="outline"
+                                  >
+                                  Revoke Access
+                                </Button>
                             </Td>
                         </Tr>
                     ))}

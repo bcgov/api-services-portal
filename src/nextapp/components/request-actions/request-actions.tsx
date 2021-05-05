@@ -5,16 +5,19 @@ import NextLink from 'next/link';
 import { gql } from 'graphql-request';
 import { QueryKey, useMutation, useQueryClient } from 'react-query';
 import api from '@/shared/services/api';
+import { RequestControls } from '@/shared/types/app.types';
 
 interface RequestActionsProps {
   id: string;
+  controls: RequestControls;
   queryKey: QueryKey;
 }
 
-const RequestActions: React.FC<RequestActionsProps> = ({ id, queryKey }) => {
+const RequestActions: React.FC<RequestActionsProps> = ({ id, controls, queryKey }) => {
   const client = useQueryClient();
   const toast = useToast();
-  const reject = useMutation((id: string) => api(mutation, { id }));
+  const approve = useMutation((id: string) => api(approveMutation, { id, controls: JSON.stringify(controls) }, { ssr: false }));
+  const reject = useMutation((id: string) => api(rejectMutation, { id }, { ssr: false }));
 
   const handleReject = async () => {
     try {
@@ -32,17 +35,33 @@ const RequestActions: React.FC<RequestActionsProps> = ({ id, queryKey }) => {
     }
   };
 
+  const handleApprove = async () => {
+    try {
+      await approve.mutateAsync(id);
+      toast({
+        title: 'Request Approved',
+        status: 'success',
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        title: 'Approval failed',
+        status: 'error',
+      });
+    }
+  };  
+
   return (
     <ButtonGroup isAttached>
-      <NextLink href={`/manager/poc/requests/issue/${id}`}>
-        <Button
+      <Button
           colorScheme="green"
-          disabled={reject.isLoading}
+          disabled={approve.isLoading}
+          isLoading={approve.isLoading}
           leftIcon={<Icon as={FaCheck} />}
-        >
+          onClick={handleApprove}
+          >
           Approve
-        </Button>
-      </NextLink>
+      </Button>
       <Button
         colorScheme="orange"
         disabled={reject.isLoading}
@@ -58,7 +77,18 @@ const RequestActions: React.FC<RequestActionsProps> = ({ id, queryKey }) => {
 
 export default RequestActions;
 
-const mutation = gql`
+const approveMutation = gql`
+  mutation FulfillRequest($id: ID!, $controls: String!) {
+    updateAccessRequest(
+        id: $id, 
+        data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }
+    ) {
+        id
+    }
+  }
+`
+
+const rejectMutation = gql`
   mutation Approve($id: ID!) {
     updateAccessRequest(
       id: $id

@@ -82,7 +82,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
                 type="hidden"
                 name="dataset"
                 defaultValue={value}
-                value={selected?.name}
+                value={selected?.id}
               />
               <Box
                 {...getMenuProps()}

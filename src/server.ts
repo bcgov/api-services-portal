@@ -25,6 +25,9 @@ const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
+const redis = require('redis')
+let RedisStore = require('connect-redis')(session)
+
 const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
@@ -105,7 +108,7 @@ const keystone = new Keystone({
       maxAge: 1000 * 60 * 15, // 15 minute
       sameSite: true,
     },
-    //   sessionStore: new MongoStore({ url: process.env.MONGO_URL, mongoOptions: { auth: { user: process.env.MONGO_USER, password: process.env.MONGO_PASSWORD } } })
+    sessionStore: (process.env.SESSION_STORE === 'redis' ? new RedisStore({client:redis.createClient({ url: process.env.REDIS_URL, password: process.env.REDIS_PASSWORD })}) : null)
   });
 
   const yamlReport = []
@@ -209,7 +212,7 @@ const { pages } = require('./admin-hooks.js');
 const { checkWhitelist, loadWhitelistAndWatch, addToWhitelist } = require('./authz/whitelist')
 
 const apps = [
-    //new ApiHealthApp(state),
+    new ApiHealthApp(state),
     new ApiOpenapiApp(),
     new ApiGraphqlWhitelistApp({
         apiPath

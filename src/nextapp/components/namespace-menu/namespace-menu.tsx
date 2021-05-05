@@ -41,7 +41,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   const handleNamespaceChange = React.useCallback(
     (id: string) => async () => {
       try {
-        await restApi(`/admin/switch/${id}`, {method: 'PUT'});
+        await restApi(`/admin/switch/${id}`, { method: 'PUT' });
         client.invalidateQueries();
       } catch (err) {
         toast({
@@ -69,7 +69,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           _focus={{ boxShadow: 'outline' }}
         >
           <Icon as={FaNetworkWired} mr={2} color="rgba(255, 255, 255, 0.75)" />
-          {user.namespace} <Icon as={FaChevronDown} />
+          {user?.namespace ?? 'No Active Namespace'} <Icon as={FaChevronDown} />
         </MenuButton>
         <MenuList color="gray.600">
           <>

@@ -94,6 +94,7 @@ const NewRequestsPage: React.FC<
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
+        additionalDetails: formData.get("additionalDetails")
       };
       const result = await graphql(mutation, payload);
       client.invalidateQueries('allAccessRequests');
@@ -148,7 +149,7 @@ const NewRequestsPage: React.FC<
               </VStack>
               <Box flex={1}>
                 <Heading size="sm" mb={2}>
-                  OAuth Flow
+                  Requestor
                 </Heading>
                 <Flex>
                   <Avatar name={requestor.name} />
@@ -208,7 +209,7 @@ const NewRequestsPage: React.FC<
                 </Box>
             )}
             <Textarea
-              name="other"
+              name="additionalDetails"
               placeholder=""
               variant="bc-input"
             />
@@ -292,11 +293,13 @@ const mutation = gql`
     $requestor: ID!
     $applicationId: ID!
     $productEnvironmentId: ID!
+    $additionalDetails: String
   ) {
     createAccessRequest(
       data: {
         name: $name
         controls: $controls
+        additionalDetails: $additionalDetails
         requestor: { connect: { id: $requestor } }
         application: { connect: { id: $applicationId } }
         productEnvironment: { connect: { id: $productEnvironmentId } }

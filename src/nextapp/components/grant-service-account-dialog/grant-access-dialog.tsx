@@ -27,18 +27,22 @@ import { gql } from 'graphql-request';
 import { UmaResourceSet } from '@/shared/types/query.types';
 import { useApiMutation } from '@/shared/services/api';
 import id from 'date-fns/esm/locale/id/index.js';
+import { useQueryClient } from 'react-query';
 
 interface ShareResourceDialogProps {
   prodEnvId: string;
   resource: UmaResourceSet;
   resourceId: string;
+  queryKey: string;
 }
 
 const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
   prodEnvId,
   resource,
   resourceId,
+  queryKey
 }) => {
+  const client = useQueryClient();
   const grant = useApiMutation(mutation);
   const toast = useToast();
   const title = 'Grant Service Account Access';
@@ -64,6 +68,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       title: 'Access Granted',
       status: 'success',
     });
+    client.invalidateQueries(queryKey);
     onClose();
   };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
