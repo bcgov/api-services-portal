@@ -198,13 +198,6 @@ class Oauth2ProxyAuthStrategy {
         const namespace = oauthUser['namespace']
         const groups = JSON.stringify(oauthUser['groups'])
         let roles = JSON.stringify(['developer']) // authenticated user gets developer role automatically
-        if ('realm_access' in oauthUser) {
-            try {
-                roles = JSON.stringify(oauthUser.realm_access.roles.filter(r => allRoles.includes(r)))
-            } catch (e) {
-                logger.error("register_user - error parsing realm_acccess roles %s - defaulting roles to none", e)
-            }
-        }
         if ('resource_access' in oauthUser) {
             try {
                 const clientId = process.env.GWA_RES_SVR_CLIENT_ID
