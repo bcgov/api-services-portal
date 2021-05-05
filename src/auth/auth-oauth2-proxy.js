@@ -90,9 +90,13 @@ class Oauth2ProxyAuthStrategy {
                 logger.debug("SESSION USER = %j", req.user)
                 if (req.user) {
                     if (jti != req.user.jti) {
-                        logger.debug("Looks like a different credential.. %s", jti)
-                        await this._sessionManager.endAuthedSession(req);
-                        return res.status(403).json({error:'invalid_session'})
+                        logger.warn("Looks like a different credential.. %s", jti)
+                        logger.warn("OK if subjects the same! %s %s", req['oauth_user']['sub'], req.user.sub)
+                        if (req['oauth_user']['sub'] != req.user.sub) {
+                            logger.warn("Subjects different too!  Ending session.")
+                            await this._sessionManager.endAuthedSession(req);
+                            return res.status(403).json({error:'invalid_session'})
+                        }
                     }
                 }
             }
