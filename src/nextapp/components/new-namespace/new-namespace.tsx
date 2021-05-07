@@ -28,6 +28,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
     async (payload: { name: string }) =>
       await restApi<{ name: string; id: string }>('/gw/api/namespaces', {
         method: 'POST',
+        headers: { Accept: 'application/json' },
         body: JSON.stringify(payload),
       })
   );
@@ -52,6 +53,10 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
             status: 'success',
           });
           queryClient.invalidateQueries();
+          toast({
+            title: `Switched to  ${json.name} namespace`,
+            status: 'success',
+          });
           onClose();
         } catch (err) {
           toast({

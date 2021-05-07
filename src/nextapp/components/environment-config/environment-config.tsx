@@ -1,32 +1,32 @@
 import * as React from 'react';
 import api from '@/shared/services/api';
 import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
   Box,
   Button,
   Checkbox,
   Heading,
-  Input,
   Select,
-  Badge,
   Text,
   Textarea,
   Switch,
   ButtonGroup,
   Icon,
-  VStack,
   useToast,
+  Flex,
+  Divider,
+  Tooltip,
+  FormControl,
+  FormLabel,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaCircle, FaCode } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
-import LegalSelect from './legal-select'
+import LegalSelect from './legal-select';
 import YamlViewer from '../yaml-viewer';
 
 interface EnvironmentConfigProps {
@@ -37,8 +37,17 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [flow, setFlow] = React.useState<string>(data.flow);
-  const statusText = data.active ? 'Running' : 'Idle';
-  const statusBoxColorScheme = data.active ? 'green' : 'orange';
+  const [isEditing, setEditing] = React.useState<boolean>(false);
+  const flowTypes: { value: string; label: string }[] = [
+    { value: 'public', label: 'Public' },
+    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
+    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
+    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
+  ];
+
+  const handleToggleEditing = React.useCallback(() => {
+    setEditing((state) => !state);
+  }, [setEditing]);
 
   // Updates
   const client = useQueryClient();
@@ -60,18 +69,20 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
       active: Boolean(formData.get('active')),
       flow: formData.get('flow') as string,
       approval: Boolean(formData.get('approval')) as boolean,
-      additionalDetailsToRequest: formData.get('additionalDetailsToRequest') as string
+      additionalDetailsToRequest: formData.get(
+        'additionalDetailsToRequest'
+      ) as string,
     };
 
-    ['credentialIssuer', 'legal'].map((fieldName:string) => {
-        if (formData.has(fieldName) && formData.get(fieldName) != "") {
-            payload[fieldName] = {
-                connect: { id: formData.get(fieldName) as string },
-            };
-        } else {
-            payload[fieldName] = { disconnectAll: true }
-        }
-    })
+    ['credentialIssuer', 'legal'].map((fieldName: string) => {
+      if (formData.has(fieldName) && formData.get(fieldName) != '') {
+        payload[fieldName] = {
+          connect: { id: formData.get(fieldName) as string },
+        };
+      } else {
+        payload[fieldName] = { disconnectAll: true };
+      }
+    });
 
     try {
       await mutation.mutateAsync({
@@ -79,6 +90,11 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
         data: payload,
       });
       client.invalidateQueries(['environment', data.id]);
+      toast({
+        title: 'Environment Updated',
+        status: 'success',
+      });
+      setEditing(false);
     } catch (err) {
       toast({
         title: 'Environment Update Failed',
@@ -100,114 +116,156 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
       setFlow(data.flow);
     }
     setChanged(false);
+    setEditing(false);
   }, [flow, data, setFlow, setChanged]);
 
-  const flowTypes = [
-    { value: 'public', label: 'Public' },
-    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
-    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
-    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
-  ];
+  const flowTypeText = flowTypes.reduce((memo: string, flow) => {
+    if (flow.value === data.flow) {
+      return flow.label;
+    }
+    return memo;
+  }, '-');
 
   return (
-    <form onChange={onChange} onSubmit={onSubmit} onReset={onReset}>
+    <>
       <Box
         bgColor="white"
-        mt={8}
-        p={4}
-        display="flex"
         border="2px solid"
-        borderColor={data.active ? 'green.500' : 'orange.500'}
+        borderColor="gray.300"
         borderRadius={4}
-        overflow="hidden"
       >
-        <Box display="flex">
-          <Switch
-            defaultIsChecked={data.active}
-            id="active"
-            name="active"
-            value="active"
-          />
-        </Box>
-        <Box flex={1} ml={5} display="flex" flexDirection="column">
-          <Heading
-            size="sm"
-            mb={2}
-            color="inherit"
-            display="flex"
-            alignItems="center"
-          >
-            {data?.product?.name}{' '}
-            <Badge
-              px={2}
-              mx={1}
-              colorScheme="blue"
-              variant="solid"
-              fontSize="inherit"
-            >
-              {data.name}
-            </Badge>{' '}
-            Environment is{' '}
-            <Badge
-              colorScheme={statusBoxColorScheme}
-              px={2}
-              mx={1}
-              variant="solid"
-              fontSize="inherit"
-            >
-              {statusText}
-            </Badge>
-            {mutation.isError && (
-              <Box color="red" display="flex" alignItems="center" ml={8}>
-                <Icon as={FaExclamationTriangle} mr={2} />
-                <Text>Error updating environment</Text>
-              </Box>
-            )}
-          </Heading>
-          <Box>
-            <Text mb={4}></Text>
-            <Box>
-              <Text fontWeight="bold" mr={4}>
-                <Checkbox name="approval" value="true" defaultIsChecked={data.approval}>Approval Required?</Checkbox>
-              </Text>
-            </Box>
-
-            <Box display="flex" alignItems="center">
-              <Text fontWeight="bold" mr={4}>
-                Terms of Use?
-              </Text>
-              <LegalSelect value={data.legal?.id}/>
-            </Box>
-            <Box alignItems="center">
-              <Text fontWeight="bold" mr={4}>
-                Optional Instructions for Requester
-              </Text>
-              <Textarea size="sm" defaultValue={data.additionalDetailsToRequest}
-                variant="filled" name="additionalDetailsToRequest"></Textarea>
-            </Box>
-            <Box display="flex" alignItems="center">
-              <Text fontWeight="bold" mr={4}>
-                Authorization
-              </Text>
-              <Select
-                size="sm"
-                variant="filled"
-                width="auto"
-                id="flow"
-                name="flow"
-                value={flow}
-                onChange={onAuthChange}
+        <Flex as="header" p={4} justify="space-between" align="center">
+          <Heading size="md">
+            <Box as="span">
+              <Tooltip
+                label={data.active ? 'Active' : 'Inactive'}
+                aria-label={data.active ? 'Active icon' : 'Inactive icon'}
               >
-                {flowTypes.map((f) => (
-                  <option value={f.value}>{f.label}</option>
-                ))}
-              </Select>
-              {(flow === 'client-credentials' ||
-                flow === 'authorization-code') && (
-                <CredentialIssuerSelect value={data.credentialIssuer?.id} environmentId={data.id} flow={flow} />
+                <Icon
+                  as={FaCircle}
+                  color={data.active ? 'green.500' : 'yellow.400'}
+                  boxSize={3}
+                  mr={2}
+                />
+              </Tooltip>
+            </Box>
+            {`${data.name} Environment Configuration`}
+          </Heading>
+          {!isEditing && (
+            <Button
+              size="sm"
+              variant="outline"
+              colorScheme="bc-blue"
+              onClick={handleToggleEditing}
+            >
+              Edit
+            </Button>
+          )}
+        </Flex>
+        <Divider />
+        <Box p={4}>
+          {!isEditing && (
+            <>
+              <Heading size="sm">Authentication Flow</Heading>
+              <Text mb={4}>{flowTypeText}</Text>
+              {data.additionalDetailsToRequest && (
+                <>
+                  <Heading size="sm">Additional Details to Requester</Heading>
+                  <Text>{data.additionalDetailsToRequest}</Text>
+                </>
               )}
-              <Box flex={1} />
-              <Box>
+            </>
+          )}
+          {isEditing && (
+            <form onChange={onChange} onSubmit={onSubmit} onReset={onReset}>
+              <Box
+                bgColor={data.active ? 'green.50' : 'yellow.50'}
+                px={4}
+                py={2}
+                mb={4}
+                borderRadius={4}
+              >
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="active" mb={1}>
+                    {data.active ? 'Environment Enabled' : 'Environment Idle'}
+                  </FormLabel>
+                  <Switch
+                    defaultIsChecked={data.active}
+                    id="active"
+                    name="active"
+                    value="active"
+                  />
+                </FormControl>
+              </Box>
+              <Grid gap={8} templateColumns="1fr 1fr">
+                <GridItem>
+                  <FormControl mb={4}>
+                    <Checkbox
+                      name="approval"
+                      value="true"
+                      defaultIsChecked={data.approval}
+                    >
+                      Approval Required?
+                    </Checkbox>
+                  </FormControl>
+
+                  <FormControl mb={4}>
+                    <FormLabel htmlFor="legal">Terms of Use</FormLabel>
+                    <Grid gap={4} templateColumns="1fr 1fr">
+                      <GridItem>
+                        <LegalSelect value={data.legal?.id} />
+                      </GridItem>
+                    </Grid>
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel htmlFor="flow">Authorization</FormLabel>
+                    <Grid gap={4} templateColumns="1fr 1fr">
+                      <GridItem>
+                        <Select
+                          size="sm"
+                          variant="bc-input"
+                          width="auto"
+                          id="flow"
+                          name="flow"
+                          value={flow}
+                          onChange={onAuthChange}
+                        >
+                          {flowTypes.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </Select>
+                      </GridItem>
+                      {(flow === 'client-credentials' ||
+                        flow === 'authorization-code') && (
+                        <GridItem>
+                          <CredentialIssuerSelect
+                            value={data.credentialIssuer?.id}
+                            environmentId={data.id}
+                            flow={flow}
+                          />
+                        </GridItem>
+                      )}
+                    </Grid>
+                  </FormControl>
+                </GridItem>
+                <GridItem>
+                  <FormControl>
+                    <FormLabel htmlFor="additionalDetailsToRequest">
+                      Optional Instructions for Requester
+                    </FormLabel>
+                    <Textarea
+                      size="sm"
+                      defaultValue={data.additionalDetailsToRequest}
+                      variant="bc-input"
+                      name="additionalDetailsToRequest"
+                    />
+                  </FormControl>
+                </GridItem>
+              </Grid>
+              <Flex justify="flex-end" mt={4}>
                 <ButtonGroup size="sm">
                   <Button type="reset" isDisabled={mutation.isLoading}>
                     Cancel
@@ -221,29 +279,30 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                     Apply Changes
                   </Button>
                 </ButtonGroup>
-              </Box>
-            </Box>
-          </Box>
+              </Flex>
+            </form>
+          )}
         </Box>
       </Box>
-      { flow === 'kong-api-key-acl' && (
-        <Box p={2}>
-            <Alert status="warning" mb={4}>
-                
-                <AlertIcon boxSize="40px" mr={5} />
-                <Box flex="1">
-                    <AlertTitle mt={4} mb={1} fontSize="lg">Plugin Configuration</AlertTitle>
-                    <AlertDescription maxWidth="sm">
-                        <Box>Ensure that services associated with this environment have the following plugins:</Box>
-                        <YamlViewer doc={`plugins:\n- name: key-auth\n  tags: [ ns.${data.product.namespace} ]\n  protocols: [ http, https ]\n  config:\n    key_names: ["X-API-KEY"]\n    run_on_preflight: true\n    hide_credentials: true\n    key_in_body: false\n- name: acl\n  tags: [ ns.${data.product.namespace} ]\n  config:\n    hide_groups_header: true\n    allow: [ ${data.appId} ]`}/>
-
-                    </AlertDescription>
-                </Box>
-            </Alert>
+      {flow === 'kong-api-key-acl' && (
+        <Box my={4} bgColor="white">
+          <Flex as="header" p={4} align="center">
+            <Icon as={FaCode} color="bc-link" mr={2} boxSize={6} />
+            <Heading size="md">Plugin Configuration</Heading>
+          </Flex>
+          <Divider />
+          <Box p={4}>
+            <Text fontSize="sm">
+              Ensure that services associated with this environment have the
+              following plugins:
+            </Text>
+          </Box>
+          <YamlViewer
+            doc={`plugins:\n- name: key-auth\n  tags: [ ns.${data.product.namespace} ]\n  protocols: [ http, https ]\n  config:\n    key_names: ["X-API-KEY"]\n    run_on_preflight: true\n    hide_credentials: true\n    key_in_body: false\n- name: acl\n  tags: [ ns.${data.product.namespace} ]\n  config:\n    hide_groups_header: true\n    allow: [ ${data.appId} ]`}
+          />
         </Box>
-
       )}
-    </form>
+    </>
   );
 };
 

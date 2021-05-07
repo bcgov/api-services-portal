@@ -115,7 +115,7 @@ export const restApi = async <T>(url: string, options = {}): Promise<T> => {
     const config = {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       ...options,
     };

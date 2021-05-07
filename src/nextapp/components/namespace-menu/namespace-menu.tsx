@@ -39,11 +39,21 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   );
 
   const handleNamespaceChange = React.useCallback(
-    (id: string) => async () => {
+    (namespace: NamespaceData) => async () => {
+      toast({
+        title: `Switching to  ${namespace.name} namespace`,
+        status: 'info',
+      });
       try {
-        await restApi(`/admin/switch/${id}`, { method: 'PUT' });
+        await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
+        toast.closeAll();
         client.invalidateQueries();
+        toast({
+          title: `Switched to  ${namespace.name} namespace`,
+          status: 'success',
+        });
       } catch (err) {
+        toast.closeAll();
         toast({
           title: 'Unable to switch namespaces',
           status: 'error',
@@ -83,10 +93,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                   {data
                     .filter((n) => n.name !== user.namespace)
                     .map((n) => (
-                      <MenuItem
-                        key={n.id}
-                        onClick={handleNamespaceChange(n.id)}
-                      >
+                      <MenuItem key={n.id} onClick={handleNamespaceChange(n)}>
                         {n.name}
                       </MenuItem>
                     ))}

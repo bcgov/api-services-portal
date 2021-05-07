@@ -528,7 +528,7 @@ app.post('/gql/api', async (req, res) => {
 app.put('/admin/switch/:id', (req, res) => {
   const next = namespaces.find((n) => n.id === req.params.id);
   namespace = next;
-  res.json({ status: 'ok' });
+  res.json({ switch: true });
 });
 
 app
@@ -537,7 +537,8 @@ app
     res.json(namespacesJson);
   })
   .post((req, res) => {
-    const namespace = { name: req.body.name, id: casual.uuid };
+    const newName = casual.word;
+    namespace = { name: newName, id: casual.uuid };
     namespacesJson.push(namespace);
     res.json(namespace);
   });
