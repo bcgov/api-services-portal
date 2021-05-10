@@ -32,7 +32,7 @@ const namespaces = [
   'citz-gdx',
   'dss-dds',
 ];
-const namespacesJson = namespaces.map((n) => ({ name: n, id: casual.uuid }));
+let namespacesJson = namespaces.map((n) => ({ name: n, id: casual.uuid }));
 let namespace = sample(namespacesJson);
 const devs = [
   'Joshua Jones',
@@ -542,5 +542,11 @@ app
     namespacesJson.push(namespace);
     res.json(namespace);
   });
+app.delete('/v2/namespaces/:namespace', (req, res) => {
+  namespacesJson = namespacesJson.filter(
+    (n) => n.name !== req.params.namespace
+  );
+  res.json({ status: 'ok' });
+});
 
 app.listen(port, () => console.log(`Mock server running on port ${port}`));

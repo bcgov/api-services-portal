@@ -20,6 +20,8 @@ import type { NamespaceData } from '@/shared/types/app.types';
 import { FaTrash } from 'react-icons/fa';
 import { useMutation, useQueryClient } from 'react-query';
 import { restApi } from '@/shared/services/api';
+import { useAuth } from '@/shared/services/auth';
+import { useRouter } from 'next/router';
 
 interface NamespaceManagerProps {
   data: NamespaceData[];
@@ -32,7 +34,9 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useAuth();
   const client = useQueryClient();
+  const router = useRouter();
   const toast = useToast();
   const mutation = useMutation((name: string) =>
     restApi(`/gw/api/namespaces/${name}`, {
@@ -46,6 +50,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
       try {
         await mutation.mutateAsync(name);
         client.invalidateQueries('allNamespaces');
+
+        if (user.namespace === name && router) {
+          router.push('/manager');
+        }
+
         toast({
           title: ' Namespace Deleted',
           status: 'success',
