@@ -173,6 +173,8 @@ jobs:
             skip-auth-regex: '/home|/public|/docs|/_next|/images|/feed|/signout'
             whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
             skip-provider-button: 'true'
+            profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
+
 
 
         env:
