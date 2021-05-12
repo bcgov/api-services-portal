@@ -1022,10 +1022,12 @@ export type Content = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  isPublic?: Maybe<Scalars['Boolean']>;
 };
 
 export type ContentWhereInput = {
@@ -1143,6 +1145,24 @@ export type ContentWhereInput = {
   readme_not_ends_with_i?: Maybe<Scalars['String']>;
   readme_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   readme_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   tags?: Maybe<Scalars['String']>;
   tags_not?: Maybe<Scalars['String']>;
   tags_contains?: Maybe<Scalars['String']>;
@@ -1189,6 +1209,8 @@ export type ContentWhereInput = {
   order_not_in?: Maybe<Array<Maybe<Scalars['Int']>>>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isComplete_not?: Maybe<Scalars['Boolean']>;
+  isPublic?: Maybe<Scalars['Boolean']>;
+  isPublic_not?: Maybe<Scalars['Boolean']>;
 };
 
 export type ContentWhereUniqueInput = {
@@ -1210,6 +1232,8 @@ export enum SortContentsBy {
   GithubRepositoryDesc = 'githubRepository_DESC',
   ReadmeAsc = 'readme_ASC',
   ReadmeDesc = 'readme_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   TagsAsc = 'tags_ASC',
   TagsDesc = 'tags_DESC',
   SlugAsc = 'slug_ASC',
@@ -1217,7 +1241,9 @@ export enum SortContentsBy {
   OrderAsc = 'order_ASC',
   OrderDesc = 'order_DESC',
   IsCompleteAsc = 'isComplete_ASC',
-  IsCompleteDesc = 'isComplete_DESC'
+  IsCompleteDesc = 'isComplete_DESC',
+  IsPublicAsc = 'isPublic_ASC',
+  IsPublicDesc = 'isPublic_DESC'
 }
 
 export type ContentUpdateInput = {
@@ -1227,10 +1253,12 @@ export type ContentUpdateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  isPublic?: Maybe<Scalars['Boolean']>;
 };
 
 export type ContentsUpdateInput = {
@@ -1245,10 +1273,12 @@ export type ContentCreateInput = {
   externalLink?: Maybe<Scalars['String']>;
   githubRepository?: Maybe<Scalars['String']>;
   readme?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   tags?: Maybe<Scalars['String']>;
   slug?: Maybe<Scalars['String']>;
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
+  isPublic?: Maybe<Scalars['Boolean']>;
 };
 
 export type ContentsCreateInput = {
@@ -5772,8 +5802,8 @@ export type UmaPermissionTicketInput = {
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
-export type UnauthenticateUserOutput = {
-  __typename?: 'unauthenticateUserOutput';
+export type UnauthenticateTemporaryIdentityOutput = {
+  __typename?: 'unauthenticateTemporaryIdentityOutput';
   /**
    * `true` when unauthentication succeeds.
    * NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
@@ -5781,12 +5811,12 @@ export type UnauthenticateUserOutput = {
   success?: Maybe<Scalars['Boolean']>;
 };
 
-export type AuthenticateUserOutput = {
-  __typename?: 'authenticateUserOutput';
+export type AuthenticateTemporaryIdentityOutput = {
+  __typename?: 'authenticateTemporaryIdentityOutput';
   /**  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.  */
   token?: Maybe<Scalars['String']>;
-  /**  Retrieve information on the newly authenticated User here.  */
-  item?: Maybe<User>;
+  /**  Retrieve information on the newly authenticated TemporaryIdentity here.  */
+  item?: Maybe<TemporaryIdentity>;
 };
 
 export type Query = {
@@ -5988,7 +6018,7 @@ export type Query = {
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
-  authenticatedUser?: Maybe<User>;
+  authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -6936,10 +6966,10 @@ export type Mutation = {
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
-  /**  Authenticate and generate a token for a User with the Password Authentication Strategy.  */
-  authenticateUserWithPassword?: Maybe<AuthenticateUserOutput>;
-  unauthenticateUser?: Maybe<UnauthenticateUserOutput>;
-  updateAuthenticatedUser?: Maybe<User>;
+  /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
+  authenticateTemporaryIdentityWithPassword?: Maybe<AuthenticateTemporaryIdentityOutput>;
+  unauthenticateTemporaryIdentity?: Maybe<UnauthenticateTemporaryIdentityOutput>;
+  updateAuthenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
 };
 
 
@@ -7677,14 +7707,14 @@ export type MutationApprovePermissionsArgs = {
 };
 
 
-export type MutationAuthenticateUserWithPasswordArgs = {
+export type MutationAuthenticateTemporaryIdentityWithPasswordArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationUpdateAuthenticatedUserArgs = {
-  data?: Maybe<UserUpdateInput>;
+export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
+  data?: Maybe<TemporaryIdentityUpdateInput>;
 };
 
 

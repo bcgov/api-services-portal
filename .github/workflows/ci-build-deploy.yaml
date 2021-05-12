@@ -175,8 +175,7 @@ jobs:
             skip-provider-button: 'true'
             profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
             insecure-oidc-allow-unverified-email: 'true'
-
-
+            oidc-email-claim: 'sub'
 
         env:
           SESSION_SECRET:
