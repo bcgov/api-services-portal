@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import cx from 'classnames';
 
+import { Flex, Box } from "@chakra-ui/react"
+
 interface NameValueProps {
   name: string;
   value: any;
@@ -12,9 +14,10 @@ const NameValue: React.FC<NameValueProps> = ({ name, value, width }) => {
   const style = {}
   style['width'] = width
   return (
-    <div className="flex" style={style}>
-      <div className="m-2"><b>{name}</b><br/>{value}</div>
-    </div>
+    <Flex>
+      <Box style={style}><b>{name}</b></Box>
+      <Box >{value}</Box>
+    </Flex>
   );
 };
 

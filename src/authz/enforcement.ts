@@ -123,7 +123,7 @@ export function EnforcementPoint (params : any) {
                 || rule['matchNotOneOfFieldKey'] != null)) {
                 continue
             }
-            const result = ((ruleConditionState) => {
+            const result: any = ((ruleConditionState) => {
                 const matches = []
                 for ( const key of Object.keys(rule)) {
                     const value : any = (rule as any)[key]
@@ -146,6 +146,7 @@ export function EnforcementPoint (params : any) {
                 }
                 if (ruleConditionState && rule.result === RuleResult.Allow) {
                     if (rule.filters != null) {
+                        const filters = []
                         for ( const filterId of rule.filters) {
                             if (!(filterId in actions)) {
                                 logger.debug("--> DENY")
@@ -155,8 +156,13 @@ export function EnforcementPoint (params : any) {
                             const result = actions[filterId](ctx, "Y")
                             if (result) {
                                 logger.debug("--> FILTER %j", result)
-                                return result
+                                filters.push(result)
                             }
+                        }
+                        if (filters.length == 1) {
+                            return filters[0]
+                        } else {
+                            return `{ AND: [ ${filters.join(",")} ] }` as any
                         }
                     }
                     return true

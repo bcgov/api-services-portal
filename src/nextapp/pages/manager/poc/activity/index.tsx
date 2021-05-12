@@ -5,6 +5,8 @@ import {
     Button,
     Box,
     Container,
+    Heading,
+    Divider,
     Stack,
     VStack,
     Skeleton,
@@ -68,14 +70,10 @@ const ActivityPage = () => {
         <Container maxW="6xl">
   
           <PageHeader title="Activity" actions={false} breadcrumb={breadcrumbs()}>
-            <p>
-              <strong>Activity</strong> provides details about your services on the Gateway.
-
-            </p>
           </PageHeader>
   
-          <Box mt={5}>
-              <List data={data} state={state} refetch={fetch} />
+          <Box bgColor="white" mb={4}>
+            <List data={data} state={state} refetch={fetch} />
           </Box>
         </Container>
         </>

@@ -203,6 +203,10 @@ const query = gql`
             tags
             createdAt
         }
+        application {
+            name
+            appId
+        }
     }
 
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {

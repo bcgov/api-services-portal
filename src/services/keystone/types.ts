@@ -315,6 +315,7 @@ export type Activity = {
   action?: Maybe<Scalars['String']>;
   result?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
+  context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
@@ -438,6 +439,24 @@ export type ActivityWhereInput = {
   message_not_ends_with_i?: Maybe<Scalars['String']>;
   message_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   message_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  context?: Maybe<Scalars['String']>;
+  context_not?: Maybe<Scalars['String']>;
+  context_contains?: Maybe<Scalars['String']>;
+  context_not_contains?: Maybe<Scalars['String']>;
+  context_starts_with?: Maybe<Scalars['String']>;
+  context_not_starts_with?: Maybe<Scalars['String']>;
+  context_ends_with?: Maybe<Scalars['String']>;
+  context_not_ends_with?: Maybe<Scalars['String']>;
+  context_i?: Maybe<Scalars['String']>;
+  context_not_i?: Maybe<Scalars['String']>;
+  context_contains_i?: Maybe<Scalars['String']>;
+  context_not_contains_i?: Maybe<Scalars['String']>;
+  context_starts_with_i?: Maybe<Scalars['String']>;
+  context_not_starts_with_i?: Maybe<Scalars['String']>;
+  context_ends_with_i?: Maybe<Scalars['String']>;
+  context_not_ends_with_i?: Maybe<Scalars['String']>;
+  context_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  context_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   refId?: Maybe<Scalars['String']>;
   refId_not?: Maybe<Scalars['String']>;
   refId_contains?: Maybe<Scalars['String']>;
@@ -515,6 +534,8 @@ export enum SortActivitiesBy {
   ResultDesc = 'result_DESC',
   MessageAsc = 'message_ASC',
   MessageDesc = 'message_DESC',
+  ContextAsc = 'context_ASC',
+  ContextDesc = 'context_DESC',
   RefIdAsc = 'refId_ASC',
   RefIdDesc = 'refId_DESC',
   NamespaceAsc = 'namespace_ASC',
@@ -536,6 +557,7 @@ export type ActivityUpdateInput = {
   action?: Maybe<Scalars['String']>;
   result?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
+  context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
@@ -554,6 +576,7 @@ export type ActivityCreateInput = {
   action?: Maybe<Scalars['String']>;
   result?: Maybe<Scalars['String']>;
   message?: Maybe<Scalars['String']>;
+  context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;

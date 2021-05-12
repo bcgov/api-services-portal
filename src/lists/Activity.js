@@ -29,7 +29,11 @@ module.exports = {
         isRequired: false,
     },
     message: {
-        type: Markdown,
+        type: Text,
+        isRequired: false,
+    },
+    context: {
+        type: Text,
         isRequired: false,
     },
     refId: {
@@ -69,7 +73,7 @@ module.exports = {
         }
     })
   },
-  recordActivity: (context, action, type, refId, message, result = "") => {
+  recordActivity: (context, action, type, refId, message, result = "", activityContext = "") => {
         console.log("Record Activity")
         const userId = context.authedItem.userId
         const namespace = context.authedItem.namespace
@@ -77,11 +81,11 @@ module.exports = {
         console.log("USERID="+userId+" NAME=" + name)
 
         return context.executeGraphQL({
-            query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $userId: String) {
-                    createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, actor: { connect: { id : $userId }} }) {
+            query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: String) {
+                    createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, actor: { connect: { id : $userId }} }) {
                         id
                 } }`,
-            variables: { name, namespace, type, action, refId, message, result, userId },
+            variables: { name, namespace, type, action, refId, message, result, activityContext, userId },
         })
   }
 }

@@ -7,12 +7,14 @@ export const GET_LIST = `
           action
           result
           message
+          context
           refId
           namespace
           extRefId
           createdAt
           actor {
               name
+              username
           }
         }
     }

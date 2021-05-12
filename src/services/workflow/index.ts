@@ -453,11 +453,14 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
     const kongApi = new KongConsumerService(process.env.KONG_URL)
     const feederApi = new FeederService(process.env.FEEDER_URL)
 
+    const message = { text: "" }
     try {
+        
         if (originalInput['credential'] == "NEW") {
             const newCredential = await regenerateCredential(context, existingItem['id'])
             if (newCredential != null) {
                 updatedItem['credential'] = JSON.stringify(newCredential)
+                message.text = "requested access"
             }
         }
 
@@ -619,13 +622,14 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
 
             // Call /feeds to sync the Consumer with KeystoneJS
             await feederApi.forceSync('kong', 'consumer', kongConsumerPK)
+
+            message.text = "approved access"
         }
 
         const refId = updatedItem.id
         const action = operation
-        const message = "Changes to " + JSON.stringify(originalInput)
 
-        await recordActivity (context, action, 'AccessRequest', refId, message)
+        await recordActivity (context, action, 'AccessRequest', refId, message.text, "success", JSON.stringify(originalInput))
     } catch (err) {
         console.log("WORKFLOW ERR - "+err)
         await recordActivity (context, operation, 'AccessRequest', updatedItem.id, "Failed to Apply Workflow - " + err, "failed")

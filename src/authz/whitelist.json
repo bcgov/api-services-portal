@@ -451,5 +451,80 @@
           "referer": "http://localhost:4180/devportal/docs/ns-invoking-pharmanet-api-try-3",
           "query": "\n      {\n        allDiscoverableContents(where: { isComplete: true }) {\n          id\n          namespace\n          title\n          slug\n          description\n        }\n      }\n    ",
           "added": "2021-05-08T18:17:09.603Z"
+     },
+     "f8cacde2afa67d4526c5911a6c8bbe66": {
+          "referer": "http://localhost:4180/admin",
+          "query": "{\n  user: authenticatedTemporaryIdentity {\n    id\n    _label_\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T18:01:40.717Z"
+     },
+     "2c2d9f7d4190bba8df3d940697cf2edd": {
+          "referer": "http://localhost:4180/admin/gateway-groups",
+          "query": "query getList($where: GatewayGroupWhereInput, $search: String, $sortBy: [SortGatewayGroupsBy!], $first: Int, $skip: Int) {\n  allGatewayGroups(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allGatewayGroupsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T18:01:44.501Z"
+     },
+     "ff011b84790b44a8b2175b2f21b547ac": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n        application {\n            name\n            appId\n        }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-12T19:07:21.254Z"
+     },
+     "0ff065acedbc36a7fa4a78e83d7e9c00": {
+          "referer": "http://localhost:4180/admin/gateway-plugins?!id_in=%22606d21ed439270850940bf64,606d24768303f7862d0b0ac8%22",
+          "query": "query getList($where: GatewayPluginWhereInput, $search: String, $sortBy: [SortGatewayPluginsBy!], $first: Int, $skip: Int) {\n  allGatewayPlugins(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allGatewayPluginsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:04.356Z"
+     },
+     "6d1f4b01274d3039ae990567cf617752": {
+          "referer": "http://localhost:4180/admin/gateway-plugins/609c17dc4337bc74fb720251",
+          "query": "query getItem($id: ID!) {\n  GatewayPlugin(where: {id: $id}) {\n    _label_\n    id\n    name\n    namespace\n    tags\n    config\n    service {\n      id\n      _label_\n      __typename\n    }\n    route {\n      id\n      _label_\n      __typename\n    }\n    extSource\n    extForeignKey\n    extRecordHash\n    updatedAt\n    createdAt\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:22.526Z"
+     },
+     "c1b1675a5f6f9ac0dc050350a040c8fa": {
+          "referer": "http://localhost:4180/admin/gateway-plugins/609c17dc4337bc74fb720251",
+          "query": "query RelationshipSelect($search: String!, $first: Int!, $skip: Int!) {\n  allGatewayServices(search: $search, first: $first, skip: $skip) {\n    _label_\n    id\n    __typename\n  }\n  _allGatewayServicesMeta(search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:22.688Z"
+     },
+     "6a12b4f9d24f1324d0633067a1220131": {
+          "referer": "http://localhost:4180/admin/gateway-plugins/609c17dc4337bc74fb720251",
+          "query": "query getList($where: GatewayServiceWhereInput, $search: String, $sortBy: [SortGatewayServicesBy!], $first: Int, $skip: Int) {\n  allGatewayServices(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allGatewayServicesMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:22.718Z"
+     },
+     "e6c8be8c6fe43d4dbd10bccfd9abb457": {
+          "referer": "http://localhost:4180/admin/gateway-plugins/609c17dc4337bc74fb720251",
+          "query": "query RelationshipSelect($search: String!, $first: Int!, $skip: Int!) {\n  allGatewayRoutes(search: $search, first: $first, skip: $skip) {\n    _label_\n    id\n    __typename\n  }\n  _allGatewayRoutesMeta(search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:22.742Z"
+     },
+     "6afdcb4bef4965bcde7aa21ab0532fff": {
+          "referer": "http://localhost:4180/admin/gateway-plugins/609c17dc4337bc74fb720251",
+          "query": "query getList($where: GatewayRouteWhereInput, $search: String, $sortBy: [SortGatewayRoutesBy!], $first: Int, $skip: Int) {\n  allGatewayRoutes(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allGatewayRoutesMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:21:22.807Z"
+     },
+     "904fe57bf1b655a61ea100a6129d96d1": {
+          "referer": "http://localhost:4180/admin/gateway-consumers?!username_contains_i=%22acope%22",
+          "query": "query getList($where: GatewayConsumerWhereInput, $search: String, $sortBy: [SortGatewayConsumersBy!], $first: Int, $skip: Int) {\n  allGatewayConsumers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    username\n    customId\n    __typename\n  }\n  _allGatewayConsumersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:22:19.248Z"
+     },
+     "bd100d7fbe971d4dfd94411d8bbcefb2": {
+          "referer": "http://localhost:4180/admin/gateway-consumers?fields=_label_%2Cusername%2CcustomId%2CaclGroups&!aclGroups_contains_i=%22sid2pid%22",
+          "query": "query getList($where: GatewayConsumerWhereInput, $search: String, $sortBy: [SortGatewayConsumersBy!], $first: Int, $skip: Int) {\n  allGatewayConsumers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    username\n    customId\n    aclGroups\n    __typename\n  }\n  _allGatewayConsumersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:22:49.872Z"
+     },
+     "061263c3840dce7943360f72e4984f30": {
+          "referer": "http://localhost:4180/admin/gateway-consumers?fields=_label_%2Cusername%2CcustomId%2CaclGroups%2Cplugins&!aclGroups_contains_i=%22sid2pid%22",
+          "query": "query getList($where: GatewayConsumerWhereInput, $search: String, $sortBy: [SortGatewayConsumersBy!], $first: Int, $skip: Int) {\n  allGatewayConsumers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    username\n    customId\n    aclGroups\n    plugins {\n      id\n      _label_\n      __typename\n    }\n    __typename\n  }\n  _allGatewayConsumersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T19:23:19.152Z"
+     },
+     "46dc30104647b53b8f1ee7487b1e3a5a": {
+          "referer": "http://localhost:4180/manager/poc/activity",
+          "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
+          "added": "2021-05-12T20:33:52.726Z"
+     },
+     "0d7771d64b9783bd9b4aea28c36df325": {
+          "referer": "http://localhost:4180/manager/poc/activity",
+          "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          changes\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
+          "added": "2021-05-12T21:12:22.770Z"
+     },
+     "02a1cbc8cc2a615ae533f6b82bcabb05": {
+          "referer": "http://localhost:4180/manager/poc/activity",
+          "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          context\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
+          "added": "2021-05-12T21:18:46.070Z"
      }
 }
