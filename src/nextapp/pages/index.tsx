@@ -30,7 +30,7 @@ const actions: HomeActions[] = [
   },
   {
     title: 'Are you an API Provider?',
-    url: '/manager/poc/namespaces',
+    url: '/manager/namespaces',
     icon: FaToolbox,
     roles: [],
     description: "Is your Ministry looking to build and share APIs?  Go to Namespaces to get started!"

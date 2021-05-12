@@ -36,6 +36,13 @@ module.exports = {
       type: Text,
       isRequired: false,
     },
+    namespace: {
+        type: Text,
+        isRequired: true,
+        adminConfig: {
+            isReadOnly: false
+        }
+    },
     tags: {
         type: Text,
         isRequired: true,
@@ -57,14 +64,23 @@ module.exports = {
       type: Checkbox,
       defaultValue: false,
     },
+    isPublic: {
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: false,
+    },
   },
   hooks: {
     resolveInput: ({
         operation,
         resolvedData,
+        existingItem,
         context,
     }) => {
-        resolvedData['slug'] = slugify(resolvedData['title']).toLowerCase()
+        if ('title' in resolvedData) {
+            const ns = 'namespace' in resolvedData ? resolvedData['namespace'] : existingItem['namespace']
+            resolvedData['slug'] = slugify(ns + " " + resolvedData['title']).toLowerCase()
+        }
         return resolvedData
     }
   }

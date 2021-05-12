@@ -426,5 +426,30 @@
           "referer": "http://localhost:4180/manager/consumers",
           "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n  }\n",
           "added": "2021-05-05T17:31:13.555Z"
+     },
+     "cebbe74275b82e6d830015b63724f041": {
+          "referer": "http://localhost:4180/devportal/docs",
+          "query": "\n      {\n        allDiscoverableContents(where: {}) {\n          id\n          title\n          slug\n          description\n        }\n      }\n    ",
+          "added": "2021-05-08T17:33:43.978Z"
+     },
+     "ca5bc4d0d2bf67cccb616bb9adfb9f47": {
+          "referer": "http://localhost:4180/devportal/docs",
+          "query": "\n  query {\n    allDiscoverableContents(where: { isComplete: true }) {\n      id\n      title\n      slug\n    }\n  }\n",
+          "added": "2021-05-08T17:35:38.029Z"
+     },
+     "3b77e97d06b4926c408a99a1bf4a152d": {
+          "referer": "http://localhost:4180/devportal/docs",
+          "query": "\n  query Content($slug: String!) {\n    allDiscoverableContents(where: { slug: $slug, isComplete: true }) {\n      id\n      title\n      slug\n      content\n      readme\n      githubRepository\n    }\n  }\n",
+          "added": "2021-05-08T17:35:38.074Z"
+     },
+     "764f4ee3f37aa2ef17e1ac2188e47393": {
+          "referer": "http://localhost:4180/devportal/docs",
+          "query": "\n  query {\n    allDiscoverableContents(where: { isComplete: true }) {\n      id\n      namespace\n      title\n      slug\n    }\n  }\n",
+          "added": "2021-05-08T18:13:43.499Z"
+     },
+     "bb4946bc2e3e19ec41c2be119cee46ea": {
+          "referer": "http://localhost:4180/devportal/docs/ns-invoking-pharmanet-api-try-3",
+          "query": "\n      {\n        allDiscoverableContents(where: { isComplete: true }) {\n          id\n          namespace\n          title\n          slug\n          description\n        }\n      }\n    ",
+          "added": "2021-05-08T18:17:09.603Z"
      }
 }

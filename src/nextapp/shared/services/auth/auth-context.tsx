@@ -15,7 +15,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const session = useSession();
   const router = useRouter();
-  const route = links.find((d) => d.url === router?.pathname);
+  const route = links.find((d) => d.url === router?.pathname || d.altUrls?.includes(router?.pathname));
   const isUnauthorized = session.error && route?.access.length > 0;
 
   return (

@@ -14,6 +14,7 @@ const navigationQuery = gql`
   query {
     allDiscoverableContents(where: { isComplete: true }) {
       id
+      namespace
       title
       slug
     }
@@ -61,7 +62,7 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
         </aside>
         <div className="col-span-12 sm:col-span-10 bg-white">
           <div className="container sm:mr-auto sm:max-w-3xl py-6 px-6">
-            <article className={styles.markdownBody}>
+            <article className={styles['markdown-body']}>
               <nav className="mb-3 flex list-none text-gray-500 text-sm">
                 <li>
                   <Link href="/devportal/docs">

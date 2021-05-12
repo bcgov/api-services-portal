@@ -100,13 +100,13 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
         }
       }
     `;
-    const pages: { allContents: any[] } = await api(pagesQuery, null, {
+    const pages: { allDiscoverableContents: any[] } = await api(pagesQuery, null, {
         headers: req.headers as HeadersInit,
     });
 
     return {
       props: {
-        pages: pages.allContents || [],
+        pages: pages.allDiscoverableContents || [],
       },
     };
   } catch (err) {

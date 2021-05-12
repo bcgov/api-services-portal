@@ -43,6 +43,7 @@ const transformations = {
     "mapNamespace": (keystone, transformInfo, currentData, inputData, key) => {
         if (inputData['tags'] != null) {
             const val = inputData['tags'].filter(tag => tag.startsWith('ns.') && tag.indexOf('.', 3) == -1).map(tag => tag.substring(3))[0]
+            console.log("MapNamespace " + JSON.stringify(inputData['tags']) + " :: " + val)
             return currentData != null && currentData[key] === val ? null : val
         } else {
             return null
@@ -266,9 +267,10 @@ const metadata = {
     'Content': {
         query: 'allContents',
         refKey: 'externalLink',
-        sync: ['title', 'description', 'content', 'githubRepository', 'readme', 'order', 'isComplete', 'tags'],
+        sync: ['title', 'description', 'content', 'githubRepository', 'readme', 'order', 'isPublic', 'isComplete', 'tags', 'namespace'],
         transformations: {
-            tags: {name: "toStringDefaultArray"}
+            tags: {name: "toStringDefaultArray"},
+            namespace: {name:"mapNamespace"}
         }
     },
     'Legal': {
