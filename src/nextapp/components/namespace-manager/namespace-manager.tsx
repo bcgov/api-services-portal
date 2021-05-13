@@ -49,7 +49,6 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
     (name: string) => async () => {
       try {
         await mutation.mutateAsync(name);
-        client.invalidateQueries('allNamespaces');
 
         if (user.namespace === name && router) {
           router.push('/manager');
@@ -59,6 +58,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           title: ' Namespace Deleted',
           status: 'success',
         });
+        client.invalidateQueries();
       } catch (err) {
         toast({
           title: 'Delete Namespace Failed',
@@ -66,7 +66,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
         });
       }
     },
-    [client, mutation, toast]
+    [client, mutation, router, toast, user.namespace]
   );
 
   return (

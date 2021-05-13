@@ -502,6 +502,12 @@ const server = mockServer(schemaWithMocks, {
   },
 });
 
+app.put('/admin/switch/:id', (req, res) => {
+  const next = namespaces.find((n) => n.id === req.params.id);
+  namespace = next;
+  res.json({ switch: true });
+});
+
 app.get('/admin/session', (_, res) => {
   // res.sendStatus(401);
   res.json({
@@ -523,12 +529,6 @@ app.get('/admin/session', (_, res) => {
 app.post('/gql/api', async (req, res) => {
   const response = await server.query(req.body.query, req.body.variables);
   res.json(response);
-});
-
-app.put('/admin/switch/:id', (req, res) => {
-  const next = namespaces.find((n) => n.id === req.params.id);
-  namespace = next;
-  res.json({ switch: true });
 });
 
 app
