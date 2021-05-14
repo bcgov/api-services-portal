@@ -143,7 +143,7 @@ const server = mockServer(schemaWithMocks, {
       return result;
     },
     allGatewayServices: () => new MockList(108, (_, { id }) => ({ id })),
-    allDatasets: () => new MockList(8, (_, { id }) => ({ id })),
+    allDatasets: () => new MockList(40, (_, { id }) => ({ id })),
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
     allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),

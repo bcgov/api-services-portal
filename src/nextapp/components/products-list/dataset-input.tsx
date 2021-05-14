@@ -22,10 +22,17 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
   const theme = useTheme();
   const [search, setSearch] = React.useState<string>('');
   const [selected, setSelected] = React.useState<Dataset | null>(null);
-  const { data, isLoading, isSuccess } = useApi(['dataset-search', search], {
-    query: SEARCH_DATASETS,
-    variables: { search },
-  });
+  const { data, isLoading, isSuccess } = useApi(
+    ['dataset-search', search],
+    {
+      query: SEARCH_DATASETS,
+      variables: { search, first: 10 },
+    },
+    {
+      enabled: Boolean(search),
+    }
+  );
+
   const onChange = React.useCallback(
     (selection: Dataset) => {
       if (selection) {
@@ -38,7 +45,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
   );
   const onStateChange = React.useCallback(
     (changes: StateChangeOptions<Dataset>) => {
-      if (changes.selectedItem && !changes.selectedItem) {
+      if (changes.inputValue) {
         setSearch(changes.inputValue);
       }
     },

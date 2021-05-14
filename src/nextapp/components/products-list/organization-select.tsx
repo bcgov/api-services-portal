@@ -51,7 +51,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
       <FormControl id="product-organization">
         <FormLabel>Organization</FormLabel>
         <Select
-          defaultValue={data.organization ? data.organization[0] : ''}
+          defaultValue={data.organization.id}
           isLoading={organizationsQuery.isLoading}
           onChange={onOrganizationChange}
           name="organization"
@@ -71,7 +71,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
       <FormControl id="product-organization-unit">
         <FormLabel>Organization Unit</FormLabel>
         <Select
-          defaultValue={data.organizationUnit?.name}
+          defaultValue={data.organizationUnit?.id}
           name="organizationUnit"
           variant="bc-input"
           isDisabled={!organization}

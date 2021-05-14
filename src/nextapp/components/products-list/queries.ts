@@ -7,9 +7,11 @@ export const GET_LIST = gql`
       name
       description
       organization {
+        id
         title
       }
       organizationUnit {
+        id
         title
       }
       dataset {

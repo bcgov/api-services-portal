@@ -30,14 +30,14 @@ interface DiscoveryListItemProps {
 
 const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
   return (
-    <Box
+    <Flex
       bg="white"
       borderRadius={4}
       border="2px solid"
       borderColor="gray.400"
+      flexDirection="column"
       position="relative"
       overflow="hidden"
-      width="100%"
     >
       <Box
         as="header"
@@ -51,72 +51,20 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
           <Heading isTruncated size="md" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
-            { data.dataset ? (
-                <>
-                    <Link
-                    href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                        data.dataset.name
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    >
-                    {data.dataset.title}
-                    </Link>
-                    <Badge color="bc-blue-alt" ml={2}>
-                    BCDC
-                    </Badge>
-                </>
+            {data.dataset ? (
+              <>
+                <NextLink passHref href={`/devportal/requests/new/${data.id}`}>
+                  <Link>{data.dataset.title}</Link>
+                </NextLink>
+                <Badge color="bc-blue-alt" ml={2}>
+                  {data.dataset.sector}
+                </Badge>
+              </>
             ) : (
-                <span>{ data.name }</span>
+              <span>{data.name}</span>
             )}
           </Heading>
         </Box>
-        <NextLink href={`/devportal/requests/new/${data.id}`}>
-          <Button size="sm" variant="primary">
-            Request Access
-          </Button>
-        </NextLink>
-      </Box>
-      <Divider />
-      { data.dataset && (
-      <Box p={4}>
-        <Heading size="sm" mb={2}>
-          {data.dataset?.organization?.title}
-          <Icon as={FaChevronRight} boxSize="2" mx={2} />
-          <Text as="span" fontWeight="normal" color="gray.600">
-            {data.dataset?.organizationUnit?.title}
-          </Text>
-        </Heading>
-        <Text>
-          {data.dataset.notes ?? <Text as="em">No description added</Text>}
-        </Text>
-        <Grid gap={4} templateColumns="repeat(5, 1fr)" my={4} color="gray.500">
-          <GridItem>
-            <Heading size="xs">Sector</Heading>
-            <Text fontSize="sm">{data.dataset.sector}</Text>
-          </GridItem>
-          <GridItem>
-            <Heading size="xs">License</Heading>
-            <Text fontSize="sm">{data.dataset.license_title}</Text>
-          </GridItem>
-          <GridItem>
-            <Heading size="xs">Who Can Access?</Heading>
-            <Text fontSize="sm">{data.dataset.view_audience}</Text>
-          </GridItem>
-          <GridItem>
-            <Heading size="xs">Security Class</Heading>
-            <Text fontSize="sm">{data.dataset.security_class}</Text>
-          </GridItem>
-          <GridItem>
-            <Heading size="xs">First Published</Heading>
-            <Text fontSize="sm">-</Text>
-          </GridItem>
-        </Grid>
-      </Box>
-      )}
-      <Divider />
-      <Flex p={4} bgColor="gray.50" justify="space-between">
-        {data.dataset && (<TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />)}
         <Wrap spacing={2}>
           {data.environments.map((e) => (
             <WrapItem key={e.id}>
@@ -126,8 +74,29 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
             </WrapItem>
           ))}
         </Wrap>
+      </Box>
+      <Divider />
+      {data.dataset && (
+        <Box flex={1} p={4}>
+          <Heading size="sm" mb={2}>
+            {data.dataset?.organization?.title}
+            <Icon as={FaChevronRight} boxSize="2" mx={2} />
+            <Text as="span" fontWeight="normal" color="gray.600">
+              {data.dataset?.organizationUnit?.title}
+            </Text>
+          </Heading>
+          <Text>
+            {data.dataset.notes ?? <Text as="em">No description added</Text>}
+          </Text>
+        </Box>
+      )}
+      <Divider />
+      <Flex p={4} bgColor="gray.50" justify="space-between">
+        {data.dataset && (
+          <TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />
+        )}
       </Flex>
-    </Box>
+    </Flex>
   );
 };
 

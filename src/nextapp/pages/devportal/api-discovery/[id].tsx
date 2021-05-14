@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Box, Container, Text } from '@chakra-ui/react';
+import api, { useApi } from '@/shared/services/api';
+import { Box, Button, Container, Text } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
+import kebabCase from 'lodash/kebabCase';
+import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
-import api, { useApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
@@ -45,8 +47,23 @@ const ApiPage: React.FC<
         <title>API Program Services | API Discovery</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title={`API: ${data.Product?.name}`}>
-          <Text>Find an API and request an API key to get started</Text>
+        <PageHeader
+          actions={
+            <NextLink href={`/devportal/requests/new/${data.id}`}>
+              <Button variant="primary"></Button>
+            </NextLink>
+          }
+          title={`API: ${data.Product?.name}`}
+        >
+          <Link
+            href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
+              data.dataset.name
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Find an API and request an API key to get started
+          </Link>
         </PageHeader>
         <Box mt={5}>Hi</Box>
       </Container>
