@@ -21,12 +21,24 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
   const [organization, setOrganization] = React.useState<string>(
     data.organization?.id ?? ''
   );
+  const [organizationUnit, setOrganizationUnit] = React.useState<string>(
+    data.organizationUnit?.id ?? ''
+  );
+  // Events
   const onOrganizationChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setOrganization(event.target.value);
     },
     [setOrganization]
   );
+  const onOrganizationUnitChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setOrganizationUnit(event.target.value);
+    },
+    [setOrganizationUnit]
+  );
+
+  // Queries
   const organizationsQuery = useApi(
     'organizations',
     {
@@ -51,13 +63,13 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
       <FormControl id="product-organization">
         <FormLabel>Organization</FormLabel>
         <Select
-          defaultValue={data.organization.id}
           isLoading={organizationsQuery.isLoading}
           onChange={onOrganizationChange}
           name="organization"
           variant="bc-input"
           value={organization}
         >
+          <option value="">Select an Organization</option>
           {organizationsQuery.data?.allOrganizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
@@ -71,10 +83,11 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
       <FormControl id="product-organization-unit">
         <FormLabel>Organization Unit</FormLabel>
         <Select
-          defaultValue={data.organizationUnit?.id}
           name="organizationUnit"
           variant="bc-input"
           isDisabled={!organization}
+          onChange={onOrganizationUnitChange}
+          value={organizationUnit}
         >
           <option value="">Select an Organization Unit</option>
           {organizationUnitsQuery.data?.Organization?.orgUnits.map((unit) => (
