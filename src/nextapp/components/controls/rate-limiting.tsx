@@ -152,7 +152,6 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
         </FormControl>
         <FormControl id="day">
           <FormLabel>Day</FormLabel>
-          {console.log(config.day)}
           <Input
             variant="bc-input"
             name="day"

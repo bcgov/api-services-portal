@@ -21,7 +21,6 @@ import {
 import NextLink from 'next/link';
 import { Product } from '@/shared/types/query.types';
 import { FaBook, FaChevronRight } from 'react-icons/fa';
-import kebabCase from 'lodash/kebabCase';
 import TagsList from '../tags-list';
 
 interface DiscoveryListItemProps {
@@ -38,6 +37,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       flexDirection="column"
       position="relative"
       overflow="hidden"
+      height="100%"
     >
       <Box
         as="header"
@@ -49,43 +49,31 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         pb={2}
       >
         <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
-          <Heading isTruncated size="md" lineHeight="1.5">
+          <Heading size="sm" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
             {data.dataset ? (
               <>
-                <NextLink passHref href={`/devportal/requests/new/${data.id}`}>
+                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
                   <Link>{data.dataset.title}</Link>
                 </NextLink>
-                <Badge color="bc-blue-alt" ml={2}>
-                  {data.dataset.sector}
-                </Badge>
               </>
             ) : (
               <span>{data.name}</span>
             )}
           </Heading>
         </Box>
-        <Wrap spacing={2}>
-          {data.environments.map((e) => (
-            <WrapItem key={e.id}>
-              <Badge colorScheme="green" fontSize="md">
-                {e.name}
-              </Badge>
-            </WrapItem>
-          ))}
-        </Wrap>
       </Box>
       <Divider />
       {data.dataset && (
         <Box flex={1} p={4}>
-          <Heading size="sm" mb={2}>
+          <Heading size="xs" mb={2}>
             {data.dataset?.organization?.title}
             <Icon as={FaChevronRight} boxSize="2" mx={2} />
             <Text as="span" fontWeight="normal" color="gray.600">
               {data.dataset?.organizationUnit?.title}
             </Text>
           </Heading>
-          <Text>
+          <Text fontSize="sm" noOfLines={2}>
             {data.dataset.notes ?? <Text as="em">No description added</Text>}
           </Text>
         </Box>
@@ -93,7 +81,16 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       <Divider />
       <Flex p={4} bgColor="gray.50" justify="space-between">
         {data.dataset && (
-          <TagsList colorScheme="blue" data={data.dataset.tags} size="0.9rem" />
+          <>
+            <Badge color="bc-blue-alt">{data.dataset.sector}</Badge>
+            <Wrap spacing={2}>
+              {data.environments.map((e) => (
+                <WrapItem key={e.id}>
+                  <Badge colorScheme="green">{e.name}</Badge>
+                </WrapItem>
+              ))}
+            </Wrap>
+          </>
         )}
       </Flex>
     </Flex>

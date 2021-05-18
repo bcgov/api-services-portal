@@ -1,6 +1,16 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
-import { Box, Button, Container, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Heading,
+  Icon,
+  Link,
+  Text,
+} from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import kebabCase from 'lodash/kebabCase';
@@ -11,13 +21,16 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
+import { FaExternalLinkAlt } from 'react-icons/fa';
+import TagsList from '@/components/tags-list';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
+  const queryKey = ['DiscoverableProduct', id];
 
   await queryClient.prefetchQuery(
-    ['Product', id],
+    queryKey,
     async () =>
       await api<Query>(
         query,
@@ -32,14 +45,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       id,
       dehydratedState: dehydrate(queryClient),
+      queryKey,
     },
   };
 };
 
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
-  const { data } = useApi(['Product', id], { query }, { suspense: false });
+> = ({ id, queryKey }) => {
+  const { data } = useApi(queryKey, { query }, { suspense: false });
 
   return (
     <>
@@ -47,25 +61,67 @@ const ApiPage: React.FC<
         <title>API Program Services | API Discovery</title>
       </Head>
       <Container maxW="6xl">
-        {/* <PageHeader
+        <PageHeader
           actions={
-            <NextLink href={`/devportal/requests/new/${data.id}`}>
-              <Button variant="primary"></Button>
+            <NextLink href={`/devportal/requests/new/${id}`}>
+              <Button colorScheme="green">Request Access</Button>
             </NextLink>
           }
-          title={`API: ${data.Product?.name}`}
+          title={
+            <Link
+              isExternal
+              href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
+                data?.DiscoverableProduct?.dataset.title
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {data?.DiscoverableProduct?.name}
+              <Icon
+                as={FaExternalLinkAlt}
+                boxSize="5"
+                mx={2}
+                color="gray.400"
+              />
+            </Link>
+          }
         >
-          <Link
-            href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-              data.dataset.name
-            )}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Find an API and request an API key to get started
-          </Link>
+          <Box fontSize="sm" color="gray.600">
+            <Text>
+              Published by{' '}
+              <Text as="strong">
+                {data.DiscoverableProduct.dataset.organization.title}
+              </Text>
+            </Text>
+            <Text>
+              Licensed under{' '}
+              <Text as="strong">
+                {data.DiscoverableProduct.dataset.license_title}
+              </Text>
+            </Text>
+          </Box>
         </PageHeader>
-        <Box mt={5}>Hi</Box> */}
+        <Box my={5}>
+          <Box bgColor="white">
+            <Box as="header" p={4}>
+              <Heading size="md">Description</Heading>
+            </Box>
+            <Divider />
+            <Box p={4}>
+              <Text>{data.DiscoverableProduct.dataset.notes}</Text>
+            </Box>
+            <Divider />
+            <Flex bgColor="gray.50" p={4} justify="space-between">
+              {data.DiscoverableProduct.dataset && (
+                <TagsList
+                  colorScheme="blue"
+                  data={data.DiscoverableProduct.dataset.tags}
+                  size="0.75rem"
+                />
+              )}
+            </Flex>
+          </Box>
+        </Box>
       </Container>
     </>
   );

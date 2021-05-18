@@ -9,8 +9,6 @@ interface DiscoveryListProps {
 }
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
-  const total = data?.length ?? 0;
-
   return (
     <Grid
       gap={4}
@@ -18,7 +16,6 @@ const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
         base: '1fr',
         sm: '1fr 1fr',
         md: 'repeat(3, 1fr)',
-        lg: `repeat(${Math.min(total, 4)}, 1fr)`,
       }}
     >
       {data?.map((p) => (

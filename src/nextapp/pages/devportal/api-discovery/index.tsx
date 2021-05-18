@@ -43,7 +43,7 @@ const ApiDiscoveryPage: React.FC = () => {
         <PageHeader title="Discover our APIs">
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>
-        <Box mt={5}>
+        <Box my={5}>
           <DiscoveryList data={data.allDiscoverableProducts} />
         </Box>
       </Container>
@@ -62,7 +62,6 @@ const query = gql`
         name
         active
         flow
-        
       }
       dataset {
         name

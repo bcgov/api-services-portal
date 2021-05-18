@@ -37,7 +37,7 @@ import NextLink from 'next/link';
 import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -67,27 +67,27 @@ const ConsumersPage: React.FC<
     },
     { suspense: false }
   );
+  const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
+  const totalConsumers = data?.allServiceAccessesByNamespace?.length ?? 0;
 
   return (
     <>
       <Head>
         <title>{`Consumers ${
-          data?.allAccessRequestsByNamespace.length > 0
-            ? `(${data?.allAccessRequestsByNamespace.length})`
-            : ''
+          totalRequests > 0 ? `(${totalRequests})` : ''
         }`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="Consumers" breadcrumb={breadcrumbs([])}/>
+        <PageHeader title="Consumers" breadcrumb={breadcrumbs([])} />
         <Box mb={4}>
-          {data?.allAccessRequestsByNamespace.length === 0 && (
+          {totalRequests === 0 && (
             <Alert status="info">
               <AlertIcon />
               Once you add consumers to your API, access requests will be listed
               here.
             </Alert>
           )}
-          {data?.allAccessRequestsByNamespace.length > 0 && <AccessRequests />}
+          {totalRequests > 0 && <AccessRequests />}
         </Box>
         <Box bgColor="white" mb={4}>
           <Box
@@ -105,11 +105,11 @@ const ConsumersPage: React.FC<
                 <Th>Name/Id</Th>
                 <Th>Controls</Th>
                 <Th>Tags</Th>
-                <Th colSpan={2}>Created</Th>
+                <Th colSpan={2}>Last Updated</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {data.allServiceAccessesByNamespace.length === 0 && (
+              {totalConsumers === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -125,60 +125,65 @@ const ConsumersPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allServiceAccessesByNamespace?.filter(d => d.consumer != null).map(d => d.consumer).map((d) => (
-                <Tr key={d.id}>
-                  <Td>
-                    <NextLink passHref href={`/manager/consumers/${d.id}`}>
-                      <Link>{d.customId ?? d.username}</Link>
-                    </NextLink>
-                  </Td>
-                  <Td>
-                    <Wrap>
-                      {d.plugins?.length === 0 ? (
+              {data.allServiceAccessesByNamespace
+                ?.filter((d) => !!d.consumer)
+                .map((d) => d.consumer)
+                .map((d) => (
+                  <Tr key={d.id}>
+                    <Td>
+                      <NextLink passHref href={`/manager/consumers/${d.id}`}>
+                        <Link>{d.customId ?? d.username}</Link>
+                      </NextLink>
+                    </Td>
+                    <Td>
+                      <Wrap>
+                        {d.plugins?.length === 0 ? (
+                          <NextLink href={`/manager/consumers/${d.id}`}>
+                            <Button
+                              leftIcon={<Icon as={FaPlusCircle} />}
+                              size="xs"
+                              variant="ghost"
+                              color="gray"
+                            >
+                              Add Controls
+                            </Button>
+                          </NextLink>
+                        ) : (
+                          d.plugins.map((d) => (
+                            <WrapItem key={d.id}>
+                              <Badge variant="outline">{d.name}</Badge>
+                            </WrapItem>
+                          ))
+                        )}
+                      </Wrap>
+                    </Td>
+                    <Td>
+                      <TagsList data={d.tags} size="xs" />
+                    </Td>
+                    <Td>{`${formatDistanceToNow(
+                      new Date(d.updatedAt)
+                    )} ago`}</Td>
+                    <Td textAlign="right">
+                      <ButtonGroup size="sm">
                         <NextLink href={`/manager/consumers/${d.id}`}>
                           <Button
-                            leftIcon={<Icon as={FaPlusCircle} />}
-                            size="xs"
-                            variant="ghost"
-                            color="gray"
+                            variant="outline"
+                            color="bc-blue-alt"
+                            leftIcon={<Icon as={FaPen} />}
                           >
-                            Add Controls
+                            Edit
                           </Button>
                         </NextLink>
-                      ) : (
-                        d.plugins.map((d) => (
-                          <WrapItem key={d.id}>
-                            <Badge variant="outline">{d.name}</Badge>
-                          </WrapItem>
-                        ))
-                      )}
-                    </Wrap>
-                  </Td>
-                  <Td>
-                    <TagsList data={d.tags} />
-                  </Td>
-                  <Td>{`${formatDistanceToNow(new Date(d.createdAt))} ago`}</Td>
-                  <Td textAlign="right">
-                    <ButtonGroup size="sm">
-                      <NextLink href={`/manager/consumers/${d.id}`}>
-                        <Button
+                        <IconButton
+                          aria-label="disable consumer button"
+                          icon={<Icon as={FaStop} />}
                           variant="outline"
-                          color="bc-blue-alt"
-                          leftIcon={<Icon as={FaPen} />}
-                        >
-                          Edit
-                        </Button>
-                      </NextLink>
-                      <IconButton
-                        aria-label="disable consumer button"
-                        icon={<Icon as={FaStop} />}
-                        variant="outline"
-                        colorScheme="red"
-                      />
-                    </ButtonGroup>
-                  </Td>
-                </Tr>
-              ))}
+                          colorScheme="red"
+                        />
+                      </ButtonGroup>
+                    </Td>
+                  </Tr>
+                ))}
             </Tbody>
           </Table>
         </Box>
@@ -191,22 +196,22 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
-    allServiceAccessesByNamespace(first: 200) {
-        consumer {
-            id
-            username
-            aclGroups
-            customId
-            plugins {
-                name
-            }
-            tags
-            createdAt
+    allServiceAccessesByNamespace(first: 200, orderBy: "updatedAt_DESC") {
+      consumer {
+        id
+        username
+        aclGroups
+        customId
+        plugins {
+          name
         }
-        application {
-            name
-            appId
-        }
+        tags
+        updatedAt
+      }
+      application {
+        name
+        appId
+      }
     }
 
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {
