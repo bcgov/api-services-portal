@@ -47,7 +47,7 @@ const ApiPage: React.FC<
         <title>API Program Services | API Discovery</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader
+        {/* <PageHeader
           actions={
             <NextLink href={`/devportal/requests/new/${data.id}`}>
               <Button variant="primary"></Button>
@@ -65,7 +65,7 @@ const ApiPage: React.FC<
             Find an API and request an API key to get started
           </Link>
         </PageHeader>
-        <Box mt={5}>Hi</Box>
+        <Box mt={5}>Hi</Box> */}
       </Container>
     </>
   );
