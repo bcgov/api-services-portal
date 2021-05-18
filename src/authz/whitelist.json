@@ -526,5 +526,115 @@
           "referer": "http://localhost:4180/manager/poc/activity",
           "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          context\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
           "added": "2021-05-12T21:18:46.070Z"
+     },
+     "6ce4858b86d6ddd322b909401be794ee": {
+          "referer": "http://localhost:4180/admin/credential-issuers",
+          "query": "query getList($where: CredentialIssuerWhereInput, $search: String, $sortBy: [SortCredentialIssuersBy!], $first: Int, $skip: Int) {\n  allCredentialIssuers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allCredentialIssuersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:39:47.612Z"
+     },
+     "8433a222635eb8ab4fb998544fdd4ffe": {
+          "referer": "http://localhost:4180/admin/credential-issuers",
+          "query": "mutation deleteMany($ids: [ID!]) {\n  deleteCredentialIssuers(ids: $ids) {\n    id\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:39:53.802Z"
+     },
+     "c794afeee4dc0e52eee78231bf7cb759": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "query getItem($id: ID!) {\n  CredentialIssuer(where: {id: $id}) {\n    _label_\n    id\n    name\n    namespace\n    description\n    flow\n    clientRegistration\n    mode\n    clientAuthenticator\n    authPlugin\n    instruction\n    environmentDetails\n    oidcDiscoveryUrl\n    initialAccessToken\n    clientId\n    clientSecret\n    availableScopes\n    clientRoles\n    resourceScopes\n    resourceType\n    apiKeyName\n    owner {\n      id\n      _label_\n      __typename\n    }\n    environments {\n      id\n      _label_\n      __typename\n    }\n    updatedBy {\n      id\n      _label_\n      __typename\n    }\n    createdBy {\n      id\n      _label_\n      __typename\n    }\n    updatedAt\n    createdAt\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:08.102Z"
+     },
+     "9fe2c51568c92ae8c4ecc68cd1a69fae": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "query RelationshipSelect($search: String!, $first: Int!, $skip: Int!) {\n  allUsers(search: $search, first: $first, skip: $skip) {\n    _label_\n    id\n    __typename\n  }\n  _allUsersMeta(search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:08.787Z"
+     },
+     "db32082869291ab65c288fc04e1de8f6": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "query getList($where: UserWhereInput, $search: String, $sortBy: [SortUsersBy!], $first: Int, $skip: Int) {\n  allUsers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    username\n    __typename\n  }\n  _allUsersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:08.818Z"
+     },
+     "7a307fdb7dd1dc6061f709a45d821f12": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "query RelationshipSelect($search: String!, $first: Int!, $skip: Int!) {\n  allEnvironments(search: $search, first: $first, skip: $skip) {\n    _label_\n    id\n    __typename\n  }\n  _allEnvironmentsMeta(search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:08.852Z"
+     },
+     "4c623f855999d9cca9390e64538b3801": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "query getList($where: EnvironmentWhereInput, $search: String, $sortBy: [SortEnvironmentsBy!], $first: Int, $skip: Int) {\n  allEnvironments(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    appId\n    name\n    __typename\n  }\n  _allEnvironmentsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:08.874Z"
+     },
+     "e36d1fe612684954282f0ecaf9b8b8ff": {
+          "referer": "http://localhost:4180/admin/credential-issuers/609c64adb7c2ebb3b34ce533",
+          "query": "mutation update($id: ID!, $data: CredentialIssuerUpdateInput) {\n  updateCredentialIssuer(id: $id, data: $data) {\n    id\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:19.561Z"
+     },
+     "2064aeabfb6517006b060e7f8ee93309": {
+          "referer": "http://localhost:4180/admin/temporary-identities",
+          "query": "query getList($where: TemporaryIdentityWhereInput, $search: String, $sortBy: [SortTemporaryIdentitiesBy!], $first: Int, $skip: Int) {\n  allTemporaryIdentities(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    jti\n    sub\n    __typename\n  }\n  _allTemporaryIdentitiesMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:28.612Z"
+     },
+     "1a2ba2ca2194e4dd8386bcd9a70eafa0": {
+          "referer": "http://localhost:4180/admin/temporary-identities/609c67329688e2b584de93f1",
+          "query": "query getItem($id: ID!) {\n  TemporaryIdentity(where: {id: $id}) {\n    _label_\n    id\n    jti\n    sub\n    name\n    username\n    email\n    isAdmin\n    userId\n    namespace\n    groups\n    roles\n    updatedAt\n    createdAt\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:29.433Z"
+     },
+     "913258036c39a9ac8801b7b3678ed441": {
+          "referer": "http://localhost:4180/admin/temporary-identities/609c67329688e2b584de93f1",
+          "query": "mutation update($id: ID!, $data: TemporaryIdentityUpdateInput) {\n  updateTemporaryIdentity(id: $id, data: $data) {\n    id\n    __typename\n  }\n}\n",
+          "added": "2021-05-12T23:40:34.379Z"
+     },
+     "18489d238be583caa125efbb4b0c07c1": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: 'dss-loc') {\n      id\n      name\n    }\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-14T20:06:55.106Z"
+     },
+     "895a7ecc49defea29d1d903ceeb8999b": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: \"dss-loc\") {\n      id\n      name\n    }\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-14T20:07:30.010Z"
+     },
+     "2df3bb57bb55a30667f880dae7835813": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: \"dss-loc\") {\n      id\n      name\n    }\n    getResourceOwners(name: \"dss-loc\", type: \"namespace\") {\n      id\n      name\n    }\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-14T20:49:28.806Z"
+     },
+     "e66d2ed4d05910eb0494c21d8705fdbd": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: \"dss-loc\") {\n      id\n      name\n    }\n    getResourceOwners(name: \"dss-loc\", type: \"namespace\") {\n      id\n      name\n      owner\n    }\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-14T20:50:23.042Z"
+     },
+     "7f9426ed65372a111c97f9246ecf6aff": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: \"dss-loc\") {\n      id\n      name\n    }\n    getResourceOwners(name: \"dss-loc\", type: \"namespace\") {\n      id\n      name\n      owner {\n          id\n          name\n      }\n    }\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-05-14T20:50:55.259Z"
+     },
+     "931c2fbc3b54659fefc60e3dd842f83a": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {      \n    getUmaPoliciesByResourceName(resourceName: \"dss-loc\") {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-14T21:08:30.675Z"
+     },
+     "1901bc46273dcfcafe9034e70324fed2": {
+          "referer": "http://localhost:4180/admin/products",
+          "query": "query getList($where: ProductWhereInput, $search: String, $sortBy: [SortProductsBy!], $first: Int, $skip: Int) {\n  allProducts(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    appId\n    name\n    __typename\n  }\n  _allProductsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-17T19:43:47.768Z"
+     },
+     "6e1ded4a1818c1cf39700cf3737718a3": {
+          "referer": "http://localhost:4180/admin/service-accesses?search=sa-sampler-42da4f15-0725c509d952",
+          "query": "query getList($where: ServiceAccessWhereInput, $search: String, $sortBy: [SortServiceAccessesBy!], $first: Int, $skip: Int) {\n  allServiceAccesses(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    namespace\n    __typename\n  }\n  _allServiceAccessesMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-17T19:43:49.695Z"
+     },
+     "40016c6f72a34314024cc2ae27e7e523": {
+          "referer": "http://localhost:4180/admin/activities",
+          "query": "query getList($where: ActivityWhereInput, $search: String, $sortBy: [SortActivitiesBy!], $first: Int, $skip: Int) {\n  allActivities(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    extRefId\n    type\n    __typename\n  }\n  _allActivitiesMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-17T19:43:50.958Z"
+     },
+     "23e355fc5fb8d4ec80b13f750e1f9ebe": {
+          "referer": "http://localhost:4180/admin/alerts",
+          "query": "query getList($where: AlertWhereInput, $search: String, $sortBy: [SortAlertsBy!], $first: Int, $skip: Int) {\n  allAlerts(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    state\n    __typename\n  }\n  _allAlertsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-17T19:43:53.561Z"
+     },
+     "d86658a5ac07ae65723426f1a9b39feb": {
+          "referer": "http://localhost:4180/admin/metrics",
+          "query": "query getList($where: MetricWhereInput, $search: String, $sortBy: [SortMetricsBy!], $first: Int, $skip: Int) {\n  allMetrics(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    query\n    __typename\n  }\n  _allMetricsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-05-17T19:43:54.077Z"
      }
 }

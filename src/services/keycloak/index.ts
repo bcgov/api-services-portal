@@ -1,5 +1,6 @@
 export { KeycloakClientService } from './clientService'
-export type { ClientRegistration, ClientRegResponse } from './clientService'
+export { KeycloakClientRegistrationService } from './clientRegistrationService'
+export type { ClientRegistration, ClientRegResponse } from './clientRegistrationService'
 
 export { KeycloakPermissionTicketService } from './permissionTicketService'
 export type { PermissionTicketQuery, PermissionTicket } from './permissionTicketService'

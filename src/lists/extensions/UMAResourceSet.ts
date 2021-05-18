@@ -9,6 +9,11 @@ import { KeycloakTokenService, getOpenidFromIssuer } from '../../services/keyclo
 
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from '../../services/workflow/types'
 
+import { doClientLoginForCredentialIssuer } from './Common'
+import type { TokenExchangeResult } from './Common'
+
+import { mergeWhereClause } from '@keystonejs/utils'
+
 const keystoneApi = require('../../services/keystone')
 
 const typeUMAScope = `
@@ -25,7 +30,6 @@ type UMAResourceSet {
     ownerManagedAccess: Boolean,
     uris: [String]
     resource_scopes: [UMAScope]
-    scopes: [UMAScope]
 }
 `
 module.exports = {
@@ -41,24 +45,37 @@ module.exports = {
                 schema: 'getResourceSet(prodEnvId: ID!, owner: String, type: String, resourceId: String): [UMAResourceSet]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
                     const noauthContext =  keystone.createContext({ skipAccessControl: true })
-
-                    const prodEnv = await keystoneApi.lookupEnvironmentAndIssuerById(noauthContext, args.prodEnvId)
-                    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
+                    console.log("ARGS = "+JSON.stringify(args))
+                    console.log("QUERY = "+JSON.stringify(query))
+                    console.log("ACCESS = "+JSON.stringify(access))
+                    // assume 'access' is criteria that can be added to the Environment lookup
+                    console.log("M = "+JSON.stringify(mergeWhereClause(args,access)))
                     
-                    const openid = await getOpenidFromIssuer (issuerEnvConfig.issuerUrl)
+                    // if the resource server owns all the resources, then how do we know which resources the particular
+                    // user can manage and therefore retrieve?
+                    //
+                    // We can enforce authorization to user's with a particular Resource scope.  This resource scope would
+                    // need to be specified in the Credential Issuer details
+                    //
+                    // NOTE: A Resource with the same name can be created multiple times for different Owners
+                    // So could have multiple users manage access for the same "resource"
 
-                    const accessToken = await new KeycloakTokenService(openid.issuer).getKeycloakSession (issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
-                    const kcprotectApi = new UMAResourceRegistrationService (openid.issuer, accessToken)
+                    const tokenResult : TokenExchangeResult = await doClientLoginForCredentialIssuer (noauthContext, args.prodEnvId)
+
+                    const kcprotectApi = new UMAResourceRegistrationService (tokenResult.issuer, tokenResult.accessToken)
                     if (args.resourceId != null) {
                         const res = await kcprotectApi.getResourceSet (args.resourceId)
                         console.log(JSON.stringify(res))
                         return [ res ]
                     } else {
-                        return await kcprotectApi.listResources({owner: args.owner, type: args.type} as ResourceSetQuery)
+                        console.log("Adding owner " + JSON.stringify(context.req.user))
+                        const resOwnerResources = await kcprotectApi.listResources({ owner: tokenResult.clientUuid, type: args.type} as ResourceSetQuery)
+                        const currentUserOwner = await kcprotectApi.listResources({ owner: context.req.user.sub, exactName: true, type: args.type} as ResourceSetQuery)
+                        return [ ...resOwnerResources, ...currentUserOwner ]
                     }
                 },
                 access: EnforcementPoint,
-              },
+              }
             ],
             mutations: [
             ]

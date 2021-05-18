@@ -5,7 +5,7 @@ const { EnforcementPoint } = require('../../authz/enforcement')
 
 import { KeycloakPermissionTicketService, PermissionTicket, PermissionTicketQuery } from '../../services/keycloak'
 
-import { getOpenidFromIssuer, KeycloakTokenService, KeycloakUserService, KeycloakClientService } from '../../services/keycloak'
+import { getOpenidFromIssuer, KeycloakTokenService, KeycloakUserService, KeycloakClientRegistrationService } from '../../services/keycloak'
 
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from '../../services/workflow/types'
 

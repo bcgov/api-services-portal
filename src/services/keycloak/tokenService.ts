@@ -56,6 +56,10 @@ export class KeycloakTokenService {
         })
         .then(checkStatus)
         .then(res => res.json())
+        .catch ((err:any) => {
+            logger.error("[tokenExchange] failed %s", err)
+            throw err
+        })
         logger.debug("[tokenExchange] RESULT = %s", JSON.stringify(response, null, 3));
         return response['access_token']
     }

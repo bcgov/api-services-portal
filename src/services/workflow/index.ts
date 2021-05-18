@@ -47,12 +47,12 @@ const {
   linkServiceAccessToRequest,
 } = require('../keystone');
 
-import { registerClient } from './client-credentials'
+import { registerClient, findClient } from './client-credentials'
 import { registerApiKey } from './kong-api-key'
 
 import {v4 as uuidv4} from 'uuid'
 
-import { KeycloakClientService, KeycloakTokenService, getOpenidFromDiscovery, getOpenidFromIssuer } from '../keycloak'
+import { KeycloakClientRegistrationService, KeycloakTokenService, getOpenidFromDiscovery, getOpenidFromIssuer } from '../keycloak'
 
 import { KongConsumerService } from '../kong'
 import { FeederService } from '../feeder'
@@ -256,12 +256,13 @@ const regenerateCredential = async (context: any, accessRequestId: string) : Pro
 
         const nickname = clientId
 
-        const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId, nickname) 
+        const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId)
 
         console.log(JSON.stringify(newClient, null, 4))
 
-        // Call /feeds to sync the Consumer with KeystoneJS
-        await feederApi.forceSync('kong', 'consumer', newClient.consumer.id)
+        const kongApi = new KongConsumerService(process.env.KONG_URL)
+        const consumer = await kongApi.createKongConsumer (nickname, clientId)
+        const consumerPK = await AddClientConsumer (context, nickname, clientId, consumer.id)
 
         const credentialReference = {
             id: newClient.client.id,
@@ -270,7 +271,7 @@ const regenerateCredential = async (context: any, accessRequestId: string) : Pro
         // Create a ServiceAccess record
         const consumerType = 'client'
         const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
-        const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application )
+        const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, consumerPK, productEnvironment, application )
 
         await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
 
@@ -284,8 +285,16 @@ const regenerateCredential = async (context: any, accessRequestId: string) : Pro
     return null
 }
 
-export const CreateServiceAccount = async (context: any, productEnvironmentSlug: any, namespace: any) : Promise<NewCredential> => {
+const AddClientConsumer = async (context: any, nickname: string, clientId: string, consumerKongId: string) : Promise<string> => {
     const feederApi = new FeederService(process.env.FEEDER_URL)
+    const consumerPK = await addKongConsumer(context, nickname, clientId, consumerKongId)
+
+    // Call /feeds to sync the Consumer with KeystoneJS
+    await feederApi.forceSync('kong', 'consumer', consumerKongId)
+    return consumerPK
+}
+
+export const CreateServiceAccount = async (context: any, productEnvironmentSlug: any, namespace: any, existingClientId?: string) : Promise<NewCredential> => {
 
     const productEnvironment = await lookupProductEnvironmentServicesBySlug(context, productEnvironmentSlug)
 
@@ -293,33 +302,32 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
 //    const application = await lookupApplication(context, requestDetails.application.id)
 
     const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 12)
-    const clientId = ('sa-' + namespace + '-' + productEnvironment.appId + '-' + extraIdentifier).toLowerCase()
+    const newClientId = ('sa-' + namespace + '-' + productEnvironment.appId + '-' + extraIdentifier).toLowerCase()
 
-    const nickname = clientId
+    const client = existingClientId != null ? 
+        await findClient(context, productEnvironment.name, productEnvironment.credentialIssuer.id, existingClientId) : 
+        await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, newClientId)
+    console.log(JSON.stringify(client, null, 4))
 
-    const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId, nickname) 
+    const clientId = client.client.clientId
+    const nickname = client.client.clientId
 
-    console.log(JSON.stringify(newClient, null, 4))
-
-    // Call /feeds to sync the Consumer with KeystoneJS
-    await feederApi.forceSync('kong', 'consumer', newClient.consumer.id)
+    const kongApi = new KongConsumerService(process.env.KONG_URL)
+    const consumer = await kongApi.createKongConsumer (nickname, clientId)
+    const consumerPK = await AddClientConsumer (context, nickname, clientId, consumer.id)
 
     const credentialReference = {
-        id: newClient.client.id,
-        clientId: newClient.client.clientId,
+        id: client.client.id,
+        clientId: client.client.clientId,
     }
-    // Create a ServiceAccess record
-    const consumerType = 'client'
-    const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
-    const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, newClient.consumerPK, productEnvironment, application, namespace)
 
     //await linkServiceAccessToRequest (context, serviceAccessId, requestDetails.id)
 
     const backToUser : NewCredential = {
         flow: productEnvironment.flow,
-        clientId: newClient.client.clientId,
-        clientSecret: newClient.client.clientSecret,
-        tokenEndpoint: newClient.openid.token_endpoint
+        clientId: client.client.clientId,
+        clientSecret: client.client.clientSecret,
+        tokenEndpoint: client.openid.token_endpoint
     }
 
     //updatedItem['credential'] = JSON.stringify(backToUser)
@@ -333,6 +341,10 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
         }   
     */   
 
+    // Create a ServiceAccess record
+    const consumerType = 'client'
+    const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
+    const serviceAccessId = await addServiceAccess(context, clientId, false, aclEnabled, consumerType, credentialReference, null, consumerPK, productEnvironment, application, namespace)
 
     //const clientId = requestDetails.serviceAccess.consumer.customId
 
@@ -351,7 +363,7 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
     const controls: RequestControls = JSON.parse('{"defaultClientScopes": []}')
     //const defaultClientScopes = controls.defaultClientScopes;
     
-    const kcClientService = new KeycloakClientService(openid.issuer, null)
+    const kcClientService = new KeycloakClientRegistrationService(openid.issuer, null)
     await kcClientService.updateClientRegistration (token, clientId, {clientId, enabled: true})
 
     // // https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
@@ -443,7 +455,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
                         // and then delete each one
 
 
-                        await new KeycloakClientService(null, null).deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
+                        await new KeycloakClientRegistrationService(null, null).deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
                     }
                 }))
     }
@@ -569,7 +581,7 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
                     const controls: RequestControls= JSON.parse(requestDetails.controls)
                     //const defaultClientScopes = controls.defaultClientScopes;
                     
-                    const kcClientService = new KeycloakClientService(openid.issuer, null)
+                    const kcClientService = new KeycloakClientRegistrationService(openid.issuer, null)
 
                     await kcClientService.updateClientRegistration (token, clientId, {clientId, enabled: true})
 

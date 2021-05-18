@@ -1,6 +1,6 @@
 import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../../logger'
+import { Logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from '../keycloak/keycloakApi'
 
@@ -21,6 +21,7 @@ export interface Policy {
     clients: string[]
 }
 
+const logger = Logger('uma2-policy')
 export class UMAPolicyService {
     private issuerUrl : string
     private accessToken : string
@@ -34,6 +35,7 @@ export class UMAPolicyService {
         const requestQuery = querystring.stringify(query as any)
         const url = `${this.issuerUrl}/authz/protection/uma-policy?${requestQuery}`
         logger.debug("QUERY = %s", url)
+        logger.debug("TOKEN = "+this.accessToken)
         const result = await fetch (url, {
             method: 'get', 
             headers: {'Authorization': `Bearer ${this.accessToken}` }

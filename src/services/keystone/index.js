@@ -124,6 +124,8 @@ module.exports = {
             variables: { id: id },
         })
         console.log("lookupProductEnvironmentServices " + JSON.stringify(result))
+        assert.strictEqual(result.data.allEnvironments.length, 1, "ProductEnvironmentNotFound " + id)
+
         result.data.allEnvironments[0].services.map(svc =>
             svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
         return result.data.allEnvironments[0]
@@ -143,6 +145,8 @@ module.exports = {
                             credentialIssuer {
                                 id
                                 flow
+                                resourceType
+                                resourceScopes
                             }
                             services {
                                 name
@@ -163,6 +167,7 @@ module.exports = {
             variables: { appId: appId },
         })
         console.log("lookupProductEnvironmentServicesBySlug " + JSON.stringify(result))
+        assert.strictEqual(result.data.allEnvironments.length, 1, "ProductEnvironmentNotFound By Slug " + appId)
         result.data.allEnvironments[0].services.map(svc =>
             svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
         return result.data.allEnvironments[0]
@@ -355,6 +360,22 @@ module.exports = {
         })
         console.log("lookupCredentialIssuerById " + JSON.stringify(result))
         return result.data.CredentialIssuer
+    },
+
+    lookupServiceAccessesByNamespace: async function (context, ns) {
+        const result = await context.executeGraphQL({
+            query: `query GetServiceAccessByNamespace($ns: String!) {
+                        allServiceAccesses(where: {namespace: $ns}) {
+                            id
+                            consumer {
+                                username
+                            }
+                        }
+                    }`,
+            variables: { ns: ns },
+        })
+        console.log("lookupServiceAccessesByNamespace " + JSON.stringify(result))
+        return result.data.allServiceAccesses
     },
 
     lookupEnvironmentAndIssuerById: async function (context, id) {

@@ -252,6 +252,27 @@ const configureExpress = (app:any) => {
     app.put('/feed/:entity/:id', (req : any, res : any) => PutFeed(keystone, req, res).catch ((err : any) => res.status(400).json({result: 'error', error: "" + err})))
     app.delete('/feed/:entity/:id', (req : any, res : any) => DeleteFeed(keystone, req, res))
 
+    app.put('/migration/import', async (req : any, res : any) => {
+        const { MigrationFromV1 }  = require('./batch/migrationV1')
+        await new MigrationFromV1(keystone).report(req.body)
+        await new MigrationFromV1(keystone).migrate(req.body).then(() => {
+            res.status(200).json({result: 'migrated'})
+        }).catch ((err:any) => {
+            console.log("Error Migrating " + err)
+            res.status(400).json({result: 'failed'})
+        })
+    })
+
+    app.post('/migration/report', async (req : any, res : any) => {
+        const { MigrationFromV1 }  = require('./batch/migrationV1')
+        await new MigrationFromV1(keystone).report(req.body).then(() => {
+            res.status(200).json({result: 'reported'})
+        }).catch ((err:any) => {
+            console.log("Error Migrating " + err)
+            res.status(400).json({result: 'failed'})
+        })
+    })
+
     // Added for handling failed calls that require orchestrating multiple changes
     app.put('/tasked/:id', async (req : any, res : any) => {
         const tasked = new Retry(process.env.WORKING_PATH, req.params['id'])
@@ -259,6 +280,26 @@ const configureExpress = (app:any) => {
         res.status(200).json({result: 'ok'})
     })   
     
+    // const {ConfigService} = require('./services/bceid/config.service')
+    // const {BCeIDService} = require('./services/bceid/bceid.service')
+    // const bc = new BCeIDService(new ConfigService())
+    // bc.getAccountDetails('MaxineDeryck1').then ((answer:any) => {
+    //     console.log("DONE!")
+    //     console.log("ANSWER = " + JSON.stringify(answer))
+    // }).catch ((err: any) => {
+    //     console.log("ERROR ! " + err)
+    // })
+
+    // const { NotificationService } = require('./services/notification/notification.service')
+
+    // const nc = new NotificationService(new ConfigService())
+    
+    // nc.notify ({email: "aidan.cope@gmail.com", name: "Aidan Cope"}, { template: 'email-template', subject: 'Yeah!'}).then ((answer:any) => {
+    //     console.log("DONE!")
+    //     console.log("ANSWER = " + JSON.stringify(answer))
+    // }).catch ((err: any) => {
+    //     console.log("ERROR ! " + err)
+    // })
 }
 
 export { keystone, apps, dev, configureExpress }

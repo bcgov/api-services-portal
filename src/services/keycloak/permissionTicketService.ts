@@ -56,6 +56,10 @@ export class KeycloakPermissionTicketService {
         .then(checkStatus)
         .then(res => res.json())
         .then(json => json as PermissionTicket[])
+        .catch((err) => {
+            logger.error("[listPermissions] Failed to list permissions %s", err)
+            throw err
+        })
         logger.debug("[listPermissions] RESULT %j", result)
         return result
     }

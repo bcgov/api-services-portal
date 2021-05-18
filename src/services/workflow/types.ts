@@ -1,4 +1,5 @@
 import { CredentialIssuer } from '../keystone/types'
+import { strict as assert } from 'assert'
 export interface KeystoneContext {
 
 }
@@ -47,5 +48,7 @@ export interface IssuerEnvironmentConfig {
 
 export function getIssuerEnvironmentConfig (issuer: CredentialIssuer, environment: string) {
     const details : IssuerEnvironmentConfig[] = JSON.parse(issuer.environmentDetails)
-    return details.filter (c => c.environment === environment)[0]
+    const env = details.filter (c => c.environment === environment)
+    assert.strictEqual(env.length, 1, `EnvironmentMissing ${issuer.name} ${environment}` )
+    return env[0]
 }

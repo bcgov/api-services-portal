@@ -85,8 +85,12 @@ app.get('/replay/:source', (req, res) => {
 
 
 // curl http://localhost:6000/push -F "yaml=@values.yaml"
-app.post('/push', upload.single('yaml'), async (req, res) => {
-    const data = YAML.loadAll(req.file.buffer.toString('utf-8'))
+app.post('/push', upload.fields([{ name: 'yaml', maxCount: 1 }, { name: 'content', maxCount: 1 }]), async (req, res) => {
+    const data = YAML.loadAll(req.files['yaml'][0].buffer.toString('utf-8'))
+    if ('content' in req.files) {
+        console.log("CONTENT")
+        data[0].record['content'] = req.files['content'][0].buffer.toString('utf-8')
+    }
     await push({workingPath: process.env.WORKING_PATH, destinationUrl: process.env.DESTINATION_URL, items: data})
     .then(() => res.send({state:'pushed'}))
     .catch (err => { console.log(err); res.status(400).send({state:'failed'})})

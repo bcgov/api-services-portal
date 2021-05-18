@@ -92,6 +92,10 @@ module.exports = {
         type: Text,
         isRequired: false,
     },
+    resourceAccessScope: {
+        type: Text,
+        isRequired: false,
+    },
     apiKeyName: {
         type: Text,
         isRequired: false,
@@ -111,7 +115,7 @@ module.exports = {
         resolvedData,
         context,
     }) => {
-        if (operation == "create") {
+        if (operation == "create" && !('owner' in resolvedData)) {
             resolvedData['owner'] = context.authedItem.userId
         }
         return resolvedData

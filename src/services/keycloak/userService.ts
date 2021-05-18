@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import { logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from './keycloakApi'
+import { strict as assert } from 'assert'
 
 import { clientTemplate } from './templates/client-template'
 
@@ -21,11 +22,8 @@ export class KeycloakUserService {
         logger.debug("Finding "+ username)
         const users = await this.kcAdminClient.users.find({ username : username })
         logger.debug("lookupUserByUsername : " + JSON.stringify(users))
-        if (users.length == null) {
-            return null
-        } else {
-            return users[0].id
-        }
+        assert.strictEqual(users.length, 1, 'User not found ' + username)
+        return users[0].id
     }    
 
     public async login (clientId: string, clientSecret: string) : Promise<KeycloakUserService> {

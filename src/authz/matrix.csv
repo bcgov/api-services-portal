@@ -1,4 +1,5 @@
 ID,matchOneOfBaseQueryName,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchOneOfFieldKey,matchNotOneOfFieldKey,matchUserNS,inRole,matchOneOfRole,result,filters
+,,,,,"update,create,delete",,,,aps-admin,,allow,
 API Owner Role Rules,,,AccessRequest,update,,isApproved,,,api-owner,,allow,
 API Owner Role Rules,,,AccessRequest,,"create,read",isApproved,,,api-owner,,allow,
 API Owner Role Rules,,,AccessRequest,read,,,,,api-owner,,allow,
@@ -55,7 +56,7 @@ API Owner Role Rules,,getPermissionTickets,,,,,,,api-owner,,allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,allow,
 API Owner Role Rules,,revokePermissions,,,,,,,api-owner,,allow,
 API Owner Role Rules,,approvePermissions,,,,,,,api-owner,,allow,
-API Owner Role Rules,,getResourceSet,,,,,,,api-owner,,allow,
+API Owner Role Rules,,getResourceSet,,,,,,,api-owner,,allow,filterByUserNS
 API Owner Role Rules,,getUmaPolicies,,,,,,,api-owner,,allow,
 API Owner Role Rules,,createUmaPolicy,,,,,,,api-owner,,allow,
 API Owner Role Rules,,deleteUmaPolicy,,,,,,,api-owner,,allow,
@@ -116,3 +117,5 @@ API Owner Role Rules,,allAccessRequestsByNamespace,,,,,,,api-owner,,allow,filter
 API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,allow,filterByEnvironmentPackageNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,allow,filterByUserNS
+,,getUmaPoliciesByResourceName,,,,,,,api-owner,,allow,
+,,getResourceOwners,,,,,,,api-owner,,allow,

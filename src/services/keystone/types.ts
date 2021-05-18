@@ -1345,6 +1345,7 @@ export type CredentialIssuer = {
   clientRoles?: Maybe<Scalars['String']>;
   resourceScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
+  resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
   owner?: Maybe<User>;
   environments: Array<Environment>;
@@ -1652,6 +1653,24 @@ export type CredentialIssuerWhereInput = {
   resourceType_not_ends_with_i?: Maybe<Scalars['String']>;
   resourceType_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   resourceType_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resourceAccessScope?: Maybe<Scalars['String']>;
+  resourceAccessScope_not?: Maybe<Scalars['String']>;
+  resourceAccessScope_contains?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_contains?: Maybe<Scalars['String']>;
+  resourceAccessScope_starts_with?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_starts_with?: Maybe<Scalars['String']>;
+  resourceAccessScope_ends_with?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_ends_with?: Maybe<Scalars['String']>;
+  resourceAccessScope_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_contains_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_contains_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_starts_with_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_starts_with_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_ends_with_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_not_ends_with_i?: Maybe<Scalars['String']>;
+  resourceAccessScope_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resourceAccessScope_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   apiKeyName?: Maybe<Scalars['String']>;
   apiKeyName_not?: Maybe<Scalars['String']>;
   apiKeyName_contains?: Maybe<Scalars['String']>;
@@ -1743,6 +1762,8 @@ export enum SortCredentialIssuersBy {
   ResourceScopesDesc = 'resourceScopes_DESC',
   ResourceTypeAsc = 'resourceType_ASC',
   ResourceTypeDesc = 'resourceType_DESC',
+  ResourceAccessScopeAsc = 'resourceAccessScope_ASC',
+  ResourceAccessScopeDesc = 'resourceAccessScope_DESC',
   ApiKeyNameAsc = 'apiKeyName_ASC',
   ApiKeyNameDesc = 'apiKeyName_DESC',
   OwnerAsc = 'owner_ASC',
@@ -1778,6 +1799,7 @@ export type CredentialIssuerUpdateInput = {
   clientRoles?: Maybe<Scalars['String']>;
   resourceScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
+  resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
@@ -1806,6 +1828,7 @@ export type CredentialIssuerCreateInput = {
   clientRoles?: Maybe<Scalars['String']>;
   resourceScopes?: Maybe<Scalars['String']>;
   resourceType?: Maybe<Scalars['String']>;
+  resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
@@ -5801,7 +5824,6 @@ export type UmaResourceSet = {
   ownerManagedAccess?: Maybe<Scalars['Boolean']>;
   uris?: Maybe<Array<Maybe<Scalars['String']>>>;
   resource_scopes?: Maybe<Array<Maybe<UmaScope>>>;
-  scopes?: Maybe<Array<Maybe<UmaScope>>>;
 };
 
 export type UmaPermissionTicket = {
@@ -6036,6 +6058,8 @@ export type Query = {
   myApplications?: Maybe<Array<Maybe<Application>>>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
+  getUmaPoliciesByResourceName?: Maybe<Array<Maybe<UmaPolicy>>>;
+  getResourceOwners?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
   getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
@@ -6692,6 +6716,17 @@ export type QueryAllDiscoverableContentsArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ContentWhereInput>;
+};
+
+
+export type QueryGetUmaPoliciesByResourceNameArgs = {
+  resourceName?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetResourceOwnersArgs = {
+  type?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
 };
 
 

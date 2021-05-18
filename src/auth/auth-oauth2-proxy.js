@@ -129,7 +129,9 @@ class Oauth2ProxyAuthStrategy {
             // - Get a Requestor Party Token for the particular Resource
             const subjectToken = req.headers['x-forwarded-access-token']
             const accessToken = await new UMA2TokenService(process.env.OIDC_ISSUER).getRequestingPartyToken(process.env.GWA_RES_SVR_CLIENT_ID, process.env.GWA_RES_SVR_CLIENT_SECRET, subjectToken, req.params['ns']).catch (err => {
+                logger.error("Error getting new RPT %s", err)
                 res.status(400).json({switch:false, error:"rpt_fail"})
+                return
             }) 
             try {
                 const rpt = jwtDecoder(accessToken)

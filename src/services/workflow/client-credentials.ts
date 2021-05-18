@@ -1,8 +1,6 @@
 const { lookupCredentialIssuerById, addKongConsumer } = require('../keystone')
 
-import { KeycloakClientService, KeycloakTokenService, getOpenidFromIssuer } from '../keycloak'
-
-import { KongConsumerService } from '../kong'
+import { KeycloakClientRegistrationService, KeycloakClientService, KeycloakTokenService, getOpenidFromIssuer } from '../keycloak'
 
 import {v4 as uuidv4} from 'uuid'
 
@@ -21,8 +19,7 @@ import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
  * @param {*} credentialIssuerPK 
  * @param {*} newClientId 
  */
-export async function registerClient (context: any, environment: string, credentialIssuerPK: string, newClientId: string, nickname: string) {
-    const kongApi = new KongConsumerService(process.env.KONG_URL)
+export async function registerClient (context: any, environment: string, credentialIssuerPK: string, newClientId: string) {
 
     // Find the credential issuer and based on its type, go do the appropriate action
     const issuer: CredentialIssuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
@@ -41,17 +38,33 @@ export async function registerClient (context: any, environment: string, credent
     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
     // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-    const client = await new KeycloakClientService(null, null).clientRegistration(openid.issuer, token, newClientId, uuidv4(), false)
+    const client = await new KeycloakClientRegistrationService(null, null).clientRegistration(openid.issuer, token, newClientId, uuidv4(), false)
     assert.strictEqual(client.clientId, newClientId)
-
-    const consumer = await kongApi.createKongConsumer (nickname, newClientId)
-
-    const consumerPK = await addKongConsumer(context, nickname, newClientId, consumer.id)
 
     return {
         openid,
-        client,
-        consumer,
-        consumerPK
+        client
+    }
+}
+
+
+export async function findClient (context: any, environment: string, credentialIssuerPK: string, clientId: string) {
+
+    // Find the credential issuer and based on its type, go do the appropriate action
+    const issuer: CredentialIssuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
+
+    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(issuer, environment)
+
+    const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl)
+
+    const kcClientService = new KeycloakClientService(openid.issuer, null)
+
+    await kcClientService.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
+
+    const client = await kcClientService.findByClientId(clientId)
+
+    return {
+        openid,
+        client
     }
 }

@@ -329,6 +329,8 @@ components:
                     $ref: '#/components/schemas/Maybe_User_'
                 apiKeyName:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                resourceAccessScope:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 resourceType:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 resourceScopes:

@@ -1,8 +1,8 @@
 const { EnforcementPoint } = require('../../authz/enforcement')
 
-import { UMAPolicyService, Policy, PolicyQuery } from '../../services/uma2'
+import { UMAPolicyService, Policy, PolicyQuery, UMAResourceRegistrationService, ResourceSetQuery, ResourceSet } from '../../services/uma2'
 
-import { doTokenExchangeForCredentialIssuer } from './Common'
+import { doTokenExchangeForCredentialIssuer, doClientLoginForCredentialIssuer } from './Common'
 import type { TokenExchangeResult } from './Common'
 
 const typeUMAPolicy = `
@@ -51,6 +51,7 @@ module.exports = {
                     },
                     access: EnforcementPoint,
               },
+
             ],
             mutations: [
             

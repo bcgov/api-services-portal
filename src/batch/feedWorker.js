@@ -255,7 +255,7 @@ const metadata = {
     'CredentialIssuer': {
         query: 'allCredentialIssuers',
         refKey: 'name',
-        sync: ['name', 'description', 'flow', 'clientRegistration', 'mode', 'authPlugin', 'clientAuthenticator', 'instruction', 'environmentDetails', 'oidcDiscoveryUrl', 'initialAccessToken', 'clientId', 'clientSecret', 'clientRoles', 'availableScopes', 'resourceScopes', 'resourceType', 'apiKeyName', 'owner'],
+        sync: ['name', 'namespace', 'description', 'flow', 'clientRegistration', 'mode', 'authPlugin', 'clientAuthenticator', 'instruction', 'environmentDetails', 'oidcDiscoveryUrl', 'initialAccessToken', 'clientId', 'clientSecret', 'clientRoles', 'availableScopes', 'resourceScopes', 'resourceType', 'resourceAccessScope', 'apiKeyName', 'owner'],
         transformations: {
             availableScopes: {name: "toStringDefaultArray"},
             resourceScopes: {name: "toStringDefaultArray"},
