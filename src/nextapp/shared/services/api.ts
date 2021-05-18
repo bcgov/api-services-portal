@@ -11,6 +11,7 @@ import omit from 'lodash/omit';
 import type { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
+import { FetchOptions } from 'react-query/types/core/query';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -110,7 +111,10 @@ export const useApiMutation = <T>(
  * This is a standard REST API, used for a few specific use cases
  * TODO: Rename api and this restApi functions to be more specific
  */
-export const restApi = async <T>(url: string, options = {}): Promise<T> => {
+export const restApi = async <T>(
+  url: string,
+  options = {}
+): Promise<T | string> => {
   try {
     const config = {
       method: 'GET',
@@ -120,13 +124,19 @@ export const restApi = async <T>(url: string, options = {}): Promise<T> => {
       ...options,
     };
     const response = await fetch(url, config);
-    const json = await response.json();
+    const contentType = response.headers.get('Content-Type');
 
     if (!response.ok) {
       throw response.statusText;
     }
 
-    return json;
+    if (contentType?.includes('application/json')) {
+      const json = await response.json();
+      return json;
+    }
+
+    const text = await response.text();
+    return text;
   } catch (err) {
     throw new Error(err);
   }

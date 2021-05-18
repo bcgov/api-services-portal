@@ -351,15 +351,18 @@ const server = mockServer(schemaWithMocks, {
     customId: () => sample([casual.word, null, null, null]),
     tags: JSON.stringify(casual.array_of_words(random(0, 2))),
     namespace: () => sample([null, ...namespaces]),
-    plugins: () => new MockList(random(0, 2), (_, { id }) => ({ id })),
+    plugins: () => new MockList(random(0, 4), (_, { id }) => ({ id })),
     createdAt: formatISO(new Date()).toString(),
     kongConsumerId: casual.uuid,
   }),
   GatewayPlugin: () => {
     const random = sample([true, false, null]);
-    const name = casual.random_element(['rate-limiting', 'ip-restriction']);
-    const isService = random === true;
-    const isRoute = random === false;
+    // const name = casual.random_element(['rate-limiting', 'ip-restriction']);
+    // const isService = random === true;
+    // const isRoute = random === false;
+    const name = 'rate-limiting';
+    const isService = true;
+    const isRoute = true;
     let config = '';
 
     switch (name) {
@@ -546,7 +549,7 @@ app.delete('/v2/namespaces/:namespace', (req, res) => {
   namespacesJson = namespacesJson.filter(
     (n) => n.name !== req.params.namespace
   );
-  res.json({ status: 'ok' });
+  res.end();
 });
 
 app.listen(port, () => console.log(`Mock server running on port ${port}`));
