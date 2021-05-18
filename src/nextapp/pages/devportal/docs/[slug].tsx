@@ -7,7 +7,15 @@ import gfm from 'remark-gfm';
 import { gql } from 'graphql-request';
 import api from '@/shared/services/api';
 import gh from '@/shared/services/github';
-
+import {
+    Button,
+    Box,
+    Text
+  } from '@chakra-ui/react';
+import {
+    FaExternalLinkAlt
+  } from 'react-icons/fa';
+  
 import styles from './docs.module.css';
 
 const navigationQuery = gql`
@@ -45,6 +53,10 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
   content,
   title,
 }) => {
+  const renderers = {
+    link: InternalLink,
+    heading: HeadingRenderer
+  }
   return (
     <>
       <Head>
@@ -72,7 +84,7 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
                 <li className="mx-2 text-gray-400">/</li>
                 <li>{title}</li>
               </nav>
-              <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>{content}</ReactMarkdownWithHtml>
+              <ReactMarkdownWithHtml  renderers={renderers} plugins={[gfm]}>{content}</ReactMarkdownWithHtml>
             </article>
           </div>
         </div>
@@ -88,15 +100,49 @@ export const getServerSideProps: GetServerSideProps = async ({ req, params }) =>
   const pages: { allDiscoverableContents: any[] } = await api(documentQuery, {slug: params.slug}, {
     headers: req.headers as HeadersInit,
   });
-  const page = pages.allDiscoverableContents.find((page) => page.slug === params.slug);
+  const page = pages.allDiscoverableContents?.find((page) => page.slug === params.slug);
 
+  if (page == null) {
+      return {
+          props: {
+              pages: []
+          }
+      }
+  }
   return {
     props: {
-      content: page.content,
+      content: page?.content,
       pages: nav.allDiscoverableContents,
-      title: page.title,
+      title: page?.title,
     }
   };
 };
+
+  const InternalLink = (props:any) => {
+    return (
+        <a href={props.href}>
+            <Button 
+                justifyContent="flex-start" 
+                colorScheme="blue" 
+                variant="link">
+                    <Box mr={1}>{props.children}</Box>
+                    <FaExternalLinkAlt/>
+            </Button>
+        </a>
+    )
+  }
+
+  function flatten(text, child) {
+    return typeof child === 'string'
+      ? text + child
+      : React.Children.toArray(child.props.children).reduce(flatten, text)
+  }
+  
+  function HeadingRenderer(props) {
+    var children = React.Children.toArray(props.children)
+    var text = children.reduce(flatten, '')
+    var slug = text.toLowerCase().replace(/\W/g, '-')
+    return React.createElement('h' + props.level, {id: slug}, props.children)
+  }
 
 export default DocsContentPage;

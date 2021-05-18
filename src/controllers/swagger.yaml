@@ -615,6 +615,24 @@ paths:
                     required: false
                     schema:
                         type: string
+    '/identifiers/{type}':
+        get:
+            operationId: GetProduct
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: type
+                    required: true
+                    schema:
+                        type: string
     '/products/{productId}':
         get:
             operationId: GetProduct

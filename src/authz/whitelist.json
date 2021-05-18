@@ -636,5 +636,10 @@
           "referer": "http://localhost:4180/admin/metrics",
           "query": "query getList($where: MetricWhereInput, $search: String, $sortBy: [SortMetricsBy!], $first: Int, $skip: Int) {\n  allMetrics(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    name\n    query\n    __typename\n  }\n  _allMetricsMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
           "added": "2021-05-17T19:43:54.077Z"
+     },
+     "2b11b0faca8fa5070b28b230578a7585": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-18T04:21:31.993Z"
      }
 }

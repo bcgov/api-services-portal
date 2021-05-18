@@ -119,3 +119,4 @@ API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,allow,filterB
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,allow,filterByUserNS
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,allow,
+Guest,,allDiscoverableContents,,,,,,,guest,,allow,
