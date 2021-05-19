@@ -1,14 +1,16 @@
 import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../../logger'
+import { Logger } from '../../logger'
 import querystring from 'querystring'
-import { headers } from './keycloakApi'
+import { headers } from './keycloak-api'
 
 import { strict as assert } from 'assert'
 
 import { clientTemplate } from './templates/client-template'
 
 import { default as KcAdminClient } from 'keycloak-admin'
+
+const logger = Logger('keycloak.ClientReg')
 
 export interface ClientRegResponse {
     id: string,
@@ -49,7 +51,7 @@ export class KeycloakClientRegistrationService {
         })
 
         logger.debug("[clientRegistration] CALLING %s", `${issuer}/clients-registrations/default`)
-        logger.debug("[clientRegistration] BODY %s", JSON.stringify(body, null, 4))
+        logger.debug("[clientRegistration] BODY %j", body)
 
         const response = await fetch(`${issuer}/clients-registrations/default`, {
             method: 'post',
@@ -58,7 +60,7 @@ export class KeycloakClientRegistrationService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        logger.debug("[clientRegistration] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[clientRegistration] RESULT %j", response);
         return {
             id: response['id'],
             enabled: response['enabled'],
@@ -70,7 +72,7 @@ export class KeycloakClientRegistrationService {
 
     public async updateClientRegistration (accessToken : string, clientId : string, vars : ClientRegistration) : Promise<ClientRegResponse> {
         logger.debug("[updateClientRegistration] CALLING %s", `${this.issuerUrl}/clients-registrations/default/${clientId}`)
-        logger.debug("[updateClientRegistration] BODY %s", JSON.stringify(vars, null, 4))
+        logger.debug("[updateClientRegistration] BODY %j", vars)
 
         vars.clientId = clientId
         
@@ -81,7 +83,7 @@ export class KeycloakClientRegistrationService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        logger.debug("[updateClientRegistration] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[updateClientRegistration] RESULT %j", response);
         return {
             id: response['id'],
             enabled: response['enabled'],
@@ -120,8 +122,8 @@ export class KeycloakClientRegistrationService {
         // console.log(scopeToId['PatientRecord.Read'])
         // const result2  = await kcAdminClient.clients.addOptionalClientScope({id:clientId, clientScopeId: scopeToId['PatientRecord.Read']})
         // console.log(JSON.stringify(result2, null, 4))
-        console.log("[A] " + JSON.stringify(scopesToAdd))
-        console.log("[D] " + JSON.stringify(scopesToDelete))
+        logger.debug("[syncScopes] (%s) [A] %j", clientId, scopesToAdd)
+        logger.debug("[syncScopes] (%s) [D] %j", clientId, scopesToDelete)
         return [ scopesToAdd, scopesToDelete ]
     }
     
@@ -152,7 +154,7 @@ export class KeycloakClientRegistrationService {
             clientId: clientId,
             clientSecret: clientSecret
         }).catch ((err:any) => {
-            console.log("Login failed " + err)
+            logger.error("Login failed %s", err)
             throw(err)
         })
         this.session = true

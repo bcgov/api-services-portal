@@ -641,5 +641,25 @@
           "referer": "http://localhost:4180/manager/products",
           "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
           "added": "2021-05-18T04:21:31.993Z"
+     },
+     "70e0c07aca82096fec6f9bdc7b6b1bc7": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $id }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+          "added": "2021-05-18T19:05:11.533Z"
+     },
+     "b0b09b52cc820a077771cf4d08b7f96c": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: \"$id\" }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+          "added": "2021-05-18T19:05:53.980Z"
+     },
+     "429baa1c18acc109b7f67e586d613fe6": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!, $rid: string!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+          "added": "2021-05-18T19:10:01.644Z"
+     },
+     "676efc6d02cd0becae418438ea621d04": {
+          "referer": "http://localhost:4180/manager/requests/60a40b8741d31911580b9f80",
+          "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+          "added": "2021-05-18T19:10:28.676Z"
      }
 }

@@ -120,3 +120,9 @@ API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,allow,fil
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,allow,
 Guest,,allDiscoverableContents,,,,,,,guest,,allow,
+Guest,,allDiscoverableProducts,,,,,,,guest,,allow,filterByActiveEnvironment
+,,allProducts,,,,,,,guest,,allow,
+,,environments,,,,,,,guest,,allow,
+,,allDatasets,,,,,,,guest,,allow,
+,,Environment,,,,,,,guest,,allow,
+,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,guest,,allow,

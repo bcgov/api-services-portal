@@ -1,9 +1,29 @@
 
-export { UMAPolicyService } from './policyService'
-export type { Policy, PolicyQuery } from './policyService'
+export { 
+    UMAPolicyService 
+} from './policy-service'
 
-export { UMAResourceRegistrationService } from './resourceRegistrationService'
-export type { ResourceSetQuery, ResourceScope, ResourceOwner, ResourceSet } from './resourceRegistrationService'
+export type { 
+    Policy, 
+    PolicyQuery 
+} from './policy-service'
 
-export { UMA2TokenService } from './tokenService'
-export type { ClientRegistration, ClientRegResponse } from './tokenService'
+export { 
+    UMAResourceRegistrationService 
+} from './resource-registration-service'
+
+export type { 
+    ResourceSetQuery, 
+    ResourceScope, 
+    ResourceOwner, 
+    ResourceSet 
+} from './resource-registration-service'
+
+export { 
+    UMA2TokenService 
+} from './token-service'
+
+export type { 
+    ClientRegistration, 
+    ClientRegResponse 
+} from './token-service'

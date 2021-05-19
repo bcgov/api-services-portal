@@ -1,9 +1,10 @@
-
 const fs = require('fs')
 const express = require('express');
 const { RegisterRoutes } = require("./controllers/routes")
 const specFile = fs.realpathSync('controllers/swagger.yaml')
 const spec = fs.readFileSync(specFile)
+
+const { Register } = require('./controllers/ioc/registry')
 
 class ApiOpenapiApp {
   constructor() {
@@ -12,6 +13,8 @@ class ApiOpenapiApp {
   prepareMiddleware({ keystone }) {
     const app = express();
     
+    Register(keystone)
+
     app.use(express.json());
     RegisterRoutes(app)
 

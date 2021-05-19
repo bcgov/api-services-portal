@@ -2,7 +2,7 @@ import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
 import { logger } from '../../logger'
 import querystring from 'querystring'
-import { headers } from '../keycloak/keycloakApi'
+import { headers } from '../keycloak/keycloak-api'
 
 export interface ResourceSetQuery {
     name?: string,

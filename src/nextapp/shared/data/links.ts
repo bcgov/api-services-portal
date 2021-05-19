@@ -16,7 +16,7 @@ const links: NavLink[] = [
   {
     name: 'Directory',
     url: '/devportal/api-discovery',
-    access: ['developer', 'api-owner'],
+    access: [],
     sites: ['devportal'],
   },
   {

@@ -10,9 +10,18 @@
     },
     "routes": {
       "routesDir": "controllers",
-      "basePath": "/ds/api"
+      "basePath": "/ds/api",
+      "iocModule": "controllers/ioc",
+      "authenticationModule": "./auth/auth-tsoa"
     },
     "ignore": [
         "**/node_modules/**"
-    ]
+    ],
+    "securityDefinitions": {
+        "jwt": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
 }

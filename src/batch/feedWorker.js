@@ -294,6 +294,19 @@ const metadata = {
     },
 }
 
+const importFeedWorker = async (keystone, entity, json) => {
+    const eid = json['id']
+    console.log(JSON.stringify(json, null, 4))
+
+    assert.strictEqual(entity in metadata, true)
+    assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
+
+    assert.strictEqual(typeof eid == 'string', true, 'Unique ID is not a string! ' + JSON.stringify(body))
+
+    const result = await syncRecords(keystone, entity, eid, json)
+    return result
+}
+
 const putFeedWorker = async (keystone, req, res) => {
     const entity = req.params['entity']
     const eid = 'id' in req.params ? req.params['id'] : req.body['id']
@@ -501,6 +514,7 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
 }
 
 module.exports = {
+    Importer: importFeedWorker,
     PutFeed: putFeedWorker,
     DeleteFeed: deleteFeedWorker
 }

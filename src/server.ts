@@ -1,5 +1,6 @@
 /// <reference types="node" />
 /// <reference types="express" />
+import "reflect-metadata"
 import express from "express";
 import request from "graphql-request";
 import { AnyCnameRecord } from "node:dns";

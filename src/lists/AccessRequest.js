@@ -71,9 +71,6 @@ module.exports = {
         listKey,
         fieldPath, // Field hooks only
     }) {
-        console.log("VALIDATE AR " + operation + " " + JSON.stringify(existingItem, null, 3));
-        console.log("VALIDATE AR " + operation + " " + JSON.stringify(originalInput, null, 3));
-        console.log("VALIDATE AR " + operation + " " + JSON.stringify(resolvedData, null, 3));
         await Validate(context, operation, existingItem, originalInput, resolvedData, addValidationError)
     }),
     beforeChange: ({
@@ -85,7 +82,6 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) => {
-        console.log("BEFORE CHANGE TO ACCESS REQUEST " + operation + " " + JSON.stringify(resolvedData, null, 3));
     },
     afterChange: (async function ({
         operation,
@@ -96,10 +92,6 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) {
-        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(existingItem, null, 3));
-        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(originalInput, null, 3));
-        console.log("AFTER CHG AR " + operation + " " + JSON.stringify(updatedItem, null, 3));
-
         await Apply(context.createContext({skipAccessControl:true}), operation, existingItem, originalInput, updatedItem)
     })
   }

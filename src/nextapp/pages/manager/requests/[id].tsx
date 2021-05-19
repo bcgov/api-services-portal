@@ -39,7 +39,7 @@ import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import RequestActions from '@/components/request-actions';
-
+import ActivityList from '@/components/activity-list';
 import breadcrumbs from '@/components/ns-breadcrumb'
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -51,7 +51,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id },
+        { id, rid:id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -213,29 +213,7 @@ const AccessRequestPage: React.FC<
                     </Box>
                 </TabPanel>
                 <TabPanel p={0}>
-                  {/* {data?.AccessRequest.activity.map((a) => (
-                    <Box key={a.id} bgColor="white" mb={2}>
-                      <Box
-                        as="header"
-                        p={2}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Heading size="xs" display="flex" alignItems="center">
-                          <Icon as={FaRegClock} color="gray.400" mr={2} />{' '}
-                          {a.name}
-                        </Heading>
-                        <Text as="time" fontSize="small" color="gray.400">
-                          {format(new Date(a.createdAt), 'LLL do, yyyy')}
-                        </Text>
-                      </Box>
-                      <Divider />
-                      <Box p={2}>
-                        <Text>{a.message}</Text>
-                      </Box>
-                    </Box>
-                  ))} */}
+                    <ActivityList data={data.allActivities}/>
                 </TabPanel>
               </TabPanels>
             </GridItem>
@@ -276,7 +254,7 @@ const AccessRequestPage: React.FC<
 export default AccessRequestPage;
 
 const query = gql`
-  query GetAccessRequest($id: ID!) {
+  query GetAccessRequest($id: ID!, $rid: String!) {
     AccessRequest(where: { id: $id }) {
       id
       name
@@ -302,6 +280,24 @@ const query = gql`
           clientRoles
         }
       }
+    }
+
+    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {
+        id
+        type
+        name
+        action
+        result
+        message
+        context
+        refId
+        namespace
+        extRefId
+        createdAt
+        actor {
+            name
+            username
+        }
     }
   }
 `;

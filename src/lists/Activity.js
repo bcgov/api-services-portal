@@ -61,31 +61,13 @@ module.exports = {
         listKey,
         fieldPath, // exists only for field hooks
       }) {
-        console.log("ACTIVITY " + operation + " " + JSON.stringify(originalInput, null, 3));
-        console.log("ACTIVITY " + operation + " " + JSON.stringify(updatedItem, null, 3));
-
         if (updatedItem.action == 'publish' && updatedItem.type == 'GatewayConfig') {
-            const feeder = require('../services/feeder');
-            const feederApi = new feeder(process.env.FEEDER_URL)
+            const { FeederService } = require('../services/feeder');
+            const feederApi = new FeederService(process.env.FEEDER_URL)
             feederApi.forceSync('kong', 'namespace', updatedItem.namespace).catch (err => {
                 console.log("Capture and log error " + err)
             })
         }
     })
-  },
-  recordActivity: (context, action, type, refId, message, result = "", activityContext = "") => {
-        console.log("Record Activity")
-        const userId = context.authedItem.userId
-        const namespace = context.authedItem.namespace
-        const name = `${action} ${type}[${refId}]`
-        console.log("USERID="+userId+" NAME=" + name)
-
-        return context.executeGraphQL({
-            query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: String) {
-                    createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, actor: { connect: { id : $userId }} }) {
-                        id
-                } }`,
-            variables: { name, namespace, type, action, refId, message, result, activityContext, userId },
-        })
   }
 }

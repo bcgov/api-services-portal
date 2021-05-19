@@ -5,6 +5,56 @@ components:
     requestBodies: {}
     responses: {}
     schemas:
+        Maybe_Scalars-at-String_:
+            type: string
+            nullable: true
+        Maybe_Scalars-at-Int_:
+            type: number
+            format: double
+            nullable: true
+        Maybe_Scalars-at-Boolean_:
+            type: boolean
+            nullable: true
+        Content:
+            properties:
+                isPublic:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                isComplete:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                order:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Int_'
+                slug:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                tags:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                namespace:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                readme:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                githubRepository:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                externalLink:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                content:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                description:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                title:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                id:
+                    type: string
+                _label_:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    description: "This virtual field will be resolved in one of the following ways (in this order):\n 1. Execution of 'labelResolver' set on the Content List config, or\n 2. As an alias to the field set on 'labelField' in the Content List config, or\n 3. As an alias to a 'name' field on the Content List (if one exists), or\n 4. As an alias to the 'id' field on the Content List."
+                __typename:
+                    type: string
+                    enum:
+                        - Content
+                    nullable: false
+            required:
+                - id
+            type: object
+            description: 'A keystone list'
         TheUser:
             properties:
                 id:
@@ -25,12 +75,6 @@ components:
                     type: array
             type: object
             additionalProperties: false
-        Maybe_Scalars-at-String_:
-            type: string
-            nullable: true
-        Maybe_Scalars-at-Boolean_:
-            type: boolean
-            nullable: true
         OrganizationUnit:
             properties:
                 extRecordHash:
@@ -63,10 +107,6 @@ components:
                 - id
             type: object
             description: 'A keystone list'
-        Maybe_Scalars-at-Int_:
-            type: number
-            format: double
-            nullable: true
         _QueryMeta:
             properties:
                 count:
@@ -590,6 +630,52 @@ info:
         name: 'BC Gov APS'
 openapi: 3.0.0
 paths:
+    '/namespaces/{ns}/contents':
+        put:
+            operationId: PutContent
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt: []
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: string
+        get:
+            operationId: GetContent
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Content'
+                                type: array
+            security:
+                -
+                    jwt: []
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
     '/users/{userId}':
         get:
             operationId: GetUser
@@ -633,7 +719,27 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/products/{productId}':
+    '/namespaces/{ns}/products':
+        get:
+            operationId: GetProducts
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Product'
+                                type: array
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/products/{productId}':
         get:
             operationId: GetProduct
             responses:

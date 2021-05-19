@@ -1,6 +1,6 @@
 import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../../logger'
+import { Logger } from '../../logger'
 
 import {v4 as uuidv4} from 'uuid'
 
@@ -30,6 +30,8 @@ export interface DiffResult {
     C: string[]
 }
 
+const logger = Logger('kong')
+
 export class KongConsumerService {
     private kongUrl : string
 
@@ -57,12 +59,12 @@ export class KongConsumerService {
         try {
             logger.debug("createOrGetConsumer - TRY %s", username)
             const result = await this.getConsumerByUsername (username)
-            logger.debug("createOrGetConsumer - RESULT %s", JSON.stringify(result))
+            logger.debug("createOrGetConsumer - RESULT %j", result)
             return result
         } catch (err) {
             logger.debug("createOrGetConsumer - CATCH ERROR %s", err)
             const result = await this.createKongConsumer (username, customId)
-            logger.debug("createOrGetConsumer - CATCH RESULT %s", JSON.stringify(result))
+            logger.debug("createOrGetConsumer - CATCH RESULT %j", result)
             return result
         }
     }
@@ -85,14 +87,14 @@ export class KongConsumerService {
             })
             .then(checkStatus)
             .then(res => res.json())
-            logger.debug("[createKongConsumer] KONG RESPONSE %s", JSON.stringify(response, null, 3))
+            logger.debug("[createKongConsumer] RESULT %j", response)
             return {
                 id: response['id'],
                 username: response['username'],
                 custom_id: response['custom_id']
             } as KongConsumer
         } catch (err) {
-            console.log("[createKongConsumer] ERROR " + err)
+            logger.error("[createKongConsumer] ERROR %s", err)
             throw(err)
         };
     }
@@ -111,7 +113,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
         
-        logger.debug("KONG KEYAUTH RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[addKeyAuthToConsumer] RESULT %j", response);
         return {
             keyAuthPK: response['id'],
             apiKey: response['key']
@@ -132,7 +134,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
         
-        logger.debug("[addPluginToConsumer] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[addPluginToConsumer] RESULT %j", response);
         return {
             id: response['id']
         } as KongObjectID
@@ -155,7 +157,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
         
-        logger.debug("[updateConsumerPlugin] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[updateConsumerPlugin] RESULT %j", response);
     }
 
     public async deleteConsumerPlugin (consumerPK: string, pluginPK: string) : Promise<void> {
@@ -183,7 +185,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
 
-        logger.debug("[genKeyForConsumerKeyAuth] RESULT = %s", JSON.stringify(response, null, 3));
+        logger.debug("[genKeyForConsumerKeyAuth] RESULT %j", response);
         return {
             keyAuthPK: keyAuthPK,
             apiKey: response['key']
@@ -200,7 +202,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
 
-        logger.debug("[getConsumersByNamespace] RESPONSE = %s", JSON.stringify(response, null, 3))
+        logger.debug("[getConsumersByNamespace] RESULT %j", response);
         return response['data'].map((c:KongConsumer) => c.id)
     }
 
@@ -213,7 +215,7 @@ export class KongConsumerService {
         .then(checkStatus)
         .then(res => res.json())
 
-        logger.debug("[getConsumerACLByNamespace] RESPONSE = %s", JSON.stringify(response, null, 3))
+        logger.debug("[getConsumerACLByNamespace] RESULT %j", response);
         return response['data']
     }   
 
@@ -240,7 +242,7 @@ export class KongConsumerService {
             .then(checkStatus)
             result.C.push(group)
         }
-        logger.debug("UPDATE TO CONSUMER ACL: %s : %s", consumerPK, JSON.stringify(result));
+        logger.debug("[updateConsumerACLByNamespace] (%s) RESULT %j", consumerPK, result)
 
         return result
     }

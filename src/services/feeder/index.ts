@@ -1,1 +1,1 @@
-export { FeederService } from './feederService'
+export { FeederService } from './feeder-service'

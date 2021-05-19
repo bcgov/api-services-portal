@@ -1,13 +1,38 @@
-export { KeycloakClientService } from './clientService'
-export { KeycloakClientRegistrationService } from './clientRegistrationService'
-export type { ClientRegistration, ClientRegResponse } from './clientRegistrationService'
+export {
+    KeycloakClientService
+} from './client-service'
 
-export { KeycloakPermissionTicketService } from './permissionTicketService'
-export type { PermissionTicketQuery, PermissionTicket } from './permissionTicketService'
+export {
+    KeycloakClientRegistrationService
+} from './client-registration-service'
 
-export { KeycloakTokenService } from './tokenService'
-export type { Token } from './tokenService'
+export type {
+    ClientRegistration,
+    ClientRegResponse
+} from './client-registration-service'
 
-export { KeycloakUserService } from './userService'
+export { 
+    KeycloakPermissionTicketService
+} from './permission-ticket-service'
 
-export { getOpenidFromDiscovery, getOpenidFromIssuer } from './keycloakApi'
+export type { 
+    PermissionTicketQuery,
+    PermissionTicket
+} from './permission-ticket-service'
+
+export {
+    KeycloakTokenService
+} from './token-service'
+
+export type { 
+    Token 
+} from './token-service'
+
+export { 
+    KeycloakUserService 
+} from './user-service'
+
+export { 
+    getOpenidFromDiscovery,
+    getOpenidFromIssuer 
+} from './keycloak-api'
