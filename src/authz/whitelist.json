@@ -661,5 +661,20 @@
           "referer": "http://localhost:4180/manager/requests/60a40b8741d31911580b9f80",
           "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
           "added": "2021-05-18T19:10:28.676Z"
+     },
+     "3c5819c703d4e1c2e635cf194caa78a5": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  query GetProducts {\n    allDiscoverableProducts {\n      id\n      name\n      environments {\n        name\n        active\n        flow\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n        view_audience\n        security_class\n        record_publish_date\n        tags\n        organization {\n          title\n        }\n        organizationUnit {\n          title\n        }\n      }\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n    }\n  }\n",
+          "added": "2021-05-19T16:01:07.473Z"
+     },
+     "ea8ba79a2b79b5462e0014885c7ef897": {
+          "referer": "http://localhost:4180/devportal/api-discovery",
+          "query": "\n  query GetProduct($id: ID!) {\n    DiscoverableProduct(where: { id: $id }) {\n      id\n      name\n      environments {\n        name\n        active\n        flow\n        services {\n          name\n          host\n        }\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n        security_class\n        view_audience\n        tags\n        organization {\n          title\n        }\n        organizationUnit {\n          title\n        }\n      }\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n    }\n  }\n",
+          "added": "2021-05-19T16:01:21.358Z"
+     },
+     "d8a1fe9c4cd13380ae02a8a77ed3105e": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200, orderBy: \"updatedAt_DESC\") {\n      consumer {\n        id\n        username\n        aclGroups\n        customId\n        plugins {\n          name\n        }\n        tags\n        updatedAt\n      }\n      application {\n        name\n        appId\n      }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-19T16:02:06.048Z"
      }
 }
