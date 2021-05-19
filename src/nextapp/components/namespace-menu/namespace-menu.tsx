@@ -35,7 +35,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   const managerDisclosure = useDisclosure();
   const { data, isLoading, isSuccess, isError } = useQuery<NamespaceData[]>(
     'allNamespaces',
-    async () => await restApi<NamespaceData[]>('/gw/api/namespaces')
+    () => restApi<NamespaceData[]>('/gw/api/namespaces') as Promise<NamespaceData[]>
   );
 
   const handleNamespaceChange = React.useCallback(
