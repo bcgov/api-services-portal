@@ -46,7 +46,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           const name = data.get('name') as string;
           const json = await mutation.mutateAsync({
             name,
-          });
+          }) as { name: string; id: string };
 
           toast({
             title: `Namespace ${json.name} created!`,
