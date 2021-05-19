@@ -62,8 +62,8 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
         policy: 'local',
       };
 
-
-  const numOrNull = ((value: FormDataEntryValue) => Number(value) == 0 ? null : Number(value))
+  const numOrNull = (value: FormDataEntryValue) =>
+    Number(value) == 0 ? null : Number(value);
 
   const onSubmit = async (formData: FormData) => {
     try {

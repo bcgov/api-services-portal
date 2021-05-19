@@ -15,6 +15,8 @@ import {
   Flex,
   IconButton,
   Divider,
+  Center,
+  Heading,
 } from '@chakra-ui/react';
 import type { NamespaceData } from '@/shared/types/app.types';
 import { FaTrash } from 'react-icons/fa';
@@ -82,6 +84,16 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
             </Text>
           </Box>
           <Divider />
+          {data.length <= 0 && (
+            <Center>
+              <Box my={8}>
+                <Heading mb={2} size="sm">
+                  You have no namespaces
+                </Heading>
+                <Text fontSize="sm">Create a namespace to manage.</Text>
+              </Box>
+            </Center>
+          )}
           {data.map((n) => (
             <Flex
               key={n.id}
