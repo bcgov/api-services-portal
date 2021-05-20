@@ -2,18 +2,11 @@ import * as React from 'react';
 import {
   Badge,
   Box,
-  Button,
   Divider,
   Flex,
-  Grid,
-  GridItem,
   Heading,
   Icon,
   Link,
-  SimpleGrid,
-  Stack,
-  Tag,
-  TagLabel,
   Text,
   Wrap,
   WrapItem,
@@ -21,7 +14,6 @@ import {
 import NextLink from 'next/link';
 import { Product } from '@/shared/types/query.types';
 import { FaBook, FaChevronRight } from 'react-icons/fa';
-import TagsList from '../tags-list';
 
 interface DiscoveryListItemProps {
   data: Product;
@@ -51,15 +43,9 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
           <Heading size="sm" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
-            {data.dataset ? (
-              <>
-                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
-                  <Link>{data.dataset.title}</Link>
-                </NextLink>
-              </>
-            ) : (
-              <span>{data.name}</span>
-            )}
+            <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+              <Link>{data.dataset.title}</Link>
+            </NextLink>
           </Heading>
         </Box>
       </Box>
