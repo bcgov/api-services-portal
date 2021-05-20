@@ -51,6 +51,7 @@ const actions : any = {
     "filterByEnvActiveOrProductNS": require('./actions/filterByEnvActiveOrProductNS'),
     "filterByEnvironmentPackageNS": require('./actions/filterByEnvironmentPackageNS'),
     "filterByNamespaceOrAppOwner": require('./actions/filterByNamespaceOrAppOwner'),
+    "filterByNamespaceOrPublic": require('./actions/filterByNamespaceOrPublic'),
     "filterByOwner": filterByOwner,
     "filterByOwnerOrRelated": require('./actions/filterByOwnerOrRelated'),
     "filterBySelf": require('./actions/filterBySelf'),
