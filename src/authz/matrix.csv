@@ -107,7 +107,7 @@ Developer Role Rules - Fields,,,AccessRequest,read,,"name,controls,application,p
 Developer Role Rules - Fields,,,ServiceAccess,read,,"consumer,application",,,developer,,allow,
 API Owner Role Rules,,,,,"read,update,create",,*,,api-owner,,allow,
 API Owner Role Rules,,allDiscoverableProducts,,,,,,,api-owner,,allow,filterByActiveEnvironment
-API Owner Role Rules,,allDiscoverableContents,,,,,,,api-owner,,allow,
+API Owner Role Rules,,allDiscoverableContents,,,,,,,api-owner,,allow,filterByNamespaceOrPublic
 API Owner Role Rules,,DiscoverableProduct,,,,,,,api-owner,,allow,
 API Owner Role Rules,,myServiceAccesses,,,,,,,api-owner,,allow,filterByAppOwner
 API Owner Role Rules,,myApplications,,,,,,,api-owner,,allow,filterByOwner
@@ -119,10 +119,11 @@ API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,allow,filterB
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,allow,filterByUserNS
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,allow,
-Guest,,allDiscoverableContents,,,,,,,guest,,allow,
+Guest,,allDiscoverableContents,,,,,,,guest,,allow,filterByNamespaceOrPublic
 Guest,,allDiscoverableProducts,,,,,,,guest,,allow,filterByActiveEnvironment
 ,,allProducts,,,,,,,guest,,allow,
 ,,environments,,,,,,,guest,,allow,
 ,,allDatasets,,,,,,,guest,,allow,
 ,,Environment,,,,,,,guest,,allow,
 ,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,guest,,allow,
+,,allContents,,,,,,,guest,,allow,

@@ -38,7 +38,7 @@ function dot (value, _key) {
 }
 
 const transformations = {
-    "toStringDefaultArray": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? '[]':JSON.stringify(inputData[key]),
+    "toStringDefaultArray": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? null:JSON.stringify(inputData[key]),
     "toString": (keystone, transformInfo, currentData, inputData, key) => inputData[key] ==  null || (currentData != null && currentData[key] === JSON.stringify(inputData[key])) ? null:JSON.stringify(inputData[key]),
     "mapNamespace": (keystone, transformInfo, currentData, inputData, key) => {
         if (inputData['tags'] != null) {
@@ -440,6 +440,7 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
                 data[field] = json[field]
             }
         }
+
         if ('transformations' in md) {
             for (const transformKey of Object.keys(md.transformations)) {
                 const transformInfo = md.transformations[transformKey]
@@ -479,8 +480,10 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
                 }
             }
         }
+        
         if ('transformations' in md) {
             for (const transformKey of transformKeys) {
+                console.log("Changed? " + transformKey)
                 // unset transformKey from data[] 
                 delete data[transformKey]
                 const transformInfo = md.transformations[transformKey]
@@ -493,7 +496,7 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
 
                 const transformMutation = await transformations[transformInfo.name](keystone, transformInfo, localRecord, json, transformKey)
                 if (transformMutation != null) {
-                    console.log(" -- Updated [" + transformKey + "] " + JSON.stringify(data[transformKey]) + " to " + JSON.stringify(transformMutation))
+                    console.log(" -- updated [" + transformKey + "] " + JSON.stringify(localRecord[transformKey]) + " to " + JSON.stringify(transformMutation))
                     data[transformKey] = transformMutation
                 }
             }
@@ -514,6 +517,8 @@ const syncRecords = async function (keystone, entity, eid, json, children = fals
 }
 
 module.exports = {
+    lookup: lookup,
+    syncRecords: syncRecords,
     Importer: importFeedWorker,
     PutFeed: putFeedWorker,
     DeleteFeed: deleteFeedWorker

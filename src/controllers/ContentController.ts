@@ -11,6 +11,7 @@ import {
     Security,
     SuccessResponse,
 } from "tsoa";
+import express from 'express'
 import { NamespaceValidator } from '../auth/namespace-validator'
 import { KeystoneService } from "./ioc/keystoneInjector"
 import { inject, injectable } from "tsyringe";
@@ -20,8 +21,7 @@ const { syncRecords } = require('../batch/feedWorker')
 
 @injectable()
 @Route("/namespaces/{ns}/contents")
-@Security('jwt')
-//, ['Content.Publish']
+@Security('jwt', ['Content.Publish'])
 export class ContentController extends Controller {
     private keystone: KeystoneService
     constructor (@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -31,13 +31,10 @@ export class ContentController extends Controller {
 
     @Put()
     public async putContent(
-        @Request() request: any,
         @Path() ns: string,
-        @Body() body: string
+        @Request() request: express.Request
     ): Promise<any> {
-        console.log("Body = "+body)
-        const result = await syncRecords(this.keystone.context(), 'Content', null, body)
-        return result
+        return await syncRecords(this.keystone.context(), 'Content', request.body['id'], request.body)
     }
 
     @Get()
