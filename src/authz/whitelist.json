@@ -686,5 +686,10 @@
           "referer": "http://localhost:4180/manager/poc/credential-issuers/60a57688c3b2fc7fae63c44c",
           "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientAuthenticator\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            resourceAccessScope\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
           "added": "2021-05-19T20:35:27.649Z"
+     },
+     "ae1f4abb982d8d4d087396d52a71f173": {
+          "referer": "http://localhost:4180/devportal/api-discovery",
+          "query": "\n  query GetProduct($id: ID!) {\n    DiscoverableProduct(where: { id: $id }) {\n      id\n      name\n      environments {\n        name\n        active\n        flow\n        services {\n          name\n          host\n        }\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n        security_class\n        view_audience\n        tags\n        record_publish_date\n        isInCatalog\n        organization {\n          title\n        }\n        organizationUnit {\n          title\n        }\n      }\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n    }\n  }\n",
+          "added": "2021-05-20T21:47:35.095Z"
      }
 }

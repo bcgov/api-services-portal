@@ -127,3 +127,5 @@ Guest,,allDiscoverableProducts,,,,,,,guest,,allow,filterByActiveEnvironment
 ,,Environment,,,,,,,guest,,allow,
 ,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,guest,,allow,
 ,,allContents,,,,,,,guest,,allow,
+,,DiscoverableProduct,,,,,,,guest,,allow,
+,,services,,,,,,,guest,,allow,
