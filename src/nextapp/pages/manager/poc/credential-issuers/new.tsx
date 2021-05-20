@@ -120,7 +120,7 @@ const CreateIssuer = () => {
     }
   }
 
-  const [issuer, setIssuer] = React.useState({ name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", apiKeyName: "X-API-KEY", owner: (user == null ? { name:"", username:"", email:""}:user) });
+  const [issuer, setIssuer] = React.useState({ name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", resourceAccessScope: "", apiKeyName: "X-API-KEY", owner: (user == null ? { name:"", username:"", email:""}:user) });
 
   const flow = issuer.flow
 
@@ -143,6 +143,7 @@ const CreateIssuer = () => {
   const fulfill = (object) => {
     const vars = { data : {...object, ...{ 
         availableScopes: JSON.stringify(issuer.availableScopes),
+        resourceScopes: JSON.stringify(issuer.resourceScopes),
         clientRoles: JSON.stringify(issuer.clientRoles),
         environmentDetails: JSON.stringify(issuer.environmentDetails),
         owner: { connect: { id: user.userId }}
@@ -482,6 +483,26 @@ const CreateIssuer = () => {
                                     If your APIs are using UMA2 Resource Scopes, then provide the full list of Scopes setup in the idP.
                                 </Box>
                             </Alert>                                
+
+                            <FormControl
+                                mb={4}
+                                isDisabled={false}
+                            >
+                                <FormLabel>Resource Access Scope</FormLabel>
+                                <Input
+                                    placeholder="Resource Access Scope"
+                                    name="resourceAccessScope"
+                                    variant="bc-input"
+                                    onChange={(e : any) => setIssuer({...issuer, ...{resourceAccessScope:e.target.value}})}
+                                />
+                            </FormControl>   
+                            <Alert status="info">
+                                <AlertIcon />
+                                <Box>
+                                    The Resource Access Scope identifies a Resource Scope that, when granted to a user, allows them to administer permissions for the particular resource.  This can be used when the Resource Server is the owner of the resource.
+                                </Box>
+                            </Alert>                                
+
 
                     </Box>
                 </Box>

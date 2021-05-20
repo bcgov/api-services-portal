@@ -37,7 +37,7 @@ import gfm from 'remark-gfm';
 
 import graphql from '@/shared/services/graphql'
 
-import tmpstyles from '../../docs/docs.module.css';
+import tmpstyles from '../../../docs/docs.module.css';
 
 import List from './list'
 

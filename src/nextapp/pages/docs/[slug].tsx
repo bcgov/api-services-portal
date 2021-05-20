@@ -77,7 +77,7 @@ const DocsContentPage: React.FC<DocsContentPageProps> = ({
             <article className={styles['markdown-body']}>
               <nav className="mb-3 flex list-none text-gray-500 text-sm">
                 <li>
-                  <Link href="/devportal/docs">
+                  <Link href="/docs">
                     <a>Docs</a>
                   </Link>
                 </li>

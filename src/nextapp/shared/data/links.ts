@@ -99,9 +99,9 @@ const links: NavLink[] = [
   },
   {
     name: 'Documentation',
-    url: '/devportal/docs',
+    url: '/docs',
     altUrls: [
-        '/devportal/docs/[slug]'
+        '/docs/[slug]'
     ],
     access: [],
     sites: ['devportal'],

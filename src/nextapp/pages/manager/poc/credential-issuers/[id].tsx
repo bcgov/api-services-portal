@@ -31,7 +31,7 @@ import { useRouter } from 'next/router';
 
 const { useEffect, useState } = React;
 
-import { CREATE_ISSUER, UPDATE_ISSUER, GET_ISSUER } from './queries';
+import { CREATE_ISSUER, DELETE_ISSUER, UPDATE_ISSUER, GET_ISSUER } from './queries';
 
 import NextLink from 'next/link';
 
@@ -70,7 +70,7 @@ const ListArray = ({name, value, edit, onChange}) => {
 const IssuerPage = () => {
     const { user } = useAuth()
     const context = useAppContext();
-    const [issuer, setIssuer] = React.useState({ id:"", name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", apiKeyName: "X-API-KEY", owner: (user == null ? { id:"", name:"", username:"", email:""}:{...user,...{id:user.userId}}) , environments: []});
+    const [issuer, setIssuer] = React.useState({ id:"", name: "", flow: "", environmentDetails: [], clientRegistration: "", clientAuthenticator: "client-secret", mode: "auto", availableScopes: [], clientRoles: [], resourceScopes: [], resourceType: "", resourceAccessScope: "", apiKeyName: "X-API-KEY", owner: (user == null ? { id:"", name:"", username:"", email:""}:{...user,...{id:user.userId}}) , environments: []});
     const [{ state, data }, setState] = useState({
         state: 'loading',
         data: null,
@@ -127,6 +127,10 @@ const IssuerPage = () => {
     });
   };
 
+  const backToList = () => {
+    window.location.href = `/manager/poc/credential-issuers`;
+  };
+
   const refetch = (id : string) => {
     window.location.href = `/manager/poc/credential-issuers/${id}`;
   };
@@ -174,6 +178,14 @@ const IssuerPage = () => {
     setIssuer( { ...issuer, ... { environmentDetails: issuer.environmentDetails }})
   }
 
+  const deleteIssuer = () => {
+    graphql(DELETE_ISSUER, { id: issuer.id })
+      .then(backToList)
+      .catch((err) => {
+        errorToast('Failed to delete issuer')
+      })
+  }
+
   const fulfill = (object) => {
     const vars = { id: issuer.id, data : {...object, ...{ 
         availableScopes: JSON.stringify(issuer.availableScopes),
@@ -193,6 +205,12 @@ const IssuerPage = () => {
   if (state === 'loading') {
       return <></>
   }
+
+  const actions = [
+    ( <Button colorScheme="red" onClick={deleteIssuer}>Delete Profile</Button>
+    )
+  ]
+
   return (
     <>
       <Head>
@@ -200,7 +218,7 @@ const IssuerPage = () => {
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={false}
+          actions={actions}
           breadcrumb={breadcrumb}
           title={<Box as="span">{issuer?.name}</Box>}
         />
@@ -521,6 +539,25 @@ const IssuerPage = () => {
                                 </Box>
                             </Alert>                                
 
+                            <FormControl
+                                mb={4}
+                                isDisabled={false}
+                            >
+                                <FormLabel>Resource Access Scope</FormLabel>
+                                <Input
+                                    placeholder="Resource Access Scope"
+                                    name="resourceAccessScope"
+                                    variant="bc-input"
+                                    value={issuer.resourceAccessScope}
+                                    onChange={(e : any) => setIssuer({...issuer, ...{resourceAccessScope:e.target.value}})}
+                                />
+                            </FormControl>   
+                            <Alert status="info">
+                                <AlertIcon />
+                                <Box>
+                                    The Resource Access Scope identifies a Resource Scope that, when granted to a user, allows them to administer permissions for the particular resource.  This can be used when the Resource Server is the owner of the resource.
+                                </Box>
+                            </Alert>     
                     </Box>
                 </Box>
             </Box>     

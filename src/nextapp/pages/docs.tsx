@@ -5,8 +5,10 @@ import {
   Center,
   Container,
   Heading,
+  HStack,
   Icon,
   Link,
+  Tag,
   Text,
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
@@ -24,6 +26,7 @@ interface PageData {
   description: string;
   slug: string;
   title: string;
+  tags: string;
 }
 
 interface DocsPageProps {
@@ -74,11 +77,16 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
             {pages.map((d) => (
               <Card key={d.id}>
                 <Heading as="h3" size="md" mb={2}>
-                  <NextLink passHref href={`/devportal/docs/${d.slug}`}>
+                  <NextLink passHref href={`/docs/${d.slug}`}>
                     <Link _hover={{ textDecor: 'underline' }}>{d.title}</Link>
                   </NextLink>
                 </Heading>
                 <Text>{d.description}</Text>
+                <HStack spacing={1} mt={4}>
+                    {JSON.parse(d.tags).map((tag:string) => (
+                        <Tag size="md" key={tag} variant="solid" colorScheme="teal">{tag}</Tag>
+                    ))}
+                </HStack>
               </Card>
             ))}
           </GridLayout>
@@ -97,6 +105,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
           title
           slug
           description
+          tags
         }
       }
     `;

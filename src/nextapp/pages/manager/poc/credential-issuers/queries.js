@@ -32,6 +32,7 @@ export const GET_ISSUER = `
             availableScopes
             resourceScopes
             resourceType
+            resourceAccessScope
             environmentDetails
             owner {
                 id
