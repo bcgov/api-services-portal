@@ -135,6 +135,7 @@ const server = mockServer(schemaWithMocks, {
   Query: () => ({
     // allProducts: () => allProducts,
     allProducts: () => new MockList(8, (_, { id }) => ({ id })),
+    allDiscoverableProducts: () => new MockList(10, (_, { id }) => ({ id })),
     allEnvironments: () => {
       const result = [];
       allProducts.forEach((p) => {
@@ -242,7 +243,18 @@ const server = mockServer(schemaWithMocks, {
     },
   }),
   Product: () => ({
-    name: casual.title,
+    name: casual.random_element([
+      'BC Address Geocoder Web Service',
+      'API Gateway Services',
+      'Address List Editor',
+      'Document Generation',
+      'BC Route Planner',
+      'Service BC Office Locations',
+      'Welcome BC Settlement Service Providers - Interactive Web Map Data',
+      'Laboratory Services in BC',
+      'Immunization Services in BC',
+      'BC Health Care Facilities (Hospital)',
+    ]),
     description: casual.words(10),
     kongRouteId: casual.uuid,
     kongServiceId: casual.uuid,
@@ -252,6 +264,7 @@ const server = mockServer(schemaWithMocks, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
+    environments: () => new MockList(1, (_, { id }) => ({ id })),
   }),
   Organization: () => ({
     name: casual.random_element([
@@ -405,7 +418,17 @@ const server = mockServer(schemaWithMocks, {
     };
   },
   Dataset: () => ({
-    name: casual.random_element([
+    title: casual.random_element([
+      'BC Address Geocoder Web Service',
+      'API Gateway Services',
+      'Address List Editor',
+      'Document Generation',
+      'BC Route Planner',
+      'Service BC Office Locations',
+      'Welcome BC Settlement Service Providers - Interactive Web Map Data',
+      'Laboratory Services in BC',
+      'Immunization Services in BC',
+      'BC Health Care Facilities (Hospital)',
       'BC Gov News API Service',
       'WorkBC Job Postings - API Web Service',
       'BC Roads Map Service - Web Mercator',
@@ -435,7 +458,6 @@ const server = mockServer(schemaWithMocks, {
       'HIGH-INTERNAL',
     ]),
     notes: casual.description,
-    title: casual.word,
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
     record_publish_date: casual.date('YYYY-MM-DD'),

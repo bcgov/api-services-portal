@@ -53,7 +53,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           alignItems={{ base: 'flex-start', sm: 'center' }}
           justifyContent="space-between"
         >
-          <Heading as="h1" size="lg">
+          <Heading as="h1" size="lg" mr={8}>
             {title}
           </Heading>
           {actions}

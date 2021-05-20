@@ -9,7 +9,6 @@ import {
   ModalHeader,
   ButtonGroup,
   Icon,
-  useToast,
   Box,
   Text,
   Flex,
@@ -20,10 +19,8 @@ import {
 } from '@chakra-ui/react';
 import type { NamespaceData } from '@/shared/types/app.types';
 import { FaTrash } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
-import { restApi } from '@/shared/services/api';
-import { useAuth } from '@/shared/services/auth';
-import { useRouter } from 'next/router';
+
+import DeleteNamespace from './delete-namespace';
 
 interface NamespaceManagerProps {
   data: NamespaceData[];
@@ -36,41 +33,6 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { user } = useAuth();
-  const client = useQueryClient();
-  const router = useRouter();
-  const toast = useToast();
-  const mutation = useMutation((name: string) =>
-    restApi(`/gw/api/namespaces/${name}`, {
-      method: 'DELETE',
-      body: JSON.stringify({ name: name }),
-    })
-  );
-
-  const handleDelete = React.useCallback(
-    (name: string) => async () => {
-      try {
-        await mutation.mutateAsync(name);
-
-        if (user.namespace === name && router) {
-          router.push('/manager');
-        }
-
-        toast({
-          title: ' Namespace Deleted',
-          status: 'success',
-        });
-        client.invalidateQueries();
-      } catch (err) {
-        toast({
-          title: 'Delete Namespace Failed',
-          status: 'error',
-        });
-      }
-    },
-    [client, mutation, router, toast, user.namespace]
-  );
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="xl">
       <ModalOverlay />
@@ -104,16 +66,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
               sx={{ _hover: { bgColor: 'blue.50' } }}
             >
               <Text>{n.name}</Text>
-              <IconButton
-                aria-label="Delete namespace button"
-                isDisabled={mutation.isLoading}
-                size="xs"
-                colorScheme="red"
-                variant="outline"
-                onClick={handleDelete(n.name)}
-              >
-                <Icon as={FaTrash} />
-              </IconButton>
+              <DeleteNamespace name={n.name} />
             </Flex>
           ))}
         </ModalBody>

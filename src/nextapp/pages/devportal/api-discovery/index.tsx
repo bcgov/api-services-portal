@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Container, Text } from '@chakra-ui/react';
+import { Box, Container, Flex, Input, Select, Text } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
@@ -44,6 +44,22 @@ const ApiDiscoveryPage: React.FC = () => {
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>
         <Box my={5}>
+          {false && (
+            <Flex p={4} mb={4} bgColor="white" justify="space-between">
+              <Flex align="center">
+                <Text as="strong" mr={4}>
+                  Filter
+                </Text>
+                <Select defaultValue="name" variant="bc-input">
+                  <option value="name">Name</option>
+                  <option value="name">Published Date</option>
+                </Select>
+              </Flex>
+              <Box>
+                <Input placeholder="Search APIs" variant="bc-input" />
+              </Box>
+            </Flex>
+          )}
           <DiscoveryList data={data.allDiscoverableProducts} />
         </Box>
       </Container>
