@@ -47,7 +47,7 @@ const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
   const onChange = (value: string) => {
     setControl(value);
   };
-  const handleScopeIdChange = (event: React.ChangeEvent<HTMLSelectInput>) => {
+  const handleScopeIdChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setScopeId(event.target.value);
   };
 
