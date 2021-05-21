@@ -51,6 +51,7 @@ API Owner Role Rules,,,ServiceAccess,read,,,,,api-owner,,allow,
 API Owner Role Rules,,,TemporaryIdentity,read,,,,,api-owner,,allow,filterByTemporaryIdentity
 API Owner Role Rules,,,User,read,,,,,api-owner,,allow,
 API Owner Role Rules,,getGatewayConsumerPlugins,,,,,,,api-owner,,allow,
+,,deleteGatewayConsumerPlugin,,,,,,,api-owner,,allow,
 API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,allow,
 API Owner Role Rules,,getPermissionTickets,,,,,,,api-owner,,allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,allow,
@@ -129,3 +130,5 @@ Guest,,allDiscoverableProducts,,,,,,,guest,,allow,filterByActiveEnvironment
 ,,allContents,,,,,,,guest,,allow,
 ,,DiscoverableProduct,,,,,,,guest,,allow,
 ,,services,,,,,,,guest,,allow,
+,,mySelf,,,,,,,api-owner,,allow,filterBySelf
+,,acceptLegal,,,,,,,,,allow,

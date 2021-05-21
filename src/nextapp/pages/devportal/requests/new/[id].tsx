@@ -223,7 +223,7 @@ const NewRequestsPage: React.FC<
                 borderRadius={4}
               >
                 <Checkbox colorScheme="blue" name="acceptLegal">
-                  {dataset.environments[0].legal.title} "{dataset.environments[0].legal.reference}" {JSON.stringify(data.mySelf)}
+                  {dataset.environments[0].legal.title}
                 </Checkbox>
                 <Link
                   fontWeight="bold"

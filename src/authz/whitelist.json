@@ -691,5 +691,70 @@
           "referer": "http://localhost:4180/devportal/api-discovery",
           "query": "\n  query GetProduct($id: ID!) {\n    DiscoverableProduct(where: { id: $id }) {\n      id\n      name\n      environments {\n        name\n        active\n        flow\n        services {\n          name\n          host\n        }\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n        security_class\n        view_audience\n        tags\n        record_publish_date\n        isInCatalog\n        organization {\n          title\n        }\n        organizationUnit {\n          title\n        }\n      }\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n    }\n  }\n",
           "added": "2021-05-20T21:47:35.095Z"
+     },
+     "adb2e7dc535971400d2d58af811d5dfd": {
+          "referer": "http://localhost:4180/manager/consumers/60a7ed913baeb40b62d56733",
+          "query": "\n  query GetControlContent {\n    allGatewayServicesByNamespace {\n      id\n      name\n      extForeignKey\n      routes {\n        id\n        name\n        extForeignKey\n      }\n    }\n  }\n",
+          "added": "2021-05-21T17:30:03.815Z"
+     },
+     "edb49bcaac8f725e0554231647ebf957": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  mutation Remove($id: ID!) {\n    deleteGatewayPlugin(id: $id) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-21T18:05:52.340Z"
+     },
+     "aa7c2da58bd0ede8b7a28394e915807e": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n  }\n",
+          "added": "2021-05-21T18:52:27.512Z"
+     },
+     "1d7bbc7ec7ca397f04aec5df7b2b7baf": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  mutation Remove($id: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayPlugin(id: $id, pluginExtForeignKey: $pluginExtForeignKey) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-21T19:11:16.789Z"
+     },
+     "e81c3197b5c034942fb5c5040e391f0a": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayPlugin(id: $consumerId, pluginExtForeignKey: $pluginExtForeignKey) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-21T19:23:12.403Z"
+     },
+     "bb43db046c09930b4a22ab80783414ed": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayConsumerPlugin(id: $consumerId, pluginExtForeignKey: $pluginExtForeignKey) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-21T19:24:16.077Z"
+     },
+     "092612ccbda0b6073f9a8fc034422bae": {
+          "referer": "http://localhost:4180/manager/consumers/609ecc3e2bda87f3887c0bf7",
+          "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayConsumerPlugin(id: $consumerId, pluginExtForeignKey: $pluginExtForeignKey) {\n      id\n    }\n  }\n",
+          "added": "2021-05-21T19:25:44.509Z"
+     },
+     "d49ef0f6c48f1f16ef7148a80006fe09": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-21T19:34:39.417Z"
+     },
+     "5bb7068dc4ab1363e84c00c7def708d3": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      username\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-21T19:35:03.453Z"
+     },
+     "3d967d82d463aef9a2d16cd0b7165783": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n          reference\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-21T19:37:11.325Z"
+     },
+     "b78a3d9f7bf63a4a46793bf8ed49f744": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: String\n  ) {\n    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal)\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-21T19:40:47.223Z"
+     },
+     "2573bd7ed0081c1c2eb3a59117d6bae3": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c1ecb4337bc74fb7205ca",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal)\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-21T20:06:28.928Z"
+     },
+     "7a755b3e907a757ff0a18cea6c7ae5ba": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c1ecb4337bc74fb7205ca",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal) {\n        legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-21T20:07:17.173Z"
      }
 }
