@@ -127,13 +127,13 @@ const ApiPage: React.FC<
             <Text>
               Published by{' '}
               <Text as="strong">
-                {data.DiscoverableProduct.dataset.organization.title}
+                {data.DiscoverableProduct.dataset?.organization?.title}
               </Text>
             </Text>
             <Text>
               Licensed under{' '}
               <Text as="strong">
-                {data.DiscoverableProduct.dataset.license_title}
+                {data.DiscoverableProduct.dataset?.license_title}
               </Text>
             </Text>
           </Box>
@@ -146,7 +146,7 @@ const ApiPage: React.FC<
               </Box>
               <Divider />
               <Box p={4}>
-                <Text>{data.DiscoverableProduct.dataset.notes}</Text>
+                <Text>{data.DiscoverableProduct.dataset?.notes}</Text>
               </Box>
               <Divider />
               <Flex bgColor="gray.50" p={4} align="center">

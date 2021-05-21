@@ -222,11 +222,11 @@ const NewRequestsPage: React.FC<
                 borderRadius={4}
               >
                 <Checkbox colorScheme="blue">
-                  {dataset.environments[0]?.legal.title}
+                  {dataset.environments[0].legal.title}
                 </Checkbox>
                 <Link
                   fontWeight="bold"
-                  href={dataset.environments[0]?.legal.link}
+                  href={dataset.environments[0].legal.link}
                   colorScheme="blue"
                   target="_blank"
                   rel="noreferrer"
