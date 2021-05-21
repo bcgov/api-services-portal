@@ -17,14 +17,13 @@ interface ControlTypeSelectProps {
   serviceId?: string;
 }
 
-
-
 const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
   routeId,
   serviceId,
 }) => {
   const defaultScope = routeId ? 'route' : 'service';
   const defaultScopeId = routeId ?? serviceId;
+  const [scopeId, setScopeId] = React.useState<string>(defaultScopeId);
   const [control, setControl] = React.useState<string>(defaultScope);
   const { data, isLoading } = useApi(
     ['consumerControlsOptions'],
@@ -47,6 +46,9 @@ const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
   }, [data, control, isLoading]);
   const onChange = (value: string) => {
     setControl(value);
+  };
+  const handleScopeIdChange = (event: React.ChangeEvent<HTMLSelectInput>) => {
+    setScopeId(event.target.value);
   };
 
   return (
@@ -71,7 +73,8 @@ const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
           isDisabled={isLoading}
           name={control}
           variant="bc-input"
-          defaultValue={defaultScopeId}
+          value={scopeId}
+          onChange={handleScopeIdChange}
         >
           {options.map((o) => (
             <option key={o.extForeignKey} value={o.extForeignKey}>
@@ -100,3 +103,4 @@ const query = gql`
     }
   }
 `;
+

@@ -332,6 +332,8 @@ const server = mockServer(schemaWithMocks, {
     namespace: casual.namespace,
     paths: casual.word,
     host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
+    extSource: casual.word,
+    extForeignKey: casual.uuid,
     isActive: casual.boolean,
     tags: '["ns.jh-etk-prod"]',
     updatedAt: casual.date('YYYY-MM-DD'),

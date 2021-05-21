@@ -20,7 +20,7 @@ import {
 import type { NamespaceData } from '@/shared/types/app.types';
 import { FaTrash } from 'react-icons/fa';
 
-import DeleteNamespace from './delete-namespace';
+import NamespaceDelete from '../namespace-delete';
 
 interface NamespaceManagerProps {
   data: NamespaceData[];
@@ -33,52 +33,83 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [namespaceToDelete, setNamespaceToDelete] = React.useState<
+    string | null
+  >(null);
+  const handleDeleteNamespace = React.useCallback(
+    (name: string) => () => {
+      setNamespaceToDelete(name);
+    },
+    [setNamespaceToDelete]
+  );
+  const handleCancel = React.useCallback(() => {
+    setNamespaceToDelete(null);
+  }, [setNamespaceToDelete]);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="xl">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Manage Namespaces</ModalHeader>
-        <ModalBody px={0}>
-          <Box px={6} pb={4}>
-            <Text>
-              All namespaces listed below may be removed, but this is permament.
-              Proceed with caution.
-            </Text>
-          </Box>
-          <Divider />
-          {data.length <= 0 && (
-            <Center>
-              <Box my={8}>
-                <Heading mb={2} size="sm">
-                  You have no namespaces
-                </Heading>
-                <Text fontSize="sm">Create a namespace to manage.</Text>
-              </Box>
-            </Center>
-          )}
-          {data.map((n) => (
-            <Flex
-              key={n.id}
-              align="center"
-              justify="space-between"
-              py={2}
-              px={6}
-              sx={{ _hover: { bgColor: 'blue.50' } }}
-            >
-              <Text>{n.name}</Text>
-              <DeleteNamespace name={n.name} />
-            </Flex>
-          ))}
-        </ModalBody>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button onClick={onClose} variant="primary">
-              Done
-            </Button>
-          </ButtonGroup>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <>
+      {namespaceToDelete && (
+        <NamespaceDelete name={namespaceToDelete} onCancel={handleCancel} />
+      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        scrollBehavior="inside"
+        size="xl"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Manage Namespaces</ModalHeader>
+          <ModalBody px={0}>
+            <Box px={6} pb={4}>
+              <Text>
+                All namespaces listed below may be removed, but this is
+                permament. Proceed with caution.
+              </Text>
+            </Box>
+            <Divider />
+            {data.length <= 0 && (
+              <Center>
+                <Box my={8}>
+                  <Heading mb={2} size="sm">
+                    You have no namespaces
+                  </Heading>
+                  <Text fontSize="sm">Create a namespace to manage.</Text>
+                </Box>
+              </Center>
+            )}
+            {data.map((n) => (
+              <Flex
+                key={n.id}
+                align="center"
+                justify="space-between"
+                py={2}
+                px={6}
+                sx={{ _hover: { bgColor: 'blue.50' } }}
+              >
+                <Text>{n.name}</Text>
+                <IconButton
+                  aria-label="Delete namespace button"
+                  size="xs"
+                  colorScheme="red"
+                  variant="outline"
+                  onClick={handleDeleteNamespace(n.name)}
+                >
+                  <Icon as={FaTrash} />
+                </IconButton>
+              </Flex>
+            ))}
+          </ModalBody>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button onClick={onClose} variant="primary">
+                Done
+              </Button>
+            </ButtonGroup>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

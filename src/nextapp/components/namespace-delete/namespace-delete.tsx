@@ -1,4 +1,4 @@
-import { useApiMutation } from '@/shared/services/api';
+import * as React from 'react';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -8,24 +8,23 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
-  Icon,
-  IconButton,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { gql } from 'graphql-request';
-import * as React from 'react';
-import { FaTrash } from 'react-icons/fa';
 import { useMutation, useQueryClient } from 'react-query';
 import { restApi } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
-interface DeleteApplicationProps {
+interface NamespaceDeleteProps {
   name: string;
+  onCancel: () => void;
 }
 
-const DeleteNamespace: React.FC<DeleteApplicationProps> = ({ name }) => {
+const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
+  name,
+  onCancel,
+}) => {
   const cancelRef = React.useRef();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { user } = useAuth();
@@ -59,24 +58,17 @@ const DeleteNamespace: React.FC<DeleteApplicationProps> = ({ name }) => {
       });
     }
   }, [client, mutation, name, router, toast, user.namespace]);
+  const handleCancel = React.useCallback(() => onCancel(), [onCancel]);
+
+  React.useEffect(() => onOpen(), [onOpen]);
 
   return (
     <>
-      <IconButton
-        aria-label="Delete namespace button"
-        isDisabled={mutation.isLoading}
-        size="xs"
-        colorScheme="red"
-        variant="outline"
-        onClick={onOpen}
-      >
-        <Icon as={FaTrash} />
-      </IconButton>
       <AlertDialog
         isCentered
         motionPreset="slideInBottom"
         leastDestructiveRef={cancelRef}
-        onClose={onClose}
+        onClose={handleCancel}
         isOpen={isOpen}
       >
         <AlertDialogOverlay />
@@ -87,7 +79,7 @@ const DeleteNamespace: React.FC<DeleteApplicationProps> = ({ name }) => {
             {`Are you sure you want to delete the ${name} namespace? It cannot be undone.`}
           </AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button ref={cancelRef} onClick={handleCancel}>
               Cancel
             </Button>
             <Button colorScheme="red" ml={3} onClick={handleDelete}>
@@ -100,4 +92,4 @@ const DeleteNamespace: React.FC<DeleteApplicationProps> = ({ name }) => {
   );
 };
 
-export default DeleteNamespace;
+export default NamespaceDelete;
