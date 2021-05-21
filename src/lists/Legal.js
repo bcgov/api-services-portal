@@ -59,5 +59,4 @@ module.exports = {
     byTracking(),
     atTracking()
   ]
-
 };

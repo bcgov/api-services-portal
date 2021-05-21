@@ -94,7 +94,8 @@ const NewRequestsPage: React.FC<
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
-        additionalDetails: formData.get("additionalDetails")
+        additionalDetails: formData.get("additionalDetails"),
+        acceptLegal: formData.has("acceptLegal") ? true:false
       };
       const result = await graphql(mutation, payload);
       client.invalidateQueries('allAccessRequests');
@@ -221,8 +222,8 @@ const NewRequestsPage: React.FC<
                 bgColor="blue.50"
                 borderRadius={4}
               >
-                <Checkbox colorScheme="blue">
-                  {dataset.environments[0].legal.title}
+                <Checkbox colorScheme="blue" name="acceptLegal">
+                  {dataset.environments[0].legal.title} "{dataset.environments[0].legal.reference}" {JSON.stringify(data.mySelf)}
                 </Checkbox>
                 <Link
                   fontWeight="bold"
@@ -269,12 +270,16 @@ const query = gql`
           title
           description
           link
+          reference
         }
       }
     }
     myApplications {
       id
       name
+    }
+    mySelf {
+      legalsAgreed
     }
     allTemporaryIdentities {
       id
@@ -294,7 +299,12 @@ const mutation = gql`
     $applicationId: ID!
     $productEnvironmentId: ID!
     $additionalDetails: String
+    $acceptLegal: Boolean!
   ) {
+    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal) {
+        legalsAgreed
+    }
+
     createAccessRequest(
       data: {
         name: $name

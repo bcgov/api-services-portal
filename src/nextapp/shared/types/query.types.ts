@@ -7024,6 +7024,7 @@ export type Mutation = {
   createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
+  acceptLegal?: Maybe<User>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
@@ -7735,6 +7736,12 @@ export type MutationUpdateGatewayConsumerPluginArgs = {
 export type MutationDeleteGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
   pluginExtForeignKey: Scalars['String'];
+};
+
+
+export type MutationAcceptLegalArgs = {
+  productEnvironmentId: Scalars['ID'];
+  acceptLegal: Scalars['Boolean'];
 };
 
 

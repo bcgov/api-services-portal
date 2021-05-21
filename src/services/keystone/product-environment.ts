@@ -92,6 +92,10 @@ export async function lookupEnvironmentAndIssuerById (context: any, id: string) 
         query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
                     Environment(where: {id: $id}) {
                         name
+                        approval
+                        legal {
+                            reference
+                        }
                         credentialIssuer {
                             name
                             flow

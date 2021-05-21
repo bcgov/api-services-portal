@@ -47,3 +47,7 @@ export {
     lookupServiceAccessesByNamespace,
     markActiveTheServiceAccess
 } from './service-access'
+
+export {
+    updateUserLegalAccept
+} from './user'

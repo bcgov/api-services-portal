@@ -1,5 +1,9 @@
 const { Text, Checkbox, Relationship, Select, Password } = require('@keystonejs/fields')
 
+const { EnforcementPoint } = require('../authz/enforcement')
+
+const { lookupEnvironmentAndIssuerById, updateUserLegalAccept } = require('../services/keystone')
+
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => {
     console.log("IsAdmin?" + user.isAdmin)
@@ -57,4 +61,23 @@ module.exports = {
     delete: access.userIsAdmin,
     auth: true,
   },
+  extensions: [
+    (keystone) => {
+      keystone.extendGraphQLSchema({
+          mutations: [
+            {
+              schema: 'acceptLegal(productEnvironmentId: ID!, acceptLegal: Boolean!): User',
+              resolver: async (item, args, context, info, { query, access }) => {
+                  const noauthContext =  keystone.createContext({ skipAccessControl: true })
+
+                  const env = await lookupEnvironmentAndIssuerById (noauthContext, args.productEnvironmentId)
+                  
+                  return await updateUserLegalAccept (noauthContext, context.authedItem.userId, env.legal.reference)
+              },
+              access: EnforcementPoint,
+            }           
+          ]
+        })
+    }
+  ]
 }
