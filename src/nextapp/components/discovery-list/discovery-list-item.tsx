@@ -43,9 +43,17 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
         <Box as="hgroup" display="flex" overflow="hidden" mr={2}>
           <Heading size="sm" lineHeight="1.5">
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
-            <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
-              <Link>{data.dataset.title}</Link>
-            </NextLink>
+            {data.dataset ? (
+              <>
+                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+                  <Link>{data.dataset.title}</Link>
+                </NextLink>
+              </>
+            ) : (
+                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+                  <Link>{data.name}</Link>
+                </NextLink>
+            )}
           </Heading>
         </Box>
       </Box>
