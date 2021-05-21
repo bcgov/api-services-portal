@@ -15,6 +15,7 @@ module.exports = {
                 { gqlName: 'DiscoverableProduct', list: 'Product', type: SchemaType.ItemQuery},
                 { gqlName: 'myServiceAccesses', list: 'ServiceAccess', type: SchemaType.ListQuery},
                 { gqlName: 'myApplications', list: 'Application', type: SchemaType.ListQuery},
+                { gqlName: 'mySelf', list: 'User', type: SchemaType.ItemQuery},
                 { gqlName: 'CredentialIssuerSummary', list: 'CredentialIssuer', type: SchemaType.ItemQuery},
                 { gqlName: 'allDiscoverableContents', list: 'Content', type: SchemaType.ListQuery}
             ]

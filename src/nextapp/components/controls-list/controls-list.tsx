@@ -101,7 +101,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                           mode="edit"
                         />
                       )}
-                      <DeleteControl consumerId={consumerId} id={d.id} />
+                      <DeleteControl consumerId={consumerId} pluginExtForeignKey={d.extForeignKey} />
                     </ButtonGroup>
                   </GridItem>
                 </Grid>
@@ -141,7 +141,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                           data={d}
                         />
                       )}
-                      <DeleteControl consumerId={consumerId} id={d.id} />
+                      <DeleteControl consumerId={consumerId} pluginExtForeignKey={d.extForeignKey} />
                     </ButtonGroup>
                   </GridItem>
                 </Grid>

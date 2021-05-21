@@ -131,6 +131,7 @@ const query = gql`
       plugins {
         id
         name
+        extForeignKey
         config
         service {
           id

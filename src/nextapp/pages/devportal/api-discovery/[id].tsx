@@ -108,7 +108,7 @@ const ApiPage: React.FC<
             <Link
               isExternal
               href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                data?.DiscoverableProduct?.dataset.title
+                data?.DiscoverableProduct?.dataset?.title
               )}`}
               target="_blank"
               rel="noreferrer"
@@ -164,7 +164,7 @@ const ApiPage: React.FC<
             </Box>
           </GridItem>
           <GridItem as="aside" colSpan={3}>
-            {detailItems.map((d) => (
+            {data.DiscoverableProduct.dataset && detailItems.map((d) => (
               <Box key={d.title} mb={4}>
                 <Heading size="xs">{d.title}</Heading>
                 <Text fontSize="sm" color="gray.600">

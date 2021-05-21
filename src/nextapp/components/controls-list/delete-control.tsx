@@ -20,20 +20,20 @@ import { useMutation, useQueryClient } from 'react-query';
 
 interface DeleteControlProps {
   consumerId: string;
-  id: string;
+  pluginExtForeignKey: string;
 }
 
-const DeleteControl: React.FC<DeleteControlProps> = ({ consumerId, id }) => {
+const DeleteControl: React.FC<DeleteControlProps> = ({ consumerId, pluginExtForeignKey }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const deleteMutation = useMutation((id: string) => api(mutation, { id }));
+  const deleteMutation = useMutation((keys: { consumerId: string, pluginExtForeignKey: string}) => api(mutation, keys));
   const cancelRef = React.useRef();
 
   const handleDelete = async () => {
     try {
-      await deleteMutation.mutateAsync(id);
-      queryClient.invalidateQueries(['consumer', id]);
+      await deleteMutation.mutateAsync({consumerId, pluginExtForeignKey});
+      queryClient.invalidateQueries(['consumer', consumerId]);
       toast({
         title: 'Control removed',
         status: 'success',
@@ -88,10 +88,9 @@ const DeleteControl: React.FC<DeleteControlProps> = ({ consumerId, id }) => {
 export default DeleteControl;
 
 const mutation = gql`
-  mutation Remove($id: ID!) {
-    deleteGatewayPlugin(id: $id) {
+  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {
+    deleteGatewayConsumerPlugin(id: $consumerId, pluginExtForeignKey: $pluginExtForeignKey) {
       id
-      name
     }
   }
 `;

@@ -32,6 +32,7 @@ type ControlsPayload = {
     day: number;
     policy: string;
   };
+  tags: string[]
 };
 
 interface RateLimitingProps {
@@ -77,6 +78,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
           day: numOrNull(formData.get('day')) as number,
           policy: formData.get('policy') as string,
         },
+        tags: []
       };
 
       if (formData.has('route')) {

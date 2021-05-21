@@ -89,9 +89,11 @@ export default ControlTypeSelect;
 const query = gql`
   query GetControlContent {
     allGatewayServicesByNamespace {
+      id
       name
       extForeignKey
       routes {
+        id
         name
         extForeignKey
       }

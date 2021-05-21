@@ -26,6 +26,7 @@ type ControlsPayload = {
   config: {
     allow: string[];
   };
+  tags: string[]
 };
 
 interface IpRestrictionProps {
@@ -59,6 +60,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
         config: {
           allow: [formData.get('allow') as string],
         },
+        tags: ['consumer']
       };
 
       if (formData.has('route')) {
@@ -94,11 +96,11 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
 
   return (
     <ControlsDialog
-      buttonText="IP Restritions"
+      buttonText="IP Restrictions"
       icon={FaDoorClosed}
       mode={mode}
       onSubmit={onSubmit}
-      title="IP Restrition"
+      title="IP Restriction"
     >
       <ControlTypeSelect
         serviceId={data?.service?.id}

@@ -6056,6 +6056,7 @@ export type Query = {
   DiscoverableProduct?: Maybe<Product>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
+  mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   getUmaPoliciesByResourceName?: Maybe<Array<Maybe<UmaPolicy>>>;
@@ -6703,6 +6704,11 @@ export type QueryMyApplicationsArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ApplicationWhereInput>;
+};
+
+
+export type QueryMySelfArgs = {
+  where?: Maybe<UserWhereInput>;
 };
 
 
