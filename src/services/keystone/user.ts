@@ -4,12 +4,12 @@ import { User } from "./types"
 const assert = require('assert').strict;
 const logger = Logger('keystone.user')
 
-export interface LegalsAgreed {
+export interface LegalAgreed {
     reference: string,
     agreedTimestamp: string
 }
 
-async function lookupUserLegals (context: any, id: string) : Promise<User> {
+export async function lookupUserLegals (context: any, id: string) : Promise<LegalAgreed[]> {
     const result = await context.executeGraphQL({
         query: `query GetUser($id: ID!) {
                     User(where: {id: $id}) {
@@ -21,15 +21,14 @@ async function lookupUserLegals (context: any, id: string) : Promise<User> {
     logger.debug("Query [lookupUserLegals] result %j", result)
     assert.strictEqual(result.data.User != null, true, "User not found")
     result.data.User.legalsAgreed == null && (result.data.User.legalsAgreed = '[]')
-    return result.data.User
+    return JSON.parse(result.data.User.legalsAgreed)
 }
 
-export async function updateUserLegalAccept (context: any, userId: string, legalReference: string) : Promise<User> {
+export async function updateUserLegalAccept (context: any, userId: string, legalReference: string) : Promise<LegalAgreed[]> {
 
-    const user = await lookupUserLegals (context, userId)
-    const legalsAgreed : LegalsAgreed[] = JSON.parse(user.legalsAgreed)
+    const legalsAgreed : LegalAgreed[] = await lookupUserLegals (context, userId)
 
-    if (legalsAgreed.filter((ag:LegalsAgreed) => ag.reference === legalReference).length == 0) {
+    if (legalsAgreed.filter(ag => ag.reference === legalReference).length == 0) {
         legalsAgreed.push({
             reference: legalReference,
             agreedTimestamp: new Date().toISOString()
@@ -44,10 +43,10 @@ export async function updateUserLegalAccept (context: any, userId: string, legal
         })
         logger.debug("[updateUserLegalAccept] RESULT %j", result)
         assert.strictEqual(result.data.updateUser != null, true, "Failed to update legal terms for user")
-        return result.data.updateUser
+        return JSON.parse(result.data.updateUser.legalsAgreed)
     } else {
         logger.warn("[updateUserLegalAccept] User '%s' already agreed to '%s' terms", userId, legalReference)
-        return user
+        return legalsAgreed
     }
 }
 

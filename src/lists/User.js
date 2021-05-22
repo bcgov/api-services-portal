@@ -72,7 +72,12 @@ module.exports = {
 
                   const env = await lookupEnvironmentAndIssuerById (noauthContext, args.productEnvironmentId)
                   
-                  return await updateUserLegalAccept (noauthContext, context.authedItem.userId, env.legal.reference)
+                  if (args.acceptLegal) {
+                    const legalsAgreed = await updateUserLegalAccept (noauthContext, context.authedItem.userId, env.legal.reference)
+                    return { id: context.authedItem.userId, legalsAgreed: JSON.stringify(legalsAgreed) }
+                  } else {
+                    return null
+                  }
               },
               access: EnforcementPoint,
             }           

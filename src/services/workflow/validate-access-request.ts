@@ -1,10 +1,13 @@
 import { strict as assert } from 'assert'
 import {
     lookupEnvironmentAndApplicationByAccessRequest,
+    lookupEnvironmentAndIssuerById,
     lookupCredentialIssuerById,
+    lookupUserLegals,
+    LegalAgreed
 } from '../keystone'
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
-import { isUpdatingToIssued, isBlank } from './common'
+import { isUpdatingToIssued, isRequested, isBlank } from './common'
 import { getOpenidFromIssuer } from '../keycloak'
 import { Logger } from '../../logger'
 
@@ -20,17 +23,28 @@ const errors = {
     WF07: "WF07 This service uses client credential flow, so an Application is required.",
     WF08: "WF08 Client Registration setting is missing from the Issuer",
     WF09: "WF09 Managed Client Registration requires a Client ID and Secret",
-    WF10: "WF10 Initial Access Token is required when doing client registration via an IAT"
+    WF10: "WF10 Initial Access Token is required when doing client registration via an IAT",
+    WF11: "WF11 Terms of use for this API has not been accepted."
 }
 
 export const Validate = async (context: any, operation: any, existingItem: any, originalInput: any, resolvedData: any, addValidationError: any) => {
     try {
         const requestDetails = operation == 'create' ? null : await lookupEnvironmentAndApplicationByAccessRequest(context, existingItem.id)
 
-        if (operation == 'create') {
-            // If its create, make sure the App + ProductEnvironment doesn't already exist as a Request
+        if (isRequested(existingItem, resolvedData)) {
+            // If there are legal terms, make sure the user has accepted them
+            const prodEnv = await lookupEnvironmentAndIssuerById(context, resolvedData.productEnvironment.toString())
+            const legalsAgreed : LegalAgreed[] = await lookupUserLegals (context, context.authedItem.userId)
+            const legalReference = prodEnv.legal?.reference
+            logger.debug("Legal validation... %j", legalReference)
+            assert.strictEqual(legalReference == null ||
+                legalsAgreed.filter(lg => lg.reference === legalReference).length != 0,
+            true, errors.WF11)
 
-        }
+            assert.strictEqual('isComplete' in resolvedData, false, 'Can not mark a new request complete')
+            assert.strictEqual('isIssued' in resolvedData, false, 'Can not mark a new request issued')
+            assert.strictEqual('isApproved' in resolvedData, false, 'Can not mark a new request approved')
+        } else 
         if (isUpdatingToIssued(existingItem, resolvedData)) {
             assert.strictEqual(requestDetails != null, true, errors.WF01);
             assert.strictEqual(requestDetails.productEnvironment != null, true, errors.WF02);

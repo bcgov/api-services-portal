@@ -49,5 +49,7 @@ export {
 } from './service-access'
 
 export {
-    updateUserLegalAccept
+    lookupUserLegals,
+    updateUserLegalAccept,
+    LegalAgreed
 } from './user'

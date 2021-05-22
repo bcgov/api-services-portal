@@ -26,7 +26,7 @@ import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
 import { QueryClient, useQueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { Environment, Query } from '@/shared/types/query.types';
 import api, { useApi } from '@/shared/services/api';
 import graphql from '@/shared/services/graphql';
 import { dehydrate } from 'react-query/hydration';
@@ -78,6 +78,11 @@ const NewRequestsPage: React.FC<
   );
   const dataset = data?.allDiscoverableProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
+  const legalsAgreed = data?.mySelf.legalsAgreed == null ? [] : JSON.parse(data?.mySelf.legalsAgreed)
+  const isAgreed = (env : Environment) => {
+      const ref = env?.legal?.reference
+      return legalsAgreed.filter((ag:{reference:string}) => ag.reference === ref).length != 0
+  }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -214,7 +219,7 @@ const NewRequestsPage: React.FC<
               placeholder=""
               variant="bc-input"
             />
-            {dataset.environments[0]?.legal && (
+            {dataset.environments[0]?.legal && isAgreed(dataset.environments[0]) == false &&  (
               <Flex
                 justify="space-between"
                 mt={4}
