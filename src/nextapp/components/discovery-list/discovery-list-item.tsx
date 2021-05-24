@@ -50,42 +50,62 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
                 </NextLink>
               </>
             ) : (
-                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
-                  <Link>{data.name}</Link>
-                </NextLink>
+              <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+                <Link>{data.name}</Link>
+              </NextLink>
             )}
           </Heading>
         </Box>
       </Box>
       <Divider />
-      {data.dataset && (
-        <Box flex={1} p={4}>
-          <Heading size="xs" mb={2}>
-            {data.dataset?.organization?.title}
-            <Icon as={FaChevronRight} boxSize="2" mx={2} />
-            <Text as="span" fontWeight="normal" color="gray.600">
-              {data.dataset?.organizationUnit?.title}
-            </Text>
-          </Heading>
+      <Box flex={1} p={4}>
+        <Heading size="xs" mb={2}>
+          {data.organization && (
+            <>
+              {data.organization.title}
+              {data.organizationUnit && (
+                <>
+                  <Text
+                    as="span"
+                    d="block"
+                    fontWeight="normal"
+                    color="gray.400"
+                    mt={1}
+                    fontSize="xs"
+                  >
+                    {data.organizationUnit.title}
+                  </Text>
+                </>
+              )}
+            </>
+          )}
+          {!data.organization && 'Open Dataset'}
+        </Heading>
+        {data.dataset && (
           <Text fontSize="sm" noOfLines={2}>
-            {data.dataset.notes ?? <Text as="em">No description added</Text>}
+            {data.dataset.notes}
           </Text>
-        </Box>
-      )}
+        )}
+        {!data.dataset && (
+          <Text as="em" fontSize="sm" color="gray.400">
+            No description added
+          </Text>
+        )}
+      </Box>
       <Divider />
       <Flex p={4} bgColor="gray.50" justify="space-between">
-        {data.dataset && (
-          <>
+        <Box>
+          {data.dataset && (
             <Badge color="bc-blue-alt">{data.dataset.sector}</Badge>
-            <Wrap spacing={2}>
-              {data.environments.map((e) => (
-                <WrapItem key={e.id}>
-                  <Badge colorScheme="green">{e.name}</Badge>
-                </WrapItem>
-              ))}
-            </Wrap>
-          </>
-        )}
+          )}
+        </Box>
+        <Wrap spacing={2}>
+          {data.environments.map((e) => (
+            <WrapItem key={e.id}>
+              <Badge colorScheme="green">{e.name}</Badge>
+            </WrapItem>
+          ))}
+        </Wrap>
       </Flex>
     </Flex>
   );

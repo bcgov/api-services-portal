@@ -46,6 +46,17 @@ const requesters = devs.map((d) => ({
   requesterName: d,
   requester: casual.uuid,
 }));
+const randomNullValue = () => {
+  const isFilled = casual.coin_flip;
+
+  if (!isFilled) {
+    return null;
+  }
+
+  return {
+    id: casual.uuid,
+  };
+};
 // Casual Definitions
 casual.define('namespace', () => {
   return sample(namespaces);
@@ -265,6 +276,9 @@ const server = mockServer(schemaWithMocks, {
     isActive: casual.coin_flip,
     tags: casual.words(3),
     environments: () => new MockList(1, (_, { id }) => ({ id })),
+    dataset: randomNullValue,
+    organization: randomNullValue,
+    organizationUnit: randomNullValue,
   }),
   Organization: () => ({
     name: casual.random_element([
@@ -301,9 +315,15 @@ const server = mockServer(schemaWithMocks, {
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   OrganizationUnit: () => ({
-    name: casual.title,
+    name: casual.random_element([
+      'DataBC',
+      'Information Innovation and Technology',
+    ]),
     sector: casual.word,
-    title: casual.title,
+    title: casual.random_element([
+      'DataBC',
+      'Information Innovation and Technology',
+    ]),
     bcdcId: casual.uuid,
     tags: casual.word,
     description: casual.short_description,
