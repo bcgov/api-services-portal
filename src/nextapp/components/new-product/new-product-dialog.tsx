@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from 'react';
 import {
   Button,
@@ -55,7 +54,9 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
         try {
           const productName = data.get('name') as string;
           const environment = data.get('environment') as string;
-          const res = await productMutation.mutateAsync({ name: productName });
+          const res: Mutation = await productMutation.mutateAsync({
+            name: productName,
+          });
           await environmentMutation.mutateAsync({
             product: res.createProduct.id,
             name: environment,
