@@ -23,7 +23,8 @@ export type {
     ResourceSetQuery, 
     ResourceScope, 
     ResourceOwner, 
-    ResourceSet 
+    ResourceSet,
+    ResourceSetInput
 } from './resource-registration-service'
 
 export { 

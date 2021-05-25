@@ -1,16 +1,9 @@
 import {
-    Body,
     Controller,
     Get,
     Path,
-    Post,
-    Query,
-    Route,
-    SuccessResponse,
-} from "tsoa";
-  
-import { Product } from '../nextapp/shared/types/query.types'
-
+    Route
+} from "tsoa"
 import { v4 } from 'uuid'
 
 @Route("identifiers")

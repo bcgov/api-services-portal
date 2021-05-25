@@ -18,7 +18,8 @@ import {
   FaPlusCircle,
 } from 'react-icons/fa';
 import { useQuery, useQueryClient } from 'react-query';
-import { restApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
+import { restApi, useApi } from '@/shared/services/api';
 import type { NamespaceData } from '@/shared/types/app.types';
 
 import NamespaceManager from '../namespace-manager';
@@ -28,15 +29,25 @@ interface NamespaceMenuProps {
   user: UserData;
 }
 
+const query = gql`
+  query GetNamespaces {
+    allNamespaces {
+      id
+      name
+    }
+  }
+`;
+
 const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   const client = useQueryClient();
   const toast = useToast();
   const newNamespaceDisclosure = useDisclosure();
   const managerDisclosure = useDisclosure();
-  const { data, isLoading, isSuccess, isError } = useQuery<NamespaceData[]>(
+  const { data, isLoading, isSuccess, isError } = useApi(
     'allNamespaces',
-    () => restApi<NamespaceData[]>('/gw/api/namespaces') as Promise<NamespaceData[]>
-  );
+    { query },
+    { suspense: false }
+  )
 
   const handleNamespaceChange = React.useCallback(
     (namespace: NamespaceData) => async () => {
@@ -87,11 +98,11 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
             {isError && (
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
-            {isSuccess && data.length > 0 && (
+            {isSuccess && data.allNamespaces.length > 0 && (
               <>
                 <MenuOptionGroup title="Change Namespaces">
                   {data
-                    .filter((n) => n.name !== user.namespace)
+                    .allNamespaces.filter((n) => n.name !== user.namespace)
                     .map((n) => (
                       <MenuItem key={n.id} onClick={handleNamespaceChange(n)}>
                         {n.name}
@@ -128,7 +139,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
       />
       {data && (
         <NamespaceManager
-          data={data}
+          data={data.allNamespaces}
           isOpen={managerDisclosure.isOpen}
           onClose={managerDisclosure.onClose}
         />

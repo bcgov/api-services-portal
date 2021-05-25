@@ -212,6 +212,11 @@ jobs:
             value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
           GWA_RES_SVR_CLIENT_ID:
             value: 'gwa-api'
+          KEYCLOAK_AUTH_URL:
+            value: 'https://${local.endpoints.authz}/auth'
+          KEYCLOAK_REALM:
+            value: 'aps-v2'
+
 
         readinessProbe:
           exec:

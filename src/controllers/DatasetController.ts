@@ -11,9 +11,9 @@ import { inject, injectable } from "tsyringe";
 import { syncRecords } from '../batch/feed-worker'
 
 @injectable()
-@Route("/namespaces/{ns}/products")
+@Route("/namespaces/{ns}/datasets")
 @Security('jwt', [])
-export class ProductController extends Controller {
+export class DatasetController extends Controller {
     private keystone: KeystoneService
     constructor (@inject('KeystoneService') private _keystone: KeystoneService) {
         super()
@@ -25,6 +25,6 @@ export class ProductController extends Controller {
         @Path() ns: string,
         @Request() request: any
     ): Promise<any> {
-        return await syncRecords(this.keystone.context(), 'Product', request.body['id'], request.body)
+        return await syncRecords(this.keystone.context(), 'Dataset', request.body['id'], request.body)
     }
 }

@@ -5797,6 +5797,17 @@ export type ApplicationSummary = {
   name?: Maybe<Scalars['String']>;
 };
 
+export type Namespace = {
+  __typename?: 'Namespace';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+export type NamespaceInput = {
+  name: Scalars['String'];
+};
+
 export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
@@ -6082,6 +6093,7 @@ export type Query = {
   mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
+  allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getResourceSet?: Maybe<UmaResourceSet>;
@@ -7046,6 +7058,8 @@ export type Mutation = {
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
+  createNamespace?: Maybe<Namespace>;
+  deleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
@@ -7763,6 +7777,16 @@ export type MutationDeleteGatewayConsumerPluginArgs = {
 export type MutationAcceptLegalArgs = {
   productEnvironmentId: Scalars['ID'];
   acceptLegal: Scalars['Boolean'];
+};
+
+
+export type MutationCreateNamespaceArgs = {
+  namespace: Scalars['String'];
+};
+
+
+export type MutationDeleteNamespaceArgs = {
+  namespace: Scalars['String'];
 };
 
 

@@ -13,8 +13,6 @@ class ApiOpenapiApp {
 
   prepareMiddleware({ keystone }) {
     const app = express();
-    
-
     app.use(express.json());
 
     let kcConfig = {
@@ -29,9 +27,10 @@ class ApiOpenapiApp {
 
     let keycloak = new Keycloak({ }, kcConfig)
 
-    Register(keystone, keycloak)
+    Register(keystone)
 
-    app.use('/ds/api/namespaces/:ns', (req, res, next) => { console.log("NS="+JSON.stringify(req.user) + " : " +JSON.stringify(req.params)); return keycloak.enforcer(`${req.params.ns}:Content.Publish`)(req, res, next) })
+    app.use('/ds/api/namespaces/:ns/', (req, res, next) => 
+        keycloak.enforcer(`${req.params.ns}:Content.Publish`)(req, res, next))
 
     RegisterRoutes(app)
 

@@ -805,5 +805,50 @@
           "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
           "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n          reference\n        }\n        credentialIssuer {\n          clientAuthenticator\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
           "added": "2021-05-25T06:36:03.808Z"
+     },
+     "f2bc2d191573d41259f028fcd68c0c83": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  query GetNamespaces {\n    getNamespaces {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-25T20:52:54.761Z"
+     },
+     "afc05a67a1753aa00ef23d7da3d25597": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  query GetNamespaces {\n    allNamespaces {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-05-25T21:02:18.647Z"
+     },
+     "2f25ae32b4069ec00ebbaafbb1ce768c": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(name: $name)\n}\n",
+          "added": "2021-05-25T21:11:58.786Z"
+     },
+     "435d3fe82da796695f9beb28131a3ec6": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(namespace: $name)\n}\n",
+          "added": "2021-05-25T21:12:20.924Z"
+     },
+     "9754f2a03fd374a8237ae427fc02a79a": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(data: { name: $name, scopes: [] })\n}\n",
+          "added": "2021-05-25T21:13:02.261Z"
+     },
+     "a28b13ecd2665c4488ee390912847978": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(data: { name: $name, scopes: [] }) {\n      id\n      name\n  }\n}\n",
+          "added": "2021-05-25T21:13:22.602Z"
+     },
+     "170f0c898f22eb5819b4b73dd95503ac": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(namespace: $name) {\n      id\n      name\n  }\n}\n",
+          "added": "2021-05-25T21:39:04.460Z"
+     },
+     "6f1d002266c080b0415371c59b888709": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(name: $name)\n}\n",
+          "added": "2021-05-25T21:39:48.560Z"
+     },
+     "1e983d443f49213db444d1b2a5842865": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(namespace: $name)\n}\n",
+          "added": "2021-05-25T21:40:25.547Z"
      }
 }

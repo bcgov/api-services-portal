@@ -157,6 +157,7 @@ const keystone = new Keystone({
 
   for (const _list of [
       'AliasedQueries',
+      'Namespace',
       'ServiceAccount',
       'UMAPolicy',
       'UMAResourceSet',

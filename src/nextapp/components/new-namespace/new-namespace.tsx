@@ -14,7 +14,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useMutation, useQueryClient } from 'react-query';
-import { restApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
+import { restApi, useApiMutation } from '@/shared/services/api';
 
 interface NewNamespace {
   isOpen: boolean;
@@ -24,14 +25,7 @@ interface NewNamespace {
 const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const mutation = useMutation(
-    async (payload: { name: string }) =>
-      await restApi<{ name: string; id: string }>('/gw/api/namespaces', {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: JSON.stringify(payload),
-      })
-  );
+  const createMutation = useApiMutation(mutation);
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,17 +38,17 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
       if (form.current.checkValidity()) {
         try {
           const name = data.get('name') as string;
-          const json = await mutation.mutateAsync({
+          const json = await createMutation.mutateAsync({
             name,
-          }) as { name: string; id: string };
+          }) as { createNamespace: { name: string; id: string }};
 
           toast({
-            title: `Namespace ${json.name} created!`,
+            title: `Namespace ${json.createNamespace.name} created!`,
             status: 'success',
           });
           queryClient.invalidateQueries();
           toast({
-            title: `Switched to  ${json.name} namespace`,
+            title: `Switched to  ${json.createNamespace.name} namespace`,
             status: 'success',
           });
           onClose();
@@ -79,7 +73,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
             <FormControl isRequired mb={4}>
               <FormLabel>Namespace</FormLabel>
               <Input
-                isDisabled={mutation.isLoading}
+                isDisabled={createMutation.isLoading}
                 placeholder="Enter a unique namespace name"
                 name="name"
                 type="text"
@@ -92,7 +86,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           <ButtonGroup>
             <Button onClick={onClose}>Cancel</Button>
             <Button
-              isLoading={mutation.isLoading}
+              isLoading={createMutation.isLoading}
               variant="primary"
               onClick={handleCreateNamespace}
             >
@@ -106,3 +100,12 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
 };
 
 export default NewNamespace;
+
+const mutation = gql`
+mutation CreateNamespace ($name: String!) {
+  createNamespace(namespace: $name) {
+      id
+      name
+  }
+}
+`

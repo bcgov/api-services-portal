@@ -23,12 +23,22 @@ export interface ResourceOwner {
 }
 
 export interface ResourceSet {
-    id?: string,
+    id: string,
     name: string,
     type: string,
     uris?: string[],
     icon_uri?: string,
     resource_scopes: ResourceScope[],
+    owner?: ResourceOwner,
+    ownerManagedAccess: boolean
+}
+
+export interface ResourceSetInput {
+    name: string,
+    type: string,
+    uris?: string[],
+    icon_uri?: string,
+    resource_scopes: string[],
     owner?: ResourceOwner,
     ownerManagedAccess: boolean
 }
@@ -42,7 +52,7 @@ export class UMAResourceRegistrationService {
         this.accessToken = accessToken
     }
 
-    public async createResourceSet (set: ResourceSet) : Promise<ResourceSet> {
+    public async createResourceSet (set: ResourceSetInput) : Promise<ResourceSet> {
         const url = `${this.issuerUrl}/authz/protection/resource_set`
         logger.debug("[createResourceSet] URL %s", url)
         const result = await fetch (url, {

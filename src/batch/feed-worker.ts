@@ -10,6 +10,7 @@ import {
 } from './transformations'
 import { metadata } from './data-rules'
 import { BatchService } from '../services/keystone/batch-service'
+import { Logger } from '../logger'
 
 export function dot (value: any, _key: string) {
     let returnedValue = value
@@ -21,6 +22,8 @@ export function dot (value: any, _key: string) {
     }
     return returnedValue
 }
+
+const logger = Logger('batch.worker')
 
 const transformations = {
     "toStringDefaultArray": toStringDefaultArray,
@@ -50,8 +53,6 @@ export const putFeedWorker = async (keystone: any, req: any, res: any) => {
     const entity = req.params['entity']
     const eid = 'id' in req.params ? req.params['id'] : req.body['id']
     const json = req.body
-    console.log(JSON.stringify(json, null, 4))
-
 
     assert.strictEqual(entity in metadata, true)
     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
@@ -74,12 +75,10 @@ export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
     const md = (metadata as any)[entity]
 
     const localRecord = await batchService.lookup(md.query, md.refKey, eid, md.sync)
-    console.log(localRecord)
     if (localRecord == null) {
         res.json({result: 'not-found'})
     } else {
         const nr = await batchService.remove(entity, localRecord.id)
-        console.log("--> RESULT " + JSON.stringify(nr))
         res.json({result: 'deleted'})
     }
 }
@@ -131,21 +130,22 @@ export const syncRecords = async function (keystone: any, entity: string, eid: s
                 if (transformInfo.syncFirst) {
                     // handle these children independently first - return a list of IDs
                     const allIds = await syncListOfRecords (keystone, transformInfo.list, json[transformKey])
-                    console.log("All IDS " + allIds)
+                    logger.debug("All IDS " + allIds)
                     json[transformKey + "_ids"] = allIds.map(status => status.id)
                 }
                 const transformMutation = await transformations[transformInfo.name](keystone, transformInfo, null, json, transformKey)
                 if (transformMutation != null) {
-                    console.log(" -- Updated [" + transformKey + "] " + JSON.stringify(data[transformKey]) + " to " + JSON.stringify(transformMutation))
+                    logger.debug(" -- Updated [" + transformKey + "] " + JSON.stringify(data[transformKey]) + " to " + JSON.stringify(transformMutation))
                     data[transformKey] = transformMutation
                 }
             }
         }
         data[md.refKey] = eid
-        console.log("CREATING " + JSON.stringify(data))
+        logger.debug("CREATING " + JSON.stringify(data))
         const nr = await batchService.create(entity, data)
-        console.log("--> RESULT " + nr)
+        logger.debug("--> RESULT " + nr)
         if (nr == null) {
+            logger.error("CREATE FAILED (%s) %j", nr, data)
             return {status: 400, result: 'create-failed'}
         } else {
             return {status: 200, result: 'created', id: nr}
@@ -156,10 +156,10 @@ export const syncRecords = async function (keystone: any, entity: string, eid: s
 
         for (const field of md.sync) {
             if (!transformKeys.includes(field)) {
-                console.log("Changed? " + field)
-                console.log(" -- " + JSON.stringify(json[field]) + " == " + JSON.stringify(localRecord[field]))
+                logger.debug("Changed? " + field)
+                logger.debug(" -- " + JSON.stringify(json[field]) + " == " + JSON.stringify(localRecord[field]))
                 if (field in json && json[field] !== localRecord[field]) {
-                    console.log(" -- updated")
+                    logger.debug(" -- updated")
                     data[field] = json[field]
                 }
             }
@@ -167,32 +167,33 @@ export const syncRecords = async function (keystone: any, entity: string, eid: s
         
         if ('transformations' in md) {
             for (const transformKey of transformKeys) {
-                console.log("Changed? " + transformKey)
+                logger.debug("Changed? " + transformKey)
                 // unset transformKey from data[] 
                 delete data[transformKey]
                 const transformInfo = md.transformations[transformKey]
                 if (transformInfo.syncFirst) {
                     // handle these children independently first - return a list of IDs
                     const allIds = await syncListOfRecords (keystone, transformInfo.list, json[transformKey])
-                    console.log("All IDS FOR " + transformInfo.list + " :: " + JSON.stringify(allIds, null, 3))
+                    logger.debug("All IDS FOR " + transformInfo.list + " :: " + JSON.stringify(allIds, null, 3))
                     json[transformKey + "_ids"] = allIds.map(status => status.id)
                 }
 
                 const transformMutation = await transformations[transformInfo.name](keystone, transformInfo, localRecord, json, transformKey)
                 if (transformMutation != null) {
-                    console.log(" -- updated [" + transformKey + "] " + JSON.stringify(localRecord[transformKey]) + " to " + JSON.stringify(transformMutation))
+                    logger.debug(" -- updated [" + transformKey + "] " + JSON.stringify(localRecord[transformKey]) + " to " + JSON.stringify(transformMutation))
                     data[transformKey] = transformMutation
                 }
             }
         }
-        console.log(Object.keys(data))
+        logger.debug(Object.keys(data))
         if (Object.keys(data).length === 0) {
             return {status: 200, result: 'no-change', id: localRecord['id']}
         }
-        console.log("UPDATING " + JSON.stringify(data))
+        logger.debug("UPDATING " + JSON.stringify(data))
         const nr = await batchService.update(entity, localRecord.id, data)
-        console.log("--> RESULT " + nr)
+        logger.debug("--> RESULT " + nr)
         if (nr == null) {
+            logger.error("UPDATE FAILED (%s) %j", nr, data)
             return {status: 400, result: 'update-failed'}
         } else {
             return {status: 200, result: 'updated', id: nr}

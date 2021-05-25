@@ -4,7 +4,7 @@ const keystoneApi = require('../services/keystone')
 import { doClientLoginForCredentialIssuer } from '../lists/extensions/Common'
 import type { TokenExchangeResult } from '../lists/extensions/Common'
 import { KeycloakPermissionTicketService } from '../services/keycloak'
-import { UMAResourceRegistrationService, ResourceSetQuery, ResourceSet } from '../services/uma2'
+import { UMAResourceRegistrationService, ResourceSetQuery, ResourceSetInput } from '../services/uma2'
 import { CreateServiceAccount } from '../services/workflow'
 
 import { Logger } from '../logger'
@@ -74,7 +74,7 @@ export class MigrationFromV1 {
             const found = resOwnerResources.filter((res:any) => res.name == def.namespace)
             logger.info("---- %s %s", def.namespace, found.length == 1 ? "EXISTS":"NEW")
             if (found.length == 0) {
-                const resource: ResourceSet = {
+                const resource: ResourceSetInput = {
                     name: def.namespace,
                     type: 'namespace',
                     resource_scopes: resourceScopes,
