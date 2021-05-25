@@ -641,8 +641,7 @@ paths:
                             schema: {}
             security:
                 -
-                    jwt:
-                        - Content.Publish
+                    jwt: []
             parameters:
                 -
                     in: path
@@ -663,8 +662,7 @@ paths:
                                 type: array
             security:
                 -
-                    jwt:
-                        - Content.Publish
+                    jwt: []
             parameters:
                 -
                     in: path

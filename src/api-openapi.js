@@ -1,6 +1,7 @@
 const fs = require('fs')
 const express = require('express');
 const { RegisterRoutes } = require("./controllers/routes")
+const Keycloak = require('keycloak-connect')
 const specFile = fs.realpathSync('controllers/swagger.yaml')
 const spec = fs.readFileSync(specFile)
 
@@ -13,9 +14,25 @@ class ApiOpenapiApp {
   prepareMiddleware({ keystone }) {
     const app = express();
     
-    Register(keystone)
 
     app.use(express.json());
+
+    let kcConfig = {
+        clientId: process.env.GWA_RES_SVR_CLIENT_ID,
+        secret: process.env.GWA_RES_SVR_CLIENT_SECRET,
+        public: false,
+        bearerOnly: true,
+        serverUrl: process.env.KEYCLOAK_AUTH_URL,
+        realm: process.env.KEYCLOAK_REALM,
+        verifyTokenAudience: false
+    }
+
+    let keycloak = new Keycloak({ }, kcConfig)
+
+    Register(keystone, keycloak)
+
+    app.use('/ds/api/namespaces/:ns', (req, res, next) => { console.log("NS="+JSON.stringify(req.user) + " : " +JSON.stringify(req.params)); return keycloak.enforcer(`${req.params.ns}:Content.Publish`)(req, res, next) })
+
     RegisterRoutes(app)
 
     app.get('/ds/api/swagger.yaml', (req, res) => {

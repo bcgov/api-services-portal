@@ -22,12 +22,14 @@ const { syncRecords } = require('../batch/feed-worker')
 
 @injectable()
 @Route("/namespaces/{ns}/contents")
-@Security('jwt', ['Content.Publish'])
+@Security('jwt', [])
 export class ContentController extends Controller {
     private keystone: KeystoneService
-    constructor (@inject('KeystoneService') private _keystone: KeystoneService) {
+    private keycloak: any
+    constructor (@inject('KeystoneService') private _keystone: KeystoneService, @inject('KeycloakClient') private _kc: any) {
         super()
         this.keystone = _keystone
+        this.keycloak = _kc
     }
 
     @Put()
@@ -35,6 +37,7 @@ export class ContentController extends Controller {
         @Path() ns: string,
         @Request() request: any
     ): Promise<any> {
+        console.log("IN")
         assert.strictEqual (ns, request.user.namespace, "Invalid namespace")
         return await syncRecords(this.keystone.context(), 'Content', request.body['id'], request.body)
     }
