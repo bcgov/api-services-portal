@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   Button,
   ButtonGroup,
@@ -15,7 +14,8 @@ import {
   Textarea,
   useToast,
 } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 interface NewApplicationDialog {
@@ -31,10 +31,11 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const applicationMutation = useMutation(
-    (payload: { name: string; description: string; owner: string }) =>
-      api(mutation, payload)
-  );
+  const applicationMutation = useApiMutation<{
+    name: string;
+    description: string;
+    owner: string;
+  }>(mutation);
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,23 +43,17 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
   };
   const createApplication = async () => {
     if (form.current) {
-      const data = new FormData(form.current);
+      try {
+        const data = new FormData(form.current);
 
-      if (form.current.checkValidity()) {
-        const name = data.get('name') as string;
-        const description = data.get('description') as string;
-        const res = await applicationMutation.mutateAsync({
-          name,
-          description,
-          owner: userId,
-        });
-
-        if (res.errors) {
-          toast({
-            title: 'Create Application Failed',
-            status: 'error',
+        if (form.current.checkValidity()) {
+          const name = data.get('name') as string;
+          const description = data.get('description') as string;
+          await applicationMutation.mutateAsync({
+            name,
+            description,
+            owner: userId,
           });
-        } else {
           toast({
             title: `${name} created!`,
             description: 'You can now request access to an API',
@@ -67,6 +62,11 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           queryClient.invalidateQueries('allApplications');
           onClose();
         }
+      } catch {
+        toast({
+          title: 'Create Application Failed',
+          status: 'error',
+        });
       }
     }
   };
@@ -109,12 +109,7 @@ export default NewApplicationDialog;
 
 const mutation = gql`
   mutation Add($name: String!, $description: String) {
-    createApplication(
-      data: {
-        name: $name
-        description: $description
-      }
-    ) {
+    createApplication(data: { name: $name, description: $description }) {
       id
     }
   }

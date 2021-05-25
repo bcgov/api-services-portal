@@ -7,9 +7,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FaDoorClosed } from 'react-icons/fa';
-import api, { useApi } from '@/shared/services/api';
-import { useQueryClient, QueryKey, useMutation } from 'react-query';
-import { serializeFormData } from '@/shared/services/utils';
+import { useApiMutation } from '@/shared/services/api';
+import { useQueryClient, QueryKey } from 'react-query';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
@@ -26,7 +25,7 @@ type ControlsPayload = {
   config: {
     allow: string[];
   };
-  tags: string[]
+  tags: string[];
 };
 
 interface IpRestrictionProps {
@@ -43,8 +42,8 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const mutation = useMutation((payload: { id: string; controls: string }) =>
-    api(FULFILL_REQUEST, payload)
+  const mutation = useApiMutation<{ id: string; controls: string }>(
+    FULFILL_REQUEST
   );
   const toast = useToast();
   const config = data?.config
@@ -60,7 +59,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
         config: {
           allow: [formData.get('allow') as string],
         },
-        tags: ['consumer']
+        tags: ['consumer'],
       };
 
       if (formData.has('route')) {

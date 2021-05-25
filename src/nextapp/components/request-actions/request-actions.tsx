@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { Button, ButtonGroup, Icon, useToast } from '@chakra-ui/react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
-import NextLink from 'next/link';
 import { gql } from 'graphql-request';
-import { QueryKey, useMutation, useQueryClient } from 'react-query';
-import api from '@/shared/services/api';
+import { QueryKey, useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 import { RequestControls } from '@/shared/types/app.types';
 
 interface RequestActionsProps {
@@ -13,15 +12,21 @@ interface RequestActionsProps {
   queryKey: QueryKey;
 }
 
-const RequestActions: React.FC<RequestActionsProps> = ({ id, controls, queryKey }) => {
+const RequestActions: React.FC<RequestActionsProps> = ({
+  id,
+  controls,
+  queryKey,
+}) => {
   const client = useQueryClient();
   const toast = useToast();
-  const approve = useMutation((id: string) => api(approveMutation, { id, controls: JSON.stringify(controls) }, { ssr: false }));
-  const reject = useMutation((id: string) => api(rejectMutation, { id }, { ssr: false }));
+  const approve = useApiMutation<{ id: string; controls: string }>(
+    approveMutation
+  );
+  const reject = useApiMutation<{ id: string }>(rejectMutation);
 
   const handleReject = async () => {
     try {
-      await reject.mutateAsync(id);
+      await reject.mutateAsync({ id });
       toast({
         title: 'Request Rejected',
         status: 'success',
@@ -37,7 +42,7 @@ const RequestActions: React.FC<RequestActionsProps> = ({ id, controls, queryKey 
 
   const handleApprove = async () => {
     try {
-      await approve.mutateAsync(id);
+      await approve.mutateAsync({ id, controls: JSON.stringify(controls) });
       toast({
         title: 'Request Approved',
         status: 'success',
@@ -49,18 +54,18 @@ const RequestActions: React.FC<RequestActionsProps> = ({ id, controls, queryKey 
         status: 'error',
       });
     }
-  };  
+  };
 
   return (
     <ButtonGroup isAttached>
       <Button
-          colorScheme="green"
-          disabled={approve.isLoading}
-          isLoading={approve.isLoading}
-          leftIcon={<Icon as={FaCheck} />}
-          onClick={handleApprove}
-          >
-          Approve
+        colorScheme="green"
+        disabled={approve.isLoading}
+        isLoading={approve.isLoading}
+        leftIcon={<Icon as={FaCheck} />}
+        onClick={handleApprove}
+      >
+        Approve
       </Button>
       <Button
         colorScheme="orange"
@@ -80,13 +85,18 @@ export default RequestActions;
 const approveMutation = gql`
   mutation FulfillRequest($id: ID!, $controls: String!) {
     updateAccessRequest(
-        id: $id, 
-        data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }
+      id: $id
+      data: {
+        isApproved: true
+        isIssued: true
+        isComplete: true
+        controls: $controls
+      }
     ) {
-        id
+      id
     }
   }
-`
+`;
 
 const rejectMutation = gql`
   mutation Approve($id: ID!) {

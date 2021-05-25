@@ -18,14 +18,14 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { FaPenSquare } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
 import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
 
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
 import OrganizationSelect from './organization-select';
-import api from '@/shared/services/api';
 
 interface EditProductProps {
   data: Product;
@@ -36,50 +36,45 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const mutation = useMutation(
-    (payload: ProductUpdateInput) =>
-      api(UPDATE_PRODUCT, { id: data.id, data: payload }),
-    {
-      onSuccess: () => {
-        client.invalidateQueries(['products']);
-        onClose();
-        toast({
-          title: `${data.name} Updated`,
-          status: 'success',
-        });
-      },
-      onError: () => {
-        toast({
-          title: `${data.name} Update Failed`,
-          status: 'error',
-        });
-      },
-    }
-  );
+  const mutation = useApiMutation<ProductUpdateInput>(UPDATE_PRODUCT);
   const updateProduct = React.useCallback(async () => {
-    const formData = new FormData(formRef.current);
-    const payload: ProductUpdateInput = {
-      name: formData.get('name') as string,
-    };
+    try {
+      const formData = new FormData(formRef.current);
+      const payload: ProductUpdateInput = {
+        name: formData.get('name') as string,
+      };
 
-    for (const k of formData.keys()) {
-      if (k !== 'name') {
-        if (formData.get(k)) {
-          payload[k] = {
-            connect: {
-              id: formData.get(k),
-            },
-          };
-        } else {
-          payload[k] = {
-            disconnectAll: true,
-          };
+      for (const k of formData.keys()) {
+        if (k !== 'name') {
+          if (formData.get(k)) {
+            payload[k] = {
+              connect: {
+                id: formData.get(k),
+              },
+            };
+          } else {
+            payload[k] = {
+              disconnectAll: true,
+            };
+          }
         }
       }
-    }
 
-    await mutation.mutateAsync(payload);
-  }, [mutation]);
+      await mutation.mutateAsync({ id: data.id, data: payload });
+      client.invalidateQueries(['products']);
+      onClose();
+      toast({
+        title: `${data.name} Updated`,
+        status: 'success',
+      });
+    } catch (err) {
+      console.error(err.message);
+      toast({
+        title: 'Update Product Failed',
+        status: 'error',
+      });
+    }
+  }, [client, data, mutation, onClose, toast]);
   const onUpdate = React.useCallback(() => {
     if (formRef.current.checkValidity()) {
       updateProduct();

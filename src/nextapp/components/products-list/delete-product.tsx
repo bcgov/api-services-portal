@@ -10,8 +10,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { DELETE_PRODUCT } from '@/shared/queries/products-queries';
-import api from '@/shared/services/api';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 
 interface DeleteProductProps {
   id: string;
@@ -27,22 +27,23 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
   const onOpen = () => {
     setIsOpen(true);
   };
-  const mutation = useMutation(
-    async (id: string) => await api(DELETE_PRODUCT, { id }),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Product Deleted',
-          status: 'success',
-        });
-        onDeleted();
-      },
-    }
-  );
+  const mutation = useApiMutation<{ id: string }>(DELETE_PRODUCT);
   const onDelete = async () => {
-    await mutation.mutateAsync(id);
-    setIsOpen(false);
-    client.invalidateQueries('products');
+    try {
+      await mutation.mutateAsync({ id });
+      toast({
+        title: 'Product Deleted',
+        status: 'success',
+      });
+      onDeleted();
+      setIsOpen(false);
+      client.invalidateQueries('products');
+    } catch {
+      toast({
+        title: 'Product Delete Failed',
+        status: 'error',
+      });
+    }
   };
 
   return (

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   FormControl,
   FormLabel,
@@ -9,8 +8,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FaTrafficLight } from 'react-icons/fa';
-import { QueryKey, useMutation, useQueryClient } from 'react-query';
-import { serializeFormData } from '@/shared/services/utils';
+import { QueryKey, useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
@@ -32,7 +31,7 @@ type ControlsPayload = {
     day: number;
     policy: string;
   };
-  tags: string[]
+  tags: string[];
 };
 
 interface RateLimitingProps {
@@ -49,8 +48,8 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const mutation = useMutation((payload: { id: string; controls: string }) =>
-    api(FULFILL_REQUEST, payload)
+  const mutation = useApiMutation<{ id: string; controls: string }>(
+    FULFILL_REQUEST
   );
   const toast = useToast();
   const config = data?.config
@@ -78,7 +77,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
           day: numOrNull(formData.get('day')) as number,
           policy: formData.get('policy') as string,
         },
-        tags: []
+        tags: [],
       };
 
       if (formData.has('route')) {

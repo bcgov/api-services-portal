@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   Button,
   Menu,
@@ -8,8 +7,9 @@ import {
   MenuItem,
   useToast,
 } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { ADD_ENVIRONMENT } from '@/shared/queries/products-queries';
+import { useApiMutation } from '@/shared/services/api';
 
 const options: { name: string; value: string }[] = [
   { name: 'Development', value: 'dev' },
@@ -32,30 +32,25 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 }) => {
   const toast = useToast();
   const client = useQueryClient();
-  const mutation = useMutation(
-    async (value: string) =>
-      await api(ADD_ENVIRONMENT, { product: productId, name: value }),
-    {
-      onSuccess: () => {
-        client.invalidateQueries('products');
-        toast({
-          title: 'Environment Added',
-          description:
-            'You may now configure it. By default it is not enabled.',
-          status: 'success',
-        });
-      },
-      onError: () => {
-        toast({
-          title: 'Action Failed',
-          description: 'Environment could not be added',
-          status: 'error',
-        });
-      },
-    }
+  const mutation = useApiMutation<{ product: string; name: string }>(
+    ADD_ENVIRONMENT
   );
   const onSelect = (value: string) => async () => {
-    await mutation.mutateAsync(value);
+    try {
+      await mutation.mutateAsync({ product: productId, name: value });
+      client.invalidateQueries('products');
+      toast({
+        title: 'Environment Added',
+        description: 'You may now configure it. By default it is not enabled.',
+        status: 'success',
+      });
+    } catch {
+      toast({
+        title: 'Action Failed',
+        description: 'Environment could not be added',
+        status: 'error',
+      });
+    }
   };
 
   return (

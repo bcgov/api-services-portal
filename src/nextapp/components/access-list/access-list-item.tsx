@@ -24,8 +24,8 @@ import {
 import CircleIcon from '../circle-icon';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
-import { QueryKey, useMutation, useQueryClient } from 'react-query';
-import api from '@/shared/services/api';
+import { QueryKey, useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 
 interface AccessListItemProps {
   data: ServiceAccess[];
@@ -39,7 +39,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const revoke = useMutation((id) => api(mutation, { id }));
+  const revoke = useApiMutation(mutation);
   const toast = useToast();
   const handleRevoke = React.useCallback(
     (id) => async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -47,7 +47,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
       event.stopPropagation();
 
       try {
-        await revoke.mutateAsync(id);
+        await revoke.mutateAsync({ id });
         client.invalidateQueries(queryKey);
         toast({
           title: 'Access Revoked',
@@ -72,17 +72,18 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Heading size="md">{product.name}</Heading>
         </Flex>
         <Spacer />
-        {data.filter(e => e.productEnvironment.credentialIssuer?.resourceType).length > 0 && (
-            <NextLink href={`/devportal/access/${product.id}`}>
+        {data.filter((e) => e.productEnvironment.credentialIssuer?.resourceType)
+          .length > 0 && (
+          <NextLink href={`/devportal/access/${product.id}`}>
             <Button
-                size="sm"
-                variant="primary"
-                display="flex"
-                rightIcon={<Icon as={FaChevronRight} />}
+              size="sm"
+              variant="primary"
+              display="flex"
+              rightIcon={<Icon as={FaChevronRight} />}
             >
-                Manage Resources
+              Manage Resources
             </Button>
-            </NextLink>
+          </NextLink>
         )}
       </Flex>
       <Divider />

@@ -1,4 +1,3 @@
-import api from '@/shared/services/api';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -16,23 +15,30 @@ import {
 import { gql } from 'graphql-request';
 import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 
 interface DeleteControlProps {
   consumerId: string;
   pluginExtForeignKey: string;
 }
 
-const DeleteControl: React.FC<DeleteControlProps> = ({ consumerId, pluginExtForeignKey }) => {
+const DeleteControl: React.FC<DeleteControlProps> = ({
+  consumerId,
+  pluginExtForeignKey,
+}) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const deleteMutation = useMutation((keys: { consumerId: string, pluginExtForeignKey: string}) => api(mutation, keys));
+  const deleteMutation = useApiMutation<{
+    consumerId: string;
+    pluginExtForeignKey: string;
+  }>(mutation);
   const cancelRef = React.useRef();
 
   const handleDelete = async () => {
     try {
-      await deleteMutation.mutateAsync({consumerId, pluginExtForeignKey});
+      await deleteMutation.mutateAsync({ consumerId, pluginExtForeignKey });
       queryClient.invalidateQueries(['consumer', consumerId]);
       toast({
         title: 'Control removed',
@@ -89,7 +95,10 @@ export default DeleteControl;
 
 const mutation = gql`
   mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {
-    deleteGatewayConsumerPlugin(id: $consumerId, pluginExtForeignKey: $pluginExtForeignKey) {
+    deleteGatewayConsumerPlugin(
+      id: $consumerId
+      pluginExtForeignKey: $pluginExtForeignKey
+    ) {
       id
     }
   }

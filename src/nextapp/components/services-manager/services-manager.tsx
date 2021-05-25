@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   Box,
   Divider,
@@ -17,12 +16,27 @@ import {
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import { FaRegTimesCircle, FaSearch, FaWrench } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
+import { useApiMutation } from '@/shared/services/api';
 import type { GatewayService } from '@/types/query.types';
 
 import ActiveServices from './active-services';
 import AvailableServices from './available-services';
+
+type ConnectPayload = {
+  id: string;
+};
+
+type MutationPayload = {
+  id: string;
+  data: {
+    services: {
+      disconnectAll: boolean;
+      connect: ConnectPayload[];
+    };
+  };
+};
 
 interface ServicesManagerProps {
   data: GatewayService[];
@@ -42,13 +56,10 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
 
   // Mutations
   const client = useQueryClient();
-  const mutation = useMutation(
-    async (changes: unknown) =>
-      await api(UPDATE_ENVIRONMENT, changes, { ssr: false })
-  );
+  const mutation = useApiMutation<MutationPayload>(UPDATE_ENVIRONMENT);
 
   const onServicesChange = React.useCallback(
-    async (payload: { id: string }[]) => {
+    async (payload: ConnectPayload[]) => {
       try {
         await mutation.mutateAsync({
           id: environmentId,
@@ -73,7 +84,7 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
         });
       }
     },
-    [environmentId, mutation]
+    [client, environmentId, mutation, toast]
   );
 
   const onSearchChange = React.useCallback(

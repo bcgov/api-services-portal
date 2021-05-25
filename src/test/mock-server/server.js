@@ -392,12 +392,9 @@ const server = mockServer(schemaWithMocks, {
   }),
   GatewayPlugin: () => {
     const random = sample([true, false, null]);
-    // const name = casual.random_element(['rate-limiting', 'ip-restriction']);
-    // const isService = random === true;
-    // const isRoute = random === false;
-    const name = 'rate-limiting';
-    const isService = true;
-    const isRoute = true;
+    const name = casual.random_element(['rate-limiting', 'ip-restriction']);
+    const isService = random === true;
+    const isRoute = random === false;
     let config = '';
 
     switch (name) {

@@ -1,6 +1,5 @@
 // @ts-nocheck
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   Button,
   ButtonGroup,
@@ -19,11 +18,12 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import {
   ADD_ENVIRONMENT,
   ADD_PRODUCT,
 } from '@/shared/queries/products-queries';
+import { useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/types/query.types';
 
 interface NewProductDialogProps {
@@ -37,18 +37,11 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const productMutation = useMutation((name: string) =>
-    api(ADD_PRODUCT, { name })
-  );
-  const environmentMutation = useMutation(
-    async (variables) => await api(ADD_ENVIRONMENT, variables),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('products');
-        onClose();
-      },
-    }
-  );
+  const productMutation = useApiMutation<{ name: string }>(ADD_PRODUCT);
+  const environmentMutation = useApiMutation<{
+    product: string;
+    name: string;
+  }>(ADD_ENVIRONMENT);
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -59,24 +52,26 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
       const data = new FormData(form.current);
 
       if (form.current.checkValidity()) {
-        const productName = data.get('name') as string;
-        const environment = data.get('environment') as string;
-        const res = await productMutation.mutateAsync(productName);
-        await environmentMutation.mutateAsync({
-          product: res.createProduct.id,
-          name: environment,
-        });
-
-        if (res.errors) {
-          toast({
-            title: 'Create Failed',
-            status: 'error',
+        try {
+          const productName = data.get('name') as string;
+          const environment = data.get('environment') as string;
+          const res = await productMutation.mutateAsync({ name: productName });
+          await environmentMutation.mutateAsync({
+            product: res.createProduct.id,
+            name: environment,
           });
-        } else {
+
+          queryClient.invalidateQueries('products');
           toast({
             title: `Product ${productName} created!`,
             description: 'You can now add more environments',
             status: 'success',
+          });
+          onClose();
+        } catch {
+          toast({
+            title: 'Create Failed',
+            status: 'error',
           });
         }
       }

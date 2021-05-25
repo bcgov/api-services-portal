@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -13,8 +12,9 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FaTrash } from 'react-icons/fa';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { REMOVE_ENVIRONMENT } from '@/shared/queries/products-queries';
+import { useApiMutation } from '@/shared/services/api';
 
 interface DeleteEnvironmentProps {
   id: string;
@@ -23,25 +23,26 @@ interface DeleteEnvironmentProps {
 const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
   const client = useQueryClient();
   const toast = useToast();
-  const mutation = useMutation(
-    async (id: string) => await api(REMOVE_ENVIRONMENT, { id }),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Environment Deleted',
-          status: 'success',
-        });
-      },
-    }
-  );
+  const mutation = useApiMutation<{ id: string }>(REMOVE_ENVIRONMENT);
   const [open, setOpen] = React.useState<boolean>(false);
   const cancelRef = React.useRef<HTMLButtonElement>(null);
   const onClose = () => setOpen(false);
   const onConfirm = () => setOpen(true);
   const onDelete = async () => {
-    await mutation.mutateAsync(id);
-    setOpen(false);
-    client.invalidateQueries('products');
+    try {
+      await mutation.mutateAsync({ id });
+      setOpen(false);
+      client.invalidateQueries('products');
+      toast({
+        title: 'Environment Deleted',
+        status: 'success',
+      });
+    } catch {
+      toast({
+        title: 'Environment Delete Failed',
+        status: 'error',
+      });
+    }
   };
 
   return (

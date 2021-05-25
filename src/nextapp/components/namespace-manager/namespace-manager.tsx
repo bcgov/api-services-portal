@@ -60,7 +60,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Manage Namespaces</ModalHeader>
-          <ModalBody px={0}>
+          <ModalBody px={0} maxH={300}>
             <Box px={6} pb={4}>
               <Text>
                 All namespaces listed below may be removed, but this is
@@ -85,14 +85,23 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                 justify="space-between"
                 py={2}
                 px={6}
-                sx={{ _hover: { bgColor: 'blue.50' } }}
+                sx={{
+                  _hover: {
+                    bgColor: 'blue.50',
+                    '& .namespace-manager-delete': {
+                      opacity: 1,
+                    },
+                  },
+                }}
               >
                 <Text>{n.name}</Text>
                 <IconButton
                   aria-label="Delete namespace button"
                   size="xs"
                   colorScheme="red"
+                  opacity={0}
                   variant="outline"
+                  className="namespace-manager-delete"
                   onClick={handleDeleteNamespace(n.name)}
                 >
                   <Icon as={FaTrash} />
@@ -100,6 +109,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
               </Flex>
             ))}
           </ModalBody>
+          <Divider />
           <ModalFooter>
             <ButtonGroup>
               <Button onClick={onClose} variant="primary">
