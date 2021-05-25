@@ -7,7 +7,8 @@ import {v4 as uuidv4} from 'uuid'
 import { strict as assert } from 'assert'
 
 import { CredentialIssuer } from '../keystone/types'
-import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
+import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig, RequestControls } from './types'
+import { ClientAuthenticator } from '../keycloak/client-registration-service'
 
 
 /**
@@ -19,7 +20,7 @@ import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
  * @param {*} credentialIssuerPK 
  * @param {*} newClientId 
  */
-export async function registerClient (context: any, environment: string, credentialIssuerPK: string, newClientId: string) {
+export async function registerClient (context: any, environment: string, credentialIssuerPK: string, controls: RequestControls, newClientId: string) {
 
     // Find the credential issuer and based on its type, go do the appropriate action
     const issuer: CredentialIssuer = await lookupCredentialIssuerById(context, credentialIssuerPK)
@@ -38,7 +39,7 @@ export async function registerClient (context: any, environment: string, credent
     // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
     // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
-    const client = await new KeycloakClientRegistrationService(null, null).clientRegistration(openid.issuer, token, newClientId, uuidv4(), false)
+    const client = await new KeycloakClientRegistrationService(openid.issuer, token).clientRegistration(<ClientAuthenticator> issuer.clientAuthenticator, newClientId, uuidv4(), controls.clientCertificate, false)
     assert.strictEqual(client.clientId, newClientId)
 
     return {

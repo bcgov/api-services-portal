@@ -1,5 +1,10 @@
 import fetch from 'node-fetch'
 import { checkStatus } from '../checkStatus'
+import { logger } from '../../logger'
+export interface OpenidWellKnown {
+    issuer: string
+    token_endpoint: string
+}
 
 export function headers( accessToken : string): HeadersInit {
     const headers : HeadersInit = {
@@ -10,7 +15,7 @@ export function headers( accessToken : string): HeadersInit {
     return headers
 }
 
-export async function getOpenidFromIssuer (url : string) {
+export async function getOpenidFromIssuer (url : string) : Promise<OpenidWellKnown> {
     return fetch(`${url}/.well-known/openid-configuration`, {
         method: 'get',
         headers: { 
@@ -20,7 +25,8 @@ export async function getOpenidFromIssuer (url : string) {
     })
     .then(checkStatus)
     .then(res => res.json())
-    .catch (() => {
+    .catch ((err) => {
+        logger.error("[getOpenidFromIssuer] %s failed %s", url, err)
         return null
     })
 }
@@ -35,7 +41,8 @@ export async function getOpenidFromDiscovery (url : string) {
     })
     .then(checkStatus)
     .then(res => res.json())
-    .catch (() => {
+    .catch ((err) => {
+        logger.error("[getOpenidFromDiscovery] %s failed %s", url, err)
         return null
     })
 }

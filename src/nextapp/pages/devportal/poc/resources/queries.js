@@ -1,6 +1,6 @@
-export const GET_PERMISSIONS = `
-    query GetPermissions($resourceId: String, $prodEnvId: ID!) {
-        getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {
+export const GET_PERMISSIONS_FOR_RESOURCE = `
+    query GetPermissions($resourceId: String!, $prodEnvId: ID!) {
+        getPermissionTicketsForResource(resourceId: $resourceId, prodEnvId: $prodEnvId) {
             id
             owner
             ownerName
@@ -80,7 +80,7 @@ export const GET_RESOURCES = `
             type
         }
 
-        getPermissionTickets(prodEnvId: $prodEnvId) {
+        allPermissionTickets(prodEnvId: $prodEnvId) {
             id
             owner
             ownerName

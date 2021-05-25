@@ -1,5 +1,5 @@
 
-export const clientTemplate = {
+export const clientTemplateClientSecret = {
   "clientId": "",
   "name": "",
   "description": "",

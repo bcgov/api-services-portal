@@ -15,8 +15,7 @@ const verifyJWT = jwt({
     secret: jwtCheck, 
     algorithms: ['RS256'], 
     credentialsRequired: true, 
-    requestProperty: 'oauth_user', 
-    getToken: (req) => ('x-forwarded-access-token' in req.headers) ? req.headers['x-forwarded-access-token'] : null
+    requestProperty: 'oauth_user'
 })
 
 export function expressAuthentication(request: any, securityName: string, scopes?: string[]): Promise<any> {

@@ -73,7 +73,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
                         // and then delete each one
 
 
-                        await new KeycloakClientRegistrationService(null, null).deleteClientRegistration(openid.issuer, token, svc.consumer.customId)
+                        await new KeycloakClientRegistrationService(openid.issuer, token).deleteClientRegistration(svc.consumer.customId)
                     }
                 }))
     }

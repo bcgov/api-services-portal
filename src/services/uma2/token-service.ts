@@ -1,6 +1,8 @@
 import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../../logger'
+import { Logger } from '../../logger'
+
+const logger = Logger('uma2-token')
 
 export interface ClientRegResponse {
     id: string,
@@ -17,6 +19,10 @@ export interface ClientRegistration {
     enabled?: boolean,
 }
 
+export interface ResourceItem {
+    rsid: string,
+    rsname: string
+}
 export class UMA2TokenService {
     private issuerUrl : string
 
@@ -45,7 +51,32 @@ export class UMA2TokenService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        logger.debug("[getRequestingPartyToken] RESULT = %j", response);
+        logger.debug("[getRequestingPartyToken] RESULT %j", response);
         return response['access_token']
+    }
+
+    public async getPermittedResourcesUsingTicket (subjectToken: string, ticket: string) : Promise<ResourceItem[]> {
+        const params = new URLSearchParams();
+        params.append('grant_type', 'urn:ietf:params:oauth:grant-type:uma-ticket')
+        params.append('ticket', ticket)
+        params.append('submit_request', 'false')
+        params.append('response_mode', 'permissions')
+
+        logger.debug("[getPermittedResourcesUsingTicket] uma-ticket %s", this.issuerUrl);
+
+        const response = await fetch(`${this.issuerUrl}/protocol/openid-connect/token`, {
+            method: 'post',
+            body:    params,
+            headers: { 
+                'Authorization': `Bearer ${subjectToken}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        .then(res => res as ResourceItem[])
+        logger.debug("[getPermittedResourcesUsingTicket] RESULT %j", response);
+        return response
     }
 }

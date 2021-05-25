@@ -41,8 +41,6 @@ export const ValidateActiveEnvironment = async (context: any, operation: any, ex
                 const missing = resolvedServices ? resolvedServices.filter(isServiceMissingAllPlugins) : envServices.services.filter(isServiceMissingAllPlugins)
 
                 if (missing.length != 0) {
-                    logger.debug("issuer %j", issuer)
-                    resolvedServices ? logger.debug("VALIDATION FAILURE(resolvedServices) %j", resolvedServices) :
                     addValidationError("[" + missing.map((s:any) => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {

@@ -9,8 +9,11 @@ import { getOpenidFromIssuer, KeycloakTokenService, KeycloakUserService, Keycloa
 
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from '../../services/workflow/types'
 
-import { doTokenExchangeForCredentialIssuer } from './Common'
+import { getSuitableOwnerToken, getResourceSets, getEnvironmentContext } from './Common'
 import type { TokenExchangeResult } from './Common'
+import { strict as assert } from 'assert'
+
+import { UMAResourceRegistrationService, ResourceSetQuery } from '../../services/uma2'
 
 const keystoneApi = require('../../services/keystone')
 
@@ -44,56 +47,59 @@ module.exports = {
             types: [
                 { type: typeUMAPermissionTicket },
                 { type: typeUMAPermissionTicketInput },
-            ],            
+            ],
             queries: [
               {
-                schema: 'getPermissionTickets(prodEnvId: ID!, resourceId: String): [UMAPermissionTicket]',
+                schema: 'allPermissionTickets(prodEnvId: ID!): [UMAPermissionTicket]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                    const resourceIds = await getResourceSets (envCtx)
 
-                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
-                
-                    const params : PermissionTicketQuery = {returnNames: true}
-                    if (args.resourceId != null) {
-                        params.resourceId = args.resourceId
+                    const allPermissionTickets : PermissionTicket[] = []
+                    const permissionApi = new KeycloakPermissionTicketService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
+                    for ( const resId of resourceIds) {
+                        const resPerms = await permissionApi.listPermissions ({resourceId: resId, returnNames: true})
+                        Array.prototype.push.apply (allPermissionTickets, resPerms)
                     }
-                    return await kcprotectApi.listPermissions (params)
+                    return allPermissionTickets
                 },
                 access: EnforcementPoint,
               },
+              {
+                schema: 'getPermissionTicketsForResource(prodEnvId: ID!, resourceId: String!): [UMAPermissionTicket]',
+                resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
+
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+
+                    const permissionApi = new KeycloakPermissionTicketService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
+                    const params : PermissionTicketQuery = {resourceId: args.resourceId, returnNames: true}
+                    return await permissionApi.listPermissions (params)
+                },
+                access: EnforcementPoint
+              }
             ],
             mutations: [
               {
                 schema: 'grantPermissions(prodEnvId: ID!, data: UMAPermissionTicketInput! ): [UMAPermissionTicket]',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const noauthContext =  keystone.createContext({ skipAccessControl: true })
+                    const scopes = args.data.scopes
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const prodEnv = await keystoneApi.lookupEnvironmentAndIssuerById(noauthContext, args.prodEnvId)
-                    const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
-                    
-                    const openid = await getOpenidFromIssuer (issuerEnvConfig.issuerUrl)
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.data.resourceId).length, 1, "Invalid Resource")
 
-                    const kcadminApi = new KeycloakUserService (openid.issuer)
-                    await kcadminApi.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret)
-
-                    const userId = await kcadminApi.lookupUserByUsername(args.data.username)
-
-                    console.log("user = "+userId)
+                    const userApi = new KeycloakUserService (envCtx.openid.issuer)
+                    await userApi.login(envCtx.issuerEnvConfig.clientId, envCtx.issuerEnvConfig.clientSecret)
+                    const userId = await userApi.lookupUserByUsername(args.data.username)
 
                     const result = []
-
-                    console.log(JSON.stringify(context.req.headers, null, 4))
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-
-                    const scopes = args.data.scopes
                     const granted = 'granted' in args.data ? args.data['granted'] : true
-                    const accessToken = await new KeycloakTokenService(openid.issuer).tokenExchange (issuerEnvConfig.clientId, issuerEnvConfig.clientSecret, subjectToken)
-                    const kcprotectApi = new KeycloakPermissionTicketService (openid.issuer, accessToken)
+                    const permissionApi = new KeycloakPermissionTicketService (envCtx.openid.issuer, envCtx.accessToken)
                     for (const scope of scopes) {
-                        const permission = await kcprotectApi.createOrUpdatePermission (args.data.resourceId, userId, granted, scope)
-                        console.log(JSON.stringify(permission))
+                        const permission = await permissionApi.createOrUpdatePermission (args.data.resourceId, userId, granted, scope)
                         result.push({ id: permission.id })
                     }
                     return result
@@ -101,39 +107,44 @@ module.exports = {
                 access: EnforcementPoint,
               },
               {
-                schema: 'revokePermissions(prodEnvId: ID!, ids: [String]! ): Boolean',
+                schema: 'revokePermissions(prodEnvId: ID!, resourceId: String!, ids: [String]! ): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+
+                    const permissionApi = new KeycloakPermissionTicketService (envCtx.openid.issuer, envCtx.accessToken)
+
+                    const perms = await permissionApi.listPermissions ({resourceId: args.resourceId})
+
                     for (const permId of args.ids) {
-                        await kcprotectApi.deletePermission (permId)
+                        assert.strictEqual(perms.filter(perm => perm.id === permId).length, 1, 'Invalid Permission')
+                        await permissionApi.deletePermission (permId)
                     }
                     return true
-
                 },
                 access: EnforcementPoint,
               },              
               {
                 schema: 'approvePermissions(prodEnvId: ID!, resourceId: String!, requesterId: String!, scopes: [String]! ): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const kcprotectApi = new KeycloakPermissionTicketService (tokenResult.issuer, tokenResult.accessToken)
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+
+                    const permissionApi = new KeycloakPermissionTicketService (envCtx.openid.issuer, envCtx.accessToken)
+
                     for (const scope of args.scopes) {
-                        await kcprotectApi.approvePermission (args.resourceId, args.requesterId, scope)
+                        await permissionApi.approvePermission (args.resourceId, args.requesterId, scope)
                     }
                     return true
-
                 },
                 access: EnforcementPoint,
-              },  
-                                             
+              }
             ]
-
-          });
+          })
       }
   ]
 

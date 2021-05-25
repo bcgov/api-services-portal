@@ -12,7 +12,7 @@ import { KongConsumerService } from '../kong'
 import { FeederService } from '../feeder'
 import { RequestControls } from './types'
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types'
-import { regenerateCredential } from './regenerate-credential'
+import { generateCredential } from './generate-credential'
 import { isUpdatingToIssued, isUpdatingToRejected } from './common'
 import { Logger } from '../../logger'
 
@@ -28,7 +28,7 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
     if (originalInput['credential'] == "NEW") {
         try {
         
-            const newCredential = await regenerateCredential(context, existingItem['id'])
+            const newCredential = await generateCredential(context, existingItem['id'])
             if (newCredential != null) {
                 updatedItem['credential'] = JSON.stringify(newCredential)
                 message.text = "requested access"
@@ -82,9 +82,9 @@ export const Apply = async (context: any, operation: any, existingItem: any, ori
 
                 const controls: RequestControls = {...{defaultClientScopes:[]}, ...JSON.parse(requestDetails.controls)}
                 
-                const kcClientService = new KeycloakClientRegistrationService(openid.issuer, null)
+                const kcClientService = new KeycloakClientRegistrationService(openid.issuer, token)
 
-                await kcClientService.updateClientRegistration (token, clientId, {clientId, enabled: true})
+                await kcClientService.updateClientRegistration (clientId, {clientId, enabled: true})
 
                 // Only valid for 'managed' client registration
                 // const kcadminApi = new KeycloakClientService(baseUrl, realm)

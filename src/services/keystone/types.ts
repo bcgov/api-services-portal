@@ -5194,6 +5194,7 @@ export type TemporaryIdentity = {
   namespace?: Maybe<Scalars['String']>;
   groups?: Maybe<Scalars['String']>;
   roles?: Maybe<Scalars['String']>;
+  scopes?: Maybe<Scalars['String']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
 };
@@ -5369,6 +5370,24 @@ export type TemporaryIdentityWhereInput = {
   roles_not_ends_with_i?: Maybe<Scalars['String']>;
   roles_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   roles_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes?: Maybe<Scalars['String']>;
+  scopes_not?: Maybe<Scalars['String']>;
+  scopes_contains?: Maybe<Scalars['String']>;
+  scopes_not_contains?: Maybe<Scalars['String']>;
+  scopes_starts_with?: Maybe<Scalars['String']>;
+  scopes_not_starts_with?: Maybe<Scalars['String']>;
+  scopes_ends_with?: Maybe<Scalars['String']>;
+  scopes_not_ends_with?: Maybe<Scalars['String']>;
+  scopes_i?: Maybe<Scalars['String']>;
+  scopes_not_i?: Maybe<Scalars['String']>;
+  scopes_contains_i?: Maybe<Scalars['String']>;
+  scopes_not_contains_i?: Maybe<Scalars['String']>;
+  scopes_starts_with_i?: Maybe<Scalars['String']>;
+  scopes_not_starts_with_i?: Maybe<Scalars['String']>;
+  scopes_ends_with_i?: Maybe<Scalars['String']>;
+  scopes_not_ends_with_i?: Maybe<Scalars['String']>;
+  scopes_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -5414,6 +5433,8 @@ export enum SortTemporaryIdentitiesBy {
   GroupsDesc = 'groups_DESC',
   RolesAsc = 'roles_ASC',
   RolesDesc = 'roles_DESC',
+  ScopesAsc = 'scopes_ASC',
+  ScopesDesc = 'scopes_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -5431,6 +5452,7 @@ export type TemporaryIdentityUpdateInput = {
   namespace?: Maybe<Scalars['String']>;
   groups?: Maybe<Scalars['String']>;
   roles?: Maybe<Scalars['String']>;
+  scopes?: Maybe<Scalars['String']>;
 };
 
 export type TemporaryIdentitiesUpdateInput = {
@@ -5449,6 +5471,7 @@ export type TemporaryIdentityCreateInput = {
   namespace?: Maybe<Scalars['String']>;
   groups?: Maybe<Scalars['String']>;
   roles?: Maybe<Scalars['String']>;
+  scopes?: Maybe<Scalars['String']>;
 };
 
 export type TemporaryIdentitiesCreateInput = {
@@ -6059,11 +6082,11 @@ export type Query = {
   mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
-  getUmaPoliciesByResourceName?: Maybe<Array<Maybe<UmaPolicy>>>;
-  getResourceOwners?: Maybe<Array<Maybe<UmaResourceSet>>>;
-  getUmaPolicies?: Maybe<Array<Maybe<UmaPolicy>>>;
-  getResourceSet?: Maybe<Array<Maybe<UmaResourceSet>>>;
-  getPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
+  getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
+  allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
+  getResourceSet?: Maybe<UmaResourceSet>;
+  allPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
+  getPermissionTicketsForResource?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
   authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
@@ -6725,34 +6748,32 @@ export type QueryAllDiscoverableContentsArgs = {
 };
 
 
-export type QueryGetUmaPoliciesByResourceNameArgs = {
-  resourceName?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetResourceOwnersArgs = {
-  type?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryGetUmaPoliciesArgs = {
+export type QueryGetUmaPoliciesForResourceArgs = {
   prodEnvId: Scalars['ID'];
-  resourceId?: Maybe<Scalars['String']>;
+  resourceId: Scalars['String'];
+};
+
+
+export type QueryAllResourceSetsArgs = {
+  prodEnvId: Scalars['ID'];
+  type?: Maybe<Scalars['String']>;
 };
 
 
 export type QueryGetResourceSetArgs = {
   prodEnvId: Scalars['ID'];
-  owner?: Maybe<Scalars['String']>;
-  type?: Maybe<Scalars['String']>;
-  resourceId?: Maybe<Scalars['String']>;
+  resourceId: Scalars['String'];
 };
 
 
-export type QueryGetPermissionTicketsArgs = {
+export type QueryAllPermissionTicketsArgs = {
   prodEnvId: Scalars['ID'];
-  resourceId?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetPermissionTicketsForResourceArgs = {
+  prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
 };
 
 export type Mutation = {
@@ -7747,13 +7768,14 @@ export type MutationAcceptLegalArgs = {
 
 export type MutationCreateUmaPolicyArgs = {
   prodEnvId: Scalars['ID'];
-  resourceId?: Maybe<Scalars['String']>;
+  resourceId: Scalars['String'];
   data: UmaPolicyInput;
 };
 
 
 export type MutationDeleteUmaPolicyArgs = {
   prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
   policyId: Scalars['String'];
 };
 
@@ -7766,6 +7788,7 @@ export type MutationGrantPermissionsArgs = {
 
 export type MutationRevokePermissionsArgs = {
   prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
   ids: Array<Maybe<Scalars['String']>>;
 };
 

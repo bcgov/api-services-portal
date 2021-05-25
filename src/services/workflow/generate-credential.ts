@@ -5,22 +5,24 @@ import {
     addServiceAccess,
     linkServiceAccessToRequest
 } from '../keystone'
-
+import crypto from "crypto"
 import { strict as assert } from 'assert'
 import { AddClientConsumer } from './add-client-consumer'
 import { FeederService } from '../feeder'
 import { KongConsumerService } from '../kong'
-import { NewCredential } from './types'
+import { NewCredential, RequestControls } from './types'
 import { registerClient } from './client-credentials'
 import { registerApiKey } from './kong-api-key'
 import { Logger } from '../../logger'
 
 const logger = Logger('wf.RegenCreds')
 
-export const regenerateCredential = async (context: any, accessRequestId: string) : Promise<NewCredential> => {
+export const generateCredential = async (context: any, accessRequestId: string) : Promise<NewCredential> => {
     const feederApi = new FeederService(process.env.FEEDER_URL)
 
     const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, accessRequestId)
+
+    const controls: RequestControls = 'controls' in requestDetails ? JSON.parse(requestDetails.controls) : {}
 
     const flow = requestDetails.productEnvironment.flow
 
@@ -67,7 +69,28 @@ export const regenerateCredential = async (context: any, accessRequestId: string
 
         const nickname = clientId
 
-        const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, clientId)
+        const clientSigning : any = { publicKey: null, privateKey: null }
+
+        if (controls.clientGenCertificate) {
+            const {
+                publicKey,
+                privateKey,
+            } = crypto.generateKeyPairSync('rsa', {
+                modulusLength: 4096,
+                publicKeyEncoding: {
+                  type: 'spki',
+                  format: 'pem'
+                },
+                privateKeyEncoding: {
+                  type: 'pkcs8',
+                  format: 'pem'
+                }
+            })
+            clientSigning.publicKey = publicKey
+            clientSigning.privateKey = privateKey
+            controls.clientCertificate = clientSigning.publicKey
+        }
+        const newClient = await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, controls, clientId)
 
         logger.debug("new-client %j", newClient)
 
@@ -90,7 +113,9 @@ export const regenerateCredential = async (context: any, accessRequestId: string
             flow: productEnvironment.flow,
             clientId: newClient.client.clientId,
             clientSecret: newClient.client.clientSecret,
-            tokenEndpoint: newClient.openid.token_endpoint
+            tokenEndpoint: newClient.openid.token_endpoint,
+            clientPublicKey: clientSigning.publicKey,
+            clientPrivateKey: clientSigning.privateKey,
         } as NewCredential
     }
     return null

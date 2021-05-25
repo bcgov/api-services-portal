@@ -11,13 +11,14 @@ import {
     Security,
     SuccessResponse,
 } from "tsoa";
+import { strict as assert } from 'assert'
 import express from 'express'
 import { NamespaceValidator } from '../auth/namespace-validator'
 import { KeystoneService } from "./ioc/keystoneInjector"
 import { inject, injectable } from "tsyringe";
 import { Content } from "@/services/keystone/types";
 
-const { syncRecords } = require('../batch/feedWorker')
+const { syncRecords } = require('../batch/feed-worker')
 
 @injectable()
 @Route("/namespaces/{ns}/contents")
@@ -32,13 +33,13 @@ export class ContentController extends Controller {
     @Put()
     public async putContent(
         @Path() ns: string,
-        @Request() request: express.Request
+        @Request() request: any
     ): Promise<any> {
+        assert.strictEqual (ns, request.user.namespace, "Invalid namespace")
         return await syncRecords(this.keystone.context(), 'Content', request.body['id'], request.body)
     }
 
     @Get()
-    @NamespaceValidator()
     public async getContent(
         @Request() request: any,
         @Path() ns: string

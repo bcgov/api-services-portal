@@ -112,7 +112,7 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
   const handleRevoke = async (id: string | string[]) => {
     try {
       const tickets = Array.isArray(id) ? id : [id];
-      await revoke.mutateAsync({ prodEnvId, tickets });
+      await revoke.mutateAsync({ prodEnvId, resourceId, tickets });
       toast({
         title: 'Access Revoked',
         status: 'success',
@@ -200,8 +200,8 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
 export default UsersAccessList;
 
 const revokeMutation = gql`
-  mutation RevokeAccess($prodEnvId: ID!, $tickets: [String]!) {
-    revokePermissions(prodEnvId: $prodEnvId, ids: $tickets)
+  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {
+    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)
   }
 `;
 

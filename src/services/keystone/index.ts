@@ -35,6 +35,7 @@ export {
 } from './gateway-service'
 
 export { 
+    lookupEnvironmentAndIssuerUsingWhereClause,
     lookupEnvironmentAndIssuerById,
     lookupProductEnvironmentServices,
     lookupProductEnvironmentServicesBySlug,

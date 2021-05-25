@@ -23,7 +23,7 @@ import ModelIcon from '@/components/model-icon/model-icon';
 
 const { useEffect, useState } = React;
 
-import { GET_ACCESS_LIST, GET_PERMISSIONS, GET_RESOURCES, GRANT_ACCESS, REVOKE_ACCESS } from './queries'
+import { GET_ACCESS_LIST, GET_PERMISSIONS_FOR_RESOURCE, GET_RESOURCES, GRANT_ACCESS, REVOKE_ACCESS } from './queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 

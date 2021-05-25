@@ -47,7 +47,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({
           </Tr>
         </Thead>
         <Tbody>
-          {data?.getResourceSet?.map((r) => (
+          {data?.allResourceSets?.map((r) => (
             <Tr key={r.id}>
               <Td width="50%">
                 <NextLink
@@ -60,7 +60,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({
               <Td>{r.type}</Td>
               <Td>
                 <AvatarGroup size="sm" max={6}>
-                  {data.getPermissionTickets
+                  {data.allPermissionTickets
                     ?.filter((p) => p.resource === r.id)
                     .map((p) => (
                       <Avatar
@@ -85,12 +85,10 @@ export default ResourcesComponent;
 const query = gql`
   query GetResources(
     $prodEnvId: ID!
-    $owner: String
     $resourceType: String
   ) {
-    getResourceSet(
+    allResourceSets(
       prodEnvId: $prodEnvId
-      owner: $owner
       type: $resourceType
     ) {
       id
@@ -98,7 +96,7 @@ const query = gql`
       type
     }
 
-    getPermissionTickets(prodEnvId: $prodEnvId) {
+    allPermissionTickets(prodEnvId: $prodEnvId) {
       id
       owner
       ownerName

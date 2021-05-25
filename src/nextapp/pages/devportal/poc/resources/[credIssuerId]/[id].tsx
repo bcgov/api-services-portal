@@ -22,7 +22,7 @@ import ModelIcon from '@/components/model-icon/model-icon';
 
 const { useEffect, useState } = React;
 
-import { GET_PERMISSIONS, GET_RESOURCES, GRANT_USER_ACCESS, CREATE_UMA_POLICY, DELETE_UMA_POLICY, GRANT_ACCESS, REVOKE_ACCESS } from '../queries'
+import { GET_PERMISSIONS_FOR_RESOURCE, GET_RESOURCES, GRANT_USER_ACCESS, CREATE_UMA_POLICY, DELETE_UMA_POLICY, GRANT_ACCESS, REVOKE_ACCESS } from '../queries'
 
 import { styles } from '@/shared/styles/devportal.css';
 
@@ -42,7 +42,7 @@ const ResourcesPage = () => {
 
     const [{ state, data }, setState] = useState({ state: 'loading', data: null });
     const fetch = () => {
-        graphql(GET_PERMISSIONS, {resourceId: id, prodEnvId: prodEnvId, owner: user?.sub})
+        graphql(GET_PERMISSIONS_FOR_RESOURCE, {resourceId: id, prodEnvId: prodEnvId, owner: user?.sub})
         .then(({ data }) => {
             setState({ state: 'loaded', data });
         })

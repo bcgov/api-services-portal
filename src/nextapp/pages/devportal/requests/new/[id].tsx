@@ -95,7 +95,7 @@ const NewRequestsPage: React.FC<
     try {
       const payload = {
         name: `${dataset.name} FOR ${data.allTemporaryIdentities[0].name}`,
-        controls: '{}',
+        controls: '{"clientGenCertificate":false}',
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
@@ -208,6 +208,7 @@ const NewRequestsPage: React.FC<
                 }))}
             />
           </FieldsetBox>
+
           <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != "" ? true:false} title="Additional Information & Terms">
             {dataset.environments[0]?.additionalDetailsToRequest != "" && (
                 <Box p={4}>
@@ -276,6 +277,9 @@ const query = gql`
           description
           link
           reference
+        }
+        credentialIssuer {
+          clientAuthenticator
         }
       }
     }

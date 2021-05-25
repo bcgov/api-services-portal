@@ -756,5 +756,54 @@
           "referer": "http://localhost:4180/devportal/requests/new/609c1ecb4337bc74fb7205ca",
           "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal) {\n        legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
           "added": "2021-05-21T20:07:17.173Z"
+     },
+     "f8ac4a81c7b8c0db2cd1d8155edfd77d": {
+          "referer": "http://localhost:4180/admin/users/60a2ec5185ff5040b3cf3636",
+          "query": "query getItem($id: ID!) {\n  User(where: {id: $id}) {\n    _label_\n    id\n    name\n    username\n    email\n    isAdmin\n    password_is_set\n    legalsAgreed\n    __typename\n  }\n}\n",
+          "added": "2021-05-22T00:51:39.935Z"
+     },
+     "85c4949788ae6b1152947a7504ef0ca5": {
+          "referer": "http://localhost:4180/admin/users/60a2ec5185ff5040b3cf3636",
+          "query": "mutation update($id: ID!, $data: UserUpdateInput) {\n  updateUser(id: $id, data: $data) {\n    id\n    __typename\n  }\n}\n",
+          "added": "2021-05-22T00:51:46.429Z"
+     },
+     "0205c0b426193472dfbd74e7a048b76d": {
+          "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query GetResources(\n    $prodEnvId: ID!\n    $resourceType: String\n  ) {\n    allResourceSets(\n      prodEnvId: $prodEnvId\n      type: $resourceType\n    ) {\n      id\n      name\n      type\n    }\n\n    getPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
+          "added": "2021-05-22T19:12:50.893Z"
+     },
+     "0ef2dd4c92b6a2b7a3345fc96b1e117c": {
+          "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+          "added": "2021-05-23T00:19:18.297Z"
+     },
+     "a39208c89fccb8d42db376f70095992f": {
+          "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query GetResources(\n    $prodEnvId: ID!\n    $resourceType: String\n  ) {\n    allResourceSets(\n      prodEnvId: $prodEnvId\n      type: $resourceType\n    ) {\n      id\n      name\n      type\n    }\n\n    allPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
+          "added": "2021-05-25T04:23:58.794Z"
+     },
+     "073514815f170485418d3b1071011e21": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+          "added": "2021-05-25T04:38:07.324Z"
+     },
+     "242f50e1670aa197d678c8fef078a6c5": {
+          "referer": "http://localhost:4180/devportal/resources/d30f6967-254b-4a19-abb7-abd02f14f23e?peid=609c5bf79b8ceca36d31ce94",
+          "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+          "added": "2021-05-25T04:41:48.865Z"
+     },
+     "c6fff2d82e5ee7d1238f729783a5148f": {
+          "referer": "http://localhost:4180/devportal/resources/d30f6967-254b-4a19-abb7-abd02f14f23e?peid=609c5bf79b8ceca36d31ce94",
+          "query": "\n  mutation RevokeSAAccess(\n      $prodEnvId: ID!, \n      $resourceId: String!,\n      $policyId: String!) {\n    deleteUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, policyId: $policyId)\n}\n",
+          "added": "2021-05-25T05:01:47.286Z"
+     },
+     "21581865a450d056abc17a0552a75a27": {
+          "referer": "http://localhost:4180/devportal/resources/d30f6967-254b-4a19-abb7-abd02f14f23e?peid=609c5bf79b8ceca36d31ce94",
+          "query": "\n  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {\n    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)\n  }\n",
+          "added": "2021-05-25T05:20:36.064Z"
+     },
+     "caadf1abf799958a180d79b8fb3acbcd": {
+          "referer": "http://localhost:4180/devportal/requests/new/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n          reference\n        }\n        credentialIssuer {\n          clientAuthenticator\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-25T06:36:03.808Z"
      }
 }

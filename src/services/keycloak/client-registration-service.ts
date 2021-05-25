@@ -6,7 +6,8 @@ import { headers } from './keycloak-api'
 
 import { strict as assert } from 'assert'
 
-import { clientTemplate } from './templates/client-template'
+import { clientTemplateClientSecret } from './templates/client-template-client-secret'
+import { clientTemplateClientJwt } from './templates/client-template-client-jwt'
 
 import { default as KcAdminClient } from 'keycloak-admin'
 
@@ -27,6 +28,11 @@ export interface ClientRegistration {
     enabled?: boolean,
 }
 
+export enum ClientAuthenticator {
+    ClientJWT = "client-jwt",
+    ClientSecret = "client-secret"
+}
+
 export class KeycloakClientRegistrationService {
     private issuerUrl : string
     private accessToken : string
@@ -43,20 +49,29 @@ export class KeycloakClientRegistrationService {
         }
     }
 
-    public async clientRegistration (issuer : string, accessToken : string, clientId : string, clientSecret : string, enabled : boolean =false) : Promise<ClientRegResponse> {
-        const body = Object.assign(clientTemplate, {
-            enabled: enabled,
-            clientId: clientId,
-            secret: clientSecret
-        })
+    public async clientRegistration (authenticator: ClientAuthenticator, clientId : string, clientSecret : string, certificate : string, enabled : boolean =false) : Promise<ClientRegResponse> {
+        const body = authenticator === ClientAuthenticator.ClientJWT ? 
+            Object.assign(clientTemplateClientJwt, {
+                enabled,
+                clientId,
+                attributes: {
+                    'jwt.credential.certificate': certificate
+                }
+            }) 
+            :
+            Object.assign(clientTemplateClientSecret, {
+                enabled,
+                clientId,
+                secret: clientSecret
+            })
 
-        logger.debug("[clientRegistration] CALLING %s", `${issuer}/clients-registrations/default`)
+        logger.debug("[clientRegistration] CALLING %s", `${this.issuerUrl}/clients-registrations/default`)
         logger.debug("[clientRegistration] BODY %j", body)
 
-        const response = await fetch(`${issuer}/clients-registrations/default`, {
+        const response = await fetch(`${this.issuerUrl}/clients-registrations/default`, {
             method: 'post',
             body:    JSON.stringify(body),
-            headers: headers(accessToken) as any
+            headers: headers(this.accessToken) as any
         })
         .then(checkStatus)
         .then(res => res.json())
@@ -70,7 +85,7 @@ export class KeycloakClientRegistrationService {
         } as ClientRegResponse
     }
 
-    public async updateClientRegistration (accessToken : string, clientId : string, vars : ClientRegistration) : Promise<ClientRegResponse> {
+    public async updateClientRegistration (clientId : string, vars : ClientRegistration) : Promise<ClientRegResponse> {
         logger.debug("[updateClientRegistration] CALLING %s", `${this.issuerUrl}/clients-registrations/default/${clientId}`)
         logger.debug("[updateClientRegistration] BODY %j", vars)
 
@@ -79,7 +94,7 @@ export class KeycloakClientRegistrationService {
         const response = await fetch(`${this.issuerUrl}/clients-registrations/default/${clientId}`, {
             method: 'put',
             body:    JSON.stringify(vars),
-            headers: headers(accessToken) as any
+            headers: headers(this.accessToken) as any
         })
         .then(checkStatus)
         .then(res => res.json())
@@ -91,10 +106,10 @@ export class KeycloakClientRegistrationService {
         } as ClientRegResponse
     }
 
-    public async deleteClientRegistration (issuer: string, accessToken: string, clientId: string) : Promise<void> {
-        await fetch(`${issuer}/clients-registrations/default/${clientId}`, {
+    public async deleteClientRegistration (clientId: string) : Promise<void> {
+        await fetch(`${this.issuerUrl}/clients-registrations/default/${clientId}`, {
             method: 'delete',
-            headers: headers(accessToken) as any
+            headers: headers(this.accessToken) as any
         })
         .then(checkStatus)
     }

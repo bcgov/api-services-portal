@@ -1,11 +1,5 @@
-import { checkStatus } from '../checkStatus'
-import fetch from 'node-fetch'
 import { logger } from '../../logger'
-import querystring from 'querystring'
-import { headers } from './keycloak-api'
 import { strict as assert } from 'assert'
-
-import { clientTemplate } from './templates/client-template'
 
 import { default as KcAdminClient } from 'keycloak-admin'
 
@@ -19,9 +13,9 @@ export class KeycloakUserService {
     }
 
     public async lookupUserByUsername (username: string) {
-        logger.debug("Finding "+ username)
+        logger.debug("[lookupUserByUsername] %s", username)
         const users = await this.kcAdminClient.users.find({ username : username })
-        logger.debug("lookupUserByUsername : " + JSON.stringify(users))
+        logger.debug("[lookupUserByUsername] : %j", users)
         assert.strictEqual(users.length, 1, 'User not found ' + username)
         return users[0].id
     }    
@@ -32,7 +26,7 @@ export class KeycloakUserService {
             clientId: clientId,
             clientSecret: clientSecret
         }).catch ((err:any) => {
-            console.log("Login failed " + err)
+            logger.error("[login] Login failed %s", err)
             throw(err)
         })
         return this

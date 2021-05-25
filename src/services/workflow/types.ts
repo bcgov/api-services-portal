@@ -10,6 +10,8 @@ export interface NewCredential {
     clientSecret?: string
     tokenEndpoint?: string
     apiKey?: string
+    clientPublicKey?: string
+    clientPrivateKey?: string
 }
 
 export interface RequestControls {
@@ -17,7 +19,10 @@ export interface RequestControls {
     roles?: string[]
     aclGroups?: string[]
     plugins?: ConsumerPlugin[]
+    clientCertificate?: string
+    clientGenCertificate?: boolean
 }
+
 export interface Name {
     name: string
 }
@@ -41,6 +46,7 @@ export interface IssuerEnvironmentConfig {
     environment: string
     issuerUrl: string
     clientRegistration?: string
+    // clientAuthenticator?: string
     clientId?: string
     clientSecret?: string
     initialAccessToken?: string

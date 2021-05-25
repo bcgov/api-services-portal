@@ -1,5 +1,5 @@
 import { Logger } from "../../logger"
-import { Environment, GatewayService } from "./types"
+import { Environment, EnvironmentWhereInput, GatewayService } from "./types"
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.prod-env')
@@ -87,10 +87,12 @@ export async function lookupProductEnvironmentServicesBySlug (context: any, appI
     return result.data.allEnvironments[0]
 }
 
-export async function lookupEnvironmentAndIssuerById (context: any, id: string) {
+export async function lookupEnvironmentAndIssuerUsingWhereClause (context: any, where: EnvironmentWhereInput) {
+    logger.debug("[lookupEnvironmentAndIssuerUsingWhereClause] WHERE %j", where)
     const result = await context.executeGraphQL({
-        query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
-                    Environment(where: {id: $id}) {
+        query: `query GetCredentialIssuerByEnvironmentId($where: EnvironmentWhereInput!) {
+                    Environment(where: $where) {
+                        id
                         name
                         approval
                         legal {
@@ -101,6 +103,34 @@ export async function lookupEnvironmentAndIssuerById (context: any, id: string) 
                             flow
                             mode
                             environmentDetails
+                            resourceType
+                            resourceAccessScope
+                        }
+                    }
+                }`,
+        variables: { where },
+    })
+    logger.debug("[lookupEnvironmentAndIssuerUsingWhereClause] result %j", result)
+    return result.data.Environment
+}
+
+export async function lookupEnvironmentAndIssuerById (context: any, id: string) {
+    const result = await context.executeGraphQL({
+        query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
+                    Environment(where: {id: $id}) {
+                        id
+                        name
+                        approval
+                        legal {
+                            reference
+                        }
+                        credentialIssuer {
+                            name
+                            flow
+                            mode
+                            environmentDetails
+                            resourceType
+                            resourceAccessScope
                         }
                     }
                 }`,

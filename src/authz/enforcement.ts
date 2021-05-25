@@ -70,6 +70,7 @@ const conditions : any = {
     "matchNotOneOfFieldKey": require('./conditions/matchNotOneOfFieldKey'),
     "matchOneOfFieldKey": require('./conditions/matchOneOfFieldKey'),
     "matchOneOfRole": require('./conditions/matchOneOfRole'),
+    "matchOneOfScope": require('./conditions/matchOneOfScope'),
     "matchOneOfListKey": require('./conditions/matchOneOfListKey'),
     "inRole": require('./conditions/inRole'),
     "matchFieldKey": require('./conditions/matchFieldKey'),

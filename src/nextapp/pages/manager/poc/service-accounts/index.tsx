@@ -188,15 +188,7 @@ const ApplicationsPage: React.FC<
 export default ApplicationsPage;
 
 const query = gql`
-  query GET {      
-    getUmaPoliciesByResourceName(resourceName: "dss-loc") {
-      id
-      name
-    }
-    getResourceOwners(name: "dss-loc", type: "namespace") {
-      id
-      name
-    }
+  query GET {
     allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {
       id
       name

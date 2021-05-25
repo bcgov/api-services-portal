@@ -1,0 +1,66 @@
+import { checkStatus } from '../checkStatus'
+import fetch from 'node-fetch'
+import { Logger } from '../../logger'
+import querystring from 'querystring'
+import { headers } from '../keycloak/keycloak-api'
+
+const logger = Logger('uma2-permission')
+
+/*
+
+## Get a ticket for the Namespace.Manage scope
+
+curl -v -X POST \
+  https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/authz/protection/permission \
+  -H 'Authorization: Bearer '$RTOK \
+  -H 'Content-Type: application/json' \
+  -d '[
+  {
+    "resource_scopes": [
+        "Namespace.Manage"
+    ]
+  }
+]'
+
+## Then use the Ticket and the user's token to get a new Token
+
+curl -v -X POST \
+  https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token \
+  -H "Authorization: Bearer ${UTOK}" \
+  --data "grant_type=urn:ietf:params:oauth:grant-type:uma-ticket" \
+  --data "ticket=$TK" \
+   \
+  --data "submit_request=false" \
+  --data "response_mode=permissions"
+
+Returns: [{"rsid":"d30f6967-254b-4a19-abb7-abd02f14f23e","rsname":"platform"}]
+
+*/
+
+export interface TicketRequest {
+    resource_id?: string
+    resource_scopes?: string[]
+    claims?: any
+}
+
+export class UMAPermissionService {
+    private issuerUrl : string
+    private accessToken : string
+
+    constructor(issuerUrl: string, accessToken: string) {
+        this.issuerUrl = issuerUrl
+        this.accessToken = accessToken
+    }
+
+    public async requestTicket (request : TicketRequest[]) : Promise<string> {
+        const url = `${this.issuerUrl}/authz/protection/permission`
+        logger.debug("[requestTicket] (%s) %j", url, request)
+        const result = await fetch (url, {
+            method: 'post',
+            body: JSON.stringify(request),
+            headers: headers(this.accessToken) as any
+        }).then(checkStatus).then(res => res.json())
+        logger.debug("[requestTicket] RESULT %j", result)
+        return result.ticket
+    }
+}

@@ -8,11 +8,12 @@ import { QueryKey, useQueryClient } from 'react-query';
 import { FaCheck, FaMinusCircle } from 'react-icons/fa';
 
 interface RevokeVariables {
-    prodEnvId: string;
+    prodEnvId: string
+    resourceId: string
     policyId: string
   }
 
-function List({ prodEnvId, data, queryKey }) {
+function List({ prodEnvId, resourceId, data, queryKey }) {
         const list = data?.sort((a,b) => a.name.localeCompare(b.name))
 
         const toast = useToast();
@@ -21,7 +22,7 @@ function List({ prodEnvId, data, queryKey }) {
 
         const handleRevoke = async (policyId: string) => {
             try {
-              await revoke.mutateAsync({ prodEnvId, policyId });
+              await revoke.mutateAsync({ prodEnvId, resourceId, policyId });
               toast({
                 title: 'Access Revoked',
                 status: 'success',
@@ -81,8 +82,9 @@ function List({ prodEnvId, data, queryKey }) {
 const revokeMutation = gql`
   mutation RevokeSAAccess(
       $prodEnvId: ID!, 
+      $resourceId: String!,
       $policyId: String!) {
-    deleteUmaPolicy(prodEnvId: $prodEnvId, policyId: $policyId)
+    deleteUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, policyId: $policyId)
 }
 `
 

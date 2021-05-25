@@ -1,13 +1,4 @@
-import { checkStatus } from '../checkStatus'
-import fetch from 'node-fetch'
-import { logger } from '../../logger'
-import querystring from 'querystring'
-import { headers } from './keycloak-api'
-
 import { strict as assert } from 'assert'
-
-import { clientTemplate } from './templates/client-template'
-
 import { default as KcAdminClient } from 'keycloak-admin'
 
 export class KeycloakClientService {

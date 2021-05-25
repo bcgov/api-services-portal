@@ -33,6 +33,7 @@ export {
 } from './user-service'
 
 export { 
+    OpenidWellKnown,
     getOpenidFromDiscovery,
     getOpenidFromIssuer 
 } from './keycloak-api'

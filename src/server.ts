@@ -33,7 +33,7 @@ const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
-const { PutFeed, DeleteFeed } = require('./batch/feedWorker');
+const { putFeedWorker, deleteFeedWorker } = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('./authz/enforcement')
@@ -246,12 +246,12 @@ const configureExpress = (app:any) => {
     //     console.log(req.path)
     //     req.path == "/" ? res.redirect('/home') : next()
     // })
-    app.put('/feed/:entity', (req : any, res : any) => PutFeed(keystone, req, res).catch ((err : any) => {
+    app.put('/feed/:entity', (req : any, res : any) => putFeedWorker(keystone, req, res).catch ((err : any) => {
         console.log(err)
         res.status(400).json({result: 'error', error: "" + err})
     }))
-    app.put('/feed/:entity/:id', (req : any, res : any) => PutFeed(keystone, req, res).catch ((err : any) => res.status(400).json({result: 'error', error: "" + err})))
-    app.delete('/feed/:entity/:id', (req : any, res : any) => DeleteFeed(keystone, req, res))
+    app.put('/feed/:entity/:id', (req : any, res : any) => putFeedWorker(keystone, req, res).catch ((err : any) => res.status(400).json({result: 'error', error: "" + err})))
+    app.delete('/feed/:entity/:id', (req : any, res : any) => deleteFeedWorker(keystone, req, res))
 
     app.put('/migration/import', async (req : any, res : any) => {
         const { MigrationFromV1 }  = require('./batch/migrationV1')

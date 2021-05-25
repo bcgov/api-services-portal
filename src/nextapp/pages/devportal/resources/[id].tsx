@@ -50,9 +50,9 @@ const ApiAccessResourcePage: React.FC<
 > = ({ queryKey, variables }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
   const { prodEnvId, resourceId } = variables;
-  const requests = data.getPermissionTickets?.filter((p) => !p.granted);
+  const requests = data.getPermissionTicketsForResource?.filter((p) => !p.granted);
 
-  const resource = data.getResourceSet?.[0]
+  const resource = data.getResourceSet
 
   return (
     <>
@@ -101,7 +101,7 @@ const ApiAccessResourcePage: React.FC<
           )}
           <UsersAccessList
             enableRevoke
-            data={data?.getPermissionTickets.filter((p) => p.granted)}
+            data={data?.getPermissionTicketsForResource.filter((p) => p.granted)}
             resourceId={resourceId}
             prodEnvId={prodEnvId}
             queryKey={queryKey}
@@ -125,7 +125,7 @@ const ApiAccessResourcePage: React.FC<
             />
           </Box>
           <Divider />
-          <ServiceAccounts prodEnvId={prodEnvId} data={data?.getUmaPolicies} queryKey={queryKey}/>
+          <ServiceAccounts prodEnvId={prodEnvId} resourceId={resourceId} data={data?.getUmaPoliciesForResource} queryKey={queryKey}/>
         </Box>
       </Container>
     </>
@@ -135,8 +135,8 @@ const ApiAccessResourcePage: React.FC<
 export default ApiAccessResourcePage;
 
 const query = gql`
-  query GetPermissions($resourceId: String, $prodEnvId: ID!) {
-    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {
+  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {
+    getPermissionTicketsForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       owner
       ownerName
@@ -149,7 +149,7 @@ const query = gql`
       granted
     }
 
-    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {
+    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
       description

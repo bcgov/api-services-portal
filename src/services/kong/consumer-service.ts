@@ -102,7 +102,7 @@ export class KongConsumerService {
     public async addKeyAuthToConsumer (consumerPK: string) : Promise<KeyAuthResponse> {
         const body = {
         }
-        logger.debug("CALLING with " + consumerPK);
+        logger.debug("[addKeyAuthToConsumer] CALLING with " + consumerPK);
 
         const response = await fetch(`${this.kongUrl}/consumers/${consumerPK}/key-auth`, {
             method: 'post',
@@ -123,7 +123,7 @@ export class KongConsumerService {
     public async addPluginToConsumer (consumerPK: string, plugin : KongPlugin) : Promise<KongObjectID> {
         const body = {
         }
-        logger.debug("CALLING with " + consumerPK);
+        logger.debug("[addPluginToConsumer] CALLING with " + consumerPK);
 
         const response = await fetch(`${this.kongUrl}/consumers/${consumerPK}/plugins`, {
             method: 'post',

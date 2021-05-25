@@ -10,6 +10,8 @@ export async function lookupCredentialIssuerById (context: any, id: string) : Pr
                         name
                         flow
                         mode
+                        clientRegistration
+                        clientAuthenticator
                         environmentDetails
                     }
                 }`,

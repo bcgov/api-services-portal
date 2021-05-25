@@ -125,6 +125,17 @@ export class KeycloakPermissionTicketService {
         .then(checkStatus)
     }
 
+    public async getPermission (id : string) : Promise<PermissionTicket> {
+        const url = `${this.issuerUrl}/authz/protection/permission/ticket/${id}`
+        const result = await fetch (url, {
+            method: 'get', 
+            headers: headers(this.accessToken) as any
+        })
+        .then(checkStatus)
+        .then(res => res.json())
+        return result
+    }
+
     public async createOrUpdatePermission (resourceId : string, requesterId : string, granted : boolean, scopeName : string) : Promise<PermissionTicket> {
         const perms = await this.listPermissions ({resourceId: resourceId, requester: requesterId, returnNames: true})
         logger.debug(JSON.stringify(perms))

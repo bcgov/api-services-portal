@@ -2,8 +2,9 @@ const { EnforcementPoint } = require('../../authz/enforcement')
 
 import { UMAPolicyService, Policy, PolicyQuery, UMAResourceRegistrationService, ResourceSetQuery, ResourceSet } from '../../services/uma2'
 
-import { doTokenExchangeForCredentialIssuer, doClientLoginForCredentialIssuer } from './Common'
+import { getSuitableOwnerToken, getEnvironmentContext, getResourceSets } from './Common'
 import type { TokenExchangeResult } from './Common'
+import { strict as assert } from 'assert'
 
 const typeUMAPolicy = `
 type UMAPolicy {
@@ -40,14 +41,16 @@ module.exports = {
             ],            
             queries: [
                 {
-                    schema: 'getUmaPolicies(prodEnvId: ID!, resourceId: String): [UMAPolicy]',
+                    schema: 'getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]',
                     resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                        const subjectToken = context.req.headers['x-forwarded-access-token']
-                        const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
-                        
-                        const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
+                        const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
+
+                        const resourceIds = await getResourceSets (envCtx)
+                        assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+    
+                        const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
                     
-                        return await kcprotectApi.listPolicies ({resource: args.resourceId} as PolicyQuery)
+                        return await policyApi.listPolicies ({resource: args.resourceId} as PolicyQuery)
                     },
                     access: EnforcementPoint,
               },
@@ -56,26 +59,32 @@ module.exports = {
             mutations: [
             
               {
-                schema: 'createUmaPolicy(prodEnvId: ID!, resourceId: String, data: UMAPolicyInput!): UMAPolicy',
+                schema: 'createUmaPolicy(prodEnvId: ID!, resourceId: String!, data: UMAPolicyInput!): UMAPolicy',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
-                
-                    return await kcprotectApi.createUmaPolicy (args.resourceId, args.data as Policy)
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+
+                    const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
+                    return await policyApi.createUmaPolicy (args.resourceId, args.data as Policy)
                 },
                 access: EnforcementPoint,
               },   
               {
-                schema: 'deleteUmaPolicy(prodEnvId: ID!, policyId: String!): Boolean',
+                schema: 'deleteUmaPolicy(prodEnvId: ID!, resourceId: String!, policyId: String!): Boolean',
                 resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const subjectToken = context.req.headers['x-forwarded-access-token']
-                    const tokenResult : TokenExchangeResult = await doTokenExchangeForCredentialIssuer (keystone, subjectToken, args.prodEnvId)
+                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
 
-                    const kcprotectApi = new UMAPolicyService (tokenResult.issuer, tokenResult.accessToken)
-                
-                    await kcprotectApi.deleteUmaPolicy (args.policyId)
+                    const resourceIds = await getResourceSets (envCtx)
+                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+
+                    const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
+
+                    await policyApi.findPolicyByResource (args.resourceId, args.policyId)
+
+                    await policyApi.deleteUmaPolicy (args.policyId)
+
                     return true
                 },
                 access: EnforcementPoint,

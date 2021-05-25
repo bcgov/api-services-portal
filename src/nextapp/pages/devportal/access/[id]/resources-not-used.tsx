@@ -42,7 +42,7 @@ interface ResourcesProps {
 const ResourcesComponent: React.FC<ResourcesProps> = ({prodEnvId, owner, resourceType, environment}) => {
     const { data } = useApi(
         'allProductResources',
-        { query, variables: { prodEnvId, owner, resourceType } },
+        { query, variables: { prodEnvId, resourceType } },
         { suspense: false }
     );
     
@@ -68,7 +68,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({prodEnvId, owner, resourc
           </Tr>
         </Thead>
         <Tbody>
-          {data?.getResourceSet?.map((r) => (
+          {data?.allResourceSets?.map((r) => (
             <Tr key={r.id}>
               <Td width="50%">
                 <NextLink
@@ -80,8 +80,9 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({prodEnvId, owner, resourc
               </Td>
               <Td>{r.type}</Td>
               <Td>
+
                 <AvatarGroup size="sm" max={6}>
-                  {data.getPermissionTickets
+                  {data.allPermissionTickets
                     ?.filter((p) => p.resource === r.id)
                     .map((p) => (
                       <Avatar
@@ -106,14 +107,14 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({prodEnvId, owner, resourc
 export default ResourcesComponent;
 
 const query = gql`
-  query GetResources($prodEnvId: ID!, $owner: String, $resourceType: String) {
-    getResourceSet(prodEnvId: $prodEnvId, owner: $owner, type: $resourceType) {
+  query GetResources($prodEnvId: ID!, $resourceType: String) {
+    allResourceSets(prodEnvId: $prodEnvId, type: $resourceType) {
       id
       name
       type
     }
 
-    getPermissionTickets(prodEnvId: $prodEnvId) {
+    allPermissionTickets(prodEnvId: $prodEnvId) {
       id
       owner
       ownerName
@@ -125,6 +126,5 @@ const query = gql`
       scopeName
       granted
     }
-
   }
 `;

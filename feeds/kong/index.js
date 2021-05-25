@@ -95,6 +95,8 @@ function loadProducer (xfer, destinationUrl, file, name, type, feedPath) {
 
         item['plugins'].map(plugin => xfer.inject_hash_and_source('kong', plugin))
 
+        item['plugins'].filter(plugin => plugin.tags == null).map(plugin => { plugin['tags'] = []})
+        
         // if (item['plugins'].length == 0) {
         //     return new Promise ((resolve, reject) => resolve())
         // }

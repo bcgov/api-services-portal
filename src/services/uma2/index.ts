@@ -1,3 +1,10 @@
+export { 
+    UMAPermissionService,
+} from './permission-service'
+
+export type {
+    TicketRequest
+} from './permission-service'
 
 export { 
     UMAPolicyService 
@@ -20,7 +27,7 @@ export type {
 } from './resource-registration-service'
 
 export { 
-    UMA2TokenService 
+    UMA2TokenService
 } from './token-service'
 
 export type { 

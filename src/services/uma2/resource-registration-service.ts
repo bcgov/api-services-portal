@@ -1,8 +1,10 @@
 import { checkStatus } from '../checkStatus'
 import fetch from 'node-fetch'
-import { logger } from '../../logger'
+import { Logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from '../keycloak/keycloak-api'
+
+const logger = Logger('uma2-resource')
 
 export interface ResourceSetQuery {
     name?: string,
@@ -42,7 +44,7 @@ export class UMAResourceRegistrationService {
 
     public async createResourceSet (set: ResourceSet) : Promise<ResourceSet> {
         const url = `${this.issuerUrl}/authz/protection/resource_set`
-        logger.debug("[createResourceSet] URL = %s", url)
+        logger.debug("[createResourceSet] URL %s", url)
         const result = await fetch (url, {
             method: 'post', 
             body: JSON.stringify(set),
@@ -51,13 +53,13 @@ export class UMAResourceRegistrationService {
         .then(checkStatus)
         .then(res => res.json())
         result.id = result._id
-        logger.debug("[createResourceSet] RESULT = %j", result)
+        logger.debug("[createResourceSet] RESULT %j", result)
         return result
     }
 
     public async deleteResourceSet (rid : string) {
         const url = `${this.issuerUrl}/authz/protection/resource_set/${rid}`
-        logger.debug("[deleteResourceSet] URL = %s", url)
+        logger.debug("[deleteResourceSet] URL %s", url)
         const result = await fetch (url, {
             method: 'delete', 
             headers: headers(this.accessToken) as any
@@ -68,7 +70,7 @@ export class UMAResourceRegistrationService {
 
     public async getResourceSet (rid : string) : Promise<ResourceSet> {
         const url = `${this.issuerUrl}/authz/protection/resource_set/${rid}`
-        logger.debug("[getResourceSet] URL = %s", url)
+        logger.debug("[getResourceSet] URL %s", url)
         const result = await fetch (url, {
             method: 'get', 
             headers: headers(this.accessToken) as any
@@ -76,15 +78,20 @@ export class UMAResourceRegistrationService {
         .then(checkStatus)
         .then(res => res.json())
         .then(json => json as ResourceSet)
-        logger.debug("[getResourceSet] (%s) RESULT = %s", rid, JSON.stringify(result))
+        logger.debug("[getResourceSet] (%s) RESULT %j", rid, result)
         result.id = rid
         return result
     }
 
-    public async listResources (query : ResourceSetQuery) : Promise<ResourceSet[]> {
+    public async listResourcesByIdList (resources : string[]) : Promise<ResourceSet[]> {
+        logger.debug("[listResourcesByIdList] Search %j", resources)
+        return Promise.all(resources.map((id) => this.getResourceSet(id)))
+    }
+
+    public async listResources (query : ResourceSetQuery) : Promise<string[]> {
         const requestQuery = querystring.stringify(query as any)
         const url = `${this.issuerUrl}/authz/protection/resource_set?${requestQuery}`
-        logger.debug("[listResources] URL = %s", url)
+        logger.debug("[listResources] %s", url)
         const result = await fetch (url, {
             method: 'get', 
             headers: headers(this.accessToken) as any
@@ -92,7 +99,7 @@ export class UMAResourceRegistrationService {
         .then(checkStatus)
         .then(res => res.json())
         .then(json => json as string[])
-        logger.debug("[listResources] RESULT = %s", JSON.stringify(result, null, 4))
-        return Promise.all(result.map((id) => this.getResourceSet(id)))
+        logger.debug("[listResources] RESULT %j", result)
+        return result
     }    
 }

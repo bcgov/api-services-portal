@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import { Logger } from '../../logger'
 import querystring from 'querystring'
 import { headers } from '../keycloak/keycloak-api'
+import { strict as assert } from 'assert'
 
 export interface PolicyQuery {
     resource?: string,
@@ -31,34 +32,42 @@ export class UMAPolicyService {
         this.accessToken = accessToken
     }
 
+    public async findPolicyByResource(resourceId: string, policyId: string): Promise<Policy> {
+        const policies = await this.listPolicies({resource: resourceId})
+        
+        const matched = policies.filter(p => p.id === policyId)
+
+        assert.strictEqual(matched.length, 1, "Policy not found or not associated with resource")
+        return matched[0]
+    }
+
     public async listPolicies(query: PolicyQuery): Promise<Policy[]> {
         const requestQuery = querystring.stringify(query as any)
         const url = `${this.issuerUrl}/authz/protection/uma-policy?${requestQuery}`
-        logger.debug("QUERY = %s", url)
-        logger.debug("TOKEN = "+this.accessToken)
+        logger.debug("[listPolicies] %s", url)
         const result = await fetch (url, {
             method: 'get', 
             headers: {'Authorization': `Bearer ${this.accessToken}` }
         }).then(checkStatus).then(res => res.json())
-        logger.debug(JSON.stringify(result, null, 4))
+        logger.debug("[listPolicies] RESULT %j", result)
         return result
     }
 
     public async createUmaPolicy (rid : string, body : Policy) {
         const url = `${this.issuerUrl}/authz/protection/uma-policy/${rid}`
-        logger.debug("QUERY = "+url)
+        logger.debug("[createUmaPolicy] %s", url)
         const result = await fetch (url, {
             method: 'post',
             body: JSON.stringify(body),
             headers: headers(this.accessToken) as any
         }).then(checkStatus).then(res => res.json())
-        logger.debug(JSON.stringify(result, null, 4))
+        logger.debug("[createUmaPolicy] RESULT %j", result)
         return result
     }
 
     public async deleteUmaPolicy (policyId : string) {
         const url = `${this.issuerUrl}/authz/protection/uma-policy/${policyId}`
-        logger.debug("QUERY = "+url)
+        logger.debug("[deleteUmaPolicy] %s", url)
         await fetch (url, {
             method: 'delete',
             headers: headers(this.accessToken) as any

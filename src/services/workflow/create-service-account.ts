@@ -20,6 +20,8 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
 
     const productEnvironment = await lookupProductEnvironmentServicesBySlug(context, productEnvironmentSlug)
 
+    const controls: RequestControls = {defaultClientScopes: [], clientCertificate: null, clientGenCertificate: false}
+
     const application : any = null
 //    const application = await lookupApplication(context, requestDetails.application.id)
 
@@ -28,7 +30,7 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
 
     const client = existingClientId != null ? 
         await findClient(context, productEnvironment.name, productEnvironment.credentialIssuer.id, existingClientId) : 
-        await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, newClientId)
+        await registerClient (context, productEnvironment.name, productEnvironment.credentialIssuer.id, controls, newClientId)
     logger.debug("Using client %j", client)
 
     const clientId = client.client.clientId
@@ -82,11 +84,10 @@ export const CreateServiceAccount = async (context: any, productEnvironmentSlug:
     // issuer.initialAccessToken if 'iat'
     const token = issuerEnvConfig.clientRegistration == 'anonymous' ? null : (issuerEnvConfig.clientRegistration == 'managed' ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret) : issuerEnvConfig.initialAccessToken)
 
-    const controls: RequestControls = JSON.parse('{"defaultClientScopes": []}')
     //const defaultClientScopes = controls.defaultClientScopes;
     
-    const kcClientService = new KeycloakClientRegistrationService(openid.issuer, null)
-    await kcClientService.updateClientRegistration (token, clientId, {clientId, enabled: true})
+    const kcClientService = new KeycloakClientRegistrationService(openid.issuer, token)
+    await kcClientService.updateClientRegistration (clientId, {clientId, enabled: true})
 
     // // https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky
     // console.log("S = "+openid.issuer.indexOf('/realms'))

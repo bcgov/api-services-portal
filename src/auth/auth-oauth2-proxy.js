@@ -109,6 +109,7 @@ class Oauth2ProxyAuthStrategy {
                 logger.debug("Session %j", response.user)
                 response.user.groups = toJson(response.user.groups)
                 response.user.roles = toJson(response.user.roles)
+                response.user.scopes = toJson(response.user.scopes)
             }
             res.json(response)
         })
@@ -170,11 +171,11 @@ class Oauth2ProxyAuthStrategy {
 
         const { errors } = await this.keystone.executeGraphQL({
             context: this.keystone.createContext({ skipAccessControl: true }),
-            query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String) {
-                    updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles }) {
+            query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String, $scopes: String) {
+                    updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles, scopes: $scopes }) {
                         id
                 } }`,
-            variables: { tempId, newJti, namespace, roles },
+            variables: { tempId, newJti, namespace, roles, scopes: JSON.stringify(scopes) },
         })
         if (errors) {
             logger.error("assign_namespace - NO! Something went wrong %j", errors)
@@ -258,11 +259,11 @@ class Oauth2ProxyAuthStrategy {
             logger.debug("Temporary Credential NOT FOUND - CREATING AUTOMATICALLY")
             const { errors } = await this.keystone.executeGraphQL({
                 context: this.keystone.createContext({ skipAccessControl: true }),
-                query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $userId: String) {
-                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, userId: $userId }) {
+                query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
+                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
                             id
                     } }`,
-                variables: { jti, sub, name, email, username, namespace, groups, roles, userId },
+                variables: { jti, sub, name, email, username, namespace, groups, roles, scopes : '[]', userId },
             })
             if (errors) {
                 logger.error("register_user - NO! Something went wrong %j", errors)
@@ -274,6 +275,7 @@ class Oauth2ProxyAuthStrategy {
         const user = results[0]
         user.groups = toJson(user.groups)
         user.roles = toJson(user.roles)
+        user.scopes = toJson(user.scopes)
 
         logger.debug("[register_user] USER = %j", user)
         await this._authenticateItem(user, null, operation === 'create', req, res, next);

@@ -37,8 +37,8 @@ function ViewSecret({cred, defaultShow, instruction, onClose}) {
                         {name:'apiKey', label:'API Key'}, 
                         {name:'clientId', label:'Client ID'}, 
                         {name:'clientSecret', label:'Client Secret'},
-                        {name:'privateKey', label:'Signing Key'},
-                        {name:'certificate', label:'Signing Certificate'},
+                        {name:'clientPrivateKey', label:'Signing Private Key'},
+                        {name:'clientPublicKey', label:'Signing Public Certificate'},
                         {name:'tokenEndpoint', label:'Token Endpoint'}
                     ].filter(c => c.name in cred).map(c => (
                         <Box><strong>{c.label} :</strong> {cred[c.name]}</Box>
