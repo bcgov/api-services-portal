@@ -4,35 +4,41 @@ import { Box, Container, Flex, Input, Select, Text } from '@chakra-ui/react';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { gql } from 'graphql-request';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, restApi } from '@/shared/services/api';
 import { GetServerSideProps } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
+const { useEffect, useState } = React
 
-const queryKey = ['allProducts', 'discovery'];
+//const queryKey = ['allProducts', 'discovery'];
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const queryClient = new QueryClient();
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(
-    queryKey,
-    async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
-  );
+// //   await queryClient.prefetchQuery(
+// //     queryKey,
+// //     async () =>
+// //       await api<Query>(query, null, {
+// //         headers: context.req.headers as HeadersInit,
+// //       })
+// //   );
 
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-};
+//   return {
+//     props: {
+//       dehydratedState: dehydrate(queryClient),
+//     },
+//   };
+// };
 
 const ApiDiscoveryPage: React.FC = () => {
-  const { data } = useApi(queryKey, { query }, { suspense: false });
+  const [data, setData] = useState<Query['allProducts']>();
+  useEffect(() => {
+    restApi('/ds/api/directory').then((data) => {
+        setData(data as Query['allProducts'])
+      })
+  }, [])
 
   return (
     <>
@@ -60,7 +66,7 @@ const ApiDiscoveryPage: React.FC = () => {
               </Box>
             </Flex>
           )}
-          <DiscoveryList data={data.allDiscoverableProducts} />
+          <DiscoveryList data={data} />
         </Box>
       </Container>
     </>
@@ -68,40 +74,3 @@ const ApiDiscoveryPage: React.FC = () => {
 };
 
 export default ApiDiscoveryPage;
-
-const query = gql`
-  query GetProducts {
-    allDiscoverableProducts {
-      id
-      name
-      environments {
-        name
-        active
-        flow
-      }
-      dataset {
-        name
-        title
-        notes
-        sector
-        license_title
-        view_audience
-        security_class
-        record_publish_date
-        tags
-        organization {
-          title
-        }
-        organizationUnit {
-          title
-        }
-      }
-      organization {
-        title
-      }
-      organizationUnit {
-        title
-      }
-    }
-  }
-`;

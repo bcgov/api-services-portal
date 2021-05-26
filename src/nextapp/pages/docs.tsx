@@ -15,8 +15,9 @@ import NextLink from 'next/link';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import type { GetServerSideProps } from 'next';
-
-import api from '@/shared/services/api';
+const { useEffect, useState } = React
+import { Query } from '@/shared/types/query.types';
+import { restApi } from '@/shared/services/api';
 import Card from '@/components/card';
 import GridLayout from '@/layouts/grid';
 import PageHeader from '@/components/page-header';
@@ -31,11 +32,17 @@ interface PageData {
 
 interface DocsPageProps {
   error: string;
-  pages: PageData[];
 }
 
-const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
-  return (
+const DocsPage: React.FC<DocsPageProps> = ({ error }) => {
+  const [pages, setPages] = useState<Query['allContents']>();
+  useEffect(() => {
+    restApi('/ds/api/documentation').then((data) => {
+        setPages(data as Query['allContents'])
+      })
+  }, [])
+  
+  return pages ? (
     <>
       <Head>
         <title>API Program Services | Documentation</title>
@@ -83,7 +90,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
                 </Heading>
                 <Text>{d.description}</Text>
                 <HStack spacing={1} mt={4}>
-                    {JSON.parse(d.tags).map((tag:string) => (
+                    {(d.tags as any).map((tag:string) => (
                         <Tag size="md" key={tag} variant="solid" colorScheme="teal">{tag}</Tag>
                     ))}
                 </HStack>
@@ -93,39 +100,39 @@ const DocsPage: React.FC<DocsPageProps> = ({ error, pages }) => {
         )}
       </Container>
     </>
-  );
-};
+  ) : <></>
+}
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  try {
-    const pagesQuery = gql`
-      {
-        allDiscoverableContents(where: { isComplete: true }) {
-          id
-          title
-          slug
-          description
-          tags
-        }
-      }
-    `;
-    const pages: { allDiscoverableContents: any[] } = await api(pagesQuery, null, {
-        headers: req.headers as HeadersInit,
-    });
+// export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+//   try {
+//     const pagesQuery = gql`
+//       {
+//         allDiscoverableContents(where: { isComplete: true }) {
+//           id
+//           title
+//           slug
+//           description
+//           tags
+//         }
+//       }
+//     `;
+//     const pages: { allDiscoverableContents: any[] } = await api(pagesQuery, null, {
+//         headers: req.headers as HeadersInit,
+//     });
 
-    return {
-      props: {
-        pages: pages.allDiscoverableContents || [],
-      },
-    };
-  } catch (err) {
-    return {
-      props: {
-        pages: [],
-        error: err.message,
-      },
-    };
-  }
-};
+//     return {
+//       props: {
+//         pages: pages.allDiscoverableContents || [],
+//       },
+//     };
+//   } catch (err) {
+//     return {
+//       props: {
+//         pages: [],
+//         error: err.message,
+//       },
+//     };
+//   }
+// };
 
 export default DocsPage;

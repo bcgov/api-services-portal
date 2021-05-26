@@ -1,41 +1,75 @@
-import jwt from 'express-jwt'
-import jwksRsa from 'jwks-rsa'
+import jwt from 'express-jwt';
+import jwksRsa from 'jwks-rsa';
 import { Logger } from '../logger';
+import express from 'express';
+import Keycloak from 'keycloak-connect';
 
-const logger = Logger('auth-tsoa')
+const logger = Logger('auth-tsoa');
 
 const jwtCheck = jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: process.env.JWKS_URL
-})
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 5,
+  jwksUri: process.env.JWKS_URL,
+});
 
-const verifyJWT = jwt({ 
-    secret: jwtCheck, 
-    algorithms: ['RS256'], 
-    credentialsRequired: true, 
-    requestProperty: 'oauth_user'
-})
+const verifyJWT = jwt({
+  secret: jwtCheck,
+  algorithms: ['RS256'],
+  credentialsRequired: true,
+  requestProperty: 'oauth_user',
+});
 
-export function expressAuthentication(request: any, securityName: string, scopes?: string[]): Promise<any> {
-    return new Promise((resolve: any, reject: any) => {
-        verifyJWT(request, null, ((err:any) => {
-            if (err) {
-                logger.debug("ERROR Verifying jWT " + err)
-                return reject(err)
+let kcConfig: any = {
+  clientId: process.env.GWA_RES_SVR_CLIENT_ID,
+  secret: process.env.GWA_RES_SVR_CLIENT_SECRET,
+  public: false,
+  bearerOnly: true,
+  serverUrl: process.env.KEYCLOAK_AUTH_URL,
+  realm: process.env.KEYCLOAK_REALM,
+  verifyTokenAudience: false,
+};
+
+let keycloak = new Keycloak({}, kcConfig);
+
+export function expressAuthentication(
+  request: any,
+  securityName: string,
+  scopes?: string[]
+): Promise<any> {
+  return new Promise((resolve: any, reject: any) => {
+    verifyJWT(request, null, (err: any) => {
+      if (err) {
+        logger.debug('ERROR Verifying JWT ' + err);
+        return reject(err);
+      } else {
+        logger.debug('RESOLVED %j', request.oauth_user);
+        // Check if JWT contains all required scopes
+        const tokenScopes = request.oauth_user.scope.split(' ');
+        logger.debug('Token Scopes = %s', tokenScopes);
+        logger.debug(
+          "Resource Authorization on '%s'",
+          `${request.params.ns}:${scopes[0]}`
+        );
+        const resp: any = keycloak.enforcer(
+          `${request.params.ns}:${scopes[0]}`
+        )(
+          request,
+          {
+            status: (s: number) => {
+              reject(new Error('JWT does not contain required scope.'));
+            },
+            end: (text: string) => false,
+          } as any,
+          (authzerr: any) => {
+            if (authzerr) {
+              reject(new Error('Access Denied'));
             } else {
-                logger.debug("RESOLVED %j", request.oauth_user)
-                // Check if JWT contains all required scopes
-                const tokenScopes = request.oauth_user.scope.split(' ')
-                logger.debug("Token Scopes = %s", tokenScopes)
-                for (let scope of scopes) {
-                    if (!tokenScopes.includes(scope)) {
-                        reject(new Error("JWT does not contain required scope."));
-                    }
-                }                
-                return resolve(request.oauth_user)
+              resolve(request.oauth_user);
             }
-        }))
-    })
+          }
+        );
+      }
+    });
+  });
 }
