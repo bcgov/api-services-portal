@@ -1,8 +1,6 @@
-const { Text, Checkbox, Select, Relationship } = require('@keystonejs/fields')
+const { Text, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
-
 const { newProductID, isProductID } = require('../services/identifiers')
-
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
 module.exports = {

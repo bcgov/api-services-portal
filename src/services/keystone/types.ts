@@ -4755,6 +4755,8 @@ export type Product = {
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<Dataset>;
+  organization?: Maybe<Organization>;
+  organizationUnit?: Maybe<OrganizationUnit>;
   environments: Array<Environment>;
   _environmentsMeta?: Maybe<_QueryMeta>;
 };
@@ -4862,6 +4864,10 @@ export type ProductWhereInput = {
   description_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   dataset?: Maybe<DatasetWhereInput>;
   dataset_is_null?: Maybe<Scalars['Boolean']>;
+  organization?: Maybe<OrganizationWhereInput>;
+  organization_is_null?: Maybe<Scalars['Boolean']>;
+  organizationUnit?: Maybe<OrganizationUnitWhereInput>;
+  organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
   environments_every?: Maybe<EnvironmentWhereInput>;
   /**  condition must be true for at least 1 node  */
@@ -4887,6 +4893,10 @@ export enum SortProductsBy {
   DescriptionDesc = 'description_DESC',
   DatasetAsc = 'dataset_ASC',
   DatasetDesc = 'dataset_DESC',
+  OrganizationAsc = 'organization_ASC',
+  OrganizationDesc = 'organization_DESC',
+  OrganizationUnitAsc = 'organizationUnit_ASC',
+  OrganizationUnitDesc = 'organizationUnit_DESC',
   EnvironmentsAsc = 'environments_ASC',
   EnvironmentsDesc = 'environments_DESC'
 }
@@ -4897,6 +4907,8 @@ export type ProductUpdateInput = {
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -4911,6 +4923,8 @@ export type ProductCreateInput = {
   namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
+  organization?: Maybe<OrganizationRelateToOneInput>;
+  organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 

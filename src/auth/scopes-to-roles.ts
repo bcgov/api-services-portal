@@ -1,7 +1,9 @@
 
+export function scopes (scopeString: string) {
+    return scopeString.split(' ')
+}
 
-export function scopesToRoles (scopeString: string) {
-    const scopes = scopeString.split(' ')
+export function scopesToRoles (scopes: string[]) {
     const _roles = []
     if (scopes.includes('Namespace.Manage')) {
         _roles.push('api-owner')

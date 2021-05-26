@@ -1,6 +1,6 @@
 import { Keystone } from "@keystonejs/keystone";
 import { injectable } from "tsyringe";
-import { scopesToRoles } from '../../auth/scopes-to-roles'
+import { scopes, scopesToRoles } from '../../auth/scopes-to-roles'
 
 @injectable()
 export class KeystoneService {
@@ -13,12 +13,18 @@ export class KeystoneService {
       return this.keystone
   }
 
+  public sudo() : any {
+      return this.keystone.createContext({ skipAccessControl: true })
+  }
+
   public createContext(request: any) : any {
+      const _scopes = scopes(request.user.scope)
       const identity = { 
           id: null,
           username: request.user['preferred_username'],
           namespace: request.user['namespace'],
-          roles: scopesToRoles(request.user.scope),
+          roles: scopesToRoles(_scopes),
+          scopes: _scopes,
           userId: null
       } as any
       return this.keystone.createContext({ skipAccessControl: false, authentication: { item: identity }})      

@@ -74,6 +74,62 @@ paths:
                     required: true
                     schema:
                         type: string
+    /directory:
+        get:
+            operationId: List
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters: []
+    '/directory/{id}':
+        get:
+            operationId: Get
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    /documentation:
+        get:
+            operationId: List
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters: []
+    '/documentation/{slug}':
+        get:
+            operationId: Get
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: slug
+                    required: true
+                    schema:
+                        type: string
     '/users/{userId}':
         get:
             operationId: GetUser
@@ -101,7 +157,7 @@ paths:
                         type: string
     '/identifiers/{type}':
         get:
-            operationId: GetProduct
+            operationId: GetNewID
             responses:
                 '200':
                     description: Ok

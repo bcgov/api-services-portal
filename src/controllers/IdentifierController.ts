@@ -4,17 +4,22 @@ import {
     Path,
     Route
 } from "tsoa"
-import { v4 } from 'uuid'
+
+import { newProductID, newEnvironmentID, newApplicationID } from '../services/identifiers'
 
 @Route("identifiers")
 export class IdentifiersController extends Controller {
 
     @Get("{type}")
-    public async getProduct(
+    public async getNewID(
       @Path() type: string
     ): Promise<string> {
       if (type == 'environment') {
-        return v4().replace(/-/g,'').toUpperCase().substr(0, 8)
+        return newEnvironmentID()
+      } else if (type == 'product') {
+        return newProductID()
+      } else if (type == 'application') {
+        return newApplicationID()
       } else {
         return ""
       }
