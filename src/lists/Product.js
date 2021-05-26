@@ -1,9 +1,7 @@
 const { Text, Checkbox, Select, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
-const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
-const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
-const { v4: uuidv4 } = require('uuid');
+const { newProductID, isProductID } = require('../services/identifiers')
 
 const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
 
@@ -41,14 +39,11 @@ module.exports = {
         resolvedData
     }) => {
         if (operation == "create") {
-            // If an AppId is provided then don't bother creating one
-            if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
-                return resolvedData
+            if ('appId' in resolvedData && isProductID(resolvedData['appId'])) {
             } else {
-                resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+                resolvedData['appId'] = newProductID()
             }
             resolvedData['namespace'] = context['authedItem']['namespace']
-            return resolvedData
         }
         return resolvedData
     }
