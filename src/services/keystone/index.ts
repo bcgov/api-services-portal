@@ -1,8 +1,9 @@
 
-export { 
+export {
     lookupEnvironmentAndApplicationByAccessRequest,
     linkServiceAccessToRequest,
-    markAccessRequestAsNotIssued
+    markAccessRequestAsNotIssued,
+    updateAccessRequestState
 } from './access-request'
 
 export {

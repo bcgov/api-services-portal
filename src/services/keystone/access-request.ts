@@ -1,5 +1,5 @@
 import { Logger } from '../../logger'
-import { AccessRequest } from './types'
+import { AccessRequest, AccessRequestUpdateInput } from './types'
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.access-req')
@@ -7,8 +7,9 @@ const logger = Logger('keystone.access-req')
 export async function lookupEnvironmentAndApplicationByAccessRequest (context: any, id: string) : Promise<AccessRequest> {
     const result = await context.executeGraphQL({
         query: `query GetSpecificEnvironment($id: ID!) {
-                    allAccessRequests(where: {id: $id}) {
+                    AccessRequest(where: {id: $id}) {
                         id
+                        controls
                         productEnvironment {
                             appId
                             id
@@ -34,13 +35,12 @@ export async function lookupEnvironmentAndApplicationByAccessRequest (context: a
                                 extForeignKey
                             }
                         }
-                        controls
                     }
                 }`,
         variables: { id: id },
     })
     logger.debug("Query [lookupEnvironmentAndApplicationByAccessRequest] result %j", result)
-    return result.data.allAccessRequests[0]
+    return result.data.AccessRequest
 }
 
 
@@ -68,6 +68,22 @@ export async function markAccessRequestAsNotIssued (context: any, requestId: str
                     }
                 }`,
         variables: { requestId },
+    })
+    logger.debug("Mutation [markAccessRequestAsNotIssued] result %j", result)
+
+    assert.strictEqual('errors' in result, false, 'Error marking request as not issued')
+    return result.data.updateAccessRequest
+}
+
+export async function updateAccessRequestState (context: any, requestId: string, data: AccessRequestUpdateInput) : Promise<AccessRequest> {
+    // { isComplete: false, isApproved: false, isIssued: false }
+    const result = await context.executeGraphQL({
+        query: `mutation MarkRequestNotIssued($requestId: ID!, $data: AccessRequestUpdateInput) {
+                    updateAccessRequest(id: $requestId, data: $data ) {
+                        id
+                    }
+                }`,
+        variables: { requestId, data },
     })
     logger.debug("Mutation [markAccessRequestAsNotIssued] result %j", result)
 

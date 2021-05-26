@@ -1,9 +1,6 @@
 const { Text, Checkbox, Select, Relationship } = require('@keystonejs/fields')
-const { Markdown } = require('@keystonejs/fields-markdown')
-const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
-const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
-const {v4: uuidv4} = require('uuid');
+const { newEnvironmentID, isEnvironmentID } = require('../services/identifiers')
 
 const { ValidateActiveEnvironment } = require('../services/workflow')
 
@@ -65,11 +62,10 @@ module.exports = {
         fieldPath, // Field hooks only
     }) {
         if (operation == 'create') {
-            // If an AppId is provided then don't bother creating one
-            if ('appId' in resolvedData && resolvedData['appId'].length == 8) {
-                return resolvedData
+            if ('appId' in resolvedData && isEnvironmentID(resolvedData['appId'])) {
+            } else {
+                resolvedData['appId'] = newEnvironmentID()
             }
-            resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
         }
         return resolvedData
     }),

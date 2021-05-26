@@ -14,13 +14,12 @@ import { NewCredential, RequestControls } from './types'
 import { registerClient } from './client-credentials'
 import { registerApiKey } from './kong-api-key'
 import { Logger } from '../../logger'
+import { AccessRequest } from '../keystone/types'
 
 const logger = Logger('wf.RegenCreds')
 
-export const generateCredential = async (context: any, accessRequestId: string) : Promise<NewCredential> => {
+export const generateCredential = async (context: any, requestDetails: AccessRequest) : Promise<NewCredential> => {
     const feederApi = new FeederService(process.env.FEEDER_URL)
-
-    const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(context, accessRequestId)
 
     const controls: RequestControls = 'controls' in requestDetails ? JSON.parse(requestDetails.controls) : {}
 

@@ -7,6 +7,7 @@ export async function lookupCredentialIssuerById (context: any, id: string) : Pr
     const result = await context.executeGraphQL({
         query: `query GetCredentialIssuerById($id: ID!) {
                     CredentialIssuer(where: {id: $id}) {
+                        id
                         name
                         flow
                         mode

@@ -25,6 +25,6 @@ export class DatasetController extends Controller {
         @Path() ns: string,
         @Request() request: any
     ): Promise<any> {
-        return await syncRecords(this.keystone.context(), 'Dataset', request.body['id'], request.body)
+        return await syncRecords(this.keystone.createContext(request), 'DraftDataset', request.body['id'], request.body)
     }
 }

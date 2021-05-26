@@ -7,13 +7,15 @@ export async function connectMany (keystone: any, transformInfo: any, currentDat
     const idList = dot(inputData, fieldKey)
     const refIds = []
     const batchService = new BatchService(keystone)
-    for (const uniqueKey of idList) {
-        const lkup = await batchService.lookup(transformInfo['list'], transformInfo['refKey'], uniqueKey, [])
-        if (lkup == null) {
-            console.log(`NO! Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`)
-            throw Error("Failed to find " + uniqueKey + " in " + transformInfo['list'])
+    if (idList != null) {
+        for (const uniqueKey of idList) {
+            const lkup = await batchService.lookup(transformInfo['list'], transformInfo['refKey'], uniqueKey, [])
+            if (lkup == null) {
+                console.log(`NO! Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`)
+                throw Error("Failed to find " + uniqueKey + " in " + transformInfo['list'])
+            }
+            refIds.push(lkup['id'])
         }
-        refIds.push(lkup['id'])
     }
     if (refIds.length == 0) {
         return { disconnectAll: true }

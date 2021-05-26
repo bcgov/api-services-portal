@@ -1,0 +1,1 @@
+export function alwaysFalse (keystone: any, transformInfo: any, currentData: any, inputData: any, _fieldKey: string) { return false }

@@ -1,6 +1,7 @@
 import { strict as assert } from 'assert'
 
 import {
+    lookupCredentialIssuerById,
     lookupProductEnvironmentServices,
     lookupServices,
 } from '../keystone'
@@ -14,6 +15,11 @@ export const ValidateActiveEnvironment = async (context: any, operation: any, ex
         try {
             const envServices = existingItem == null ? null : await lookupProductEnvironmentServices(context, existingItem.id)
 
+            const issuer = existingItem == null ?
+                await lookupCredentialIssuerById(context, `${resolvedData.credentialIssuer}`)
+                : 
+                envServices.credentialIssuer
+                
             const resolvedServices = ('services' in resolvedData) ? await lookupServices(context, resolvedData['services']) : null
 
             const flow = existingItem == null ? resolvedData['flow'] : envServices.flow
@@ -34,7 +40,7 @@ export const ValidateActiveEnvironment = async (context: any, operation: any, ex
                     addValidationError("[" + missing.map((s:any) => s.name).join(",") + "] missing or incomplete acl or key-auth plugin.")
                 }
             } else if (flow == 'client-credentials') {
-                const issuer = envServices.credentialIssuer
+                assert.strictEqual(issuer != null, true, 'Environment missing issuer details')
                 const isServiceMissingAllPlugins = (svc:any) => svc.plugins.filter((plugin:any) => plugin.name == 'jwt-keycloak' && plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -44,7 +50,7 @@ export const ValidateActiveEnvironment = async (context: any, operation: any, ex
                     addValidationError("[" + missing.map((s:any) => s.name).join(",") + "] missing or incomplete jwt-keycloak plugin.")
                 }
             } else if (flow == 'authorization-code') {
-                const issuer = envServices.credentialIssuer
+                assert.strictEqual(issuer != null, true, 'Environment missing issuer details')
                 const isServiceMissingAllPlugins = (svc: any) => svc.plugins.filter((plugin:any) => plugin.name == 'oidc' && plugin.config['discovery'] == issuer.oidcDiscoveryUrl).length != 1
 
                 // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -59,7 +65,7 @@ export const ValidateActiveEnvironment = async (context: any, operation: any, ex
             }
 
         } catch (err) {
-            logger.error("Validation threw an exception %j", err)
+            logger.error("Validation threw an exception %s", err)
             if(err instanceof assert.AssertionError) {
                 addValidationError(err.message)
             } else {

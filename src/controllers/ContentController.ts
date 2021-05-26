@@ -25,6 +25,6 @@ export class ContentController extends Controller {
         @Path() ns: string,
         @Request() request: any
     ): Promise<any> {
-        return await syncRecords(this.keystone.context(), 'Content', request.body['id'], request.body)
+        return await syncRecords(this.keystone.createContext(request), 'Content', request.body['id'], request.body)
     }
 }

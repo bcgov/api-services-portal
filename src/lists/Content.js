@@ -77,6 +77,9 @@ module.exports = {
         existingItem,
         context,
     }) => {
+        if (operation == 'create') {
+            resolvedData['namespace'] = context['authedItem']['namespace']
+        }
         if ('title' in resolvedData) {
             const ns = 'namespace' in resolvedData ? resolvedData['namespace'] : existingItem['namespace']
             resolvedData['slug'] = slugify(ns + " " + resolvedData['title']).toLowerCase()

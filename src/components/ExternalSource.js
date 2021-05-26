@@ -3,7 +3,7 @@ const { AuthedRelationship } = require('@keystonejs/fields-authed-relationship')
 const { composeHook } = require('@keystonejs/list-plugins/lib/utils');
 const { Text } = require('@keystonejs/fields')
 
-const _externallySourced = ({ isRequired }) => ({
+const _externallySourced = () => ({
   externalSourceField = 'extSource',
   externalUniqueIdField = 'extForeignKey',
   externalRecordHash = 'extRecordHash',
@@ -11,7 +11,7 @@ const _externallySourced = ({ isRequired }) => ({
 } = {}) => ({ fields = {}, hooks = {}, ...rest }) => {
   const fieldOptions = {
     type: Text,
-    isRequired: isRequired,
+    isRequired: true,
     ...byFieldOptions,
   };
     
@@ -21,13 +21,13 @@ const _externallySourced = ({ isRequired }) => ({
       };
   })
 
-  if (isRequired) {
+  if (fields[externalUniqueIdField].isRequired) {
       fields[externalUniqueIdField].isUnique = true
   }
   
-  return { fields, hooks, ...rest };
-};
+  return { fields, hooks, ...rest }
+}
 
-const externallySourced = options => _externallySourced({ isRequired: true })(options);
+const externallySourced = options => _externallySourced()(options)
 
-module.exports = { externallySourced };
+module.exports = { externallySourced }

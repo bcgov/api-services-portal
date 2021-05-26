@@ -3,6 +3,10 @@ export {
 } from './alwaysTrue'
 
 export {
+    alwaysFalse
+} from './alwaysFalse'
+
+export {
     connectExclusiveList
 } from './connectExclusiveList'
 

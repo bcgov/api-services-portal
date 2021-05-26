@@ -1,6 +1,7 @@
 import { strict as assert } from 'assert'
 import { 
     alwaysTrue,
+    alwaysFalse,
     connectExclusiveList,
     connectMany,
     connectOne,
@@ -33,6 +34,7 @@ const transformations = {
     "connectMany": connectMany,
     "connectOne": connectOne,
     "alwaysTrue": alwaysTrue,
+    "alwaysFalse": alwaysFalse,
 } as any
 
 
@@ -64,15 +66,17 @@ export const putFeedWorker = async (keystone: any, req: any, res: any) => {
 }
 
 export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
-    const entity = req.params['entity']
+    const feedEntity = req.params['entity']
     const eid = req.params['id']
     const json = req.body
     const batchService = new BatchService(keystone)
 
-    assert.strictEqual(entity in metadata, true)
+    assert.strictEqual(feedEntity in metadata, true)
     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false)
 
-    const md = (metadata as any)[entity]
+    const md = (metadata as any)[feedEntity]
+
+    const entity = 'entity' in md ? md['entity'] : feedEntity
 
     const localRecord = await batchService.lookup(md.query, md.refKey, eid, md.sync)
     if (localRecord == null) {
@@ -108,8 +112,9 @@ const syncListOfRecords = async function (keystone: any, entity: string, records
 //     return result
 // }
 
-export const syncRecords = async function (keystone: any, entity: string, eid: string, json: any, children = false) {
-    const md = (metadata as any)[entity]
+export const syncRecords = async function (keystone: any, feedEntity: string, eid: string, json: any, children = false) {
+    const md = (metadata as any)[feedEntity]
+    const entity = 'entity' in md ? md['entity'] : feedEntity
 
     assert.strictEqual(children == false && md.childOnly === true, false, 'This entity is only part of a child.')
 
@@ -130,7 +135,8 @@ export const syncRecords = async function (keystone: any, entity: string, eid: s
                 if (transformInfo.syncFirst) {
                     // handle these children independently first - return a list of IDs
                     const allIds = await syncListOfRecords (keystone, transformInfo.list, json[transformKey])
-                    logger.debug("All IDS " + allIds)
+                    logger.debug("CHILDREN [%s] %j", transformKey, allIds)
+                    assert.strictEqual(allIds.filter(record => record.status != 200).length, 0, "Failed updating children")
                     json[transformKey + "_ids"] = allIds.map(status => status.id)
                 }
                 const transformMutation = await transformations[transformInfo.name](keystone, transformInfo, null, json, transformKey)
@@ -174,7 +180,8 @@ export const syncRecords = async function (keystone: any, entity: string, eid: s
                 if (transformInfo.syncFirst) {
                     // handle these children independently first - return a list of IDs
                     const allIds = await syncListOfRecords (keystone, transformInfo.list, json[transformKey])
-                    logger.debug("All IDS FOR " + transformInfo.list + " :: " + JSON.stringify(allIds, null, 3))
+                    logger.debug("CHILDREN [%s] %j", transformKey, allIds)
+                    assert.strictEqual(allIds.filter(record => record.status != 200).length, 0, "Failed updating children")
                     json[transformKey + "_ids"] = allIds.map(status => status.id)
                 }
 

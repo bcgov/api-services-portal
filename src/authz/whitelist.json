@@ -850,5 +850,15 @@
           "referer": "http://localhost:4180/manager/namespaces",
           "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(namespace: $name)\n}\n",
           "added": "2021-05-25T21:40:25.547Z"
+     },
+     "b25b2954bf1385f9fbf1d5c7b46038ba": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        id\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-26T17:28:46.056Z"
+     },
+     "5742c25e1531eec7ad2c1846fd0649cb": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-26T17:29:08.072Z"
      }
 }

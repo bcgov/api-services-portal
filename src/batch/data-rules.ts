@@ -27,6 +27,18 @@ export const metadata = {
             isInCatalog: {name: "alwaysTrue"}
         }
     },
+    'DraftDataset': {
+        entity: 'Dataset',
+        query: 'allDatasets',
+        refKey: 'name',
+        sync: ['name', 'sector', 'license_title', 'security_class', 'view_audience', 'download_audience', 'record_publish_date', 'notes', 'title', 'organization', 'organizationUnit', 'isInCatalog', 'tags'],
+        transformations: {
+            tags: {name: "toString"},
+            organization: {name: "connectOne", list: "allOrganizations", refKey: 'name' },
+            organizationUnit: {name: "connectOne", list: "allOrganizationUnits", refKey: 'name'},
+            isInCatalog: {name: "alwaysFalse"}
+        }
+    },
     'Metric': {
         query: 'allMetrics',
         refKey: 'name',
@@ -139,10 +151,12 @@ export const metadata = {
     'Product': {
         query: 'allProducts',
         refKey: 'appId',
-        sync: [ 'name', 'namespace'],
+        sync: [ 'name' ],
         transformations: {
             dataset: {name: "connectOne", list: "allDatasets", refKey: 'name' },
-            environments: {name: "connectExclusiveList", list: "Environment", syncFirst: true}
+            environments: {name: "connectExclusiveList", list: "Environment", syncFirst: true},
+            organization: {name: "connectOne", list: "allOrganizations", refKey: 'name' },
+            organizationUnit: {name: "connectOne", list: "allOrganizationUnits", refKey: 'name'},
         }
     },
     'Environment': {

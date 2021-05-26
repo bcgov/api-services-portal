@@ -5,7 +5,7 @@ const { byTracking, atTracking } = require('@keystonejs/list-plugins')
 
 const { EnforcementPoint } = require('../authz/enforcement')
 
-const { v4: uuidv4 } = require('uuid');
+const { newApplicationID, isApplicationID } = require('../services/identifiers')
 
 const { DeleteAccess } = require('../services/workflow')
 
@@ -51,15 +51,13 @@ module.exports = {
         fieldPath, // Field hooks only
     }) => {
         if (operation == "create") {
-            // If an AppId is provided then don't bother creating one
-            if ('appId' in resolvedData && resolvedData['appId'].length == 16) {
+            if ('appId' in resolvedData && isApplicationID(resolvedData['appId'])) {
             } else {
-                resolvedData['appId'] = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 16)
+                resolvedData['appId'] = newApplicationID()
             }
-
             resolvedData['owner'] = context.authedItem.userId
-            return resolvedData
         }
+        return resolvedData
     },
     beforeDelete: (async function ({
         operation,

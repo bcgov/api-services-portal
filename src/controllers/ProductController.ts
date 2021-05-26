@@ -25,6 +25,6 @@ export class ProductController extends Controller {
         @Path() ns: string,
         @Request() request: any
     ): Promise<any> {
-        return await syncRecords(this.keystone.context(), 'Product', request.body['id'], request.body)
+        return await syncRecords(this.keystone.createContext(request), 'Product', request.body['id'], request.body)
     }
 }

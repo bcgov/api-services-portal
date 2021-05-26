@@ -15,6 +15,7 @@ export const GET_LIST = gql`
         title
       }
       dataset {
+        name
         title
         notes
         sector

@@ -29,8 +29,12 @@ class ApiOpenapiApp {
 
     Register(keystone)
 
-    app.use('/ds/api/namespaces/:ns/', (req, res, next) => 
+    app.use('/ds/api/namespaces/:ns/contents', (req, res, next) => 
         keycloak.enforcer(`${req.params.ns}:Content.Publish`)(req, res, next))
+    app.use('/ds/api/namespaces/:ns/datasets', (req, res, next) => 
+        keycloak.enforcer(`${req.params.ns}:Namespace.Manage`)(req, res, next))
+    app.use('/ds/api/namespaces/:ns/products', (req, res, next) => 
+        keycloak.enforcer(`${req.params.ns}:Namespace.Manage`)(req, res, next))
 
     RegisterRoutes(app)
 
