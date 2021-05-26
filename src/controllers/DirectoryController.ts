@@ -75,9 +75,7 @@ const list = gql`
 
 const item = gql`
   query GetProduct($id: ID!) {
-    DiscoverableProduct(
-      where: { id: $id, environments_some: { active: true } }
-    ) {
+    DiscoverableProduct(where: { id: $id }) {
       id
       name
       environments {
