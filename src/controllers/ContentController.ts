@@ -25,21 +25,6 @@ export class ContentController extends Controller {
   }
 
   @Put()
-  @OperationId('put-content-with-body')
-  public async putContentWithBody(
-    @Path() ns: string,
-    @Body() body: any,
-    @Request() request: any
-  ): Promise<any> {
-    return await syncRecords(
-      this.keystone.createContext(request),
-      'Content',
-      request.body['id'],
-      body
-    );
-  }
-
-  @Put()
   public async putContent(
     @Path() ns: string,
     @Request() request: any
@@ -54,6 +39,7 @@ export class ContentController extends Controller {
 
   @Put('{contentId}/markdown')
   public async putMarkdown(
+    @Path() ns: string,
     @Path() contentId: string,
     @Request() request: any
   ): Promise<any> {
@@ -68,6 +54,7 @@ export class ContentController extends Controller {
 
   @Put('{contentId}/markdownv2')
   public async putMarkdownV2(
+    @Path() ns: string,
     @Path() contentId: string,
     @Body() body: any,
     @Request() request: any
