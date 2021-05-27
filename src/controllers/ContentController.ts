@@ -1,4 +1,13 @@
-import { Controller, Request, Put, Path, Route, Security, Body } from 'tsoa';
+import {
+  Controller,
+  Request,
+  Put,
+  Path,
+  Route,
+  Security,
+  Body,
+  OperationId,
+} from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../batch/feed-worker';
@@ -13,6 +22,21 @@ export class ContentController extends Controller {
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
     this.keystone = _keystone;
+  }
+
+  @Put()
+  @OperationId('put-content-with-body')
+  public async putContentWithBody(
+    @Path() ns: string,
+    @Body() body: any,
+    @Request() request: any
+  ): Promise<any> {
+    return await syncRecords(
+      this.keystone.createContext(request),
+      'Content',
+      request.body['id'],
+      body
+    );
   }
 
   @Put()
@@ -39,6 +63,21 @@ export class ContentController extends Controller {
       'Content',
       contentId,
       { content: request.file.buffer.toString() }
+    );
+  }
+
+  @Put('{contentId}/markdownv2')
+  public async putMarkdownV2(
+    @Path() contentId: string,
+    @Body() body: any,
+    @Request() request: any
+  ): Promise<any> {
+    await this.handleFile(request);
+    return await syncRecords(
+      this.keystone.createContext(request),
+      'Content',
+      contentId,
+      { content: body }
     );
   }
 
