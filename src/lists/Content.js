@@ -9,9 +9,10 @@ const {
 } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const slugify = require('slugify');
+const { logger } = require('../logger');
 
 module.exports = {
-  labelField: "title",
+  labelField: 'title',
   fields: {
     title: {
       type: Text,
@@ -26,37 +27,37 @@ module.exports = {
       isRequired: false,
     },
     externalLink: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     githubRepository: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     readme: {
       type: Text,
       isRequired: false,
     },
     namespace: {
-        type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
+      type: Text,
+      isRequired: true,
+      adminConfig: {
+        isReadOnly: false,
+      },
     },
     tags: {
-        type: Text,
-        isRequired: true,
-        adminConfig: {
-            isReadOnly: false
-        }
-    },    
+      type: Text,
+      isRequired: true,
+      adminConfig: {
+        isReadOnly: false,
+      },
+    },
     slug: {
       type: Slug,
       adminConfig: {
         isReadOnly: true, //slug can be created automatically and you may want to show this as read only
       },
-      isUnique: true
+      isUnique: true,
     },
     order: {
       type: Integer,
@@ -72,24 +73,27 @@ module.exports = {
     },
     publishDate: {
       type: DateTime,
-      inRequired: false
-    }
+      inRequired: false,
+    },
   },
   hooks: {
-    resolveInput: ({
-        operation,
-        resolvedData,
-        existingItem,
-        context,
-    }) => {
-        if (operation == 'create') {
-            resolvedData['namespace'] = context['authedItem']['namespace']
-        }
-        if ('title' in resolvedData) {
-            const ns = 'namespace' in resolvedData ? resolvedData['namespace'] : existingItem['namespace']
-            resolvedData['slug'] = slugify(ns + " " + resolvedData['title']).toLowerCase()
-        }
-        return resolvedData
-    }
-  }
-}
+    resolveInput: ({ operation, resolvedData, existingItem, context }) => {
+      if (operation == 'create') {
+        resolvedData['namespace'] = context['authedItem']['namespace'];
+      }
+      if ('title' in resolvedData) {
+        const ns =
+          'namespace' in resolvedData
+            ? resolvedData['namespace']
+            : existingItem['namespace'];
+
+        resolvedData['slug'] = slugify(
+          ns + ' ' + resolvedData['title']
+        ).toLowerCase();
+
+        logger.debug('[List.Content] Set Slug %s', resolvedData['slug']);
+      }
+      return resolvedData;
+    },
+  },
+};
