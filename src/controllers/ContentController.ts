@@ -59,7 +59,9 @@ export class ContentController extends Controller {
     @Body() body: any,
     @Request() request: any
   ): Promise<any> {
-    await this.handleFile(request);
+    //await this.handleFile(request);
+    console.log('B=' + body);
+    console.log('BK=' + Object.keys(body));
     return await syncRecords(
       this.keystone.createContext(request),
       'ContentBySlug',
