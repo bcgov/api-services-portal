@@ -111,10 +111,14 @@ export const useApiMutation = <T>(
  * This is a standard REST API, used for a few specific use cases
  * TODO: Rename api and this restApi functions to be more specific
  */
-export const restApi = async <T>(
+export async function restApi<T>(
   url: string,
-  options = {}
-): Promise<T | string> => {
+  options?: RequestInit
+): Promise<T>;
+export async function restApi(
+  url: string,
+  options?: RequestInit
+): Promise<string> {
   try {
     const config = {
       method: 'GET',
@@ -123,7 +127,7 @@ export const restApi = async <T>(
       },
       ...options,
     };
-    const response = await fetch(url, config);
+    const response = await fetch(apiHost + url, config);
     const contentType = response.headers.get('Content-Type');
 
     if (!response.ok) {
@@ -140,6 +144,6 @@ export const restApi = async <T>(
   } catch (err) {
     throw new Error(err);
   }
-};
+}
 
 export default api;

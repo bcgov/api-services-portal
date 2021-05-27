@@ -5361,7 +5361,7 @@ type _ListSchema {
 
 type _ListMeta {
   key: String
-  name: String 
+  name: String
   description: String
   label: String
   singular: String

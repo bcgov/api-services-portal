@@ -7,9 +7,11 @@ const {
 const casual = require('casual-browserify');
 const times = require('lodash/times');
 const random = require('lodash/random');
+const fetch = require('node-fetch');
 const snakeCase = require('lodash/snakeCase');
 const express = require('express');
 const cors = require('cors');
+const { gql } = require('graphql-request');
 const { addHours, parse, formatISO, subDays } = require('date-fns');
 
 const metricsData = require('./metrics-data');
@@ -291,9 +293,9 @@ const server = mockServer(schemaWithMocks, {
     isActive: casual.coin_flip,
     tags: casual.words(3),
     environments: () => new MockList(1, (_, { id }) => ({ id })),
-    dataset: randomNullValue,
-    organization: randomNullValue,
-    organizationUnit: randomNullValue,
+    dataset: randomNullValue(),
+    organization: randomNullValue(),
+    organizationUnit: randomNullValue(),
   }),
   Organization: () => ({
     name: casual.random_element([
@@ -577,6 +579,115 @@ app.get('/admin/session', (_, res) => {
 app.post('/gql/api', async (req, res) => {
   const response = await server.query(req.body.query, req.body.variables);
   res.json(response);
+});
+
+app.get('/ds/api/directory', async (req, res) => {
+  const query = gql`
+    query GetProducts {
+      allDiscoverableProducts {
+        id
+        name
+        environments {
+          name
+          active
+          flow
+        }
+        dataset {
+          name
+          title
+          notes
+          sector
+          license_title
+          view_audience
+          security_class
+          record_publish_date
+          tags
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+        organization {
+          title
+        }
+        organizationUnit {
+          title
+        }
+      }
+    }
+  `;
+  const request = await fetch('http://localhost:4000/gql/api', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      variables: {},
+      query,
+    }),
+  });
+  const result = await request.json();
+  res.json(result.data.allDiscoverableProducts);
+});
+
+app.get('/ds/api/directory/:id', async (req, res) => {
+  const query = gql`
+    query GetProduct($id: ID!) {
+      DiscoverableProduct(where: { id: $id }) {
+        id
+        name
+        environments {
+          name
+          active
+          flow
+          services {
+            name
+            host
+          }
+        }
+        dataset {
+          name
+          title
+          notes
+          sector
+          license_title
+          security_class
+          view_audience
+          tags
+          record_publish_date
+          isInCatalog
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+        organization {
+          title
+        }
+        organizationUnit {
+          title
+        }
+      }
+    }
+  `;
+  const request = await fetch('http://localhost:4000/gql/api', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      variables: { id: req.params.id },
+      query,
+    }),
+  });
+  const result = await request.json();
+  res.json(result.data.DiscoverableProduct);
 });
 
 app

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import api, { useApi, restApi } from '@/shared/services/api';
 import {
   Box,
   Button,
@@ -18,10 +17,10 @@ import Head from 'next/head';
 import kebabCase from 'lodash/kebabCase';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
-import { gql } from 'graphql-request';
+import { Product } from '@/shared/types/query.types';
+import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import {
   FaCheckCircle,
@@ -29,7 +28,6 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
-const { useEffect, useState } = React;
 
 type DetailItem = {
   title: string;
@@ -67,17 +65,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
   const queryKey = ['DiscoverableProduct', id];
 
-  //   await queryClient.prefetchQuery(
-  //     queryKey,
-  //     async () =>
-  //       await api<Query>(
-  //         query,
-  //         { id },
-  //         {
-  //           headers: context.req.headers as HeadersInit,
-  //         }
-  //       )
-  //   );
+  await queryClient.prefetchQuery(
+    queryKey,
+    async () => await restApi<Product>(`/ds/api/directory/${id}`)
+  );
 
   return {
     props: {
@@ -91,14 +82,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
-  const [data, setData] = useState<Query['Product']>();
-  useEffect(() => {
-    restApi<Query['Product']>(`/ds/api/directory/${id}`).then((data) => {
-      setData(data as Query['Product']);
-    });
-  }, []);
+  const { data } = useQuery<Product>(queryKey, () =>
+    restApi<Product>(`/ds/api/directory/${id}`)
+  );
 
-  return data ? (
+  return (
     <>
       <Head>
         <title>API Program Services | API Discovery</title>
@@ -185,8 +173,6 @@ const ApiPage: React.FC<
         </Grid>
       </Container>
     </>
-  ) : (
-    <></>
   );
 };
 

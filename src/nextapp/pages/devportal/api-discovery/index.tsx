@@ -3,42 +3,37 @@ import { Box, Container, Flex, Input, Select, Text } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
-import { gql } from 'graphql-request';
-import api, { useApi, restApi } from '@/shared/services/api';
-import { GetServerSideProps } from 'next';
-import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { restApi } from '@/shared/services/api';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { QueryClient, useQuery } from 'react-query';
+import { Product } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
-const { useEffect, useState } = React
 
-//const queryKey = ['allProducts', 'discovery'];
+const queryKey = ['allProducts', 'discovery'];
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const queryClient = new QueryClient();
+export const getServerSideProps: GetServerSideProps = async () => {
+  const queryClient = new QueryClient();
 
-// //   await queryClient.prefetchQuery(
-// //     queryKey,
-// //     async () =>
-// //       await api<Query>(query, null, {
-// //         headers: context.req.headers as HeadersInit,
-// //       })
-// //   );
+  await queryClient.prefetchQuery(
+    queryKey,
+    async () => await restApi<Product[]>('/ds/api/directory')
+  );
 
-//   return {
-//     props: {
-//       dehydratedState: dehydrate(queryClient),
-//     },
-//   };
-// };
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+      queryKey,
+    },
+  };
+};
 
-const ApiDiscoveryPage: React.FC = () => {
-  const [data, setData] = useState<Query['allProducts']>();
-  useEffect(() => {
-    restApi('/ds/api/directory').then((data) => {
-        setData(data as Query['allProducts'])
-      })
-  }, [])
+const ApiDiscoveryPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ queryKey }) => {
+  const { data } = useQuery(queryKey, () =>
+    restApi<Product[]>('/ds/api/directory')
+  );
 
   return (
     <>
