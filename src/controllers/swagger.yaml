@@ -4,27 +4,7 @@ components:
     parameters: {}
     requestBodies: {}
     responses: {}
-    schemas:
-        TheUser:
-            properties:
-                id:
-                    type: number
-                    format: double
-                email:
-                    type: string
-                name:
-                    type: string
-                status:
-                    type: string
-                    enum:
-                        - Happy
-                        - Sad
-                phoneNumbers:
-                    items:
-                        type: string
-                    type: array
-            type: object
-            additionalProperties: false
+    schemas: {}
     securitySchemes: {}
 info:
     title: bcgov-aps-portal
@@ -47,11 +27,32 @@ paths:
                             schema: {}
             security:
                 -
-                    jwt: []
+                    jwt:
+                        - Content.Publish
             parameters:
                 -
                     in: path
                     name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/contents/{contentId}/markdown':
+        put:
+            operationId: PutMarkdown
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt:
+                        - Content.Publish
+            parameters:
+                -
+                    in: path
+                    name: contentId
                     required: true
                     schema:
                         type: string
@@ -66,7 +67,8 @@ paths:
                             schema: {}
             security:
                 -
-                    jwt: []
+                    jwt:
+                        - Namespace.Manage
             parameters:
                 -
                     in: path
@@ -130,31 +132,6 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/users/{userId}':
-        get:
-            operationId: GetUser
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/TheUser'
-            security: []
-            parameters:
-                -
-                    in: path
-                    name: userId
-                    required: true
-                    schema:
-                        format: double
-                        type: number
-                -
-                    in: query
-                    name: name
-                    required: false
-                    schema:
-                        type: string
     '/identifiers/{type}':
         get:
             operationId: GetNewID
@@ -184,7 +161,8 @@ paths:
                             schema: {}
             security:
                 -
-                    jwt: []
+                    jwt:
+                        - Namespace.Manage
             parameters:
                 -
                     in: path

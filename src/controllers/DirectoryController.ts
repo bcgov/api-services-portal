@@ -1,39 +1,40 @@
-import {
-    Controller,
-    Request,
-    Get,
-    Path,
-    Route,
-    Security
-} from "tsoa"
-import { KeystoneService } from "./ioc/keystoneInjector"
-import { inject, injectable } from "tsyringe"
-import { syncRecords } from '../batch/feed-worker'
-import { gql } from 'graphql-request'
-//import { Product } from "@/services/keystone/types"
-
+import { Controller, Request, Get, Path, Route, Security } from 'tsoa';
+import { KeystoneService } from './ioc/keystoneInjector';
+import { inject, injectable } from 'tsyringe';
+import { syncRecords } from '../batch/feed-worker';
+import { gql } from 'graphql-request';
+import { Product } from '@/services/keystone/types';
+import { strict as assert } from 'assert';
 @injectable()
-@Route("/directory")
+@Route('/directory')
 export class DirectoryController extends Controller {
-    private keystone: KeystoneService
-    constructor (@inject('KeystoneService') private _keystone: KeystoneService) {
-        super()
-        this.keystone = _keystone
-    }
+  private keystone: KeystoneService;
+  constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
+    super();
+    this.keystone = _keystone;
+  }
 
-    @Get()
-    public async list(
-    ): Promise<any> {
-        const result = await this.keystone.executeGraphQL({context: this.keystone.sudo(), query: list})
-        return result.data.allDiscoverableProducts
-    }
+  @Get()
+  public async list(): Promise<any> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.sudo(),
+      query: list,
+    });
+    return result.data.allDiscoverableProducts;
+  }
 
-    @Get('{id}')
-    public async get(
-        @Path() id: string,
-    ): Promise<any> {
-        return (await this.keystone.executeGraphQL({context: this.keystone.sudo(), query: item, variables: { id }})).data.DiscoverableProduct
-    }
+  @Get('{id}')
+  public async get(@Path() id: string): Promise<any> {
+    const product: Product = (
+      await this.keystone.executeGraphQL({
+        context: this.keystone.sudo(),
+        query: item,
+        variables: { id },
+      })
+    ).data.DiscoverableProduct;
+    assert.strictEqual(product != null, true, `Product Not Found`);
+    return product;
+  }
 }
 
 const list = gql`

@@ -5,6 +5,7 @@ const {
   Url,
   Float,
   Integer,
+  DateTime,
 } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
 const slugify = require('slugify');
@@ -69,6 +70,10 @@ module.exports = {
       isRequired: true,
       defaultValue: false,
     },
+    publishDate: {
+      type: DateTime,
+      inRequired: false
+    }
   },
   hooks: {
     resolveInput: ({

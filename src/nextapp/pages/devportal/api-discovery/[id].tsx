@@ -1,5 +1,5 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, restApi } from '@/shared/services/api';
 import {
   Box,
   Button,
@@ -29,6 +29,7 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
+const { useEffect, useState } = React;
 
 type DetailItem = {
   title: string;
@@ -66,17 +67,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
   const queryKey = ['DiscoverableProduct', id];
 
-  await queryClient.prefetchQuery(
-    queryKey,
-    async () =>
-      await api<Query>(
-        query,
-        { id },
-        {
-          headers: context.req.headers as HeadersInit,
-        }
-      )
-  );
+  //   await queryClient.prefetchQuery(
+  //     queryKey,
+  //     async () =>
+  //       await api<Query>(
+  //         query,
+  //         { id },
+  //         {
+  //           headers: context.req.headers as HeadersInit,
+  //         }
+  //       )
+  //   );
 
   return {
     props: {
@@ -90,9 +91,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
-  const { data } = useApi(queryKey, { query }, { suspense: false });
+  const [data, setData] = useState<Query['Product']>();
+  useEffect(() => {
+    restApi<Query['Product']>(`/ds/api/directory/${id}`).then((data) => {
+      setData(data as Query['Product']);
+    });
+  }, []);
 
-  return (
+  return data ? (
     <>
       <Head>
         <title>API Program Services | API Discovery</title>
@@ -108,12 +114,12 @@ const ApiPage: React.FC<
             <Link
               isExternal
               href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                data?.DiscoverableProduct?.dataset?.title
+                data?.dataset?.title
               )}`}
               target="_blank"
               rel="noreferrer"
             >
-              {data?.DiscoverableProduct?.name}
+              {data?.name}
               <Icon
                 as={FaExternalLinkAlt}
                 boxSize="5"
@@ -126,9 +132,7 @@ const ApiPage: React.FC<
           <Box fontSize="sm" color="gray.600">
             <Text>
               Licensed under{' '}
-              <Text as="strong">
-                {data.DiscoverableProduct.dataset?.license_title}
-              </Text>
+              <Text as="strong">{data.dataset?.license_title}</Text>
             </Text>
           </Box>
         </PageHeader>
@@ -140,38 +144,17 @@ const ApiPage: React.FC<
               </Box>
               <Divider />
               <Box p={4}>
-                {data.DiscoverableProduct.organization && (
-                  <Heading size="xs" mb={2}>
-                    {data.DiscoverableProduct.organization.title}
-                    {data.DiscoverableProduct.organizationUnit && (
-                      <>
-                        <Text
-                          as="span"
-                          fontWeight="normal"
-                          color="gray.400"
-                          mt={1}
-                        >
-                          {' / '}
-                          {data.DiscoverableProduct.organizationUnit.title}
-                        </Text>
-                      </>
-                    )}
-                  </Heading>
-                )}
-                <Text>
-                  {data.DiscoverableProduct.dataset?.notes ??
-                    'No description provided'}
-                </Text>
+                <Text>{data.dataset?.notes}</Text>
               </Box>
               <Divider />
               <Flex bgColor="gray.50" p={4} align="center">
                 <Heading as="h6" size="xs" mr={4}>
                   Tags
                 </Heading>
-                {data.DiscoverableProduct.dataset && (
+                {data.dataset && (
                   <TagsList
                     colorScheme="blue"
-                    data={data.DiscoverableProduct.dataset.tags}
+                    data={data.dataset.tags}
                     size="0.75rem"
                   />
                 )}
@@ -179,14 +162,14 @@ const ApiPage: React.FC<
             </Box>
           </GridItem>
           <GridItem as="aside" colSpan={3}>
-            {data.DiscoverableProduct.dataset &&
+            {data.dataset &&
               detailItems.map((d) => (
                 <Box key={d.title} mb={4}>
                   <Heading size="xs">{d.title}</Heading>
                   <Text fontSize="sm" color="gray.600">
-                    {!d.isBool && data.DiscoverableProduct.dataset[d.key]}
+                    {!d.isBool && data.dataset[d.key]}
                     {d.isBool &&
-                      (data.DiscoverableProduct.dataset[d.key] ? (
+                      (data.dataset[d.key] ? (
                         <>
                           <Icon as={FaCheckCircle} color="green.300" /> Yes
                         </>
@@ -202,49 +185,9 @@ const ApiPage: React.FC<
         </Grid>
       </Container>
     </>
+  ) : (
+    <></>
   );
 };
 
 export default ApiPage;
-
-const query = gql`
-  query GetProduct($id: ID!) {
-    DiscoverableProduct(where: { id: $id }) {
-      id
-      name
-      environments {
-        name
-        active
-        flow
-        services {
-          name
-          host
-        }
-      }
-      dataset {
-        name
-        title
-        notes
-        sector
-        license_title
-        security_class
-        view_audience
-        tags
-        record_publish_date
-        isInCatalog
-        organization {
-          title
-        }
-        organizationUnit {
-          title
-        }
-      }
-      organization {
-        title
-      }
-      organizationUnit {
-        title
-      }
-    }
-  }
-`;

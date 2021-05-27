@@ -12,6 +12,25 @@ export class BatchService {
         this.context = this.keystone.createContext({ skipAccessControl: true })
     }
 
+    public async list (entity: string, query: any, refKey: string, eid: string, fields: string[]) {
+        logger.debug("[list] : %s :: %s == %s", query, refKey, eid)
+        const result = await this.keystone.executeGraphQL({
+            context: this.context,
+            query: `query($id: String) {
+              ${query}(where: { ${refKey} : $id }) {
+                id, ${fields.join(',')}
+              }
+            }`,
+            variables: { id: eid }
+        })
+        logger.debug("[lookup] RESULT %j", result)
+
+        if (result['data'][query].length > 1) {
+            throw Error('Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid)
+        }
+        return result['data'][query].length == 0 ? null : result['data'][query][0]
+    }
+
     public async lookup (query: string, refKey: string, eid: string, fields: string[]) {
         logger.debug("[lookup] : %s :: %s == %s", query, refKey, eid)
         const result = await this.keystone.executeGraphQL({

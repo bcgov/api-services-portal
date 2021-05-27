@@ -1051,6 +1051,7 @@ export type Content = {
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isPublic?: Maybe<Scalars['Boolean']>;
+  publishDate?: Maybe<Scalars['DateTime']>;
 };
 
 export type ContentWhereInput = {
@@ -1234,6 +1235,14 @@ export type ContentWhereInput = {
   isComplete_not?: Maybe<Scalars['Boolean']>;
   isPublic?: Maybe<Scalars['Boolean']>;
   isPublic_not?: Maybe<Scalars['Boolean']>;
+  publishDate?: Maybe<Scalars['DateTime']>;
+  publishDate_not?: Maybe<Scalars['DateTime']>;
+  publishDate_lt?: Maybe<Scalars['DateTime']>;
+  publishDate_lte?: Maybe<Scalars['DateTime']>;
+  publishDate_gt?: Maybe<Scalars['DateTime']>;
+  publishDate_gte?: Maybe<Scalars['DateTime']>;
+  publishDate_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
+  publishDate_not_in?: Maybe<Array<Maybe<Scalars['DateTime']>>>;
 };
 
 export type ContentWhereUniqueInput = {
@@ -1266,7 +1275,9 @@ export enum SortContentsBy {
   IsCompleteAsc = 'isComplete_ASC',
   IsCompleteDesc = 'isComplete_DESC',
   IsPublicAsc = 'isPublic_ASC',
-  IsPublicDesc = 'isPublic_DESC'
+  IsPublicDesc = 'isPublic_DESC',
+  PublishDateAsc = 'publishDate_ASC',
+  PublishDateDesc = 'publishDate_DESC'
 }
 
 export type ContentUpdateInput = {
@@ -1282,6 +1293,7 @@ export type ContentUpdateInput = {
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isPublic?: Maybe<Scalars['Boolean']>;
+  publishDate?: Maybe<Scalars['DateTime']>;
 };
 
 export type ContentsUpdateInput = {
@@ -1302,6 +1314,7 @@ export type ContentCreateInput = {
   order?: Maybe<Scalars['Int']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   isPublic?: Maybe<Scalars['Boolean']>;
+  publishDate?: Maybe<Scalars['DateTime']>;
 };
 
 export type ContentsCreateInput = {
