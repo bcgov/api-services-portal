@@ -207,9 +207,7 @@ export const syncRecords = async function (
       }
     }
     data[md.refKey] = eid;
-    logger.debug('CREATING ' + JSON.stringify(data));
     const nr = await batchService.create(entity, data);
-    logger.debug('--> RESULT ' + nr);
     if (nr == null) {
       logger.error('CREATE FAILED (%s) %j', nr, data);
       return { status: 400, result: 'create-failed' };
@@ -283,9 +281,7 @@ export const syncRecords = async function (
     if (Object.keys(data).length === 0) {
       return { status: 200, result: 'no-change', id: localRecord['id'] };
     }
-    logger.debug('UPDATING ' + JSON.stringify(data));
     const nr = await batchService.update(entity, localRecord.id, data);
-    logger.debug('--> RESULT ' + nr);
     if (nr == null) {
       logger.error('UPDATE FAILED (%s) %j', nr, data);
       return { status: 400, result: 'update-failed' };

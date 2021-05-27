@@ -1,23 +1,27 @@
-const { Text, Relationship } = require('@keystonejs/fields')
-const { Markdown } = require('@keystonejs/fields-markdown')
-const { newProductID, isProductID } = require('../services/identifiers')
-const { FieldEnforcementPoint, EnforcementPoint } = require('../authz/enforcement')
+const { Text, Relationship } = require('@keystonejs/fields');
+const { Markdown } = require('@keystonejs/fields-markdown');
+const { newProductID, isProductID } = require('../services/identifiers');
+const {
+  FieldEnforcementPoint,
+  EnforcementPoint,
+} = require('../authz/enforcement');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
     appId: {
-        type: Text,
-        isRequired: true,
-        isUnique: false,
+      type: Text,
+      isRequired: true,
+      isUnique: false,
     },
     name: {
-        type: Text,
-        isRequired: true,
+      type: Text,
+      isRequired: true,
     },
     namespace: {
-        type: Text,
-        isRequired: true,
-        access: FieldEnforcementPoint
+      type: Text,
+      isRequired: true,
+      access: FieldEnforcementPoint,
     },
     description: {
       type: Markdown,
@@ -27,23 +31,26 @@ module.exports = {
     dataset: { type: Relationship, ref: 'Dataset' },
     organization: { type: Relationship, ref: 'Organization', many: false },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
-    environments: { type: Relationship, ref: 'Environment.product', many: true },
+    environments: {
+      type: Relationship,
+      ref: 'Environment.product',
+      many: true,
+    },
   },
   access: EnforcementPoint,
   hooks: {
-    resolveInput: ({
-        context,
-        operation,
-        resolvedData
-    }) => {
-        if (operation == "create") {
-            if ('appId' in resolvedData && isProductID(resolvedData['appId'])) {
-            } else {
-                resolvedData['appId'] = newProductID()
-            }
-            resolvedData['namespace'] = context['authedItem']['namespace']
+    resolveInput: ({ context, operation, resolvedData }) => {
+      if (operation == 'create') {
+        if ('appId' in resolvedData && isProductID(resolvedData['appId'])) {
+        } else {
+          resolvedData['appId'] = newProductID();
         }
-        return resolvedData
-    }
+        if ('namespace' in context['authedItem']) {
+          resolvedData['namespace'] = context['authedItem']['namespace'];
+        }
+      }
+      logger.debug('[List.Product] Resolved %j', resolvedData);
+      return resolvedData;
+    },
   },
-}
+};

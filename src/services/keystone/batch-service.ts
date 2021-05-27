@@ -73,7 +73,7 @@ export class BatchService {
                 id
               }
             }`,
-      variables: { data: data },
+      variables: { data },
     });
     logger.debug('[create] RESULT %j', result);
 
