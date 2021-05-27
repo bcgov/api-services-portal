@@ -33,6 +33,7 @@ export class DirectoryController extends Controller {
       })
     ).data.DiscoverableProduct;
     assert.strictEqual(product != null, true, `Product Not Found`);
+    return product;
   }
 }
 
