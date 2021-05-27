@@ -870,5 +870,10 @@
           "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
           "query": "\n  query GetResources($prodEnvId: ID!, $resourceType: String) {\n    allResourceSets(prodEnvId: $prodEnvId, type: $resourceType) {\n      id\n      name\n      type\n    }\n\n    allPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
           "added": "2021-05-27T16:31:20.746Z"
+     },
+     "398091e26a0271254962eb43f0345132": {
+          "referer": "http://localhost:4180/devportal/applications",
+          "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(data: { name: $name, description: $description }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-27T16:43:33.435Z"
      }
 }
