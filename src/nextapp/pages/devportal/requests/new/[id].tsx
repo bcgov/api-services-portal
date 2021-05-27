@@ -16,11 +16,12 @@ import {
   Heading,
   Avatar,
   Select,
-  Icon,
   StackDivider,
   useToast,
+  Center,
 } from '@chakra-ui/react';
 import Head from 'next/head';
+import isEmpty from 'lodash/isEmpty';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -31,7 +32,7 @@ import api, { useApi } from '@/shared/services/api';
 import graphql from '@/shared/services/graphql';
 import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
-import { FaBook, FaCog } from 'react-icons/fa';
+import { FaBook } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 
 const queryKey = 'newAccessRequest';
@@ -76,13 +77,39 @@ const NewRequestsPage: React.FC<
     },
     { suspense: false }
   );
+  const [environment, setEnvironment] = React.useState<string>('');
   const dataset = data?.allDiscoverableProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
-  const legalsAgreed = data?.mySelf.legalsAgreed == null ? [] : JSON.parse(data?.mySelf.legalsAgreed)
-  const isAgreed = (env : Environment) => {
-      const ref = env?.legal?.reference
-      return legalsAgreed.filter((ag:{reference:string}) => ag.reference === ref).length != 0
-  }
+  const hasSelectedEnvironment = Boolean(environment);
+  const selectedEnvironment: Environment = dataset.environments.find(
+    (e) => e.id === environment
+  );
+  const apiTitle = data.allDiscoverableProducts.reduce((memo: string, d) => {
+    if (isEmpty(memo) && d.id !== id) {
+      return 'API';
+    }
+    return d.name;
+  }, '');
+  const hasNotAgreedLegal = React.useMemo(() => {
+    const legalsAgreed = !isEmpty(data?.mySelf?.legalsAgreed)
+      ? JSON.parse(data.mySelf.legalsAgreed)
+      : [];
+
+    if (selectedEnvironment?.legal) {
+      const { reference } = selectedEnvironment?.legal;
+
+      if (!isEmpty(reference)) {
+        const legalAgreements = legalsAgreed.filter(
+          (ag: { reference: string }) => ag.reference === reference
+        );
+
+        return legalAgreements.length === 0;
+      }
+    }
+
+    return true;
+  }, [data.mySelf, selectedEnvironment]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -99,8 +126,8 @@ const NewRequestsPage: React.FC<
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
-        additionalDetails: formData.get("additionalDetails"),
-        acceptLegal: formData.has("acceptLegal") ? true:false
+        additionalDetails: formData.get('additionalDetails'),
+        acceptLegal: formData.has('acceptLegal') ? true : false,
       };
       const result = await graphql(mutation, payload);
       client.invalidateQueries('allAccessRequests');
@@ -109,7 +136,9 @@ const NewRequestsPage: React.FC<
         description: 'Check back to see if it has been accepted soon',
         status: 'success',
       });
-      router?.push(`/devportal/poc/access/${result.data.createAccessRequest.id}`);
+      router?.push(
+        `/devportal/poc/access/${result.data.createAccessRequest.id}`
+      );
     } catch (err) {
       toast({
         title: 'Unable to make request',
@@ -138,38 +167,10 @@ const NewRequestsPage: React.FC<
             {' first.'}
           </Alert>
         )}
-        <PageHeader title="New Access Request">
-          <Text>
-          </Text>
-        </PageHeader>
+        <PageHeader title="New Access Request" />
         <form onSubmit={handleSubmit}>
-          <FieldsetBox title="APIs">
-            <HStack divider={<StackDivider />} spacing={4}>
-              <VStack flex={1}>
-                <Icon as={FaCog} boxSize="14" color="bc-blue-alt" />
-                <Box>
-                  <Text fontWeight="bold" color="bc-blue-alt">
-                    {data.allDiscoverableProducts.find((d) => d.id === id)?.name ?? 'API'}
-                  </Text>
-                </Box>
-              </VStack>
-              <Box flex={1}>
-                <Heading size="sm" mb={2}>
-                  Requestor
-                </Heading>
-                <Flex>
-                  <Avatar name={requestor.name} />
-                  <Box ml={2}>
-                    <Text fontWeight="bold">
-                      {requestor.name}{' '}
-                      <Text as="span" fontWeight="normal" color="gray.400">
-                        {requestor.username}
-                      </Text>
-                    </Text>
-                    <Text fontSize="xs">{requestor.email}</Text>
-                  </Box>
-                </Flex>
-              </Box>
+          <FieldsetBox title={apiTitle}>
+            <HStack spacing={4}>
               <Box flex={1}>
                 <Heading size="sm" mb={3}>
                   Select an application to consume the API
@@ -183,6 +184,23 @@ const NewRequestsPage: React.FC<
                   ))}
                 </Select>
               </Box>
+              <Box mx={4} w={100}>
+                <Center>as</Center>
+              </Box>
+              <Box flex={1}>
+                <Flex>
+                  <Avatar name={requestor.name} />
+                  <Box ml={2}>
+                    <Text fontWeight="bold">
+                      {requestor.name}{' '}
+                      <Text as="span" fontWeight="normal" color="gray.400">
+                        {requestor.username}
+                      </Text>
+                    </Text>
+                    <Text fontSize="xs">{requestor.email}</Text>
+                  </Box>
+                </Flex>
+              </Box>
             </HStack>
           </FieldsetBox>
           <FieldsetBox
@@ -190,8 +208,8 @@ const NewRequestsPage: React.FC<
             title={`Which ${dataset?.name} API Environment?`}
           >
             <RadioGroup
-              defaultValue=""
               name="environmentId"
+              onChange={setEnvironment}
               options={dataset?.environments
                 .filter((e) => e.active)
                 .map((e) => ({
@@ -206,21 +224,28 @@ const NewRequestsPage: React.FC<
                     </Box>
                   ),
                 }))}
+              value={environment}
             />
           </FieldsetBox>
 
-          <FieldsetBox isRequired={dataset.environments[0]?.additionalDetailsToRequest != "" ? true:false} title="Additional Information & Terms">
-            {dataset.environments[0]?.additionalDetailsToRequest != "" && (
-                <Box p={4}>
-                    <pre>{dataset.environments[0]?.additionalDetailsToRequest}</pre>
-                </Box>
+          <FieldsetBox
+            isRequired={hasSelectedEnvironment}
+            title="Additional Information & Terms"
+          >
+            {selectedEnvironment?.additionalDetailsToRequest && (
+              <Box pb={4}>
+                <Text>
+                  <Text as="strong">From the API Provider</Text>:{' '}
+                  {selectedEnvironment.additionalDetailsToRequest}
+                </Text>
+              </Box>
             )}
             <Textarea
               name="additionalDetails"
-              placeholder=""
+              placeholder="Add any addtional notes for the API Provider"
               variant="bc-input"
             />
-            {dataset.environments[0]?.legal && isAgreed(dataset.environments[0]) == false &&  (
+            {selectedEnvironment?.legal && hasNotAgreedLegal && (
               <Flex
                 justify="space-between"
                 mt={4}
@@ -229,11 +254,11 @@ const NewRequestsPage: React.FC<
                 borderRadius={4}
               >
                 <Checkbox colorScheme="blue" name="acceptLegal">
-                  {dataset.environments[0].legal.title}
+                  {selectedEnvironment.legal.title}
                 </Checkbox>
                 <Link
                   fontWeight="bold"
-                  href={dataset.environments[0].legal.link}
+                  href={selectedEnvironment.legal.link}
                   colorScheme="blue"
                   target="_blank"
                   rel="noreferrer"
@@ -310,8 +335,11 @@ const mutation = gql`
     $additionalDetails: String
     $acceptLegal: Boolean!
   ) {
-    acceptLegal(productEnvironmentId: $productEnvironmentId, acceptLegal: $acceptLegal) {
-        legalsAgreed
+    acceptLegal(
+      productEnvironmentId: $productEnvironmentId
+      acceptLegal: $acceptLegal
+    ) {
+      legalsAgreed
     }
 
     createAccessRequest(

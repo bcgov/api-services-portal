@@ -125,12 +125,6 @@ const ApiPage: React.FC<
         >
           <Box fontSize="sm" color="gray.600">
             <Text>
-              Published by{' '}
-              <Text as="strong">
-                {data.DiscoverableProduct.dataset?.organization?.title}
-              </Text>
-            </Text>
-            <Text>
               Licensed under{' '}
               <Text as="strong">
                 {data.DiscoverableProduct.dataset?.license_title}
@@ -142,11 +136,32 @@ const ApiPage: React.FC<
           <GridItem colSpan={9}>
             <Box bgColor="white">
               <Box as="header" p={4}>
-                <Heading size="md">Description</Heading>
+                <Heading size="md">Details</Heading>
               </Box>
               <Divider />
               <Box p={4}>
-                <Text>{data.DiscoverableProduct.dataset?.notes}</Text>
+                {data.DiscoverableProduct.organization && (
+                  <Heading size="xs" mb={2}>
+                    {data.DiscoverableProduct.organization.title}
+                    {data.DiscoverableProduct.organizationUnit && (
+                      <>
+                        <Text
+                          as="span"
+                          fontWeight="normal"
+                          color="gray.400"
+                          mt={1}
+                        >
+                          {' / '}
+                          {data.DiscoverableProduct.organizationUnit.title}
+                        </Text>
+                      </>
+                    )}
+                  </Heading>
+                )}
+                <Text>
+                  {data.DiscoverableProduct.dataset?.notes ??
+                    'No description provided'}
+                </Text>
               </Box>
               <Divider />
               <Flex bgColor="gray.50" p={4} align="center">
@@ -164,24 +179,25 @@ const ApiPage: React.FC<
             </Box>
           </GridItem>
           <GridItem as="aside" colSpan={3}>
-            {data.DiscoverableProduct.dataset && detailItems.map((d) => (
-              <Box key={d.title} mb={4}>
-                <Heading size="xs">{d.title}</Heading>
-                <Text fontSize="sm" color="gray.600">
-                  {!d.isBool && data.DiscoverableProduct.dataset[d.key]}
-                  {d.isBool &&
-                    (data.DiscoverableProduct.dataset[d.key] ? (
-                      <>
-                        <Icon as={FaCheckCircle} color="green.300" /> Yes
-                      </>
-                    ) : (
-                      <>
-                        <Icon as={FaTimesCircle} color="red.300" /> No
-                      </>
-                    ))}
-                </Text>
-              </Box>
-            ))}
+            {data.DiscoverableProduct.dataset &&
+              detailItems.map((d) => (
+                <Box key={d.title} mb={4}>
+                  <Heading size="xs">{d.title}</Heading>
+                  <Text fontSize="sm" color="gray.600">
+                    {!d.isBool && data.DiscoverableProduct.dataset[d.key]}
+                    {d.isBool &&
+                      (data.DiscoverableProduct.dataset[d.key] ? (
+                        <>
+                          <Icon as={FaCheckCircle} color="green.300" /> Yes
+                        </>
+                      ) : (
+                        <>
+                          <Icon as={FaTimesCircle} color="red.300" /> No
+                        </>
+                      ))}
+                  </Text>
+                </Box>
+              ))}
           </GridItem>
         </Grid>
       </Container>

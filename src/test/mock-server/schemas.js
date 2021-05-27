@@ -283,6 +283,7 @@ type Activity {
   action: String
   result: String
   message: String
+  context: String
   refId: String
   namespace: String
   actor: User
@@ -406,6 +407,24 @@ input ActivityWhereInput {
   message_not_ends_with_i: String
   message_in: [String]
   message_not_in: [String]
+  context: String
+  context_not: String
+  context_contains: String
+  context_not_contains: String
+  context_starts_with: String
+  context_not_starts_with: String
+  context_ends_with: String
+  context_not_ends_with: String
+  context_i: String
+  context_not_i: String
+  context_contains_i: String
+  context_not_contains_i: String
+  context_starts_with_i: String
+  context_not_starts_with_i: String
+  context_ends_with_i: String
+  context_not_ends_with_i: String
+  context_in: [String]
+  context_not_in: [String]
   refId: String
   refId_not: String
   refId_contains: String
@@ -483,6 +502,8 @@ enum SortActivitiesBy {
   result_DESC
   message_ASC
   message_DESC
+  context_ASC
+  context_DESC
   refId_ASC
   refId_DESC
   namespace_ASC
@@ -504,6 +525,7 @@ input ActivityUpdateInput {
   action: String
   result: String
   message: String
+  context: String
   refId: String
   namespace: String
   actor: UserRelateToOneInput
@@ -522,6 +544,7 @@ input ActivityCreateInput {
   action: String
   result: String
   message: String
+  context: String
   refId: String
   namespace: String
   actor: UserRelateToOneInput
@@ -954,10 +977,12 @@ type Content {
   externalLink: String
   githubRepository: String
   readme: String
+  namespace: String
   tags: String
   slug: String
   order: Int
   isComplete: Boolean
+  isPublic: Boolean
 }
 
 input ContentWhereInput {
@@ -1075,6 +1100,24 @@ input ContentWhereInput {
   readme_not_ends_with_i: String
   readme_in: [String]
   readme_not_in: [String]
+  namespace: String
+  namespace_not: String
+  namespace_contains: String
+  namespace_not_contains: String
+  namespace_starts_with: String
+  namespace_not_starts_with: String
+  namespace_ends_with: String
+  namespace_not_ends_with: String
+  namespace_i: String
+  namespace_not_i: String
+  namespace_contains_i: String
+  namespace_not_contains_i: String
+  namespace_starts_with_i: String
+  namespace_not_starts_with_i: String
+  namespace_ends_with_i: String
+  namespace_not_ends_with_i: String
+  namespace_in: [String]
+  namespace_not_in: [String]
   tags: String
   tags_not: String
   tags_contains: String
@@ -1121,6 +1164,8 @@ input ContentWhereInput {
   order_not_in: [Int]
   isComplete: Boolean
   isComplete_not: Boolean
+  isPublic: Boolean
+  isPublic_not: Boolean
 }
 
 input ContentWhereUniqueInput {
@@ -1142,6 +1187,8 @@ enum SortContentsBy {
   githubRepository_DESC
   readme_ASC
   readme_DESC
+  namespace_ASC
+  namespace_DESC
   tags_ASC
   tags_DESC
   slug_ASC
@@ -1150,6 +1197,8 @@ enum SortContentsBy {
   order_DESC
   isComplete_ASC
   isComplete_DESC
+  isPublic_ASC
+  isPublic_DESC
 }
 
 input ContentUpdateInput {
@@ -1159,10 +1208,12 @@ input ContentUpdateInput {
   externalLink: String
   githubRepository: String
   readme: String
+  namespace: String
   tags: String
   slug: String
   order: Int
   isComplete: Boolean
+  isPublic: Boolean
 }
 
 input ContentsUpdateInput {
@@ -1177,10 +1228,12 @@ input ContentCreateInput {
   externalLink: String
   githubRepository: String
   readme: String
+  namespace: String
   tags: String
   slug: String
   order: Int
   isComplete: Boolean
+  isPublic: Boolean
 }
 
 input ContentsCreateInput {
@@ -1215,6 +1268,7 @@ type CredentialIssuer {
   clientRoles: String
   resourceScopes: String
   resourceType: String
+  resourceAccessScope: String
   apiKeyName: String
   owner: User
   environments(
@@ -1514,6 +1568,24 @@ input CredentialIssuerWhereInput {
   resourceType_not_ends_with_i: String
   resourceType_in: [String]
   resourceType_not_in: [String]
+  resourceAccessScope: String
+  resourceAccessScope_not: String
+  resourceAccessScope_contains: String
+  resourceAccessScope_not_contains: String
+  resourceAccessScope_starts_with: String
+  resourceAccessScope_not_starts_with: String
+  resourceAccessScope_ends_with: String
+  resourceAccessScope_not_ends_with: String
+  resourceAccessScope_i: String
+  resourceAccessScope_not_i: String
+  resourceAccessScope_contains_i: String
+  resourceAccessScope_not_contains_i: String
+  resourceAccessScope_starts_with_i: String
+  resourceAccessScope_not_starts_with_i: String
+  resourceAccessScope_ends_with_i: String
+  resourceAccessScope_not_ends_with_i: String
+  resourceAccessScope_in: [String]
+  resourceAccessScope_not_in: [String]
   apiKeyName: String
   apiKeyName_not: String
   apiKeyName_contains: String
@@ -1602,6 +1674,8 @@ enum SortCredentialIssuersBy {
   resourceScopes_DESC
   resourceType_ASC
   resourceType_DESC
+  resourceAccessScope_ASC
+  resourceAccessScope_DESC
   apiKeyName_ASC
   apiKeyName_DESC
   owner_ASC
@@ -1637,6 +1711,7 @@ input CredentialIssuerUpdateInput {
   clientRoles: String
   resourceScopes: String
   resourceType: String
+  resourceAccessScope: String
   apiKeyName: String
   environments: EnvironmentRelateToManyInput
 }
@@ -1665,6 +1740,7 @@ input CredentialIssuerCreateInput {
   clientRoles: String
   resourceScopes: String
   resourceType: String
+  resourceAccessScope: String
   apiKeyName: String
   owner: UserRelateToOneInput
   environments: EnvironmentRelateToManyInput
@@ -5358,7 +5434,6 @@ type UMAResourceSet {
   ownerManagedAccess: Boolean
   uris: [String]
   resource_scopes: [UMAScope]
-  scopes: [UMAScope]
 }
 
 type UMAPermissionTicket {
@@ -5847,6 +5922,7 @@ type Query {
     orderBy: String
     where: ApplicationWhereInput
   ): [Application]
+  mySelf(where: UserWhereInput): User
   CredentialIssuerSummary(where: CredentialIssuerWhereInput): CredentialIssuer
   allDiscoverableContents(
     first: Int
@@ -5854,15 +5930,17 @@ type Query {
     orderBy: String
     where: ContentWhereInput
   ): [Content]
-  getUmaPolicies(credIssuerId: ID!, resourceId: String): [UMAPolicy]
+  getUmaPoliciesByResourceName(resourceName: String): [UMAPolicy]
+  getResourceOwners(type: String, name: String): [UMAResourceSet]
+  getUmaPolicies(prodEnvId: ID!, resourceId: String): [UMAPolicy]
   getResourceSet(
-    credIssuerId: ID!
+    prodEnvId: ID!
     owner: String
     type: String
     resourceId: String
   ): [UMAResourceSet]
   getPermissionTickets(
-    credIssuerId: ID!
+    prodEnvId: ID!
     resourceId: String
   ): [UMAPermissionTicket]
   appVersion: String
@@ -6036,20 +6114,21 @@ type Mutation {
     id: ID!
     pluginExtForeignKey: String!
   ): GatewayConsumer
+  acceptLegal(productEnvironmentId: ID!, acceptLegal: Boolean!): User
   createServiceAccount: ServiceAccount
   createUmaPolicy(
-    credIssuerId: ID!
+    prodEnvId: ID!
     resourceId: String
     data: UMAPolicyInput!
   ): UMAPolicy
-  deleteUmaPolicy(credIssuerId: ID!, policyId: String!): Boolean
+  deleteUmaPolicy(prodEnvId: ID!, policyId: String!): Boolean
   grantPermissions(
-    credIssuerId: ID!
+    prodEnvId: ID!
     data: UMAPermissionTicketInput!
   ): [UMAPermissionTicket]
-  revokePermissions(credIssuerId: ID!, ids: [String]!): Boolean
+  revokePermissions(prodEnvId: ID!, ids: [String]!): Boolean
   approvePermissions(
-    credIssuerId: ID!
+    prodEnvId: ID!
     resourceId: String!
     requesterId: String!
     scopes: [String]!

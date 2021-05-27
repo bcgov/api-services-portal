@@ -57,6 +57,20 @@ const randomNullValue = () => {
     id: casual.uuid,
   };
 };
+const user = {
+  id: casual.uuid,
+  userId: casual.uuid,
+  name: 'Viktor Vaughn',
+  username: 'vikvaughn',
+  email: 'villain@doom.net',
+  roles: ['api-owner', 'developer'],
+  isAdmin: false,
+  namespace: namespace ? namespace.name : null,
+  groups: null,
+  legalsAgreed: '[]',
+  sub: 'sub',
+};
+
 // Casual Definitions
 casual.define('namespace', () => {
   return sample(namespaces);
@@ -188,6 +202,7 @@ const server = mockServer(schemaWithMocks, {
     },
     getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
     getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
+    mySelf: () => user,
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -555,18 +570,7 @@ app.put('/admin/switch/:id', (req, res) => {
 app.get('/admin/session', (_, res) => {
   // res.sendStatus(401);
   res.json({
-    user: {
-      id: casual.uuid,
-      userId: casual.uuid,
-      name: 'Viktor Vaughn',
-      username: 'vikvaughn',
-      email: 'villain@doom.net',
-      roles: ['api-owner', 'developer'],
-      isAdmin: false,
-      namespace: namespace ? namespace.name : null,
-      groups: null,
-      sub: 'sub',
-    },
+    user,
   });
 });
 

@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { Product } from '@/shared/types/query.types';
-import { FaBook, FaChevronRight } from 'react-icons/fa';
+import { FaBook } from 'react-icons/fa';
 
 interface DiscoveryListItemProps {
   data: Product;

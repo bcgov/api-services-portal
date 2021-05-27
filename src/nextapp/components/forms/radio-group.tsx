@@ -14,17 +14,23 @@ interface RadioCardOption {
 interface RadioGroupProps {
   defaultValue?: string;
   name: string;
+  onChange: (value: string) => void;
   options: RadioCardOption[];
+  value?: string;
 }
 
 const RadioGroup: React.FC<RadioGroupProps> = ({
   defaultValue = '',
   name,
+  onChange,
   options,
+  value,
 }) => {
   const { getRootProps, getRadioProps } = useRadioGroup({
     name,
+    onChange,
     defaultValue,
+    value,
   });
   const group = getRootProps();
 
