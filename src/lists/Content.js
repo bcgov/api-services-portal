@@ -77,10 +77,19 @@ module.exports = {
     },
   },
   hooks: {
-    resolveInput: ({ operation, resolvedData, existingItem, context }) => {
+    resolveInput: ({
+      operation,
+      originalInput,
+      resolvedData,
+      existingItem,
+      context,
+    }) => {
+      logger.debug('[List.Content] Original %j', originalInput);
+      logger.debug('[List.Content] Resolved %j', resolvedData);
       if (operation == 'create') {
         resolvedData['namespace'] = context['authedItem']['namespace'];
       }
+
       if ('title' in resolvedData) {
         const ns =
           'namespace' in resolvedData

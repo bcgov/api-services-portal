@@ -394,6 +394,7 @@ export const metadata = {
       'isComplete',
       'tags',
       'publishDate',
+      'slug',
     ],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
