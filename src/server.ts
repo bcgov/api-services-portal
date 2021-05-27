@@ -1,9 +1,9 @@
 /// <reference types="node" />
 /// <reference types="express" />
-import "reflect-metadata"
-import express from "express";
-import request from "graphql-request";
-import { AnyCnameRecord } from "node:dns";
+import 'reflect-metadata';
+import express from 'express';
+import request from 'graphql-request';
+import { AnyCnameRecord } from 'node:dns';
 const { Keystone } = require('@keystonejs/keystone');
 const { Checkbox, Password, Select } = require('@keystonejs/fields');
 //import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
@@ -19,43 +19,47 @@ const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
 const { ApiOpenapiApp } = require('./api-openapi');
 
-var Keycloak = require("keycloak-connect");
+var Keycloak = require('keycloak-connect');
 
 const initialiseData = require('./initial-data');
 const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
-const redis = require('redis')
-let RedisStore = require('connect-redis')(session)
+const redis = require('redis');
+let RedisStore = require('connect-redis')(session);
 
 const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
 const { putFeedWorker, deleteFeedWorker } = require('./batch/feed-worker');
-const { Retry } = require('./services/tasked')
+const { Retry } = require('./services/tasked');
 
-const { FieldEnforcementPoint, EnforcementPoint } = require('./authz/enforcement')
+const {
+  FieldEnforcementPoint,
+  EnforcementPoint,
+} = require('./authz/enforcement');
 
-const { loadRulesAndWatch } = require('./authz/enforcement')
+const { loadRulesAndWatch } = require('./authz/enforcement');
 
-const { logger } = require('./logger')
+const { logger } = require('./logger');
 
 const apiPath = '/gql/api';
 const PROJECT_NAME = 'APS Service Portal';
 
 const { KnexAdapter } = require('@keystonejs/adapter-knex');
 const knexAdapterConfig = {
-    knexOptions: {
-        connection: {
-            host : process.env.KNEX_HOST,
-            port : process.env.KNEX_PORT,
-            user : process.env.KNEX_USER,
-            password : process.env.KNEX_PASSWORD,
-            database : process.env.KNEX_DATABASE
-          }        
-    }
+  knexOptions: {
+    debug: process.env.LOG_LEVEL === 'debug' ? true : false,
+    connection: {
+      host: process.env.KNEX_HOST,
+      port: process.env.KNEX_PORT,
+      user: process.env.KNEX_USER,
+      password: process.env.KNEX_PASSWORD,
+      database: process.env.KNEX_DATABASE,
+    },
+  },
 };
 
 const { MongooseAdapter } = require('@keystonejs/adapter-mongoose');
@@ -67,241 +71,278 @@ const mongooseAdapterConfig = {
 
 // GraphQL TypeScript codegen. Will output a `types.d.ts` file to `./src`
 async function generateTypes() {
-    await Promise.all(['/nextapp/shared/types/query.types.ts', '/services/keystone/types.ts'].map (async (path:string) => {
+  await Promise.all(
+    ['/nextapp/shared/types/query.types.ts', '/services/keystone/types.ts'].map(
+      async (path: string) => {
         await generate(
-            {
-              schema: `http://localhost:3000${apiPath}`,
-              generates: {
-                [process.cwd() + path]: {
-                  plugins: ['typescript'],
-                },
+          {
+            schema: `http://localhost:3000${apiPath}`,
+            generates: {
+              [process.cwd() + path]: {
+                plugins: ['typescript'],
               },
             },
-            true
-          )      
-    }))
+          },
+          true
+        );
+      }
+    )
+  );
 }
 
-const adapter = process.env.ADAPTER ? process.env.ADAPTER : "mongoose"
+const adapter = process.env.ADAPTER ? process.env.ADAPTER : 'mongoose';
 
 require('dotenv').config();
 
-loadRulesAndWatch(process.env.NODE_ENV)
+loadRulesAndWatch(process.env.NODE_ENV);
 
-const state = { connected : false }
+const state = { connected: false };
 
 const keystone = new Keystone({
-    onConnect(keystone: any) {
-      if (process.env.NODE_ENV === 'development') {
-        generateTypes();
-      }
-      if (process.env.CREATE_TABLES !== 'true') {
-        initialiseData(keystone);
-      }
-      console.log("CONNECTED!")
-      state.connected = true
-    },
-    adapter: adapter == "knex" ? new KnexAdapter(knexAdapterConfig) : new MongooseAdapter(mongooseAdapterConfig),
-    cookieSecret: process.env.COOKIE_SECRET,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', // Default to true in production
-      //maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-      maxAge: 1000 * 60 * 15, // 15 minute
-      sameSite: true,
-    },
-    sessionStore: (process.env.SESSION_STORE === 'redis' ? new RedisStore({client:redis.createClient({ url: process.env.REDIS_URL, password: process.env.REDIS_PASSWORD })}) : null)
-  });
-
-  const yamlReport = []
-  for (const _list of [
-    'AccessRequest',
-    'Activity',
-    'Alert',
-    'Application',
-    'Blob',
-    'Content',
-    'CredentialIssuer',
-    'Dataset',
-    'Environment',
-    'GatewayConsumer',
-    'GatewayGroup',
-    'GatewayPlugin',
-    'GatewayRoute',
-    'GatewayService',
-    'Legal',
-    'Metric',
-    'Organization',
-    'OrganizationUnit',
-    'Product',
-    'ServiceAccess',
-    'TemporaryIdentity',
-    'User',
-  ]) {
-    const list = require('./lists/' + _list)
-    if ('extensions' in list) {
-        console.log("Registering Extension!")
-        list.extensions.map ((ext:any) => ext(keystone))
+  onConnect(keystone: any) {
+    if (process.env.NODE_ENV === 'development') {
+      generateTypes();
     }
-    logger.info(" %s", _list)
-    
-    list.access = EnforcementPoint
-    for (  const entry of Object.entries(list.fields) ) {
-        logger.info("      %s", entry[0])
-        //list.fields[entry[0]].access = FieldEnforcementPoint
+    if (process.env.CREATE_TABLES !== 'true') {
+      initialiseData(keystone);
     }
-    const out = { list: _list, fields: Object.keys(list.fields).sort()}
-    yamlReport.push(out)
-    keystone.createList(_list, list);
-  }
-  const report = require('js-yaml').dump(yamlReport)
-
-  for (const _list of [
-      'AliasedQueries',
-      'Namespace',
-      'ServiceAccount',
-      'UMAPolicy',
-      'UMAResourceSet',
-      'UMAPermissionTicket',
-    ]) {
-      const list = require('./lists/extensions/' + _list)
-      if ('extensions' in list) {
-          console.log("Registering Extension!")
-          list.extensions.map ((ext:any) => ext(keystone))
-      }
-  }
-  const strategyType = process.env.AUTH_STRATEGY || 'Password';
-  console.log('Auth Strategy: ' + strategyType);
-
-  const authStrategy =
-    strategyType === 'Password'
-      ? keystone.createAuthStrategy({
-          type: PasswordAuthStrategy,
-          list: 'User',
+    console.log('CONNECTED!');
+    state.connected = true;
+  },
+  adapter:
+    adapter == 'knex'
+      ? new KnexAdapter(knexAdapterConfig)
+      : new MongooseAdapter(mongooseAdapterConfig),
+  cookieSecret: process.env.COOKIE_SECRET,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Default to true in production
+    //maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    maxAge: 1000 * 60 * 15, // 15 minute
+    sameSite: true,
+  },
+  sessionStore:
+    process.env.SESSION_STORE === 'redis'
+      ? new RedisStore({
+          client: redis.createClient({
+            url: process.env.REDIS_URL,
+            password: process.env.REDIS_PASSWORD,
+          }),
         })
-      : keystone.createAuthStrategy({
-          type: Oauth2ProxyAuthStrategy,
-          list: 'TemporaryIdentity',
-          signinPath: 'oauth2/sign_in',
-  
-          config: {
-            onAuthenticated: ({ token, item, isNewItem }:any, req:any, res:any) => {
-              console.log('Token = ' + token);
-              console.log('Redirecting to /');
-              res.redirect(302, '/');
-            },
+      : null,
+});
+
+const yamlReport = [];
+for (const _list of [
+  'AccessRequest',
+  'Activity',
+  'Alert',
+  'Application',
+  'Blob',
+  'Content',
+  'CredentialIssuer',
+  'Dataset',
+  'Environment',
+  'GatewayConsumer',
+  'GatewayGroup',
+  'GatewayPlugin',
+  'GatewayRoute',
+  'GatewayService',
+  'Legal',
+  'Metric',
+  'Organization',
+  'OrganizationUnit',
+  'Product',
+  'ServiceAccess',
+  'TemporaryIdentity',
+  'User',
+]) {
+  const list = require('./lists/' + _list);
+  if ('extensions' in list) {
+    console.log('Registering Extension!');
+    list.extensions.map((ext: any) => ext(keystone));
+  }
+  logger.info(' %s', _list);
+
+  list.access = EnforcementPoint;
+  for (const entry of Object.entries(list.fields)) {
+    logger.info('      %s', entry[0]);
+    //list.fields[entry[0]].access = FieldEnforcementPoint
+  }
+  const out = { list: _list, fields: Object.keys(list.fields).sort() };
+  yamlReport.push(out);
+  keystone.createList(_list, list);
+}
+const report = require('js-yaml').dump(yamlReport);
+
+for (const _list of [
+  'AliasedQueries',
+  'Namespace',
+  'ServiceAccount',
+  'UMAPolicy',
+  'UMAResourceSet',
+  'UMAPermissionTicket',
+]) {
+  const list = require('./lists/extensions/' + _list);
+  if ('extensions' in list) {
+    console.log('Registering Extension!');
+    list.extensions.map((ext: any) => ext(keystone));
+  }
+}
+const strategyType = process.env.AUTH_STRATEGY || 'Password';
+console.log('Auth Strategy: ' + strategyType);
+
+const authStrategy =
+  strategyType === 'Password'
+    ? keystone.createAuthStrategy({
+        type: PasswordAuthStrategy,
+        list: 'User',
+      })
+    : keystone.createAuthStrategy({
+        type: Oauth2ProxyAuthStrategy,
+        list: 'TemporaryIdentity',
+        signinPath: 'oauth2/sign_in',
+
+        config: {
+          onAuthenticated: (
+            { token, item, isNewItem }: any,
+            req: any,
+            res: any
+          ) => {
+            console.log('Token = ' + token);
+            console.log('Redirecting to /');
+            res.redirect(302, '/');
           },
-          hooks: {
-            afterAuth: async ({
-              operation,
-              item,
-              success,
-              message,
-              token,
-              originalInput,
-              resolvedData,
-              context,
-              listKey,
-            }: any) => {
-              console.log('AFTER AUTH');
-              console.log('ctx = ' + context.session);
-            },
+        },
+        hooks: {
+          afterAuth: async ({
+            operation,
+            item,
+            success,
+            message,
+            token,
+            originalInput,
+            resolvedData,
+            context,
+            listKey,
+          }: any) => {
+            console.log('AFTER AUTH');
+            console.log('ctx = ' + context.session);
           },
-        });
-  
+        },
+      });
+
 const { pages } = require('./admin-hooks.js');
 //const tasked = require('./services/tasked');
 
-const { checkWhitelist, loadWhitelistAndWatch, addToWhitelist } = require('./authz/whitelist')
+const {
+  checkWhitelist,
+  loadWhitelistAndWatch,
+  addToWhitelist,
+} = require('./authz/whitelist');
 
 const apps = [
-    new ApiHealthApp(state),
-    new ApiOpenapiApp(),
-    new ApiGraphqlWhitelistApp({
-        apiPath
-    }),
-    new AdminUIApp({
-      name: PROJECT_NAME,
-      adminPath: '/admin',
-      apiPath,
-      signinPath: 'oauth2/sign_in',
-      authStrategy,
-      pages: pages,
-      enableDefaultRoute: false,
-      isAccessAllowed: (user: any) => {
-        // console.log('isAllowed?');
-        // console.log(JSON.stringify(user));
-        return true;
-      },
-    }),
-    new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
-    new NextApp({ dir: 'nextapp' }),
-]
+  new ApiHealthApp(state),
+  new ApiOpenapiApp(),
+  new ApiGraphqlWhitelistApp({
+    apiPath,
+  }),
+  new AdminUIApp({
+    name: PROJECT_NAME,
+    adminPath: '/admin',
+    apiPath,
+    signinPath: 'oauth2/sign_in',
+    authStrategy,
+    pages: pages,
+    enableDefaultRoute: false,
+    isAccessAllowed: (user: any) => {
+      // console.log('isAllowed?');
+      // console.log(JSON.stringify(user));
+      return true;
+    },
+  }),
+  new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
+  new NextApp({ dir: 'nextapp' }),
+];
 
-const dev = process.env.NODE_ENV !== 'production'
+const dev = process.env.NODE_ENV !== 'production';
 
-const configureExpress = (app:any) => {
-    const express = require('express')
-    app.use(express.json())
+const configureExpress = (app: any) => {
+  const express = require('express');
+  app.use(express.json());
 
-    // app.get('/', (req, res, next) => {
-    //     console.log(req.path)
-    //     req.path == "/" ? res.redirect('/home') : next()
-    // })
-    app.put('/feed/:entity', (req : any, res : any) => putFeedWorker(keystone, req, res).catch ((err : any) => {
-        console.log(err)
-        res.status(400).json({result: 'error', error: "" + err})
-    }))
-    app.put('/feed/:entity/:id', (req : any, res : any) => putFeedWorker(keystone, req, res).catch ((err : any) => res.status(400).json({result: 'error', error: "" + err})))
-    app.delete('/feed/:entity/:id', (req : any, res : any) => deleteFeedWorker(keystone, req, res))
-
-    app.put('/migration/import', async (req : any, res : any) => {
-        const { MigrationFromV1 }  = require('./batch/migrationV1')
-        await new MigrationFromV1(keystone).report(req.body)
-        await new MigrationFromV1(keystone).migrate(req.body).then(() => {
-            res.status(200).json({result: 'migrated'})
-        }).catch ((err:any) => {
-            console.log("Error Migrating " + err)
-            res.status(400).json({result: 'failed'})
-        })
+  // app.get('/', (req, res, next) => {
+  //     console.log(req.path)
+  //     req.path == "/" ? res.redirect('/home') : next()
+  // })
+  app.put('/feed/:entity', (req: any, res: any) =>
+    putFeedWorker(keystone, req, res).catch((err: any) => {
+      console.log(err);
+      res.status(400).json({ result: 'error', error: '' + err });
     })
+  );
+  app.put('/feed/:entity/:id', (req: any, res: any) =>
+    putFeedWorker(keystone, req, res).catch((err: any) =>
+      res.status(400).json({ result: 'error', error: '' + err })
+    )
+  );
+  app.delete('/feed/:entity/:id', (req: any, res: any) =>
+    deleteFeedWorker(keystone, req, res)
+  );
 
-    app.post('/migration/report', async (req : any, res : any) => {
-        const { MigrationFromV1 }  = require('./batch/migrationV1')
-        await new MigrationFromV1(keystone).report(req.body).then(() => {
-            res.status(200).json({result: 'reported'})
-        }).catch ((err:any) => {
-            console.log("Error Migrating " + err)
-            res.status(400).json({result: 'failed'})
-        })
-    })
+  app.put('/migration/import', async (req: any, res: any) => {
+    const { MigrationFromV1 } = require('./batch/migrationV1');
+    await new MigrationFromV1(keystone).report(req.body);
+    await new MigrationFromV1(keystone)
+      .migrate(req.body)
+      .then(() => {
+        res.status(200).json({ result: 'migrated' });
+      })
+      .catch((err: any) => {
+        console.log('Error Migrating ' + err);
+        res.status(400).json({ result: 'failed' });
+      });
+  });
 
-    // Added for handling failed calls that require orchestrating multiple changes
-    app.put('/tasked/:id', async (req : any, res : any) => {
-        const tasked = new Retry(process.env.WORKING_PATH, req.params['id'])
-        await tasked.start()
-        res.status(200).json({result: 'ok'})
-    })   
-    
-    // const {ConfigService} = require('./services/bceid/config.service')
-    // const {BCeIDService} = require('./services/bceid/bceid.service')
-    // const bc = new BCeIDService(new ConfigService())
-    // bc.getAccountDetails('MaxineDeryck1').then ((answer:any) => {
-    //     console.log("DONE!")
-    //     console.log("ANSWER = " + JSON.stringify(answer))
-    // }).catch ((err: any) => {
-    //     console.log("ERROR ! " + err)
-    // })
+  app.post('/migration/report', async (req: any, res: any) => {
+    const { MigrationFromV1 } = require('./batch/migrationV1');
+    await new MigrationFromV1(keystone)
+      .report(req.body)
+      .then(() => {
+        res.status(200).json({ result: 'reported' });
+      })
+      .catch((err: any) => {
+        console.log('Error Migrating ' + err);
+        res.status(400).json({ result: 'failed' });
+      });
+  });
 
-    // const { NotificationService } = require('./services/notification/notification.service')
+  // Added for handling failed calls that require orchestrating multiple changes
+  app.put('/tasked/:id', async (req: any, res: any) => {
+    const tasked = new Retry(process.env.WORKING_PATH, req.params['id']);
+    await tasked.start();
+    res.status(200).json({ result: 'ok' });
+  });
 
-    // const nc = new NotificationService(new ConfigService())
-    
-    // nc.notify ({email: "aidan.cope@gmail.com", name: "Aidan Cope"}, { template: 'email-template', subject: 'Yeah!'}).then ((answer:any) => {
-    //     console.log("DONE!")
-    //     console.log("ANSWER = " + JSON.stringify(answer))
-    // }).catch ((err: any) => {
-    //     console.log("ERROR ! " + err)
-    // })
-}
+  // const {ConfigService} = require('./services/bceid/config.service')
+  // const {BCeIDService} = require('./services/bceid/bceid.service')
+  // const bc = new BCeIDService(new ConfigService())
+  // bc.getAccountDetails('MaxineDeryck1').then ((answer:any) => {
+  //     console.log("DONE!")
+  //     console.log("ANSWER = " + JSON.stringify(answer))
+  // }).catch ((err: any) => {
+  //     console.log("ERROR ! " + err)
+  // })
 
-export { keystone, apps, dev, configureExpress }
+  // const { NotificationService } = require('./services/notification/notification.service')
+
+  // const nc = new NotificationService(new ConfigService())
+
+  // nc.notify ({email: "aidan.cope@gmail.com", name: "Aidan Cope"}, { template: 'email-template', subject: 'Yeah!'}).then ((answer:any) => {
+  //     console.log("DONE!")
+  //     console.log("ANSWER = " + JSON.stringify(answer))
+  // }).catch ((err: any) => {
+  //     console.log("ERROR ! " + err)
+  // })
+};
+
+export { keystone, apps, dev, configureExpress };
