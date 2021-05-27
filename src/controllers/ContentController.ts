@@ -31,7 +31,7 @@ export class ContentController extends Controller {
   ): Promise<any> {
     return await syncRecords(
       this.keystone.createContext(request),
-      'Content',
+      'ContentBySlug',
       request.body['id'],
       request.body
     );
@@ -46,7 +46,7 @@ export class ContentController extends Controller {
     await this.handleFile(request);
     return await syncRecords(
       this.keystone.createContext(request),
-      'Content',
+      'ContentBySlug',
       contentId,
       { content: request.file.buffer.toString() }
     );
@@ -62,9 +62,9 @@ export class ContentController extends Controller {
     await this.handleFile(request);
     return await syncRecords(
       this.keystone.createContext(request),
-      'Content',
+      'ContentBySlug',
       contentId,
-      { content: body }
+      { content: body.toString() }
     );
   }
 

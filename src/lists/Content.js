@@ -93,9 +93,9 @@ module.exports = {
             ? resolvedData['namespace']
             : existingItem['namespace'];
 
-        // resolvedData['slug'] = slugify(
-        //   ns + ' ' + resolvedData['title']
-        // ).toLowerCase();
+        resolvedData['slug'] = slugify(
+          ns + ' ' + resolvedData['title']
+        ).toLowerCase();
 
         logger.debug('[List.Content] Set Slug %s', resolvedData['slug']);
       }

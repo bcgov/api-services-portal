@@ -3,12 +3,10 @@ import { Logger } from '../../logger';
 const logger = Logger('ks.batch');
 
 export class BatchService {
-  private keystone: any;
   private context: any;
 
-  constructor(keystone: any) {
-    this.keystone = keystone;
-    this.context = this.keystone.createContext({ skipAccessControl: true });
+  constructor(context: any) {
+    this.context = context;
   }
 
   public async list(
@@ -19,8 +17,7 @@ export class BatchService {
     fields: string[]
   ) {
     logger.debug('[list] : %s :: %s == %s', query, refKey, eid);
-    const result = await this.keystone.executeGraphQL({
-      context: this.context,
+    const result = await this.context.executeGraphQL({
       query: `query($id: String) {
               ${query}(where: { ${refKey} : $id }) {
                 id, ${fields.join(',')}
@@ -45,8 +42,7 @@ export class BatchService {
     fields: string[]
   ) {
     logger.debug('[lookup] : %s :: %s == %s', query, refKey, eid);
-    const result = await this.keystone.executeGraphQL({
-      context: this.context,
+    const result = await this.context.executeGraphQL({
       query: `query($id: String) {
               ${query}(where: { ${refKey} : $id }) {
                 id, ${fields.join(',')}
@@ -66,8 +62,7 @@ export class BatchService {
 
   public async create(entity: string, data: any) {
     logger.debug('[create] : (%s) %j', entity, data);
-    const result = await this.keystone.executeGraphQL({
-      context: this.context,
+    const result = await this.context.executeGraphQL({
       query: `mutation ($data: ${entity}CreateInput) {
               create${entity}(data: $data) {
                 id
@@ -82,8 +77,7 @@ export class BatchService {
 
   public async update(entity: string, id: string, data: any): Promise<string> {
     logger.debug('[update] : %s %s', entity, id);
-    const result = await this.keystone.executeGraphQL({
-      context: this.context,
+    const result = await this.context.executeGraphQL({
       query: `mutation ($id: ID!, $data: ${entity}UpdateInput) {
               update${entity}(id: $id, data: $data) {
                 id
@@ -97,8 +91,7 @@ export class BatchService {
 
   public async remove(entity: string, id: string): Promise<any> {
     logger.debug('[remove] : %s %s', entity, id);
-    const result = await this.keystone.executeGraphQL({
-      context: this.context,
+    const result = await this.context.executeGraphQL({
       query: `mutation ($id: ID!) {
               delete${entity}(id: $id)
             }`,

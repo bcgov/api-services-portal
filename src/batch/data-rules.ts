@@ -401,6 +401,28 @@ export const metadata = {
       namespace: { name: 'mapNamespace' },
     },
   },
+  ContentBySlug: {
+    entity: 'Content',
+    query: 'allContents',
+    refKey: 'slug',
+    sync: [
+      'externalLink',
+      'title',
+      'description',
+      'content',
+      'githubRepository',
+      'readme',
+      'order',
+      'isPublic',
+      'isComplete',
+      'tags',
+      'publishDate',
+    ],
+    transformations: {
+      tags: { name: 'toStringDefaultArray' },
+      namespace: { name: 'mapNamespace' },
+    },
+  },
   Legal: {
     query: 'allLegals',
     refKey: 'reference',
