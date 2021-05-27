@@ -37,7 +37,7 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({
 
   return (
     <>
-      {data?.getResourceSet == null && <Progress size="xs" isIndeterminate />}
+      {data?.allResourceSets == null && <Progress size="xs" isIndeterminate />}
       <Table variant="simple">
         <Thead>
           <Tr>
@@ -83,14 +83,8 @@ const ResourcesComponent: React.FC<ResourcesProps> = ({
 export default ResourcesComponent;
 
 const query = gql`
-  query GetResources(
-    $prodEnvId: ID!
-    $resourceType: String
-  ) {
-    allResourceSets(
-      prodEnvId: $prodEnvId
-      type: $resourceType
-    ) {
+  query GetResources($prodEnvId: ID!, $resourceType: String) {
+    allResourceSets(prodEnvId: $prodEnvId, type: $resourceType) {
       id
       name
       type

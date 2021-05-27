@@ -860,5 +860,15 @@
           "referer": "http://localhost:4180/manager/products",
           "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
           "added": "2021-05-26T17:29:08.072Z"
+     },
+     "e1b6fe1d5e8a6230fbda9f9afdff5c72": {
+          "referer": "http://localhost:4180/devportal/requests/new/60ae79b7bb408c4fefb33374",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(\n      productEnvironmentId: $productEnvironmentId\n      acceptLegal: $acceptLegal\n    ) {\n      legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-27T16:25:46.020Z"
+     },
+     "cc8bbd6f18ffbbab95c1a7b0caaa52e6": {
+          "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
+          "query": "\n  query GetResources($prodEnvId: ID!, $resourceType: String) {\n    allResourceSets(prodEnvId: $prodEnvId, type: $resourceType) {\n      id\n      name\n      type\n    }\n\n    allPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
+          "added": "2021-05-27T16:31:20.746Z"
      }
 }
