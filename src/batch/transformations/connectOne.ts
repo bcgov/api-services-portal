@@ -14,22 +14,26 @@ export async function connectOne(
   const batchService = new BatchService(keystone);
   const fieldKey = 'key' in transformInfo ? transformInfo['key'] : _fieldKey;
 
+  const value = dot(inputData, fieldKey);
+
+  // undefined value is one that was never passed in (rather than explicitely passed in null)
+  if (typeof value === 'undefined') {
+    return null;
+  } else if (value == null) {
+    return { disconnectAll: true };
+  }
+
   const lkup = await batchService.lookup(
     transformInfo['list'],
     transformInfo['refKey'],
-    dot(inputData, fieldKey),
+    value,
     []
   );
   if (lkup == null) {
     logger.error(
       `Lookup failed for ${transformInfo['list']} ${transformInfo['refKey']}!`
     );
-    throw Error(
-      'Failed to find ' +
-        dot(inputData, fieldKey) +
-        ' in ' +
-        transformInfo['list']
-    );
+    throw Error('Failed to find ' + value + ' in ' + transformInfo['list']);
   } else if (
     currentData != null &&
     'id' in currentData[fieldKey] &&
