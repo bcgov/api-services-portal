@@ -1,4 +1,12 @@
-import { Controller, Request, Get, Path, Route, Security } from 'tsoa';
+import {
+  Controller,
+  OperationId,
+  Request,
+  Get,
+  Path,
+  Route,
+  Security,
+} from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../batch/feed-worker';
@@ -15,6 +23,7 @@ export class DirectoryController extends Controller {
   }
 
   @Get()
+  @OperationId('directory-list')
   public async list(): Promise<any> {
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.sudo(),
@@ -24,6 +33,7 @@ export class DirectoryController extends Controller {
   }
 
   @Get('{id}')
+  @OperationId('directory-item')
   public async get(@Path() id: string): Promise<any> {
     const product: Product = (
       await this.keystone.executeGraphQL({

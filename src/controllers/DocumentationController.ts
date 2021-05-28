@@ -1,4 +1,4 @@
-import { Controller, Get, Path, Route } from 'tsoa';
+import { Controller, OperationId, Get, Path, Route } from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
@@ -15,6 +15,7 @@ export class DocumentationController extends Controller {
   }
 
   @Get()
+  @OperationId('document-list')
   public async list(): Promise<any> {
     const result: Content[] = (
       await this.keystone.executeGraphQL({
@@ -29,6 +30,7 @@ export class DocumentationController extends Controller {
   }
 
   @Get('{slug}')
+  @OperationId('document-item')
   public async get(@Path() slug: string): Promise<any> {
     const content: Content = (
       await this.keystone.executeGraphQL({

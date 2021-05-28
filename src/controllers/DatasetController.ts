@@ -1,4 +1,13 @@
-import { Body, Controller, Request, Put, Path, Route, Security } from 'tsoa';
+import {
+  Body,
+  Controller,
+  OperationId,
+  Request,
+  Put,
+  Path,
+  Route,
+  Security,
+} from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../batch/feed-worker';
@@ -14,6 +23,7 @@ export class DatasetController extends Controller {
   }
 
   @Put()
+  @OperationId('put-dataset')
   public async put(
     @Path() ns: string,
     @Body() body: any,
