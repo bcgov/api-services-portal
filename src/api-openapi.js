@@ -1,7 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 const { RegisterRoutes } = require('./controllers/routes');
-const specFile = fs.realpathSync('controllers/swagger.yaml');
+const specFile = fs.realpathSync('controllers/openapi.yaml');
 const spec = fs.readFileSync(specFile);
 
 const { Register } = require('./controllers/ioc/registry');
@@ -17,7 +17,7 @@ class ApiOpenapiApp {
 
     RegisterRoutes(app);
 
-    app.get('/ds/api/swagger.yaml', (req, res) => {
+    app.get('/ds/api/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
       res.send(spec);
     });

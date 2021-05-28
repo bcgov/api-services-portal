@@ -22,6 +22,23 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "Content": {
+        "dataType": "refObject",
+        "properties": {
+            "externalLink": {"dataType":"string","required":true},
+            "title": {"dataType":"string"},
+            "description": {"dataType":"string"},
+            "content": {"dataType":"string"},
+            "order": {"dataType":"double"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "isComplete": {"dataType":"boolean"},
+            "isPublic": {"dataType":"boolean"},
+            "publishDate": {"dataType":"string"},
+            "slug": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new ValidationService(models);
 
@@ -37,6 +54,7 @@ export function RegisterRoutes(app: express.Router) {
             function ContentController_putContent(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"Content"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -58,35 +76,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.putContent.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/namespaces/:ns/contents/:contentId/markdown',
-            authenticateMiddleware([{"jwt":["Content.Publish"]}]),
-            function ContentController_putMarkdown(request: any, response: any, next: any) {
-            const args = {
-                    contentId: {"in":"path","name":"contentId","required":true,"dataType":"string"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-            const controller: any = container.get<ContentController>(ContentController);
-            if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-            }
-
-
-            const promise = controller.putMarkdown.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -257,6 +246,7 @@ export function RegisterRoutes(app: express.Router) {
             function ProductController_put(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"any"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

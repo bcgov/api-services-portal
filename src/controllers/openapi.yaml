@@ -4,7 +4,36 @@ components:
     parameters: {}
     requestBodies: {}
     responses: {}
-    schemas: {}
+    schemas:
+        Content:
+            properties:
+                externalLink:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                content:
+                    type: string
+                order:
+                    type: number
+                    format: double
+                tags:
+                    items:
+                        type: string
+                    type: array
+                isComplete:
+                    type: boolean
+                isPublic:
+                    type: boolean
+                publishDate:
+                    type: string
+                slug:
+                    type: string
+            required:
+                - externalLink
+            type: object
+            additionalProperties: false
     securitySchemes: {}
 info:
     title: bcgov-aps-portal
@@ -18,7 +47,7 @@ openapi: 3.0.0
 paths:
     '/namespaces/{ns}/contents':
         put:
-            operationId: PutContent
+            operationId: put-content
             responses:
                 '200':
                     description: Ok
@@ -36,26 +65,12 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/contents/{contentId}/markdown':
-        put:
-            operationId: PutMarkdown
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            security:
-                -
-                    jwt:
-                        - Content.Publish
-            parameters:
-                -
-                    in: path
-                    name: contentId
-                    required: true
-                    schema:
-                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Content'
     '/namespaces/{ns}/datasets':
         put:
             operationId: Put
@@ -152,7 +167,7 @@ paths:
                         type: string
     '/namespaces/{ns}/products':
         put:
-            operationId: Put
+            operationId: put-product
             responses:
                 '200':
                     description: Ok
@@ -170,6 +185,11 @@ paths:
                     required: true
                     schema:
                         type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: {}
 servers:
     -
         url: /ds/api

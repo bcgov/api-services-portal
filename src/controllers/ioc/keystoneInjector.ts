@@ -2,6 +2,14 @@ import { Keystone } from '@keystonejs/keystone';
 import { injectable } from 'tsyringe';
 import { scopes, scopesToRoles } from '../../auth/scopes-to-roles';
 
+const resolveUsername = function (user: any) {
+  for (const nm of ['preferred_username', 'clientId']) {
+    if (nm in user) {
+      return user[nm];
+    }
+  }
+  return null;
+};
 @injectable()
 export class KeystoneService {
   private keystone: any;
@@ -21,8 +29,8 @@ export class KeystoneService {
     const _scopes = scopes(request.user.scope);
     const identity = {
       id: null,
-      username: request.user['preferred_username'],
-      namespace: request.user['namespace'],
+      username: resolveUsername(request.user),
+      namespace: request.params.ns,
       roles: scopesToRoles(_scopes),
       scopes: _scopes,
       userId: null,

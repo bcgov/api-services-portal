@@ -1,4 +1,13 @@
-import { Controller, Request, Put, Path, Route, Security } from 'tsoa';
+import {
+  Controller,
+  Request,
+  OperationId,
+  Put,
+  Path,
+  Route,
+  Security,
+  Body,
+} from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../batch/feed-worker';
@@ -14,12 +23,17 @@ export class ProductController extends Controller {
   }
 
   @Put()
-  public async put(@Path() ns: string, @Request() request: any): Promise<any> {
+  @OperationId('put-product')
+  public async put(
+    @Path() ns: string,
+    @Body() body: any,
+    @Request() request: any
+  ): Promise<any> {
     return await syncRecords(
       this.keystone.createContext(request),
       'Product',
-      request.body['id'],
-      request.body
+      body['appId'],
+      body
     );
   }
 }

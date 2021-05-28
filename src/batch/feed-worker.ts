@@ -11,6 +11,7 @@ import {
 } from './transformations';
 import union from 'lodash/union';
 import { metadata } from './data-rules';
+import { BatchResult } from './types';
 import { BatchService } from '../services/keystone/batch-service';
 import { Logger } from '../logger';
 
@@ -110,8 +111,8 @@ const syncListOfRecords = async function (
   keystone: any,
   entity: string,
   records: any
-) {
-  const result = [];
+): Promise<BatchResult[]> {
+  const result: BatchResult[] = [];
   if (records == null || typeof records == 'undefined') {
     return [];
   }
@@ -142,7 +143,7 @@ export const syncRecords = async function (
   eid: string,
   json: any,
   children = false
-) {
+): Promise<BatchResult> {
   const md = (metadata as any)[feedEntity];
   const entity = 'entity' in md ? md['entity'] : feedEntity;
 

@@ -18,7 +18,7 @@ export class DatasetController extends Controller {
     return await syncRecords(
       this.keystone.createContext(request),
       'DraftDataset',
-      request.body['id'],
+      request.body['name'],
       request.body
     );
   }

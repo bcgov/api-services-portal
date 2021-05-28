@@ -40,6 +40,7 @@ module.exports = {
   access: EnforcementPoint,
   hooks: {
     resolveInput: ({ context, operation, resolvedData }) => {
+      logger.debug('[List.Product] Auth %j', context['authedItem']);
       if (operation == 'create') {
         if ('appId' in resolvedData && isProductID(resolvedData['appId'])) {
         } else {

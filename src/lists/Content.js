@@ -57,6 +57,18 @@ module.exports = {
       adminConfig: {
         isReadOnly: true, //slug can be created automatically and you may want to show this as read only
       },
+      generate: ({ resolvedData, existingItem }) => {
+        const ns =
+          'namespace' in resolvedData
+            ? resolvedData['namespace']
+            : existingItem['namespace'];
+        const title =
+          'title' in resolvedData
+            ? resolvedData['title']
+            : existingItem['title'];
+        return slugify(ns + ' ' + title).toLowerCase();
+      },
+      makeUnique: (val) => val,
       isUnique: true,
     },
     order: {
@@ -74,32 +86,6 @@ module.exports = {
     publishDate: {
       type: DateTime,
       inRequired: false,
-    },
-  },
-  hooks: {
-    resolveInput: ({
-      operation,
-      originalInput,
-      resolvedData,
-      existingItem,
-      context,
-    }) => {
-      logger.debug('[List.Content] Original %j', originalInput);
-      logger.debug('[List.Content] Resolved %j', resolvedData);
-
-      if ('title' in resolvedData) {
-        const ns =
-          'namespace' in resolvedData
-            ? resolvedData['namespace']
-            : existingItem['namespace'];
-
-        resolvedData['slug'] = slugify(
-          ns + ' ' + resolvedData['title']
-        ).toLowerCase();
-
-        logger.debug('[List.Content] Set Slug %s', resolvedData['slug']);
-      }
-      return resolvedData;
     },
   },
 };

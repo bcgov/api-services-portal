@@ -118,7 +118,7 @@ const DocsContentPage: React.FC<
 
 const InternalLink = (props: any) => {
   return (
-    <a href={props.href}>
+    <a href={props.href} target="_blank">
       <Button justifyContent="flex-start" colorScheme="blue" variant="link">
         <Box mr={1}>{props.children}</Box>
         <FaExternalLinkAlt />
