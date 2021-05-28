@@ -491,5 +491,35 @@
           "referer": "http://localhost:4180/devportal/requests/new/60a34109b1fd0a61670dcbed",
           "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(\n      productEnvironmentId: $productEnvironmentId\n      acceptLegal: $acceptLegal\n    ) {\n      legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
           "added": "2021-05-28T05:48:43.618Z"
+     },
+     "d8a1fe9c4cd13380ae02a8a77ed3105e": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200, orderBy: \"updatedAt_DESC\") {\n      consumer {\n        id\n        username\n        aclGroups\n        customId\n        plugins {\n          name\n        }\n        tags\n        updatedAt\n      }\n      application {\n        name\n        appId\n      }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-28T07:03:39.853Z"
+     },
+     "676efc6d02cd0becae418438ea621d04": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+          "added": "2021-05-28T07:03:58.064Z"
+     },
+     "c9e3c7d3203e4b3c095e454aa721f901": {
+          "referer": "http://localhost:4180/manager/requests/60ac9c8d58615f36c3f2f7be",
+          "query": "\n  mutation FulfillRequest($id: ID!, $controls: String!) {\n    updateAccessRequest(\n      id: $id\n      data: {\n        isApproved: true\n        isIssued: true\n        isComplete: true\n        controls: $controls\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-28T07:04:00.664Z"
+     },
+     "aa7c2da58bd0ede8b7a28394e915807e": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n  }\n",
+          "added": "2021-05-28T07:04:12.402Z"
+     },
+     "adb2e7dc535971400d2d58af811d5dfd": {
+          "referer": "http://localhost:4180/manager/consumers/60b05e2d2e7ef60dc63477ed",
+          "query": "\n  query GetControlContent {\n    allGatewayServicesByNamespace {\n      id\n      name\n      extForeignKey\n      routes {\n        id\n        name\n        extForeignKey\n      }\n    }\n  }\n",
+          "added": "2021-05-28T07:04:13.819Z"
+     },
+     "e373a8ddc9d8d43ad06d081777d4c1a3": {
+          "referer": "http://localhost:4180/manager/consumers/60b05e2d2e7ef60dc63477ed",
+          "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayConsumerPlugin(\n      id: $consumerId\n      pluginExtForeignKey: $pluginExtForeignKey\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-28T07:04:35.684Z"
      }
 }
