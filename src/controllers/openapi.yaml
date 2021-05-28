@@ -73,7 +73,7 @@ paths:
                             $ref: '#/components/schemas/Content'
     '/namespaces/{ns}/dataset':
         put:
-            operationId: Put
+            operationId: put-dataset
             responses:
                 '200':
                     description: Ok
@@ -98,7 +98,7 @@ paths:
                         schema: {}
     /directory:
         get:
-            operationId: List
+            operationId: directory-list
             responses:
                 '200':
                     description: Ok
@@ -109,7 +109,7 @@ paths:
             parameters: []
     '/directory/{id}':
         get:
-            operationId: Get
+            operationId: directory-item
             responses:
                 '200':
                     description: Ok
@@ -126,7 +126,7 @@ paths:
                         type: string
     /documentation:
         get:
-            operationId: List
+            operationId: document-list
             responses:
                 '200':
                     description: Ok
@@ -137,7 +137,7 @@ paths:
             parameters: []
     '/documentation/{slug}':
         get:
-            operationId: Get
+            operationId: document-item
             responses:
                 '200':
                     description: Ok

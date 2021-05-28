@@ -139,6 +139,25 @@ const syncListOfRecords = async function (
 //     return result
 // }
 
+function buildQueryResponse(md: any): string[] {
+  const relationshipFields = Object.keys(
+    md.transformations
+  ).filter((tranField: any) =>
+    ['connectOne', 'connectExclusiveList', 'connectMany'].includes(
+      md.transformations[tranField].name
+    )
+  );
+  const response = md.sync
+    .filter((s: string) => !relationshipFields.includes(s))
+    .slice();
+  logger.debug('[buildQueryResponse] DRAFT (%s) %j', md.query, response);
+  relationshipFields.forEach((field: string) => {
+    response.push(`${field} { id }`);
+  });
+  logger.debug('[buildQueryResponse] FINAL (%s) %j', md.query, response);
+  return response;
+}
+
 export const syncRecords = async function (
   keystone: any,
   feedEntity: string,
@@ -161,7 +180,7 @@ export const syncRecords = async function (
     md.query,
     md.refKey,
     eid,
-    union(md.sync, Object.keys(md.transformations))
+    buildQueryResponse(md)
   );
   if (localRecord == null) {
     const data: any = {};
@@ -224,12 +243,11 @@ export const syncRecords = async function (
 
     for (const field of md.sync) {
       if (!transformKeys.includes(field)) {
-        logger.debug('Changed? ' + field);
         logger.debug(
-          ' -- ' +
-            JSON.stringify(json[field]) +
-            ' == ' +
-            JSON.stringify(localRecord[field])
+          ' -- changed? (%s) %j -> %j',
+          field,
+          localRecord[field],
+          json[field]
         );
         if (field in json && json[field] !== localRecord[field]) {
           logger.debug(' -- updated');
@@ -240,7 +258,7 @@ export const syncRecords = async function (
 
     if ('transformations' in md) {
       for (const transformKey of transformKeys) {
-        logger.debug('Changed? ' + transformKey);
+        logger.debug(' -- changed trans? (%s)', transformKey);
         // unset transformKey from data[]
         delete data[transformKey];
         const transformInfo = md.transformations[transformKey];
@@ -267,23 +285,21 @@ export const syncRecords = async function (
           json,
           transformKey
         );
-        if (transformMutation != null) {
+        if (transformMutation && transformMutation != null) {
           logger.debug(
-            ' -- updated [' +
-              transformKey +
-              '] ' +
-              JSON.stringify(localRecord[transformKey]) +
-              ' to ' +
-              JSON.stringify(transformMutation)
+            ' -- updated trans (%s) %j -> %j',
+            transformKey,
+            localRecord[transformKey],
+            transformMutation
           );
           data[transformKey] = transformMutation;
         }
       }
     }
-    logger.debug(Object.keys(data));
     if (Object.keys(data).length === 0) {
       return { status: 200, result: 'no-change', id: localRecord['id'] };
     }
+    logger.debug('keys triggering update %j', Object.keys(data));
     const nr = await batchService.update(entity, localRecord.id, data);
     if (nr == null) {
       logger.error('UPDATE FAILED (%s) %j', nr, data);
