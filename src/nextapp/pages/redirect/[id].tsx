@@ -31,25 +31,25 @@ const RedirectPage: React.FC<
       title: 'API Key Request (KQ) End-of-Life',
       description:
         "The KQ application has been demised and replaced with the API Services Portal.  To get a key to an API, go to the <a href='/devportal/api-discovery'>Directory</a> page and request access.",
-      moreDetails: '/devportal/docs/news-portal-release-1',
+      moreDetails: '/devportal/docs/platform-api-services-portal-released',
     },
     argg: {
       title: 'API Registration Generator (ARGG) End-of-Life',
       description:
         "The ARGG application has been demised and replaced with the API Services Portal.  To register an API so that it is discoverable, find the 'Gateway Administration API' in the Directory and Request access to get started.",
-      moreDetails: '/devportal/docs/news-portal-release-1',
+      moreDetails: '/devportal/docs/platform-api-services-portal-released',
     },
     'api-spec-editor': {
       title: 'API Spec Editor End-of-Life',
       description:
         'The API Spec Editor application has been demised and replaced with an API Swagger Console.',
-      moreDetails: '/devportal/docs/news-portal-release-1',
+      moreDetails: '/devportal/docs/platform-api-services-portal-released',
     },
     'api-console': {
       title: 'API Console End-of-Life',
       description:
         'The API Console application has been demised and replaced with a Swagger Console.',
-      moreDetails: '/devportal/docs/news-portal-release-1',
+      moreDetails: '/devportal/docs/platform-api-services-portal-released',
     },
   };
   if (!(id in sources)) {
