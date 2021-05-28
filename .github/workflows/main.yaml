@@ -1,6 +1,6 @@
 name: Create Release
 
-on: 
+on:
   push:
     branches:
       - main
@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - id: release
-        uses: rymndhng/release-on-push-action@v0.15.0
+        uses: rymndhng/release-on-push-action@v0.20.0
         with:
           bump_version_scheme: patch
 
