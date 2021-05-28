@@ -481,5 +481,10 @@
           "referer": "http://localhost:4180/devportal/applications",
           "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(data: { name: $name, description: $description }) {\n      id\n    }\n  }\n",
           "added": "2021-05-28T05:44:19.642Z"
+     },
+     "02a1cbc8cc2a615ae533f6b82bcabb05": {
+          "referer": "http://localhost:4180/manager/poc/activity",
+          "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          context\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
+          "added": "2021-05-28T05:46:48.377Z"
      }
 }
