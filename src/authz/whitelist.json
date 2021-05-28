@@ -471,5 +471,15 @@
           "referer": "http://localhost:4180/",
           "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(namespace: $name)\n}\n",
           "added": "2021-05-28T05:25:29.789Z"
+     },
+     "caadf1abf799958a180d79b8fb3acbcd": {
+          "referer": "http://localhost:4180/devportal/api-discovery/609c1ecb4337bc74fb7205ca",
+          "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n          reference\n        }\n        credentialIssuer {\n          clientAuthenticator\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+          "added": "2021-05-28T05:43:48.994Z"
+     },
+     "398091e26a0271254962eb43f0345132": {
+          "referer": "http://localhost:4180/devportal/applications",
+          "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(data: { name: $name, description: $description }) {\n      id\n    }\n  }\n",
+          "added": "2021-05-28T05:44:19.642Z"
      }
 }
