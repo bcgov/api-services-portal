@@ -486,5 +486,10 @@
           "referer": "http://localhost:4180/manager/poc/activity",
           "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          context\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
           "added": "2021-05-28T05:46:48.377Z"
+     },
+     "e1b6fe1d5e8a6230fbda9f9afdff5c72": {
+          "referer": "http://localhost:4180/devportal/requests/new/60a34109b1fd0a61670dcbed",
+          "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(\n      productEnvironmentId: $productEnvironmentId\n      acceptLegal: $acceptLegal\n    ) {\n      legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-05-28T05:48:43.618Z"
      }
 }

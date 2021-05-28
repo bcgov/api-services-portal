@@ -73,7 +73,8 @@ export const putFeedWorker = async (keystone: any, req: any, res: any) => {
       JSON.stringify(req.body)
   );
 
-  const result = await syncRecords(keystone, entity, eid, json);
+  const context = keystone.createContext({ skipAccessControl: true });
+  const result = await syncRecords(context, entity, eid, json);
   res.status(result.status).json(result);
 };
 
@@ -81,7 +82,8 @@ export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const eid = req.params['id'];
   const json = req.body;
-  const batchService = new BatchService(keystone);
+  const context = keystone.createContext({ skipAccessControl: true });
+  const batchService = new BatchService(context);
 
   assert.strictEqual(feedEntity in metadata, true);
   assert.strictEqual(
