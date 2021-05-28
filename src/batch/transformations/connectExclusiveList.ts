@@ -8,8 +8,10 @@ export function connectExclusiveList(
   if (
     fieldKey in currentData &&
     currentData[fieldKey] != null &&
-    currentData[fieldKey].map((d: any) => d.id).join(' ') ===
-      inputData[fieldKey + '_ids'].join(' ')
+    currentData[fieldKey]
+      .map((d: any) => d.id)
+      .sort()
+      .join(' ') === inputData[fieldKey + '_ids'].sort().join(' ')
   ) {
     return null;
   }

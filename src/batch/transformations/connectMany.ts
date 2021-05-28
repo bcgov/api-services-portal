@@ -37,7 +37,10 @@ export async function connectMany(
   if (
     fieldKey in currentData &&
     currentData[fieldKey] != null &&
-    currentData[fieldKey].map((d: any) => d.id).join(' ') === refIds.join(' ')
+    currentData[fieldKey]
+      .map((d: any) => d.id)
+      .sort()
+      .join(' ') === refIds.sort().join(' ')
   ) {
     return null;
   }
