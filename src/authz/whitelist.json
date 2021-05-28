@@ -461,5 +461,15 @@
           "referer": "http://localhost:4180/devportal/resources/d30f6967-254b-4a19-abb7-abd02f14f23e?peid=609c5bf79b8ceca36d31ce94",
           "query": "\n  mutation RevokeSAAccess(\n      $prodEnvId: ID!, \n      $resourceId: String!,\n      $policyId: String!) {\n    deleteUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, policyId: $policyId)\n}\n",
           "added": "2021-05-28T03:06:08.587Z"
+     },
+     "170f0c898f22eb5819b4b73dd95503ac": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(namespace: $name) {\n      id\n      name\n  }\n}\n",
+          "added": "2021-05-28T05:25:03.543Z"
+     },
+     "1e983d443f49213db444d1b2a5842865": {
+          "referer": "http://localhost:4180/",
+          "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(namespace: $name)\n}\n",
+          "added": "2021-05-28T05:25:29.789Z"
      }
 }
