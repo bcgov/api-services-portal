@@ -122,7 +122,11 @@ const NewRequestsPage: React.FC<
     try {
       const payload = {
         name: `${dataset.name} FOR ${data.allTemporaryIdentities[0].name}`,
-        controls: '{"clientGenCertificate":false}',
+        controls: JSON.stringify({
+          clientGenCertificate:
+            selectedEnvironment?.credentialIssuer?.clientAuthenticator ===
+            'client-jwt',
+        }),
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
         productEnvironmentId: formData.get('environmentId'),
