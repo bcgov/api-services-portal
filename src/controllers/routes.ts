@@ -13,6 +13,8 @@ import { DocumentationController } from './DocumentationController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { IdentifiersController } from './IdentifierController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { IssuerController } from './IssuerController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductController } from './ProductController';
 import { expressAuthentication } from './../auth/auth-tsoa';
 import { iocContainer } from './ioc';
@@ -79,11 +81,12 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/namespaces/:ns/datasets',
+        app.put('/ds/api/namespaces/:ns/dataset',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
             function DatasetController_put(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"any"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -238,6 +241,36 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.getNewID.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/namespaces/:ns/issuers',
+            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+            function IssuerController_put(request: any, response: any, next: any) {
+            const args = {
+                    ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"any"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+            const controller: any = container.get<IssuerController>(IssuerController);
+            if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+            }
+
+
+            const promise = controller.put.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

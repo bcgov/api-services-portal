@@ -51,7 +51,7 @@ const PROJECT_NAME = 'APS Service Portal';
 const { KnexAdapter } = require('@keystonejs/adapter-knex');
 const knexAdapterConfig = {
   knexOptions: {
-    debug: process.env.LOG_LEVEL === 'debug' ? true : false,
+    debug: process.env.LOG_LEVEL === 'debug' ? false : false,
     connection: {
       host: process.env.KNEX_HOST,
       port: process.env.KNEX_PORT,

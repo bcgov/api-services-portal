@@ -521,5 +521,10 @@
           "referer": "http://localhost:4180/manager/consumers/60b05e2d2e7ef60dc63477ed",
           "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayConsumerPlugin(\n      id: $consumerId\n      pluginExtForeignKey: $pluginExtForeignKey\n    ) {\n      id\n    }\n  }\n",
           "added": "2021-05-28T07:04:35.684Z"
+     },
+     "b7b196ea3c68aeb81b2d8e7b6bc5d223": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+          "added": "2021-05-28T08:16:22.934Z"
      }
 }

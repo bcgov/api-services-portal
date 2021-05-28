@@ -23,7 +23,7 @@ import {
   ButtonGroup,
   Icon,
   Wrap,
-  WrapItem
+  WrapItem,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import format from 'date-fns/format';
@@ -40,7 +40,7 @@ import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import RequestActions from '@/components/request-actions';
 import ActivityList from '@/components/activity-list';
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -51,7 +51,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id, rid:id },
+        { id, rid: id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -76,6 +76,7 @@ const AccessRequestPage: React.FC<
       query,
       variables: {
         id,
+        rid: id,
       },
     },
     { suspense: false }
@@ -83,29 +84,40 @@ const AccessRequestPage: React.FC<
   const isComplete =
     data.AccessRequest?.isIssued && data.AccessRequest?.isApproved;
 
-  const breadcrumb = breadcrumbs([{ href: '/manager/consumers', text: 'Consumer Requests' }]);
+  const breadcrumb = breadcrumbs([
+    { href: '/manager/consumers', text: 'Consumer Requests' },
+  ]);
   const { plugins } = data?.AccessRequest?.controls
     ? JSON.parse(data.AccessRequest.controls)
     : [];
 
-  const controls : RequestControls = data?.AccessRequest?.controls
-    ? JSON.parse(data.AccessRequest.controls)
-    : {};
+  const controls: RequestControls = {
+    ...{ defaultClientScopes: [] },
+    ...(data?.AccessRequest?.controls
+      ? JSON.parse(data.AccessRequest.controls)
+      : {}),
+  };
 
-  const availableScopes = data?.AccessRequest.productEnvironment.credentialIssuer?.availableScopes
-    ? JSON.parse(data?.AccessRequest.productEnvironment.credentialIssuer?.availableScopes)
-    : []
+  const availableScopes = data?.AccessRequest.productEnvironment
+    .credentialIssuer?.availableScopes
+    ? JSON.parse(
+        data?.AccessRequest.productEnvironment.credentialIssuer?.availableScopes
+      )
+    : [];
 
-  const clientRoles = data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles
-    ? JSON.parse(data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles)
-    : []
+  const clientRoles = data?.AccessRequest.productEnvironment.credentialIssuer
+    ?.clientRoles
+    ? JSON.parse(
+        data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles
+      )
+    : [];
 
   const setScopes = (scopes: string[]) => {
-      controls['defaultClientScopes'] = scopes
-  }
+    controls['defaultClientScopes'] = scopes;
+  };
   const setRoles = (roles: string[]) => {
-    controls['roles'] = roles
-}
+    controls['roles'] = roles;
+  };
 
   return data.AccessRequest ? (
     <>
@@ -116,7 +128,9 @@ const AccessRequestPage: React.FC<
         <PageHeader
           breadcrumb={breadcrumb}
           actions={
-            !isComplete && <RequestActions id={id} controls={controls} queryKey={queryKey} />
+            !isComplete && (
+              <RequestActions id={id} controls={controls} queryKey={queryKey} />
+            )
           }
           title={
             <Box as="span" display="flex" alignItems="center">
@@ -175,45 +189,45 @@ const AccessRequestPage: React.FC<
                   <ControlsList consumerId={id} data={plugins} />
                 </TabPanel>
                 <TabPanel p={0}>
-                    <FormControl>
-                        <FormLabel>Scopes</FormLabel>
-                        <CheckboxGroup onChange={(d: string[]) => setScopes(d)}>
-                            <Wrap spacing={4}>
-                            {availableScopes.map((r) => (
-                                <WrapItem key={r}>
-                                    <Checkbox value={r} name="scopes">
-                                        {r}
-                                    </Checkbox>
-                                </WrapItem>
-                            ))}
-                            </Wrap>
-                        </CheckboxGroup>
-                    </FormControl>
-                    <FormControl>
-                        <FormLabel>Roles</FormLabel>
-                        <CheckboxGroup onChange={(d: string[]) => setRoles(d)}>
-                            <Wrap spacing={4}>
-                            {clientRoles.map((r) => (
-                                <WrapItem key={r}>
-                                    <Checkbox value={r} name="clientRoles">
-                                        {r}
-                                    </Checkbox>
-                                </WrapItem>
-                            ))}
-                            </Wrap>
-                        </CheckboxGroup>
-                    </FormControl>
+                  <FormControl>
+                    <FormLabel>Scopes</FormLabel>
+                    <CheckboxGroup onChange={(d: string[]) => setScopes(d)}>
+                      <Wrap spacing={4}>
+                        {availableScopes.map((r) => (
+                          <WrapItem key={r}>
+                            <Checkbox value={r} name="scopes">
+                              {r}
+                            </Checkbox>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
+                    </CheckboxGroup>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Roles</FormLabel>
+                    <CheckboxGroup onChange={(d: string[]) => setRoles(d)}>
+                      <Wrap spacing={4}>
+                        {clientRoles.map((r) => (
+                          <WrapItem key={r}>
+                            <Checkbox value={r} name="clientRoles">
+                              {r}
+                            </Checkbox>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
+                    </CheckboxGroup>
+                  </FormControl>
                 </TabPanel>
                 <TabPanel>
-                    <Box bgColor="white" p={5}>
+                  <Box bgColor="white" p={5}>
                     <FormControl>
-                        <FormLabel>Requestor Comments:</FormLabel>
-                        <Box>{data?.AccessRequest.additionalDetails}</Box>
+                      <FormLabel>Requestor Comments:</FormLabel>
+                      <Box>{data?.AccessRequest.additionalDetails}</Box>
                     </FormControl>
-                    </Box>
+                  </Box>
                 </TabPanel>
                 <TabPanel p={0}>
-                    <ActivityList data={data.allActivities}/>
+                  <ActivityList data={data.allActivities} />
                 </TabPanel>
               </TabPanels>
             </GridItem>
@@ -282,22 +296,22 @@ const query = gql`
       }
     }
 
-    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {
-        id
-        type
+    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {
+      id
+      type
+      name
+      action
+      result
+      message
+      context
+      refId
+      namespace
+      extRefId
+      createdAt
+      actor {
         name
-        action
-        result
-        message
-        context
-        refId
-        namespace
-        extRefId
-        createdAt
-        actor {
-            name
-            username
-        }
+        username
+      }
     }
   }
 `;
