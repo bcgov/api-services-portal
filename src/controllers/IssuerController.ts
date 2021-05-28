@@ -15,7 +15,7 @@ import { syncRecords } from '../batch/feed-worker';
 @injectable()
 @Route('/namespaces/{ns}/issuers')
 @Security('jwt', ['Namespace.Manage'])
-export class ProductController extends Controller {
+export class IssuerController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
