@@ -17,7 +17,7 @@ import {
   FaNetworkWired,
   FaPlusCircle,
 } from 'react-icons/fa';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
 import type { NamespaceData } from '@/shared/types/app.types';
@@ -29,15 +29,6 @@ interface NamespaceMenuProps {
   user: UserData;
 }
 
-const query = gql`
-  query GetNamespaces {
-    allNamespaces {
-      id
-      name
-    }
-  }
-`;
-
 const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
   const client = useQueryClient();
   const toast = useToast();
@@ -47,7 +38,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
     'allNamespaces',
     { query },
     { suspense: false }
-  )
+  );
 
   const handleNamespaceChange = React.useCallback(
     (namespace: NamespaceData) => async () => {
@@ -101,8 +92,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
                 <MenuOptionGroup title="Change Namespaces">
-                  {data
-                    .allNamespaces.filter((n) => n.name !== user.namespace)
+                  {data.allNamespaces
+                    .filter((n) => n.name !== user.namespace)
                     .map((n) => (
                       <MenuItem key={n.id} onClick={handleNamespaceChange(n)}>
                         {n.name}
@@ -149,3 +140,12 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
 };
 
 export default NamespaceMenu;
+
+const query = gql`
+  query GetNamespaces {
+    allNamespaces {
+      id
+      name
+    }
+  }
+`;

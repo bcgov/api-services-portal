@@ -11,9 +11,9 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation } from '@/shared/services/api';
+import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
@@ -36,7 +36,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 
   const handleDelete = React.useCallback(async () => {
     try {
-      await deleteMutation.mutateAsync({name});
+      await deleteMutation.mutateAsync({ name });
 
       if (user.namespace === name && router) {
         router.push('/manager');
@@ -47,14 +47,14 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
         status: 'success',
       });
       client.invalidateQueries();
-      onClose()
+      onClose();
     } catch (err) {
       toast({
         title: 'Delete Namespace Failed',
         status: 'error',
       });
     }
-  }, [client, mutation, name, router, toast, user.namespace]);
+  }, [client, deleteMutation, name, onClose, router, toast, user.namespace]);
   const handleCancel = React.useCallback(() => onCancel(), [onCancel]);
 
   React.useEffect(() => onOpen(), [onOpen]);
@@ -92,7 +92,8 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 export default NamespaceDelete;
 
 const mutation = gql`
-mutation DeleteNamespace ($name: String!) {
-  deleteNamespace(namespace: $name)
-}
-`
+  mutation DeleteNamespace($name: String!) {
+    deleteNamespace(namespace: $name)
+  }
+`;
+

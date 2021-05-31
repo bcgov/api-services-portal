@@ -162,6 +162,7 @@ const server = mockServer(schemaWithMocks, {
   Query: () => ({
     // allProducts: () => allProducts,
     allProducts: () => new MockList(8, (_, { id }) => ({ id })),
+    allNamespaces: () => new MockList(8, (_, { id }) => ({ id })),
     allDiscoverableProducts: () => new MockList(10, (_, { id }) => ({ id })),
     allEnvironments: () => {
       const result = [];
@@ -269,6 +270,9 @@ const server = mockServer(schemaWithMocks, {
 
       return { id, name };
     },
+  }),
+  Namespace: () => ({
+    name: casual.random_element(namespaces),
   }),
   Product: () => ({
     name: casual.random_element([
@@ -631,6 +635,43 @@ app.get('/ds/api/directory', async (req, res) => {
   });
   const result = await request.json();
   res.json(result.data.allDiscoverableProducts);
+});
+
+app.get('/ds/api/documentation', async (req, res) => {
+  res.json([
+    {
+      slug: 'platform-api-services-portal-released',
+      title: 'API Services Portal Released',
+      description: 'API Services Portal Released',
+      tags: ['ns.platform'],
+    },
+    {
+      slug: 'platform-api-owner-user-journey',
+      title: 'API Owner User Journey',
+      description:
+        'Setup a new namespace for onboarding services on the API Gateway.',
+      tags: ['ns.platform'],
+    },
+    {
+      slug: 'moh-proto-the-pharmanet-api',
+      title: 'The PharmaNet API',
+      description: 'Getting Started with Electronic Prescribing',
+      tags: ['ns.moh-proto'],
+    },
+  ]);
+});
+
+app.get('/ds/api/documentation/:slug', async (req, res) => {
+  res.json({
+    slug: 'platform-api-services-portal-released',
+    tags: ['ns.platform'],
+    title: 'API Services Portal Released',
+    content:
+      '\n# API Services Portal Released\n\nWe are happy to announce that the API Services Portal has been released into Production.\n\nA few notable points:\n\n* The following applications have reached end-of-life and are now demised:\n\n  * **ARGG**: If you would like the publish an API, please follow the steps in the API Owner User Journey.\n  * **KQ**: Requesting access to APIs is now done via the Directory page on the API Services Portal.\n\n',
+    readme: null,
+    githubRepository: null,
+    publishDate: '2021-05-27T12:00:00.000-08:00',
+  });
 });
 
 app.get('/ds/api/directory/:id', async (req, res) => {

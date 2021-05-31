@@ -15,7 +15,19 @@ export interface NamespaceData {
 }
 
 export interface RequestControls {
-    defaultClientScopes?: string[]
-    aclGroups?: string[]
-//    plugins?: ConsumerPlugin[]
+  defaultClientScopes?: string[];
+  aclGroups?: string[];
+  //    plugins?: ConsumerPlugin[]
+}
+
+export interface DocumentationArticle {
+  id: string;
+  content: string;
+  publishDate: string;
+  githubRepository: string | null;
+  readme: string | null;
+  description: string;
+  slug: string;
+  title: string;
+  tags: string[];
 }

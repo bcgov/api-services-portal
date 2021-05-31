@@ -983,6 +983,7 @@ type Content {
   order: Int
   isComplete: Boolean
   isPublic: Boolean
+  publishDate: DateTime
 }
 
 input ContentWhereInput {
@@ -1166,6 +1167,14 @@ input ContentWhereInput {
   isComplete_not: Boolean
   isPublic: Boolean
   isPublic_not: Boolean
+  publishDate: DateTime
+  publishDate_not: DateTime
+  publishDate_lt: DateTime
+  publishDate_lte: DateTime
+  publishDate_gt: DateTime
+  publishDate_gte: DateTime
+  publishDate_in: [DateTime]
+  publishDate_not_in: [DateTime]
 }
 
 input ContentWhereUniqueInput {
@@ -1199,6 +1208,8 @@ enum SortContentsBy {
   isComplete_DESC
   isPublic_ASC
   isPublic_DESC
+  publishDate_ASC
+  publishDate_DESC
 }
 
 input ContentUpdateInput {
@@ -1214,6 +1225,7 @@ input ContentUpdateInput {
   order: Int
   isComplete: Boolean
   isPublic: Boolean
+  publishDate: DateTime
 }
 
 input ContentsUpdateInput {
@@ -1234,6 +1246,7 @@ input ContentCreateInput {
   order: Int
   isComplete: Boolean
   isPublic: Boolean
+  publishDate: DateTime
 }
 
 input ContentsCreateInput {
@@ -4903,6 +4916,7 @@ type TemporaryIdentity {
   namespace: String
   groups: String
   roles: String
+  scopes: String
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -5078,6 +5092,24 @@ input TemporaryIdentityWhereInput {
   roles_not_ends_with_i: String
   roles_in: [String]
   roles_not_in: [String]
+  scopes: String
+  scopes_not: String
+  scopes_contains: String
+  scopes_not_contains: String
+  scopes_starts_with: String
+  scopes_not_starts_with: String
+  scopes_ends_with: String
+  scopes_not_ends_with: String
+  scopes_i: String
+  scopes_not_i: String
+  scopes_contains_i: String
+  scopes_not_contains_i: String
+  scopes_starts_with_i: String
+  scopes_not_starts_with_i: String
+  scopes_ends_with_i: String
+  scopes_not_ends_with_i: String
+  scopes_in: [String]
+  scopes_not_in: [String]
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -5123,6 +5155,8 @@ enum SortTemporaryIdentitiesBy {
   groups_DESC
   roles_ASC
   roles_DESC
+  scopes_ASC
+  scopes_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -5140,6 +5174,7 @@ input TemporaryIdentityUpdateInput {
   namespace: String
   groups: String
   roles: String
+  scopes: String
 }
 
 input TemporaryIdentitiesUpdateInput {
@@ -5158,6 +5193,7 @@ input TemporaryIdentityCreateInput {
   namespace: String
   groups: String
   roles: String
+  scopes: String
 }
 
 input TemporaryIdentitiesCreateInput {
@@ -5361,7 +5397,7 @@ type _ListSchema {
 
 type _ListMeta {
   key: String
-  name: String
+  name: String 
   description: String
   label: String
   singular: String
@@ -5387,6 +5423,16 @@ input _ListSchemaFieldsInput {
 type ApplicationSummary {
   appId: String
   name: String
+}
+
+type Namespace {
+  id: String!
+  name: String!
+  scopes: [String]!
+}
+
+input NamespaceInput {
+  name: String!
 }
 
 type ServiceAccount {
@@ -5930,18 +5976,14 @@ type Query {
     orderBy: String
     where: ContentWhereInput
   ): [Content]
-  getUmaPoliciesByResourceName(resourceName: String): [UMAPolicy]
-  getResourceOwners(type: String, name: String): [UMAResourceSet]
-  getUmaPolicies(prodEnvId: ID!, resourceId: String): [UMAPolicy]
-  getResourceSet(
+  allNamespaces: [Namespace]
+  getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]
+  allResourceSets(prodEnvId: ID!, type: String): [UMAResourceSet]
+  getResourceSet(prodEnvId: ID!, resourceId: String!): UMAResourceSet
+  allPermissionTickets(prodEnvId: ID!): [UMAPermissionTicket]
+  getPermissionTicketsForResource(
     prodEnvId: ID!
-    owner: String
-    type: String
-    resourceId: String
-  ): [UMAResourceSet]
-  getPermissionTickets(
-    prodEnvId: ID!
-    resourceId: String
+    resourceId: String!
   ): [UMAPermissionTicket]
   appVersion: String
   authenticatedUser: User
@@ -6115,18 +6157,28 @@ type Mutation {
     pluginExtForeignKey: String!
   ): GatewayConsumer
   acceptLegal(productEnvironmentId: ID!, acceptLegal: Boolean!): User
+  createNamespace(namespace: String!): Namespace
+  deleteNamespace(namespace: String!): Boolean
   createServiceAccount: ServiceAccount
   createUmaPolicy(
     prodEnvId: ID!
-    resourceId: String
+    resourceId: String!
     data: UMAPolicyInput!
   ): UMAPolicy
-  deleteUmaPolicy(prodEnvId: ID!, policyId: String!): Boolean
+  deleteUmaPolicy(
+    prodEnvId: ID!
+    resourceId: String!
+    policyId: String!
+  ): Boolean
   grantPermissions(
     prodEnvId: ID!
     data: UMAPermissionTicketInput!
   ): [UMAPermissionTicket]
-  revokePermissions(prodEnvId: ID!, ids: [String]!): Boolean
+  revokePermissions(
+    prodEnvId: ID!
+    resourceId: String!
+    ids: [String]!
+  ): Boolean
   approvePermissions(
     prodEnvId: ID!
     resourceId: String!
@@ -6147,5 +6199,4 @@ enum CacheControlScope {
   PUBLIC
   PRIVATE
 }
-
 `;

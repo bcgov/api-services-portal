@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 
 interface CardProps {
   children: React.ReactNode;
@@ -7,16 +7,18 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ children }) => {
   return (
-    <Box
-      d="flex"
+    <Flex
       bg="white"
-      border="1px"
-      borderColor="#eaeaea"
-      boxShadow="md"
-      borderRadius="4px"
+      borderRadius={4}
+      border="2px solid"
+      borderColor="gray.400"
+      flexDirection="column"
+      position="relative"
+      overflow="hidden"
+      height="100%"
     >
-      <Box m="4">{children}</Box>
-    </Box>
+      {children}
+    </Flex>
   );
 };
 
