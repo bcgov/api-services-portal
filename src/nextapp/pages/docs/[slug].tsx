@@ -1,10 +1,9 @@
 import * as React from 'react';
 import {
-  // Button,
+  Button,
   Box,
   Container,
   Text,
-  // Flex,
   Grid,
   Heading,
   Wrap,
@@ -13,6 +12,7 @@ import {
   List,
   ListItem,
   Link,
+  Icon,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -22,11 +22,12 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import gfm from 'remark-gfm';
 import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-// import { FaExternalLinkAlt } from 'react-icons/fa';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
-import styles from './docs.module.css';
+import { useRouter } from 'next/router';
 import { DocumentationArticle } from '@/shared/types/app.types';
+import styles from './docs.module.css';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const { slug } = params;
@@ -56,6 +57,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 const DocsContentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey, sideNavQueryKey, slug }) => {
+  const router = useRouter();
   const { data } = useQuery(queryKey, () =>
     restApi<DocumentationArticle>(`/ds/api/documentation/${slug}`)
   );
@@ -98,6 +100,7 @@ const DocsContentPage: React.FC<
             borderRight="1px solid"
             borderColor="#f1f1f1"
             p={4}
+            overflow="hidden"
             className={styles['markdown-body']}
           >
             <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
@@ -111,9 +114,17 @@ const DocsContentPage: React.FC<
             </Box>
             <List as="nav">
               {allArticles.data?.map((page) => (
-                <ListItem key={page.id} fontSize="sm">
+                <ListItem key={page.id} fontSize="sm" mb={2}>
                   <NextLink passHref href={page.slug}>
-                    <Link>{page.title}</Link>
+                    <Link
+                      fontWeight={
+                        router?.asPath === `/docs/${page.slug}`
+                          ? 'bold'
+                          : 'normal'
+                      }
+                    >
+                      {page.title}
+                    </Link>
                   </NextLink>
                 </ListItem>
               ))}
@@ -125,31 +136,40 @@ const DocsContentPage: React.FC<
   );
 };
 
-// const InternalLink = (props: any) => {
-//   return (
-//     <>
-//       {' '}
-//       <a href={props.href} target="_blank">
-//         <Button justifyContent="flex-start" colorScheme="blue" variant="link">
-//           <Box mr={1}>{props.children}</Box>
-//           <FaExternalLinkAlt />
-//         </Button>
-//       </a>
-//     </>
-//   );
-// };
+const InternalLink: React.FC<{ children: React.ReactNode; href: string }> = ({
+  children,
+  href,
+}) => {
+  return (
+    <>
+      {' '}
+      <Button
+        as="a"
+        href={href}
+        target="_blank"
+        rightIcon={<Icon as={FaExternalLinkAlt} boxSize={3} />}
+        variant="link"
+      >
+        {children}
+      </Button>
+    </>
+  );
+};
 
-// function flatten(text, child) {
-//   return typeof child === 'string'
-//     ? text + child
-//     : React.Children.toArray(child.props.children).reduce(flatten, text);
-// }
+function flatten(text: string, child: React.ReactElement | string) {
+  return typeof child === 'string'
+    ? text + child
+    : React.Children.toArray(child.props.children).reduce(flatten, text);
+}
 
-// function HeadingRenderer(props) {
-//   var children = React.Children.toArray(props.children);
-//   var text = children.reduce(flatten, '');
-//   var slug = text.toLowerCase().replace(/\W/g, '-');
-//   return React.createElement('h' + props.level, { id: slug }, props.children);
-// }
+const HeadingRenderer: React.FC<{
+  children: React.ReactNode;
+  level: number;
+}> = ({ children, level }) => {
+  const nodes = React.Children.toArray(children);
+  const text = nodes.reduce(flatten, '');
+  const slug = text.toLowerCase().replace(/\W/g, '-');
+  return React.createElement('h' + level, { id: slug }, children);
+};
 
 export default DocsContentPage;
