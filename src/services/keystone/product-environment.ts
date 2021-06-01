@@ -167,7 +167,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
   });
   logger.debug('Query result %j', result);
   assert.strictEqual(
-    result.data.allEnvironment == null,
+    result.data.Environment == null,
     false,
     'ProductEnvironmentNotFound ' + id
   );
