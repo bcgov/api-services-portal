@@ -35,6 +35,7 @@ export async function connectMany(
     }
   }
   if (
+    currentData != null &&
     fieldKey in currentData &&
     currentData[fieldKey] != null &&
     currentData[fieldKey]
