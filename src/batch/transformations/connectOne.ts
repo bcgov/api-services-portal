@@ -36,6 +36,7 @@ export async function connectOne(
     throw Error('Failed to find ' + value + ' in ' + transformInfo['list']);
   } else if (
     currentData != null &&
+    currentData[fieldKey] &&
     'id' in currentData[fieldKey] &&
     currentData[fieldKey]['id'] == lkup['id']
   ) {

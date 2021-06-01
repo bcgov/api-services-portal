@@ -526,5 +526,75 @@
           "referer": "http://localhost:4180/manager/consumers",
           "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
           "added": "2021-05-28T08:16:22.934Z"
+     },
+     "317080585c1dbf0467005f8a097a3f1b": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-31T20:40:38.403Z"
+     },
+     "75a5ca12217591d7a6717438f8b3074c": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        appId\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-31T20:41:59.684Z"
+     },
+     "7aa9867cc96445124e0303cf9f6abb36": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-31T20:46:02.815Z"
+     },
+     "c2e7d12c9c1ec1d1e62979e9a04e5ad7": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  mutation ToggleConsumerACLMembership(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $group: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerGroupMembership(id: $id)\n  }\n",
+          "added": "2021-05-31T21:16:57.066Z"
+     },
+     "8d4decae694fbb666484100a54f069de": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  mutation ToggleConsumerACLMembership(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $group: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerGroupMembership(\n      prodEnvId: $prodEnvId\n      consumerId: $consumerId\n      group: $group\n      grant: $grant\n    )\n  }\n",
+          "added": "2021-05-31T21:20:57.095Z"
+     },
+     "fc22131d32aa7f5601781ab0446e1f38": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-05-31T22:02:40.182Z"
+     },
+     "b9264ef73166bdb92aca1ee0d1baeb61": {
+          "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+          "query": "\n  query GetConsumerScopesAndRoles(\n    $prodEnvId: ID!\n    $consumerUsername: ID!\n    $consumerType: String!\n  ) {\n    consumerScopesAndRoles(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      consumerType: $consumerType\n    ) {\n      id\n      consumerType\n      defaultScopes\n      optionalScopes\n      clientRoles\n    }\n  }\n",
+          "added": "2021-06-01T03:53:38.063Z"
+     },
+     "b3349812a0132f09f7b24833baa00430": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  mutation LinkConsumerToNamespace($username: String!) {\n    linkConsumerToNamespace(username: $username)\n  }\n",
+          "added": "2021-06-01T05:04:50.018Z"
+     },
+     "f8cacde2afa67d4526c5911a6c8bbe66": {
+          "referer": "http://localhost:4180/admin",
+          "query": "{\n  user: authenticatedTemporaryIdentity {\n    id\n    _label_\n    __typename\n  }\n}\n",
+          "added": "2021-06-01T05:16:25.224Z"
+     },
+     "061263c3840dce7943360f72e4984f30": {
+          "referer": "http://localhost:4180/admin/gateway-consumers?fields=_label_%2Cusername%2CcustomId%2CaclGroups%2Cplugins&!aclGroups_contains_i=%22router_user%22",
+          "query": "query getList($where: GatewayConsumerWhereInput, $search: String, $sortBy: [SortGatewayConsumersBy!], $first: Int, $skip: Int) {\n  allGatewayConsumers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    username\n    customId\n    aclGroups\n    plugins {\n      id\n      _label_\n      __typename\n    }\n    __typename\n  }\n  _allGatewayConsumersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+          "added": "2021-06-01T05:16:28.717Z"
+     },
+     "81d7ccbf028ce2abfe6cda6ea84849cc": {
+          "referer": "http://localhost:4180/manager/consumers/60b5c8a811dc5e48f6cbd863",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      namespace\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-06-01T06:08:06.801Z"
+     },
+     "a7100c780acc3377cec5f891d0dca3d6": {
+          "referer": "http://localhost:4180/manager/consumers/60b5c8a811dc5e48f6cbd863",
+          "query": "\n  mutation ToggleConsumerRoles(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $roleName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerRoleAssignment(\n      prodEnvId: $prodEnvId\n      consumerId: $consumerId\n      roleName: $roleName\n      grant: $grant\n    )\n  }\n",
+          "added": "2021-06-01T06:19:54.225Z"
+     },
+     "3f49e70c55b37148d7f10fda3d9cea5a": {
+          "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
+          "query": "\n  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerUsername: ID!) {\n    consumerScopesAndRoles(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n    ) {\n      id\n      consumerType\n      defaultScopes\n      optionalScopes\n      clientRoles\n    }\n  }\n",
+          "added": "2021-06-01T06:27:34.830Z"
+     },
+     "602067643dc862654d0ce78db879da9d": {
+          "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
+          "query": "\n  mutation ToggleConsumerRoles(\n    $prodEnvId: ID!\n    $consumerUsername: String!\n    $roleName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerRoleAssignment(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      roleName: $roleName\n      grant: $grant\n    )\n  }\n",
+          "added": "2021-06-01T06:49:33.063Z"
      }
 }

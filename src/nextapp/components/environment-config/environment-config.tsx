@@ -298,7 +298,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
             </Text>
           </Box>
           <YamlViewer
-            doc={`plugins:\n- name: key-auth\n  tags: [ ns.${data.product.namespace} ]\n  protocols: [ http, https ]\n  config:\n    key_names: ["X-API-KEY"]\n    run_on_preflight: true\n    hide_credentials: true\n    key_in_body: false\n- name: acl\n  tags: [ ns.${data.product.namespace} ]\n  config:\n    hide_groups_header: true\n    allow: [ ${data.appId} ]`}
+            doc={`  plugins:\n  - name: key-auth\n    tags: [ ns.${data.product.namespace} ]\n    protocols: [ http, https ]\n    config:\n      key_names: ["X-API-KEY"]\n      run_on_preflight: true\n      hide_credentials: true\n      key_in_body: false\n  - name: acl\n    tags: [ ns.${data.product.namespace} ]\n    config:\n      hide_groups_header: true\n      allow: [ ${data.appId} ]`}
           />
         </Box>
       )}

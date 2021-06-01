@@ -176,6 +176,8 @@ const report = require('js-yaml').dump(yamlReport);
 
 for (const _list of [
   'AliasedQueries',
+  'ConsumerGroups',
+  'ConsumerScopesAndRoles',
   'Namespace',
   'ServiceAccount',
   'UMAPolicy',

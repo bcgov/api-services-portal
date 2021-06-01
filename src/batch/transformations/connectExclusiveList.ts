@@ -6,8 +6,9 @@ export function connectExclusiveList(
   fieldKey: string
 ) {
   if (
+    currentData != null &&
     fieldKey in currentData &&
-    currentData[fieldKey] != null &&
+    currentData[fieldKey] &&
     currentData[fieldKey]
       .map((d: any) => d.id)
       .sort()

@@ -1,19 +1,11 @@
-export {
-    Apply
-} from './apply'
+export { Apply } from './apply';
 
-export {
-    CreateServiceAccount
-} from './create-service-account'
+export { CreateServiceAccount } from './create-service-account';
 
-export {
-    DeleteAccess
-} from './delete-access'
+export { DeleteAccess } from './delete-access';
 
-export {
-    Validate
-} from './validate-access-request'
+export { Validate } from './validate-access-request';
 
-export {
-    ValidateActiveEnvironment
-} from './validate-active-environment'
+export { ValidateActiveEnvironment } from './validate-active-environment';
+
+export { LinkConsumerToNamespace } from './link-consumer-to-namespace';

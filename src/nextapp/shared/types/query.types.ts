@@ -5810,6 +5810,22 @@ export type ApplicationSummary = {
   name?: Maybe<Scalars['String']>;
 };
 
+export type ConsumerScopesAndRoles = {
+  __typename?: 'ConsumerScopesAndRoles';
+  id: Scalars['String'];
+  consumerType: Scalars['String'];
+  defaultScopes: Array<Maybe<Scalars['String']>>;
+  optionalScopes: Array<Maybe<Scalars['String']>>;
+  clientRoles: Array<Maybe<Scalars['String']>>;
+};
+
+export type ConsumerScopesAndRolesInput = {
+  id: Scalars['String'];
+  defaultScopes: Array<Maybe<Scalars['String']>>;
+  optionalScopes: Array<Maybe<Scalars['String']>>;
+  clientRoles: Array<Maybe<Scalars['String']>>;
+};
+
 export type Namespace = {
   __typename?: 'Namespace';
   id: Scalars['String'];
@@ -6106,6 +6122,7 @@ export type Query = {
   mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
+  consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
@@ -6773,6 +6790,12 @@ export type QueryAllDiscoverableContentsArgs = {
 };
 
 
+export type QueryConsumerScopesAndRolesArgs = {
+  prodEnvId: Scalars['ID'];
+  consumerUsername: Scalars['ID'];
+};
+
+
 export type QueryGetUmaPoliciesForResourceArgs = {
   prodEnvId: Scalars['ID'];
   resourceId: Scalars['String'];
@@ -7071,6 +7094,9 @@ export type Mutation = {
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
+  updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
+  linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
+  updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   createNamespace?: Maybe<Namespace>;
   deleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
@@ -7790,6 +7816,27 @@ export type MutationDeleteGatewayConsumerPluginArgs = {
 export type MutationAcceptLegalArgs = {
   productEnvironmentId: Scalars['ID'];
   acceptLegal: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateConsumerGroupMembershipArgs = {
+  prodEnvId: Scalars['ID'];
+  consumerId: Scalars['ID'];
+  group: Scalars['String'];
+  grant: Scalars['Boolean'];
+};
+
+
+export type MutationLinkConsumerToNamespaceArgs = {
+  username: Scalars['String'];
+};
+
+
+export type MutationUpdateConsumerRoleAssignmentArgs = {
+  prodEnvId: Scalars['ID'];
+  consumerUsername: Scalars['String'];
+  roleName: Scalars['String'];
+  grant: Scalars['Boolean'];
 };
 
 

@@ -55,6 +55,10 @@ API Owner Role Rules,,deleteGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,allPermissionTickets,,,,,,,api-owner,,,allow,
+,,updateConsumerGroupMembership,,,,,,,api-owner,,,allow,filterByPackageNS
+,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
+,,linkConsumerToNamespace,,,,,,,api-owner,,,allow,
+,,updateConsumerRoleAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
 API Owner Role Rules,,allNamespaces,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,createNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteNamespace,,,,,,,api-owner,,,allow,
@@ -120,9 +124,10 @@ API Owner Role Rules,,myApplications,,,,,,,api-owner,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
 API Owner Role Rules,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
-API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
+API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,,allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
+,,,,,,,,,api-owner,,,allow,
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,,allow,
 Guest,,allDiscoverableContents,,,,,,,guest,,,allow,filterByNamespaceOrPublic

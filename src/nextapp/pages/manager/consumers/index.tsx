@@ -36,6 +36,7 @@ import { gql } from 'graphql-request';
 import NextLink from 'next/link';
 import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
+import LinkConsumer from '@/components/link-consumer';
 
 import breadcrumbs from '@/components/ns-breadcrumb';
 
@@ -60,8 +61,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
+  const queryKey = ['allConsumers'];
   const { data } = useApi(
-    ['allConsumers'],
+    queryKey,
     {
       query,
     },
@@ -69,6 +71,8 @@ const ConsumersPage: React.FC<
   );
   const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
   const totalConsumers = data?.allServiceAccessesByNamespace?.length ?? 0;
+
+  const actions = [<LinkConsumer queryKey={queryKey} />];
 
   return (
     <>
@@ -78,7 +82,11 @@ const ConsumersPage: React.FC<
         }`}</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="Consumers" breadcrumb={breadcrumbs([])} />
+        <PageHeader
+          title="Consumers"
+          breadcrumb={breadcrumbs([])}
+          actions={actions}
+        />
         <Box mb={4}>
           {totalRequests === 0 && (
             <Alert status="info">
