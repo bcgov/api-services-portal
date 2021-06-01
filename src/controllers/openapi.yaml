@@ -71,7 +71,7 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Content'
-    '/namespaces/{ns}/dataset':
+    '/namespaces/{ns}/datasets':
         put:
             operationId: put-dataset
             responses:
@@ -182,7 +182,7 @@ paths:
             security:
                 -
                     jwt:
-                        - Namespace.Manage
+                        - CredentialIssuer.Admin
             parameters:
                 -
                     in: path

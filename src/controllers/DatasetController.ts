@@ -13,7 +13,7 @@ import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../batch/feed-worker';
 
 @injectable()
-@Route('/namespaces/{ns}/dataset')
+@Route('/namespaces/{ns}/datasets')
 @Security('jwt', ['Namespace.Manage'])
 export class DatasetController extends Controller {
   private keystone: KeystoneService;

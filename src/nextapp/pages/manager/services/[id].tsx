@@ -27,12 +27,13 @@ import { GET_GATEWAY_SERVICE } from '@/shared/queries/gateway-service-queries';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 import EnvironmentBadge from '@/components/environment-badge';
 import MetricGraph from '@/components/services-list/metric-graph';
+import ServiceRoutes from '@/components/service-routes';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { Query } from '@/shared/types/query.types';
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -71,7 +72,9 @@ const ServicePage: React.FC<
     },
     { enabled: Boolean(id), suspense: false }
   );
-  const breadcrumb = breadcrumbs([{ href: '/manager/services', text: 'Services' }]);
+  const breadcrumb = breadcrumbs([
+    { href: '/manager/services', text: 'Services' },
+  ]);
   const tags: string[] = !isEmpty(data?.GatewayService?.tags)
     ? (JSON.parse(data.GatewayService.tags) as string[])
     : [];
@@ -154,7 +157,7 @@ const ServicePage: React.FC<
             )}
           </Box>
         </Box>
-        <Box bgColor="white" gridColumn="span 4">
+        <Box bgColor="white" gridColumn="span 5">
           <Box
             p={4}
             display="flex"
@@ -165,23 +168,16 @@ const ServicePage: React.FC<
           </Box>
           <Divider />
           <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Route</Th>
-                <Th>Namespace</Th>
-              </Tr>
-            </Thead>
             <Tbody>
-              {data?.GatewayService.routes.map((r) => (
-                <Tr key={r.id}>
-                  <Td>{r.name}</Td>
-                  <Td>{r.namespace}</Td>
-                </Tr>
-              ))}
+              <Tr>
+                <Td>
+                  <ServiceRoutes routes={data?.GatewayService.routes} />
+                </Td>
+              </Tr>
             </Tbody>
           </Table>
         </Box>
-        <Box bgColor="white" gridColumn="span 4">
+        <Box bgColor="white" gridColumn="span 3">
           <Box
             p={4}
             display="flex"
@@ -201,10 +197,6 @@ const ServicePage: React.FC<
               gridRowGap={2}
               gridTemplateColumns="1fr 2fr"
             >
-              <Text as="dt" fontWeight="bold">
-                Namespace
-              </Text>
-              <Text as="dd">{data?.GatewayService.namespace}</Text>
               <Text as="dt" fontWeight="bold">
                 Host
               </Text>

@@ -81,7 +81,7 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/namespaces/:ns/dataset',
+        app.put('/ds/api/namespaces/:ns/datasets',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
             function DatasetController_put(request: any, response: any, next: any) {
             const args = {
@@ -245,7 +245,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/ds/api/namespaces/:ns/issuers',
-            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+            authenticateMiddleware([{"jwt":["CredentialIssuer.Admin"]}]),
             function IssuerController_put(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},

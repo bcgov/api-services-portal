@@ -596,5 +596,15 @@
           "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
           "query": "\n  mutation ToggleConsumerRoles(\n    $prodEnvId: ID!\n    $consumerUsername: String!\n    $roleName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerRoleAssignment(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      roleName: $roleName\n      grant: $grant\n    )\n  }\n",
           "added": "2021-06-01T06:49:33.063Z"
+     },
+     "905704bc61eebe0a395cd3c550dbf158": {
+          "referer": "http://localhost:4180/manager/services/60a7f41eb3c6f22ab455ec1f",
+          "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        host\n      }\n      updatedAt\n    }\n  }\n",
+          "added": "2021-06-01T20:45:09.617Z"
+     },
+     "5600ed61fad01032ac67ec031deb1c7c": {
+          "referer": "http://localhost:4180/manager/services/60a7f41eb3c6f22ab455ec1f",
+          "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        hosts\n        paths\n        methods\n      }\n      updatedAt\n    }\n  }\n",
+          "added": "2021-06-01T20:45:18.071Z"
      }
 }

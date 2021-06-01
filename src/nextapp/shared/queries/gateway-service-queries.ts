@@ -63,7 +63,9 @@ export const GET_GATEWAY_SERVICE = gql`
       routes {
         id
         name
-        namespace
+        hosts
+        paths
+        methods
       }
       updatedAt
     }
