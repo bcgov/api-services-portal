@@ -123,7 +123,7 @@ const ConsumersPage: React.FC<
           />
 
           <Box as="header" bgColor="white" p={4}>
-            <Heading size="md">Access Control Groups</Heading>
+            <Heading size="md">Authorization - ACL Groups</Heading>
           </Box>
           <Divider />
           <ConsumerACL
@@ -134,7 +134,7 @@ const ConsumersPage: React.FC<
           />
 
           <Box as="header" bgColor="white" p={4}>
-            <Heading size="md">Permissions</Heading>
+            <Heading size="md">Authorization - Scopes and Roles</Heading>
           </Box>
           <Divider />
           <ConsumerPermissions
