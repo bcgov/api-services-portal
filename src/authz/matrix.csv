@@ -127,7 +127,6 @@ API Owner Role Rules,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filte
 API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,,allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
-,,,,,,,,,api-owner,,,allow,
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,,allow,
 Guest,,allDiscoverableContents,,,,,,,guest,,,allow,filterByNamespaceOrPublic
@@ -140,6 +139,6 @@ Guest,,allDiscoverableProducts,,,,,,,guest,,,allow,filterByActiveEnvironment
 ,,allContents,,,,,,,guest,,,allow,
 ,,DiscoverableProduct,,,,,,,guest,,,allow,
 ,,services,,,,,,,guest,,,allow,
-,,mySelf,,,,,,,api-owner,,,allow,filterBySelf
+API Owner Role Rules,,mySelf,,,,,,,,,,allow,filterBySelf
 ,,acceptLegal,,,,,,,,,,allow,
 ,,,User,update,,,,,,,,allow,
