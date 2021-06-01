@@ -16,6 +16,7 @@ import multer from 'multer';
 import { DateTime, Markdown } from '@keystonejs/fields';
 
 interface Content {
+  kind?: string;
   externalLink: string;
   title?: string;
   description?: string;

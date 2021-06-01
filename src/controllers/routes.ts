@@ -27,6 +27,7 @@ const models: TsoaRoute.Models = {
     "Content": {
         "dataType": "refObject",
         "properties": {
+            "kind": {"dataType":"string"},
             "externalLink": {"dataType":"string","required":true},
             "title": {"dataType":"string"},
             "description": {"dataType":"string"},

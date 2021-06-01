@@ -17,6 +17,13 @@ class ApiOpenapiApp {
 
     RegisterRoutes(app);
 
+    // RFC 8631 service-desc link relation
+    // https://datatracker.ietf.org/doc/html/rfc8631
+    app.get('/ds/api', (req, res) => {
+      res.setHeader('Link', '</ds/api/openapi.yaml>; rel="service-desc"');
+      res.status(204).end();
+    });
+
     app.get('/ds/api/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
       res.send(spec);
