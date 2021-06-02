@@ -606,5 +606,20 @@
           "referer": "http://localhost:4180/manager/services/60a7f41eb3c6f22ab455ec1f",
           "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        hosts\n        paths\n        methods\n      }\n      updatedAt\n    }\n  }\n",
           "added": "2021-06-01T20:45:18.071Z"
+     },
+     "cd62d7dd83bb2ede2e38f7bb91000dfe": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+          "query": "\n  query GET {\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      productEnvironment {\n        credentialIssuer {\n          instruction\n        }\n      }\n    }\n  }\n",
+          "added": "2021-06-02T20:24:42.443Z"
+     },
+     "a4320a0fa32c22f2637725d5e3771ad1": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+          "query": "\n  mutation GenCredential($id: ID!) {\n    updateAccessRequest(id: $id, data: { credential: \"NEW\" }) {\n      credential\n    }\n  }\n",
+          "added": "2021-06-02T20:24:52.161Z"
+     },
+     "cc7ad864ebfca2ba9fd78a713dc6f149": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+          "query": "\n  mutation DeleteNamespace($name: String!) {\n    deleteNamespace(namespace: $name)\n  }\n",
+          "added": "2021-06-02T20:26:44.095Z"
      }
 }

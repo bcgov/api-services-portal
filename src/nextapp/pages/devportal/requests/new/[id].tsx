@@ -141,7 +141,7 @@ const NewRequestsPage: React.FC<
         status: 'success',
       });
       router?.push(
-        `/devportal/poc/access/${result.data.createAccessRequest.id}`
+        `/devportal/requests/new/tokens?requestId=${result.data.createAccessRequest.id}`
       );
     } catch (err) {
       toast({

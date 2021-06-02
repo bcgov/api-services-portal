@@ -17,9 +17,7 @@ const links: NavLink[] = [
     name: 'Directory',
     url: '/devportal/api-discovery',
     access: [],
-    altUrls: [
-        '/devportal/api-discovery/[id]'
-    ],
+    altUrls: ['/devportal/api-discovery/[id]'],
     sites: ['devportal'],
   },
   {
@@ -30,6 +28,7 @@ const links: NavLink[] = [
       '/devportal/access/[id]',
       '/devportal/resources/[id]',
       '/devportal/requests/new/[id]',
+      '/devportal/requests/new/tokens',
     ],
     sites: ['devportal'],
   },
@@ -103,9 +102,7 @@ const links: NavLink[] = [
   {
     name: 'Documentation',
     url: '/docs',
-    altUrls: [
-        '/docs/[slug]'
-    ],
+    altUrls: ['/docs/[slug]'],
     access: [],
     sites: ['devportal'],
   },
