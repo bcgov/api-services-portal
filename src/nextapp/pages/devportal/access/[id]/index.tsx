@@ -123,17 +123,18 @@ const ApiAccessServicePage: React.FC<
                 <Divider />
               </>
             )}
-            {selectedEnvironment && selectedEnvironment.credentialIssuer != null && (
-              <ClientRequest fallback={<ResourcesListLoading />}>
-                <ResourcesList
-                  prodEnvId={selectedEnvironment.id}
-                  resourceType={
-                    selectedEnvironment.credentialIssuer.resourceType
-                  }
-                  owner={user?.sub}
-                />
-              </ClientRequest>
-            )}
+            {selectedEnvironment &&
+              selectedEnvironment.credentialIssuer != null && (
+                <ClientRequest fallback={<ResourcesListLoading />}>
+                  <ResourcesList
+                    prodEnvId={selectedEnvironment.id}
+                    resourceType={
+                      selectedEnvironment.credentialIssuer.resourceType
+                    }
+                    owner={user?.sub}
+                  />
+                </ClientRequest>
+              )}
             {!selectedEnvironment && (
               <Box p={4} minHeight={200}>
                 <EmptyPane

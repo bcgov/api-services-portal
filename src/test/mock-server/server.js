@@ -507,6 +507,14 @@ const server = mockServer(schemaWithMocks, {
     isApproved: casual.boolean,
     isIssued: true,
     isComplete: false,
+    credential: JSON.stringify({
+      apiKey: '5SbpWNWbPhV40ZcGBKRUxQneEAErF8Mw',
+      clientId: casual.uuid,
+      clientSecret: casual.uuid,
+      clientPrivateKey: '5SbpWNWbPhV40ZcGBKRUxQneEAErF8Mw',
+      clientPublicKey: '5SbpWNWbPhV40ZcGBKRUxQneEAErF8Mw',
+      tokenEndpoint: 'https://apps-gov-bc-ca.dev.ca/auth/realms/token/endpoint',
+    }),
     controls: JSON.stringify({
       plugins: [
         {
