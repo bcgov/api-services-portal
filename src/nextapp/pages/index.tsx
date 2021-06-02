@@ -26,14 +26,15 @@ const actions: HomeActions[] = [
     url: '/devportal/api-discovery',
     icon: FaBook,
     roles: [],
-    description: `Looking for BC Government APIs to integrate with?  Go to the <a href="/devportal/api-discovery">Directory</a> to see what is available and to request access!`
+    description: `Looking for BC Government APIs to integrate with?  Go to the <a href="/devportal/api-discovery">Directory</a> to see what is available and to request access!`,
   },
   {
     title: 'Are you an API Provider?',
     url: '/manager/namespaces',
     icon: FaToolbox,
     roles: [],
-    description: "Is your Ministry looking to build and share APIs?  Go to Namespaces to get started!"
+    description:
+      'Is your Ministry looking to build and share APIs?  Go to Namespaces to get started!',
   },
 ];
 
@@ -75,17 +76,21 @@ const HomePage: React.FC = () => {
             )
             .map((action) => (
               <Card key={action.url}>
-                <Heading size="md" mb={2}>
-                  <NextLink passHref href={action.url}>
-                    <Link color="bc-link" display="flex" alignItems="center">
-                      <Icon as={action.icon} color="bc-yellow" mr={2} />
-                      {action.title}
-                    </Link>
-                  </NextLink>
-                </Heading>
-                <p>
-                    <span dangerouslySetInnerHTML={{__html: action.description}} />
-                </p>
+                <Box p={4}>
+                  <Heading size="md" mb={2}>
+                    <NextLink passHref href={action.url}>
+                      <Link color="bc-link" display="flex" alignItems="center">
+                        <Icon as={action.icon} color="bc-yellow" mr={2} />
+                        {action.title}
+                      </Link>
+                    </NextLink>
+                  </Heading>
+                  <p>
+                    <span
+                      dangerouslySetInnerHTML={{ __html: action.description }}
+                    />
+                  </p>
+                </Box>
               </Card>
             ))}
         </GridLayout>

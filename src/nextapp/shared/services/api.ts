@@ -8,7 +8,7 @@ import {
   UseQueryResult,
 } from 'react-query';
 import omit from 'lodash/omit';
-import type { Query } from '@/types/query.types';
+import { Mutation, Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
 import { FetchOptions } from 'react-query/types/core/query';

@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Box,
   Divider,
+  Flex,
   Grid,
   Icon,
   IconButton,
@@ -9,8 +10,9 @@ import {
   Tooltip,
   useToast,
 } from '@chakra-ui/react';
-import has from 'lodash/has';
 import { FaClipboard } from 'react-icons/fa';
+import has from 'lodash/has';
+import isNil from 'lodash/isNil';
 
 interface ViewSecretProps {
   credentials: Record<string, string>;
@@ -39,12 +41,14 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
           { name: 'clientPublicKey', label: 'Signing Public Certificate' },
           { name: 'tokenEndpoint', label: 'Token Endpoint' },
         ]
-          .filter((c) => has(credentials, c.name))
+          .filter(
+            (c) => has(credentials, c.name) && !isNil(credentials[c.name])
+          )
           .map((c) => (
             <React.Fragment key={c.name}>
               <Divider />
               <Grid
-                templateColumns="260px 1fr 40px"
+                templateColumns="260px 1fr"
                 gap={4}
                 lineHeight={2}
                 px={4}
@@ -55,22 +59,27 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
                 <Text fontWeight="bold" textAlign="right">
                   {c.label}
                 </Text>
-                <Text as="code">{credentials[c.name]}</Text>
-                <Box textAlign="center">
+                <Flex>
+                  <Text as="code" wordBreak="break-all" noOfLines={1}>
+                    {credentials[c.name]}
+                  </Text>
                   <Tooltip
                     label="Copy to clipboard"
                     aria-label="Copy to clipboard tooltip"
                   >
                     <IconButton
                       aria-label="Copy to clipboard button"
+                      ml={3}
                       size="xs"
-                      variant="tertiary"
+                      variant="outline"
+                      color="bc-link"
+                      bgColor="white"
                       onClick={handleClipboard(credentials[c.name])}
                     >
                       <Icon as={FaClipboard} />
                     </IconButton>
                   </Tooltip>
-                </Box>
+                </Flex>
               </Grid>
             </React.Fragment>
           ))}

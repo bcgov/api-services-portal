@@ -12,6 +12,7 @@ import {
   Text,
   Center,
   Icon,
+  Flex,
 } from '@chakra-ui/react';
 import gfm from 'remark-gfm';
 import { gql } from 'graphql-request';
@@ -22,7 +23,7 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { useRouter } from 'next/router';
 import ViewSecret from '@/components/view-secret';
 import { Mutation } from '@/shared/types/query.types';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaEye, FaKey } from 'react-icons/fa';
 
 const ApiAccessPage: React.FC = () => {
   const router = useRouter();
@@ -68,66 +69,82 @@ const ApiAccessPage: React.FC = () => {
           </Alert>
         </PageHeader>
         <Box my={5} bgColor="white">
-          <Box
-            p={4}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box p={4} display="flex" alignItems="center">
+            <Icon as={FaKey} mr={2} color="bc-yellow" />
             <Heading size="md">Your Credentials</Heading>
           </Box>
           <Divider />
-          <Box p={4}>
-            <Box mb={4}>
-              <Heading size="sm" mb={2}>
-                Instructions
-              </Heading>
-              {instruction && (
-                <Box className="markdown-body">
-                  <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>
-                    {instruction}
-                  </ReactMarkdownWithHtml>
+          {instruction && (
+            <>
+              <Box p={4}>
+                <Box mb={4}>
+                  <Heading size="sm" mb={2}>
+                    Instructions
+                  </Heading>
+                  <Box className="markdown-body">
+                    <ReactMarkdownWithHtml allowDangerousHtml plugins={[gfm]}>
+                      {instruction}
+                    </ReactMarkdownWithHtml>
+                  </Box>
                 </Box>
-              )}
-              {!instruction && <Text>No instructions provided</Text>}
-            </Box>
-          </Box>
-          <Divider />
+              </Box>
+              <Divider />
+            </>
+          )}
           <Box p={4}>
-            <Box mb={4}>
+            <Box>
               <Heading size="sm">Secrets</Heading>
             </Box>
-            <Text mb={4}>
-              Clicking "View Secrets" will generate your credentials one time.
-              Take care not to generate secrets before you are ready.
-            </Text>
             {!credentialGenerator.isSuccess && (
-              <Center w="100%" py={4}>
-                <Button
-                  isLoading={credentialGenerator.isLoading}
-                  onClick={generateCredentials}
-                  variant="primary"
-                >
-                  View Secrets
-                </Button>
-              </Center>
+              <>
+                <Text py={4}>
+                  Clicking &quot;Generate Secrets&quot; will generate your
+                  credentials one time. Take care not to generate secrets before
+                  you are ready.
+                </Text>
+                <Center w="100%" py={4}>
+                  <Button
+                    isLoading={credentialGenerator.isLoading}
+                    onClick={generateCredentials}
+                    leftIcon={<Icon as={FaEye} />}
+                    variant="primary"
+                  >
+                    Generate Secrets
+                  </Button>
+                </Center>
+              </>
             )}
           </Box>
           {credentialGenerator.isError && (
-            <Center py={4}>
-              <Box textAlign="center">
+            <Center py={8} bgColor="red.50">
+              <Flex align="center">
                 <Icon
                   as={FaExclamationTriangle}
                   boxSize={8}
                   color="red.400"
-                  mb={2}
+                  mr={4}
                 />
-                <Heading size="sm">Secret Generation Failed</Heading>
-              </Box>
+                <Box>
+                  <Heading color="red.700" size="sm">
+                    Secret Generation Failed
+                  </Heading>
+                  <Text color="red.900" fontSize="sm">
+                    Credentials have already been generated
+                  </Text>
+                </Box>
+              </Flex>
             </Center>
           )}
           {credentialGenerator.isSuccess && (
-            <ViewSecret credentials={credentials} />
+            <>
+              <Box px={4}>
+                <Text mb={4}>
+                  These are your tokens. Copy and paste them somewhere safe like
+                  a text file.
+                </Text>
+              </Box>
+              <ViewSecret credentials={credentials} />
+            </>
           )}
         </Box>
       </Container>
