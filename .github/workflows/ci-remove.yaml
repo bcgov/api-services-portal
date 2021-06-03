@@ -2,49 +2,49 @@ name: Delete Deployment
 
 on:
   delete:
-    branches: [ dev, main, feature/* ]
+    branches: [dev, main, feature/*]
 
 jobs:
   delete:
     runs-on: ubuntu-latest
     steps:
-    - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
-      run: |
-        echo "BRANCH = ${{ github.event.ref }}"
-        export BRANCH="${{ github.event.ref }}"
-        echo "::set-output name=DEPLOY_ID::${BRANCH//\//-}"
-      id: set-deploy-id
+      - name: Set DEPLOY_ID which will delete a custom deploy from 'dev' environment
+        run: |
+          echo "BRANCH = ${{ github.event.ref }}"
+          export BRANCH="${{ github.event.ref }}"
+          echo "::set-output name=DEPLOY_ID::${BRANCH//\//-}"
+        id: set-deploy-id
 
-    - name: Get deploy ID
-      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
-    - uses: actions/checkout@v2
-      
-    - name: Install oc
-      uses: redhat-actions/oc-installer@v1
-      with:
-        version: '4.6'
+      - uses: actions/checkout@v2
 
-    - name: Authenticate and set context
-      uses: redhat-actions/oc-login@v1
-      with:
-        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      - name: Install oc
+        uses: redhat-actions/oc-installer@v1
+        with:
+          version: '4.6'
 
-        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
-        insecure_skip_tls_verify: true
+      - name: Authenticate and set context
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
 
-        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+          # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+          insecure_skip_tls_verify: true
 
-    - name: 'Get Helm'
-      run: |
-        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
-        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+          namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
-    - name: 'Delete ALL'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
-       
-        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
-        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-        helm delete proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
+      - name: 'Get Helm'
+        run: |
+          curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+          tar -xf helm-v3.4.2-linux-amd64.tar.gz
+
+      - name: 'Delete ALL'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
+
+          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
+          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes

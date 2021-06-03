@@ -26,13 +26,13 @@ jobs:
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
 
-      - name: Create docker image aps-portal
+      - name: Create docker image api-services-portal
         uses: docker/build-push-action@v1
         with:
           registry: docker.pkg.github.com
           username: $GITHUB_ACTOR
           password: ${{ secrets.GITHUB_TOKEN }}
-          repository: bcgov/aps-portal/aps-portal
+          repository: bcgov/api-services-portal/api-services-portal
           path: .
           dockerfile: ./Dockerfile
           push: true
@@ -45,7 +45,7 @@ jobs:
           registry: docker.pkg.github.com
           username: $GITHUB_ACTOR
           password: ${{ secrets.GITHUB_TOKEN }}
-          repository: bcgov/aps-portal/data-feeder
+          repository: bcgov/api-services-portal/data-feeder
           path: feeds
           dockerfile: feeds/Dockerfile
           push: true

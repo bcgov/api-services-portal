@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ dev, main, feature/* ]
+    branches: [dev, main, feature/*]
 
 env:
   REGISTRY: docker.pkg.github.com
@@ -16,232 +16,232 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Docker meta
-      id: docker_meta
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
 
-    - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
-      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
-      id: set-deploy-id
+      - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+        run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+        id: set-deploy-id
 
-    - name: Get deploy ID
-      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
-    - uses: actions/checkout@v2
-      
-    - name: Install oc
-      uses: redhat-actions/oc-installer@v1
-      with:
-        version: '4.6'
+      - uses: actions/checkout@v2
 
-    - name: Authenticate and set context
-      uses: redhat-actions/oc-login@v1
-      with:
-        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      - name: Install oc
+        uses: redhat-actions/oc-installer@v1
+        with:
+          version: '4.6'
 
-        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
-        insecure_skip_tls_verify: true
+      - name: Authenticate and set context
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
 
-        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+          # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+          insecure_skip_tls_verify: true
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v1 
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ env.REGISTRY_USERNAME }}
-        password: ${{ env.REGISTRY_PASSWORD }}
+          namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
-    - uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
-    
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Build
-      uses: docker/build-push-action@v2
-      with:
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
-        context: .
-        file: Dockerfile
-        tags: ${{ steps.docker_meta.outputs.tags }} 
-        load: true
-        build-args: |
-          GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-
-    - name: Push
-      run: docker push ${{ steps.docker_meta.outputs.tags }} 
-
-    - name: 'Get Helm'
-      run: |
-        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
-        tar -xf helm-v3.4.2-linux-amd64.tar.gz
-
-    - name: 'Deploy Database'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
-
-        echo '
-        image:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
           registry: ${{ env.REGISTRY }}
-          repository: bcgov-dss/api-serv-infra/mongodb
-          tag: 4.4-ea993071
-          pullPolicy: IfNotPresent
-          pullSecrets:
-            - dev-github-read-packages-creds
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
 
-        auth:
-            rootPassword: "s3cr3t"
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-        arbiter:
-            enabled: false
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-        rbac:
-            create: true
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          load: true
+          build-args: |
+            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
-        strategyType: Recreate
+      - name: Push
+        run: docker push ${{ steps.docker_meta.outputs.tags }}
 
-        persistence:
-            enabled: true
-            size: 2Gi
+      - name: 'Get Helm'
+        run: |
+          curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+          tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
-        resources:
-          limits:
-            cpu: 300m
-            memory: 512Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi    
+      - name: 'Deploy Database'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
 
-        podSecurityContext:
-            enabled: true
+          echo '
+          image:
+            registry: ${{ env.REGISTRY }}
+            repository: bcgov-dss/api-serv-infra/mongodb
+            tag: 4.4-ea993071
+            pullPolicy: IfNotPresent
+            pullSecrets:
+              - dev-github-read-packages-creds
+
+          auth:
+              rootPassword: "s3cr3t"
+
+          arbiter:
+              enabled: false
+
+          rbac:
+              create: true
+
+          strategyType: Recreate
+
+          persistence:
+              enabled: true
+              size: 2Gi
+
+          resources:
+            limits:
+              cpu: 300m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi    
+
+          podSecurityContext:
+              enabled: true
+              fsGroup: ${{ secrets.RUNNING_UID_GID }}
+
+          containerSecurityContext:
+              enabled: true
+              runAsUser: ${{ secrets.RUNNING_UID_GID }}
+          ' > values.yaml
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
+
+      - name: 'Deploy Backend'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
+
+          echo "
+          podAnnotations:
+            sha: $GITHUB_SHA
+
+          replicaCount: 1
+
+          rollingUpdate:
+            maxUnavailable: 50%
+            maxSurge: 50%
+
+          image:
+            repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
+            tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            pullPolicy: Always
+
+          imagePullSecrets:
+            - name: dev-github-read-packages-creds
+
+          podSecurityContext:
             fsGroup: ${{ secrets.RUNNING_UID_GID }}
 
-        containerSecurityContext:
-            enabled: true
+          securityContext:
             runAsUser: ${{ secrets.RUNNING_UID_GID }}
-        ' > values.yaml
-        helm repo add bitnami https://charts.bitnami.com/bitnami
-        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
 
-    - name: 'Deploy Backend'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
+          containerPort: 3000
 
-        echo "
-        podAnnotations:
-          sha: $GITHUB_SHA
+          oauthProxy:
+            enabled: true
+            image:
+              tag: v7.1.3          
+            config:
+              upstream: http://127.0.0.1:3000
+              client-id: ${{ secrets.OIDC_CLIENT_ID }}
+              client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
+              oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
+              redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
+              skip-auth-regex: '/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/ds/api|/signout|^[/]$'
+              whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
+              skip-provider-button: 'true'
+              profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
+              insecure-oidc-allow-unverified-email: 'true'
+              oidc-email-claim: 'sub'
 
-        replicaCount: 1
-
-        rollingUpdate:
-          maxUnavailable: 50%
-          maxSurge: 50%
-
-        image:
-          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/aps-portal
-          tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          pullPolicy: Always
-
-        imagePullSecrets:
-          - name: dev-github-read-packages-creds
-
-        podSecurityContext:
-          fsGroup: ${{ secrets.RUNNING_UID_GID }}
-
-        securityContext:
-          runAsUser: ${{ secrets.RUNNING_UID_GID }}
-
-        containerPort: 3000
-
-        oauthProxy:
-          enabled: true
-          image:
-            tag: v7.1.3          
-          config:
-            upstream: http://127.0.0.1:3000
-            client-id: ${{ secrets.OIDC_CLIENT_ID }}
-            client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
-            oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
-            redirect-url: https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-            skip-auth-regex: '/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/ds/api|/signout|^[/]$'
-            whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
-            skip-provider-button: 'true'
-            profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
-            insecure-oidc-allow-unverified-email: 'true'
-            oidc-email-claim: 'sub'
-
-        env:
-          SESSION_SECRET:
-            value: '234873290483290'
-            secure: true
-          AUTH_STRATEGY:
-            value: Oauth2Proxy
-          KONG_URL:
-            value: '${{ secrets.KONG_URL_DEV}}'
-          MONGO_URL:
-            value: 'mongodb://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
-          MONGO_USER:
-            value: root
-            secure: true
-          MONGO_PASSWORD:
-            value: s3cr3t
-            secure: true
-          FEEDER_URL:
-            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
-          GITHUB_API_TOKEN:
-            value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
-            secure: true
-          OIDC_ISSUER:  
-            value: '${{ secrets.OIDC_ISSUER }}'
-          JWKS_URL:
-            value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
-          EXTERNAL_URL:
-            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
-          NEXT_PUBLIC_API_ROOT:
-            value: 'https://aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
-          GWA_API_URL:
-            value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
-          GWA_RES_SVR_CLIENT_ID:
-            value: 'gwa-api'
-          KEYCLOAK_AUTH_URL:
-            value: '${{ secrets.KEYCLOAK_AUTH }}'
-          KEYCLOAK_REALM:
-            value: '${{ secrets.KEYCLOAK_REALM }}'
+          env:
+            SESSION_SECRET:
+              value: '234873290483290'
+              secure: true
+            AUTH_STRATEGY:
+              value: Oauth2Proxy
+            KONG_URL:
+              value: '${{ secrets.KONG_URL_DEV}}'
+            MONGO_URL:
+              value: 'mongodb://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
+            MONGO_USER:
+              value: root
+              secure: true
+            MONGO_PASSWORD:
+              value: s3cr3t
+              secure: true
+            FEEDER_URL:
+              value: 'http://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
+            GITHUB_API_TOKEN:
+              value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
+              secure: true
+            OIDC_ISSUER:  
+              value: '${{ secrets.OIDC_ISSUER }}'
+            JWKS_URL:
+              value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
+            EXTERNAL_URL:
+              value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
+            NEXT_PUBLIC_API_ROOT:
+              value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
+            GWA_API_URL:
+              value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
+            GWA_RES_SVR_CLIENT_ID:
+              value: 'gwa-api'
+            KEYCLOAK_AUTH_URL:
+              value: '${{ secrets.KEYCLOAK_AUTH }}'
+            KEYCLOAK_REALM:
+              value: '${{ secrets.KEYCLOAK_REALM }}'
 
 
-        readinessProbe:
-          exec:
-            command:
-            - sh
-            - -c
-            - 'state=$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".loading | ascii_downcase\"); if [ \"$loading\" == \"true\" ]; then exit 1; fi'
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - 'state=$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".loading | ascii_downcase\"); if [ \"$loading\" == \"true\" ]; then exit 1; fi'
 
-        " > values.yaml
-        
-        helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
+          " > values.yaml
 
-    - name: 'Deploy Routes'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
+          helm repo add bcgov http://bcgov.github.io/helm-charts
+          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
 
-        echo "
-        routes:
-          - host: aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
-            targetPort: http
-            service: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api
-            wildcardPolicy: None
-            tls:
-              termination: edge
-        " > values.yaml
-        helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+      - name: 'Deploy Routes'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
+
+          echo "
+          routes:
+            - host: api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
+              targetPort: http
+              service: proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api
+              wildcardPolicy: None
+              tls:
+                termination: edge
+          " > values.yaml
+          helm repo add bcgov http://bcgov.github.io/helm-charts
+          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route

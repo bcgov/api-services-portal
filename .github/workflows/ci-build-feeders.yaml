@@ -2,7 +2,7 @@ name: Build Data-Feeder
 
 on:
   push:
-    branches: [ dev, main, feature/* ]
+    branches: [dev, main, feature/*]
 
 env:
   REGISTRY: docker.pkg.github.com
@@ -16,123 +16,123 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Docker meta
-      id: docker_meta
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: ${{ env.REGISTRY }}/bcgov/aps-portal/data-feeder
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v1 
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ env.REGISTRY_USERNAME }}
-        password: ${{ env.REGISTRY_PASSWORD }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
 
-    - uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
-    
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v1
+      - uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-    - name: Build
-      uses: docker/build-push-action@v2
-      with:
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
-        context: feeds
-        file: feeds/Dockerfile
-        tags: ${{ steps.docker_meta.outputs.tags }} 
-        load: true
-        build-args: |
-          GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Push
-      run: docker push ${{ steps.docker_meta.outputs.tags }} 
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          context: feeds
+          file: feeds/Dockerfile
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          load: true
+          build-args: |
+            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
-    - name: Install oc
-      uses: redhat-actions/oc-installer@v1
-      with:
-        version: '4.6'
+      - name: Push
+        run: docker push ${{ steps.docker_meta.outputs.tags }}
 
-    - name: Authenticate and set context
-      uses: redhat-actions/oc-login@v1
-      with:
-        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      - name: Install oc
+        uses: redhat-actions/oc-installer@v1
+        with:
+          version: '4.6'
 
-        # Disables SSL cert checking. Use this if you don't have the certificate authority data.
-        insecure_skip_tls_verify: true
+      - name: Authenticate and set context
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
 
-        namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+          # Disables SSL cert checking. Use this if you don't have the certificate authority data.
+          insecure_skip_tls_verify: true
 
-    - name: 'Get Helm'
-      run: |
-        curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
-        tar -xf helm-v3.4.2-linux-amd64.tar.gz
+          namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
-    - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
-      run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
-      id: set-deploy-id
+      - name: 'Get Helm'
+        run: |
+          curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
+          tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
-    - name: Get deploy ID
-      run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
+      - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
+        run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+        id: set-deploy-id
 
-    - name: 'Deploy Feeder'
-      run: |
-        export PATH=$PATH:`pwd`/linux-amd64
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
-        echo "
-        podAnnotations:
-          sha: $GITHUB_SHA
+      - name: 'Deploy Feeder'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
 
-        replicaCount: 1
+          echo "
+          podAnnotations:
+            sha: $GITHUB_SHA
 
-        rollingUpdate:
-          maxUnavailable: 50%
-          maxSurge: 50%
+          replicaCount: 1
 
-        image:
-          repository: ${{ env.REGISTRY }}/bcgov/aps-portal/data-feeder
-          tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          pullPolicy: Always
+          rollingUpdate:
+            maxUnavailable: 50%
+            maxSurge: 50%
 
-        imagePullSecrets:
-          - name: dev-github-read-packages-creds
+          image:
+            repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder
+            tag: ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            pullPolicy: Always
 
-        podSecurityContext:
-          fsGroup: ${{ secrets.RUNNING_UID_GID }}
+          imagePullSecrets:
+            - name: dev-github-read-packages-creds
 
-        securityContext:
-          runAsUser: ${{ secrets.RUNNING_UID_GID }}
+          podSecurityContext:
+            fsGroup: ${{ secrets.RUNNING_UID_GID }}
 
-        containerPort: 6000
+          securityContext:
+            runAsUser: ${{ secrets.RUNNING_UID_GID }}
 
-        serviceAccount:
-          create: true
-          name: proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+          containerPort: 6000
 
-        env:
-          LOG_FEEDS:
-            value: 'false'
-          WORKING_PATH:
-            value: '/tmp'
-          KONG_ADMIN_URL:
-            value: 'http://kong-kong-admin:8001'
-          CKAN_URL:
-            value: 'https://catalog.data.gov.bc.ca'
-          PROM_URL:
-            value: 'http://prometheus-server'
-          DESTINATION_URL:
-            value: 'http://proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
-        " > values.yaml
-        
-        helm repo add bcgov http://bcgov.github.io/helm-charts
-        helm upgrade --install proto-aps-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
+          serviceAccount:
+            create: true
+            name: proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+
+          env:
+            LOG_FEEDS:
+              value: 'false'
+            WORKING_PATH:
+              value: '/tmp'
+            KONG_ADMIN_URL:
+              value: 'http://kong-kong-admin:8001'
+            CKAN_URL:
+              value: 'https://catalog.data.gov.bc.ca'
+            PROM_URL:
+              value: 'http://prometheus-server'
+            DESTINATION_URL:
+              value: 'http://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
+          " > values.yaml
+
+          helm repo add bcgov http://bcgov.github.io/helm-charts
+          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
