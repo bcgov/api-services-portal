@@ -43,15 +43,15 @@ import api, { useApi } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
 import { FaTrash } from 'react-icons/fa';
 
-import graphql from '@/shared/services/graphql'
+import graphql from '@/shared/services/graphql';
 
 const queryKey = 'getServiceAccounts';
 
-const { useEffect, useState } = React
+const { useEffect, useState } = React;
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
-import ViewSecret from '@/components/view-secret'
+import ViewSecret from '@/components/view-secret';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -59,9 +59,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(query, { ns: 'abc'}, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        { ns: 'abc' },
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
@@ -78,58 +82,60 @@ const ApplicationsPage: React.FC<
     queryKey,
     {
       query,
-      variables: { ns: 'abc'}
+      variables: { ns: 'abc' },
     },
     { suspense: false }
   );
 
-  const [{cred, pending}, setCred] = useState({cred:null, pending:false});
+  const [{ cred, pending }, setCred] = useState({ cred: null, pending: false });
 
   const queryClient = useQueryClient();
 
   const doDelete = (id) => {
-    setCred({cred: null, pending:false})
-    api(DELETE, { id: id}
-    ).then (() => {
-        queryClient.invalidateQueries(queryKey);
-    })
-  }
+    setCred({ cred: null, pending: false });
+    api(DELETE, { id: id }).then(() => {
+      queryClient.invalidateQueries(queryKey);
+    });
+  };
   const doCreate = () => {
-    setCred({cred: null, pending:true})
-    graphql(CREATE, {}
-        ).then (({data}) => {
-            queryClient.invalidateQueries(queryKey);
-            setCred ({cred: JSON.parse(data.createServiceAccount.credentials), pending:false})
-        })
-  }
+    setCred({ cred: null, pending: true });
+    graphql(CREATE, {}).then(({ data }) => {
+      queryClient.invalidateQueries(queryKey);
+      setCred({
+        cred: JSON.parse(data.createServiceAccount.credentials),
+        pending: false,
+      });
+    });
+  };
 
   const actions = [
-      ( <Button variant="primary" onClick={() => doCreate()}>New Service Account</Button> )
-  ]
+    <Button variant="primary" onClick={() => doCreate()}>
+      New Service Account
+    </Button>,
+  ];
   return (
     <>
       <Head>
         <title>API Program Services | Service Accounts</title>
       </Head>
       <Container maxW="6xl">
-
         <PageHeader
           breadcrumb={breadcrumbs()}
           actions={actions}
           title="Service Accounts"
         >
-          <Text>Service Accounts allow you to access BC Government APIs via the Gateway API or the Gateway CLI.</Text>
+          <Text>
+            Service Accounts allow you to access BC Government APIs via the
+            Gateway API or the Gateway CLI.
+          </Text>
         </PageHeader>
-        { cred != null && ( 
-            <Box m={4}>
-                <ViewSecret cred={cred} defaultShow={true} instruction={null} onClose={() => true}/> 
-            </Box>
+        {cred != null && (
+          <Box m={4}>
+            <ViewSecret credentials={cred} />
+          </Box>
         )}
-        { pending && (
-            <Progress size="xs" isIndeterminate />            
-        )}
+        {pending && <Progress size="xs" isIndeterminate />}
         <Box bgColor="white" mb={4}>
-          
           <Box
             p={4}
             display="flex"
@@ -148,7 +154,7 @@ const ApplicationsPage: React.FC<
               </Tr>
             </Thead>
             <Tbody>
-            {data.allNamespaceServiceAccounts?.length === 0 && (
+              {data.allNamespaceServiceAccounts?.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>
                     <Center>
@@ -157,23 +163,24 @@ const ApplicationsPage: React.FC<
                           Create your first Service Account
                         </Heading>
                         <Text color="gray.600">
-                          Service Accounts can be used to access our API for functions like publish gateway configuration.
+                          Service Accounts can be used to access our API for
+                          functions like publish gateway configuration.
                         </Text>
-                        <Box mt={4}>
-                          {actions[0]}
-                        </Box>
+                        <Box mt={4}>{actions[0]}</Box>
                       </Box>
                     </Center>
                   </Td>
                 </Tr>
-              )}  
-              
+              )}
+
               {data.allNamespaceServiceAccounts?.map((d) => (
                 <Tr key={d.id}>
                   <Td>{d.name}</Td>
                   <Td>{d.createdAt}</Td>
                   <Td textAlign="right">
-                    <Button colorScheme="red" onClick={() => doDelete(d.id)}>Delete</Button>
+                    <Button colorScheme="red" onClick={() => doDelete(d.id)}>
+                      Delete
+                    </Button>
                   </Td>
                 </Tr>
               ))}
@@ -189,7 +196,9 @@ export default ApplicationsPage;
 
 const query = gql`
   query GET {
-    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {
+    allNamespaceServiceAccounts(
+      where: { consumerType: client, application_is_null: true }
+    ) {
       id
       name
       createdAt
@@ -204,7 +213,7 @@ const query = gql`
 const DELETE = gql`
   mutation DeleteServiceAccount($id: ID!) {
     deleteServiceAccess(id: $id) {
-        id
+      id
     }
   }
 `;
@@ -212,9 +221,10 @@ const DELETE = gql`
 const CREATE = gql`
   mutation CreateServiceAccount {
     createServiceAccount {
-        id
-        name
-        credentials
+      id
+      name
+      credentials
     }
   }
 `;
+
