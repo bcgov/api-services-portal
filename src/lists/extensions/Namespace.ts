@@ -18,6 +18,9 @@ import {
   KeycloakPermissionTicketService,
   KeycloakGroupService,
 } from '../../services/keycloak';
+import { Logger } from '../../logger';
+
+const logger = Logger('ext.Namespace');
 
 import { strict as assert } from 'assert';
 
@@ -25,7 +28,8 @@ const typeNamespace = `
 type Namespace {
     id: String!
     name: String!,
-    scopes: [String]!
+    scopes: [UMAScope]!,
+    prodEnvId: String
 }
 `;
 
@@ -41,6 +45,58 @@ module.exports = {
       keystone.extendGraphQLSchema({
         types: [{ type: typeNamespace }, { type: typeNamespaceInput }],
         queries: [
+          {
+            schema: 'currentNamespace: Namespace',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
+
+              const resourceIds = await getResourceSets(envCtx);
+              const resourcesApi = new UMAResourceRegistrationService(
+                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.accessToken
+              );
+              const namespaces = <ResourceSet[]>(
+                await resourcesApi.listResourcesByIdList(resourceIds)
+              );
+
+              const matched = namespaces
+                .filter((ns) => ns.name == context.req.user.namespace)
+                .map((ns) => ({
+                  id: ns.id,
+                  name: ns.name,
+                  scopes: ns.resource_scopes,
+                  prodEnvId: prodEnv.id,
+                }));
+              if (matched.length == 0) {
+                logger.warn(
+                  '[currentNamespace] NOT FOUND! %j',
+                  context.req.user
+                );
+                return {};
+              } else {
+                return matched[0];
+              }
+            },
+            access: EnforcementPoint,
+          },
+
           {
             schema: 'allNamespaces: [Namespace]',
             resolver: async (
@@ -76,6 +132,7 @@ module.exports = {
                 id: ns.id,
                 name: ns.name,
                 scopes: ns.resource_scopes,
+                prodEnvId: prodEnv.id,
               }));
             },
             access: EnforcementPoint,
@@ -91,6 +148,14 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              const namespace_validation_rule = '^[a-z][a-z0-9-]{4,14}$';
+              let re = new RegExp(namespace_validation_rule);
+              assert.strictEqual(
+                re.test(args.namespace),
+                true,
+                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+              );
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
