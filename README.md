@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs.  It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
+The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs. It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
 
 ## Running the Project.
 
@@ -41,25 +41,27 @@ npm run dev
 
 Once running, the `api services portal` application is reachable via `localhost:4180`.
 
-
 ## Design
 
 The `API Services Portal` is a React application using the Chakra UI component library, and using two frameworks: KeystoneJS V5, and NextJS.
 
 The application is divided up into the following six components:
+
 ### 1. Data Model
 
 The KeystoneJS lists define the aggregated data model that makes up this application.
 
 Source: `src/lists/*`
+
 ### 2. UI
 
 The actual pages and components for the `API Services Portal`.
 
 Source: `src/nextapp/*`
+
 ### 3. Authentication
 
-Support for an OAuth2-Proxy was added to allow authenticating with an OAuth2 flow.  A Token is passed on to the KeystoneJS backend and our middleware verifies the token and starts a session.
+Support for an OAuth2-Proxy was added to allow authenticating with an OAuth2 flow. A Token is passed on to the KeystoneJS backend and our middleware verifies the token and starts a session.
 
 Source: `src/auth/auth-oauth2-proxy.js`
 
@@ -67,12 +69,12 @@ Source: `src/auth/auth-oauth2-proxy.js`
 
 A decision matrix and authorization rules engine is implemented to centralize the rules around access to data.
 
-It uses Permissions retrieved for the logged in user and a particular `Namespace` Resource.  The Requesting Party Token (RPT) holding the permissions will be maintained in the KeystoneJS Session and refreshed accordingly.
+It uses Permissions retrieved for the logged in user and a particular `Namespace` Resource. The Requesting Party Token (RPT) holding the permissions will be maintained in the KeystoneJS Session and refreshed accordingly.
 
 Switching namespaces will result in getting a new RPT that has the relevant permission for the user for the `Namespace`.
 
 | Function                                   | Access                                                                              |
-|--------------------------------------------|-------------------------------------------------------------------------------------|
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
 | Discover APIs                              | Guest                                                                               |
 | API Access (Request Access)                | Authenticated                                                                       |
 | API Access (Revoke, Documentation)         | Authenticated and Service Access (by Consumer for user or app)                      |
@@ -96,6 +98,7 @@ Switching namespaces will result in getting a new RPT that has the relevant perm
 | Namespace Profile (Org and Contacts)       | UMA `Namespace` Resource Permission `Namespace.Admin`                               |
 
 Source: `src/authz`
+
 ### 5. Ingestor
 
 An ingestion framework for adding content from external sources.
@@ -107,13 +110,15 @@ Source: `src/batch/feedWorker.js`
 A set of feeders that live close to the external sources for reading and sending data to the Ingestor
 
 Currently support feeders:
-* CKAN (Comprehensive Knowledge Archive Network)
-* Kong
-* Prometheus
+
+- CKAN (Comprehensive Knowledge Archive Network)
+- Kong
+- Prometheus
 
 Source: `feeds`
 
 ## User Journeys
+
 Roles:
 
 - **API Owner**: Does the technical deployment of the API on the Gateway under a particular Namespace - Gateway Services.
@@ -222,28 +227,37 @@ const Component = () => {
 
 ```
 
-All Typescript paths alias `src/nextapp` to `@/` for easier module loading.
+All Typescript paths alias `src/nextapp` to `@/`.
 
 #### Mock Server
 
-For convenience a mock server is available to fake data via the GraphQL api. To use along side running `$ npm run dev`:
+For convenience a mock server is available to fake data via the GraphQL api. Run by opening a new shell window after running `$ npm run dev`:
 
 ```shell
 $ cd src/
-$ node test/mock-server/server.js
+$ npm run mock-server
 ```
 
-In `./src/.env.local` be sure to set these
+In `./src/.env.local` assign the Next and GWA `API_ROOT` values to the following
 
 ```
 NEXT_PUBLIC_API_ROOT=http://localhost:4000
+GWA_API_URL=http://localhost:4000
 ```
 
+It should be noted that a 1-to-1 replication of the production API is not the goal of the mock server. It's simply to replicate requests and confirm the content returned will behave in an expected way.
 
+###### Updating mock server schemas
+
+When Keystone-level types are updated, there is a manual step required for the mock server in order to keep the mock data structure in sync with the production server. It is definitely manual at the moment, but fairly easy and quick to do.
+
+1. After the Keystone dev server has started (`$ npm run dev`), open [http://localhost:3000/admin/graphiql](http://localhost:3000/admin/graphiql)
+2. The far right of the graphiql interface are 2 tabs, `DOCS` and `SCHEMAS`. You can either download and copy or copy the contents of the `SCHEMAS` tab and paste it in `src/test/mock-server/schemas.js` inside the string literal.
+3. Delete any instances of a `@deprecated(reason: "Use `path` instead")` string. These messages break the graphql-tools
 
 ### Database (KNex)
 
-When using Postgres as a backend, there is limited support for migrations.  So need to come up with a process for `upgrading` databases.
+When using Postgres as a backend, there is limited support for migrations. So need to come up with a process for `upgrading` databases.
 
 ```
 select 'drop table "' || tablename || '" cascade;' from pg_tables where schemaname='public';
