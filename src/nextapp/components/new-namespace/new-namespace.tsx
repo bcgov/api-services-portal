@@ -38,9 +38,9 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
       if (form.current.checkValidity()) {
         try {
           const name = data.get('name') as string;
-          const json = await createMutation.mutateAsync({
+          const json = (await createMutation.mutateAsync({
             name,
-          }) as { createNamespace: { name: string; id: string }};
+          })) as { createNamespace: { name: string; id: string } };
 
           toast({
             title: `Namespace ${json.createNamespace.name} created!`,
@@ -53,9 +53,10 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           });
           onClose();
         } catch (err) {
+          console.log(JSON.stringify(err));
           toast({
             title: 'Namespace Create Failed',
-            description: err?.message,
+            description: err?.[0]?.message,
             status: 'error',
           });
         }
@@ -102,10 +103,10 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
 export default NewNamespace;
 
 const mutation = gql`
-mutation CreateNamespace ($name: String!) {
-  createNamespace(namespace: $name) {
+  mutation CreateNamespace($name: String!) {
+    createNamespace(namespace: $name) {
       id
       name
+    }
   }
-}
-`
+`;

@@ -91,6 +91,14 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              const namespace_validation_rule = '^[a-z][a-z0-9-]{4,14}$';
+              let re = new RegExp(namespace_validation_rule);
+              assert.strictEqual(
+                re.test(args.namespace),
+                true,
+                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+              );
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
