@@ -44,13 +44,14 @@ export class KeycloakGroupService {
         (group: GroupRepresentation) => group.name == groupName
       ).length == 0
     ) {
-      logger.debug('[createIfMissing] CREATED %s', groupName);
+      logger.debug('[createIfMissing] CREATE %s...', groupName);
       await this.kcAdminClient.groups.setOrCreateChild(
         { id: groups[0].id },
         {
           name: groupName,
         }
       );
+      logger.debug('[createIfMissing] CREATED %s', groupName);
     } else {
       logger.debug('[createIfMissing] EXISTS %s', groupName);
     }

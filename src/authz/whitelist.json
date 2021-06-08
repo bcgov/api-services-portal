@@ -621,5 +621,20 @@
           "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
           "query": "\n  mutation DeleteNamespace($name: String!) {\n    deleteNamespace(namespace: $name)\n  }\n",
           "added": "2021-06-02T20:26:44.095Z"
+     },
+     "a45894f8cb7cf5ad9abcea1c3d2c4f0a": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-08T21:39:33.120Z"
+     },
+     "df53970ba9e6fc294d5bf30686437fcb": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  mutation CreateServiceAccount {\n    createServiceAccount {\n      id\n      name\n      credentials\n    }\n  }\n",
+          "added": "2021-06-08T21:39:34.517Z"
+     },
+     "e81b929f8dc81567309f774bd93ee4ee": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  mutation DeleteServiceAccount($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
+          "added": "2021-06-08T21:39:55.771Z"
      }
 }
