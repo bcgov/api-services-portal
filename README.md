@@ -231,7 +231,7 @@ All Typescript paths alias `src/nextapp` to `@/`.
 
 #### Mock Server
 
-For convenience a mock server is available to fake data via the GraphQL api. Run by opening a new shell window after running `$ npm run dev`:
+For convenience a mock server is available to fake data via the GraphQL api. Run by opening a new shell window after running `$ npm run dev` and run the following:
 
 ```shell
 $ cd src/
@@ -254,6 +254,30 @@ When Keystone-level types are updated, there is a manual step required for the m
 1. After the Keystone dev server has started (`$ npm run dev`), open [http://localhost:3000/admin/graphiql](http://localhost:3000/admin/graphiql)
 2. The far right of the graphiql interface are 2 tabs, `DOCS` and `SCHEMAS`. You can either download and copy or copy the contents of the `SCHEMAS` tab and paste it in `src/test/mock-server/schemas.js` inside the string literal.
 3. Delete any instances of a `@deprecated(reason: "Use `path` instead")` string. These messages break the graphql-tools
+
+#### Coding Style
+
+There isn't a strict, repo-wide coding style per se, but we use Prettier and ESLint to maintain a consistent code style. Both libraries are included locally as part of the node_modules, so it is recommended to configure your editor to run off local versions instead of global so any API changes between versions don't collide.
+
+Keep your code neat with easy to understand variable names, common sense verbosity is encouraged so anyone can understand what the code does.
+
+```javascript
+// don't
+const x = a + b;
+
+if (x) c(x);
+
+// do
+
+const sumOfItems = itemA + itemB;
+
+if (sumOfItems) {
+  runResultOfSums(sumOfItems);
+}
+
+// you can use abbreviations for iterations though, as long as the list is explicit
+const newItemsMapped = allNewItems.map((a) => ({ ...a, newKey: 'a' }));
+```
 
 ### Database (KNex)
 
