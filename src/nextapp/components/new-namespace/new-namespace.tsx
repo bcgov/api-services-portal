@@ -53,7 +53,6 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           });
           onClose();
         } catch (err) {
-          console.log(JSON.stringify(err));
           toast({
             title: 'Namespace Create Failed',
             description: err?.[0]?.message,
