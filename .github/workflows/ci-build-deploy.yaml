@@ -23,7 +23,10 @@ jobs:
           images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
 
       - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
-        run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+        run: |
+          echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+          echo '::set-output name=APP_VERSION::${{ steps.docker_meta.outputs.labels['org.opencontainers.image.version'] }}'
+          echo '::set-output name=APP_REVISON::${{ steps.docker_meta.outputs.labels['org.opencontainers.image.revision'] }}'
         id: set-deploy-id
 
       - name: Get deploy ID
@@ -76,6 +79,8 @@ jobs:
           load: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+            APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
       - name: Push
         run: docker push ${{ steps.docker_meta.outputs.tags }}
