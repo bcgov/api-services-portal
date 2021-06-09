@@ -58,7 +58,7 @@ API Owner Role Rules,,updateConsumerGroupMembership,,,,,,,api-owner,,,allow,filt
 API Owner Role Rules,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
 API Owner Role Rules,,linkConsumerToNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,updateConsumerRoleAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
-API Owner Role Rules,,allNamespaces,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,allNamespaces,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,createNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,currentNamespace,,,,,,,api-owner,,,allow,
