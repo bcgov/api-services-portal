@@ -26,7 +26,7 @@ jobs:
         run: |
           echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
           echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
-          echo '::set-output name=APP_REVISON::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
+          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
         id: set-deploy-id
 
       - name: Get deploy ID
