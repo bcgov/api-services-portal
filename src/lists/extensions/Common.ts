@@ -268,7 +268,7 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   assert.strictEqual(
     isUserBasedResourceOwners(envCtx),
     false,
-    'User-based resource owner is not supposed to be used or namespaces!'
+    'User-based resource owner is not supposed to be used for namespaces!'
   );
 
   const issuerEnvConfig = envCtx.issuerEnvConfig;
