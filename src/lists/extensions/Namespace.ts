@@ -11,6 +11,7 @@ import {
   getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
+  getNamespaceResourceSets,
   isUserBasedResourceOwners,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
@@ -63,7 +64,7 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
+              const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
                 envCtx.issuerEnvConfig.issuerUrl,
                 envCtx.accessToken
