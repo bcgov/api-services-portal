@@ -1,0 +1,60 @@
+const casual = require('casual-browserify');
+
+const data = require('./example-data');
+
+/*
+ * This is a simple Map wrapper that has some convenience methods for seeding the
+ * database as well as simple CRUD functions.
+ */
+class MockDatabase {
+  role = 'api-owner';
+
+  constructor(role = 'api-owner', namespace = null) {
+    this.role = role;
+    this.db = new Map();
+    this.db.set('user', {
+      id: casual.uuid,
+      userId: casual.uuid,
+      name: 'Viktor Vaughn',
+      username: 'vikvaughn',
+      email: 'villain@doom.net',
+      roles: [role],
+      isAdmin: false,
+      namespace,
+      groups: null,
+      legalsAgreed: '[]',
+      sub: 'sub',
+    });
+    this.db.set(
+      'namespaces',
+      data.namespaces.map((n) => ({ name: n, id: casual.uuid }))
+    );
+    this.db.set(
+      'products',
+      data.products.map((p) => ({ name: p, id: casual.uuid, environments: [] }))
+    );
+  }
+
+  create(key, payload) {
+    const payloadWithId = { ...payload, id: casual.uuid };
+    if (this.db.has(key)) {
+      const items = this.db.get(key);
+      this.db.set(key, [...items, payloadWithId]);
+    } else {
+      this.db.set(key, [payloadWithId]);
+    }
+
+    return payloadWithId;
+  }
+
+  get(key) {
+    return this.db.get(key);
+  }
+
+  set(key, value) {
+    this.db.set(key, value);
+    return this.db;
+  }
+}
+
+module.exports = MockDatabase;
