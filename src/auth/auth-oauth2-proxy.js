@@ -283,8 +283,8 @@ class Oauth2ProxyAuthStrategy {
         );
       }
     } else {
-      roles.push('developer');
-      roles.push('portal-user');
+      _roles.push('developer');
+      _roles.push('portal-user');
     }
     const roles = JSON.stringify(_roles); // authenticated user gets developer role automatically
 
