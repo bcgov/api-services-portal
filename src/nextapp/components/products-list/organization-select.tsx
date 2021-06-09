@@ -72,7 +72,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
           <option value="">Select an Organization</option>
           {organizationsQuery.data?.allOrganizations.map((org) => (
             <option key={org.id} value={org.id}>
-              {org.name}
+              {org.title}
             </option>
           ))}
         </Select>
@@ -92,7 +92,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
           <option value="">Select an Organization Unit</option>
           {organizationUnitsQuery.data?.Organization?.orgUnits.map((unit) => (
             <option key={unit.id} value={unit.id}>
-              {unit.name}
+              {unit.title}
             </option>
           ))}
         </Select>

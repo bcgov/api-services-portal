@@ -56,8 +56,8 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
     <>
       <FormControl id="dataset" position="relative">
         <Downshift
-          initialInputValue={dataset?.name}
-          itemToString={(item) => (item ? item.name : '')}
+          initialInputValue={dataset?.title}
+          itemToString={(item) => (item ? item.title : '')}
           onChange={onChange}
           onStateChange={onStateChange}
         >
@@ -109,7 +109,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 {isOpen &&
                   isSuccess &&
                   data.allDatasets
-                    .filter((d) => !inputValue || d.name.includes(inputValue))
+                    .filter((d) => !inputValue || d.title.includes(inputValue))
                     .map((d, index, arr) => (
                       <Box
                         key={d.id}
@@ -136,7 +136,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                           },
                         })}
                       >
-                        <Text fontSize="md">{d.name}</Text>
+                        <Text fontSize="md">{d.title}</Text>
                       </Box>
                     ))}
               </Box>
