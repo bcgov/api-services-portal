@@ -18,15 +18,15 @@ jobs:
     steps:
       - name: Docker meta
         id: docker_meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
 
       - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
         run: |
           echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
-          echo '::set-output name=APP_VERSION::${{ steps.docker_meta.outputs.labels['org.opencontainers.image.version'] }}'
-          echo '::set-output name=APP_REVISON::${{ steps.docker_meta.outputs.labels['org.opencontainers.image.revision'] }}'
+          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
+          echo '::set-output name=APP_REVISON::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
         id: set-deploy-id
 
       - name: Get deploy ID
