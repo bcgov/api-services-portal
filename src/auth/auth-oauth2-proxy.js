@@ -264,9 +264,10 @@ class Oauth2ProxyAuthStrategy {
     const namespace = oauthUser['namespace'];
     const groups = JSON.stringify(oauthUser['groups']);
     const _roles = [];
+    const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
+    
     if ('resource_access' in oauthUser && clientId in oauthUser['resource_access']) {
       try {
-        const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
         logger.debug('register_user - Getting resources for [%s]', clientId);
 
         oauthUser['resource_access'][clientId].roles
