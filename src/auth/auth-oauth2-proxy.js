@@ -264,7 +264,7 @@ class Oauth2ProxyAuthStrategy {
     const namespace = oauthUser['namespace'];
     const groups = JSON.stringify(oauthUser['groups']);
     const _roles = [];
-    if ('resource_access' in oauthUser) {
+    if ('resource_access' in oauthUser && clientId in oauthUser['resource_access']) {
       try {
         const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
         logger.debug('register_user - Getting resources for [%s]', clientId);
@@ -281,6 +281,8 @@ class Oauth2ProxyAuthStrategy {
           'register_user - error parsing resource_access roles %s - defaulting roles to none - %s',
           e
         );
+        _roles.push('developer');
+        _roles.push('portal-user');
       }
     } else {
       _roles.push('developer');
