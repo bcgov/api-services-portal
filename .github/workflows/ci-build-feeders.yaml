@@ -122,7 +122,7 @@ jobs:
 
           serviceAccount:
             create: true
-            name: proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            name: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
 
           env:
             LOG_FEEDS:
@@ -136,8 +136,8 @@ jobs:
             PROM_URL:
               value: 'http://prometheus-server'
             DESTINATION_URL:
-              value: 'http://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
+              value: 'http://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api'
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api

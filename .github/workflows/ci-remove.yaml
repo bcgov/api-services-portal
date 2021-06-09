@@ -45,6 +45,6 @@ jobs:
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
-          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
-          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
-          helm delete proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
+          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
+          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
