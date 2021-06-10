@@ -140,20 +140,35 @@ const InternalLink: React.FC<{ children: React.ReactNode; href: string }> = ({
   children,
   href,
 }) => {
-  return (
-    <>
-      {' '}
-      <Button
-        as="a"
-        href={href}
-        target="_blank"
-        rightIcon={<Icon as={FaExternalLinkAlt} boxSize={3} />}
-        variant="link"
-      >
-        {children}
-      </Button>
-    </>
-  );
+  if (href.startsWith("http")) {
+    return (
+      <>
+        {' '}
+        <Button
+          as="a"
+          href={href}
+          target="_blank"
+          rightIcon={<Icon as={FaExternalLinkAlt} boxSize={3} />}
+          variant="link"
+        >
+          {children}
+        </Button>
+      </>
+    );
+  } else {
+    return (
+      <>
+        {' '}
+        <Button
+          as="a"
+          href={href}
+          variant="link"
+        >
+          {children}
+        </Button>
+      </>
+    )
+  }
 };
 
 function flatten(text: string, child: React.ReactElement | string) {

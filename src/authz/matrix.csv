@@ -94,8 +94,8 @@ Developer Role Rules,,,AccessRequest,,create,,,,developer,,,allow,
 Developer Role Rules,,,AccessRequest,,"update,read",,,,developer,,,allow,filterByRequestor
 Developer Role Rules,,,Application,create,,,,,developer,,,allow,
 Developer Role Rules,,,Application,,"read,delete,update",,,,developer,,,allow,filterByOwner
-Developer Role Rules,,,ServiceAccess,delete,,,,,developer,,,allow,filterByAppOwner
-Developer Role Rules,,,ServiceAccess,read,,,,,developer,,,allow,filterByAppOwner
+Developer Role Rules,,,ServiceAccess,delete,,,,,portal-user,,,allow,filterByAppOwner
+Developer Role Rules,,,ServiceAccess,read,,,,,portal-user,,,allow,filterByAppOwner
 Developer Role Rules - Fields,,,Product,read,,"id,name,dataset,organization,organizationUnit,environments",,,developer,,,allow,
 Developer Role Rules - Fields,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,developer,,,allow,
 Developer Role Rules - Fields,,,Dataset,read,,,"isInCatalog,extSource,extForeignKey,extRecordHash",,developer,,,allow,
