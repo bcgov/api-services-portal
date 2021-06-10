@@ -18,12 +18,15 @@ jobs:
     steps:
       - name: Docker meta
         id: docker_meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
 
       - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
-        run: echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+        run: |
+          echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
+          echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
+          echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
         id: set-deploy-id
 
       - name: Get deploy ID
@@ -76,6 +79,8 @@ jobs:
           load: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+            APP_VERSION=${{ steps.set-deploy-id.outputs.APP_VERSION }}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
       - name: Push
         run: docker push ${{ steps.docker_meta.outputs.tags }}
@@ -130,7 +135,7 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
 
       - name: 'Deploy Backend'
         run: |
@@ -188,7 +193,7 @@ jobs:
             KONG_URL:
               value: '${{ secrets.KONG_URL_DEV}}'
             MONGO_URL:
-              value: 'mongodb://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
+              value: 'mongodb://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db-mongodb:27017'
             MONGO_USER:
               value: root
               secure: true
@@ -196,7 +201,7 @@ jobs:
               value: s3cr3t
               secure: true
             FEEDER_URL:
-              value: 'http://proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
+              value: 'http://proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api'
             GITHUB_API_TOKEN:
               value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
               secure: true
@@ -228,7 +233,7 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
 
       - name: 'Deploy Routes'
         run: |
@@ -238,10 +243,10 @@ jobs:
           routes:
             - host: api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca
               targetPort: http
-              service: proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api
+              service: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api
               wildcardPolicy: None
               tls:
                 termination: edge
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route

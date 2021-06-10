@@ -5,6 +5,7 @@ export const ORGANIZATIONS_LIST = gql`
     allOrganizations(sortBy: name_DESC) {
       id
       name
+      title
     }
   }
 `;
@@ -16,6 +17,7 @@ export const ORGANIZATIONS_OWN_UNITS_LIST = gql`
       orgUnits {
         name
         id
+        title
       }
     }
   }

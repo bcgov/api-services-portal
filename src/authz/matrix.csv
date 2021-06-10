@@ -4,64 +4,64 @@ API Owner Role Rules,,,AccessRequest,update,,isApproved,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,,"create,read",isApproved,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,,"create,update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,Activity,read,,,,,api-owner,,,allow,filterByUserNS
-API Owner Role Rules,,,Alert,,"read,create,update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,Application,,"read,update,delete",,,,api-owner,,,allow,filterByOwner
-API Owner Role Rules,,,Application,,create,,,,api-owner,,,allow,
+API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
+API Owner Role Rules,,,Application,,"read,update,delete",,,,,,"api-owner,provider-user",allow,filterByOwner
+API Owner Role Rules,,,Application,,create,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Content,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,CredentialIssuer,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,CredentialIssuer,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,CredentialIssuer,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,CredentialIssuer,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Dataset,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,create,,active,,,api-owner,,,deny,
-API Owner Role Rules,,,Environment,,"update,delete",active,,,api-owner,,,allow,
-API Owner Role Rules,,,Environment,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,Environment,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,Environment,,"update,delete,read",active,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,Environment,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,,"read,update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayGroup,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayGroup,,"update,delete,create",,,,api-owner,,,allow,
-API Owner Role Rules,,,GatewayPlugin,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,GatewayRoute,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,GatewayService,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,GatewayPlugin,read,,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,GatewayRoute,read,,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,GatewayService,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Group,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Group,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,Group,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,Legal,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,Legal,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Legal,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,MemberRole,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,MemberRole,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,MemberRole,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,Metric,,read,,,,api-owner,,,allow,
-API Owner Role Rules,,,Namespace,,read,,,,api-owner,,,allow,
+API Owner Role Rules,,,Metric,,read,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,Namespace,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Namespace,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Namespace,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,Namespace,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Organization,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,OrganizationUnit,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Product,update,,namespace,,,,,,deny,
-API Owner Role Rules,,,Product,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,Product,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Product,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Product,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,ServiceAccess,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,TemporaryIdentity,read,,,,,api-owner,,,allow,filterByTemporaryIdentity
-API Owner Role Rules,,,User,read,,,,,api-owner,,,allow,
+API Owner Role Rules,,,ServiceAccess,read,,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,TemporaryIdentity,read,,,,,,,"api-owner,provider-user",allow,filterByTemporaryIdentity
+API Owner Role Rules,,,User,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,allPermissionTickets,,,,,,,api-owner,,,allow,
-,,updateConsumerGroupMembership,,,,,,,api-owner,,,allow,filterByPackageNS
-,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
-,,linkConsumerToNamespace,,,,,,,api-owner,,,allow,
-,,updateConsumerRoleAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
-API Owner Role Rules,,allNamespaces,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,updateConsumerGroupMembership,,,,,,,api-owner,,,allow,filterByPackageNS
+API Owner Role Rules,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
+API Owner Role Rules,,linkConsumerToNamespace,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,updateConsumerRoleAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
+Portal User Namespaces,,allNamespaces,,,,,,,portal-user,,,allow,
 API Owner Role Rules,,createNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteNamespace,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,currentNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,revokePermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,approvePermissions,,,,,,,api-owner,,,allow,
@@ -70,7 +70,7 @@ API Owner Role Rules,,allResourceSets,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,getUmaPoliciesForResource,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,createUmaPolicy,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteUmaPolicy,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,getServiceAccounts,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,getServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,createServiceAccount,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteServiceAccount,,,,,,,api-owner,,,allow,
 Developer Role Rules,,myServiceAccesses,,,,,,,developer,,,allow,filterByAppOwner
@@ -115,30 +115,29 @@ Developer Role Rules - Fields,,,AccessRequest,create,,"name,controls,requestor,a
 Developer Role Rules - Fields,,,AccessRequest,,"read,update",credential,,,developer,,,allow,
 Developer Role Rules - Fields,,,AccessRequest,read,,"name,controls,application,productEnvironment,isIssued",,,developer,,,allow,
 Developer Role Rules - Fields,,,ServiceAccess,read,,"consumer,application",,,developer,,,allow,
-API Owner Role Rules,,,,,"read,update,create",,*,,api-owner,,,allow,
-API Owner Role Rules,,allDiscoverableProducts,,,,,,,api-owner,,,allow,filterByActiveEnvironment
-API Owner Role Rules,,allDiscoverableContents,,,,,,,api-owner,,,allow,filterByNamespaceOrPublic
-API Owner Role Rules,,DiscoverableProduct,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,myServiceAccesses,,,,,,,api-owner,,,allow,filterByAppOwner
-API Owner Role Rules,,myApplications,,,,,,,api-owner,,,allow,filterByOwner
-API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
-API Owner Role Rules,,allProductsByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
+API Owner Role - All Fields,,,,,read,,*,,,,"api-owner,provider-user",allow,
+API Owner Role - All Fields,,,,,"update,create",,*,,api-owner,,,allow,
+Portal User,,DiscoverableProduct,,,,,,,portal-user,,,allow,
+Portal User,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
+Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
+API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
 API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
-API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,api-owner,,,allow,filterByUserNS
-API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
+API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 ,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
 ,,getResourceOwners,,,,,,,api-owner,,,allow,
-Guest,,allDiscoverableContents,,,,,,,guest,,,allow,filterByNamespaceOrPublic
-Guest,,allDiscoverableProducts,,,,,,,guest,,,allow,filterByActiveEnvironment
-,,allProducts,,,,,,,guest,,,allow,
-,,environments,,,,,,,guest,,,allow,
-,,allDatasets,,,,,,,guest,,,allow,
-,,Environment,,,,,,,guest,,,allow,
-,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,guest,,,allow,
-,,allContents,,,,,,,guest,,,allow,
-,,DiscoverableProduct,,,,,,,guest,,,allow,
-,,services,,,,,,,guest,,,allow,
-API Owner Role Rules,,mySelf,,,,,,,,,,allow,filterBySelf
-,,acceptLegal,,,,,,,,,,allow,
-,,,User,update,,,,,,,,allow,
+Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
+Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment
+Portal User or Guest,,allProducts,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,environments,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,allDatasets,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,Environment,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,,Environment,read,,"name,active,flow,services,legal,product,credentialIssuer",,,,,"portal-user,guest",allow,
+Portal User or Guest,,allContents,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,DiscoverableProduct,,,,,,,,,"portal-user,guest",allow,
+Portal User or Guest,,services,,,,,,,,,"portal-user,guest",allow,
+ALL USERS,,mySelf,,,,,,,,,,allow,filterBySelf
+ALL USERS,,acceptLegal,,,,,,,,,,allow,
+ALL USERS,,,User,update,,,,,,,,allow,
