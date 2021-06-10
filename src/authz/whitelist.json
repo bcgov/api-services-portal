@@ -636,5 +636,15 @@
           "referer": "http://localhost:4180/manager/poc/service-accounts",
           "query": "\n  mutation DeleteServiceAccount($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
           "added": "2021-06-08T21:39:55.771Z"
+     },
+     "5918f7500ca71b9bcd5853c3c9da3318": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  mutation CreateNamespace($name: String!) {\n    createNamespace(namespace: $name) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-06-08T23:23:29.330Z"
+     },
+     "21581865a450d056abc17a0552a75a27": {
+          "referer": "http://localhost:4180/devportal/resources/28f9bdbd-dbdb-4fe4-b999-3875b6aae17a?peid=609c5bf79b8ceca36d31ce94",
+          "query": "\n  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {\n    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)\n  }\n",
+          "added": "2021-06-10T20:28:29.544Z"
      }
 }

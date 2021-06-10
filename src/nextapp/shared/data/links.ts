@@ -23,7 +23,7 @@ const links: NavLink[] = [
   {
     name: 'API Access',
     url: '/devportal/access',
-    access: ['developer', 'api-owner'],
+    access: ['developer', 'api-owner', 'provider-user'],
     altUrls: [
       '/devportal/access/[id]',
       '/devportal/resources/[id]',
@@ -35,7 +35,7 @@ const links: NavLink[] = [
   {
     name: 'Applications',
     url: '/devportal/applications',
-    access: ['developer', 'api-owner'],
+    access: ['developer', 'api-owner', 'provider-user'],
     sites: ['devportal'],
   },
   {
@@ -50,11 +50,12 @@ const links: NavLink[] = [
       '/manager/consumers/[id]',
       '/manager/requests/[id]',
       '/manager/poc/credential-issuers',
+      '/manager/poc/credential-issuers/new',
       '/manager/poc/credential-issuers/[id]',
       '/manager/poc/service-accounts',
       '/manager/poc/activity',
     ],
-    access: ['api-owner'],
+    access: ['api-owner', 'provider-user'],
     sites: ['devportal'],
   },
   {

@@ -1,5 +1,11 @@
 FROM node:15.14.0-alpine3.13
 
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+
+ARG APP_REVISION
+ENV APP_REVISION=${APP_REVISION}
+
 RUN apk add curl jq
 RUN npm install -g npm@7.11.2
 
