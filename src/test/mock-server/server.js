@@ -6,8 +6,9 @@ const {
   MockList,
 } = require('graphql-tools');
 const casual = require('casual-browserify');
-const times = require('lodash/times');
+const kebabCase = require('lodash/kebabCase');
 const random = require('lodash/random');
+const times = require('lodash/times');
 const express = require('express');
 const cors = require('cors');
 const { addHours, parse, formatISO, subDays } = require('date-fns');
@@ -223,16 +224,7 @@ const server = mockServer(schemaWithMocks, {
     organizationUnit: randomNullValue(),
   }),
   Organization: () => ({
-    name: casual.random_element([
-      'Ministry of Advanced Education and Skills Training',
-      'Ministry of Agriculture, Food and Fisheries',
-      'Ministry of Attorney General',
-      'Ministry of Citizens Services',
-      'Ministry of Education',
-      'Ministry of Health',
-      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
-      'Ministry of Indigenous Relations and Reconciliation',
-    ]),
+    name: casual.random_element(data.organizations.map((o) => kebabCase(o))),
     sector: casual.random_element([
       'Health & Safety',
       'Service',
@@ -242,30 +234,17 @@ const server = mockServer(schemaWithMocks, {
       'Finance',
     ]),
     bcdcId: casual.uuid,
-    title: casual.random_element([
-      'Ministry of Advanced Education and Skills Training',
-      'Ministry of Agriculture, Food and Fisheries',
-      'Ministry of Attorney General',
-      'Ministry of Citizens Services',
-      'Ministry of Education',
-      'Ministry of Health',
-      'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
-      'Ministry of Indigenous Relations and Reconciliation',
-    ]),
+    title: casual.random_element(data.organizations),
     tags: casual.words(3),
     description: casual.description,
     orgUnits: () => new MockList(2, (_, { id }) => ({ id })),
   }),
   OrganizationUnit: () => ({
-    name: casual.random_element([
-      'DataBC',
-      'Information Innovation and Technology',
-    ]),
+    name: casual.random_element(
+      data.organizationUnits.map((o) => kebabCase(o))
+    ),
     sector: casual.word,
-    title: casual.random_element([
-      'DataBC',
-      'Information Innovation and Technology',
-    ]),
+    title: casual.random_element(data.organizationUnits),
     bcdcId: casual.uuid,
     tags: casual.word,
     description: casual.short_description,
@@ -379,26 +358,8 @@ const server = mockServer(schemaWithMocks, {
     };
   },
   Dataset: () => ({
-    title: casual.random_element([
-      'BC Address Geocoder Web Service',
-      'API Gateway Services',
-      'Address List Editor',
-      'Document Generation',
-      'BC Route Planner',
-      'Service BC Office Locations',
-      'Welcome BC Settlement Service Providers - Interactive Web Map Data',
-      'Laboratory Services in BC',
-      'Immunization Services in BC',
-      'BC Health Care Facilities (Hospital)',
-      'BC Gov News API Service',
-      'WorkBC Job Postings - API Web Service',
-      'BC Roads Map Service - Web Mercator',
-      'British Columbia Geographical Names Web Service - BCGNWS',
-      'Open511-DriveBC API',
-      'Historic City of Vancouver Fire Insurance Map',
-      'BC Laws API',
-      'BC Web Map Library',
-    ]),
+    title: casual.random_element(data.datasets),
+    name: casual.random_element(data.datasets.map((d) => kebabCase(d))),
     sector: casual.random_element([
       'Health & Safety',
       'Service',

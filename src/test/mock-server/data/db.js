@@ -1,4 +1,5 @@
 const casual = require('casual-browserify');
+const kebabCase = require('lodash/kebabCase');
 
 const data = require('./example-data');
 
@@ -32,6 +33,14 @@ class MockDatabase {
     this.db.set(
       'products',
       data.products.map((p) => ({ name: p, id: casual.uuid, environments: [] }))
+    );
+    this.db.set(
+      'datasets',
+      data.datasets.map((d) => ({
+        title: d,
+        id: casual.uuid,
+        name: kebabCase(d),
+      }))
     );
   }
 
