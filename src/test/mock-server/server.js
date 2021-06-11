@@ -225,6 +225,7 @@ const server = mockServer(schemaWithMocks, {
     allOrganizations: () => allOrganizations,
     allOrganizationUnits: () => allOrganizationUnits,
     allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),
+    allNamespaceServiceAccounts: () => new MockList(2, (_, { id }) => ({ id })),
     allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
     allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
     allMetrics: (_query, _, args) => {
@@ -319,6 +320,18 @@ const server = mockServer(schemaWithMocks, {
 
       return { id, name };
     },
+    createServiceAccount: () => {
+      return {
+        id: `sa-${namespace}-${casual.uuid}`,
+        name: `sa-${namespace}-${casual.uuid}`,
+        credentials: JSON.stringify({
+          clientId: casual.uuid,
+          clientSecret: casual.uuid,
+          tokenEndpoint:
+            'https://apps-gov-bc-ca.dev.ca/auth/realms/token/endpoint',
+        }),
+      };
+    },
   }),
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
@@ -326,6 +339,10 @@ const server = mockServer(schemaWithMocks, {
   }),
   Namespace: () => ({
     name: casual.random_element(namespaces),
+  }),
+  ServiceAccount: () => ({
+    id: `sa-${namespace}-${casual.uuid}`,
+    name: `sa-${namespace}-${casual.uuid}`,
   }),
   Product: () => ({
     name: casual.random_element([
