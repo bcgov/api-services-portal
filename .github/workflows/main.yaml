@@ -27,6 +27,11 @@ jobs:
           echo "Version ${{ steps.release.outputs.version }}"
           echo "Revision ${GITHUB_SHA}"
 
+      - name: Set DEPLOY_ID
+        run: |
+          echo "::set-output name=APP_REVISION::${GITHUB_SHA}"
+        id: set-deploy-id
+
       - name: Create docker image api-services-portal
         uses: docker/build-push-action@v1
         with:
@@ -53,4 +58,4 @@ jobs:
           push: true
           tags: ${{ steps.release.outputs.tag_name }}
           tag_with_sha: false
-          build_args: APP_VERSION=${{ steps.release.outputs.version }},APP_REVISION=${GITHUB_SHA}
+          build_args: APP_VERSION=${{ steps.release.outputs.version }},APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
