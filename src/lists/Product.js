@@ -46,7 +46,7 @@ module.exports = {
         } else {
           resolvedData['appId'] = newProductID();
         }
-        if ('namespace' in context['authedItem']) {
+        if ('authedItem' in context && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
       }
