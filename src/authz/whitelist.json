@@ -636,5 +636,25 @@
           "referer": "http://localhost:4180/manager/poc/service-accounts",
           "query": "\n  mutation DeleteServiceAccount($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
           "added": "2021-06-08T21:39:55.771Z"
+     },
+     "5918f7500ca71b9bcd5853c3c9da3318": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  mutation CreateNamespace($name: String!) {\n    createNamespace(namespace: $name) {\n      id\n      name\n    }\n  }\n",
+          "added": "2021-06-08T23:23:29.330Z"
+     },
+     "21581865a450d056abc17a0552a75a27": {
+          "referer": "http://localhost:4180/devportal/resources/28f9bdbd-dbdb-4fe4-b999-3875b6aae17a?peid=609c5bf79b8ceca36d31ce94",
+          "query": "\n  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {\n    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)\n  }\n",
+          "added": "2021-06-10T20:28:29.544Z"
+     },
+     "eb765e1d5ea1ecd8bf0e64f1a1b3bc1d": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET {\n    allOrganizations(sortBy: name_DESC) {\n      id\n      name\n      title\n    }\n  }\n",
+          "added": "2021-06-11T05:54:50.249Z"
+     },
+     "3ff59d8d44a038c1416655d5a89f5a60": {
+          "referer": "http://localhost:4180/manager/products",
+          "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n        title\n      }\n    }\n  }\n",
+          "added": "2021-06-11T05:55:08.602Z"
      }
 }

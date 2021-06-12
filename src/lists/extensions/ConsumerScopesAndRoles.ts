@@ -164,6 +164,7 @@ module.exports = {
               );
               return true;
             },
+            access: EnforcementPoint,
           },
           {
             schema:

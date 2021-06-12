@@ -427,6 +427,7 @@ export const metadata = {
     query: 'allLegals',
     refKey: 'reference',
     sync: ['title', 'link', 'document', 'version', 'active'],
+    transformations: {},
   },
   Activity: {
     query: 'allActivities',
@@ -450,5 +451,6 @@ export const metadata = {
     query: 'allUsers',
     refKey: 'username',
     sync: ['name', 'username', 'email'],
+    transformations: {},
   },
 };

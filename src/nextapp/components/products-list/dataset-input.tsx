@@ -15,13 +15,13 @@ import { useApi } from '@/shared/services/api';
 import { Dataset } from '@/shared/types/query.types';
 
 interface DatasetInputProps {
-  value: string | undefined;
+  dataset?: Dataset;
 }
 
-const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
+const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
   const theme = useTheme();
   const [search, setSearch] = React.useState<string>('');
-  const [selected, setSelected] = React.useState<Dataset | null>(null);
+  const [selected, setSelected] = React.useState<Dataset | null>(dataset);
   const { data, isLoading, isSuccess } = useApi(
     ['dataset-search', search],
     {
@@ -56,9 +56,10 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
     <>
       <FormControl id="dataset" position="relative">
         <Downshift
+          initialInputValue={dataset?.title}
+          itemToString={(item) => (item ? item.title : '')}
           onChange={onChange}
           onStateChange={onStateChange}
-          itemToString={(item) => (item ? item.title : '')}
         >
           {({
             getInputProps,
@@ -82,13 +83,13 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ value }) => {
                   { suppressRefError: true }
                 )}
                 {...getInputProps()}
-                defaultValue={value}
+                defaultValue={dataset?.id}
                 variant="bc-input"
               />
               <input
                 type="hidden"
                 name="dataset"
-                defaultValue={value}
+                defaultValue={dataset?.id}
                 value={selected?.id}
               />
               <Box

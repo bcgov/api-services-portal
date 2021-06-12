@@ -39,6 +39,12 @@ const RedirectPage: React.FC<
         "The ARGG application has been demised and replaced with the API Services Portal.  To register an API so that it is discoverable, find the 'Gateway Administration API' in the Directory and Request access to get started.",
       moreDetails: '/docs/platform-api-services-portal-released',
     },
+    'gwa-ui': {
+      title: 'API Services Portal V1 (GWA UI) End-of-Life',
+      description:
+        "The API Services Portal UI has been upgraded!",
+      moreDetails: '/docs/platform-api-services-portal-released',
+    },
     'api-spec-editor': {
       title: 'API Spec Editor End-of-Life',
       description:
