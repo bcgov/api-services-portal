@@ -10,17 +10,17 @@ services:
         '0.0.0.0',
         '-Djboss.socket.binding.port-offset=1000',
         '-Dkeycloak.migration.action=import',
-        '-Dkeycloak.migration.provider=dir',
-        '-Dkeycloak.migration.dir=/realm-config',
-        '-Dkeycloak.migration.strategy=IGNORE_EXISTING',
+        '-Dkeycloak.migration.provider=singleFile',
+        '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
+        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
       ]
     ports:
       - 9080:9080/tcp
-    environment:
-      KEYCLOAK_USER: local
-      KEYCLOAK_PASSWORD: local
+    #environment:
+    #KEYCLOAK_USER: local
+    #KEYCLOAK_PASSWORD: local
     volumes:
-      - ./keycloak:/realm-config
+      - ./keycloak/master-realm.json:/tmp/realm-config/master-realm.json
     networks:
       keycloak:
         aliases:
