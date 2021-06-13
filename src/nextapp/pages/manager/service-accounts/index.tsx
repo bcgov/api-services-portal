@@ -1,7 +1,6 @@
 import * as React from 'react';
-import api, { useApi, useApiMutation } from '@/shared/services/api';
+import api, { useApi } from '@/shared/services/api';
 import {
-  Button,
   Box,
   Container,
   Text,
@@ -14,7 +13,6 @@ import {
   Tbody,
   Td,
   Center,
-  useToast,
   Icon,
 } from '@chakra-ui/react';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -22,12 +20,13 @@ import { gql } from 'graphql-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { QueryClient, useQueryClient } from 'react-query';
-import { Mutation, Query } from '@/shared/types/query.types';
+import { Query } from '@/shared/types/query.types';
 import ViewSecret from '@/components/view-secret';
 import { dehydrate } from 'react-query/hydration';
 import ServiceAccountDelete from '@/components/service-account-delete/service-account-delete';
 import { format } from 'date-fns';
 import { FaKey } from 'react-icons/fa';
+import ServiceAccountCreate from '@/components/service-account-create';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'getServiceAccounts';
@@ -60,7 +59,6 @@ const ServiceAccountsPage: React.FC<
   const [credentials, setCredentials] = React.useState<Record<string, string>>(
     {}
   );
-  const toast = useToast();
   const { data } = useApi(
     queryKey,
     {
@@ -69,39 +67,10 @@ const ServiceAccountsPage: React.FC<
     },
     { suspense: false }
   );
-  const credentialGenerator = useApiMutation(mutation);
-
-  const handleCreate = React.useCallback(async () => {
-    try {
-      const res: Mutation = await credentialGenerator.mutateAsync({});
-
-      if (res.createServiceAccount.credentials !== 'NEW') {
-        setCredentials(JSON.parse(res.createServiceAccount.credentials));
-      }
-      client.invalidateQueries(queryKey);
-
-      toast({
-        title: 'Service Account Created',
-        status: 'success',
-      });
-    } catch (err) {
-      console.log(err);
-      toast({
-        title: 'Could not create Service Account',
-        status: 'error',
-      });
-    }
-  }, [client, credentialGenerator, queryKey, setCredentials, toast]);
-
-  const createButton = (
-    <Button
-      isLoading={credentialGenerator.isLoading}
-      variant="primary"
-      onClick={handleCreate}
-    >
-      New Service Account
-    </Button>
-  );
+  const handleCreate = (credentials: Record<string, string>) => {
+    setCredentials(credentials);
+    client.invalidateQueries(queryKey);
+  };
 
   return (
     <>
@@ -109,7 +78,10 @@ const ServiceAccountsPage: React.FC<
         <title>API Program Services | Service Accounts</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader actions={createButton} title="Service Accounts">
+        <PageHeader
+          actions={<ServiceAccountCreate onCreate={handleCreate} />}
+          title="Service Accounts"
+        >
           <Text>
             Service Accounts allow you to access BC Government APIs via the
             Gateway API or the Gateway CLI.
@@ -162,7 +134,9 @@ const ServiceAccountsPage: React.FC<
                           Service Accounts can be used to access our API for
                           functions like publish gateway configuration.
                         </Text>
-                        <Box mt={4}>{createButton}</Box>
+                        <Box mt={4}>
+                          <ServiceAccountCreate onCreate={handleCreate} />
+                        </Box>
                       </Box>
                     </Center>
                   </Td>
@@ -200,16 +174,6 @@ const query = gql`
     allTemporaryIdentities {
       id
       userId
-    }
-  }
-`;
-
-const mutation = gql`
-  mutation CreateServiceAccount {
-    createServiceAccount {
-      id
-      name
-      credentials
     }
   }
 `;

@@ -26,7 +26,6 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import { UmaResourceSet } from '@/shared/types/query.types';
 import { useApiMutation } from '@/shared/services/api';
-import id from 'date-fns/esm/locale/id/index.js';
 import { useQueryClient } from 'react-query';
 
 interface ShareResourceDialogProps {
@@ -40,7 +39,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
   prodEnvId,
   resource,
   resourceId,
-  queryKey
+  queryKey,
 }) => {
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
@@ -52,7 +51,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
     const formData = new FormData(formRef?.current);
     const scopes = formData.getAll('scopes') as string[];
 
-    const serviceAccountId = formData.get('serviceAccountId') as string
+    const serviceAccountId = formData.get('serviceAccountId') as string;
 
     await grant.mutateAsync({
       prodEnvId,
@@ -60,8 +59,8 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       data: {
         name: `Service Acct ${serviceAccountId}`,
         description: `Service Acct ${serviceAccountId}`,
-        clients: [ serviceAccountId ],
-        scopes: scopes
+        clients: [serviceAccountId],
+        scopes: scopes,
       },
     });
     toast({
@@ -150,11 +149,16 @@ export default ShareResourceDialog;
 
 const mutation = gql`
   mutation GrantSAAccess(
-      $prodEnvId: ID!, 
-      $resourceId: String!, 
-      $data: UMAPolicyInput!) {
-    createUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {
-        id
+    $prodEnvId: ID!
+    $resourceId: String!
+    $data: UMAPolicyInput!
+  ) {
+    createUmaPolicy(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      data: $data
+    ) {
+      id
     }
   }
 `;
