@@ -656,5 +656,23 @@
           "referer": "http://localhost:4180/manager/products",
           "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n        title\n      }\n    }\n  }\n",
           "added": "2021-06-11T05:55:08.602Z"
+     "34c8c044db0ee8eb0b6808b6b29ba080": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      name\n      prodEnvId\n    }\n  }\n",
+          "added": "2021-06-08T22:56:06.255Z"
+     },
+     "c51c963657cc256fcd69c6a294e9ac5f": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      prodEnvId\n    }\n  }\n",
+          "added": "2021-06-08T22:57:49.425Z"
+     },
+     "dd757f543a0e7bcf0989286c6bb219b4": {
+          "referer": "http://localhost:4180/manager/poc/service-accounts",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      scopes\n      prodEnvId\n    }\n  }\n",
+          "added": "2021-06-08T22:58:28.096Z"
+     },
+     "82ee3140c55e3dcdcc07b487505ee8ae": {
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      scopes {\n        name\n      }\n      prodEnvId\n    }\n  }\n",
+          "added": "2021-06-08T22:59:02.979Z"
      }
 }

@@ -69,7 +69,7 @@ const secondaryActions = [
   },
   {
     title: 'Service Accounts',
-    url: '/manager/poc/service-accounts',
+    url: '/manager/service-accounts',
     icon: FaUserPlus,
     roles: [],
     description:
