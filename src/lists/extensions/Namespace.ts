@@ -11,6 +11,7 @@ import {
   getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
+  getNamespaceResourceSets,
   isUserBasedResourceOwners,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
@@ -119,7 +120,7 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
+              const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
                 envCtx.issuerEnvConfig.issuerUrl,
                 envCtx.accessToken
@@ -148,8 +149,8 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const namespace_validation_rule = '^[a-z][a-z0-9-]{4,14}$';
-              let re = new RegExp(namespace_validation_rule);
+              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+              const re = new RegExp(namespaceValidationRule);
               assert.strictEqual(
                 re.test(args.namespace),
                 true,

@@ -33,7 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   return (
     <Box d="flex" alignItems="center" justifyContent="flex-end">
-      {user.roles.includes('api-owner') && <NamespaceMenu user={user} />}
+      {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <Box
         as="span"
         d="flex"

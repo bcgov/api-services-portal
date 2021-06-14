@@ -34,7 +34,7 @@ export class KeycloakTokenService {
         })
         .then(checkStatus)
         .then(res => res.json())
-        const masked = {access_token:null, refresh_token:null, ...response}
+        const masked = {...response, ...{access_token:'****', refresh_token:'****'}}
         logger.debug("[getKeycloakSession] RESULT = %j", masked);
         return response['access_token']
     }
@@ -60,7 +60,8 @@ export class KeycloakTokenService {
             logger.error("[tokenExchange] failed %s", err)
             throw err
         })
-        logger.debug("[tokenExchange] RESULT = %s", JSON.stringify(response, null, 3));
+        const masked = {...response, ...{access_token:'****', refresh_token:'****'}}
+        logger.debug("[tokenExchange] RESULT = %j", masked);
         return response['access_token']
     }
 }

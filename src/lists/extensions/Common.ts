@@ -261,3 +261,38 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
     return allowedResources.map((res) => res.rsid);
   }
 }
+
+export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
+  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
+
+  assert.strictEqual(
+    isUserBasedResourceOwners(envCtx),
+    false,
+    'User-based resource owner is not supposed to be used for namespaces!'
+  );
+
+  const issuerEnvConfig = envCtx.issuerEnvConfig;
+  //const resourceAccessScope =
+  //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
+  const resSvrAccessToken = await new KeycloakTokenService(
+    envCtx.openid.issuer
+  ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+  envCtx.accessToken = resSvrAccessToken;
+  const permApi = new UMAPermissionService(
+    issuerEnvConfig.issuerUrl,
+    resSvrAccessToken
+  );
+  const permTicket = await permApi.requestTicket([
+    { resource_scopes: ['Namespace.View', 'Namespace.Manage'] },
+  ]);
+  const tokenApi = new UMA2TokenService(issuerEnvConfig.issuerUrl);
+  const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(
+    envCtx.subjectToken,
+    permTicket
+  );
+  logger.debug(
+    '[getNamespaceResourceSets] (ResSvrBased) RETURN %j',
+    allowedResources
+  );
+  return allowedResources.map((res) => res.rsid);
+}
