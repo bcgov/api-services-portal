@@ -656,6 +656,7 @@
           "referer": "http://localhost:4180/manager/products",
           "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n        title\n      }\n    }\n  }\n",
           "added": "2021-06-11T05:55:08.602Z"
+     },
      "34c8c044db0ee8eb0b6808b6b29ba080": {
           "referer": "http://localhost:4180/manager/namespaces",
           "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      name\n      prodEnvId\n    }\n  }\n",

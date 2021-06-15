@@ -8,10 +8,9 @@ import {
   UseQueryResult,
 } from 'react-query';
 import omit from 'lodash/omit';
-import { Mutation, Query } from '@/types/query.types';
+import { Query } from '@/types/query.types';
 
 import { apiHost } from '../config';
-import { FetchOptions } from 'react-query/types/core/query';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -94,10 +93,7 @@ export const useApi = (
   );
 };
 
-export const useApiMutation = <T>(
-  mutation: string
-  // queryOptions: UseQueryOptions = { suspense: true }
-): UseMutationResult => {
+export const useApiMutation = <T>(mutation: string): UseMutationResult => {
   const mutate = useMutation(
     async (variables: T) =>
       await api<Query>(mutation, variables, { ssr: false })
@@ -145,5 +141,17 @@ export async function restApi(
     throw new Error(err);
   }
 }
+
+export const useRestApi = <T>(
+  key: QueryKey,
+  url: string,
+  queryOptions: UseQueryOptions<T> = { suspense: true }
+): UseQueryResult<T> => {
+  return useQuery<T, Error>(
+    key,
+    async () => await restApi<T>(url),
+    queryOptions
+  );
+};
 
 export default api;
