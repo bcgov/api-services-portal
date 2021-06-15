@@ -1,9 +1,9 @@
 ---
-name: APS Portal Issue Template
+name: API Services Portal Issue Template
 about: Generic template for all GitHub issues
 ---
 
-# APS Portal Issue
+# API Services Portal Issue
 
 <!-- Use what you want. Remove what you don't want. -->
 
