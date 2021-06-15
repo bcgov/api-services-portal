@@ -21,7 +21,7 @@ import breadcrumbs from '@/components/ns-breadcrumb';
 
 interface AccessResourceProps {
   queryKey: string;
-  variables: { prodEnvId: string; resourceId: string };
+  variables?: { prodEnvId: string; resourceId: string };
 }
 
 const ApiAccessResourcePage: React.FC<AccessResourceProps> = ({
