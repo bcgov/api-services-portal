@@ -17,9 +17,9 @@ import {
 import NextLink from 'next/link';
 import { FaRegFolderOpen } from 'react-icons/fa';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import { restApi } from '@/shared/services/api';
+import { restApi, useApi, useRestApi } from '@/shared/services/api';
 import Card from '@/components/card';
 import GridLayout from '@/layouts/grid';
 import PageHeader from '@/components/page-header';
@@ -27,27 +27,29 @@ import type { DocumentationArticle } from '@/shared/types/app.types';
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const queryKey = 'allDocuments';
+  const url = '/ds/api/documentation';
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<DocumentationArticle[]>('/ds/api/directory')
+    async () => await restApi<DocumentationArticle[]>(url)
   );
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
       queryKey,
+      url,
     },
   };
 };
 
 const DocsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ queryKey }) => {
-  const { data } = useQuery(queryKey, () =>
-    restApi<DocumentationArticle[]>('/ds/api/documentation')
-  );
+> = ({ queryKey, url }) => {
+  const { data } = useRestApi<DocumentationArticle[]>(queryKey, url, {
+    suspense: false,
+  });
 
   return (
     <>
