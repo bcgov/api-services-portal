@@ -47,11 +47,17 @@ Once running, the `api services portal` application is reachable via `localhost:
 
 #### 2. Docker
 
-##### Commands
+##### Steps
 
-- `docker-compose up` : Spins up a local development environment with services (MongoDB, Keycloak, OAuth2-proxy, APS-Portal)
+1. Create a `.env` from `.env.local` file
+2. Edit `.env` file by updating all (`<UPDATE_ME>`)'s with appropriate values
+3. Update `cookie_secret` in `.oauth2-proxy/oauth2-proxy-local.cfg`
+4. Run `docker-compose up` to spin up a local development environment with services (MongoDB, Keycloak, OAuth2-proxy, APS-Portal)
+5. `docker-compose down` : Removes all the hosted services
 
-- `docker-compose down` : Removes all the hosted services
+##### Note:
+
+- Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
 
 ## Design
 
