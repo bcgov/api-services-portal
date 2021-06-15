@@ -6,6 +6,10 @@ The `API Services Portal` is a frontend for API Providers to manage the lifecycl
 
 ## Running the Project.
 
+### Installation
+
+#### 1. Manual
+
 To run this project first run `npm install`.
 
 This application requires to have an Authentication proxy in front of it. Go to [oauth2-proxy](oauth2-proxy) for instructions on starting the proxy locally.
@@ -40,6 +44,14 @@ npm run dev
 ```
 
 Once running, the `api services portal` application is reachable via `localhost:4180`.
+
+#### 2. Docker
+
+##### Commands
+
+- `docker-compose up` : Spins up a local development environment with services (MongoDB, Keycloak, OAuth2-proxy, APS-Portal)
+
+- `docker-compose down` : Removes all the hosted services
 
 ## Design
 
