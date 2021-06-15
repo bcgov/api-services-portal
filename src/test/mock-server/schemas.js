@@ -5425,10 +5425,26 @@ type ApplicationSummary {
   name: String
 }
 
+type ConsumerScopesAndRoles {
+  id: String!
+  consumerType: String!
+  defaultScopes: [String]!
+  optionalScopes: [String]!
+  clientRoles: [String]!
+}
+
+input ConsumerScopesAndRolesInput {
+  id: String!
+  defaultScopes: [String]!
+  optionalScopes: [String]!
+  clientRoles: [String]!
+}
+
 type Namespace {
   id: String!
   name: String!
-  scopes: [String]!
+  scopes: [UMAScope]!
+  prodEnvId: String
 }
 
 input NamespaceInput {
@@ -5976,6 +5992,11 @@ type Query {
     orderBy: String
     where: ContentWhereInput
   ): [Content]
+  consumerScopesAndRoles(
+    prodEnvId: ID!
+    consumerUsername: ID!
+  ): ConsumerScopesAndRoles
+  currentNamespace: Namespace
   allNamespaces: [Namespace]
   getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]
   allResourceSets(prodEnvId: ID!, type: String): [UMAResourceSet]
@@ -6157,6 +6178,19 @@ type Mutation {
     pluginExtForeignKey: String!
   ): GatewayConsumer
   acceptLegal(productEnvironmentId: ID!, acceptLegal: Boolean!): User
+  updateConsumerGroupMembership(
+    prodEnvId: ID!
+    consumerId: ID!
+    group: String!
+    grant: Boolean!
+  ): Boolean
+  linkConsumerToNamespace(username: String!): Boolean
+  updateConsumerRoleAssignment(
+    prodEnvId: ID!
+    consumerUsername: String!
+    roleName: String!
+    grant: Boolean!
+  ): Boolean
   createNamespace(namespace: String!): Namespace
   deleteNamespace(namespace: String!): Boolean
   createServiceAccount: ServiceAccount
@@ -6199,4 +6233,5 @@ enum CacheControlScope {
   PUBLIC
   PRIVATE
 }
+
 `;

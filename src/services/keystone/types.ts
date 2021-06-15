@@ -5830,7 +5830,8 @@ export type Namespace = {
   __typename?: 'Namespace';
   id: Scalars['String'];
   name: Scalars['String'];
-  scopes: Array<Maybe<Scalars['String']>>;
+  scopes: Array<Maybe<UmaScope>>;
+  prodEnvId?: Maybe<Scalars['String']>;
 };
 
 export type NamespaceInput = {
@@ -6123,6 +6124,7 @@ export type Query = {
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
+  currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
