@@ -29,10 +29,10 @@ const ApiAccessResourcePage: React.FC<AccessResourceProps> = ({
   variables,
 }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
-  const { prodEnvId, resourceId } = variables;
   if (!data) {
     return <></>;
   }
+  const { prodEnvId, resourceId } = variables;
   const requests = data.getPermissionTicketsForResource?.filter(
     (p) => !p.granted
   );
