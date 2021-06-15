@@ -701,5 +701,15 @@
      "57fa329defc7fd4f7ceaa3da860b8752": {
           "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: \"createdAt_DESC\"\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
           "added": "2021-06-14T18:13:40.046Z"
+     },
+     "030610692ee4f492182724d9d2651544": {
+          "referer": "http://localhost:4180/manager/namespace-access",
+          "query": "\n  query currentNamespace {\n    name\n    scopes\n  }\n",
+          "added": "2021-06-15T21:02:21.221Z"
+     },
+     "cb73913a56ecc7305c3d0add835a07d7": {
+          "referer": "http://localhost:4180/manager/namespace-access",
+          "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n    ) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n\n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+          "added": "2021-06-15T21:21:13.325Z"
      }
 }
