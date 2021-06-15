@@ -10,11 +10,12 @@ import { Query } from '@/types/query.types';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
 import { QueryClient } from 'react-query';
+import EnvironmentPlugins from '@/components/environment-plugins';
 import EnvironmentConfig from '@/components/environment-config';
 import EnvironmentNav from '@/components/environment-nav';
 import { dehydrate } from 'react-query/hydration';
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -68,7 +69,10 @@ const EnvironmentPage: React.FC<
               data={data.Environment?.product?.environments}
             />
           }
-          breadcrumb={breadcrumbs([{ href: '/manager/products', text: 'Products' }, { text: title }])}
+          breadcrumb={breadcrumbs([
+            { href: '/manager/products', text: 'Products' },
+            { text: title },
+          ])}
           title={
             <>
               Edit Environment{' '}
@@ -79,12 +83,12 @@ const EnvironmentPage: React.FC<
           }
         >
           <>
-            <Text>
-            </Text>
+            <Text></Text>
           </>
         </PageHeader>
         <Box>
           <EnvironmentConfig data={data.Environment} />
+          <EnvironmentPlugins data={data.Environment} />
         </Box>
         <Box my={5}>
           {user?.namespace && (
