@@ -31,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<DocumentationArticle[]>('/ds/api/directory')
+    async () => await restApi<DocumentationArticle[]>('/ds/api/documentation')
   );
 
   return {

@@ -37,11 +37,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<DocumentationArticle>(`/ds/api/directory/${slug}`)
+    async () =>
+      await restApi<DocumentationArticle>(`/ds/api/documentation/${slug}`)
   );
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<DocumentationArticle[]>('/ds/api/directory')
+    async () => await restApi<DocumentationArticle[]>('/ds/api/documentation')
   );
 
   return {
@@ -140,7 +141,7 @@ const InternalLink: React.FC<{ children: React.ReactNode; href: string }> = ({
   children,
   href,
 }) => {
-  if (href.startsWith("http")) {
+  if (href.startsWith('http')) {
     return (
       <>
         {' '}
@@ -159,15 +160,11 @@ const InternalLink: React.FC<{ children: React.ReactNode; href: string }> = ({
     return (
       <>
         {' '}
-        <Button
-          as="a"
-          href={href}
-          variant="link"
-        >
+        <Button as="a" href={href} variant="link">
           {children}
         </Button>
       </>
-    )
+    );
   }
 };
 
