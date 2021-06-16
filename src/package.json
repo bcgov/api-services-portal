@@ -87,6 +87,7 @@
   "numeral": "^2.0.6",
   "openid-client": "^4.2.2",
   "postcss": "^7.0.35",
+  "prom-client": "^13.1.0",
   "react": "^17.0.1",
   "react-dom": "^17.0.1",
   "react-error-boundary": "^3.1.0",

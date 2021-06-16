@@ -18,6 +18,7 @@ const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
 const { ApiOpenapiApp } = require('./api-openapi');
+const { Telemetry } = require('./services/telemetry/prometheus');
 
 var Keycloak = require('keycloak-connect');
 
@@ -47,6 +48,12 @@ const { logger } = require('./logger');
 
 const apiPath = '/gql/api';
 const PROJECT_NAME = 'APS Service Portal';
+
+const telemetry = new Telemetry();
+const counter = telemetry.newCounter(
+  'user_list_actions',
+  'List actions by username'
+);
 
 const { KnexAdapter } = require('@keystonejs/adapter-knex');
 const knexAdapterConfig = {
@@ -168,11 +175,18 @@ for (const _list of [
     logger.info('      %s', entry[0]);
     //list.fields[entry[0]].access = FieldEnforcementPoint
   }
+
+  // if (!('hooks' in list)) {
+  //   list['hooks'] = []
+  // }
   const out = { list: _list, fields: Object.keys(list.fields).sort() };
   yamlReport.push(out);
   keystone.createList(_list, list);
+
+  counter.inc({ requester: 'system', list: _list, action: 'register' });
 }
-const report = require('js-yaml').dump(yamlReport);
+
+//const report = require('js-yaml').dump(yamlReport);
 
 for (const _list of [
   'AliasedQueries',
@@ -242,11 +256,35 @@ const {
   addToWhitelist,
 } = require('./authz/whitelist');
 
+const LogPlugin = {
+  requestDidStart(requestContext: any) {
+    const start = Date.now();
+    const op: { op: string } = { op: null };
+
+    return {
+      didResolveOperation(context: any) {
+        op.op = context.operationName;
+      },
+      willSendResponse(context: any) {
+        const stop = Date.now();
+        const elapsed = stop - start;
+        const size = JSON.stringify(context.response).length * 2;
+        console.log(
+          `Operation ${op.op} completed in ${elapsed} ms and returned ${size} bytes`
+        );
+      },
+    };
+  },
+};
+
 const apps = [
   new ApiHealthApp(state),
   new ApiOpenapiApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
+    apollo: {
+      plugins: [LogPlugin],
+    },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
@@ -345,6 +383,8 @@ const configureExpress = (app: any) => {
   // }).catch ((err: any) => {
   //     console.log("ERROR ! " + err)
   // })
+
+  telemetry.expose(app);
 };
 
 export { keystone, apps, dev, configureExpress };
