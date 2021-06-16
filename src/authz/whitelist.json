@@ -675,5 +675,31 @@
      "82ee3140c55e3dcdcc07b487505ee8ae": {
           "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      scopes {\n        name\n      }\n      prodEnvId\n    }\n  }\n",
           "added": "2021-06-08T22:59:02.979Z"
+     },
+     "5f804316eb2333f7b1eecc24c0a53a2a": {
+          "referer": "http://localhost:4180/manager/service-accounts",
+          "query": "\n  query GET {\n    currentNamespace {\n      id\n      name\n      scopes {\n        name\n      }\n      prodEnvId\n    }\n  }\n",
+          "added": "2021-06-14T18:10:33.121Z"
+     },
+     "f68ed4753e35892e58b5857e8639810b": {
+          "referer": "http://localhost:4180/manager/service-accounts",
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      sortBy: ['createdAt_DESC']\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-14T18:11:39.697Z"
+     },
+     "09935650941dae862d8890c98e7fd99e": {
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      sortBy: ['createdAt_DESC'],\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-14T18:11:50.748Z"
+     },
+     "f5b50797d3ca4254bcca638cc47ddee5": {
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: 'createdAt_DESC',\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-14T18:12:22.679Z"
+     },
+     "204058b06089cb6256e511032a2eb7c3": {
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: 'createdAt_DESC'\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-14T18:12:37.683Z"
+     },
+     "57fa329defc7fd4f7ceaa3da860b8752": {
+          "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: \"createdAt_DESC\"\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+          "added": "2021-06-14T18:13:40.046Z"
      }
 }

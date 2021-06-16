@@ -32,7 +32,7 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync({ id });
-      queryClient.invalidateQueries('allApplications');
+      queryClient.invalidateQueries('getServiceAccounts');
       toast({
         title: 'Service Account deleted',
         status: 'success',

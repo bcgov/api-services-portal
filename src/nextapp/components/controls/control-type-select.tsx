@@ -39,7 +39,7 @@ const ControlTypeSelect: React.FC<ControlTypeSelectProps> = ({
       case 'service':
         return data?.allGatewayServicesByNamespace;
       case 'route':
-        return [];
+        return data?.allGatewayServicesByNamespace.map((s) => s.routes).flat();
       default:
         return [];
     }
@@ -103,4 +103,3 @@ const query = gql`
     }
   }
 `;
-

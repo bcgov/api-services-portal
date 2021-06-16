@@ -57,7 +57,7 @@ const ServiceAccountsPage: React.FC<
 > = ({ queryKey }) => {
   const client = useQueryClient();
   const [credentials, setCredentials] = React.useState<Record<string, string>>(
-    {}
+    null
   );
   const { data } = useApi(
     queryKey,
@@ -165,6 +165,7 @@ export default ServiceAccountsPage;
 const query = gql`
   query GET {
     allNamespaceServiceAccounts(
+      orderBy: "createdAt_DESC"
       where: { consumerType: client, application_is_null: true }
     ) {
       id

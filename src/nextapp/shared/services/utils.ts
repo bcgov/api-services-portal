@@ -18,6 +18,8 @@ export const serializeFormData = (formData: FormData): unknown => {
 
 export const getAuthToken = (method: string): IconType => {
   switch (method) {
+    case 'kong-acl-only':
+      return FaLock;
     case 'kong-api-key-acl':
       return FaKey;
     case 'authorization-code':
