@@ -126,6 +126,8 @@ export class MigrationFromV1 {
                 noauthContext,
                 productEnvironmentSlug,
                 def.namespace,
+                null,
+                [],
                 svc.clientId
               );
               logger.info(

@@ -48,6 +48,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
     try {
       const form = new FormData(formRef?.current);
       const res: Mutation = await credentialGenerator.mutateAsync({
+        resourceId: data?.currentNamespace.id,
         scopes: form.getAll('scopes'),
       });
 
@@ -152,8 +153,8 @@ const query = gql`
 `;
 
 const mutation = gql`
-  mutation CreateServiceAccount {
-    createServiceAccount {
+  mutation CreateServiceAccount($resourceId: String!, $scopes: [String]!) {
+    createServiceAccount(resourceId: $resourceId, scopes: $scopes) {
       id
       name
       credentials

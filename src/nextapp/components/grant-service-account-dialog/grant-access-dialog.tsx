@@ -57,7 +57,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       prodEnvId,
       resourceId,
       data: {
-        name: `Service Acct ${serviceAccountId}`,
+        name: serviceAccountId,
         description: `Service Acct ${serviceAccountId}`,
         clients: [serviceAccountId],
         scopes: scopes,

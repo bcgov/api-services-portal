@@ -7852,6 +7852,12 @@ export type MutationDeleteNamespaceArgs = {
 };
 
 
+export type MutationCreateServiceAccountArgs = {
+  resourceId: Scalars['String'];
+  scopes: Array<Maybe<Scalars['String']>>;
+};
+
+
 export type MutationCreateUmaPolicyArgs = {
   prodEnvId: Scalars['ID'];
   resourceId: Scalars['String'];

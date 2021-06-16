@@ -711,5 +711,15 @@
           "referer": "http://localhost:4180/manager/namespace-access",
           "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n    ) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n\n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
           "added": "2021-06-15T21:21:13.325Z"
+     },
+     "83fc109d25042aa0f3d88f46349776d3": {
+          "referer": "http://localhost:4180/manager/service-accounts",
+          "query": "\n  mutation CreateServiceAccount($scopes: [String]!) {\n    createServiceAccount(scopes: $scopes) {\n      id\n      name\n      credentials\n    }\n  }\n",
+          "added": "2021-06-16T05:24:25.027Z"
+     },
+     "61a4f5840dd36e50e94cc5066c739ac9": {
+          "referer": "http://localhost:4180/manager/service-accounts",
+          "query": "\n  mutation CreateServiceAccount($resourceId: String!, $scopes: [String]!) {\n    createServiceAccount(resourceId: $resourceId, scopes: $scopes) {\n      id\n      name\n      credentials\n    }\n  }\n",
+          "added": "2021-06-16T05:56:54.209Z"
      }
 }
