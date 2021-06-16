@@ -6,6 +6,10 @@ The `API Services Portal` is a frontend for API Providers to manage the lifecycl
 
 ## Running the Project.
 
+### Installation
+
+#### 1. Manual
+
 To run this project first run `npm install`.
 
 This application requires to have an Authentication proxy in front of it. Go to [oauth2-proxy](oauth2-proxy) for instructions on starting the proxy locally.
@@ -40,6 +44,21 @@ npm run dev
 ```
 
 Once running, the `api services portal` application is reachable via `localhost:4180`.
+
+#### 2. Docker
+
+##### Steps
+
+1. Create a `.env` from `.env.local` file
+2. Edit `.env` file by updating all (`<UPDATE_ME>`)'s with appropriate values
+3. Update `cookie_secret` in `oauth2-proxy/oauth2-proxy-local.cfg` (must by 16 or 24 characters in length)
+4. Run `docker-compose up` to spin up a local development environment with services (MongoDB, Keycloak, OAuth2-proxy, APS-Portal)
+5. Go to: http://oauth2proxy.localtest.me:4180
+6. `docker-compose down` : Removes all the hosted services
+
+##### Note:
+
+- Please wait until keycloak service starts and is initialized with `master` realm. The realm configuration is saved in `./keycloak/master-realm.json`. It also creates a realm user `local` with admin privileges.
 
 ## Design
 
