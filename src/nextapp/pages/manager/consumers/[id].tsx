@@ -73,7 +73,9 @@ const ConsumersPage: React.FC<
       .filter((p) => p.environments.length != 0)
       .filter(
         (p) =>
-          p.environments.filter((e) => e.flow == 'kong-api-key-acl').length != 0
+          p.environments.filter((e) =>
+            ['kong-api-key-acl', 'kong-acl-only'].includes(e.flow)
+          ).length != 0
       ).length != 0;
 
   const hasEnvironmentWithClientCredFlow = (products: Product[]): boolean =>
