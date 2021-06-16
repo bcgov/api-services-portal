@@ -53,7 +53,7 @@ Once running, the `api services portal` application is reachable via `localhost:
 2. Edit `.env` file by updating all (`<UPDATE_ME>`)'s with appropriate values
 3. Update `cookie_secret` in `oauth2-proxy/oauth2-proxy-local.cfg` (must by 16 or 24 characters in length)
 4. Run `docker-compose up` to spin up a local development environment with services (MongoDB, Keycloak, OAuth2-proxy, APS-Portal)
-5. Go to: http://localhost:4180
+5. Go to: http://oauth2proxy.localtest.me:4180
 6. `docker-compose down` : Removes all the hosted services
 
 ##### Note:
