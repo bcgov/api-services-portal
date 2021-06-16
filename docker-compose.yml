@@ -46,8 +46,11 @@ services:
       - .env
     networks:
       keycloak: {}
-      oauth2-proxy: {}
       portal: {}
+      oauth2-proxy:
+        aliases:
+          - oauth2proxy.localtest.me
+
   apsportal:
     container_name: apsportal
     depends_on:
