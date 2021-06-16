@@ -68,6 +68,23 @@ const ConsumersPage: React.FC<
     ? JSON.parse(consumer?.aclGroups)
     : [];
 
+  const hasEnvironmentWithAclBasedFlow = (products: Product[]): boolean =>
+    products
+      .filter((p) => p.environments.length != 0)
+      .filter(
+        (p) =>
+          p.environments.filter((e) => e.flow == 'kong-api-key-acl').length != 0
+      ).length != 0;
+
+  const hasEnvironmentWithClientCredFlow = (products: Product[]): boolean =>
+    products
+      .filter((p) => p.environments.length != 0)
+      .filter(
+        (p) =>
+          p.environments.filter((e) => e.flow == 'client-credentials').length !=
+          0
+      ).length != 0;
+
   return (
     consumer && (
       <>
@@ -122,27 +139,35 @@ const ConsumersPage: React.FC<
             data={consumer.plugins.filter((p) => p.route || p.service)}
           />
 
-          <Box as="header" bgColor="white" p={4}>
-            <Heading size="md">Authorization - ACL Groups</Heading>
-          </Box>
-          <Divider />
-          <ConsumerACL
-            queryKey={queryKey}
-            consumerId={id}
-            products={data.allProductsByNamespace}
-            aclGroups={consumerAclGroups}
-          />
+          {hasEnvironmentWithAclBasedFlow(data.allProductsByNamespace) && (
+            <>
+              <Box as="header" bgColor="white" p={4}>
+                <Heading size="md">Authorization - ACL Groups</Heading>
+              </Box>
+              <Divider />
+              <ConsumerACL
+                queryKey={queryKey}
+                consumerId={id}
+                products={data.allProductsByNamespace}
+                aclGroups={consumerAclGroups}
+              />
+            </>
+          )}
 
-          <Box as="header" bgColor="white" p={4}>
-            <Heading size="md">Authorization - Scopes and Roles</Heading>
-          </Box>
-          <Divider />
-          <ConsumerPermissions
-            queryKey={queryKey}
-            products={data.allProductsByNamespace}
-            consumerId={id}
-            consumerUsername={consumer.username}
-          />
+          {hasEnvironmentWithClientCredFlow(data.allProductsByNamespace) && (
+            <>
+              <Box as="header" bgColor="white" p={4}>
+                <Heading size="md">Authorization - Scopes and Roles</Heading>
+              </Box>
+              <Divider />
+              <ConsumerPermissions
+                queryKey={queryKey}
+                products={data.allProductsByNamespace}
+                consumerId={id}
+                consumerUsername={consumer.username}
+              />
+            </>
+          )}
         </Container>
       </>
     )

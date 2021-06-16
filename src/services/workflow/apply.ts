@@ -219,7 +219,8 @@ async function setupAuthorizationAndEnable(
   const flow = setup.flow;
   const ns = setup.namespace;
   const controls = setup.controls;
-  const aclEnabled = setup.flow == 'kong-api-key-acl';
+  const aclEnabled =
+    setup.flow == 'kong-api-key-acl' || setup.flow == 'kong-acl-only';
 
   let kongConsumerPK: string;
 
@@ -284,7 +285,7 @@ async function setupAuthorizationAndEnable(
     );
 
     await markActiveTheServiceAccess(context, setup.serviceAccessId);
-  } else if (flow == 'kong-api-key-acl') {
+  } else if (flow == 'kong-api-key-acl' || flow == 'kong-acl-only') {
     // update the Consumer ACL group membership to requestDetails.productEnvironment.appId
     await kongApi.updateConsumerACLByNamespace(
       kongConsumerPK,

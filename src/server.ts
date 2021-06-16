@@ -117,7 +117,7 @@ const keystone = new Keystone({
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Default to true in production
     //maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-    maxAge: 1000 * 60 * 15, // 15 minute
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
     sameSite: true,
   },
   sessionStore:

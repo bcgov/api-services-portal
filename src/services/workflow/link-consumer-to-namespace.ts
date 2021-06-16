@@ -52,7 +52,6 @@ export const LinkConsumerToNamespace = async (
   }
 
   // Create a ServiceAccess record
-  //const aclEnabled = (productEnvironment.flow == 'kong-api-key-acl')
   const serviceAccessId = await addServiceAccess(
     context,
     consumerUsername,

@@ -63,7 +63,9 @@ export const generateCredential = async (
     };
     // Create a ServiceAccess record
     const consumerType = 'client';
-    const aclEnabled = productEnvironment.flow == 'kong-api-key-acl';
+    const aclEnabled =
+      productEnvironment.flow == 'kong-api-key-acl' ||
+      productEnvironment.flow == 'kong-acl-only';
     const serviceAccessId = await addServiceAccess(
       context,
       clientId,
@@ -146,7 +148,9 @@ export const generateCredential = async (
     };
     // Create a ServiceAccess record
     const consumerType = 'client';
-    const aclEnabled = productEnvironment.flow == 'kong-api-key-acl';
+    const aclEnabled =
+      productEnvironment.flow == 'kong-api-key-acl' ||
+      productEnvironment.flow == 'kong-acl-only';
     const serviceAccessId = await addServiceAccess(
       context,
       clientId,

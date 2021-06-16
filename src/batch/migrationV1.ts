@@ -2,7 +2,10 @@ const keystoneApi = require('../services/keystone');
 
 import { doClientLoginForCredentialIssuer } from '../lists/extensions/Common';
 import type { TokenExchangeResult } from '../lists/extensions/Common';
-import { KeycloakPermissionTicketService } from '../services/keycloak';
+import {
+  KeycloakPermissionTicketService,
+  KeycloakUserService,
+} from '../services/keycloak';
 import {
   UMAResourceRegistrationService,
   ResourceSetQuery,
@@ -78,17 +81,23 @@ export class MigrationFromV1 {
       tokenResult.issuer,
       tokenResult.accessToken
     );
-    const resOwnerResources = await kcprotectApi.listResources({
+    const resOwnerResourceIds = await kcprotectApi.listResources({
       owner: tokenResult.clientUuid,
       type: prodEnv.credentialIssuer.resourceType,
     } as ResourceSetQuery);
+
+    const resOwnerResources = await kcprotectApi.listResourcesByIdList(
+      resOwnerResourceIds
+    );
 
     const kcpermApi = new KeycloakPermissionTicketService(
       tokenResult.issuer,
       tokenResult.accessToken
     );
 
-    const resourceScopes = JSON.parse(prodEnv.credentialIssuer.availableScopes);
+    const resourceScopes = JSON.parse(prodEnv.credentialIssuer.resourceScopes);
+
+    logger.info('Resource Scopes %j', resourceScopes);
 
     return Promise.all(
       definition.map(async (def: V1Definition) => {
@@ -100,6 +109,7 @@ export class MigrationFromV1 {
           def.namespace,
           found.length == 1 ? 'EXISTS' : 'NEW'
         );
+        const workingResource: { id: string } = { id: null };
         if (found.length == 0) {
           const resource: ResourceSetInput = {
             name: def.namespace,
@@ -109,54 +119,61 @@ export class MigrationFromV1 {
           };
           const newresource = await kcprotectApi.createResourceSet(resource);
           logger.info(' > Created %j', newresource);
-
-          const existingAccounts = await keystoneApi.lookupServiceAccessesByNamespace(
-            noauthContext,
-            def.namespace
-          );
-          const isExistingAccount = (nm: string) =>
-            existingAccounts.filter((sa: any) => sa.consumer.username === nm)
-              .length != 0;
-
-          for (const svc of def.service_accounts) {
-            if (isExistingAccount(svc.clientId)) {
-              logger.info(' > Skipped [%s] Service Account', svc.clientId);
-            } else {
-              const result = await CreateServiceAccount(
-                noauthContext,
-                productEnvironmentSlug,
-                def.namespace,
-                null,
-                [],
-                svc.clientId
-              );
-              logger.info(
-                ' > Created [%s] Service Account %j',
-                svc.clientId,
-                result
-              );
-            }
-          }
-
-          for (const user of def.admin_membership) {
-            const granted = true;
-            for (const scope of ['Namespace.Manage']) {
-              const permission = await kcpermApi.createOrUpdatePermission(
-                newresource.id,
-                user.id,
-                granted,
-                scope
-              );
-              logger.info(' > Permission %j', permission);
-            }
-          }
+          workingResource['id'] = newresource['id'];
         } else {
-          logger.info('---- Skipping');
-          // const cleanupServiceAccounts = await keystoneApi.deleteRecords (noauthContext, 'ServiceAccess', {namespace: def.namespace}, true, ['id'])
-          // logger.info(" > Deleted Service Accounts %j", cleanupServiceAccounts)
-          // await kcprotectApi.deleteResourceSet(found[0].id)
-          // logger.info(" > Deleted")
+          workingResource['id'] = found[0]['id'];
         }
+
+        const existingAccounts = await keystoneApi.lookupServiceAccessesByNamespace(
+          noauthContext,
+          def.namespace
+        );
+        const isExistingAccount = (nm: string) =>
+          existingAccounts.filter((sa: any) => sa.consumer.username === nm)
+            .length != 0;
+
+        for (const svc of def.service_accounts) {
+          if (isExistingAccount(svc.clientId)) {
+            logger.info(' > Skipped [%s] Service Account', svc.clientId);
+          } else {
+            const result = await CreateServiceAccount(
+              noauthContext,
+              productEnvironmentSlug,
+              def.namespace,
+              workingResource['id'],
+              ['GatewayConfig.Publish'],
+              svc.clientId
+            );
+            logger.info(
+              ' > Created [%s] Service Account %j',
+              svc.clientId,
+              result
+            );
+          }
+        }
+
+        for (const user of def.admin_membership) {
+          const granted = true;
+          logger.info(' > Update permissions with Namespace.Manage %j', user);
+
+          for (const scope of ['Namespace.Manage']) {
+            const permission = await kcpermApi.createOrUpdatePermission(
+              workingResource.id,
+              user.id,
+              granted,
+              scope
+            );
+            logger.info(' > Permission %j', user, permission);
+          }
+        }
+
+        // } else {
+        //   logger.info('---- Skipping');
+        //   // const cleanupServiceAccounts = await keystoneApi.deleteRecords (noauthContext, 'ServiceAccess', {namespace: def.namespace}, true, ['id'])
+        //   // logger.info(" > Deleted Service Accounts %j", cleanupServiceAccounts)
+        //   // await kcprotectApi.deleteResourceSet(found[0].id)
+        //   // logger.info(" > Deleted")
+        // }
       })
     );
   }

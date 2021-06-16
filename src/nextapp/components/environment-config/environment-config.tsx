@@ -24,10 +24,9 @@ import {
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
 import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
 import { useMutation, useQueryClient } from 'react-query';
-import { FaCircle, FaCode } from 'react-icons/fa';
+import { FaCircle } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
 import LegalSelect from './legal-select';
-import YamlViewer from '../yaml-viewer';
 
 interface EnvironmentConfigProps {
   data: Environment;
@@ -42,6 +41,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     { value: 'public', label: 'Public' },
     { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
     { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
+    { value: 'kong-acl-only', label: 'Kong ACL Only' },
     { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
   ];
 
@@ -284,24 +284,6 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
           )}
         </Box>
       </Box>
-      {flow === 'kong-api-key-acl' && (
-        <Box my={4} bgColor="white">
-          <Flex as="header" p={4} align="center">
-            <Icon as={FaCode} color="bc-link" mr={2} boxSize={6} />
-            <Heading size="md">Plugin Configuration</Heading>
-          </Flex>
-          <Divider />
-          <Box p={4}>
-            <Text fontSize="sm">
-              Ensure that services associated with this environment have the
-              following plugins:
-            </Text>
-          </Box>
-          <YamlViewer
-            doc={`  plugins:\n  - name: key-auth\n    tags: [ ns.${data.product.namespace} ]\n    protocols: [ http, https ]\n    config:\n      key_names: ["X-API-KEY"]\n      run_on_preflight: true\n      hide_credentials: true\n      key_in_body: false\n  - name: acl\n    tags: [ ns.${data.product.namespace} ]\n    config:\n      hide_groups_header: true\n      allow: [ ${data.appId} ]`}
-          />
-        </Box>
-      )}
     </>
   );
 };

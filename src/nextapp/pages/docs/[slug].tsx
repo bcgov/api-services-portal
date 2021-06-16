@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Button,
   Box,
   Container,
   Text,
@@ -12,7 +11,6 @@ import {
   List,
   ListItem,
   Link,
-  Icon,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -20,13 +18,13 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import gfm from 'remark-gfm';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import { FaExternalLinkAlt } from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
-import { restApi } from '@/shared/services/api';
+import { restApi, useRestApi } from '@/shared/services/api';
 import { useRouter } from 'next/router';
 import { DocumentationArticle } from '@/shared/types/app.types';
+import { DocHeader, InternalLink } from '@/components/docs';
 import styles from './docs.module.css';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
@@ -37,11 +35,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<DocumentationArticle>(`/ds/api/directory/${slug}`)
+    async () =>
+      await restApi<DocumentationArticle>(`/ds/api/documentation/${slug}`)
   );
   await queryClient.prefetchQuery(
-    queryKey,
-    async () => await restApi<DocumentationArticle[]>('/ds/api/directory')
+    sideNavQueryKey,
+    async () => await restApi<DocumentationArticle[]>('/ds/api/documentation')
   );
 
   return {
@@ -58,22 +57,30 @@ const DocsContentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey, sideNavQueryKey, slug }) => {
   const router = useRouter();
-  const { data } = useQuery(queryKey, () =>
-    restApi<DocumentationArticle>(`/ds/api/documentation/${slug}`)
+  const { data } = useRestApi<DocumentationArticle>(
+    queryKey,
+    `/ds/api/documentation/${slug}`,
+    {
+      suspense: false,
+    }
   );
-  const allArticles = useQuery(sideNavQueryKey, () =>
-    restApi<DocumentationArticle[]>('/ds/api/documentation')
+  const allArticles = useRestApi<DocumentationArticle[]>(
+    sideNavQueryKey,
+    '/ds/api/documentation',
+    {
+      suspense: false,
+    }
   );
 
   const renderers = {
     link: InternalLink,
-    heading: HeadingRenderer,
+    heading: DocHeader,
   };
 
   return (
     <>
       <Head>
-        <title>API Program Services | Documentation</title>
+        <title>API Program Services | Documentation | {data.title}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -134,57 +141,6 @@ const DocsContentPage: React.FC<
       </Container>
     </>
   );
-};
-
-const InternalLink: React.FC<{ children: React.ReactNode; href: string }> = ({
-  children,
-  href,
-}) => {
-  if (href.startsWith("http")) {
-    return (
-      <>
-        {' '}
-        <Button
-          as="a"
-          href={href}
-          target="_blank"
-          rightIcon={<Icon as={FaExternalLinkAlt} boxSize={3} />}
-          variant="link"
-        >
-          {children}
-        </Button>
-      </>
-    );
-  } else {
-    return (
-      <>
-        {' '}
-        <Button
-          as="a"
-          href={href}
-          variant="link"
-        >
-          {children}
-        </Button>
-      </>
-    )
-  }
-};
-
-function flatten(text: string, child: React.ReactElement | string) {
-  return typeof child === 'string'
-    ? text + child
-    : React.Children.toArray(child.props.children).reduce(flatten, text);
-}
-
-const HeadingRenderer: React.FC<{
-  children: React.ReactNode;
-  level: number;
-}> = ({ children, level }) => {
-  const nodes = React.Children.toArray(children);
-  const text = nodes.reduce(flatten, '');
-  const slug = text.toLowerCase().replace(/\W/g, '-');
-  return React.createElement('h' + level, { id: slug }, children);
 };
 
 export default DocsContentPage;

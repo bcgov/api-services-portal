@@ -191,10 +191,13 @@ const server = mockServer(schemaWithMocks, {
         namespaces.filter((n) => n.name !== namespace)
       );
       return true;
+    },
     createServiceAccount: () => {
+      const user = db.get('user');
+
       return {
-        id: `sa-${namespace}-${casual.uuid}`,
-        name: `sa-${namespace}-${casual.uuid}`,
+        id: `sa-${user.namespace}-${casual.uuid}`,
+        name: `sa-${user.namespace}-${casual.uuid}`,
         credentials: JSON.stringify({
           clientId: casual.uuid,
           clientSecret: casual.uuid,
@@ -209,12 +212,15 @@ const server = mockServer(schemaWithMocks, {
     appId: casual.uuid,
   }),
   Namespace: () => ({
-    name: casual.random_element(namespaces),
+    name: casual.random_element(data.namespaces),
   }),
-  ServiceAccount: () => ({
-    id: `sa-${namespace}-${casual.uuid}`,
-    name: `sa-${namespace}-${casual.uuid}`,
-  }),
+  ServiceAccount: () => {
+    const user = db.get('user');
+    return {
+      id: `sa-${user.namespace}-${casual.uuid}`,
+      name: `sa-${user.namespace}-${casual.uuid}`,
+    };
+  },
   Product: () => ({
     name: casual.random_element([
       'BC Address Geocoder Web Service',
