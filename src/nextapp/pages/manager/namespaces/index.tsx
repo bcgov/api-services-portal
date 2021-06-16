@@ -68,6 +68,13 @@ const secondaryActions = [
     description: 'Manage authorization servers used to protect your APIs',
   },
   {
+    title: 'Namespace Access',
+    url: '/manager/namespace-access',
+    icon: FaUserPlus,
+    roles: [],
+    description: 'Manage namespace access by users and service accounts',
+  },
+  {
     title: 'Service Accounts',
     url: '/manager/service-accounts',
     icon: FaUserPlus,

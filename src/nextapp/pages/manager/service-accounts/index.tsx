@@ -27,6 +27,7 @@ import ServiceAccountDelete from '@/components/service-account-delete/service-ac
 import { format } from 'date-fns';
 import { FaKey } from 'react-icons/fa';
 import ServiceAccountCreate from '@/components/service-account-create';
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'getServiceAccounts';
@@ -79,6 +80,7 @@ const ServiceAccountsPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
+          breadcrumb={breadcrumbs()}
           actions={<ServiceAccountCreate onCreate={handleCreate} />}
           title="Service Accounts"
         >
@@ -87,6 +89,7 @@ const ServiceAccountsPage: React.FC<
             Gateway API or the Gateway CLI.
           </Text>
         </PageHeader>
+
         {credentials && (
           <Box my={4} bgColor="white">
             <Box p={4} display="flex" alignItems="center">
