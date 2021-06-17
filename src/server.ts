@@ -282,9 +282,9 @@ const apps = [
   new ApiOpenapiApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
-    apollo: {
-      plugins: [LogPlugin],
-    },
+    // apollo: {
+    //   plugins: [LogPlugin],
+    // },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
@@ -302,6 +302,20 @@ const apps = [
   }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
   new NextApp({ dir: 'nextapp' }),
+  () => {
+    return {
+      prepareMiddleware({ keystone, dev }: any) {
+        keystone.createApolloServer({
+          apolloConfig: {
+            plugins: [LogPlugin],
+          },
+          schemaName: 'internal',
+        });
+        return express();
+      },
+      build() {},
+    };
+  },
 ];
 
 const dev = process.env.NODE_ENV !== 'production';
