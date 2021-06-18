@@ -14,6 +14,7 @@ import ResourcesManager from '@/components/resources-manager';
 import { useAuth } from '@/shared/services/auth';
 import EmptyPane from '@/components/empty-pane';
 import UsersAccessList from '@/components/users-access-list';
+import ServiceAccountsList from '@/components/service-accounts-list';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'namespaceAccess';
@@ -144,6 +145,12 @@ const AccessRedirectPage: React.FC<
             />
           </Box>
           <Divider />
+          <ServiceAccountsList
+            prodEnvId={prodEnvId}
+            resourceId={resourceId}
+            data={permissions.data?.getUmaPoliciesForResource}
+            queryKey={queryKey}
+          />
         </Box>
       </Container>
     </>

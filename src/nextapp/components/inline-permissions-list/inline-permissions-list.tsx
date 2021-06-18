@@ -4,7 +4,6 @@ import { Tag, TagCloseButton, Wrap, WrapItem } from '@chakra-ui/react';
 interface InlinePermissionsListProps {
   data: {
     id: string;
-    scope: string;
     scopeName: string;
   }[];
   enableRevoke: boolean;
