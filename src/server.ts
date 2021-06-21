@@ -115,7 +115,7 @@ const keystone = new Keystone({
       : new MongooseAdapter(mongooseAdapterConfig),
   cookieSecret: process.env.COOKIE_SECRET,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Default to true in production
+    secure: process.env.NODE_ENV === 'production' && !process.env.LOCAL_ENV, // Default to true in production
     //maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     sameSite: true,

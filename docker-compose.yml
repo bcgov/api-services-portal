@@ -1,9 +1,19 @@
 version: '3.8'
+
+x-common-variables: &common-variables
+  KONG_DATABASE: postgres
+  KONG_PG_DATABASE: kong
+  KONG_PG_HOST: kong-db
+  KONG_PG_USER: konguser
+  KONG_PG_PASSWORD: konguser
+
 services:
   keycloak:
     image: jboss/keycloak:11.0.3
     container_name: keycloak
     hostname: keycloak
+    depends_on:
+      - kong-db
     command:
       [
         '-b',
@@ -16,49 +26,42 @@ services:
       ]
     ports:
       - 9080:9080/tcp
-    #environment:
-    #KEYCLOAK_USER: local
-    #KEYCLOAK_PASSWORD: local
+    environment:
+      #KEYCLOAK_USER: local
+      #KEYCLOAK_PASSWORD: local
+      DB_ADDR: kong-db:5432
+      DB_USER: keycloakuser
+      DB_PASSWORD: keycloakuser
     volumes:
-      - ./keycloak/master-realm.json:/tmp/realm-config/master-realm.json
+      - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
     networks:
       keycloak:
         aliases:
           - keycloak.localtest.me
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - 27017:27017
-    networks:
-      portal: {}
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
     container_name: oauth2-proxy
     command: --config ./oauth2-proxy.cfg
+    depends_on:
+      - keycloak
     ports:
       - 4180:4180/tcp
     volumes:
-      - ./oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
+      - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
     env_file:
       - .env
     networks:
       keycloak: {}
       portal: {}
+      kong-net: {}
       oauth2-proxy:
         aliases:
           - oauth2proxy.localtest.me
-
   apsportal:
     container_name: apsportal
     depends_on:
-      - mongodb
       - keycloak
-      - oauth2-proxy
-    command:
-      - dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -70,7 +73,67 @@ services:
           - apsportal.localtest.me
       keycloak: {}
       oauth2-proxy: {}
+  kong-db:
+    image: postgres:latest
+    container_name: kong-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    restart: on-failure
+    tty: true
+    ports:
+      - 5432:5432
+    volumes:
+      - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - kong-net
+      - keycloak
+      - portal
+  kong-migrations:
+    image: kong:latest
+    command: kong migrations bootstrap
+    depends_on:
+      - kong-db
+    environment: *common-variables
+    networks:
+      - kong-net
+    restart: on-failure
+  kong-migrations-up:
+    image: kong:latest
+    command: kong migrations up && kong migrations finish
+    depends_on:
+      - kong-db
+    environment: *common-variables
+    networks:
+      - kong-net
+    restart: on-failure
+  kong:
+    image: kong:latest
+    container_name: kong
+    depends_on:
+      - kong-migrations
+      - kong-migrations-up
+    environment:
+      <<: *common-variables
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_CASSANDRA_CONTACT_POINTS: kong-db
+      KONG_NGINX_WORKER_PROCESSES: '1'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    ports:
+      - 8000:8000
+      - 8001:8001
+    networks:
+      kong-net:
+        aliases:
+          - kong.localtest.me
+    restart: on-failure:5
 networks:
   keycloak: {}
   oauth2-proxy: {}
   portal: {}
+  kong-net: {}
