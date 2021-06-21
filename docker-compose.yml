@@ -86,7 +86,7 @@ services:
     volumes:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
-      - ./postgres_data:/var/lib/postgresql/data
+      - aps-pg-data:/var/lib/postgresql/data
     networks:
       - kong-net
       - keycloak
@@ -137,3 +137,5 @@ networks:
   oauth2-proxy: {}
   portal: {}
   kong-net: {}
+volumes:
+  aps-pg-data: {}
