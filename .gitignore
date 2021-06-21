@@ -114,6 +114,3 @@ kc.js
 
 # vs code settings
 .vscode
-
-# local postgres data
-postgres-data/
