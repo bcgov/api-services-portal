@@ -103,7 +103,7 @@ const AccessRequestPage: React.FC<
       : {}),
   };
 
-  const availableScopes = data?.AccessRequest.productEnvironment
+  const availableScopes = data?.AccessRequest?.productEnvironment
     .credentialIssuer?.availableScopes
     ? JSON.parse(
         data?.AccessRequest.productEnvironment.credentialIssuer?.availableScopes

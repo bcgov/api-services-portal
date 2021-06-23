@@ -1,27 +1,17 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-} from '@chakra-ui/react';
+import { Container } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import AuthorizationProfileForm, {
+  DeleteAuthorizationProfile,
+} from '@/components/authorization-profile-controls';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -57,17 +47,35 @@ const AuthorizationProfile: React.FC<
     { query, variables: { id } },
     { suspense: false }
   );
+  const issuer = data?.CredentialIssuer;
+  const breadcrumbs = useNamespaceBreadcrumbs([
+    {
+      href: '/manager/poc/credential-issuers',
+      text: 'Authorization Profiles',
+    },
+    {
+      href: `/manager/poc/credential-issuers/${id}`,
+      text: issuer?.name,
+    },
+  ]);
+
+  const handleSubmit = React.useCallback((payload: any) => {
+    console.log(payload);
+  }, []);
+  console.log(issuer);
 
   return (
     <>
       <Head>
-        <title>{`API Program Services | Authorization Profile | ${data.CredentialIssuer?.name}`}</title>
+        <title>{`API Program Services | Authorization Profile | ${issuer?.name}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={<Button colorScheme="red">Delete Profile</Button>}
-          title={data.CredentialIssuer?.name}
+          actions={<DeleteAuthorizationProfile id={id} />}
+          breadcrumb={breadcrumbs}
+          title={issuer?.name}
         />
+        <AuthorizationProfileForm issuer={issuer} onSubmit={handleSubmit} />
       </Container>
     </>
   );

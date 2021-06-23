@@ -347,6 +347,8 @@ const server = mockServer(schemaWithMocks, {
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,
     initialAccessToken: casual.card_number,
+    flow: 'client-credentials',
+    clientAuthenticator: 'client-secret',
     clientId: casual.uuid,
     clientSecret: casual.uuid,
     availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),

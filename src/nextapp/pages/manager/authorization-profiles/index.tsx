@@ -22,6 +22,7 @@ import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'authorizationProfiles';
@@ -50,6 +51,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const AuthorizationProfiles: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+  const breadcrumbs = useNamespaceBreadcrumbs([
+    {
+      href: '/manager/poc/credential-issuers',
+      text: 'Authorization Profiles',
+    },
+  ]);
   const { data } = useApi(queryKey, { query }, { suspense: false });
 
   return (
@@ -66,6 +73,7 @@ const AuthorizationProfiles: React.FC<
               </Button>
             </NextLink>
           }
+          breadcrumb={breadcrumbs}
           title="Authorization Profiles"
         >
           <p>
