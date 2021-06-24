@@ -5810,6 +5810,43 @@ export type ApplicationSummary = {
   name?: Maybe<Scalars['String']>;
 };
 
+export type BusinessProfile = {
+  __typename?: 'BusinessProfile';
+  user?: Maybe<UserDetails>;
+  institution?: Maybe<InstitutionDetails>;
+};
+
+export type UserDetails = {
+  __typename?: 'UserDetails';
+  guid?: Maybe<Scalars['String']>;
+  displayName?: Maybe<Scalars['String']>;
+  firstname?: Maybe<Scalars['String']>;
+  surname?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+  isSuspended?: Maybe<Scalars['Boolean']>;
+  isManagerDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+export type InstitutionDetails = {
+  __typename?: 'InstitutionDetails';
+  guid?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
+  legalName?: Maybe<Scalars['String']>;
+  address?: Maybe<AddressDetails>;
+  isSuspended?: Maybe<Scalars['Boolean']>;
+  businessTypeOther?: Maybe<Scalars['String']>;
+};
+
+export type AddressDetails = {
+  __typename?: 'AddressDetails';
+  addressLine1?: Maybe<Scalars['String']>;
+  addressLine2?: Maybe<Scalars['String']>;
+  city?: Maybe<Scalars['String']>;
+  postal?: Maybe<Scalars['String']>;
+  province?: Maybe<Scalars['String']>;
+  country?: Maybe<Scalars['String']>;
+};
+
 export type ConsumerScopesAndRoles = {
   __typename?: 'ConsumerScopesAndRoles';
   id: Scalars['String'];
@@ -6123,6 +6160,7 @@ export type Query = {
   mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
+  BusinessProfile?: Maybe<BusinessProfile>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -6789,6 +6827,11 @@ export type QueryAllDiscoverableContentsArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ContentWhereInput>;
+};
+
+
+export type QueryBusinessProfileArgs = {
+  serviceAccessId: Scalars['ID'];
 };
 
 

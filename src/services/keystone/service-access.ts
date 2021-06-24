@@ -26,6 +26,11 @@ export async function lookupCredentialReferenceByServiceAccess(
                                 id
                             }
                         }
+                        application {
+                          owner {
+                            username
+                          }
+                        }
                         consumer {
                             id
                             customId
@@ -40,6 +45,12 @@ export async function lookupCredentialReferenceByServiceAccess(
     'Query [lookupCredentialReferenceByServiceAccess] result %j',
     result
   );
+  assert.strictEqual(
+    result.data.allServiceAccesses.length,
+    1,
+    'ServiceAccessNotFound'
+  );
+
   result.data.allServiceAccesses[0].credentialReference = JSON.parse(
     result.data.allServiceAccesses[0].credentialReference
   );

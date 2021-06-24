@@ -39,6 +39,7 @@ import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import RequestActions from '@/components/request-actions';
+import BusinessProfile from '@/components/business-profile';
 import ActivityList from '@/components/activity-list';
 import breadcrumbs from '@/components/ns-breadcrumb';
 
@@ -253,7 +254,10 @@ const AccessRequestPage: React.FC<
                 <Heading size="sm" mb={2}>
                   Application
                 </Heading>
-                <Text>{data?.AccessRequest.application?.name}</Text>
+                <Text mb={3}>{data?.AccessRequest.application?.name}</Text>
+                <BusinessProfile
+                  serviceAccessId={data?.AccessRequest?.serviceAccess?.id}
+                />
               </Box>
             </GridItem>
           </Grid>
@@ -283,6 +287,9 @@ const query = gql`
       }
       application {
         name
+      }
+      serviceAccess {
+        id
       }
       productEnvironment {
         name

@@ -7,8 +7,9 @@ API Owner Role Rules,,,AccessRequest,,"create,update,delete",,,,api-owner,,,allo
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,Application,,"read,update,delete",,,,,,"api-owner,provider-user",allow,filterByOwner
+API Owner Role Rules,,,Application,,"read,update,delete",,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Application,,create,,,,,,"api-owner,provider-user",allow,
+,,BusinessProfile,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Content,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,CredentialIssuer,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,CredentialIssuer,,"update,delete",,,,api-owner,,,allow,

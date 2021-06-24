@@ -721,5 +721,15 @@
           "referer": "http://localhost:4180/manager/service-accounts",
           "query": "\n  mutation CreateServiceAccount($resourceId: String!, $scopes: [String]!) {\n    createServiceAccount(resourceId: $resourceId, scopes: $scopes) {\n      id\n      name\n      credentials\n    }\n  }\n",
           "added": "2021-06-16T05:56:54.209Z"
+     },
+     "b13519f4421dc481f3c23247dcb63d12": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      serviceAccess {\n        id\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+          "added": "2021-06-24T05:32:11.325Z"
+     },
+     "1f3608db1a9f3c60ea6fc0eaa283c4e6": {
+          "referer": "http://localhost:4180/manager/requests/609daa814a180ccfaaedbe0d",
+          "query": "\n  query GetBusinessProfile($serviceAccessId: ID!) {\n    BusinessProfile(serviceAccessId: $serviceAccessId) {\n      user {\n        displayName\n        firstname\n        surname\n        email\n        isSuspended\n        isManagerDisabled\n      }\n      institution {\n        type\n        legalName\n        address {\n          addressLine1\n          addressLine2\n          city\n          postal\n          province\n          country\n        }\n        isSuspended\n        businessTypeOther\n      }\n    }\n  }\n",
+          "added": "2021-06-24T05:43:48.010Z"
      }
 }
