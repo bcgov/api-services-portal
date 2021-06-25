@@ -5,6 +5,9 @@ import { dot } from '../feed-worker';
 const logger = Logger('batch.handleNameChange');
 
 /**
+ * Case that may not happen that often, but happens when the name goes from
+ *  A -> B -> A
+ * So renamed to something else, then renamed back to its original name.
  *
  * @param keystone
  * @param md
