@@ -5,9 +5,11 @@ import { dot } from '../feed-worker';
 const logger = Logger('batch.handleNameChange');
 
 /**
- * Case that may not happen that often, but happens when the name goes from
- *  A -> B -> A
- * So renamed to something else, then renamed back to its original name.
+ * This is needed in two scenarios:
+ * (1) GatewayService/Route name goes from: A -> B -> A
+ *     So renamed to something else, then renamed back to its original name.
+ *
+ * (2) If the GatewayService/Route is deleted and re-created
  *
  * @param keystone
  * @param md
