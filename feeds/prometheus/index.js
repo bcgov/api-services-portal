@@ -69,7 +69,7 @@ async function sync(
   }
 
   // Now, send to portal
-  await xfer.concurrentWork(producer(xfer, numDays, destinationUrl));
+  await xfer.concurrentWork(producer(xfer, params.numDays, destinationUrl));
 }
 
 function producer(xfer, numDays, destinationUrl) {
