@@ -1,6 +1,6 @@
 ID,matchOneOfBaseQueryName,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchOneOfFieldKey,matchNotOneOfFieldKey,matchUserNS,inRole,matchOneOfScope,matchOneOfRole,result,filters
 ,,,,,"update,create,delete",,,,aps-admin,,,allow,
-API Owner Role Rules,,,AccessRequest,update,,isApproved,,,api-owner,,,allow,
+API Owner Role Rules,,,AccessRequest,update,,isApproved,,,access-manager,,,allow,
 API Owner Role Rules,,,AccessRequest,,"create,read",isApproved,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,,"create,update,delete",,,,api-owner,,,allow,
