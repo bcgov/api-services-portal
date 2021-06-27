@@ -13,6 +13,7 @@ import {
   Textarea,
   Divider,
 } from '@chakra-ui/react';
+import ListInput from '@/components/forms/list-input';
 import Section from '../section';
 import { CredentialIssuer } from '@/shared/types/query.types';
 import FormGroup from './form-group';
@@ -35,7 +36,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
                 <Text as="strong">Manual</Text> issuing of the credential means
                 that this owner{' '}
                 <Text as="mark" bgColor="blue.200">
-                  ({issuer.owner.name})
+                  ({issuer?.owner?.name})
                 </Text>{' '}
                 will complete setup of the new credential with the particular
                 OIDC Provider, and communicate that to the requestor via email
@@ -45,7 +46,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
                 <Text as="strong">Automatic</Text> issuing of the credential
                 means that this owner{' '}
                 <Text as="mark" bgColor="blue.200">
-                  ({issuer.owner.name})
+                  ({issuer?.owner?.name})
                 </Text>{' '}
                 has configured appropriate credentials here to allow the API
                 Manager to manage Clients on the particular OIDC Provider.
@@ -80,14 +81,11 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           </Alert>
         }
       >
-        <FormControl>
-          <FormLabel>Scopes</FormLabel>
-          <Textarea
-            name="availableScopes"
-            defaultValue={issuer.availableScopes}
-            variant="bc-input"
-          />
-        </FormControl>
+        <ListInput
+          label="Scopes"
+          name="availableScopes"
+          value={issuer.availableScopes}
+        />
       </FormGroup>
       <Divider />
       <FormGroup
@@ -102,14 +100,12 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           </Alert>
         }
       >
-        <FormControl>
-          <FormLabel>Roles</FormLabel>
-          <Textarea
-            name="availableScopes"
-            defaultValue={issuer.availableScopes}
-            variant="bc-input"
-          />
-        </FormControl>
+        <ListInput
+          required
+          label="Client Roles"
+          name="clientRoles"
+          value={issuer.clientRoles}
+        />
       </FormGroup>
       <Divider />
       <FormGroup>
@@ -135,14 +131,11 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           </Alert>
         }
       >
-        <FormControl>
-          <FormLabel>Resource Scopes</FormLabel>
-          <Textarea
-            name="resourceScopes"
-            defaultValue={issuer.resourceScopes}
-            variant="bc-input"
-          />
-        </FormControl>
+        <ListInput
+          label="Resource Scopes"
+          name="resourceScopes"
+          value={issuer.resourceScopes}
+        />
       </FormGroup>
       <Divider />
       <FormGroup

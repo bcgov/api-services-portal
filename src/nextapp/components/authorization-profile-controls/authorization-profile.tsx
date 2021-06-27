@@ -29,7 +29,7 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   issuer,
   onSubmit,
 }) => {
-  const [flow, setFlow] = React.useState<string | number>(issuer.flow);
+  const [flow, setFlow] = React.useState<string | number>(issuer?.flow);
   const handleSubmit = React.useCallback(
     (event) => {
       event.preventDefault();
