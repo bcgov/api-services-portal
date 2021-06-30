@@ -9,6 +9,7 @@ import {
   toStringDefaultArray,
   toString,
 } from './transformations';
+import { handleNameChange } from './hooks';
 import union from 'lodash/union';
 import { metadata } from './data-rules';
 import { BatchResult } from './types';
@@ -27,6 +28,10 @@ export function dot(value: any, _key: string) {
 }
 
 const logger = Logger('batch.worker');
+
+const hooks = {
+  'pre-lookup': { handleNameChange: handleNameChange },
+} as any;
 
 const transformations = {
   toStringDefaultArray: toStringDefaultArray,
@@ -175,6 +180,20 @@ export const syncRecords = async function (
   );
 
   const batchService = new BatchService(keystone);
+
+  // pre-lookup hook that can be used to handle special cases,
+  // such as for Kong, cleaning up records where the service or route has been renamed
+  //
+  if ('hooks' in md) {
+    for (const hook of md['hooks']) {
+      assert.strictEqual(
+        hook in hooks['pre-lookup'],
+        true,
+        `Hook ${hook} missing!`
+      );
+      await hooks['pre-lookup'][hook](keystone, entity, md, eid, json);
+    }
+  }
 
   const localRecord = await batchService.lookup(
     md.query,

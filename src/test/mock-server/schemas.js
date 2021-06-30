@@ -31,9 +31,16 @@ input ServiceAccessRelateToOneInput {
   disconnectAll: Boolean
 }
 
+# DateTime custom scalar represents an ISO 8601 datetime string
 scalar DateTime
 
+#  A keystone list
 type AccessRequest {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the AccessRequest List config, or
+  #  2. As an alias to the field set on 'labelField' in the AccessRequest List config, or
+  #  3. As an alias to a 'name' field on the AccessRequest List (if one exists), or
+  #  4. As an alias to the 'id' field on the AccessRequest List.
   _label_: String
   id: ID!
   name: String
@@ -274,7 +281,13 @@ input BlobRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Activity {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Activity List config, or
+  #  2. As an alias to the field set on 'labelField' in the Activity List config, or
+  #  3. As an alias to a 'name' field on the Activity List (if one exists), or
+  #  4. As an alias to the 'id' field on the Activity List.
   _label_: String
   id: ID!
   extRefId: String
@@ -562,7 +575,13 @@ input GatewayServiceRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Alert {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Alert List config, or
+  #  2. As an alias to the field set on 'labelField' in the Alert List config, or
+  #  3. As an alias to a 'name' field on the Alert List (if one exists), or
+  #  4. As an alias to the 'id' field on the Alert List.
   _label_: String
   id: ID!
   name: String
@@ -712,7 +731,13 @@ input OrganizationUnitRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Application {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Application List config, or
+  #  2. As an alias to the field set on 'labelField' in the Application List config, or
+  #  3. As an alias to a 'name' field on the Application List (if one exists), or
+  #  4. As an alias to the 'id' field on the Application List.
   _label_: String
   id: ID!
   appId: String
@@ -884,7 +909,13 @@ input ApplicationsCreateInput {
   data: ApplicationCreateInput
 }
 
+#  A keystone list
 type Blob {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Blob List config, or
+  #  2. As an alias to the field set on 'labelField' in the Blob List config, or
+  #  3. As an alias to a 'name' field on the Blob List (if one exists), or
+  #  4. As an alias to the 'id' field on the Blob List.
   _label_: String
   id: ID!
   ref: String
@@ -968,7 +999,13 @@ input BlobsCreateInput {
   data: BlobCreateInput
 }
 
+#  A keystone list
 type Content {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Content List config, or
+  #  2. As an alias to the field set on 'labelField' in the Content List config, or
+  #  3. As an alias to a 'name' field on the Content List (if one exists), or
+  #  4. As an alias to the 'id' field on the Content List.
   _label_: String
   id: ID!
   title: String
@@ -1260,7 +1297,13 @@ input EnvironmentRelateToManyInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type CredentialIssuer {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the CredentialIssuer List config, or
+  #  2. As an alias to the field set on 'labelField' in the CredentialIssuer List config, or
+  #  3. As an alias to a 'name' field on the CredentialIssuer List (if one exists), or
+  #  4. As an alias to the 'id' field on the CredentialIssuer List.
   _label_: String
   id: ID!
   name: String
@@ -1619,8 +1662,11 @@ input CredentialIssuerWhereInput {
   apiKeyName_not_in: [String]
   owner: UserWhereInput
   owner_is_null: Boolean
+  #  condition must be true for all nodes
   environments_every: EnvironmentWhereInput
+  #  condition must be true for at least 1 node
   environments_some: EnvironmentWhereInput
+  #  condition must be false for all nodes
   environments_none: EnvironmentWhereInput
   updatedBy: UserWhereInput
   updatedBy_is_null: Boolean
@@ -1763,7 +1809,13 @@ input CredentialIssuersCreateInput {
   data: CredentialIssuerCreateInput
 }
 
+#  A keystone list
 type Dataset {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Dataset List config, or
+  #  2. As an alias to the field set on 'labelField' in the Dataset List config, or
+  #  3. As an alias to a 'name' field on the Dataset List (if one exists), or
+  #  4. As an alias to the 'id' field on the Dataset List.
   _label_: String
   id: ID!
   name: String
@@ -2202,7 +2254,13 @@ input ProductRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Environment {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Environment List config, or
+  #  2. As an alias to the field set on 'labelField' in the Environment List config, or
+  #  3. As an alias to a 'name' field on the Environment List (if one exists), or
+  #  4. As an alias to the 'id' field on the Environment List.
   _label_: String
   id: ID!
   appId: String
@@ -2305,8 +2363,11 @@ input EnvironmentWhereInput {
   additionalDetailsToRequest_not_ends_with_i: String
   additionalDetailsToRequest_in: [String]
   additionalDetailsToRequest_not_in: [String]
+  #  condition must be true for all nodes
   services_every: GatewayServiceWhereInput
+  #  condition must be true for at least 1 node
   services_some: GatewayServiceWhereInput
+  #  condition must be false for all nodes
   services_none: GatewayServiceWhereInput
   product: ProductWhereInput
   product_is_null: Boolean
@@ -2382,7 +2443,13 @@ input GatewayPluginRelateToManyInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type GatewayConsumer {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the GatewayConsumer List config, or
+  #  2. As an alias to the field set on 'labelField' in the GatewayConsumer List config, or
+  #  3. As an alias to a 'name' field on the GatewayConsumer List (if one exists), or
+  #  4. As an alias to the 'id' field on the GatewayConsumer List.
   _label_: String
   id: ID!
   username: String
@@ -2510,8 +2577,11 @@ input GatewayConsumerWhereInput {
   tags_not_ends_with_i: String
   tags_in: [String]
   tags_not_in: [String]
+  #  condition must be true for all nodes
   plugins_every: GatewayPluginWhereInput
+  #  condition must be true for at least 1 node
   plugins_some: GatewayPluginWhereInput
+  #  condition must be false for all nodes
   plugins_none: GatewayPluginWhereInput
   extSource: String
   extSource_not: String
@@ -2649,7 +2719,13 @@ input GatewayConsumersCreateInput {
   data: GatewayConsumerCreateInput
 }
 
+#  A keystone list
 type GatewayGroup {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the GatewayGroup List config, or
+  #  2. As an alias to the field set on 'labelField' in the GatewayGroup List config, or
+  #  3. As an alias to a 'name' field on the GatewayGroup List (if one exists), or
+  #  4. As an alias to the 'id' field on the GatewayGroup List.
   _label_: String
   id: ID!
   name: String
@@ -2831,7 +2907,13 @@ input GatewayRouteRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type GatewayPlugin {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the GatewayPlugin List config, or
+  #  2. As an alias to the field set on 'labelField' in the GatewayPlugin List config, or
+  #  3. As an alias to a 'name' field on the GatewayPlugin List (if one exists), or
+  #  4. As an alias to the 'id' field on the GatewayPlugin List.
   _label_: String
   id: ID!
   name: String
@@ -3066,7 +3148,13 @@ input GatewayPluginsCreateInput {
   data: GatewayPluginCreateInput
 }
 
+#  A keystone list
 type GatewayRoute {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the GatewayRoute List config, or
+  #  2. As an alias to the field set on 'labelField' in the GatewayRoute List config, or
+  #  3. As an alias to a 'name' field on the GatewayRoute List (if one exists), or
+  #  4. As an alias to the 'id' field on the GatewayRoute List.
   _label_: String
   id: ID!
   name: String
@@ -3216,8 +3304,11 @@ input GatewayRouteWhereInput {
   tags_not_in: [String]
   service: GatewayServiceWhereInput
   service_is_null: Boolean
+  #  condition must be true for all nodes
   plugins_every: GatewayPluginWhereInput
+  #  condition must be true for at least 1 node
   plugins_some: GatewayPluginWhereInput
+  #  condition must be false for all nodes
   plugins_none: GatewayPluginWhereInput
   extSource: String
   extSource_not: String
@@ -3370,7 +3461,13 @@ input GatewayRouteRelateToManyInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type GatewayService {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the GatewayService List config, or
+  #  2. As an alias to the field set on 'labelField' in the GatewayService List config, or
+  #  3. As an alias to a 'name' field on the GatewayService List (if one exists), or
+  #  4. As an alias to the 'id' field on the GatewayService List.
   _label_: String
   id: ID!
   name: String
@@ -3496,11 +3593,17 @@ input GatewayServiceWhereInput {
   tags_not_ends_with_i: String
   tags_in: [String]
   tags_not_in: [String]
+  #  condition must be true for all nodes
   routes_every: GatewayRouteWhereInput
+  #  condition must be true for at least 1 node
   routes_some: GatewayRouteWhereInput
+  #  condition must be false for all nodes
   routes_none: GatewayRouteWhereInput
+  #  condition must be true for all nodes
   plugins_every: GatewayPluginWhereInput
+  #  condition must be true for at least 1 node
   plugins_some: GatewayPluginWhereInput
+  #  condition must be false for all nodes
   plugins_none: GatewayPluginWhereInput
   environment: EnvironmentWhereInput
   environment_is_null: Boolean
@@ -3644,7 +3747,13 @@ input GatewayServicesCreateInput {
   data: GatewayServiceCreateInput
 }
 
+#  A keystone list
 type Legal {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Legal List config, or
+  #  2. As an alias to the field set on 'labelField' in the Legal List config, or
+  #  3. As an alias to a 'name' field on the Legal List (if one exists), or
+  #  4. As an alias to the 'id' field on the Legal List.
   _label_: String
   id: ID!
   title: String
@@ -3835,7 +3944,13 @@ input LegalsCreateInput {
   data: LegalCreateInput
 }
 
+#  A keystone list
 type Metric {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Metric List config, or
+  #  2. As an alias to the field set on 'labelField' in the Metric List config, or
+  #  3. As an alias to a 'name' field on the Metric List (if one exists), or
+  #  4. As an alias to the 'id' field on the Metric List.
   _label_: String
   id: ID!
   name: String
@@ -4024,7 +4139,13 @@ input OrganizationUnitRelateToManyInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Organization {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Organization List config, or
+  #  2. As an alias to the field set on 'labelField' in the Organization List config, or
+  #  3. As an alias to a 'name' field on the Organization List (if one exists), or
+  #  4. As an alias to the 'id' field on the Organization List.
   _label_: String
   id: ID!
   name: String
@@ -4150,8 +4271,11 @@ input OrganizationWhereInput {
   description_not_ends_with_i: String
   description_in: [String]
   description_not_in: [String]
+  #  condition must be true for all nodes
   orgUnits_every: OrganizationUnitWhereInput
+  #  condition must be true for at least 1 node
   orgUnits_some: OrganizationUnitWhereInput
+  #  condition must be false for all nodes
   orgUnits_none: OrganizationUnitWhereInput
   extSource: String
   extSource_not: String
@@ -4269,7 +4393,13 @@ input OrganizationsCreateInput {
   data: OrganizationCreateInput
 }
 
+#  A keystone list
 type OrganizationUnit {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the OrganizationUnit List config, or
+  #  2. As an alias to the field set on 'labelField' in the OrganizationUnit List config, or
+  #  3. As an alias to a 'name' field on the OrganizationUnit List (if one exists), or
+  #  4. As an alias to the 'id' field on the OrganizationUnit List.
   _label_: String
   id: ID!
   name: String
@@ -4498,7 +4628,13 @@ input DatasetRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type Product {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the Product List config, or
+  #  2. As an alias to the field set on 'labelField' in the Product List config, or
+  #  3. As an alias to a 'name' field on the Product List (if one exists), or
+  #  4. As an alias to the 'id' field on the Product List.
   _label_: String
   id: ID!
   appId: String
@@ -4611,8 +4747,11 @@ input ProductWhereInput {
   organization_is_null: Boolean
   organizationUnit: OrganizationUnitWhereInput
   organizationUnit_is_null: Boolean
+  #  condition must be true for all nodes
   environments_every: EnvironmentWhereInput
+  #  condition must be true for at least 1 node
   environments_some: EnvironmentWhereInput
+  #  condition must be false for all nodes
   environments_none: EnvironmentWhereInput
 }
 
@@ -4684,7 +4823,13 @@ input GatewayConsumerRelateToOneInput {
   disconnectAll: Boolean
 }
 
+#  A keystone list
 type ServiceAccess {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the ServiceAccess List config, or
+  #  2. As an alias to the field set on 'labelField' in the ServiceAccess List config, or
+  #  3. As an alias to a 'name' field on the ServiceAccess List (if one exists), or
+  #  4. As an alias to the 'id' field on the ServiceAccess List.
   _label_: String
   id: ID!
   name: String
@@ -4903,7 +5048,13 @@ input ServiceAccessesCreateInput {
   data: ServiceAccessCreateInput
 }
 
+#  A keystone list
 type TemporaryIdentity {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the TemporaryIdentity List config, or
+  #  2. As an alias to the field set on 'labelField' in the TemporaryIdentity List config, or
+  #  3. As an alias to a 'name' field on the TemporaryIdentity List (if one exists), or
+  #  4. As an alias to the 'id' field on the TemporaryIdentity List.
   _label_: String
   id: ID!
   jti: String
@@ -5200,7 +5351,13 @@ input TemporaryIdentitiesCreateInput {
   data: TemporaryIdentityCreateInput
 }
 
+#  A keystone list
 type User {
+  # This virtual field will be resolved in one of the following ways (in this order):
+  #  1. Execution of 'labelResolver' set on the User List config, or
+  #  2. As an alias to the field set on 'labelField' in the User List config, or
+  #  3. As an alias to a 'name' field on the User List (if one exists), or
+  #  4. As an alias to the 'id' field on the User List.
   _label_: String
   id: ID!
   name: String
@@ -5341,69 +5498,120 @@ input UsersCreateInput {
   data: UserCreateInput
 }
 
+# The  scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 scalar JSON
 
 type _ListAccess {
+  # Access Control settings for the currently logged in (or anonymous)
+  # user when performing 'create' operations.
+  # NOTE: 'create' can only return a Boolean.
+  # It is not possible to specify a declarative Where clause for this
+  # operation
   create: Boolean
+  # Access Control settings for the currently logged in (or anonymous)
+  # user when performing 'read' operations.
   read: JSON
+  # Access Control settings for the currently logged in (or anonymous)
+  # user when performing 'update' operations.
   update: JSON
+  # Access Control settings for the currently logged in (or anonymous)
+  # user when performing 'delete' operations.
   delete: JSON
+  # Access Control settings for the currently logged in (or anonymous)
+  # user when performing 'auth' operations.
   auth: JSON
 }
 
 type _ListQueries {
+  # Single-item query name
   item: String
+  # All-items query name
   list: String
+  # List metadata query name
   meta: String
 }
 
 type _ListMutations {
+  # Create mutation name
   create: String
+  # Create many mutation name
   createMany: String
+  # Update mutation name
   update: String
+  # Update many mutation name
   updateMany: String
+  # Delete mutation name
   delete: String
+  # Delete many mutation name
   deleteMany: String
 }
 
 type _ListInputTypes {
+  # Input type for matching multiple items
   whereInput: String
+  # Input type for matching a unique item
   whereUniqueInput: String
+  # Create mutation input type name
   createInput: String
+  # Create many mutation input type name
   createManyInput: String
+  # Update mutation name input
   updateInput: String
+  # Update many mutation name input
   updateManyInput: String
 }
 
 type _ListSchemaFields {
+  # The path of the field in its list
   path: String
-  name: String 
+  # The name of the field in its list
+  name: String @deprecated(reason: "Use path instead")
+  # The field type (ie, Checkbox, Text, etc)
   type: String
 }
 
 type _ListSchemaRelatedFields {
+  # The typename as used in GraphQL queries
   type: String
+  # A list of GraphQL field names
   fields: [String]
 }
 
 type _ListSchema {
+  # The typename as used in GraphQL queries
   type: String
+  # Top level GraphQL query names which either return this type, or
+  # provide aggregate information about this type
   queries: _ListQueries
+  # Top-level GraphQL mutation names
   mutations: _ListMutations
+  # Top-level GraphQL input types
   inputTypes: _ListInputTypes
+  # Information about fields defined on this list
   fields(where: _ListSchemaFieldsInput): [_ListSchemaFields]
+  # Information about fields on other types which return this type, or
+  # provide aggregate information about this type
   relatedFields: [_ListSchemaRelatedFields]
 }
 
 type _ListMeta {
+  # The Keystone list key
   key: String
-  name: String 
+  # The Keystone List name
+  name: String @deprecated(reason: "Use key instead")
+  # The list's user-facing description
   description: String
+  # The list's display name in the Admin UI
   label: String
+  # The list's singular display name
   singular: String
+  # The list's plural display name
   plural: String
+  # The list's data path
   path: String
+  # Access control configuration for the currently authenticated request
   access: _ListAccess
+  # Information on the generated GraphQL schema
   schema: _ListSchema
 }
 
@@ -5413,6 +5621,7 @@ type _QueryMeta {
 
 input _ksListsMetaInput {
   key: String
+  # Whether this is an auxiliary helper list
   auxiliary: Boolean
 }
 
@@ -5423,6 +5632,39 @@ input _ListSchemaFieldsInput {
 type ApplicationSummary {
   appId: String
   name: String
+}
+
+type BusinessProfile {
+  user: UserDetails
+  institution: InstitutionDetails
+}
+
+type UserDetails {
+  guid: String
+  displayName: String
+  firstname: String
+  surname: String
+  email: String
+  isSuspended: Boolean
+  isManagerDisabled: Boolean
+}
+
+type InstitutionDetails {
+  guid: String
+  type: String
+  legalName: String
+  address: AddressDetails
+  isSuspended: Boolean
+  businessTypeOther: String
+}
+
+type AddressDetails {
+  addressLine1: String
+  addressLine2: String
+  city: String
+  postal: String
+  province: String
+  country: String
 }
 
 type ConsumerScopesAndRoles {
@@ -5518,16 +5760,21 @@ input UMAPermissionTicketInput {
   scopes: [String]!
 }
 
-type unauthenticateUserOutput {
+type unauthenticateTemporaryIdentityOutput {
+  # true when unauthentication succeeds.
+  # NOTE: unauthentication always succeeds when the request has an invalid or missing authentication token.
   success: Boolean
 }
 
-type authenticateUserOutput {
+type authenticateTemporaryIdentityOutput {
+  #  Used to make subsequent authenticated requests by setting this token in a header: 'Authorization: Bearer <token>'.
   token: String
-  item: User
+  #  Retrieve information on the newly authenticated TemporaryIdentity here.
+  item: TemporaryIdentity
 }
 
 type Query {
+  #  Search for all AccessRequest items which match the where clause.
   allAccessRequests(
     where: AccessRequestWhereInput
     search: String
@@ -5536,7 +5783,9 @@ type Query {
     first: Int
     skip: Int
   ): [AccessRequest]
+  #  Search for the AccessRequest item with the matching ID.
   AccessRequest(where: AccessRequestWhereUniqueInput!): AccessRequest
+  #  Perform a meta-query on all AccessRequest items which match the where clause.
   _allAccessRequestsMeta(
     where: AccessRequestWhereInput
     search: String
@@ -5545,7 +5794,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the AccessRequest list.
   _AccessRequestsMeta: _ListMeta
+  #  Search for all Activity items which match the where clause.
   allActivities(
     where: ActivityWhereInput
     search: String
@@ -5554,7 +5805,9 @@ type Query {
     first: Int
     skip: Int
   ): [Activity]
+  #  Search for the Activity item with the matching ID.
   Activity(where: ActivityWhereUniqueInput!): Activity
+  #  Perform a meta-query on all Activity items which match the where clause.
   _allActivitiesMeta(
     where: ActivityWhereInput
     search: String
@@ -5563,7 +5816,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Activity list.
   _ActivitiesMeta: _ListMeta
+  #  Search for all Alert items which match the where clause.
   allAlerts(
     where: AlertWhereInput
     search: String
@@ -5572,7 +5827,9 @@ type Query {
     first: Int
     skip: Int
   ): [Alert]
+  #  Search for the Alert item with the matching ID.
   Alert(where: AlertWhereUniqueInput!): Alert
+  #  Perform a meta-query on all Alert items which match the where clause.
   _allAlertsMeta(
     where: AlertWhereInput
     search: String
@@ -5581,7 +5838,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Alert list.
   _AlertsMeta: _ListMeta
+  #  Search for all Application items which match the where clause.
   allApplications(
     where: ApplicationWhereInput
     search: String
@@ -5590,7 +5849,9 @@ type Query {
     first: Int
     skip: Int
   ): [Application]
+  #  Search for the Application item with the matching ID.
   Application(where: ApplicationWhereUniqueInput!): Application
+  #  Perform a meta-query on all Application items which match the where clause.
   _allApplicationsMeta(
     where: ApplicationWhereInput
     search: String
@@ -5599,7 +5860,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Application list.
   _ApplicationsMeta: _ListMeta
+  #  Search for all Blob items which match the where clause.
   allBlobs(
     where: BlobWhereInput
     search: String
@@ -5608,7 +5871,9 @@ type Query {
     first: Int
     skip: Int
   ): [Blob]
+  #  Search for the Blob item with the matching ID.
   Blob(where: BlobWhereUniqueInput!): Blob
+  #  Perform a meta-query on all Blob items which match the where clause.
   _allBlobsMeta(
     where: BlobWhereInput
     search: String
@@ -5617,7 +5882,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Blob list.
   _BlobsMeta: _ListMeta
+  #  Search for all Content items which match the where clause.
   allContents(
     where: ContentWhereInput
     search: String
@@ -5626,7 +5893,9 @@ type Query {
     first: Int
     skip: Int
   ): [Content]
+  #  Search for the Content item with the matching ID.
   Content(where: ContentWhereUniqueInput!): Content
+  #  Perform a meta-query on all Content items which match the where clause.
   _allContentsMeta(
     where: ContentWhereInput
     search: String
@@ -5635,7 +5904,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Content list.
   _ContentsMeta: _ListMeta
+  #  Search for all CredentialIssuer items which match the where clause.
   allCredentialIssuers(
     where: CredentialIssuerWhereInput
     search: String
@@ -5644,7 +5915,9 @@ type Query {
     first: Int
     skip: Int
   ): [CredentialIssuer]
+  #  Search for the CredentialIssuer item with the matching ID.
   CredentialIssuer(where: CredentialIssuerWhereUniqueInput!): CredentialIssuer
+  #  Perform a meta-query on all CredentialIssuer items which match the where clause.
   _allCredentialIssuersMeta(
     where: CredentialIssuerWhereInput
     search: String
@@ -5653,7 +5926,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the CredentialIssuer list.
   _CredentialIssuersMeta: _ListMeta
+  #  Search for all Dataset items which match the where clause.
   allDatasets(
     where: DatasetWhereInput
     search: String
@@ -5662,7 +5937,9 @@ type Query {
     first: Int
     skip: Int
   ): [Dataset]
+  #  Search for the Dataset item with the matching ID.
   Dataset(where: DatasetWhereUniqueInput!): Dataset
+  #  Perform a meta-query on all Dataset items which match the where clause.
   _allDatasetsMeta(
     where: DatasetWhereInput
     search: String
@@ -5671,7 +5948,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Dataset list.
   _DatasetsMeta: _ListMeta
+  #  Search for all Environment items which match the where clause.
   allEnvironments(
     where: EnvironmentWhereInput
     search: String
@@ -5680,7 +5959,9 @@ type Query {
     first: Int
     skip: Int
   ): [Environment]
+  #  Search for the Environment item with the matching ID.
   Environment(where: EnvironmentWhereUniqueInput!): Environment
+  #  Perform a meta-query on all Environment items which match the where clause.
   _allEnvironmentsMeta(
     where: EnvironmentWhereInput
     search: String
@@ -5689,7 +5970,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Environment list.
   _EnvironmentsMeta: _ListMeta
+  #  Search for all GatewayConsumer items which match the where clause.
   allGatewayConsumers(
     where: GatewayConsumerWhereInput
     search: String
@@ -5698,7 +5981,9 @@ type Query {
     first: Int
     skip: Int
   ): [GatewayConsumer]
+  #  Search for the GatewayConsumer item with the matching ID.
   GatewayConsumer(where: GatewayConsumerWhereUniqueInput!): GatewayConsumer
+  #  Perform a meta-query on all GatewayConsumer items which match the where clause.
   _allGatewayConsumersMeta(
     where: GatewayConsumerWhereInput
     search: String
@@ -5707,7 +5992,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the GatewayConsumer list.
   _GatewayConsumersMeta: _ListMeta
+  #  Search for all GatewayGroup items which match the where clause.
   allGatewayGroups(
     where: GatewayGroupWhereInput
     search: String
@@ -5716,7 +6003,9 @@ type Query {
     first: Int
     skip: Int
   ): [GatewayGroup]
+  #  Search for the GatewayGroup item with the matching ID.
   GatewayGroup(where: GatewayGroupWhereUniqueInput!): GatewayGroup
+  #  Perform a meta-query on all GatewayGroup items which match the where clause.
   _allGatewayGroupsMeta(
     where: GatewayGroupWhereInput
     search: String
@@ -5725,7 +6014,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the GatewayGroup list.
   _GatewayGroupsMeta: _ListMeta
+  #  Search for all GatewayPlugin items which match the where clause.
   allGatewayPlugins(
     where: GatewayPluginWhereInput
     search: String
@@ -5734,7 +6025,9 @@ type Query {
     first: Int
     skip: Int
   ): [GatewayPlugin]
+  #  Search for the GatewayPlugin item with the matching ID.
   GatewayPlugin(where: GatewayPluginWhereUniqueInput!): GatewayPlugin
+  #  Perform a meta-query on all GatewayPlugin items which match the where clause.
   _allGatewayPluginsMeta(
     where: GatewayPluginWhereInput
     search: String
@@ -5743,7 +6036,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the GatewayPlugin list.
   _GatewayPluginsMeta: _ListMeta
+  #  Search for all GatewayRoute items which match the where clause.
   allGatewayRoutes(
     where: GatewayRouteWhereInput
     search: String
@@ -5752,7 +6047,9 @@ type Query {
     first: Int
     skip: Int
   ): [GatewayRoute]
+  #  Search for the GatewayRoute item with the matching ID.
   GatewayRoute(where: GatewayRouteWhereUniqueInput!): GatewayRoute
+  #  Perform a meta-query on all GatewayRoute items which match the where clause.
   _allGatewayRoutesMeta(
     where: GatewayRouteWhereInput
     search: String
@@ -5761,7 +6058,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the GatewayRoute list.
   _GatewayRoutesMeta: _ListMeta
+  #  Search for all GatewayService items which match the where clause.
   allGatewayServices(
     where: GatewayServiceWhereInput
     search: String
@@ -5770,7 +6069,9 @@ type Query {
     first: Int
     skip: Int
   ): [GatewayService]
+  #  Search for the GatewayService item with the matching ID.
   GatewayService(where: GatewayServiceWhereUniqueInput!): GatewayService
+  #  Perform a meta-query on all GatewayService items which match the where clause.
   _allGatewayServicesMeta(
     where: GatewayServiceWhereInput
     search: String
@@ -5779,7 +6080,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the GatewayService list.
   _GatewayServicesMeta: _ListMeta
+  #  Search for all Legal items which match the where clause.
   allLegals(
     where: LegalWhereInput
     search: String
@@ -5788,7 +6091,9 @@ type Query {
     first: Int
     skip: Int
   ): [Legal]
+  #  Search for the Legal item with the matching ID.
   Legal(where: LegalWhereUniqueInput!): Legal
+  #  Perform a meta-query on all Legal items which match the where clause.
   _allLegalsMeta(
     where: LegalWhereInput
     search: String
@@ -5797,7 +6102,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Legal list.
   _LegalsMeta: _ListMeta
+  #  Search for all Metric items which match the where clause.
   allMetrics(
     where: MetricWhereInput
     search: String
@@ -5806,7 +6113,9 @@ type Query {
     first: Int
     skip: Int
   ): [Metric]
+  #  Search for the Metric item with the matching ID.
   Metric(where: MetricWhereUniqueInput!): Metric
+  #  Perform a meta-query on all Metric items which match the where clause.
   _allMetricsMeta(
     where: MetricWhereInput
     search: String
@@ -5815,7 +6124,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Metric list.
   _MetricsMeta: _ListMeta
+  #  Search for all Organization items which match the where clause.
   allOrganizations(
     where: OrganizationWhereInput
     search: String
@@ -5824,7 +6135,9 @@ type Query {
     first: Int
     skip: Int
   ): [Organization]
+  #  Search for the Organization item with the matching ID.
   Organization(where: OrganizationWhereUniqueInput!): Organization
+  #  Perform a meta-query on all Organization items which match the where clause.
   _allOrganizationsMeta(
     where: OrganizationWhereInput
     search: String
@@ -5833,7 +6146,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Organization list.
   _OrganizationsMeta: _ListMeta
+  #  Search for all OrganizationUnit items which match the where clause.
   allOrganizationUnits(
     where: OrganizationUnitWhereInput
     search: String
@@ -5842,7 +6157,9 @@ type Query {
     first: Int
     skip: Int
   ): [OrganizationUnit]
+  #  Search for the OrganizationUnit item with the matching ID.
   OrganizationUnit(where: OrganizationUnitWhereUniqueInput!): OrganizationUnit
+  #  Perform a meta-query on all OrganizationUnit items which match the where clause.
   _allOrganizationUnitsMeta(
     where: OrganizationUnitWhereInput
     search: String
@@ -5851,7 +6168,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the OrganizationUnit list.
   _OrganizationUnitsMeta: _ListMeta
+  #  Search for all Product items which match the where clause.
   allProducts(
     where: ProductWhereInput
     search: String
@@ -5860,7 +6179,9 @@ type Query {
     first: Int
     skip: Int
   ): [Product]
+  #  Search for the Product item with the matching ID.
   Product(where: ProductWhereUniqueInput!): Product
+  #  Perform a meta-query on all Product items which match the where clause.
   _allProductsMeta(
     where: ProductWhereInput
     search: String
@@ -5869,7 +6190,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the Product list.
   _ProductsMeta: _ListMeta
+  #  Search for all ServiceAccess items which match the where clause.
   allServiceAccesses(
     where: ServiceAccessWhereInput
     search: String
@@ -5878,7 +6201,9 @@ type Query {
     first: Int
     skip: Int
   ): [ServiceAccess]
+  #  Search for the ServiceAccess item with the matching ID.
   ServiceAccess(where: ServiceAccessWhereUniqueInput!): ServiceAccess
+  #  Perform a meta-query on all ServiceAccess items which match the where clause.
   _allServiceAccessesMeta(
     where: ServiceAccessWhereInput
     search: String
@@ -5887,7 +6212,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the ServiceAccess list.
   _ServiceAccessesMeta: _ListMeta
+  #  Search for all TemporaryIdentity items which match the where clause.
   allTemporaryIdentities(
     where: TemporaryIdentityWhereInput
     search: String
@@ -5896,9 +6223,11 @@ type Query {
     first: Int
     skip: Int
   ): [TemporaryIdentity]
+  #  Search for the TemporaryIdentity item with the matching ID.
   TemporaryIdentity(
     where: TemporaryIdentityWhereUniqueInput!
   ): TemporaryIdentity
+  #  Perform a meta-query on all TemporaryIdentity items which match the where clause.
   _allTemporaryIdentitiesMeta(
     where: TemporaryIdentityWhereInput
     search: String
@@ -5907,7 +6236,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the TemporaryIdentity list.
   _TemporaryIdentitiesMeta: _ListMeta
+  #  Search for all User items which match the where clause.
   allUsers(
     where: UserWhereInput
     search: String
@@ -5916,7 +6247,9 @@ type Query {
     first: Int
     skip: Int
   ): [User]
+  #  Search for the User item with the matching ID.
   User(where: UserWhereUniqueInput!): User
+  #  Perform a meta-query on all User items which match the where clause.
   _allUsersMeta(
     where: UserWhereInput
     search: String
@@ -5925,7 +6258,9 @@ type Query {
     first: Int
     skip: Int
   ): _QueryMeta
+  #  Retrieve the meta-data for the User list.
   _UsersMeta: _ListMeta
+  #  Retrieve the meta-data for all lists.
   _ksListsMeta(where: _ksListsMetaInput): [_ListMeta]
   allApplicationNames: [ApplicationSummary]
   getGatewayConsumerPlugins(id: ID!): GatewayConsumer
@@ -5992,6 +6327,7 @@ type Query {
     orderBy: String
     where: ContentWhereInput
   ): [Content]
+  BusinessProfile(serviceAccessId: ID!): BusinessProfile
   consumerScopesAndRoles(
     prodEnvId: ID!
     consumerUsername: ID!
@@ -6006,166 +6342,299 @@ type Query {
     prodEnvId: ID!
     resourceId: String!
   ): [UMAPermissionTicket]
+  # The version of the Keystone application serving this API.
   appVersion: String
-  authenticatedUser: User
+  authenticatedTemporaryIdentity: TemporaryIdentity
 }
 
 type Mutation {
+  #  Create a single AccessRequest item.
   createAccessRequest(data: AccessRequestCreateInput): AccessRequest
+  #  Create multiple AccessRequest items.
   createAccessRequests(data: [AccessRequestsCreateInput]): [AccessRequest]
+  #  Update a single AccessRequest item by ID.
   updateAccessRequest(id: ID!, data: AccessRequestUpdateInput): AccessRequest
+  #  Update multiple AccessRequest items by ID.
   updateAccessRequests(data: [AccessRequestsUpdateInput]): [AccessRequest]
+  #  Delete a single AccessRequest item by ID.
   deleteAccessRequest(id: ID!): AccessRequest
+  #  Delete multiple AccessRequest items by ID.
   deleteAccessRequests(ids: [ID!]): [AccessRequest]
+  #  Create a single Activity item.
   createActivity(data: ActivityCreateInput): Activity
+  #  Create multiple Activity items.
   createActivities(data: [ActivitiesCreateInput]): [Activity]
+  #  Update a single Activity item by ID.
   updateActivity(id: ID!, data: ActivityUpdateInput): Activity
+  #  Update multiple Activity items by ID.
   updateActivities(data: [ActivitiesUpdateInput]): [Activity]
+  #  Delete a single Activity item by ID.
   deleteActivity(id: ID!): Activity
+  #  Delete multiple Activity items by ID.
   deleteActivities(ids: [ID!]): [Activity]
+  #  Create a single Alert item.
   createAlert(data: AlertCreateInput): Alert
+  #  Create multiple Alert items.
   createAlerts(data: [AlertsCreateInput]): [Alert]
+  #  Update a single Alert item by ID.
   updateAlert(id: ID!, data: AlertUpdateInput): Alert
+  #  Update multiple Alert items by ID.
   updateAlerts(data: [AlertsUpdateInput]): [Alert]
+  #  Delete a single Alert item by ID.
   deleteAlert(id: ID!): Alert
+  #  Delete multiple Alert items by ID.
   deleteAlerts(ids: [ID!]): [Alert]
+  #  Create a single Application item.
   createApplication(data: ApplicationCreateInput): Application
+  #  Create multiple Application items.
   createApplications(data: [ApplicationsCreateInput]): [Application]
+  #  Update a single Application item by ID.
   updateApplication(id: ID!, data: ApplicationUpdateInput): Application
+  #  Update multiple Application items by ID.
   updateApplications(data: [ApplicationsUpdateInput]): [Application]
+  #  Delete a single Application item by ID.
   deleteApplication(id: ID!): Application
+  #  Delete multiple Application items by ID.
   deleteApplications(ids: [ID!]): [Application]
+  #  Create a single Blob item.
   createBlob(data: BlobCreateInput): Blob
+  #  Create multiple Blob items.
   createBlobs(data: [BlobsCreateInput]): [Blob]
+  #  Update a single Blob item by ID.
   updateBlob(id: ID!, data: BlobUpdateInput): Blob
+  #  Update multiple Blob items by ID.
   updateBlobs(data: [BlobsUpdateInput]): [Blob]
+  #  Delete a single Blob item by ID.
   deleteBlob(id: ID!): Blob
+  #  Delete multiple Blob items by ID.
   deleteBlobs(ids: [ID!]): [Blob]
+  #  Create a single Content item.
   createContent(data: ContentCreateInput): Content
+  #  Create multiple Content items.
   createContents(data: [ContentsCreateInput]): [Content]
+  #  Update a single Content item by ID.
   updateContent(id: ID!, data: ContentUpdateInput): Content
+  #  Update multiple Content items by ID.
   updateContents(data: [ContentsUpdateInput]): [Content]
+  #  Delete a single Content item by ID.
   deleteContent(id: ID!): Content
+  #  Delete multiple Content items by ID.
   deleteContents(ids: [ID!]): [Content]
+  #  Create a single CredentialIssuer item.
   createCredentialIssuer(data: CredentialIssuerCreateInput): CredentialIssuer
+  #  Create multiple CredentialIssuer items.
   createCredentialIssuers(
     data: [CredentialIssuersCreateInput]
   ): [CredentialIssuer]
+  #  Update a single CredentialIssuer item by ID.
   updateCredentialIssuer(
     id: ID!
     data: CredentialIssuerUpdateInput
   ): CredentialIssuer
+  #  Update multiple CredentialIssuer items by ID.
   updateCredentialIssuers(
     data: [CredentialIssuersUpdateInput]
   ): [CredentialIssuer]
+  #  Delete a single CredentialIssuer item by ID.
   deleteCredentialIssuer(id: ID!): CredentialIssuer
+  #  Delete multiple CredentialIssuer items by ID.
   deleteCredentialIssuers(ids: [ID!]): [CredentialIssuer]
+  #  Create a single Dataset item.
   createDataset(data: DatasetCreateInput): Dataset
+  #  Create multiple Dataset items.
   createDatasets(data: [DatasetsCreateInput]): [Dataset]
+  #  Update a single Dataset item by ID.
   updateDataset(id: ID!, data: DatasetUpdateInput): Dataset
+  #  Update multiple Dataset items by ID.
   updateDatasets(data: [DatasetsUpdateInput]): [Dataset]
+  #  Delete a single Dataset item by ID.
   deleteDataset(id: ID!): Dataset
+  #  Delete multiple Dataset items by ID.
   deleteDatasets(ids: [ID!]): [Dataset]
+  #  Create a single Environment item.
   createEnvironment(data: EnvironmentCreateInput): Environment
+  #  Create multiple Environment items.
   createEnvironments(data: [EnvironmentsCreateInput]): [Environment]
+  #  Update a single Environment item by ID.
   updateEnvironment(id: ID!, data: EnvironmentUpdateInput): Environment
+  #  Update multiple Environment items by ID.
   updateEnvironments(data: [EnvironmentsUpdateInput]): [Environment]
+  #  Delete a single Environment item by ID.
   deleteEnvironment(id: ID!): Environment
+  #  Delete multiple Environment items by ID.
   deleteEnvironments(ids: [ID!]): [Environment]
+  #  Create a single GatewayConsumer item.
   createGatewayConsumer(data: GatewayConsumerCreateInput): GatewayConsumer
+  #  Create multiple GatewayConsumer items.
   createGatewayConsumers(data: [GatewayConsumersCreateInput]): [GatewayConsumer]
+  #  Update a single GatewayConsumer item by ID.
   updateGatewayConsumer(
     id: ID!
     data: GatewayConsumerUpdateInput
   ): GatewayConsumer
+  #  Update multiple GatewayConsumer items by ID.
   updateGatewayConsumers(data: [GatewayConsumersUpdateInput]): [GatewayConsumer]
+  #  Delete a single GatewayConsumer item by ID.
   deleteGatewayConsumer(id: ID!): GatewayConsumer
+  #  Delete multiple GatewayConsumer items by ID.
   deleteGatewayConsumers(ids: [ID!]): [GatewayConsumer]
+  #  Create a single GatewayGroup item.
   createGatewayGroup(data: GatewayGroupCreateInput): GatewayGroup
+  #  Create multiple GatewayGroup items.
   createGatewayGroups(data: [GatewayGroupsCreateInput]): [GatewayGroup]
+  #  Update a single GatewayGroup item by ID.
   updateGatewayGroup(id: ID!, data: GatewayGroupUpdateInput): GatewayGroup
+  #  Update multiple GatewayGroup items by ID.
   updateGatewayGroups(data: [GatewayGroupsUpdateInput]): [GatewayGroup]
+  #  Delete a single GatewayGroup item by ID.
   deleteGatewayGroup(id: ID!): GatewayGroup
+  #  Delete multiple GatewayGroup items by ID.
   deleteGatewayGroups(ids: [ID!]): [GatewayGroup]
+  #  Create a single GatewayPlugin item.
   createGatewayPlugin(data: GatewayPluginCreateInput): GatewayPlugin
+  #  Create multiple GatewayPlugin items.
   createGatewayPlugins(data: [GatewayPluginsCreateInput]): [GatewayPlugin]
+  #  Update a single GatewayPlugin item by ID.
   updateGatewayPlugin(id: ID!, data: GatewayPluginUpdateInput): GatewayPlugin
+  #  Update multiple GatewayPlugin items by ID.
   updateGatewayPlugins(data: [GatewayPluginsUpdateInput]): [GatewayPlugin]
+  #  Delete a single GatewayPlugin item by ID.
   deleteGatewayPlugin(id: ID!): GatewayPlugin
+  #  Delete multiple GatewayPlugin items by ID.
   deleteGatewayPlugins(ids: [ID!]): [GatewayPlugin]
+  #  Create a single GatewayRoute item.
   createGatewayRoute(data: GatewayRouteCreateInput): GatewayRoute
+  #  Create multiple GatewayRoute items.
   createGatewayRoutes(data: [GatewayRoutesCreateInput]): [GatewayRoute]
+  #  Update a single GatewayRoute item by ID.
   updateGatewayRoute(id: ID!, data: GatewayRouteUpdateInput): GatewayRoute
+  #  Update multiple GatewayRoute items by ID.
   updateGatewayRoutes(data: [GatewayRoutesUpdateInput]): [GatewayRoute]
+  #  Delete a single GatewayRoute item by ID.
   deleteGatewayRoute(id: ID!): GatewayRoute
+  #  Delete multiple GatewayRoute items by ID.
   deleteGatewayRoutes(ids: [ID!]): [GatewayRoute]
+  #  Create a single GatewayService item.
   createGatewayService(data: GatewayServiceCreateInput): GatewayService
+  #  Create multiple GatewayService items.
   createGatewayServices(data: [GatewayServicesCreateInput]): [GatewayService]
+  #  Update a single GatewayService item by ID.
   updateGatewayService(id: ID!, data: GatewayServiceUpdateInput): GatewayService
+  #  Update multiple GatewayService items by ID.
   updateGatewayServices(data: [GatewayServicesUpdateInput]): [GatewayService]
+  #  Delete a single GatewayService item by ID.
   deleteGatewayService(id: ID!): GatewayService
+  #  Delete multiple GatewayService items by ID.
   deleteGatewayServices(ids: [ID!]): [GatewayService]
+  #  Create a single Legal item.
   createLegal(data: LegalCreateInput): Legal
+  #  Create multiple Legal items.
   createLegals(data: [LegalsCreateInput]): [Legal]
+  #  Update a single Legal item by ID.
   updateLegal(id: ID!, data: LegalUpdateInput): Legal
+  #  Update multiple Legal items by ID.
   updateLegals(data: [LegalsUpdateInput]): [Legal]
+  #  Delete a single Legal item by ID.
   deleteLegal(id: ID!): Legal
+  #  Delete multiple Legal items by ID.
   deleteLegals(ids: [ID!]): [Legal]
+  #  Create a single Metric item.
   createMetric(data: MetricCreateInput): Metric
+  #  Create multiple Metric items.
   createMetrics(data: [MetricsCreateInput]): [Metric]
+  #  Update a single Metric item by ID.
   updateMetric(id: ID!, data: MetricUpdateInput): Metric
+  #  Update multiple Metric items by ID.
   updateMetrics(data: [MetricsUpdateInput]): [Metric]
+  #  Delete a single Metric item by ID.
   deleteMetric(id: ID!): Metric
+  #  Delete multiple Metric items by ID.
   deleteMetrics(ids: [ID!]): [Metric]
+  #  Create a single Organization item.
   createOrganization(data: OrganizationCreateInput): Organization
+  #  Create multiple Organization items.
   createOrganizations(data: [OrganizationsCreateInput]): [Organization]
+  #  Update a single Organization item by ID.
   updateOrganization(id: ID!, data: OrganizationUpdateInput): Organization
+  #  Update multiple Organization items by ID.
   updateOrganizations(data: [OrganizationsUpdateInput]): [Organization]
+  #  Delete a single Organization item by ID.
   deleteOrganization(id: ID!): Organization
+  #  Delete multiple Organization items by ID.
   deleteOrganizations(ids: [ID!]): [Organization]
+  #  Create a single OrganizationUnit item.
   createOrganizationUnit(data: OrganizationUnitCreateInput): OrganizationUnit
+  #  Create multiple OrganizationUnit items.
   createOrganizationUnits(
     data: [OrganizationUnitsCreateInput]
   ): [OrganizationUnit]
+  #  Update a single OrganizationUnit item by ID.
   updateOrganizationUnit(
     id: ID!
     data: OrganizationUnitUpdateInput
   ): OrganizationUnit
+  #  Update multiple OrganizationUnit items by ID.
   updateOrganizationUnits(
     data: [OrganizationUnitsUpdateInput]
   ): [OrganizationUnit]
+  #  Delete a single OrganizationUnit item by ID.
   deleteOrganizationUnit(id: ID!): OrganizationUnit
+  #  Delete multiple OrganizationUnit items by ID.
   deleteOrganizationUnits(ids: [ID!]): [OrganizationUnit]
+  #  Create a single Product item.
   createProduct(data: ProductCreateInput): Product
+  #  Create multiple Product items.
   createProducts(data: [ProductsCreateInput]): [Product]
+  #  Update a single Product item by ID.
   updateProduct(id: ID!, data: ProductUpdateInput): Product
+  #  Update multiple Product items by ID.
   updateProducts(data: [ProductsUpdateInput]): [Product]
+  #  Delete a single Product item by ID.
   deleteProduct(id: ID!): Product
+  #  Delete multiple Product items by ID.
   deleteProducts(ids: [ID!]): [Product]
+  #  Create a single ServiceAccess item.
   createServiceAccess(data: ServiceAccessCreateInput): ServiceAccess
+  #  Create multiple ServiceAccess items.
   createServiceAccesses(data: [ServiceAccessesCreateInput]): [ServiceAccess]
+  #  Update a single ServiceAccess item by ID.
   updateServiceAccess(id: ID!, data: ServiceAccessUpdateInput): ServiceAccess
+  #  Update multiple ServiceAccess items by ID.
   updateServiceAccesses(data: [ServiceAccessesUpdateInput]): [ServiceAccess]
+  #  Delete a single ServiceAccess item by ID.
   deleteServiceAccess(id: ID!): ServiceAccess
+  #  Delete multiple ServiceAccess items by ID.
   deleteServiceAccesses(ids: [ID!]): [ServiceAccess]
+  #  Create a single TemporaryIdentity item.
   createTemporaryIdentity(data: TemporaryIdentityCreateInput): TemporaryIdentity
+  #  Create multiple TemporaryIdentity items.
   createTemporaryIdentities(
     data: [TemporaryIdentitiesCreateInput]
   ): [TemporaryIdentity]
+  #  Update a single TemporaryIdentity item by ID.
   updateTemporaryIdentity(
     id: ID!
     data: TemporaryIdentityUpdateInput
   ): TemporaryIdentity
+  #  Update multiple TemporaryIdentity items by ID.
   updateTemporaryIdentities(
     data: [TemporaryIdentitiesUpdateInput]
   ): [TemporaryIdentity]
+  #  Delete a single TemporaryIdentity item by ID.
   deleteTemporaryIdentity(id: ID!): TemporaryIdentity
+  #  Delete multiple TemporaryIdentity items by ID.
   deleteTemporaryIdentities(ids: [ID!]): [TemporaryIdentity]
+  #  Create a single User item.
   createUser(data: UserCreateInput): User
+  #  Create multiple User items.
   createUsers(data: [UsersCreateInput]): [User]
+  #  Update a single User item by ID.
   updateUser(id: ID!, data: UserUpdateInput): User
+  #  Update multiple User items by ID.
   updateUsers(data: [UsersUpdateInput]): [User]
+  #  Delete a single User item by ID.
   deleteUser(id: ID!): User
+  #  Delete multiple User items by ID.
   deleteUsers(ids: [ID!]): [User]
   createGatewayConsumerPlugin(id: ID!, plugin: String!): GatewayConsumer
   updateGatewayConsumerPlugin(
@@ -6193,7 +6662,7 @@ type Mutation {
   ): Boolean
   createNamespace(namespace: String!): Namespace
   deleteNamespace(namespace: String!): Boolean
-  createServiceAccount: ServiceAccount
+  createServiceAccount(resourceId: String!, scopes: [String]!): ServiceAccount
   createUmaPolicy(
     prodEnvId: ID!
     resourceId: String!
@@ -6219,14 +6688,18 @@ type Mutation {
     requesterId: String!
     scopes: [String]!
   ): Boolean
-  authenticateUserWithPassword(
+  #  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.
+  authenticateTemporaryIdentityWithPassword(
     email: String
     password: String
-  ): authenticateUserOutput
-  unauthenticateUser: unauthenticateUserOutput
-  updateAuthenticatedUser(data: UserUpdateInput): User
+  ): authenticateTemporaryIdentityOutput
+  unauthenticateTemporaryIdentity: unauthenticateTemporaryIdentityOutput
+  updateAuthenticatedTemporaryIdentity(
+    data: TemporaryIdentityUpdateInput
+  ): TemporaryIdentity
 }
 
+# The Upload scalar type represents a file upload.
 scalar Upload
 
 enum CacheControlScope {

@@ -63,7 +63,13 @@ const schemaWithMocks = addMocksToSchema({
 const server = mockServer(schemaWithMocks, {
   Query: () => ({
     allProducts: () => db.get('products'),
-    allProductsByNamespace: () => db.get('products'),
+    allProductsByNamespace: () => {
+      const products = db.get('products');
+      products.map((prod) => {
+        prod.environments = () => new MockList(2, (_, { id }) => ({ id }));
+      });
+      return products;
+    },
     allNamespaces: () => db.get('namespaces'),
     allDiscoverableProducts: () => new MockList(10, (_, { id }) => ({ id })),
     allEnvironments: () => new MockList(4, (_, { id }) => ({ id })),
@@ -104,6 +110,27 @@ const server = mockServer(schemaWithMocks, {
     getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
     myServiceAccesses: () => new MockList(8, (_, { id }) => ({ id })),
     mySelf: () => db.get('user'),
+    BusinessProfile: () => ({
+      user: {
+        displayName: 'Joe Smith',
+        firstname: 'Joe',
+        surname: 'Smith',
+        email: 'joe_smith@nowhere.com',
+      },
+      institution: {
+        type: 'Other',
+        legalName: 'Smith Associates',
+        address: {
+          addressLine1: '2233 Broadway South',
+          addressLine1: '',
+          city: 'Mincetown',
+          postal: 'V1B4A3',
+          province: 'BC',
+          country: 'CA',
+        },
+        businessTypeOther: 'Corporation',
+      },
+    }),
   }),
   Mutation: () => ({
     createProduct: ({ data }) => {
@@ -243,7 +270,7 @@ const server = mockServer(schemaWithMocks, {
     paths: casual.domain,
     isActive: casual.coin_flip,
     tags: casual.words(3),
-    environments: () => new MockList(1, (_, { id }) => ({ id })),
+    environments: () => new MockList(3, (_, { id }) => ({ id })),
     dataset: randomNullValue(),
     organization: randomNullValue(),
     organizationUnit: randomNullValue(),
@@ -276,17 +303,14 @@ const server = mockServer(schemaWithMocks, {
   }),
   Environment: ({ id }) => ({
     id,
-    name: casual.random_element([
-      'dev',
-      'test',
-      'prod',
-      'sandbox',
-      'other',
-      null,
-    ]),
+    name: casual.random_element(['dev', 'test', 'prod', 'sandbox', 'other']),
     approval: casual.boolean,
     active: casual.boolean,
-    authMethod: casual.random_element(['jwt', 'public', 'keys']),
+    flow: casual.random_element([
+      'kong-api-key-acl',
+      'public',
+      'client-credentials',
+    ]),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
@@ -313,7 +337,7 @@ const server = mockServer(schemaWithMocks, {
     methods: JSON.stringify([
       casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
     ]),
-    tags: '["ns.jh-etk-prod"]',
+    tags: '["ns.sample"]',
   }),
   CredentialIssuer: () => ({
     name: casual.title,
@@ -325,12 +349,19 @@ const server = mockServer(schemaWithMocks, {
     initialAccessToken: casual.card_number,
     clientId: casual.uuid,
     clientSecret: casual.uuid,
-    environments: () => new MockList(2, (_, { id }) => ({ id })),
+    availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),
+    clientRoles: JSON.stringify(['role-a', 'role-b', 'role-c']),
+    resourceScopes: JSON.stringify([]),
+    environments: () => {
+      const envs = [];
+      return JSON.stringify(envs);
+    },
   }),
   GatewayConsumer: () => ({
     username: casual.username,
     customId: () => sample([casual.word, null, null, null]),
     tags: JSON.stringify(casual.array_of_words(random(0, 2))),
+    aclGroups: JSON.stringify([]),
     namespace: () => sample([null, ...data.namespaces]),
     plugins: () => new MockList(random(0, 4), (_, { id }) => ({ id })),
     createdAt: formatISO(new Date()).toString(),
@@ -360,7 +391,7 @@ const server = mockServer(schemaWithMocks, {
         });
         break;
       default:
-        config = '';
+        config = JSON.stringify({});
     }
 
     return {
@@ -429,7 +460,7 @@ const server = mockServer(schemaWithMocks, {
           service: { id: casual.uuid, name: 'my-test-service' },
           route: null,
           kongPluginId: casual.uuid,
-          config: casual.word,
+          config: JSON.stringify({}),
           tags: JSON.stringify(casual.array_of_words(2)),
         },
       ],
@@ -479,6 +510,9 @@ const server = mockServer(schemaWithMocks, {
     const date = subDays(new Date(), subtract);
 
     return formatISO(date);
+  },
+  Activity: () => {
+    return { context: JSON.stringify({ name: 'blah' }) };
   },
 });
 

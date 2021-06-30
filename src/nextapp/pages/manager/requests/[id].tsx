@@ -6,6 +6,7 @@ import {
   Checkbox,
   CheckboxGroup,
   Container,
+  Flex,
   FormControl,
   FormLabel,
   Heading,
@@ -39,8 +40,12 @@ import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import RequestActions from '@/components/request-actions';
+import BusinessProfile from '@/components/business-profile';
 import ActivityList from '@/components/activity-list';
 import breadcrumbs from '@/components/ns-breadcrumb';
+import isString from 'lodash/isString';
+
+const isNotBlank = (v: any) => isString(v) && v.length > 0;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -118,6 +123,8 @@ const AccessRequestPage: React.FC<
   const setRoles = (roles: string[]) => {
     controls['roles'] = roles;
   };
+
+  const requestor = data?.AccessRequest?.requestor;
 
   return data.AccessRequest ? (
     <>
@@ -219,7 +226,27 @@ const AccessRequestPage: React.FC<
                   </FormControl>
                 </TabPanel>
                 <TabPanel>
-                  <Box bgColor="white" p={5}>
+                  {isNotBlank(
+                    data?.AccessRequest.productEnvironment
+                      ?.additionalDetailsToRequest
+                  ) ? (
+                    <Box bgColor="white" p={5}>
+                      <FormControl>
+                        <FormLabel>Instructions for Requester:</FormLabel>
+                        <Box>
+                          {
+                            data?.AccessRequest.productEnvironment
+                              ?.additionalDetailsToRequest
+                          }
+                        </Box>
+                      </FormControl>
+                    </Box>
+                  ) : (
+                    <Box bgColor="white" p={5}>
+                      <Text>No Comments Requested.</Text>
+                    </Box>
+                  )}
+                  <Box bgColor="white" p={5} mt={3}>
                     <FormControl>
                       <FormLabel>Requestor Comments:</FormLabel>
                       <Box>{data?.AccessRequest.additionalDetails}</Box>
@@ -236,14 +263,21 @@ const AccessRequestPage: React.FC<
                 <Heading size="sm" mb={2}>
                   Requestor
                 </Heading>
-                <Text mb={3}>
-                  <Avatar
-                    name={data?.AccessRequest.requestor.name}
-                    size="xs"
-                    mr={2}
-                  />
-                  {data?.AccessRequest.requestor.name}
-                </Text>
+                <Box flex={1} mb={3}>
+                  <Flex>
+                    <Avatar name={requestor.name} size="sm" mr={2} />
+                    <Box ml={2}>
+                      <Text fontWeight="bold">
+                        {requestor.name}{' '}
+                        <Text as="span" fontWeight="normal" color="gray.400">
+                          {requestor.username}
+                        </Text>
+                      </Text>
+                      <Text fontSize="xs">{requestor.email}</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+
                 <Heading size="sm" mb={2}>
                   Environment
                 </Heading>
@@ -253,7 +287,10 @@ const AccessRequestPage: React.FC<
                 <Heading size="sm" mb={2}>
                   Application
                 </Heading>
-                <Text>{data?.AccessRequest.application?.name}</Text>
+                <Text mb={3}>{data?.AccessRequest.application?.name}</Text>
+                <BusinessProfile
+                  serviceAccessId={data?.AccessRequest?.serviceAccess?.id}
+                />
               </Box>
             </GridItem>
           </Grid>
@@ -280,12 +317,17 @@ const query = gql`
       requestor {
         name
         username
+        email
       }
       application {
         name
       }
+      serviceAccess {
+        id
+      }
       productEnvironment {
         name
+        additionalDetailsToRequest
         product {
           name
         }

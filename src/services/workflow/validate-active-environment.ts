@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-
+import { getIssuerEnvironmentConfig } from './types';
 import {
   lookupCredentialIssuerById,
   lookupProductEnvironmentServices,
@@ -93,11 +93,16 @@ export const ValidateActiveEnvironment = async (
           true,
           'Environment missing issuer details'
         );
+
+        const envConfig = getIssuerEnvironmentConfig(issuer, envServices.name);
+
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter(
             (plugin: any) =>
               plugin.name == 'jwt-keycloak' &&
-              plugin.config['well_known_template'] == issuer.oidcDiscoveryUrl
+              plugin.config['well_known_template'].startsWith(
+                envConfig.issuerUrl
+              )
           ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -118,11 +123,14 @@ export const ValidateActiveEnvironment = async (
           true,
           'Environment missing issuer details'
         );
+
+        const envConfig = getIssuerEnvironmentConfig(issuer, envServices.name);
+
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter(
             (plugin: any) =>
               plugin.name == 'oidc' &&
-              plugin.config['discovery'] == issuer.oidcDiscoveryUrl
+              plugin.config['discovery'].startsWith(envConfig.issuerUrl)
           ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current

@@ -166,6 +166,7 @@ export const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleNameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       namespace: { name: 'mapNamespace' },
@@ -198,6 +199,7 @@ export const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleNameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       methods: { name: 'toStringDefaultArray' },
