@@ -55,7 +55,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: .
           file: Dockerfile
-          tags: ${{ steps.release.outputs.tag_name }}
+          tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
           load: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
