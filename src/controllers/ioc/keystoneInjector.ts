@@ -1,6 +1,6 @@
 import { Keystone } from '@keystonejs/keystone';
 import { injectable } from 'tsyringe';
-import { scopes, scopesToRoles } from '../../auth/scopes-to-roles';
+import { scopes, scopesToRoles } from '../../auth/scope-role-utils';
 
 const resolveUsername = function (user: any) {
   for (const nm of ['preferred_username', 'clientId']) {
