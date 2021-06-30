@@ -1,16 +1,16 @@
 // import { Injectable } from "@nestjs/common";
-import { BasicAuthSecurity, Client, createClientAsync } from "soap";
-import { BCeIDConfig } from "./config";
+import { BasicAuthSecurity, Client, createClientAsync } from 'soap';
+import { BCeIDConfig } from './config';
 // import { LoggerService } from "../../logger/logger.service";
-import { ConfigService } from "./config.service";
-import { AccountDetails } from "./account-details.model";
+import { ConfigService } from './config.service';
+import { AccountDetails } from './account-details.model';
 import {
   BCeIDAccountTypeCodes,
   ResponseBase,
   ResponseCodes,
-} from "./bceid.models";
+} from './bceid.models';
 
-import { Logger } from '../../logger'
+import { Logger } from '../../logger';
 
 /**
  * Manage the execution of SOAP requests to the BCeID Web Service as per described
@@ -34,21 +34,6 @@ export class BCeIDService {
    * @returns account details if the account was found, otherwise null.
    */
   public async getAccountDetails(userName: string): Promise<AccountDetails> {
-    if (process.env.DUMMY_BCeID_ACCOUNT_RESPONSE === "yes") {
-      return {
-        user: {
-          guid: "a90b3-ff78c-98b0c-2e5fb-7c667",
-          displayName: "Test Account",
-          firstname: "Test",
-          surname: "Account",
-          email: "test.account@sims.ca",
-        },
-        institution: {
-          guid: "b90a3-ee78b-98a0d-2f5db-7a457",
-          legalName: "Test Institute",
-        },
-      };
-    }
     var client = await this.getSoapClient();
     // SOAP call body to execute the getAccountDetail request.
     var body = {
@@ -68,7 +53,7 @@ export class BCeIDService {
       },
     };
 
-    this.logger.info("Calling with %j", body)
+    this.logger.info('Calling with %j', body);
     try {
       // Destructuring the result of the SOAP request to get the
       // first item on the array where the parsed js object is.
@@ -82,7 +67,7 @@ export class BCeIDService {
       this.ensureSuccessStatusResult(response);
 
       const userAccount = result.getAccountDetailResult.account;
-      this.logger.info("Result = %s", JSON.stringify(userAccount, null, 5))
+      this.logger.info('Result = %j', userAccount);
       return {
         user: {
           guid: userAccount.guid.value,
@@ -90,15 +75,28 @@ export class BCeIDService {
           firstname: userAccount.individualIdentity?.name?.firstname.value,
           surname: userAccount.individualIdentity?.name?.surname.value,
           email: userAccount.contact?.email.value,
+          isSuspended: userAccount.state.isSuspended.value,
+          isManagerDisabled: userAccount.state.isManagerDisabled.value,
         },
         institution: {
           guid: userAccount.business?.guid.value,
+          type: userAccount.business?.type.code,
           legalName: userAccount.business?.legalName.value,
+          businessTypeOther: userAccount.business?.businessTypeOther.value,
+          isSuspended: userAccount.business?.state.isSuspended.value,
+          address: {
+            addressLine1: userAccount.business?.address?.addressLine1.value,
+            addressLine2: userAccount.business?.address?.addressLine2.value,
+            city: userAccount.business?.address?.city.value,
+            postal: userAccount.business?.address?.postal.value,
+            province: userAccount.business?.address?.province.value,
+            country: userAccount.business?.address?.country.value,
+          },
         },
       };
     } catch (error) {
       this.logger.error(
-        `Error while retrieving account details from BCeID Web Service. ${error}`,
+        `Error while retrieving account details from BCeID Web Service. ${error}`
       );
       throw error;
     }
@@ -114,9 +112,12 @@ export class BCeIDService {
     // Authentication needed to execute each SOAP action request.
     const clientSecurity = new BasicAuthSecurity(
       this.bceidConfig.credential.userName,
-      this.bceidConfig.credential.password,
+      this.bceidConfig.credential.password
     );
-    this.logger.info("Soap Client %j", this.bceidConfig.credential)
+    this.logger.info(
+      'Soap Client User %s',
+      this.bceidConfig.credential.userName
+    );
     try {
       var client = await createClientAsync(this.bceidConfig.wsdlEndpoint, {
         wsdl_headers: wsdlAuthHeader,
@@ -125,7 +126,7 @@ export class BCeIDService {
       return client;
     } catch (error) {
       this.logger.error(
-        `Error while creating BCeID Web Service client. ${error}`,
+        `Error while creating BCeID Web Service client. ${error}`
       );
       throw error;
     }
@@ -144,10 +145,10 @@ export class BCeIDService {
         `Method returned an unsuccessful status.
          Code: ${methodCallResult.code},
          failureCode: ${methodCallResult.failureCode},
-         message: ${methodCallResult.message}`,
+         message: ${methodCallResult.message}`
       );
       throw new Error(
-        "Unexpected result while executing request to BCeID Web Service.",
+        'Unexpected result while executing request to BCeID Web Service.'
       );
     }
   }
@@ -158,12 +159,12 @@ export class BCeIDService {
    */
   private getWsdlAuthHeader() {
     const auth =
-      "Basic " +
+      'Basic ' +
       Buffer.from(
-        `${this.bceidConfig.credential.userName}:${this.bceidConfig.credential.password}`,
-      ).toString("base64");
+        `${this.bceidConfig.credential.userName}:${this.bceidConfig.credential.password}`
+      ).toString('base64');
     return { Authorization: auth };
   }
 
-  logger = Logger('bceid.service')
+  logger = Logger('bceid.service');
 }

@@ -34,8 +34,11 @@ import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
 import { FaBook } from 'react-icons/fa';
 import { useRouter } from 'next/router';
+import isString from 'lodash/isString';
 
 const queryKey = 'newAccessRequest';
+
+const isNotBlank = (v: any) => isString(v) && v.length > 0;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -121,7 +124,11 @@ const NewRequestsPage: React.FC<
 
     try {
       const payload = {
-        name: `${dataset.name} FOR ${data.allTemporaryIdentities[0].name}`,
+        name: `${dataset.name} FOR ${
+          data.allTemporaryIdentities[0].name
+            ? data.allTemporaryIdentities[0].name
+            : data.allTemporaryIdentities[0].username
+        }`,
         controls: JSON.stringify({
           clientGenCertificate:
             selectedEnvironment?.credentialIssuer?.clientAuthenticator ===
@@ -233,10 +240,13 @@ const NewRequestsPage: React.FC<
           </FieldsetBox>
 
           <FieldsetBox
-            isRequired={hasSelectedEnvironment}
+            isRequired={
+              hasSelectedEnvironment &&
+              isNotBlank(selectedEnvironment?.additionalDetailsToRequest)
+            }
             title="Additional Information & Terms"
           >
-            {selectedEnvironment?.additionalDetailsToRequest && (
+            {isNotBlank(selectedEnvironment?.additionalDetailsToRequest) && (
               <Box pb={4}>
                 <Text>
                   <Text as="strong">From the API Provider</Text>:{' '}

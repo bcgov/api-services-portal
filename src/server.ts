@@ -176,6 +176,7 @@ const report = require('js-yaml').dump(yamlReport);
 
 for (const _list of [
   'AliasedQueries',
+  'BusinessProfile',
   'ConsumerGroups',
   'ConsumerScopesAndRoles',
   'Namespace',
@@ -324,16 +325,6 @@ const configureExpress = (app: any) => {
     await tasked.start();
     res.status(200).json({ result: 'ok' });
   });
-
-  // const {ConfigService} = require('./services/bceid/config.service')
-  // const {BCeIDService} = require('./services/bceid/bceid.service')
-  // const bc = new BCeIDService(new ConfigService())
-  // bc.getAccountDetails('MaxineDeryck1').then ((answer:any) => {
-  //     console.log("DONE!")
-  //     console.log("ANSWER = " + JSON.stringify(answer))
-  // }).catch ((err: any) => {
-  //     console.log("ERROR ! " + err)
-  // })
 
   // const { NotificationService } = require('./services/notification/notification.service')
 
