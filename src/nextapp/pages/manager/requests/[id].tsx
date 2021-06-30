@@ -43,6 +43,9 @@ import RequestActions from '@/components/request-actions';
 import BusinessProfile from '@/components/business-profile';
 import ActivityList from '@/components/activity-list';
 import breadcrumbs from '@/components/ns-breadcrumb';
+import isString from 'lodash/isString';
+
+const isNotBlank = (v: any) => isString(v) && v.length > 0;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -223,8 +226,10 @@ const AccessRequestPage: React.FC<
                   </FormControl>
                 </TabPanel>
                 <TabPanel>
-                  {data?.AccessRequest.productEnvironment
-                    ?.additionalDetailsToRequest.length > 0 ? (
+                  {isNotBlank(
+                    data?.AccessRequest.productEnvironment
+                      ?.additionalDetailsToRequest
+                  ) ? (
                     <Box bgColor="white" p={5}>
                       <FormControl>
                         <FormLabel>Instructions for Requester:</FormLabel>
