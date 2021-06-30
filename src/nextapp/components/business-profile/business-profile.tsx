@@ -3,6 +3,8 @@ import { Heading, Text } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 
+import Loading from './business-profile-loading';
+
 interface BusinessProfileProps {
   serviceAccessId: string;
 }
@@ -20,39 +22,38 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
   );
 
   if (!data) {
-    return null;
+    return <Loading />;
   }
+  if (data.BusinessProfile.institution == null) {
+    return <></>;
+  }
+  const institution = data.BusinessProfile.institution;
+  const contact = data.BusinessProfile.user;
   return (
     <>
       <Heading size="sm" mb={2}>
         Business Profile
       </Heading>
       <Heading size="xs" mt={3} mb={1}>
-        {data.BusinessProfile.institution.businessTypeOther}
+        {institution.businessTypeOther}
       </Heading>
-      <Text mb={0}>{data.BusinessProfile.institution.legalName}</Text>
+      <Text mb={0}>{institution.legalName}</Text>
+      <Text mb={0}>{institution.address.addressLine1}</Text>
+      <Text mb={0}>{institution.address.addressLine2}</Text>
       <Text mb={0}>
-        {data.BusinessProfile.institution.address.addressLine1}
+        {institution.address.city} {institution.address.province}
       </Text>
-      <Text mb={0}>
-        {data.BusinessProfile.institution.address.addressLine2}
-      </Text>
-      <Text mb={0}>
-        {data.BusinessProfile.institution.address.city}{' '}
-        {data.BusinessProfile.institution.address.province}
-      </Text>
-      <Text mb={0}>{data.BusinessProfile.institution.address.postal}</Text>
-      <Text mb={0}>{data.BusinessProfile.institution.address.country}</Text>
+      <Text mb={0}>{institution.address.postal}</Text>
+      <Text mb={0}>{institution.address.country}</Text>
 
       <Heading size="xs" mt={3} mb={1}>
         Contact
       </Heading>
-      <Text mb={0}>{data.BusinessProfile.user.displayName}</Text>
+      <Text mb={0}>{contact.displayName}</Text>
       <Text mb={0}>
-        {data.BusinessProfile.user.surname},{' '}
-        {data.BusinessProfile.user.firstname}
+        {contact.surname}, {contact.firstname}
       </Text>
-      <Text mb={0}>{data.BusinessProfile.user.email}</Text>
+      <Text mb={0}>{contact.email}</Text>
     </>
   );
 };
