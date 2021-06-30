@@ -21,6 +21,7 @@ export async function lookupProductEnvironmentServices(
                         credentialIssuer {
                             id
                             flow
+                            environmentDetails
                         }
                         services {
                             name
