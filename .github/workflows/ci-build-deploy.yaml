@@ -221,7 +221,8 @@ jobs:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
               value: '${{ secrets.KEYCLOAK_REALM }}'
-
+            COOKIE_SECURE:
+              value: 'true'
 
           readinessProbe:
             exec:

@@ -11,6 +11,7 @@ const querystring = require('querystring');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
+const { deriveRoleFromUsername } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
 const authLogoutUrl =
@@ -175,6 +176,7 @@ class Oauth2ProxyAuthStrategy {
         try {
           const rpt = jwtDecoder(accessToken);
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+          const username = req['oauth_user']['preferred_username']; // Username included in token
           // The oauth2_proxy is handling the refresh token; so there can be a new jti
           logger.info(
             '[ns-switch] %s -> %s : %s',
@@ -185,6 +187,7 @@ class Oauth2ProxyAuthStrategy {
           await this.assign_namespace(
             req.user.jti,
             jti,
+            username,
             rpt['authorization']['permissions'][0]
           );
           res.json({ switch: true });
@@ -197,7 +200,7 @@ class Oauth2ProxyAuthStrategy {
     return app;
   }
 
-  async assign_namespace(jti, newJti, umaAuthDetails) {
+  async assign_namespace(jti, newJti, username, umaAuthDetails) {
     const namespace = umaAuthDetails['rsname'];
     const scopes = umaAuthDetails['scopes'];
     const _roles = [];
@@ -214,6 +217,7 @@ class Oauth2ProxyAuthStrategy {
     }
 
     _roles.push('portal-user');
+    _roles.push(deriveRoleFromUsername(username));
 
     const roles = JSON.stringify(_roles);
 
@@ -261,12 +265,16 @@ class Oauth2ProxyAuthStrategy {
 
     const name = oauthUser['name'];
     const email = oauthUser['email'];
+    const username = oauthUser['preferred_username'];
     const namespace = oauthUser['namespace'];
     const groups = JSON.stringify(oauthUser['groups']);
     const _roles = [];
     const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
-    
-    if ('resource_access' in oauthUser && clientId in oauthUser['resource_access']) {
+
+    if (
+      'resource_access' in oauthUser &&
+      clientId in oauthUser['resource_access']
+    ) {
       try {
         logger.debug('register_user - Getting resources for [%s]', clientId);
 
@@ -274,21 +282,17 @@ class Oauth2ProxyAuthStrategy {
           .filter((r) => allRoles.includes(r))
           .map((r) => _roles.push(r));
 
-        _roles.push('portal-user');
-
         logger.debug('register_user - Roles = %s', _roles);
       } catch (e) {
         logger.error(
           'register_user - error parsing resource_access roles %s - defaulting roles to none - %s',
           e
         );
-        _roles.push('developer');
-        _roles.push('portal-user');
       }
-    } else {
-      _roles.push('developer');
-      _roles.push('portal-user');
     }
+    _roles.push('portal-user');
+    _roles.push(deriveRoleFromUsername(username));
+
     const roles = JSON.stringify(_roles); // authenticated user gets developer role automatically
 
     /*
@@ -305,8 +309,6 @@ class Oauth2ProxyAuthStrategy {
             developer        : A Developer discovers APIs, requests access if required and consumes them - everyone has 'developer' role
             aps-admin        : Someone from the APS team with elevated privileges.
         */
-
-    const username = oauthUser['preferred_username'];
 
     let _results = await _users.adapter.find({ username: username });
 
