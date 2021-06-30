@@ -30,6 +30,7 @@ const query = gql`
       name
       requestor {
         name
+        username
       }
     }
   }
@@ -47,11 +48,14 @@ const AccessRequests: React.FC = () => {
   );
   const total = data?.allAccessRequestsByNamespace.length ?? 0;
   const isShowingAll = total > initialSlice && sliceIndex !== initialSlice;
-  const color = data?.allAccessRequestsByNamespace.length === 0 ? 'blue' : 'yellow';
+  const color =
+    data?.allAccessRequestsByNamespace.length === 0 ? 'blue' : 'yellow';
   const handleShowMore = React.useCallback(
     () =>
       setSliceIndex((s) =>
-        s === initialSlice ? data.allAccessRequestsByNamespace.length : initialSlice
+        s === initialSlice
+          ? data.allAccessRequestsByNamespace.length
+          : initialSlice
       ),
     [data, setSliceIndex]
   );
@@ -110,7 +114,9 @@ const AccessRequests: React.FC = () => {
                     {d.requestor && (
                       <>
                         <Text as="span" fontWeight="bold">
-                          {d.requestor?.name}
+                          {d.requestor?.name
+                            ? d.requestor?.name
+                            : d.requestor.username}
                         </Text>{' '}
                         is requesting access to{' '}
                       </>
