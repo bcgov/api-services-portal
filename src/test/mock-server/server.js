@@ -343,7 +343,7 @@ const server = mockServer(schemaWithMocks, {
     name: casual.title,
     description: casual.description,
     authMethod: casual.random_element(['jwt', 'public', 'keys']),
-    mode: casual.word,
+    mode: casual.random_element(['manual', 'auto']),
     instruction: casual.description,
     oidcDiscoveryUrl: casual.url,
     initialAccessToken: casual.card_number,

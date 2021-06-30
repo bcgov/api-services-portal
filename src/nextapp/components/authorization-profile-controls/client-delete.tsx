@@ -1,4 +1,4 @@
-import { useApiMutation } from '@/shared/services/api';
+import * as React from 'react';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -11,40 +11,16 @@ import {
   Icon,
   IconButton,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react';
-import { gql } from 'graphql-request';
-import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
-import { useQueryClient } from 'react-query';
 
 interface ClientDeleteProps {
-  // id: string;
+  onDelete: () => void;
 }
 
-const ClientDelete: React.FC<ClientDeleteProps> = () => {
-  const toast = useToast();
-  const queryClient = useQueryClient();
+const ClientDelete: React.FC<ClientDeleteProps> = ({ onDelete }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const deleteMutation = useApiMutation<{ id: string }>(mutation);
   const cancelRef = React.useRef();
-
-  const handleDelete = async () => {
-    try {
-      // await deleteMutation.mutateAsync({ id });
-      // queryClient.invalidateQueries('allApplications');
-      // toast({
-      //   title: 'Issuer Environment deleted',
-      //   status: 'success',
-      // });
-      onClose();
-    } catch {
-      toast({
-        title: 'Issuer Environment delete failed',
-        status: 'error',
-      });
-    }
-  };
 
   return (
     <>
@@ -75,7 +51,7 @@ const ClientDelete: React.FC<ClientDeleteProps> = () => {
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button colorScheme="red" ml={3} onClick={onDelete}>
               Yes, Delete
             </Button>
           </AlertDialogFooter>
@@ -86,12 +62,3 @@ const ClientDelete: React.FC<ClientDeleteProps> = () => {
 };
 
 export default ClientDelete;
-
-const mutation = gql`
-  mutation Remove($id: ID!) {
-    deleteApplication(id: $id) {
-      name
-      id
-    }
-  }
-`;

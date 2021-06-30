@@ -1,19 +1,5 @@
 import * as React from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Text,
-  ButtonGroup,
-  Flex,
-  Divider,
-  Heading,
-  FormControl,
-  FormLabel,
-  Input,
-  Grid,
-  AlertIcon,
-} from '@chakra-ui/react';
+import { Button, ButtonGroup, Flex, Divider } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { CredentialIssuer } from '@/shared/types/query.types';
 
@@ -21,6 +7,7 @@ import AuthorizationProfileAuthentication from './authentication';
 import AuthorizationProfileSection from './profile';
 import AuthorizationProfileAuthorization from './authorization';
 import ClientManagment from './client-management';
+import { EnvironmentItem } from './types';
 
 interface AuthorizationProfileFormProps {
   issuer?: CredentialIssuer;
@@ -31,17 +18,54 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   issuer,
   onSubmit,
 }) => {
+  const form = React.useRef<HTMLFormElement>(null);
   const [flow, setFlow] = React.useState<string | number>(issuer?.flow);
+  const [mode, setMode] = React.useState<string | number>(
+    issuer?.mode ?? 'auto'
+  );
+  const [environments, setEnvironments] = React.useState<EnvironmentItem[]>(
+    () => {
+      try {
+        return JSON.parse(issuer.environmentDetails);
+      } catch {
+        return [];
+      }
+    }
+  );
+
   const handleSubmit = React.useCallback(
     (event) => {
       event.preventDefault();
-      console.log(event.target.elements.name.value);
+      if (form.current?.checkValidity()) {
+        const formData = new FormData(form.current);
+        const payload = {
+          environmentDetails: JSON.stringify(environments),
+        };
+
+        for (const [key, value] of formData.entries()) {
+          payload[key] = value;
+        }
+
+        onSubmit(payload);
+      }
     },
-    [onSubmit]
+    [environments, onSubmit]
+  );
+  const handleCreateEnvironment = React.useCallback(
+    (payload: EnvironmentItem) => {
+      setEnvironments((state) => [...state, payload]);
+    },
+    [setEnvironments]
+  );
+  const handleDeleteEnvironment = React.useCallback(
+    (index: number) => {
+      setEnvironments((state) => state.filter((_, i) => i !== index));
+    },
+    [setEnvironments]
   );
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={form} onSubmit={handleSubmit}>
       <AuthorizationProfileSection issuer={issuer} />
       <AuthorizationProfileAuthentication
         flow={flow}
@@ -50,8 +74,17 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
       />
       {flow === 'client-credentials' && (
         <>
-          <AuthorizationProfileAuthorization issuer={issuer} />
-          <ClientManagment issuer={issuer} />
+          <AuthorizationProfileAuthorization
+            issuer={issuer}
+            mode={mode}
+            onModeChange={setMode}
+          />
+          <ClientManagment
+            data={environments}
+            mode={mode}
+            onCreate={handleCreateEnvironment}
+            onDelete={handleDeleteEnvironment}
+          />
         </>
       )}
       <Divider my={4} />

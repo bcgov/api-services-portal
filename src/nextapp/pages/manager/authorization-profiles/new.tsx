@@ -1,19 +1,19 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
-import { Container } from '@chakra-ui/react';
-import { dehydrate } from 'react-query/hydration';
+import { useApiMutation } from '@/shared/services/api';
+import { Container, useToast } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
-import AuthorizationProfileForm, {
-  DeleteAuthorizationProfile,
-} from '@/components/authorization-profile-controls';
+import AuthorizationProfileForm from '@/components/authorization-profile-controls';
+import { CredentialIssuerCreateInput } from '@/shared/types/query.types';
+import { useRouter } from 'next/router';
+import { useQueryClient } from 'react-query';
 
 const AuthorizationProfile: React.FC = () => {
+  const router = useRouter();
+  const toast = useToast();
+  const client = useQueryClient();
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
       href: '/manager/authorization-profiles',
@@ -25,9 +25,27 @@ const AuthorizationProfile: React.FC = () => {
     },
   ]);
 
-  const handleSubmit = React.useCallback((payload: any) => {
-    console.log(payload);
-  }, []);
+  const { mutateAsync } = useApiMutation(mutation);
+
+  const handleSubmit = React.useCallback(
+    async (payload: CredentialIssuerCreateInput) => {
+      try {
+        await mutateAsync({ data: payload });
+        client.invalidateQueries('authorizationProfiles');
+        toast({
+          title: 'Credential issuer updated',
+          status: 'success',
+        });
+        router?.push('/manager/authorization-profiles');
+      } catch {
+        toast({
+          title: 'Unable to create credential issuer',
+          status: 'error',
+        });
+      }
+    },
+    [client, mutateAsync, router, toast]
+  );
 
   return (
     <>
@@ -46,33 +64,10 @@ const AuthorizationProfile: React.FC = () => {
 
 export default AuthorizationProfile;
 
-const query = gql`
-  query GetCredentialIssuer($id: ID!) {
-    CredentialIssuer(where: { id: $id }) {
+const mutation = gql`
+  mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {
+    createCredentialIssuer(data: $data) {
       id
-      name
-      flow
-      mode
-      apiKeyName
-      clientAuthenticator
-      clientRoles
-      availableScopes
-      resourceScopes
-      resourceType
-      resourceAccessScope
-      environmentDetails
-      owner {
-        id
-        name
-        username
-        email
-      }
-      environments {
-        name
-        product {
-          name
-        }
-      }
     }
   }
 `;

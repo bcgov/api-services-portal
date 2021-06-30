@@ -1,39 +1,33 @@
 import * as React from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, Text } from '@chakra-ui/react';
 import { uid } from 'react-uid';
-import { CredentialIssuer } from '@/shared/types/query.types';
 
 import ClientDelete from './client-delete';
 import Section from '../section';
 import NewClient from './new-client';
-
-interface EnvironmentItem {
-  environment: string;
-  issuerUrl: string;
-  clientRegistration: string;
-  clientId: string;
-}
+import { EnvironmentItem } from './types';
 
 interface ClientManagmentProps {
-  issuer: CredentialIssuer;
+  data: EnvironmentItem[];
+  mode?: string;
+  onCreate: (payload: EnvironmentItem) => void;
+  onDelete: (index: number) => void;
 }
 
-const ClientManagment: React.FC<ClientManagmentProps> = ({ issuer }) => {
-  const environments: EnvironmentItem[] = React.useMemo(() => {
-    try {
-      return JSON.parse(issuer.environmentDetails);
-    } catch {
-      return [];
-    }
-  }, [issuer]);
-
-  const handleCreate = React.useCallback((payload) => {
-    console.log('create', payload);
-  }, []);
+const ClientManagment: React.FC<ClientManagmentProps> = ({
+  data,
+  mode,
+  onCreate,
+  onDelete,
+}) => {
+  const handleDelete = React.useCallback(
+    (index: number) => () => onDelete(index),
+    [onDelete]
+  );
 
   return (
     <Section
-      actions={<NewClient mode={issuer?.mode} onCreate={handleCreate} />}
+      actions={<NewClient mode={mode} onCreate={onCreate} />}
       title="Client Management"
     >
       <Table variant="simple">
@@ -47,20 +41,24 @@ const ClientManagment: React.FC<ClientManagmentProps> = ({ issuer }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {environments.map((e) => (
+          {data.map((e, index) => (
             <Tr key={uid(e)}>
               <Td>{e.environment}</Td>
               <Td>{e.issuerUrl}</Td>
               <Td>{e.clientRegistration}</Td>
               <Td>{e.clientId}</Td>
               <Td>
-                <ClientDelete />
+                <ClientDelete onDelete={handleDelete(index)} />
               </Td>
             </Tr>
           ))}
-          {!environments.length && (
+          {!data.length && (
             <Tr>
-              <Td colSpan={5}>none created</Td>
+              <Td colSpan={5}>
+                <Text align="center">
+                  You haven&apos;t created any environments yet
+                </Text>
+              </Td>
             </Tr>
           )}
         </Tbody>

@@ -1,17 +1,18 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
-import { Container } from '@chakra-ui/react';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
+import { Container, useToast } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { QueryClient, useQueryClient } from 'react-query';
+import { CredentialIssuerUpdateInput, Query } from '@/shared/types/query.types';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import AuthorizationProfileForm, {
   DeleteAuthorizationProfile,
 } from '@/components/authorization-profile-controls';
+import { useRouter } from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -42,6 +43,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const AuthorizationProfile: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
+  const router = useRouter();
+  const toast = useToast();
+  const client = useQueryClient();
   const { data } = useApi(
     queryKey,
     { query, variables: { id } },
@@ -58,11 +62,27 @@ const AuthorizationProfile: React.FC<
       text: issuer?.name,
     },
   ]);
+  const { mutateAsync } = useApiMutation(mutation);
 
-  const handleSubmit = React.useCallback((payload: any) => {
-    console.log(payload);
-  }, []);
-  console.log(issuer);
+  const handleSubmit = React.useCallback(
+    async (payload: CredentialIssuerUpdateInput) => {
+      try {
+        await mutateAsync({ id, data: payload });
+        client.invalidateQueries('authorizationProfiles');
+        toast({
+          title: 'Credential issuer updated',
+          status: 'success',
+        });
+        router?.push('/manager/authorization-profiles');
+      } catch {
+        toast({
+          title: 'Unable to create credential issuer',
+          status: 'error',
+        });
+      }
+    },
+    [client, id, mutateAsync, router, toast]
+  );
 
   return (
     <>
@@ -110,6 +130,14 @@ const query = gql`
           name
         }
       }
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {
+    updateCredentialIssuer(id: $id, data: $data) {
+      id
     }
   }
 `;

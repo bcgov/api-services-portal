@@ -15,6 +15,7 @@ import isEmpty from 'lodash/isEmpty';
 import { uid } from 'react-uid';
 
 interface ListInputProps {
+  buttonText?: string;
   label: string;
   name: string;
   placeholder?: string;
@@ -23,6 +24,7 @@ interface ListInputProps {
 }
 
 const ListInput: React.FC<ListInputProps> = ({
+  buttonText = 'Add Value',
   label,
   name,
   placeholder,
@@ -73,11 +75,13 @@ const ListInput: React.FC<ListInputProps> = ({
             {values.length > 1 && (
               <InputRightElement width="3rem">
                 <IconButton
+                  aria-label="delete item"
                   colorScheme="red"
                   h="1.75rem"
                   icon={<Icon as={FaTimes} />}
                   size="sm"
                   onClick={handleRemove(index)}
+                  variant="link"
                 />
               </InputRightElement>
             )}
@@ -92,7 +96,7 @@ const ListInput: React.FC<ListInputProps> = ({
           size="sm"
           onClick={handleAdd}
         >
-          Add Value
+          {buttonText}
         </Button>
       </Box>
     </>

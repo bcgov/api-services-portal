@@ -10,7 +10,6 @@ import {
   Stack,
   Radio,
   RadioGroup,
-  Textarea,
   Divider,
 } from '@chakra-ui/react';
 import ListInput from '@/components/forms/list-input';
@@ -20,10 +19,14 @@ import FormGroup from './form-group';
 
 interface AuthorizationProfileAuthorizationProps {
   issuer: CredentialIssuer;
+  mode: string;
+  onModeChange: (value: number | string) => void;
 }
 
 const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizationProps> = ({
   issuer,
+  mode,
+  onModeChange,
 }) => {
   return (
     <Section title="Authorization">
@@ -57,7 +60,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
       >
         <FormControl as="fieldset" isRequired>
           <FormLabel as="legend">Mode</FormLabel>
-          <RadioGroup defaultValue={issuer?.mode}>
+          <RadioGroup value={mode} onChange={onModeChange}>
             <Stack>
               <Radio name="mode" value="manual">
                 Manual
@@ -82,6 +85,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
         }
       >
         <ListInput
+          buttonText="Add Scope"
           label="Scopes"
           name="availableScopes"
           value={issuer?.availableScopes}
@@ -102,6 +106,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
       >
         <ListInput
           required
+          buttonText="Add Client Roles"
           label="Client Roles"
           name="clientRoles"
           value={issuer?.clientRoles}
@@ -132,6 +137,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
         }
       >
         <ListInput
+          buttonText="Add Resource Scope"
           label="Resource Scopes"
           name="resourceScopes"
           value={issuer?.resourceScopes}
