@@ -63,7 +63,7 @@ jobs:
             APP_REVISION=${GITHUB_SHA}
 
       - name: Push
-        run: docker push ${{ steps.release.outputs.tag_name }}
+        run: docker push ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
 
       # - name: Create docker image data-feeder
       #   uses: docker/build-push-action@v1
