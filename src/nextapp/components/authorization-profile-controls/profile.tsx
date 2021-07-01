@@ -1,22 +1,11 @@
 import * as React from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Text,
-  ButtonGroup,
-  Flex,
-  Divider,
-  Heading,
-  FormControl,
-  FormLabel,
-  Input,
-  Grid,
-  AlertIcon,
-} from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Heading, Input } from '@chakra-ui/react';
+import ProfileCard from '@/components/profile-card';
 import { CredentialIssuer } from '@/shared/types/query.types';
+
 import Section from '../section';
 import FormGroup from './form-group';
+import { useAuth } from '@/shared/services/auth';
 
 interface AuthorizationProfileSection {
   issuer?: CredentialIssuer;
@@ -25,37 +14,21 @@ interface AuthorizationProfileSection {
 const AuthorizationProfileSection: React.FC<AuthorizationProfileSection> = ({
   issuer,
 }) => {
+  const { user } = useAuth();
+  const administrator = issuer?.owner ?? user;
+
   return (
     <Section title="Profile">
       <FormGroup
         infoBoxes={
-          <Alert variant="left-accent">
-            <AlertIcon />
-            <Grid
-              as="dl"
-              fontSize="sm"
-              gap={2}
-              templateColumns="45% 1fr"
-              lineHeight="shorter"
-              sx={{
-                dt: {
-                  fontWeight: 'bold',
-                },
-              }}
-              w="100%"
-            >
-              <Text as="dt">Administrator Name</Text>
-              <Text as="dd">{issuer?.owner.name}</Text>
-              <Text as="dt" fontWeight="normal">
-                Username
-              </Text>
-              <Text as="dd">{issuer?.owner.username}</Text>
-              <Text as="dt" fontWeight="normal">
-                Email
-              </Text>
-              <Text as="dd">{issuer?.owner.email}</Text>
-            </Grid>
-          </Alert>
+          administrator && (
+            <Box>
+              <Heading size="sm" mb={2}>
+                Administrator
+              </Heading>
+              <ProfileCard data={administrator} />
+            </Box>
+          )
         }
       >
         <FormControl isRequired mb={4} isDisabled={false}>

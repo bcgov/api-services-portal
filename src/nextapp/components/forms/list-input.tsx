@@ -31,6 +31,7 @@ const ListInput: React.FC<ListInputProps> = ({
   required,
   value = '',
 }) => {
+  const fieldsetRef = React.useRef<HTMLDivElement>(null);
   const [values, setValues] = React.useState<string[]>(value.split('\n'));
   const computedValue = React.useMemo(() => {
     return values.filter((v) => !isEmpty(v)).join('\n');
@@ -51,24 +52,36 @@ const ListInput: React.FC<ListInputProps> = ({
         })
       );
     },
-    [setValues, values]
+    [setValues]
   );
   const handleRemove = React.useCallback(
     (index: number) => () => {
-      setValues((state) => state.filter((v, i) => i !== index));
+      setValues((state) => state.filter((_, i) => i !== index));
     },
     [setValues]
   );
 
+  React.useLayoutEffect(() => {
+    fieldsetRef.current
+      ?.querySelector('.list-input-item:last-of-type input')
+      .focus();
+  }, [values]);
+
   return (
     <>
-      <FormControl isRequired={required}>
+      <FormControl isRequired={required} ref={fieldsetRef}>
         <FormLabel>{label}</FormLabel>
         {values.map((v, index) => (
-          <InputGroup key={uid(index)} mb={2} id={uid(index)}>
+          <InputGroup
+            key={uid(index)}
+            mb={2}
+            id={uid(index)}
+            className="list-input-item"
+          >
             <Input
               onChange={handleChange(index)}
               placeholder={placeholder}
+              type="text"
               variant="bc-input"
               value={v}
             />

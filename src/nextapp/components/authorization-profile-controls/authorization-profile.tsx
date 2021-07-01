@@ -1,7 +1,10 @@
 import * as React from 'react';
 import { Button, ButtonGroup, Flex, Divider } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { CredentialIssuer } from '@/shared/types/query.types';
+import {
+  CredentialIssuer,
+  CredentialIssuerCreateInput,
+} from '@/shared/types/query.types';
 
 import AuthorizationProfileAuthentication from './authentication';
 import AuthorizationProfileSection from './profile';
@@ -11,7 +14,7 @@ import { EnvironmentItem } from './types';
 
 interface AuthorizationProfileFormProps {
   issuer?: CredentialIssuer;
-  onSubmit: (payload: any) => void;
+  onSubmit: (payload: CredentialIssuerCreateInput) => void;
 }
 
 const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
