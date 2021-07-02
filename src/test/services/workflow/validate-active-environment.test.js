@@ -231,23 +231,6 @@ describe('Validate Active Environment', function () {
         },
       };
 
-      // const prodEnv =
-      //   ctx.context.IN.GetProductEnvironmentServices.data.allEnvironments[0];
-      // prodEnv.flow = 'client-credentials';
-      // prodEnv.credentialIssuer = {
-      //   oidcDiscoveryUrl:
-      //     'http://provider/realm/.well-known/openid-configuration',
-      // };
-      // prodEnv.services[0].plugins = [
-      //   {
-      //     name: 'jwt-keycloak',
-      //     config: JSON.stringify({
-      //       well_known_template:
-      //         'http://provider/realm/.well-known/openid-configuration',
-      //     }),
-      //   },
-      // ];
-
       await ValidateActiveEnvironment(
         ctx.context,
         'create',
