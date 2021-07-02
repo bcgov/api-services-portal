@@ -1,6 +1,6 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
-import { Box, Container, Divider, Heading, Text } from '@chakra-ui/react';
+import { Box, Container, Divider, Heading } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import GrantAccessDialog from '@/components/grant-access-dialog';
 import GrantServiceAccountDialog from '@/components/grant-service-account-dialog';
