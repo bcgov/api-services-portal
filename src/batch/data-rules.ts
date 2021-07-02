@@ -310,7 +310,7 @@ export const metadata = {
   Product: {
     query: 'allProducts',
     refKey: 'appId',
-    sync: ['name'],
+    sync: ['name', 'namespace'],
     transformations: {
       dataset: { name: 'connectOne', list: 'allDatasets', refKey: 'name' },
       environments: {
