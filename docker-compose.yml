@@ -23,6 +23,7 @@ services:
         '-Dkeycloak.migration.provider=singleFile',
         '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
         '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
+        '-Dkeycloak.profile.feature.upload_scripts=enabled',
       ]
     ports:
       - 9080:9080/tcp
@@ -67,12 +68,29 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    ports:
+      - 3000:3000
     networks:
       portal:
         aliases:
           - apsportal.localtest.me
       keycloak: {}
       oauth2-proxy: {}
+  feeder:
+    container_name: feeder
+    depends_on:
+      - apsportal
+    build:
+      context: ./feeds
+      dockerfile: Dockerfile
+    env_file:
+      - ./feeds/.env
+    ports:
+      - 6000:6000
+    networks:
+      portal:
+        aliases:
+          - feeder.localtest.me
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -86,7 +104,6 @@ services:
     volumes:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
-      - aps-pg-data:/var/lib/postgresql/data
     networks:
       - kong-net
       - keycloak
