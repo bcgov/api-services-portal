@@ -52,7 +52,13 @@ const PROJECT_NAME = 'APS Service Portal';
 const telemetry = new Telemetry();
 const counter = telemetry.newCounter(
   'user_list_actions',
-  'List actions by username'
+  'List actions by username',
+  ['requester', 'list', 'action']
+);
+
+const opCounter = telemetry.newCounter(
+  'operation_counter',
+  'Number of operations by name'
 );
 
 const { KnexAdapter } = require('@keystonejs/adapter-knex');
@@ -260,6 +266,7 @@ const LogPlugin = {
   requestDidStart(requestContext: any) {
     const start = Date.now();
     const op: { op: string } = { op: null };
+    console.log('Started... ' + requestContext);
 
     return {
       didResolveOperation(context: any) {
@@ -282,9 +289,9 @@ const apps = [
   new ApiOpenapiApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
-    // apollo: {
-    //   plugins: [LogPlugin],
-    // },
+    apollo: {
+      plugins: [LogPlugin],
+    },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
@@ -302,20 +309,20 @@ const apps = [
   }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
   new NextApp({ dir: 'nextapp' }),
-  () => {
-    return {
-      prepareMiddleware({ keystone, dev }: any) {
-        keystone.createApolloServer({
-          apolloConfig: {
-            plugins: [LogPlugin],
-          },
-          schemaName: 'internal',
-        });
-        return express();
-      },
-      build() {},
-    };
-  },
+  // () => {
+  //   return {
+  //     prepareMiddleware({ keystone, dev }: any) {
+  //       keystone.createApolloServer({
+  //         apolloConfig: {
+  //           plugins: [LogPlugin],
+  //         },
+  //         schemaName: 'internal',
+  //       });
+  //       return express();
+  //     },
+  //     build() {},
+  //   };
+  // },
 ];
 
 const dev = process.env.NODE_ENV !== 'production';

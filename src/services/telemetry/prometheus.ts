@@ -20,12 +20,12 @@ export class Telemetry {
     });
   }
 
-  public newCounter(name: string, help: string): any {
+  public newCounter(name: string, help: string, labels: string[]): any {
     const counter = new client.Counter({
       name: name,
       help: help,
       // add `as const` here to enforce label names
-      labelNames: ['requester', 'list', 'action'],
+      labelNames: labels,
       registers: [this.register],
     });
     return counter;
