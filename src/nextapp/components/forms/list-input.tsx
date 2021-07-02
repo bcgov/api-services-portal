@@ -27,7 +27,7 @@ const ListInput: React.FC<ListInputProps> = ({
   name,
   placeholder,
   required,
-  value,
+  value = '',
 }) => {
   const [values, setValues] = React.useState<string[]>(value.split('\n'));
   const computedValue = React.useMemo(() => {

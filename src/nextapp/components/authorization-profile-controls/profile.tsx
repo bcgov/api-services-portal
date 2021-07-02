@@ -42,17 +42,18 @@ const AuthorizationProfileSection: React.FC<AuthorizationProfileSection> = ({
                   fontWeight: 'bold',
                 },
               }}
+              w="100%"
             >
               <Text as="dt">Administrator Name</Text>
-              <Text as="dd">{issuer.owner.name}</Text>
+              <Text as="dd">{issuer?.owner.name}</Text>
               <Text as="dt" fontWeight="normal">
                 Username
               </Text>
-              <Text as="dd">{issuer.owner.username}</Text>
+              <Text as="dd">{issuer?.owner.username}</Text>
               <Text as="dt" fontWeight="normal">
                 Email
               </Text>
-              <Text as="dd">{issuer.owner.email}</Text>
+              <Text as="dd">{issuer?.owner.email}</Text>
             </Grid>
           </Alert>
         }

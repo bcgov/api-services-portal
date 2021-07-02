@@ -84,7 +84,7 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
                 placeholder="Key Name"
                 name="apiKeyName"
                 variant="bc-input"
-                defaultValue={issuer.apiKeyName}
+                defaultValue={issuer?.apiKeyName}
               />
             </FormControl>
           </Box>
@@ -96,7 +96,7 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
           <FormGroup>
             <FormControl isRequired as="fieldset">
               <FormLabel as="legend">Client Authenticator</FormLabel>
-              <RadioGroup defaultValue={issuer.clientAuthenticator}>
+              <RadioGroup defaultValue={issuer?.clientAuthenticator}>
                 <Stack>
                   <Radio name="clientAuthenticator" value="client-secret">
                     Client ID and Secret

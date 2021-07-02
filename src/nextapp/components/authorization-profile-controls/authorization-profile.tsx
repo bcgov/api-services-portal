@@ -14,11 +14,13 @@ import {
   Grid,
   AlertIcon,
 } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import { CredentialIssuer } from '@/shared/types/query.types';
 
 import AuthorizationProfileAuthentication from './authentication';
 import AuthorizationProfileSection from './profile';
 import AuthorizationProfileAuthorization from './authorization';
+import ClientManagment from './client-management';
 
 interface AuthorizationProfileFormProps {
   issuer?: CredentialIssuer;
@@ -41,22 +43,25 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   return (
     <form onSubmit={handleSubmit}>
       <AuthorizationProfileSection issuer={issuer} />
-      {issuer && (
-        <AuthorizationProfileAuthentication
-          flow={flow}
-          issuer={issuer}
-          onChange={setFlow}
-        />
-      )}
+      <AuthorizationProfileAuthentication
+        flow={flow}
+        issuer={issuer}
+        onChange={setFlow}
+      />
       {flow === 'client-credentials' && (
-        <AuthorizationProfileAuthorization issuer={issuer} />
+        <>
+          <AuthorizationProfileAuthorization issuer={issuer} />
+          <ClientManagment issuer={issuer} />
+        </>
       )}
       <Divider my={4} />
       <Flex justify="flex-end">
         <ButtonGroup>
-          <Button>Cancel</Button>
+          <NextLink href="/manager/authorization-profiles">
+            <Button>Cancel</Button>
+          </NextLink>
           <Button variant="primary" type="submit">
-            Save Changes
+            {issuer ? 'Save Changes' : 'Create'}
           </Button>
         </ButtonGroup>
       </Flex>

@@ -358,6 +358,8 @@ const server = mockServer(schemaWithMocks, {
       const envs = [];
       return JSON.stringify(envs);
     },
+    environmentDetails:
+      '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
   }),
   GatewayConsumer: () => ({
     username: casual.username,

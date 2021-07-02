@@ -57,7 +57,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
       >
         <FormControl as="fieldset" isRequired>
           <FormLabel as="legend">Mode</FormLabel>
-          <RadioGroup defaultValue={issuer.mode}>
+          <RadioGroup defaultValue={issuer?.mode}>
             <Stack>
               <Radio name="mode" value="manual">
                 Manual
@@ -84,7 +84,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
         <ListInput
           label="Scopes"
           name="availableScopes"
-          value={issuer.availableScopes}
+          value={issuer?.availableScopes}
         />
       </FormGroup>
       <Divider />
@@ -104,7 +104,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           required
           label="Client Roles"
           name="clientRoles"
-          value={issuer.clientRoles}
+          value={issuer?.clientRoles}
         />
       </FormGroup>
       <Divider />
@@ -115,7 +115,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
             placeholder="Resource Type"
             name="resourceType"
             variant="bc-input"
-            defaultValue={issuer.resourceType}
+            defaultValue={issuer?.resourceType}
           />
         </FormControl>
       </FormGroup>
@@ -134,7 +134,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
         <ListInput
           label="Resource Scopes"
           name="resourceScopes"
-          value={issuer.resourceScopes}
+          value={issuer?.resourceScopes}
         />
       </FormGroup>
       <Divider />
@@ -157,7 +157,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
             placeholder="Resource Access Scope"
             name="resourceAccessScope"
             variant="bc-input"
-            defaultValue={issuer.resourceAccessScope}
+            defaultValue={issuer?.resourceAccessScope}
           />
         </FormControl>
       </FormGroup>

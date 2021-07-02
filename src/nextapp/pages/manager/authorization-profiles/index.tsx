@@ -53,7 +53,7 @@ const AuthorizationProfiles: React.FC<
 > = ({ queryKey }) => {
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
-      href: '/manager/poc/credential-issuers',
+      href: '/manager/authorization-profiles',
       text: 'Authorization Profiles',
     },
   ]);
@@ -67,7 +67,7 @@ const AuthorizationProfiles: React.FC<
       <Container maxW="6xl">
         <PageHeader
           actions={
-            <NextLink passHref href="/manager/credential-issuers/new">
+            <NextLink passHref href="/manager/authorization-profiles/new">
               <Button as="a" variant="primary">
                 New Profile
               </Button>
