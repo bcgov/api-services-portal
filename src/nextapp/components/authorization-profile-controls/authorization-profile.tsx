@@ -22,10 +22,8 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   onSubmit,
 }) => {
   const form = React.useRef<HTMLFormElement>(null);
-  const [flow, setFlow] = React.useState<string | number>(issuer?.flow);
-  const [mode, setMode] = React.useState<string | number>(
-    issuer?.mode ?? 'auto'
-  );
+  const [flow, setFlow] = React.useState<string>(issuer?.flow);
+  const [mode, setMode] = React.useState<string>(issuer?.mode ?? 'auto');
   const [environments, setEnvironments] = React.useState<EnvironmentItem[]>(
     () => {
       try {
@@ -66,6 +64,10 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
     },
     [setEnvironments]
   );
+
+  React.useEffect(() => {
+    setEnvironments([]);
+  }, [mode, setEnvironments]);
 
   return (
     <form ref={form} onSubmit={handleSubmit}>

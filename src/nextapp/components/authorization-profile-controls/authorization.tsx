@@ -16,11 +16,12 @@ import ListInput from '@/components/forms/list-input';
 import Section from '../section';
 import { CredentialIssuer } from '@/shared/types/query.types';
 import FormGroup from './form-group';
+import { useAuth } from '@/shared/services/auth';
 
 interface AuthorizationProfileAuthorizationProps {
   issuer: CredentialIssuer;
   mode: string;
-  onModeChange: (value: number | string) => void;
+  onModeChange: (value: string) => void;
 }
 
 const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizationProps> = ({
@@ -28,6 +29,9 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
   mode,
   onModeChange,
 }) => {
+  const { user } = useAuth();
+  const administrator = issuer?.owner ?? user;
+
   return (
     <Section title="Authorization">
       <FormGroup
@@ -39,7 +43,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
                 <Text as="strong">Manual</Text> issuing of the credential means
                 that this owner{' '}
                 <Text as="mark" bgColor="blue.200">
-                  ({issuer?.owner?.name})
+                  ({administrator.name})
                 </Text>{' '}
                 will complete setup of the new credential with the particular
                 OIDC Provider, and communicate that to the requestor via email
@@ -49,7 +53,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
                 <Text as="strong">Automatic</Text> issuing of the credential
                 means that this owner{' '}
                 <Text as="mark" bgColor="blue.200">
-                  ({issuer?.owner?.name})
+                  ({administrator.name})
                 </Text>{' '}
                 has configured appropriate credentials here to allow the API
                 Manager to manage Clients on the particular OIDC Provider.
@@ -60,7 +64,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
       >
         <FormControl as="fieldset" isRequired>
           <FormLabel as="legend">Mode</FormLabel>
-          <RadioGroup value={mode} onChange={onModeChange}>
+          <RadioGroup value={mode as string} onChange={onModeChange}>
             <Stack>
               <Radio name="mode" value="manual">
                 Manual

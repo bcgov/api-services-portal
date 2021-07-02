@@ -19,7 +19,7 @@ import FormGroup from './form-group';
 interface AuthorizationProfileAuthenticationProps {
   flow: string | number;
   issuer: CredentialIssuer;
-  onChange: React.Dispatch<string | number>;
+  onChange: React.Dispatch<string>;
 }
 
 const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthenticationProps> = ({
@@ -58,7 +58,7 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
       >
         <FormControl isRequired as="fieldset">
           <FormLabel as="legend">Flow</FormLabel>
-          <RadioGroup onChange={onChange} value={flow}>
+          <RadioGroup onChange={onChange} value={flow as string}>
             <Stack>
               <Radio name="flow" value="client-credentials">
                 Client Credential Flow

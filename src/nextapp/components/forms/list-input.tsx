@@ -39,6 +39,15 @@ const ListInput: React.FC<ListInputProps> = ({
 
   const handleAdd = React.useCallback(() => {
     setValues((state) => [...state, '']);
+    setTimeout(() => {
+      const lastInput: HTMLInputElement = fieldsetRef.current?.querySelector(
+        '.list-input-item:last-of-type input'
+      );
+
+      if (lastInput) {
+        lastInput.focus();
+      }
+    }, 50);
   }, [setValues]);
   const handleChange = React.useCallback(
     (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,12 +69,6 @@ const ListInput: React.FC<ListInputProps> = ({
     },
     [setValues]
   );
-
-  React.useLayoutEffect(() => {
-    fieldsetRef.current
-      ?.querySelector('.list-input-item:last-of-type input')
-      .focus();
-  }, [values]);
 
   return (
     <>

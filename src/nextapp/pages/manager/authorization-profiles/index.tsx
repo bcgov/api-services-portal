@@ -12,7 +12,6 @@ import {
   Tr,
   Th,
   Td,
-  TableCaption,
 } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
@@ -92,7 +91,6 @@ const AuthorizationProfiles: React.FC<
           </Box>
           <Divider />
           <Table variant="simple">
-            <TableCaption>-</TableCaption>
             <Thead>
               <Tr>
                 <Th>Name</Th>

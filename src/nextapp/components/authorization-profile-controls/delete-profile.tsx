@@ -10,7 +10,6 @@ import {
   AlertDialogOverlay,
   Button,
   Icon,
-  IconButton,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -50,14 +49,9 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
 
   return (
     <>
-      <IconButton
-        aria-label="delete profile button"
-        colorScheme="red"
-        icon={<Icon as={FaTrash} />}
-        onClick={onOpen}
-        variant="outline"
-        size="sm"
-      />
+      <Button colorScheme="red" onClick={onOpen} size="sm">
+        Delete Profile
+      </Button>
       <AlertDialog
         isCentered
         motionPreset="slideInBottom"

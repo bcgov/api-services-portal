@@ -16,6 +16,7 @@ const AuthorizationProfileSection: React.FC<AuthorizationProfileSection> = ({
 }) => {
   const { user } = useAuth();
   const administrator = issuer?.owner ?? user;
+  console.log(administrator);
 
   return (
     <Section title="Profile">
