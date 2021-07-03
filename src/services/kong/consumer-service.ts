@@ -169,18 +169,13 @@ export class KongConsumerService {
     pluginPK: string,
     plugin: KongPlugin
   ): Promise<void> {
-    const { v4: uuidv4 } = require('uuid');
-
-    const body = {
-      key: uuidv4().replace(/-/g, ''),
-    };
-    logger.debug('CALLING with ' + consumerPK + ' ' + pluginPK);
+    logger.debug('[updateConsumerPlugin] C=%s P=%s', consumerPK, pluginPK);
 
     const response = await fetch(
       `${this.kongUrl}/consumers/${consumerPK}/plugins/${pluginPK}`,
       {
         method: 'put',
-        body: JSON.stringify(body),
+        body: JSON.stringify(plugin),
         headers: {
           'Content-Type': 'application/json',
         },
