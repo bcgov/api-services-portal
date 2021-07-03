@@ -79,7 +79,7 @@ services:
   feeder:
     container_name: feeder
     depends_on:
-      - apsportal
+      - oauth2-proxy
     build:
       context: ./feeds
       dockerfile: Dockerfile
@@ -91,6 +91,21 @@ services:
       portal:
         aliases:
           - feeder.localtest.me
+  feeder-seeding:
+    container_name: feeder-seeding
+    command: ''
+    entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+    depends_on:
+      - feeder
+    build:
+      context: ./feeds
+      dockerfile: Dockerfile
+    restart: on-failure
+    volumes:
+      - ./local/feeder-init:/tmp
+    networks:
+      - portal
+      - keycloak
   kong-db:
     image: postgres:latest
     container_name: kong-db
