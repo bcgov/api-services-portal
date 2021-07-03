@@ -1,5 +1,7 @@
 # API Services Portal
 
+[![Lifecycle:Maturing](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+
 ## Introduction
 
 The `API Services Portal` is a frontend for API Providers to manage the lifecycle of their APIs and for Developers to discover and access these APIs. It works in combination with the Kong Community Edition Gateway and Keycloak IAM solution.
