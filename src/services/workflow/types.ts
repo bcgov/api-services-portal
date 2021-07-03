@@ -51,7 +51,7 @@ export interface IssuerEnvironmentConfig {
   initialAccessToken?: string;
 }
 
-export function getIssuerEnvironmentConfig(
+export function checkIssuerEnvironmentConfig(
   issuer: CredentialIssuer,
   environment: string
 ) {
@@ -59,10 +59,19 @@ export function getIssuerEnvironmentConfig(
     issuer.environmentDetails
   );
   const env = details.filter((c) => c.environment === environment);
+  return env.length == 1 ? env[0] : null;
+}
+
+export function getIssuerEnvironmentConfig(
+  issuer: CredentialIssuer,
+  environment: string
+) {
+  const env = checkIssuerEnvironmentConfig(issuer, environment);
+
   assert.strictEqual(
-    env.length,
-    1,
+    env != null,
+    true,
     `EnvironmentMissing ${issuer.name} ${environment}`
   );
-  return env[0];
+  return env;
 }

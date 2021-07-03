@@ -43,9 +43,7 @@ import RequestActions from '@/components/request-actions';
 import BusinessProfile from '@/components/business-profile';
 import ActivityList from '@/components/activity-list';
 import breadcrumbs from '@/components/ns-breadcrumb';
-import isString from 'lodash/isString';
-
-const isNotBlank = (v: any) => isString(v) && v.length > 0;
+import isNotBlank from '@/shared/isNotBlank';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;

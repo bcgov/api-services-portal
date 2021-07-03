@@ -8,6 +8,7 @@ import { KongConsumerService } from '../../services/kong';
 import {
   KeycloakUserService,
   KeycloakClientService,
+  KeycloakClientRegistrationService,
 } from '../../services/keycloak';
 import { EnvironmentWhereInput } from '@/services/keystone/types';
 import { mergeWhereClause } from '@keystonejs/utils';
@@ -72,6 +73,19 @@ module.exports = {
                 args.prodEnvId,
                 access
               );
+              if (envCtx == null) {
+                logger.warn(
+                  'Credential Issuer did not have an environment for prodenv %s',
+                  args.prodEnvId
+                );
+                return {
+                  id: '',
+                  consumerType: '',
+                  defaultScopes: [],
+                  optionalScopes: [],
+                  clientRoles: [],
+                } as any;
+              }
               try {
                 const kcClientService = new KeycloakClientService(
                   envCtx.issuerEnvConfig.issuerUrl
@@ -107,10 +121,14 @@ module.exports = {
                     userId,
                     client.id
                   );
+                  const defaultScopes = await kcClientService.listDefaultScopes(
+                    consumerClient.id
+                  );
+
                   return {
                     id: userId,
                     consumerType: 'client',
-                    defaultScopes: [],
+                    defaultScopes: defaultScopes.map((v: any) => v.name),
                     optionalScopes: [],
                     clientRoles: userRoles.map((r: any) => r.name),
                   } as any;
@@ -250,6 +268,89 @@ module.exports = {
               } catch (err) {
                 logger.error(
                   '[updateConsumerRoleAssignment] Failed to update %s',
+                  err
+                );
+                throw err;
+              }
+
+              return args.grant;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'updateConsumerScopeAssignment( prodEnvId: ID!, consumerUsername: String!, scopeName: String!, grant: Boolean! ): Boolean',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
+              );
+              try {
+                const kcClientService = new KeycloakClientService(
+                  envCtx.issuerEnvConfig.issuerUrl
+                );
+                const kcClientRegService = new KeycloakClientRegistrationService(
+                  envCtx.issuerEnvConfig.issuerUrl,
+                  null
+                );
+                await kcClientService.login(
+                  envCtx.issuerEnvConfig.clientId,
+                  envCtx.issuerEnvConfig.clientSecret
+                );
+                await kcClientRegService.login(
+                  envCtx.issuerEnvConfig.clientId,
+                  envCtx.issuerEnvConfig.clientSecret
+                );
+
+                const client = await kcClientService.findByClientId(
+                  envCtx.issuerEnvConfig.clientId
+                );
+
+                const availableScopes = await kcClientService.listDefaultScopes(
+                  client.id
+                );
+
+                const selectedScope = availableScopes
+                  .filter((r: any) => r.name === args.scopeName)
+                  .map((r: any) => r.id);
+
+                assert.strictEqual(
+                  selectedScope.length,
+                  1,
+                  'Scope not found in IdP'
+                );
+
+                logger.debug(
+                  '[updateConsumerScopeAssignment] selected %j',
+                  selectedScope
+                );
+
+                const isClient = await kcClientService.isClient(
+                  args.consumerUsername
+                );
+
+                assert.strictEqual(
+                  isClient,
+                  true,
+                  'Only clients support scopes'
+                );
+
+                await kcClientRegService.syncClientScopes(
+                  args.consumerUsername,
+                  client.id,
+                  args.grant ? selectedScope : [],
+                  args.grant ? [] : selectedScope
+                );
+              } catch (err) {
+                logger.error(
+                  '[updateConsumerScopeAssignment] Failed to update %s',
                   err
                 );
                 throw err;

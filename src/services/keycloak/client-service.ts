@@ -41,7 +41,7 @@ export class KeycloakClientService {
 
   public async lookupServiceAccountUserId(id: string) {
     const us = await this.kcAdminClient.clients.getServiceAccountUser({ id });
-    logger.debug('[lookupServiceAccountUserId] (%d) RESULT %j', id, us);
+    logger.debug('[lookupServiceAccountUserId] (%s) RESULT %j', id, us);
     return us.id;
   }
 
@@ -51,6 +51,15 @@ export class KeycloakClientService {
     });
     logger.debug('[listRoles] (%d) RESULT %j', id, roles);
     return roles;
+  }
+
+  public async listDefaultScopes(id: string) {
+    logger.debug('[listDefaultScopes] For %s', id);
+    const scopes = await this.kcAdminClient.clients.listDefaultClientScopes({
+      id,
+    });
+    logger.debug('[listDefaultScopes] RESULT %j', scopes);
+    return scopes;
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {
