@@ -46,6 +46,9 @@ export const ValidateActiveEnvironment = async (
       const flow =
         existingItem == null ? resolvedData['flow'] : envServices.flow;
 
+      const envName =
+        existingItem == null ? resolvedData['name'] : envServices.name;
+
       // The Credential Issuer says what plugins are expected
       // Loop through the Services to make sure the plugin is configured correctly
 
@@ -94,7 +97,7 @@ export const ValidateActiveEnvironment = async (
           'Environment missing issuer details'
         );
 
-        const envConfig = getIssuerEnvironmentConfig(issuer, envServices.name);
+        const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter(
@@ -124,7 +127,7 @@ export const ValidateActiveEnvironment = async (
           'Environment missing issuer details'
         );
 
-        const envConfig = getIssuerEnvironmentConfig(issuer, envServices.name);
+        const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter(
