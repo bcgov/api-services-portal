@@ -38,10 +38,10 @@ const ApiDiscoveryPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Program Services | API Discovery</title>
+        <title>API Services Portal | API Directory</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="Discover our APIs">
+        <PageHeader title="API Directory">
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>
         <Box my={5}>
