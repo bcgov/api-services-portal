@@ -109,7 +109,6 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
         }
       >
         <ListInput
-          required
           buttonText="Add Client Roles"
           label="Client Roles"
           name="clientRoles"

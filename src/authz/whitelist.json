@@ -746,5 +746,30 @@
           "referer": "http://localhost:4180/manager/requests/60dba098fb76a41bf6a8e74e",
           "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n        email\n      }\n      application {\n        name\n      }\n      serviceAccess {\n        id\n      }\n      productEnvironment {\n        name\n        additionalDetailsToRequest\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
           "added": "2021-06-29T22:48:41.365Z"
+     },
+     "7aa8f879b0f8616c491a0b8150351f86": {
+          "referer": "http://localhost:4180/manager/namespaces",
+          "query": "\n  query GetCredentialIssuers {\n    allCredentialIssuersByNamespace {\n      id\n      name\n      flow\n      mode\n      owner {\n        name\n        username\n      }\n      environments {\n        name\n        product {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-03T04:02:31.664Z"
+     },
+     "e0d6fa4bbc6e9ac5de7e1e0c9e4e2a8e": {
+          "referer": "http://localhost:4180/manager/authorization-profiles/new",
+          "query": "\n  mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {\n    createCredentialIssuer(data: $data) {\n      id\n    }\n  }\n",
+          "added": "2021-07-03T04:02:48.917Z"
+     },
+     "a72b7eb3967c41a72dc60be075985acd": {
+          "referer": "http://localhost:4180/manager/authorization-profiles",
+          "query": "\n  query GetCredentialIssuer($id: ID!) {\n    CredentialIssuer(where: { id: $id }) {\n      id\n      name\n      flow\n      mode\n      apiKeyName\n      clientAuthenticator\n      clientRoles\n      availableScopes\n      resourceScopes\n      resourceType\n      resourceAccessScope\n      environmentDetails\n      owner {\n        id\n        name\n        username\n        email\n      }\n      environments {\n        name\n        product {\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-03T04:09:37.259Z"
+     },
+     "7d372df72cc7bfa2ab3c833b37d19631": {
+          "referer": "http://localhost:4180/manager/authorization-profiles/60dfe2fc07d4a7ba5eba7f25",
+          "query": "\n  mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {\n    updateCredentialIssuer(id: $id, data: $data) {\n      id\n    }\n  }\n",
+          "added": "2021-07-03T04:10:22.729Z"
+     },
+     "9993800a311f9bce81b60f1cf19387f3": {
+          "referer": "http://localhost:4180/manager/authorization-profiles/60dfe2fc07d4a7ba5eba7f25",
+          "query": "\n  mutation DeleteAuthzProfile($id: ID!) {\n    deleteCredentialIssuer(id: $id) {\n      id\n    }\n  }\n",
+          "added": "2021-07-03T04:11:58.471Z"
      }
 }
