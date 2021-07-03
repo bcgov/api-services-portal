@@ -183,7 +183,7 @@ export class KeycloakClientRegistrationService {
 
   public async applyChanges(
     clientId: string,
-    changes: string,
+    changes: string[][],
     optional: boolean
   ): Promise<void> {
     const addFunction = optional
@@ -198,6 +198,25 @@ export class KeycloakClientRegistrationService {
     for (const scopeId of changes[1]) {
       await delFunction({ id: clientId, clientScopeId: scopeId });
     }
+  }
+
+  public async syncClientScopes(
+    subjectClientId: string,
+    clientUniqueId: string,
+    addScopes: string[],
+    delScopes: string[]
+  ) {
+    const lkup = await this.kcAdminClient.clients.find({
+      clientId: subjectClientId,
+    });
+    assert.strictEqual(
+      lkup.length,
+      1,
+      'Client ID not found ' + subjectClientId
+    );
+    const clientPK = lkup[0].id;
+
+    await this.applyChanges(clientPK, [addScopes, delScopes], false);
   }
 
   public async syncAndApply(
