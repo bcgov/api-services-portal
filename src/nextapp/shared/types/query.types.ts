@@ -7142,6 +7142,7 @@ export type Mutation = {
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
+  updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   createNamespace?: Maybe<Namespace>;
   deleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
@@ -7881,6 +7882,14 @@ export type MutationUpdateConsumerRoleAssignmentArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['String'];
   roleName: Scalars['String'];
+  grant: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateConsumerScopeAssignmentArgs = {
+  prodEnvId: Scalars['ID'];
+  consumerUsername: Scalars['String'];
+  scopeName: Scalars['String'];
   grant: Scalars['Boolean'];
 };
 

@@ -43,7 +43,7 @@ const RolesComponent: React.FC<RolesProps> = ({
   prodEnvId,
   credentialIssuer,
 }) => {
-  const queryKey = ['consumer-scopes-roles', prodEnvId, consumerUsername];
+  const queryKey = ['consumer-roles', prodEnvId, consumerUsername];
   const variables = { prodEnvId, consumerUsername };
   const { data, isFetching, isLoading, isSuccess } = useApi(
     queryKey,
@@ -102,6 +102,9 @@ const RolesComponent: React.FC<RolesProps> = ({
   }
   if (data == null) {
     return <Text>Error</Text>;
+  }
+  if (data.consumerScopesAndRoles.id == '') {
+    return <></>;
   }
   const clientRoles = credentialIssuer.clientRoles
     ? JSON.parse(credentialIssuer.clientRoles)

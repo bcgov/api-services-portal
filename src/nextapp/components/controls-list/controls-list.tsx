@@ -88,20 +88,23 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                       {d.name === 'ip-restriction' && (
                         <IpRestriction
                           data={d}
-                          id={d.id}
-                          queryKey={['consumer', d.id]}
+                          id={consumerId}
+                          queryKey={['consumer', consumerId]}
                           mode="edit"
                         />
                       )}
                       {d.name === 'rate-limiting' && (
                         <RateLimiting
                           data={d}
-                          id={d.id}
-                          queryKey={['consumer', d.id]}
+                          id={consumerId}
+                          queryKey={['consumer', consumerId]}
                           mode="edit"
                         />
                       )}
-                      <DeleteControl consumerId={consumerId} pluginExtForeignKey={d.extForeignKey} />
+                      <DeleteControl
+                        consumerId={consumerId}
+                        pluginExtForeignKey={d.extForeignKey}
+                      />
                     </ButtonGroup>
                   </GridItem>
                 </Grid>
@@ -127,21 +130,24 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                     <ButtonGroup>
                       {d.name === 'ip-restriction' && (
                         <IpRestriction
-                          id={d.id}
-                          queryKey={['consumer', d.id]}
+                          id={consumerId}
+                          queryKey={['consumer', consumerId]}
                           mode="edit"
                           data={d}
                         />
                       )}
                       {d.name === 'rate-limiting' && (
                         <RateLimiting
-                          id={d.id}
-                          queryKey={['consumer', d.id]}
+                          id={consumerId}
+                          queryKey={['consumer', consumerId]}
                           mode="edit"
                           data={d}
                         />
                       )}
-                      <DeleteControl consumerId={consumerId} pluginExtForeignKey={d.extForeignKey} />
+                      <DeleteControl
+                        consumerId={consumerId}
+                        pluginExtForeignKey={d.extForeignKey}
+                      />
                     </ButtonGroup>
                   </GridItem>
                 </Grid>

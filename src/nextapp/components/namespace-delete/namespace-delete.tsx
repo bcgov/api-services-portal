@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
-import { useApiMutation } from '@/shared/services/api';
+import { restApi, useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 
@@ -40,6 +40,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 
       if (user.namespace === name && router) {
         router.push('/manager');
+        await restApi('/admin/switch', { method: 'PUT' });
       }
 
       toast({
@@ -96,4 +97,3 @@ const mutation = gql`
     deleteNamespace(namespace: $name)
   }
 `;
-

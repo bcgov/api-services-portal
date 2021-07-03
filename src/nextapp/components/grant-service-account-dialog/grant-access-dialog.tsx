@@ -118,7 +118,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
                   <FormLabel>Permissions</FormLabel>
                   <CheckboxGroup>
                     <Wrap spacing={4}>
-                      {resource.resource_scopes.map((r) => (
+                      {resource?.resource_scopes.map((r) => (
                         <WrapItem key={r.name}>
                           <Checkbox value={r.name} name="scopes">
                             {r.name}

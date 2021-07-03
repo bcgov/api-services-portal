@@ -7,6 +7,7 @@ import {
 import {
   IssuerEnvironmentConfig,
   getIssuerEnvironmentConfig,
+  checkIssuerEnvironmentConfig,
 } from '../../services/workflow/types';
 import {
   UMAPermissionService,
@@ -60,10 +61,14 @@ export async function getEnvironmentContext(
       access
     ).where
   );
-  const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(
+  const issuerEnvConfig: IssuerEnvironmentConfig = checkIssuerEnvironmentConfig(
     prodEnv.credentialIssuer,
     prodEnv.name
   );
+
+  if (issuerEnvConfig == null) {
+    return null;
+  }
 
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
   const subjectToken = context.req.headers['x-forwarded-access-token'];
