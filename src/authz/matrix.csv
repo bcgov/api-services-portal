@@ -52,6 +52,7 @@ API Owner Role Rules,,,TemporaryIdentity,read,,,,,,,"api-owner,provider-user",al
 API Owner Role Rules,,,User,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,updateGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,allPermissionTickets,,,,,,,api-owner,,,allow,

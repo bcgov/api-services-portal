@@ -776,5 +776,15 @@
           "referer": "http://localhost:4180/manager/consumers/60ad8e1044cf9a36ef674085",
           "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      name\n      consumerType\n      application {\n        appId\n        name\n        owner {\n          name\n          username\n          email\n        }\n      }\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
           "added": "2021-07-03T01:47:59.254Z"
+     },
+     "b2e2c4b6ce7586668c34d3226ae6c5da": {
+          "referer": "http://localhost:4180/manager/consumers/60b7e9154b74934a7b6ad72a",
+          "query": "\n  mutation updateGatewayConsumerPlugin($id: ID!, $controls: String!) {\n    updateGatewayConsumerPlugin(id: $id, plugin: $controls) {\n      id\n    }\n  }\n",
+          "added": "2021-07-03T03:10:14.327Z"
+     },
+     "7073ccad4a36f9d6b1fae48ad9e00f72": {
+          "referer": "http://localhost:4180/manager/consumers/60b7e9154b74934a7b6ad72a",
+          "query": "\n  mutation updateGatewayConsumerPlugin(\n    $id: ID!\n    $pluginExtForeignKey: String!\n    $controls: String!\n  ) {\n    updateGatewayConsumerPlugin(\n      id: $id\n      pluginExtForeignKey: $pluginExtForeignKey\n      plugin: $controls\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-07-03T03:23:01.128Z"
      }
 }
