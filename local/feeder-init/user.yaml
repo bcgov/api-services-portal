@@ -1,6 +1,0 @@
-entity: User
-record:
-  id: "awsummer@idir"
-  name: "Awesome Summers"
-  email: "awsummer@gmail.com"
-  isAdmin: false

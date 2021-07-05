@@ -61,6 +61,7 @@ services:
           - oauth2proxy.localtest.me
   apsportal:
     container_name: apsportal
+    image: apsportal:latest
     depends_on:
       - keycloak
     build:
@@ -76,8 +77,10 @@ services:
           - apsportal.localtest.me
       keycloak: {}
       oauth2-proxy: {}
+      kong-net: {}
   feeder:
     container_name: feeder
+    image: feeder:latest
     depends_on:
       - oauth2-proxy
     build:
@@ -91,15 +94,14 @@ services:
       portal:
         aliases:
           - feeder.localtest.me
+      kong-net: {}
   feeder-seeding:
     container_name: feeder-seeding
+    image: feeder:latest
     command: ''
     entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
     depends_on:
       - feeder
-    build:
-      context: ./feeds
-      dockerfile: Dockerfile
     restart: on-failure
     volumes:
       - ./local/feeder-init:/tmp
