@@ -68,9 +68,10 @@ const AccessRedirectPage: React.FC<
       },
     },
     {
-      enabled: Boolean(data) && isSuccess,
+      enabled: Boolean(resourceId),
     }
   );
+
   const requests = permissions.data?.getPermissionTicketsForResource.filter(
     (p) => !p.granted
   );
