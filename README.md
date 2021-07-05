@@ -51,10 +51,11 @@ Once running, the `api services portal` application is reachable via `localhost:
 
 1. Create a `.env` from `.env.local` file
 2. Edit `.env` file by updating all (`<UPDATE_ME>`)'s with appropriate values
-3. Run `docker-compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal and Kong Gateway)
+3. Run `docker-compose up` to spin up a local development environment with services (Postgres, Keycloak, OAuth2-proxy, APS-Portal, Feeder and Kong Gateway)
 4. Go to: http://oauth2proxy.localtest.me:4180
 5. To login, use username `local` and password `local`
 6. `docker-compose down` : Removes all the hosted services
+7. Create a `.env` from `.env.local` file under `feeds` directory
 
 ##### Note:
 

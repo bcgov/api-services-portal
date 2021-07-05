@@ -4,11 +4,11 @@ record:
   name: Gateway Services API
   namespace: platform
   environments:
-    - id: CA853245
+    - id: E0000000
       name: prod
       active: true
       approval: true
       flow: client-credentials
       legal: terms-of-use-for-api-gateway-1
       services: []
-      credentialIssuer: "Gateway Services Resource Server"
+      credentialIssuer: 'Gateway Services Resource Server'
