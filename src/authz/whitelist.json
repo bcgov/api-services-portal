@@ -786,5 +786,10 @@
           "referer": "http://localhost:4180/manager/consumers/60b7e9154b74934a7b6ad72a",
           "query": "\n  mutation updateGatewayConsumerPlugin(\n    $id: ID!\n    $pluginExtForeignKey: String!\n    $controls: String!\n  ) {\n    updateGatewayConsumerPlugin(\n      id: $id\n      pluginExtForeignKey: $pluginExtForeignKey\n      plugin: $controls\n    ) {\n      id\n    }\n  }\n",
           "added": "2021-07-03T03:23:01.128Z"
+     },
+     "a2750969742e7ffa0880f452f82ee58b": {
+          "referer": "http://localhost:4180/manager/namespace-access",
+          "query": "\n  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {\n    grantPermissions(prodEnvId: $prodEnvId, data: $data) {\n      id\n    }\n  }\n",
+          "added": "2021-07-05T23:29:33.635Z"
      }
 }
