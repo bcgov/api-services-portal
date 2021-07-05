@@ -17,7 +17,8 @@ import UsersAccessList from '@/components/users-access-list';
 import ServiceAccountsList from '@/components/service-accounts-list';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const queryKey = 'namespaceAccess';
+  const keystoneReq = context.req as any;
+  const queryKey = ['namespaceAccess', keystoneReq.user.namespace];
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
@@ -59,7 +60,7 @@ const AccessRedirectPage: React.FC<
   const prodEnvId = data?.currentNamespace?.prodEnvId;
 
   const permissions = useApi(
-    'namespacePermissions',
+    ['namespacePermissions', resourceId],
     {
       query: permissionsQuery,
       variables: {
@@ -68,7 +69,7 @@ const AccessRedirectPage: React.FC<
       },
     },
     {
-      enabled: Boolean(resourceId),
+      enabled: isSuccess && Boolean(resourceId),
     }
   );
 
@@ -113,12 +114,7 @@ const AccessRedirectPage: React.FC<
             />
           </Box>
           <Divider />
-          {!resourceId && (
-            <EmptyPane
-              message="This Service Access Request contains no resources"
-              title="No Resources"
-            />
-          )}
+
           <UsersAccessList
             enableRevoke
             data={permissions.data?.getPermissionTicketsForResource.filter(
