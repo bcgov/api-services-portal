@@ -27,18 +27,24 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 * Clone this repository
 * Create a new file `cypress.env.json` from `cypress.env.local.json`
 
-#### Locally
+#### 2.1 Locally
 
 * Run `npm install` to install all the dependencies
 * Run `npm run cy:run` to run the tests
 
-#### Docker
+#### 2.2 Docker
 
-#### Docker Compose
+* Run `docker build -t aps-cypress-e2e:latest `  to build an image
+* Run `docker run --rm -it -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
 
-#### GitHub Actions
+#### 2.3 Docker Compose
 
+* Run `docker-compose up` to spin a container that run cypress as a service and it executes the tests 
+* Run `docker-compose down` to tear down the container
 
+#### 2.4 GitHub Actions
+
+* Any new commit pushed to `feature` branch would trigger a job and deploys a container and it executes the tests
 
 ## Cypress IntelliSense
 
