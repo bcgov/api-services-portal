@@ -791,5 +791,15 @@
           "referer": "http://localhost:4180/manager/namespace-access",
           "query": "\n  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {\n    grantPermissions(prodEnvId: $prodEnvId, data: $data) {\n      id\n    }\n  }\n",
           "added": "2021-07-05T23:29:33.635Z"
+     },
+     "d78565ea5ddbf2b4c6f47b7654cb52c4": {
+          "referer": "http://localhost:4180/manager/namespace-access",
+          "query": "\n  mutation GrantSAAccess(\n    $prodEnvId: ID!\n    $resourceId: String!\n    $data: UMAPolicyInput!\n  ) {\n    createUmaPolicy(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n      data: $data\n    ) {\n      id\n    }\n  }\n",
+          "added": "2021-07-06T02:58:10.429Z"
+     },
+     "990f9d0261b747a2d571b0898a9680a8": {
+          "referer": "http://localhost:4180/manager/namespace-access",
+          "query": "\n  mutation RevokeSAAccess(\n    $prodEnvId: ID!\n    $resourceId: String!\n    $policyId: String!\n  ) {\n    deleteUmaPolicy(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n      policyId: $policyId\n    )\n  }\n",
+          "added": "2021-07-06T02:58:35.159Z"
      }
 }
