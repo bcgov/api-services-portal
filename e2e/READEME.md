@@ -24,27 +24,27 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 
 ### 2. Run Tests
 
-* Clone this repository
-* Create a new file `cypress.env.json` from `cypress.env.local.json`
+- Clone this repository
+- Create a new file `cypress.env.json` from `cypress.env.local.json`
 
 #### 2.1 Locally
 
-* Run `npm install` to install all the dependencies
-* Run `npm run cy:run` to run the tests
+- Run `npm install` to install all the dependencies
+- Run `npm run cy:run` to run the tests
 
 #### 2.2 Docker
 
-* Run `docker build -t aps-cypress-e2e:latest `  to build an image
-* Run `docker run --rm -it -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
+- Run `docker build -t aps-cypress-e2e:latest ` to build an image
+- Run `docker run --rm -it -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
 
 #### 2.3 Docker Compose
 
-* Run `docker-compose up` to spin a container that run cypress as a service and it executes the tests 
-* Run `docker-compose down` to tear down the container
+- Run `docker-compose up` to spin a container that run cypress as a service and it executes the tests
+- Run `docker-compose down` to tear down the container
 
 #### 2.4 GitHub Actions
 
-* Any new commit pushed to `feature` branch would trigger a job and deploys a container and it executes the tests
+- Any new commit pushed to `feature/automation-*` branch triggers a job (`.github/workflows/ci-build-deploy-e2e.yaml`) and deploys a container to execute the test suite
 
 ## Cypress IntelliSense
 
@@ -56,9 +56,9 @@ commands.
 
 ### Custom commands
 
-* This project also adds several custom commands in [cypress/support/index.js](cypress/support/index.ts). 
-* To let TypeScript compiler know that we have added a custom command and have IntelliSense working, I have described the type signature of the custom command in file [cypress/support/global.d.ts](cypress/support/global.d.ts). 
-* To include the new ".d.ts" file into IntelliSense, I could update `tsconfig.json` or I could add another special comment to the JavaScript spec files - `/// <reference types="...>`.
+- This project also adds several custom commands in [cypress/support/index.js](cypress/support/index.ts).
+- To let TypeScript compiler know that we have added a custom command and have IntelliSense working, I have described the type signature of the custom command in file [cypress/support/global.d.ts](cypress/support/global.d.ts).
+- To include the new ".d.ts" file into IntelliSense, I could update `tsconfig.json` or I could add another special comment to the JavaScript spec files - `/// <reference types="...>`.
 
 ```js
 // type definitions for Cypress object "cy"
@@ -69,4 +69,3 @@ commands.
 ```
 
 **Related:** [IntelliSense for custom Chai assertions added to Cypress](https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/extending-cypress__chai-assertions#code-completion)
-
