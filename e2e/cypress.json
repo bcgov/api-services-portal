@@ -1,0 +1,8 @@
+{
+  "baseUrl": "https://api-services-portal-dev.apps.silver.devops.gov.bc.ca",
+  "integrationFolder": "cypress/tests",
+  "screenshotOnRunFailure": false,
+  "video": false,
+  "defaultCommandTimeout": 1000,
+  "requestTimeout": 1000
+}

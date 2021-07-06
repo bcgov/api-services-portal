@@ -1,0 +1,27 @@
+{
+  "name": "bcgov-aps-portal-e2e",
+  "version": "1.0.0",
+  "description": "End to End and Integration Tests for APS Portal",
+  "main": "index.js",
+  "author": "BC Gov APS",
+  "license": "MIT",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run --config watchForFileChanges=false"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.9.8",
+    "@cypress/instrument-cra": "^1.4.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
+    "cypress": "^7.6.0",
+    "cypress-xpath": "^1.6.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-chai-friendly": "^0.7.1",
+    "eslint-plugin-cypress": "^2.11.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.2",
+    "typescript": "^4.3.5"
+  }
+}
