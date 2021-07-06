@@ -72,7 +72,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: ./e2e
-          file: Dockerfile
+          file: ./e2e/Dockerfile
           tags: ${{ steps.docker_meta.outputs.tags }}
           load: true
           build-args: |
