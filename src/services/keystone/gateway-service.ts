@@ -1,11 +1,17 @@
-import { Logger } from '../../logger'
-import { GatewayService } from './types'
+import { Logger } from '../../logger';
+import { GatewayService } from './types';
 
-const logger = Logger('keystone.gw-service')
+const logger = Logger('keystone.gw-service');
 
-export async function lookupServices (context: any, serviceIds: string[]) : Promise<GatewayService[]> {
-    const result = await context.executeGraphQL({
-        query: `query GetServices($services: [ID]) {
+export async function lookupServices(
+  context: any,
+  serviceIds: string[]
+): Promise<GatewayService[]> {
+  if (serviceIds.length == 0) {
+    return [];
+  }
+  const result = await context.executeGraphQL({
+    query: `query GetServices($services: [ID]) {
                     allGatewayServices(where: {id_in: $services}) {
                             name
                             plugins {
@@ -21,10 +27,11 @@ export async function lookupServices (context: any, serviceIds: string[]) : Prom
                             }
                     }
                 }`,
-        variables: { services: serviceIds },
-    })
-    logger.debug("Query result %j", result)
-    result.data.allGatewayServices.map((svc:GatewayService) =>
-        svc.plugins?.map(plugin => plugin.config = JSON.parse(plugin.config)))
-    return result.data.allGatewayServices
+    variables: { services: serviceIds },
+  });
+  logger.debug('Query result %j', result);
+  result.data.allGatewayServices.map((svc: GatewayService) =>
+    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)))
+  );
+  return result.data.allGatewayServices;
 }

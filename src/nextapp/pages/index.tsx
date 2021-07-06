@@ -22,19 +22,19 @@ type HomeActions = {
 };
 const actions: HomeActions[] = [
   {
-    title: 'Are you a Developer?',
-    url: '/devportal/api-discovery',
+    title: 'For Developers',
+    url: '/devportal/api-directory',
     icon: FaBook,
     roles: [],
-    description: `Looking for BC Government APIs to integrate with?  Go to the <a href="/devportal/api-discovery">Directory</a> to see what is available and to request access!`,
+    description: `<a href="/devportal/api-directory">Visit the Directory</a> to see what APIs are available for integration.`,
   },
   {
-    title: 'Are you an API Provider?',
+    title: 'For API Providers',
     url: '/manager/namespaces',
     icon: FaToolbox,
     roles: [],
     description:
-      'Is your Ministry looking to build and share APIs?  Go to Namespaces to get started!',
+      '<a href="/manager/namespaces">Login</a> with BC Government credentials to start building and sharing APIs from your Ministry',
   },
 ];
 

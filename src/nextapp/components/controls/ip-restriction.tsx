@@ -12,7 +12,7 @@ import { useQueryClient, QueryKey } from 'react-query';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
-import { FULFILL_REQUEST } from './queries';
+import { CREATE_PLUGIN, UPDATE_PLUGIN } from './queries';
 
 type ControlsPayload = {
   name: string;
@@ -42,9 +42,11 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const mutation = useApiMutation<{ id: string; controls: string }>(
-    FULFILL_REQUEST
-  );
+  const mutation = useApiMutation<{
+    id: string;
+    controls: string;
+    pluginExtForeignKey?: string;
+  }>(mode == 'edit' ? UPDATE_PLUGIN : CREATE_PLUGIN);
   const toast = useToast();
   const config = data?.config
     ? JSON.parse(data.config)
@@ -78,6 +80,10 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
         id,
         controls: JSON.stringify(controls),
       };
+      if (mode == 'edit') {
+        payload['pluginExtForeignKey'] = data.extForeignKey;
+      }
+
       await mutation.mutateAsync(payload);
       client.invalidateQueries(queryKey);
       toast({

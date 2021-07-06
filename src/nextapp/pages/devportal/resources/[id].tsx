@@ -1,6 +1,6 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
-import { Box, Container, Divider, Heading, Text } from '@chakra-ui/react';
+import { Box, Container, Divider, Heading } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import GrantAccessDialog from '@/components/grant-access-dialog';
 import GrantServiceAccountDialog from '@/components/grant-service-account-dialog';
@@ -15,7 +15,7 @@ import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
 
-import ServiceAccounts from './service-accounts'
+import ServiceAccounts from '@/components/service-accounts-list';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -50,9 +50,11 @@ const ApiAccessResourcePage: React.FC<
 > = ({ queryKey, variables }) => {
   const { data } = useApi(queryKey, { query, variables }, { suspense: false });
   const { prodEnvId, resourceId } = variables;
-  const requests = data.getPermissionTicketsForResource?.filter((p) => !p.granted);
+  const requests = data.getPermissionTicketsForResource?.filter(
+    (p) => !p.granted
+  );
 
-  const resource = data.getResourceSet
+  const resource = data.getResourceSet;
 
   return (
     <>
@@ -73,7 +75,10 @@ const ApiAccessResourcePage: React.FC<
           }
           breadcrumb={[
             { href: '/devportal/access', text: 'API Access' },
-            { href: '/devportal/access/' + data?.Environment?.product.id, text: `${data?.Environment?.product.name} Resources` },
+            {
+              href: '/devportal/access/' + data?.Environment?.product.id,
+              text: `${data?.Environment?.product.name} Resources`,
+            },
           ]}
           title={`${resource.type} ${resource.name}`}
         />
@@ -101,12 +106,13 @@ const ApiAccessResourcePage: React.FC<
           )}
           <UsersAccessList
             enableRevoke
-            data={data?.getPermissionTicketsForResource.filter((p) => p.granted)}
+            data={data?.getPermissionTicketsForResource.filter(
+              (p) => p.granted
+            )}
             resourceId={resourceId}
             prodEnvId={prodEnvId}
             queryKey={queryKey}
           />
-
         </Box>
 
         <Box bgColor="white" my={4} mb={4}>
@@ -125,7 +131,12 @@ const ApiAccessResourcePage: React.FC<
             />
           </Box>
           <Divider />
-          <ServiceAccounts prodEnvId={prodEnvId} resourceId={resourceId} data={data?.getUmaPoliciesForResource} queryKey={queryKey}/>
+          <ServiceAccounts
+            prodEnvId={prodEnvId}
+            resourceId={resourceId}
+            data={data?.getUmaPoliciesForResource}
+            queryKey={queryKey}
+          />
         </Box>
       </Container>
     </>
@@ -136,7 +147,10 @@ export default ApiAccessResourcePage;
 
 const query = gql`
   query GetPermissions($resourceId: String!, $prodEnvId: ID!) {
-    getPermissionTicketsForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+    getPermissionTicketsForResource(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+    ) {
       id
       owner
       ownerName
@@ -170,7 +184,7 @@ const query = gql`
         name
       }
     }
-    
+
     Environment(where: { id: $prodEnvId }) {
       name
       product {

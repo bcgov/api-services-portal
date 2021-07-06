@@ -13,7 +13,7 @@ import { useApiMutation } from '@/shared/services/api';
 
 import ControlsDialog from './controls-dialog';
 import ControlTypeSelect from './control-type-select';
-import { FULFILL_REQUEST } from './queries';
+import { CREATE_PLUGIN, UPDATE_PLUGIN } from './queries';
 
 type ControlsPayload = {
   name: string;
@@ -49,7 +49,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
 }) => {
   const client = useQueryClient();
   const mutation = useApiMutation<{ id: string; controls: string }>(
-    FULFILL_REQUEST
+    mode == 'edit' ? UPDATE_PLUGIN : CREATE_PLUGIN
   );
   const toast = useToast();
   const config = data?.config
@@ -96,6 +96,10 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
         id,
         controls: JSON.stringify(controls),
       };
+      if (mode == 'edit') {
+        payload['pluginExtForeignKey'] = data.extForeignKey;
+      }
+
       await mutation.mutateAsync(payload);
       client.invalidateQueries(queryKey);
       toast({

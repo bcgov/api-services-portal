@@ -125,6 +125,8 @@ jobs:
             name: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
 
           env:
+            TZ:
+              value: 'America/Los_Angeles'
             LOG_FEEDS:
               value: 'false'
             WORKING_PATH:

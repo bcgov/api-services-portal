@@ -34,11 +34,9 @@ import { dehydrate } from 'react-query/hydration';
 import { FieldsetBox, RadioGroup } from '@/components/forms';
 import { FaBook } from 'react-icons/fa';
 import { useRouter } from 'next/router';
-import isString from 'lodash/isString';
+import isNotBlank from '@/shared/isNotBlank';
 
 const queryKey = 'newAccessRequest';
-
-const isNotBlank = (v: any) => isString(v) && v.length > 0;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;

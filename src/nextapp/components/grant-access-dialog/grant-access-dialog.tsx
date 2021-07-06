@@ -39,7 +39,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
   prodEnvId,
   resource,
   resourceId,
-  queryKey
+  queryKey,
 }) => {
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
@@ -114,7 +114,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
                   <FormLabel>Permissions</FormLabel>
                   <CheckboxGroup>
                     <Wrap spacing={4}>
-                      {resource.resource_scopes.map((r) => (
+                      {resource?.resource_scopes.map((r) => (
                         <WrapItem key={r.name}>
                           <Checkbox value={r.name} name="scopes">
                             {r.name}
@@ -144,10 +144,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
 export default ShareResourceDialog;
 
 const mutation = gql`
-  mutation GrantUserAccess(
-    $prodEnvId: ID!
-    $data: UMAPermissionTicketInput!
-  ) {
+  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
     grantPermissions(prodEnvId: $prodEnvId, data: $data) {
       id
     }

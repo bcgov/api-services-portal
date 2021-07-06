@@ -21,8 +21,8 @@ import ControlsList from '@/components/controls-list';
 import IpRestriction from '@/components/controls/ip-restriction';
 import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
+import ConsumerAuthz from '@/components/consumer-authz';
 import ConsumerACL from '@/components/consumer-acl';
-import ConsumerPermissions from '@/components/consumer-permissions';
 
 import breadcrumbs from '@/components/ns-breadcrumb';
 
@@ -76,15 +76,6 @@ const ConsumersPage: React.FC<
           p.environments.filter((e) =>
             ['kong-api-key-acl', 'kong-acl-only'].includes(e.flow)
           ).length != 0
-      ).length != 0;
-
-  const hasEnvironmentWithClientCredFlow = (products: Product[]): boolean =>
-    products
-      .filter((p) => p.environments.length != 0)
-      .filter(
-        (p) =>
-          p.environments.filter((e) => e.flow == 'client-credentials').length !=
-          0
       ).length != 0;
 
   return (
@@ -141,34 +132,19 @@ const ConsumersPage: React.FC<
             data={consumer.plugins.filter((p) => p.route || p.service)}
           />
 
-          {hasEnvironmentWithAclBasedFlow(data.allProductsByNamespace) && (
-            <>
-              <Box as="header" bgColor="white" p={4}>
-                <Heading size="md">Authorization - ACL Groups</Heading>
-              </Box>
-              <Divider />
-              <ConsumerACL
-                queryKey={queryKey}
-                consumerId={id}
-                products={data.allProductsByNamespace}
-                aclGroups={consumerAclGroups}
-              />
-            </>
-          )}
+          <ConsumerAuthz
+            queryKey={queryKey}
+            consumerId={id}
+            consumerUsername={consumer.username}
+            consumerAclGroups={consumerAclGroups}
+            products={data.allProductsByNamespace}
+          />
 
-          {hasEnvironmentWithClientCredFlow(data.allProductsByNamespace) && (
-            <>
-              <Box as="header" bgColor="white" p={4}>
-                <Heading size="md">Authorization - Scopes and Roles</Heading>
-              </Box>
-              <Divider />
-              <ConsumerPermissions
-                queryKey={queryKey}
-                products={data.allProductsByNamespace}
-                consumerId={id}
-                consumerUsername={consumer.username}
-              />
-            </>
+          {hasEnvironmentWithAclBasedFlow(data.allProductsByNamespace) && (
+            <ConsumerACL
+              products={data.allProductsByNamespace}
+              aclGroups={consumerAclGroups}
+            />
           )}
         </Container>
       </>
@@ -205,6 +181,20 @@ const query = gql`
       createdAt
     }
 
+    allServiceAccesses(where: { consumer: { id: $id } }) {
+      name
+      consumerType
+      application {
+        appId
+        name
+        owner {
+          name
+          username
+          email
+        }
+      }
+    }
+
     allProductsByNamespace {
       id
       name
@@ -215,6 +205,7 @@ const query = gql`
         active
         flow
         credentialIssuer {
+          id
           availableScopes
           clientRoles
         }

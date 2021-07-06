@@ -16,7 +16,7 @@ import {
 import { useMutation, useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
-import type { Mutation } from '@/types/query.types'
+import type { Mutation } from '@/types/query.types';
 interface NewNamespace {
   isOpen: boolean;
   onClose: () => void;
@@ -40,11 +40,14 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           const name = data.get('name') as string;
           const json: Mutation = await createMutation.mutateAsync({
             name,
-          })
+          });
 
           toast({
             title: `Namespace ${json.createNamespace.name} created!`,
             status: 'success',
+          });
+          await restApi(`/admin/switch/${json.createNamespace.id}`, {
+            method: 'PUT',
           });
           queryClient.invalidateQueries();
           toast({
