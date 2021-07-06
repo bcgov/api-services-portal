@@ -116,6 +116,16 @@ jobs:
           securityContext:
             runAsUser: ${{ secrets.RUNNING_UID_GID }}
 
+          extraVolumeMounts:
+            - name: aps-portal-e2e-user-creds
+              mountPath: "/"
+              readOnly: true
+
+          extraVolumes:
+          - name: aps-portal-e2e-user-creds
+            secret:
+              secretName: bcgov-aps-portal-e2e-generic-api-secrets 
+
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts

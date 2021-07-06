@@ -25,7 +25,8 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 ### 2. Run Tests
 
 - Clone this repository
-- Create a new file `cypress.env.json` from `cypress.env.local.json`
+- Create a new file `.env` from `.env.local`
+- Replace `<UPDATE_ME>` with appropriate values
 
 #### 2.1 Locally
 

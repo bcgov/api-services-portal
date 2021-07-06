@@ -9,10 +9,10 @@ describe('User navigates aps portal login page and', () => {
 
   it('enter credentials to login into portal', () => {
     cy.xpath("//button[normalize-space()='Login']").click()
-    const oidcProviderURL = new URL(Cypress.env('oidc-issuer'))
+    const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
 
-    if (Cypress.env('tests-env') === 'dev') {
-      cy.loginToDev(Cypress.env('username'), Cypress.env('password'))
+    if (Cypress.env('TESTS_ENV') === 'dev') {
+      cy.loginToDev(Cypress.env('PORTAL_USERNAME'), Cypress.env('PORTAL_PASSWORD'))
       cy.verifySession(Cypress.config('baseUrl') + '/admin/session')
     }
   })

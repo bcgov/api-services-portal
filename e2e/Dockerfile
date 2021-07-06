@@ -1,7 +1,6 @@
 FROM cypress/included:7.6.0
 
 COPY cypress.json .
-COPY cypress.env.json .
 COPY tsconfig.json .
 COPY package.json .
 COPY package-lock.json .

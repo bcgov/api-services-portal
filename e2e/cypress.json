@@ -8,5 +8,9 @@
   "reporter": "junit",
   "reporterOptions": {
     "toConsole": true
+  },
+  "env": {
+    "OIDC_ISSUER": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2",
+    "TESTS_ENV": "dev"
   }
 }

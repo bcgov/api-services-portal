@@ -1,5 +1,5 @@
 Cypress.Commands.add('loginToDev', (username, password) => {
-  const oidcProviderURL = new URL(Cypress.env('oidc-issuer'))
+  const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
   const appURL = new URL(Cypress.config('baseUrl'))
 
   cy.location().should((loc) => {
