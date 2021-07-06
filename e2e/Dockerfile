@@ -1,10 +1,12 @@
-FROM cypress/included:3.2.0
+FROM cypress/included:7.6.0
 
-COPY . /e2e
+COPY cypress.json .
+COPY cypress.env.json .
+COPY tsconfig.json .
+COPY package.json .
+COPY package-lock.json .
+COPY ./cypress/ cypress
 
-RUN npm install
+RUN npm ci --production
 
-CMD [ "cy:run" ]
-
-ENTRYPOINT [ "npm", "run" ]
-
+CMD [ "--config-file", "./cypress.json" ]

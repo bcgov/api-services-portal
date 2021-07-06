@@ -4,5 +4,9 @@
   "screenshotOnRunFailure": false,
   "video": false,
   "defaultCommandTimeout": 1000,
-  "requestTimeout": 1000
+  "requestTimeout": 1000,
+  "reporter": "junit",
+  "reporterOptions": {
+    "toConsole": true
+  }
 }

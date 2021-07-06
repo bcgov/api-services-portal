@@ -1,13 +1,13 @@
-describe('aps portal login page', () => {
+describe('User navigates aps portal login page and', () => {
   beforeEach(() => {
     cy.visit('/')
   })
 
-  it('displays login button', () => {
+  it('finds login button', () => {
     cy.xpath('//button').contains('Login')
   })
 
-  it('login into portal', () => {
+  it('enter credentials to login into portal', () => {
     cy.xpath("//button[normalize-space()='Login']").click()
     const oidcProviderURL = new URL(Cypress.env('oidc-issuer'))
 

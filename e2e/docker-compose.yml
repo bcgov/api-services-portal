@@ -2,9 +2,10 @@ version: '3.2'
 
 services:
   cypress:
-    image: 'cypress/included:3.2.0'
+    image: 'aps-cypress-e2e:latest'
     container_name: cypress-e2e
-    command: npm run cy:run
-    working_dir: /e2e
-    volumes:
-      - ./:/e2e
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # environment:
+    #   DEBUG: cypress:* - Writes complete log
