@@ -118,7 +118,7 @@ jobs:
 
           extraVolumeMounts:
             - name: aps-portal-e2e-user-creds
-              mountPath: "/e2e"
+              mountPath: "/app"
               readOnly: true
 
           extraVolumes:

@@ -1,13 +1,15 @@
-FROM cypress/included:7.6.0
+FROM cypress/base:12.19.0
 
-WORKDIR /e2e
+WORKDIR /app
 
-COPY cypress.json .
-COPY tsconfig.json .
-COPY package.json .
-COPY package-lock.json .
-COPY ./cypress/ cypress
+COPY cypress.json /app
+COPY tsconfig.json /app
+COPY package.json /app
+COPY package-lock.json /app
+ADD cypress /app/cypress
 
-RUN npm ci --production
+RUN npm install
 
-CMD [ "--config-file", "./cypress.json" ]
+CMD [ "--config-file", "/app/cypress.json" ]
+
+ENTRYPOINT ["npm", "run", "cy:run"]
