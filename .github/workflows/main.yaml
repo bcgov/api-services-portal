@@ -58,8 +58,8 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          # cache-from: type=local,src=/tmp/.buildx-cache
+          # cache-to: type=local,dest=/tmp/.buildx-cache
           context: .
           file: Dockerfile
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
