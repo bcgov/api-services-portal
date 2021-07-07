@@ -1,5 +1,7 @@
 FROM cypress/included:7.6.0
 
+WORKDIR /e2e
+
 COPY cypress.json .
 COPY tsconfig.json .
 COPY package.json .
