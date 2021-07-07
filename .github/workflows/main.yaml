@@ -55,11 +55,11 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build
+      - name: Build Portal
         uses: docker/build-push-action@v2
         with:
-          # cache-from: type=local,src=/tmp/.buildx-cache
-          # cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: .
           file: Dockerfile
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
@@ -67,21 +67,18 @@ jobs:
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
-            APP_REVISION=${GITHUB_SHA}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
 
-      # - name: Push
-      #   run: docker push ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
-
-      # - name: Create docker image data-feeder
-      #   uses: docker/build-push-action@v1
-      #   with:
-      #     registry: docker.pkg.github.com
-      #     username: $GITHUB_ACTOR
-      #     password: ${{ secrets.GITHUB_TOKEN }}
-      #     repository: bcgov/api-services-portal/data-feeder
-      #     path: feeds
-      #     dockerfile: feeds/Dockerfile
-      #     push: true
-      #     tags: ${{ steps.release.outputs.tag_name }}
-      #     tag_with_sha: false
-      #     build_args: APP_VERSION=${{ steps.release.outputs.version }},APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
+      - name: Build Feeder
+        uses: docker/build-push-action@v2
+        with:
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          context: ./feeds
+          file: ./feeds/Dockerfile
+          tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder:${{ steps.release.outputs.tag_name }}
+          push: true
+          build-args: |
+            GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+            APP_VERSION=${{ steps.release.outputs.version }}
+            APP_REVISION=${{ steps.set-deploy-id.outputs.APP_REVISION }}
