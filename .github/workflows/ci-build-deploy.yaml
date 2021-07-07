@@ -93,7 +93,7 @@ jobs:
 
           echo '
           image:
-            registry: ${{ env.REGISTRY }}
+            registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
             tag: 4.4-ea993071
             pullPolicy: IfNotPresent
