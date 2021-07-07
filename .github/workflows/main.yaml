@@ -63,14 +63,14 @@ jobs:
           context: .
           file: Dockerfile
           tags: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
-          load: true
+          push: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
             APP_VERSION=${{ steps.release.outputs.version }}
             APP_REVISION=${GITHUB_SHA}
 
-      - name: Push
-        run: docker push ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
+      # - name: Push
+      #   run: docker push ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal:${{ steps.release.outputs.tag_name }}
 
       # - name: Create docker image data-feeder
       #   uses: docker/build-push-action@v1
