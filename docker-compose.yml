@@ -23,6 +23,7 @@ services:
         '-Dkeycloak.migration.provider=singleFile',
         '-Dkeycloak.migration.file=/tmp/realm-config/master-realm.json',
         '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
+        '-Dkeycloak.profile.feature.upload_scripts=enabled',
       ]
     ports:
       - 9080:9080/tcp
@@ -60,6 +61,7 @@ services:
           - oauth2proxy.localtest.me
   apsportal:
     container_name: apsportal
+    image: apsportal:latest
     depends_on:
       - keycloak
     build:
@@ -67,12 +69,45 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    ports:
+      - 3000:3000
     networks:
       portal:
         aliases:
           - apsportal.localtest.me
       keycloak: {}
       oauth2-proxy: {}
+      kong-net: {}
+  feeder:
+    container_name: feeder
+    image: feeder:latest
+    depends_on:
+      - oauth2-proxy
+    build:
+      context: ./feeds
+      dockerfile: Dockerfile
+    env_file:
+      - ./feeds/.env
+    ports:
+      - 6000:6000
+    networks:
+      portal:
+        aliases:
+          - feeder.localtest.me
+      kong-net: {}
+  feeder-seeding:
+    container_name: feeder-seeding
+    image: feeder:latest
+    command: ''
+    entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+    depends_on:
+      - feeder
+    restart: on-failure
+    volumes:
+      - ./local/feeder-init:/tmp
+    networks:
+      - portal
+      - keycloak
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -86,7 +121,6 @@ services:
     volumes:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
-      - aps-pg-data:/var/lib/postgresql/data
     networks:
       - kong-net
       - keycloak

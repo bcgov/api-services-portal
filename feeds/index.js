@@ -11,6 +11,7 @@ const port = 6000;
 
 const replay = require('./utils/replay');
 const push = require('./utils/push');
+require('dotenv').config()
 
 assert.strictEqual(
   'WORKING_PATH' in process.env,
