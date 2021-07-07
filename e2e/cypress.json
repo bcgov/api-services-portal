@@ -5,9 +5,11 @@
   "video": false,
   "defaultCommandTimeout": 1000,
   "requestTimeout": 1000,
-  "reporter": "junit",
+  "reporter": "mochawesome",
   "reporterOptions": {
-    "toConsole": true
+    "reportFilename": "bcgov-aps-cypress-e2e-report",
+    "quiet": true,
+    "reportDir": "results"
   },
   "env": {
     "OIDC_ISSUER": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2",
