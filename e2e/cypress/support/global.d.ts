@@ -4,8 +4,12 @@ declare namespace Cypress {
   interface Chainable<Subject> {
     loginToDev(username: string, password: string): Chainable<Element>
 
-    verifySession(url: string): Chainable<Element>
+    getSession(url: string): Chainable<Subject>
 
-    callApi(options: Partial<RequestOptions>): Chainable<Response<any>>
+    callApi(options: Partial<RequestOptions>): Chainable<Subject>
+
+    addContext(message: any): Chainable<Subject>
+
+    loginByAuthAPI(username: string, password: string): Chainable<Subject>
   }
 }

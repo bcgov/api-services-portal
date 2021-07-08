@@ -1,19 +1,22 @@
-describe('User navigates aps portal login page and', () => {
+describe('Login spec', () => {
   beforeEach(() => {
     cy.visit('/')
   })
-
-  it('finds login button', () => {
+  it('should have login button', () => {
     cy.xpath('//button').contains('Login')
   })
 
-  it('enter credentials to login into portal', () => {
+  it('should allow user to authenticate', () => {
     cy.xpath("//button[normalize-space()='Login']").click()
-    const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
 
     if (Cypress.env('TESTS_ENV') === 'dev') {
       cy.loginToDev(Cypress.env('PORTAL_USERNAME'), Cypress.env('PORTAL_PASSWORD'))
-      cy.verifySession(Cypress.config('baseUrl') + '/admin/session')
     }
+  })
+
+  it('should save user session after login', () => {
+    cy.getSession(Cypress.config('baseUrl') + '/admin/session').then((sessionObj: any) => {
+      cy.log('logged user - ' + JSON.stringify(sessionObj.user))
+    })
   })
 })

@@ -1,4 +1,4 @@
 import './commands'
 import 'cypress-xpath'
-import './login-commands'
+import './auth-commands'
 import './api-commands'

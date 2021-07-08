@@ -5,7 +5,7 @@
     "types": ["cypress", "node"],
     "allowJs": true
   },
-  "include": ["./cypress/**/*.ts"],
+  "include": ["./cypress/**/*.ts", "**/*.d.ts"],
   "exclude": [],
   "noEmit": true
 }

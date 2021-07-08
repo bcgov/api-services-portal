@@ -6,10 +6,15 @@
   "author": "BC Gov APS",
   "license": "MIT",
   "scripts": {
-    "cy:open": "cypress open",
-    "cy:run": "cypress run --config watchForFileChanges=false"
+    "cy:open": "cypress open --config-file cypress.json",
+    "cy:run": "cypress run --config-file cypress.json",
+    "cy:run:cfg": "cypress run --config",
+    "moch:json": "mochawesome-merge -f results/*.json -o results/report/bcgov-aps-cypress-e2e-report.json",
+    "moch:html": "marge results/report/bcgov-aps-cypress-e2e-report.json --reportDir results/report --inline"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/mochawesome": "^6.2.0",
     "@types/node": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
@@ -26,7 +31,9 @@
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mochawesome": "^6.2.2",
+    "mochawesome-merge": "^4.2.0",
     "typescript": "^4.3.5"
   }
 }

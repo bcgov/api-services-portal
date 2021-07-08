@@ -3,13 +3,13 @@
   "integrationFolder": "cypress/tests",
   "screenshotOnRunFailure": false,
   "video": false,
-  "defaultCommandTimeout": 1000,
-  "requestTimeout": 1000,
+  "watchForFileChanges": true,
   "reporter": "mochawesome",
   "reporterOptions": {
-    "reportFilename": "bcgov-aps-cypress-e2e-report",
-    "quiet": true,
-    "reportDir": "results"
+    "reportDir": "results",
+    "html": false,
+    "json": true,
+    "overwrite": false
   },
   "env": {
     "OIDC_ISSUER": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2",
