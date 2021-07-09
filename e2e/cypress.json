@@ -1,5 +1,5 @@
 {
-  "baseUrl": "https://api-services-portal-dev.apps.silver.devops.gov.bc.ca",
+  "baseUrl": "http://oauth2proxy.localtest.me:4180",
   "integrationFolder": "cypress/tests",
   "screenshotOnRunFailure": false,
   "video": false,
@@ -11,8 +11,9 @@
     "json": true,
     "overwrite": false
   },
+  "chromeWebSecurity": false,
   "env": {
-    "OIDC_ISSUER": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2",
+    "OIDC_ISSUER": "http://keycloak.localtest.me:9080/auth/realms/master",
     "TESTS_ENV": "dev"
   }
 }
