@@ -90,7 +90,7 @@ module.exports = {
                   '[currentNamespace] NOT FOUND! %j',
                   context.req.user
                 );
-                return {};
+                return null;
               } else {
                 return matched[0];
               }
