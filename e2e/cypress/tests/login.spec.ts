@@ -7,11 +7,7 @@ describe('Login spec', () => {
   })
 
   it('should allow user to authenticate', () => {
-    cy.xpath("//button[normalize-space()='Login']").click()
-
-    if (Cypress.env('TESTS_ENV') === 'dev') {
-      cy.loginToDev(Cypress.env('PORTAL_USERNAME'), Cypress.env('PORTAL_PASSWORD'))
-    }
+    cy.login(Cypress.env('PORTAL_USERNAME'), Cypress.env('PORTAL_PASSWORD'))
   })
 
   it('should save user session after login', () => {
