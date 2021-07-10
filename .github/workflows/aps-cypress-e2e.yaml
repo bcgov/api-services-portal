@@ -24,7 +24,8 @@ jobs:
               docker-compose down
               break
             else
+              docker ps -a
               echo  "Waiting for Cypress to Complete E2E Tests....."
-              sleep 3m
+              sleep 1m
             fi
           done
