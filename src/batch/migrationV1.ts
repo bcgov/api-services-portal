@@ -1,5 +1,7 @@
 const keystoneApi = require('../services/keystone');
 
+import { AssertionError } from 'assert';
+
 import { doClientLoginForCredentialIssuer } from '../lists/extensions/Common';
 import type { TokenExchangeResult } from '../lists/extensions/Common';
 import {
@@ -14,6 +16,7 @@ import {
 import { CreateServiceAccount } from '../services/workflow';
 
 import { Logger } from '../logger';
+import { ServiceAccess } from '@/services/keystone/types';
 
 export interface V1ServiceAccount {
   clientId: string;
@@ -32,6 +35,7 @@ export interface V1Definition {
   view_membership: V1Membership[];
   attributes: V1Attributes;
   acl_protected: V1ServiceACL[];
+  acl_members: string[]; // consumer usernames
 }
 
 export interface V1Membership {
@@ -109,6 +113,7 @@ export class MigrationFromV1 {
           def.namespace,
           found.length == 1 ? 'EXISTS' : 'NEW'
         );
+
         const workingResource: { id: string } = { id: null };
         if (found.length == 0) {
           const resource: ResourceSetInput = {
@@ -164,6 +169,50 @@ export class MigrationFromV1 {
               scope
             );
             logger.info(' > Permission %j', user, permission);
+          }
+        }
+
+        // Get a list of all Service Accesses by Namespace
+        const serviceAccesses = await keystoneApi.lookupServiceAccessesByNamespace(
+          noauthContext,
+          def.namespace
+        );
+
+        const isServiceAccessExists = (username: string) =>
+          serviceAccesses.filter(
+            (sa: ServiceAccess) => sa.consumer.username === username
+          ).length != 0;
+
+        // If the Consumer Username does not exist, then
+        // create a Service Access record
+        for (const consumer of def.acl_members.filter(
+          (consumer) => !isServiceAccessExists(consumer)
+        )) {
+          logger.info(' > Create Service Access for %j', consumer);
+          const consumerItem = await keystoneApi
+            .lookupKongConsumerByUsername(noauthContext, consumer)
+            .catch((ex: any) => {
+              if (ex instanceof AssertionError) {
+                logger.warn('[%s] %s', consumer, ex);
+              } else {
+                throw ex;
+              }
+            });
+
+          if (consumerItem) {
+            await keystoneApi.addServiceAccess(
+              noauthContext,
+              consumer,
+              true,
+              true,
+              consumer.includes('@') ? 'user' : 'client',
+              null,
+              null,
+              consumerItem.id,
+              null,
+              null,
+              def.namespace
+            );
           }
         }
 
