@@ -84,7 +84,7 @@ export class KongConsumerService {
   public async createKongConsumer(username: string, customId: string) {
     let body: KongConsumer = {
       username: username,
-      tags: ['aps-portal-poc'],
+      tags: ['aps-portal'],
     };
     if (customId) {
       body['custom_id'] = customId;
