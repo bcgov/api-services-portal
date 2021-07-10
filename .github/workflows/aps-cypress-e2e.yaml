@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Spin up API Services Portal and Run E2E Tests
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker-compose -f docker-compose.yml up
       - name: Stop the Containers
         run: |
           while true; do
