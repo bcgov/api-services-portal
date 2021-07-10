@@ -52,7 +52,7 @@ services:
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.local
     networks:
       keycloak: {}
       portal: {}
@@ -69,7 +69,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.local
     ports:
       - 3000:3000
     networks:
@@ -88,7 +88,7 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env
+      - ./feeds/.env.local
     restart: on-failure
     ports:
       - 6000:6000
