@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: lucasalt/act_base:latest
+      options: -v /var/run/docker.sock:/var/run/docker.sock -v ${{ github.workspace }}:/home/nkuruba/nithin/Git/api-services-portal
     steps:
       - uses: actions/checkout@v1
       - name: Spin up API Services Portal and Run E2E Tests
