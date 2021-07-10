@@ -17,7 +17,7 @@ jobs:
       - name: Stop the Containers
         run: |
           while true; do
-            if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+            if [ "$(docker ps -aq -f status=exited -f name=keycloak)" ]; then
               # cleanup
               docker-compose stop
               sleep 1m

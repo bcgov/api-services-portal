@@ -39,90 +39,90 @@ services:
       keycloak:
         aliases:
           - keycloak.localtest.me
-  oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
-    container_name: oauth2-proxy
-    command: --config ./oauth2-proxy.cfg
-    depends_on:
-      - keycloak
-    ports:
-      - 4180:4180/tcp
-    volumes:
-      - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
-    restart: unless-stopped
-    env_file:
-      - .env.local
-    networks:
-      keycloak: {}
-      portal: {}
-      kong-net: {}
-      oauth2-proxy:
-        aliases:
-          - oauth2proxy.localtest.me
-  apsportal:
-    container_name: apsportal
-    image: apsportal:latest
-    depends_on:
-      - keycloak
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env.local
-    ports:
-      - 3000:3000
-    networks:
-      portal:
-        aliases:
-          - apsportal.localtest.me
-      keycloak: {}
-      oauth2-proxy: {}
-      kong-net: {}
-  feeder:
-    container_name: feeder
-    image: feeder:latest
-    depends_on:
-      - oauth2-proxy
-    build:
-      context: ./feeds
-      dockerfile: Dockerfile
-    env_file:
-      - ./feeds/.env.local
-    ports:
-      - 6000:6000
-    networks:
-      portal:
-        aliases:
-          - feeder.localtest.me
-      kong-net: {}
-  feeder-seeding:
-    container_name: feeder-seeding
-    image: feeder:latest
-    command: ''
-    entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
-    depends_on:
-      - feeder
-    volumes:
-      - ./local/feeder-init:/tmp
-    networks:
-      - portal
-      - keycloak
-  cypress:
-    image: 'aps-cypress-e2e:latest'
-    container_name: cypress-e2e
-    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-    build:
-      context: ./e2e
-      dockerfile: Dockerfile
-    environment:
-      # DEBUG: cypress:* - Writes complete log
-      CYPRESS_PORTAL_USERNAME: local
-      CYPRESS_PORTAL_PASSWORD: local
-      CYPRESS_CLIENT_ID: aps-portal
-      CYPRESS_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
-    networks:
-      - keycloak
-      - oauth2-proxy
+  # oauth2-proxy:
+  #   image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
+  #   container_name: oauth2-proxy
+  #   command: --config ./oauth2-proxy.cfg
+  #   depends_on:
+  #     - keycloak
+  #   ports:
+  #     - 4180:4180/tcp
+  #   volumes:
+  #     - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env.local
+  #   networks:
+  #     keycloak: {}
+  #     portal: {}
+  #     kong-net: {}
+  #     oauth2-proxy:
+  #       aliases:
+  #         - oauth2proxy.localtest.me
+  # apsportal:
+  #   container_name: apsportal
+  #   image: apsportal:latest
+  #   depends_on:
+  #     - keycloak
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env.local
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     portal:
+  #       aliases:
+  #         - apsportal.localtest.me
+  #     keycloak: {}
+  #     oauth2-proxy: {}
+  #     kong-net: {}
+  # feeder:
+  #   container_name: feeder
+  #   image: feeder:latest
+  #   depends_on:
+  #     - oauth2-proxy
+  #   build:
+  #     context: ./feeds
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - ./feeds/.env.local
+  #   ports:
+  #     - 6000:6000
+  #   networks:
+  #     portal:
+  #       aliases:
+  #         - feeder.localtest.me
+  #     kong-net: {}
+  # feeder-seeding:
+  #   container_name: feeder-seeding
+  #   image: feeder:latest
+  #   command: ''
+  #   entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+  #   depends_on:
+  #     - feeder
+  #   volumes:
+  #     - ./local/feeder-init:/tmp
+  #   networks:
+  #     - portal
+  #     - keycloak
+  # cypress:
+  #   image: 'aps-cypress-e2e:latest'
+  #   container_name: cypress-e2e
+  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+  #   build:
+  #     context: ./e2e
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     # DEBUG: cypress:* - Writes complete log
+  #     CYPRESS_PORTAL_USERNAME: local
+  #     CYPRESS_PORTAL_PASSWORD: local
+  #     CYPRESS_CLIENT_ID: aps-portal
+  #     CYPRESS_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+  #   networks:
+  #     - keycloak
+  #     - oauth2-proxy
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -140,51 +140,49 @@ services:
       - kong-net
       - keycloak
       - portal
-  kong-migrations:
-    image: kong:latest
-    command: kong migrations bootstrap
-    depends_on:
-      - kong-db
-    environment: *common-variables
-    networks:
-      - kong-net
-    restart: on-failure
-  kong-migrations-up:
-    image: kong:latest
-    command: kong migrations up && kong migrations finish
-    depends_on:
-      - kong-db
-    environment: *common-variables
-    networks:
-      - kong-net
-    restart: on-failure
-  kong:
-    image: kong:latest
-    container_name: kong
-    depends_on:
-      - kong-migrations
-      - kong-migrations-up
-    environment:
-      <<: *common-variables
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_CASSANDRA_CONTACT_POINTS: kong-db
-      KONG_NGINX_WORKER_PROCESSES: '1'
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
-    ports:
-      - 8000:8000
-      - 8001:8001
-    networks:
-      kong-net:
-        aliases:
-          - kong.localtest.me
-    restart: on-failure:5
+  # kong-migrations:
+  #   image: kong:latest
+  #   command: kong migrations bootstrap
+  #   depends_on:
+  #     - kong-db
+  #   environment: *common-variables
+  #   networks:
+  #     - kong-net
+  #   restart: on-failure
+  # kong-migrations-up:
+  #   image: kong:latest
+  #   command: kong migrations up && kong migrations finish
+  #   depends_on:
+  #     - kong-db
+  #   environment: *common-variables
+  #   networks:
+  #     - kong-net
+  #   restart: on-failure
+  # kong:
+  #   image: kong:latest
+  #   container_name: kong
+  #   depends_on:
+  #     - kong-migrations
+  #     - kong-migrations-up
+  #   environment:
+  #     <<: *common-variables
+  #     KONG_ADMIN_ACCESS_LOG: /dev/stdout
+  #     KONG_ADMIN_ERROR_LOG: /dev/stderr
+  #     KONG_CASSANDRA_CONTACT_POINTS: kong-db
+  #     KONG_NGINX_WORKER_PROCESSES: '1'
+  #     KONG_PROXY_ACCESS_LOG: /dev/stdout
+  #     KONG_PROXY_ERROR_LOG: /dev/stderr
+  #     KONG_ADMIN_LISTEN: 0.0.0.0:8001
+  #   ports:
+  #     - 8000:8000
+  #     - 8001:8001
+  #   networks:
+  #     kong-net:
+  #       aliases:
+  #         - kong.localtest.me
+  #   restart: on-failure:5
 networks:
   keycloak: {}
-  oauth2-proxy: {}
-  portal: {}
-  kong-net: {}
-volumes:
-  aps-pg-data: {}
+  # oauth2-proxy: {}
+  # portal: {}
+  # kong-net: {}
