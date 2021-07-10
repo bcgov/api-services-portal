@@ -202,7 +202,7 @@ export class MigrationFromV1 {
           if (consumerItem) {
             await keystoneApi.addServiceAccess(
               noauthContext,
-              consumer,
+              consumer + ' for namespace ' + def.namespace,
               true,
               true,
               consumer.includes('@') ? 'user' : 'client',
