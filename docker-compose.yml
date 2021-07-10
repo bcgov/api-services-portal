@@ -51,7 +51,7 @@ services:
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.local
     networks:
       keycloak: {}
       portal: {}
@@ -68,7 +68,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.local
     ports:
       - 3000:3000
     networks:
@@ -87,7 +87,7 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env
+      - ./feeds/.env.local
     ports:
       - 6000:6000
     networks:
@@ -107,22 +107,22 @@ services:
     networks:
       - portal
       - keycloak
-  # cypress:
-  #   image: 'aps-cypress-e2e:latest'
-  #   container_name: cypress-e2e
-  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-  #   build:
-  #     context: ./e2e
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     # DEBUG: cypress:* - Writes complete log
-  #     CYPRESS_PORTAL_USERNAME: local
-  #     CYPRESS_PORTAL_PASSWORD: local
-  #     CYPRESS_CLIENT_ID: aps-portal
-  #     CYPRESS_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
-  #   networks:
-  #     - keycloak
-  #     - oauth2-proxy
+  cypress:
+    image: 'aps-cypress-e2e:latest'
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    environment:
+      # DEBUG: cypress:* - Writes complete log
+      CYPRESS_PORTAL_USERNAME: local
+      CYPRESS_PORTAL_PASSWORD: local
+      CYPRESS_CLIENT_ID: aps-portal
+      CYPRESS_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+    networks:
+      - keycloak
+      - oauth2-proxy
   kong-db:
     image: postgres:latest
     container_name: kong-db

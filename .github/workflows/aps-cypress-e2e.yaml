@@ -8,10 +8,23 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    container: cypress/included:4.11.0
+    container:
+      image: lucasalt/act_base:latest
     steps:
       - uses: actions/checkout@v1
-      - run: |
-          cd e2e
-          npm install --production
-          npm run cy:run --config-file cypress.json
+      - name: Spin up API Services Portal and Run E2E Tests
+        run: docker-compose -f docker-compose.yml up -d
+      - name: Stop the Containers
+        run: |
+          while true; do
+            if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+              # cleanup
+              docker-compose stop
+              sleep 1m
+              docker-compose down
+              break
+            else
+              echo  "Waiting for Cypress to Complete E2E Tests....."
+              sleep 3m
+            fi
+          done
