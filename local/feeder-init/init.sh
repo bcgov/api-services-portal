@@ -16,7 +16,7 @@ while true; do
         break
     else
         echo  "Waiting for Keycloak....."
-        sleep 2m
+        sleep 1m
     fi
 done
 

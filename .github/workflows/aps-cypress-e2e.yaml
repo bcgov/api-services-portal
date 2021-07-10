@@ -11,11 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Spin up API Services Portal and Run E2E Tests
-        run: docker-compose up
+        run: docker-compose up -d
       - name: Stop the Containers
         run: |
           while true; do
-            if [ "$(docker ps -aq -f status=exited -f name=keycloak)" ]; then
+            if [ "$(docker ps -aq -f status=exited -f name=cypress)" ]; then
               # cleanup
               docker-compose stop
               sleep 1m

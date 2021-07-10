@@ -8,11 +8,13 @@ while true; do
     if [[ "$keycloakstatus" == "200" ]]; then
         echo  "Keycloak is up"
         cd /e2e
+        # added sleep to wait for initial data seeding
+        sleep 2m
         npm run cy:run
         break
     else
         echo  "Waiting for Keycloak....."
-        sleep 2m
+        sleep 3m
     fi
 done
 
