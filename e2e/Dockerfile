@@ -13,6 +13,4 @@ ADD cypress /e2e/cypress
 
 RUN npm install --production
 
-CMD [ "--config-file", "/e2e/cypress.json" ]
-
-ENTRYPOINT ["npm", "run", "cy:run"]
+ENTRYPOINT ["npm", "run", "cy:run:html"]

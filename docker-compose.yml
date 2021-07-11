@@ -122,6 +122,8 @@ services:
       CYPRESS_PORTAL_PASSWORD: local
       CYPRESS_CLIENT_ID: aps-portal
       CYPRESS_CLIENT_SECRET: 8e1a17ed-cb93-4806-ac32-e303d1c86018
+    volumes:
+      - ./e2e/results/report:/e2e/results/report
     networks:
       - keycloak
       - oauth2-proxy
