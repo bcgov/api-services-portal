@@ -13,7 +13,7 @@ jobs:
       - name: Spin up API Services Portal and Run E2E Tests
         run: docker-compose up -d
       - name: Upload E2E Test Report as Artifact
-        run: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: E2E Test Report
           path: ${{ github.workspace }}/e2e/results/report/*.html
