@@ -32,9 +32,23 @@ const ListInput: React.FC<ListInputProps> = ({
   value = '',
 }) => {
   const fieldsetRef = React.useRef<HTMLDivElement>(null);
-  const [values, setValues] = React.useState<string[]>(value.split('\n'));
+  const [values, setValues] = React.useState<string[]>(() => {
+    try {
+      if (value) {
+        return JSON.parse(value);
+      } else {
+        throw '';
+      }
+    } catch {
+      return [''];
+    }
+  });
   const computedValue = React.useMemo(() => {
-    return values.filter((v) => !isEmpty(v)).join('\n');
+    let validValues = [];
+    if (values) {
+      validValues = values.filter((v) => !isEmpty(v));
+    }
+    return JSON.stringify(validValues);
   }, [values]);
 
   const handleAdd = React.useCallback(() => {

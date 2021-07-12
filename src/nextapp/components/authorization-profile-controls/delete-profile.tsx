@@ -9,13 +9,12 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
-  Icon,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
-import { FaTrash } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
+import { useRouter } from 'next/router';
 
 interface DeleteAuthorizationProfileProps {
   id: string;
@@ -24,6 +23,7 @@ interface DeleteAuthorizationProfileProps {
 const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
   id,
 }) => {
+  const router = useRouter();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
@@ -39,6 +39,7 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
         status: 'success',
       });
       onClose();
+      router.push('/manager/authorization-profiles');
     } catch {
       toast({
         title: 'Profile delete failed',
