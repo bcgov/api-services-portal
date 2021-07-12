@@ -25,7 +25,7 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 ### 2. Run Tests
 
 - Clone this repository
-- Create a new file `cypress.env.json` from `cypress.env.local.json`
+- Create a new file `.env` from `.env.local`
 - Replace `<UPDATE_ME>` with appropriate values
 
 #### 2.1 Locally
@@ -36,7 +36,7 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 #### 2.2 Docker
 
 - Run `docker build -t aps-cypress-e2e:latest ` to build an image
-- Run `docker run --rm -it -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
+- Run `docker run --rm -it --env-file .env -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
 
 #### 2.3 Docker Compose
 
@@ -45,7 +45,7 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 
 #### 2.4 GitHub Actions
 
-- Any new commit pushed to `feature/automation-*` branch triggers a job (`.github/workflows/ci-build-deploy-e2e.yaml`) and deploys a container to execute the test suite
+- Any new commit pushed to `feature/automation-*` branch triggers a job (`.github/workflows/aps-cypress-e2e.yaml`) and deploys a container to execute the test suite
 
 ## Cypress IntelliSense
 

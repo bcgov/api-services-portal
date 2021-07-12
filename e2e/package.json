@@ -9,8 +9,8 @@
     "cy:open": "cypress open --config-file cypress.json",
     "cy:run": "cypress run --config-file cypress.json",
     "cy:run:cfg": "cypress run --config",
-    "moch:json": "mochawesome-merge -f results/*.json -o results/report/bcgov-aps-cypress-e2e-report.json",
-    "moch:html": "marge results/report/bcgov-aps-cypress-e2e-report.json --reportDir results/report --inline",
+    "moch:json": "mochawesome-merge -f results/*.json -o results/report/bcgov-aps-e2e-report.json",
+    "moch:html": "marge results/report/bcgov-aps-e2e-report.json --reportDir results/report -i -t 'API Services Portal E2E Test Report'",
     "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html"
   },
   "devDependencies": {

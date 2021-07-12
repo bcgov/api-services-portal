@@ -1,5 +1,4 @@
 {
-  "baseUrl": "http://oauth2proxy.localtest.me:4180",
   "integrationFolder": "cypress/tests",
   "screenshotOnRunFailure": false,
   "video": false,
@@ -11,9 +10,5 @@
     "json": true,
     "overwrite": false
   },
-  "chromeWebSecurity": false,
-  "env": {
-    "OIDC_ISSUER": "http://keycloak.localtest.me:9080/auth/realms/master",
-    "TESTS_ENV": "dev"
-  }
+  "chromeWebSecurity": false
 }

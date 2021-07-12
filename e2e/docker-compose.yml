@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # environment:
-    #   DEBUG: cypress:* - Writes complete log
+    env_file:
+      - .env
     volumes:
       - ./results/report:/e2e/results/report
