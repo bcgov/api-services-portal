@@ -25,23 +25,25 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 ### 2. Run Tests
 
 - Clone this repository
-- Create a new file `.env` from `.env.local`
-- Replace `<UPDATE_ME>` with appropriate values
+- Run `npm install` to install all the dependencies
 
 #### 2.1 Locally
 
-- Run `npm install` to install all the dependencies
-- Run `npm run cy:run` to run the tests
+##### 2.1.1 Cypress Test Runner
 
-#### 2.2 Docker
+- Create a new file `cypress.json` from `cypress.local.json`
 
-- Run `docker build -t aps-cypress-e2e:latest ` to build an image
-- Run `docker run --rm -it --env-file .env -name aps-cypress-e2e aps-cypress-e2e:latest` to spin up a container to run the tests
+- Run `npm run cy:open` to open the test runner and execute tests selectively
 
-#### 2.3 Docker Compose
+##### 2.2.2 Cypress Headless
 
-- Run `docker-compose up` to spin a container that run cypress as a service and it executes the tests
-- Run `docker-compose down` to tear down the container
+- Run `npm run cy:run` to run the tests and print the results to the console
+- Run `npm run cy:run:html` to run the tests and generate `mochawesome` report under `results/report`
+
+#### 2.2 Docker Compose
+
+- Run `docker-compose up` under parent folder `api-services-portal` to spin up a local environment, which includes cypress as one of the service and it executes the tests
+- Run `docker-compose down` to tear down the containers
 
 #### 2.4 GitHub Actions
 
