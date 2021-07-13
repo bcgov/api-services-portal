@@ -1,9 +1,10 @@
-describe('Authentication spec', () => {
+describe('Authentication spec', { retries: 2 }, () => {
   before(() => {
     cy.clearCookies()
   })
-  afterEach(() => {
-    cy.saveCookies()
+
+  beforeEach(() => {
+    cy.visit('/')
   })
   it('should find login button', () => {
     cy.visit('/')

@@ -29,16 +29,16 @@ The steps below will take you all the way through Cypress. It is assumed you hav
 
 #### 2.1 Locally
 
-##### 2.1.1 Cypress Test Runner
+- Create a new file `cypress.json` from `cypress.local.json` and update any params if necessary
 
-- Create a new file `cypress.json` from `cypress.local.json`
+##### 2.1.1 Cypress Test Runner
 
 - Run `npm run cy:open` to open the test runner and execute tests selectively
 
 ##### 2.2.2 Cypress Headless
 
 - Run `npm run cy:run` to run the tests and print the results to the console
-- Run `npm run cy:run:html` to run the tests and generate `mochawesome` report under `results/report`
+- Run `npm run cy:run:dev:html` to run the tests and generate `mochawesome` report under `results/report`
 
 #### 2.2 Docker Compose
 

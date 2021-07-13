@@ -11,7 +11,8 @@
     "cy:run:dev": "cypress run --config-file cypress.json",
     "moch:json": "mochawesome-merge -f results/*.json -o results/report/bcgov-aps-e2e-report.json",
     "moch:html": "marge results/report/bcgov-aps-e2e-report.json --reportDir results/report -i -t 'API Services Portal E2E Test Report'",
-    "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html"
+    "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html",
+    "cy:run:dev:html": "run-s --continue-on-error cy:run:dev moch:json moch:html"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.4",
