@@ -840,5 +840,10 @@
           "referer": "http://localhost:4180/",
           "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      application {\n        name\n      }\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n    allAccessRequests(where: { serviceAccess_is_null: true }) {\n      id\n      productEnvironment {\n        id\n        name\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n",
           "added": "2021-07-13T20:26:37.682Z"
+     },
+     "bce730773f7c2aa9ef4ceb5ea1d8712e": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetPendingAccessRequests {\n    allAccessRequestsByNamespace(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n        username\n      }\n      serviceAccess {\n        id\n      }\n    }\n  }\n",
+          "added": "2021-07-13T20:59:20.473Z"
      }
 }

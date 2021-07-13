@@ -32,6 +32,9 @@ const query = gql`
         name
         username
       }
+      serviceAccess {
+        id
+      }
     }
   }
 `;
@@ -46,17 +49,14 @@ const AccessRequests: React.FC = () => {
     },
     { suspense: false }
   );
-  const total = data?.allAccessRequestsByNamespace.length ?? 0;
+  const total =
+    data?.allAccessRequestsByNamespace.filter(
+      (req) => req.serviceAccess != null
+    ).length ?? 0;
   const isShowingAll = total > initialSlice && sliceIndex !== initialSlice;
-  const color =
-    data?.allAccessRequestsByNamespace.length === 0 ? 'blue' : 'yellow';
+  const color = total === 0 ? 'blue' : 'yellow';
   const handleShowMore = React.useCallback(
-    () =>
-      setSliceIndex((s) =>
-        s === initialSlice
-          ? data.allAccessRequestsByNamespace.length
-          : initialSlice
-      ),
+    () => setSliceIndex((s) => (s === initialSlice ? total : initialSlice)),
     [data, setSliceIndex]
   );
 
@@ -81,7 +81,7 @@ const AccessRequests: React.FC = () => {
       </Box>
       <Table size="sm" variant="simple" borderRadius={4}>
         <Tbody>
-          {data?.allAccessRequestsByNamespace.length === 0 && (
+          {total === 0 && (
             <Tr>
               <Td colSpan={4}>
                 <Center>
@@ -103,53 +103,54 @@ const AccessRequests: React.FC = () => {
               </Td>
             </Tr>
           )}
-          {data?.allAccessRequestsByNamespace.slice(0, sliceIndex).map((d) => (
-            <Tr key={d.id}>
-              <Td borderColor="yellow.300" width="5">
-                <Icon as={FaUser} color="yellow.700" />
-              </Td>
-              <Td borderColor="yellow.300">
-                <NextLink passHref href={`/manager/requests/${d.id}`}>
-                  <Link>
-                    {d.requestor && (
-                      <>
-                        <Text as="span" fontWeight="bold">
-                          {d.requestor?.name
-                            ? d.requestor?.name
-                            : d.requestor.username}
-                        </Text>{' '}
-                        is requesting access to{' '}
-                      </>
-                    )}
-                    <Text as="span" fontWeight="bold">
-                      {d.name}
-                    </Text>
-                  </Link>
-                </NextLink>
-              </Td>
-              <Td borderColor="yellow.300"></Td>
-              <Td textAlign="right" borderColor="yellow.300">
-                <NextLink passHref href={`/manager/requests/${d.id}`}>
-                  <Button
-                    leftIcon={<Icon as={FaMicroscope} />}
-                    size="sm"
-                    variant="secondary"
-                  >
-                    Review
-                  </Button>
-                </NextLink>
-              </Td>
-            </Tr>
-          ))}
-          {data?.allAccessRequestsByNamespace.length > 4 && (
+          {data?.allAccessRequestsByNamespace
+            .filter((req) => req.serviceAccess != null)
+            .slice(0, sliceIndex)
+            .map((d) => (
+              <Tr key={d.id}>
+                <Td borderColor="yellow.300" width="5">
+                  <Icon as={FaUser} color="yellow.700" />
+                </Td>
+                <Td borderColor="yellow.300">
+                  <NextLink passHref href={`/manager/requests/${d.id}`}>
+                    <Link>
+                      {d.requestor && (
+                        <>
+                          <Text as="span" fontWeight="bold">
+                            {d.requestor?.name
+                              ? d.requestor?.name
+                              : d.requestor.username}
+                          </Text>{' '}
+                          is requesting access to{' '}
+                        </>
+                      )}
+                      <Text as="span" fontWeight="bold">
+                        {d.name}
+                      </Text>
+                    </Link>
+                  </NextLink>
+                </Td>
+                <Td borderColor="yellow.300"></Td>
+                <Td textAlign="right" borderColor="yellow.300">
+                  <NextLink passHref href={`/manager/requests/${d.id}`}>
+                    <Button
+                      leftIcon={<Icon as={FaMicroscope} />}
+                      size="sm"
+                      variant="secondary"
+                    >
+                      Review
+                    </Button>
+                  </NextLink>
+                </Td>
+              </Tr>
+            ))}
+          {total > 4 && (
             <Tr>
               <Td colSpan={4} textAlign="center">
                 <Button size="sm" variant="secondary" onClick={handleShowMore}>
                   {isShowingAll
                     ? 'Show less'
-                    : `Show ${
-                        data.allAccessRequestsByNamespace.length - initialSlice
-                      } More`}
+                    : `Show ${total - initialSlice} More`}
                 </Button>
               </Td>
             </Tr>
