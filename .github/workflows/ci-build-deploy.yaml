@@ -5,10 +5,7 @@ on:
     branches: [dev, main, feature/*]
 
 env:
-  REGISTRY: docker.pkg.github.com
-  # REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
-  # REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
-  #REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+  REGISTRY: ghcr.io
   REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
   REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
@@ -96,7 +93,7 @@ jobs:
 
           echo '
           image:
-            registry: ${{ env.REGISTRY }}
+            registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
             tag: 4.4-ea993071
             pullPolicy: IfNotPresent

@@ -23,6 +23,10 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   const onNextLinkClick = (event) => router.push(event.target.value);
 
+  if (site === 'redirect') {
+    return <></>;
+  }
+
   if (!user) {
     return (
       <Button color="secondary" href="/admin/signin">

@@ -30,9 +30,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     //  return 'manager';
     //}
     if (router?.pathname.startsWith('/platform')) {
-        return 'platform';
+      return 'platform';
     }
-  
+    if (router?.pathname.startsWith('/redirect')) {
+      return 'redirect';
+    }
+
     return 'devportal';
   }, [router]);
 

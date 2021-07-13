@@ -28,6 +28,14 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
+import gfm from 'remark-gfm';
+import { DocHeader, InternalLink } from '@/components/docs';
+
+const renderers = {
+  link: InternalLink,
+  heading: DocHeader,
+};
 
 type DetailItem = {
   title: string;
@@ -89,7 +97,7 @@ const ApiPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Program Services | API Discovery</title>
+        <title>API Services Portal | API Directory</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -99,24 +107,42 @@ const ApiPage: React.FC<
             </NextLink>
           }
           title={
-            <Link
-              isExternal
-              href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                data?.dataset?.title
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {data?.name}
-              <Icon
-                as={FaExternalLinkAlt}
-                boxSize="5"
-                mx={2}
-                color="gray.400"
-              />
-            </Link>
+            data?.dataset?.isInCatalog ? (
+              <Link
+                isExternal
+                href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
+                  data?.dataset?.title
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {data?.name}
+                <Icon
+                  as={FaExternalLinkAlt}
+                  boxSize="5"
+                  mx={2}
+                  color="gray.400"
+                />
+              </Link>
+            ) : (
+              <Text>{data?.name}</Text>
+            )
           }
         >
+          {data.dataset?.organization && (
+            <Box fontSize="sm" color="gray.600">
+              <Text>
+                Published by the{' '}
+                <Text as="strong">
+                  {data.dataset.organization.title}
+                  {' - '}
+                </Text>
+                {data.dataset.organizationUnit && (
+                  <Text as="strong">{data.dataset.organizationUnit.title}</Text>
+                )}
+              </Text>
+            </Box>
+          )}
           <Box fontSize="sm" color="gray.600">
             <Text>
               Licensed under{' '}
@@ -132,7 +158,9 @@ const ApiPage: React.FC<
               </Box>
               <Divider />
               <Box p={4}>
-                <Text>{data.dataset?.notes}</Text>
+                <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
+                  {data.dataset?.notes}
+                </ReactMarkdownWithHtml>
               </Box>
               <Divider />
               <Flex bgColor="gray.50" p={4} align="center">
