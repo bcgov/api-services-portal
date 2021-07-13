@@ -25,32 +25,30 @@ Cypress.Commands.add('login', (username, password) => {
     expect(loc.protocol).to.eq(appURL.protocol)
     expect(loc.hostname).to.eq(appURL.hostname)
   })
+  log.end()
+})
+
+Cypress.Commands.add('saveCookies', () => {
   //saving the session cookie
   cy.getCookies().then((cookies) => {
     cookies.map((cookie) => {
       Cypress.Cookies.preserveOnce(cookie.name)
     })
   })
-
-  log.end()
 })
 
-Cypress.Commands.add('getSession', (url: string) => {
-  cy.request({ method: 'GET', url: url })
-    .then((response) => {
-      expect(response.status).to.eq(200)
-      expect(response.body).to.include({ anonymous: false })
-    })
-    .then((response: any) => {
+Cypress.Commands.add('getSession', () => {
+  cy.request({ method: 'GET', url: Cypress.config('baseUrl') + '/admin/session' }).then(
+    (res) => {
+      cy.wrap(res).as('session')
+      expect(res.status).to.eq(200)
       const log = Cypress.log({
         name: 'Session Info',
         displayName: 'SESSION_INFO',
-        message: JSON.stringify(response.body.user),
+        message: JSON.stringify(res.body),
       })
-    })
-    .then((response) => {
-      cy.wrap(response.body)
-    })
+    }
+  )
 })
 
 Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
@@ -84,4 +82,13 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
   })
   log.snapshot('after')
   log.end()
+})
+
+Cypress.Commands.add('logout', () => {
+  cy.getSession().then(() => {
+    cy.get('@session').then((res: any) => {
+      cy.contains(res.body.user.name).click()
+      cy.contains('Sign Out').click()
+    })
+  })
 })
