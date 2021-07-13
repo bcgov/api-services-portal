@@ -114,6 +114,8 @@ services:
     image: 'aps-cypress-e2e:latest'
     container_name: cypress-e2e
     entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    depends_on:
+      - feeder-seeding
     build:
       context: ./e2e
       dockerfile: Dockerfile
