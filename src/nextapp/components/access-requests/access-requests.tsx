@@ -50,8 +50,8 @@ const AccessRequests: React.FC = () => {
     { suspense: false }
   );
   const total =
-    data?.allAccessRequestsByNamespace.filter(
-      (req) => req.serviceAccess != null
+    data?.allAccessRequestsByNamespace.filter((req) =>
+      Boolean(req.serviceAccess)
     ).length ?? 0;
   const isShowingAll = total > initialSlice && sliceIndex !== initialSlice;
   const color = total === 0 ? 'blue' : 'yellow';
