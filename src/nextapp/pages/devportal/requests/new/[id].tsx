@@ -142,7 +142,6 @@ const NewRequestsPage: React.FC<
       client.invalidateQueries('allAccessRequests');
       toast({
         title: 'Request submitted',
-        description: '',
         status: 'success',
       });
       router?.push(

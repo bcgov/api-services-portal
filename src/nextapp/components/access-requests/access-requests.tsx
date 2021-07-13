@@ -104,7 +104,7 @@ const AccessRequests: React.FC = () => {
             </Tr>
           )}
           {data?.allAccessRequestsByNamespace
-            .filter((req) => req.serviceAccess != null)
+            .filter((req) => Boolean(req.serviceAccess))
             .slice(0, sliceIndex)
             .map((d) => (
               <Tr key={d.id}>
