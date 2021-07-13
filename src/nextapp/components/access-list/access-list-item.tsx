@@ -99,12 +99,18 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Flex flex={1}>
             <Box mr={2}>
               {d.active && (
-                <CircleIcon label="Approved" color="green">
+                <CircleIcon
+                  label={`Approved for ${d.application?.name}`}
+                  color="green"
+                >
                   <Icon as={FaCheck} />
                 </CircleIcon>
               )}
               {!d.active && (
-                <CircleIcon label="Pending" color="orange">
+                <CircleIcon
+                  label={`Pending for ${d.application?.name}`}
+                  color="orange"
+                >
                   <Icon as={FaHourglass} />
                 </CircleIcon>
               )}
@@ -122,15 +128,6 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
                 {d.productEnvironment.name}
               </Text>
               <HStack ml={3}>
-                {!d.productEnvironment.services?.length && (
-                  <Tag
-                    borderRadius="full"
-                    variant="subtle"
-                    colorScheme="orange"
-                  >
-                    No services
-                  </Tag>
-                )}
                 {d.productEnvironment.services?.map((s) => (
                   <Tag
                     key={s.id}

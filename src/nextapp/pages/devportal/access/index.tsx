@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Alert, AlertIcon, Box, Container, Stack } from '@chakra-ui/react';
+
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import EmptyPane from '@/components/empty-pane';
@@ -10,7 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
-import AccessList from '@/components/access-list';
+import AccessList, { CollectCredentialList } from '@/components/access-list';
 
 const queryKey = 'allServiceAccesses';
 
@@ -40,7 +41,7 @@ const ApiAccessPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Program Services | API Access</title>
+        <title>API Program Services | My Access</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader title="My Access" />
@@ -51,11 +52,19 @@ const ApiAccessPage: React.FC<
             List of the BC Government Service APIs that you have access to.
           </Alert>
         </Stack>
+
+        {data.allAccessRequests?.length > 0 && (
+          <CollectCredentialList
+            data={data.allAccessRequests}
+            queryKey={queryKey}
+          />
+        )}
+
         <Box mt={5}>
           <AccessList data={data.myServiceAccesses} queryKey={queryKey} />
           {data.myServiceAccesses.length == 0 && (
             <EmptyPane
-              message="Go to the Directory to find one today!"
+              message="Go to the API Directory to find one today!"
               title="Not using any APIs yet?"
             />
           )}
@@ -73,6 +82,9 @@ const query = gql`
       id
       name
       active
+      application {
+        name
+      }
       productEnvironment {
         id
         name
@@ -87,6 +99,19 @@ const query = gql`
           flow
           resourceType
         }
+        product {
+          id
+          name
+        }
+      }
+    }
+    allAccessRequests(
+      where: { isComplete: null, serviceAccess_is_null: true }
+    ) {
+      id
+      productEnvironment {
+        id
+        name
         product {
           id
           name
