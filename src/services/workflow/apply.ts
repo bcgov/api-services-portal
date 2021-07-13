@@ -126,8 +126,8 @@ export const Apply = async (
         existingItem.id
       );
       assert.strictEqual(
-        requestDetails.serviceAccess != null,
-        true,
+        requestDetails.serviceAccess == null,
+        false,
         'Service Access is Missing!'
       );
 
@@ -155,6 +155,11 @@ export const Apply = async (
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
         context,
         existingItem.id
+      );
+      assert.strictEqual(
+        requestDetails.serviceAccess == null,
+        false,
+        'Service Access is Missing!'
       );
       await deleteRecord(
         context,

@@ -105,9 +105,7 @@ const query = gql`
         }
       }
     }
-    allAccessRequests(
-      where: { isComplete: null, serviceAccess_is_null: true }
-    ) {
+    allAccessRequests(where: { serviceAccess_is_null: true }) {
       id
       productEnvironment {
         id
