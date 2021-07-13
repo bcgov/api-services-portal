@@ -55,33 +55,34 @@ const ApiAccessPage: React.FC = () => {
     router?.push('/devportal/access');
   };
 
-  return access.data ? (
+  return (
     <>
       <Head>
         <title>API Program Services | API Access</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader title="Access Requested">
-          {approval ? (
-            <Alert status="info" p={4}>
-              <AlertIcon />
-              <AlertTitle mr={5}>Pending Approval:</AlertTitle>
-              <AlertDescription>
-                Your request for access has been submitted.
-                <br />
-                If approved, your credentials will be authorized to access the
-                API.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert status="info" p={4}>
-              <AlertIcon />
-              <AlertTitle mr={5}>Request Processed:</AlertTitle>
-              <AlertDescription>
-                Your credentials are ready and authorized to access the API.
-              </AlertDescription>
-            </Alert>
-          )}
+          {access.data &&
+            (approval ? (
+              <Alert status="info" p={4}>
+                <AlertIcon />
+                <AlertTitle mr={5}>Pending Approval:</AlertTitle>
+                <AlertDescription>
+                  Your request for access has been submitted.
+                  <br />
+                  If approved, your credentials will be authorized to access the
+                  API.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert status="info" p={4}>
+                <AlertIcon />
+                <AlertTitle mr={5}>Request Processed:</AlertTitle>
+                <AlertDescription>
+                  Your credentials are ready and authorized to access the API.
+                </AlertDescription>
+              </Alert>
+            ))}
         </PageHeader>
         <Box my={5} bgColor="white">
           <Box p={4} display="flex" alignItems="center">
@@ -164,8 +165,6 @@ const ApiAccessPage: React.FC = () => {
         </Box>
       </Container>
     </>
-  ) : (
-    <></>
   );
 };
 
