@@ -2,7 +2,7 @@ name: Scan for Vulnerabilities in API Services Portal Container Image
 
 on:
   push:
-    branches: [util/gh-container-scan]
+    branches: [dev, main, scan/*]
 
 jobs:
   Anchore-Build-Scan:
