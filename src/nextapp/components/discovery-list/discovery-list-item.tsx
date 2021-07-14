@@ -45,12 +45,12 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
             {data.dataset ? (
               <>
-                <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+                <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
                   <Link>{data.dataset.title}</Link>
                 </NextLink>
               </>
             ) : (
-              <NextLink passHref href={`/devportal/api-discovery/${data.id}`}>
+              <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
                 <Link>{data.name}</Link>
               </NextLink>
             )}
@@ -60,10 +60,10 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       <Divider />
       <Box flex={1} p={4}>
         <Heading size="xs" mb={2}>
-          {data.organization && (
+          {data.dataset?.organization && (
             <>
-              {data.organization.title}
-              {data.organizationUnit && (
+              {data.dataset.organization.title}
+              {data.dataset.organizationUnit && (
                 <>
                   <Text
                     as="span"
@@ -73,13 +73,13 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
                     mt={1}
                     fontSize="xs"
                   >
-                    {data.organizationUnit.title}
+                    {data.dataset.organizationUnit.title}
                   </Text>
                 </>
               )}
             </>
           )}
-          {!data.organization && 'Open Dataset'}
+          {!data.dataset?.organization && 'Open Dataset'}
         </Heading>
         {data.dataset && (
           <Text fontSize="sm" noOfLines={2}>
