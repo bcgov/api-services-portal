@@ -65,10 +65,6 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
     [setEnvironments]
   );
 
-  React.useEffect(() => {
-    setEnvironments([]);
-  }, [mode, setEnvironments]);
-
   return (
     <form ref={form} onSubmit={handleSubmit}>
       <AuthorizationProfileSection issuer={issuer} />
@@ -107,4 +103,4 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   );
 };
 
-export default AuthorizationProfileForm;
+export default React.memo(AuthorizationProfileForm);

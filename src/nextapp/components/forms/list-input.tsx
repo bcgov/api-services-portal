@@ -2,13 +2,19 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  IconButton,
+  Divider,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  Flex,
   FormControl,
   FormLabel,
   Icon,
+  IconButton,
   Input,
   InputGroup,
   InputRightElement,
+  Text,
 } from '@chakra-ui/react';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import isEmpty from 'lodash/isEmpty';
@@ -27,11 +33,13 @@ const ListInput: React.FC<ListInputProps> = ({
   buttonText = 'Add Value',
   label,
   name,
-  placeholder,
+  placeholder = 'Press enter to add',
   required,
   value = '',
 }) => {
   const fieldsetRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [isAdding, setIsAdding] = React.useState<boolean>(false);
   const [values, setValues] = React.useState<string[]>(() => {
     try {
       if (value) {
@@ -40,7 +48,7 @@ const ListInput: React.FC<ListInputProps> = ({
         throw '';
       }
     } catch {
-      return [''];
+      return [];
     }
   });
   const computedValue = React.useMemo(() => {
@@ -51,31 +59,32 @@ const ListInput: React.FC<ListInputProps> = ({
     return JSON.stringify(validValues);
   }, [values]);
 
-  const handleAdd = React.useCallback(() => {
-    setValues((state) => [...state, '']);
+  const handleAddToggle = React.useCallback(() => {
+    setIsAdding((state) => !state);
     setTimeout(() => {
-      const lastInput: HTMLInputElement = fieldsetRef.current?.querySelector(
-        '.list-input-item:last-of-type input'
-      );
-
-      if (lastInput) {
-        lastInput.focus();
-      }
+      inputRef.current?.focus();
     }, 50);
-  }, [setValues]);
-  const handleChange = React.useCallback(
-    (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value;
-      setValues((state) =>
-        state.map((v, i) => {
-          if (i === index) {
-            return newValue;
-          }
-          return v;
-        })
-      );
+  }, [setIsAdding]);
+  const handleAdd = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const valueToAdd = inputRef.current?.value;
+
+        if (valueToAdd.trim()) {
+          setValues((state) => [...state, valueToAdd]);
+        }
+
+        inputRef.current.value = '';
+      }
+
+      if (event.key === 'Escape') {
+        setIsAdding(false);
+      }
+
+      return false;
     },
-    [setValues]
+    [setIsAdding, setValues]
   );
   const handleRemove = React.useCallback(
     (index: number) => () => {
@@ -88,47 +97,47 @@ const ListInput: React.FC<ListInputProps> = ({
     <>
       <FormControl isRequired={required} ref={fieldsetRef}>
         <FormLabel>{label}</FormLabel>
+        <Divider />
         {values.map((v, index) => (
-          <InputGroup
-            key={uid(index)}
-            mb={2}
-            id={uid(index)}
-            className="list-input-item"
-          >
-            <Input
-              onChange={handleChange(index)}
-              placeholder={placeholder}
-              type="text"
-              variant="bc-input"
-              value={v}
-            />
-            {values.length > 1 && (
-              <InputRightElement width="3rem">
-                <IconButton
-                  aria-label="delete item"
-                  colorScheme="red"
-                  h="1.75rem"
-                  icon={<Icon as={FaTimes} />}
-                  size="sm"
-                  onClick={handleRemove(index)}
-                  variant="link"
-                />
-              </InputRightElement>
-            )}
-          </InputGroup>
+          <React.Fragment key={uid(v)}>
+            <Flex my={2}>
+              <Text flex={1}>{v}</Text>
+              <IconButton
+                aria-label="delete item"
+                colorScheme="red"
+                h="1.75rem"
+                icon={<Icon as={FaTimes} />}
+                size="sm"
+                onClick={handleRemove(index)}
+                variant="link"
+              />
+            </Flex>
+            <Divider />
+          </React.Fragment>
         ))}
+        {isAdding && (
+          <Box my={4}>
+            <Input
+              ref={inputRef}
+              placeholder={placeholder}
+              onKeyDown={handleAdd}
+            />
+          </Box>
+        )}
         <input type="hidden" name={name} value={computedValue} />
       </FormControl>
-      <Box mt={2}>
-        <Button
-          colorScheme="green"
-          leftIcon={<Icon as={FaPlus} />}
-          size="sm"
-          onClick={handleAdd}
-        >
-          {buttonText}
-        </Button>
-      </Box>
+      {!isAdding && (
+        <Box mt={2}>
+          <Button
+            colorScheme="green"
+            leftIcon={<Icon as={FaPlus} />}
+            size="sm"
+            onClick={handleAddToggle}
+          >
+            {buttonText}
+          </Button>
+        </Box>
+      )}
     </>
   );
 };
