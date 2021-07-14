@@ -1614,5 +1614,49 @@
           "referer": "http://localhost:4180/manager/namespace-access",
           "query": "\n  mutation RevokeSAAccess(\n    $prodEnvId: ID!\n    $resourceId: String!\n    $policyId: String!\n  ) {\n    deleteUmaPolicy(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n      policyId: $policyId\n    )\n  }\n",
           "added": "2021-07-06T02:58:35.159Z"
+     },
+     "48d6d4f62bd088ecee52b2e148bca8d7": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60edd451bcb1bb2c65f30536",
+          "query": "\n  query GET {\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      productEnvironment {\n        flow\n        credentialIssuer {\n          instruction\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T18:01:04.016Z"
+     },
+     "739a3831e5e5df76264c51e002b5ca31": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60edd451bcb1bb2c65f30536",
+          "query": "\n  query GET {\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      id\n      productEnvironment {\n        flow\n        credentialIssuer {\n          instruction\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T18:04:08.689Z"
+     },
+     "b2c257133d36336168846295b682372d": {
+          "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60edd451bcb1bb2c65f30536",
+          "query": "\n  query GET {\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      id\n      productEnvironment {\n        approval\n        credentialIssuer {\n          instruction\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T18:06:49.925Z"
+     },
+     "cf3b7dee56b04cfd41b95d196bd4907f": {
+          "referer": "http://localhost:4180/devportal/access",
+          "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      id\n      productEnvironment {\n        id\n        name\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T18:27:27.458Z"
+     },
+     "e0984d8a4083b05c52e1dbd03c7bd809": {
+          "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n    allAccessRequests(\n      where: { isComplete: null, serviceAccess_is_null: true }\n    ) {\n      id\n      productEnvironment {\n        id\n        name\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T18:28:21.222Z"
+     },
+     "72b5db83f7405b97305008f03b71ab14": {
+          "referer": "http://localhost:4180/devportal/access",
+          "query": "\n  mutation CancelAccessRequest($id: ID!) {\n    deleteAccessRequest(id: $id) {\n      id\n    }\n  }\n",
+          "added": "2021-07-13T19:09:22.827Z"
+     },
+     "e67b6f45513db1744aa777371a7c8c4d": {
+          "referer": "http://localhost:4180/devportal/access",
+          "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      application {\n        name\n      }\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n    allAccessRequests(\n      where: { isComplete: null, serviceAccess_is_null: true }\n    ) {\n      id\n      productEnvironment {\n        id\n        name\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T19:33:53.428Z"
+     },
+     "b3703f6e3e6b8ee7176ca9ab756f8dde": {
+          "referer": "http://localhost:4180/",
+          "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      application {\n        name\n      }\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n    allAccessRequests(where: { serviceAccess_is_null: true }) {\n      id\n      productEnvironment {\n        id\n        name\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n",
+          "added": "2021-07-13T20:26:37.682Z"
+     },
+     "bce730773f7c2aa9ef4ceb5ea1d8712e": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetPendingAccessRequests {\n    allAccessRequestsByNamespace(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n        username\n      }\n      serviceAccess {\n        id\n      }\n    }\n  }\n",
+          "added": "2021-07-13T20:59:20.473Z"
      }
 }

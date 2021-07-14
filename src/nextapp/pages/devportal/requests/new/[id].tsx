@@ -142,7 +142,6 @@ const NewRequestsPage: React.FC<
       client.invalidateQueries('allAccessRequests');
       toast({
         title: 'Request submitted',
-        description: 'Check back to see if it has been accepted soon',
         status: 'success',
       });
       router?.push(
@@ -221,6 +220,7 @@ const NewRequestsPage: React.FC<
               onChange={setEnvironment}
               options={dataset?.environments
                 .filter((e) => e.active)
+                .filter((e) => e.flow !== 'public')
                 .map((e) => ({
                   value: e.id,
                   icon: FaBook,
