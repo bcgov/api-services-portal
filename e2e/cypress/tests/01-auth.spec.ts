@@ -1,8 +1,4 @@
-describe('Authentication spec', { retries: 2 }, () => {
-  before(() => {
-    cy.clearCookies()
-  })
-
+describe('Authentication spec', () => {
   beforeEach(() => {
     cy.visit('/')
   })

@@ -13,7 +13,5 @@ declare namespace Cypress {
     loginByAuthAPI(username: string, password: string): Chainable<Subject>
 
     logout(): Chainable<Subject>
-
-    saveCookies(): Chainable<Subject>
   }
 }

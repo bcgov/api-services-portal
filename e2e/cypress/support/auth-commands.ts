@@ -26,16 +26,6 @@ Cypress.Commands.add('login', (username, password) => {
     expect(loc.hostname).to.eq(appURL.hostname)
   })
   log.end()
-  cy.saveCookies()
-})
-
-Cypress.Commands.add('saveCookies', () => {
-  //saving the session cookie
-  cy.getCookies().then((cookies) => {
-    cookies.map((cookie) => {
-      Cypress.Cookies.preserveOnce(cookie.name)
-    })
-  })
 })
 
 Cypress.Commands.add('getSession', () => {
@@ -50,7 +40,6 @@ Cypress.Commands.add('getSession', () => {
       })
     }
   )
-  cy.saveCookies()
 })
 
 Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
