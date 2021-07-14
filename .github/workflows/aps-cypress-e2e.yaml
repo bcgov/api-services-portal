@@ -29,5 +29,5 @@ jobs:
       - name: Upload E2E Test Report as Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: E2E Test Report
-          path: ${{ github.workspace }}/e2e/results/report/*.html
+          name: report
+          path: ${{ github.workspace }}/e2e/results/report

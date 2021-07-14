@@ -4,7 +4,7 @@ import * as jwt from 'jsonwebtoken'
 Cypress.Commands.add('login', (username, password) => {
   const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
   const appURL = new URL(Cypress.config('baseUrl'))
-  cy.xpath("//button[normalize-space()='Login']").click()
+  cy.xpath('//button').contains('Login').click()
   cy.location().should((loc) => {
     expect(loc.protocol).to.eq(oidcProviderURL.protocol)
     expect(loc.hostname).to.eq(oidcProviderURL.hostname)

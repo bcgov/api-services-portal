@@ -1,7 +1,8 @@
 {
   "baseUrl": "http://oauth2proxy.localtest.me:4180",
   "integrationFolder": "cypress/tests",
-  "screenshotOnRunFailure": false,
+  "screenshotOnRunFailure": true,
+  "screenshotsFolder": "results/report/assets",
   "video": false,
   "watchForFileChanges": true,
   "reporter": "mochawesome",
