@@ -1,4 +1,817 @@
 {
+  "21052b1e50cbb20c2edf94571d41481a": {
+    "query": "query IntrospectionQuery {\n  __schema {\n    queryType {\n      name\n    }\n    mutationType {\n      name\n    }\n    subscriptionType {\n      name\n    }\n    types {\n      ...FullType\n    }\n    directives {\n      name\n      description\n      locations\n      args {\n        ...InputValue\n      }\n    }\n  }\n}\n\nfragment FullType on __Type {\n  kind\n  name\n  description\n  fields(includeDeprecated: true) {\n    name\n    description\n    args {\n      ...InputValue\n    }\n    type {\n      ...TypeRef\n    }\n    isDeprecated\n    deprecationReason\n  }\n  inputFields {\n    ...InputValue\n  }\n  interfaces {\n    ...TypeRef\n  }\n  enumValues(includeDeprecated: true) {\n    name\n    description\n    isDeprecated\n    deprecationReason\n  }\n  possibleTypes {\n    ...TypeRef\n  }\n}\n\nfragment InputValue on __InputValue {\n  name\n  description\n  type {\n    ...TypeRef\n  }\n  defaultValue\n}\n\nfragment TypeRef on __Type {\n  kind\n  name\n  ofType {\n    kind\n    name\n    ofType {\n      kind\n      name\n      ofType {\n        kind\n        name\n        ofType {\n          kind\n          name\n          ofType {\n            kind\n            name\n            ofType {\n              kind\n              name\n              ofType {\n                kind\n                name\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n"
+  },
+  "cb82824c55ad2de70494934fcd039a48": {
+    "operation": null,
+    "query": "{\n  allDiscoverableProducts(where: {environments_some: {active: true}}) {\n    name\n    environments(where: {active: true}) {\n      name\n    }\n    organization {\n      name\n      title\n    }\n  }\n  myApplications {\n    id\n    name\n  }\n}\n"
+  },
+  "70e5b9605d48517c6789b61e29896e51": {
+    "query": "\n  query GetProducts {\n    allDiscoverableProducts {\n      id\n      name\n      environments {\n        name\n        active\n        flow\n        \n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n        view_audience\n        security_class\n        record_publish_date\n        tags\n        organization {\n          title\n        }\n        organizationUnit {\n          title\n        }\n      }\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n    }\n  }\n"
+  },
+  "34ee04d6606f3146f6ae3efbde3fa8a3": {
+    "query": "\n  query GetMyServiceAccesses {\n    myServiceAccesses {\n      id\n      name\n      active\n      productEnvironment {\n        id\n        name\n        flow\n        services {\n          id\n          name\n        }\n        credentialIssuer {\n          id\n          name\n          flow\n          resourceType\n        }\n        product {\n          id\n          name\n        }\n      }\n    }\n  }\n"
+  },
+  "869946a26aaff1ff57516f887d259257": {
+    "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(\n      data: {\n        name: $name\n        description: $description\n      }\n    ) {\n      id\n    }\n  }\n"
+  },
+  "7fc130b9b34f65c83baa8f8479b304aa": {
+    "query": "\n  mutation Remove($id: ID!) {\n    deleteApplication(id: $id) {\n      name\n      id\n    }\n  }\n"
+  },
+  "24542e8cf6c82e22dfe190586953c155": {
+    "query": "\n      {\n        allDiscoverableContents(where: { isComplete: true }) {\n          id\n          title\n          slug\n          description\n        }\n      }\n    "
+  },
+  "5dd78f79f254b02170a335e91e364e4c": {
+    "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        legal {\n          title\n          description\n          link\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n"
+  },
+  "98cbb3dbd8f72cd1d327821fb7b8f5dc": {
+    "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n  ) {\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n"
+  },
+  "7810501cf245180d98808ec179840788": {
+    "query": "\n    mutation GenCredential($id: ID!) {\n        updateAccessRequest(id: $id, data: { credential: \"NEW\" }) {\n            credential\n        }\n    }\n"
+  },
+  "164cbfac4188793d3974ee08150f2ba9": {
+    "query": "\n    query GET {\n        allTemporaryIdentities {\n            id\n            userId\n        }\n        myServiceAccesses(where: {  }) {\n            id\n            name\n            active\n            application {\n              appId\n            }\n            productEnvironment {\n              name\n              flow\n              credentialIssuer {\n                instruction\n              }\n              product {\n                name\n              }\n              services {\n                  name\n                  routes {\n                      name\n                      hosts\n                      methods\n                      paths\n                  }\n              }\n            }\n        }  \n        allAccessRequests(where: { isComplete: null }) {\n            id\n            name\n            isIssued\n            application {\n              appId\n            }\n            productEnvironment {\n                name\n                flow\n                credentialIssuer {\n                  instruction\n                }\n                product {\n                  name\n                }\n                services {\n                    name\n                    routes {\n                        name\n                        hosts\n                        methods\n                        paths\n                    }\n                }\n            }\n        }        \n    }\n"
+  },
+  "7e84ad633cdd38bfc769043aa1fb9515": {
+    "query": "\n  query GetEnvironmentsByProduct($id: ID!) {\n    Product(where: { id: $id }) {\n      name\n      environments {\n        name\n        credentialIssuer {\n          id\n          resourceType\n        }\n      }\n    }\n  }\n"
+  },
+  "0b9b0fc556d52772e77193b6878a6012": {
+    "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuers(orderBy: \"name_ASC\") {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n"
+  },
+  "7282c6a41c25452fc04ba0a3ca4d7205": {
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        allCredentialIssuers(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientRegistration\n            oidcDiscoveryUrl\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceType\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n"
+  },
+  "7649571474cb2bd3ff1f4361c68d184a": {
+    "query": "\n    mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {\n        createCredentialIssuer (data: $data) {\n            id\n        }\n    }\n"
+  },
+  "f3c0324ebffe1c696c114ad3ebeb93ee": {
+    "query": "\n    mutation UpdateAuthorization($id: ID!, $clientRoles: String!, $availableScopes: String!, $resourceType: String!) {\n        updateCredentialIssuer (id: $id, data: { clientRoles: $clientRoles, availableScopes: $availableScopes, resourceType: $resourceType }) {\n            id\n        }\n    }\n"
+  },
+  "8aae948f7df8007aa9c504b139c00441": {
+    "query": "\n    mutation CreateAuthzProfile($id: ID!) {\n        deleteCredentialIssuer (id: $id) {\n            id\n        }\n    }\n"
+  },
+  "9136c4059c9a7a394a0698fe2b4f7690": {
+    "query": "\n  query GetServices {\n    allGatewayServices(first: 200) {\n      id\n      name\n      updatedAt\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      routes {\n        id\n        name\n      }\n      plugins {\n        id\n        name\n      }\n    }\n  }\n"
+  },
+  "f190c0aa0b258974dc57e01ad51fc441": {
+    "query": "\n  query GetMetrics($service: String!, $days: [String!]) {\n    allMetrics(\n      sortBy: day_ASC\n      where: {\n        query: \"kong_http_requests_hourly_service\"\n        day_in: $days\n        service: { name_contains: $service }\n      }\n    ) {\n      query\n      day\n      metric\n      values\n      service {\n        name\n      }\n    }\n  }\n"
+  },
+  "ff1e589711145245d9494f5ae28e8e39": {
+    "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        namespace\n      }\n      updatedAt\n    }\n  }\n"
+  },
+  "5df41c6ebcd0b801e7768ea3c1252a2e": {
+    "query": "\n  query GET($namespace: String!) {\n    allProducts(where: { namespace: $namespace }) {\n      id\n      name\n      description\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n"
+  },
+  "c9e0e6923870f82ef5f974206adca3c3": {
+    "query": "\n  mutation Add($name: String!) {\n    createProduct(data: { name: $name }) {\n      id\n      name\n    }\n  }\n"
+  },
+  "d43e71e35248d38a4127741c269bc1b3": {
+    "query": "\n  mutation Add($name: String!, $product: ID!) {\n    createEnvironment(\n      data: { name: $name, product: { connect: { id: $product } } }\n    ) {\n      id\n      name\n    }\n  }\n"
+  },
+  "45c0fc9cce5fc64e144c801fb4b23754": {
+    "query": "\n  query GET($search: String!) {\n    allDatasets(search: $search) {\n      id\n      name\n      title\n    }\n  }\n"
+  },
+  "36815dfc37c8cdb868bca959e408a31a": {
+    "query": "\n  query GET {\n    allOrganizations(sortBy: name_DESC) {\n      id\n      name\n    }\n  }\n"
+  },
+  "5e0b44a99515f4df85fe0cbb48665cc2": {
+    "query": "\n  mutation Update($id: ID!, $data: ProductUpdateInput) {\n    updateProduct(id: $id, data: $data) {\n      id\n    }\n  }\n"
+  },
+  "942e09ea1b601bc8b6199c344708766e": {
+    "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n"
+  },
+  "021c11cfb3125f496fc2494bd75617b4": {
+    "query": "\n  query GET($ns: String!) {\n    allGatewayServices(where: { namespace: $ns }) {\n      id\n      name\n      environment {\n        id\n      }\n    }\n  }\n"
+  },
+  "2f3bfb09b72c9c8bdcac6e31126b1a73": {
+    "query": "\n  query GET($flow: String) {\n    allCredentialIssuers(where: { flow: $flow}) {\n      id\n      name\n    }\n  }\n"
+  },
+  "014de0429336e44dec6fe61fec09b23f": {
+    "query": "\n  mutation Update($id: ID!, $data: EnvironmentUpdateInput) {\n    updateEnvironment(id: $id, data: $data) {\n      name\n      id\n    }\n  }\n"
+  },
+  "e89d3ac8414daa7a223dedb390dde834": {
+    "query": "\n  mutation Remove($id: ID!) {\n    deleteEnvironment(id: $id) {\n      name\n      id\n    }\n  }\n"
+  },
+  "8cdc18ee9bfecd766bf3a70e7d1dba74": {
+    "query": "\n  mutation Remove($id: ID!) {\n    deleteProduct(id: $id) {\n      id\n    }\n  }\n"
+  },
+  "ff9924389e62e9b2eef670aac8cbacd8": {
+    "query": "\n  query GetConsumers {\n    allServiceAccesses(first: 200, sortBy: updatedAt_DESC) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n    }\n\n    allAccessRequests(where: { isComplete_not: true }) {\n      id\n    }\n  }\n"
+  },
+  "fa715cbb607cacb74fd02264e73e95e0": {
+    "query": "\n  query GetPendingAccessRequests {\n    allAccessRequests(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n      }\n    }\n  }\n"
+  },
+  "5bed012bae91c559ee46f42a202eb16a": {
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n  }\n"
+  },
+  "1d931bda7dd081d70775d8941c649981": {
+    "query": "\n  query GetControlContent {\n    allGatewayRoutes {\n      name\n      extForeignKey\n    }\n    allGatewayServices {\n      name\n      extForeignKey\n    }\n  }\n"
+  },
+  "e5f972a2af707166c38822c721dbb1c0": {
+    "query": "\n  mutation createGatewayConsumerPlugin($id: ID!, $controls: String!) {\n    createGatewayConsumerPlugin(id: $id, plugin: $controls) {\n      id\n    }\n  }\n"
+  },
+  "9b19b9946a80f6844b9eb7f0938159e2": {
+    "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n      }\n    }\n  }\n"
+  },
+  "582f2d0d70c73d27ce92360c50b1321f": {
+    "query": "\n    query GetAccessRequests($id: ID!) {\n        allAccessRequests(where: { id: $id } ) {\n          id\n          name\n          isApproved\n          isIssued\n          controls\n          additionalDetails\n          createdAt\n          requestor {\n            name\n            username\n            email\n          }\n          application {\n            appId\n            name\n          }\n          serviceAccess {\n            consumer {\n              username\n              customId\n            }\n          }\n          productEnvironment {\n            name\n            appId\n            active\n            flow\n            credentialIssuer {\n                name\n                flow\n                mode\n                availableScopes\n            }\n            product {\n              name\n              organization {\n                  name\n                  title\n              }\n              organizationUnit {\n                  name\n                  title\n              }\n            }\n            services {\n                name\n                host\n            }\n          }\n        }\n    }\n"
+  },
+  "64b78fbe48840e7f53da945f15fae866": {
+    "query": "\n    query GetProducts {\n        allServiceAccesses {\n            id\n            name\n            active\n            productEnvironment {\n              name\n              flow\n              credentialIssuer {\n                id\n                name\n                flow\n                clientId\n                availableScopes\n                resourceType\n              }\n              product {\n                name\n              }\n            }\n        }\n    }\n"
+  },
+  "712871fae3631b0248b8179dd835576c": {
+    "query": "\n    query GetResources($credIssuerId: ID!, $owner: String!, $resourceType: String) {\n        getResourceSet(credIssuerId: $credIssuerId, owner: $owner, type: $resourceType) {\n            id\n            name\n            type\n        }\n\n        getPermissionTickets(credIssuerId: $credIssuerId) {\n            id\n            owner\n            ownerName\n            requester\n            requesterName\n            resource\n            resourceName\n            scope\n            scopeName\n            granted\n        }        \n    }\n"
+  },
+  "87b01376c9dcbda37902baced783b9fd": {
+    "query": "\n    query GetPermissions($resourceId: String, $credIssuerId: ID!) {\n        getPermissionTickets(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n            id\n            owner\n            ownerName\n            requester\n            requesterName\n            resource\n            resourceName\n            scope\n            scopeName\n            granted\n        }\n\n        getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n            id\n            name\n            description\n            type\n            logic\n            decisionStrategy\n            owner\n            clients\n            users\n            scopes\n        }\n        \n        CredentialIssuer(where: {id: $credIssuerId}) {\n            clientId\n            resourceType\n            availableScopes\n        }\n\n        getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {\n            id\n            name\n            type\n            resource_scopes {\n                name\n            }\n        }\n    }\n"
+  },
+  "30c6496ff07f4cd2dd4cd362b07ef00b": {
+    "query": "\n  query GET {\n    allServiceAccesses(orderBy: \"createdAt_DESC\", where: { consumerType: client, namespace_not: null, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n"
+  },
+  "b5285a969b9069defb9b30ae88f98fb4": {
+    "query": "\n  mutation CreateServiceAccount {\n    createServiceAccount {\n        id\n        name\n        credentials\n    }\n  }\n"
+  },
+  "ba4d42582863f7c602e22943d72d6fda": {
+    "query": "\n  mutation DeleteServiceAccount($id: ID!) {\n    deleteServiceAccess(id: $id) {\n        id\n    }\n  }\n"
+  },
+  "5e7fd453e8e15d6bae8de06f873cbf1b": {
+    "query": "\n    mutation GrantSAAccess($credIssuerId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {\n        createUmaPolicy(credIssuerId: $credIssuerId, resourceId: $resourceId, data: $data) {\n            id\n        }\n    }\n"
+  },
+  "649ead71deeaaa84f086ab4b4ef2d0c7": {
+    "query": "\n    mutation RevokeSAAccess($credIssuerId: ID!, $policyId: String!) {\n        deleteUmaPolicy(credIssuerId: $credIssuerId, policyId: $policyId)\n    }\n"
+  },
+  "54e201721dd1b4abf27ffc7750e8cdeb": {
+    "query": "\n    mutation GrantUserAccess($credIssuerId: ID!, $data: UMAPermissionTicketInput!) {\n        grantPermissions(credIssuerId: $credIssuerId, data: $data) {\n            id\n        }\n    }\n"
+  },
+  "572b4b99eaafbc288d879d0651be430f": {
+    "query": "\n    mutation RevokeAccess($credIssuerId: ID!, $tickets: [String]!) {\n        revokePermissions(credIssuerId: $credIssuerId, ids: $tickets)\n    }\n"
+  },
+  "1a67f5abb4549467bc88388e673610e2": {
+    "query": "\n    mutation GrantAccess($credIssuerId: ID!, $resourceId: String!, $requesterId: String!, $scopes: [String]!) {\n        approvePermissions(credIssuerId: $credIssuerId, resourceId: $resourceId, requesterId: $requesterId, scopes: $scopes)\n    }\n"
+  },
+  "6e2213798c7c4afb0d4932731aaee746": {
+    "query": "\n  query GetResources(\n    $credIssuerId: ID!\n    $owner: String\n    $resourceType: String\n  ) {\n    getResourceSet(\n      credIssuerId: $credIssuerId\n      owner: $owner\n      type: $resourceType\n    ) {\n      id\n      name\n      type\n    }\n\n    getPermissionTickets(credIssuerId: $credIssuerId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n"
+  },
+  "98d9f61d8809fcd6092dca49d436ea13": {
+    "query": "\n  query GetPermissions($resourceId: String, $credIssuerId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    CredentialIssuerSummary(where: { id: $credIssuerId }) {\n      clientId\n      resourceType\n      availableScopes\n    }\n\n    getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n  }\n"
+  },
+  "61e234b0c352d681316ea661ba205396": {
+    "query": "\n  query GetPermissions($resourceId: String, $credIssuerId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, credIssuerId: $credIssuerId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n    \n    getResourceSet(credIssuerId: $credIssuerId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n  }\n"
+  },
+  "efaee2304be960c21f4773d243b25022": {
+    "query": "\n  mutation GrantAccess(\n    $credIssuerId: ID!\n    $resourceId: String!\n    $requesterId: String!\n    $scopes: [String]!\n  ) {\n    approvePermissions(\n      credIssuerId: $credIssuerId\n      resourceId: $resourceId\n      requesterId: $requesterId\n      scopes: $scopes\n    )\n  }\n"
+  },
+  "8d9178bbb517008260143d6d1ad3e48e": {
+    "query": "\n  mutation GrantUserAccess(\n    $credIssuerId: ID!\n    $data: UMAPermissionTicketInput!\n  ) {\n    grantPermissions(credIssuerId: $credIssuerId, data: $data) {\n      id\n    }\n  }\n"
+  },
+  "f7010c1f5b042f81a053149d6edb7a97": {
+    "query": "{\n  allDiscoverableProducts(where: {environments_some: {active: true}}) {\n    name\n    environments(where: {active: true}) {\n      name\n    }\n    organization {\n      title\n    }\n  }\n  myApplications {\n    id\n    name\n  }\n}\n"
+  },
+  "0f881afe8034802d5fc2a7fdf8ee53b3": {
+    "query": "{\n  allDiscoverableProducts(where: {environments_some: {active: true}}) {\n    name\n    environments(where: {active: true}) {\n      name\n    }\n    organization {\n      title\n      name\n    }\n  }\n  myApplications {\n    id\n    name\n  }\n}\n",
+    "added": "2021-05-01T17:44:10.807Z"
+  },
+  "b3ac613649f34f9ed58e458d8c4e0be8": {
+    "query": "\n  query {\n    myApplications {\n      id\n      appId\n      name\n      owner {\n        name\n      }\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-05-01T17:51:07.471Z"
+  },
+  "5561d1afeb4febb005966d7efc725737": {
+    "query": "\n  mutation Update($id: ID!, $active: Boolean) {\n    updateEnvironment(id: $id, data: { active: $active }) {\n      name\n      id\n      active\n    }\n  }\n",
+    "added": "2021-05-01T17:56:15.429Z"
+  },
+  "e387e4dfe77a0d5207a7364b6ec1f3b8": {
+    "query": "\n    mutation FulfillRequest($id: ID!, $controls: String!) {\n        updateAccessRequest(id: $id, data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }) {\n            id\n        }\n    }\n",
+    "added": "2021-05-01T17:58:35.147Z"
+  },
+  "fc522a4bb2d6f449ad51225bdd4356a3": {
+    "query": "\n    query GetAccessRequests {\n        allAccessRequests(sortBy: [createdAt_DESC]) {\n          id\n          name\n          isApproved\n          isIssued\n          isComplete\n          createdAt\n          requestor {\n            name\n            username\n            email\n          }\n          application {\n              name\n          }\n          serviceAccess {\n              id\n          }\n          productEnvironment {\n              name\n              flow\n              credentialIssuer {\n                  name\n                  flow\n                  mode\n              }\n              product {\n                name\n                organization {\n                    name\n                    title\n                }\n                organizationUnit {\n                    name\n                    title\n                }\n              }\n              services {\n                  name\n                  host\n              }\n          }\n        }\n    }\n",
+    "added": "2021-05-01T17:58:43.603Z"
+  },
+  "270ce32ff612cd6b50909442791afc2c": {
+    "query": "\n  mutation Approve($id: ID!) {\n    updateAccessRequest(\n      id: $id\n      data: { isApproved: false, isComplete: true }\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-05-01T17:59:33.903Z"
+  },
+  "da4627820b7d026bff6c2e0ad74d6993": {
+    "referer": "http://localhost:4180/devportal/access",
+    "query": "\n  mutation CancelAccess($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
+    "added": "2021-05-03T03:51:18.805Z"
+  },
+  "57ccbeb6ab6385f4d9157ec71d0af66b": {
+    "referer": "http://localhost:4180/manager/services",
+    "query": "\n  query GetServices {\n    allGatewayServicesByNamespace(first: 200) {\n      id\n      name\n      updatedAt\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      routes {\n        id\n        name\n      }\n      plugins {\n        id\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-03T04:06:59.242Z"
+  },
+  "1b4e9f470ad0cbd09765e61f3a3191f3": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200, sortBy: updatedAt_DESC) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+    "added": "2021-05-03T04:15:00.918Z"
+  },
+  "627ab65d15887b4073ae0a42af759ee5": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET($namespace: String!) {\n    allProductsByNamespace(where: { namespace: $namespace }) {\n      id\n      name\n      description\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-03T04:22:20.770Z"
+  },
+  "ca3396cb109a027586f8a88fcafab178": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        title\n      }\n      organizationUnit {\n        title\n      }\n      dataset {\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-03T04:24:57.504Z"
+  },
+  "ef9b39b6026c6e986bbbde767554b33e": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200) {\n        consumer {\n            id\n            username\n            aclGroups\n            customId\n            plugins {\n                name\n            }\n            tags\n            createdAt\n        }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+    "added": "2021-05-03T04:40:49.957Z"
+  },
+  "762f7f4b9177e5529396855275a8b882": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetPendingAccessRequests {\n    allAccessRequestsByNamespace(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-03T04:40:56.037Z"
+  },
+  "2cbccd27ed2332806aecc26ceef80130": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  query GET {\n    allServiceAccessesByNamespace(orderBy: \"createdAt_DESC\", where: { consumerType: client, namespace_not: null, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-05-03T04:56:47.774Z"
+  },
+  "5d18a6f55463ea75b85fe2be5bc4716e": {
+    "referer": "http://localhost:4180/manager/poc/namespaces",
+    "query": "\n  query GET {\n    allServiceAccessesByNamespace(where: { consumerType: client, namespace_not: null, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-05-03T04:57:01.498Z"
+  },
+  "bcc7104dcd32b65018369a958321227f": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  query GET {\n    allServiceAccessesByNamespace(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-05-03T04:57:58.781Z"
+  },
+  "0f0729e54266db6ca0bf4faab9b669cf": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(where: { consumerType: client, application_is_null: true }) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-05-03T05:01:05.655Z"
+  },
+  "66c93863f727adee6fe73f330e337456": {
+    "referer": "http://localhost:4180/manager/poc/activity",
+    "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n          }\n        }\n    }\n",
+    "added": "2021-05-03T05:02:23.332Z"
+  },
+  "ce126df31b7c93cde098d4a414f5e867": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers",
+    "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace(orderBy: \"name_ASC\") {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+    "added": "2021-05-03T05:22:03.167Z"
+  },
+  "fa743ec5f90e1b2c1897efdf67f7c8a1": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers",
+    "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace(first:20) {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+    "added": "2021-05-03T05:22:43.164Z"
+  },
+  "c039b050c3d605fbb834577d1092c90e": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers",
+    "query": "\n    query GetCredentialIssuers {\n        allCredentialIssuersByNamespace {\n          id\n          name\n          flow\n          mode\n          owner {\n              name\n              username\n          }\n          environments {\n              name\n              product {\n                name\n              }\n          }\n        }\n    }\n",
+    "added": "2021-05-03T05:24:17.055Z"
+  },
+  "fbe730b4789ce693f47d4e2ff3a56bef": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/issuer/608f892d7aa28b3ee36d727c",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientRegistration\n            oidcDiscoveryUrl\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceType\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-03T05:27:43.598Z"
+  },
+  "afb6752f2404a9e442c8830f47b1290d": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($flow: String) {\n    allCredentialIssuersByNamespace(where: { flow: $flow}) {\n      id\n      name\n    }\n  }\n",
+    "added": "2021-05-03T21:31:04.049Z"
+  },
+  "18eee5343281a196598afaaa92d07d3a": {
+    "referer": "http://localhost:4180/devportal/requests/new/608d963a0eac350a840c5032",
+    "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+    "added": "2021-05-03T22:27:56.512Z"
+  },
+  "5113980c0b07afe1f73d33e0d910483c": {
+    "referer": "http://localhost:4180/manager/consumers/60907a60b9eaf28737811b68",
+    "query": "\n  query GetControlContent {\n    allGatewayServicesByNamespace {\n      name\n      extForeignKey\n      routes {\n        name\n        extForeignKey\n      }\n    }\n  }\n",
+    "added": "2021-05-03T22:43:23.802Z"
+  },
+  "5473c4e41e5fc59d9acd22fbfa413cf0": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+    "added": "2021-05-03T22:45:25.519Z"
+  },
+  "c6794f580490706e453e4f2122f6b6ef": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+    "added": "2021-05-03T22:48:34.130Z"
+  },
+  "938f6cb6a17ca50d63d2e3b07b6ee259": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n    allLegals {\n        id\n        title\n        reference\n    }\n  }\n",
+    "added": "2021-05-04T02:37:02.723Z"
+  },
+  "241b17af5a14298c47cd72c45603c2af": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($flow: String) {\n    allLegals {\n      id\n      title\n      reference\n    }\n  }\n",
+    "added": "2021-05-04T02:40:11.782Z"
+  },
+  "1af923113867cf18699bf9fd48ed9c8d": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET {\n    allLegals {\n      id\n      title\n      reference\n    }\n  }\n",
+    "added": "2021-05-04T02:40:33.167Z"
+  },
+  "40235fd96287814fea547af0c9421ead": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($id: ID!) {\n    Environment(where: { id: $id }) {\n      id\n      name\n      active\n      flow\n      appId\n      legal {\n          id\n          title\n          reference\n      }\n      credentialIssuer {\n          id\n      }\n      approval\n      additionalDetailsToRequest\n      product {\n        name\n        namespace\n        organization {\n          name\n        }\n        environments {\n          name\n          id\n        }\n      }\n      services {\n        name\n        id\n      }\n    }\n  }\n",
+    "added": "2021-05-04T03:30:56.003Z"
+  },
+  "5454858e3bace6259f2c4cf260d138ae": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            clientId\n            clientSecret\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-04T04:17:43.565Z"
+  },
+  "88375d8583bdf9825bfeab3b4874e3f8": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-04T04:18:42.431Z"
+  },
+  "1361e818c2e03e1f0217de58ed9512e9": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+    "query": "\n    mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {\n        updateCredentialIssuer (id: $id, data: $data) {\n            id\n        }\n    }\n",
+    "added": "2021-05-04T04:28:51.350Z"
+  },
+  "c31548fe29ec8603691b8179e7f9e6d9": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-04T04:32:19.426Z"
+  },
+  "b1e92b051e98f539460355efcdec561d": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/60906b21460cd07f48f147e9",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientAuthenticator\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-04T04:43:58.652Z"
+  },
+  "c79882ca813f2e28692cf91ced827993": {
+    "referer": "http://localhost:4180/manager/products/608d963a0eac350a840c5033",
+    "query": "\n  query GET($flow: String) {\n    allCredentialIssuersByNamespace(where: { flow: $flow}) {\n      id\n      name\n      environmentDetails\n    }\n  }\n",
+    "added": "2021-05-04T05:10:30.959Z"
+  },
+  "430e99af1246c6d0cc496e62f15e3fff": {
+    "referer": "http://localhost:4180/devportal/poc/resources",
+    "query": "\n    query GetResources($prodEnvId: ID!, $owner: String!, $resourceType: String) {\n        getResourceSet(prodEnvId: $prodEnvId, owner: $owner, type: $resourceType) {\n            id\n            name\n            type\n        }\n\n        getPermissionTickets(prodEnvId: $prodEnvId) {\n            id\n            owner\n            ownerName\n            requester\n            requesterName\n            resource\n            resourceName\n            scope\n            scopeName\n            granted\n        }        \n    }\n",
+    "added": "2021-05-04T18:03:59.755Z"
+  },
+  "6ca967cf2a262c338e0f78f35df02438": {
+    "referer": "http://localhost:4180/devportal/access",
+    "query": "\n  query GetEnvironmentsByProduct($id: ID!) {\n    Product(where: { id: $id }) {\n      name\n      environments {\n        id\n        name\n        credentialIssuer {\n          id\n          resourceType\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-04T18:12:02.852Z"
+  },
+  "36c7f83dd514eadf3de094f02918036c": {
+    "referer": "http://localhost:4180/devportal/access/608d963a0eac350a840c5032",
+    "query": "\n  query GetResources(\n    $prodEnvId: ID!\n    $owner: String\n    $resourceType: String\n  ) {\n    getResourceSet(\n      prodEnvId: $prodEnvId\n      owner: $owner\n      type: $resourceType\n    ) {\n      id\n      name\n      type\n    }\n\n    getPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
+    "added": "2021-05-04T18:12:02.935Z"
+  },
+  "447b524ac079e6c372a8ebcfaa41a591": {
+    "referer": "http://localhost:4180/devportal/access/605e7afa2420523942b05f9a",
+    "query": "\n  query GetPermissions($resourceId: String, $prodEnvId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-04T18:18:12.090Z"
+  },
+  "34e5387304ea50ceadc7f891e26be174": {
+    "referer": "http://localhost:4180/devportal/resources/f2dab0ff-f9e9-466d-a115-52010a1bb47d?peid=605e7afb2420523942b05f9b",
+    "query": "\n  query GetPermissions($resourceId: String, $prodEnvId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-04T18:21:42.374Z"
+  },
+  "43df0bdd0b7d750ddf04ae78b2d4b18b": {
+    "referer": "http://localhost:4180/devportal/resources/f2dab0ff-f9e9-466d-a115-52010a1bb47d?peid=605e7afb2420523942b05f9b",
+    "query": "\n  mutation RevokeAccess($prodEnvId: ID!, $tickets: [String]!) {\n    revokePermissions(prodEnvId: $prodEnvId, ids: $tickets)\n  }\n",
+    "added": "2021-05-04T18:27:04.146Z"
+  },
+  "af9082e55fb2892d63c1ab971a7821d5": {
+    "referer": "http://localhost:4180/devportal/resources/f2dab0ff-f9e9-466d-a115-52010a1bb47d?peid=605e7afb2420523942b05f9b",
+    "query": "\n  mutation GrantUserAccess(\n    $prodEnvId: ID!\n    $data: UMAPermissionTicketInput!\n  ) {\n    grantPermissions(prodEnvId: $prodEnvId, data: $data) {\n      id\n    }\n  }\n",
+    "added": "2021-05-04T18:30:01.528Z"
+  },
+  "9d48c2d21e114b26b8dd56be972af0f1": {
+    "referer": "http://localhost:4180/devportal/access/605e7afa2420523942b05f9a",
+    "query": "\n  query GetPermissions($resourceId: String, $prodEnvId: ID!) {\n    getPermissionTickets(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPolicies(resourceId: $resourceId, prodEnvId: $prodEnvId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-04T18:35:01.952Z"
+  },
+  "ea089f3e222ef310c3240d23ad4f7b11": {
+    "referer": "http://localhost:4180/devportal/resources/2a9640cc-c89e-44d5-826a-458b4460b91a?peid=606393b601ac0b48cfadcb0c",
+    "query": "\n  mutation GrantSAAccess(\n      $prodEnvId: ID!, \n      $resourceId: String!, \n      $data: UMAPolicyInput!) {\n    createUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {\n        id\n    }\n  }\n",
+    "added": "2021-05-04T19:15:51.757Z"
+  },
+  "0cb51f5035bc27157165bd5c0a5443b7": {
+    "referer": "http://localhost:4180/devportal/resources/2a9640cc-c89e-44d5-826a-458b4460b91a?peid=606393b601ac0b48cfadcb0c",
+    "query": "\n  mutation RevokeSAAccess(\n      $prodEnvId: ID!, \n      $policyId: String!) {\n    deleteUmaPolicy(prodEnvId: $prodEnvId, policyId: $policyId)\n}\n",
+    "added": "2021-05-04T19:28:41.943Z"
+  },
+  "8473d241baf6d7d70afcb43dce12e21f": {
+    "referer": "http://localhost:4180/manager/requests/609231a5681d3210b7707bbe",
+    "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-05T06:06:10.473Z"
+  },
+  "af09f8310abb04f6c77fdd6f1ad8f77c": {
+    "referer": "http://localhost:4180/manager/requests/609231a5681d3210b7707bbe",
+    "query": "\n  mutation FulfillRequest($id: ID!, $controls: String!) {\n    updateAccessRequest(\n        id: $id, \n        data: { isApproved: true, isIssued: true, isComplete: true, controls: $controls }\n    ) {\n        id\n    }\n  }\n",
+    "added": "2021-05-05T06:18:03.288Z"
+  },
+  "08c0b2daa3e2c3226afe1ac150ae917f": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n      }\n    }\n  }\n",
+    "added": "2021-05-05T16:06:08.199Z"
+  },
+  "08ea470b98ac8542f103fff6c1f35492": {
+    "referer": "http://localhost:4180/manager/requests/606418fdb391bd7bfd1d6193",
+    "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-05T17:18:37.806Z"
+  },
+  "b1429527c4b1b450366f693247b7120e": {
+    "referer": "http://localhost:4180/devportal/requests/new/605e7afa2420523942b05f9a",
+    "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n  ) {\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-05-05T17:24:39.378Z"
+  },
+  "3f0ca27697b28bff1965c71ba90ce1c7": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetAccessRequest($id: ID!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-05T17:31:13.555Z"
+  },
+  "69301c687a618189e45f23f1ef4a39b6": {
+    "referer": "http://localhost:4180/admin/graphiql",
+    "query": "mutation ($data: ContentCreateInput) {\n  createContent(data: $data) {\n    id\n  }\n}\n",
+    "added": "2021-05-27T21:27:58.114Z"
+  },
+  "afc05a67a1753aa00ef23d7da3d25597": {
+    "referer": "http://localhost:4180/",
+    "query": "\n  query GetNamespaces {\n    allNamespaces {\n      id\n      name\n    }\n  }\n",
+    "added": "2021-05-27T21:30:07.761Z"
+  },
+  "cc8bbd6f18ffbbab95c1a7b0caaa52e6": {
+    "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
+    "query": "\n  query GetResources($prodEnvId: ID!, $resourceType: String) {\n    allResourceSets(prodEnvId: $prodEnvId, type: $resourceType) {\n      id\n      name\n      type\n    }\n\n    allPermissionTickets(prodEnvId: $prodEnvId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n  }\n",
+    "added": "2021-05-27T21:30:43.926Z"
+  },
+  "5742c25e1531eec7ad2c1846fd0649cb": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET {\n    allProductsByNamespace {\n      id\n      name\n      description\n      organization {\n        id\n        title\n      }\n      organizationUnit {\n        id\n        title\n      }\n      dataset {\n        name\n        title\n        notes\n        sector\n        license_title\n      }\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          id\n          name\n          host\n        }\n        credentialIssuer {\n          name\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-28T02:55:37.527Z"
+  },
+  "242f50e1670aa197d678c8fef078a6c5": {
+    "referer": "http://localhost:4180/devportal/access/609c5bf79b8ceca36d31ce95",
+    "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n    \n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+    "added": "2021-05-28T02:59:47.750Z"
+  },
+  "663c0683e24542fa7529a53e31e1e96e": {
+    "referer": "http://localhost:4180/manager/poc/credential-issuers/609daa674a180ccfaaedbe0b",
+    "query": "\n    query GetCredentialIssuer($id: ID!) {\n        CredentialIssuer(where: { id: $id }) {\n            id\n            name\n            flow\n            mode\n            apiKeyName\n            clientAuthenticator\n            clientRoles\n            availableScopes\n            resourceScopes\n            resourceType\n            resourceAccessScope\n            environmentDetails\n            owner {\n                id\n                name\n                username\n                email\n            }\n            environments {\n                name\n                product {\n                    name\n                }\n            }\n        }\n    }\n",
+    "added": "2021-05-28T03:05:38.617Z"
+  },
+  "c6fff2d82e5ee7d1238f729783a5148f": {
+    "referer": "http://localhost:4180/devportal/resources/d30f6967-254b-4a19-abb7-abd02f14f23e?peid=609c5bf79b8ceca36d31ce94",
+    "query": "\n  mutation RevokeSAAccess(\n      $prodEnvId: ID!, \n      $resourceId: String!,\n      $policyId: String!) {\n    deleteUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, policyId: $policyId)\n}\n",
+    "added": "2021-05-28T03:06:08.587Z"
+  },
+  "170f0c898f22eb5819b4b73dd95503ac": {
+    "referer": "http://localhost:4180/",
+    "query": "\nmutation CreateNamespace ($name: String!) {\n  createNamespace(namespace: $name) {\n      id\n      name\n  }\n}\n",
+    "added": "2021-05-28T05:25:03.543Z"
+  },
+  "1e983d443f49213db444d1b2a5842865": {
+    "referer": "http://localhost:4180/",
+    "query": "\nmutation DeleteNamespace ($name: String!) {\n  deleteNamespace(namespace: $name)\n}\n",
+    "added": "2021-05-28T05:25:29.789Z"
+  },
+  "caadf1abf799958a180d79b8fb3acbcd": {
+    "referer": "http://localhost:4180/devportal/api-discovery/609c1ecb4337bc74fb7205ca",
+    "query": "\n  query Get($id: ID!) {\n    allDiscoverableProducts(where: { id: $id }) {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        additionalDetailsToRequest\n        legal {\n          title\n          description\n          link\n          reference\n        }\n        credentialIssuer {\n          clientAuthenticator\n        }\n      }\n    }\n    myApplications {\n      id\n      name\n    }\n    mySelf {\n      legalsAgreed\n    }\n    allTemporaryIdentities {\n      id\n      userId\n      name\n      username\n      email\n    }\n  }\n",
+    "added": "2021-05-28T05:43:48.994Z"
+  },
+  "398091e26a0271254962eb43f0345132": {
+    "referer": "http://localhost:4180/devportal/applications",
+    "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(data: { name: $name, description: $description }) {\n      id\n    }\n  }\n",
+    "added": "2021-05-28T05:44:19.642Z"
+  },
+  "02a1cbc8cc2a615ae533f6b82bcabb05": {
+    "referer": "http://localhost:4180/manager/poc/activity",
+    "query": "\n    query GET($first: Int, $skip: Int) {\n        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {\n          id\n          type\n          name\n          action\n          result\n          message\n          context\n          refId\n          namespace\n          extRefId\n          createdAt\n          actor {\n              name\n              username\n          }\n        }\n    }\n",
+    "added": "2021-05-28T05:46:48.377Z"
+  },
+  "e1b6fe1d5e8a6230fbda9f9afdff5c72": {
+    "referer": "http://localhost:4180/devportal/requests/new/60a34109b1fd0a61670dcbed",
+    "query": "\n  mutation AddAccessRequest(\n    $name: String!\n    $controls: String\n    $requestor: ID!\n    $applicationId: ID!\n    $productEnvironmentId: ID!\n    $additionalDetails: String\n    $acceptLegal: Boolean!\n  ) {\n    acceptLegal(\n      productEnvironmentId: $productEnvironmentId\n      acceptLegal: $acceptLegal\n    ) {\n      legalsAgreed\n    }\n\n    createAccessRequest(\n      data: {\n        name: $name\n        controls: $controls\n        additionalDetails: $additionalDetails\n        requestor: { connect: { id: $requestor } }\n        application: { connect: { id: $applicationId } }\n        productEnvironment: { connect: { id: $productEnvironmentId } }\n      }\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-05-28T05:48:43.618Z"
+  },
+  "d8a1fe9c4cd13380ae02a8a77ed3105e": {
+    "referer": "http://localhost:4180/manager/namespaces",
+    "query": "\n  query GetConsumers {\n    allServiceAccessesByNamespace(first: 200, orderBy: \"updatedAt_DESC\") {\n      consumer {\n        id\n        username\n        aclGroups\n        customId\n        plugins {\n          name\n        }\n        tags\n        updatedAt\n      }\n      application {\n        name\n        appId\n      }\n    }\n\n    allAccessRequestsByNamespace(where: { isComplete_not: true }) {\n      id\n    }\n  }\n",
+    "added": "2021-05-28T07:03:39.853Z"
+  },
+  "676efc6d02cd0becae418438ea621d04": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities( sortBy: createdAt_DESC, where: { refId: $rid }) {\n        id\n        type\n        name\n        action\n        result\n        message\n        context\n        refId\n        namespace\n        extRefId\n        createdAt\n        actor {\n            name\n            username\n        }\n    }\n  }\n",
+    "added": "2021-05-28T07:03:58.064Z"
+  },
+  "c9e3c7d3203e4b3c095e454aa721f901": {
+    "referer": "http://localhost:4180/manager/requests/60ac9c8d58615f36c3f2f7be",
+    "query": "\n  mutation FulfillRequest($id: ID!, $controls: String!) {\n    updateAccessRequest(\n      id: $id\n      data: {\n        isApproved: true\n        isIssued: true\n        isComplete: true\n        controls: $controls\n      }\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-05-28T07:04:00.664Z"
+  },
+  "aa7c2da58bd0ede8b7a28394e915807e": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n  }\n",
+    "added": "2021-05-28T07:04:12.402Z"
+  },
+  "adb2e7dc535971400d2d58af811d5dfd": {
+    "referer": "http://localhost:4180/manager/consumers/60b05e2d2e7ef60dc63477ed",
+    "query": "\n  query GetControlContent {\n    allGatewayServicesByNamespace {\n      id\n      name\n      extForeignKey\n      routes {\n        id\n        name\n        extForeignKey\n      }\n    }\n  }\n",
+    "added": "2021-05-28T07:04:13.819Z"
+  },
+  "e373a8ddc9d8d43ad06d081777d4c1a3": {
+    "referer": "http://localhost:4180/manager/consumers/60b05e2d2e7ef60dc63477ed",
+    "query": "\n  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {\n    deleteGatewayConsumerPlugin(\n      id: $consumerId\n      pluginExtForeignKey: $pluginExtForeignKey\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-05-28T07:04:35.684Z"
+  },
+  "b7b196ea3c68aeb81b2d8e7b6bc5d223": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+    "added": "2021-05-28T08:16:22.934Z"
+  },
+  "317080585c1dbf0467005f8a097a3f1b": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-31T20:40:38.403Z"
+  },
+  "75a5ca12217591d7a6717438f8b3074c": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        appId\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-31T20:41:59.684Z"
+  },
+  "7aa9867cc96445124e0303cf9f6abb36": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-31T20:46:02.815Z"
+  },
+  "c2e7d12c9c1ec1d1e62979e9a04e5ad7": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  mutation ToggleConsumerACLMembership(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $group: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerGroupMembership(id: $id)\n  }\n",
+    "added": "2021-05-31T21:16:57.066Z"
+  },
+  "8d4decae694fbb666484100a54f069de": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  mutation ToggleConsumerACLMembership(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $group: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerGroupMembership(\n      prodEnvId: $prodEnvId\n      consumerId: $consumerId\n      group: $group\n      grant: $grant\n    )\n  }\n",
+    "added": "2021-05-31T21:20:57.095Z"
+  },
+  "fc22131d32aa7f5601781ab0446e1f38": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-05-31T22:02:40.182Z"
+  },
+  "b9264ef73166bdb92aca1ee0d1baeb61": {
+    "referer": "http://localhost:4180/manager/consumers/60b548b107d3401764f3eee8",
+    "query": "\n  query GetConsumerScopesAndRoles(\n    $prodEnvId: ID!\n    $consumerUsername: ID!\n    $consumerType: String!\n  ) {\n    consumerScopesAndRoles(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      consumerType: $consumerType\n    ) {\n      id\n      consumerType\n      defaultScopes\n      optionalScopes\n      clientRoles\n    }\n  }\n",
+    "added": "2021-06-01T03:53:38.063Z"
+  },
+  "b3349812a0132f09f7b24833baa00430": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  mutation LinkConsumerToNamespace($username: String!) {\n    linkConsumerToNamespace(username: $username)\n  }\n",
+    "added": "2021-06-01T05:04:50.018Z"
+  },
+  "f8cacde2afa67d4526c5911a6c8bbe66": {
+    "referer": "http://localhost:4180/admin",
+    "query": "{\n  user: authenticatedTemporaryIdentity {\n    id\n    _label_\n    __typename\n  }\n}\n",
+    "added": "2021-06-01T05:16:25.224Z"
+  },
+  "061263c3840dce7943360f72e4984f30": {
+    "referer": "http://localhost:4180/admin/gateway-consumers?fields=_label_%2Cusername%2CcustomId%2CaclGroups%2Cplugins&!aclGroups_contains_i=%22router_user%22",
+    "query": "query getList($where: GatewayConsumerWhereInput, $search: String, $sortBy: [SortGatewayConsumersBy!], $first: Int, $skip: Int) {\n  allGatewayConsumers(\n    where: $where\n    search: $search\n    sortBy: $sortBy\n    first: $first\n    skip: $skip\n  ) {\n    _label_\n    id\n    username\n    customId\n    aclGroups\n    plugins {\n      id\n      _label_\n      __typename\n    }\n    __typename\n  }\n  _allGatewayConsumersMeta(where: $where, search: $search) {\n    count\n    __typename\n  }\n}\n",
+    "added": "2021-06-01T05:16:28.717Z"
+  },
+  "81d7ccbf028ce2abfe6cda6ea84849cc": {
+    "referer": "http://localhost:4180/manager/consumers/60b5c8a811dc5e48f6cbd863",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      namespace\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-06-01T06:08:06.801Z"
+  },
+  "a7100c780acc3377cec5f891d0dca3d6": {
+    "referer": "http://localhost:4180/manager/consumers/60b5c8a811dc5e48f6cbd863",
+    "query": "\n  mutation ToggleConsumerRoles(\n    $prodEnvId: ID!\n    $consumerId: ID!\n    $roleName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerRoleAssignment(\n      prodEnvId: $prodEnvId\n      consumerId: $consumerId\n      roleName: $roleName\n      grant: $grant\n    )\n  }\n",
+    "added": "2021-06-01T06:19:54.225Z"
+  },
+  "3f49e70c55b37148d7f10fda3d9cea5a": {
+    "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
+    "query": "\n  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerUsername: ID!) {\n    consumerScopesAndRoles(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n    ) {\n      id\n      consumerType\n      defaultScopes\n      optionalScopes\n      clientRoles\n    }\n  }\n",
+    "added": "2021-06-01T06:27:34.830Z"
+  },
+  "602067643dc862654d0ce78db879da9d": {
+    "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
+    "query": "\n  mutation ToggleConsumerRoles(\n    $prodEnvId: ID!\n    $consumerUsername: String!\n    $roleName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerRoleAssignment(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      roleName: $roleName\n      grant: $grant\n    )\n  }\n",
+    "added": "2021-06-01T06:49:33.063Z"
+  },
+  "905704bc61eebe0a395cd3c550dbf158": {
+    "referer": "http://localhost:4180/manager/services/60a7f41eb3c6f22ab455ec1f",
+    "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        host\n      }\n      updatedAt\n    }\n  }\n",
+    "added": "2021-06-01T20:45:09.617Z"
+  },
+  "5600ed61fad01032ac67ec031deb1c7c": {
+    "referer": "http://localhost:4180/manager/services/60a7f41eb3c6f22ab455ec1f",
+    "query": "\n  query GET($id: ID!) {\n    GatewayService(where: { id: $id }) {\n      id\n      name\n      namespace\n      tags\n      host\n      environment {\n        id\n        name\n        active\n        flow\n        product {\n          name\n          organization {\n            title\n          }\n          organizationUnit {\n            title\n          }\n        }\n      }\n      plugins {\n        id\n        name\n      }\n      routes {\n        id\n        name\n        hosts\n        paths\n        methods\n      }\n      updatedAt\n    }\n  }\n",
+    "added": "2021-06-01T20:45:18.071Z"
+  },
+  "cd62d7dd83bb2ede2e38f7bb91000dfe": {
+    "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+    "query": "\n  query GET {\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    allAccessRequests(where: { isComplete: null }) {\n      productEnvironment {\n        credentialIssuer {\n          instruction\n        }\n      }\n    }\n  }\n",
+    "added": "2021-06-02T20:24:42.443Z"
+  },
+  "a4320a0fa32c22f2637725d5e3771ad1": {
+    "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+    "query": "\n  mutation GenCredential($id: ID!) {\n    updateAccessRequest(id: $id, data: { credential: \"NEW\" }) {\n      credential\n    }\n  }\n",
+    "added": "2021-06-02T20:24:52.161Z"
+  },
+  "cc7ad864ebfca2ba9fd78a713dc6f149": {
+    "referer": "http://localhost:4180/devportal/requests/new/tokens?requestId=60b7e9074b74934a7b6ad728",
+    "query": "\n  mutation DeleteNamespace($name: String!) {\n    deleteNamespace(namespace: $name)\n  }\n",
+    "added": "2021-06-02T20:26:44.095Z"
+  },
+  "a45894f8cb7cf5ad9abcea1c3d2c4f0a": {
+    "referer": "http://localhost:4180/manager/namespaces",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-08T21:39:33.120Z"
+  },
+  "df53970ba9e6fc294d5bf30686437fcb": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  mutation CreateServiceAccount {\n    createServiceAccount {\n      id\n      name\n      credentials\n    }\n  }\n",
+    "added": "2021-06-08T21:39:34.517Z"
+  },
+  "e81b929f8dc81567309f774bd93ee4ee": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  mutation DeleteServiceAccount($id: ID!) {\n    deleteServiceAccess(id: $id) {\n      id\n    }\n  }\n",
+    "added": "2021-06-08T21:39:55.771Z"
+  },
+  "5918f7500ca71b9bcd5853c3c9da3318": {
+    "referer": "http://localhost:4180/",
+    "query": "\n  mutation CreateNamespace($name: String!) {\n    createNamespace(namespace: $name) {\n      id\n      name\n    }\n  }\n",
+    "added": "2021-06-08T23:23:29.330Z"
+  },
+  "21581865a450d056abc17a0552a75a27": {
+    "referer": "http://localhost:4180/devportal/resources/28f9bdbd-dbdb-4fe4-b999-3875b6aae17a?peid=609c5bf79b8ceca36d31ce94",
+    "query": "\n  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {\n    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)\n  }\n",
+    "added": "2021-06-10T20:28:29.544Z"
+  },
+  "eb765e1d5ea1ecd8bf0e64f1a1b3bc1d": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET {\n    allOrganizations(sortBy: name_DESC) {\n      id\n      name\n      title\n    }\n  }\n",
+    "added": "2021-06-11T05:54:50.249Z"
+  },
+  "3ff59d8d44a038c1416655d5a89f5a60": {
+    "referer": "http://localhost:4180/manager/products",
+    "query": "\n  query GET($id: ID!) {\n    Organization(where: { id: $id }) {\n      id\n      orgUnits {\n        name\n        id\n        title\n      }\n    }\n  }\n",
+    "added": "2021-06-11T05:55:08.602Z"
+  },
+  "34c8c044db0ee8eb0b6808b6b29ba080": {
+    "referer": "http://localhost:4180/manager/namespaces",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      name\n      prodEnvId\n    }\n  }\n",
+    "added": "2021-06-08T22:56:06.255Z"
+  },
+  "c51c963657cc256fcd69c6a294e9ac5f": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      prodEnvId\n    }\n  }\n",
+    "added": "2021-06-08T22:57:49.425Z"
+  },
+  "dd757f543a0e7bcf0989286c6bb219b4": {
+    "referer": "http://localhost:4180/manager/poc/service-accounts",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      scopes\n      prodEnvId\n    }\n  }\n",
+    "added": "2021-06-08T22:58:28.096Z"
+  },
+  "82ee3140c55e3dcdcc07b487505ee8ae": {
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n    currentNamespace {\n      id\n      name\n      scopes {\n        name\n      }\n      prodEnvId\n    }\n  }\n",
+    "added": "2021-06-08T22:59:02.979Z"
+  },
+  "5f804316eb2333f7b1eecc24c0a53a2a": {
+    "referer": "http://localhost:4180/manager/service-accounts",
+    "query": "\n  query GET {\n    currentNamespace {\n      id\n      name\n      scopes {\n        name\n      }\n      prodEnvId\n    }\n  }\n",
+    "added": "2021-06-14T18:10:33.121Z"
+  },
+  "f68ed4753e35892e58b5857e8639810b": {
+    "referer": "http://localhost:4180/manager/service-accounts",
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      sortBy: ['createdAt_DESC']\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-14T18:11:39.697Z"
+  },
+  "09935650941dae862d8890c98e7fd99e": {
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      sortBy: ['createdAt_DESC'],\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-14T18:11:50.748Z"
+  },
+  "f5b50797d3ca4254bcca638cc47ddee5": {
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: 'createdAt_DESC',\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-14T18:12:22.679Z"
+  },
+  "204058b06089cb6256e511032a2eb7c3": {
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: 'createdAt_DESC'\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-14T18:12:37.683Z"
+  },
+  "57fa329defc7fd4f7ceaa3da860b8752": {
+    "query": "\n  query GET {\n    allNamespaceServiceAccounts(\n      orderBy: \"createdAt_DESC\"\n      where: { consumerType: client, application_is_null: true }\n    ) {\n      id\n      name\n      createdAt\n    }\n    allTemporaryIdentities {\n      id\n      userId\n    }\n  }\n",
+    "added": "2021-06-14T18:13:40.046Z"
+  },
+  "030610692ee4f492182724d9d2651544": {
+    "referer": "http://localhost:4180/manager/namespace-access",
+    "query": "\n  query currentNamespace {\n    name\n    scopes\n  }\n",
+    "added": "2021-06-15T21:02:21.221Z"
+  },
+  "cb73913a56ecc7305c3d0add835a07d7": {
+    "referer": "http://localhost:4180/manager/namespace-access",
+    "query": "\n  query GetPermissions($resourceId: String!, $prodEnvId: ID!) {\n    getPermissionTicketsForResource(\n      prodEnvId: $prodEnvId\n      resourceId: $resourceId\n    ) {\n      id\n      owner\n      ownerName\n      requester\n      requesterName\n      resource\n      resourceName\n      scope\n      scopeName\n      granted\n    }\n\n    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      description\n      type\n      logic\n      decisionStrategy\n      owner\n      clients\n      users\n      scopes\n    }\n\n    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {\n      id\n      name\n      type\n      resource_scopes {\n        name\n      }\n    }\n\n    Environment(where: { id: $prodEnvId }) {\n      name\n      product {\n        id\n        name\n      }\n    }\n  }\n",
+    "added": "2021-06-15T21:21:13.325Z"
+  },
+  "83fc109d25042aa0f3d88f46349776d3": {
+    "referer": "http://localhost:4180/manager/service-accounts",
+    "query": "\n  mutation CreateServiceAccount($scopes: [String]!) {\n    createServiceAccount(scopes: $scopes) {\n      id\n      name\n      credentials\n    }\n  }\n",
+    "added": "2021-06-16T05:24:25.027Z"
+  },
+  "61a4f5840dd36e50e94cc5066c739ac9": {
+    "referer": "http://localhost:4180/manager/service-accounts",
+    "query": "\n  mutation CreateServiceAccount($resourceId: String!, $scopes: [String]!) {\n    createServiceAccount(resourceId: $resourceId, scopes: $scopes) {\n      id\n      name\n      credentials\n    }\n  }\n",
+    "added": "2021-06-16T05:56:54.209Z"
+  },
+  "b13519f4421dc481f3c23247dcb63d12": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n      }\n      application {\n        name\n      }\n      serviceAccess {\n        id\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+    "added": "2021-06-24T05:32:11.325Z"
+  },
+  "1f3608db1a9f3c60ea6fc0eaa283c4e6": {
+    "referer": "http://localhost:4180/manager/requests/609daa814a180ccfaaedbe0d",
+    "query": "\n  query GetBusinessProfile($serviceAccessId: ID!) {\n    BusinessProfile(serviceAccessId: $serviceAccessId) {\n      user {\n        displayName\n        firstname\n        surname\n        email\n        isSuspended\n        isManagerDisabled\n      }\n      institution {\n        type\n        legalName\n        address {\n          addressLine1\n          addressLine2\n          city\n          postal\n          province\n          country\n        }\n        isSuspended\n        businessTypeOther\n      }\n    }\n  }\n",
+    "added": "2021-06-24T05:43:48.010Z"
+  },
+  "e500280ae6fa283e22d0e9095e1174c7": {
+    "referer": "http://localhost:4180/manager/consumers",
+    "query": "\n  query GetPendingAccessRequests {\n    allAccessRequestsByNamespace(where: { isIssued_not: true }) {\n      id\n      name\n      requestor {\n        name\n        username\n      }\n    }\n  }\n",
+    "added": "2021-06-29T22:14:01.196Z"
+  },
+  "0ebc74e357250ab2d8cdca8afd3aff7e": {
+    "referer": "http://localhost:4180/manager/requests/60dba098fb76a41bf6a8e74e",
+    "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n        email\n      }\n      application {\n        name\n      }\n      serviceAccess {\n        id\n      }\n      productEnvironment {\n        name\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+    "added": "2021-06-29T22:42:13.261Z"
+  },
+  "4eccdd9ef225022880be1cc65bfcf5a3": {
+    "referer": "http://localhost:4180/manager/requests/60dba098fb76a41bf6a8e74e",
+    "query": "\n  query GetAccessRequest($id: ID!, $rid: String!) {\n    AccessRequest(where: { id: $id }) {\n      id\n      name\n      isApproved\n      isIssued\n      controls\n      additionalDetails\n      createdAt\n      requestor {\n        name\n        username\n        email\n      }\n      application {\n        name\n      }\n      serviceAccess {\n        id\n      }\n      productEnvironment {\n        name\n        additionalDetailsToRequest\n        product {\n          name\n        }\n        credentialIssuer {\n          availableScopes\n          clientRoles\n        }\n      }\n    }\n\n    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {\n      id\n      type\n      name\n      action\n      result\n      message\n      context\n      refId\n      namespace\n      extRefId\n      createdAt\n      actor {\n        name\n        username\n      }\n    }\n  }\n",
+    "added": "2021-06-29T22:48:41.365Z"
+  },
+  "7aa8f879b0f8616c491a0b8150351f86": {
+    "referer": "http://localhost:4180/manager/namespaces",
+    "query": "\n  query GetCredentialIssuers {\n    allCredentialIssuersByNamespace {\n      id\n      name\n      flow\n      mode\n      owner {\n        name\n        username\n      }\n      environments {\n        name\n        product {\n          name\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T04:02:31.664Z"
+  },
+  "e0d6fa4bbc6e9ac5de7e1e0c9e4e2a8e": {
+    "referer": "http://localhost:4180/manager/authorization-profiles/new",
+    "query": "\n  mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {\n    createCredentialIssuer(data: $data) {\n      id\n    }\n  }\n",
+    "added": "2021-07-03T04:02:48.917Z"
+  },
+  "a72b7eb3967c41a72dc60be075985acd": {
+    "referer": "http://localhost:4180/manager/authorization-profiles",
+    "query": "\n  query GetCredentialIssuer($id: ID!) {\n    CredentialIssuer(where: { id: $id }) {\n      id\n      name\n      flow\n      mode\n      apiKeyName\n      clientAuthenticator\n      clientRoles\n      availableScopes\n      resourceScopes\n      resourceType\n      resourceAccessScope\n      environmentDetails\n      owner {\n        id\n        name\n        username\n        email\n      }\n      environments {\n        name\n        product {\n          name\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T04:09:37.259Z"
+  },
+  "7d372df72cc7bfa2ab3c833b37d19631": {
+    "referer": "http://localhost:4180/manager/authorization-profiles/60dfe2fc07d4a7ba5eba7f25",
+    "query": "\n  mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {\n    updateCredentialIssuer(id: $id, data: $data) {\n      id\n    }\n  }\n",
+    "added": "2021-07-03T04:10:22.729Z"
+  },
+  "9993800a311f9bce81b60f1cf19387f3": {
+    "referer": "http://localhost:4180/manager/authorization-profiles/60dfe2fc07d4a7ba5eba7f25",
+    "query": "\n  mutation DeleteAuthzProfile($id: ID!) {\n    deleteCredentialIssuer(id: $id) {\n      id\n    }\n  }\n",
+    "added": "2021-07-03T04:11:58.471Z"
+  },
+  "78b1987847e9566263124c3b003f06bd": {
+    "referer": "http://localhost:4180/manager/consumers/60b53dbaa6802a80a0ff27dd",
+    "query": "\n  mutation ToggleConsumerScopes(\n    $prodEnvId: ID!\n    $consumerUsername: String!\n    $scopeName: String!\n    $grant: Boolean!\n  ) {\n    updateConsumerScopeAssignment(\n      prodEnvId: $prodEnvId\n      consumerUsername: $consumerUsername\n      scopeName: $scopeName\n      grant: $grant\n    )\n  }\n",
+    "added": "2021-07-02T23:59:23.643Z"
+  },
+  "7238409bbbc0954b2c00cd03a8162054": {
+    "referer": "http://localhost:4180/manager/consumers/60b53dbaa6802a80a0ff27dd",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T00:43:58.265Z"
+  },
+  "1aa9f1d913d81a275515d46091053bec": {
+    "referer": "http://localhost:4180/manager/consumers/60b53dbaa6802a80a0ff27dd",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      application {\n        name\n        owner {\n          username\n        }\n      }\n    }\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T01:43:27.940Z"
+  },
+  "13758b33b8f2db459bfb37fd789e5309": {
+    "referer": "http://localhost:4180/manager/consumers/60b5bff29dc26943fb23d4b6",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      name\n      consumerType\n      application {\n        appId\n        name\n        owner {\n          username\n        }\n      }\n    }\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T01:46:50.029Z"
+  },
+  "0d9d51ac4ff398172f53dac66b86e481": {
+    "referer": "http://localhost:4180/manager/consumers/60ad8e1044cf9a36ef674085",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      name\n      consumerType\n      application {\n        appId\n        name\n        owner {\n          name\n          username\n          email\n        }\n      }\n    }\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T01:47:50.661Z"
+  },
+  "b35cd8088be328bd3528db32a3ba97cf": {
+    "referer": "http://localhost:4180/manager/consumers/60ad8e1044cf9a36ef674085",
+    "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n        }\n        route {\n          id\n          name\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      name\n      consumerType\n      application {\n        appId\n        name\n        owner {\n          name\n          username\n          email\n        }\n      }\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+    "added": "2021-07-03T01:47:59.254Z"
+  },
+  "b2e2c4b6ce7586668c34d3226ae6c5da": {
+    "referer": "http://localhost:4180/manager/consumers/60b7e9154b74934a7b6ad72a",
+    "query": "\n  mutation updateGatewayConsumerPlugin($id: ID!, $controls: String!) {\n    updateGatewayConsumerPlugin(id: $id, plugin: $controls) {\n      id\n    }\n  }\n",
+    "added": "2021-07-03T03:10:14.327Z"
+  },
+  "7073ccad4a36f9d6b1fae48ad9e00f72": {
+    "referer": "http://localhost:4180/manager/consumers/60b7e9154b74934a7b6ad72a",
+    "query": "\n  mutation updateGatewayConsumerPlugin(\n    $id: ID!\n    $pluginExtForeignKey: String!\n    $controls: String!\n  ) {\n    updateGatewayConsumerPlugin(\n      id: $id\n      pluginExtForeignKey: $pluginExtForeignKey\n      plugin: $controls\n    ) {\n      id\n    }\n  }\n",
+    "added": "2021-07-03T03:23:01.128Z"
+  },
      "21052b1e50cbb20c2edf94571d41481a": {
           "query": "query IntrospectionQuery {\n  __schema {\n    queryType {\n      name\n    }\n    mutationType {\n      name\n    }\n    subscriptionType {\n      name\n    }\n    types {\n      ...FullType\n    }\n    directives {\n      name\n      description\n      locations\n      args {\n        ...InputValue\n      }\n    }\n  }\n}\n\nfragment FullType on __Type {\n  kind\n  name\n  description\n  fields(includeDeprecated: true) {\n    name\n    description\n    args {\n      ...InputValue\n    }\n    type {\n      ...TypeRef\n    }\n    isDeprecated\n    deprecationReason\n  }\n  inputFields {\n    ...InputValue\n  }\n  interfaces {\n    ...TypeRef\n  }\n  enumValues(includeDeprecated: true) {\n    name\n    description\n    isDeprecated\n    deprecationReason\n  }\n  possibleTypes {\n    ...TypeRef\n  }\n}\n\nfragment InputValue on __InputValue {\n  name\n  description\n  type {\n    ...TypeRef\n  }\n  defaultValue\n}\n\nfragment TypeRef on __Type {\n  kind\n  name\n  ofType {\n    kind\n    name\n    ofType {\n      kind\n      name\n      ofType {\n        kind\n        name\n        ofType {\n          kind\n          name\n          ofType {\n            kind\n            name\n            ofType {\n              kind\n              name\n              ofType {\n                kind\n                name\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n"
      },

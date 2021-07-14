@@ -341,24 +341,48 @@ const server = mockServer(schemaWithMocks, {
     ]),
     tags: '["ns.sample"]',
   }),
-  CredentialIssuer: () => ({
-    name: casual.title,
-    description: casual.description,
-    authMethod: casual.random_element(['jwt', 'public', 'keys']),
-    mode: casual.word,
-    instruction: casual.description,
-    oidcDiscoveryUrl: casual.url,
-    initialAccessToken: casual.card_number,
-    clientId: casual.uuid,
-    clientSecret: casual.uuid,
-    availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),
-    clientRoles: JSON.stringify(['role-a', 'role-b', 'role-c']),
-    resourceScopes: JSON.stringify([]),
-    environments: () => {
-      const envs = [];
-      return JSON.stringify(envs);
-    },
-  }),
+  CredentialIssuer: () => {
+    const flow = casual.random_element([
+      'kong-api-key-acl',
+      'client-credentials',
+    ]);
+    let credentialValues = {};
+
+    if (flow === 'client-credentials') {
+      credentialValues = {
+        availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),
+        clientRoles: JSON.stringify(['role-a', 'role-b', 'role-c']),
+        resourceScopes: JSON.stringify([]),
+        resourceAccessScope: 'Manager.View',
+        resourceType: 'namespace',
+        apiKeyName: null,
+      };
+    }
+
+    return {
+      name: casual.title,
+      description: casual.description,
+      authMethod: casual.random_element(['jwt', 'public', 'keys']),
+      mode: casual.random_element(['manual', 'auto']),
+      instruction: casual.description,
+      oidcDiscoveryUrl: casual.url,
+      initialAccessToken: casual.card_number,
+      flow,
+      clientAuthenticator: 'client-secret',
+      clientId: casual.uuid,
+      clientSecret: casual.uuid,
+      availableScopes: null,
+      clientRoles: null,
+      resourceScopes: null,
+      resourceAccessScope: null,
+      resourceType: null,
+      apiKeyName: 'keyname',
+      ...credentialValues,
+      environments: () => JSON.stringify([]),
+      environmentDetails:
+        '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
+    };
+  },
   GatewayConsumer: () => ({
     username: casual.username,
     customId: () => sample([casual.word, null, null, null]),

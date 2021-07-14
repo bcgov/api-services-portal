@@ -53,7 +53,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
       bg="bc-blue-alt"
       pos="fixed"
       w="100%"
-      zIndex={{ base: 1000, sm: 1 }}
+      zIndex={{ base: 1000, sm: 5 }}
       top="65px"
     >
       <Container
@@ -75,7 +75,11 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
             <NextLink href={link.url}>
               <Link
                 {...linkProps}
-                aria-current={link.url === active || link.altUrls?.includes (active) ? 'page' : false}
+                aria-current={
+                  link.url === active || link.altUrls?.includes(active)
+                    ? 'page'
+                    : false
+                }
               >
                 <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}
