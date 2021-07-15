@@ -57,6 +57,7 @@ services:
       keycloak: {}
       portal: {}
       kong-net: {}
+      redis-net: {}
       oauth2-proxy:
         aliases:
           - oauth2proxy.localtest.me
@@ -182,8 +183,21 @@ services:
         aliases:
           - kong.localtest.me
     restart: on-failure:5
+  redis:
+    image: bitnami/redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=s3cr3t
+    restart: on-failure
+    ports:
+      - 6379:6379
+    networks:
+      redis-net:
+        aliases:
+          - redis.localtest.me
 networks:
   keycloak: {}
   oauth2-proxy: {}
   portal: {}
   kong-net: {}
+  redis-net: {}
