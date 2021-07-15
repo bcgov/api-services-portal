@@ -35,10 +35,12 @@ export class KeystoneService {
       scopes: _scopes,
       userId: null,
     } as any;
-    return this.keystone.createContext({
+    const ctx = this.keystone.createContext({
       skipAccessControl: true,
       authentication: { item: identity },
     });
+    ctx.req = request;
+    return ctx;
   }
 
   public executeGraphQL({ context, query, variables }: any) {
