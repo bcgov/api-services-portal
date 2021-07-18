@@ -39,6 +39,7 @@ services:
       keycloak:
         aliases:
           - keycloak.localtest.me
+      kong-net: {}
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
     container_name: oauth2-proxy
@@ -51,11 +52,12 @@ services:
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.local
     networks:
       keycloak: {}
       portal: {}
       kong-net: {}
+      redis-net: {}
       oauth2-proxy:
         aliases:
           - oauth2proxy.localtest.me
@@ -68,7 +70,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.local
     ports:
       - 3000:3000
     networks:
@@ -87,7 +89,8 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env
+      - ./feeds/.env.local
+    restart: on-failure
     ports:
       - 6000:6000
     networks:
@@ -100,14 +103,28 @@ services:
     image: feeder:latest
     command: ''
     entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+    restart: on-failure
     depends_on:
       - feeder
-    restart: on-failure
     volumes:
       - ./local/feeder-init:/tmp
     networks:
       - portal
       - keycloak
+  cypress:
+    image: 'aps-cypress-e2e:latest'
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    depends_on:
+      - feeder-seeding
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    volumes:
+      - ./e2e/results/report:/e2e/results/report
+    networks:
+      - keycloak
+      - oauth2-proxy
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -166,10 +183,21 @@ services:
         aliases:
           - kong.localtest.me
     restart: on-failure:5
+  redis:
+    image: bitnami/redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=s3cr3t
+    restart: on-failure
+    ports:
+      - 6379:6379
+    networks:
+      redis-net:
+        aliases:
+          - redis.localtest.me
 networks:
   keycloak: {}
   oauth2-proxy: {}
   portal: {}
   kong-net: {}
-volumes:
-  aps-pg-data: {}
+  redis-net: {}
