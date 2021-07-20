@@ -14,10 +14,9 @@
   },
   "chromeWebSecurity": false,
   "env": {
-    "PORTAL_USERNAME": "local",
-    "PORTAL_PASSWORD": "local",
     "CLIENT_ID": "aps-portal",
     "CLIENT_SECRET": "8e1a17ed-cb93-4806-ac32-e303d1c86018",
-    "OIDC_ISSUER": "http://keycloak.localtest.me:9080"
+    "OIDC_ISSUER": "http://keycloak.localtest.me:9080",
+    "TOKEN_URL": "http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token"
   }
 }

@@ -22,11 +22,3 @@
 //
 //
 // -- This will overwrite an existing command --
-
-import * as Mocha from 'mocha'
-
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-const addContext = require('mochawesome/addContext')
-Cypress.Commands.add('addContext', (message) => {
-  cy.once('test:after:run', (test) => addContext({ test }, message))
-})

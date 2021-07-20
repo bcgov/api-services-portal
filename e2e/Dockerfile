@@ -4,7 +4,7 @@ WORKDIR /e2e
 
 RUN apt-get install curl
 
-COPY cypress.local.json /e2e
+COPY cypress.json /e2e
 COPY tsconfig.json /e2e
 COPY package.json /e2e
 COPY package-lock.json /e2e

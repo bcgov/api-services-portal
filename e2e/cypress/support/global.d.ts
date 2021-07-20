@@ -1,17 +1,22 @@
 /// <reference types="cypress" />
+/// <reference types="cypress-xpath" />
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    login(username: string, password: string): Chainable<Element>
+    login(username: string, password: string): void
 
-    getSession(): Chainable<any>
+    getSession(): Chainable<Cypress.Response<any>>
 
-    callApi(options: Partial<RequestOptions>): Chainable<Subject>
+    loginByAuthAPI(username: string, password: string): Chainable<Cypress.Response<any>>
 
-    addContext(message: any): Chainable<Subject>
+    logout(): void
 
-    loginByAuthAPI(username: string, password: string): Chainable<Subject>
+    preserveCookies(): void
 
-    logout(): Chainable<Subject>
+    saveState(key: string, value: string): void
+
+    getState(key: string): string
+
+    clearState(): void
   }
 }
