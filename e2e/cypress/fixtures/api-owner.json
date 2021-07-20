@@ -1,0 +1,12 @@
+{
+  "user": {
+    "credentials": {
+      "username": "awsummer@idir",
+      "password": "awsummer"
+    }
+  },
+  "namespace": "platform",
+  "serviceAccount": {
+    "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
+  }
+}

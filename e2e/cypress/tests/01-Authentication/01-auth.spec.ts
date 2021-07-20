@@ -1,14 +1,20 @@
+import LoginPage from '../../pageObjects/login'
+
 describe('Authentication spec', () => {
+  const login = new LoginPage()
   beforeEach(() => {
-    cy.visit('/')
+    cy.fixture('developer').as('developer')
+    cy.visit(login.path)
+    cy.preserveCookies()
   })
   it('should find login button', () => {
-    cy.visit('/')
-    cy.xpath('//button').contains('Login')
+    cy.xpath(login.loginButton).should('be.visible')
   })
 
   it('should allow user to authenticate', () => {
-    cy.login(Cypress.env('PORTAL_USERNAME'), Cypress.env('PORTAL_PASSWORD'))
+    cy.get('@developer').then(({ user }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+    })
   })
 
   it('should save user session after login', () => {

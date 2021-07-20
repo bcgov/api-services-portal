@@ -1,10 +1,11 @@
-import { opendir } from 'fs'
 import * as jwt from 'jsonwebtoken'
+import LoginPage from '../pageObjects/login'
 
-Cypress.Commands.add('login', (username, password) => {
+Cypress.Commands.add('login', (username: string, password: string) => {
+  const login = new LoginPage()
   const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
-  const appURL = new URL(Cypress.config('baseUrl'))
-  cy.xpath('//button').contains('Login').click()
+  const appURL = new URL(Cypress.config('baseUrl') || '')
+  cy.xpath(login.loginButton).click()
   cy.location().should((loc) => {
     expect(loc.protocol).to.eq(oidcProviderURL.protocol)
     expect(loc.hostname).to.eq(oidcProviderURL.hostname)
@@ -17,9 +18,9 @@ Cypress.Commands.add('login', (username, password) => {
     autoEnd: false,
   })
 
-  cy.get('#username').type(username)
-  cy.get('#password').type(password)
-  cy.get('#kc-login').click()
+  cy.xpath(login.usernameInput).type(username)
+  cy.xpath(login.passwordInput).type(password)
+  cy.xpath(login.loginSubmitButton).click()
 
   cy.location().should((loc) => {
     expect(loc.protocol).to.eq(appURL.protocol)
@@ -54,8 +55,8 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
     url: Cypress.env('OIDC_ISSUER') + '/protocol/openid-connect/token',
     body: {
       grant_type: 'password',
-      username: Cypress.env('PORTAL_USERNAME'),
-      password: Cypress.env('PORTAL_PASSWORD'),
+      username: Cypress.env('DEV_USERNAME'),
+      password: Cypress.env('DEV_PASSWORD'),
       Scope: 'openid',
       client_id: Cypress.env('CLIENT_ID'),
       client_secret: Cypress.env('CLIENT_SECRET'),
