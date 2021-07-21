@@ -3,7 +3,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    login(username: string, password: string): void
+    login(username: string, password: string): Chainable<any>
 
     getSession(): Chainable<Cypress.Response<any>>
 
@@ -12,6 +12,8 @@ declare namespace Cypress {
     logout(): void
 
     preserveCookies(): void
+
+    preserveCookiesDefaults(): void
 
     saveState(key: string, value: string): void
 

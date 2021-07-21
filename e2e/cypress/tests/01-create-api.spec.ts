@@ -1,41 +1,42 @@
-import HomePage from '../../pageObjects/home'
-import LoginPage from '../../pageObjects/login'
-import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
-import ToolBar from '../../pageObjects/toolbar'
+import HomePage from '../pageObjects/home'
+import LoginPage from '../pageObjects/login'
+import ServiceAccountsPage from '../pageObjects/serviceAccounts'
+import ToolBar from '../pageObjects/toolbar'
 
-describe('Service Account spec', () => {
-  const home = new HomePage()
-  const sa = new ServiceAccountsPage()
-  const tb = new ToolBar()
+describe('Create API Spec', () => {
   const login = new LoginPage()
+  const home = new HomePage()
+  const tb = new ToolBar()
+  const sa = new ServiceAccountsPage()
 
   beforeEach(() => {
     cy.fixture('apiowner').as('apiowner')
     cy.visit(login.path)
-    cy.preserveCookies()
-  })
-  it('find login button', () => {
-    cy.xpath(login.loginButton).should('be.visible')
   })
 
-  it('user authentication', () => {
+  it('authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
   })
 
-  it('should allow user to create a new service account', () => {
+  it('creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
+      home.createNamespace(namespace)
       home.useNamespace(namespace)
     })
+  })
+  it('creates a new service account', () => {
     cy.xpath(tb.namespaces).click()
     cy.contains('Service Accounts').click({ force: true })
-    cy.xpath(sa.newServiceAccount).click()
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       cy.log(serviceAccount.scopes)
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
+  })
+  afterEach(() => {
+    cy.preserveCookies()
   })
   after(() => {
     cy.logout()
