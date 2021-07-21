@@ -2,6 +2,9 @@ import LoginPage from '../../pageObjects/login'
 
 describe('Authentication spec', () => {
   const login = new LoginPage()
+  before(() => {
+    cy.resetState()
+  })
   beforeEach(() => {
     cy.fixture('developer').as('developer')
     cy.visit(login.path)

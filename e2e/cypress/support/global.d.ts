@@ -17,6 +17,6 @@ declare namespace Cypress {
 
     getState(key: string): string
 
-    clearState(): void
+    resetState(): void
   }
 }

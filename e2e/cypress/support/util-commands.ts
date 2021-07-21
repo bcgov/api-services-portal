@@ -1,4 +1,5 @@
 Cypress.Commands.add('preserveCookies', () => {
+  cy.log('< Saving Cookies')
   Cypress.Cookies.preserveOnce(
     ...[
       '_oauth2_proxy',
@@ -8,9 +9,11 @@ Cypress.Commands.add('preserveCookies', () => {
     ]
   )
   Cypress.Cookies.debug(true, { verbose: false })
+  cy.log('> Saving Cookies')
 })
 
 Cypress.Commands.add('saveState', (key: string, value: string) => {
+  cy.log('< Saving State')
   cy.log(key, value)
   if (key.includes('>')) {
     let keyItems = key.split('>')
@@ -25,6 +28,7 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       cy.writeFile('cypress/fixtures/state/store.json', currState)
     })
   }
+  cy.log('< Saving State')
 })
 
 Cypress.Commands.add('getState', (key: string) => {
@@ -40,7 +44,7 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
-Cypress.Commands.add('clearState', () => {
+Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}
     cy.writeFile('cypress/fixtures/state/store.json', currState)

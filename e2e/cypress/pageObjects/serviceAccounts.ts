@@ -5,10 +5,10 @@ class ServiceAccountsPage {
   shareButton: string = '/html/body/div[4]/div[4]/div/section/footer/div/button[2]'
 
   clientId: string =
-    '/html[1]/body[1]/div[1]/main[1]/div[1]/div[2]/div[3]/div[1]/div[1]/code[1]'
+    '/html[1]/body[1]/div[1]/main[1]/div[1]/div[2]/div[3]/div[1]/div[1]/code'
 
   clientSecret: string =
-    '/html[1]/body[1]/div[1]/main[1]/div[1]/div[2]/div[3]/div[2]/div[1]/code[1]'
+    '/html[1]/body[1]/div[1]/main[1]/div[1]/div[2]/div[3]/div[2]/div[1]/code'
 
   createServiceAccount(scopes: string[]): void {
     scopes.forEach((scope) => {
@@ -20,7 +20,14 @@ class ServiceAccountsPage {
   saveServiceAcctCreds(): void {
     cy.xpath(this.clientId).then(($clientId) => {
       cy.xpath(this.clientSecret).then(($clientSecret) => {
-        cy.saveState($clientId.text(), $clientSecret.text())
+        cy.saveState(
+          'credentials',
+          "{'clientId': '" +
+            $clientId.text() +
+            "', 'clientSecret': '" +
+            $clientSecret.text() +
+            "'}"
+        )
       })
     })
   }

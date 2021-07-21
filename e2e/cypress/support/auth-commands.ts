@@ -2,6 +2,7 @@ import * as jwt from 'jsonwebtoken'
 import LoginPage from '../pageObjects/login'
 
 Cypress.Commands.add('login', (username: string, password: string) => {
+  cy.log('< Log in with user ' + username)
   const login = new LoginPage()
   const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
   const appURL = new URL(Cypress.config('baseUrl') || '')
@@ -27,9 +28,11 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     expect(loc.hostname).to.eq(appURL.hostname)
   })
   log.end()
+  cy.log('> Log in')
 })
 
 Cypress.Commands.add('getSession', () => {
+  cy.log('< Get Session')
   cy.request({ method: 'GET', url: Cypress.config('baseUrl') + '/admin/session' }).then(
     (res) => {
       cy.wrap(res).as('session')
@@ -41,6 +44,7 @@ Cypress.Commands.add('getSession', () => {
       })
     }
   )
+  cy.log('> Get Session')
 })
 
 Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
@@ -77,10 +81,13 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
+  cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.contains(res.body.user.name).click()
       cy.contains('Sign Out').click()
+      cy.clearCookies()
     })
   })
+  cy.log('> Logging out')
 })
