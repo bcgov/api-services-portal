@@ -1,15 +1,12 @@
 import * as jwt from 'jsonwebtoken'
+import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 
 Cypress.Commands.add('login', (username: string, password: string) => {
+  cy.log('< Log in with user ' + username)
   const login = new LoginPage()
-  const oidcProviderURL = new URL(Cypress.env('OIDC_ISSUER'))
-  const appURL = new URL(Cypress.config('baseUrl') || '')
-  cy.xpath(login.loginButton).click()
-  cy.location().should((loc) => {
-    expect(loc.protocol).to.eq(oidcProviderURL.protocol)
-    expect(loc.hostname).to.eq(oidcProviderURL.hostname)
-  })
+  const appURL = new URL(Cypress.config('baseUrl')!)
+  cy.xpath(login.loginButton).should('be.visible').click()
 
   const log = Cypress.log({
     name: 'Login to Dev',
@@ -21,15 +18,16 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.xpath(login.usernameInput).type(username)
   cy.xpath(login.passwordInput).type(password)
   cy.xpath(login.loginSubmitButton).click()
+  cy.wait(1000)
 
-  cy.location().should((loc) => {
-    expect(loc.protocol).to.eq(appURL.protocol)
-    expect(loc.hostname).to.eq(appURL.hostname)
-  })
+  log.snapshot('Post Login')
   log.end()
+  cy.xpath(login.loginButton).should('not.exist')
+  cy.log('> Log in')
 })
 
 Cypress.Commands.add('getSession', () => {
+  cy.log('< Get Session')
   cy.request({ method: 'GET', url: Cypress.config('baseUrl') + '/admin/session' }).then(
     (res) => {
       cy.wrap(res).as('session')
@@ -41,6 +39,7 @@ Cypress.Commands.add('getSession', () => {
       })
     }
   )
+  cy.log('> Get Session')
 })
 
 Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
@@ -77,10 +76,14 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
+  cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.contains(res.body.user.name).click()
       cy.contains('Sign Out').click()
+      cy.clearCookies()
     })
   })
+  cy.wait(2000)
+  cy.log('> Logging out')
 })

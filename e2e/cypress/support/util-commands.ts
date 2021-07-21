@@ -1,16 +1,56 @@
 Cypress.Commands.add('preserveCookies', () => {
+  cy.log('< Saving Cookies')
   Cypress.Cookies.preserveOnce(
     ...[
+      'AUTH_SESSION_ID_LEGACY',
+      'KC_RESTART',
+      'KEYCLOAK_IDENTITY_LEGACY',
+      'KEYCLOAK_LOCALE',
+      'KEYCLOAK_LOCALE',
+      'KEYCLOAK_SESSION_LEGACY',
       '_oauth2_proxy',
       '_oauth2_proxy_csrf',
-      'ab547b670fc5c67e38dbef98822b7c8d',
       'keystone.sid',
     ]
   )
-  Cypress.Cookies.debug(true, { verbose: false })
+  // Cypress.Cookies.defaults({
+  //   preserve: [
+  //     'AUTH_SESSION_ID_LEGACY',
+  //     'KC_RESTART',
+  //     'KEYCLOAK_IDENTITY_LEGACY',
+  //     'KEYCLOAK_LOCALE',
+  //     'KEYCLOAK_LOCALE',
+  //     'KEYCLOAK_SESSION_LEGACY',
+  //     '_oauth2_proxy',
+  //     '_oauth2_proxy_csrf',
+  //     'keystone.sid',
+  //   ],
+  // })
+  Cypress.Cookies.debug(true)
+  cy.log('> Saving Cookies')
+})
+
+Cypress.Commands.add('preserveCookiesDefaults', () => {
+  cy.log('< Saving Cookies as Defaults')
+  Cypress.Cookies.defaults({
+    preserve: [
+      'AUTH_SESSION_ID_LEGACY',
+      'KC_RESTART',
+      'KEYCLOAK_IDENTITY_LEGACY',
+      'KEYCLOAK_LOCALE',
+      'KEYCLOAK_LOCALE',
+      'KEYCLOAK_SESSION_LEGACY',
+      '_oauth2_proxy',
+      '_oauth2_proxy_csrf',
+      'keystone.sid',
+    ],
+  })
+  Cypress.Cookies.debug(true)
+  cy.log('> Saving Cookies')
 })
 
 Cypress.Commands.add('saveState', (key: string, value: string) => {
+  cy.log('< Saving State')
   cy.log(key, value)
   if (key.includes('>')) {
     let keyItems = key.split('>')
@@ -25,6 +65,7 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       cy.writeFile('cypress/fixtures/state/store.json', currState)
     })
   }
+  cy.log('< Saving State')
 })
 
 Cypress.Commands.add('getState', (key: string) => {
@@ -40,7 +81,7 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
-Cypress.Commands.add('clearState', () => {
+Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}
     cy.writeFile('cypress/fixtures/state/store.json', currState)
