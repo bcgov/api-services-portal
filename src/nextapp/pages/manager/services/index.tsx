@@ -18,7 +18,7 @@ import SearchInput from '@/components/search-input';
 import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+import breadcrumbs from '@/components/ns-breadcrumb';
 
 // export const getServerSideProps = withAuth(async (context) => {
 //   const { user } = context;
@@ -54,7 +54,7 @@ const ServicesPage: React.FC = () => {
         </p>
       </PageHeader>
       <Divider my={4} />
-      <Box d="flex" flexDir="column">
+      <Box d="flex" flexDir="column" data-testid="hi">
         <Box
           as="header"
           my={4}
@@ -67,6 +67,7 @@ const ServicesPage: React.FC = () => {
           </Heading>
           <HStack>
             <SearchInput
+              data-testid="hello"
               onChange={setSearch}
               placeholder="Search Gateway Services"
               value={search}

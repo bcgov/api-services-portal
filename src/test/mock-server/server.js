@@ -81,31 +81,7 @@ const server = mockServer(schemaWithMocks, {
     allNamespaceServiceAccounts: () => new MockList(2, (_, { id }) => ({ id })),
     allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
     allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
-    allMetrics: (_query, _, args) => {
-      const result = args.variableValues.days.map((d, index) => {
-        const metrics = metricsData[index];
-        const date = parse(d, 'yyyy-MM-dd', new Date());
-        const values = [];
-
-        times(24, (n) => {
-          const hour = addHours(date, n);
-
-          if (metrics[n]) {
-            values.push([hour.getTime(), metrics[n]]);
-          }
-        });
-
-        return {
-          name: `kong_http_requests_hourly.${d}.{}`,
-          query: 'kong_http_requests_hourly',
-          day: d,
-          metric: '{}',
-          values: JSON.stringify(values),
-        };
-      });
-
-      return result;
-    },
+    allMetrics: (_query, _, args) => metricsData,
     getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
     getPermissionTicketsForResource: () =>
       new MockList(6, (_, { id }) => ({ id })),
@@ -124,7 +100,6 @@ const server = mockServer(schemaWithMocks, {
         legalName: 'Smith Associates',
         address: {
           addressLine1: '2233 Broadway South',
-          addressLine1: '',
           city: 'Mincetown',
           postal: 'V1B4A3',
           province: 'BC',
