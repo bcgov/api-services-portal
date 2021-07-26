@@ -62,7 +62,7 @@ const actions = [
 const secondaryActions = [
   {
     title: 'Authorization Profiles',
-    url: '/manager/poc/credential-issuers',
+    url: '/manager/authorization-profiles',
     icon: FaShieldAlt,
     roles: [],
     description: 'Manage authorization servers used to protect your APIs',

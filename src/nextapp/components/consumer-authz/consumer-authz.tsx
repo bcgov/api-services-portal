@@ -78,73 +78,75 @@ const ConsumerAuthz: React.FC<ConsumerACLProps> = ({
                   </Box>
                   <Box bgColor="white">
                     <Box>
-                      {d.environments.map((e, index: number, arr: any) => (
-                        <Box
-                          key={e.id}
-                          px={4}
-                          py={2}
-                          className="environment-item"
-                          display="flex"
-                          flexDirection={{ base: 'column', sm: 'row' }}
-                          alignItems={{ base: 'flex-start', sm: 'center' }}
-                          bgColor={'inherit'}
-                          borderColor="blue.100"
-                          borderBottomWidth={index === arr.length - 1 ? 0 : 1}
-                          color={'inherit'}
-                        >
+                      {d.environments
+                        .filter((e) => e.flow != 'public')
+                        .map((e, index: number, arr: any) => (
                           <Box
-                            width="15%"
+                            key={e.id}
+                            px={4}
+                            py={2}
+                            className="environment-item"
                             display="flex"
-                            alignItems="center"
-                            mb={{ base: 4, sm: 0 }}
+                            flexDirection={{ base: 'column', sm: 'row' }}
+                            alignItems={{ base: 'flex-start', sm: 'center' }}
+                            bgColor={'inherit'}
+                            borderColor="blue.100"
+                            borderBottomWidth={index === arr.length - 1 ? 0 : 1}
+                            color={'inherit'}
                           >
-                            <Box mr={4}>
-                              <Text
-                                display="inline-block"
-                                fontSize="sm"
-                                bgColor="blue.300"
-                                color="white"
-                                textTransform="uppercase"
-                                px={2}
-                                borderRadius={2}
-                              >
-                                {e.name}
-                              </Text>
+                            <Box
+                              width="15%"
+                              display="flex"
+                              alignItems="center"
+                              mb={{ base: 4, sm: 0 }}
+                            >
+                              <Box mr={4}>
+                                <Text
+                                  display="inline-block"
+                                  fontSize="sm"
+                                  bgColor="blue.300"
+                                  color="white"
+                                  textTransform="uppercase"
+                                  px={2}
+                                  borderRadius={2}
+                                >
+                                  {e.name}
+                                </Text>
+                              </Box>
                             </Box>
+                            {e.flow === 'client-credentials' && (
+                              <Box width="20%" mr={10}>
+                                <RolesComponent
+                                  prodEnvId={e.id}
+                                  credentialIssuer={e.credentialIssuer}
+                                  consumerId={consumerId}
+                                  consumerUsername={consumerUsername}
+                                ></RolesComponent>
+                              </Box>
+                            )}
+                            {e.flow === 'client-credentials' && (
+                              <Box width="20%" mr={10}>
+                                <ScopesComponent
+                                  prodEnvId={e.id}
+                                  credentialIssuer={e.credentialIssuer}
+                                  consumerId={consumerId}
+                                  consumerUsername={consumerUsername}
+                                ></ScopesComponent>
+                              </Box>
+                            )}
+                            {(e.flow === 'kong-api-key-acl' ||
+                              e.flow == 'kong-acl-only') && (
+                              <Box width="20%" mr={10}>
+                                <ACLComponent
+                                  queryKey={queryKey}
+                                  env={e}
+                                  consumerId={consumerId}
+                                  aclGroups={consumerAclGroups}
+                                ></ACLComponent>
+                              </Box>
+                            )}
                           </Box>
-                          {e.flow === 'client-credentials' && (
-                            <Box width="20%" mr={10}>
-                              <RolesComponent
-                                prodEnvId={e.id}
-                                credentialIssuer={e.credentialIssuer}
-                                consumerId={consumerId}
-                                consumerUsername={consumerUsername}
-                              ></RolesComponent>
-                            </Box>
-                          )}
-                          {e.flow === 'client-credentials' && (
-                            <Box width="20%" mr={10}>
-                              <ScopesComponent
-                                prodEnvId={e.id}
-                                credentialIssuer={e.credentialIssuer}
-                                consumerId={consumerId}
-                                consumerUsername={consumerUsername}
-                              ></ScopesComponent>
-                            </Box>
-                          )}
-                          {(e.flow === 'kong-api-key-acl' ||
-                            e.flow == 'kong-acl-only') && (
-                            <Box width="20%" mr={10}>
-                              <ACLComponent
-                                queryKey={queryKey}
-                                env={e}
-                                consumerId={consumerId}
-                                aclGroups={consumerAclGroups}
-                              ></ACLComponent>
-                            </Box>
-                          )}
-                        </Box>
-                      ))}
+                        ))}
                     </Box>
                   </Box>
                 </Box>

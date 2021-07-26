@@ -70,6 +70,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
       }
     }
   };
+  const submitForm = React.useCallback(() => form.current?.requestSubmit(), []);
 
   return (
     <Modal isOpen={open} onClose={onClose}>
@@ -95,7 +96,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         <ModalFooter>
           <ButtonGroup>
             <Button onClick={onClose}>Cancel</Button>
-            <Button variant="primary" onClick={createApplication}>
+            <Button variant="primary" onClick={submitForm}>
               Create
             </Button>
           </ButtonGroup>

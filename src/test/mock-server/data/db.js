@@ -19,7 +19,7 @@ class MockDatabase {
       name: 'Viktor Vaughn',
       username: 'vikvaughn',
       email: 'villain@doom.net',
-      roles: [role],
+      roles: [role, 'portal-user'],
       isAdmin: false,
       namespace,
       groups: null,
