@@ -23,6 +23,7 @@ import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
 import differenceInDays from 'date-fns/differenceInDays';
+import max from 'lodash/max';
 import mean from 'lodash/mean';
 import numeral from 'numeral';
 import round from 'lodash/round';
@@ -121,7 +122,20 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   const totalHours = 24 * 5;
   const downtime = sum(dailies.map((d) => d.downtime));
   const totalRequests = sum(dailies.map((d) => d.total));
-  const requestsAverage = mean(dailies.map((d) => d.total));
+  const peak: number[] | [number, string] = dailies.reduce(
+    (memo, d) => {
+      const prevPeak = Number(memo[1]);
+      const currentPeak = Number(d.peak[1]);
+
+      if (currentPeak > prevPeak) {
+        return d.peak;
+      }
+      return memo;
+    },
+    [0, '0']
+  );
+  const peakRequests = round(Number(peak[1]), 2);
+  const peakDay = format(new Date(peak[0] * 1000), 'EEE');
   const usage = downtime / totalHours;
   const usagePercent = usage * 100;
   const color = interpolateRdYlGn(usage);
@@ -155,8 +169,8 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Box>
         <StatGroup spacing={8} flexWrap="wrap">
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Avg</StatLabel>
-            <StatNumber>{numeral(requestsAverage).format('0.0a')}</StatNumber>
+            <StatLabel {...labelProps}>Peak</StatLabel>
+            <StatNumber>{peakRequests}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Total Req</StatLabel>
@@ -165,10 +179,8 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Days since</StatLabel>
-            <StatNumber>
-              {differenceInDays(new Date(), new Date(service?.updatedAt))}
-            </StatNumber>
+            <StatLabel {...labelProps}>Peak Day</StatLabel>
+            <StatNumber>{peakDay}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Plugins</StatLabel>

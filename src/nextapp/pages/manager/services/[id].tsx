@@ -95,9 +95,9 @@ const ServicePage: React.FC<
         breadcrumb={breadcrumb}
         title={
           <Box as="span">
-            {data?.GatewayService.name}
+            {data?.GatewayService?.name}
             <EnvironmentBadge
-              data={data?.GatewayService.environment}
+              data={data?.GatewayService?.environment}
               ml={2}
               fontSize="1rem"
             />
@@ -120,7 +120,7 @@ const ServicePage: React.FC<
               <MetricGraph
                 days={range}
                 height={100}
-                id={data?.GatewayService.name}
+                id={data?.GatewayService?.name}
                 service={data?.GatewayService}
               />
             </ClientRequest>
@@ -150,7 +150,7 @@ const ServicePage: React.FC<
                   alt
                   days={range}
                   height={100}
-                  id={data?.GatewayService.name}
+                  id={data?.GatewayService?.name}
                   service={data?.GatewayService}
                 />
               </ClientRequest>
@@ -171,7 +171,7 @@ const ServicePage: React.FC<
             <Tbody>
               <Tr>
                 <Td>
-                  <ServiceRoutes routes={data?.GatewayService.routes} />
+                  <ServiceRoutes routes={data?.GatewayService?.routes} />
                 </Td>
               </Tr>
             </Tbody>
@@ -200,7 +200,7 @@ const ServicePage: React.FC<
               <Text as="dt" fontWeight="bold">
                 Host
               </Text>
-              <Text as="dd">{data?.GatewayService.host}</Text>
+              <Text as="dd">{data?.GatewayService?.host}</Text>
               <Text as="dt" fontWeight="bold">
                 Tags
               </Text>

@@ -315,6 +315,8 @@ const server = mockServer(schemaWithMocks, {
       casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
     ]),
     tags: '["ns.sample"]',
+    hosts: JSON.stringify(['route']),
+    paths: JSON.stringify(['/path']),
   }),
   CredentialIssuer: () => {
     const flow = casual.random_element([
