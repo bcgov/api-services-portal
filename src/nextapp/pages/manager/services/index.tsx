@@ -20,6 +20,7 @@ import SearchInput from '@/components/search-input';
 import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import { grafanaUrl } from '@/shared/config';
 import Head from 'next/head';
 
 // export const getServerSideProps = withAuth(async (context) => {
@@ -59,7 +60,7 @@ const ServicesPage: React.FC = () => {
             <Button
               as="a"
               variant="primary"
-              href="https://grafana.apps.gov.bc.ca/"
+              href={grafanaUrl}
               rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
             >
               View Full Metrics
