@@ -14,8 +14,11 @@ class HomePage {
 
   useNamespace(name: string): void {
     cy.xpath(this.namespaceDropdown).click()
-    cy.contains(name).click()
-    cy.xpath(this.namespaceDropdown).should('include.text', name)
+    cy.contains(name)
+      .click()
+      .then(() => {
+        cy.xpath(this.namespaceDropdown).should('include.text', name)
+      })
   }
 }
 
