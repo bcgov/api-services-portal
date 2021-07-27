@@ -266,7 +266,6 @@ class Oauth2ProxyAuthStrategy {
     const name = oauthUser['name'];
     const email = oauthUser['email'];
     const username = oauthUser['preferred_username'];
-    const namespace = oauthUser['namespace'];
     const groups = JSON.stringify(oauthUser['groups']);
     const _roles = [];
     const clientId = process.env.GWA_RES_SVR_CLIENT_ID;
@@ -342,8 +341,8 @@ class Oauth2ProxyAuthStrategy {
       logger.debug('Temporary Credential NOT FOUND - CREATING AUTOMATICALLY');
       const { errors } = await this.keystone.executeGraphQL({
         context: this.keystone.createContext({ skipAccessControl: true }),
-        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $namespace: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
-                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, namespace: $namespace, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
+        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
+                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
                             id
                     } }`,
         variables: {
@@ -352,7 +351,6 @@ class Oauth2ProxyAuthStrategy {
           name,
           email,
           username,
-          namespace,
           groups,
           roles,
           scopes: '[]',
