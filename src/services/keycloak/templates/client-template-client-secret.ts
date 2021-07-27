@@ -38,7 +38,7 @@ export const clientTemplateClientSecret = {
   fullScopeAllowed: false,
   nodeReRegistrationTimeout: -1,
   protocolMappers: [] as string[],
-  defaultClientScopes: [],
-  optionalClientScopes: [],
+  defaultClientScopes: [] as string[],
+  optionalClientScopes: [] as string[],
   access: { view: true, configure: true, manage: true },
 };
