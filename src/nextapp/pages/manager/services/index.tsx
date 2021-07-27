@@ -20,27 +20,20 @@ import SearchInput from '@/components/search-input';
 import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
-import { grafanaUrl } from '@/shared/config';
 import Head from 'next/head';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
-// export const getServerSideProps = withAuth(async (context) => {
-//   const { user } = context;
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    props: {
+      metricsUrl: process.env.NEXT_PUBLIC_GRAFANA_URL,
+    },
+  };
+};
 
-//   if (!user) {
-//     return {
-//       redirect: {
-//         destination: '/unauthorized',
-//         permanent: false,
-//       },
-//     };
-//   }
-
-//   return {
-//     props: {},
-//   };
-// });
-
-const ServicesPage: React.FC = () => {
+const ServicesPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ metricsUrl }) => {
   const breadcrumb = useNamespaceBreadcrumbs();
   const { user } = useAuth();
   const [search, setSearch] = React.useState<string>('');
@@ -60,7 +53,7 @@ const ServicesPage: React.FC = () => {
             <Button
               as="a"
               variant="primary"
-              href={grafanaUrl}
+              href={metricsUrl}
               rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
             >
               View Full Metrics
