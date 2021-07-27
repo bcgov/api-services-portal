@@ -17,7 +17,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
   const { data } = useApi(
     'gateway-services',
     {
-      query: LIST_GATEWAY_SERVICES
+      query: LIST_GATEWAY_SERVICES,
     },
     {
       suspense: true,
@@ -37,7 +37,6 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
           <EmptyPane
             title="No services created yet."
             message="You need to publish configuration to the API Gateway."
-            
           />
         </Box>
       )}

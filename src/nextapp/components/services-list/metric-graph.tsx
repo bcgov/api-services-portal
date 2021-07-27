@@ -22,9 +22,6 @@ import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
-import differenceInDays from 'date-fns/differenceInDays';
-import max from 'lodash/max';
-import mean from 'lodash/mean';
 import numeral from 'numeral';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
@@ -135,7 +132,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     [0, '0']
   );
   const peakRequests = round(Number(peak[1]), 2);
-  const peakDay = format(new Date(peak[0] * 1000), 'EEE');
+  const peakDay = format(new Date(peak[0] * 1000), 'LLL d');
   const usage = downtime / totalHours;
   const usagePercent = usage * 100;
   const color = interpolateRdYlGn(usage);
