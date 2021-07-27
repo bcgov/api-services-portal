@@ -19,6 +19,7 @@ import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { Environment, EnvironmentWhereInput } from '@/services/keystone/types';
 import { mergeWhereClause } from '@keystonejs/utils';
+import getSubjectToken from '../../auth/auth-token';
 
 import {
   lookupEnvironmentAndIssuerById,
@@ -71,7 +72,7 @@ export async function getEnvironmentContext(
   }
 
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-  const subjectToken = context.req.headers['x-forwarded-access-token'];
+  const subjectToken = getSubjectToken(context.req);
   const subjectUuid = context.req.user.sub;
 
   return { subjectToken, subjectUuid, prodEnv, issuerEnvConfig, openid };
