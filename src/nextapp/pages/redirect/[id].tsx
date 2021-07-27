@@ -16,45 +16,39 @@ import { FaExclamationCircle } from 'react-icons/fa';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
+  const { url } = context.query;
   return {
     props: {
       id,
+      url,
     },
   };
 };
 
 const RedirectPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
+> = ({ id, url }) => {
   const sources = {
     kq: {
-      title: 'API Key Request (KQ) End-of-Life',
+      title: 'API Key Request (KQ) has moved',
       description:
-        "The KQ application has been demised and replaced with the API Services Portal.  To get a key to an API, go to the <a href='/devportal/api-discovery'>Directory</a> page and request access.",
+        "The KQ application has been replaced with the API Services Portal.  To get a key to an API now, go to the <a href='/devportal/api-directory'>Directory</a> page and request access.",
       moreDetails: '/docs/platform-api-services-portal-released',
     },
     argg: {
-      title: 'API Registration Generator (ARGG) End-of-Life',
+      title: 'API Registration Generator (ARGG) has moved',
       description:
-        "The ARGG application has been demised and replaced with the API Services Portal.  To register an API so that it is discoverable, find the 'Gateway Administration API' in the Directory and Request access to get started.",
+        "The ARGG application has been replaced with the API Services Portal.  To get started, go to the <a href='/docs/platform-api-owner-user-journey'>API Owner User Journey</a> guide.",
       moreDetails: '/docs/platform-api-services-portal-released',
     },
     'gwa-ui': {
-      title: 'API Services Portal V1 (GWA UI) End-of-Life',
-      description:
-        "The API Services Portal UI has been upgraded!",
+      title: 'API Services Portal has been upgraded',
+      description: "Go to the <a href='/'>API Services Portal</a>",
       moreDetails: '/docs/platform-api-services-portal-released',
     },
-    'api-spec-editor': {
-      title: 'API Spec Editor End-of-Life',
-      description:
-        'The API Spec Editor application has been demised and replaced with an API Swagger Console.',
-      moreDetails: '/docs/platform-api-services-portal-released',
-    },
-    'api-console': {
-      title: 'API Console End-of-Life',
-      description:
-        'The API Console application has been demised and replaced with a Swagger Console.',
+    oaseditor: {
+      title: 'API Spec Editor has moved',
+      description: `The API Spec Editor application has been replaced with an API Swagger Console.  <a href='https://openapi.apps.gov.bc.ca/?url=${url}' target='_blank'>Open the API Swagger Console</a>.`,
       moreDetails: '/docs/platform-api-services-portal-released',
     },
   };
@@ -69,7 +63,7 @@ const RedirectPage: React.FC<
       <Container maxW="12xl" fontSize="lg" p={0}>
         <Alert
           variant="subtle"
-          status="warning"
+          status="info"
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
@@ -89,7 +83,7 @@ const RedirectPage: React.FC<
             <Link
               fontWeight="bold"
               href={sources[id].moreDetails}
-            >{`More Details...`}</Link>
+            >{`View the release notes..`}</Link>
           )}
         </Alert>
       </Container>

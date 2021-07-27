@@ -1,0 +1,11 @@
+entity: Organization
+record:
+  id: 7a66db63-26f4-4052-9cd5-3272b63910f8
+  type: organization
+  name: ministry-of-health
+  sector: ''
+  title: 'Ministry of Health'
+  tags: []
+  description: 'The Ministry of Health1 has overall responsibility for ensuring that quality, appropriate, cost effective and timely health services are available for all British Columbians.'
+  extSource: ''
+  extRecordHash: ''

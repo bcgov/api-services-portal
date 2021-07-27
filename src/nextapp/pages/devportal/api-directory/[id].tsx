@@ -94,6 +94,9 @@ const ApiPage: React.FC<
     restApi<Product>(`/ds/api/directory/${id}`)
   );
 
+  const hasProtectedEnvironments = () =>
+    data?.environments?.filter((env) => env.flow !== 'public').length > 0;
+
   return (
     <>
       <Head>
@@ -103,7 +106,12 @@ const ApiPage: React.FC<
         <PageHeader
           actions={
             <NextLink href={`/devportal/requests/new/${id}`}>
-              <Button colorScheme="green">Request Access</Button>
+              <Button
+                colorScheme="green"
+                disabled={hasProtectedEnvironments() == false}
+              >
+                Request Access
+              </Button>
             </NextLink>
           }
           title={

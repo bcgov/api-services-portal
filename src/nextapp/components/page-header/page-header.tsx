@@ -36,8 +36,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 </NextLink>
               </BreadcrumbItem>
               {breadcrumb.length > 0 &&
-                breadcrumb.map((b) => (
-                  <BreadcrumbItem key={b.text}>
+                breadcrumb.map((b, index) => (
+                  <BreadcrumbItem key={index + b.text + b.href}>
                     <NextLink passHref href={b.href || router?.asPath || '#'}>
                       <BreadcrumbLink>{b.text}</BreadcrumbLink>
                     </NextLink>

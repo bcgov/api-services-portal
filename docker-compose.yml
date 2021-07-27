@@ -30,6 +30,8 @@ services:
     environment:
       #KEYCLOAK_USER: local
       #KEYCLOAK_PASSWORD: local
+      DB_VENDOR: POSTGRES
+      DB_SCHEMA: public
       DB_ADDR: kong-db:5432
       DB_USER: keycloakuser
       DB_PASSWORD: keycloakuser
@@ -195,9 +197,29 @@ services:
       redis-net:
         aliases:
           - redis.localtest.me
+  gwa-api:
+    image: gateway-api:latest
+    container_name: gwa-api
+    entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
+    ports:
+      - 2000:2000
+    env_file:
+      - ./local/gwa-api/.env.local
+    restart: on-failure:5
+    volumes:
+      - ./local/gwa-api:/tmp/gwa
+    networks:
+      gwa-net:
+        aliases:
+          - gwa-api.localtest.me
+      oauth2-proxy: {}
+      portal: {}
+      kong-net: {}
+      keycloak: {}
 networks:
   keycloak: {}
   oauth2-proxy: {}
   portal: {}
   kong-net: {}
   redis-net: {}
+  gwa-net: {}

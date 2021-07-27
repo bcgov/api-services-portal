@@ -110,4 +110,3 @@ const MyApplicationsPage = () => {
 }
 
 export default MyApplicationsPage;
-
