@@ -1,7 +1,7 @@
 import { gql } from 'graphql-request';
 
 export const LIST_GATEWAY_SERVICES = gql`
-  query GetServices {
+  query GetServices($days: [String!]) {
     allGatewayServicesByNamespace(first: 200) {
       id
       name
@@ -29,6 +29,15 @@ export const LIST_GATEWAY_SERVICES = gql`
         id
         name
       }
+    }
+    allMetrics(
+      sortBy: day_ASC
+      where: { query: "kong_http_requests_daily_namespace", day_in: $days }
+    ) {
+      query
+      day
+      metric
+      values
     }
   }
 `;

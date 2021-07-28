@@ -23,7 +23,7 @@ const schemas = require('./schemas');
 const { sample } = require('lodash');
 
 const app = express();
-const db = new MockDatabase('api-owner', 'dss-loc');
+const db = new MockDatabase('api-owner', 'aps-portal');
 const port = 4000;
 
 const randomNullValue = () => {

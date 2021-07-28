@@ -40,7 +40,7 @@ interface DailyDatum {
   downtime: number;
   requests: number[];
   total: number;
-  peak: number[];
+  peak: number | number[];
 }
 
 interface MetricGraphProps {
@@ -49,6 +49,7 @@ interface MetricGraphProps {
   height?: number;
   id: string;
   service: GatewayService;
+  totalRequests: number;
 }
 
 const MetricGraph: React.FC<MetricGraphProps> = ({
@@ -57,6 +58,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   height = 100,
   id,
   service,
+  totalRequests,
 }) => {
   const { data } = useApi(['metric', id], {
     query: GET_METRICS,
@@ -84,7 +86,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     }, 0);
     const downtime = 24 - values.length;
     const defaultPeakDate: number = firstDateValue.getTime();
-    const peak: any = value.reduce(
+    const peak: number | [number, number] = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
           return v;
@@ -116,10 +118,8 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
       requests,
     };
   });
-  const totalHours = 24 * 5;
-  const downtime = sum(dailies.map((d) => d.downtime));
-  const totalRequests = sum(dailies.map((d) => d.total));
-  const peak: number[] | [number, string] = dailies.reduce(
+  const totalDailyRequests = sum(dailies.map((d) => d.total));
+  const peak = dailies.reduce(
     (memo, d) => {
       const prevPeak = Number(memo[1]);
       const currentPeak = Number(d.peak[1]);
@@ -133,7 +133,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   );
   const peakRequests = round(Number(peak[1]), 2);
   const peakDay = format(new Date(peak[0] * 1000), 'LLL d');
-  const usage = downtime / totalHours;
+  const usage = totalDailyRequests / totalRequests;
   const usagePercent = usage * 100;
   const color = interpolateRdYlGn(usage);
   const y = scaleLinear().range([0, height]).domain([0, 1]);
@@ -172,7 +172,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Total Req</StatLabel>
             <StatNumber overflow="hidden">
-              {numeral(totalRequests).format('0.0a')}
+              {numeral(totalDailyRequests).format('0.0a')}
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
