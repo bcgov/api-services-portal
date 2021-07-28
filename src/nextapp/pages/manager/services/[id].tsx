@@ -12,8 +12,6 @@ import {
   Tbody,
   Td,
   Text,
-  Th,
-  Thead,
   Tr,
   Wrap,
   WrapItem,
@@ -22,7 +20,7 @@ import ClientRequest from '@/components/client-request';
 import isEmpty from 'lodash/isEmpty';
 import PageHeader from '@/components/page-header';
 import api, { useApi } from '@/shared/services/api';
-import { dateRange } from '@/components/services-list/utils';
+import { dateRange, useTotalRequests } from '@/components/services-list/utils';
 import { GET_GATEWAY_SERVICE } from '@/shared/queries/gateway-service-queries';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 import EnvironmentBadge from '@/components/environment-badge';
@@ -36,6 +34,7 @@ import { Query } from '@/shared/types/query.types';
 import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const range: string[] = dateRange();
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
@@ -43,7 +42,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         GET_GATEWAY_SERVICE,
-        { id: context.params.id },
+        { id: context.params.id, days: range },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -54,24 +53,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       id: context.params.id,
       dehydratedState: dehydrate(queryClient),
+      range,
     },
   };
 };
 
 const ServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
-  const range = dateRange();
+> = ({ id, range }) => {
   const { data } = useApi(
     ['gateway-service', id],
     {
       query: GET_GATEWAY_SERVICE,
       variables: {
         id,
+        days: range,
       },
     },
     { enabled: Boolean(id), suspense: false }
   );
+  const totalNamespaceRequests = useTotalRequests(data);
   const breadcrumb = breadcrumbs([
     { href: '/manager/services', text: 'Services' },
   ]);
@@ -122,6 +123,7 @@ const ServicePage: React.FC<
                 height={100}
                 id={data?.GatewayService?.name}
                 service={data?.GatewayService}
+                totalRequests={totalNamespaceRequests}
               />
             </ClientRequest>
           )}
@@ -152,6 +154,7 @@ const ServicePage: React.FC<
                   height={100}
                   id={data?.GatewayService?.name}
                   service={data?.GatewayService}
+                  totalRequests={totalNamespaceRequests}
                 />
               </ClientRequest>
             )}

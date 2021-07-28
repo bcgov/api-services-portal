@@ -43,7 +43,7 @@ export const LIST_GATEWAY_SERVICES = gql`
 `;
 
 export const GET_GATEWAY_SERVICE = gql`
-  query GET($id: ID!) {
+  query GET($id: ID!, $days: [String!]) {
     GatewayService(where: { id: $id }) {
       id
       name
@@ -77,6 +77,15 @@ export const GET_GATEWAY_SERVICE = gql`
         methods
       }
       updatedAt
+    }
+    allMetrics(
+      sortBy: day_ASC
+      where: { query: "kong_http_requests_daily_namespace", day_in: $days }
+    ) {
+      query
+      day
+      metric
+      values
     }
   }
 `;

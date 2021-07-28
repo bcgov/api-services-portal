@@ -81,7 +81,12 @@ const server = mockServer(schemaWithMocks, {
     allNamespaceServiceAccounts: () => new MockList(2, (_, { id }) => ({ id })),
     allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
     allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
-    allMetrics: (_query, _, args) => metricsData,
+    allMetrics: (query) => {
+      if (query.where.query === 'kong_http_requests_daily_namespace') {
+        return metricsData.namespaceMetrics;
+      }
+      return metricsData.serviceMetrics;
+    },
     getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
     getPermissionTicketsForResource: () =>
       new MockList(6, (_, { id }) => ({ id })),
