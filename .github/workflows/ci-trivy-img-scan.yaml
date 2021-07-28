@@ -1,4 +1,4 @@
-name: Scan for Vulnerabilities in API Services Portal Container Image
+name: Scan for Vulnerabilities - Trivy
 
 on:
   push:
@@ -8,10 +8,14 @@ jobs:
   trivy-image-Scan:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag bcgov/api-services-portal:trivy-scan
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
+          image-ref: 'bcgov/api-services-portal:trivy-scan'
           format: 'template'
           exit-code: '0'
           ignore-unfixed: true
