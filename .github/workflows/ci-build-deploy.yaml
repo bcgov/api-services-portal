@@ -209,7 +209,9 @@ jobs:
             EXTERNAL_URL:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
             NEXT_PUBLIC_API_ROOT:
-              value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'          
+              value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'    
+            NEXT_PUBLIC_GRAFANA_URL:
+              value: 'https://grafana-apps-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_RES_SVR_CLIENT_ID:
