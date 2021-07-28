@@ -75,6 +75,15 @@ const RedirectPage: React.FC<
               maxWidth="lg"
               pb={5}
               dangerouslySetInnerHTML={{ __html: sources[id].description }}
+              sx={{
+                '& a': {
+                  textDecoration: 'underline',
+                  color: 'bc-link',
+                  '&:hover': {
+                    textDecoration: 'none',
+                  },
+                },
+              }}
             ></AlertDescription>
             {sources[id].moreDetails && (
               <NextLink passHref href={sources[id].moreDetails}>
