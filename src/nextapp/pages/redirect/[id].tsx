@@ -5,14 +5,13 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Link,
-  VStack,
+  Button,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import { useAuth } from '@/shared/services/auth';
+import NextLink from 'next/link';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { Box, Center, Heading, Icon } from '@chakra-ui/react';
-import { FaExclamationCircle } from 'react-icons/fa';
+import { Icon } from '@chakra-ui/react';
+import { FaArrowCircleRight } from 'react-icons/fa';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -20,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       id,
-      url,
+      url: url ?? '',
     },
   };
 };
@@ -52,41 +51,60 @@ const RedirectPage: React.FC<
       moreDetails: '/docs/platform-api-services-portal-released',
     },
   };
-  if (!(id in sources)) {
-    return <></>;
-  }
   return (
     <>
       <Head>
         <title>API Services Portal | Redirect</title>
       </Head>
-      <Container maxW="12xl" fontSize="lg" p={0}>
-        <Alert
-          variant="subtle"
-          status="info"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          textAlign="center"
-          minHeight="300px"
-        >
-          <AlertIcon boxSize="60px" mr={0} />
-          <AlertTitle pb={3} pt={3}>
-            {sources[id].title}
-          </AlertTitle>
-          <AlertDescription
-            maxWidth="lg"
-            pb={5}
-            dangerouslySetInnerHTML={{ __html: sources[id].description }}
-          ></AlertDescription>
-          {sources[id].moreDetails && (
-            <Link
-              fontWeight="bold"
-              href={sources[id].moreDetails}
-            >{`View the release notes..`}</Link>
-          )}
-        </Alert>
-      </Container>
+      {sources[id] && (
+        <Container maxW="12xl" fontSize="lg" p={0}>
+          <Alert
+            variant="subtle"
+            status="info"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            textAlign="center"
+            minHeight="300px"
+          >
+            <AlertIcon boxSize="60px" mr={0} />
+            <AlertTitle pb={3} pt={3}>
+              {sources[id].title}
+            </AlertTitle>
+            <AlertDescription
+              maxWidth="lg"
+              pb={5}
+              dangerouslySetInnerHTML={{ __html: sources[id].description }}
+              sx={{
+                '& a': {
+                  textDecoration: 'underline',
+                  color: 'bc-link',
+                  '&:hover': {
+                    textDecoration: 'none',
+                  },
+                },
+              }}
+            ></AlertDescription>
+            {sources[id].moreDetails && (
+              <NextLink passHref href={sources[id].moreDetails}>
+                <Button
+                  as="a"
+                  fontWeight="bold"
+                  rightIcon={<Icon as={FaArrowCircleRight} />}
+                  textDecoration="underline"
+                  variant="link"
+                  color="bc-link"
+                  sx={{
+                    _hover: {
+                      textDecoration: 'none',
+                    },
+                  }}
+                >{`View the release notes`}</Button>
+              </NextLink>
+            )}
+          </Alert>
+        </Container>
+      )}
     </>
   );
 };
