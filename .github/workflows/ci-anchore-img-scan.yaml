@@ -1,0 +1,24 @@
+name: Scan for Vulnerabilities - Anchore
+
+on:
+  push:
+    branches: [dev, main, scan/*]
+
+jobs:
+  anchore-image-Scan:
+    runs-on: ubuntu-latest
+    steps:
+      # - name: Checkout the code
+      #   uses: actions/checkout@v2
+      # - name: Build the Docker image
+      #   run: docker build . --file Dockerfile --tag bcgov/api-services-portal:scan
+      - name: Run the Anchore Scan
+        uses: anchore/scan-action@main
+        with:
+          image: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
+          acs-report-enable: true
+          fail-build: false
+      - name: Upload Anchore Scan Results
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: anchore-results.sarif
