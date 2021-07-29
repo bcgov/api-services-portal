@@ -52,7 +52,12 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
         zIndex={2}
       >
         <Menu placement="right-start">
-          <MenuButton as={Button} alignItems="center" display="flex">
+          <MenuButton
+            as={Button}
+            alignItems="center"
+            display="flex"
+            variant="bc-blue-alt"
+          >
             <Icon as={FaUserCircle} mr={2} mt={-1} color="bc-blue-alt" />
             {user.name}
             <Icon size="sm" ml={2} as={FaChevronDown} color="white" />
