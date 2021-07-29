@@ -96,7 +96,8 @@ module.exports = {
 
               const result = await kongApi.addPluginToConsumer(
                 kongConsumerPK,
-                JSON.parse(args.plugin)
+                JSON.parse(args.plugin),
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);
@@ -123,7 +124,8 @@ module.exports = {
               const result = await kongApi.updateConsumerPlugin(
                 kongConsumerPK,
                 args.pluginExtForeignKey,
-                JSON.parse(args.plugin)
+                JSON.parse(args.plugin),
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);
@@ -149,7 +151,8 @@ module.exports = {
 
               const result = await kongApi.deleteConsumerPlugin(
                 kongConsumerPK,
-                args.pluginExtForeignKey
+                args.pluginExtForeignKey,
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);
