@@ -330,7 +330,11 @@ async function setupAuthorizationAndEnable(
   if ('plugins' in controls) {
     for (const plugin of controls.plugins) {
       // assume the service and route IDs are Kong's unique IDs for them
-      await kongApi.addPluginToConsumer(kongConsumerPK, plugin);
+      await kongApi.addPluginToConsumer(
+        kongConsumerPK,
+        plugin,
+        context.req.user.namespace
+      );
     }
   }
 
