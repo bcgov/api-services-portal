@@ -58,22 +58,22 @@ services:
       aps-net:
         aliases:
           - oauth2proxy.localtest.me
-  # apsportal:
-  #   container_name: apsportal
-  #   image: apsportal:latest
-  #   depends_on:
-  #     - keycloak
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - .env.local
-  #   ports:
-  #     - 3000:3000
-  #   networks:
-  #     aps-net:
-  #       aliases:
-  #         - apsportal.localtest.me
+  apsportal:
+    container_name: apsportal
+    image: apsportal:latest
+    depends_on:
+      - keycloak
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.local
+    ports:
+      - 3000:3000
+    networks:
+      aps-net:
+        aliases:
+          - apsportal.localtest.me
   feeder:
     container_name: feeder
     image: feeder:latest
@@ -91,18 +91,18 @@ services:
       aps-net:
         aliases:
           - feeder.localtest.me
-  # feeder-seeding:
-  #   container_name: feeder-seeding
-  #   image: feeder:latest
-  #   command: ''
-  #   entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
-  #   restart: on-failure
-  #   depends_on:
-  #     - feeder
-  #   volumes:
-  #     - ./local/feeder-init:/tmp
-  #   networks:
-  #     - aps-net
+  feeder-seeding:
+    container_name: feeder-seeding
+    image: feeder:latest
+    command: ''
+    entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+    restart: on-failure
+    depends_on:
+      - feeder
+    volumes:
+      - ./local/feeder-init:/tmp
+    networks:
+      - aps-net
   # cypress:
   #   image: 'aps-cypress-e2e:latest'
   #   container_name: cypress-e2e
