@@ -57,10 +57,16 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               color="text"
               onClick={onNextLinkClick}
               value="/poc/my-profile"
+              data-testid="auth-menu-user-profile"
             >
               My Profile
             </MenuItem>
-            <MenuItem as="a" color="text" href="/admin/signout">
+            <MenuItem
+              as="a"
+              color="text"
+              href="/admin/signout"
+              data-testid="auth-menu-signout-btn"
+            >
               Sign Out
             </MenuItem>
           </MenuList>

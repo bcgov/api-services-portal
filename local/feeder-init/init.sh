@@ -4,7 +4,7 @@ apk add --no-cache curl
 cd /tmp
 
 while true; do
-    keycloakstatus=$(curl -o /dev/null -Isw '%{http_code}\n' http://keycloak.localtest.me:9080/auth/realms/master)
+    keycloakstatus=$(curl -o /dev/null -Isw '%{http_code}\n' http://oauth2proxy.localtest.me:4180)
     echo "$keycloakstatus"
     if [[ "$keycloakstatus" == "200" ]]; then
         echo  "Keycloak is up"

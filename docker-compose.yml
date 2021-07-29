@@ -38,10 +38,9 @@ services:
     volumes:
       - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
     networks:
-      keycloak:
+      aps-net:
         aliases:
           - keycloak.localtest.me
-      kong-net: {}
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
     container_name: oauth2-proxy
@@ -56,32 +55,25 @@ services:
     env_file:
       - .env.local
     networks:
-      keycloak: {}
-      portal: {}
-      kong-net: {}
-      redis-net: {}
-      oauth2-proxy:
+      aps-net:
         aliases:
           - oauth2proxy.localtest.me
-  apsportal:
-    container_name: apsportal
-    image: apsportal:latest
-    depends_on:
-      - keycloak
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env.local
-    ports:
-      - 3000:3000
-    networks:
-      portal:
-        aliases:
-          - apsportal.localtest.me
-      keycloak: {}
-      oauth2-proxy: {}
-      kong-net: {}
+  # apsportal:
+  #   container_name: apsportal
+  #   image: apsportal:latest
+  #   depends_on:
+  #     - keycloak
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env.local
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     aps-net:
+  #       aliases:
+  #         - apsportal.localtest.me
   feeder:
     container_name: feeder
     image: feeder:latest
@@ -96,37 +88,34 @@ services:
     ports:
       - 6000:6000
     networks:
-      portal:
+      aps-net:
         aliases:
           - feeder.localtest.me
-      kong-net: {}
-  feeder-seeding:
-    container_name: feeder-seeding
-    image: feeder:latest
-    command: ''
-    entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
-    restart: on-failure
-    depends_on:
-      - feeder
-    volumes:
-      - ./local/feeder-init:/tmp
-    networks:
-      - portal
-      - keycloak
-  cypress:
-    image: 'aps-cypress-e2e:latest'
-    container_name: cypress-e2e
-    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-    depends_on:
-      - feeder-seeding
-    build:
-      context: ./e2e
-      dockerfile: Dockerfile
-    volumes:
-      - ./e2e/results/report:/e2e/results/report
-    networks:
-      - keycloak
-      - oauth2-proxy
+  # feeder-seeding:
+  #   container_name: feeder-seeding
+  #   image: feeder:latest
+  #   command: ''
+  #   entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+  #   restart: on-failure
+  #   depends_on:
+  #     - feeder
+  #   volumes:
+  #     - ./local/feeder-init:/tmp
+  #   networks:
+  #     - aps-net
+  # cypress:
+  #   image: 'aps-cypress-e2e:latest'
+  #   container_name: cypress-e2e
+  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+  #   depends_on:
+  #     - feeder-seeding
+  #   build:
+  #     context: ./e2e
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./e2e/results/report:/e2e/results/report
+  #   networks:
+  #     - aps-net
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -141,9 +130,7 @@ services:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
     networks:
-      - kong-net
-      - keycloak
-      - portal
+      - aps-net
   kong-migrations:
     image: kong:latest
     command: kong migrations bootstrap
@@ -151,7 +138,7 @@ services:
       - kong-db
     environment: *common-variables
     networks:
-      - kong-net
+      - aps-net
     restart: on-failure
   kong-migrations-up:
     image: kong:latest
@@ -160,7 +147,7 @@ services:
       - kong-db
     environment: *common-variables
     networks:
-      - kong-net
+      - aps-net
     restart: on-failure
   kong:
     image: kong:latest
@@ -181,7 +168,7 @@ services:
       - 8000:8000
       - 8001:8001
     networks:
-      kong-net:
+      aps-net:
         aliases:
           - kong.localtest.me
     restart: on-failure:5
@@ -194,12 +181,12 @@ services:
     ports:
       - 6379:6379
     networks:
-      redis-net:
+      aps-net:
         aliases:
           - redis.localtest.me
-  gwa-api:
-    image: gateway-api:latest
-    container_name: gwa-api
+  gwa-gateway-api:
+    image: ghcr.io/bcgov/gwa-api/gwa-gateway-api:feature-add-consumer-service
+    container_name: gwa-gateway-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
       - 2000:2000
@@ -209,17 +196,8 @@ services:
     volumes:
       - ./local/gwa-api:/tmp/gwa
     networks:
-      gwa-net:
+      aps-net:
         aliases:
           - gwa-api.localtest.me
-      oauth2-proxy: {}
-      portal: {}
-      kong-net: {}
-      keycloak: {}
 networks:
-  keycloak: {}
-  oauth2-proxy: {}
-  portal: {}
-  kong-net: {}
-  redis-net: {}
-  gwa-net: {}
+  aps-net: {}

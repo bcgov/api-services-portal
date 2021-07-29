@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  apsportal:
+    container_name: apsportal
+    image: apsportal:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.local
+    ports:
+      - 3000:3000
+    networks:
+      aps-net:
+        aliases:
+          - apsportal.localtest.me
+#   feeder-seeding:
+#     container_name: feeder-seeding
+#     image: feeder:latest
+#     command: ''
+#     entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+#     restart: on-failure
+#     volumes:
+#       - ./local/feeder-init:/tmp
+#     networks:
+#       - aps-net
+#   cypress:
+#     image: 'aps-cypress-e2e:latest'
+#     container_name: cypress-e2e
+#     entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+#     build:
+#       context: ./e2e
+#       dockerfile: Dockerfile
+#     volumes:
+#       - ./e2e/results/report:/e2e/results/report
+#     networks:
+#       - aps-net
+networks:
+  aps-net: {}

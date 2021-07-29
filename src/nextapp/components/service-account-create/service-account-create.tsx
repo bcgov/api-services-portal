@@ -79,6 +79,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
         leftIcon={<Icon as={FaPlusCircle} />}
         variant="primary"
         onClick={onOpen}
+        data-testid="sa-create-second-btn"
       >
         New Service Account
       </Button>
@@ -103,7 +104,11 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                       {isSuccess &&
                         data?.currentNamespace.scopes.map((s) => (
                           <WrapItem key={s.name}>
-                            <Checkbox value={s.name} name="scopes">
+                            <Checkbox
+                              value={s.name}
+                              name="scopes"
+                              data-testid={'sa-scope-' + s.name}
+                            >
                               {s.name}
                             </Checkbox>
                           </WrapItem>
@@ -119,6 +124,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
               <Button
                 isDisabled={credentialGenerator.isLoading}
                 onClick={onClose}
+                data-testid="sa-scopes-cancel-btn"
               >
                 Cancel
               </Button>
@@ -126,6 +132,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                 isLoading={credentialGenerator.isLoading}
                 variant="primary"
                 onClick={handleCreate}
+                data-testid="sa-scopes-share-btn"
               >
                 Share
               </Button>

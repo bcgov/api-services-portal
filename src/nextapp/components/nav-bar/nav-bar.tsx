@@ -80,6 +80,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
                     ? 'page'
                     : false
                 }
+                data-testid={'navbar-link-' + link.name}
               >
                 <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}
