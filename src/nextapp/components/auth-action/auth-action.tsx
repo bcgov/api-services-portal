@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {
   Box,
+  Button,
   Icon,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
 } from '@chakra-ui/react';
-import Button from '@/components/button';
 import { FaChevronDown, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
@@ -29,7 +29,12 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   if (!user) {
     return (
-      <Button color="secondary" href="/admin/signin">
+      <Button
+        as="a"
+        variant="secondary"
+        href="/admin/signin"
+        data-testid="login-btn"
+      >
         Login
       </Button>
     );
