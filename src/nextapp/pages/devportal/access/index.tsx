@@ -61,7 +61,7 @@ const ApiAccessPage: React.FC<
         )}
 
         <Box mt={5}>
-          <AccessList data={data.myServiceAccesses} queryKey={queryKey} />
+          <AccessList data={data?.myServiceAccesses} queryKey={queryKey} />
           {data.myServiceAccesses.length == 0 && (
             <EmptyPane
               message="Go to the API Directory to find one today!"

@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Box } from '@chakra-ui/react';
 import groupBy from 'lodash/groupBy';
-import reduce from 'lodash/reduce';
+import uniqBy from 'lodash/uniqBy';
 import { ServiceAccess } from '@/shared/types/query.types';
-import AccessListItem from './access-list-item';
 import { QueryKey } from 'react-query';
+
+import AccessListItem from './access-list-item';
 
 interface AccessListProps {
   data: ServiceAccess[];
@@ -12,11 +13,12 @@ interface AccessListProps {
 }
 
 const AccessList: React.FC<AccessListProps> = ({ data, queryKey }) => {
-  const productsDict = groupBy(data, (d) => d.productEnvironment?.product.id);
-  const products = reduce(data, (result, value) => {
-    result.some(a => a.id == value.productEnvironment?.product.id) == false && result.push(value.productEnvironment?.product)
-    return result
-  }, [])
+  const productsDict = groupBy(data, (d) => d.productEnvironment?.product?.id);
+  const allProducts = data
+    .filter((a) => Boolean(a.productEnvironment?.product))
+    .map((a) => a.productEnvironment?.product);
+  const products = uniqBy(allProducts, 'id');
+
   return (
     <Box>
       {products.map((p) => (
