@@ -94,6 +94,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                 <MenuOptionGroup title="Change Namespaces">
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
+                    .sort((a, b) => a.name.localeCompare(b.name))
                     .map((n) => (
                       <MenuItem key={n.id} onClick={handleNamespaceChange(n)}>
                         {n.name}

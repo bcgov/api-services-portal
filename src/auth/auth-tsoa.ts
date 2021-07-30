@@ -47,6 +47,9 @@ export function expressAuthentication(
         // Check if JWT contains all required scopes
         const tokenScopes = request.oauth_user.scope.split(' ');
         logger.debug('Token Scopes = %s', tokenScopes);
+        if (scopes.length == 0) {
+          return resolve(request.oauth_user);
+        }
         logger.debug(
           "Resource Authorization on '%s'",
           `${request.params.ns}:${scopes[0]}`
