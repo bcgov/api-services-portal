@@ -157,7 +157,7 @@ module.exports = {
         if (!('owner' in resolvedData) && context['authedItem']) {
           resolvedData['owner'] = context.authedItem.userId;
         }
-        if ('namespace' in context['authedItem']) {
+        if (context['authedItem'] && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
       }
