@@ -79,6 +79,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           _hover={{ bg: 'gray.400' }}
           _expanded={{ bg: 'blue.400' }}
           _focus={{ boxShadow: 'outline' }}
+          data-testid="ns-dropdown-btn"
         >
           <Icon as={FaNetworkWired} mr={2} color="rgba(255, 255, 255, 0.75)" />
           {user?.namespace ?? 'No Active Namespace'} <Icon as={FaChevronDown} />
@@ -96,7 +97,11 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                     .filter((n) => n.name !== user.namespace)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((n) => (
-                      <MenuItem key={n.id} onClick={handleNamespaceChange(n)}>
+                      <MenuItem
+                        key={n.id}
+                        onClick={handleNamespaceChange(n)}
+                        data-testid={'ns-dropdown-item-' + n.name}
+                      >
                         {n.name}
                       </MenuItem>
                     ))}
@@ -111,6 +116,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
               icon={<Icon as={FaEdit} />}
               color="bc-blue-alt"
               onClick={managerDisclosure.onOpen}
+              data-testid="ns-dropdown-manage-btn"
             >
               Manage Namespaces
             </MenuItem>
@@ -119,6 +125,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
               onClick={newNamespaceDisclosure.onOpen}
               fontWeight="bold"
               color="bc-blue-alt"
+              data-testid="ns-dropdown-create-btn"
             >
               Create New Namespace
             </MenuItem>

@@ -109,7 +109,11 @@ const ApplicationsPage: React.FC<
   };
 
   const actions = [
-    <Button variant="primary" onClick={() => doCreate()}>
+    <Button
+      variant="primary"
+      onClick={() => doCreate()}
+      data-testid="sa-create-primary-btn"
+    >
       New Service Account
     </Button>,
   ];
@@ -227,4 +231,3 @@ const CREATE = gql`
     }
   }
 `;
-
