@@ -57,6 +57,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             alignItems="center"
             display="flex"
             variant="bc-blue-alt"
+            data-testid="auth-menu-user"
           >
             <Icon as={FaUserCircle} mr={2} mt={-1} color="bc-blue-alt" />
             {user.name}

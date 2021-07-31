@@ -13,6 +13,7 @@ const NewProduct: React.FC = () => {
         variant="primary"
         onClick={onOpen}
         leftIcon={<Icon as={FaLayerGroup} />}
+        data-testid="prds-new-btn"
       >
         New Product
       </Button>
