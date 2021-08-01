@@ -55,14 +55,19 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 
   return (
     <Menu>
-      <MenuButton as={Button} variant="unstyled">
+      <MenuButton as={Button} variant="unstyled" data-testid="prd-env-add-btn">
         {children}
       </MenuButton>
       <MenuList>
         {options
           .filter((e) => !environments.includes(e.value))
           .map((e) => (
-            <MenuItem key={e.value} onClick={onSelect(e.value)} value={e.value}>
+            <MenuItem
+              key={e.value}
+              onClick={onSelect(e.value)}
+              value={e.value}
+              data-testid={'prd-env-item-' + e.value}
+            >
               {e.name}
             </MenuItem>
           ))}
