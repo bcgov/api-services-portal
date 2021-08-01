@@ -39,6 +39,7 @@ const logger = Logger('kong');
 
 export class KongConsumerService {
   private kongUrl: string;
+  private gwaUrl: string = process.env.GWA_API_URL;
 
   constructor(kongUrl: string) {
     this.kongUrl = kongUrl;
@@ -143,14 +144,14 @@ export class KongConsumerService {
     plugin: KongPlugin,
     namespace: string
   ): Promise<KongObjectID> {
-    const body = {};
+    const body = { ...plugin, tags: ['ns.' + namespace] };
     logger.debug('[addPluginToConsumer] CALLING with ' + consumerPK);
 
     const response = await fetch(
-      `/gw/api/namespaces/${namespace}/consumers/${consumerPK}/plugins`,
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins`,
       {
         method: 'post',
-        body: JSON.stringify(plugin),
+        body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -172,12 +173,12 @@ export class KongConsumerService {
     namespace: string
   ): Promise<void> {
     logger.debug('[updateConsumerPlugin] C=%s P=%s', consumerPK, pluginPK);
-
+    const body = { ...plugin, tags: ['ns.' + namespace] };
     const response = await fetch(
-      `/gw/api/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
       {
         method: 'put',
-        body: JSON.stringify(plugin),
+        body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -195,7 +196,7 @@ export class KongConsumerService {
     namespace: string
   ): Promise<void> {
     await fetch(
-      `/gw/api/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
       {
         method: 'delete',
         headers: {
