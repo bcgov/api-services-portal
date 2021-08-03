@@ -64,7 +64,9 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
                     as="code"
                     wordBreak="break-all"
                     noOfLines={1}
-                    data-testid={'sa-new-creds' + c.label}
+                    data-testid={
+                      'sa-new-creds-' + c.label.toLowerCase().replace(' ', '-')
+                    }
                   >
                     {credentials[c.name]}
                   </Text>
