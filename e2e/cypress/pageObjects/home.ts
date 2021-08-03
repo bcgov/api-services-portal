@@ -1,24 +1,33 @@
 class HomePage {
-  namespaceDropdown: string = '/html/body/div[1]/header/hgroup[2]/div[1]/div/button'
-  profileIcon: string =
-    '/html/body/div[1]/header/hgroup[2]/div[1]/div/span/button/span/svg[1]'
-
-  namespaceNameInput: string = '/html/body/div[3]/div[4]/div/section/div/form/div/input'
+  nsDropdown: string = '[data-testid=ns-dropdown-btn]'
+  nsDropdownCreateNsBtn: string = '[data-testid=ns-dropdown-create-btn]'
+  nsDropdownManageNsBtn: string = '[data-testid=ns-dropdown-manage-btn]'
+  namespaceNameInput: string = '[data-testid=ns-modal-name-input]'
+  nsCreateBtn: string = '[data-testid=ns-modal-create-btn]'
+  nsSelectNamespace: string = '[data-testid=ns-dropdown-item-]'
 
   createNamespace(name: string): void {
-    cy.xpath(this.namespaceDropdown).click()
-    cy.contains('Create New Namespace').click()
-    cy.xpath(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
-    cy.xpath("//button[normalize-space()='Create']").click()
+    cy.get(this.nsDropdown).click()
+    cy.get(this.nsDropdownCreateNsBtn).click()
+    cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
+    cy.get(this.nsCreateBtn).click()
+    cy.wait(2000) // wait for dropdown to have latest text
+    cy.get(this.nsDropdown).then(($el) => {
+      expect($el).contain(name)
+    })
   }
 
   useNamespace(name: string): void {
-    cy.xpath(this.namespaceDropdown).click()
-    cy.contains(name)
-      .click()
-      .then(() => {
-        cy.xpath(this.namespaceDropdown).should('include.text', name)
-      })
+    cy.get(this.nsDropdown).click()
+    cy.get(this.getNamespaceTestId(name)).click()
+    cy.wait(2000) // wait for dropdown to have latest text
+    cy.get(this.nsDropdown).then(($el) => {
+      expect($el.text().trim()).to.eq(name)
+    })
+  }
+
+  getNamespaceTestId(name: string): string {
+    return '[data-testid=ns-dropdown-item-' + name + ']'
   }
 }
 

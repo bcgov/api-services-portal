@@ -1,12 +1,20 @@
 import * as jwt from 'jsonwebtoken'
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
+import request = require('request')
+import { method } from 'cypress/types/bluebird'
+import { url } from 'inspector'
+
+interface formDataRequestOptions {
+  method: string
+  url: string
+}
 
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.log('< Log in with user ' + username)
   const login = new LoginPage()
-  const appURL = new URL(Cypress.config('baseUrl')!)
-  cy.xpath(login.loginButton).should('be.visible').click()
+  const home = new HomePage()
+  cy.get(login.loginButton).click()
 
   const log = Cypress.log({
     name: 'Login to Dev',
@@ -14,15 +22,17 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
+  cy.wait(1500) // wait added to evade login timeout
+  cy.get(login.usernameInput).type(username)
+  cy.get(login.passwordInput).type(password)
+  cy.get(login.loginSubmitButton).click()
 
-  cy.xpath(login.usernameInput).type(username)
-  cy.xpath(login.passwordInput).type(password)
-  cy.xpath(login.loginSubmitButton).click()
-  cy.wait(1000)
-
-  log.snapshot('Post Login')
   log.end()
-  cy.xpath(login.loginButton).should('not.exist')
+  cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
+    expect($el).to.exist
+    expect($el).to.be.visible
+    expect($el).contain('No Active Namespace')
+  })
   cy.log('> Log in')
 })
 
@@ -84,6 +94,71 @@ Cypress.Commands.add('logout', () => {
       cy.clearCookies()
     })
   })
-  cy.wait(2000)
   cy.log('> Logging out')
 })
+
+Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string) => {
+  cy.log('< Get Token')
+  cy.request({
+    method: 'POST',
+    url: Cypress.env('TOKEN_URL'),
+    body: {
+      grant_type: 'client_credentials',
+      scope: 'openid',
+      client_id,
+      client_secret,
+    },
+    form: true,
+  }).then((res) => {
+    cy.wrap(res).as('accessTokenResponse')
+    expect(res.status).to.eq(200)
+  })
+  cy.log('> Get Token')
+})
+
+Cypress.Commands.add('publishApi', (fileName: string) => {
+  cy.log('< Publish API')
+  const requestName: string = 'publishAPI'
+  cy.fixture('state/store').then((creds: any) => {
+    const serviceAcctCreds = JSON.parse(creds.credentials)
+    cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
+      () => {
+        cy.get('@accessTokenResponse').then((res: any) => {
+          const options = {
+            method: 'PUT',
+            url: Cypress.env('GWA_API_URL') + '/namespaces/platform/gateway',
+          }
+          formDataRequest(options, res.body.access_token, fileName, requestName)
+          cy.wait(`@${requestName}`).then((res: any) => {
+            cy.wrap(res.response).as('publishAPIResponse')
+          })
+        })
+      }
+    )
+  })
+})
+
+const formDataRequest = (
+  options: formDataRequestOptions,
+  accessToken: string,
+  fileName: string,
+  requestName: string
+) => {
+  const data = new FormData()
+  data.append('hasHeader', 'true')
+  cy.intercept(options.method, options.url)
+    .as(requestName)
+    .window()
+    .then((win) => {
+      cy.fixture(fileName, 'binary')
+        .then((bin) => Cypress.Blob.binaryStringToBlob(bin))
+        .then((blob) => {
+          const xhr = new win.XMLHttpRequest()
+          data.set('configFile', blob, fileName)
+          data.set('dryRun', 'true')
+          xhr.open(options.method, options.url)
+          xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
+          xhr.send(data)
+        })
+    })
+}

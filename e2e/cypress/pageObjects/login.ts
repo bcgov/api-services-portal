@@ -1,10 +1,10 @@
 class LoginPage {
   path: string = '/'
 
-  loginButton: string = "//button[normalize-space()='Login']"
-  usernameInput: string = "//input[@id='username']"
-  passwordInput: string = "//input[@id='password']"
-  loginSubmitButton: string = "//input[@id='kc-login']"
+  loginButton: string = '[data-testid=login-btn]'
+  usernameInput: string = '[id=username]'
+  passwordInput: string = '[id=password]'
+  loginSubmitButton: string = '[id=kc-login]'
 }
 
 export default LoginPage
