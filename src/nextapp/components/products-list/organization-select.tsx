@@ -68,6 +68,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
           name="organization"
           variant="bc-input"
           value={organization}
+          data-testid="prd-edit-org-dd"
         >
           <option value="">Select an Organization</option>
           {organizationsQuery.data?.allOrganizations.map((org) => (

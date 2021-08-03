@@ -20,5 +20,12 @@ declare namespace Cypress {
     getState(key: string): string
 
     resetState(): void
+
+    getAccessToken(
+      client_id: string,
+      client_secret: string
+    ): Chainable<Cypress.Response<any>>
+
+    publishApi(content: any): Chainable<Cypress.Response<any>>
   }
 }

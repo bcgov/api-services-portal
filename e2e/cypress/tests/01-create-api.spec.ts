@@ -10,6 +10,7 @@ describe('Create API Spec', () => {
   const sa = new ServiceAccountsPage()
 
   beforeEach(() => {
+    cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.visit(login.path)
   })
@@ -23,20 +24,22 @@ describe('Create API Spec', () => {
   it('creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
       home.createNamespace(namespace)
-      home.useNamespace(namespace)
     })
   })
   it('creates a new service account', () => {
-    cy.xpath(tb.namespaces).click()
-    cy.contains('Service Accounts').click({ force: true })
+    cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
-      cy.log(serviceAccount.scopes)
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
   })
-  afterEach(() => {
-    cy.preserveCookies()
+
+  it('publishes a new API to Kong Gateway', () => {
+    cy.publishApi('service.yml').then(() => {
+      cy.get('@publishAPIResponse').then((res: any) => {
+        cy.log(JSON.stringify(res.body))
+      })
+    })
   })
   after(() => {
     cy.logout()

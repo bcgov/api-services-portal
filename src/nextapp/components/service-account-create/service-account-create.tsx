@@ -104,11 +104,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                       {isSuccess &&
                         data?.currentNamespace.scopes.map((s) => (
                           <WrapItem key={s.name}>
-                            <Checkbox
-                              value={s.name}
-                              name="scopes"
-                              data-testid={'sa-scope-' + s.name}
-                            >
+                            <Checkbox value={s.name} name="scopes">
                               {s.name}
                             </Checkbox>
                           </WrapItem>
