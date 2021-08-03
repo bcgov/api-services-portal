@@ -11,27 +11,26 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git
+          git clone https://github.com/bcgov/gwa-api.git -b feature/add-consumer-service
           cd gwa-api/microservices/gatewayApi
-          docker build -t gateway-api:test .
-
-      # - uses: actions/checkout@v1
-      # - name: Spin up API Services Portal and Run E2E Tests
-      #   run: docker-compose up -d
-      # - name: Stop the Containers
-      #   run: |
-      #     while true; do
-      #       if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
-      #         # cleanup
-      #         docker-compose down
-      #         break
-      #       else
-      #         echo  "Waiting for Cypress to Complete E2E Tests....."
-      #         sleep 1m
-      #       fi
-      #     done
-      # - name: Upload E2E Test Report as Artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: report
-      #     path: ${{ github.workspace }}/e2e/results/report
+          docker build -t gateway-api:e2e-testing .
+      - uses: actions/checkout@v1
+      - name: Spin up API Services Portal and Run E2E Tests
+        run: docker-compose up -d
+      - name: Stop the Containers
+        run: |
+          while true; do
+            if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+              # cleanup
+              docker-compose down
+              break
+            else
+              echo  "Waiting for Cypress to Complete E2E Tests....."
+              sleep 1m
+            fi
+          done
+      - name: Upload E2E Test Report as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: report
+          path: ${{ github.workspace }}/e2e/results/report
