@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build GWA API Image
-      - run: |
+        run: |
           git clone https://github.com/bcgov/gwa-api.git
           cd gwa-api/microservices/gatewayApi
           docker build -t gateway-api:test .
