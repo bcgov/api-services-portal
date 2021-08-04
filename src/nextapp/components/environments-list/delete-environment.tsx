@@ -53,6 +53,7 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
         size="xs"
         variant="outline"
         onClick={onConfirm}
+        data-testid="prd-env-delete-btn"
       >
         <Icon as={FaTrash} />
       </IconButton>

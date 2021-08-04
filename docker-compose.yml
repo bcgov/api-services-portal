@@ -30,13 +30,15 @@ services:
     environment:
       #KEYCLOAK_USER: local
       #KEYCLOAK_PASSWORD: local
+      DB_VENDOR: POSTGRES
+      DB_SCHEMA: public
       DB_ADDR: kong-db:5432
       DB_USER: keycloakuser
       DB_PASSWORD: keycloakuser
     volumes:
       - ./local/keycloak/master-realm.json:/tmp/realm-config/master-realm.json
     networks:
-      keycloak:
+      aps-net:
         aliases:
           - keycloak.localtest.me
   oauth2-proxy:
@@ -51,12 +53,9 @@ services:
       - ./local/oauth2-proxy/oauth2-proxy-local.cfg:/oauth2-proxy.cfg
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.local
     networks:
-      keycloak: {}
-      portal: {}
-      kong-net: {}
-      oauth2-proxy:
+      aps-net:
         aliases:
           - oauth2proxy.localtest.me
   apsportal:
@@ -68,16 +67,13 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.local
     ports:
       - 3000:3000
     networks:
-      portal:
+      aps-net:
         aliases:
           - apsportal.localtest.me
-      keycloak: {}
-      oauth2-proxy: {}
-      kong-net: {}
   feeder:
     container_name: feeder
     image: feeder:latest
@@ -87,27 +83,39 @@ services:
       context: ./feeds
       dockerfile: Dockerfile
     env_file:
-      - ./feeds/.env
+      - ./feeds/.env.local
+    restart: on-failure
     ports:
       - 6000:6000
     networks:
-      portal:
+      aps-net:
         aliases:
           - feeder.localtest.me
-      kong-net: {}
   feeder-seeding:
     container_name: feeder-seeding
     image: feeder:latest
     command: ''
     entrypoint: sh -c "chmod +x /tmp/init.sh && sh /tmp/init.sh"
+    restart: on-failure
     depends_on:
       - feeder
-    restart: on-failure
     volumes:
       - ./local/feeder-init:/tmp
     networks:
-      - portal
-      - keycloak
+      - aps-net
+  cypress:
+    image: 'aps-cypress-e2e:latest'
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    depends_on:
+      - feeder-seeding
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    volumes:
+      - ./e2e/results/report:/e2e/results/report
+    networks:
+      - aps-net
   kong-db:
     image: postgres:latest
     container_name: kong-db
@@ -122,9 +130,7 @@ services:
       - ./local/db/database-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - ./local/db/keystone-init.sql:/docker-entrypoint-initdb.d/2-init.sql
     networks:
-      - kong-net
-      - keycloak
-      - portal
+      - aps-net
   kong-migrations:
     image: kong:latest
     command: kong migrations bootstrap
@@ -132,7 +138,7 @@ services:
       - kong-db
     environment: *common-variables
     networks:
-      - kong-net
+      - aps-net
     restart: on-failure
   kong-migrations-up:
     image: kong:latest
@@ -141,7 +147,7 @@ services:
       - kong-db
     environment: *common-variables
     networks:
-      - kong-net
+      - aps-net
     restart: on-failure
   kong:
     image: kong:latest
@@ -162,14 +168,36 @@ services:
       - 8000:8000
       - 8001:8001
     networks:
-      kong-net:
+      aps-net:
         aliases:
           - kong.localtest.me
     restart: on-failure:5
+  redis:
+    image: bitnami/redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=s3cr3t
+    restart: on-failure
+    ports:
+      - 6379:6379
+    networks:
+      aps-net:
+        aliases:
+          - redis.localtest.me
+  gwa-gateway-api:
+    image: gateway-api:e2e-testing
+    container_name: gwa-gateway-api
+    entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
+    ports:
+      - 2000:2000
+    env_file:
+      - ./local/gwa-api/.env.local
+    restart: on-failure:5
+    volumes:
+      - ./local/gwa-api:/tmp/gwa
+    networks:
+      aps-net:
+        aliases:
+          - gwa-api.localtest.me
 networks:
-  keycloak: {}
-  oauth2-proxy: {}
-  portal: {}
-  kong-net: {}
-volumes:
-  aps-pg-data: {}
+  aps-net: {}

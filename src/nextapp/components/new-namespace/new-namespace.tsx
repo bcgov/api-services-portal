@@ -81,17 +81,21 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
                 name="name"
                 type="text"
                 variant="bc-input"
+                data-testid="ns-modal-name-input"
               />
             </FormControl>
           </form>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose} data-testid="ns-modal-cancel-btn">
+              Cancel
+            </Button>
             <Button
               isLoading={createMutation.isLoading}
               variant="primary"
               onClick={handleCreateNamespace}
+              data-testid="ns-modal-create-btn"
             >
               Create
             </Button>
