@@ -23,7 +23,7 @@ const schemas = require('./schemas');
 const { sample } = require('lodash');
 
 const app = express();
-const db = new MockDatabase('api-owner', 'dss-loc');
+const db = new MockDatabase('api-owner', 'aps-portal');
 const port = 4000;
 
 const randomNullValue = () => {
@@ -81,30 +81,11 @@ const server = mockServer(schemaWithMocks, {
     allNamespaceServiceAccounts: () => new MockList(2, (_, { id }) => ({ id })),
     allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
     allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
-    allMetrics: (_query, _, args) => {
-      const result = args.variableValues.days.map((d, index) => {
-        const metrics = metricsData[index];
-        const date = parse(d, 'yyyy-MM-dd', new Date());
-        const values = [];
-
-        times(24, (n) => {
-          const hour = addHours(date, n);
-
-          if (metrics[n]) {
-            values.push([hour.getTime(), metrics[n]]);
-          }
-        });
-
-        return {
-          name: `kong_http_requests_hourly.${d}.{}`,
-          query: 'kong_http_requests_hourly',
-          day: d,
-          metric: '{}',
-          values: JSON.stringify(values),
-        };
-      });
-
-      return result;
+    allMetrics: (query) => {
+      if (query.where.query === 'kong_http_requests_daily_namespace') {
+        return metricsData.namespaceMetrics;
+      }
+      return metricsData.serviceMetrics;
     },
     getPermissionTickets: () => new MockList(6, (_, { id }) => ({ id })),
     getPermissionTicketsForResource: () =>
@@ -124,7 +105,6 @@ const server = mockServer(schemaWithMocks, {
         legalName: 'Smith Associates',
         address: {
           addressLine1: '2233 Broadway South',
-          addressLine1: '',
           city: 'Mincetown',
           postal: 'V1B4A3',
           province: 'BC',
@@ -340,6 +320,8 @@ const server = mockServer(schemaWithMocks, {
       casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
     ]),
     tags: '["ns.sample"]',
+    hosts: JSON.stringify(['route']),
+    paths: JSON.stringify(['/path']),
   }),
   CredentialIssuer: () => {
     const flow = casual.random_element([

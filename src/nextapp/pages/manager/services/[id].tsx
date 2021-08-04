@@ -18,7 +18,7 @@ import ClientRequest from '@/components/client-request';
 import isEmpty from 'lodash/isEmpty';
 import PageHeader from '@/components/page-header';
 import api, { useApi } from '@/shared/services/api';
-import { dateRange } from '@/components/services-list/utils';
+import { dateRange, useTotalRequests } from '@/components/services-list/utils';
 import { GET_GATEWAY_SERVICE } from '@/shared/queries/gateway-service-queries';
 import EnvironmentBadge from '@/components/environment-badge';
 import MetricGraph from '@/components/services-list/metric-graph';
@@ -31,6 +31,7 @@ import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import Head from 'next/head';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const range: string[] = dateRange();
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
@@ -38,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         GET_GATEWAY_SERVICE,
-        { id: context.params.id },
+        { id: context.params.id, days: range },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -49,27 +50,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       id: context.params.id,
       dehydratedState: dehydrate(queryClient),
+      range,
     },
   };
 };
 
 const ServicePage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
+> = ({ id, range }) => {
   const breadcrumb = useNamespaceBreadcrumbs([
     { href: '/manager/services', text: 'Services' },
   ]);
-  const range = dateRange();
   const { data } = useApi(
     ['gateway-service', id],
     {
       query: GET_GATEWAY_SERVICE,
       variables: {
         id,
+        days: range,
       },
     },
     { enabled: Boolean(id), suspense: false }
   );
+  const totalNamespaceRequests = useTotalRequests(data);
   const tags: string[] = !isEmpty(data?.GatewayService?.tags)
     ? (JSON.parse(data.GatewayService.tags) as string[])
     : [];
@@ -77,7 +80,7 @@ const ServicePage: React.FC<
   return (
     <>
       <Head>
-        <title>{`API Program Services | Services | ${data?.GatewayService.name}`}</title>
+        <title>{`API Program Services | Services | ${data?.GatewayService?.name}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -109,8 +112,9 @@ const ServicePage: React.FC<
                 <MetricGraph
                   days={range}
                   height={100}
-                  id={data?.GatewayService.name}
+                  id={data?.GatewayService?.name}
                   service={data?.GatewayService}
+                  totalRequests={totalNamespaceRequests}
                 />
               </ClientRequest>
             )}
@@ -143,6 +147,7 @@ const ServicePage: React.FC<
                     height={100}
                     id={data?.GatewayService.name}
                     service={data?.GatewayService}
+                    totalRequests={totalNamespaceRequests}
                   />
                 </ClientRequest>
               )}
@@ -162,7 +167,7 @@ const ServicePage: React.FC<
               <Tbody>
                 <Tr>
                   <Td>
-                    <ServiceRoutes routes={data?.GatewayService.routes} />
+                    <ServiceRoutes routes={data?.GatewayService?.routes} />
                   </Td>
                 </Tr>
               </Tbody>
@@ -191,7 +196,7 @@ const ServicePage: React.FC<
                 <Text as="dt" fontWeight="bold">
                   Host
                 </Text>
-                <Text as="dd">{data?.GatewayService.host}</Text>
+                <Text as="dd">{data?.GatewayService?.host}</Text>
                 <Text as="dt" fontWeight="bold">
                   Tags
                 </Text>
