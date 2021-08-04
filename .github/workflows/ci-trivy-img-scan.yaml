@@ -1,0 +1,29 @@
+name: Scan for Vulnerabilities - Trivy
+
+on:
+  push:
+    branches: [dev, main, scan/*]
+
+jobs:
+  trivy-image-Scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag bcgov/api-services-portal:trivy-scan
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'bcgov/api-services-portal:trivy-scan'
+          format: 'template'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+      - name: Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results.sarif'
