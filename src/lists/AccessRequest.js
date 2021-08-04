@@ -12,6 +12,8 @@ const {
 
 const { Apply, Validate } = require('../services/workflow');
 
+const { getCurrentNamespace } = require('../services/keystone/namespace');
+
 module.exports = {
   fields: {
     name: {
@@ -113,6 +115,8 @@ module.exports = {
         originalInput,
         updatedItem
       );
+      const namespaceData = await getCurrentNamespace(context);
+      console.log(JSON.stringify(namespaceData));
     },
   },
 };
