@@ -132,10 +132,11 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     [0, '0']
   );
   const peakRequests = round(Number(peak[1]), 2);
-  const peakDay = format(new Date(peak[0] * 1000), 'LLL d');
-  const usage = totalDailyRequests / totalRequests;
-  const usagePercent = usage * 100;
-  const color = interpolateRdYlGn(usage);
+  const peakDay =
+    peak[1] > 0 ? format(new Date(peak[0] * 1000), 'LLL d') : 'n/a';
+  const usage = totalRequests > 0 ? totalDailyRequests / totalRequests : 0;
+  const usagePercent = usage ? usage * 100 : 0;
+  const color = usage ? interpolateRdYlGn(usage) : '#eee';
   const y = scaleLinear().range([0, height]).domain([0, 1]);
 
   if (data.allMetrics) {
