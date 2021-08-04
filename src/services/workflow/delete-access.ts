@@ -19,7 +19,10 @@ import { UMAPolicyService } from '../uma2';
 const logger = Logger('wf.DeleteAccess');
 
 export const DeleteAccess = async (context: any, operation: any, keys: any) => {
-  const kongApi = new KongConsumerService(process.env.KONG_URL);
+  const kongApi = new KongConsumerService(
+    process.env.KONG_URL,
+    process.env.GWA_API_URL
+  );
 
   // From the Application, get all the related ServiceAccesses
   // From these, call Kong and Keycloak to delete them

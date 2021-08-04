@@ -86,7 +86,10 @@ module.exports = {
             schema:
               'createGatewayConsumerPlugin(id: ID!, plugin: String!): GatewayConsumer',
             resolver: async (item, args, context, info, { query, access }) => {
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(
@@ -113,7 +116,10 @@ module.exports = {
                 skipAccessControl: true,
               });
 
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(
@@ -141,7 +147,10 @@ module.exports = {
                 skipAccessControl: true,
               });
 
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(

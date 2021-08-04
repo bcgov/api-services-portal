@@ -39,10 +39,11 @@ const logger = Logger('kong');
 
 export class KongConsumerService {
   private kongUrl: string;
-  private gwaUrl: string = process.env.GWA_API_URL;
+  private gwaUrl: string;
 
-  constructor(kongUrl: string) {
+  constructor(kongUrl: string, gwaUrl: string) {
     this.kongUrl = kongUrl;
+    this.gwaUrl = gwaUrl;
   }
 
   public async getConsumerByUsername(username: string) {
