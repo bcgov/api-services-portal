@@ -20,6 +20,7 @@ export interface RequestControls {
   plugins?: ConsumerPlugin[];
   clientCertificate?: string;
   clientGenCertificate?: boolean;
+  jwksUrl?: string;
 }
 
 export interface Name {

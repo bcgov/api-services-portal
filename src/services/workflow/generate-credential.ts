@@ -122,6 +122,8 @@ export const generateCredential = async (
       clientSigning.publicKey = publicKey;
       clientSigning.privateKey = privateKey;
       controls.clientCertificate = clientSigning.publicKey;
+    } else {
+      controls.clientCertificate = null;
     }
     const newClient = await registerClient(
       context,

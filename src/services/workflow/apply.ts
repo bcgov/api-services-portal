@@ -272,11 +272,6 @@ async function setupAuthorizationAndEnable(
       token
     );
 
-    await kcClientService.updateClientRegistration(clientId, {
-      clientId,
-      enabled: true,
-    });
-
     // Only valid for 'managed' client registration
     // const kcadminApi = new KeycloakClientService(baseUrl, realm)
     await kcClientService.login(
@@ -288,6 +283,11 @@ async function setupAuthorizationAndEnable(
       controls.defaultClientScopes,
       []
     );
+
+    await kcClientService.updateClientRegistration(clientId, {
+      clientId,
+      enabled: true,
+    });
 
     await markActiveTheServiceAccess(context, setup.serviceAccessId);
   } else if (flow == 'kong-api-key-acl' || flow == 'kong-acl-only') {
