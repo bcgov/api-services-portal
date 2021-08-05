@@ -62,7 +62,7 @@ export class KeycloakClientRegistrationService {
             enabled,
             clientId,
             attributes: {
-              'jwt.credential.certificate': certificate,
+              'jwt.credential.public.key': certificate,
             },
           })
         : Object.assign(clientTemplateClientSecret, {
