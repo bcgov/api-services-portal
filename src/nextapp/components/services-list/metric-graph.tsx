@@ -174,22 +174,22 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Box>
         <StatGroup spacing={8} flexWrap="wrap">
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Req</StatLabel>
+            <StatLabel {...labelProps}>Peak Hourly</StatLabel>
             <StatNumber>{peakRequests}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Total Req</StatLabel>
-            <StatNumber overflow="hidden">
-              {numeral(totalDailyRequests).format('0.0a')}
-            </StatNumber>
+            <StatLabel {...labelProps}>Peak Daily</StatLabel>
+            <StatNumber>{numeral(peakDay.total).format('0.0a')}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Peak Day</StatLabel>
             <StatNumber>{peakDayText}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Plugins</StatLabel>
-            <StatNumber>{service?.plugins.length}</StatNumber>
+            <StatLabel {...labelProps}>Total Req</StatLabel>
+            <StatNumber overflow="hidden">
+              {numeral(totalDailyRequests).format('0.0a')}
+            </StatNumber>
           </Stat>
         </StatGroup>
       </Box>
