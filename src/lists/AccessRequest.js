@@ -12,7 +12,9 @@ const {
 
 const { Apply, Validate } = require('../services/workflow');
 
-const { getCurrentNamespace } = require('../services/keystone/namespace');
+const {
+  lookupEnvironmentAndApplicationByAccessRequest,
+} = require('../services/keystone/access-request');
 
 module.exports = {
   fields: {
@@ -108,15 +110,25 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
+      const noauthContext = context
+        .createContext({ skipAccessControl: true })
+        .sudo();
       await Apply(
-        context.createContext({ skipAccessControl: true }),
+        noauthContext,
         operation,
         existingItem,
         originalInput,
         updatedItem
       );
-      const namespaceData = await getCurrentNamespace(context);
-      console.log(JSON.stringify(namespaceData));
+
+      const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
+        noauthContext,
+        updatedItem.id
+      );
+      console.log(
+        'This is Awesome Result Namespace: ' +
+          accessRequest.productEnvironment.product.namespace
+      );
     },
   },
 };
