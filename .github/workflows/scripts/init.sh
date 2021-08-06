@@ -1,4 +1,4 @@
-#/bin/bash -e +x
+#/bin/bash +e -x
 
 python scripts/template.py scripts/feeder-init/legal.yaml legal.yaml
 python scripts/template.py scripts/feeder-init/platform-authz-profile.yaml platform-authz-profile.yaml
