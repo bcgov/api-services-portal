@@ -1,20 +1,34 @@
 const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
-
 const { byTracking } = require('../components/ByTracking');
-
 const { atTracking } = require('@keystonejs/list-plugins');
-
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
-
 const { Apply, Validate } = require('../services/workflow');
-
 const {
   lookupEnvironmentAndApplicationByAccessRequest,
 } = require('../services/keystone/access-request');
+const {
+  lookupCredentialIssuerById,
+} = require('../services/keystone/credential-issuer');
+const {
+  doClientLoginForCredentialIssuer,
+} = require('../lists/extensions/Common');
+const { UMAResourceRegistrationService } = require('../services/uma2');
+const keystoneApi = require('../services/keystone');
+const { KeycloakPermissionTicketService } = require('../services/keycloak');
+const {
+  getSuitableOwnerToken,
+  getEnvironmentContext,
+  getResourceSets,
+  getNamespaceResourceSets,
+  isUserBasedResourceOwners,
+} = require('../lists/extensions/Common');
+const {
+  lookupProductEnvironmentServicesBySlug,
+} = require('../services/keystone');
 
 module.exports = {
   fields: {
@@ -110,9 +124,8 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
-      const noauthContext = context
-        .createContext({ skipAccessControl: true })
-        .sudo();
+      const noauthContext = context.createContext({ skipAccessControl: true });
+
       await Apply(
         noauthContext,
         operation,
@@ -121,14 +134,60 @@ module.exports = {
         updatedItem
       );
 
-      const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
-        noauthContext,
-        updatedItem.id
-      );
-      console.log(
-        'This is Awesome Result Namespace: ' +
-          accessRequest.productEnvironment.product.namespace
-      );
+      if (operation == 'create') {
+        const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
+          noauthContext,
+          updatedItem.id
+        );
+        console.log(
+          'This is awesome namespace: ' +
+            accessRequest.productEnvironment.product.namespace
+        );
+        const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG;
+
+        const prodEnv = await lookupProductEnvironmentServicesBySlug(
+          noauthContext,
+          productEnvironmentSlug
+        );
+        const envCtx = await getEnvironmentContext(context, prodEnv.id, '');
+
+        console.log('This is envCtx: ', JSON.stringify(envCtx));
+
+        const resourceIds = await getResourceSets(envCtx);
+        const resourcesApi = new UMAResourceRegistrationService(
+          envCtx.issuerEnvConfig.issuerUrl,
+          envCtx.accessToken
+        );
+        const namespaces = await resourcesApi.listResourcesByIdList(
+          resourceIds
+        );
+        const matched = namespaces
+          .filter(
+            (ns) =>
+              ns.name == accessRequest.productEnvironment.product.namespace
+          )
+          .map((ns) => ({
+            id: ns.id,
+            name: ns.name,
+            scopes: ns.resource_scopes,
+            prodEnvId: prodEnv.id,
+          }));
+        namespaceObj = matched[0];
+        console.log(
+          'This is the same namespace: ' + JSON.stringify(namespaceObj)
+        );
+        const permissionApi = new KeycloakPermissionTicketService(
+          envCtx.issuerEnvConfig.issuerUrl,
+          envCtx.accessToken
+        );
+        const params = { resourceId: namespaceObj.id, returnNames: true };
+        const permissions = await permissionApi.listPermissions(params);
+        console.log('Permissions List: ' + JSON.stringify(permissions));
+        permissions.forEach((user) => {
+          console.log('User Name: ' + user.requesterName);
+          console.log('User Scopes: ' + user.scopeName);
+        });
+      }
     },
   },
 };
