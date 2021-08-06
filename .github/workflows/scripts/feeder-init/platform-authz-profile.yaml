@@ -8,7 +8,7 @@ record:
   clientAuthenticator: client-secret
   authPlugin: jwt-keycloak
   clientRoles: []
-  availableScopes: []
+  availableScopes: [Sample.*]
   resourceType: platform
   resourceAccessScope: Namespace.Manage
   resourceScopes:
