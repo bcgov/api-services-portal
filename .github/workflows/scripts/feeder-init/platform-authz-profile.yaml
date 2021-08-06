@@ -17,6 +17,7 @@ record:
     - Access.Manage
     - GatewayConfig.Publish
     - Content.Publish
+    - CredentialIssuer.Admin
   owner: user_api-owner
   environmentDetails:
     - environment: prod
