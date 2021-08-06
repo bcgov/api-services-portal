@@ -17,7 +17,7 @@ record:
     - Access.Manage
     - GatewayConfig.Publish
     - Content.Publish
-  owner: awsummer@idir
+  owner: acope@idir
   environmentDetails:
     - environment: prod
       issuerUrl: '{OIDC_ISSUER}'
