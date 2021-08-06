@@ -17,7 +17,7 @@ record:
     - Access.Manage
     - GatewayConfig.Publish
     - Content.Publish
-  owner: acope@idir
+  owner: user_api-owner
   environmentDetails:
     - environment: prod
       issuerUrl: '{OIDC_ISSUER}'
