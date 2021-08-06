@@ -86,7 +86,10 @@ module.exports = {
             schema:
               'createGatewayConsumerPlugin(id: ID!, plugin: String!): GatewayConsumer',
             resolver: async (item, args, context, info, { query, access }) => {
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(
@@ -96,7 +99,8 @@ module.exports = {
 
               const result = await kongApi.addPluginToConsumer(
                 kongConsumerPK,
-                JSON.parse(args.plugin)
+                JSON.parse(args.plugin),
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);
@@ -112,7 +116,10 @@ module.exports = {
                 skipAccessControl: true,
               });
 
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(
@@ -123,7 +130,8 @@ module.exports = {
               const result = await kongApi.updateConsumerPlugin(
                 kongConsumerPK,
                 args.pluginExtForeignKey,
-                JSON.parse(args.plugin)
+                JSON.parse(args.plugin),
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);
@@ -139,7 +147,10 @@ module.exports = {
                 skipAccessControl: true,
               });
 
-              const kongApi = new KongConsumerService(process.env.KONG_URL);
+              const kongApi = new KongConsumerService(
+                process.env.KONG_URL,
+                process.env.GWA_API_URL
+              );
               const feederApi = new FeederService(process.env.FEEDER_URL);
 
               const kongConsumerPK = await lookupKongConsumerId(
@@ -149,7 +160,8 @@ module.exports = {
 
               const result = await kongApi.deleteConsumerPlugin(
                 kongConsumerPK,
-                args.pluginExtForeignKey
+                args.pluginExtForeignKey,
+                context.req.user.namespace
               );
 
               await feederApi.forceSync('kong', 'consumer', kongConsumerPK);

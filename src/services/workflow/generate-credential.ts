@@ -133,7 +133,10 @@ export const generateCredential = async (
 
     logger.debug('new-client %j', newClient);
 
-    const kongApi = new KongConsumerService(process.env.KONG_URL);
+    const kongApi = new KongConsumerService(
+      process.env.KONG_URL,
+      process.env.GWA_API_URL
+    );
     const consumer = await kongApi.createKongConsumer(nickname, clientId);
     const consumerPK = await AddClientConsumer(
       context,
