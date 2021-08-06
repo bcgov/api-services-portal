@@ -70,7 +70,7 @@ jobs:
           OIDC_ISSUER=${{ secrets.OIDC_ISSUER }} \
           OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
-          (cd .github/workflows && ./init.sh)
+          (cd .github/workflows && ./scripts/init.sh)
 
       - name: Set up Docker Buildx
         id: buildx
