@@ -39,4 +39,9 @@ export {
   markActiveTheServiceAccess,
 } from './service-access';
 
-export { lookupUserLegals, updateUserLegalAccept, LegalAgreed } from './user';
+export {
+  lookupUserLegals,
+  updateUserLegalAccept,
+  LegalAgreed,
+  lookupUserByUsername,
+} from './user';

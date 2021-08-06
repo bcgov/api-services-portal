@@ -28,6 +28,7 @@ const {
 } = require('../lists/extensions/Common');
 const {
   lookupProductEnvironmentServicesBySlug,
+  lookupUserByUsername,
 } = require('../services/keystone');
 
 const KeystoneService = require('../services/keystone');
@@ -185,28 +186,35 @@ module.exports = {
         const params = { resourceId: namespaceObj.id, returnNames: true };
         const permissions = await permissionApi.listPermissions(params);
         console.log('Permissions List: ' + JSON.stringify(permissions));
-        permissions.forEach(async (user) => {
-          console.log('User Name: ' + user.requesterName);
-          console.log('User Scopes: ' + user.scopeName);
-          const userResult = await noauthContext.executeGraphQL({
-            query: `query GetUserWithUsername($username: String!) {
-                            allUsers(where: {username: $username}) {
-                                id
-                                name
-                                username
-                                email
-                            }
-                        }`,
-            variables: { username: user.requesterName },
-          });
-
-          console.log(
-            'User object errors: ' + JSON.stringify(userResult.errors)
+        const {
+          NotificationService,
+        } = require('../services/notification/notification.service');
+        const NotifyConfig = {
+          enabled: true,
+          secure: true,
+          from: process.env.EMAIL_FROM || '',
+          host: process.env.EMAIL_HOST || '',
+          port: process.env.EMAIL_PORT || 25,
+          user: process.env.EMAIL_USER || '',
+          pass: process.env.EMAIL_PASS || '',
+        };
+        const nc = new NotificationService(NotifyConfig);
+        permissions.forEach(async (perm) => {
+          const userDetails = await lookupUserByUsername(
+            context,
+            perm.requesterName
           );
-          console.log(
-            'This is the user object: ' +
-              JSON.stringify(userResult.data.allUsers)
-          );
+          nc.notify(
+            { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
+            { template: 'email-template', subject: 'Yeah!' }
+          )
+            .then((answer) => {
+              console.log('DONE!');
+              console.log('ANSWER = ' + JSON.stringify(answer));
+            })
+            .catch((err) => {
+              console.log('ERROR ! ' + err);
+            });
         });
       }
     },
