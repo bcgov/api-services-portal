@@ -30,6 +30,8 @@ const {
   lookupProductEnvironmentServicesBySlug,
 } = require('../services/keystone');
 
+const KeystoneService = require('../services/keystone');
+
 module.exports = {
   fields: {
     name: {
@@ -183,9 +185,28 @@ module.exports = {
         const params = { resourceId: namespaceObj.id, returnNames: true };
         const permissions = await permissionApi.listPermissions(params);
         console.log('Permissions List: ' + JSON.stringify(permissions));
-        permissions.forEach((user) => {
+        permissions.forEach(async (user) => {
           console.log('User Name: ' + user.requesterName);
           console.log('User Scopes: ' + user.scopeName);
+          const userResult = await noauthContext.executeGraphQL({
+            query: `query GetUserWithUsername($username: String!) {
+                            allUsers(where: {username: $username}) {
+                                id
+                                name
+                                username
+                                email
+                            }
+                        }`,
+            variables: { username: user.requesterName },
+          });
+
+          console.log(
+            'User object errors: ' + JSON.stringify(userResult.errors)
+          );
+          console.log(
+            'This is the user object: ' +
+              JSON.stringify(userResult.data.allUsers)
+          );
         });
       }
     },
