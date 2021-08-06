@@ -46,7 +46,6 @@ export const generateCredential = async (
       requestDetails.application.id
     );
 
-    //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
     const clientId = productEnvironment.appId + '-' + application.appId;
 
     const nickname = clientId;
@@ -100,8 +99,7 @@ export const generateCredential = async (
       requestDetails.application.id
     );
 
-    //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
-    const clientId = application.appId + '-' + productEnvironment.appId;
+    const clientId = productEnvironment.appId + '-' + application.appId;
 
     const nickname = clientId;
 
