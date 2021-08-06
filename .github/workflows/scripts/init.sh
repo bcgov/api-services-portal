@@ -1,4 +1,4 @@
-#/bin/bash -e
+#/bin/bash -e +x
 
 python scripts/template.py scripts/feeder-init/legal.yaml legal.yaml
 python scripts/template.py scripts/feeder-init/platform-authz-profile.yaml platform-authz-profile.yaml
@@ -11,9 +11,9 @@ while true; do
         echo  "Portal is up"
         kubectl port-forward service/${SERVICE} 8080:80 &
         FWD_PID=$!
-        curl http://localhost:8080/push -F yaml=@legal.yaml
-        curl http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
-        curl http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
+        curl --fail http://localhost:8080/push -F yaml=@legal.yaml
+        curl --fail http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
+        curl --fail http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
         kill -9 $FWD_PID
         break
     else

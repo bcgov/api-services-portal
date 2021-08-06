@@ -66,6 +66,7 @@ jobs:
           export PATH=$PATH:`pwd`/linux-amd64
 
           cd .github/workflows
+          SERVICE=proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api \
           PORTAL_URL=https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca \
           OIDC_ISSUER=${{ secrets.OIDC_ISSUER }} \
           OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
