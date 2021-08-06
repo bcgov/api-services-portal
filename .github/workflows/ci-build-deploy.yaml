@@ -64,6 +64,7 @@ jobs:
       - name: 'Seed Data'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
+          kubectl get pods
 
           cd .github/workflows
           SERVICE=proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-generic-api \
