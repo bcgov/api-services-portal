@@ -13,9 +13,9 @@ while true; do
         FWD_PID=$!
         echo "Port forwarded ${SERVICE} with $FWD_PID"
         sleep 5
-        curl --fail http://localhost:8080/push -F yaml=@legal.yaml
-        curl --fail http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
-        curl --fail http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@legal.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
         kill $FWD_PID
         break
     else
