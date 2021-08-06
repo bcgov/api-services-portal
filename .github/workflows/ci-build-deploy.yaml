@@ -65,12 +65,12 @@ jobs:
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
-          ls -l
+
           PORTAL_URL=https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca \
           OIDC_ISSUER=${{ secrets.OIDC_ISSUER }} \
           OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
-          .github/workflows/scripts/init.sh
+          (cd .github/workflows/scripts && ./init.sh)
 
       - name: Set up Docker Buildx
         id: buildx
