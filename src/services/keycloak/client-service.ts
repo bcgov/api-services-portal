@@ -53,6 +53,13 @@ export class KeycloakClientService {
     return roles;
   }
 
+  public async listClientScopes() {
+    logger.debug('[listClientScopes]');
+    const scopes = await this.kcAdminClient.clientScopes.listClientScopes();
+    logger.debug('[listClientScopes] RESULT %j', scopes);
+    return scopes;
+  }
+
   public async listDefaultScopes(id: string) {
     logger.debug('[listDefaultScopes] For %s', id);
     const scopes = await this.kcAdminClient.clients.listDefaultClientScopes({
