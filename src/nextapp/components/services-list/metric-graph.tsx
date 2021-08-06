@@ -37,6 +37,7 @@ import { GatewayService } from '@/shared/types/query.types';
 interface DailyDatum {
   day: string;
   dayFormatted: string;
+  dayFormattedShort: string;
   downtime: number;
   requests: number[];
   total: number;
@@ -112,6 +113,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return {
       day,
       dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
+      dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
       total,
       peak,
@@ -132,8 +134,13 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     [0, '0']
   );
   const peakRequests = round(Number(peak[1]), 2);
-  const peakDay =
-    peak[1] > 0 ? format(new Date(peak[0] * 1000), 'LLL d') : 'n/a';
+  const peakDay = dailies.reduce((memo, d) => {
+    if (!memo || d.total > memo.total) {
+      return d;
+    }
+    return memo;
+  }, null);
+  const peakDayText = peakDay ? peakDay.dayFormattedShort : 'n/a';
   const usage = totalRequests > 0 ? totalDailyRequests / totalRequests : 0;
   const usagePercent = usage ? usage * 100 : 0;
   const color = usage ? interpolateRdYlGn(usage) : '#eee';
@@ -167,22 +174,22 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Box>
         <StatGroup spacing={8} flexWrap="wrap">
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak</StatLabel>
+            <StatLabel {...labelProps}>Peak Hourly</StatLabel>
             <StatNumber>{peakRequests}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Peak Daily</StatLabel>
+            <StatNumber>{numeral(peakDay.total).format('0.0a')}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Peak Day</StatLabel>
+            <StatNumber>{peakDayText}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Total Req</StatLabel>
             <StatNumber overflow="hidden">
               {numeral(totalDailyRequests).format('0.0a')}
             </StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Day</StatLabel>
-            <StatNumber>{peakDay}</StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Plugins</StatLabel>
-            <StatNumber>{service?.plugins.length}</StatNumber>
           </Stat>
         </StatGroup>
       </Box>
