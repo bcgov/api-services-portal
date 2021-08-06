@@ -232,7 +232,7 @@ jobs:
               command:
               - sh
               - -c
-              - 'state=$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"$state\" == \"ready\" ]; then exit 1; fi'
+              - 'state=\$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"\$state\" == \"ready\" ]; then exit 1; fi'
 
           " > values.yaml
 
