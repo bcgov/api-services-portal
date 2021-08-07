@@ -10,28 +10,21 @@ const { Apply, Validate } = require('../services/workflow');
 const {
   lookupEnvironmentAndApplicationByAccessRequest,
 } = require('../services/keystone/access-request');
-const {
-  lookupCredentialIssuerById,
-} = require('../services/keystone/credential-issuer');
-const {
-  doClientLoginForCredentialIssuer,
-} = require('../lists/extensions/Common');
 const { UMAResourceRegistrationService } = require('../services/uma2');
-const keystoneApi = require('../services/keystone');
 const { KeycloakPermissionTicketService } = require('../services/keycloak');
 const {
-  getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
-  getNamespaceResourceSets,
-  isUserBasedResourceOwners,
 } = require('../lists/extensions/Common');
 const {
   lookupProductEnvironmentServicesBySlug,
   lookupUserByUsername,
 } = require('../services/keystone');
 
-const KeystoneService = require('../services/keystone');
+const { ConfigService } = require('../services/bceid/config.service');
+const {
+  NotificationService,
+} = require('../services/notification/notification.service');
 
 module.exports = {
   fields: {
@@ -186,22 +179,10 @@ module.exports = {
         const params = { resourceId: namespaceObj.id, returnNames: true };
         const permissions = await permissionApi.listPermissions(params);
         console.log('Permissions List: ' + JSON.stringify(permissions));
-        const {
-          NotificationService,
-        } = require('../services/notification/notification.service');
-        const NotifyConfig = {
-          enabled: true,
-          secure: true,
-          from: process.env.EMAIL_FROM || '',
-          host: process.env.EMAIL_HOST || '',
-          port: process.env.EMAIL_PORT || 25,
-          user: process.env.EMAIL_USER || '',
-          pass: process.env.EMAIL_PASS || '',
-        };
-        const nc = new NotificationService(NotifyConfig);
+        const nc = new NotificationService(new ConfigService());
         permissions.forEach(async (perm) => {
           const userDetails = await lookupUserByUsername(
-            context,
+            noauthContext,
             perm.requesterName
           );
           nc.notify(

@@ -11,8 +11,8 @@ import { ConfigService } from '../bceid/config.service';
 
 export class NotificationService {
   private notifyConfig: NotificationConfig;
-  constructor(private readonly config: NotificationConfig) {
-    this.notifyConfig = this.config;
+  constructor(private readonly config: ConfigService) {
+    this.notifyConfig = this.config.getConfig().notification;
   }
 
   private templateToContent(to: User, templateName: string) {
