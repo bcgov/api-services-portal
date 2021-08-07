@@ -79,6 +79,7 @@ module.exports = {
       options: [
         { value: 'client-secret', label: 'Client ID and Secret' },
         { value: 'client-jwt', label: 'Signed JWT' },
+        { value: 'client-jwt-jwks-url', label: 'Signed JWT with JWKS URL' },
       ],
     },
     authPlugin: {
