@@ -2,7 +2,7 @@ const namespaceMetrics = [
   {
     query: 'kong_http_requests_daily_namespace',
     day: '2021-07-10',
-    metric: JSON.stringify({ service: 'aps-portal' }),
+    metric: JSON.stringify({ namespace: 'aps-portal' }),
     values: JSON.stringify([
       [1625900400, '0'],
       [1625904000, '10.29'],
@@ -34,7 +34,7 @@ const namespaceMetrics = [
   {
     query: 'kong_http_requests_daily_namespace',
     day: '2021-07-11',
-    metric: JSON.stringify({ service: 'aps-portal' }),
+    metric: JSON.stringify({ namespace: 'aps-portal' }),
     values: JSON.stringify([
       [1625986800, '0'],
       [1625990400, '12.00836820083682'],
@@ -66,7 +66,7 @@ const namespaceMetrics = [
   {
     query: 'kong_http_requests_daily_namespace',
     day: '2021-07-12',
-    metric: JSON.stringify({ service: 'aps-portal' }),
+    metric: JSON.stringify({ namespace: 'aps-portal' }),
     values: JSON.stringify([
       [1626073200, '0'],
       [1626076800, '200.00836820083682'],
@@ -98,7 +98,7 @@ const namespaceMetrics = [
   {
     query: 'kong_http_requests_daily_namespace',
     day: '2021-07-13',
-    metric: JSON.stringify({ service: 'aps-portal' }),
+    metric: JSON.stringify({ namespace: 'aps-portal' }),
     values: JSON.stringify([
       [1626159600, '18.00418410041841'],
       [1626163200, '18.00418410041841'],
@@ -130,7 +130,7 @@ const namespaceMetrics = [
   {
     query: 'kong_http_requests_daily_namespace',
     day: '2021-07-14',
-    metric: JSON.stringify({ service: 'aps-portal' }),
+    metric: JSON.stringify({ namespace: 'aps-portal' }),
     values: JSON.stringify([
       [1626246000, '0'],
       [1626249600, '0'],

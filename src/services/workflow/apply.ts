@@ -218,7 +218,10 @@ async function setupAuthorizationAndEnable(
   context: any,
   setup: SetupAuthorizationInput
 ) {
-  const kongApi = new KongConsumerService(process.env.KONG_URL);
+  const kongApi = new KongConsumerService(
+    process.env.KONG_URL,
+    process.env.GWA_API_URL
+  );
   const feederApi = new FeederService(process.env.FEEDER_URL);
 
   const flow = setup.flow;
@@ -330,7 +333,11 @@ async function setupAuthorizationAndEnable(
   if ('plugins' in controls) {
     for (const plugin of controls.plugins) {
       // assume the service and route IDs are Kong's unique IDs for them
-      await kongApi.addPluginToConsumer(kongConsumerPK, plugin);
+      await kongApi.addPluginToConsumer(
+        kongConsumerPK,
+        plugin,
+        context.req.user.namespace
+      );
     }
   }
 
