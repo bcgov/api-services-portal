@@ -6,13 +6,17 @@ import {
   ResourceSet,
   ResourceSetInput,
 } from '../../services/uma2';
-import { lookupProductEnvironmentServicesBySlug } from '../../services/keystone';
+import {
+  lookupProductEnvironmentServicesBySlug,
+  lookupUserByUsername,
+} from '../../services/keystone';
 import {
   getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
   getNamespaceResourceSets,
   isUserBasedResourceOwners,
+  doClientLoginForCredentialIssuer,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
 import {
@@ -24,6 +28,15 @@ import { Logger } from '../../logger';
 const logger = Logger('ext.Namespace');
 
 import { strict as assert } from 'assert';
+import { User } from '@/services/keystone/types';
+
+const typeUserContact = `
+  type UserContact {
+    id: ID!
+    name: String!
+    username: String!
+    email: String!
+  }`;
 
 const typeNamespace = `
 type Namespace {
@@ -44,7 +57,11 @@ module.exports = {
   extensions: [
     (keystone: any) => {
       keystone.extendGraphQLSchema({
-        types: [{ type: typeNamespace }, { type: typeNamespaceInput }],
+        types: [
+          { type: typeNamespace },
+          { type: typeNamespaceInput },
+          { type: typeUserContact },
+        ],
         queries: [
           {
             schema: 'currentNamespace: Namespace',
@@ -97,7 +114,6 @@ module.exports = {
             },
             access: EnforcementPoint,
           },
-
           {
             schema: 'allNamespaces: [Namespace]',
             resolver: async (
@@ -135,6 +151,83 @@ module.exports = {
                 scopes: ns.resource_scopes,
                 prodEnvId: prodEnv.id,
               }));
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'usersByNamespace(namespace: String!): [UserContact]',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+              const re = new RegExp(namespaceValidationRule);
+              assert.strictEqual(
+                re.test(args.namespace),
+                true,
+                'Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.'
+              );
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+
+              const tokenResult: TokenExchangeResult = await doClientLoginForCredentialIssuer(
+                noauthContext,
+                prodEnv.id
+              );
+
+              const kcprotectApi = new UMAResourceRegistrationService(
+                tokenResult.issuer,
+                tokenResult.accessToken
+              );
+              const resOwnerResourceIds = await kcprotectApi.listResources({
+                owner: tokenResult.clientUuid,
+                type: 'namespace',
+              } as ResourceSetQuery);
+
+              const namespaces = await kcprotectApi.listResourcesByIdList(
+                resOwnerResourceIds
+              );
+
+              const matched = namespaces
+                .filter((ns) => ns.name == args.namespace)
+                .map((ns) => ({
+                  id: ns.id,
+                  name: ns.name,
+                  scopes: ns.resource_scopes,
+                  prodEnvId: prodEnv.id,
+                }));
+              const namespaceObj = matched[0];
+              const permissionApi = new KeycloakPermissionTicketService(
+                tokenResult.issuer,
+                tokenResult.accessToken
+              );
+              const params = { resourceId: namespaceObj.id, returnNames: true };
+              const permissions = await permissionApi.listPermissions(params);
+              const listOfUsers: Array<any> = [];
+              for (const perm of permissions) {
+                if (perm.granted) {
+                  const user = await lookupUserByUsername(
+                    noauthContext,
+                    perm.requesterName
+                  );
+                  listOfUsers.push({
+                    id: user[0].id,
+                    name: user[0].name,
+                    username: user[0].username,
+                    email: user[0].email,
+                  });
+                }
+              }
+              return listOfUsers;
             },
             access: EnforcementPoint,
           },

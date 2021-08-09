@@ -7,7 +7,7 @@ import { Logger } from '../../logger';
 
 import { NotificationConfig, EmailNotification, User } from './config';
 
-import { ConfigService } from '../bceid/config.service';
+import { ConfigService } from '../config.service';
 
 export class NotificationService {
   private notifyConfig: NotificationConfig;

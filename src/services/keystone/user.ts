@@ -70,7 +70,7 @@ export async function updateUserLegalAccept(
 export async function lookupUserByUsername(
   context: any,
   username: string
-): Promise<User> {
+): Promise<[User]> {
   const result = await context.executeGraphQL({
     query: `query GetUserWithUsername($username: String!) {
                     allUsers(where: {username: $username}) {

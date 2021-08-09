@@ -21,7 +21,7 @@ const {
   lookupUserByUsername,
 } = require('../services/keystone');
 
-const { ConfigService } = require('../services/bceid/config.service');
+const { ConfigService } = require('../services/config.service');
 const {
   NotificationService,
 } = require('../services/notification/notification.service');
@@ -139,65 +139,36 @@ module.exports = {
           'This is awesome namespace: ' +
             accessRequest.productEnvironment.product.namespace
         );
-        const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG;
-
-        const prodEnv = await lookupProductEnvironmentServicesBySlug(
-          noauthContext,
-          productEnvironmentSlug
-        );
-        const envCtx = await getEnvironmentContext(context, prodEnv.id, '');
-
-        console.log('This is envCtx: ', JSON.stringify(envCtx));
-
-        const resourceIds = await getResourceSets(envCtx);
-        const resourcesApi = new UMAResourceRegistrationService(
-          envCtx.issuerEnvConfig.issuerUrl,
-          envCtx.accessToken
-        );
-        const namespaces = await resourcesApi.listResourcesByIdList(
-          resourceIds
-        );
-        const matched = namespaces
-          .filter(
-            (ns) =>
-              ns.name == accessRequest.productEnvironment.product.namespace
-          )
-          .map((ns) => ({
-            id: ns.id,
-            name: ns.name,
-            scopes: ns.resource_scopes,
-            prodEnvId: prodEnv.id,
-          }));
-        namespaceObj = matched[0];
-        console.log(
-          'This is the same namespace: ' + JSON.stringify(namespaceObj)
-        );
-        const permissionApi = new KeycloakPermissionTicketService(
-          envCtx.issuerEnvConfig.issuerUrl,
-          envCtx.accessToken
-        );
-        const params = { resourceId: namespaceObj.id, returnNames: true };
-        const permissions = await permissionApi.listPermissions(params);
-        console.log('Permissions List: ' + JSON.stringify(permissions));
-        const nc = new NotificationService(new ConfigService());
-        permissions.forEach(async (perm) => {
-          const userDetails = await lookupUserByUsername(
-            noauthContext,
-            perm.requesterName
-          );
-          nc.notify(
-            { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
-            { template: 'email-template', subject: 'Yeah!' }
-          )
-            .then((answer) => {
-              console.log('DONE!');
-              console.log('ANSWER = ' + JSON.stringify(answer));
-            })
-            .catch((err) => {
-              console.log('ERROR ! ' + err);
-            });
+        const userContactList = await noauthContext.executeGraphQL({
+          query: `query ListUsersByNamespace($namespace: String!) {
+                          usersByNamespace(namespace: $namespace) {
+                              id
+                              name
+                              username
+                              email
+                          }
+                      }`,
+          variables: {
+            namespace: accessRequest.productEnvironment.product.namespace,
+          },
         });
+        console.log('userContactList: ' + JSON.stringify(userContactList));
       }
+      const nc = new NotificationService(new ConfigService());
+      userContactList.data.usersByNamespace.forEach((contact) => {
+        nc.notify(
+          { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
+          { template: 'email-template', subject: 'Yeah!' }
+        )
+          .then((info) => {
+            console.log(
+              `[SUCCESS][${info}] Notification sent to ${contact.email}`
+            );
+          })
+          .catch((err) => {
+            console.log('[ERROR] Sending notification failed!' + err);
+          });
+      });
     },
   },
 };
