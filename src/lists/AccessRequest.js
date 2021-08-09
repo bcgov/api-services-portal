@@ -135,10 +135,6 @@ module.exports = {
           noauthContext,
           updatedItem.id
         );
-        console.log(
-          'This is awesome namespace: ' +
-            accessRequest.productEnvironment.product.namespace
-        );
         const userContactList = await noauthContext.executeGraphQL({
           query: `query ListUsersByNamespace($namespace: String!) {
                           usersByNamespace(namespace: $namespace) {
@@ -152,23 +148,22 @@ module.exports = {
             namespace: accessRequest.productEnvironment.product.namespace,
           },
         });
-        console.log('userContactList: ' + JSON.stringify(userContactList));
+        const nc = new NotificationService(new ConfigService());
+        userContactList.data.usersByNamespace.forEach((contact) => {
+          nc.notify(
+            { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
+            { template: 'email-template', subject: 'Yeah!' }
+          )
+            .then((info) => {
+              console.log(
+                `[SUCCESS][${info}] Notification sent to ${contact.email}`
+              );
+            })
+            .catch((err) => {
+              console.log('[ERROR] Sending notification failed!' + err);
+            });
+        });
       }
-      const nc = new NotificationService(new ConfigService());
-      userContactList.data.usersByNamespace.forEach((contact) => {
-        nc.notify(
-          { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
-          { template: 'email-template', subject: 'Yeah!' }
-        )
-          .then((info) => {
-            console.log(
-              `[SUCCESS][${info}] Notification sent to ${contact.email}`
-            );
-          })
-          .catch((err) => {
-            console.log('[ERROR] Sending notification failed!' + err);
-          });
-      });
     },
   },
 };
