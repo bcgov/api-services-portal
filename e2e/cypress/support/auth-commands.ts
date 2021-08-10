@@ -22,7 +22,6 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-  cy.wait(1500) // wait added to evade login timeout
   cy.get(login.usernameInput).type(username)
   cy.get(login.passwordInput).type(password)
   cy.get(login.loginSubmitButton).click()
