@@ -153,10 +153,7 @@ module.exports = {
         userContactList.data.usersByNamespace.forEach((contact) => {
           nc.notify(
             { email: 'nithu.everyyear@gmail.com', name: contact.name },
-            {
-              template: 'access-rqst-notification',
-              subject: 'New Access Request!',
-            }
+            { template: 'email-template', subject: 'Yeah!' }
           )
             .then((answer) => {
               console.log(
