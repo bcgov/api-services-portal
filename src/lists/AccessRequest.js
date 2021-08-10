@@ -152,10 +152,10 @@ module.exports = {
         const nc = new NotificationService(new ConfigService());
         userContactList.data.usersByNamespace.forEach((contact) => {
           nc.notify(
-            { email: 'nithu.everyyear@gmail.com', name: contact.name },
+            { email: contact.email, name: contact.name },
             {
               template: 'access-rqst-notification',
-              subject: 'New Access Request!',
+              subject: 'APS - New Access Request!',
             }
           )
             .then((answer) => {
@@ -169,6 +169,29 @@ module.exports = {
               console.log('[ERROR] Sending notification failed!' + err);
             });
         });
+      } else if (operation == 'update') {
+        if (updatedItem.isComplete == true) {
+          const nc = new NotificationService(new ConfigService());
+          nc.notify(
+            { email: requestor.email, name: requestor.name },
+            {
+              template: isApproved
+                ? 'access-rqst-approved'
+                : 'access-rqst-rejected',
+              subject: 'APS - Access Request!',
+            }
+          )
+            .then((answer) => {
+              console.log(
+                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
+                  requestor.email
+                }`
+              );
+            })
+            .catch((err) => {
+              console.log('[ERROR] Sending notification failed!' + err);
+            });
+        }
       }
     },
   },
