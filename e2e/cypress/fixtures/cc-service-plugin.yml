@@ -1,0 +1,48 @@
+services:
+- name: cc-service-for-platform
+  host: httpbin.org
+  tags: [ns.ccplatform]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: cc-service-for-platform-route
+    tags: [ns.ccplatform]
+    hosts:
+      - cc-service-for-platform.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
+
+
+  plugins:
+  - name: jwt-keycloak
+    tags: [ ns.ccplatform ]
+    enabled: true
+    config:
+      algorithm: RS256
+      well_known_template: http://keycloak.localtest.me:9080/auth/realms/master/.well-known/openid-configuration
+      allowed_iss:
+      - http://keycloak.localtest.me:9080/auth/realms/master
+      run_on_preflight: true
+      iss_key_grace_period: 10
+      maximum_expiration: 0
+      claims_to_verify:
+      - exp
+      uri_param_names:
+      - jwt
+      cookie_names: []
+      scope: null
+      roles: null
+      realm_roles: null
+      client_roles: null
+      anonymous: null
+      consumer_match: true
+      consumer_match_claim: azp  
+      consumer_match_claim_custom_id: true
+      consumer_match_ignore_not_found: false
+
