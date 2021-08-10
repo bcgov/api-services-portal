@@ -215,7 +215,7 @@ module.exports = {
               let permissions = await permissionApi.listPermissions(params);
               if (args.scopeName) {
                 const updatedPermissions = permissions.filter((perm) => {
-                  return perm.scope == args.scopeName;
+                  return perm.scopeName == args.scopeName;
                 });
                 permissions = updatedPermissions;
               }
