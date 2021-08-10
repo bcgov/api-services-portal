@@ -152,7 +152,7 @@ module.exports = {
         const nc = new NotificationService(new ConfigService());
         userContactList.data.usersByNamespace.forEach((contact) => {
           nc.notify(
-            { email: 'nithu.everyyear@gmail.com', name: contact.name },
+            { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
             { template: 'email-template', subject: 'Yeah!' }
           )
             .then((answer) => {
