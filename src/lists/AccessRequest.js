@@ -170,6 +170,7 @@ module.exports = {
             });
         });
       } else if (operation == 'update') {
+        console.log('This is updated item: ' + JSON.stringify(updatedItem));
         if (updatedItem.isComplete == true) {
           const requestor = await noauthContext.executeGraphQL({
             query: `query GetRequestingUser($id: ID!) {
@@ -181,7 +182,7 @@ module.exports = {
                             }
                         }`,
             variables: {
-              id: existingItem.requestor,
+              id: existingItem.requestor.id,
             },
           });
           console.log('this is requestor: ' + JSON.stringify(requestor));
