@@ -184,7 +184,6 @@ module.exports = {
               id: existingItem.requestor,
             },
           });
-          console.log('This requestor query: ' + JSON.stringify(requestor));
           const nc = new NotificationService(new ConfigService());
           nc.notify(
             {
