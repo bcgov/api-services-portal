@@ -171,11 +171,27 @@ module.exports = {
         });
       } else if (operation == 'update') {
         if (updatedItem.isComplete == true) {
+          const requestor = await noauthContext.executeGraphQL({
+            query: `query GetRequestingUser($id: ID!) {
+                            User(where: {id: $id}) {
+                                id
+                                name
+                                username
+                                email
+                            }
+                        }`,
+            variables: {
+              id: existingItem.requestor,
+            },
+          });
           const nc = new NotificationService(new ConfigService());
           nc.notify(
-            { email: requestor.email, name: requestor.name },
             {
-              template: isApproved
+              email: requestor.data.User.email,
+              name: requestor.data.User.name,
+            },
+            {
+              template: updatedItem.isApproved
                 ? 'access-rqst-approved'
                 : 'access-rqst-rejected',
               subject: 'APS - Access Request!',
@@ -184,7 +200,7 @@ module.exports = {
             .then((answer) => {
               console.log(
                 `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-                  requestor.email
+                  requestor.data.User.email
                 }`
               );
             })
