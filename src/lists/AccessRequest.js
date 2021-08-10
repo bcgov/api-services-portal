@@ -152,8 +152,11 @@ module.exports = {
         const nc = new NotificationService(new ConfigService());
         userContactList.data.usersByNamespace.forEach((contact) => {
           nc.notify(
-            { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
-            { template: 'email-template', subject: 'Yeah!' }
+            { email: 'nithu.everyyear@gmail.com', name: contact.name },
+            {
+              template: 'access-rqst-notification',
+              subject: 'New Access Request!',
+            }
           )
             .then((answer) => {
               console.log(

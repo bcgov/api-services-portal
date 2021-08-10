@@ -155,7 +155,8 @@ module.exports = {
             access: EnforcementPoint,
           },
           {
-            schema: 'usersByNamespace(namespace: String!): [UserContact]',
+            schema:
+              'usersByNamespace(namespace: String!, scopeName: String): [UserContact]',
             resolver: async (
               item: any,
               args: any,
