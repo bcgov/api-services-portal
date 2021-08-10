@@ -191,7 +191,7 @@ const NewRequestsPage: React.FC<
                 <Heading size="sm" mb={3}>
                   Select an application to consume the API
                 </Heading>
-                <Select name="applicationId">
+                <Select name="applicationId" isRequired={true}>
                   <option value="">No Application Selected</option>
                   {data.myApplications.map((a) => (
                     <option key={a.id} value={a.id}>

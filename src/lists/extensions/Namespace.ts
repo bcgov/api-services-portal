@@ -211,7 +211,13 @@ module.exports = {
                 tokenResult.accessToken
               );
               const params = { resourceId: namespaceObj.id, returnNames: true };
-              const permissions = await permissionApi.listPermissions(params);
+              let permissions = await permissionApi.listPermissions(params);
+              if (args.scopeName) {
+                const updatedPermissions = permissions.filter((perm) => {
+                  return perm.scope == args.scopeName;
+                });
+                permissions = updatedPermissions;
+              }
               const listOfUsers: Array<any> = [];
               for (const perm of permissions) {
                 if (perm.granted) {

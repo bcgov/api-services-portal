@@ -136,8 +136,8 @@ module.exports = {
           updatedItem.id
         );
         const userContactList = await noauthContext.executeGraphQL({
-          query: `query ListUsersByNamespace($namespace: String!) {
-                          usersByNamespace(namespace: $namespace) {
+          query: `query ListUsersByNamespace($namespace: String!, $scopeName: String) {
+                          usersByNamespace(namespace: $namespace, scopeName: $scopeName) {
                               id
                               name
                               username
@@ -146,6 +146,7 @@ module.exports = {
                       }`,
           variables: {
             namespace: accessRequest.productEnvironment.product.namespace,
+            scopeName: 'Access.Manage',
           },
         });
         const nc = new NotificationService(new ConfigService());
@@ -154,9 +155,11 @@ module.exports = {
             { email: 'nithu.everyyear@gmail.com', name: 'Nithin Kuruba' },
             { template: 'email-template', subject: 'Yeah!' }
           )
-            .then((info) => {
+            .then((answer) => {
               console.log(
-                `[SUCCESS][${info}] Notification sent to ${contact.email}`
+                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
+                  contact.email
+                }`
               );
             })
             .catch((err) => {
