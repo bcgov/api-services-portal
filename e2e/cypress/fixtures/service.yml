@@ -1,19 +1,19 @@
 services:
-  - name: a-service-for-platform
-    host: httpbin.org
+- name: a-service-for-platform
+  host: httpbin.org
+  tags: [ns.platform]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: a-service-for-platform-route
     tags: [ns.platform]
-    port: 443
-    protocol: https
-    retries: 0
-    routes:
-      - name: a-service-for-platform-route
-        tags: [ns.platform]
-        hosts:
-          - a-service-for-platform.api.gov.bc.ca
-        paths:
-          - /
-        methods:
-          - GET
-        strip_path: false
-        https_redirect_status_code: 426
-        path_handling: v0
+    hosts:
+      - a-service-for-platform.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0
