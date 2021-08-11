@@ -170,9 +170,6 @@ module.exports = {
             });
         });
       } else if (operation == 'update') {
-        console.log('This is updated item: ' + JSON.stringify(updatedItem));
-        console.log('This is existing item: ' + JSON.stringify(existingItem));
-        console.log('this is original input: ' + JSON.stringify(originalInput));
         if (updatedItem.isComplete == true) {
           const requestor = await noauthContext.executeGraphQL({
             query: `query GetRequestingUser($id: ID!) {
@@ -184,10 +181,9 @@ module.exports = {
                             }
                         }`,
             variables: {
-              id: updatedItem.requestor,
+              id: updatedItem.requestor.toString(),
             },
           });
-          console.log('this is requestor: ' + JSON.stringify(requestor));
           const nc = new NotificationService(new ConfigService());
           nc.notify(
             {
