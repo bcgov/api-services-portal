@@ -275,7 +275,10 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
               <Flex justify="flex-end" mt={4}>
                 <ButtonGroup size="sm">
                   <Button
+<<<<<<< HEAD
                     variant="secondary"
+=======
+>>>>>>> 85a30097 (added test ids for environment config form elements)
                     type="reset"
                     isDisabled={mutation.isLoading}
                     data-testid="prd-env-config-cancel-btn"
@@ -286,6 +289,10 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                     isDisabled={!hasChanged}
                     isLoading={mutation.isLoading}
                     type="submit"
+<<<<<<< HEAD
+=======
+                    variant="primary"
+>>>>>>> 85a30097 (added test ids for environment config form elements)
                     data-testid="prd-env-config-apply-btn"
                   >
                     Apply Changes
