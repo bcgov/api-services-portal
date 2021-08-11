@@ -1,13 +1,13 @@
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
+import Products from '../pageObjects/products'
 import ServiceAccountsPage from '../pageObjects/serviceAccounts'
-import ToolBar from '../pageObjects/toolbar'
 
 describe('Create API Spec', () => {
   const login = new LoginPage()
   const home = new HomePage()
-  const tb = new ToolBar()
   const sa = new ServiceAccountsPage()
+  const pd = new Products()
 
   beforeEach(() => {
     cy.preserveCookies()
@@ -23,7 +23,7 @@ describe('Create API Spec', () => {
 
   it('creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      home.createNamespace(namespace)
+      home.useNamespace(namespace)
     })
   })
   it('creates a new service account', () => {
@@ -36,6 +36,28 @@ describe('Create API Spec', () => {
 
   it('publishes a new API to Kong Gateway', () => {
     cy.publishApi('service.yml').then(() => {
+      cy.get('@publishAPIResponse').then((res: any) => {
+        cy.log(JSON.stringify(res.body))
+      })
+    })
+  })
+  it('creates as new product in the directory', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.createNewProduct(product.name, product.environment)
+      pd.editProduct(product.name, product.orgName, product.orgUnitName)
+    })
+  })
+  it('publish product to directory', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.editProductEnvironment(product.name, product.environment.name)
+      pd.editProductEnvironmentConfig(product.environment.config)
+    })
+    pd.generateKongPluginConfig()
+  })
+  it('applies authorization plugin to service published to Kong Gateway', () => {
+    cy.publishApi('service-plugin.yml').then(() => {
       cy.get('@publishAPIResponse').then((res: any) => {
         cy.log(JSON.stringify(res.body))
       })

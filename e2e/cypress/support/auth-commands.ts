@@ -22,8 +22,9 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-  cy.get(login.usernameInput).type(username)
-  cy.get(login.passwordInput).type(password)
+  cy.wait(1000)
+  cy.get(login.usernameInput).click().type(username)
+  cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
 
   log.end()
@@ -154,7 +155,7 @@ const formDataRequest = (
         .then((blob) => {
           const xhr = new win.XMLHttpRequest()
           data.set('configFile', blob, fileName)
-          data.set('dryRun', 'true')
+          data.set('dryRun', 'false')
           xhr.open(options.method, options.url)
           xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
           xhr.send(data)
