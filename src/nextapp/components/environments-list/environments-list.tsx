@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useQueryClient } from 'react-query';
-import type { Environment, Mutation } from '@/types/query.types';
+import type { Environment, Mutation, Product } from '@/types/query.types';
 import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import { getAuthToken } from '@/shared/services/utils';
@@ -20,9 +20,13 @@ import { useApiMutation } from '@/shared/services/api';
 
 interface EnvironmentsListProps {
   data: Environment[];
+  product: Product;
 }
 
-const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
+const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
+  data,
+  product,
+}) => {
   const toast = useToast();
   const client = useQueryClient();
   const mutation = useApiMutation<{ id: string; active: boolean }>(
@@ -122,7 +126,12 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({ data }) => {
                 <Button
                   size="xs"
                   variant="outline"
-                  data-testid="prd-env-edit-btn"
+                  data-testid={
+                    product.name.toLowerCase().replaceAll(' ', '-') +
+                    '-' +
+                    e.name +
+                    '-edit-btn'
+                  }
                 >
                   Edit
                 </Button>
