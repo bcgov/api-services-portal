@@ -89,6 +89,7 @@ const OrganizationSelect: React.FC<OrganizationSelectProps> = ({ data }) => {
           isDisabled={!organization}
           onChange={onOrganizationUnitChange}
           value={organizationUnit}
+          data-testid="prd-edit-org-unit-dd"
         >
           <option value="">Select an Organization Unit</option>
           {organizationUnitsQuery.data?.Organization?.orgUnits.map((unit) => (
