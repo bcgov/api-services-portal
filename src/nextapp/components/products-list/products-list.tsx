@@ -16,7 +16,7 @@ import EditProduct from './edit-product';
 const ProductsList: React.FC = () => {
   const { data } = useQuery<Query>(
     'products',
-    async () => await api(GET_LIST, { } ),
+    async () => await api(GET_LIST, {}),
     {
       suspense: true,
     }
@@ -117,7 +117,7 @@ const ProductsList: React.FC = () => {
               )}
               {d.environments.length > 0 && (
                 <Box bgColor="blue.50">
-                  <EnvironmentsList data={d.environments} />
+                  <EnvironmentsList data={d.environments} product={d} />
                 </Box>
               )}
             </Box>

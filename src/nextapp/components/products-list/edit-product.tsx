@@ -94,7 +94,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         variant="tertiary"
         leftIcon={<Icon as={FaPenSquare} />}
         onClick={onOpen}
-        data-testid="prd-edit-btn"
+        data-testid={data.name.toLowerCase().replaceAll(' ', '-') + '-edit-btn'}
       >
         Edit
       </Button>

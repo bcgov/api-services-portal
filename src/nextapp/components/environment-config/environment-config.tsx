@@ -157,6 +157,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
               variant="outline"
               colorScheme="bc-blue"
               onClick={handleToggleEditing}
+              data-testid="prd-env-config-edit-btn"
             >
               Edit
             </Button>
@@ -194,6 +195,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                     id="active"
                     name="active"
                     value="active"
+                    data-testid="prd-env-config-activate-radio"
                   />
                 </FormControl>
               </Box>
@@ -204,6 +206,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                       name="approval"
                       value="true"
                       defaultIsChecked={data.approval}
+                      data-testid="prd-env-config-approval-checkbox"
                     >
                       Approval Required?
                     </Checkbox>
@@ -230,6 +233,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                           name="flow"
                           value={flow}
                           onChange={onAuthChange}
+                          data-testid="prd-env-config-terms-dd"
                         >
                           {flowTypes.map((f) => (
                             <option key={f.value} value={f.value}>
@@ -261,13 +265,18 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                       defaultValue={data.additionalDetailsToRequest}
                       variant="bc-input"
                       name="additionalDetailsToRequest"
+                      data-testid="prd-env-config-optional-text"
                     />
                   </FormControl>
                 </GridItem>
               </Grid>
               <Flex justify="flex-end" mt={4}>
                 <ButtonGroup size="sm">
-                  <Button type="reset" isDisabled={mutation.isLoading}>
+                  <Button
+                    type="reset"
+                    isDisabled={mutation.isLoading}
+                    data-testid="prd-env-config-cancel-btn"
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -275,6 +284,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                     isLoading={mutation.isLoading}
                     type="submit"
                     variant="primary"
+                    data-testid="prd-env-config-apply-btn"
                   >
                     Apply Changes
                   </Button>
