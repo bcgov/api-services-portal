@@ -49,7 +49,6 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
       isLoading={isLoading}
       isDisabled={!isSuccess}
       defaultValue={value}
-      data-testid="prd-env-config-authz-dd"
     >
       <option></option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
