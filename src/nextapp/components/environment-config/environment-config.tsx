@@ -234,7 +234,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                           name="flow"
                           value={flow}
                           onChange={onAuthChange}
-                          data-testid="prd-env-config-terms-dd"
+                          data-testid="prd-env-config-authz-dd"
                         >
                           {flowTypes.map((f) => (
                             <option key={f.value} value={f.value}>
