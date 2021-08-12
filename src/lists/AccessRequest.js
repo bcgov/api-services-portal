@@ -155,7 +155,7 @@ module.exports = {
             { email: contact.email, name: contact.name },
             {
               template: 'access-rqst-notification',
-              subject: 'APS - New Access Request!',
+              subject: `Access Request - ${updatedItem.name}`,
             }
           )
             .then((answer) => {
@@ -194,7 +194,7 @@ module.exports = {
               template: updatedItem.isApproved
                 ? 'access-rqst-approved'
                 : 'access-rqst-rejected',
-              subject: 'APS - Access Request!',
+              subject: `Access Request - ${updatedItem.name}`,
             }
           )
             .then((answer) => {
