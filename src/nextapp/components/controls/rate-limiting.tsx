@@ -124,8 +124,8 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
       title="Rate Limiting"
     >
       <ControlTypeSelect
-        serviceId={data?.service?.id}
-        routeId={data?.route?.id}
+        serviceId={data?.service?.extForeignKey}
+        routeId={data?.route?.extForeignKey}
       />
       <HStack spacing={4} mb={4}>
         <FormControl id="second">
