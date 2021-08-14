@@ -12,9 +12,17 @@ const colors = {
 };
 
 const buttonVariants = {
-  primary: { bg: 'bc-blue', color: 'white', borderRadius: 4 },
-  secondary: { bg: 'bc-yellow', color: 'white', borderRadius: 4 },
-  tertiary: { bg: 'bc-link', color: 'white', borderRadius: 4 },
+  primary: {
+    bg: 'bc-blue',
+    color: 'white',
+  },
+  secondary: {
+    bg: 'white',
+    color: 'bc-blue',
+    border: '2px solid',
+    borderColor: 'bc-blue',
+  },
+  header: { bg: 'bc-yellow', color: 'white' },
 };
 const theme = extendTheme({
   colors,
@@ -40,6 +48,33 @@ const theme = extendTheme({
       variants: buttonVariants,
     },
     Button: {
+      baseStyle: {
+        borderRadius: 4,
+        _hover: {
+          opacity: 0.8,
+          textDecoration: 'underline',
+        },
+        _active: {
+          opacity: 1,
+        },
+        _focus: {
+          outline: '4px solid',
+          outlineColor: 'bc-border-focus',
+          outlineOffset: 1,
+        },
+        '&:disabled': {
+          opacity: 0.4,
+        },
+        '&:disabled:hover': {
+          opacity: 0.4,
+        },
+      },
+      sizes: {
+        md: {
+          py: '12px',
+          px: '36px',
+        },
+      },
       variants: buttonVariants,
     },
     Input: {
@@ -63,8 +98,11 @@ const theme = extendTheme({
             bg: 'white',
             border: '2px solid',
             borderColor: '#606060',
+            padding: '8px 45px 8px 15px',
             _focus: {
-              borderColor: 'bc-border-focus',
+              outline: '4px solid',
+              outlineOffset: 1,
+              outlineColor: 'bc-border-focus',
             },
           },
         },
