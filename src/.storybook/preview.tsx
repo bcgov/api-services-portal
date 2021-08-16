@@ -7,7 +7,7 @@ import '@bcgov/bc-sans/css/BCSans.css';
 export const decorators = [
   (Story) => (
     <ChakraProvider theme={theme}>
-      <div dir="ltr" id="story-wrapper" style={{ minHeight: '100vh' }}>
+      <div dir="ltr" style={{ minHeight: '100vh', backgroundColor: 'white' }}>
         <Story />
       </div>
     </ChakraProvider>

@@ -7,13 +7,9 @@ export default {
 
 export const Primary = () => (
   <VStack spacing={4}>
-    <Button variant="primary">Primary</Button>
-    <Button isActive variant="primary">
-      Active
-    </Button>
-    <Button isDisabled variant="primary">
-      Disabled
-    </Button>
+    <Button>Primary</Button>
+    <Button isActive>Active</Button>
+    <Button isDisabled>Disabled</Button>
   </VStack>
 );
 export const Secondary = () => (
