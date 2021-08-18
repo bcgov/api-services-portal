@@ -131,7 +131,7 @@ module.exports = {
           updatedItem.productEnvironment.toString()
         );
         if (prodEnvironment.approval) {
-          if (updatedItem.credential == 'NEW') {
+          if (updatedItem.credential == 'NEW' && !updatedItem.isComplete) {
             const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
               noauthContext,
               updatedItem.id
@@ -161,7 +161,7 @@ module.exports = {
                   console.log('[ERROR] Sending notification failed!' + err);
                 });
             });
-          } else if (updatedItem.isComplete == true) {
+          } else if (updatedItem.isComplete) {
             const requestor = await lookupUser(
               noauthContext,
               updatedItem.requestor.toString()
