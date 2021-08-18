@@ -243,17 +243,17 @@ const NewRequestsPage: React.FC<
                 }))}
               value={environment}
             />
-            {clientAuthenticator == 'client-jwt-jwks-url' && (
+            {clientAuthenticator === 'client-jwt-jwks-url' && (
               <Box pt={4}>
                 <FormControl>
                   <FormLabel>
-                    JWKS URL of Public Keys for Signed JWT Authentication
+                    JWKS URL of Public Key for Signed JWT Authentication
                   </FormLabel>
                   <Input
                     placeholder="https://"
                     name="jwksUrl"
                     variant="bc-input"
-                    defaultValue={''}
+                    defaultValue=""
                   />
                 </FormControl>
               </Box>
