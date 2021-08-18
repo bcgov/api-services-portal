@@ -162,15 +162,15 @@ module.exports = {
                 });
             });
           } else if (updatedItem.isComplete) {
-            const requestor = await lookupUser(
+            const requestorDtls = await lookupUser(
               noauthContext,
               updatedItem.requestor.toString()
             );
             const nc = new NotificationService(new ConfigService());
             nc.notify(
               {
-                email: requestor.email,
-                name: requestor.name,
+                email: requestorDtls[0]?.email,
+                name: requestorDtls[0]?.name,
               },
               {
                 template: updatedItem.isApproved
@@ -182,7 +182,7 @@ module.exports = {
               .then((answer) => {
                 console.log(
                   `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-                    requestor.email
+                    requestorDtls[0]?.email
                   }`
                 );
               })
