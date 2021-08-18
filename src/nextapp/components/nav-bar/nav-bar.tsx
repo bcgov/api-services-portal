@@ -71,6 +71,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
             key={link.url}
             width={{ base: '100%', sm: 'auto' }}
             pos="relative"
+            sx={{ listStyle: 'none' }}
           >
             <NextLink href={link.url}>
               <Link

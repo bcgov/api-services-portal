@@ -15,8 +15,8 @@ export default {
 export const TextArea = () => (
   <VStack spacing={4}>
     <Textarea placeholder="Add requirements here" variant="bc-input" />
-    <Textarea isDisabled placeholder="Disabled Dropdown" variant="bc-input" />
-    <Textarea isInvalid placeholder="Invalid Dropdown" variant="bc-input" />
+    <Textarea isDisabled placeholder="Disabled Textarea" variant="bc-input" />
+    <Textarea isInvalid placeholder="Invalid Textarea" variant="bc-input" />
   </VStack>
 );
 
@@ -28,7 +28,7 @@ export const WithLabel = () => (
 );
 
 export const WithHelperText = () => (
-  <FormControl isRequired isInvalid mb={4}>
+  <FormControl isRequired mb={4}>
     <FormLabel>Requirements</FormLabel>
     <FormHelperText>Helper text goes here</FormHelperText>
     <Textarea placeholder="Add requirements here" variant="bc-input" />

@@ -11,6 +11,9 @@ const colors = {
   'bc-border-focus': '#3B99FC',
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
+  ui: {
+    500: '#606060',
+  },
 };
 const _focus = {
   outline: '4px solid',
@@ -61,6 +64,12 @@ const buttonVariants = {
       },
     },
   },
+  flat: {
+    color: 'bc-blue',
+    _hover: {
+      bgColor: 'bc-gray',
+    },
+  },
 };
 const theme = extendTheme(
   {
@@ -72,10 +81,16 @@ const theme = extendTheme(
     },
     styles: {
       global: {
+        body: {
+          background: '#f1f1f1',
+        },
         'body > div:first-of-type': {
           height: '100vh',
           display: 'flex',
           flexDir: 'column',
+        },
+        '.chakra-form__error-message': {
+          fontWeight: 'bold',
         },
       },
     },
@@ -92,6 +107,7 @@ const theme = extendTheme(
           },
           _active: {
             opacity: 1,
+            ..._focus,
           },
           _focus,
           _disabled,
@@ -109,19 +125,24 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
-          '& label > span': {
-            borderColor: 'red',
+          borderColor: 'bc-component',
+          '& label': {
+            borderColor: 'bc-component',
+          },
+          borderRadius: 0,
+          '.chakra-checkbox__control': {
+            borderRadius: 0,
           },
         },
-        variants: {
-          'bc-input': {
-            borderColor: 'red',
-            color: 'bc-component',
-            _checked: {
-              background: 'bc-component',
-              color: 'bc-component',
-            },
-          },
+        defaultProps: {
+          size: 'lg',
+          colorScheme: 'ui',
+        },
+      },
+      Radio: {
+        defaultProps: {
+          size: 'lg',
+          colorScheme: 'ui',
         },
       },
       Input: {
@@ -131,6 +152,7 @@ const theme = extendTheme(
               bg: 'white',
               border: '2px solid',
               borderColor: 'bc-component',
+              borderRadius: '4px',
               _focus,
               _disabled,
               _invalid,
@@ -146,7 +168,7 @@ const theme = extendTheme(
               bg: 'white',
               border: '2px solid',
               borderColor: 'bc-component',
-              padding: '8px 45px 8px 15px',
+              borderRadius: '4px',
               _focus,
               _disabled,
               _invalid,
@@ -161,6 +183,7 @@ const theme = extendTheme(
             bg: 'white',
             border: '2px solid',
             borderColor: 'bc-component',
+            borderRadius: '4px',
             _focus,
             _disabled,
             _invalid,
@@ -180,11 +203,9 @@ const theme = extendTheme(
           },
         },
       },
-      FormErrorMessage: {
-        variants: {
-          'bc-input': {
-            fontWeight: 'bold',
-          },
+      Switch: {
+        defaultProps: {
+          colorScheme: 'ui',
         },
       },
     },

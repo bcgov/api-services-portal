@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  Checkbox,
+  Radio,
   FormControl,
   FormErrorMessage,
   FormHelperText,
@@ -9,12 +9,12 @@ import {
 } from '@chakra-ui/react';
 
 export default {
-  title: 'BCGov/Checkbox',
+  title: 'BCGov/Radio',
 };
 
-export const DefaultCheckbox = () => (
+export const DefaultRadio = () => (
   <VStack spacing={4}>
-    <Checkbox>Checkbox</Checkbox>
-    <Checkbox defaultIsChecked>Checkbox</Checkbox>
+    <Radio>Radio</Radio>
+    <Radio defaultIsChecked>Radio</Radio>
   </VStack>
 );
