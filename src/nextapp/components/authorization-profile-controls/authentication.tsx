@@ -102,7 +102,10 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
                     Client ID and Secret
                   </Radio>
                   <Radio name="clientAuthenticator" value="client-jwt">
-                    Signed JWT
+                    Signed JWT - Generated Key Pair
+                  </Radio>
+                  <Radio name="clientAuthenticator" value="client-jwt-jwks-url">
+                    Signed JWT with JWKS URL
                   </Radio>
                 </Stack>
               </RadioGroup>

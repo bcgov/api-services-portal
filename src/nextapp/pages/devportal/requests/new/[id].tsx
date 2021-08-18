@@ -5,6 +5,9 @@ import {
   Button,
   Box,
   Container,
+  FormLabel,
+  FormControl,
+  Input,
   VStack,
   Text,
   Flex,
@@ -85,6 +88,9 @@ const NewRequestsPage: React.FC<
   const selectedEnvironment: Environment = dataset.environments.find(
     (e) => e.id === environment
   );
+  const clientAuthenticator =
+    selectedEnvironment?.credentialIssuer?.clientAuthenticator;
+
   const apiTitle = data.allDiscoverableProducts.reduce((memo: string, d) => {
     if (isEmpty(memo) && d.id !== id) {
       return 'API';
@@ -128,9 +134,11 @@ const NewRequestsPage: React.FC<
             : data.allTemporaryIdentities[0].username
         }`,
         controls: JSON.stringify({
-          clientGenCertificate:
-            selectedEnvironment?.credentialIssuer?.clientAuthenticator ===
-            'client-jwt',
+          clientGenCertificate: clientAuthenticator === 'client-jwt',
+          jwksUrl:
+            clientAuthenticator === 'client-jwt-jwks-url'
+              ? formData.get('jwksUrl')
+              : '',
         }),
         requestor: data.allTemporaryIdentities[0].userId,
         applicationId: formData.get('applicationId'),
@@ -235,6 +243,21 @@ const NewRequestsPage: React.FC<
                 }))}
               value={environment}
             />
+            {clientAuthenticator === 'client-jwt-jwks-url' && (
+              <Box pt={4}>
+                <FormControl>
+                  <FormLabel>
+                    JWKS URL of Public Key for Signed JWT Authentication
+                  </FormLabel>
+                  <Input
+                    placeholder="https://"
+                    name="jwksUrl"
+                    variant="bc-input"
+                    defaultValue=""
+                  />
+                </FormControl>
+              </Box>
+            )}
           </FieldsetBox>
 
           <FieldsetBox
