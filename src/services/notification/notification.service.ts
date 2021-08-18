@@ -63,18 +63,8 @@ export class NotificationService {
       html: emailContent,
     };
 
-    return transporter
-      .sendMail(mailOptions)
-      .then((answer) => {
-        console.log(
-          `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-            user.email
-          }`
-        );
-      })
-      .catch((err) => {
-        console.log('[ERROR] Sending notification failed!' + err);
-      });
+    return transporter.sendMail(mailOptions);
+
     // , function (error : any, info : any) {
     //     if (error) {
     //         this.logger.error("Error sending email to " + mailOptions.to, error);

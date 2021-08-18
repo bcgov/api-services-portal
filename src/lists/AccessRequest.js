@@ -124,12 +124,18 @@ module.exports = {
         originalInput,
         updatedItem
       );
-      const prodEnvironment = await lookupProductEnvironmentServices(
-        noauthContext,
-        updatedItem.productEnvironment.toString()
+
+      console.log(
+        'This is updatedItem.productEnvironment: ' +
+          updatedItem.productEnvironment
       );
-      if (prodEnvironment.approval) {
-        if (operation == 'create') {
+
+      if (operation == 'create') {
+        const prodEnvironment = await lookupProductEnvironmentServices(
+          noauthContext,
+          updatedItem.productEnvironment.toString()
+        );
+        if (prodEnvironment.approval) {
           const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
             noauthContext,
             updatedItem.id
@@ -148,29 +154,49 @@ module.exports = {
                   template: 'access-rqst-notification',
                   subject: `Access Request - ${updatedItem.name}`,
                 }
-              );
+              )
+                .then((answer) => {
+                  console.log(
+                    `[SUCCESS][${JSON.stringify(
+                      answer
+                    )}] Notification sent to ${contact.email}`
+                  );
+                })
+                .catch((err) => {
+                  console.log('[ERROR] Sending notification failed!' + err);
+                });
             });
           }
-        } else if (operation == 'update') {
-          if (updatedItem.isComplete == true) {
-            const requestor = await lookupUser(
-              noauthContext,
-              updatedItem.requestor.toString()
-            );
-            const nc = new NotificationService(new ConfigService());
-            nc.notify(
-              {
-                email: requestor.email,
-                name: requestor.name,
-              },
-              {
-                template: updatedItem.isApproved
-                  ? 'access-rqst-approved'
-                  : 'access-rqst-rejected',
-                subject: `Access Request - ${updatedItem.name}`,
-              }
-            );
-          }
+        }
+      } else if (operation == 'update') {
+        if (updatedItem.isComplete == true) {
+          const requestor = await lookupUser(
+            noauthContext,
+            updatedItem.requestor.toString()
+          );
+          const nc = new NotificationService(new ConfigService());
+          nc.notify(
+            {
+              email: requestor.email,
+              name: requestor.name,
+            },
+            {
+              template: updatedItem.isApproved
+                ? 'access-rqst-approved'
+                : 'access-rqst-rejected',
+              subject: `Access Request - ${updatedItem.name}`,
+            }
+          )
+            .then((answer) => {
+              console.log(
+                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
+                  requestor.email
+                }`
+              );
+            })
+            .catch((err) => {
+              console.log('[ERROR] Sending notification failed!' + err);
+            });
         }
       }
     },
