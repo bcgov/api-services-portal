@@ -10,15 +10,10 @@ const { Apply, Validate } = require('../services/workflow');
 const {
   lookupEnvironmentAndApplicationByAccessRequest,
 } = require('../services/keystone/access-request');
-const { UMAResourceRegistrationService } = require('../services/uma2');
-const { KeycloakPermissionTicketService } = require('../services/keycloak');
 const {
-  getEnvironmentContext,
-  getResourceSets,
-} = require('../lists/extensions/Common');
-const {
-  lookupProductEnvironmentServicesBySlug,
-  lookupUserByUsername,
+  lookupUser,
+  lookupProductEnvironmentServices,
+  lookupUsersByNamespace,
 } = require('../services/keystone');
 
 const { ConfigService } = require('../services/config.service');
@@ -129,84 +124,53 @@ module.exports = {
         originalInput,
         updatedItem
       );
-
-      if (operation == 'create') {
-        const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
-          noauthContext,
-          updatedItem.id
-        );
-        const userContactList = await noauthContext.executeGraphQL({
-          query: `query ListUsersByNamespace($namespace: String!, $scopeName: String) {
-                          usersByNamespace(namespace: $namespace, scopeName: $scopeName) {
-                              id
-                              name
-                              username
-                              email
-                          }
-                      }`,
-          variables: {
-            namespace: accessRequest.productEnvironment.product.namespace,
-            scopeName: 'Access.Manage',
-          },
-        });
-        const nc = new NotificationService(new ConfigService());
-        userContactList.data.usersByNamespace.forEach((contact) => {
-          nc.notify(
-            { email: contact.email, name: contact.name },
-            {
-              template: 'access-rqst-notification',
-              subject: `Access Request - ${updatedItem.name}`,
-            }
-          )
-            .then((answer) => {
-              console.log(
-                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-                  contact.email
-                }`
+      const prodEnvironment = await lookupProductEnvironmentServices(
+        noauthContext,
+        updatedItem.productEnvironment.toString()
+      );
+      if (prodEnvironment.approval) {
+        if (operation == 'create') {
+          const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
+            noauthContext,
+            updatedItem.id
+          );
+          const userContactList = await lookupUsersByNamespace(
+            noauthContext,
+            accessRequest.productEnvironment.product.namespace,
+            'Access.Manage'
+          );
+          if (updatedItem.credential == 'NEW') {
+            const nc = new NotificationService(new ConfigService());
+            userContactList.forEach((contact) => {
+              nc.notify(
+                { email: contact.email, name: contact.name },
+                {
+                  template: 'access-rqst-notification',
+                  subject: `Access Request - ${updatedItem.name}`,
+                }
               );
-            })
-            .catch((err) => {
-              console.log('[ERROR] Sending notification failed!' + err);
             });
-        });
-      } else if (operation == 'update') {
-        if (updatedItem.isComplete == true) {
-          const requestor = await noauthContext.executeGraphQL({
-            query: `query GetRequestingUser($id: ID!) {
-                            User(where: {id: $id}) {
-                                id
-                                name
-                                username
-                                email
-                            }
-                        }`,
-            variables: {
-              id: updatedItem.requestor.toString(),
-            },
-          });
-          const nc = new NotificationService(new ConfigService());
-          nc.notify(
-            {
-              email: requestor.data.User.email,
-              name: requestor.data.User.name,
-            },
-            {
-              template: updatedItem.isApproved
-                ? 'access-rqst-approved'
-                : 'access-rqst-rejected',
-              subject: `Access Request - ${updatedItem.name}`,
-            }
-          )
-            .then((answer) => {
-              console.log(
-                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-                  requestor.data.User.email
-                }`
-              );
-            })
-            .catch((err) => {
-              console.log('[ERROR] Sending notification failed!' + err);
-            });
+          }
+        } else if (operation == 'update') {
+          if (updatedItem.isComplete == true) {
+            const requestor = await lookupUser(
+              noauthContext,
+              updatedItem.requestor.toString()
+            );
+            const nc = new NotificationService(new ConfigService());
+            nc.notify(
+              {
+                email: requestor.email,
+                name: requestor.name,
+              },
+              {
+                template: updatedItem.isApproved
+                  ? 'access-rqst-approved'
+                  : 'access-rqst-rejected',
+                subject: `Access Request - ${updatedItem.name}`,
+              }
+            );
+          }
         }
       }
     },
