@@ -1,16 +1,30 @@
 const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
-
 const { byTracking } = require('../components/ByTracking');
-
 const { atTracking } = require('@keystonejs/list-plugins');
-
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
-
 const { Apply, Validate } = require('../services/workflow');
+const {
+  lookupEnvironmentAndApplicationByAccessRequest,
+} = require('../services/keystone/access-request');
+const { UMAResourceRegistrationService } = require('../services/uma2');
+const { KeycloakPermissionTicketService } = require('../services/keycloak');
+const {
+  getEnvironmentContext,
+  getResourceSets,
+} = require('../lists/extensions/Common');
+const {
+  lookupProductEnvironmentServicesBySlug,
+  lookupUserByUsername,
+} = require('../services/keystone');
+
+const { ConfigService } = require('../services/config.service');
+const {
+  NotificationService,
+} = require('../services/notification/notification.service');
 
 module.exports = {
   fields: {
@@ -106,13 +120,95 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
+      const noauthContext = context.createContext({ skipAccessControl: true });
+
       await Apply(
-        context.createContext({ skipAccessControl: true }),
+        noauthContext,
         operation,
         existingItem,
         originalInput,
         updatedItem
       );
+
+      if (operation == 'create') {
+        const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
+          noauthContext,
+          updatedItem.id
+        );
+        const userContactList = await noauthContext.executeGraphQL({
+          query: `query ListUsersByNamespace($namespace: String!, $scopeName: String) {
+                          usersByNamespace(namespace: $namespace, scopeName: $scopeName) {
+                              id
+                              name
+                              username
+                              email
+                          }
+                      }`,
+          variables: {
+            namespace: accessRequest.productEnvironment.product.namespace,
+            scopeName: 'Access.Manage',
+          },
+        });
+        const nc = new NotificationService(new ConfigService());
+        userContactList.data.usersByNamespace.forEach((contact) => {
+          nc.notify(
+            { email: contact.email, name: contact.name },
+            {
+              template: 'access-rqst-notification',
+              subject: `Access Request - ${updatedItem.name}`,
+            }
+          )
+            .then((answer) => {
+              console.log(
+                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
+                  contact.email
+                }`
+              );
+            })
+            .catch((err) => {
+              console.log('[ERROR] Sending notification failed!' + err);
+            });
+        });
+      } else if (operation == 'update') {
+        if (updatedItem.isComplete == true) {
+          const requestor = await noauthContext.executeGraphQL({
+            query: `query GetRequestingUser($id: ID!) {
+                            User(where: {id: $id}) {
+                                id
+                                name
+                                username
+                                email
+                            }
+                        }`,
+            variables: {
+              id: updatedItem.requestor.toString(),
+            },
+          });
+          const nc = new NotificationService(new ConfigService());
+          nc.notify(
+            {
+              email: requestor.data.User.email,
+              name: requestor.data.User.name,
+            },
+            {
+              template: updatedItem.isApproved
+                ? 'access-rqst-approved'
+                : 'access-rqst-rejected',
+              subject: `Access Request - ${updatedItem.name}`,
+            }
+          )
+            .then((answer) => {
+              console.log(
+                `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
+                  requestor.data.User.email
+                }`
+              );
+            })
+            .catch((err) => {
+              console.log('[ERROR] Sending notification failed!' + err);
+            });
+        }
+      }
     },
   },
 };

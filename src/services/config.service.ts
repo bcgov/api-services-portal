@@ -1,4 +1,4 @@
-import { IConfig } from "./config";
+import { IConfig } from './bceid/config';
 
 export class ConfigService {
   getConfig(): IConfig {
@@ -33,21 +33,23 @@ export class ConfigService {
         },
       },
       notification: {
-        enabled: ['true','TRUE'].includes(process.env.EMAIL_ENABLED || 'false'),
-        secure: ['true','TRUE'].includes(process.env.EMAIL_SECURE || 'false'),
+        enabled: ['true', 'TRUE'].includes(
+          process.env.EMAIL_ENABLED || 'false'
+        ),
+        secure: ['true', 'TRUE'].includes(process.env.EMAIL_SECURE || 'false'),
         from: process.env.EMAIL_FROM || '',
         host: process.env.EMAIL_HOST || '',
         port: Number(process.env.EMAIL_PORT || 25),
         user: process.env.EMAIL_USER || '',
-        pass: process.env.EMAIL_PASS || ''
-      }
+        pass: process.env.EMAIL_PASS || '',
+      },
     };
   }
 
   private getOpenIdConfigurationUrl(): string {
     return new URL(
       `realms/${process.env.KEYCLOAK_REALM}/.well-known/openid-configuration`,
-      process.env.KEYCLOAK_AUTH_URL,
+      process.env.KEYCLOAK_AUTH_URL
     ).href;
   }
 }

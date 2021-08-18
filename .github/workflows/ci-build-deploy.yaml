@@ -226,6 +226,12 @@ jobs:
               value: '${{ secrets.KEYCLOAK_REALM }}'
             COOKIE_SECURE:
               value: 'true'
+            EMAIL_ENABLED:
+              value: 'true'
+            EMAIL_FROM:
+              value: 'API.Services.Portal@gov.bc.ca'
+            EMAIL_HOST:
+              value: 'apps.smtp.gov.bc.ca'
 
           readinessProbe:
             exec:
