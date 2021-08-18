@@ -131,6 +131,7 @@ module.exports = {
           updatedItem.productEnvironment.toString()
         );
         if (prodEnvironment.approval) {
+          const nc = new NotificationService(new ConfigService());
           if (updatedItem.credential == 'NEW' && !updatedItem.isComplete) {
             const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
               noauthContext,
@@ -141,7 +142,7 @@ module.exports = {
               accessRequest.productEnvironment.product.namespace,
               'Access.Manage'
             );
-            const nc = new NotificationService(new ConfigService());
+
             userContactList.forEach((contact) => {
               nc.notify(
                 { email: contact.email, name: contact.name },
@@ -149,24 +150,13 @@ module.exports = {
                   template: 'access-rqst-notification',
                   subject: `Access Request - ${updatedItem.name}`,
                 }
-              )
-                .then((answer) => {
-                  console.log(
-                    `[SUCCESS][${JSON.stringify(
-                      answer
-                    )}] Notification sent to ${contact.email}`
-                  );
-                })
-                .catch((err) => {
-                  console.log('[ERROR] Sending notification failed!' + err);
-                });
+              );
             });
           } else if (updatedItem.isComplete) {
             const requestorDtls = await lookupUser(
               noauthContext,
               updatedItem.requestor.toString()
             );
-            const nc = new NotificationService(new ConfigService());
             nc.notify(
               {
                 email: requestorDtls[0]?.email,
@@ -178,17 +168,7 @@ module.exports = {
                   : 'access-rqst-rejected',
                 subject: `Access Request - ${updatedItem.name}`,
               }
-            )
-              .then((answer) => {
-                console.log(
-                  `[SUCCESS][${JSON.stringify(answer)}] Notification sent to ${
-                    requestorDtls[0]?.email
-                  }`
-                );
-              })
-              .catch((err) => {
-                console.log('[ERROR] Sending notification failed!' + err);
-              });
+            );
           }
         }
       }
