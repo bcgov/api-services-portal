@@ -251,6 +251,26 @@ const Component = () => {
 
 All Typescript paths alias `src/nextapp` to `@/`.
 
+#### Storybook
+
+[Chakra UI](https://chakra-ui.com) was chosen for the UI framework due to its utility and flexibility. A theme has been created which follows the [BC Government Web Design System](https://developer.gov.bc.ca/Design-System) alongside custom components written for the portal.
+
+Storybook has been installed to demonstrate and preview custom components. To view run `$ npm run storybook`.
+
+Core components like buttons and form elements have their own Chakra theme variant, all set by default so using a button like so;
+
+```jsx
+import { Button } from 'chakra-ui/react';
+
+// Renders as a BC Primary Button
+<Button>Primary<Button>
+
+// or the longhand declarative version
+<Button variant="primary">Primary</Button>
+```
+
+All the core components stories are located in `src/stories`. For custom components add the story in the component folder, ie `src/nextapp/components/card/card.stories.tsx`.
+
 #### Mock Server
 
 For convenience a mock server is available to fake data via the GraphQL api. Run by opening a new shell window after running `$ npm run dev` and run the following:
