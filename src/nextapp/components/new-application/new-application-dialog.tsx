@@ -95,10 +95,10 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button variant="primary" onClick={submitForm}>
-              Create
+            <Button onClick={onClose} variant="secondary">
+              Cancel
             </Button>
+            <Button onClick={submitForm}>Create</Button>
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>

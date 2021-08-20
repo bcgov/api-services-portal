@@ -306,8 +306,8 @@ const NewRequestsPage: React.FC<
           <Box mt={4} bgColor="white">
             <Flex justify="flex-end" p={4}>
               <ButtonGroup>
-                <Button onClick={handleCancel}>Cancel</Button>
-                <Button type="submit" variant="primary">
+                <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+                <Button type="submit">
                   Submit
                 </Button>
               </ButtonGroup>

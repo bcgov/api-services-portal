@@ -148,12 +148,15 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose} data-testid="prd-cancel-btn">
+            <Button
+              onClick={onClose}
+              variant="secondary"
+              data-testid="prd-cancel-btn"
+            >
               Cancel
             </Button>
             <Button
               isLoading={productMutation.isLoading}
-              variant="primary"
               onClick={createProduct}
               data-testid="prd-create-btn"
             >

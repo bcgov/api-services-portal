@@ -163,7 +163,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button onClick={onClose}>Cancel</Button>
+              <Button variant="secondary" onClick={onClose}>Cancel</Button>
               <Button variant="primary" onClick={submitForm}>
                 Add
               </Button>
