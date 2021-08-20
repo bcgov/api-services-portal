@@ -86,3 +86,43 @@ export async function lookupUserByUsername(
   assert.strictEqual(result.data.allUsers.length, 1, 'UserNotFound');
   return result.data.allUsers;
 }
+
+export async function lookupUser(context: any, id: string): Promise<[User]> {
+  const result = await context.executeGraphQL({
+    query: `query FetchUser($id: ID!) {
+                    allUsers(where: {id: $id}) {
+                      id
+                      name
+                      username
+                      email
+                    }
+                }`,
+    variables: { id: id },
+  });
+  logger.debug('Query [lookupUser] result %j', result);
+  assert.strictEqual(result.data.allUsers.length, 1, 'UserNotFound');
+  return result.data.allUsers;
+}
+
+export async function lookupUsersByNamespace(
+  context: any,
+  namespace: string,
+  scope: string
+): Promise<[User]> {
+  const result = await context.executeGraphQL({
+    query: `query ListUsersByNamespace($namespace: String!, $scopeName: String) {
+                    usersByNamespace(namespace: $namespace, scopeName: $scopeName) {
+                      id
+                      name
+                      username
+                      email
+                    }
+                  }`,
+    variables: {
+      namespace: namespace,
+      scopeName: scope,
+    },
+  });
+  logger.debug('Query [lookupUsersByNamespace] result %j', result);
+  return result.data.usersByNamespace;
+}

@@ -15,6 +15,7 @@ export async function lookupProductEnvironmentServices(
                         id
                         name
                         flow
+                        approval
                         product {
                             namespace
                         }
