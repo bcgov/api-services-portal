@@ -17,17 +17,20 @@ import {
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
+import { Application, Mutation } from '@/shared/types/query.types';
 
 interface NewApplicationDialog {
   open: boolean;
   onClose: () => void;
   userId: string;
+  handleAfterCreate?: (app: Application) => void;
 }
 
 const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
   open,
   onClose,
   userId,
+  handleAfterCreate,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -49,7 +52,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         if (form.current.checkValidity()) {
           const name = data.get('name') as string;
           const description = data.get('description') as string;
-          await applicationMutation.mutateAsync({
+          const a: Mutation = await applicationMutation.mutateAsync({
             name,
             description,
             owner: userId,
@@ -60,7 +63,9 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
             status: 'success',
           });
           queryClient.invalidateQueries('allApplications');
+          queryClient.invalidateQueries('newAccessRequest');
           onClose();
+          if (handleAfterCreate) handleAfterCreate(a?.createApplication);
         }
       } catch {
         toast({
@@ -112,6 +117,8 @@ const mutation = gql`
   mutation Add($name: String!, $description: String) {
     createApplication(data: { name: $name, description: $description }) {
       id
+      appId
+      name
     }
   }
 `;
