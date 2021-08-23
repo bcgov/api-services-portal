@@ -1,7 +1,10 @@
 import { getSession } from './use-session';
 import links from '@/shared/data/links';
 import { UserData } from 'types';
-import type { GetServerSidePropsContext } from 'next';
+import fetch from 'isomorphic-unfetch';
+import type { GetServerSideProps, GetServerSidePropsContext } from 'next';
+
+import { apiHost } from '../../config';
 
 /**
  * Authentication function for pages
@@ -15,28 +18,30 @@ import type { GetServerSidePropsContext } from 'next';
  * export const getServerSideProps = withAuth((req, res) => ({ props: { user: req.user } }));
  * ```
  */
-interface ReturnServerSideContext extends GetServerSidePropsContext {
-  user?: UserData;
-}
+export function withAuth(handler: GetServerSideProps) {
+  return async (context: GetServerSidePropsContext) => {
+    let isAuthenticated = false;
 
-export function withAuth(handler) {
-  return async (
-    context: GetServerSidePropsContext
-  ): Promise<ReturnServerSideContext> => {
-    const nextContext: ReturnServerSideContext = { ...context };
-    const user = await getSession();
-    const [section] = /\/?(home|docs|poc\/)([a-zA-Z-_]*)/.exec(context.req.url);
-    const currentRoute = links.find((link) => section === link.url);
+    try {
+      const res = await fetch(`${apiHost}/oauth2/auth`, {
+        headers: context.req.headers as any,
+      });
 
-    if (user && currentRoute) {
-      if (
-        currentRoute.access.length === 0 ||
-        currentRoute.access.some((role) => user.roles.includes(role))
-      ) {
-        nextContext.user = user;
+      if (res.ok) {
+        isAuthenticated = true;
       }
+    } catch (err) {
+      console.error('[AUTH]', err);
     }
 
-    return handler(nextContext);
+    if (!isAuthenticated) {
+      return {
+        props: {
+          authenticated: false,
+        },
+      };
+    }
+
+    return handler(context);
   };
 }

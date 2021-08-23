@@ -13,7 +13,11 @@ import {
 import PageHeader from '@/components/page-header';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from 'next';
 import Head from 'next/head';
 import { Environment, Product, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
@@ -23,32 +27,35 @@ import RateLimiting from '@/components/controls/rate-limiting';
 import ModelIcon from '@/components/model-icon/model-icon';
 import ConsumerAuthz from '@/components/consumer-authz';
 import ConsumerACL from '@/components/consumer-acl';
+import { withAuth } from '@/shared/services/auth';
 
 import breadcrumbs from '@/components/ns-breadcrumb';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params;
-  const queryClient = new QueryClient();
+export const getServerSideProps: GetServerSideProps = withAuth(
+  async (context: GetServerSidePropsContext) => {
+    const { id } = context.params;
+    const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(
-    ['consumer', id],
-    async () =>
-      await api<Query>(
-        query,
-        { id },
-        {
-          headers: context.req.headers as HeadersInit,
-        }
-      )
-  );
+    await queryClient.prefetchQuery(
+      ['consumer', id],
+      async () =>
+        await api<Query>(
+          query,
+          { id },
+          {
+            headers: context.req.headers as HeadersInit,
+          }
+        )
+    );
 
-  return {
-    props: {
-      id,
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-};
+    return {
+      props: {
+        id,
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
+  }
+);
 
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>

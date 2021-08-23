@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AppError from '@/components/app-error';
 import { Box, ChakraProvider } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -70,7 +71,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
               <AppWrapper router={router}>
-                <Component {...pageProps} />
+                {!pageProps.authenticated && <AppError />}
+                {pageProps.authenticated && <Component {...pageProps} />}
               </AppWrapper>
             </Box>
           </AuthProvider>

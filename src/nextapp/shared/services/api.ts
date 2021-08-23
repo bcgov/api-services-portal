@@ -65,6 +65,7 @@ const api = async <T extends ApiResponse>(
   } catch (err) {
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
+      throw err;
     } else {
       throw err.response.errors;
     }
