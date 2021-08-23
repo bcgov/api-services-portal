@@ -204,6 +204,7 @@ const NewRequestsPage: React.FC<
           open={isOpen}
           onClose={onClose}
           userId={requestor.userId}
+          refreshQueryKey={queryKey}
           handleAfterCreate={handleAfterCreate}
         />
         <form onSubmit={handleSubmit}>

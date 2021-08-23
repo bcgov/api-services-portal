@@ -23,6 +23,7 @@ interface NewApplicationDialog {
   open: boolean;
   onClose: () => void;
   userId: string;
+  refreshQueryKey: string;
   handleAfterCreate?: (app: Application) => void;
 }
 
@@ -30,6 +31,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
   open,
   onClose,
   userId,
+  refreshQueryKey,
   handleAfterCreate,
 }) => {
   const toast = useToast();
@@ -62,8 +64,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
             description: 'You can now request access to an API',
             status: 'success',
           });
-          queryClient.invalidateQueries('allApplications');
-          queryClient.invalidateQueries('newAccessRequest');
+          queryClient.invalidateQueries(refreshQueryKey);
           onClose();
           if (handleAfterCreate) handleAfterCreate(a?.createApplication);
         }
