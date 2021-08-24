@@ -33,7 +33,11 @@ const { Strategy, Issuer, Client } = require('openid-client');
 
 const { staticRoute, staticPath, distDir } = require('./config');
 
-const { putFeedWorker, deleteFeedWorker } = require('./batch/feed-worker');
+const {
+  putFeedWorker,
+  deleteFeedWorker,
+  getFeedWorker,
+} = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked');
 
 const {
@@ -277,6 +281,12 @@ const configureExpress = (app: any) => {
   //     console.log(req.path)
   //     req.path == "/" ? res.redirect('/home') : next()
   // })
+  app.get('/feed/:entity/:refKey/:refKeyValue', (req: any, res: any) =>
+    getFeedWorker(keystone, req, res).catch((err: any) => {
+      console.log(err);
+      res.status(400).json({ result: 'error', error: '' + err });
+    })
+  );
   app.put('/feed/:entity', (req: any, res: any) =>
     putFeedWorker(keystone, req, res).catch((err: any) => {
       console.log(err);

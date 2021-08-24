@@ -10,29 +10,43 @@ export class BatchService {
   }
 
   public async list(
-    entity: string,
     query: any,
     refKey: string,
-    eid: string,
+    refKeyId: string,
     fields: string[]
   ) {
-    logger.debug('[list] : %s :: %s == %s', query, refKey, eid);
+    logger.debug('[list] : %s :: %s == %s', query, refKey, refKeyId);
     const result = await this.context.executeGraphQL({
       query: `query($id: String) {
               ${query}(where: { ${refKey} : $id }) {
                 id, ${fields.join(',')}
               }
             }`,
-      variables: { id: eid },
+      variables: { id: refKeyId },
     });
-    logger.debug('[lookup] RESULT %j', result);
+    logger.debug('[list] RESULT %j', result);
 
-    if (result['data'][query].length > 1) {
-      throw Error(
-        'Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid
-      );
-    }
-    return result['data'][query].length == 0 ? null : result['data'][query][0];
+    return result['data'][query].length == 0 ? [] : result['data'][query];
+  }
+
+  public async listRelated(
+    query: any,
+    refKey: string,
+    refKeyId: string,
+    fields: string[]
+  ) {
+    logger.debug('[listRelated] : %s :: %s == %s', query, refKey, refKeyId);
+    const result = await this.context.executeGraphQL({
+      query: `query($id: String) {
+              ${query}(where: { ${refKey} : { id: $id } }) {
+                id, ${fields.join(',')}
+              }
+            }`,
+      variables: { id: refKeyId },
+    });
+    logger.debug('[listRelated] RESULT %j', result);
+
+    return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 
   public async lookup(
@@ -99,5 +113,17 @@ export class BatchService {
     });
     logger.debug('[remove] RESULT %j', result);
     return 'errors' in result ? null : result['data'][`delete${entity}`];
+  }
+
+  public async removeAll(entity: string, ids: string[]): Promise<any> {
+    logger.debug('[removeAll] : %s %s', entity, ids);
+    const result = await this.context.executeGraphQL({
+      query: `mutation ($ids: [ID!]) {
+              delete${entity}s(ids: $ids)
+            }`,
+      variables: { ids: ids },
+    });
+    logger.debug('[removeAll] RESULT %j', result);
+    return 'errors' in result ? null : result['data'][`delete${entity}s`];
   }
 }

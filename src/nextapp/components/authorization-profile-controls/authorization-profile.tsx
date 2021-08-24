@@ -92,9 +92,9 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
       <Flex justify="flex-end">
         <ButtonGroup>
           <NextLink href="/manager/authorization-profiles">
-            <Button>Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
           </NextLink>
-          <Button variant="primary" type="submit">
+          <Button type="submit">
             {issuer ? 'Save Changes' : 'Create'}
           </Button>
         </ButtonGroup>

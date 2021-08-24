@@ -89,7 +89,9 @@ const ApplicationsPage: React.FC<
           </Alert>
         )}
         <PageHeader
-          actions={<NewApplication userId={userId} />}
+          actions={
+            <NewApplication userId={userId} refreshQueryKey={queryKey} />
+          }
           title="My Applications"
         >
           <Text>Applications allow you to access BC Government APIs.</Text>
@@ -125,7 +127,10 @@ const ApplicationsPage: React.FC<
                           Consumers access your API under restrictions you set
                         </Text>
                         <Box mt={4}>
-                          <NewApplication userId={userId} />
+                          <NewApplication
+                            userId={userId}
+                            refreshQueryKey={queryKey}
+                          />
                         </Box>
                       </Box>
                     </Center>

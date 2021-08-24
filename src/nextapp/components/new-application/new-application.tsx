@@ -5,9 +5,13 @@ import NewApplicationDialog from './new-application-dialog';
 
 interface NewApplicationProps {
   userId: string;
+  refreshQueryKey: string;
 }
 
-const NewApplication: React.FC<NewApplicationProps> = ({ userId }) => {
+const NewApplication: React.FC<NewApplicationProps> = ({
+  userId,
+  refreshQueryKey,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -15,7 +19,12 @@ const NewApplication: React.FC<NewApplicationProps> = ({ userId }) => {
       <Button isDisabled={!userId} onClick={onOpen} variant="primary">
         Create Application
       </Button>
-      <NewApplicationDialog open={isOpen} onClose={onClose} userId={userId} />
+      <NewApplicationDialog
+        open={isOpen}
+        onClose={onClose}
+        userId={userId}
+        refreshQueryKey={refreshQueryKey}
+      />
     </>
   );
 };

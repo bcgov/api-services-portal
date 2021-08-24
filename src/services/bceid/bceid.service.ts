@@ -2,7 +2,7 @@
 import { BasicAuthSecurity, Client, createClientAsync } from 'soap';
 import { BCeIDConfig } from './config';
 // import { LoggerService } from "../../logger/logger.service";
-import { ConfigService } from './config.service';
+import { ConfigService } from '../config.service';
 import { AccountDetails } from './account-details.model';
 import {
   BCeIDAccountTypeCodes,

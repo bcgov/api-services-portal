@@ -33,7 +33,7 @@ export const clientTemplateClientJwt = {
     'saml.authnstatement': 'false',
     'display.on.consent.screen': 'false',
     'saml.onetimeuse.condition': 'false',
-    'jwt.credential.certificate': '',
+    'jwt.credential.public.key': '',
   },
   authenticationFlowBindingOverrides: {},
   fullScopeAllowed: false,
