@@ -17,17 +17,22 @@ import {
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
+import { Application, Mutation } from '@/shared/types/query.types';
 
 interface NewApplicationDialog {
   open: boolean;
   onClose: () => void;
   userId: string;
+  refreshQueryKey: string;
+  handleAfterCreate?: (app: Application) => void;
 }
 
 const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
   open,
   onClose,
   userId,
+  refreshQueryKey,
+  handleAfterCreate,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -49,18 +54,23 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         if (form.current.checkValidity()) {
           const name = data.get('name') as string;
           const description = data.get('description') as string;
-          await applicationMutation.mutateAsync({
-            name,
-            description,
-            owner: userId,
-          });
+          const newApplication: Mutation = await applicationMutation.mutateAsync(
+            {
+              name,
+              description,
+              owner: userId,
+            }
+          );
           toast({
             title: `${name} created!`,
             description: 'You can now request access to an API',
             status: 'success',
           });
-          queryClient.invalidateQueries('allApplications');
+          queryClient.invalidateQueries(refreshQueryKey);
           onClose();
+          if (handleAfterCreate) {
+            handleAfterCreate(newApplication?.createApplication);
+          }
         }
       } catch {
         toast({
@@ -112,6 +122,8 @@ const mutation = gql`
   mutation Add($name: String!, $description: String) {
     createApplication(data: { name: $name, description: $description }) {
       id
+      appId
+      name
     }
   }
 `;

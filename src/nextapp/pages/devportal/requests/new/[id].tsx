@@ -8,6 +8,7 @@ import {
   FormLabel,
   FormControl,
   Input,
+  Icon,
   VStack,
   Text,
   Flex,
@@ -22,6 +23,8 @@ import {
   StackDivider,
   useToast,
   Center,
+  useDisclosure,
+  Tooltip,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import isEmpty from 'lodash/isEmpty';
@@ -30,7 +33,7 @@ import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
 import { QueryClient, useQueryClient } from 'react-query';
-import { Environment, Query } from '@/shared/types/query.types';
+import { Application, Environment, Query } from '@/shared/types/query.types';
 import api, { useApi } from '@/shared/services/api';
 import graphql from '@/shared/services/graphql';
 import { dehydrate } from 'react-query/hydration';
@@ -38,6 +41,13 @@ import { FieldsetBox, RadioGroup } from '@/components/forms';
 import { FaBook } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 import isNotBlank from '@/shared/isNotBlank';
+import {
+  FaChevronDown,
+  FaEdit,
+  FaNetworkWired,
+  FaPlusCircle,
+} from 'react-icons/fa';
+import NewApplicationDialog from '@/components/new-application/new-application-dialog';
 
 const queryKey = 'newAccessRequest';
 
@@ -164,6 +174,12 @@ const NewRequestsPage: React.FC<
     }
   };
   const handleCancel = () => router?.back();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedApplication, setSelectedApplication] = React.useState('');
+
+  const handleAfterCreate = (app: Application) => {
+    setSelectedApplication(app.id);
+  };
 
   return (
     <>
@@ -184,14 +200,25 @@ const NewRequestsPage: React.FC<
           </Alert>
         )}
         <PageHeader title="New Access Request" />
+        <NewApplicationDialog
+          open={isOpen}
+          onClose={onClose}
+          userId={requestor.userId}
+          refreshQueryKey={queryKey}
+          handleAfterCreate={handleAfterCreate}
+        />
         <form onSubmit={handleSubmit}>
           <FieldsetBox title={apiTitle}>
             <HStack spacing={4}>
               <Box flex={1}>
-                <Heading size="sm" mb={3}>
-                  Select an application to consume the API
-                </Heading>
-                <Select name="applicationId" isRequired={true}>
+                <Select
+                  name="applicationId"
+                  isRequired={true}
+                  value={selectedApplication}
+                  onChange={(e) => {
+                    setSelectedApplication(e.target.value);
+                  }}
+                >
                   <option value="">No Application Selected</option>
                   {data.myApplications.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -200,6 +227,16 @@ const NewRequestsPage: React.FC<
                   ))}
                 </Select>
               </Box>
+              <Tooltip
+                label="Create New Application"
+                fontSize="md"
+                placement="top"
+                hasArrow
+              >
+                <Box mx={4}>
+                  <Icon as={FaPlusCircle} boxSize={6} onClick={onOpen} />
+                </Box>
+              </Tooltip>
               <Box mx={4} w={100}>
                 <Center>as</Center>
               </Box>
@@ -306,10 +343,10 @@ const NewRequestsPage: React.FC<
           <Box mt={4} bgColor="white">
             <Flex justify="flex-end" p={4}>
               <ButtonGroup>
-                <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
-                <Button type="submit">
-                  Submit
+                <Button variant="secondary" onClick={handleCancel}>
+                  Cancel
                 </Button>
+                <Button type="submit">Submit</Button>
               </ButtonGroup>
             </Flex>
           </Box>
@@ -345,7 +382,11 @@ const query = gql`
     }
     myApplications {
       id
+      appId
       name
+      owner {
+        name
+      }
     }
     mySelf {
       legalsAgreed
