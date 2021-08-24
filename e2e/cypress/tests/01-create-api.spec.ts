@@ -29,7 +29,7 @@ describe('Create API Spec', () => {
 
   it('creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
-      home.useNamespace(namespace)
+      home.createNamespace(namespace)
     })
   })
 
@@ -53,12 +53,7 @@ describe('Create API Spec', () => {
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
-<<<<<<< HEAD
       pd.createNewProduct(product.name, product.environment.name)
-=======
-      pd.createNewProduct(product.name, product.environment)
-      pd.editProduct(product.name, product.orgName, product.orgUnitName)
->>>>>>> 3afb2df1 (Added latest test cases to update product environment and its config and create authorization plugin for the published service)
     })
   })
   it('publish product to directory', () => {
@@ -78,7 +73,6 @@ describe('Create API Spec', () => {
       })
     })
   })
-<<<<<<< HEAD
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
     cy.visit(pd.path)
@@ -86,8 +80,6 @@ describe('Create API Spec', () => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
-=======
->>>>>>> 3afb2df1 (Added latest test cases to update product environment and its config and create authorization plugin for the published service)
   after(() => {
     cy.logout()
     cy.clearLocalStorage({log:true})
