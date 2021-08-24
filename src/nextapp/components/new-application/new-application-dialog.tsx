@@ -68,8 +68,9 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           });
           queryClient.invalidateQueries(refreshQueryKey);
           onClose();
-          if (handleAfterCreate)
+          if (handleAfterCreate) {
             handleAfterCreate(newApplication?.createApplication);
+          }
         }
       } catch {
         toast({
