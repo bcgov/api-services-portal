@@ -31,7 +31,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Button
         as="a"
-        variant="secondary"
+        variant="header"
         href="/admin/signin"
         data-testid="login-btn"
       >

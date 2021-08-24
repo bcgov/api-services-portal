@@ -94,10 +94,10 @@ const EditEnvironment: React.FC<EditEnvironmentProps> = ({ data }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} onClick={onClose}>
+            <Button variant="secondary" mr={3} onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary">Update</Button>
+            <Button>Update</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -114,6 +114,30 @@ export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
   }
 };
 
+export const getFeedWorker = async (keystone: any, req: any, res: any) => {
+  const feedEntity = req.params['entity'];
+  const refKey = req.params['refKey'];
+  const refKeyValue = req.params['refKeyValue'];
+
+  const context = keystone.createContext({ skipAccessControl: true });
+  const batchService = new BatchService(context);
+
+  assert.strictEqual(feedEntity in metadata, true);
+  assert.strictEqual(refKey === null || refKeyValue === null, false);
+
+  const md = (metadata as any)[feedEntity];
+
+  assert.strictEqual(md['sync'].includes(refKey), true, 'Unexpected ref key');
+
+  const recordReferences = await batchService.list(
+    md.query,
+    refKey,
+    refKeyValue,
+    ['extForeignKey', 'extRecordHash']
+  );
+  res.json(recordReferences);
+};
+
 const syncListOfRecords = async function (
   keystone: any,
   entity: string,

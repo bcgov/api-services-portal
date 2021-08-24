@@ -174,8 +174,8 @@ const NewIssuerEnvironmentDialog: React.FC<NewIssuerEnvironmentDialog> = ({
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button variant="primary" onClick={addEnvironmentConfig}>
+            <Button variant="secondary" onClick={onClose}>Cancel</Button>
+            <Button onClick={addEnvironmentConfig}>
               Add
             </Button>
           </ButtonGroup>

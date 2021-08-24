@@ -4,6 +4,8 @@ export { CreateServiceAccount } from './create-service-account';
 
 export { DeleteAccess } from './delete-access';
 
+export { DeleteGatewayConfig } from './delete-gateway-config';
+
 export { Validate } from './validate-access-request';
 
 export { ValidateActiveEnvironment } from './validate-active-environment';

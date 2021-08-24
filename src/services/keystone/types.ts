@@ -5875,6 +5875,14 @@ export type NamespaceInput = {
   name: Scalars['String'];
 };
 
+export type UserContact = {
+  __typename?: 'UserContact';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  username: Scalars['String'];
+  email: Scalars['String'];
+};
+
 export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
@@ -6164,6 +6172,7 @@ export type Query = {
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
+  usersByNamespace?: Maybe<Array<Maybe<UserContact>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getResourceSet?: Maybe<UmaResourceSet>;
@@ -6838,6 +6847,11 @@ export type QueryBusinessProfileArgs = {
 export type QueryConsumerScopesAndRolesArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['ID'];
+};
+
+
+export type QueryUsersByNamespaceArgs = {
+  namespace: Scalars['String'];
 };
 
 

@@ -1,16 +1,25 @@
 const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
 const { Markdown } = require('@keystonejs/fields-markdown');
-
 const { byTracking } = require('../components/ByTracking');
-
 const { atTracking } = require('@keystonejs/list-plugins');
-
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
-
 const { Apply, Validate } = require('../services/workflow');
+const {
+  lookupEnvironmentAndApplicationByAccessRequest,
+} = require('../services/keystone/access-request');
+const {
+  lookupUser,
+  lookupProductEnvironmentServices,
+  lookupUsersByNamespace,
+} = require('../services/keystone');
+
+const { ConfigService } = require('../services/config.service');
+const {
+  NotificationService,
+} = require('../services/notification/notification.service');
 
 module.exports = {
   fields: {
@@ -106,13 +115,63 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
+      const noauthContext = context.createContext({ skipAccessControl: true });
+
       await Apply(
-        context.createContext({ skipAccessControl: true }),
+        noauthContext,
         operation,
         existingItem,
         originalInput,
         updatedItem
       );
+
+      if (operation == 'update') {
+        const prodEnvironment = await lookupProductEnvironmentServices(
+          noauthContext,
+          updatedItem.productEnvironment.toString()
+        );
+        if (prodEnvironment.approval) {
+          const nc = new NotificationService(new ConfigService());
+          if (updatedItem.credential == 'NEW' && !updatedItem.isComplete) {
+            const accessRequest = await lookupEnvironmentAndApplicationByAccessRequest(
+              noauthContext,
+              updatedItem.id
+            );
+            const userContactList = await lookupUsersByNamespace(
+              noauthContext,
+              accessRequest.productEnvironment.product.namespace,
+              'Access.Manage'
+            );
+
+            userContactList.forEach((contact) => {
+              nc.notify(
+                { email: contact.email, name: contact.name },
+                {
+                  template: 'access-rqst-notification',
+                  subject: `Access Request - ${updatedItem.name}`,
+                }
+              );
+            });
+          } else if (updatedItem.isComplete) {
+            const requestorDtls = await lookupUser(
+              noauthContext,
+              updatedItem.requestor.toString()
+            );
+            nc.notify(
+              {
+                email: requestorDtls[0]?.email,
+                name: requestorDtls[0]?.name,
+              },
+              {
+                template: updatedItem.isApproved
+                  ? 'access-rqst-approved'
+                  : 'access-rqst-rejected',
+                subject: `Access Request - ${updatedItem.name}`,
+              }
+            );
+          }
+        }
+      }
     },
   },
 };

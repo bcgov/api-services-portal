@@ -1,0 +1,14 @@
+entity: Product
+record:
+  id: 748D98F1F56C
+  name: Gateway Services API
+  namespace: platform
+  environments:
+    - id: FB000000
+      name: prod
+      active: true
+      approval: true
+      flow: client-credentials
+      legal: terms-of-use-for-api-gateway-1
+      services: []
+      credentialIssuer: 'Gateway Services Resource Server'

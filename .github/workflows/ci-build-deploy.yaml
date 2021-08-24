@@ -214,21 +214,31 @@ jobs:
               value: 'https://grafana-apps-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
+            GWA_PROD_ENV_SLUG:
+              value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
-              value: 'gwa-api'
+              value: '${{ secrets.OIDC_CLIENT_ID }}'
+            GWA_RES_SVR_CLIENT_SECRET:
+              value: '${{ secrets.OIDC_CLIENT_SECRET }}'
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
               value: '${{ secrets.KEYCLOAK_REALM }}'
             COOKIE_SECURE:
               value: 'true'
+            EMAIL_ENABLED:
+              value: 'true'
+            EMAIL_FROM:
+              value: 'API.Services.Portal@gov.bc.ca'
+            EMAIL_HOST:
+              value: 'apps.smtp.gov.bc.ca'
 
           readinessProbe:
             exec:
               command:
               - sh
               - -c
-              - 'state=$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".loading | ascii_downcase\"); if [ \"$loading\" == \"true\" ]; then exit 1; fi'
+              - 'state=\$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"\$state\" == \"ready\" ]; then exit 1; fi'
 
           " > values.yaml
 
@@ -250,3 +260,15 @@ jobs:
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
           helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+
+      - name: 'Seed Data'
+        run: |
+          export PATH=$PATH:`pwd`/linux-amd64
+
+          cd .github/workflows
+          SERVICE=proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api \
+          PORTAL_URL=https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca \
+          OIDC_ISSUER=${{ secrets.OIDC_ISSUER }} \
+          OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
+          OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
+          ./scripts/init.sh
