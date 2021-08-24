@@ -218,7 +218,10 @@ async function setupAuthorizationAndEnable(
   context: any,
   setup: SetupAuthorizationInput
 ) {
-  const kongApi = new KongConsumerService(process.env.KONG_URL);
+  const kongApi = new KongConsumerService(
+    process.env.KONG_URL,
+    process.env.GWA_API_URL
+  );
   const feederApi = new FeederService(process.env.FEEDER_URL);
 
   const flow = setup.flow;
@@ -272,11 +275,6 @@ async function setupAuthorizationAndEnable(
       token
     );
 
-    await kcClientService.updateClientRegistration(clientId, {
-      clientId,
-      enabled: true,
-    });
-
     // Only valid for 'managed' client registration
     // const kcadminApi = new KeycloakClientService(baseUrl, realm)
     await kcClientService.login(
@@ -288,6 +286,11 @@ async function setupAuthorizationAndEnable(
       controls.defaultClientScopes,
       []
     );
+
+    await kcClientService.updateClientRegistration(clientId, {
+      clientId,
+      enabled: true,
+    });
 
     await markActiveTheServiceAccess(context, setup.serviceAccessId);
   } else if (flow == 'kong-api-key-acl' || flow == 'kong-acl-only') {
@@ -330,7 +333,11 @@ async function setupAuthorizationAndEnable(
   if ('plugins' in controls) {
     for (const plugin of controls.plugins) {
       // assume the service and route IDs are Kong's unique IDs for them
-      await kongApi.addPluginToConsumer(kongConsumerPK, plugin);
+      await kongApi.addPluginToConsumer(
+        kongConsumerPK,
+        plugin,
+        context.req.user.namespace
+      );
     }
   }
 

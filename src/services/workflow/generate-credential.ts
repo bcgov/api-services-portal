@@ -46,8 +46,7 @@ export const generateCredential = async (
       requestDetails.application.id
     );
 
-    //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
-    const clientId = application.appId + '-' + productEnvironment.appId;
+    const clientId = productEnvironment.appId + '-' + application.appId;
 
     const nickname = clientId;
 
@@ -100,8 +99,7 @@ export const generateCredential = async (
       requestDetails.application.id
     );
 
-    //const extraIdentifier = uuidv4().replace(/-/g,'').toUpperCase().substr(0, 8)
-    const clientId = application.appId + '-' + productEnvironment.appId;
+    const clientId = productEnvironment.appId + '-' + application.appId;
 
     const nickname = clientId;
 
@@ -122,6 +120,8 @@ export const generateCredential = async (
       clientSigning.publicKey = publicKey;
       clientSigning.privateKey = privateKey;
       controls.clientCertificate = clientSigning.publicKey;
+    } else {
+      controls.clientCertificate = null;
     }
     const newClient = await registerClient(
       context,
@@ -133,7 +133,10 @@ export const generateCredential = async (
 
     logger.debug('new-client %j', newClient);
 
-    const kongApi = new KongConsumerService(process.env.KONG_URL);
+    const kongApi = new KongConsumerService(
+      process.env.KONG_URL,
+      process.env.GWA_API_URL
+    );
     const consumer = await kongApi.createKongConsumer(nickname, clientId);
     const consumerPK = await AddClientConsumer(
       context,

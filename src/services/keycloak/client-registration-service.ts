@@ -30,6 +30,7 @@ export interface ClientRegistration {
 
 export enum ClientAuthenticator {
   ClientJWT = 'client-jwt',
+  ClientJWTwithJWKS = 'client-jwt-jwks-url',
   ClientSecret = 'client-secret',
 }
 
@@ -54,21 +55,32 @@ export class KeycloakClientRegistrationService {
     clientId: string,
     clientSecret: string,
     certificate: string,
+    jwksUrl: string,
     enabled: boolean = false
   ): Promise<ClientRegResponse> {
     const body =
-      authenticator === ClientAuthenticator.ClientJWT
+      authenticator === ClientAuthenticator.ClientSecret
+        ? Object.assign(clientTemplateClientSecret, {
+            enabled,
+            clientId,
+            secret: clientSecret,
+          })
+        : authenticator === ClientAuthenticator.ClientJWT
         ? Object.assign(clientTemplateClientJwt, {
             enabled,
             clientId,
             attributes: {
-              'jwt.credential.certificate': certificate,
+              'jwt.credential.public.key': certificate,
             },
           })
-        : Object.assign(clientTemplateClientSecret, {
+        : Object.assign(clientTemplateClientJwt, {
             enabled,
             clientId,
-            secret: clientSecret,
+            attributes: {
+              'jwt.credential.public.key': '',
+              'jwks.url': jwksUrl,
+              'use.jwks.url': 'true',
+            },
           });
 
     logger.debug(
@@ -92,7 +104,10 @@ export class KeycloakClientRegistrationService {
       id: response['id'],
       enabled: response['enabled'],
       clientId: response['clientId'],
-      clientSecret: clientSecret,
+      clientSecret:
+        authenticator === ClientAuthenticator.ClientSecret
+          ? clientSecret
+          : null,
       registrationAccessToken: response['registrationAccessToken'],
     } as ClientRegResponse;
   }

@@ -39,9 +39,11 @@ const logger = Logger('kong');
 
 export class KongConsumerService {
   private kongUrl: string;
+  private gwaUrl: string;
 
-  constructor(kongUrl: string) {
+  constructor(kongUrl: string, gwaUrl: string) {
     this.kongUrl = kongUrl;
+    this.gwaUrl = gwaUrl;
   }
 
   public async getConsumerByUsername(username: string) {
@@ -140,16 +142,17 @@ export class KongConsumerService {
 
   public async addPluginToConsumer(
     consumerPK: string,
-    plugin: KongPlugin
+    plugin: KongPlugin,
+    namespace: string
   ): Promise<KongObjectID> {
-    const body = {};
+    const body = { ...plugin, tags: ['ns.' + namespace] };
     logger.debug('[addPluginToConsumer] CALLING with ' + consumerPK);
 
     const response = await fetch(
-      `${this.kongUrl}/consumers/${consumerPK}/plugins`,
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins`,
       {
         method: 'post',
-        body: JSON.stringify(plugin),
+        body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -167,15 +170,16 @@ export class KongConsumerService {
   public async updateConsumerPlugin(
     consumerPK: string,
     pluginPK: string,
-    plugin: KongPlugin
+    plugin: KongPlugin,
+    namespace: string
   ): Promise<void> {
     logger.debug('[updateConsumerPlugin] C=%s P=%s', consumerPK, pluginPK);
-
+    const body = { ...plugin, tags: ['ns.' + namespace] };
     const response = await fetch(
-      `${this.kongUrl}/consumers/${consumerPK}/plugins/${pluginPK}`,
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
       {
         method: 'put',
-        body: JSON.stringify(plugin),
+        body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -189,14 +193,18 @@ export class KongConsumerService {
 
   public async deleteConsumerPlugin(
     consumerPK: string,
-    pluginPK: string
+    pluginPK: string,
+    namespace: string
   ): Promise<void> {
-    await fetch(`${this.kongUrl}/consumers/${consumerPK}/plugins/${pluginPK}`, {
-      method: 'delete',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then(checkStatus);
+    await fetch(
+      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
+      {
+        method: 'delete',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    ).then(checkStatus);
   }
 
   public async genKeyForConsumerKeyAuth(consumerPK: string, keyAuthPK: string) {

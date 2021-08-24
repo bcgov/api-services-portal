@@ -94,6 +94,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         variant="tertiary"
         leftIcon={<Icon as={FaPenSquare} />}
         onClick={onOpen}
+        data-testid="prd-edit-btn"
       >
         Edit
       </Button>
@@ -111,6 +112,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
                     name="name"
                     defaultValue={data.name}
                     variant="bc-input"
+                    data-testid="prd-edit-name-input"
                   />
                   <FormHelperText>Must be unique</FormHelperText>
                 </FormControl>
@@ -123,7 +125,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
           <ModalFooter>
             <DeleteProduct id={data.id} onDeleted={onClose} />
             <Box flex={1} />
-            <Button mr={3} onClick={onClose}>
+            <Button mr={3} onClick={onClose} data-testid="prd-edit-cancel-btn">
               Cancel
             </Button>
             <Button
@@ -131,6 +133,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
               isLoading={mutation.isLoading}
               variant="primary"
               onClick={onUpdate}
+              data-testid="prd-edit-update-btn"
             >
               Update
             </Button>

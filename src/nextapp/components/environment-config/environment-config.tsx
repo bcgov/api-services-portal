@@ -267,14 +267,17 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
               </Grid>
               <Flex justify="flex-end" mt={4}>
                 <ButtonGroup size="sm">
-                  <Button type="reset" isDisabled={mutation.isLoading}>
+                  <Button
+                    variant="secondary"
+                    type="reset"
+                    isDisabled={mutation.isLoading}
+                  >
                     Cancel
                   </Button>
                   <Button
                     isDisabled={!hasChanged}
                     isLoading={mutation.isLoading}
                     type="submit"
-                    variant="primary"
                   >
                     Apply Changes
                   </Button>

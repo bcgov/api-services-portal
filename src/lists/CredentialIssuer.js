@@ -79,6 +79,7 @@ module.exports = {
       options: [
         { value: 'client-secret', label: 'Client ID and Secret' },
         { value: 'client-jwt', label: 'Signed JWT' },
+        { value: 'client-jwt-jwks-url', label: 'Signed JWT with JWKS URL' },
       ],
     },
     authPlugin: {
@@ -157,7 +158,7 @@ module.exports = {
         if (!('owner' in resolvedData) && context['authedItem']) {
           resolvedData['owner'] = context.authedItem.userId;
         }
-        if ('namespace' in context['authedItem']) {
+        if (context['authedItem'] && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
       }

@@ -11,9 +11,14 @@ import { GatewayService } from '@/shared/types/query.types';
 interface ServiceItemProps {
   data: GatewayService;
   range: string[];
+  totalRequests: number;
 }
 
-const ServiceItem: React.FC<ServiceItemProps> = ({ data, range }) => {
+const ServiceItem: React.FC<ServiceItemProps> = ({
+  data,
+  range,
+  totalRequests,
+}) => {
   const { ref, inView } = useInView();
 
   return (
@@ -56,7 +61,13 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ data, range }) => {
         {!inView && <Skeleton flex={1} m={4} />}
         {inView && (
           <ClientRequest fallback={<Skeleton flex={1} />}>
-            <MetricGraph alt days={range} id={data.name} service={data} />
+            <MetricGraph
+              alt
+              days={range}
+              id={data.name}
+              service={data}
+              totalRequests={totalRequests}
+            />
           </ClientRequest>
         )}
       </Box>

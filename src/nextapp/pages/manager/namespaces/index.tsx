@@ -175,7 +175,10 @@ const NamespacesPage: React.FC = () => {
                     </Center>
                     <Heading size="md" mb={2}>
                       <NextLink passHref href={a.url}>
-                        <Link color="bc-blue-alt">
+                        <Link
+                          color="bc-blue-alt"
+                          data-testid={'ns-manage-link-' + a.title}
+                        >
                           {a.title}
                           <Icon
                             as={FaArrowRight}
@@ -223,7 +226,12 @@ const NamespacesPage: React.FC = () => {
                     </Circle>
                     <Heading size="sm">
                       <NextLink passHref href={a.url}>
-                        <Link color="bc-blue-alt">{a.title}</Link>
+                        <Link
+                          color="bc-blue-alt"
+                          data-testid={'ns-action-link-' + a.title}
+                        >
+                          {a.title}
+                        </Link>
                       </NextLink>
                     </Heading>
                   </GridItem>

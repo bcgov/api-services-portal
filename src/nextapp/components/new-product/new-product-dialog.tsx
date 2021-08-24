@@ -96,25 +96,46 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                 placeholder="Product Name"
                 name="name"
                 variant="bc-input"
+                data-testid="prd-name-input"
               />
             </FormControl>
             <FormControl as="fieldset" isRequired>
               <FormLabel as="legend">Environment</FormLabel>
               <RadioGroup defaultValue="dev">
                 <Stack>
-                  <Radio name="environment" value="dev">
+                  <Radio
+                    name="environment"
+                    value="dev"
+                    data-testid="prd-env-dev-radio"
+                  >
                     Development
                   </Radio>
-                  <Radio name="environment" value="test">
+                  <Radio
+                    name="environment"
+                    value="test"
+                    data-testid="prd-env-test-radio"
+                  >
                     Test
                   </Radio>
-                  <Radio name="environment" value="sandbox">
+                  <Radio
+                    name="environment"
+                    value="sandbox"
+                    data-testid="prd-env-sb-radio"
+                  >
                     Sandbox
                   </Radio>
-                  <Radio name="environment" value="prod">
+                  <Radio
+                    name="environment"
+                    value="prod"
+                    data-testid="prd-env-prod-radio"
+                  >
                     Production
                   </Radio>
-                  <Radio name="environment" value="other">
+                  <Radio
+                    name="environment"
+                    value="other"
+                    data-testid="prd-env-other-radio"
+                  >
                     Other
                   </Radio>
                 </Stack>
@@ -127,11 +148,17 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button
+              onClick={onClose}
+              variant="secondary"
+              data-testid="prd-cancel-btn"
+            >
+              Cancel
+            </Button>
             <Button
               isLoading={productMutation.isLoading}
-              variant="primary"
               onClick={createProduct}
+              data-testid="prd-create-btn"
             >
               Create
             </Button>

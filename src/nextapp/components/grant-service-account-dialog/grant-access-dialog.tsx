@@ -133,8 +133,8 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button onClick={onClose}>Cancel</Button>
-              <Button variant="primary" onClick={handleSubmitClick}>
+              <Button variant="secondary" onClick={onClose}>Cancel</Button>
+              <Button onClick={handleSubmitClick}>
                 Share
               </Button>
             </ButtonGroup>

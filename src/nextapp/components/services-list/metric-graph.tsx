@@ -22,8 +22,6 @@ import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
-import differenceInDays from 'date-fns/differenceInDays';
-import mean from 'lodash/mean';
 import numeral from 'numeral';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
@@ -39,10 +37,11 @@ import { GatewayService } from '@/shared/types/query.types';
 interface DailyDatum {
   day: string;
   dayFormatted: string;
+  dayFormattedShort: string;
   downtime: number;
   requests: number[];
   total: number;
-  peak: number[];
+  peak: number | number[];
 }
 
 interface MetricGraphProps {
@@ -51,6 +50,7 @@ interface MetricGraphProps {
   height?: number;
   id: string;
   service: GatewayService;
+  totalRequests: number;
 }
 
 const MetricGraph: React.FC<MetricGraphProps> = ({
@@ -59,6 +59,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   height = 100,
   id,
   service,
+  totalRequests,
 }) => {
   const { data } = useApi(['metric', id], {
     query: GET_METRICS,
@@ -86,7 +87,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     }, 0);
     const downtime = 24 - values.length;
     const defaultPeakDate: number = firstDateValue.getTime();
-    const peak: any = value.reduce(
+    const peak: number | [number, number] = value.reduce(
       (memo, v) => {
         if (memo[1] < Number(v[1])) {
           return v;
@@ -112,19 +113,37 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return {
       day,
       dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
+      dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
       total,
       peak,
       requests,
     };
   });
-  const totalHours = 24 * 5;
-  const downtime = sum(dailies.map((d) => d.downtime));
-  const totalRequests = sum(dailies.map((d) => d.total));
-  const requestsAverage = mean(dailies.map((d) => d.total));
-  const usage = downtime / totalHours;
-  const usagePercent = usage * 100;
-  const color = interpolateRdYlGn(usage);
+  const totalDailyRequests = sum(dailies.map((d) => d.total));
+  const peak = dailies.reduce(
+    (memo, d) => {
+      const prevPeak = Number(memo[1]);
+      const currentPeak = Number(d.peak[1]);
+
+      if (currentPeak > prevPeak) {
+        return d.peak;
+      }
+      return memo;
+    },
+    [0, '0']
+  );
+  const peakRequests = round(Number(peak[1]), 2);
+  const peakDay = dailies.reduce((memo, d) => {
+    if (!memo || d.total > memo.total) {
+      return d;
+    }
+    return memo;
+  }, null);
+  const peakDayText = peakDay ? peakDay.dayFormattedShort : 'n/a';
+  const usage = totalRequests > 0 ? totalDailyRequests / totalRequests : 0;
+  const usagePercent = usage ? usage * 100 : 0;
+  const color = usage ? interpolateRdYlGn(usage) : '#eee';
   const y = scaleLinear().range([0, height]).domain([0, 1]);
 
   if (data.allMetrics) {
@@ -155,24 +174,22 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Box>
         <StatGroup spacing={8} flexWrap="wrap">
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Avg</StatLabel>
-            <StatNumber>{numeral(requestsAverage).format('0.0a')}</StatNumber>
+            <StatLabel {...labelProps}>Peak Hourly</StatLabel>
+            <StatNumber>{peakRequests}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Peak Daily</StatLabel>
+            <StatNumber>{numeral(peakDay.total).format('0.0a')}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Peak Day</StatLabel>
+            <StatNumber>{peakDayText}</StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Total Req</StatLabel>
             <StatNumber overflow="hidden">
-              {numeral(totalRequests).format('0.0a')}
+              {numeral(totalDailyRequests).format('0.0a')}
             </StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Days since</StatLabel>
-            <StatNumber>
-              {differenceInDays(new Date(), new Date(service?.updatedAt))}
-            </StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Plugins</StatLabel>
-            <StatNumber>{service?.plugins.length}</StatNumber>
           </Stat>
         </StatGroup>
       </Box>

@@ -71,6 +71,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
             key={link.url}
             width={{ base: '100%', sm: 'auto' }}
             pos="relative"
+            sx={{ listStyle: 'none' }}
           >
             <NextLink href={link.url}>
               <Link
@@ -80,6 +81,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
                     ? 'page'
                     : false
                 }
+                data-testid={'navbar-link-' + link.name}
               >
                 <Box as="span" whiteSpace="nowrap" pr={BadgeElement ? 4 : 0}>
                   {link.name}

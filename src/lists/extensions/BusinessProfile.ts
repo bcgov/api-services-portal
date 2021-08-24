@@ -2,7 +2,7 @@ import { EnforcementPoint } from '../../authz/enforcement';
 
 import { lookupCredentialReferenceByServiceAccess } from '../../services/keystone';
 
-import { ConfigService } from '../../services/bceid/config.service';
+import { ConfigService } from '../../services/config.service';
 import { BCeIDService } from '../../services/bceid/bceid.service';
 
 const typeBusinessProfile = `

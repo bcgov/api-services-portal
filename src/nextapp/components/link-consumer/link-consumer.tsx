@@ -103,8 +103,8 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button onClick={onClose}>Cancel</Button>
-              <Button variant="primary" onClick={handleSubmitClick}>
+              <Button variant="secondary" onClick={onClose}>Cancel</Button>
+              <Button onClick={handleSubmitClick}>
                 Link
               </Button>
             </ButtonGroup>

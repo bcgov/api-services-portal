@@ -5,7 +5,7 @@ const { portal } = require('../utils/portal');
 
 const queries = [
   {
-    query: 'sum(increase(kong_http_status[60m])) by (service,code)',
+    query: 'sum(increase(kong_http_status[1d])) by (service,code)',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily_service_code',
   },
@@ -20,18 +20,18 @@ const queries = [
     id: 'kong_http_requests_hourly_namespace',
   },
   {
-    query: 'sum(increase(kong_http_status[60m])) by (namespace)',
+    query: 'sum(increase(kong_http_status[1d])) by (namespace)',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily_namespace',
   },
   {
-    query: 'sum(increase(kong_http_status[60m]))',
+    query: 'sum(increase(kong_http_status[1d]))',
     step: 60 * 60 * 24,
     id: 'kong_http_requests_daily',
   },
   {
     query:
-      'sum(increase(konglog_service_consumer_counter[60m])) by (consumer,service)',
+      'sum(increase(konglog_service_consumer_counter[1d])) by (consumer,service)',
     step: 60 * 60 * 24,
     id: 'konglog_service_consumer_daily',
   },

@@ -60,7 +60,14 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
                   {c.label}
                 </Text>
                 <Flex>
-                  <Text as="code" wordBreak="break-all" noOfLines={1}>
+                  <Text
+                    as="code"
+                    wordBreak="break-all"
+                    noOfLines={1}
+                    data-testid={
+                      'sa-new-creds-' + c.label.toLowerCase().replace(' ', '-')
+                    }
+                  >
                     {credentials[c.name]}
                   </Text>
                   <Tooltip
