@@ -27,9 +27,9 @@ async function scopedSyncByNamespace(
   namespace
 ) {
   const exceptions = [];
+
   const scopedDir = `${workingPath}/${uuidv4()}`;
   const xfer = transfers(scopedDir, url, exceptions);
-
   await xfer.copy(`/services?tags=ns.${namespace}`, 'gw-services');
   await xfer.copy(`/routes?tags=ns.${namespace}`, 'gw-routes');
   await xfer.copy(`/consumers?tags=ns.${namespace}`, 'gw-consumers');
@@ -70,7 +70,30 @@ async function scopedSyncByNamespace(
   await xfer.concurrentWork(
     loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
   );
-  //await xfer.concurrentWork(loadAppsProducer(xfer, destinationUrl, 'gw-consumers', 'name', 'service', '/feed/Application'))
+
+  // remove any GatewayService or GatewayRoutes that no longer exist in Kong
+  const destination = portal(destinationUrl);
+
+  const cleanupEntities = [
+    { entity: 'GatewayService', file: 'gw-services' },
+    { entity: 'GatewayRoute', file: 'gw-routes' },
+  ];
+  for (item of cleanupEntities) {
+    const current = await destination.get(
+      '/feed/' + item.entity + '/namespace/' + namespace
+    );
+    const items = xfer.get_json_content(item.file)['data'];
+    for (cur of current.filter(
+      (cur) =>
+        items.filter((target) => target['id'] === cur.extForeignKey).length == 0
+    )) {
+      const nm = item.entity + ':' + cur.extForeignKey;
+      await destination
+        .fireAndForgetDeletion('/feed/' + item.entity + '/' + cur.extForeignKey)
+        .then((result) => console.log(`[${nm}] DELETED`))
+        .catch((err) => console.log(`[${nm}] DELETION ERR ${err}`));
+    }
+  }
 
   fs.rmdirSync(scopedDir, { recursive: true });
 }
