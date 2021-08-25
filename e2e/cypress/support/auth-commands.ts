@@ -22,7 +22,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-  cy.wait(1000)
+  cy.wait(3000)
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
