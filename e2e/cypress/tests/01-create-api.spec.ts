@@ -9,6 +9,12 @@ describe('Create API Spec', () => {
   const sa = new ServiceAccountsPage()
   const pd = new Products()
 
+  before(() => {
+    cy.visit('/')
+    cy.clearCookies()
+    cy.reload()
+  })
+
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
