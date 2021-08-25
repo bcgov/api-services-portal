@@ -71,8 +71,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
               <AppWrapper router={router}>
-                {!pageProps.authenticated && <AppError />}
-                {pageProps.authenticated && <Component {...pageProps} />}
+                {pageProps.authenticated === false ? (
+                  <AppError />
+                ) : (
+                  <Component {...pageProps} />
+                )}
               </AppWrapper>
             </Box>
           </AuthProvider>

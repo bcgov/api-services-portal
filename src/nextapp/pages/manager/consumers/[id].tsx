@@ -89,7 +89,7 @@ const ConsumersPage: React.FC<
     consumer && (
       <>
         <Head>
-          <title>{`Consumers | ${consumer.username}`}</title>
+          <title>{`Consumers | ${consumer?.username}`}</title>
         </Head>
         <Container maxW="6xl">
           <PageHeader
@@ -99,7 +99,7 @@ const ConsumersPage: React.FC<
             title={
               <Box as="span" display="flex" alignItems="center">
                 <ModelIcon model="consumer" size="sm" mr={2} />
-                {consumer.username}
+                {consumer?.username}
               </Box>
             }
           >
@@ -108,13 +108,13 @@ const ConsumersPage: React.FC<
                 Namespace
               </Text>
               <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                {consumer.namespace ?? '-'}
+                {consumer?.namespace ?? '-'}
               </Text>
               <Text as="span" ml={3} mr={1} fontWeight="bold">
                 Kong Consumer ID
               </Text>
               <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                {consumer.extForeignKey}
+                {consumer?.extForeignKey}
               </Text>
             </Text>
           </PageHeader>
@@ -136,20 +136,20 @@ const ConsumersPage: React.FC<
           </HStack>
           <ControlsList
             consumerId={id}
-            data={consumer.plugins.filter((p) => p.route || p.service)}
+            data={consumer?.plugins.filter((p) => p.route || p.service)}
           />
 
           <ConsumerAuthz
             queryKey={queryKey}
             consumerId={id}
-            consumerUsername={consumer.username}
+            consumerUsername={consumer?.username}
             consumerAclGroups={consumerAclGroups}
-            products={data.allProductsByNamespace}
+            products={data?.allProductsByNamespace}
           />
 
-          {hasEnvironmentWithAclBasedFlow(data.allProductsByNamespace) && (
+          {hasEnvironmentWithAclBasedFlow(data?.allProductsByNamespace) && (
             <ConsumerACL
-              products={data.allProductsByNamespace}
+              products={data?.allProductsByNamespace}
               aclGroups={consumerAclGroups}
             />
           )}
