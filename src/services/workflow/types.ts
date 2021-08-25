@@ -6,6 +6,7 @@ export interface NewCredential {
   flow: string;
   clientId?: string;
   clientSecret?: string;
+  issuer?: string;
   tokenEndpoint?: string;
   apiKey?: string;
   clientPublicKey?: string;

@@ -179,6 +179,7 @@ export const generateCredential = async (
       clientSecret: controls.clientGenCertificate
         ? null
         : newClient.client.clientSecret,
+      issuer: controls.jwksUrl ? newClient.openid.issuer : null,
       tokenEndpoint: newClient.openid.token_endpoint,
       clientPublicKey: clientSigning.publicKey,
       clientPrivateKey: clientSigning.privateKey,
