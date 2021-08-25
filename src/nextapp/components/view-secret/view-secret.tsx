@@ -39,6 +39,7 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
           { name: 'clientSecret', label: 'Client Secret' },
           { name: 'clientPrivateKey', label: 'Signing Private Key' },
           { name: 'clientPublicKey', label: 'Signing Public Certificate' },
+          { name: 'issuer', label: 'Issuer' },
           { name: 'tokenEndpoint', label: 'Token Endpoint' },
         ]
           .filter(
