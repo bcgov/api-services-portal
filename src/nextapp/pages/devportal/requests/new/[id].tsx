@@ -332,7 +332,11 @@ const NewRequestsPage: React.FC<
                 bgColor="blue.50"
                 borderRadius={4}
               >
-                <Checkbox colorScheme="blue" name="acceptLegal">
+                <Checkbox
+                  colorScheme="blue"
+                  name="acceptLegal"
+                  data-testid="access-rqst-legal-terms-cb"
+                >
                   {selectedEnvironment.legal.title}
                 </Checkbox>
                 <Link

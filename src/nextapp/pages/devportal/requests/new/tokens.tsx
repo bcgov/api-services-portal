@@ -124,6 +124,7 @@ const ApiAccessPage: React.FC = () => {
                     onClick={generateCredentials}
                     leftIcon={<Icon as={FaEye} />}
                     variant="primary"
+                    data-testid="access-rqst-gen-scrts-btn"
                   >
                     Generate Secrets
                   </Button>
