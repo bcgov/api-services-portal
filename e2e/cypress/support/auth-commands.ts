@@ -22,7 +22,6 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-  cy.wait(3000)
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
@@ -91,7 +90,7 @@ Cypress.Commands.add('logout', () => {
     cy.get('@session').then((res: any) => {
       cy.contains(res.body.user.name).click()
       cy.contains('Sign Out').click()
-      cy.clearCookies()
+      cy.removeCookies()
     })
   })
   cy.log('> Logging out')
