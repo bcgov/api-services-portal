@@ -109,6 +109,7 @@ const ApiPage: React.FC<
               <Button
                 colorScheme="green"
                 disabled={hasProtectedEnvironments() == false}
+                data-testid="api-rqst-access-btn"
               >
                 Request Access
               </Button>

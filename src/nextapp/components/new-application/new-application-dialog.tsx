@@ -91,7 +91,12 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={4}>
               <FormLabel>Application Name</FormLabel>
-              <Input placeholder=" Name" name="name" variant="bc-input" />
+              <Input
+                placeholder=" Name"
+                name="name"
+                variant="bc-input"
+                data-testid="create-app-name-input"
+              />
             </FormControl>
             <FormControl isRequired as="fieldset">
               <FormLabel>Description</FormLabel>
@@ -99,16 +104,23 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
                 name="description"
                 placeholder="What does your application do?"
                 variant="bc-input"
+                data-testid="create-app-description-input"
               />
             </FormControl>
           </form>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose} variant="secondary">
+            <Button
+              onClick={onClose}
+              variant="secondary"
+              data-testid="create-app-cancel-btn"
+            >
               Cancel
             </Button>
-            <Button onClick={submitForm}>Create</Button>
+            <Button onClick={submitForm} data-testid="create-app-submit-btn">
+              Create
+            </Button>
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>
