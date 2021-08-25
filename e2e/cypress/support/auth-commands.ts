@@ -4,6 +4,7 @@ import LoginPage from '../pageObjects/login'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
+import { checkElementExists } from '.'
 
 interface formDataRequestOptions {
   method: string
@@ -25,6 +26,13 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+
+  if (checkElementExists('.alert')) {
+    cy.reload()
+    cy.get(login.usernameInput).click().type(username)
+    cy.get(login.passwordInput).click().type(password)
+    cy.get(login.loginSubmitButton).click()
+  }
 
   log.end()
   cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
