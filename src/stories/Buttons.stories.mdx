@@ -1,0 +1,98 @@
+import { Box, Button, Icon, HStack } from '@chakra-ui/react';
+import { FaPlus } from 'react-icons/fa'
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+
+
+<Meta title="BCGov/Buttons" component={Button} />
+
+export const Template = (args) => (
+  <HStack spacing={4}>
+    <Button {...args} />
+    <Button {...args} isDisabled>Disabled</Button>
+    <Button {...args} isActive>Active</Button>
+    <Button {...args} leftIcon={<Icon as={FaPlus}/>}>Icon Button</Button>
+  </HStack> 
+)
+
+# Buttons
+
+Custom variants have been added to extend the base Chakra theme to match the BC Design Guidelines. To use:
+
+Reference the [Chakra Button](https://chakra-ui.com/docs/form/button) documentation for additional props
+
+```javascript
+import { Button } from '@chakra-ui/react';
+
+const Component = () => <Button>Button</Button>
+```
+
+## Primary Button
+
+The default `Button` is automatically set to the `primary` variant. Use for the most important actions you want users to take on your site.
+
+<Canvas>
+  <Story 
+    name="Primary"
+    args={{ 
+      children: 'Primary Button',
+  }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Secondary Button
+
+Use the `secondary` button from supporting actions users can take on your site. 
+
+<Canvas>
+  <Story 
+    name="Secondary"
+    args={{ 
+      variant: 'secondary',
+      children: 'Secondary Button',
+  }}>
+  {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Flat Button
+
+In some cases with the APS UI the size and boldness of the secondary button can be too overpowering.
+
+**NOTE** Because Chakra doesn't offer  default sizes tied to a `variant` at the theme level, manually set `flat` buttons to `size="sm"`
+
+<Canvas>
+  <Story 
+    name="Flat Button"
+    args={{ 
+      variant: 'flat',
+      size: 'sm',
+      children: 'Flat Button',
+  }}>
+  {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Header Action Button
+
+When using a button in the app bar header, set the variant to `header`
+
+<Canvas>
+  <Story 
+    name="Header Button"
+    args={{ 
+      variant: 'header',
+      children: 'Header Button',
+  }}>
+  {Template.bind({})}
+  </Story>
+</Canvas>
+
+
+<Canvas>
+  <Story name="Header example">
+    <Box d="flex" justifyContent="flex-end" bgColor="bc-blue" p={4}>
+      <Button variant="header">Login</Button>
+    </Box>
+  </Story>
+</Canvas>

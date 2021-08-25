@@ -208,6 +208,22 @@ const theme = extendTheme(
           colorScheme: 'ui',
         },
       },
+      Table: {
+        sizes: {
+          sm: { th: { fontSize: 'sm' } },
+          md: { th: { fontSize: 'md' } },
+          lg: { th: { fontSize: 'lg' } },
+        },
+        variants: {
+          simple: {
+            th: {
+              borderBottom: '2px solid',
+              borderColor: 'bc-yellow',
+              textTransform: 'none',
+            },
+          },
+        },
+      },
     },
   },
   withDefaultVariant({
