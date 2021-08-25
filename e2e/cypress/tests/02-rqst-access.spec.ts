@@ -7,6 +7,12 @@ describe('Request Access Spec', () => {
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
 
+  before(() => {
+    cy.visit('/')
+    cy.clearCookies()
+    cy.reload()
+  })
+
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')

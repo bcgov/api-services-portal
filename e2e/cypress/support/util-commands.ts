@@ -1,33 +1,28 @@
+const listOfCookies = [
+  'AUTH_SESSION_ID_LEGACY',
+  'KC_RESTART',
+  'KEYCLOAK_IDENTITY_LEGACY',
+  'KEYCLOAK_LOCALE',
+  'KEYCLOAK_REMEMBER_ME',
+  'KEYCLOAK_SESSION_LEGACY',
+  '_oauth2_proxy',
+  '_oauth2_proxy_csrf',
+  'keystone.sid',
+]
+
 Cypress.Commands.add('preserveCookies', () => {
   cy.log('< Saving Cookies')
-  Cypress.Cookies.preserveOnce(
-    ...[
-      'AUTH_SESSION_ID_LEGACY',
-      'KC_RESTART',
-      'KEYCLOAK_IDENTITY_LEGACY',
-      'KEYCLOAK_LOCALE',
-      'KEYCLOAK_LOCALE',
-      'KEYCLOAK_SESSION_LEGACY',
-      '_oauth2_proxy',
-      '_oauth2_proxy_csrf',
-      'keystone.sid',
-    ]
-  )
-  // Cypress.Cookies.defaults({
-  //   preserve: [
-  //     'AUTH_SESSION_ID_LEGACY',
-  //     'KC_RESTART',
-  //     'KEYCLOAK_IDENTITY_LEGACY',
-  //     'KEYCLOAK_LOCALE',
-  //     'KEYCLOAK_LOCALE',
-  //     'KEYCLOAK_SESSION_LEGACY',
-  //     '_oauth2_proxy',
-  //     '_oauth2_proxy_csrf',
-  //     'keystone.sid',
-  //   ],
-  // })
+  Cypress.Cookies.preserveOnce(...listOfCookies)
   Cypress.Cookies.debug(true)
   cy.log('> Saving Cookies')
+})
+
+Cypress.Commands.add('removeCookies', () => {
+  cy.log('< Removing Cookies')
+  listOfCookies.forEach((cookie) => {
+    cy.clearCookie(cookie)
+  })
+  cy.log('> Removing Cookies')
 })
 
 Cypress.Commands.add('preserveCookiesDefaults', () => {

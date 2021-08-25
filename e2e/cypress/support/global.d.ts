@@ -13,6 +13,8 @@ declare namespace Cypress {
 
     preserveCookies(): void
 
+    removeCookies(): void
+
     preserveCookiesDefaults(): void
 
     saveState(key: string, value: string): void
