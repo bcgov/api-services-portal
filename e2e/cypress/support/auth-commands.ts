@@ -23,10 +23,6 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-<<<<<<< HEAD
-=======
-  cy.wait(3000)
->>>>>>> 86430cad (increated delay before login to avoid login timeouts)
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
