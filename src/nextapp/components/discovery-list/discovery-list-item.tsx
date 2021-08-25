@@ -45,15 +45,15 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
             {data.dataset ? (
               <>
-                <NextLink
-                  passHref
-                  href={`/devportal/api-directory/${data.id}`}
-                  data-testid={
-                    'api-' +
-                    data.dataset.title.replaceAll(' ', '').toLowerCase()
-                  }
-                >
-                  <Link>{data.dataset.title}</Link>
+                <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
+                  <Link
+                    data-testid={
+                      'api-' +
+                      data.dataset.title.replaceAll(' ', '').toLowerCase()
+                    }
+                  >
+                    {data.dataset.title}
+                  </Link>
                 </NextLink>
               </>
             ) : (
