@@ -1,0 +1,20 @@
+{
+  "user": {
+    "credentials": {
+      "username": "local",
+      "password": "local"
+    }
+  },
+  "namespace": "platform",
+  "product": {
+    "name": "Auto Test Product",
+    "environment": "dev"
+  },
+  "application": {
+    "name": "Auto Test App",
+    "description": "Test application for auto test"
+  },
+  "accessRequest": {
+    "notes": "This is test access request"
+  }
+}
