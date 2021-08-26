@@ -72,7 +72,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
               <AppWrapper router={router}>
                 {pageProps.authenticated === false ? (
-                  <AppError />
+                  ''
                 ) : (
                   <Component {...pageProps} />
                 )}
