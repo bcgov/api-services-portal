@@ -531,10 +531,10 @@ app.post('/gql/api', async (req, res) => {
 
 app.get('/oauth2/auth', (req, res) => {
   // Fake signed out
-  res.status(401);
-  res.send('Unauthorized');
+  // res.status(401);
+  // res.send('Unauthorized');
   // Fake signed in
-  // res.status(200);
+  res.status(200);
   res.end();
 });
 app.use('/admin', adminApi);

@@ -2,13 +2,11 @@ import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
   Box,
-  Button,
   Container,
   Divider,
   Heading,
   HStack,
   Text,
-  Switch,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import { dehydrate } from 'react-query/hydration';
@@ -28,7 +26,6 @@ import ModelIcon from '@/components/model-icon/model-icon';
 import ConsumerAuthz from '@/components/consumer-authz';
 import ConsumerACL from '@/components/consumer-acl';
 import { withAuth } from '@/shared/services/auth';
-import Error from 'next/error';
 import breadcrumbs from '@/components/ns-breadcrumb';
 
 export const getServerSideProps: GetServerSideProps = withAuth(
@@ -59,107 +56,103 @@ export const getServerSideProps: GetServerSideProps = withAuth(
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id }) => {
-  try {
-    const queryKey = ['consumer', id];
-    const { data } = useApi(
-      queryKey,
-      {
-        query,
-        variables: { id },
-      },
-      { suspense: false }
-    );
+  const queryKey = ['consumer', id];
+  const { data } = useApi(
+    queryKey,
+    {
+      query,
+      variables: { id },
+    },
+    { suspense: false }
+  );
 
-    const consumer = data?.getGatewayConsumerPlugins;
-    const consumerAclGroups = consumer?.aclGroups
-      ? JSON.parse(consumer?.aclGroups)
-      : [];
+  const consumer = data?.getGatewayConsumerPlugins;
+  const consumerAclGroups = consumer?.aclGroups
+    ? JSON.parse(consumer?.aclGroups)
+    : [];
 
-    const hasEnvironmentWithAclBasedFlow = (products: Product[]): boolean =>
-      products
-        .filter((p) => p.environments.length != 0)
-        .filter(
-          (p) =>
-            p.environments.filter((e) =>
-              ['kong-api-key-acl', 'kong-acl-only'].includes(e.flow)
-            ).length != 0
-        ).length != 0;
+  const hasEnvironmentWithAclBasedFlow = (products: Product[]): boolean =>
+    products
+      .filter((p) => p.environments.length != 0)
+      .filter(
+        (p) =>
+          p.environments.filter((e) =>
+            ['kong-api-key-acl', 'kong-acl-only'].includes(e.flow)
+          ).length != 0
+      ).length != 0;
 
-    return (
-      consumer && (
-        <>
-          <Head>
-            <title>{`Consumers | ${consumer?.username}`}</title>
-          </Head>
-          <Container maxW="6xl">
-            <PageHeader
-              breadcrumb={breadcrumbs([
-                { href: '/manager/consumers', text: 'Consumers' },
-              ])}
-              title={
-                <Box as="span" display="flex" alignItems="center">
-                  <ModelIcon model="consumer" size="sm" mr={2} />
-                  {consumer?.username}
-                </Box>
-              }
-            >
-              <Text fontSize="sm">
-                <Text as="span" mr={1} fontWeight="bold">
-                  Namespace
-                </Text>
-                <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                  {consumer?.namespace ?? '-'}
-                </Text>
-                <Text as="span" ml={3} mr={1} fontWeight="bold">
-                  Kong Consumer ID
-                </Text>
-                <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                  {consumer?.extForeignKey}
-                </Text>
+  return (
+    consumer && (
+      <>
+        <Head>
+          <title>{`Consumers | ${consumer?.username}`}</title>
+        </Head>
+        <Container maxW="6xl">
+          <PageHeader
+            breadcrumb={breadcrumbs([
+              { href: '/manager/consumers', text: 'Consumers' },
+            ])}
+            title={
+              <Box as="span" display="flex" alignItems="center">
+                <ModelIcon model="consumer" size="sm" mr={2} />
+                {consumer?.username}
+              </Box>
+            }
+          >
+            <Text fontSize="sm">
+              <Text as="span" mr={1} fontWeight="bold">
+                Namespace
               </Text>
-            </PageHeader>
+              <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
+                {consumer?.namespace ?? '-'}
+              </Text>
+              <Text as="span" ml={3} mr={1} fontWeight="bold">
+                Kong Consumer ID
+              </Text>
+              <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
+                {consumer?.extForeignKey}
+              </Text>
+            </Text>
+          </PageHeader>
 
-            <Box as="header" bgColor="white" p={4}>
-              <Heading size="md">Add Controls</Heading>
-            </Box>
-            <Divider />
-            <HStack
-              bgColor="white"
-              spacing={4}
-              p={4}
-              borderRadius={4}
-              mb={4}
-              justify="stretch"
-            >
-              <IpRestriction id={id} queryKey={queryKey} mode="create" />
-              <RateLimiting id={id} queryKey={queryKey} mode="create" />
-            </HStack>
-            <ControlsList
-              consumerId={id}
-              data={consumer?.plugins.filter((p) => p.route || p.service)}
-            />
+          <Box as="header" bgColor="white" p={4}>
+            <Heading size="md">Add Controls</Heading>
+          </Box>
+          <Divider />
+          <HStack
+            bgColor="white"
+            spacing={4}
+            p={4}
+            borderRadius={4}
+            mb={4}
+            justify="stretch"
+          >
+            <IpRestriction id={id} queryKey={queryKey} mode="create" />
+            <RateLimiting id={id} queryKey={queryKey} mode="create" />
+          </HStack>
+          <ControlsList
+            consumerId={id}
+            data={consumer?.plugins.filter((p) => p.route || p.service)}
+          />
 
-            <ConsumerAuthz
-              queryKey={queryKey}
-              consumerId={id}
-              consumerUsername={consumer?.username}
-              consumerAclGroups={consumerAclGroups}
+          <ConsumerAuthz
+            queryKey={queryKey}
+            consumerId={id}
+            consumerUsername={consumer?.username}
+            consumerAclGroups={consumerAclGroups}
+            products={data?.allProductsByNamespace}
+          />
+
+          {hasEnvironmentWithAclBasedFlow(data?.allProductsByNamespace) && (
+            <ConsumerACL
               products={data?.allProductsByNamespace}
+              aclGroups={consumerAclGroups}
             />
-
-            {hasEnvironmentWithAclBasedFlow(data?.allProductsByNamespace) && (
-              <ConsumerACL
-                products={data?.allProductsByNamespace}
-                aclGroups={consumerAclGroups}
-              />
-            )}
-          </Container>
-        </>
-      )
-    );
-  } catch (err) {
-    return <Error statusCode={500} />;
-  }
+          )}
+        </Container>
+      </>
+    )
+  );
 };
 
 export default ConsumersPage;

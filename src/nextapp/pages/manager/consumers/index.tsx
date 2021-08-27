@@ -133,7 +133,7 @@ const ConsumersPage: React.FC<
                   </Td>
                 </Tr>
               )}
-              {data.allServiceAccessesByNamespace
+              {data?.allServiceAccessesByNamespace
                 ?.filter((d) => !!d.consumer)
                 .map((d) => d.consumer)
                 .map((d) => (

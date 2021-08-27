@@ -39,6 +39,11 @@ const theme = extendTheme({
     IconButton: {
       variants: buttonVariants,
     },
+    Link: {
+      baseStyle: {
+        color: 'bc-link',
+      },
+    },
     Button: {
       variants: buttonVariants,
     },
