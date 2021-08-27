@@ -1,0 +1,92 @@
+import { 
+  Box, 
+  Tag,
+  TagLabel,
+  TagLeftIcon,
+  TagRightIcon,
+  TagCloseButton,
+  Icon,
+  HStack,
+} from '@chakra-ui/react';
+import { FaGripVertical, FaPlus } from 'react-icons/fa'
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+
+
+<Meta title="BCGov/Tags" component={Tag} />
+
+export const Template = ({ children, ...args }) => (
+  <HStack spacing={4} >
+    <Tag {...args}>{children}</Tag>
+    <Tag {...args}>
+      <TagLabel>Tag with Close</TagLabel>
+      <TagCloseButton />
+    </Tag>
+    <Tag {...args}>
+      <TagLeftIcon as={FaPlus} />
+      <TagLabel>Tag with Icon</TagLabel>
+    </Tag>
+  </HStack> 
+)
+
+export const DragTemplate = (args) => (
+  <Tag {...args}>
+    <TagLabel>Tag with Icon</TagLabel>
+    <TagRightIcon as={FaGripVertical} color="bc-gray"/>
+  </Tag>
+)
+
+# Tags
+
+Custom variants have been added to extend the base Chakra theme to match the BC Design Guidelines. To use:
+
+Reference the [Chakra Button](https://chakra-ui.com/docs/form/button) documentation for additional props
+
+```javascript
+import { Tag } from '@chakra-ui/react';
+
+const Component = () => <Tag>Button</Tag>
+```
+
+## Default Tag
+
+The default implementation of this tag works well for components where it is the only tag present in a card or table row.
+
+<Canvas>
+  <Story 
+    name="Default"
+    args={{ 
+      children: 'Production',
+  }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Outline Tag
+
+Use the outline variant for groups of tags
+
+<Canvas>
+  <Story 
+    name="Outline"
+    args={{ 
+      children: 'test',
+      variant: 'outline'
+  }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Draggable Tag
+
+Custom tag for drag and drop interfaces
+
+<Canvas>
+  <Story 
+    name="Draggable"
+    args={{ 
+      children: 'Drag me',
+      variant: 'drag'
+  }}>
+    {DragTemplate.bind({})}
+  </Story>
+</Canvas>

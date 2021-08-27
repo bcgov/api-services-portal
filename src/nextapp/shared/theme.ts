@@ -7,6 +7,7 @@ const colors = {
   'bc-component': '#606060',
   'bc-link': '#1A5A96',
   'bc-blue-alt': '#38598A',
+  'bc-light-blue': '#77ACF1',
   'bc-gray': '#f2f2f2',
   'bc-border-focus': '#3B99FC',
   'bc-error': '#D8292F',
@@ -224,11 +225,49 @@ const theme = extendTheme(
           },
         },
       },
+      Tag: {
+        variants: {
+          'bc-input': {
+            container: {
+              borderRadius: 4,
+              color: 'white',
+              fontWeight: 'bold',
+              px: 4,
+              backgroundColor: 'bc-light-blue',
+            },
+          },
+          outline: {
+            container: {
+              borderRadius: 4,
+              backgroundColor: '#E9F0F8',
+              borderColor: 'rgba(142, 142, 142, 0.35)',
+              color: 'text',
+            },
+          },
+          drag: {
+            container: {
+              borderRadius: 4,
+              backgroundColor: 'white',
+              border: '1px solid',
+              borderColor: 'bc-gray',
+              color: 'text',
+              fontSize: 'xs',
+            },
+          },
+        },
+      },
     },
   },
   withDefaultVariant({
     variant: 'bc-input',
-    components: ['Checkbox', 'Input', 'FormErrorMessage', 'Select', 'Textarea'],
+    components: [
+      'Checkbox',
+      'Input',
+      'FormErrorMessage',
+      'Select',
+      'Textarea',
+      'Tag',
+    ],
   })
 );
 
