@@ -31,7 +31,7 @@ export const Template = ({ children, ...args }) => (
 export const DragTemplate = (args) => (
   <Tag {...args}>
     <TagLabel>Tag with Icon</TagLabel>
-    <TagRightIcon as={FaGripVertical} color="bc-gray"/>
+    <TagRightIcon as={FaGripVertical} />
   </Tag>
 )
 
@@ -44,7 +44,7 @@ Reference the [Chakra Button](https://chakra-ui.com/docs/form/button) documentat
 ```javascript
 import { Tag } from '@chakra-ui/react';
 
-const Component = () => <Tag>Button</Tag>
+const Component = () => <Tag>Tag</Tag>
 ```
 
 ## Default Tag

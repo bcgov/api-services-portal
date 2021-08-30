@@ -15,6 +15,33 @@ const colors = {
   ui: {
     500: '#606060',
   },
+  primary: {
+    500: '#003366',
+  },
+  green: {
+    '50': '#ECF8EF',
+    '100': '#CAEDD1',
+    '200': '#A8E1B4',
+    '300': '#86D596',
+    '400': '#64C979',
+    '500': '#42BD5B',
+    '600': '#349849',
+    '700': '#277237',
+    '800': '#1A4C24',
+    '900': '#0D2612',
+  },
+  red: {
+    '50': '#FBE9EA',
+    '100': '#F4C3C4',
+    '200': '#ED9C9F',
+    '300': '#E67579',
+    '400': '#DF4E53',
+    '500': '#D8272D',
+    '600': '#AD1F24',
+    '700': '#81181B',
+    '800': '#561012',
+    '900': '#2B0809',
+  },
 };
 const _focus = {
   outline: '4px solid',
@@ -137,13 +164,13 @@ const theme = extendTheme(
         },
         defaultProps: {
           size: 'lg',
-          colorScheme: 'ui',
+          colorScheme: 'primary',
         },
       },
       Radio: {
         defaultProps: {
           size: 'lg',
-          colorScheme: 'ui',
+          colorScheme: 'primary',
         },
       },
       Input: {
@@ -206,7 +233,7 @@ const theme = extendTheme(
       },
       Switch: {
         defaultProps: {
-          colorScheme: 'ui',
+          colorScheme: 'primary',
         },
       },
       Table: {
@@ -225,7 +252,25 @@ const theme = extendTheme(
           },
         },
       },
+      Tabs: {
+        variants: {
+          line: {
+            tab: {
+              color: 'bc-component',
+              _selected: {
+                fontWeight: 'bold',
+                color: 'bc-blue',
+              },
+            },
+          },
+        },
+      },
       Tag: {
+        baseStyle: {
+          label: {
+            lineHeight: '1.4',
+          },
+        },
         variants: {
           'bc-input': {
             container: {
@@ -252,6 +297,9 @@ const theme = extendTheme(
               borderColor: 'bc-gray',
               color: 'text',
               fontSize: 'xs',
+            },
+            icon: {
+              color: 'bc-component',
             },
           },
         },

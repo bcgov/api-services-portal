@@ -88,7 +88,6 @@ When using a button in the app bar header, set the variant to `header`
   </Story>
 </Canvas>
 
-
 <Canvas>
   <Story name="Header example">
     <Box d="flex" justifyContent="flex-end" bgColor="bc-blue" p={4}>
@@ -96,3 +95,19 @@ When using a button in the app bar header, set the variant to `header`
     </Box>
   </Story>
 </Canvas>
+
+## Other variants
+
+There is support for common theme colours (eg red or green) that still adhere to the design guidelines without using custom variants like `primary` or `flat`
+
+<Canvas>
+  <Story name="Other example">
+    <HStack spacing={4}>
+      <Button variant="solid" colorScheme="green">Accept Button</Button>
+      <Button variant="solid" colorScheme="red">Reject Button</Button>
+      <Button variant="outline" colorScheme="green">Accept Button</Button>
+      <Button variant="outline" colorScheme="red">Reject Button</Button>
+    </HStack>
+  </Story>
+</Canvas>
+
