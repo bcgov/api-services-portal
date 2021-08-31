@@ -219,19 +219,21 @@ module.exports = {
                 });
                 permissions = updatedPermissions;
               }
-              const listOfUsers: Array<any> = [];
+              const listOfUsers = [];
               for (const perm of permissions) {
                 if (perm.granted) {
                   const user = await lookupUserByUsername(
                     noauthContext,
                     perm.requesterName
                   );
-                  listOfUsers.push({
-                    id: user[0].id,
-                    name: user[0].name,
-                    username: user[0].username,
-                    email: user[0].email,
-                  });
+                  if (user.length > 0) {
+                    listOfUsers.push({
+                      id: user[0].id,
+                      name: user[0].name,
+                      username: user[0].username,
+                      email: user[0].email,
+                    });
+                  }
                 }
               }
               return listOfUsers;

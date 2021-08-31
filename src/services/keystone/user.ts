@@ -83,7 +83,7 @@ export async function lookupUserByUsername(
     variables: { username: username },
   });
   logger.debug('Query [lookupUserByUsername] result %j', result);
-  assert.strictEqual(result.data.allUsers.length, 1, 'UserNotFound');
+  //assert.strictEqual(result.data.allUsers.length, 1, 'UserNotFound');
   return result.data.allUsers;
 }
 
