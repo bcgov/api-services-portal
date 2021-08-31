@@ -44,6 +44,7 @@ export {
   updateUserLegalAccept,
   LegalAgreed,
   lookupUserByUsername,
+  lookupUsersByUsernames,
   lookupUser,
   lookupUsersByNamespace,
 } from './user';
