@@ -8,10 +8,9 @@ import {
 } from '../../services/uma2';
 import {
   lookupProductEnvironmentServicesBySlug,
-  lookupUserByUsername,
+  lookupUsersByUsernames,
 } from '../../services/keystone';
 import {
-  getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
   getNamespaceResourceSets,
@@ -28,7 +27,6 @@ import { Logger } from '../../logger';
 const logger = Logger('ext.Namespace');
 
 import { strict as assert } from 'assert';
-import { User } from '@/services/keystone/types';
 
 const typeUserContact = `
   type UserContact {
@@ -219,24 +217,11 @@ module.exports = {
                 });
                 permissions = updatedPermissions;
               }
-              const listOfUsers = [];
-              for (const perm of permissions) {
-                if (perm.granted) {
-                  const user = await lookupUserByUsername(
-                    noauthContext,
-                    perm.requesterName
-                  );
-                  if (user.length > 0) {
-                    listOfUsers.push({
-                      id: user[0].id,
-                      name: user[0].name,
-                      username: user[0].username,
-                      email: user[0].email,
-                    });
-                  }
-                }
-              }
-              return listOfUsers;
+              const usernameList = permissions
+                .filter((p) => p.granted)
+                .map((p) => p.requesterName);
+
+              return await lookupUsersByUsernames(noauthContext, usernameList);
             },
             access: EnforcementPoint,
           },
