@@ -316,6 +316,7 @@ const server = mockServer(schemaWithMocks, {
     name: casual.route,
     namespace: casual.namespace,
     kongRouteId: casual.uuid,
+    extForeignKey: casual.uuid,
     methods: JSON.stringify([
       casual.random_element(['GET', 'POST', 'PUT', 'DELETE']),
     ]),

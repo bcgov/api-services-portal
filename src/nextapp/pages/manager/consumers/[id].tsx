@@ -171,10 +171,12 @@ const query = gql`
         service {
           id
           name
+          extForeignKey
         }
         route {
           id
           name
+          extForeignKey
         }
       }
       tags
