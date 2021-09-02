@@ -62,7 +62,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 name="viewport"
                 content="width=device-width, initial-scale=1, shrink-to-fit=no"
               />
-              <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+              <link href="/images/favicon.png" rel="icon" type="image/x-icon" />
             </Head>
             <Header site={site}>
               <AuthAction site={site} />

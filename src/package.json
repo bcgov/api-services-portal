@@ -11,6 +11,16 @@
     "node": ">=10.0.0"
   },
   "main": "dist/server.js",
+  "nodemonConfig": {
+    "ignore": [
+      "nextapp/*", 
+      "auth/*", 
+      "authz/*", 
+      "test/*", 
+      "stories/*"
+    ],
+    "delay": 2500
+  },
   "scripts": {
     "prebuild": "tslint -p tsconfig.json --fix",
     "ts-build": "tsc",

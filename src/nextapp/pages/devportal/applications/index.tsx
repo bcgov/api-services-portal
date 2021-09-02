@@ -14,6 +14,8 @@ import {
   Td,
   Center,
   MenuItem,
+  useToast,
+  Icon,
 } from '@chakra-ui/react';
 import get from 'lodash/get';
 import Head from 'next/head';
@@ -21,13 +23,13 @@ import PageHeader from '@/components/page-header';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
 import NewApplication from '@/components/new-application';
-import { QueryClient } from 'react-query';
+import { QueryClient, useQueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
-import DeleteApplication from '@/components/delete-application';
 import Card from '@/components/card';
 import ActionsMenu from '@/components/actions-menu';
+import { FaTrash } from 'react-icons/fa';
 
 const queryKey = 'allApplications';
 
@@ -52,6 +54,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApplicationsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
+  const toast = useToast();
+  const queryClient = useQueryClient();
   const { data } = useApi(
     queryKey,
     {
@@ -60,6 +64,25 @@ const ApplicationsPage: React.FC<
     { suspense: false }
   );
   const userId = get(data, 'allTemporaryIdentities[0].userId');
+  const deleteMutation = useApiMutation<{ id: string }>(mutation);
+  const handleDelete = React.useCallback(
+    (id: string) => async () => {
+      try {
+        await deleteMutation.mutateAsync({ id });
+        queryClient.invalidateQueries('allApplications');
+        toast({
+          title: 'Application deleted',
+          status: 'success',
+        });
+      } catch {
+        toast({
+          title: 'Application delete failed',
+          status: 'error',
+        });
+      }
+    },
+    [deleteMutation]
+  );
 
   return (
     <>
@@ -120,7 +143,13 @@ const ApplicationsPage: React.FC<
                   <Td>{d.owner?.name}</Td>
                   <Td textAlign="right">
                     <ActionsMenu>
-                      <MenuItem>Delete Application</MenuItem>
+                      <MenuItem
+                        color="red.500"
+                        icon={<Icon as={FaTrash} />}
+                        onClick={handleDelete(d.id)}
+                      >
+                        Delete Application
+                      </MenuItem>
                     </ActionsMenu>
                   </Td>
                 </Tr>
@@ -148,6 +177,15 @@ const query = gql`
     allTemporaryIdentities {
       id
       userId
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation Remove($id: ID!) {
+    deleteApplication(id: $id) {
+      name
+      id
     }
   }
 `;
