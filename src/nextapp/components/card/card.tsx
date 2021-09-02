@@ -1,24 +1,37 @@
 import * as React from 'react';
-import { Box, Flex } from '@chakra-ui/react';
+import {
+  Box,
+  BoxProps,
+  Flex,
+  Heading,
+  HStack,
+  useStyleConfig,
+} from '@chakra-ui/react';
 
-interface CardProps {
+interface CardProps extends BoxProps {
+  actions?: React.ReactNode;
   children: React.ReactNode;
+  heading?: React.ReactNode;
 }
 
-const Card: React.FC<CardProps> = ({ children }) => {
+const Card: React.FC<CardProps> = ({
+  actions,
+  children,
+  heading,
+  ...props
+}) => {
+  const styles = useStyleConfig('Box');
+
   return (
-    <Flex
-      bg="white"
-      borderRadius={4}
-      border="2px solid"
-      borderColor="gray.400"
-      flexDirection="column"
-      position="relative"
-      overflow="hidden"
-      height="100%"
-    >
+    <Box bgColor="white" sx={styles} {...props}>
+      {heading && (
+        <Flex p={6} alignItems="center" justifyContent="space-between">
+          <Heading size="sm">{heading}</Heading>
+          {actions && <HStack spacing={4}>{actions}</HStack>}
+        </Flex>
+      )}
       {children}
-    </Flex>
+    </Box>
   );
 };
 

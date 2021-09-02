@@ -1,0 +1,24 @@
+import { 
+  Box,
+  MenuItem
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import ActionsMenu from './actions-menu';
+
+<Meta title="APS/ActionsMenu" parameters={{
+  layout: 'centered',
+  backgroundColor: '#e1e1e1'
+}}/>
+
+# Actions Menu
+
+<Canvas >
+  <Story name="Menu">
+    <ActionsMenu>
+      <MenuItem>Delete</MenuItem>
+    </ActionsMenu>
+  </Story>
+</Canvas>
+
+## Heading variant
+

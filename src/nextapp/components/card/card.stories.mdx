@@ -1,0 +1,126 @@
+import { 
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import Card from './card';
+
+<Meta title="APS/Card" parameters={{
+  layout: 'centered',
+  backgroundColor: '#e1e1e1'
+}}/>
+
+# Card
+
+A card component at its most basic implementation is a simple white box, but it can be expanded to present tables with headings and actions.
+
+<Canvas >
+  <Story name="Vanilla">
+    <Card>Vanilla Card</Card>
+  </Story>
+</Canvas>
+
+Note: When rendering content not a table, compose the root child component to have this basic composure
+
+```javascript
+<Card heading="All Activities">
+  <Box p={6} pt={0}>
+    {...}
+  </Box>
+</Card>
+```
+
+## Heading variant
+
+Headings most commonly can be passed in as strings, but for more complex components a `ReactNode` can be passed in. Note they will be rendered inside a `Heading` component.
+
+<Canvas >
+  <Story name="Heading">
+    <Card heading="All Activities">
+      <Box p={6} pt={0} bg="gray.100" w={500} h={200}/>
+    </Card>
+  </Story>
+</Canvas>
+
+## With Content
+
+The most common content for the card is a `Table`, which can be composed normally as `children` of the `Card`
+
+<Canvas >
+  <Story name="With Table">
+    <Card heading="All Activities">
+      <Table variant="simple">
+        <TableCaption>Imperial to metric conversion factors</TableCaption>
+        <Thead>
+          <Tr>
+            <Th>To convert</Th>
+            <Th>into</Th>
+            <Th isNumeric>multiply by</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          <Tr>
+            <Td>inches</Td>
+            <Td>millimetres (mm)</Td>
+            <Td isNumeric>25.4</Td>
+          </Tr>
+          <Tr>
+            <Td>feet</Td>
+            <Td>centimetres (cm)</Td>
+            <Td isNumeric>30.48</Td>
+          </Tr>
+          <Tr>
+            <Td>yards</Td>
+            <Td>metres (m)</Td>
+            <Td isNumeric>0.91444</Td>
+          </Tr>
+        </Tbody>
+      </Table>
+    </Card>
+  </Story>
+</Canvas>
+
+## Card Actions
+
+Buttons can be passed into the `actions` prop, any group of components will be spaced out in a `HStack` component.
+
+<Canvas>
+  <Story name="With Actions">
+    <Card 
+      actions={
+        <>
+          <Button size="sm" variant="flat">Add</Button>
+          <Button size="sm" variant="flat">Remove</Button>
+        </>
+      }
+      heading="All Activities"
+    >
+      <Box p={6} pt={0}>Content</Box>
+    </Card>
+  </Story>
+</Canvas>
+
+## Extending the Card component
+
+The card component can accept `Box` props.
+
+<Canvas>
+  <Story name="Extending">
+    <Card
+      heading="All Activities"
+      bgColor="yellow.500"
+      borderRadius={5}
+    >
+      <Box p={6} pt={0}>Content</Box>
+    </Card>
+  </Story>
+</Canvas>
+

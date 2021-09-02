@@ -3,6 +3,7 @@ import {
   Button,
   ButtonGroup,
   FormControl,
+  FormHelperText,
   FormLabel,
   Input,
   Modal,
@@ -91,15 +92,12 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={4}>
               <FormLabel>Application Name</FormLabel>
-              <Input placeholder=" Name" name="name" variant="bc-input" />
+              <Input name="name" variant="bc-input" />
             </FormControl>
-            <FormControl isRequired as="fieldset">
-              <FormLabel>Description</FormLabel>
-              <Textarea
-                name="description"
-                placeholder="What does your application do?"
-                variant="bc-input"
-              />
+            <FormControl as="fieldset">
+              <FormLabel>Description (Optional)</FormLabel>
+              <FormHelperText>What does your application do?</FormHelperText>
+              <Textarea name="description" variant="bc-input" />
             </FormControl>
           </form>
         </ModalBody>
