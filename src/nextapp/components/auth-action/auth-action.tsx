@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Avatar,
   Box,
   Button,
   Icon,
@@ -7,6 +8,9 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Center,
+  HStack,
+  StackDivider,
 } from '@chakra-ui/react';
 import { FaChevronDown, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
@@ -41,7 +45,15 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   }
 
   return (
-    <Box d="flex" alignItems="center" justifyContent="flex-end">
+    <HStack
+      divider={<StackDivider borderColor="white" />}
+      spacing={4}
+      sx={{
+        hr: {
+          my: 2,
+        },
+      }}
+    >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <Box
         as="span"
@@ -51,17 +63,20 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
         position="relative"
         zIndex={2}
       >
-        <Menu placement="right-start">
+        <Menu placement="bottom-end">
           <MenuButton
             as={Button}
-            alignItems="center"
-            display="flex"
-            variant="bc-blue-alt"
+            px={1}
+            variant="ghost"
+            _hover={{ textDecoration: 'none' }}
+            _active={{ outline: 'none' }}
+            _focus={{ outline: 'none' }}
             data-testid="auth-menu-user"
           >
-            <Icon as={FaUserCircle} mr={2} mt={-1} color="bc-blue-alt" />
-            {user.name}
-            <Icon size="sm" ml={2} as={FaChevronDown} color="white" />
+            <Center>
+              <Avatar name={user.name} size="sm" />
+              <Icon size="sm" ml={2} as={FaChevronDown} color="white" />
+            </Center>
           </MenuButton>
           <MenuList borderRadius={0}>
             <MenuItem
@@ -83,7 +98,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
           </MenuList>
         </Menu>
       </Box>
-    </Box>
+    </HStack>
   );
 };
 

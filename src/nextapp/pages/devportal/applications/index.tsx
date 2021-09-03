@@ -81,7 +81,7 @@ const ApplicationsPage: React.FC<
         });
       }
     },
-    [deleteMutation]
+    [deleteMutation, queryClient, toast]
   );
 
   return (
