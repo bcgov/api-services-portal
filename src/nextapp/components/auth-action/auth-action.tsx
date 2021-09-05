@@ -46,13 +46,10 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   return (
     <HStack
-      divider={<StackDivider borderColor="white" />}
+      divider={
+        <StackDivider borderColor="white" height="24px" alignSelf="center" />
+      }
       spacing={4}
-      sx={{
-        hr: {
-          my: 2,
-        },
-      }}
     >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <Box

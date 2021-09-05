@@ -219,6 +219,7 @@ const server = mockServer(schemaWithMocks, {
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
     appId: casual.uuid,
+    description: casual.description,
   }),
   Namespace: () => ({
     name: casual.random_element(data.namespaces),

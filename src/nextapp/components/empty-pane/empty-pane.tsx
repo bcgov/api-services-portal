@@ -31,7 +31,7 @@ const EmptyPane: React.FC<EmptyPaneProps> = ({
         </Heading>
         <Text>{message}</Text>
         {error && <Text color="red.500">{error}</Text>}
-        {action && <Box mt="4">{action}</Box>}
+        {action && <Box mt="6">{action}</Box>}
       </Box>
     </Center>
   );
