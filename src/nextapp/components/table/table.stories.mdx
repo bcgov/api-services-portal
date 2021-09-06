@@ -1,0 +1,95 @@
+import { 
+  Box,
+  Button,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import {uid} from 'react-uid'
+import Table from './table';
+
+<Meta title="APS/Table" />
+
+export const Template = (args) => (
+  <Table 
+    {...args} 
+    data={[
+      {name: 'Application 1', id: '123', owner: 'George Bluth Sr.'},
+      {name: 'Application 2', id: '234', owner: 'Lucille Bluth'},
+      {name: 'Application 3', id: '345', owner: 'Michael Bluth'},
+      {name: 'Application 4 has a really long name', id: '456', owner: 'George Michael Bluth'},
+    ]}
+  />
+)
+
+# APS Table
+
+An enhanced version of the Chakra default table with sorting
+
+<Canvas>
+  <Story 
+    name="Basic" 
+    args={{
+      columns: [{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}],
+      children: (d, index) => (
+        <Tr key={d.id}>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+      )
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Sorting
+
+By passing `sortable={true}` sorting will be enabled.
+
+<Canvas>
+  <Story 
+    name="Sorting" 
+    args={{
+      columns: [{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}],
+      children: (d, index) => (
+        <Tr key={d.id}>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+      ),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Disclosure Rows
+
+Use `React.Fragment` to pass in multiple rows so you can use UI methods like disclosure rows.
+
+<Canvas>
+  <Story 
+    name="Disclosure Rows" 
+    args={{
+      columns: [{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}],
+      children: (d, index) => (
+      <React.Fragment key={uid(d.id,index)}>
+        <Tr>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+        {d.id === '234' && <Tr bgColor="gray.100"><Td colSpan={2}>Disclosed Content</Td></Tr>}
+      </React.Fragment>
+      ),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
