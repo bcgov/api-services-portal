@@ -6,11 +6,7 @@ import {
   Container,
   Text,
   Heading,
-  Table,
-  Thead,
   Tr,
-  Th,
-  Tbody,
   Td,
   Center,
   MenuItem,
@@ -25,12 +21,14 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
 import NewApplication from '@/components/new-application';
 import { QueryClient, useQueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { Application, Query } from '@/shared/types/query.types';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import { dehydrate } from 'react-query/hydration';
 import Card from '@/components/card';
+import Table from '@/components/table';
 import ActionsMenu from '@/components/actions-menu';
 import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
+import EmptyPane from '@/components/empty-pane';
 
 const queryKey = 'allApplications';
 
@@ -56,7 +54,7 @@ const ApplicationsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
   const toast = useToast();
-  const [openIndex, setOpenIndex] = React.useState<number>(-1);
+  const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
   const { data } = useApi(
     queryKey,
@@ -68,10 +66,10 @@ const ApplicationsPage: React.FC<
   const userId = get(data, 'allTemporaryIdentities[0].userId');
 
   const handleDetailsDisclosure = React.useCallback(
-    (index: number) => () => {
-      setOpenIndex((state) => (state !== index ? index : -1));
+    (id: string) => () => {
+      setOpenId((state) => (state !== id ? id : null));
     },
-    [setOpenIndex]
+    [setOpenId]
   );
   const deleteMutation = useApiMutation<{ id: string }>(mutation);
   const handleDelete = React.useCallback(
@@ -91,6 +89,18 @@ const ApplicationsPage: React.FC<
       }
     },
     [deleteMutation, queryClient, toast]
+  );
+  const columns = [
+    { w: '25%', name: 'Application Name', key: 'name' },
+    { w: '25%', name: 'Owner', key: 'owner.name' },
+    { colSpan: 2, name: 'App ID', key: 'appId' },
+  ];
+  const empty = (
+    <EmptyPane
+      action={<NewApplication userId={userId} refreshQueryKey={queryKey} />}
+      title="Create your first Application"
+      message="Consumers access your API under restrictions you set"
+    />
   );
 
   return (
@@ -114,82 +124,56 @@ const ApplicationsPage: React.FC<
           <Text>Applications allow you to access BC Government APIs.</Text>
         </PageHeader>
         <Card heading="My Applications">
-          <Table>
-            <Thead>
-              <Tr>
-                <Th w="25%">Name</Th>
-                <Th w="25%">Owner</Th>
-                <Th colSpan={2}>App ID</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.myApplications?.length === 0 && (
+          <Table
+            sortable
+            columns={columns}
+            data={data?.myApplications}
+            emptyView={empty}
+          >
+            {(d: Application) => (
+              <React.Fragment key={d.id}>
                 <Tr>
-                  <Td colSpan={5}>
-                    <Center>
-                      <Box my={12} textAlign="center">
-                        <Heading mb={2} size="md">
-                          Create your first Application
-                        </Heading>
-                        <Text color="gray.600">
-                          Consumers access your API under restrictions you set
-                        </Text>
-                        <Box mt={6}>
-                          <NewApplication
-                            userId={userId}
-                            refreshQueryKey={queryKey}
-                          />
-                        </Box>
-                      </Box>
-                    </Center>
+                  <Td>{d.name}</Td>
+                  <Td>{d.owner?.name}</Td>
+                  <Td>{d.appId}</Td>
+                  <Td textAlign="right">
+                    <ActionsMenu>
+                      <MenuItem
+                        color="red.500"
+                        icon={<Icon as={FaTrash} />}
+                        onClick={handleDelete(d.id)}
+                      >
+                        Delete Application
+                      </MenuItem>
+                    </ActionsMenu>
+                    <IconButton
+                      aria-label="toggle table"
+                      variant="ghost"
+                      onClick={handleDetailsDisclosure(d.id)}
+                    >
+                      <Icon
+                        as={d.id === openId ? FaChevronUp : FaChevronDown}
+                      />
+                    </IconButton>
                   </Td>
                 </Tr>
-              )}
-              {data.myApplications?.map((d, index) => (
-                <React.Fragment key={d.id}>
-                  <Tr>
-                    <Td>{d.name}</Td>
-                    <Td>{d.owner?.name}</Td>
-                    <Td>{d.appId}</Td>
-                    <Td textAlign="right">
-                      <ActionsMenu>
-                        <MenuItem
-                          color="red.500"
-                          icon={<Icon as={FaTrash} />}
-                          onClick={handleDelete(d.id)}
-                        >
-                          Delete Application
-                        </MenuItem>
-                      </ActionsMenu>
-                      <IconButton
-                        aria-label="toggle table"
-                        variant="ghost"
-                        onClick={handleDetailsDisclosure(index)}
-                      >
-                        <Icon
-                          as={index === openIndex ? FaChevronUp : FaChevronDown}
-                        />
-                      </IconButton>
+                {d.id === openId && (
+                  <Tr bgColor="#f6f6f6" boxShadow="inner">
+                    <Td w="50%" colSpan={2} valign="top">
+                      <Heading size="xs" mb={2}>
+                        Authorized API Access
+                      </Heading>
+                    </Td>
+                    <Td w="50%" colSpan={2} valign="top">
+                      <Heading size="xs" mb={2}>
+                        Description
+                      </Heading>
+                      <Text>{d.description}</Text>
                     </Td>
                   </Tr>
-                  {index === openIndex && (
-                    <Tr bgColor="#f6f6f6" boxShadow="inner">
-                      <Td w="50%" colSpan={2} valign="top">
-                        <Heading size="xs" mb={2}>
-                          Authorized API Access
-                        </Heading>
-                      </Td>
-                      <Td w="50%" colSpan={2} valign="top">
-                        <Heading size="xs" mb={2}>
-                          Description
-                        </Heading>
-                        <Text>{d.description}</Text>
-                      </Td>
-                    </Tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </Tbody>
+                )}
+              </React.Fragment>
+            )}
           </Table>
         </Card>
       </Container>

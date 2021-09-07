@@ -16,13 +16,13 @@ import Table from './table';
 
 export const Template = (args) => (
   <Table 
-    {...args} 
     data={[
       {name: 'Application 1', id: '123', owner: 'George Bluth Sr.'},
       {name: 'Application 2', id: '234', owner: 'Lucille Bluth'},
       {name: 'Application 3', id: '345', owner: 'Michael Bluth'},
       {name: 'Application 4 has a really long name', id: '456', owner: 'George Michael Bluth'},
     ]}
+    {...args} 
   />
 )
 
@@ -62,6 +62,33 @@ By passing `sortable={true}` sorting will be enabled.
           <Td>{d.owner}</Td>
         </Tr> 
       ),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Empty Table
+
+Use the `emptyView` prop to return a helpful empty data view for users. The component will be wrapped in a `tr` with a single `td` with the `colSpan` set to the total amount of columns.
+
+<Canvas>
+  <Story 
+    name="Empty Table"
+    args={{
+      columns: [{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}],
+      children: (d, index) => (
+      <React.Fragment key={uid(d.id,index)}>
+        <Tr>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+        {d.id === '234' && <Tr bgColor="gray.100"><Td colSpan={2}>Disclosed Content</Td></Tr>}
+      </React.Fragment>
+      ),
+      data: [],
+      emptyView: (<div>Custom no content message</div>),
       sortable: true
     }}
   >

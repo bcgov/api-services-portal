@@ -23,13 +23,15 @@ interface ApsTableProps {
   children: (d: unknown, index: number) => React.ReactNode;
   columns: Column[];
   data: unknown[];
-  sortable: boolean;
+  emptyView?: React.ReactNode;
+  sortable?: boolean;
 }
 
 const ApsTable: React.FC<ApsTableProps> = ({
   children,
   columns,
   data,
+  emptyView,
   sortable,
 }) => {
   const [sortKey, setSortKey] = React.useState<string>(columns[0]?.key ?? '');
@@ -62,12 +64,18 @@ const ApsTable: React.FC<ApsTableProps> = ({
               key={uid(name)}
               {...rest}
               onClick={handleSort(key)}
-              _hover={{ cursor: 'pointer' }}
+              _hover={{
+                color: 'black',
+                cursor: sortable ? 'pointer' : undefined,
+                '& svg': {
+                  fill: 'gray.600',
+                },
+              }}
             >
-              <Box pos="relative" d="inline" pr={4}>
+              <Box pos="relative" d="inline">
                 {name}
                 {sortable && (
-                  <Box h="20px" pos="absolute" right={0} top={0}>
+                  <Box h="20px" pos="absolute" right={0} top="2px">
                     <Icon
                       as={TiArrowSortedUp}
                       boxSize="3"
@@ -99,7 +107,14 @@ const ApsTable: React.FC<ApsTableProps> = ({
           ))}
         </Tr>
       </Thead>
-      <Tbody>{sorted.map((d, index) => children(d, index))}</Tbody>
+      <Tbody>
+        {!data.length && (
+          <Tr>
+            <Td colSpan={columns.length}>{emptyView}</Td>
+          </Tr>
+        )}
+        {sorted.map((d, index) => children(d, index))}
+      </Tbody>
     </Table>
   );
 };
