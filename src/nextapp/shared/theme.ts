@@ -284,6 +284,7 @@ const theme = extendTheme(
           },
           '& + div': {
             mb: 4,
+            mt: -2,
             color: 'component',
           },
         },
@@ -304,7 +305,10 @@ const theme = extendTheme(
             th: {
               borderBottom: '2px solid',
               borderColor: 'bc-yellow',
+              fontWeight: 'normal',
               textTransform: 'none',
+              letterSpacing: 'normal',
+              color: 'text',
             },
           },
         },
