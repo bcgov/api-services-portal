@@ -92,7 +92,6 @@ const ApplicationsPage: React.FC<
   );
   const columns = [
     { w: '25%', name: 'Application Name', key: 'name' },
-    { w: '25%', name: 'Owner', key: 'owner.name' },
     { colSpan: 2, name: 'App ID', key: 'appId' },
   ];
   const empty = (
@@ -134,7 +133,6 @@ const ApplicationsPage: React.FC<
               <React.Fragment key={d.id}>
                 <Tr>
                   <Td>{d.name}</Td>
-                  <Td>{d.owner?.name}</Td>
                   <Td>{d.appId}</Td>
                   <Td textAlign="right">
                     <ActionsMenu>

@@ -67,9 +67,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
               _hover={{
                 color: 'black',
                 cursor: sortable ? 'pointer' : undefined,
-                '& svg': {
-                  fill: 'gray.600',
-                },
+                userSelect: 'none',
               }}
             >
               <Box pos="relative" d="inline">
