@@ -66,8 +66,9 @@ const ApsTable: React.FC<ApsTableProps> = ({
               onClick={handleSort(key)}
               _hover={{
                 color: 'black',
-                cursor: sortable ? 'pointer' : undefined,
+                cursor: sortable && name ? 'pointer' : undefined,
                 userSelect: 'none',
+                bgColor: sortable && name ? 'gray.50' : undefined,
               }}
             >
               <Box pos="relative" d="inline">

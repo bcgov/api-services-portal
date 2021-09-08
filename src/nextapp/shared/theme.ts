@@ -14,6 +14,7 @@ const colors = {
   'bc-border-focus': '#3B99FC',
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
+  'bc-background': '#f1f1f1',
   ui: {
     500: '#606060',
   },
@@ -161,7 +162,7 @@ const theme = extendTheme(
     styles: {
       global: {
         body: {
-          background: '#f1f1f1',
+          background: 'bc-background',
         },
         'body > div:first-of-type': {
           height: '100vh',

@@ -13,6 +13,7 @@ import {
   IconButton,
   Grid,
   GridItem,
+  Flex,
 } from '@chakra-ui/react';
 import get from 'lodash/get';
 import Head from 'next/head';
@@ -27,7 +28,12 @@ import { dehydrate } from 'react-query/hydration';
 import Card from '@/components/card';
 import Table from '@/components/table';
 import ActionsMenu from '@/components/actions-menu';
-import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaExclamationCircle,
+  FaTrash,
+} from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
 import ApplicationServices from '@/components/application-services';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -173,7 +179,14 @@ const ApplicationsPage: React.FC<
                           </Heading>
                           <ErrorBoundary
                             fallback={
-                              <Text color="bc-error">Unable to load</Text>
+                              <Flex
+                                align="center"
+                                color="bc-error"
+                                fontSize="sm"
+                              >
+                                <Icon as={FaExclamationCircle} mr={2} />
+                                <Text>Unable to load</Text>
+                              </Flex>
                             }
                           >
                             <React.Suspense fallback={<Text>Loading...</Text>}>
