@@ -22,6 +22,16 @@ import Card from './card';
 
 A card component at its most basic implementation is a simple white box, but it can be expanded to present tables with headings and actions.
 
+```javascript
+import Card from '@src/components/card';
+
+const MyComponent = () => (
+  <Card>
+    Card Content
+  </Card>
+);
+```
+
 <Canvas >
   <Story name="Vanilla">
     <Card>Vanilla Card</Card>
@@ -110,7 +120,7 @@ Buttons can be passed into the `actions` prop, any group of components will be s
 
 ## Extending the Card component
 
-The card component can accept `Box` props.
+The card component can accept all `Box` props. See [Box component documentation](https://chakra-ui.com/docs/layout/box) for more
 
 <Canvas>
   <Story name="Extending">

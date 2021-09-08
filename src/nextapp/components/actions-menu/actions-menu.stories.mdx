@@ -12,6 +12,21 @@ import ActionsMenu from './actions-menu';
 
 # Actions Menu
 
+The `ActionsMenu` is a convenient wrapper around the Charka Menu, ideal for use in list-based data displays.
+
+To use 
+
+```javascript
+import { MenuItem } from '@chakra-ui/react';
+import ActionsMenu from '@src/components/actions-menu';
+
+const MyComponent = () => (
+  <ActionsMenu>
+    <MenuItem onClick={() => /* handle click */}>Delete</MenuItem>
+  </ActionsMenu>
+);
+```
+
 <Canvas >
   <Story name="Menu">
     <ActionsMenu>
@@ -19,6 +34,4 @@ import ActionsMenu from './actions-menu';
     </ActionsMenu>
   </Story>
 </Canvas>
-
-## Heading variant
 

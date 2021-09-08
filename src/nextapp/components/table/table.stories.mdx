@@ -31,6 +31,26 @@ export const Template = (args) => (
 
 An extension of the core Chakra Table with some additional features like sorting and empty views.
 
+To use 
+
+```javascript
+import { Tr, Td } from '@chakra-ui/react';
+import Table from '@src/components/actions-menu';
+
+const MyComponent = ({ data }) => (
+  <Table 
+    columns={[{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}]} 
+    data={data}>
+    {(item, index) => (
+      <Tr key={index}>
+        <Td>{d.name}</Td>
+        <Td>{d.owner}</Td>
+      </Tr> 
+    )}
+  </Table>
+);
+```
+
 |Property|Type|Description|
 |--------|----|-----------|
 |`columns`*|`{key: string, name: string}[]`|An array describing the columns. Required properties are `name` and `key`. Any Chakra `Th` component property can be passed as well for additional styling.|
