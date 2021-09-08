@@ -72,7 +72,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
             >
               <Box pos="relative" d="inline">
                 {name}
-                {sortable && (
+                {sortable && name && (
                   <Box h="20px" pos="absolute" right={0} top="2px">
                     <Icon
                       as={TiArrowSortedUp}

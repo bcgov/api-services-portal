@@ -2,17 +2,17 @@ import * as React from 'react';
 import {
   Alert,
   AlertIcon,
-  Box,
   Container,
   Text,
   Heading,
   Tr,
   Td,
-  Center,
   MenuItem,
   useToast,
   Icon,
   IconButton,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react';
 import get from 'lodash/get';
 import Head from 'next/head';
@@ -29,6 +29,8 @@ import Table from '@/components/table';
 import ActionsMenu from '@/components/actions-menu';
 import { FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
+import ApplicationServices from '@/components/application-services';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const queryKey = 'allApplications';
 
@@ -75,6 +77,9 @@ const ApplicationsPage: React.FC<
   const handleDelete = React.useCallback(
     (id: string) => async () => {
       try {
+        if (openId === id) {
+          setOpenId(null);
+        }
         await deleteMutation.mutateAsync({ id });
         queryClient.invalidateQueries('allApplications');
         toast({
@@ -88,11 +93,14 @@ const ApplicationsPage: React.FC<
         });
       }
     },
-    [deleteMutation, queryClient, toast]
+    [deleteMutation, openId, queryClient, setOpenId, toast]
   );
+
+  // Table props
   const columns = [
     { w: '25%', name: 'Application Name', key: 'name' },
-    { colSpan: 2, name: 'App ID', key: 'appId' },
+    { w: '50%', name: 'App ID', key: 'appId' },
+    { w: '25%', name: '', key: 'id' },
   ];
   const empty = (
     <EmptyPane
@@ -157,16 +165,29 @@ const ApplicationsPage: React.FC<
                 </Tr>
                 {d.id === openId && (
                   <Tr bgColor="#f6f6f6" boxShadow="inner">
-                    <Td w="50%" colSpan={2} valign="top">
-                      <Heading size="xs" mb={2}>
-                        Authorized API Access
-                      </Heading>
-                    </Td>
-                    <Td w="50%" colSpan={2} valign="top">
-                      <Heading size="xs" mb={2}>
-                        Description
-                      </Heading>
-                      <Text>{d.description}</Text>
+                    <Td colSpan={columns.length}>
+                      <Grid templateColumns="1fr 1fr" gap={4}>
+                        <GridItem>
+                          <Heading size="xs" mb={2}>
+                            Authorized API Access
+                          </Heading>
+                          <ErrorBoundary
+                            fallback={
+                              <Text color="bc-error">Unable to load</Text>
+                            }
+                          >
+                            <React.Suspense fallback={<Text>Loading...</Text>}>
+                              <ApplicationServices appId={d.id} />
+                            </React.Suspense>
+                          </ErrorBoundary>
+                        </GridItem>
+                        <GridItem>
+                          <Heading size="xs" mb={2}>
+                            Description
+                          </Heading>
+                          <Text fontSize="sm">{d.description}</Text>
+                        </GridItem>
+                      </Grid>
                     </Td>
                   </Tr>
                 )}
