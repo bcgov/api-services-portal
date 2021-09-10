@@ -1,18 +1,14 @@
 import * as React from 'react';
-import { Icon, Menu, MenuButton, MenuList, Placement } from '@chakra-ui/react';
+import { Icon, Menu, MenuButton, MenuList, MenuProps } from '@chakra-ui/react';
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 
-interface ActionsMenuProps {
+interface ActionsMenuProps extends MenuProps {
   children: React.ReactNode;
-  placement?: Placement;
 }
 
-const ActionsMenu: React.FC<ActionsMenuProps> = ({
-  children,
-  placement = 'bottom-end',
-}) => {
+const ActionsMenu: React.FC<ActionsMenuProps> = ({ children, ...rest }) => {
   return (
-    <Menu gutter={1} placement={placement}>
+    <Menu gutter={1} {...rest}>
       <MenuButton
         px={4}
         py={2}
@@ -25,7 +21,7 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({
         _expanded={{ color: 'bc-blue', borderColor: 'bc-component' }}
         _focus={{ boxShadow: 'outline' }}
       >
-        <Icon as={IoEllipsisHorizontal} />
+        <Icon as={IoEllipsisHorizontal} aria-label="action menu icon" />
       </MenuButton>
       <MenuList>{children}</MenuList>
     </Menu>

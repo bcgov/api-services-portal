@@ -106,7 +106,7 @@ const ApplicationsPage: React.FC<
   const columns = [
     { w: '25%', name: 'Application Name', key: 'name' },
     { w: '50%', name: 'App ID', key: 'appId' },
-    { w: '25%', name: '', key: 'id' },
+    { w: '25%', name: '' },
   ];
   const empty = (
     <EmptyPane
@@ -149,7 +149,7 @@ const ApplicationsPage: React.FC<
                   <Td>{d.name}</Td>
                   <Td>{d.appId}</Td>
                   <Td textAlign="right">
-                    <ActionsMenu>
+                    <ActionsMenu aria-label={`${d.name} actions menu button`}>
                       <MenuItem
                         color="red.500"
                         icon={<Icon as={FaTrash} />}

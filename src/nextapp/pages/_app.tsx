@@ -3,7 +3,6 @@ import {
   Box,
   ChakraProvider,
   Container,
-  Flex,
   Link,
   List,
   ListItem,
@@ -31,12 +30,28 @@ import '@/shared/styles/global.css';
 import { AppWrapper } from './context';
 
 const footerItems = [
-  { href: '.', text: 'Home' },
-  { href: '.', text: 'Disclaimer' },
-  { href: '.', text: 'Privacy' },
-  { href: '.', text: 'Accessibility' },
-  { href: '.', text: 'Copyright' },
-  { href: '.', text: 'Contact Us' },
+  { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/about-gov-bc-ca',
+    text: 'About gov.bc.ca',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/disclaimer',
+    text: 'Disclaimer',
+  },
+  { href: 'http://www2.gov.bc.ca/gov/content/home/privacy', text: 'Privacy' },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/accessibility',
+    text: 'Accessibility',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/copyright',
+    text: 'Copyright',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/contact-us',
+    text: 'Contact Us',
+  },
 ];
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -119,7 +134,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                       <Link
                         href={f.href}
                         d="inline-block"
-                        fontSize="sm"
+                        fontSize="xs"
                         borderRight={{ base: 'none', md: '1px solid #4b5e7e' }}
                         px="5px"
                         py={{ base: '5px', md: 0 }}

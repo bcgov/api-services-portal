@@ -16,7 +16,7 @@ import { uid } from 'react-uid';
 
 interface Column extends TableColumnHeaderProps {
   name: string;
-  key: string;
+  key?: string;
 }
 
 interface ApsTableProps {
@@ -63,7 +63,10 @@ const ApsTable: React.FC<ApsTableProps> = ({
             <Th
               key={uid(name)}
               {...rest}
-              onClick={handleSort(key)}
+              aria-label={
+                name ? `${name} column header` : 'none sortable table header'
+              }
+              onClick={key ? handleSort(key) : undefined}
               _hover={{
                 color: 'black',
                 cursor: sortable && name ? 'pointer' : undefined,
@@ -77,6 +80,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
                   <Box h="20px" pos="absolute" right={0} top="2px">
                     <Icon
                       as={TiArrowSortedUp}
+                      aria-label="sort label up icon"
                       boxSize="3"
                       ml={2}
                       pos="absolute"
@@ -89,6 +93,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
                     />
                     <Icon
                       as={TiArrowSortedDown}
+                      aria-label="sort label down icon"
                       boxSize="3"
                       ml={2}
                       pos="absolute"

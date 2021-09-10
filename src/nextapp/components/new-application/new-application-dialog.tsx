@@ -94,7 +94,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
               <FormLabel>Application Name</FormLabel>
               <Input name="name" variant="bc-input" />
             </FormControl>
-            <FormControl as="fieldset">
+            <FormControl>
               <FormLabel>Description (Optional)</FormLabel>
               <FormHelperText>What does your application do?</FormHelperText>
               <Textarea name="description" variant="bc-input" />

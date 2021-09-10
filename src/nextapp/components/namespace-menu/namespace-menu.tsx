@@ -79,7 +79,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           data-testid="ns-dropdown-btn"
         >
           {user?.namespace ?? 'No Active Namespace'}{' '}
-          <Icon as={FaChevronDown} ml={2} />
+          <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList color="gray.600">
           <>
