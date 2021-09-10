@@ -1,0 +1,72 @@
+import {
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import StatusBanner from './status-banner';
+
+<Meta
+  title="APS/Status Banner"
+  parameters={{
+    layout: 'centered',
+    backgroundColor: '#e1e1e1',
+  }}
+/>
+
+# Status Banner
+
+The status banner component showcases status-related information to the user.
+
+```javascript
+import StatusBanner from '@src/components/StatusBanner';
+
+const MyComponent = () => (
+  <StatusBanner>
+    <Heading>Status Banner Heading</Heading>
+    <Text>Status Banner Description.</Text>
+  </StatusBanner>
+);
+```
+
+## Pending Status Variant
+
+Note: when no `status` property is passed in, `pending` is used by default.
+
+<Canvas>
+  <Story name="Pending">
+    <StatusBanner status="pending">
+      <Heading>Pending</Heading>
+      <Text>Your request is pending.</Text>
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Rejected Status Variant
+
+<Canvas>
+  <Story name="Rejected">
+    <StatusBanner status="rejected">
+      <Heading>Rejected</Heading>
+      <Text>Your request has been rejected.</Text>
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Approved Status Variant
+
+<Canvas>
+  <Story name="Success">
+    <StatusBanner status="approved">
+      <Heading>Approved</Heading>
+      <Text>Your request has been approved.</Text>
+    </StatusBanner>
+  </Story>
+</Canvas>
