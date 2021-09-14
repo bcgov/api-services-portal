@@ -5877,7 +5877,7 @@ export type NamespaceInput = {
 
 export type UserContact = {
   __typename?: 'UserContact';
-  id: Scalars['String'];
+  id: Scalars['ID'];
   name: Scalars['String'];
   username: Scalars['String'];
   email: Scalars['String'];
@@ -6852,6 +6852,7 @@ export type QueryConsumerScopesAndRolesArgs = {
 
 export type QueryUsersByNamespaceArgs = {
   namespace: Scalars['String'];
+  scopeName?: Maybe<Scalars['String']>;
 };
 
 

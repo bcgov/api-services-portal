@@ -890,5 +890,10 @@
           "referer": "http://localhost:4180/devportal/requests/new/61208533a343b51df6d5d066",
           "query": "\n  mutation Add($name: String!, $description: String) {\n    createApplication(data: { name: $name, description: $description }) {\n      id\n      appId\n      name\n    }\n  }\n",
           "added": "2021-08-22T16:36:21.234Z"
+     },
+     "4f72a18c241e589f691cecbbcaa6d0ee": {
+          "referer": "http://localhost:4180/manager/consumers",
+          "query": "\n  query GetConsumer($id: ID!) {\n    getGatewayConsumerPlugins(id: $id) {\n      id\n      username\n      aclGroups\n      customId\n      extForeignKey\n      namespace\n      plugins {\n        id\n        name\n        extForeignKey\n        config\n        service {\n          id\n          name\n          extForeignKey\n        }\n        route {\n          id\n          name\n          extForeignKey\n        }\n      }\n      tags\n      createdAt\n    }\n\n    allServiceAccesses(where: { consumer: { id: $id } }) {\n      name\n      consumerType\n      application {\n        appId\n        name\n        owner {\n          name\n          username\n          email\n        }\n      }\n    }\n\n    allProductsByNamespace {\n      id\n      name\n      environments {\n        id\n        appId\n        name\n        active\n        flow\n        credentialIssuer {\n          id\n          availableScopes\n          clientRoles\n        }\n        services {\n          name\n          routes {\n            name\n          }\n        }\n      }\n    }\n  }\n",
+          "added": "2021-09-14T20:01:21.445Z"
      }
 }
