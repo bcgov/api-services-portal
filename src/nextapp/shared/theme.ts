@@ -1,4 +1,6 @@
+import { getServerSideProps } from '@/pages/devportal/access';
 import { extendTheme, withDefaultVariant } from '@chakra-ui/react';
+import { mode } from '@chakra-ui/theme-tools';
 
 const colors = {
   'bc-blue': '#003366',
@@ -123,6 +125,24 @@ const theme = extendTheme(
       },
     },
     components: {
+      Alert: {
+        variants: {
+          outline: ( props ) => {
+            const { colorScheme: c } = props;
+            return { 
+              container: {
+                paddingStart: 3,
+                borderWidth: "4px",
+                borderColor: mode(`${c}.500`, `${c}.200`)(props),
+                bg: `${c}.200`,
+              },
+              icon: {
+                color: mode(`${c}.500`, `${c}.200`)(props),
+              }
+            }
+          }
+        },
+      },
       IconButton: {
         variants: buttonVariants,
       },

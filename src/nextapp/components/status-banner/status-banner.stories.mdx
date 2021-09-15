@@ -1,14 +1,5 @@
 import {
-  Box,
-  Button,
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
+  Box
 } from '@chakra-ui/react';
 import { Meta, Story, Canvas } from '@storybook/addon-docs';
 import StatusBanner from './status-banner';
@@ -21,7 +12,32 @@ import StatusBanner from './status-banner';
   }}
 />
 
+
 # Status Banner
+
+The status banner component showcases status-related information to the user.
+
+```javascript
+import StatusBanner from '@src/components/StatusBanner';
+
+const MyComponent = () => (
+  <StatusBanner>
+    Oof!
+  </StatusBanner>
+);
+```
+
+## Status Variant
+
+<Canvas>
+  <Story name="Pending">
+    <StatusBanner status="warning" variant="outline" title="Here is a title!">
+      Hello!
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+<!-- # Status Banner
 
 The status banner component showcases status-related information to the user.
 
@@ -69,4 +85,4 @@ Note: when no `status` property is passed in, `pending` is used by default.
       <Text>Your request has been approved.</Text>
     </StatusBanner>
   </Story>
-</Canvas>
+</Canvas> -->
