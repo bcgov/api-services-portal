@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src
+        working-directory: ./src/
     # the list of steps that the action will go through
     steps:
       - uses: actions/checkout@v1
-      - run: cd src && yarn
+      - run: yarn
       - uses: chromaui/action@v1
         # options required to the GitHub chromatic action
         with:
-          workingDir: src
+          workingDir: ./src/
           # our project token, to see how to obtain it
           # refer to https://storybook.js.org/tutorials/intro-to-storybook/react/en/deploy/
           projectToken: b0960544b296
