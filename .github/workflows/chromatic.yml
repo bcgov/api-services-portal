@@ -8,10 +8,13 @@ jobs:
   test:
     # the operating system it will run on
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
     # the list of steps that the action will go through
     steps:
       - uses: actions/checkout@v1
-      - run: yarn
+      - run: cd src && yarn
       - uses: chromaui/action@v1
         # options required to the GitHub chromatic action
         with:
