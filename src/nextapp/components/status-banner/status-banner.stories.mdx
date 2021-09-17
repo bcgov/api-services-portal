@@ -27,93 +27,82 @@ const MyComponent = () => (
 );
 ```
 
-## Default Variant
+## Vanilla
 
 <Canvas>
-  <Story name="Succes1">
-    <StatusBanner status='success' title="No background color prop specified.">
-      Uses 'status' color as background color.
+  <Story name="Vanilla">
+    <StatusBanner title="Vanilla Title">
+      Uses the 'status' variant by default: sets bgColor and borderColor to white. Vanilla icon/status is 'info'.
     </StatusBanner>
   </Story>
 </Canvas>
 
-
-## Explicit backgroun Variant
+## Success, Outline Variant
 
 <Canvas>
-  <Story name="Succes2">
-    <StatusBanner status='success' bg='bc-gray' title="Here we set background prop to 'bc-gray'">
-      And it's gray! Neat!
+  <Story name="Success, Outline">
+    <StatusBanner status="success" variant="outline" title="Success Outline Title">
+      Success Outline Description
     </StatusBanner>
   </Story>
 </Canvas>
 
-## Outline Variant
+## Pending, Outline Variant
 
 <Canvas>
-  <Story name="Success3">
-    <StatusBanner status="success" variant="outline" title="Wow such success">
-      very good
+  <Story name="Pending, Outline">
+    <StatusBanner status="warning" variant="outline" title="Pending, Outline Title">
+      Pending, Outline Description
     </StatusBanner>
   </Story>
 </Canvas>
 
-## Outline Variant
+## Success, Status Variant
 
 <Canvas>
-  <Story name="Success4">
-    <StatusBanner status="success" variant="outline" bg='bc-gray'  title="Wow such success">
-      very good
+  <Story name="Success, Status">
+    <StatusBanner status="success" variant="status" title="Success, Status Title">
+      Success, Status Description
     </StatusBanner>
   </Story>
 </Canvas>
 
-<!-- # Status Banner
-
-The status banner component showcases status-related information to the user.
-
-```javascript
-import StatusBanner from '@src/components/StatusBanner';
-
-const MyComponent = () => (
-  <StatusBanner>
-    <Heading>Status Banner Heading</Heading>
-    <Text>Status Banner Description.</Text>
-  </StatusBanner>
-);
-```
-
-## Pending Status Variant
-
-Note: when no `status` property is passed in, `pending` is used by default.
+## Pending, Status Variant
 
 <Canvas>
-  <Story name="Pending">
-    <StatusBanner status="pending">
-      <Heading>Pending</Heading>
-      <Text>Your request is pending.</Text>
+  <Story name="Warning, Status">
+    <StatusBanner status="warning" variant="status" title="Pending, Status Title">
+      Pending, Status Description
     </StatusBanner>
   </Story>
 </Canvas>
 
-## Rejected Status Variant
+## Error, No Title, Outline Variant
 
 <Canvas>
-  <Story name="Rejected">
-    <StatusBanner status="rejected">
-      <Heading>Rejected</Heading>
-      <Text>Your request has been rejected.</Text>
+  <Story name="Error, No Title, Outline">
+    <StatusBanner status="error" variant="outline">
+      Oops! Something went wrong.
     </StatusBanner>
   </Story>
 </Canvas>
 
-## Approved Status Variant
+## Override Background
 
 <Canvas>
-  <Story name="Success">
-    <StatusBanner status="approved">
-      <Heading>Approved</Heading>
-      <Text>Your request has been approved.</Text>
+  <Story name="Override Background, Border Color">
+    <StatusBanner bg='tomato' borderColor='blue' title="Override Background, Border Color Title">
+      Override Background, Border Color Description
     </StatusBanner>
   </Story>
-</Canvas> -->
+</Canvas>
+
+## Left Accent Variant (Chakra provided)
+
+<Canvas>
+  <Story name="Left Accent">
+    <StatusBanner title="Left Accent Title" variant='left-accent'>
+      Left Accent Description
+    </StatusBanner>
+  </Story>
+</Canvas>
