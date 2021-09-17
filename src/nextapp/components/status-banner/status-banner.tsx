@@ -23,12 +23,13 @@ interface StatusBannerProps extends AlertProps {
 const StatusBanner: React.FC<StatusBannerProps> = ({
   children,
   dismissable,
-  // status = 'info',
   title,
+  colorScheme,
   ...props
 }) => {
+
   return (
-    <Alert borderRadius="md" {...props}>
+    <Alert borderRadius="md" {...props} >
       <AlertIcon />
       <Box flex="1">
         {title && (

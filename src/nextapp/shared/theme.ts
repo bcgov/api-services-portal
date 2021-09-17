@@ -134,13 +134,16 @@ const theme = extendTheme(
                 paddingStart: 3,
                 borderWidth: "4px",
                 borderColor: mode(`${c}.500`, `${c}.200`)(props),
-                bg: `${c}.200`,
+                bg: mode(`${c}.200`, `${c}.500`)(props),
               },
               icon: {
                 color: mode(`${c}.500`, `${c}.200`)(props),
               }
             }
           }
+        },
+        baseStyle: {
+          bg: 'bc-gray'
         },
       },
       IconButton: {

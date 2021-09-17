@@ -27,12 +27,43 @@ const MyComponent = () => (
 );
 ```
 
-## Status Variant
+## Default Variant
 
 <Canvas>
-  <Story name="Pending">
-    <StatusBanner status="warning" variant="outline" title="Here is a title!">
-      Hello!
+  <Story name="Succes1">
+    <StatusBanner status='success' title="No background color prop specified.">
+      Uses 'status' color as background color.
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+
+## Explicit backgroun Variant
+
+<Canvas>
+  <Story name="Succes2">
+    <StatusBanner status='success' bg='bc-gray' title="Here we set background prop to 'bc-gray'">
+      And it's gray! Neat!
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Outline Variant
+
+<Canvas>
+  <Story name="Success3">
+    <StatusBanner status="success" variant="outline" title="Wow such success">
+      very good
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Outline Variant
+
+<Canvas>
+  <Story name="Success4">
+    <StatusBanner status="success" variant="outline" bg='bc-gray'  title="Wow such success">
+      very good
     </StatusBanner>
   </Story>
 </Canvas>
