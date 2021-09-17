@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { Alert, AlertIcon, Box, Container, Stack } from '@chakra-ui/react';
-
-// import EmptyPane from '@/components/empty-pane';
+import { Button, Container, Link } from '@chakra-ui/react';
 import Head from 'next/head';
 import EmptyPane from '@/components/empty-pane';
 import PageHeader from '@/components/page-header';
@@ -12,6 +10,8 @@ import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import AccessList, { CollectCredentialList } from '@/components/access-list';
+import Card from '@/components/card';
+import NextLink from 'next/link';
 
 const queryKey = 'allServiceAccesses';
 
@@ -44,14 +44,9 @@ const ApiAccessPage: React.FC<
         <title>API Program Services | My Access</title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader title="My Access" />
-
-        <Stack spacing={10} my={4}>
-          <Alert status="info">
-            <AlertIcon />
-            List of the BC Government Service APIs that you have access to.
-          </Alert>
-        </Stack>
+        <PageHeader title="My Access">
+          List of the BC Government Service APIs that you have access to.
+        </PageHeader>
 
         {data.myAccessRequests?.length > 0 && (
           <CollectCredentialList
@@ -60,15 +55,19 @@ const ApiAccessPage: React.FC<
           />
         )}
 
-        <Box mt={5}>
-          <AccessList data={data.myServiceAccesses} queryKey={queryKey} />
-          {data.myServiceAccesses.length == 0 && (
+        {data.myServiceAccesses.length === 0 && (
+          <Card>
             <EmptyPane
-              message="Go to the API Directory to find one today!"
+              action={
+                <NextLink passHref href="/devportal/api-directory">
+                  <Button as="a">Go to API Directory</Button>
+                </NextLink>
+              }
+              message="Find an API and request an API key to get started"
               title="Not using any APIs yet?"
             />
-          )}
-        </Box>
+          </Card>
+        )}
       </Container>
     </>
   );
@@ -81,24 +80,12 @@ const query = gql`
     myServiceAccesses {
       id
       name
-      active
       application {
         name
       }
       productEnvironment {
         id
         name
-        flow
-        services {
-          id
-          name
-        }
-        credentialIssuer {
-          id
-          name
-          flow
-          resourceType
-        }
         product {
           id
           name
@@ -107,6 +94,9 @@ const query = gql`
     }
     myAccessRequests(where: { serviceAccess_is_null: true }) {
       id
+      application {
+        name
+      }
       productEnvironment {
         id
         name
@@ -115,6 +105,9 @@ const query = gql`
           name
         }
       }
+      isComplete
+      isApproved
+      isIssued
     }
   }
 `;

@@ -1,22 +1,40 @@
 import * as React from 'react';
 import { Box } from '@chakra-ui/react';
 import groupBy from 'lodash/groupBy';
-import reduce from 'lodash/reduce';
-import { ServiceAccess } from '@/shared/types/query.types';
+import { AccessRequest, ServiceAccess } from '@/shared/types/query.types';
 import AccessListItem from './access-list-item';
 import { QueryKey } from 'react-query';
 
 interface AccessListProps {
-  data: ServiceAccess[];
+  approved: ServiceAccess[];
+  requested: AccessRequest[];
   queryKey: QueryKey;
 }
 
-const AccessList: React.FC<AccessListProps> = ({ data, queryKey }) => {
-  const productsDict = groupBy(data, (d) => d.productEnvironment?.product.id);
-  const products = reduce(data, (result, value) => {
-    result.some(a => a.id == value.productEnvironment?.product.id) == false && result.push(value.productEnvironment?.product)
-    return result
-  }, [])
+const AccessList: React.FC<AccessListProps> = ({
+  approved,
+  requested,
+  queryKey,
+}) => {
+  const { products, productsDict } = React.useMemo(() => {
+    const data = [...approved, ...requested];
+    const productsDict = groupBy(data, (d) => d.productEnvironment?.product.id);
+    const products = data.reduce((memo, value) => {
+      if (
+        memo.some((a) => a.id === value.productEnvironment?.product.id) ===
+        false
+      ) {
+        memo.push(value.productEnvironment?.product);
+      }
+      return memo;
+    }, []);
+
+    return {
+      products,
+      productsDict,
+    };
+  }, [approved, requested]);
+
   return (
     <Box>
       {products.map((p) => (
