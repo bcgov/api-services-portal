@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { HStack } from '@chakra-ui/react';
-import { Template } from '@storybook/ui';
 
 import AccessStatus from './access-status';
 
