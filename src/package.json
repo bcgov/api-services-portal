@@ -35,7 +35,7 @@
     "generate": "graphql-codegen",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "chromatic": "npx chromatic --project-token=b0960544b296 --exit-zero-on-changes"
+    "chromatic": "npx chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "@bcgov/bc-sans": "^1.0.1",
