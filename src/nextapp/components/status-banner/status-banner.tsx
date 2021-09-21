@@ -30,7 +30,7 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
       <AlertIcon />
       <Box flex="1">
         {title && (
-          <AlertTitle mr={2} fontWeight="normal" fontSize='xl'>
+          <AlertTitle mr={2} fontWeight="normal">
             {title}
           </AlertTitle>
         )}
