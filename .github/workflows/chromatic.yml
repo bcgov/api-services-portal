@@ -1,7 +1,14 @@
 # name of our action
 name: "Chromatic Deployment"
 # the event that will trigger the action
-on: push
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - dev
+  pull_request:
+    branches:
+      - dev
 
 # what the action will do
 jobs:
@@ -21,5 +28,5 @@ jobs:
           workingDir: ./src/
           # our project token, to see how to obtain it
           # refer to https://storybook.js.org/tutorials/intro-to-storybook/react/en/deploy/
-          projectToken: b0960544b296
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
