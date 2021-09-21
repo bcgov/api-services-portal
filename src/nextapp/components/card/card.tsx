@@ -25,7 +25,13 @@ const Card: React.FC<CardProps> = ({
   return (
     <Box bgColor="white" sx={styles} {...props}>
       {heading && (
-        <Flex p={6} alignItems="center" justifyContent="space-between">
+        <Flex
+          px={9}
+          pt={9}
+          pb={3}
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Heading size="sm">{heading}</Heading>
           {actions && <HStack spacing={4}>{actions}</HStack>}
         </Flex>

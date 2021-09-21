@@ -90,7 +90,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         <ModalHeader>Create Application</ModalHeader>
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
-            <FormControl isRequired mb={4}>
+            <FormControl isRequired mb={8}>
               <FormLabel>Application Name</FormLabel>
               <Input name="name" variant="bc-input" />
             </FormControl>

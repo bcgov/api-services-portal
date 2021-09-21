@@ -28,12 +28,8 @@ import { dehydrate } from 'react-query/hydration';
 import Card from '@/components/card';
 import Table from '@/components/table';
 import ActionsMenu from '@/components/actions-menu';
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaExclamationCircle,
-  FaTrash,
-} from 'react-icons/fa';
+import { FaExclamationCircle } from 'react-icons/fa';
+import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import EmptyPane from '@/components/empty-pane';
 import ApplicationServices from '@/components/application-services';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -149,12 +145,11 @@ const ApplicationsPage: React.FC<
                   <Td>{d.name}</Td>
                   <Td>{d.appId}</Td>
                   <Td textAlign="right">
-                    <ActionsMenu aria-label={`${d.name} actions menu button`}>
-                      <MenuItem
-                        color="red.500"
-                        icon={<Icon as={FaTrash} />}
-                        onClick={handleDelete(d.id)}
-                      >
+                    <ActionsMenu
+                      aria-label={`${d.name} actions menu button`}
+                      placement="bottom-end"
+                    >
+                      <MenuItem color="red.500" onClick={handleDelete(d.id)}>
                         Delete Application
                       </MenuItem>
                     </ActionsMenu>
@@ -164,7 +159,8 @@ const ApplicationsPage: React.FC<
                       onClick={handleDetailsDisclosure(d.id)}
                     >
                       <Icon
-                        as={d.id === openId ? FaChevronUp : FaChevronDown}
+                        as={d.id === openId ? HiChevronUp : HiChevronDown}
+                        boxSize={6}
                       />
                     </IconButton>
                   </Td>
@@ -172,7 +168,7 @@ const ApplicationsPage: React.FC<
                 {d.id === openId && (
                   <Tr bgColor="#f6f6f6" boxShadow="inner">
                     <Td colSpan={columns.length}>
-                      <Grid templateColumns="1fr 1fr" gap={4}>
+                      <Grid templateColumns="1fr 50%" gap={10} py={8} px={9}>
                         <GridItem>
                           <Heading size="xs" mb={2}>
                             Authorized API Access

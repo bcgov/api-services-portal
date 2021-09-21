@@ -290,6 +290,30 @@ const theme = extendTheme(
           },
         },
       },
+      Menu: {
+        baseStyle: {
+          item: {
+            pr: 14,
+            pl: 5,
+          },
+        },
+      },
+      Modal: {
+        baseStyle: {
+          header: {
+            pt: 12,
+            px: 10,
+          },
+          body: {
+            px: 10,
+          },
+          footer: {
+            px: 10,
+            pb: 8,
+            pt: 8,
+          },
+        },
+      },
       Switch: {
         defaultProps: {
           colorScheme: 'primary',
@@ -310,6 +334,11 @@ const theme = extendTheme(
               textTransform: 'none',
               letterSpacing: 'normal',
               color: 'text',
+              pb: 5,
+              px: 9,
+            },
+            td: {
+              px: 9,
             },
           },
         },

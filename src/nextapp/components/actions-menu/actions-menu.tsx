@@ -17,9 +17,9 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ children, ...rest }) => {
         borderWidth="2px"
         borderColor="transparent"
         color="bc-component"
-        _hover={{ color: 'bc-blue', bgColor: 'white' }}
+        _hover={{ color: 'bc-blue', bgColor: '#00336505' }}
         _expanded={{ color: 'bc-blue', borderColor: 'bc-component' }}
-        _focus={{ boxShadow: 'outline' }}
+        _focus={{ boxShadow: 'outline', bgColor: '#00336505' }}
       >
         <Icon as={IoEllipsisHorizontal} aria-label="action menu icon" />
       </MenuButton>
