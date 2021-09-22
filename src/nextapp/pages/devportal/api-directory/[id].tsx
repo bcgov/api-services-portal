@@ -64,9 +64,7 @@ const ApiPage: React.FC<
   const { data } = useQuery<ApiDataset>(queryKey, () =>
     restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
-  // TODO: Not sure if this is needed still
-  // const hasProtectedEnvironments = (prod) =>
-  //   prod.environments?.some((env) => env.flow !== 'public');
+
   function DetailItem({ detail }: { detail: DetailItem }) {
     return (
       <Box mb={5}>

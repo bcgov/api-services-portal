@@ -62,7 +62,7 @@ const ApplicationSelect: React.FC = () => {
               <Button variant="secondary" onClick={onToggle}>
                 Cancel
               </Button>
-              <Button>Create</Button>
+              <Button onClick={onToggle}>Create</Button>
             </ButtonGroup>
           </GridItem>
         </Grid>

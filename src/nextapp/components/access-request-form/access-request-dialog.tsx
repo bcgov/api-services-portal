@@ -22,21 +22,25 @@ import AccessRequestCredentials from './access-request-credentials';
 interface AccessRequestDialogProps {
   defaultTab?: number;
   disabled: boolean;
+  id: string;
   open?: boolean;
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   defaultTab = 0,
   disabled,
+  id,
   open,
 }) => {
   const [tab, setTab] = React.useState<number>(defaultTab);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    onClose: () => setTab(defaultTab),
+  });
 
   return (
     <>
       <Button
-        colorScheme="bc-success"
+        colorScheme="green"
         disabled={disabled}
         variant="solid"
         onClick={onOpen}
@@ -52,7 +56,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         <ModalOverlay />
         <ModalContent minW="75%">
           <ModalHeader>
-            Access Request to Dataset
+            Access Request to Test NK API
             <Tabs defaultIndex={tab} index={tab} onChange={setTab}>
               <TabList mt={4}>
                 <Tab>1. Request Access</Tab>
@@ -62,13 +66,17 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           </ModalHeader>
           <ModalBody>
             {tab === 0 && <AccessRequestForm />}
-            {tab === 1 && <AccessRequestCredentials />}
+            {tab === 1 && <AccessRequestCredentials id={id} />}
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
               <Button variant="secondary">Cancel</Button>
-              {tab === 0 && <Button>Request Access & Continue</Button>}
-              {tab === 1 && <Button>Done</Button>}
+              {tab === 0 && (
+                <Button onClick={() => setTab(1)}>
+                  Request Access & Continue
+                </Button>
+              )}
+              {tab === 1 && <Button onClick={onClose}>Done</Button>}
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

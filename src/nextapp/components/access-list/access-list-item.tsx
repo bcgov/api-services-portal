@@ -116,7 +116,8 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
                 <MenuButton
                   as={IconButton}
                   aria-label="product actions"
-                  icon={IoEllipsisHorizontal}
+                  icon={<Icon as={IoEllipsisHorizontal} />}
+                  color="bc-blue"
                   variant="ghost"
                 />
                 <MenuList>

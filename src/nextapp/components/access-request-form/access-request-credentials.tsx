@@ -3,10 +3,15 @@ import { Box, Button, Center, Heading, Icon, Text } from '@chakra-ui/react';
 import { FaKey } from 'react-icons/fa';
 
 import ViewSecret from '../view-secret';
+import GenerateCredential from '../generate-credential';
 
-interface AccessRequestCredentialsProps {}
+interface AccessRequestCredentialsProps {
+  id: string;
+}
 
-const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = () => {
+const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = ({
+  id,
+}) => {
   return (
     <Box border="1px solid" borderColor="bc-outline" p={4} borderRadius={4}>
       <Heading
@@ -18,17 +23,8 @@ const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = () => 
       >
         <Icon as={FaKey} color="bc-blue" mr={3} /> Your Credentials
       </Heading>
-      <Text>
-        By clicking{' '}
-        <Text as="strong" color="bc-blue">
-          Generate Secrets
-        </Text>{' '}
-        we will generate your credentials once.
-      </Text>
       <Box>
-        <Center minH="250px">
-          <Button>Generate Secrets</Button>
-        </Center>
+        <GenerateCredential id={id} />
       </Box>
     </Box>
   );
