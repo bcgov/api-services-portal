@@ -17,16 +17,20 @@ import {
 } from '@chakra-ui/react';
 
 import AccessRequestForm from './access-request-form';
+import AccessRequestCredentials from './access-request-credentials';
 
 interface AccessRequestDialogProps {
+  defaultTab?: number;
   disabled: boolean;
   open?: boolean;
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
+  defaultTab = 0,
   disabled,
   open,
 }) => {
+  const [tab, setTab] = React.useState<number>(defaultTab);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -47,25 +51,24 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       >
         <ModalOverlay />
         <ModalContent minW="75%">
-          <ModalHeader>Access Request to Dataset</ModalHeader>
-          <ModalBody p={0}>
-            <Tabs>
-              <TabList mx={4}>
+          <ModalHeader>
+            Access Request to Dataset
+            <Tabs defaultIndex={tab} index={tab} onChange={setTab}>
+              <TabList mt={4}>
                 <Tab>1. Request Access</Tab>
-                <Tab isDisabled>2. Generate Secrets</Tab>
+                <Tab>2. Generate Secrets</Tab>
               </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <AccessRequestForm />
-                </TabPanel>
-                <TabPanel>Generate</TabPanel>
-              </TabPanels>
             </Tabs>
+          </ModalHeader>
+          <ModalBody>
+            {tab === 0 && <AccessRequestForm />}
+            {tab === 1 && <AccessRequestCredentials />}
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
               <Button variant="secondary">Cancel</Button>
-              <Button>Request Access & Continue</Button>
+              {tab === 0 && <Button>Request Access & Continue</Button>}
+              {tab === 1 && <Button>Done</Button>}
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

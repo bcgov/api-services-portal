@@ -2,11 +2,9 @@ import * as React from 'react';
 import {
   Box,
   Checkbox,
-  Flex,
   Link,
   Radio,
   RadioGroup,
-  Select,
   Stack,
   Text,
   Textarea,
@@ -14,14 +12,13 @@ import {
 import { FaComments, FaNetworkWired, FaWindowMaximize } from 'react-icons/fa';
 
 import Fieldset from './access-request-fieldset';
+import ApplicationSelect from './application-select';
 
-const AccessRequestForm = () => {
+const AccessRequestForm: React.FC = () => {
   return (
     <>
       <Fieldset isRequired icon={FaWindowMaximize} label="Test NK API">
-        <Select>
-          <option>App</option>
-        </Select>
+        <ApplicationSelect />
       </Fieldset>
       <Fieldset isRequired icon={FaNetworkWired} label="API Environment">
         <RadioGroup>
@@ -44,7 +41,7 @@ const AccessRequestForm = () => {
       </Fieldset>
       <Box mt={4} p={4} bgColor="#f2f2f2" borderRadius={4}>
         <Checkbox colorScheme="blue" name="acceptLegal">
-          I aggree to the terms of service for Test NK API
+          I agree to the terms of service for Test NK API
         </Checkbox>
         <Box mt={2} ml={7}>
           <Link

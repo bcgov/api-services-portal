@@ -12,3 +12,9 @@ export const Dialog = Template.bind({});
 Dialog.args = {
   open: true,
 };
+
+export const GenerateSecretsTab = Template.bind({});
+GenerateSecretsTab.args = {
+  open: true,
+  defaultTab: 1,
+};

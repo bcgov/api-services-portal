@@ -22,7 +22,8 @@ const AccessRequestFieldset: React.FC<AccessRequestFieldsetProps> = ({
   return (
     <FormControl
       as="fieldset"
-      border="1px solid #e1e1e5"
+      border="1px solid"
+      borderColor="bc-outline"
       p={4}
       borderRadius={4}
       w="100%"

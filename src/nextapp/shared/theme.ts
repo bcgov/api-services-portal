@@ -11,6 +11,7 @@ const colors = {
   'bc-light-blue': '#77ACF1',
   'bc-gray': '#f2f2f2',
   'bc-border-focus': '#3B99FC',
+  'bc-outline': '#e1e1e5',
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
   'bc-background': '#f1f1f1',
