@@ -153,7 +153,9 @@ export const CreateServiceAccount = async (
     issuerEnvConfig.clientRegistration == 'anonymous'
       ? null
       : issuerEnvConfig.clientRegistration == 'managed'
-      ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(
+      ? await new KeycloakTokenService(
+          openid.token_endpoint
+        ).getKeycloakSession(
           issuerEnvConfig.clientId,
           issuerEnvConfig.clientSecret
         )

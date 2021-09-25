@@ -51,7 +51,7 @@ export async function registerClient(
   // token is NULL if 'iat'
   // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
   // issuer.initialAccessToken if 'iat'
-  const kctoksvc = new KeycloakTokenService(openid.issuer);
+  const kctoksvc = new KeycloakTokenService(openid.token_endpoint);
 
   const token =
     issuerEnvConfig.clientRegistration == 'anonymous'

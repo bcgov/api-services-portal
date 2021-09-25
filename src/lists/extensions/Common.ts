@@ -281,7 +281,7 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   //const resourceAccessScope =
   //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
   const resSvrAccessToken = await new KeycloakTokenService(
-    envCtx.openid.issuer
+    envCtx.openid.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
   envCtx.accessToken = resSvrAccessToken;
   const permApi = new UMAPermissionService(
