@@ -1,6 +1,8 @@
 import { checkStatus } from '../checkStatus';
 import fetch from 'node-fetch';
-import { logger } from '../../logger';
+import { Logger } from '../../logger';
+
+const logger = Logger('kc.token');
 
 export interface Token {
   access_token: string;
@@ -26,6 +28,12 @@ export class KeycloakTokenService {
     params.append('grant_type', 'client_credentials');
     params.append('client_id', clientId);
     params.append('client_secret', clientSecret);
+
+    logger.debug(
+      '[getKeycloakSession] Using %s for endpoint %s',
+      clientId,
+      this.tokenUrl
+    );
 
     const response = await fetch(this.tokenUrl, {
       method: 'post',
