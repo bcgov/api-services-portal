@@ -150,7 +150,7 @@ class Oauth2ProxyAuthStrategy {
       '/admin/signin',
       [verifyJWT, checkExpired],
       async (req, res, next) => {
-        this.register_user(req, res);
+        await this.register_user(req, res);
       }
     );
 
