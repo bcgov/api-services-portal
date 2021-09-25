@@ -105,7 +105,7 @@ export async function getSuitableOwnerToken(
   if (isUserBasedResourceOwners(envctx)) {
     // This will imply scenario 2, so proceed with token exchange
     const accessToken = await new KeycloakTokenService(
-      openid.issuer
+      openid.token_endpoint
     ).tokenExchange(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret,
@@ -120,7 +120,7 @@ export async function getSuitableOwnerToken(
     // This will imply scenario 1, so verify the user is allowed to manage the particular Resource
     // and proceed with getting a token using the Resource Server credentials
     const resSvrAccessToken = await new KeycloakTokenService(
-      openid.issuer
+      openid.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
@@ -209,7 +209,7 @@ export async function doClientLoginForCredentialIssuer(
   const issuer = openid.issuer;
   const clientUuid = client.id;
   const accessToken = await new KeycloakTokenService(
-    openid.issuer
+    openid.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
   logger.debug('doClientLoginForCredentialIssuer returned ok %s', prodEnvId);
   return { issuer, accessToken, clientUuid } as TokenExchangeResult;
@@ -221,7 +221,7 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
   if (isUserBasedResourceOwners(envCtx)) {
     const issuerEnvConfig = envCtx.issuerEnvConfig;
     const accessToken = await new KeycloakTokenService(
-      envCtx.openid.issuer
+      envCtx.openid.token_endpoint
     ).tokenExchange(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret,
@@ -245,7 +245,7 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
     const resourceAccessScope =
       envCtx.prodEnv.credentialIssuer.resourceAccessScope;
     const resSvrAccessToken = await new KeycloakTokenService(
-      envCtx.openid.issuer
+      envCtx.openid.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
