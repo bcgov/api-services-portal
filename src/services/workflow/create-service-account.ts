@@ -164,7 +164,7 @@ export const CreateServiceAccount = async (
   //const defaultClientScopes = controls.defaultClientScopes;
 
   const kcClientService = new KeycloakClientRegistrationService(
-    openid.issuer,
+    issuerEnvConfig.issuerUrl,
     openid.registration_endpoint,
     token
   );

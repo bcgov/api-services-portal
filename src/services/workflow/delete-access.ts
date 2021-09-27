@@ -136,7 +136,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
           }
 
           await new KeycloakClientRegistrationService(
-            openid.issuer,
+            issuerEnvConfig.issuerUrl,
             openid.registration_endpoint,
             token
           ).deleteClientRegistration(svc.consumer.customId);

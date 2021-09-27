@@ -67,7 +67,7 @@ export async function registerClient(
 
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
   const client = await new KeycloakClientRegistrationService(
-    openid.issuer,
+    issuerEnvConfig.issuerUrl,
     openid.registration_endpoint,
     token
   ).clientRegistration(
