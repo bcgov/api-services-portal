@@ -10,7 +10,7 @@ import {
 import omit from 'lodash/omit';
 import { Query } from '@/types/query.types';
 
-import { apiHost } from '../config';
+import { apiHost, apiInternalHost } from '../config';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -46,7 +46,10 @@ const api = async <T extends ApiResponse>(
     headers: {},
     ...options,
   };
-  const apiClient = new GraphQLClient(`${apiHost}/gql/api`, {
+  const targetUrl = settings.ssr ? apiInternalHost : apiHost;
+  console.log('TARGET = ' + targetUrl);
+
+  const apiClient = new GraphQLClient(`${targetUrl}/gql/api`, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
