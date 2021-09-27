@@ -297,7 +297,8 @@ module.exports = {
                   envCtx.issuerEnvConfig.issuerUrl
                 );
                 const kcClientRegService = new KeycloakClientRegistrationService(
-                  envCtx.issuerEnvConfig.issuerUrl,
+                  envCtx.openid.issuer,
+                  envCtx.openid.registration_endpoint,
                   null
                 );
                 await kcClientService.login(

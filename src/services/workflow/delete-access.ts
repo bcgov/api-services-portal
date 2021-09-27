@@ -114,7 +114,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
               ? null
               : issuerEnvConfig.clientRegistration == 'managed'
               ? await new KeycloakTokenService(
-                  openid.issuer
+                  openid.token_endpoint
                 ).getKeycloakSession(
                   issuerEnvConfig.clientId,
                   issuerEnvConfig.clientSecret
@@ -137,6 +137,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
 
           await new KeycloakClientRegistrationService(
             openid.issuer,
+            openid.registration_endpoint,
             token
           ).deleteClientRegistration(svc.consumer.customId);
         }

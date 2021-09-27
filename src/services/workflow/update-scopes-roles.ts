@@ -82,6 +82,7 @@ export const updateScopesAndRoles = async (
 
   const kcClientService = new KeycloakClientRegistrationService(
     openid.issuer,
+    openid.registration_endpoint,
     token
   );
 

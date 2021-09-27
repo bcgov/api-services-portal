@@ -165,6 +165,7 @@ export const CreateServiceAccount = async (
 
   const kcClientService = new KeycloakClientRegistrationService(
     openid.issuer,
+    openid.registration_endpoint,
     token
   );
   await kcClientService.updateClientRegistration(clientId, {
@@ -196,7 +197,7 @@ export const CreateServiceAccount = async (
   logger.debug('Resource ID for Policy %s', nsResourceId);
   if (nsResourceId != null) {
     const resSvrAccessToken = await new KeycloakTokenService(
-      openid.issuer
+      openid.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret

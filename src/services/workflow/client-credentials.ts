@@ -68,6 +68,7 @@ export async function registerClient(
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
   const client = await new KeycloakClientRegistrationService(
     openid.issuer,
+    openid.registration_endpoint,
     token
   ).clientRegistration(
     <ClientAuthenticator>issuer.clientAuthenticator,
@@ -103,8 +104,14 @@ export async function findClient(
   );
 
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-
-  const kcClientService = new KeycloakClientService(openid.issuer, null);
+  // openid.issuer and issuerEnvConfig.issuerUrl may be different
+  // but for kcClientService we want to use the issuerEnvConfig.issuerUrl
+  // openid.issuer will be an externally accessible URL where is `issuerEnvConfig.issuerUrl`
+  // could be internal (similar to the openid.token_endpoint and registration_endpoint)
+  const kcClientService = new KeycloakClientService(
+    issuerEnvConfig.issuerUrl,
+    null
+  );
 
   await kcClientService.login(
     issuerEnvConfig.clientId,

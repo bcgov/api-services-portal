@@ -274,6 +274,7 @@ async function setupAuthorizationAndEnable(
 
     const kcClientService = new KeycloakClientRegistrationService(
       openid.issuer,
+      openid.registration_endpoint,
       token
     );
 
