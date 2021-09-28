@@ -1,0 +1,6 @@
+
+  mutation Remove($id: ID!) {
+    deleteProduct(id: $id) {
+      id
+    }
+  }

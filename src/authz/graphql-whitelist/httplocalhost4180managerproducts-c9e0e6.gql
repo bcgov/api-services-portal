@@ -1,0 +1,7 @@
+
+  mutation Add($name: String!) {
+    createProduct(data: { name: $name }) {
+      id
+      name
+    }
+  }
