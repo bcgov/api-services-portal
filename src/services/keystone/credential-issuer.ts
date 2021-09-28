@@ -1,11 +1,14 @@
-import { Logger } from '../../logger'
-import { CredentialIssuer } from './types'
+import { Logger } from '../../logger';
+import { CredentialIssuer } from './types';
 
-const logger = Logger('keystone.cred-issuer')
+const logger = Logger('keystone.cred-issuer');
 
-export async function lookupCredentialIssuerById (context: any, id: string) : Promise<CredentialIssuer> {
-    const result = await context.executeGraphQL({
-        query: `query GetCredentialIssuerById($id: ID!) {
+export async function lookupCredentialIssuerById(
+  context: any,
+  id: string
+): Promise<CredentialIssuer> {
+  const result = await context.executeGraphQL({
+    query: `query GetCredentialIssuerById($id: ID!) {
                     CredentialIssuer(where: {id: $id}) {
                         id
                         name
@@ -13,11 +16,12 @@ export async function lookupCredentialIssuerById (context: any, id: string) : Pr
                         mode
                         clientRegistration
                         clientAuthenticator
+                        resourceType
                         environmentDetails
                     }
                 }`,
-        variables: { id: id }
-    })
-    logger.debug("Query [lookupCredentialIssuerById] result %j", result)
-    return result.data.CredentialIssuer
+    variables: { id: id },
+  });
+  logger.debug('Query [lookupCredentialIssuerById] result %j', result);
+  return result.data.CredentialIssuer;
 }

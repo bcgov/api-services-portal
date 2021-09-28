@@ -124,15 +124,23 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
           // Delete the Policies that are associated with the client!!
           // Use the kcprotect service to find the UMA Policies that have this client ID
           // and then delete each one
-          logger.debug('Deleting policies for %s', svc.consumer.customId);
-          const policyApi = new UMAPolicyService(openid.issuer, token);
-          const relatedPolicies = await policyApi.listPolicies({
-            name: svc.consumer.customId,
-          });
-          for (const policy of relatedPolicies.filter(
-            (p) => p.name == svc.consumer.customId
-          )) {
-            await policyApi.deleteUmaPolicy(policy.id);
+          // Only do the below if this authorization profile has UMA resources
+          if (issuer.resourceType != null && issuer.resourceType != '') {
+            logger.debug('Deleting policies for %s', svc.consumer.customId);
+            const policyApi = new UMAPolicyService(openid.issuer, token);
+            const relatedPolicies = await policyApi.listPolicies({
+              name: svc.consumer.customId,
+            });
+            for (const policy of relatedPolicies.filter(
+              (p) => p.name == svc.consumer.customId
+            )) {
+              await policyApi.deleteUmaPolicy(policy.id);
+            }
+          } else {
+            logger.debug(
+              'Non-UMA Profile so skipping policy cleanup for %s',
+              svc.consumer.customId
+            );
           }
 
           await new KeycloakClientRegistrationService(
