@@ -1,0 +1,14 @@
+
+  query GetPendingAccessRequests {
+    allAccessRequestsByNamespace(where: { isIssued_not: true }) {
+      id
+      name
+      requestor {
+        name
+        username
+      }
+      serviceAccess {
+        id
+      }
+    }
+  }

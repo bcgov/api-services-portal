@@ -47,7 +47,7 @@ const api = async <T extends ApiResponse>(
     ...options,
   };
   const targetUrl = settings.ssr ? apiInternalHost : apiHost;
-  console.log('TARGET = ' + targetUrl);
+  console.log('[GRAPHQL] TARGET = ' + targetUrl);
 
   const apiClient = new GraphQLClient(`${targetUrl}/gql/api`, {
     headers: {
@@ -120,13 +120,17 @@ export async function restApi(
 ): Promise<string> {
   try {
     const config = {
+      ssr: true,
       method: 'GET',
       headers: {
         Accept: 'application/json',
       },
       ...options,
     };
-    const response = await fetch(apiHost + url, config);
+    const targetUrl = config.ssr ? apiInternalHost : apiHost;
+    console.log('[REST] TARGET = ' + targetUrl + url);
+
+    const response = await fetch(targetUrl + url, config);
     const contentType = response.headers.get('Content-Type');
 
     if (!response.ok) {

@@ -1,0 +1,19 @@
+
+  query GetCredentialIssuers {
+    allCredentialIssuersByNamespace {
+      id
+      name
+      flow
+      mode
+      owner {
+        name
+        username
+      }
+      environments {
+        name
+        product {
+          name
+        }
+      }
+    }
+  }

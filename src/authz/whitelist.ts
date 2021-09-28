@@ -1,45 +1,61 @@
-import fs from 'fs'
-import { Logger } from '../logger'
-import crypto  from 'crypto'
+import fs from 'fs';
+import { Logger } from '../logger';
+import crypto from 'crypto';
 
-const logger = Logger('whitelist')
+const logger = Logger('whitelist');
 
-const whitelistPath = fs.realpathSync('authz/whitelist.json')
+const whitelistPath = fs.realpathSync('authz/graphql-whitelist');
 
 const whitelist = {
-    list: {} as any
-}
+  list: {} as any,
+};
 
 function refreshWhitelist() {
-    let rawdata : Buffer = fs.readFileSync(whitelistPath);
-    whitelist.list = JSON.parse(rawdata.toString());    
-}
-
-export function addToWhitelist (referer: string, operation: string, query: string) {
+  const _list: any = {};
+  fs.readdirSync(whitelistPath).forEach(function (file: string) {
+    let queryBuffer: Buffer = fs.readFileSync(whitelistPath + '/' + file);
+    let query = queryBuffer.toString();
     var hash = crypto.createHash('md5').update(query).digest('hex');
-    whitelist.list[hash] = { referer, operation, query, added: new Date().toISOString() }
-    logger.info("ADD : [%s] %j", hash, query)
-    fs.writeFileSync(whitelistPath, JSON.stringify(whitelist.list, null, 5))
+    _list[hash] = {
+      query,
+    };
+  });
+  whitelist.list = _list;
 }
 
-export function loadWhitelistAndWatch (watch: boolean) {
-    refreshWhitelist()
-
-    if (watch) {
-        fs.watch(whitelistPath, (eventType, filename) => {
-            logger.info("Watch Detected: " + eventType)
-            refreshWhitelist()
-        })
-    }
+export function addToWhitelist(
+  referer: string,
+  operation: string,
+  query: string
+) {
+  var hash = crypto.createHash('md5').update(query).digest('hex');
+  logger.info('ADD : [%s] (%s) %j', hash, operation, query);
+  const filename =
+    typeof referer === 'undefined' ? 'unknown' : referer.replace(/\W/g, '');
+  fs.writeFileSync(
+    `${whitelistPath}/${filename}-${hash.substr(0, 6)}.gql`,
+    query
+  );
 }
 
-export function checkWhitelist (query : string) {
-    var hash = crypto.createHash('md5').update(query).digest('hex');
-    if (hash in whitelist.list) {
-        logger.info("HIT : [%s] %j", hash, query)
-        return true
-    } else {
-        logger.info("MISS: [%s] %j", hash, query)
-        return false
-    }
+export function loadWhitelistAndWatch(watch: boolean) {
+  refreshWhitelist();
+
+  if (watch) {
+    fs.watch(whitelistPath, (eventType, filename) => {
+      logger.info('Watch Detected: ' + eventType);
+      refreshWhitelist();
+    });
+  }
+}
+
+export function checkWhitelist(query: string) {
+  var hash = crypto.createHash('md5').update(query).digest('hex');
+  if (hash in whitelist.list) {
+    logger.info('HIT : [%s] %j', hash, query);
+    return true;
+  } else {
+    logger.info('MISS: [%s] %j', hash, query);
+    return false;
+  }
 }

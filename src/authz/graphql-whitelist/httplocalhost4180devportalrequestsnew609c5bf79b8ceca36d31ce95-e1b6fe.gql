@@ -1,0 +1,30 @@
+
+  mutation AddAccessRequest(
+    $name: String!
+    $controls: String
+    $requestor: ID!
+    $applicationId: ID!
+    $productEnvironmentId: ID!
+    $additionalDetails: String
+    $acceptLegal: Boolean!
+  ) {
+    acceptLegal(
+      productEnvironmentId: $productEnvironmentId
+      acceptLegal: $acceptLegal
+    ) {
+      legalsAgreed
+    }
+
+    createAccessRequest(
+      data: {
+        name: $name
+        controls: $controls
+        additionalDetails: $additionalDetails
+        requestor: { connect: { id: $requestor } }
+        application: { connect: { id: $applicationId } }
+        productEnvironment: { connect: { id: $productEnvironmentId } }
+      }
+    ) {
+      id
+    }
+  }

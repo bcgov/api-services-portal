@@ -10,6 +10,7 @@ import {
   KeycloakClientRegistrationService,
   KeycloakTokenService,
   getOpenidFromIssuer,
+  getUma2FromIssuer,
 } from '../keycloak';
 import { KongConsumerService } from '../kong';
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
@@ -109,6 +110,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
             svc.productEnvironment.name
           );
           const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+          const uma2 = await getUma2FromIssuer(issuerEnvConfig.issuerUrl);
           const token =
             issuerEnvConfig.clientRegistration == 'anonymous'
               ? null
@@ -127,7 +129,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
           // Only do the below if this authorization profile has UMA resources
           if (issuer.resourceType != null && issuer.resourceType != '') {
             logger.debug('Deleting policies for %s', svc.consumer.customId);
-            const policyApi = new UMAPolicyService(openid.issuer, token);
+            const policyApi = new UMAPolicyService(uma2.policy_endpoint, token);
             const relatedPolicies = await policyApi.listPolicies({
               name: svc.consumer.customId,
             });

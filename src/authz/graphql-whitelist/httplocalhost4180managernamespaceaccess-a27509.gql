@@ -1,0 +1,6 @@
+
+  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
+      id
+    }
+  }

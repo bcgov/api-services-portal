@@ -22,6 +22,7 @@ const authLogoutUrl =
 const { Logger } = require('../logger');
 
 const { UMA2TokenService } = require('../services/uma2');
+const { getUma2FromIssuer, Uma2WellKnown } = require('../services/keycloak');
 
 const toJson = (val) => (val ? JSON.parse(val) : null);
 
@@ -161,7 +162,8 @@ class Oauth2ProxyAuthStrategy {
         // Switch namespace
         // - Get a Requestor Party Token for the particular Resource
         const subjectToken = req.headers['x-forwarded-access-token'];
-        const accessToken = await new UMA2TokenService(process.env.OIDC_ISSUER)
+        const uma2 = await getUma2FromIssuer(process.env.OIDC_ISSUER);
+        const accessToken = await new UMA2TokenService(uma2.token_endpoint)
           .getRequestingPartyToken(
             process.env.GWA_RES_SVR_CLIENT_ID,
             process.env.GWA_RES_SVR_CLIENT_SECRET,
