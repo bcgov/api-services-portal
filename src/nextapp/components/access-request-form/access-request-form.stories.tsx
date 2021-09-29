@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import AccessRequestForm from './access-request-dialog';
+import ApplicationSelect from './application-select';
 
 export default {
   title: 'APS/AccessRequestForm',
@@ -18,3 +19,5 @@ GenerateSecretsTab.args = {
   open: true,
   defaultTab: 1,
 };
+
+export const ApplicationForm = () => <ApplicationSelect />;

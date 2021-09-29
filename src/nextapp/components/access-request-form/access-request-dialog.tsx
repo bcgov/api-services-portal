@@ -10,8 +10,6 @@ import {
   ModalOverlay,
   Tab,
   TabList,
-  TabPanel,
-  TabPanels,
   Tabs,
   useDisclosure,
 } from '@chakra-ui/react';

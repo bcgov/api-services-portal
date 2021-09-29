@@ -12,8 +12,8 @@ import {
 } from '@chakra-ui/react';
 import { FaKey } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-// import { useApiMutation } from '@/shared/services/api';
-// import type { Mutation } from '@/shared/types/query.types';
+import { useApiMutation } from '@/shared/services/api';
+import type { Mutation } from '@/shared/types/query.types';
 
 import ViewSecret from '../view-secret';
 
@@ -22,22 +22,22 @@ interface GenerateCredentialsProps {
 }
 
 const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
-  // const [credentials, setCredentials] = React.useState<Record<string, string>>(
-  //   {}
-  // );
-  // const credentialGenerator = useApiMutation(mutation);
-  // const generateCredentials = React.useCallback(async () => {
-  //   const res: Mutation = await credentialGenerator.mutateAsync({ id });
-  //   if (res.updateAccessRequest.credential !== 'NEW') {
-  //     setCredentials(JSON.parse(res.updateAccessRequest.credential));
-  //   }
-  // }, [credentialGenerator, id, setCredentials]);
-  const [showSecrets, setSecrets] = React.useState<boolean>(false);
+  const [credentials, setCredentials] = React.useState<Record<string, string>>(
+    {}
+  );
+  const credentialGenerator = useApiMutation(mutation);
+  const generateCredentials = React.useCallback(async () => {
+    const res: Mutation = await credentialGenerator.mutateAsync({ id });
+    if (res.updateAccessRequest.credential !== 'NEW') {
+      setCredentials(JSON.parse(res.updateAccessRequest.credential));
+    }
+  }, [credentialGenerator, id, setCredentials]);
+
   return (
     <>
-      {showSecrets && (
+      {credentials && (
         <Box my={8}>
-          <ViewSecret credentials={{ apiKey: '123u109e039wef49r0fejw904' }} />
+          <ViewSecret credentials={credentials} />
           <Alert status="warning" my={4}>
             <AlertIcon />
             <AlertDescription>
@@ -48,7 +48,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
           </Alert>
         </Box>
       )}
-      {!showSecrets && (
+      {!credentialGenerator.isSuccess && (
         <>
           <Text>
             By clicking{' '}
@@ -58,7 +58,21 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
             we will generate your credentials once.
           </Text>
           <Center minH="250px">
-            <Button onClick={() => setSecrets(true)}>Generate Secrets</Button>
+            <Box>
+              <Button
+                isLoading={credentialGenerator.isLoading}
+                onClick={generateCredentials}
+              >
+                {`${
+                  credentialGenerator.isError ? 'Retry ' : ''
+                }Generate Secrets`}
+              </Button>
+              {credentialGenerator.isError && (
+                <Alert status="error" mt={4}>
+                  <AlertDescription>Unable to generate keys</AlertDescription>
+                </Alert>
+              )}
+            </Box>
           </Center>
         </>
       )}
@@ -69,7 +83,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
 export default GenerateCredentials;
 
 const mutation = gql`
-  mutation genCredential($id: id!) {
+  mutation genCredential($id: ID!) {
     updateAccessRequest(id: $id, data: { credential: "NEW" }) {
       credential
     }

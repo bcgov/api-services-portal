@@ -11,12 +11,88 @@ import {
   Icon,
   Input,
   Select,
+  Text,
   useDisclosure,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
+import { gql } from 'graphql-request';
+import { useApi, useApiMutation } from '@/shared/services/api';
+import { uid } from 'react-uid';
+import { Mutation } from '@/types/query.types';
+import { useQueryClient } from 'react-query';
+import { delay } from '@/shared/services/utils';
 
 const ApplicationSelect: React.FC = () => {
+  const queryKey = 'myApplications';
+  const client = useQueryClient();
+  const nameInput = React.useRef<HTMLInputElement>(null);
+  const descriptionInput = React.useRef<HTMLInputElement>(null);
+  const [showError, setShowError] = React.useState<boolean>(false);
+  const [showSuccess, setShowSuccess] = React.useState<boolean>(false);
+  const [application, setApplication] = React.useState<string>('');
   const { isOpen, onToggle } = useDisclosure();
+  const { data, isLoading } = useApi(
+    queryKey,
+    {
+      query,
+    },
+    { suspense: false }
+  );
+  const mutate = useApiMutation(mutation);
+
+  // Events
+  const handleOpenForm = async () => {
+    onToggle();
+    await delay(200);
+    nameInput.current?.focus();
+  };
+  const handleSelectApplication = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setApplication(event.currentTarget.value);
+  };
+  const resetForm = () => {
+    if (nameInput.current) {
+      nameInput.current.value = '';
+    }
+    if (descriptionInput.current) {
+      descriptionInput.current.value = '';
+    }
+  };
+  const handleCancel = () => {
+    onToggle();
+    setShowSuccess(false);
+    setShowError(false);
+    resetForm();
+  };
+  const handleCreate = async () => {
+    setShowError(false);
+    try {
+      const name = nameInput.current?.value;
+      const description = descriptionInput.current?.value;
+
+      if (nameInput.current?.checkValidity()) {
+        await mutate.mutateAsync(
+          { name, description },
+          {
+            onSuccess(data: Mutation) {
+              setApplication(data.createApplication.id);
+            },
+          }
+        );
+        client.invalidateQueries(queryKey);
+
+        setShowSuccess(true);
+        resetForm();
+        await delay(2000);
+        handleCancel();
+      } else {
+        nameInput.current?.reportValidity();
+      }
+    } catch {
+      setShowError(true);
+    }
+  };
 
   return (
     <>
@@ -27,8 +103,19 @@ const ApplicationSelect: React.FC = () => {
             <FormHelperText>
               Select an application to consume the API
             </FormHelperText>
-            <Select>
-              <option>App</option>
+            <Select
+              isRequired
+              isDisabled={isLoading}
+              name="applicationId"
+              onChange={handleSelectApplication}
+              value={application}
+            >
+              <option value="">No Application Selected</option>
+              {data?.myApplications?.map((a) => (
+                <option key={uid(a)} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
             </Select>
           </FormControl>
         </GridItem>
@@ -36,7 +123,7 @@ const ApplicationSelect: React.FC = () => {
           <Button
             leftIcon={<Icon as={FaPlusCircle} />}
             px={2}
-            onClick={onToggle}
+            onClick={handleOpenForm}
             variant="flat"
           >
             Create Application
@@ -48,22 +135,34 @@ const ApplicationSelect: React.FC = () => {
           <GridItem>
             <FormControl isRequired>
               <FormLabel>Application Name</FormLabel>
-              <Input />
+              <Input ref={nameInput} isDisabled={mutate.isLoading} />
             </FormControl>
           </GridItem>
           <GridItem>
             <FormControl>
               <FormLabel>Description (optional)</FormLabel>
-              <Input />
+              <Input ref={descriptionInput} isDisabled={mutate.isLoading} />
             </FormControl>
           </GridItem>
-          <GridItem>
-            <ButtonGroup>
-              <Button variant="secondary" onClick={onToggle}>
+          <GridItem d="flex" alignItems="center" colSpan={2}>
+            <ButtonGroup isDisabled={mutate.isLoading}>
+              <Button variant="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button onClick={onToggle}>Create</Button>
+              <Button isLoading={mutate.isLoading} onClick={handleCreate}>
+                Create
+              </Button>
             </ButtonGroup>
+            {showError && (
+              <Text color="bc-error" ml={4}>
+                Error
+              </Text>
+            )}
+            {showSuccess && (
+              <Text color="bc-success" ml={4}>
+                Application created!
+              </Text>
+            )}
           </GridItem>
         </Grid>
       </Collapse>
@@ -72,3 +171,26 @@ const ApplicationSelect: React.FC = () => {
 };
 
 export default ApplicationSelect;
+
+const query = gql`
+  query {
+    myApplications {
+      id
+      appId
+      name
+      owner {
+        name
+      }
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation Add($name: String!, $description: String) {
+    createApplication(data: { name: $name, description: $description }) {
+      id
+      appId
+      name
+    }
+  }
+`;
