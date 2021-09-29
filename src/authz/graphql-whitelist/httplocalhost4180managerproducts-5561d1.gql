@@ -1,0 +1,8 @@
+
+  mutation Update($id: ID!, $active: Boolean) {
+    updateEnvironment(id: $id, data: { active: $active }) {
+      name
+      id
+      active
+    }
+  }
