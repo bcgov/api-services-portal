@@ -98,7 +98,7 @@ export const GET_ENVIRONMENT_LIST = gql`
 
 export const GET_ENVIRONMENT = gql`
   query GET($id: ID!) {
-    Environment(where: { id: $id }) {
+    OwnedEnvironment(where: { id: $id }) {
       id
       name
       active

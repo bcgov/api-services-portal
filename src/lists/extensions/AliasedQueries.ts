@@ -61,6 +61,11 @@ module.exports = {
           type: SchemaType.ListQuery,
         },
         {
+          gqlName: 'myAccessRequests',
+          list: 'AccessRequest',
+          type: SchemaType.ListQuery,
+        },
+        {
           gqlName: 'myApplications',
           list: 'Application',
           type: SchemaType.ListQuery,

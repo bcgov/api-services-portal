@@ -6165,6 +6165,7 @@ export type Query = {
   OwnedEnvironment?: Maybe<Environment>;
   DiscoverableProduct?: Maybe<Product>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  myAccessRequests?: Maybe<Array<Maybe<AccessRequest>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
   mySelf?: Maybe<User>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
@@ -6816,6 +6817,14 @@ export type QueryMyServiceAccessesArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryMyAccessRequestsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<AccessRequestWhereInput>;
 };
 
 

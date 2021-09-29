@@ -87,6 +87,8 @@ API Owner Role Rules,,getServiceAccounts,,,,,,,,,"api-owner,provider-user",allow
 API Owner Role Rules,,createServiceAccount,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteServiceAccount,,,,,,,api-owner,,,allow,
 Developer Role Rules,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
+Developer Role Rules,,myAccessRequests,,,,,,,portal-user,,,allow,filterByRequestor
+Developer Role Rules,,deleteAccessRequest,,,,,,,portal-user,,,allow,filterByRequestor
 Developer Role Rules,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 Developer Role Rules,,allDiscoverableProducts,,,,,,,portal-user,,,allow,filterByActiveEnvironment
 Developer Role Rules,,allDiscoverableContents,,,,,,,portal-user,,,allow,
