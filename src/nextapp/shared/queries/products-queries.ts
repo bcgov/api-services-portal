@@ -105,12 +105,13 @@ export const GET_ENVIRONMENT = gql`
       flow
       appId
       legal {
-          id
-          title
-          reference
+        id
+        title
+        reference
       }
       credentialIssuer {
-          id
+        id
+        environmentDetails
       }
       approval
       additionalDetailsToRequest
