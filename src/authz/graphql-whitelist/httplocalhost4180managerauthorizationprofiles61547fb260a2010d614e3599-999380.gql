@@ -1,0 +1,6 @@
+
+  mutation DeleteAuthzProfile($id: ID!) {
+    deleteCredentialIssuer(id: $id) {
+      id
+    }
+  }

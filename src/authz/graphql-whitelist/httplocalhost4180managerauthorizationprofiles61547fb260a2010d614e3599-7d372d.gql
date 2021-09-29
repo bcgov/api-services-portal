@@ -1,0 +1,6 @@
+
+  mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {
+    updateCredentialIssuer(id: $id, data: $data) {
+      id
+    }
+  }

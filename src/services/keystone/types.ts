@@ -6162,6 +6162,7 @@ export type Query = {
   allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
   allCredentialIssuersByNamespace?: Maybe<Array<Maybe<CredentialIssuer>>>;
   allNamespaceServiceAccounts?: Maybe<Array<Maybe<ServiceAccess>>>;
+  OwnedEnvironment?: Maybe<Environment>;
   DiscoverableProduct?: Maybe<Product>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
@@ -6797,6 +6798,11 @@ export type QueryAllNamespaceServiceAccountsArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryOwnedEnvironmentArgs = {
+  where?: Maybe<EnvironmentWhereInput>;
 };
 
 

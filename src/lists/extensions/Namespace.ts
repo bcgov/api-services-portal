@@ -83,7 +83,7 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
+              const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
                 envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken

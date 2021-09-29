@@ -1,0 +1,29 @@
+
+  query GetCredentialIssuer($id: ID!) {
+    CredentialIssuer(where: { id: $id }) {
+      id
+      name
+      flow
+      mode
+      apiKeyName
+      clientAuthenticator
+      clientRoles
+      availableScopes
+      resourceScopes
+      resourceType
+      resourceAccessScope
+      environmentDetails
+      owner {
+        id
+        name
+        username
+        email
+      }
+      environments {
+        name
+        product {
+          name
+        }
+      }
+    }
+  }
