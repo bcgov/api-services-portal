@@ -30,9 +30,9 @@ export default function JwtKeycloak(namespace, envName, issuer) {
       realm_roles: null
       client_roles: null
       anonymous: null
-      consumer_match: false
+      consumer_match: true
       consumer_match_claim: azp  
-      consumer_match_claim_custom_id: false
+      consumer_match_claim_custom_id: true
       consumer_match_ignore_not_found: false
 `;
 }

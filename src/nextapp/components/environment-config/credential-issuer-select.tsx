@@ -5,7 +5,7 @@ import { gql } from 'graphql-request';
 
 const query = gql`
   query GET($flow: String) {
-    allCredentialIssuersByNamespace(where: { flow: $flow}) {
+    allCredentialIssuersByNamespace(where: { flow: $flow }) {
       id
       name
       environmentDetails
@@ -19,12 +19,16 @@ interface CredentialIssuerSelectProps {
   value?: string;
 }
 
-const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow, value}) => {
-  const variables = { flow : flow}
+const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
+  flow,
+  value,
+}) => {
+  const variables = { flow };
   const { data, isLoading, isSuccess } = useApi(
-    'environment-credential-users',
+    ['environment-credential-users', flow],
     {
-      query, variables
+      query,
+      variables,
     },
     {
       suspense: false,
@@ -32,7 +36,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow, va
   );
 
   if (isLoading) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -49,7 +53,11 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({flow, va
       <option></option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
         <option key={d.id} value={d.id}>
-          {d.name} ({JSON.parse(d.environmentDetails).map ((e:any) => e.environment).join(',')})
+          {d.name} (
+          {JSON.parse(d.environmentDetails)
+            .map((e: any) => e.environment)
+            .join(',')}
+          )
         </option>
       ))}
     </Select>
