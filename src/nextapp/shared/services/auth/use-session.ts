@@ -13,42 +13,44 @@ export interface UserSessionResult {
   error?: Error;
 }
 
-export const getSession = async (headers:HeadersInit = { 'Accept': 'application/json' }): Promise<UserData> => {
+export const getSession = async (
+  headers: HeadersInit = { Accept: 'application/json' }
+): Promise<UserData> => {
   try {
     const req = await fetch(`${apiHost}/admin/session`, {
-        headers: headers
+      headers: headers,
     });
     if (req.ok) {
       const json = await req.json();
       return json.user;
     }
-    if (req.status == 401) {
-        throw new Error(req.statusText)
+    if (req.status == 401 || req.status == 403) {
+      throw new Error(req.statusText);
     }
-    
+
     return undefined;
   } catch (err) {
-      throw new Error(err);
+    throw new Error(err);
   }
 };
 
 export const getSessionL = async (): Promise<UserData> => {
-    try {
-      const req = await fetch(`${apiHost}/admin/session`, {
-          headers: { 'Content-Type': 'application/json'}
-      });
-      if (req.ok) {
-        const json = await req.json();
-        return json.user;
-      }
-      if (req.status == 401) {
-          throw new Error(req.statusText)
-      }
-      
-      return undefined;
-    } catch (err) {
-        throw new Error(err);
+  try {
+    const req = await fetch(`${apiHost}/admin/session`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (req.ok) {
+      const json = await req.json();
+      return json.user;
     }
+    if (req.status == 401 || req.status == 403) {
+      throw new Error(req.statusText);
+    }
+
+    return undefined;
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 export const useSession = (): UserSessionResult => {

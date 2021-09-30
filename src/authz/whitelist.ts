@@ -30,8 +30,11 @@ export function addToWhitelist(
 ) {
   var hash = crypto.createHash('md5').update(query).digest('hex');
   logger.info('ADD : [%s] (%s) %j', hash, operation, query);
+  let re = new RegExp('[a-f0-9-]{24}');
   const filename =
-    typeof referer === 'undefined' ? 'unknown' : referer.replace(/\W/g, '');
+    typeof referer === 'undefined'
+      ? 'unknown'
+      : referer.replace(re, '').replace(/\W/g, '');
   fs.writeFileSync(
     `${whitelistPath}/${filename}-${hash.substr(0, 6)}.gql`,
     query

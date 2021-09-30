@@ -44,6 +44,7 @@ export interface PluginConfig {
 }
 
 export interface IssuerEnvironmentConfig {
+  exists: boolean;
   environment: string;
   issuerUrl: string;
   clientRegistration?: string;

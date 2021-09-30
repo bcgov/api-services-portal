@@ -322,7 +322,14 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
     resSvrAccessToken
   );
   const permTicket = await permApi.requestTicket([
-    { resource_scopes: ['Namespace.View', 'Namespace.Manage'] },
+    {
+      resource_scopes: [
+        'Namespace.View',
+        'Namespace.Manage',
+        'CredentialIssuer.Admin',
+        'Access.Manage',
+      ],
+    },
   ]);
   const tokenApi = new UMA2TokenService(envCtx.uma2.token_endpoint);
   const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(

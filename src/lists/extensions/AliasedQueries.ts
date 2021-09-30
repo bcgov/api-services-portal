@@ -1,3 +1,5 @@
+import { CredentialIssuer, Environment } from '@/services/keystone/types';
+import { IssuerEnvironmentConfig } from '@/services/workflow/types';
 import {
   ListQuery,
   ItemQuery,
@@ -56,6 +58,56 @@ module.exports = {
           type: SchemaType.ItemQuery,
         },
         {
+          gqlName: 'OwnedEnvironment',
+          list: 'Environment',
+          type: SchemaType.ItemQuery,
+          hook: (data: Environment) => {
+            if (data.credentialIssuer == null) {
+              return data;
+            }
+            const envDetails = JSON.parse(
+              data.credentialIssuer.environmentDetails
+            );
+            envDetails.forEach(function (env: IssuerEnvironmentConfig) {
+              if (env.clientId || env.clientSecret) {
+                env.clientId = '****';
+                env.clientSecret = '****';
+              } else if (env.initialAccessToken) {
+                env.initialAccessToken = '****';
+              }
+              env.exists = true;
+            });
+            data.credentialIssuer.environmentDetails = JSON.stringify(
+              envDetails
+            );
+            return data;
+          },
+        },
+        {
+          gqlName: 'OwnedCredentialIssuer',
+          list: 'CredentialIssuer',
+          type: SchemaType.ItemQuery,
+          hook: (data: CredentialIssuer) => {
+            const envDetails = JSON.parse(data.environmentDetails);
+            envDetails.forEach(function (env: IssuerEnvironmentConfig) {
+              if (env.clientId || env.clientSecret) {
+                env.clientId = '****';
+                env.clientSecret = '****';
+              } else if (env.initialAccessToken) {
+                env.initialAccessToken = '****';
+              }
+              env.exists = true;
+            });
+            data.environmentDetails = JSON.stringify(envDetails);
+            return data;
+          },
+        },
+        {
+          gqlName: 'CredentialIssuerSummary',
+          list: 'CredentialIssuer',
+          type: SchemaType.ItemQuery,
+        },
+        {
           gqlName: 'myServiceAccesses',
           list: 'ServiceAccess',
           type: SchemaType.ListQuery,
@@ -71,11 +123,6 @@ module.exports = {
           type: SchemaType.ListQuery,
         },
         { gqlName: 'mySelf', list: 'User', type: SchemaType.ItemQuery },
-        {
-          gqlName: 'CredentialIssuerSummary',
-          list: 'CredentialIssuer',
-          type: SchemaType.ItemQuery,
-        },
         {
           gqlName: 'allDiscoverableContents',
           list: 'Content',

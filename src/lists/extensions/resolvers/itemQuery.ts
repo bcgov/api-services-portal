@@ -32,7 +32,8 @@ export const ItemQuery = (keystone: any, alias: AliasConfig) => {
             vars,
             gqlName
           );
-          return await a.itemQuery(vars, noauthContext, gqlName, info);
+          const record = await a.itemQuery(vars, noauthContext, gqlName, info);
+          return alias.hook ? alias.hook(record) : record;
         },
         access: EnforcementPoint,
       },

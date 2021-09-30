@@ -11,7 +11,10 @@ export { lookupApplication } from './application';
 
 export { deleteRecord, deleteRecords } from './common-delete-record';
 
-export { lookupCredentialIssuerById } from './credential-issuer';
+export {
+  lookupCredentialIssuerById,
+  updateEnvironmentDetails,
+} from './credential-issuer';
 
 export {
   addKongConsumer,

@@ -1,14 +1,17 @@
 export enum SchemaType {
-    ListQuery, ItemQuery, Mutation
+  ListQuery,
+  ItemQuery,
+  Mutation,
 }
 
 export interface AliasConfig {
-    gqlName: string,
-    list: string,
-    type: SchemaType
+  gqlName: string;
+  list: string;
+  type: SchemaType;
+  hook?: any;
 }
 
 export interface AliasType {
-    name: string,
-    list: string
+  name: string;
+  list: string;
 }

@@ -56,7 +56,12 @@ const links: NavLink[] = [
       '/manager/service-accounts',
       '/manager/poc/activity',
     ],
-    access: ['api-owner', 'provider-user'],
+    access: [
+      'api-owner',
+      'provider-user',
+      'credential-admin',
+      'access-manager',
+    ],
     sites: ['devportal'],
   },
   {

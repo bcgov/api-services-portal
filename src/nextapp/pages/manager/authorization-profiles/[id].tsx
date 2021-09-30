@@ -51,7 +51,7 @@ const AuthorizationProfile: React.FC<
     { query, variables: { id } },
     { suspense: false }
   );
-  const issuer = data?.CredentialIssuer;
+  const issuer = data?.OwnedCredentialIssuer;
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
       href: '/manager/authorization-profiles',
@@ -105,7 +105,7 @@ export default AuthorizationProfile;
 
 const query = gql`
   query GetCredentialIssuer($id: ID!) {
-    CredentialIssuer(where: { id: $id }) {
+    OwnedCredentialIssuer(where: { id: $id }) {
       id
       name
       flow

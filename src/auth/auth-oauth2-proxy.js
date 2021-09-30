@@ -208,7 +208,8 @@ class Oauth2ProxyAuthStrategy {
     const _roles = [];
     if (scopes.includes('Namespace.Manage')) {
       _roles.push('api-owner');
-    } else {
+    }
+    if (scopes.includes('Namespace.View')) {
       _roles.push('provider-user');
     }
     if (scopes.includes('CredentialIssuer.Admin')) {
