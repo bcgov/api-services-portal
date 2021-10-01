@@ -32,6 +32,10 @@ NS MANAGER,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 NS MANAGER,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
 NS MANAGER,,getResourceOwners,,,,,,,api-owner,,,allow,
 NS MANAGER,,OwnedCredentialIssuer,,,,,,,api-owner,,,allow,
+NS MANAGER,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
+NS MANAGER,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
+NS MANAGER,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
+NS MANAGER,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
