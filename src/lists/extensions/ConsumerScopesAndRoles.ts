@@ -314,9 +314,7 @@ module.exports = {
                   envCtx.issuerEnvConfig.clientId
                 );
 
-                const availableScopes = await kcClientService.listDefaultScopes(
-                  client.id
-                );
+                const availableScopes = await kcClientService.listDefaultClientScopes();
 
                 const selectedScope = availableScopes
                   .filter((r: any) => r.name === args.scopeName)
