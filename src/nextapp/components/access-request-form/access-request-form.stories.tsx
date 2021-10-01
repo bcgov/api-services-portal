@@ -7,7 +7,7 @@ export default {
   title: 'APS/AccessRequestForm',
 };
 
-const Template = (props) => <AccessRequestForm {...props} />;
+const Template = (props) => <AccessRequestForm {...props} id="1231231231231" />;
 
 export const Dialog = Template.bind({});
 Dialog.args = {

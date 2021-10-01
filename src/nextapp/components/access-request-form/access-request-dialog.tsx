@@ -11,11 +11,13 @@ import {
   Tab,
   TabList,
   Tabs,
+  Text,
   useDisclosure,
 } from '@chakra-ui/react';
 
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
+import { gql } from 'graphql-request';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -30,10 +32,25 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   id,
   open,
 }) => {
+  const formRef = React.useRef<HTMLFormElement>(null);
   const [tab, setTab] = React.useState<number>(defaultTab);
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => setTab(defaultTab),
   });
+  const handleAccessSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    console.log('hi!!!!!!');
+    if (form && form.checkValidity()) {
+      const formData = new FormData(form);
+      console.log('hi!');
+    }
+  };
+  const handleSubmit = () => {
+    formRef.current?.requestSubmit();
+    console.log('weooo');
+  };
 
   return (
     <>
@@ -63,14 +80,20 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             </Tabs>
           </ModalHeader>
           <ModalBody>
-            {tab === 0 && <AccessRequestForm />}
+            {tab === 0 && (
+              <form ref={formRef} onSubmit={handleAccessSubmit}>
+                <React.Suspense fallback={<Text>Loading...</Text>}>
+                  <AccessRequestForm id={id} />
+                </React.Suspense>
+              </form>
+            )}
             {tab === 1 && <AccessRequestCredentials id={id} />}
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
               <Button variant="secondary">Cancel</Button>
               {tab === 0 && (
-                <Button onClick={() => setTab(1)}>
+                <Button onClick={handleSubmit}>
                   Request Access & Continue
                 </Button>
               )}
@@ -84,3 +107,35 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 };
 
 export default AccessRequestDialog;
+
+const mutation = gql`
+  mutation AddAccessRequest(
+    $name: String!
+    $controls: String
+    $requestor: ID!
+    $applicationId: ID!
+    $productEnvironmentId: ID!
+    $additionalDetails: String
+    $acceptLegal: Boolean!
+  ) {
+    acceptLegal(
+      productEnvironmentId: $productEnvironmentId
+      acceptLegal: $acceptLegal
+    ) {
+      legalsAgreed
+    }
+
+    createAccessRequest(
+      data: {
+        name: $name
+        controls: $controls
+        additionalDetails: $additionalDetails
+        requestor: { connect: { id: $requestor } }
+        application: { connect: { id: $applicationId } }
+        productEnvironment: { connect: { id: $productEnvironmentId } }
+      }
+    ) {
+      id
+    }
+  }
+`;
