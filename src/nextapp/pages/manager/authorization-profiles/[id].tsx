@@ -74,9 +74,10 @@ const AuthorizationProfile: React.FC<
           status: 'success',
         });
         router?.push('/manager/authorization-profiles');
-      } catch {
+      } catch (e) {
         toast({
           title: 'Profile update failed',
+          description: Array.isArray(e) ? e[0].message : '',
           status: 'error',
         });
       }
