@@ -6,12 +6,39 @@ import YamlViewer from '../yaml-viewer';
 import JwtKeycloak from './templates/jwt-keycloak';
 import KongAclOnly from './templates/kong-acl-only';
 import KongApiKeyAcl from './templates/kong-api-key-acl';
+import { gql } from 'graphql-request';
+import { useApi } from '@/shared/services/api';
+
 interface EnvironmentPluginsProps {
   data: Environment;
 }
 
+const query = gql`
+  query GET($id: ID!) {
+    allCredentialIssuersByNamespace(where: { id: $id }) {
+      environmentDetails
+    }
+  }
+`;
+
 const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
   const flow = data.flow;
+
+  const variables = { id: data?.credentialIssuer?.id };
+  const { data: _data, isLoading, isSuccess } = useApi(
+    ['environment-credential', data?.credentialIssuer?.id],
+    {
+      query,
+      variables,
+    },
+    {
+      suspense: false,
+    }
+  );
+
+  if (isLoading) {
+    return <></>;
+  }
 
   const pluginConfigs = {
     'kong-api-key-acl': KongApiKeyAcl(data.product.namespace, data.appId),
@@ -19,7 +46,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
     'client-credentials': JwtKeycloak(
       data.product.namespace,
       data.name,
-      data.credentialIssuer
+      _data.allCredentialIssuersByNamespace[0]
     ),
   };
   return (

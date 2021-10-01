@@ -41,6 +41,22 @@ module.exports = {
           gqlName: 'allCredentialIssuersByNamespace',
           list: 'CredentialIssuer',
           type: SchemaType.ListQuery,
+          hook: (issuers: CredentialIssuer[]) => {
+            issuers.forEach((data) => {
+              const envDetails = JSON.parse(data.environmentDetails);
+              envDetails.forEach(function (env: IssuerEnvironmentConfig) {
+                if (env.clientId || env.clientSecret) {
+                  env.clientId = '****';
+                  env.clientSecret = '****';
+                } else if (env.initialAccessToken) {
+                  env.initialAccessToken = '****';
+                }
+                env.exists = true;
+              });
+              data.environmentDetails = JSON.stringify(envDetails);
+            });
+            return issuers;
+          },
         },
         {
           gqlName: 'allNamespaceServiceAccounts',
@@ -61,27 +77,30 @@ module.exports = {
           gqlName: 'OwnedEnvironment',
           list: 'Environment',
           type: SchemaType.ItemQuery,
-          hook: (data: Environment) => {
-            if (data.credentialIssuer == null) {
-              return data;
-            }
-            const envDetails = JSON.parse(
-              data.credentialIssuer.environmentDetails
-            );
-            envDetails.forEach(function (env: IssuerEnvironmentConfig) {
-              if (env.clientId || env.clientSecret) {
-                env.clientId = '****';
-                env.clientSecret = '****';
-              } else if (env.initialAccessToken) {
-                env.initialAccessToken = '****';
-              }
-              env.exists = true;
-            });
-            data.credentialIssuer.environmentDetails = JSON.stringify(
-              envDetails
-            );
-            return data;
-          },
+          // hook: (data: Environment) => {
+          //   if (
+          //     data.credentialIssuer == null ||
+          //     data.credentialIssuer.environmentDetails == null
+          //   ) {
+          //     return data;
+          //   }
+          //   const envDetails = JSON.parse(
+          //     data.credentialIssuer.environmentDetails
+          //   );
+          //   envDetails.forEach(function (env: IssuerEnvironmentConfig) {
+          //     if (env.clientId || env.clientSecret) {
+          //       env.clientId = '****';
+          //       env.clientSecret = '****';
+          //     } else if (env.initialAccessToken) {
+          //       env.initialAccessToken = '****';
+          //     }
+          //     env.exists = true;
+          //   });
+          //   data.credentialIssuer.environmentDetails = JSON.stringify(
+          //     envDetails
+          //   );
+          //   return data;
+          // },
         },
         {
           gqlName: 'OwnedCredentialIssuer',

@@ -111,7 +111,6 @@ export const GET_ENVIRONMENT = gql`
       }
       credentialIssuer {
         id
-        environmentDetails
       }
       approval
       additionalDetailsToRequest

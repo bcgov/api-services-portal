@@ -1,5 +1,15 @@
+import { gql } from 'graphql-request';
+
+const query = gql`
+  query GET($id: ID!) {
+    allCredentialIssuersByNamespace(where: { id: $id }) {
+      environmentDetails
+    }
+  }
+`;
+
 export default function JwtKeycloak(namespace, envName, issuer) {
-  if (issuer == null) {
+  if (issuer == null || issuer.environmentDetails == null) {
     return '';
   }
   const envDetails = JSON.parse(issuer.environmentDetails);

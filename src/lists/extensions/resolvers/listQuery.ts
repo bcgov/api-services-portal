@@ -2,13 +2,10 @@ import { EvalAccessControl } from './common';
 import { mergeWhereClause } from '@keystonejs/utils';
 import { AliasConfig } from './types';
 
+import { Logger } from '../../../logger';
 import { EnforcementPoint } from '../../../authz/enforcement';
 
-import { gql } from 'graphql-request';
-
-import { parse, print } from 'graphql/language';
-
-import pluralize from 'pluralize';
+const logger = Logger('ext.listQuery');
 
 export const ListQuery = (keystone: any, alias: AliasConfig) => {
   return {
@@ -25,7 +22,8 @@ export const ListQuery = (keystone: any, alias: AliasConfig) => {
           const a = keystone.getListByKey(alias.list);
           const gqlName = a.gqlNames.listQueryName;
           const vars = mergeWhereClause(args, other.access);
-          const records = a.listQuery(vars, context, gqlName, info);
+          const records = await a.listQuery(vars, context, gqlName, info);
+          //logger.debug('Records %j', records);
           return alias.hook ? alias.hook(records) : records;
         },
         access: EnforcementPoint,

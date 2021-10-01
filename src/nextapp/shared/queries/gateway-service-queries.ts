@@ -32,7 +32,7 @@ export const LIST_GATEWAY_SERVICES = gql`
     }
     allMetrics(
       sortBy: day_ASC
-      where: { query: "kong_http_requests_daily_namespace", day_in: $days }
+      where: { query: "kong_http_requests_hourly_namespace", day_in: $days }
     ) {
       query
       day

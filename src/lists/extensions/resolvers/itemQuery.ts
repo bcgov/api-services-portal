@@ -33,7 +33,14 @@ export const ItemQuery = (keystone: any, alias: AliasConfig) => {
             gqlName
           );
           const record = await a.itemQuery(vars, noauthContext, gqlName, info);
-          return alias.hook ? alias.hook(record) : record;
+          try {
+            // note: only has the root List data, not the relationships
+            logger.debug('Record %j', record);
+            return alias.hook ? alias.hook(record) : record;
+          } catch (e) {
+            logger.error('Failed to process hook - %s', e);
+            throw e;
+          }
         },
         access: EnforcementPoint,
       },
