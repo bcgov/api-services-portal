@@ -24,20 +24,25 @@ const query = gql`
 const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
   const flow = data.flow;
 
-  const variables = { id: data?.credentialIssuer?.id };
-  const { data: _data, isLoading, isSuccess } = useApi(
-    ['environment-credential', data?.credentialIssuer?.id],
-    {
-      query,
-      variables,
-    },
-    {
-      suspense: false,
-    }
-  );
+  const issuerDetails = { issuer: null };
 
-  if (isLoading) {
-    return <></>;
+  if (data?.credentialIssuer?.id) {
+    const variables = { id: data?.credentialIssuer?.id };
+    const { data: _data, isLoading, isSuccess } = useApi(
+      ['environment-credential', data?.credentialIssuer?.id],
+      {
+        query,
+        variables,
+      },
+      {
+        suspense: false,
+      }
+    );
+
+    if (isLoading) {
+      return <></>;
+    }
+    issuerDetails.issuer = _data.allCredentialIssuersByNamespace[0];
   }
 
   const pluginConfigs = {
@@ -46,7 +51,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
     'client-credentials': JwtKeycloak(
       data.product.namespace,
       data.name,
-      _data.allCredentialIssuersByNamespace[0]
+      issuerDetails.issuer
     ),
   };
   return (
