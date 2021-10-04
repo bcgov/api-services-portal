@@ -6,12 +6,10 @@ import {
   Box,
   Button,
   Center,
-  Heading,
-  Icon,
   Text,
 } from '@chakra-ui/react';
-import { FaKey } from 'react-icons/fa';
 import { gql } from 'graphql-request';
+import isEmpty from 'lodash/isEmpty';
 import { useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/shared/types/query.types';
 
@@ -35,7 +33,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
 
   return (
     <>
-      {credentials && (
+      {!isEmpty(credentials) && (
         <Box my={8}>
           <ViewSecret credentials={credentials} />
           <Alert status="warning" my={4}>

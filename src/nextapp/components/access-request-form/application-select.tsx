@@ -133,7 +133,7 @@ const ApplicationSelect: React.FC = () => {
       <Collapse animateOpacity in={isOpen}>
         <Grid templateColumns="1fr 1fr" gap={4} templateRows="repeat(1fr, 3)">
           <GridItem>
-            <FormControl isRequired>
+            <FormControl isRequired={isOpen}>
               <FormLabel>Application Name</FormLabel>
               <Input ref={nameInput} isDisabled={mutate.isLoading} />
             </FormControl>

@@ -2,6 +2,9 @@ import * as React from 'react';
 import {
   Box,
   Checkbox,
+  FormHelperText,
+  FormLabel,
+  Input,
   Link,
   Radio,
   RadioGroup,
@@ -18,7 +21,6 @@ import { Environment } from '@/shared/types/query.types';
 
 import Fieldset from './access-request-fieldset';
 import ApplicationSelect from './application-select';
-import AccessRequestEnvironmentSelect from './environment-select';
 
 interface AccessRequestFormProps {
   id: string;
@@ -38,6 +40,8 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
   const selectedEnvironment: Environment = dataset.environments.find(
     (e) => e.id === environment
   );
+  const clientAuthenticator =
+    selectedEnvironment?.credentialIssuer?.clientAuthenticator;
   const hasNotAgreedLegal = React.useMemo(() => {
     const legalsAgreed = !isEmpty(data?.mySelf?.legalsAgreed)
       ? JSON.parse(data.mySelf.legalsAgreed)
@@ -64,7 +68,11 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
         <ApplicationSelect />
       </Fieldset>
       <Fieldset isRequired icon={FaNetworkWired} label="API Environment">
-        <RadioGroup value={environment} onChange={setEnvironment}>
+        <RadioGroup
+          name="productEnvironmentId"
+          value={environment}
+          onChange={setEnvironment}
+        >
           <Stack direction="column">
             {dataset?.environments
               .filter((e) => e.active)
@@ -76,18 +84,35 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
               ))}
           </Stack>
         </RadioGroup>
+        {clientAuthenticator === 'client-jwt-jwks-url' && (
+          <Box ml={2} pl={4} borderColor="bc-component" borderLeft="1px solid">
+            <FormLabel>Public Key URL</FormLabel>
+            <FormHelperText>
+              A URL to a JWKS formatted document for signed JWT authentication
+            </FormHelperText>
+            <Input
+              isRequired
+              placeholder="https://"
+              name="jwksUrl"
+              variant="bc-input"
+              type="url"
+            />
+          </Box>
+        )}
       </Fieldset>
-      <Fieldset label="Comments" icon={FaComments}>
-        <Box mb={2}>
-          {selectedEnvironment?.additionalDetailsToRequest && (
-            <Text>
-              <Text as="strong">Instructions from API Provider:</Text>{' '}
-              {selectedEnvironment.additionalDetailsToRequest}
-            </Text>
-          )}
-        </Box>
-        <Textarea name="additionalDetails" />
-      </Fieldset>
+      {environment && (
+        <Fieldset label="Comments" icon={FaComments}>
+          <Box mb={2}>
+            {selectedEnvironment?.additionalDetailsToRequest && (
+              <Text>
+                <Text as="strong">Instructions from API Provider:</Text>{' '}
+                {selectedEnvironment.additionalDetailsToRequest}
+              </Text>
+            )}
+          </Box>
+          <Textarea name="additionalDetails" />
+        </Fieldset>
+      )}
       {selectedEnvironment?.legal && hasNotAgreedLegal && (
         <Box mt={4} p={4} bgColor="#f2f2f2" borderRadius={4}>
           <Checkbox colorScheme="blue" name="acceptLegal">
@@ -106,6 +131,18 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
           </Box>
         </Box>
       )}
+
+      <input
+        type="hidden"
+        name="name"
+        value={`${dataset.name} FOR ${requestor.name ?? requestor.username}`}
+      />
+      <input
+        type="hidden"
+        name="clientAuthenticator"
+        value={clientAuthenticator}
+      />
+      <input type="hidden" name="requestor" value={requestor?.userId} />
     </>
   );
 };
