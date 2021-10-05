@@ -1,31 +1,30 @@
 import * as React from 'react';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Button,
   ButtonGroup,
-  Flex,
-  Icon,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Slide,
   Tab,
   TabList,
   Tabs,
-  Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
+import { useQueryClient } from 'react-query';
 
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
-import { useQueryClient } from 'react-query';
 import AccessRequestFormLoading from './access-request-form-loading';
-import { FaArrowDown } from 'react-icons/fa';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -44,10 +43,13 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const toast = useToast();
+  const [hasError, setError] = React.useState<boolean>(false);
   const [tab, setTab] = React.useState<number>(defaultTab);
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => setTab(defaultTab),
   });
+
+  // Events
   const handleAccessSubmit = React.useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -60,7 +62,6 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             name: formData.get('name'),
             controls: JSON.stringify({
               clientGenCertificate: formData.get('clientAuthenticator'),
-              // TODO clarify this
               jwksUrl:
                 formData.get('clientAuthenticator') === 'client-jwt-jwks-url'
                   ? formData.get('jwksUrl')
@@ -82,7 +83,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         } catch (err) {
           toast({
             title: 'Request Failed',
-            description: err.map((e) => e.message).join('\n'),
+            description:
+              err?.map((e) => e.message).join('\n') ??
+              'Unable to create request',
             status: 'error',
           });
         }
@@ -93,6 +96,18 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const handleSubmit = React.useCallback(() => {
     formRef.current?.requestSubmit();
   }, []);
+  const handleDone = React.useCallback(() => {
+    toast({
+      status: 'warning',
+      title: 'Pending Approval',
+      description:
+        'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
+    });
+    onClose();
+  }, [onClose, toast]);
+  const handleFormError = () => {
+    setError(true);
+  };
 
   return (
     <>
@@ -128,35 +143,41 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           <ModalBody>
             {tab === 0 && (
               <form ref={formRef} onSubmit={handleAccessSubmit}>
-                <React.Suspense fallback={AccessRequestFormLoading}>
-                  <AccessRequestForm id={id} />
-                </React.Suspense>
+                <ErrorBoundary
+                  onError={handleFormError}
+                  fallback={
+                    <Alert status="error">
+                      <AlertIcon />
+                      <AlertDescription>
+                        Unable to load Access Request Form
+                      </AlertDescription>
+                    </Alert>
+                  }
+                >
+                  <React.Suspense fallback={<AccessRequestFormLoading />}>
+                    <AccessRequestForm id={id} />
+                  </React.Suspense>
+                </ErrorBoundary>
               </form>
             )}
             {tab === 1 && <AccessRequestCredentials id={id} />}
           </ModalBody>
           <ModalFooter>
-            <Slide direction="bottom">
-              <Flex
-                align="center"
-                p={4}
-                color="white"
-                bg="bc-success"
-                rounded="md"
-              >
-                <Icon as={FaArrowDown} mr={2} />
-                <Text>Scroll down for more</Text>
-              </Flex>
-            </Slide>
             {tab === 0 && (
               <ButtonGroup>
-                <Button variant="secondary">Cancel</Button>
-                <Button isLoading={mutate.isLoading} onClick={handleSubmit}>
+                <Button variant="secondary" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button
+                  isDisabled={hasError}
+                  isLoading={mutate.isLoading}
+                  onClick={handleSubmit}
+                >
                   Request Access & Continue
                 </Button>
               </ButtonGroup>
             )}
-            {tab === 1 && <Button onClick={onClose}>Done</Button>}
+            {tab === 1 && <Button onClick={handleDone}>Done</Button>}
           </ModalFooter>
         </ModalContent>
       </Modal>

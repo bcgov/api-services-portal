@@ -12,7 +12,8 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import { FaComments, FaNetworkWired, FaWindowMaximize } from 'react-icons/fa';
+import { FaCommentDots, FaLayerGroup } from 'react-icons/fa';
+import { RiApps2Fill } from 'react-icons/ri';
 import { gql } from 'graphql-request';
 import isEmpty from 'lodash/isEmpty';
 import { useApi } from '@/shared/services/api';
@@ -64,10 +65,10 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
 
   return (
     <>
-      <Fieldset isRequired icon={FaWindowMaximize} label={apiTitle}>
+      <Fieldset isRequired icon={FaLayerGroup} label={apiTitle}>
         <ApplicationSelect />
       </Fieldset>
-      <Fieldset isRequired icon={FaNetworkWired} label="API Environment">
+      <Fieldset isRequired icon={RiApps2Fill} label="API Environment">
         <RadioGroup
           name="productEnvironmentId"
           value={environment}
@@ -101,7 +102,11 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
         )}
       </Fieldset>
       {environment && (
-        <Fieldset label="Comments" icon={FaComments}>
+        <Fieldset
+          label="Comments"
+          icon={FaCommentDots}
+          isRequired={Boolean(selectedEnvironment?.additionalDetailsToRequest)}
+        >
           <Box mb={2}>
             {selectedEnvironment?.additionalDetailsToRequest && (
               <Text>
