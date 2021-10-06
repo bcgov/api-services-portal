@@ -1,0 +1,16 @@
+
+  query GET {
+    allTemporaryIdentities {
+      id
+      userId
+    }
+    allAccessRequests(where: { isComplete: null }) {
+      id
+      productEnvironment {
+        approval
+        credentialIssuer {
+          instruction
+        }
+      }
+    }
+  }

@@ -1,0 +1,14 @@
+
+  mutation updateGatewayConsumerPlugin(
+    $id: ID!
+    $pluginExtForeignKey: String!
+    $controls: String!
+  ) {
+    updateGatewayConsumerPlugin(
+      id: $id
+      pluginExtForeignKey: $pluginExtForeignKey
+      plugin: $controls
+    ) {
+      id
+    }
+  }

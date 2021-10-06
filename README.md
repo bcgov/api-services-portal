@@ -38,6 +38,7 @@ export OIDC_ISSUER=""
 export JWKS_URL=${OIDC_ISSUER}/protocol/openid-connect/certs
 
 export NEXT_PUBLIC_API_ROOT=http://localhost:4180
+export SSR_API_ROOT=http://localhost:4180
 export EXTERNAL_URL="http://localhost:4180"
 
 export GWA_API_URL=http://localhost:2000

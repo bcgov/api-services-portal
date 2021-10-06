@@ -1,0 +1,14 @@
+
+  mutation ToggleConsumerACLMembership(
+    $prodEnvId: ID!
+    $consumerId: ID!
+    $group: String!
+    $grant: Boolean!
+  ) {
+    updateConsumerGroupMembership(
+      prodEnvId: $prodEnvId
+      consumerId: $consumerId
+      group: $group
+      grant: $grant
+    )
+  }

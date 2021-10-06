@@ -1,0 +1,6 @@
+
+  query GET($id: ID!) {
+    allCredentialIssuersByNamespace(where: { id: $id }) {
+      environmentDetails
+    }
+  }

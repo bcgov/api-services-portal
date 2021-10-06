@@ -259,7 +259,9 @@ async function setupAuthorizationAndEnable(
       issuerEnvConfig.clientRegistration == 'anonymous'
         ? null
         : issuerEnvConfig.clientRegistration == 'managed'
-        ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(
+        ? await new KeycloakTokenService(
+            openid.token_endpoint
+          ).getKeycloakSession(
             issuerEnvConfig.clientId,
             issuerEnvConfig.clientSecret
           )
@@ -271,7 +273,8 @@ async function setupAuthorizationAndEnable(
     };
 
     const kcClientService = new KeycloakClientRegistrationService(
-      openid.issuer,
+      issuerEnvConfig.issuerUrl,
+      openid.registration_endpoint,
       token
     );
 

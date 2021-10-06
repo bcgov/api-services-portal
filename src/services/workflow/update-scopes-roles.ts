@@ -67,7 +67,9 @@ export const updateScopesAndRoles = async (
     issuerEnvConfig.clientRegistration == 'anonymous'
       ? null
       : issuerEnvConfig.clientRegistration == 'managed'
-      ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(
+      ? await new KeycloakTokenService(
+          openid.token_endpoint
+        ).getKeycloakSession(
           issuerEnvConfig.clientId,
           issuerEnvConfig.clientSecret
         )
@@ -79,7 +81,8 @@ export const updateScopesAndRoles = async (
   };
 
   const kcClientService = new KeycloakClientRegistrationService(
-    openid.issuer,
+    issuerEnvConfig.issuerUrl,
+    openid.registration_endpoint,
     token
   );
 

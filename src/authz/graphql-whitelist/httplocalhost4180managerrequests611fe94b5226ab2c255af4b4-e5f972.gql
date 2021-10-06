@@ -1,0 +1,6 @@
+
+  mutation createGatewayConsumerPlugin($id: ID!, $controls: String!) {
+    createGatewayConsumerPlugin(id: $id, plugin: $controls) {
+      id
+    }
+  }

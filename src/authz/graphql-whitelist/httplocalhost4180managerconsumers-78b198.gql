@@ -1,0 +1,14 @@
+
+  mutation ToggleConsumerScopes(
+    $prodEnvId: ID!
+    $consumerUsername: String!
+    $scopeName: String!
+    $grant: Boolean!
+  ) {
+    updateConsumerScopeAssignment(
+      prodEnvId: $prodEnvId
+      consumerUsername: $consumerUsername
+      scopeName: $scopeName
+      grant: $grant
+    )
+  }

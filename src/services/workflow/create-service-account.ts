@@ -14,6 +14,7 @@ import {
   KeycloakClientRegistrationService,
   KeycloakTokenService,
   getOpenidFromIssuer,
+  getUma2FromIssuer,
 } from '../keycloak';
 import { Logger } from '../../logger';
 import { Policy, UMAPolicyService } from '../uma2';
@@ -153,7 +154,9 @@ export const CreateServiceAccount = async (
     issuerEnvConfig.clientRegistration == 'anonymous'
       ? null
       : issuerEnvConfig.clientRegistration == 'managed'
-      ? await new KeycloakTokenService(openid.issuer).getKeycloakSession(
+      ? await new KeycloakTokenService(
+          openid.token_endpoint
+        ).getKeycloakSession(
           issuerEnvConfig.clientId,
           issuerEnvConfig.clientSecret
         )
@@ -162,7 +165,8 @@ export const CreateServiceAccount = async (
   //const defaultClientScopes = controls.defaultClientScopes;
 
   const kcClientService = new KeycloakClientRegistrationService(
-    openid.issuer,
+    issuerEnvConfig.issuerUrl,
+    openid.registration_endpoint,
     token
   );
   await kcClientService.updateClientRegistration(clientId, {
@@ -193,8 +197,10 @@ export const CreateServiceAccount = async (
   // Apply the scopes for this client
   logger.debug('Resource ID for Policy %s', nsResourceId);
   if (nsResourceId != null) {
+    const uma2 = await getUma2FromIssuer(issuerEnvConfig.issuerUrl);
+
     const resSvrAccessToken = await new KeycloakTokenService(
-      openid.issuer
+      uma2.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
@@ -207,7 +213,7 @@ export const CreateServiceAccount = async (
       scopes: scopes,
     };
     const policyApi = new UMAPolicyService(
-      issuerEnvConfig.issuerUrl,
+      uma2.policy_endpoint,
       resSvrAccessToken
     );
     await policyApi.createUmaPolicy(nsResourceId, policy);

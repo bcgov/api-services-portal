@@ -33,14 +33,15 @@ const AuthorizationProfile: React.FC = () => {
         await mutateAsync({ data: payload });
         client.invalidateQueries('authorizationProfiles');
         toast({
-          title: 'Credential issuer updated',
+          title: 'Profile created',
           status: 'success',
         });
         router?.push('/manager/authorization-profiles');
-      } catch {
+      } catch (e) {
         toast({
-          title: 'Unable to create credential issuer',
+          title: 'Profile creation failed',
           status: 'error',
+          description: Array.isArray(e) ? e[0].message : '',
         });
       }
     },

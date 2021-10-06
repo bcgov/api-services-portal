@@ -1,0 +1,8 @@
+
+  query GET {
+    allOrganizations(sortBy: name_DESC) {
+      id
+      name
+      title
+    }
+  }

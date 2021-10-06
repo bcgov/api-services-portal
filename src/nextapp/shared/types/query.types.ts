@@ -6162,11 +6162,14 @@ export type Query = {
   allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
   allCredentialIssuersByNamespace?: Maybe<Array<Maybe<CredentialIssuer>>>;
   allNamespaceServiceAccounts?: Maybe<Array<Maybe<ServiceAccess>>>;
+  OwnedEnvironment?: Maybe<Environment>;
   DiscoverableProduct?: Maybe<Product>;
+  OwnedCredentialIssuer?: Maybe<CredentialIssuer>;
+  CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  myAccessRequests?: Maybe<Array<Maybe<AccessRequest>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
   mySelf?: Maybe<User>;
-  CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
@@ -6800,8 +6803,23 @@ export type QueryAllNamespaceServiceAccountsArgs = {
 };
 
 
+export type QueryOwnedEnvironmentArgs = {
+  where?: Maybe<EnvironmentWhereInput>;
+};
+
+
 export type QueryDiscoverableProductArgs = {
   where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryOwnedCredentialIssuerArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
+};
+
+
+export type QueryCredentialIssuerSummaryArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
 };
 
 
@@ -6810,6 +6828,14 @@ export type QueryMyServiceAccessesArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryMyAccessRequestsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<AccessRequestWhereInput>;
 };
 
 
@@ -6823,11 +6849,6 @@ export type QueryMyApplicationsArgs = {
 
 export type QueryMySelfArgs = {
   where?: Maybe<UserWhereInput>;
-};
-
-
-export type QueryCredentialIssuerSummaryArgs = {
-  where?: Maybe<CredentialIssuerWhereInput>;
 };
 
 

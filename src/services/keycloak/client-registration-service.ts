@@ -35,15 +35,19 @@ export enum ClientAuthenticator {
 }
 
 export class KeycloakClientRegistrationService {
-  private issuerUrl: string;
+  private registrationUrl: string;
   private accessToken: string;
   private kcAdminClient: any;
   private session: boolean = false;
 
-  constructor(issuerUrl: string, accessToken: string) {
-    this.issuerUrl = issuerUrl;
+  constructor(issuerUrl: string, registrationUrl: string, accessToken: string) {
+    this.registrationUrl =
+      registrationUrl == null
+        ? null
+        : registrationUrl.replace('/openid-connect', '/default');
     this.accessToken = accessToken;
     if (issuerUrl != null) {
+      // this will probably fail if the issuer is not Keycloak
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
       this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
@@ -83,20 +87,14 @@ export class KeycloakClientRegistrationService {
             },
           });
 
-    logger.debug(
-      '[clientRegistration] CALLING %s',
-      `${this.issuerUrl}/clients-registrations/default`
-    );
+    logger.debug('[clientRegistration] CALLING %s', this.registrationUrl);
     logger.debug('[clientRegistration] BODY %j', body);
 
-    const response = await fetch(
-      `${this.issuerUrl}/clients-registrations/default`,
-      {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: headers(this.accessToken) as any,
-      }
-    )
+    const response = await fetch(this.registrationUrl, {
+      method: 'post',
+      body: JSON.stringify(body),
+      headers: headers(this.accessToken) as any,
+    })
       .then(checkStatus)
       .then((res) => res.json());
     logger.debug('[clientRegistration] RESULT %j', response);
@@ -118,20 +116,17 @@ export class KeycloakClientRegistrationService {
   ): Promise<ClientRegResponse> {
     logger.debug(
       '[updateClientRegistration] CALLING %s',
-      `${this.issuerUrl}/clients-registrations/default/${clientId}`
+      `${this.registrationUrl}/${clientId}`
     );
     logger.debug('[updateClientRegistration] BODY %j', vars);
 
     vars.clientId = clientId;
 
-    const response = await fetch(
-      `${this.issuerUrl}/clients-registrations/default/${clientId}`,
-      {
-        method: 'put',
-        body: JSON.stringify(vars),
-        headers: headers(this.accessToken) as any,
-      }
-    )
+    const response = await fetch(`${this.registrationUrl}/${clientId}`, {
+      method: 'put',
+      body: JSON.stringify(vars),
+      headers: headers(this.accessToken) as any,
+    })
       .then(checkStatus)
       .then((res) => res.json());
     logger.debug('[updateClientRegistration] RESULT %j', response);
@@ -143,7 +138,7 @@ export class KeycloakClientRegistrationService {
   }
 
   public async deleteClientRegistration(clientId: string): Promise<void> {
-    await fetch(`${this.issuerUrl}/clients-registrations/default/${clientId}`, {
+    await fetch(`${this.registrationUrl}/${clientId}`, {
       method: 'delete',
       headers: headers(this.accessToken) as any,
     }).then(checkStatus);

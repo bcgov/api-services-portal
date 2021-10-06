@@ -169,7 +169,11 @@ const query = gql`
   query GET {
     allNamespaceServiceAccounts(
       orderBy: "createdAt_DESC"
-      where: { consumerType: client, application_is_null: true }
+      where: {
+        consumerType: client
+        application_is_null: true
+        productEnvironment_is_null: false
+      }
     ) {
       id
       name

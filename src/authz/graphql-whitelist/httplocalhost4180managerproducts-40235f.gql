@@ -1,0 +1,35 @@
+
+  query GET($id: ID!) {
+    Environment(where: { id: $id }) {
+      id
+      name
+      active
+      flow
+      appId
+      legal {
+          id
+          title
+          reference
+      }
+      credentialIssuer {
+          id
+      }
+      approval
+      additionalDetailsToRequest
+      product {
+        name
+        namespace
+        organization {
+          name
+        }
+        environments {
+          name
+          id
+        }
+      }
+      services {
+        name
+        id
+      }
+    }
+  }

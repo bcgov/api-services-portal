@@ -83,9 +83,9 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
+              const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
               const namespaces = <ResourceSet[]>(
@@ -136,7 +136,7 @@ module.exports = {
 
               const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
               const namespaces = await resourcesApi.listResourcesByIdList(
@@ -184,7 +184,7 @@ module.exports = {
               );
 
               const kcprotectApi = new UMAResourceRegistrationService(
-                tokenResult.issuer,
+                tokenResult.resourceRegistrationEndpoint,
                 tokenResult.accessToken
               );
               const resOwnerResourceIds = await kcprotectApi.listResources({
@@ -262,7 +262,7 @@ module.exports = {
               const resourceIds = await getResourceSets(envCtx);
 
               const resourceApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
 
@@ -335,7 +335,7 @@ module.exports = {
               const resourceIds = await getResourceSets(envCtx);
 
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
 
