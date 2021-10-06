@@ -1,10 +1,10 @@
-import { checkStatus } from '../checkStatus'
-import fetch from 'node-fetch'
-import { Logger } from '../../logger'
-import querystring from 'querystring'
-import { headers } from '../keycloak/keycloak-api'
+import { checkStatus } from '../checkStatus';
+import fetch from 'node-fetch';
+import { Logger } from '../../logger';
+import querystring from 'querystring';
+import { headers } from '../keycloak/keycloak-api';
 
-const logger = Logger('uma2-permission')
+const logger = Logger('uma2-permission');
 
 /*
 
@@ -38,29 +38,31 @@ Returns: [{"rsid":"d30f6967-254b-4a19-abb7-abd02f14f23e","rsname":"platform"}]
 */
 
 export interface TicketRequest {
-    resource_id?: string
-    resource_scopes?: string[]
-    claims?: any
+  resource_id?: string;
+  resource_scopes?: string[];
+  claims?: any;
 }
 
 export class UMAPermissionService {
-    private issuerUrl : string
-    private accessToken : string
+  private permissionEndpoint: string;
+  private accessToken: string;
 
-    constructor(issuerUrl: string, accessToken: string) {
-        this.issuerUrl = issuerUrl
-        this.accessToken = accessToken
-    }
+  constructor(permissionEndpoint: string, accessToken: string) {
+    this.permissionEndpoint = permissionEndpoint;
+    this.accessToken = accessToken;
+    logger.debug('Endpoint %s', permissionEndpoint);
+  }
 
-    public async requestTicket (request : TicketRequest[]) : Promise<string> {
-        const url = `${this.issuerUrl}/authz/protection/permission`
-        logger.debug("[requestTicket] (%s) %j", url, request)
-        const result = await fetch (url, {
-            method: 'post',
-            body: JSON.stringify(request),
-            headers: headers(this.accessToken) as any
-        }).then(checkStatus).then(res => res.json())
-        logger.debug("[requestTicket] RESULT %j", result)
-        return result.ticket
-    }
+  public async requestTicket(request: TicketRequest[]): Promise<string> {
+    logger.debug('[requestTicket] %j', request);
+    const result = await fetch(this.permissionEndpoint, {
+      method: 'post',
+      body: JSON.stringify(request),
+      headers: headers(this.accessToken) as any,
+    })
+      .then(checkStatus)
+      .then((res) => res.json());
+    logger.debug('[requestTicket] RESULT %j', result);
+    return result.ticket;
+  }
 }

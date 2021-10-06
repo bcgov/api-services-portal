@@ -1,0 +1,66 @@
+
+  query GetConsumer($id: ID!) {
+    getGatewayConsumerPlugins(id: $id) {
+      id
+      username
+      aclGroups
+      customId
+      extForeignKey
+      namespace
+      plugins {
+        id
+        name
+        extForeignKey
+        config
+        service {
+          id
+          name
+          extForeignKey
+        }
+        route {
+          id
+          name
+          extForeignKey
+        }
+      }
+      tags
+      createdAt
+    }
+
+    allServiceAccesses(where: { consumer: { id: $id } }) {
+      name
+      consumerType
+      application {
+        appId
+        name
+        owner {
+          name
+          username
+          email
+        }
+      }
+    }
+
+    allProductsByNamespace {
+      id
+      name
+      environments {
+        id
+        appId
+        name
+        active
+        flow
+        credentialIssuer {
+          id
+          availableScopes
+          clientRoles
+        }
+        services {
+          name
+          routes {
+            name
+          }
+        }
+      }
+    }
+  }

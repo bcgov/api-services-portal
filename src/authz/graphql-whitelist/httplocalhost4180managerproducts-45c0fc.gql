@@ -1,0 +1,8 @@
+
+  query GET($search: String!) {
+    allDatasets(search: $search) {
+      id
+      name
+      title
+    }
+  }

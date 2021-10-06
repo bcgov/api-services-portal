@@ -1,0 +1,8 @@
+
+  mutation Add($name: String!, $description: String) {
+    createApplication(data: { name: $name, description: $description }) {
+      id
+      appId
+      name
+    }
+  }

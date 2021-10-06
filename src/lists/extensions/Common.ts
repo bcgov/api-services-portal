@@ -2,7 +2,9 @@ import {
   KeycloakTokenService,
   KeycloakClientService,
   getOpenidFromIssuer,
+  getUma2FromIssuer,
   OpenidWellKnown,
+  Uma2WellKnown,
 } from '../../services/keycloak';
 import {
   IssuerEnvironmentConfig,
@@ -29,6 +31,7 @@ import {
 const logger = Logger('List.Ext.Common');
 export interface TokenExchangeResult {
   issuer: string;
+  resourceRegistrationEndpoint: string;
   accessToken: string;
   clientUuid?: string;
 }
@@ -39,7 +42,18 @@ export interface EnvironmentContext {
   prodEnv: Environment;
   issuerEnvConfig: IssuerEnvironmentConfig;
   openid: OpenidWellKnown;
+  uma2: Uma2WellKnown;
+  usesUma2: boolean;
   accessToken?: string;
+}
+
+function isAuthzUsingUma2(prodEnv: {
+  credentialIssuer: { resourceType: string };
+}): boolean {
+  return (
+    (prodEnv.credentialIssuer.resourceType == null ||
+      prodEnv.credentialIssuer.resourceType === '') == false
+  );
 }
 
 export function isUserBasedResourceOwners(envCtx: EnvironmentContext): Boolean {
@@ -71,11 +85,23 @@ export async function getEnvironmentContext(
     return null;
   }
 
+  const usesUma2 = isAuthzUsingUma2(prodEnv);
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  const uma2 = usesUma2
+    ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
+    : null;
   const subjectToken = getSubjectToken(context.req);
   const subjectUuid = context.req.user.sub;
 
-  return { subjectToken, subjectUuid, prodEnv, issuerEnvConfig, openid };
+  return {
+    subjectToken,
+    subjectUuid,
+    prodEnv,
+    issuerEnvConfig,
+    openid,
+    usesUma2,
+    uma2,
+  };
 }
 
 /**
@@ -105,7 +131,7 @@ export async function getSuitableOwnerToken(
   if (isUserBasedResourceOwners(envctx)) {
     // This will imply scenario 2, so proceed with token exchange
     const accessToken = await new KeycloakTokenService(
-      openid.issuer
+      openid.token_endpoint
     ).tokenExchange(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret,
@@ -120,19 +146,19 @@ export async function getSuitableOwnerToken(
     // This will imply scenario 1, so verify the user is allowed to manage the particular Resource
     // and proceed with getting a token using the Resource Server credentials
     const resSvrAccessToken = await new KeycloakTokenService(
-      openid.issuer
+      openid.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
     );
     const permApi = new UMAPermissionService(
-      issuerEnvConfig.issuerUrl,
+      envctx.uma2.permission_endpoint,
       resSvrAccessToken
     );
     const permTicket = await permApi.requestTicket([
       { resource_scopes: [resourceAccessScope] },
     ]);
-    const tokenApi = new UMA2TokenService(issuerEnvConfig.issuerUrl);
+    const tokenApi = new UMA2TokenService(envctx.uma2.token_endpoint);
     const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(
       subjectToken,
       permTicket
@@ -197,22 +223,29 @@ export async function doClientLoginForCredentialIssuer(
     prodEnv.name
   );
 
-  const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  //const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  const uma2 = await getUma2FromIssuer(issuerEnvConfig.issuerUrl);
 
-  const kcClientService = new KeycloakClientService(openid.issuer);
+  const kcClientService = new KeycloakClientService(uma2.issuer);
   await kcClientService.login(
     issuerEnvConfig.clientId,
     issuerEnvConfig.clientSecret
   );
   const client = await kcClientService.findByClientId(issuerEnvConfig.clientId);
 
-  const issuer = openid.issuer;
+  const issuer = uma2.issuer;
+  const resourceRegistrationEndpoint = uma2.resource_registration_endpoint;
   const clientUuid = client.id;
   const accessToken = await new KeycloakTokenService(
-    openid.issuer
+    uma2.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
   logger.debug('doClientLoginForCredentialIssuer returned ok %s', prodEnvId);
-  return { issuer, accessToken, clientUuid } as TokenExchangeResult;
+  return {
+    issuer,
+    resourceRegistrationEndpoint,
+    accessToken,
+    clientUuid,
+  } as TokenExchangeResult;
 }
 
 export async function getResourceSets(envCtx: EnvironmentContext) {
@@ -221,7 +254,7 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
   if (isUserBasedResourceOwners(envCtx)) {
     const issuerEnvConfig = envCtx.issuerEnvConfig;
     const accessToken = await new KeycloakTokenService(
-      envCtx.openid.issuer
+      envCtx.openid.token_endpoint
     ).tokenExchange(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret,
@@ -229,7 +262,7 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
     );
     envCtx.accessToken = accessToken;
     const resourcesApi = new UMAResourceRegistrationService(
-      envCtx.openid.issuer,
+      envCtx.uma2.resource_registration_endpoint,
       accessToken
     );
     const subjectOwnedResourceIds = await resourcesApi.listResources({
@@ -245,20 +278,20 @@ export async function getResourceSets(envCtx: EnvironmentContext) {
     const resourceAccessScope =
       envCtx.prodEnv.credentialIssuer.resourceAccessScope;
     const resSvrAccessToken = await new KeycloakTokenService(
-      envCtx.openid.issuer
+      envCtx.openid.token_endpoint
     ).getKeycloakSession(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
     );
     envCtx.accessToken = resSvrAccessToken;
     const permApi = new UMAPermissionService(
-      issuerEnvConfig.issuerUrl,
+      envCtx.uma2.permission_endpoint,
       resSvrAccessToken
     );
     const permTicket = await permApi.requestTicket([
       { resource_scopes: [resourceAccessScope] },
     ]);
-    const tokenApi = new UMA2TokenService(issuerEnvConfig.issuerUrl);
+    const tokenApi = new UMA2TokenService(envCtx.uma2.token_endpoint);
     const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(
       envCtx.subjectToken,
       permTicket
@@ -281,17 +314,24 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   //const resourceAccessScope =
   //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
   const resSvrAccessToken = await new KeycloakTokenService(
-    envCtx.openid.issuer
+    envCtx.openid.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
   envCtx.accessToken = resSvrAccessToken;
   const permApi = new UMAPermissionService(
-    issuerEnvConfig.issuerUrl,
+    envCtx.uma2.permission_endpoint,
     resSvrAccessToken
   );
   const permTicket = await permApi.requestTicket([
-    { resource_scopes: ['Namespace.View', 'Namespace.Manage'] },
+    {
+      resource_scopes: [
+        'Namespace.View',
+        'Namespace.Manage',
+        'CredentialIssuer.Admin',
+        'Access.Manage',
+      ],
+    },
   ]);
-  const tokenApi = new UMA2TokenService(issuerEnvConfig.issuerUrl);
+  const tokenApi = new UMA2TokenService(envCtx.uma2.token_endpoint);
   const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(
     envCtx.subjectToken,
     permTicket

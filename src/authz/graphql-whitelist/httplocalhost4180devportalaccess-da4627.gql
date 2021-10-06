@@ -1,0 +1,6 @@
+
+  mutation CancelAccess($id: ID!) {
+    deleteServiceAccess(id: $id) {
+      id
+    }
+  }

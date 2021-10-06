@@ -24,7 +24,10 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
   if (!data) {
     return <Loading />;
   }
-  if (data.BusinessProfile.institution == null) {
+  if (
+    data.BusinessProfile == null ||
+    data.BusinessProfile.institution == null
+  ) {
     return <></>;
   }
   const institution = data.BusinessProfile.institution;

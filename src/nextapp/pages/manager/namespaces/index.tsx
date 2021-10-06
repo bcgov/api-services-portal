@@ -39,7 +39,7 @@ const actions = [
     title: 'Gateway Services',
     url: '/manager/services',
     icon: FaServer,
-    roles: [],
+    roles: ['api-owner', 'provider-user'],
     description:
       'View your current gateway configuration, metrics and traffic patterns',
   },
@@ -47,14 +47,14 @@ const actions = [
     title: 'Products',
     url: '/manager/products',
     icon: FaLayerGroup,
-    roles: [],
+    roles: ['api-owner', 'provider-user'],
     description: 'Publish your API and make it discoverable',
   },
   {
     title: 'Consumers',
     url: '/manager/consumers',
     icon: FaUserShield,
-    roles: [],
+    roles: ['api-owner', 'provider-user', 'access-manager'],
     description:
       'Manage your prospective and existing clients - add controls, approve access, view usage',
   },
@@ -64,21 +64,21 @@ const secondaryActions = [
     title: 'Authorization Profiles',
     url: '/manager/authorization-profiles',
     icon: FaShieldAlt,
-    roles: [],
+    roles: ['api-owner', 'credential-admin'],
     description: 'Manage authorization servers used to protect your APIs',
   },
   {
     title: 'Namespace Access',
     url: '/manager/namespace-access',
     icon: FaUserPlus,
-    roles: [],
+    roles: ['api-owner'],
     description: 'Manage namespace access by users and service accounts',
   },
   {
     title: 'Service Accounts',
     url: '/manager/service-accounts',
     icon: FaUserPlus,
-    roles: [],
+    roles: ['api-owner', 'provider-user'],
     description:
       'Manage service accounts for performing functions on the namespace',
   },
@@ -86,7 +86,7 @@ const secondaryActions = [
     title: 'Activity',
     url: '/manager/poc/activity',
     icon: FaClock,
-    roles: [],
+    roles: ['api-owner', 'provider-user', 'access-manager'],
     description: 'View all the activity within your namepace.',
   },
 ];
@@ -154,48 +154,54 @@ const NamespacesPage: React.FC = () => {
                   md: `repeat(${actions.length}, 1fr)`,
                 }}
               >
-                {actions.map((a) => (
-                  <GridItem
-                    key={a.title}
-                    flex={1}
-                    bgColor="white"
-                    p={4}
-                    sx={{
-                      _hover: {
-                        '& .link-arrow': {
-                          opacity: 1,
+                {actions
+                  .filter(
+                    (a) =>
+                      a.roles.length == 0 ||
+                      a.roles.filter((r) => user.roles.includes(r)).length > 0
+                  )
+                  .map((a) => (
+                    <GridItem
+                      key={a.title}
+                      flex={1}
+                      bgColor="white"
+                      p={4}
+                      sx={{
+                        _hover: {
+                          '& .link-arrow': {
+                            opacity: 1,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    <Center mb={4}>
-                      <Circle bg="#4c81af" color="white" size={150} mr={4}>
-                        <Icon as={a.icon} boxSize="20" />
-                      </Circle>
-                    </Center>
-                    <Heading size="md" mb={2}>
-                      <NextLink passHref href={a.url}>
-                        <Link
-                          color="bc-blue-alt"
-                          data-testid={'ns-manage-link-' + a.title}
-                        >
-                          {a.title}
-                          <Icon
-                            as={FaArrowRight}
-                            className="link-arrow"
+                      }}
+                    >
+                      <Center mb={4}>
+                        <Circle bg="#4c81af" color="white" size={150} mr={4}>
+                          <Icon as={a.icon} boxSize="20" />
+                        </Circle>
+                      </Center>
+                      <Heading size="md" mb={2}>
+                        <NextLink passHref href={a.url}>
+                          <Link
                             color="bc-blue-alt"
-                            ml={2}
-                            opacity={0}
-                            transition="opacity 0.25s ease-in-out"
-                          />
-                        </Link>
-                      </NextLink>
-                    </Heading>
-                    <Text fontSize="sm" mb={2}>
-                      {a.description}
-                    </Text>
-                  </GridItem>
-                ))}
+                            data-testid={'ns-manage-link-' + a.title}
+                          >
+                            {a.title}
+                            <Icon
+                              as={FaArrowRight}
+                              className="link-arrow"
+                              color="bc-blue-alt"
+                              ml={2}
+                              opacity={0}
+                              transition="opacity 0.25s ease-in-out"
+                            />
+                          </Link>
+                        </NextLink>
+                      </Heading>
+                      <Text fontSize="sm" mb={2}>
+                        {a.description}
+                      </Text>
+                    </GridItem>
+                  ))}
               </Grid>
             </Box>
             <Box>
@@ -212,30 +218,36 @@ const NamespacesPage: React.FC = () => {
                   md: `repeat(${secondaryActions.length}, 1fr)`,
                 }}
               >
-                {secondaryActions.map((a) => (
-                  <GridItem
-                    key={a.title}
-                    flex={1}
-                    bgColor="white"
-                    p={4}
-                    d="flex"
-                    alignItems="center"
-                  >
-                    <Circle bg="bc-blue-alt" color="white" size={30} mr={4}>
-                      <Icon as={a.icon} />
-                    </Circle>
-                    <Heading size="sm">
-                      <NextLink passHref href={a.url}>
-                        <Link
-                          color="bc-blue-alt"
-                          data-testid={'ns-action-link-' + a.title}
-                        >
-                          {a.title}
-                        </Link>
-                      </NextLink>
-                    </Heading>
-                  </GridItem>
-                ))}
+                {secondaryActions
+                  .filter(
+                    (a) =>
+                      a.roles.length == 0 ||
+                      a.roles.filter((r) => user.roles.includes(r)).length > 0
+                  )
+                  .map((a) => (
+                    <GridItem
+                      key={a.title}
+                      flex={1}
+                      bgColor="white"
+                      p={4}
+                      d="flex"
+                      alignItems="center"
+                    >
+                      <Circle bg="bc-blue-alt" color="white" size={30} mr={4}>
+                        <Icon as={a.icon} />
+                      </Circle>
+                      <Heading size="sm">
+                        <NextLink passHref href={a.url}>
+                          <Link
+                            color="bc-blue-alt"
+                            data-testid={'ns-action-link-' + a.title}
+                          >
+                            {a.title}
+                          </Link>
+                        </NextLink>
+                      </Heading>
+                    </GridItem>
+                  ))}
               </Grid>
             </Box>
           </>

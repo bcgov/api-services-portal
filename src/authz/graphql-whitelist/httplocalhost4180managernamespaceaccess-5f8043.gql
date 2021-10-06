@@ -1,0 +1,11 @@
+
+  query GET {
+    currentNamespace {
+      id
+      name
+      scopes {
+        name
+      }
+      prodEnvId
+    }
+  }

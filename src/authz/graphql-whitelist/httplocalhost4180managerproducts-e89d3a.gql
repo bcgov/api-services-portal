@@ -1,0 +1,7 @@
+
+  mutation Remove($id: ID!) {
+    deleteEnvironment(id: $id) {
+      name
+      id
+    }
+  }

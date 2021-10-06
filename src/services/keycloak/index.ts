@@ -24,6 +24,8 @@ export { KeycloakUserService } from './user-service';
 
 export {
   OpenidWellKnown,
+  Uma2WellKnown,
   getOpenidFromDiscovery,
   getOpenidFromIssuer,
+  getUma2FromIssuer,
 } from './keycloak-api';

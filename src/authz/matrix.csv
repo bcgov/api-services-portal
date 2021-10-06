@@ -1,25 +1,58 @@
 ID,matchOneOfBaseQueryName,matchQueryName,matchListKey,matchOperation,matchOneOfOperation,matchOneOfFieldKey,matchNotOneOfFieldKey,matchUserNS,inRole,matchOneOfScope,matchOneOfRole,result,filters
 ,,,,,"update,create,delete",,,,aps-admin,,,allow,
-API Owner Role Rules,,,AccessRequest,update,,isApproved,,,access-manager,,,allow,
-API Owner Role Rules,,,AccessRequest,,"create,read",isApproved,,,api-owner,,,allow,
-API Owner Role Rules,,,AccessRequest,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,AccessRequest,,"create,update,delete",,,,api-owner,,,allow,
+ACCESS MANAGER,,,AccessRequest,update,,"isApproved,isIssued",,,access-manager,,,allow,
+ACCESS MANAGER,,,AccessRequest,,"create,read","isApproved,isIssued",,,access-manager,,,allow,
+ACCESS MANAGER,,,AccessRequest,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,AccessRequest,,"update,delete",,,,access-manager,,,allow,
+ACCESS MANAGER,,allAccessRequestsByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentPackageNS
+ACCESS MANAGER,,allServiceAccessesByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentProductNSOrNS
+ACCESS MANAGER,,getGatewayConsumerPlugins,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,deleteGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,updateGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,createGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,getPermissionTicketsForResource,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,allPermissionTickets,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,updateConsumerGroupMembership,,,,,,,access-manager,,,allow,filterByPackageNS
+ACCESS MANAGER,,consumerScopesAndRoles,,,,,,,access-manager,,,allow,filterByPackageNS
+ACCESS MANAGER,,linkConsumerToNamespace,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,updateConsumerRoleAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
+ACCESS MANAGER,,updateConsumerScopeAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
+ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
+ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,GatewayRoute,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,GatewayService,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
+CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByOwner
+CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,allCredentialIssuersByNamespace,,,,,,,credential-admin,,,allow,filterByUserNS
+CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
+NS MANAGER,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
+NS MANAGER,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
+NS MANAGER,,getResourceOwners,,,,,,,api-owner,,,allow,
+NS MANAGER,,OwnedCredentialIssuer,,,,,,,api-owner,,,allow,
+NS MANAGER,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
+NS MANAGER,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
+NS MANAGER,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
+NS MANAGER,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,Application,,"read,update,delete",,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Application,,create,,,,,,"api-owner,provider-user",allow,
-,,BusinessProfile,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Content,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,CredentialIssuer,read,,,,,,,"api-owner,provider-user",allow,
-API Owner Role Rules,,,CredentialIssuer,,"update,delete",,,,api-owner,,,allow,
-API Owner Role Rules,,,CredentialIssuer,create,,,,,api-owner,,,allow,
+API Owner Role Rules,,OwnedEnvironment,,,,active,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,OwnedEnvironment,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Dataset,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,create,,active,,,api-owner,,,deny,
 API Owner Role Rules,,,Environment,,"update,delete,read",active,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,,"update,delete",,,,api-owner,,,allow,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
 API Owner Role Rules,,,GatewayConsumer,,"read,update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayGroup,read,,,,,api-owner,,,allow,
@@ -50,21 +83,10 @@ API Owner Role Rules,,,ServiceAccess,,"update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,ServiceAccess,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,TemporaryIdentity,read,,,,,,,"api-owner,provider-user",allow,filterByTemporaryIdentity
 API Owner Role Rules,,,User,read,,,,,,,"api-owner,provider-user",allow,
-API Owner Role Rules,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,deleteGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,updateGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,createGatewayConsumerPlugin,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,allPermissionTickets,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,updateConsumerGroupMembership,,,,,,,api-owner,,,allow,filterByPackageNS
-API Owner Role Rules,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
-API Owner Role Rules,,linkConsumerToNamespace,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,updateConsumerRoleAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
-API Owner Role Rules,,updateConsumerScopeAssignment,,,,,,,api-owner,,,allow,filterByPackageNS
 Portal User Namespaces,,allNamespaces,,,,,,,portal-user,,,allow,
 API Owner Role Rules,,createNamespace,,,,,,,idir-user,,,allow,
 API Owner Role Rules,,deleteNamespace,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,currentNamespace,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,currentNamespace,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,revokePermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,approvePermissions,,,,,,,api-owner,,,allow,
@@ -77,6 +99,8 @@ API Owner Role Rules,,getServiceAccounts,,,,,,,,,"api-owner,provider-user",allow
 API Owner Role Rules,,createServiceAccount,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,deleteServiceAccount,,,,,,,api-owner,,,allow,
 Developer Role Rules,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
+Developer Role Rules,,myAccessRequests,,,,,,,portal-user,,,allow,filterByRequestor
+Developer Role Rules,,deleteAccessRequest,,,,,,,portal-user,,,allow,filterByRequestor
 Developer Role Rules,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 Developer Role Rules,,allDiscoverableProducts,,,,,,,portal-user,,,allow,filterByActiveEnvironment
 Developer Role Rules,,allDiscoverableContents,,,,,,,portal-user,,,allow,
@@ -125,12 +149,10 @@ Portal User,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
 Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-API Owner Role Rules,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
-API Owner Role Rules,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
-,,getResourceOwners,,,,,,,api-owner,,,allow,
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
 Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment
 Portal User or Guest,,allProducts,,,,,,,,,"portal-user,guest",allow,

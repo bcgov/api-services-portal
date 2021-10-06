@@ -187,6 +187,7 @@ const ConsumersPage: React.FC<
                           icon={<Icon as={FaStop} />}
                           variant="outline"
                           colorScheme="red"
+                          disabled={true}
                         />
                       </ButtonGroup>
                     </Td>

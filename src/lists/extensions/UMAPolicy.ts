@@ -1,10 +1,21 @@
-const { EnforcementPoint } = require('../../authz/enforcement')
+const { EnforcementPoint } = require('../../authz/enforcement');
 
-import { UMAPolicyService, Policy, PolicyQuery, UMAResourceRegistrationService, ResourceSetQuery, ResourceSet } from '../../services/uma2'
+import {
+  UMAPolicyService,
+  Policy,
+  PolicyQuery,
+  UMAResourceRegistrationService,
+  ResourceSetQuery,
+  ResourceSet,
+} from '../../services/uma2';
 
-import { getSuitableOwnerToken, getEnvironmentContext, getResourceSets } from './Common'
-import type { TokenExchangeResult } from './Common'
-import { strict as assert } from 'assert'
+import {
+  getSuitableOwnerToken,
+  getEnvironmentContext,
+  getResourceSets,
+} from './Common';
+import type { TokenExchangeResult } from './Common';
+import { strict as assert } from 'assert';
 
 const typeUMAPolicy = `
 type UMAPolicy {
@@ -19,7 +30,7 @@ type UMAPolicy {
     clients: [String]
     scopes: [String]!
 }
-`
+`;
 
 const typeUMAPolicyInput = `
 input UMAPolicyInput {
@@ -29,70 +40,125 @@ input UMAPolicyInput {
     clients: [String]
     scopes: [String]!
 }
-`
+`;
 
 module.exports = {
   extensions: [
-      (keystone : any) => {
-        keystone.extendGraphQLSchema({
-            types: [
-                { type: typeUMAPolicy },
-                { type: typeUMAPolicyInput }
-            ],            
-            queries: [
-                {
-                    schema: 'getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]',
-                    resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                        const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
+    (keystone: any) => {
+      keystone.extendGraphQLSchema({
+        types: [{ type: typeUMAPolicy }, { type: typeUMAPolicyInput }],
+        queries: [
+          {
+            schema:
+              'getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
+              );
 
-                        const resourceIds = await getResourceSets (envCtx)
-                        assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
-    
-                        const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
-                    
-                        return await policyApi.listPolicies ({resource: args.resourceId} as PolicyQuery)
-                    },
-                    access: EnforcementPoint,
-              },
+              const resourceIds = await getResourceSets(envCtx);
+              assert.strictEqual(
+                resourceIds.filter((rid) => rid === args.resourceId).length,
+                1,
+                'Invalid Resource'
+              );
 
-            ],
-            mutations: [
-            
-              {
-                schema: 'createUmaPolicy(prodEnvId: ID!, resourceId: String!, data: UMAPolicyInput!): UMAPolicy',
-                resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
+              const policyApi = new UMAPolicyService(
+                envCtx.uma2.policy_endpoint,
+                envCtx.accessToken
+              );
 
-                    const resourceIds = await getResourceSets (envCtx)
-                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+              return await policyApi.listPolicies({
+                resource: args.resourceId,
+              } as PolicyQuery);
+            },
+            access: EnforcementPoint,
+          },
+        ],
+        mutations: [
+          {
+            schema:
+              'createUmaPolicy(prodEnvId: ID!, resourceId: String!, data: UMAPolicyInput!): UMAPolicy',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
+              );
 
-                    const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
-                    return await policyApi.createUmaPolicy (args.resourceId, args.data as Policy)
-                },
-                access: EnforcementPoint,
-              },   
-              {
-                schema: 'deleteUmaPolicy(prodEnvId: ID!, resourceId: String!, policyId: String!): Boolean',
-                resolver: async (item : any, args : any, context : any, info : any, { query, access } : any) => {
-                    const envCtx = await getEnvironmentContext(context, args.prodEnvId, access)
+              const resourceIds = await getResourceSets(envCtx);
+              assert.strictEqual(
+                resourceIds.filter((rid) => rid === args.resourceId).length,
+                1,
+                'Invalid Resource'
+              );
 
-                    const resourceIds = await getResourceSets (envCtx)
-                    assert.strictEqual(resourceIds.filter(rid => rid === args.resourceId).length, 1, "Invalid Resource")
+              const policyApi = new UMAPolicyService(
+                envCtx.uma2.policy_endpoint,
+                envCtx.accessToken
+              );
+              return await policyApi.createUmaPolicy(
+                args.resourceId,
+                args.data as Policy
+              );
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'deleteUmaPolicy(prodEnvId: ID!, resourceId: String!, policyId: String!): Boolean',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
+              );
 
-                    const policyApi = new UMAPolicyService (envCtx.issuerEnvConfig.issuerUrl, envCtx.accessToken)
+              const resourceIds = await getResourceSets(envCtx);
+              assert.strictEqual(
+                resourceIds.filter((rid) => rid === args.resourceId).length,
+                1,
+                'Invalid Resource'
+              );
 
-                    await policyApi.findPolicyByResource (args.resourceId, args.policyId)
+              const policyApi = new UMAPolicyService(
+                envCtx.uma2.policy_endpoint,
+                envCtx.accessToken
+              );
 
-                    await policyApi.deleteUmaPolicy (args.policyId)
+              await policyApi.findPolicyByResource(
+                args.resourceId,
+                args.policyId
+              );
 
-                    return true
-                },
-                access: EnforcementPoint,
-              },                                   
-            ]
+              await policyApi.deleteUmaPolicy(args.policyId);
 
-          });
-      }
-  ]
-
-}
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+        ],
+      });
+    },
+  ],
+};
