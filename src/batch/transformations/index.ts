@@ -1,31 +1,17 @@
-export {
-    alwaysTrue
-} from './alwaysTrue'
+export { alwaysTrue } from './alwaysTrue';
 
-export {
-    alwaysFalse
-} from './alwaysFalse'
+export { alwaysFalse } from './alwaysFalse';
 
-export {
-    connectExclusiveList
-} from './connectExclusiveList'
+export { connectExclusiveList } from './connectExclusiveList';
 
-export {
-    connectMany
-} from './connectMany'
+export { connectExclusiveOne } from './connectExclusiveOne';
 
-export {
-    connectOne
-} from './connectOne'
+export { connectMany } from './connectMany';
 
-export {
-    toStringDefaultArray
-} from './toStringDefaultArray'
+export { connectOne } from './connectOne';
 
-export {
-    toString,
-} from './toString'
+export { toStringDefaultArray } from './toStringDefaultArray';
 
-export {
-    mapNamespace,
-} from './mapNamespace'
+export { toString } from './toString';
+
+export { mapNamespace } from './mapNamespace';
