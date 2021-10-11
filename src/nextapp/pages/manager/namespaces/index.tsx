@@ -5,40 +5,37 @@ import {
   Container,
   Heading,
   Flex,
-  Wrap,
-  HStack,
-  Link,
   Text,
   Grid,
   GridItem,
   Icon,
   Center,
-  Circle,
   useDisclosure,
+  VStack,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import ModelIcon from '@/components/model-icon/model-icon';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { useAuth } from '@/shared/services/auth';
 import {
-  FaArrowRight,
   FaArrowUp,
+  FaChartBar,
+  FaChevronRight,
   FaClock,
-  FaLayerGroup,
-  FaServer,
   FaShieldAlt,
-  FaUserPlus,
+  FaTrash,
+  FaUserAlt,
+  FaUserFriends,
   FaUserShield,
 } from 'react-icons/fa';
-import NamespaceActions from '@/components/namespace-actions';
+import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
 
 const actions = [
   {
     title: 'Gateway Services',
     url: '/manager/services',
-    icon: FaServer,
+    icon: FaChartBar,
     roles: ['api-owner', 'provider-user'],
     description:
       'View your current gateway configuration, metrics and traffic patterns',
@@ -46,7 +43,7 @@ const actions = [
   {
     title: 'Products',
     url: '/manager/products',
-    icon: FaLayerGroup,
+    icon: RiApps2Fill,
     roles: ['api-owner', 'provider-user'],
     description: 'Publish your API and make it discoverable',
   },
@@ -61,6 +58,13 @@ const actions = [
 ];
 const secondaryActions = [
   {
+    title: 'Activity',
+    url: '/manager/poc/activity',
+    icon: FaClock,
+    roles: ['api-owner', 'provider-user', 'access-manager'],
+    description: 'View all the activity within your namepace.',
+  },
+  {
     title: 'Authorization Profiles',
     url: '/manager/authorization-profiles',
     icon: FaShieldAlt,
@@ -70,24 +74,17 @@ const secondaryActions = [
   {
     title: 'Namespace Access',
     url: '/manager/namespace-access',
-    icon: FaUserPlus,
+    icon: FaUserFriends,
     roles: ['api-owner'],
     description: 'Manage namespace access by users and service accounts',
   },
   {
     title: 'Service Accounts',
     url: '/manager/service-accounts',
-    icon: FaUserPlus,
+    icon: FaUserAlt,
     roles: ['api-owner', 'provider-user'],
     description:
       'Manage service accounts for performing functions on the namespace',
-  },
-  {
-    title: 'Activity',
-    url: '/manager/poc/activity',
-    icon: FaClock,
-    roles: ['api-owner', 'provider-user', 'access-manager'],
-    description: 'View all the activity within your namepace.',
   },
 ];
 
@@ -105,19 +102,9 @@ const NamespacesPage: React.FC = () => {
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={hasNamespace && <NamespaceActions name={user?.namespace} />}
-          title={
-            user?.namespace ? (
-              <Box as="span" display="flex" alignItems="center">
-                <ModelIcon model="namespace" size="sm" mr={2} />
-                {user.namespace}
-              </Box>
-            ) : (
-              'Namespaces'
-            )
-          }
+          title={user?.namespace}
           breadcrumb={[{ href: '/manager/namespaces', text: 'Namespaces' }]}
-        ></PageHeader>
+        />
         {!hasNamespace && (
           <>
             <Center minHeight={300}>
@@ -140,20 +127,14 @@ const NamespacesPage: React.FC = () => {
           </>
         )}
         {hasNamespace && (
-          <>
-            <Box mb={8}>
+          <Grid gap={5} templateColumns="1fr 292px" mb={8}>
+            <GridItem>
               <Flex as="header" align="center" mb={4}>
-                <Heading size="sm" color="gray.500">
-                  Manage
+                <Heading size="sm" fontWeight="normal">
+                  Manage Namespace
                 </Heading>
               </Flex>
-              <Grid
-                gap={4}
-                templateColumns={{
-                  base: '1fr',
-                  md: `repeat(${actions.length}, 1fr)`,
-                }}
-              >
+              <VStack spacing={5} align="stretch">
                 {actions
                   .filter(
                     (a) =>
@@ -161,63 +142,42 @@ const NamespacesPage: React.FC = () => {
                       a.roles.filter((r) => user.roles.includes(r)).length > 0
                   )
                   .map((a) => (
-                    <GridItem
-                      key={a.title}
-                      flex={1}
-                      bgColor="white"
-                      p={4}
-                      sx={{
-                        _hover: {
-                          '& .link-arrow': {
-                            opacity: 1,
-                          },
-                        },
-                      }}
-                    >
-                      <Center mb={4}>
-                        <Circle bg="#4c81af" color="white" size={150} mr={4}>
-                          <Icon as={a.icon} boxSize="20" />
-                        </Circle>
-                      </Center>
-                      <Heading size="md" mb={2}>
-                        <NextLink passHref href={a.url}>
-                          <Link
-                            color="bc-blue-alt"
-                            data-testid={'ns-manage-link-' + a.title}
-                          >
+                    <NextLink key={a.title} href={a.url}>
+                      <Flex
+                        align="center"
+                        bgColor="white"
+                        borderRadius={4}
+                        data-testid={'ns-manage-link-' + a.title}
+                        py={5}
+                        pl={10}
+                        pr={7}
+                        role="link"
+                        _hover={{
+                          color: 'bc-blue',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Icon as={a.icon} boxSize={14} color="bc-blue" />
+                        <Box ml={10}>
+                          <Heading size="md" mb={2}>
                             {a.title}
-                            <Icon
-                              as={FaArrowRight}
-                              className="link-arrow"
-                              color="bc-blue-alt"
-                              ml={2}
-                              opacity={0}
-                              transition="opacity 0.25s ease-in-out"
-                            />
-                          </Link>
-                        </NextLink>
-                      </Heading>
-                      <Text fontSize="sm" mb={2}>
-                        {a.description}
-                      </Text>
-                    </GridItem>
+                          </Heading>
+                          <Text fontSize="sm" mb={2}>
+                            {a.description}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </NextLink>
                   ))}
-              </Grid>
-            </Box>
-            <Box>
+              </VStack>
+            </GridItem>
+            <GridItem>
               <Flex as="header" align="center" mb={4}>
-                <Heading size="sm" color="gray.500">
+                <Heading size="sm" fontWeight="normal">
                   Actions
                 </Heading>
               </Flex>
-              <Grid
-                gap={4}
-                templateColumns={{
-                  base: '1fr',
-                  sm: `repeat(${secondaryActions.length / 2}, 1fr)`,
-                  md: `repeat(${secondaryActions.length}, 1fr)`,
-                }}
-              >
+              <VStack align="stretch" spacing={5} mb={8}>
                 {secondaryActions
                   .filter(
                     (a) =>
@@ -225,32 +185,63 @@ const NamespacesPage: React.FC = () => {
                       a.roles.filter((r) => user.roles.includes(r)).length > 0
                   )
                   .map((a) => (
-                    <GridItem
-                      key={a.title}
-                      flex={1}
-                      bgColor="white"
-                      p={4}
-                      d="flex"
-                      alignItems="center"
-                    >
-                      <Circle bg="bc-blue-alt" color="white" size={30} mr={4}>
-                        <Icon as={a.icon} />
-                      </Circle>
-                      <Heading size="sm">
-                        <NextLink passHref href={a.url}>
-                          <Link
-                            color="bc-blue-alt"
-                            data-testid={'ns-action-link-' + a.title}
-                          >
-                            {a.title}
-                          </Link>
-                        </NextLink>
-                      </Heading>
-                    </GridItem>
+                    <NextLink key={a.title} href={a.url}>
+                      <GridItem
+                        flex={1}
+                        bgColor="white"
+                        p={5}
+                        py={3}
+                        d="flex"
+                        alignItems="center"
+                        color="bc-blue"
+                        border="1px solid #e1e1e5"
+                        borderRadius={4}
+                        data-testid={'ns-action-link-' + a.title}
+                        justifyContent="space-between"
+                        role="link"
+                        _hover={{
+                          cursor: 'pointer',
+                          textDecor: 'underline',
+                        }}
+                      >
+                        <Flex align="center">
+                          <Icon as={a.icon} boxSize={5} mr={3} />
+                          <Text>{a.title}</Text>
+                        </Flex>
+                        <Icon as={FaChevronRight} />
+                      </GridItem>
+                    </NextLink>
                   ))}
-              </Grid>
-            </Box>
-          </>
+              </VStack>
+              <Flex as="header" align="center" mb={4}>
+                <Heading size="sm" fontWeight="normal">
+                  Settings
+                </Heading>
+              </Flex>
+              <Flex
+                flex={1}
+                bgColor="white"
+                p={5}
+                py={3}
+                align="center"
+                color="bc-error"
+                border="1px solid #e1e1e5"
+                borderRadius={4}
+                data-testid="ns-action-link-delete"
+                justify="space-between"
+                role="link"
+                _hover={{
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                <Flex align="center">
+                  <Icon as={FaTrash} boxSize={5} mr={3} />
+                  <Text>Delete Namespace</Text>
+                </Flex>
+              </Flex>
+            </GridItem>
+          </Grid>
         )}
       </Container>
     </>
