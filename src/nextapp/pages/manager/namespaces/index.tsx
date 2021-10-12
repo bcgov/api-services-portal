@@ -35,6 +35,7 @@ import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import { useQueryClient } from 'react-query';
+import { useRouter } from 'next/router';
 
 const actions = [
   {
@@ -96,6 +97,7 @@ const secondaryActions = [
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
   const hasNamespace = !!user?.namespace;
+  const router = useRouter();
   const toast = useToast();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
@@ -105,6 +107,8 @@ const NamespacesPage: React.FC = () => {
     if (user?.namespace) {
       try {
         await mutate.mutateAsync({ name: user?.namespace });
+        await restApi('/admin/switch', { method: 'PUT' });
+        router?.push('/manager');
 
         toast({
           title: ' Namespace Deleted',
@@ -118,7 +122,7 @@ const NamespacesPage: React.FC = () => {
         });
       }
     }
-  }, [client, mutate, toast, user]);
+  }, [client, mutate, router, toast, user]);
 
   return (
     <>
@@ -224,7 +228,7 @@ const NamespacesPage: React.FC = () => {
                         color="bc-blue"
                         border="1px solid #e1e1e5"
                         borderRadius={4}
-                        data-testid={'ns-action-link-' + a.title}
+                        data-testid={`ns-action-link-${a.title}`}
                         justifyContent="space-between"
                         role="link"
                         _hover={{
@@ -264,7 +268,6 @@ const NamespacesPage: React.FC = () => {
                   borderRadius={4}
                   data-testid="ns-action-link-delete"
                   justify="space-between"
-                  role="link"
                   _hover={{
                     cursor: 'pointer',
                     textDecoration: 'underline',
