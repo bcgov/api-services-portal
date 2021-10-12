@@ -10,8 +10,9 @@ import {
   GridItem,
   Icon,
   Center,
-  useDisclosure,
+  useToast,
   VStack,
+  useDisclosure,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
@@ -28,8 +29,12 @@ import {
   FaUserFriends,
   FaUserShield,
 } from 'react-icons/fa';
+import { gql } from 'graphql-request';
+import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
+import ConfirmationDialog from '@/components/confirmation-dialog';
+import { useQueryClient } from 'react-query';
 
 const actions = [
   {
@@ -91,13 +96,36 @@ const secondaryActions = [
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
   const hasNamespace = !!user?.namespace;
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+  const mutate = useApiMutation(mutation);
+  const client = useQueryClient();
+  const { isOpen, onClose, onOpen } = useDisclosure();
+
+  const handleDelete = React.useCallback(async () => {
+    if (user?.namespace) {
+      try {
+        await mutate.mutateAsync({ name: user?.namespace });
+
+        toast({
+          title: ' Namespace Deleted',
+          status: 'success',
+        });
+        client.invalidateQueries();
+      } catch (err) {
+        toast({
+          title: 'Delete Namespace Failed',
+          status: 'error',
+        });
+      }
+    }
+  }, [client, mutate, toast, user]);
 
   return (
     <>
       <Head>
         <title>
-          API Program Services | Namespaces{hasNamespace ? user.namespace : ''}
+          API Program Services | Namespaces
+          {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
       <Container maxW="6xl">
@@ -127,7 +155,7 @@ const NamespacesPage: React.FC = () => {
           </>
         )}
         {hasNamespace && (
-          <Grid gap={5} templateColumns="1fr 292px" mb={8}>
+          <Grid gap={10} templateColumns="1fr 292px" mb={8}>
             <GridItem>
               <Flex as="header" align="center" mb={4}>
                 <Heading size="sm" fontWeight="normal">
@@ -218,28 +246,36 @@ const NamespacesPage: React.FC = () => {
                   Settings
                 </Heading>
               </Flex>
-              <Flex
-                flex={1}
-                bgColor="white"
-                p={5}
-                py={3}
-                align="center"
-                color="bc-error"
-                border="1px solid #e1e1e5"
-                borderRadius={4}
-                data-testid="ns-action-link-delete"
-                justify="space-between"
-                role="link"
-                _hover={{
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
+              <ConfirmationDialog
+                destructive
+                body="This action cannot be undone"
+                confirmButtonText="Yes, Delete"
+                title="Delete moh-proto Namespace?"
+                onConfirm={handleDelete}
               >
-                <Flex align="center">
-                  <Icon as={FaTrash} boxSize={5} mr={3} />
-                  <Text>Delete Namespace</Text>
+                <Flex
+                  flex={1}
+                  bgColor="white"
+                  p={5}
+                  py={3}
+                  align="center"
+                  color="bc-error"
+                  border="1px solid #e1e1e5"
+                  borderRadius={4}
+                  data-testid="ns-action-link-delete"
+                  justify="space-between"
+                  role="link"
+                  _hover={{
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  <Flex align="center">
+                    <Icon as={FaTrash} boxSize={5} mr={3} />
+                    <Text>Delete Namespace</Text>
+                  </Flex>
                 </Flex>
-              </Flex>
+              </ConfirmationDialog>
             </GridItem>
           </Grid>
         )}
@@ -249,3 +285,9 @@ const NamespacesPage: React.FC = () => {
 };
 
 export default NamespacesPage;
+
+const mutation = gql`
+  mutation DeleteNamespace($name: String!) {
+    deleteNamespace(namespace: $name)
+  }
+`;
