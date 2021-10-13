@@ -116,7 +116,7 @@ const ApplicationsPage: React.FC = () => {
         <title>API Program Services | Applications</title>
       </Head>
       <Container maxW="6xl">
-        {data.allApplications?.length === 0 && (
+        {data?.allApplications?.length === 0 && (
           <Alert status="warning">
             <AlertIcon />
             Register a new application before requesting access to an API
