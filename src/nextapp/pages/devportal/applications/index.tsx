@@ -36,27 +36,25 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 const queryKey = 'allApplications';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const queryClient = new QueryClient();
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(
-    queryKey,
-    async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
-  );
+//   await queryClient.prefetchQuery(
+//     queryKey,
+//     async () =>
+//       await api<Query>(query, null, {
+//         headers: context.req.headers as HeadersInit,
+//       })
+//   );
 
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-};
+//   return {
+//     props: {
+//       dehydratedState: dehydrate(queryClient),
+//     },
+//   };
+// };
 
-const ApplicationsPage: React.FC<
-  InferGetServerSidePropsType<typeof getServerSideProps>
-> = () => {
+const ApplicationsPage: React.FC = () => {
   const toast = useToast();
   const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
