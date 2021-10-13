@@ -134,7 +134,7 @@ const ApplicationsPage: React.FC = () => {
           <Table
             sortable
             columns={columns}
-            data={data?.myApplications}
+            data={data?.myApplications ?? []}
             emptyView={empty}
           >
             {(d: Application) => (
