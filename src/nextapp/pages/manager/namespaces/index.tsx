@@ -133,10 +133,7 @@ const NamespacesPage: React.FC = () => {
         </title>
       </Head>
       <Container maxW="6xl">
-        <PageHeader
-          title={user?.namespace}
-          breadcrumb={[{ href: '/manager/namespaces', text: 'Namespaces' }]}
-        />
+        <PageHeader title={user?.namespace} />
         {!hasNamespace && (
           <>
             <Center minHeight={300}>
@@ -179,13 +176,17 @@ const NamespacesPage: React.FC = () => {
                         align="center"
                         bgColor="white"
                         borderRadius={4}
-                        data-testid={'ns-manage-link-' + a.title}
-                        py={5}
+                        data-testid={`ns-manage-link-${a.title}`}
+                        py={8}
                         pl={10}
                         pr={7}
                         role="link"
                         _hover={{
-                          color: 'bc-blue',
+                          h2: {
+                            color: 'bc-blue',
+                            textDecor: 'underline',
+                          },
+
                           cursor: 'pointer',
                         }}
                       >
