@@ -212,7 +212,7 @@ const ApplicationsPage: React.FC<
 export default ApplicationsPage;
 
 const query = gql`
-  query {
+  query MyApplications {
     myApplications {
       id
       appId
