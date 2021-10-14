@@ -68,6 +68,7 @@
     "date-fns": "^2.19.0",
     "dotenv": "^8.2.0",
     "downshift": "^6.1.0",
+    "exceljs": "^4.3.0",
     "express-jwt": "^6.0.0",
     "express-session": "^1.17.1",
     "framer-motion": "^4.1.17",

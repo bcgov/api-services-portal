@@ -12,6 +12,7 @@ import {
   Box,
   Text,
   Flex,
+  Link,
   IconButton,
   Divider,
   Center,
@@ -112,6 +113,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           <Divider />
           <ModalFooter>
             <ButtonGroup>
+              <Button variant="secondary">
+                <Link href="/int/api/namespaces/report" download>
+                  Export Report
+                </Link>
+              </Button>
               <Button onClick={onClose} variant="primary">
                 Done
               </Button>

@@ -5,7 +5,7 @@ components:
     requestBodies: {}
     responses: {}
     schemas:
-        Content:
+        ContentSummary:
             properties:
                 kind:
                     type: string
@@ -72,7 +72,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Content'
+                            $ref: '#/components/schemas/ContentSummary'
     '/namespaces/{ns}/datasets':
         put:
             operationId: put-dataset
@@ -197,6 +197,19 @@ paths:
                 content:
                     application/json:
                         schema: {}
+    /namespaces/report:
+        get:
+            operationId: report
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt: []
+            parameters: []
     /namespaces:
         get:
             operationId: namespace-list

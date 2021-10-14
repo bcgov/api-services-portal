@@ -26,7 +26,7 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "Content": {
+    "ContentSummary": {
         "dataType": "refObject",
         "properties": {
             "kind": {"dataType":"string"},
@@ -59,7 +59,7 @@ export function RegisterRoutes(app: express.Router) {
             function ContentController_putContent(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"Content"},
+                    body: {"in":"body","name":"body","required":true,"ref":"ContentSummary"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -274,6 +274,34 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.put.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/namespaces/report',
+            authenticateMiddleware([{"jwt":[]}]),
+            function NamespaceController_report(request: any, response: any, next: any) {
+            const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+            const controller: any = container.get<NamespaceController>(NamespaceController);
+            if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+            }
+
+
+            const promise = controller.report.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
