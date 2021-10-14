@@ -16,7 +16,7 @@ class ApiDirectoryPage {
     if (checkElementExists('Terms of Use for API Gateway'))
       cy.contains('Terms of Use for API Gateway').click()
     cy.get(this.submitBtn).click()
-  }
+  };
 }
 
 export default ApiDirectoryPage

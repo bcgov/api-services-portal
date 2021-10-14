@@ -32,6 +32,7 @@ describe('Create API Spec', () => {
       home.createNamespace(namespace)
     })
   })
+
   it('creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
