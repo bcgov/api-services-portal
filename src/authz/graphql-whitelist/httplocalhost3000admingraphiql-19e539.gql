@@ -1,0 +1,18 @@
+
+  query GET_APPLICATION_SERVICES($appId: String!) {
+    myServiceAccesses(where: {application: {appId: $appId}}) {
+      id
+      name
+      active
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          name
+        }
+      }
+    }
+  }
