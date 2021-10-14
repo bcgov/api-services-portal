@@ -1,3 +1,4 @@
+
 query MyApplications {
   myApplications {
     id
