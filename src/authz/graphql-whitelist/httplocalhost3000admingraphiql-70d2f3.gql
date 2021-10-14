@@ -1,17 +1,17 @@
 
-query MyApplications {
-  myApplications {
-    id
-    appId
-    description
-    name
-    owner {
+  query MyApplications {
+    myApplications {
+      id
+      appId
+      description
       name
+      owner {
+        name
+      }
+    }
+    allTemporaryIdentities {
+      id
+      userId
     }
   }
-  allTemporaryIdentities {
-    id
-    userId
-  }
-}
 
