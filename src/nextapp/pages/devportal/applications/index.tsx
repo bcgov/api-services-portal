@@ -68,6 +68,7 @@ const ApplicationsPage: React.FC<
     { suspense: false }
   );
   const userId = get(data, 'allTemporaryIdentities[0].userId');
+  console.log(data, userId);
 
   const handleDetailsDisclosure = React.useCallback(
     (id: string) => () => {
