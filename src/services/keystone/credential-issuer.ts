@@ -17,6 +17,7 @@ export async function lookupCredentialIssuerById(
                         mode
                         clientRegistration
                         clientAuthenticator
+                        clientMappers
                         resourceType
                         environmentDetails
                     }

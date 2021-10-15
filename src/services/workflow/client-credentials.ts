@@ -63,6 +63,10 @@ export async function registerClient(
         )
       : issuerEnvConfig.initialAccessToken;
 
+  // If there are any custom client Mappers, then include them
+  const clientMappers =
+    issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
+
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
@@ -76,6 +80,7 @@ export async function registerClient(
     uuidv4(),
     controls.clientCertificate,
     controls.jwksUrl,
+    clientMappers,
     false
   );
   assert.strictEqual(client.clientId, newClientId);

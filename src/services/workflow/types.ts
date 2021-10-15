@@ -24,6 +24,11 @@ export interface RequestControls {
   jwksUrl?: string;
 }
 
+export interface ClientMapper {
+  name: string;
+  defaultValue: string;
+}
+
 export interface Name {
   name: string;
 }

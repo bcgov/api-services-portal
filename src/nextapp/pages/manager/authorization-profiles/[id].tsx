@@ -114,6 +114,7 @@ const query = gql`
       apiKeyName
       clientAuthenticator
       clientRoles
+      clientMappers
       availableScopes
       resourceScopes
       resourceType

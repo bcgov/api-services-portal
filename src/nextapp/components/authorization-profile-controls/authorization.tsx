@@ -5,7 +5,11 @@ import {
   Text,
   FormControl,
   FormLabel,
+  Flex,
   Input,
+  Table,
+  Tr,
+  Td,
   AlertIcon,
   Stack,
   Radio,
@@ -17,6 +21,7 @@ import Section from '../section';
 import { CredentialIssuer } from '@/shared/types/query.types';
 import FormGroup from './form-group';
 import { useAuth } from '@/shared/services/auth';
+import { ClientMapper } from './types';
 
 interface AuthorizationProfileAuthorizationProps {
   issuer: CredentialIssuer;
@@ -31,6 +36,19 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
 }) => {
   const { user } = useAuth();
   const administrator = issuer?.owner ?? user;
+
+  const [clientMappers, setClientMappers] = React.useState<ClientMapper[]>(
+    () => {
+      try {
+        if (issuer?.clientMappers == null) {
+          return [{ name: 'audience', defaultValue: '' }];
+        }
+        return JSON.parse(issuer?.clientMappers);
+      } catch {
+        return [];
+      }
+    }
+  );
 
   return (
     <Section title="Authorization">
@@ -114,6 +132,37 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           name="clientRoles"
           value={issuer?.clientRoles}
         />
+      </FormGroup>
+      <Divider />
+      <FormGroup>
+        <FormControl>
+          <FormLabel>Client Mappers (optional)</FormLabel>
+          <Input
+            hidden
+            name="clientMappers"
+            value={JSON.stringify(clientMappers)}
+          ></Input>
+          <Table>
+            {clientMappers.map((mapper) => (
+              <Tr>
+                <Td bg="gray.100">
+                  <Text>{mapper.name}</Text>
+                </Td>
+                <Td p={2}>
+                  <Input
+                    placeholder=""
+                    variant="bc-input"
+                    defaultValue={mapper.defaultValue}
+                    onChange={(v) => {
+                      mapper.defaultValue = v.target.value;
+                      setClientMappers((state) => [mapper]);
+                    }}
+                  />
+                </Td>
+              </Tr>
+            ))}
+          </Table>
+        </FormControl>
       </FormGroup>
       <Divider />
       <FormGroup>

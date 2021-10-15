@@ -6,3 +6,8 @@ export interface EnvironmentItem {
   clientId?: string;
   clientSecret?: string;
 }
+
+export interface ClientMapper {
+  name: string;
+  defaultValue: string;
+}

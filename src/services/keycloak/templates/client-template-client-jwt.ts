@@ -1,4 +1,4 @@
-export const clientTemplateClientJwt = {
+export const clientTemplateClientJwt = JSON.stringify({
   clientId: '',
   name: '',
   description: '',
@@ -38,8 +38,8 @@ export const clientTemplateClientJwt = {
   authenticationFlowBindingOverrides: {},
   fullScopeAllowed: false,
   nodeReRegistrationTimeout: -1,
-  protocolMappers: [] as string[],
+  protocolMappers: [] as any[],
   defaultClientScopes: [] as string[],
   optionalClientScopes: [] as string[],
   access: { view: true, configure: true, manage: true },
-};
+});
