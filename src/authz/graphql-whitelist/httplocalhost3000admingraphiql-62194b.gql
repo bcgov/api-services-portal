@@ -1,0 +1,11 @@
+
+  query ApplicationSelectApplications {
+    myApplications {
+      id
+      appId
+      name
+      owner {
+        name
+      }
+    }
+  }

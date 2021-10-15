@@ -173,7 +173,7 @@ const ApplicationSelect: React.FC = () => {
 export default ApplicationSelect;
 
 const query = gql`
-  query {
+  query ApplicationSelectApplications {
     myApplications {
       id
       appId
