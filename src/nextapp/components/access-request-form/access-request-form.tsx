@@ -120,7 +120,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
       )}
       {selectedEnvironment?.legal && hasNotAgreedLegal && (
         <Box mt={4} p={4} bgColor="#f2f2f2" borderRadius={4}>
-          <Checkbox colorScheme="blue" name="acceptLegal">
+          <Checkbox isRequired colorScheme="blue" name="acceptLegal">
             {selectedEnvironment.legal.title}
           </Checkbox>
           <Box mt={2} ml={7}>
