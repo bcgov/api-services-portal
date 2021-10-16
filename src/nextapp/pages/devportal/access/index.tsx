@@ -36,7 +36,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiAccessPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
-  const { data } = useApi(queryKey, { query }, { suspense: false });
+  const { data, isError, error } = useApi(
+    queryKey,
+    { query },
+    { suspense: false }
+  );
+  console.log('data', data);
+  console.log('error', error);
+  console.log('isErro', isError);
 
   return (
     <>
