@@ -15,7 +15,7 @@
         }
       }
     }
-    myAccessRequests(where: {serviceAccess_is_null: true}) {
+    myAccessRequests(where: { serviceAccess_is_null: true }) {
       id
       application {
         name
