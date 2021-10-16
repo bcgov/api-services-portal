@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Container, Link } from '@chakra-ui/react';
+import { Button, Container } from '@chakra-ui/react';
 import Head from 'next/head';
 import EmptyPane from '@/components/empty-pane';
 import PageHeader from '@/components/page-header';
@@ -9,7 +9,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
-import AccessList, { CollectCredentialList } from '@/components/access-list';
+import AccessList from '@/components/access-list';
 import Card from '@/components/card';
 import NextLink from 'next/link';
 
@@ -49,13 +49,14 @@ const ApiAccessPage: React.FC<
         </PageHeader>
 
         {data.myAccessRequests?.length > 0 && (
-          <CollectCredentialList
-            data={data.myAccessRequests}
+          <AccessList
+            approved={data?.myServiceAccesses}
+            requested={data?.myAccessRequests}
             queryKey={queryKey}
           />
         )}
 
-        {data.myServiceAccesses.length === 0 && (
+        {data.myServiceAccesses?.length === 0 && (
           <Card>
             <EmptyPane
               action={
