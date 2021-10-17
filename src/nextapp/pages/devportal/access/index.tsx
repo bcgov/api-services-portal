@@ -67,7 +67,7 @@ const ApiAccessPage: React.FC<
         )}
 
         {data?.myServiceAccesses?.length === 0 &&
-          data?.myServiceAccesses?.length === 0 && (
+          data?.myAccessRequests?.length === 0 && (
             <Card>
               <EmptyPane
                 action={
