@@ -12,6 +12,7 @@ import { dehydrate } from 'react-query/hydration';
 import AccessList from '@/components/access-list';
 import Card from '@/components/card';
 import NextLink from 'next/link';
+import { useAuth } from '@/shared/services/auth';
 
 const queryKey = 'allServiceAccesses';
 
@@ -36,14 +37,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiAccessPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
-  const { data, isError, error } = useApi(
-    queryKey,
-    { query },
-    { suspense: false }
-  );
-  console.log('data', data);
-  console.log('error', error);
-  console.log('isErro', isError);
+  const { user } = useAuth();
+  const { data } = useApi(queryKey, { query }, { suspense: false });
 
   return (
     <>
@@ -54,6 +49,14 @@ const ApiAccessPage: React.FC<
         <PageHeader title="My Access">
           List of the BC Government Service APIs that you have access to.
         </PageHeader>
+        {!user?.namespace && (
+          <Card>
+            <EmptyPane
+              message="Select a namespace above to view access requests"
+              title="No namespace selected"
+            />
+          </Card>
+        )}
 
         {data.myAccessRequests?.length > 0 && (
           <AccessList
@@ -63,19 +66,20 @@ const ApiAccessPage: React.FC<
           />
         )}
 
-        {data.myServiceAccesses?.length === 0 && (
-          <Card>
-            <EmptyPane
-              action={
-                <NextLink passHref href="/devportal/api-directory">
-                  <Button as="a">Go to API Directory</Button>
-                </NextLink>
-              }
-              message="Find an API and request an API key to get started"
-              title="Not using any APIs yet?"
-            />
-          </Card>
-        )}
+        {data?.myServiceAccesses?.length === 0 &&
+          data?.myServiceAccesses?.length === 0 && (
+            <Card>
+              <EmptyPane
+                action={
+                  <NextLink passHref href="/devportal/api-directory">
+                    <Button as="a">Go to API Directory</Button>
+                  </NextLink>
+                }
+                message="Find an API and request an API key to get started"
+                title="No APIs yet"
+              />
+            </Card>
+          )}
       </Container>
     </>
   );
