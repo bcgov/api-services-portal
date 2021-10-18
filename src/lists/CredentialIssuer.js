@@ -86,6 +86,10 @@ module.exports = {
         { value: 'client-jwt-jwks-url', label: 'Signed JWT with JWKS URL' },
       ],
     },
+    clientMappers: {
+      type: Text,
+      isRequired: false,
+    },
     authPlugin: {
       type: Text,
       isRequired: false,

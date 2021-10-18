@@ -6,6 +6,9 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Table,
+  Tr,
+  Td,
   AlertIcon,
   Stack,
   Radio,
@@ -17,6 +20,8 @@ import Section from '../section';
 import { CredentialIssuer } from '@/shared/types/query.types';
 import FormGroup from './form-group';
 import { useAuth } from '@/shared/services/auth';
+import { ClientMapper } from './types';
+import startCase from 'lodash/startCase';
 
 interface AuthorizationProfileAuthorizationProps {
   issuer: CredentialIssuer;
@@ -31,6 +36,26 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
 }) => {
   const { user } = useAuth();
   const administrator = issuer?.owner ?? user;
+
+  const [audienceValue, setAudienceValue] = React.useState<string>(() => {
+    try {
+      if (!issuer?.clientMappers) {
+        return '';
+      }
+      return JSON.parse(issuer?.clientMappers).filter(
+        (m) => m.name === 'audience'
+      )[0].defaultValue;
+    } catch {
+      return '';
+    }
+  });
+
+  const handleAudienceUpdate = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setAudienceValue((state) => e.target.value);
+    },
+    [setAudienceValue]
+  );
 
   return (
     <Section title="Authorization">
@@ -114,6 +139,34 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           name="clientRoles"
           value={issuer?.clientRoles}
         />
+      </FormGroup>
+      <Divider />
+      <FormGroup>
+        <FormControl>
+          <FormLabel>Client Mappers (optional)</FormLabel>
+          <Input
+            hidden
+            name="clientMappers"
+            value={JSON.stringify([
+              { name: 'audience', defaultValue: audienceValue },
+            ])}
+          ></Input>
+          <Table variant="unstyled" m={0}>
+            <Tr b={0}>
+              <Td bg="gray.100">
+                <Text>Audience</Text>
+              </Td>
+              <Td p={2} m={0}>
+                <Input
+                  placeholder=""
+                  variant="bc-input"
+                  value={audienceValue}
+                  onChange={handleAudienceUpdate}
+                />
+              </Td>
+            </Tr>
+          </Table>
+        </FormControl>
       </FormGroup>
       <Divider />
       <FormGroup>
