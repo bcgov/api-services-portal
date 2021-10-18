@@ -10,4 +10,5 @@ export interface EnvironmentItem {
 export interface ClientMapper {
   name: string;
   defaultValue: string;
+  claimName?: string;
 }
