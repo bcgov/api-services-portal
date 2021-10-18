@@ -5,7 +5,6 @@ import {
   Text,
   FormControl,
   FormLabel,
-  Flex,
   Input,
   Table,
   Tr,
@@ -38,29 +37,29 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
   const { user } = useAuth();
   const administrator = issuer?.owner ?? user;
 
-  const [clientMappers, setClientMappers] = React.useState<ClientMapper[]>(
+  const [audienceMapper, setAudienceMapper] = React.useState<ClientMapper>(
     () => {
       try {
         if (!issuer?.clientMappers) {
-          return [
-            { name: 'audience', defaultValue: '' },
-            // { name: 'hardcoded_claim', defaultValue: '' },
-          ];
+          return { name: 'audience', defaultValue: '' };
         }
-        return JSON.parse(issuer?.clientMappers);
+        return JSON.parse(issuer?.clientMappers).filter(
+          (m) => m.name === 'audience'
+        )[0];
       } catch {
-        return [];
+        return { name: 'audience', defaultValue: '' };
       }
     }
   );
 
   const handleAudienceUpdate = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setClientMappers((state) => [
-        { name: 'audience', defaultValue: e.target.value },
-      ]);
+      setAudienceMapper((state) => ({
+        ...state,
+        defaultValue: e.target.value,
+      }));
     },
-    [setClientMappers]
+    [setAudienceMapper]
   );
 
   return (
@@ -153,24 +152,22 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           <Input
             hidden
             name="clientMappers"
-            value={JSON.stringify(clientMappers)}
+            value={JSON.stringify([audienceMapper])}
           ></Input>
           <Table variant="unstyled" m={0}>
-            {clientMappers.map((mapper) => (
-              <Tr b={0}>
-                <Td bg="gray.100">
-                  <Text>{startCase(mapper.name)}</Text>
-                </Td>
-                <Td p={2} m={0}>
-                  <Input
-                    placeholder=""
-                    variant="bc-input"
-                    defaultValue={mapper.defaultValue}
-                    onChange={handleAudienceUpdate}
-                  />
-                </Td>
-              </Tr>
-            ))}
+            <Tr b={0}>
+              <Td bg="gray.100">
+                <Text>{startCase(audienceMapper.name)}</Text>
+              </Td>
+              <Td p={2} m={0}>
+                <Input
+                  placeholder=""
+                  variant="bc-input"
+                  defaultValue={audienceMapper.defaultValue}
+                  onChange={handleAudienceUpdate}
+                />
+              </Td>
+            </Tr>
           </Table>
         </FormControl>
       </FormGroup>
