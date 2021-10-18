@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { Box, Button, Center, Heading, Icon, Text } from '@chakra-ui/react';
+import { Box, Heading, Icon } from '@chakra-ui/react';
 import { FaKey } from 'react-icons/fa';
 
-import ViewSecret from '../view-secret';
 import GenerateCredential from '../generate-credential';
 
 interface AccessRequestCredentialsProps {

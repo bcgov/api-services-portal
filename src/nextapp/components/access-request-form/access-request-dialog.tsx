@@ -25,6 +25,7 @@ import { useQueryClient } from 'react-query';
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
 import AccessRequestFormLoading from './access-request-form-loading';
+import { useRouter } from 'next/router';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -39,9 +40,10 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   id,
   open,
 }) => {
+  const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
   const mutate = useApiMutation(mutation);
-  const client = useQueryClient();
+  const router = useRouter();
   const toast = useToast();
   const [hasError, setError] = React.useState<boolean>(false);
   const [tab, setTab] = React.useState<number>(defaultTab);
@@ -104,6 +106,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
     });
     onClose();
+    router?.push('/devportal/access');
   }, [onClose, toast]);
   const handleFormError = () => {
     setError(true);

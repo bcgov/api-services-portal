@@ -28,10 +28,12 @@ import { useApiMutation } from '@/shared/services/api';
 import { IoEllipsisHorizontal } from 'react-icons/io5';
 import Card from '@/components/card';
 import { uid } from 'react-uid';
+
 import AccessStatus from './access-status';
+import GenerateCredentialsDialog from '../access-request-form/generate-credentials-dialog';
 
 interface AccessListItemProps {
-  data: (AccessRequest | ServiceAccess)[];
+  data: (AccessRequest & ServiceAccess)[];
   product: Product;
   queryKey: QueryKey;
 }
@@ -90,15 +92,9 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Tr key={uid(d.id)}>
             <Td>
               <AccessStatus
-                isIssued={
-                  d.__typename === 'AccessRequest' ? d.isIssued : undefined
-                }
-                isComplete={
-                  d.__typename === 'AccessRequest' ? d.isComplete : undefined
-                }
-                isApproved={
-                  d.__typename === 'AccessRequest' ? d.isApproved : undefined
-                }
+                isIssued={d.isIssued}
+                isComplete={d.isComplete}
+                isApproved={d.isApproved}
               />
             </Td>
             <Td>
@@ -112,6 +108,9 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
             </Td>
             <Td>{d.application?.name}</Td>
             <Td isNumeric>
+              {!d.isApproved && !d.isIssued && !d.isComplete && (
+                <GenerateCredentialsDialog id={d.id} />
+              )}
               <Menu>
                 <MenuButton
                   as={IconButton}
