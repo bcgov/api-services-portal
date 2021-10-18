@@ -37,29 +37,24 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
   const { user } = useAuth();
   const administrator = issuer?.owner ?? user;
 
-  const [audienceMapper, setAudienceMapper] = React.useState<ClientMapper>(
-    () => {
-      try {
-        if (!issuer?.clientMappers) {
-          return { name: 'audience', defaultValue: '' };
-        }
-        return JSON.parse(issuer?.clientMappers).filter(
-          (m) => m.name === 'audience'
-        )[0];
-      } catch {
-        return { name: 'audience', defaultValue: '' };
+  const [audienceValue, setAudienceValue] = React.useState<string>(() => {
+    try {
+      if (!issuer?.clientMappers) {
+        return '';
       }
+      return JSON.parse(issuer?.clientMappers).filter(
+        (m) => m.name === 'audience'
+      )[0].defaultValue;
+    } catch {
+      return '';
     }
-  );
+  });
 
   const handleAudienceUpdate = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setAudienceMapper((state) => ({
-        ...state,
-        defaultValue: e.target.value,
-      }));
+      setAudienceValue((state) => e.target.value);
     },
-    [setAudienceMapper]
+    [setAudienceValue]
   );
 
   return (
@@ -152,18 +147,20 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           <Input
             hidden
             name="clientMappers"
-            value={JSON.stringify([audienceMapper])}
+            value={JSON.stringify([
+              { name: 'audience', defaultValue: audienceValue },
+            ])}
           ></Input>
           <Table variant="unstyled" m={0}>
             <Tr b={0}>
               <Td bg="gray.100">
-                <Text>{startCase(audienceMapper.name)}</Text>
+                <Text>Audience</Text>
               </Td>
               <Td p={2} m={0}>
                 <Input
                   placeholder=""
                   variant="bc-input"
-                  defaultValue={audienceMapper.defaultValue}
+                  value={audienceValue}
                   onChange={handleAudienceUpdate}
                 />
               </Td>
