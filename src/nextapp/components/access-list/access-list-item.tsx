@@ -33,7 +33,7 @@ import AccessStatus from './access-status';
 import GenerateCredentialsDialog from '../access-request-form/generate-credentials-dialog';
 
 interface AccessListItemProps {
-  data: (AccessRequest & ServiceAccess)[];
+  data: (AccessRequest | ServiceAccess)[];
   product: Product;
   queryKey: QueryKey;
 }
@@ -88,7 +88,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
             <Th />
           </Tr>
         </Thead>
-        {data.map((d) => (
+        {data.map((d: AccessRequest & ServiceAccess) => (
           <Tr key={uid(d.id)}>
             <Td>
               <AccessStatus
