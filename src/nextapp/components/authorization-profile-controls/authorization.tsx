@@ -22,6 +22,7 @@ import { CredentialIssuer } from '@/shared/types/query.types';
 import FormGroup from './form-group';
 import { useAuth } from '@/shared/services/auth';
 import { ClientMapper } from './types';
+import startCase from 'lodash/startCase';
 
 interface AuthorizationProfileAuthorizationProps {
   issuer: CredentialIssuer;
@@ -40,14 +41,26 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
   const [clientMappers, setClientMappers] = React.useState<ClientMapper[]>(
     () => {
       try {
-        if (issuer?.clientMappers == null) {
-          return [{ name: 'audience', defaultValue: '' }];
+        if (!issuer?.clientMappers) {
+          return [
+            { name: 'audience', defaultValue: '' },
+            // { name: 'hardcoded_claim', defaultValue: '' },
+          ];
         }
         return JSON.parse(issuer?.clientMappers);
       } catch {
         return [];
       }
     }
+  );
+
+  const handleAudienceUpdate = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setClientMappers((state) => [
+        { name: 'audience', defaultValue: e.target.value },
+      ]);
+    },
+    [setClientMappers]
   );
 
   return (
@@ -142,21 +155,18 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
             name="clientMappers"
             value={JSON.stringify(clientMappers)}
           ></Input>
-          <Table>
+          <Table variant="unstyled" m={0}>
             {clientMappers.map((mapper) => (
-              <Tr>
+              <Tr b={0}>
                 <Td bg="gray.100">
-                  <Text>{mapper.name}</Text>
+                  <Text>{startCase(mapper.name)}</Text>
                 </Td>
-                <Td p={2}>
+                <Td p={2} m={0}>
                   <Input
                     placeholder=""
                     variant="bc-input"
                     defaultValue={mapper.defaultValue}
-                    onChange={(v) => {
-                      mapper.defaultValue = v.target.value;
-                      setClientMappers((state) => [mapper]);
-                    }}
+                    onChange={handleAudienceUpdate}
                   />
                 </Td>
               </Tr>
