@@ -51,7 +51,7 @@ const AuthorizationProfile: React.FC<
     { query, variables: { id } },
     { suspense: false }
   );
-  const issuer = data?.CredentialIssuer;
+  const issuer = data?.OwnedCredentialIssuer;
   const breadcrumbs = useNamespaceBreadcrumbs([
     {
       href: '/manager/authorization-profiles',
@@ -70,13 +70,14 @@ const AuthorizationProfile: React.FC<
         await mutateAsync({ id, data: payload });
         client.invalidateQueries('authorizationProfiles');
         toast({
-          title: 'Credential issuer updated',
+          title: 'Profile updated',
           status: 'success',
         });
         router?.push('/manager/authorization-profiles');
-      } catch {
+      } catch (e) {
         toast({
-          title: 'Unable to create credential issuer',
+          title: 'Profile update failed',
+          description: Array.isArray(e) ? e[0].message : '',
           status: 'error',
         });
       }
@@ -105,7 +106,7 @@ export default AuthorizationProfile;
 
 const query = gql`
   query GetCredentialIssuer($id: ID!) {
-    CredentialIssuer(where: { id: $id }) {
+    OwnedCredentialIssuer(where: { id: $id }) {
       id
       name
       flow
@@ -113,6 +114,7 @@ const query = gql`
       apiKeyName
       clientAuthenticator
       clientRoles
+      clientMappers
       availableScopes
       resourceScopes
       resourceType

@@ -1,4 +1,4 @@
-export const clientTemplateClientSecret = {
+export const clientTemplateClientSecret = JSON.stringify({
   clientId: '',
   name: '',
   description: '',
@@ -37,8 +37,8 @@ export const clientTemplateClientSecret = {
   authenticationFlowBindingOverrides: {},
   fullScopeAllowed: false,
   nodeReRegistrationTimeout: -1,
-  protocolMappers: [] as string[],
+  protocolMappers: [] as any[],
   defaultClientScopes: [] as string[],
   optionalClientScopes: [] as string[],
   access: { view: true, configure: true, manage: true },
-};
+});

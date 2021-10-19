@@ -1,0 +1,15 @@
+
+  query {
+    myApplications {
+      id
+      appId
+      name
+      owner {
+        name
+      }
+    }
+    allTemporaryIdentities {
+      id
+      userId
+    }
+  }

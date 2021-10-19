@@ -87,6 +87,25 @@ export async function lookupUserByUsername(
   return result.data.allUsers;
 }
 
+export async function lookupUsersByUsernames(
+  context: any,
+  usernameList: string[]
+): Promise<[User]> {
+  const result = await context.executeGraphQL({
+    query: `query GetUsersWithUsernames($usernames: [String!]!) {
+                    allUsers(where: {username_in: $usernames}) {
+                        id
+                        name
+                        username
+                        email
+                    }
+                }`,
+    variables: { usernames: usernameList },
+  });
+  logger.debug('Query [lookupUsersByUsernames] result %j', result);
+  return result.data.allUsers;
+}
+
 export async function lookupUser(context: any, id: string): Promise<[User]> {
   const result = await context.executeGraphQL({
     query: `query FetchUser($id: ID!) {

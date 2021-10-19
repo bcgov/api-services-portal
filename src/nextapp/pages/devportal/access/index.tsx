@@ -53,9 +53,9 @@ const ApiAccessPage: React.FC<
           </Alert>
         </Stack>
 
-        {data.allAccessRequests?.length > 0 && (
+        {data.myAccessRequests?.length > 0 && (
           <CollectCredentialList
-            data={data.allAccessRequests}
+            data={data.myAccessRequests}
             queryKey={queryKey}
           />
         )}
@@ -105,7 +105,7 @@ const query = gql`
         }
       }
     }
-    allAccessRequests(where: { serviceAccess_is_null: true }) {
+    myAccessRequests(where: { serviceAccess_is_null: true }) {
       id
       productEnvironment {
         id

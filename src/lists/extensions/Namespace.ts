@@ -8,10 +8,9 @@ import {
 } from '../../services/uma2';
 import {
   lookupProductEnvironmentServicesBySlug,
-  lookupUserByUsername,
+  lookupUsersByUsernames,
 } from '../../services/keystone';
 import {
-  getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
   getNamespaceResourceSets,
@@ -28,7 +27,6 @@ import { Logger } from '../../logger';
 const logger = Logger('ext.Namespace');
 
 import { strict as assert } from 'assert';
-import { User } from '@/services/keystone/types';
 
 const typeUserContact = `
   type UserContact {
@@ -85,9 +83,9 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
+              const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
               const namespaces = <ResourceSet[]>(
@@ -138,7 +136,7 @@ module.exports = {
 
               const resourceIds = await getNamespaceResourceSets(envCtx);
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
               const namespaces = await resourcesApi.listResourcesByIdList(
@@ -186,7 +184,7 @@ module.exports = {
               );
 
               const kcprotectApi = new UMAResourceRegistrationService(
-                tokenResult.issuer,
+                tokenResult.resourceRegistrationEndpoint,
                 tokenResult.accessToken
               );
               const resOwnerResourceIds = await kcprotectApi.listResources({
@@ -219,22 +217,11 @@ module.exports = {
                 });
                 permissions = updatedPermissions;
               }
-              const listOfUsers: Array<any> = [];
-              for (const perm of permissions) {
-                if (perm.granted) {
-                  const user = await lookupUserByUsername(
-                    noauthContext,
-                    perm.requesterName
-                  );
-                  listOfUsers.push({
-                    id: user[0].id,
-                    name: user[0].name,
-                    username: user[0].username,
-                    email: user[0].email,
-                  });
-                }
-              }
-              return listOfUsers;
+              const usernameList = permissions
+                .filter((p) => p.granted)
+                .map((p) => p.requesterName);
+
+              return await lookupUsersByUsernames(noauthContext, usernameList);
             },
             access: EnforcementPoint,
           },
@@ -275,7 +262,7 @@ module.exports = {
               const resourceIds = await getResourceSets(envCtx);
 
               const resourceApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
 
@@ -348,7 +335,7 @@ module.exports = {
               const resourceIds = await getResourceSets(envCtx);
 
               const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.issuerEnvConfig.issuerUrl,
+                envCtx.uma2.resource_registration_endpoint,
                 envCtx.accessToken
               );
 

@@ -17,6 +17,10 @@ const {
   EnforcementPoint,
   FieldEnforcementPoint,
 } = require('../authz/enforcement');
+const { updateEnvironmentDetails } = require('../services/keystone');
+
+const { Logger } = require('../logger');
+const logger = Logger('lists.credentialissuer');
 
 module.exports = {
   fields: {
@@ -81,6 +85,10 @@ module.exports = {
         { value: 'client-jwt', label: 'Signed JWT' },
         { value: 'client-jwt-jwks-url', label: 'Signed JWT with JWKS URL' },
       ],
+    },
+    clientMappers: {
+      type: Text,
+      isRequired: false,
     },
     authPlugin: {
       type: Text,
@@ -153,13 +161,22 @@ module.exports = {
   access: EnforcementPoint,
   plugins: [byTracking(), atTracking()],
   hooks: {
-    resolveInput: ({ operation, resolvedData, context }) => {
+    resolveInput: ({ operation, existingItem, resolvedData, context }) => {
       if (operation == 'create') {
         if (!('owner' in resolvedData) && context['authedItem']) {
           resolvedData['owner'] = context.authedItem.userId;
         }
         if (context['authedItem'] && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
+        }
+      }
+      if (operation == 'update' || operation == 'create') {
+        // special handling of the environmentDetails
+        if ('environmentDetails' in resolvedData) {
+          resolvedData['environmentDetails'] = updateEnvironmentDetails(
+            existingItem == null ? '[]' : existingItem['environmentDetails'],
+            resolvedData['environmentDetails']
+          );
         }
       }
 

@@ -6,6 +6,7 @@ export interface NewCredential {
   flow: string;
   clientId?: string;
   clientSecret?: string;
+  issuer?: string;
   tokenEndpoint?: string;
   apiKey?: string;
   clientPublicKey?: string;
@@ -21,6 +22,11 @@ export interface RequestControls {
   clientCertificate?: string;
   clientGenCertificate?: boolean;
   jwksUrl?: string;
+}
+
+export interface ClientMapper {
+  name: string;
+  defaultValue: string;
 }
 
 export interface Name {
@@ -43,6 +49,7 @@ export interface PluginConfig {
 }
 
 export interface IssuerEnvironmentConfig {
+  exists: boolean;
   environment: string;
   issuerUrl: string;
   clientRegistration?: string;

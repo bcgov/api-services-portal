@@ -51,7 +51,7 @@ export async function registerClient(
   // token is NULL if 'iat'
   // token is retrieved from doing a /token login using the provided client ID and secret if 'managed'
   // issuer.initialAccessToken if 'iat'
-  const kctoksvc = new KeycloakTokenService(openid.issuer);
+  const kctoksvc = new KeycloakTokenService(openid.token_endpoint);
 
   const token =
     issuerEnvConfig.clientRegistration == 'anonymous'
@@ -63,11 +63,16 @@ export async function registerClient(
         )
       : issuerEnvConfig.initialAccessToken;
 
+  // If there are any custom client Mappers, then include them
+  const clientMappers =
+    issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
+
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
   const client = await new KeycloakClientRegistrationService(
-    openid.issuer,
+    issuerEnvConfig.issuerUrl,
+    openid.registration_endpoint,
     token
   ).clientRegistration(
     <ClientAuthenticator>issuer.clientAuthenticator,
@@ -75,6 +80,7 @@ export async function registerClient(
     uuidv4(),
     controls.clientCertificate,
     controls.jwksUrl,
+    clientMappers,
     false
   );
   assert.strictEqual(client.clientId, newClientId);
@@ -103,8 +109,14 @@ export async function findClient(
   );
 
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-
-  const kcClientService = new KeycloakClientService(openid.issuer, null);
+  // openid.issuer and issuerEnvConfig.issuerUrl may be different
+  // but for kcClientService we want to use the issuerEnvConfig.issuerUrl
+  // openid.issuer will be an externally accessible URL where is `issuerEnvConfig.issuerUrl`
+  // could be internal (similar to the openid.token_endpoint and registration_endpoint)
+  const kcClientService = new KeycloakClientService(
+    issuerEnvConfig.issuerUrl,
+    null
+  );
 
   await kcClientService.login(
     issuerEnvConfig.clientId,

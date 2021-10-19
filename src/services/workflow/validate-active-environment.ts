@@ -6,6 +6,7 @@ import {
   lookupServices,
 } from '../keystone';
 import { Logger } from '../../logger';
+import { CredentialIssuer, Environment } from '../keystone/types';
 
 const logger = Logger('wf.ValidateActiveEnv');
 
@@ -27,11 +28,11 @@ export const ValidateActiveEnvironment = async (
     try {
       const envServices =
         existingItem == null
-          ? null
+          ? ({} as Environment)
           : await lookupProductEnvironmentServices(context, existingItem.id);
 
       const issuer =
-        existingItem == null
+        'credentialIssuer' in resolvedData
           ? await lookupCredentialIssuerById(
               context,
               `${resolvedData.credentialIssuer}`
@@ -44,10 +45,9 @@ export const ValidateActiveEnvironment = async (
           : null;
 
       const flow =
-        existingItem == null ? resolvedData['flow'] : envServices.flow;
-
+        'flow' in resolvedData ? resolvedData['flow'] : envServices.flow;
       const envName =
-        existingItem == null ? resolvedData['name'] : envServices.name;
+        'name' in resolvedData ? resolvedData['name'] : envServices.name;
 
       // The Credential Issuer says what plugins are expected
       // Loop through the Services to make sure the plugin is configured correctly

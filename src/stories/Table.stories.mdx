@@ -1,0 +1,78 @@
+import { 
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+} from '@chakra-ui/react';
+import { FaPlus } from 'react-icons/fa'
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+
+
+<Meta title="BCGov/Table" />
+
+export const Template = (args) => (
+  <Table {...args}>
+    <Thead>
+      <Tr>
+        <Th>Environment</Th>
+        <Th>Authentication</Th>
+        <Th />
+      </Tr>
+    </Thead>
+    <Tbody>
+      <Tr>
+        <Td>Production</Td>
+        <Td>Public</Td>
+        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+      </Tr>
+      <Tr>
+        <Td>Conformance</Td>
+        <Td>Client Credentials</Td>
+        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+      </Tr>
+      <Tr>
+        <Td>Test</Td>
+        <Td>Kong-API-Key-ACL</Td>
+        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+      </Tr>
+    </Tbody>
+  </Table>
+)
+
+# Table
+
+The default simple style of table has been slightly tweaked.
+
+```javascript
+<Table>
+  <Thead>
+    <Tr>
+      <Th>Environment</Th>
+      <Th>Authentication</Th>
+      <Th />
+    </Tr>
+  </Thead>
+  <Tbody>
+    <Tr>
+      <Td>Production</Td>
+      <Td>Public</Td>
+      <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+    </Tr>
+  </Tbody>
+</Table>
+```
+
+<Canvas>
+  <Story 
+    name="Default"
+    args={{ 
+      size: 'md'
+  }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>

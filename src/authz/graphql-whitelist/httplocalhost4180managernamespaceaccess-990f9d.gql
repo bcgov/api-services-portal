@@ -1,0 +1,12 @@
+
+  mutation RevokeSAAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $policyId: String!
+  ) {
+    deleteUmaPolicy(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      policyId: $policyId
+    )
+  }

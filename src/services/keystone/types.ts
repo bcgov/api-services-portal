@@ -1347,6 +1347,7 @@ export type CredentialIssuer = {
   clientRegistration?: Maybe<Scalars['String']>;
   mode?: Maybe<Scalars['String']>;
   clientAuthenticator?: Maybe<Scalars['String']>;
+  clientMappers?: Maybe<Scalars['String']>;
   authPlugin?: Maybe<Scalars['String']>;
   instruction?: Maybe<Scalars['String']>;
   environmentDetails?: Maybe<Scalars['String']>;
@@ -1468,6 +1469,24 @@ export type CredentialIssuerWhereInput = {
   clientAuthenticator_not?: Maybe<Scalars['String']>;
   clientAuthenticator_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   clientAuthenticator_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientMappers?: Maybe<Scalars['String']>;
+  clientMappers_not?: Maybe<Scalars['String']>;
+  clientMappers_contains?: Maybe<Scalars['String']>;
+  clientMappers_not_contains?: Maybe<Scalars['String']>;
+  clientMappers_starts_with?: Maybe<Scalars['String']>;
+  clientMappers_not_starts_with?: Maybe<Scalars['String']>;
+  clientMappers_ends_with?: Maybe<Scalars['String']>;
+  clientMappers_not_ends_with?: Maybe<Scalars['String']>;
+  clientMappers_i?: Maybe<Scalars['String']>;
+  clientMappers_not_i?: Maybe<Scalars['String']>;
+  clientMappers_contains_i?: Maybe<Scalars['String']>;
+  clientMappers_not_contains_i?: Maybe<Scalars['String']>;
+  clientMappers_starts_with_i?: Maybe<Scalars['String']>;
+  clientMappers_not_starts_with_i?: Maybe<Scalars['String']>;
+  clientMappers_ends_with_i?: Maybe<Scalars['String']>;
+  clientMappers_not_ends_with_i?: Maybe<Scalars['String']>;
+  clientMappers_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  clientMappers_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   authPlugin?: Maybe<Scalars['String']>;
   authPlugin_not?: Maybe<Scalars['String']>;
   authPlugin_contains?: Maybe<Scalars['String']>;
@@ -1753,6 +1772,8 @@ export enum SortCredentialIssuersBy {
   ModeDesc = 'mode_DESC',
   ClientAuthenticatorAsc = 'clientAuthenticator_ASC',
   ClientAuthenticatorDesc = 'clientAuthenticator_DESC',
+  ClientMappersAsc = 'clientMappers_ASC',
+  ClientMappersDesc = 'clientMappers_DESC',
   AuthPluginAsc = 'authPlugin_ASC',
   AuthPluginDesc = 'authPlugin_DESC',
   InstructionAsc = 'instruction_ASC',
@@ -1801,6 +1822,7 @@ export type CredentialIssuerUpdateInput = {
   clientRegistration?: Maybe<Scalars['String']>;
   mode?: Maybe<Scalars['String']>;
   clientAuthenticator?: Maybe<Scalars['String']>;
+  clientMappers?: Maybe<Scalars['String']>;
   authPlugin?: Maybe<Scalars['String']>;
   instruction?: Maybe<Scalars['String']>;
   environmentDetails?: Maybe<Scalars['String']>;
@@ -1830,6 +1852,7 @@ export type CredentialIssuerCreateInput = {
   clientRegistration?: Maybe<Scalars['String']>;
   mode?: Maybe<Scalars['String']>;
   clientAuthenticator?: Maybe<Scalars['String']>;
+  clientMappers?: Maybe<Scalars['String']>;
   authPlugin?: Maybe<Scalars['String']>;
   instruction?: Maybe<Scalars['String']>;
   environmentDetails?: Maybe<Scalars['String']>;
@@ -5877,7 +5900,7 @@ export type NamespaceInput = {
 
 export type UserContact = {
   __typename?: 'UserContact';
-  id: Scalars['String'];
+  id: Scalars['ID'];
   name: Scalars['String'];
   username: Scalars['String'];
   email: Scalars['String'];
@@ -6162,11 +6185,14 @@ export type Query = {
   allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
   allCredentialIssuersByNamespace?: Maybe<Array<Maybe<CredentialIssuer>>>;
   allNamespaceServiceAccounts?: Maybe<Array<Maybe<ServiceAccess>>>;
+  OwnedEnvironment?: Maybe<Environment>;
   DiscoverableProduct?: Maybe<Product>;
+  OwnedCredentialIssuer?: Maybe<CredentialIssuer>;
+  CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
+  myAccessRequests?: Maybe<Array<Maybe<AccessRequest>>>;
   myApplications?: Maybe<Array<Maybe<Application>>>;
   mySelf?: Maybe<User>;
-  CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
@@ -6800,8 +6826,23 @@ export type QueryAllNamespaceServiceAccountsArgs = {
 };
 
 
+export type QueryOwnedEnvironmentArgs = {
+  where?: Maybe<EnvironmentWhereInput>;
+};
+
+
 export type QueryDiscoverableProductArgs = {
   where?: Maybe<ProductWhereInput>;
+};
+
+
+export type QueryOwnedCredentialIssuerArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
+};
+
+
+export type QueryCredentialIssuerSummaryArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
 };
 
 
@@ -6810,6 +6851,14 @@ export type QueryMyServiceAccessesArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<ServiceAccessWhereInput>;
+};
+
+
+export type QueryMyAccessRequestsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<AccessRequestWhereInput>;
 };
 
 
@@ -6823,11 +6872,6 @@ export type QueryMyApplicationsArgs = {
 
 export type QueryMySelfArgs = {
   where?: Maybe<UserWhereInput>;
-};
-
-
-export type QueryCredentialIssuerSummaryArgs = {
-  where?: Maybe<CredentialIssuerWhereInput>;
 };
 
 
@@ -6852,6 +6896,7 @@ export type QueryConsumerScopesAndRolesArgs = {
 
 export type QueryUsersByNamespaceArgs = {
   namespace: Scalars['String'];
+  scopeName?: Maybe<Scalars['String']>;
 };
 
 

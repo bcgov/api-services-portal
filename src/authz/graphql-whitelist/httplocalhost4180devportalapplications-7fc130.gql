@@ -1,0 +1,7 @@
+
+  mutation Remove($id: ID!) {
+    deleteApplication(id: $id) {
+      name
+      id
+    }
+  }

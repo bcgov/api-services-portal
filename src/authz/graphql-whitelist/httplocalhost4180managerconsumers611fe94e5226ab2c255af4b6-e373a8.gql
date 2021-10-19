@@ -1,0 +1,9 @@
+
+  mutation Remove($consumerId: ID!, $pluginExtForeignKey: String!) {
+    deleteGatewayConsumerPlugin(
+      id: $consumerId
+      pluginExtForeignKey: $pluginExtForeignKey
+    ) {
+      id
+    }
+  }

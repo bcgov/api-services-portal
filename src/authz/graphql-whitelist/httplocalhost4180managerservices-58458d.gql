@@ -1,0 +1,46 @@
+
+  query GET($id: ID!, $days: [String!]) {
+    GatewayService(where: { id: $id }) {
+      id
+      name
+      namespace
+      tags
+      host
+      environment {
+        id
+        name
+        active
+        flow
+        product {
+          name
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+      }
+      plugins {
+        id
+        name
+      }
+      routes {
+        id
+        name
+        hosts
+        paths
+        methods
+      }
+      updatedAt
+    }
+    allMetrics(
+      sortBy: day_ASC
+      where: { query: "kong_http_requests_daily_namespace", day_in: $days }
+    ) {
+      query
+      day
+      metric
+      values
+    }
+  }

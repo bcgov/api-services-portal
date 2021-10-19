@@ -179,7 +179,9 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Peak Daily</StatLabel>
-            <StatNumber>{numeral(peakDay.total).format('0.0a')}</StatNumber>
+            <StatNumber>
+              {numeral(peakDay?.total ?? 0).format('0.0a')}
+            </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Peak Day</StatLabel>

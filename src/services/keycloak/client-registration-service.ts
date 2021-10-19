@@ -10,6 +10,8 @@ import { clientTemplateClientSecret } from './templates/client-template-client-s
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 
 import { default as KcAdminClient } from 'keycloak-admin';
+import { ClientMapper } from '../workflow/types';
+import { AudienceMapper } from './templates/protocol-mappers/audience';
 
 const logger = Logger('keycloak.ClientReg');
 
@@ -35,15 +37,19 @@ export enum ClientAuthenticator {
 }
 
 export class KeycloakClientRegistrationService {
-  private issuerUrl: string;
+  private registrationUrl: string;
   private accessToken: string;
   private kcAdminClient: any;
   private session: boolean = false;
 
-  constructor(issuerUrl: string, accessToken: string) {
-    this.issuerUrl = issuerUrl;
+  constructor(issuerUrl: string, registrationUrl: string, accessToken: string) {
+    this.registrationUrl =
+      registrationUrl == null
+        ? null
+        : registrationUrl.replace('/openid-connect', '/default');
     this.accessToken = accessToken;
     if (issuerUrl != null) {
+      // this will probably fail if the issuer is not Keycloak
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
       this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
@@ -56,24 +62,25 @@ export class KeycloakClientRegistrationService {
     clientSecret: string,
     certificate: string,
     jwksUrl: string,
+    clientMappers: ClientMapper[],
     enabled: boolean = false
   ): Promise<ClientRegResponse> {
     const body =
       authenticator === ClientAuthenticator.ClientSecret
-        ? Object.assign(clientTemplateClientSecret, {
+        ? Object.assign(JSON.parse(clientTemplateClientSecret), {
             enabled,
             clientId,
             secret: clientSecret,
           })
         : authenticator === ClientAuthenticator.ClientJWT
-        ? Object.assign(clientTemplateClientJwt, {
+        ? Object.assign(JSON.parse(clientTemplateClientJwt), {
             enabled,
             clientId,
             attributes: {
               'jwt.credential.public.key': certificate,
             },
           })
-        : Object.assign(clientTemplateClientJwt, {
+        : Object.assign(JSON.parse(clientTemplateClientJwt), {
             enabled,
             clientId,
             attributes: {
@@ -83,20 +90,28 @@ export class KeycloakClientRegistrationService {
             },
           });
 
-    logger.debug(
-      '[clientRegistration] CALLING %s',
-      `${this.issuerUrl}/clients-registrations/default`
-    );
+    clientMappers
+      .filter((mapper) => mapper.defaultValue !== '')
+      .forEach((mapper) => {
+        if (mapper.name == 'audience') {
+          logger.debug('[clientRegistration] adding mapper %s', mapper);
+          body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+        } else {
+          logger.warn(
+            '[clientRegistration] skipping unknown mapper %s',
+            mapper
+          );
+        }
+      });
+
+    logger.debug('[clientRegistration] CALLING %s', this.registrationUrl);
     logger.debug('[clientRegistration] BODY %j', body);
 
-    const response = await fetch(
-      `${this.issuerUrl}/clients-registrations/default`,
-      {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: headers(this.accessToken) as any,
-      }
-    )
+    const response = await fetch(this.registrationUrl, {
+      method: 'post',
+      body: JSON.stringify(body),
+      headers: headers(this.accessToken) as any,
+    })
       .then(checkStatus)
       .then((res) => res.json());
     logger.debug('[clientRegistration] RESULT %j', response);
@@ -118,20 +133,17 @@ export class KeycloakClientRegistrationService {
   ): Promise<ClientRegResponse> {
     logger.debug(
       '[updateClientRegistration] CALLING %s',
-      `${this.issuerUrl}/clients-registrations/default/${clientId}`
+      `${this.registrationUrl}/${clientId}`
     );
     logger.debug('[updateClientRegistration] BODY %j', vars);
 
     vars.clientId = clientId;
 
-    const response = await fetch(
-      `${this.issuerUrl}/clients-registrations/default/${clientId}`,
-      {
-        method: 'put',
-        body: JSON.stringify(vars),
-        headers: headers(this.accessToken) as any,
-      }
-    )
+    const response = await fetch(`${this.registrationUrl}/${clientId}`, {
+      method: 'put',
+      body: JSON.stringify(vars),
+      headers: headers(this.accessToken) as any,
+    })
       .then(checkStatus)
       .then((res) => res.json());
     logger.debug('[updateClientRegistration] RESULT %j', response);
@@ -143,7 +155,7 @@ export class KeycloakClientRegistrationService {
   }
 
   public async deleteClientRegistration(clientId: string): Promise<void> {
-    await fetch(`${this.issuerUrl}/clients-registrations/default/${clientId}`, {
+    await fetch(`${this.registrationUrl}/${clientId}`, {
       method: 'delete',
       headers: headers(this.accessToken) as any,
     }).then(checkStatus);

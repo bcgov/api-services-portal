@@ -208,6 +208,8 @@ jobs:
               value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
             EXTERNAL_URL:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
+            SSR_API_ROOT:
+              value: 'http://localhost:7999'    
             NEXT_PUBLIC_API_ROOT:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'    
             NEXT_PUBLIC_GRAFANA_URL:

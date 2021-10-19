@@ -48,7 +48,7 @@ const EnvironmentPage: React.FC<
     query: GET_ENVIRONMENT,
     variables: { id },
   });
-  const title = `${data.Environment?.product.name} Environment`;
+  const title = `${data.OwnedEnvironment?.product.name} Environment`;
   const breadcrumb = [
     { href: '/manager/products', text: 'Products' },
     {
@@ -65,8 +65,8 @@ const EnvironmentPage: React.FC<
         <PageHeader
           actions={
             <EnvironmentNav
-              id={data.Environment?.id}
-              data={data.Environment?.product?.environments}
+              id={data.OwnedEnvironment?.id}
+              data={data.OwnedEnvironment?.product?.environments}
             />
           }
           breadcrumb={breadcrumbs([
@@ -77,7 +77,7 @@ const EnvironmentPage: React.FC<
             <>
               Edit Environment{' '}
               <Badge ml={1} fontSize="1rem" colorScheme="blue" variant="solid">
-                {data.Environment?.name}
+                {data.OwnedEnvironment?.name}
               </Badge>
             </>
           }
@@ -87,13 +87,13 @@ const EnvironmentPage: React.FC<
           </>
         </PageHeader>
         <Box>
-          <EnvironmentConfig data={data.Environment} />
-          <EnvironmentPlugins data={data.Environment} />
+          <EnvironmentConfig data={data.OwnedEnvironment} />
+          <EnvironmentPlugins data={data.OwnedEnvironment} />
         </Box>
         <Box my={5}>
           {user?.namespace && (
             <ServicesManager
-              data={data.Environment?.services}
+              data={data.OwnedEnvironment?.services}
               environmentId={id}
               namespace={user.namespace}
             />

@@ -443,16 +443,27 @@ export const metadata = {
       'refId',
       'namespace',
       'actor',
+      'blob',
     ],
     transformations: {
       actor: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
-      blob: { name: 'connectOne', list: 'allBlobs', refKey: 'ref' },
+      blob: {
+        name: 'connectExclusiveOne',
+        list: 'Blob',
+        syncFirst: true,
+      },
     },
   },
   User: {
     query: 'allUsers',
     refKey: 'username',
     sync: ['name', 'username', 'email'],
+    transformations: {},
+  },
+  Blob: {
+    query: 'allBlobs',
+    refKey: 'ref',
+    sync: ['ref', 'blob'],
     transformations: {},
   },
 };

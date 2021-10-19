@@ -48,3 +48,4 @@ jobs:
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
           helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes
+          helm delete proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder
