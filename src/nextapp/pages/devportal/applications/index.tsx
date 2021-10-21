@@ -29,7 +29,7 @@ import Card from '@/components/card';
 import Table from '@/components/table';
 import ActionsMenu from '@/components/actions-menu';
 import { FaExclamationCircle } from 'react-icons/fa';
-import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
+import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
 import EmptyPane from '@/components/empty-pane';
 import ApplicationServices from '@/components/application-services';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -159,8 +159,13 @@ const ApplicationsPage: React.FC<
                       onClick={handleDetailsDisclosure(d.id)}
                     >
                       <Icon
-                        as={d.id === openId ? HiChevronUp : HiChevronDown}
+                        as={
+                          d.id === openId
+                            ? HiOutlineChevronUp
+                            : HiOutlineChevronDown
+                        }
                         boxSize={6}
+                        color="bc-component"
                       />
                     </IconButton>
                   </Td>

@@ -28,7 +28,7 @@ const Card: React.FC<CardProps> = ({
         <Flex
           px={9}
           pt={9}
-          pb={3}
+          pb={9}
           alignItems="center"
           justifyContent="space-between"
         >

@@ -284,7 +284,7 @@ const theme = extendTheme(
             display: 'none',
           },
           '& + div': {
-            mb: 4,
+            mb: 2,
             mt: -2,
             color: 'component',
           },
@@ -301,15 +301,15 @@ const theme = extendTheme(
       Modal: {
         baseStyle: {
           header: {
-            pt: 12,
-            px: 10,
+            pt: 6,
+            px: 8,
           },
           body: {
-            px: 10,
+            px: 8,
           },
           footer: {
-            px: 10,
-            pb: 8,
+            px: 8,
+            pb: 6,
             pt: 8,
           },
         },

@@ -25,7 +25,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   const router = useRouter();
 
   return (
-    <Box bg="bc-gray" py={10}>
+    <Box bg="bc-gray" pt={10} pb={8}>
       <Box as="header" display="flex" flexDirection="column" mb={2}>
         {breadcrumb && (
           <Box as="hgroup" mb={2}>
