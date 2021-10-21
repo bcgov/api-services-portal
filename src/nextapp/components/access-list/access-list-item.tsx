@@ -22,6 +22,7 @@ import {
   AccessRequest,
 } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
+import has from 'lodash/has';
 import { gql } from 'graphql-request';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
@@ -44,15 +45,20 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const revoke = useApiMutation(mutation);
+  const revokeAccess = useApiMutation(accessMutation);
+  const cancelRequest = useApiMutation(requestMutation);
   const toast = useToast();
   const handleRevoke = React.useCallback(
-    (id) => async (event: React.MouseEvent<HTMLButtonElement>) => {
+    (id, isRequest) => async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
 
       try {
-        await revoke.mutateAsync({ id });
+        if (isRequest) {
+          await cancelRequest.mutateAsync({ id });
+        } else {
+          await revokeAccess.mutateAsync({ id });
+        }
         client.invalidateQueries(queryKey);
         toast({
           title: 'Access Revoked',
@@ -66,7 +72,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
         });
       }
     },
-    [client, queryKey, revoke, toast]
+    [cancelRequest, client, queryKey, revokeAccess, toast]
   );
 
   return (
@@ -120,7 +126,10 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
                   variant="ghost"
                 />
                 <MenuList>
-                  <MenuItem color="bc-error" onClick={handleRevoke(d.id)}>
+                  <MenuItem
+                    color="bc-error"
+                    onClick={handleRevoke(d.id, has(d, 'isIssued'))}
+                  >
                     Cancel Request
                   </MenuItem>
                 </MenuList>
@@ -135,9 +144,17 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
 
 export default AccessListItem;
 
-const mutation = gql`
+const accessMutation = gql`
   mutation CancelAccess($id: ID!) {
     deleteServiceAccess(id: $id) {
+      id
+    }
+  }
+`;
+
+const requestMutation = gql`
+  mutation CancelAccessRequest($id: ID!) {
+    deleteAccessRequest(id: $id) {
       id
     }
   }

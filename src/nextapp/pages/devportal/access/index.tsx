@@ -12,7 +12,6 @@ import { dehydrate } from 'react-query/hydration';
 import AccessList from '@/components/access-list';
 import Card from '@/components/card';
 import NextLink from 'next/link';
-import { useAuth } from '@/shared/services/auth';
 
 const queryKey = 'allServiceAccesses';
 
@@ -37,7 +36,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiAccessPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
-  const { user } = useAuth();
   const { data } = useApi(queryKey, { query }, { suspense: false });
 
   return (
@@ -49,14 +47,6 @@ const ApiAccessPage: React.FC<
         <PageHeader title="My Access">
           List of the BC Government Service APIs that you have access to.
         </PageHeader>
-        {!user?.namespace && (
-          <Card>
-            <EmptyPane
-              message="Select a namespace above to view access requests"
-              title="No namespace selected"
-            />
-          </Card>
-        )}
 
         {data.myAccessRequests?.length > 0 && (
           <AccessList

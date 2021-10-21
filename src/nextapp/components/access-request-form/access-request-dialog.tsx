@@ -86,7 +86,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           toast({
             title: 'Request Failed',
             description:
-              err?.map((e) => e.message).join('\n') ??
+              err?.map((e: Error) => e.message).join('\n') ??
               'Unable to create request',
             status: 'error',
           });
@@ -99,15 +99,18 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     formRef.current?.requestSubmit();
   }, []);
   const handleDone = React.useCallback(() => {
-    toast({
-      status: 'warning',
-      title: 'Pending Approval',
-      description:
-        'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
-    });
     onClose();
     router?.push('/devportal/access');
-  }, [onClose, toast]);
+
+    if (tab === 1) {
+      toast({
+        status: 'warning',
+        title: 'Pending Approval',
+        description:
+          'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
+      });
+    }
+  }, [onClose, router, tab, toast]);
   const handleFormError = () => {
     setError(true);
   };

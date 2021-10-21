@@ -36,7 +36,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
       {!isEmpty(credentials) && (
         <Box my={8}>
           <ViewSecret credentials={credentials} />
-          <Alert status="warning" my={4}>
+          <Alert status="warning" mt={8} mb={5}>
             <AlertIcon />
             <AlertDescription>
               Please store your new API key somewhere safe because as soon as
@@ -49,11 +49,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
       {!credentialGenerator.isSuccess && (
         <>
           <Text>
-            By clicking{' '}
-            <Text as="strong" color="bc-blue">
-              Generate Secrets
-            </Text>{' '}
-            we will generate your credentials once.
+            By clicking Generate Secrets we will generate your credentials once.
           </Text>
           <Center minH="250px">
             <Box>

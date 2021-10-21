@@ -48,7 +48,7 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
             <AccessRequestCredentials id={id} />
           </ModalBody>
           <ModalFooter>
-            <Button>Done</Button>
+            <Button onClick={onClose}>Done</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
