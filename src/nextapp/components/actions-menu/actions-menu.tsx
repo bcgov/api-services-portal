@@ -10,7 +10,7 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ children, ...rest }) => {
   return (
     <Menu gutter={1} {...rest}>
       <MenuButton
-        px={4}
+        px={3}
         py={2}
         transition="all 0.2s"
         borderRadius={4}

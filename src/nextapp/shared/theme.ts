@@ -152,11 +152,12 @@ const buttonVariants = {
   ghost: {
     borderColor: 'transparent',
     _active: {
+      bgColor: '#F2F5F7',
       boxShadow: 'none',
       outlineColor: 'transparent',
     },
     _focus: {
-      bgColor: '#00336505',
+      bgColor: '#F2F5F7',
       boxShadow: 'none',
       outlineColor: 'transparent',
     },
