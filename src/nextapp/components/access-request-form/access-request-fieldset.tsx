@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Box,
   FormControl,
   FormControlProps,
   FormLabel,
@@ -34,7 +35,7 @@ const AccessRequestFieldset: React.FC<AccessRequestFieldsetProps> = ({
         <Icon as={icon} boxSize={5} color="bc-blue" mr={2} />
         {label}
       </FormLabel>
-      {children}
+      <Box pl={7}>{children}</Box>
     </FormControl>
   );
 };

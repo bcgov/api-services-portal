@@ -378,9 +378,17 @@ const theme = extendTheme(
           line: {
             tab: {
               color: 'bc-component',
+              _notFirst: {
+                ml: 6,
+              },
               _selected: {
                 fontWeight: 'bold',
                 color: 'bc-blue',
+                outline: 'none',
+                borderBottomWidth: 3,
+              },
+              _focus: {
+                boxShadow: 'none',
               },
             },
           },

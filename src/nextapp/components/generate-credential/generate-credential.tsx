@@ -48,7 +48,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
       )}
       {!credentialGenerator.isSuccess && (
         <>
-          <Text>
+          <Text pl={7}>
             By clicking Generate Secrets we will generate your credentials once.
           </Text>
           <Center minH="250px">
