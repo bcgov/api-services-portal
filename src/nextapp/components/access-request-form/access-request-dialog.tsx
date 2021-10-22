@@ -21,11 +21,12 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
+import { useRouter } from 'next/router';
+import { Mutation } from '@/shared/types/query.types';
 
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
 import AccessRequestFormLoading from './access-request-form-loading';
-import { useRouter } from 'next/router';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -42,6 +43,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
+  const isApproved = React.useRef<boolean>(false);
   const mutate = useApiMutation(mutation);
   const router = useRouter();
   const toast = useToast();
@@ -75,15 +77,18 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             additionalDetails: formData.get('additionalDetails'),
             acceptLegal: formData.has('acceptLegal') ? true : false,
           };
-          await mutate.mutateAsync(payload);
+          const response: Mutation = await mutate.mutateAsync(payload);
+          isApproved.current = response.createAccessRequest?.isApproved;
           client.invalidateQueries('allAccessRequests');
           setTab(1);
           toast({
+            isClosable: true,
             title: 'Request submitted',
             status: 'success',
           });
         } catch (err) {
           toast({
+            isClosable: true,
             title: 'Request Failed',
             description:
               err?.map((e: Error) => e.message).join('\n') ??
@@ -102,8 +107,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     onClose();
     router?.push('/devportal/access');
 
-    if (tab === 1) {
+    if (tab === 1 && isApproved.current) {
       toast({
+        isClosable: true,
         status: 'warning',
         title: 'Pending Approval',
         description:
@@ -221,6 +227,7 @@ const mutation = gql`
       }
     ) {
       id
+      isApproved
     }
   }
 `;
