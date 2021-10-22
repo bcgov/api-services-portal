@@ -1,8 +1,8 @@
 # API Services Portal
 
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bcgov/aps-portal?label=release&style=for-the-badge)
 [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00?style=for-the-badge)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-![Sonar Coverage](https://img.shields.io/sonar/coverage/aps-portal?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/bcgov/aps-portal?label=release&style=for-the-badge)
+[![Coverage](https://img.shields.io/sonar/coverage/aps-portal?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)](https://sonarcloud.io/summary/new_code?id=aps-portal)
 
 ## Introduction
 
