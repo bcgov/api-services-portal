@@ -11,3 +11,5 @@ export { Validate } from './validate-access-request';
 export { ValidateActiveEnvironment } from './validate-active-environment';
 
 export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
+
+export { getGwaProductEnvironment, getMyNamespaces } from './get-namespaces';

@@ -1,0 +1,32 @@
+# Report Generation Logic
+
+- get a list of namespaces with resource Ids that the report is based on
+- loop through namespaces:
+  - namespace access: get the uma2 policy list, for users, add to username list, for clients, add to client list; one line for each Subject/Scope combination; on output, use username and client cached metadata
+  - "consumer"
+    - user metadata: username, email, display_name
+    - client metadata: client_id, consumer_id, app_appId, app_label, app_description, app_owner_username, app_owner_email, app_owner_display_name
+  - authorization: for each credential_issuer:
+    - get the list of relevant Scopes and Roles
+    - query Keycloak to get all the Clients that have these Scopes and Roles
+    - merge that into a "Consumer" (if not in Kong, mark as "=== missing ===")
+  - authorization: for each acl:
+    - get the list of ACLs relevant to services and routes in the namespace
+    - merge that into a "Consumer" (if not in Keystone, mark as "=== missing ===")
+  - authorization: for each Service Access:
+    - merge into "Consumer"; if not existing record, it basically has no access; give warning
+  - authorization: for each Kong "Consumer":
+    - If a cached Consumer is in Kong, then make a note of it
+  - authorization: for each cached "Consumer":
+    - prod_name, env_name, credential_issuer (kong, abc), consumer, scope, role, acl (allow)
+    - separate row for each authorization
+    - if client is in keycloak, but not kong, then consumer will be "=== missing ==="
+  - gateway service metrics:
+    - prod_name, env_name, service_name, 30 Day Request Total
+  - gateway service controls:
+    - prod_name, env_name, service_name, route_name, route_info, plugin_name, info
+    - if a service is in a product environment but does not have a plugin protecting it, then flag
+  - consumer metrics:
+    - prod_name, env_name, service_name, 30 Day Request Total
+  - consumer controls:
+    - consumer, prod_name, env_name, service_name, route_name, plugin_name, info

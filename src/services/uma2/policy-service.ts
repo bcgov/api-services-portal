@@ -18,8 +18,8 @@ export interface Policy {
   name: string;
   description: string;
   scopes: string[];
-  users: string[];
-  clients: string[];
+  users?: string[];
+  clients?: string[];
 }
 
 const logger = Logger('uma2-policy');

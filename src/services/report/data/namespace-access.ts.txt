@@ -1,0 +1,44 @@
+import {
+  EnvironmentContext,
+  getEnvironmentContext,
+  getResourceSets,
+} from 'lists/extensions/Common';
+import { ReportContext, ReportNamespaceAccess } from '../types';
+import { strict as assert } from 'assert';
+import {
+  KeycloakPermissionTicketService,
+  PermissionTicket,
+  PermissionTicketQuery,
+} from '@/services/keycloak';
+import { Policy, PolicyQuery, UMAPolicyService } from '@/services/uma2';
+
+/*
+  Get the UMA Policies for a Resource and transform it into a ReportNamespaceAccess list
+ */
+export async function getNamespaceAccess(
+  context: ReportContext
+): Promise<ReportNamespaceAccess[]> {
+  const envCtx = await getEnvironmentContext(context, args.prodEnvId, access);
+  return null;
+}
+
+async function getUmaPoliciesForResource(
+  envCtx: EnvironmentContext,
+  resourceId: string
+): Promise<Policy[]> {
+  const resourceIds = await getResourceSets(envCtx);
+  assert.strictEqual(
+    resourceIds.filter((rid) => rid === resourceId).length,
+    1,
+    'Invalid Resource'
+  );
+
+  const policyApi = new UMAPolicyService(
+    envCtx.uma2.policy_endpoint,
+    envCtx.accessToken
+  );
+
+  return await policyApi.listPolicies({
+    resource: resourceId,
+  } as PolicyQuery);
+}

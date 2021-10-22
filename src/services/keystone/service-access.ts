@@ -60,7 +60,7 @@ export async function lookupCredentialReferenceByServiceAccess(
 export async function lookupServiceAccessesByNamespace(
   context: any,
   ns: string
-): Promise<ServiceAccess> {
+): Promise<ServiceAccess[]> {
   const result = await context.executeGraphQL({
     query: `query GetServiceAccessByNamespace($ns: String!) {
                     allServiceAccesses(where: {namespace: $ns}) {
@@ -72,7 +72,7 @@ export async function lookupServiceAccessesByNamespace(
                 }`,
     variables: { ns: ns },
   });
-  logger.debug('Query [lookupServiceAccessesByNamespace] result %j', result);
+  logger.debug('[lookupServiceAccessesByNamespace] result %j', result);
   return result.data.allServiceAccesses;
 }
 

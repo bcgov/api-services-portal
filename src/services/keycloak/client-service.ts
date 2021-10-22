@@ -25,6 +25,11 @@ export class KeycloakClientService {
 
   public async searchForClientId(clientId: string) {
     const lkup = await this.kcAdminClient.clients.find({ clientId: clientId });
+    logger.debug(
+      '[searchForClientId] (%s) RESULT %j',
+      clientId,
+      lkup.length == 0 ? null : lkup[0]
+    );
     return lkup.length == 0 ? null : lkup[0];
   }
 
@@ -36,6 +41,7 @@ export class KeycloakClientService {
   public async findByClientId(clientId: string) {
     const lkup = await this.kcAdminClient.clients.find({ clientId: clientId });
     assert.strictEqual(lkup.length, 1, 'Client ID not found ' + clientId);
+    //logger.debug('[findByClientId] (%s) RESULT %j', clientId, lkup[0]);
     return lkup[0];
   }
 

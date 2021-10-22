@@ -12,6 +12,10 @@ import {
   checkIssuerEnvironmentConfig,
   IssuerEnvironmentConfig,
 } from '../workflow/types';
+import {
+  getGwaProductEnvironment,
+  getMyNamespaces,
+} from '../workflow/get-namespaces';
 
 const logger = Logger('report.workbook');
 
@@ -77,6 +81,13 @@ export class WorkbookService {
         ns.attributes['perm-data-plane'],
       ]);
     });
+
+    const envCtx = await getGwaProductEnvironment(this.keystone);
+
+    const nsList = await getMyNamespaces(envCtx);
+
+    logger.debug('MyNamespaces %j', nsList);
+
     return workbook;
   }
 
