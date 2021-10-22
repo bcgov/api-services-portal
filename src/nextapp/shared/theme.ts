@@ -149,6 +149,18 @@ const buttonVariants = {
       bgColor: 'bc-gray',
     },
   },
+  ghost: {
+    borderColor: 'transparent',
+    _active: {
+      boxShadow: 'none',
+      outlineColor: 'transparent',
+    },
+    _focus: {
+      bgColor: '#00336505',
+      boxShadow: 'none',
+      outlineColor: 'transparent',
+    },
+  },
 };
 
 const theme = extendTheme(
