@@ -25,10 +25,17 @@ import ApplicationSelect from './application-select';
 
 interface AccessRequestFormProps {
   id: string;
+  onEnvironmentSelect: (value: Environment) => void;
 }
 
-const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
-  const { data } = useApi('accessRequestForm', { query, variables: { id } });
+const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
+  id,
+  onEnvironmentSelect,
+}) => {
+  const { data } = useApi('accessRequestForm', {
+    query,
+    variables: { id },
+  });
   const [environment, setEnvironment] = React.useState<string>('');
   const apiTitle = data.allDiscoverableProducts?.reduce((memo: string, d) => {
     if (!memo && d.id !== id) {
@@ -38,9 +45,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
   }, '');
   const dataset = data?.allDiscoverableProducts[0];
   const requestor = data?.allTemporaryIdentities[0];
-  const selectedEnvironment: Environment = dataset.environments.find(
-    (e) => e.id === environment
-  );
+  const selectedEnvironment: Environment = React.useMemo(() => {
+    return dataset.environments.find((e) => e.id === environment);
+  }, [dataset, environment]);
   const clientAuthenticator =
     selectedEnvironment?.credentialIssuer?.clientAuthenticator;
   const hasNotAgreedLegal = React.useMemo(() => {
@@ -62,6 +69,12 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({ id }) => {
 
     return true;
   }, [data.mySelf, selectedEnvironment]);
+
+  React.useEffect(() => {
+    if (selectedEnvironment) {
+      onEnvironmentSelect(selectedEnvironment);
+    }
+  }, [onEnvironmentSelect, selectedEnvironment]);
 
   return (
     <>
@@ -161,6 +174,7 @@ const query = gql`
       name
       environments {
         id
+        approval
         name
         active
         flow

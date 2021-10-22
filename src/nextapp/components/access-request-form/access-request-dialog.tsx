@@ -22,7 +22,7 @@ import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
-import { Mutation } from '@/shared/types/query.types';
+import { Environment } from '@/shared/types/query.types';
 
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
@@ -43,7 +43,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const isApproved = React.useRef<boolean>(false);
+  const isAutoApproved = React.useRef<boolean>(false);
   const mutate = useApiMutation(mutation);
   const router = useRouter();
   const toast = useToast();
@@ -77,8 +77,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             additionalDetails: formData.get('additionalDetails'),
             acceptLegal: formData.has('acceptLegal') ? true : false,
           };
-          const response: Mutation = await mutate.mutateAsync(payload);
-          isApproved.current = response.createAccessRequest?.isApproved;
+          await mutate.mutateAsync(payload);
           client.invalidateQueries('allAccessRequests');
           setTab(1);
           toast({
@@ -107,7 +106,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     onClose();
     router?.push('/devportal/access');
 
-    if (tab === 1 && isApproved.current) {
+    if (tab === 1 && isAutoApproved.current) {
       toast({
         isClosable: true,
         status: 'warning',
@@ -120,6 +119,12 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const handleFormError = () => {
     setError(true);
   };
+  const handleEnviornmentSelect = React.useCallback(
+    (environment: Environment) => {
+      isAutoApproved.current = environment.approval === false;
+    },
+    []
+  );
 
   return (
     <>
@@ -167,7 +172,10 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                   }
                 >
                   <React.Suspense fallback={<AccessRequestFormLoading />}>
-                    <AccessRequestForm id={id} />
+                    <AccessRequestForm
+                      id={id}
+                      onEnvironmentSelect={handleEnviornmentSelect}
+                    />
                   </React.Suspense>
                 </ErrorBoundary>
               </form>
@@ -227,7 +235,6 @@ const mutation = gql`
       }
     ) {
       id
-      isApproved
     }
   }
 `;
