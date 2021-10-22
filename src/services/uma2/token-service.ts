@@ -60,7 +60,11 @@ export class UMA2TokenService {
     })
       .then(checkStatus)
       .then((res) => res.json());
-    logger.debug('[getRequestingPartyToken] RESULT %j', response);
+    const masked = {
+      ...response,
+      ...{ access_token: '****', refresh_token: '****' },
+    };
+    logger.debug('[getRequestingPartyToken] RESULT %j', masked);
     return response['access_token'];
   }
 
