@@ -121,7 +121,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   };
   const handleEnviornmentSelect = React.useCallback(
     (environment: Environment) => {
-      isAutoApproved.current = environment.approval === false;
+      isAutoApproved.current = !environment.approval;
     },
     []
   );
