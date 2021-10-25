@@ -7,6 +7,7 @@ import {
   Uma2WellKnown,
 } from '../keycloak';
 import {
+  ResourceScope,
   ResourceSet,
   UMA2TokenService,
   UMAPermissionService,
@@ -44,7 +45,9 @@ export async function getGwaProductEnvironment(
   return await getEnvironmentContext(context, prodEnvId, {});
 }
 
-export async function getMyNamespaces(envCtx: EnvironmentContext) {
+export async function getMyNamespaces(
+  envCtx: EnvironmentContext
+): Promise<NamespaceSummary[]> {
   const resourceIds = await getNamespaceResourceSets(envCtx);
   const resourcesApi = new UMAResourceRegistrationService(
     envCtx.uma2.resource_registration_endpoint,
@@ -179,4 +182,11 @@ export interface EnvironmentContext {
   uma2: Uma2WellKnown;
   usesUma2: boolean;
   accessToken?: string;
+}
+
+export interface NamespaceSummary {
+  id: string;
+  name: string;
+  scopes: ResourceScope[];
+  prodEnvId: string;
 }

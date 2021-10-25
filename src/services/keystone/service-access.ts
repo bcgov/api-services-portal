@@ -57,6 +57,66 @@ export async function lookupCredentialReferenceByServiceAccess(
   return result.data.allServiceAccesses[0];
 }
 
+export async function lookupDetailedServiceAccessesByNS(
+  context: any,
+  ns: string
+): Promise<ServiceAccess[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetDetailedServiceAccessesByNS($ns: String!) {
+                    allServiceAccesses(where: {namespace: $ns}) {
+                        id
+                        consumerType
+                        productEnvironment {
+                            id
+                            name
+                            flow
+                            product {
+                              name
+                            }
+                            credentialIssuer {
+                              id
+                              name
+                            }
+                        }
+                        application {
+                          name
+                          appId
+                          owner {
+                            username
+                          }
+                        }
+                        consumer {
+                          id
+                          username
+                          customId
+                          extForeignKey
+                          updatedAt
+
+                          plugins {
+                            id
+                            name
+                            config
+                            service {
+                              id
+                              name
+                            }
+                            route {
+                              id
+                              name
+                              service {
+                                name
+                              }
+                            }
+                          }
+                        }
+                    }
+                }`,
+    variables: { ns },
+  });
+  logger.debug('Query [lookupDetailedServiceAccessesByNS] result %j', result);
+  return result.data.allServiceAccesses;
+}
+
 export async function lookupServiceAccessesByNamespace(
   context: any,
   ns: string

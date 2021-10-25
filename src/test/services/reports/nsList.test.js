@@ -1,8 +1,120 @@
 import fetch from 'node-fetch';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { generateExcelWorkbook } from '../../../services/report/output/xls-generator';
 
-import ExcelJS from 'exceljs';
+const fullJson = {
+  namespaces: [
+    {
+      name: 'ns_1',
+      perm_protected_ns: ['allow'],
+      perm_domains: ['*.api.gov.bc.ca', '*.apps.gov.bc.ca'],
+      perm_data_plane: ['dp-silver-kong-proxy'],
+    },
+  ],
+  ns_access: [
+    {
+      namespace: 'ns_1',
+      subject: 'jone@idir',
+      scope: 'Namespace.Manage',
+    },
+    {
+      namespace: 'ns_1',
+      subject: 'sa-sampler-ca853245-5d50c2a8908c',
+      scope: 'Namespace.Manage',
+    },
+  ],
+  gateway_metrics: [
+    {
+      namespace: 'ns_1',
+      prod_name: 'My API',
+      prod_env_name: 'prod',
+      service_name: 'a-service-for-moh-proto',
+      day_30_total: 102020,
+    },
+  ],
+  gateway_controls: [
+    {
+      namespace: 'ns_1',
+      prod_name: 'My API',
+      prod_env_name: 'prod',
+      service_name: 'a-service-for-moh-proto',
+      route_name: '',
+      plugin_name: 'acl',
+      plugin_info: '',
+    },
+  ],
+  consumer_access: [
+    {
+      namespace: 'ns_1',
+      prod_name: 'My API',
+      prod_env_name: 'prod',
+      prod_env_flow: 'kong-api-key-with-acl',
+      prod_env_issuer: '',
+      consumer_username: '535C4DF2-C9B0DCAC68DC45C9',
+      consumer_updated: '2021-09-28T05:23:32.291Z',
+      idp_client_id: '',
+      app_name: 'Mart 123',
+      app_id: 'C9B0DCAC68DC45C9',
+      app_owner: 'acope@idir',
+      perm_acl: '',
+      perm_scope: 'System.*',
+      perm_role: '',
+    },
+  ],
+  consumer_metrics: [
+    {
+      namespace: 'ns_1',
+      consumer_username: 'acope@idir',
+      prod_name: 'My API',
+      prod_env_name: 'prod',
+      service_name: 'a-service-for-moh-proto',
+      day_30_total: 102020,
+    },
+  ],
+  consumer_controls: [
+    {
+      namespace: 'ns_1',
+      consumer_username: '535C4DF2-C9B0DCAC68DC45C9',
+      prod_name: 'My API',
+      prod_env_name: 'prod',
+      service_name: 'a-service-for-moh-proto',
+      route_name: '',
+      plugin_name: 'rate-limiting',
+      plugin_info: 'local (10 req/min)',
+    },
+  ],
+};
+
+const short = {
+  namespaces: [
+    {
+      name: 'ns_1',
+      perm_protected_ns: ['allow'],
+      perm_domains: ['*.api.gov.bc.ca', '*.apps.gov.bc.ca'],
+      perm_data_plane: ['dp-silver-kong-proxy'],
+    },
+  ],
+  ns_access: [
+    {
+      namespace: 'ns_1',
+      subject: 'jone@idir',
+      scope: 'Namespace.Manage',
+    },
+    {
+      namespace: 'ns_1',
+      subject: 'sa-sampler-ca853245-5d50c2a8908c',
+      scope: 'Namespace.Manage',
+    },
+  ],
+  gateway_metrics: [
+    {
+      namespace: 'ns_1',
+      service_name: 'a-service-for-moh-proto',
+      day_30_total: 102020,
+    },
+  ],
+};
 
 describe('Generate Namespace Reports', function () {
   const server = setupServer(
@@ -26,65 +138,12 @@ describe('Generate Namespace Reports', function () {
 
   describe('output namespace list', function () {
     it('it should generate report', async function () {
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Namespaces', {
-        // properties: { tabColor: { argb: 'FFC0000' } },
-      });
-      workbook.addWorksheet('Gateway Services');
-      workbook.addWorksheet('Namespace Access');
-      workbook.addWorksheet('Service Accounts');
-      workbook.addWorksheet('Consumers');
-      workbook.addWorksheet('Consumer Controls');
-      // alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
-
-      sheet.columns = [
-        {
-          header: 'Id',
-          key: 'id',
-          width: 10,
-          style: { font: { bold: false, size: 12, name: 'Arial' } },
-        },
-        {
-          header: 'Name',
-          key: 'name',
-          width: 32,
-          style: { font: { bold: false, size: 12, name: 'Arial' } },
-        },
-        {
-          header: 'D.O.B.',
-          key: 'dob',
-          width: 15,
-          outlineLevel: 1,
-          style: {
-            font: { size: 12, name: 'Arial' },
-            numFmt: 'dd/mm/yyyy',
-          },
-        },
-      ];
-      sheet.getRow(1).font = { bold: true, size: 15, name: 'Arial' };
-      // sheet.getRow(2).font = {
-      //   name: 'Comic Sans MS',
-      //   family: 4,
-      //   size: 16,
-      //   underline: 'double',
-      //   bold: true,
-      // };
-
-      sheet.addRow([3, 'joe', new Date(1992, 1, 1)]);
-      sheet.addRow([3, 'joe2', new Date(1992, 1, 1)]);
-      sheet.addRow([3, 'joe3', new Date(1992, 1, 1)]);
-      sheet.addRow([3, 'joe4', new Date(1992, 1, 1)]);
-      sheet.addRow([3, 'joe', new Date(1992, 1, 1)]);
-      sheet.addRow({ id: 2, name: 'John Doe', dob: new Date(1970, 1, 1) });
-
-      // await sheet.commit();
-      // const rows = [
-      //   [5,'Bob',new Date()], // row by array
-      //   {id:6, name: 'Barbara', dob: new Date()}
-      // ];
-      // // add new rows and return them as array of row objects
-      // const newRows = worksheet.addRows(rows);
+      const workbook = generateExcelWorkbook(fullJson);
       //await workbook.xlsx.writeFile('test.xlsx');
+    });
+    it('it should generate report from short data', async function () {
+      const workbook = generateExcelWorkbook(short);
+      //await workbook.xlsx.writeFile('test2.xlsx');
     });
   });
 });

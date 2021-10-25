@@ -237,6 +237,24 @@ describe('KeystoneJS', function () {
       };
       const namespaces = await getMyNamespaces(envCtx);
       expect(namespaces.length).toBe(1);
+
+      const expected = [
+        {
+          id: '28f9bdbd-dbdb-4fe4-b999-3875b6aae17a',
+          name: 'acl-test',
+          scopes: [
+            { name: 'GatewayConfig.Publish' },
+            { name: 'Namespace.Manage' },
+            { name: 'Access.Manage' },
+            { name: 'Content.Publish' },
+            { name: 'Namespace.View' },
+            { name: 'CredentialIssuer.Admin' },
+          ],
+          prodEnvId: 'ENV001',
+        },
+      ];
+
+      expect(JSON.stringify(namespaces)).toBe(JSON.stringify(expected));
     });
   });
 });

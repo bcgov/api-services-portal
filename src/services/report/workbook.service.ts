@@ -1,23 +1,14 @@
 import { Keystone } from '@keystonejs/keystone';
 import ExcelJS from 'exceljs';
-
-import { lookupEnvironmentAndIssuerUsingWhereClause } from '../../services/keystone';
-
-import { getEnvironmentContext } from '../../lists/extensions/Common';
-import { KeycloakGroupService } from '../keycloak';
-import { Logger } from '../../logger';
-import { EnvironmentWhereInput } from '../keystone/types';
-import { mergeWhereClause } from '@keystonejs/utils';
-import {
-  checkIssuerEnvironmentConfig,
-  IssuerEnvironmentConfig,
-} from '../workflow/types';
-import {
-  getGwaProductEnvironment,
-  getMyNamespaces,
-} from '../workflow/get-namespaces';
-
-const logger = Logger('report.workbook');
+import { getGwaProductEnvironment } from '../workflow/get-namespaces';
+import { generateExcelWorkbook } from './output/xls-generator';
+import { getNamespaces } from './data/namespaces';
+import { getNamespaceAccess } from './data/ns-access';
+import { getGatewayMetrics } from './data/gateway-metrics';
+import { getGatewayControls } from './data/gateway-controls';
+import { getConsumerAccess } from './data/consumer-access';
+import { getConsumerMetrics } from './data/consumer-metrics';
+import { getConsumerControls } from './data/consumer-controls';
 
 export class WorkbookService {
   keystone: Keystone;
@@ -29,104 +20,39 @@ export class WorkbookService {
   }
 
   public async buildWorkbook(): Promise<ExcelJS.Workbook> {
-    const workbook = new ExcelJS.Workbook();
-
-    const sheet = workbook.addWorksheet('Namespaces', {});
-
-    sheet.columns = [
-      {
-        header: 'Name',
-        key: 'name',
-        width: 32,
-        style: { font: { bold: false, size: 12, name: 'Arial' } },
-      },
-      {
-        header: 'perm-protected-ns',
-        key: 'perm-protected-ns',
-        width: 25,
-        style: { font: { bold: false, size: 12, name: 'Arial' } },
-      },
-      {
-        header: 'perm-domains',
-        key: 'perm-domains',
-        width: 25,
-        style: { font: { bold: false, size: 12, name: 'Arial' } },
-      },
-      {
-        header: 'perm-data-plane',
-        key: 'perm-data-plane',
-        width: 25,
-        style: { font: { bold: false, size: 12, name: 'Arial' } },
-      },
-      {
-        header: 'Created',
-        key: 'created',
-        width: 15,
-        outlineLevel: 1,
-        style: {
-          font: { size: 12, name: 'Arial' },
-          numFmt: 'dd/mm/yyyy',
-        },
-      },
-    ];
-    sheet.getRow(1).font = { bold: true, size: 15, name: 'Arial' };
-
-    const data = await this.enrichData(this.namespaces);
-
-    data.forEach((ns) => {
-      sheet.addRow([
-        ns.name,
-        ns.attributes['perm-protected-fs'],
-        ns.attributes['perm-domains'],
-        ns.attributes['perm-data-plane'],
-      ]);
-    });
-
     const envCtx = await getGwaProductEnvironment(this.keystone);
 
-    const nsList = await getMyNamespaces(envCtx);
-
-    logger.debug('MyNamespaces %j', nsList);
-
-    return workbook;
-  }
-
-  /*
-  - namespace permissions (from kc group)
-  - namespace user access
-  - namespace consumer access
-  */
-  async enrichData(namespaces: string[]) {
-    const prodEnv = await lookupEnvironmentAndIssuerUsingWhereClause(
+    const namespaces = await getNamespaces(envCtx);
+    const ns_access = await getNamespaceAccess(envCtx, namespaces);
+    const gateway_metrics = await getGatewayMetrics(this.keystone, namespaces);
+    const gateway_controls = await getGatewayControls(
       this.keystone,
-      mergeWhereClause(
-        {
-          where: { appId: process.env.GWA_PROD_ENV_SLUG },
-        } as EnvironmentWhereInput,
-        {}
-      ).where
+      namespaces
     );
-    const issuerEnvConfig: IssuerEnvironmentConfig = checkIssuerEnvironmentConfig(
-      prodEnv.credentialIssuer,
-      prodEnv.name
+    const consumer_access = await getConsumerAccess(
+      envCtx,
+      this.keystone,
+      namespaces
     );
-
-    const kcGroupService = new KeycloakGroupService(issuerEnvConfig.issuerUrl);
-    await kcGroupService.login(
-      issuerEnvConfig.clientId,
-      issuerEnvConfig.clientSecret
+    const consumer_metrics = await getConsumerMetrics(
+      this.keystone,
+      namespaces
+    );
+    const consumer_controls = await getConsumerControls(
+      this.keystone,
+      namespaces
     );
 
-    const dataPromises = namespaces.map(async (ns) => {
-      const group = await kcGroupService.getGroup('ns', ns);
-      return {
-        name: ns,
-        attributes: group == null ? {} : group.attributes,
-      };
-    });
-    const data = await Promise.all(dataPromises);
+    const data = {
+      namespaces,
+      ns_access,
+      gateway_metrics,
+      gateway_controls,
+      consumer_access,
+      consumer_metrics,
+      consumer_controls,
+    };
 
-    logger.debug('Namespaces %j', data);
-    return data;
+    return generateExcelWorkbook(data);
   }
 }
