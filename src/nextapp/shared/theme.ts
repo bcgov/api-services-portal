@@ -1,4 +1,6 @@
+import { getServerSideProps } from '@/pages/devportal/access';
 import { extendTheme, withDefaultVariant } from '@chakra-ui/react';
+import { mode, transparentize } from '@chakra-ui/theme-tools';
 
 const colors = {
   'bc-blue': '#003366',
@@ -59,6 +61,54 @@ const _valid = {
   borderColor: 'bc-success',
 };
 
+const getAlertStatusColor = (color) => {
+  switch(color) {
+    case 'blue':
+      return 'bc-light-blue';
+    case 'green':
+      return 'bc-success';
+    case 'orange':
+      return 'bc-yellow';
+    case 'red':
+      return 'bc-error';
+    default:
+      return color;
+  }
+};
+
+const alertVariants = {
+  outline: ( props ) => {
+    const { colorScheme: c, theme: t } = props;
+    const color = getAlertStatusColor(c);
+    return { 
+      container: {
+        paddingStart: 3,
+        borderWidth: "1px",
+        borderColor: color,
+        bg: transparentize(color, 0.1)(t),
+      },
+      icon: {
+        color: color,
+      }
+    }
+  },
+  status: ( props ) => {
+    const { colorScheme: c} = props;
+    const color = getAlertStatusColor(c);
+    return { 
+      container: {
+        paddingStart: 3,
+        borderWidth: "1px",
+        borderColor: 'white',
+        bg: 'white',
+      },
+      icon: {
+        color: color,
+      }
+    }
+  }
+};
+
 const buttonVariants = {
   primary: {
     bg: 'bc-blue',
@@ -99,6 +149,7 @@ const buttonVariants = {
     },
   },
 };
+
 const theme = extendTheme(
   {
     colors,
@@ -123,6 +174,12 @@ const theme = extendTheme(
       },
     },
     components: {
+      Alert: {
+        variants: alertVariants,
+        defaultProps: {
+          variant: 'status',
+        },
+      },
       IconButton: {
         variants: buttonVariants,
       },
