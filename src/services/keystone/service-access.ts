@@ -62,12 +62,13 @@ export async function lookupDetailedServiceAccessesByNS(
   ns: string
 ): Promise<ServiceAccess[]> {
   const result = await context.executeGraphQL({
-    query: `query GetDetailedServiceAccessesByNS($ns: String!) {
-                    allServiceAccesses(where: {namespace: $ns}) {
+    query: `query GetDetailedServiceAccessesByNS($where: ServiceAccessWhereInput!) {
+                    allServiceAccesses(where: $where) {
                         id
                         consumerType
                         productEnvironment {
                             id
+                            appId
                             name
                             flow
                             product {
@@ -111,9 +112,19 @@ export async function lookupDetailedServiceAccessesByNS(
                         }
                     }
                 }`,
-    variables: { ns },
+    variables: {
+      where: {
+        OR: [
+          { namespace: ns },
+          { productEnvironment: { product: { namespace: ns } } },
+        ],
+      },
+    },
   });
-  logger.debug('Query [lookupDetailedServiceAccessesByNS] result %j', result);
+  logger.debug(
+    'Query [lookupDetailedServiceAccessesByNS] result row count %d',
+    result.data.allServiceAccesses.length
+  );
   return result.data.allServiceAccesses;
 }
 
@@ -132,7 +143,10 @@ export async function lookupServiceAccessesByNamespace(
                 }`,
     variables: { ns: ns },
   });
-  logger.debug('[lookupServiceAccessesByNamespace] result %j', result);
+  logger.debug(
+    '[lookupServiceAccessesByNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
   return result.data.allServiceAccesses;
 }
 

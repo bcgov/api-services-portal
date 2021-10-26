@@ -42,13 +42,14 @@ const getServiceMetricsQuery = gql`
 `;
 
 const getConsumerMetricsQuery = gql`
-  query GetConsumerMetrics($consumer: String!, $days: [String!]) {
+  query GetConsumerMetrics($ns: String!, $consumer: String!, $days: [String!]) {
     allMetrics(
       sortBy: day_ASC
       where: {
-        query: "konglog_service_consumer_daily"
+        query: "konglog_service_consumer_hourly"
         day_in: $days
-        metric: { name_contains: $consumer }
+        metric_contains: $consumer
+        service: { namespace: $ns }
       }
     ) {
       query
@@ -80,16 +81,20 @@ export async function getServiceMetrics(
 
 export async function getConsumerMetrics(
   context: any,
+  ns: string,
   consumer: string,
   days: string[]
 ): Promise<Metric[]> {
   const result = await context.executeGraphQL({
     query: getConsumerMetricsQuery,
-    variables: { consumer, days },
+    variables: { ns, consumer, days },
   });
+  if (result.errors) {
+    logger.error('[getConsumerMetrics] %j', result);
+  }
   logger.debug(
     '[getConsumerMetrics] result row count %d',
-    result.data.allMetrics.length
+    result.data?.allMetrics?.length
   );
   return result.data.allMetrics;
 }

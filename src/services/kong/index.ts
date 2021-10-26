@@ -6,3 +6,7 @@ export type {
   KongObjectID,
   DiffResult,
 } from './consumer-service';
+
+export { KongACLService } from './acl';
+
+export type { KongACL } from './acl';

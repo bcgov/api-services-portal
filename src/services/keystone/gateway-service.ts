@@ -55,6 +55,13 @@ export async function lookupServicesByNamespace(
                                     config
                                 }
                             }
+                            environment {
+                              name
+                              appId
+                              product {
+                                name
+                              }
+                            }
                     }
                 }`,
     variables: { ns: ns },

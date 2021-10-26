@@ -2,6 +2,7 @@ import { lookupServicesByNamespace } from '../../keystone/gateway-service';
 import { GatewayPlugin } from '../../keystone/types';
 import { Keystone } from '@keystonejs/keystone';
 import { ReportOfNamespaces } from './namespaces';
+import { ReportOfGatewayMetrics } from './gateway-metrics';
 
 interface ReportOfGatewayControls {
   namespace: string;
@@ -17,7 +18,8 @@ interface ReportOfGatewayControls {
  */
 export async function getGatewayControls(
   ksCtx: Keystone,
-  namespaces: ReportOfNamespaces[]
+  namespaces: ReportOfNamespaces[],
+  serviceLookup: Map<string, ReportOfGatewayMetrics>
 ): Promise<ReportOfGatewayControls[]> {
   const dataPromises = namespaces.map(
     async (ns): Promise<ReportOfGatewayControls[]> => {
@@ -26,12 +28,27 @@ export async function getGatewayControls(
       // services
       let data: ReportOfGatewayControls[] = [];
       services.forEach((svc) => {
-        svc?.plugins.forEach((plugin) => {
+        svc.plugins?.forEach((plugin) => {
           data.push({
             namespace: ns.name,
+            prod_name: serviceLookup.get(svc.name)?.prod_name,
+            prod_env_name: serviceLookup.get(svc.name)?.prod_env_name,
             service_name: svc.name,
             plugin_name: plugin.name,
             plugin_info: infoOn(plugin),
+          });
+        });
+        svc.routes?.forEach((route) => {
+          route.plugins?.forEach((plugin) => {
+            data.push({
+              namespace: ns.name,
+              prod_name: serviceLookup.get(svc.name)?.prod_name,
+              prod_env_name: serviceLookup.get(svc.name)?.prod_env_name,
+              service_name: svc.name,
+              route_name: route.name,
+              plugin_name: plugin.name,
+              plugin_info: infoOn(plugin),
+            });
           });
         });
       });
@@ -47,7 +64,7 @@ export function infoOn(plugin: GatewayPlugin): string {
   return Object.keys(plugin.config)
     .filter((key) => plugin.config[key as any])
     .map((key) => {
-      return `[${key}:${JSON.stringify(plugin.config[key as any])}]`;
+      return `${key}=${JSON.stringify(plugin.config[key as any])}`;
     })
     .join(' ; ');
 }

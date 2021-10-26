@@ -3,6 +3,7 @@ import { ReportOfNamespaces } from './namespaces';
 import { GatewayPlugin } from '../../keystone/types';
 import { infoOn } from './gateway-controls';
 import { lookupDetailedServiceAccessesByNS } from '../../keystone/service-access';
+import { ReportOfGatewayMetrics } from './gateway-metrics';
 
 interface ReportOfConsumerControls {
   namespace: string;
@@ -19,7 +20,8 @@ interface ReportOfConsumerControls {
  */
 export async function getConsumerControls(
   ksCtx: Keystone,
-  namespaces: ReportOfNamespaces[]
+  namespaces: ReportOfNamespaces[],
+  serviceLookup: Map<string, ReportOfGatewayMetrics>
 ): Promise<ReportOfConsumerControls[]> {
   const dataPromises = namespaces.map(
     async (ns): Promise<ReportOfConsumerControls[]> => {
@@ -34,6 +36,9 @@ export async function getConsumerControls(
             data.push({
               namespace: ns.name,
               consumer_username: access.consumer.username,
+              prod_name: serviceLookup.get(plugin.service.name)?.prod_name,
+              prod_env_name: serviceLookup.get(plugin.service.name)
+                ?.prod_env_name,
               service_name: plugin.service.name,
               plugin_name: plugin.name,
               plugin_info: infoOn(config),
@@ -42,8 +47,12 @@ export async function getConsumerControls(
             data.push({
               namespace: ns.name,
               consumer_username: access.consumer.username,
-              service_name: plugin.route.name,
-              route_name: plugin.route.service.name,
+              prod_name: serviceLookup.get(plugin.route.service.name)
+                ?.prod_name,
+              prod_env_name: serviceLookup.get(plugin.route.service.name)
+                ?.prod_env_name,
+              service_name: plugin.route.service.name,
+              route_name: plugin.route.name,
               plugin_name: plugin.name,
               plugin_info: infoOn(config),
             });

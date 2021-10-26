@@ -42,5 +42,5 @@ export async function getNamespaces(
     }
   );
 
-  return await Promise.all(dataPromises);
+  return Promise.all(dataPromises);
 }

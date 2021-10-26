@@ -55,8 +55,18 @@ export class KeycloakClientService {
     const roles = await this.kcAdminClient.clients.listRoles({
       id,
     });
-    logger.debug('[listRoles] (%d) RESULT %j', id, roles);
+    logger.debug('[listRoles] (%s) RESULT %j', id, roles);
     return roles;
+  }
+
+  public async findUsersWithRole(id: string, roleName: string) {
+    logger.debug('[findUsersWithRole] (%s) FIND %s', id, roleName);
+    const users = await this.kcAdminClient.clients.findUsersWithRole({
+      id,
+      roleName,
+    });
+    logger.debug('[findUsersWithRole] (%s) RESULT %j', id, users);
+    return users;
   }
 
   public async listDefaultScopes(id: string) {

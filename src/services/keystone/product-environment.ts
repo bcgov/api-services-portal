@@ -1,5 +1,10 @@
 import { Logger } from '../../logger';
-import { Environment, EnvironmentWhereInput, GatewayService } from './types';
+import {
+  CredentialIssuer,
+  Environment,
+  EnvironmentWhereInput,
+  GatewayService,
+} from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.prod-env');
@@ -108,7 +113,7 @@ export async function lookupProductEnvironmentServicesBySlug(
 export async function lookupEnvironmentAndIssuerUsingWhereClause(
   context: any,
   where: EnvironmentWhereInput
-) {
+): Promise<Environment> {
   logger.debug('[lookupEnvironmentAndIssuerUsingWhereClause] WHERE %j', where);
   const result = await context.executeGraphQL({
     query: `query GetCredentialIssuerByWhereClause($where: EnvironmentWhereInput!) {
@@ -143,6 +148,47 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
     'ProductEnvironmentNotFound'
   );
   return result.data.allEnvironments[0];
+}
+
+export async function lookupEnvironmentsByNS(
+  context: any,
+  ns: string
+): Promise<Environment[]> {
+  logger.debug('[lookupEnvironmentsByNS] WHERE ns=%s', ns);
+  const result = await context.executeGraphQL({
+    query: `query GetEnvironmentsByNamespace($ns: String!) {
+                    allEnvironments(where: { product: { namespace: $ns } }) {
+                        id
+                        appId
+                        name
+                        flow
+                        approval
+                        product {
+                          name
+                        }
+                        legal {
+                          reference
+                        }
+                        credentialIssuer {
+                          id
+                          name
+                          flow
+                          mode
+                          availableScopes
+                          clientRoles
+                          resourceType
+                          resourceAccessScope
+                          environmentDetails
+                        }
+                    }
+                }`,
+    variables: { ns },
+  });
+  logger.debug(
+    '[lookupEnvironmentsByNS] result count %d',
+    result.data.allEnvironments.length
+  );
+  return result.data.allEnvironments;
 }
 
 export async function lookupEnvironmentAndIssuerById(context: any, id: string) {

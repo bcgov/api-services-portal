@@ -146,6 +146,33 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   return allowedResources.map((res) => res.rsid);
 }
 
+export async function getResourceServerContext(
+  prodEnv: Environment
+): Promise<ResourceServerContext> {
+  const issuerEnvConfig: IssuerEnvironmentConfig = checkIssuerEnvironmentConfig(
+    prodEnv.credentialIssuer,
+    prodEnv.name
+  );
+
+  if (issuerEnvConfig == null) {
+    return null;
+  }
+
+  const usesUma2 = isAuthzUsingUma2(prodEnv);
+  const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  const uma2 = usesUma2
+    ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
+    : null;
+
+  return {
+    prodEnv,
+    issuerEnvConfig,
+    openid,
+    usesUma2,
+    uma2,
+  };
+}
+
 async function getProductEnvironmentIdBySlug(context: any, slug: string) {
   const noauthContext = context.createContext({
     skipAccessControl: true,
@@ -164,9 +191,7 @@ function isUserBasedResourceOwners(envCtx: EnvironmentContext): Boolean {
   );
 }
 
-function isAuthzUsingUma2(prodEnv: {
-  credentialIssuer: { resourceType: string };
-}): boolean {
+function isAuthzUsingUma2(prodEnv: Environment): boolean {
   return (
     (prodEnv.credentialIssuer.resourceType == null ||
       prodEnv.credentialIssuer.resourceType === '') == false
@@ -184,6 +209,14 @@ export interface EnvironmentContext {
   accessToken?: string;
 }
 
+export interface ResourceServerContext {
+  prodEnv: Environment;
+  issuerEnvConfig: IssuerEnvironmentConfig;
+  openid: OpenidWellKnown;
+  uma2: Uma2WellKnown;
+  usesUma2: boolean;
+  accessToken?: string;
+}
 export interface NamespaceSummary {
   id: string;
   name: string;
