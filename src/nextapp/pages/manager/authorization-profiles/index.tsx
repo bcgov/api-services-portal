@@ -1,5 +1,6 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
+import AuthorizationProfileForm from '@/components/authorization-profile-form';
 import {
   Box,
   Button,
@@ -12,12 +13,22 @@ import {
   Tr,
   Th,
   Td,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody,
+  Portal,
+  Link,
+  PopoverArrow,
+  Text,
+  Avatar,
+  Icon,
 } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
+import { MdModeEditOutline } from 'react-icons/md';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
@@ -66,19 +77,19 @@ const AuthorizationProfiles: React.FC<
       <Container maxW="6xl">
         <PageHeader
           actions={
-            <NextLink passHref href="/manager/authorization-profiles/new">
-              <Button as="a" variant="primary" data-testid="create-new-auth-profile-btn">
-                New Profile
+            <AuthorizationProfileForm>
+              <Button as="a" variant="primary">
+                Create New Profile
               </Button>
-            </NextLink>
+            </AuthorizationProfileForm>
           }
           breadcrumb={breadcrumbs}
           title="Authorization Profiles"
         >
-          <p>
-            <strong>Authorization Profiles</strong> describe the type of
-            authorization that protects your APIs.
-          </p>
+          <Text>
+            Authorization Profiles describe the type of authorization that
+            protects your APIs.
+          </Text>
         </PageHeader>
         <Box bgColor="white" mb={4}>
           <Box
@@ -97,7 +108,7 @@ const AuthorizationProfiles: React.FC<
                 <Th>Flow</Th>
                 <Th>Mode</Th>
                 <Th>Administrator</Th>
-                <Th>Action</Th>
+                <Th />
               </Tr>
             </Thead>
             <Tbody>
@@ -106,16 +117,69 @@ const AuthorizationProfiles: React.FC<
                   <Td>{c.name}</Td>
                   <Td>{c.flow}</Td>
                   <Td>{c.mode}</Td>
-                  <Td>{c.owner?.username}</Td>
                   <Td>
-                    <NextLink
-                      passHref
-                      href={`/manager/authorization-profiles/${c.id}`}
-                    >
-                      <Button as="a" variant="secondary" size="sm">
-                        View
+                    <Popover isLazy trigger="hover">
+                      <PopoverTrigger>
+                        <Link color="bc-blue" fontWeight="bold">
+                          {c.owner?.username}
+                        </Link>
+                      </PopoverTrigger>
+                      <Portal>
+                        <PopoverContent
+                          border="1px solid"
+                          borderColor="bc-component"
+                        >
+                          <PopoverArrow
+                            borderTop="1px solid"
+                            borderLeft="1px solid"
+                            borderColor="bc-component"
+                          />
+                          <PopoverBody
+                            d="grid"
+                            gridTemplateColumns="auto 1fr"
+                            gridGap={2}
+                            p={4}
+                          >
+                            <Avatar name={c.owner?.name} />
+                            <Box as="dl" color="bc-component">
+                              <Text
+                                as="dt"
+                                float="left"
+                                fontWeight="bold"
+                                mr={1}
+                              >
+                                Username:
+                              </Text>
+                              <Text as="dd" d="inline">
+                                {c.owner?.name}
+                              </Text>
+                              <Text
+                                as="dt"
+                                float="left"
+                                fontWeight="bold"
+                                mr={1}
+                              >
+                                Email:
+                              </Text>
+                              <Text as="dd" d="inline">
+                                {c.owner?.email}
+                              </Text>
+                            </Box>
+                          </PopoverBody>
+                        </PopoverContent>
+                      </Portal>
+                    </Popover>
+                  </Td>
+                  <Td>
+                    <AuthorizationProfileForm id={c.id}>
+                      <Button
+                        leftIcon={<Icon as={MdModeEditOutline} />}
+                        size="sm"
+                        variant="flat"
+                      >
+                        Edit
                       </Button>
-                    </NextLink>
+                    </AuthorizationProfileForm>
                   </Td>
                 </Tr>
               ))}
@@ -139,6 +203,7 @@ const query = gql`
       owner {
         name
         username
+        email
       }
       environments {
         name
