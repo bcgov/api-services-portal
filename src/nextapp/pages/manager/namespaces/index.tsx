@@ -255,7 +255,7 @@ const NamespacesPage: React.FC = () => {
                 destructive
                 body="This action cannot be undone"
                 confirmButtonText="Yes, Delete"
-                title="Delete moh-proto Namespace?"
+                title={`Delete ${user.namespace} Namespace?`}
                 onConfirm={handleDelete}
               >
                 <Flex
