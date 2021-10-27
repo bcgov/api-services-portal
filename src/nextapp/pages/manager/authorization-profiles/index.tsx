@@ -171,7 +171,7 @@ const AuthorizationProfiles: React.FC<
                     </Popover>
                   </Td>
                   <Td>
-                    <AuthorizationProfileForm id={c.id}>
+                    <AuthorizationProfileForm id={c.id} data={c}>
                       <Button
                         leftIcon={<Icon as={MdModeEditOutline} />}
                         size="sm"

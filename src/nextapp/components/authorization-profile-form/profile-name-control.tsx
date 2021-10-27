@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Box,
   Button,
+  ButtonGroup,
   Editable,
   EditableInput,
   EditablePreview,
@@ -29,9 +30,14 @@ const ProfileNameControl: React.FC<ProfileNameControlProps> = ({
     return (
       <Box ml={2}>
         {isEditing && (
-          <Button size="sm" {...getSubmitButtonProps()}>
-            Save
-          </Button>
+          <ButtonGroup>
+            <Button variant="secondary" size="sm" {...getCancelButtonProps()}>
+              Cancel
+            </Button>
+            <Button size="sm" {...getSubmitButtonProps()}>
+              Done
+            </Button>
+          </ButtonGroup>
         )}
         {!isEditing && (
           <Button
@@ -51,7 +57,7 @@ const ProfileNameControl: React.FC<ProfileNameControlProps> = ({
     <Editable
       d="flex"
       alignItems="center"
-      defaultValue="MoH Resource Server"
+      defaultValue={name}
       isPreviewFocusable={false}
     >
       <EditablePreview />
