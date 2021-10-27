@@ -246,40 +246,44 @@ const NamespacesPage: React.FC = () => {
                     </NextLink>
                   ))}
               </VStack>
-              <Flex as="header" align="center" mb={4}>
-                <Heading size="sm" fontWeight="normal">
-                  Settings
-                </Heading>
-              </Flex>
-              <ConfirmationDialog
-                destructive
-                body="This action cannot be undone"
-                confirmButtonText="Yes, Delete"
-                title={`Delete ${user.namespace} Namespace?`}
-                onConfirm={handleDelete}
-              >
-                <Flex
-                  flex={1}
-                  bgColor="white"
-                  p={5}
-                  py={3}
-                  align="center"
-                  color="bc-error"
-                  border="1px solid #e1e1e5"
-                  borderRadius={4}
-                  data-testid="ns-action-link-delete"
-                  justify="space-between"
-                  _hover={{
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  <Flex align="center">
-                    <Icon as={FaTrash} boxSize={5} mr={3} />
-                    <Text>Delete Namespace</Text>
+              {user.roles.includes('api-owner') && (
+                <>
+                  <Flex as="header" align="center" mb={4}>
+                    <Heading size="sm" fontWeight="normal">
+                      Settings
+                    </Heading>
                   </Flex>
-                </Flex>
-              </ConfirmationDialog>
+                  <ConfirmationDialog
+                    destructive
+                    body="This action cannot be undone"
+                    confirmButtonText="Yes, Delete"
+                    title={`Delete ${user.namespace} Namespace?`}
+                    onConfirm={handleDelete}
+                  >
+                    <Flex
+                      flex={1}
+                      bgColor="white"
+                      p={5}
+                      py={3}
+                      align="center"
+                      color="bc-error"
+                      border="1px solid #e1e1e5"
+                      borderRadius={4}
+                      data-testid="ns-action-link-delete"
+                      justify="space-between"
+                      _hover={{
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      <Flex align="center">
+                        <Icon as={FaTrash} boxSize={5} mr={3} />
+                        <Text>Delete Namespace</Text>
+                      </Flex>
+                    </Flex>
+                  </ConfirmationDialog>
+                </>
+              )}
             </GridItem>
           </Grid>
         )}
