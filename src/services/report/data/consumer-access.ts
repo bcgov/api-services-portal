@@ -7,12 +7,11 @@ import {
   getResourceServerContext,
   ResourceServerContext,
 } from '../../workflow/get-namespaces';
-import { KongACLService } from '../../kong';
+import { KongACLService, KongConsumers } from '../../kong';
 import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { lookupEnvironmentsByNS } from '../../keystone/product-environment';
 import { KeycloakClientService, KeycloakUserService } from '../../keycloak';
 import { logger } from '../../../logger';
-import { off } from 'superagent';
 
 export interface ReportOfConsumerAccess {
   namespace: string;
@@ -40,13 +39,16 @@ export async function getConsumerAccess(
   namespaces: ReportOfNamespaces[],
   serviceLookup: Map<string, ReportOfGatewayMetrics>
 ): Promise<ReportOfConsumerAccess[]> {
+  const kongConsumerSvc = new KongConsumers(process.env.KONG_URL);
+  const allConsumers = await kongConsumerSvc.getAllConsumers();
+
+  const kongAclSvc = new KongACLService(process.env.KONG_URL);
+  const kongAcls = await kongAclSvc.getAllAcls();
+
   const dataPromises = namespaces.map(
     async (ns): Promise<ReportOfConsumerAccess[]> => {
       const repeatChecker: any = {};
       let data: ReportOfConsumerAccess[] = [];
-
-      const kongAclSvc = new KongACLService(process.env.KONG_URL);
-      const kongAcls = await kongAclSvc.getAllAcls();
 
       // accesses will be used to suppliment
       const accesses = await lookupDetailedServiceAccessesByNS(ksCtx, ns.name);
@@ -143,12 +145,9 @@ export async function getConsumerAccess(
                       perm_role: '',
                     });
                   });
-                // clients : listRoles, findUsersWithRole, getServiceAccountUser
-                // client details have the "defaultClientScopes"
-                // Only include clients that have either "availableScopes" or "clientRoles"
-                // If so, add row to "data"
 
-                logger.warn('--- INTERESTING');
+                // ROLES
+                //
                 const resClient = await kcClient.findByClientId(
                   resSvcCtx.issuerEnvConfig.clientId
                 );
@@ -217,34 +216,48 @@ export async function getConsumerAccess(
           } else {
             // evaluate Kong ACL matches
             // perm_acl: get from Kong's ACL
-            // for (const clientId of Object.keys(consumerLookup)) {
-            //   kongAcls
-            //     .filter((acl) => acl.consumer.id === clientId)
-            //     .forEach((acl) => {
-            //       // any acl for this consumer, add a record
-            //     });
-            // }
-            // const access =
-            //   client.clientId in consumerLookup
-            //     ? consumerLookup[client.clientId]
-            //     : {};
-            // data.push({
-            //   namespace: ns.name,
-            //   prod_name: env.product.name,
-            //   prod_env_name: env.name,
-            //   prod_env_app_id: env.appId,
-            //   prod_env_flow: env.flow,
-            //   prod_env_issuer: env.credentialIssuer?.name,
-            //   consumer_username: client.clientId,
-            //   consumer_updated: access.consumer?.updatedAt,
-            //   idp_client_id: client.id,
-            //   app_name: access.application?.name,
-            //   app_id: access.application?.appId,
-            //   app_owner: access.application?.owner?.username,
-            //   perm_acl: '',
-            //   perm_scope: client.defaultClientScopes.join(' '),
-            //   perm_role: '',
-            // });
+            kongAcls.forEach((acl) => {
+              const consumerFiltered = allConsumers.filter(
+                (cons) => cons.id == acl.consumer.id
+              );
+              if (consumerFiltered.length != 1) {
+                logger.warn(
+                  '[acl] Consumer was not found!  Very unusual %s',
+                  acl.consumer.id
+                );
+                return;
+              }
+              const username = consumerFiltered[0].username;
+
+              if (env.appId === acl.group && username in consumerLookup) {
+                const access: ServiceAccess = consumerLookup[username];
+
+                repeatChecker[username] = 'processed';
+
+                data.push({
+                  namespace: ns.name,
+                  prod_name: env.product.name,
+                  prod_env_name: env.name,
+                  prod_env_app_id: env.appId,
+                  prod_env_flow: env.flow,
+                  prod_env_issuer: env.credentialIssuer?.name,
+                  consumer_username: access.consumer?.username,
+                  consumer_updated: access.consumer?.updatedAt,
+                  idp_client_id: '',
+                  app_name: access.application?.name,
+                  app_id: access.application?.appId,
+                  app_owner: access.application?.owner?.username,
+                  perm_acl: 'allow',
+                  perm_scope: '',
+                  perm_role: '',
+                });
+              } else {
+                logger.warn(
+                  '[acl] %s ignored - not applicable for this environment or missing from Service Access',
+                  acl.group
+                );
+              }
+            });
           }
         }
       );

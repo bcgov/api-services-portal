@@ -49,6 +49,7 @@ const fullJson = {
       namespace: 'ns_1',
       prod_name: 'My API',
       prod_env_name: 'prod',
+      prod_env_app_id: 'REWUIO21321AS',
       prod_env_flow: 'kong-api-key-with-acl',
       prod_env_issuer: '',
       consumer_username: '535C4DF2-C9B0DCAC68DC45C9',
