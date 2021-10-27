@@ -266,8 +266,8 @@ async function fillClientRoleBasedAccess(
     resSvcCtx.issuerEnvConfig.clientId
   );
   const roles = await kcClient.listRoles(resClient.id);
-  for (const role of roles.filter((role: any) =>
-    applicableRoles.includes(role.name)
+  for (const role of roles.filter((r: any) =>
+    applicableRoles.includes(r.name)
   )) {
     const users = await kcClient.findUsersWithRole(resClient.id, role.name);
     // find the Clients that have these user IDs

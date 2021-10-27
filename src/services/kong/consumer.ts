@@ -2,10 +2,6 @@ import { checkStatus } from '../checkStatus';
 import fetch from 'node-fetch';
 import { Logger } from '../../logger';
 
-import { v4 as uuidv4 } from 'uuid';
-import { strict as assert } from 'assert';
-import { GatewayConsumer } from '../keystone/types';
-
 const logger = Logger('kong.consumer');
 
 export interface KongConsumer {

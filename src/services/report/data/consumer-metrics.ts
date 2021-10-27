@@ -1,6 +1,5 @@
 import { Keystone } from '@keystonejs/keystone';
 import { ReportOfNamespaces } from './namespaces';
-import { lookupDetailedServiceAccessesByNS } from '../../keystone/service-access';
 import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { dateRange } from '../../utils';
 import { getConsumerMetrics, calculateStats } from '../../keystone';
