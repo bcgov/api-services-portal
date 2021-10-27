@@ -117,7 +117,7 @@ services:
     networks:
       - aps-net
   kong-db:
-    image: postgres:latest
+    image: postgres:12.8
     container_name: kong-db
     environment:
       POSTGRES_USER: postgres
@@ -185,7 +185,7 @@ services:
         aliases:
           - redis.localtest.me
   gwa-gateway-api:
-    image: gateway-api:e2e-testing
+    image: ghcr.io/bcgov/gwa-api/gwa-gateway-api:dev
     container_name: gwa-gateway-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:

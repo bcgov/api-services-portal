@@ -35,7 +35,8 @@
     "test:node": "node_modules/.bin/mocha",
     "generate": "graphql-codegen",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "chromatic": "npx chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "@bcgov/bc-sans": "^1.0.1",
@@ -147,6 +148,7 @@
     "casual-browserify": "^1.5.19-2",
     "chai": "^4.1.2",
     "chai-http": "^4.2.0",
+    "chromatic": "^5.9.2",
     "eslint": "^7.18.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-jest": "^24.1.3",

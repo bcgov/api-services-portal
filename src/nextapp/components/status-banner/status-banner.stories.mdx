@@ -1,0 +1,75 @@
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import StatusBanner from './status-banner';
+
+<Meta
+  title="APS/Status Banner"
+  parameters={{
+    layout: 'centered',
+    backgroundColor: '#e1e1e1',
+  }}
+/>
+
+# Status Banner
+
+The status banner component relays status-related information to the user.
+
+Each story showcases one of the four available statuses (`info` (default), `success`, `pending`, and `error`),
+as well as two custom variants (`status` (default), and `outline`).
+
+```javascript
+import StatusBanner from '@src/components/StatusBanner';
+
+const MyComponent = () => (
+  <StatusBanner title="Title here" status="success" variant="outline">
+    Status content here.
+  </StatusBanner>
+);
+```
+
+## Default
+
+Default status banner.
+
+<Canvas>
+  <Story name="Default">
+    <StatusBanner title="Default Title">
+      Default description.
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Success
+
+Include `status="success"` prop.
+
+<Canvas>
+  <Story name="Success Status">
+    <StatusBanner status="success" title="Request Approved">
+      Your request has been approved.
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Warning, Outline
+
+Include `status="warning"` and `variant="outline"` props.
+
+<Canvas>
+  <Story name="Warning, Outline">
+    <StatusBanner status="warning" variant="outline" title="Warning, Outline Title">
+      Warning, Outline Description
+    </StatusBanner>
+  </Story>
+</Canvas>
+
+## Error, Outline, No Title
+
+Include `status="error"` prop and omit `title` prop.
+
+<Canvas>
+  <Story name="Error, No Title, Outline">
+    <StatusBanner status="error" variant="outline">
+      Oops! Something went wrong.
+    </StatusBanner>
+  </Story>
+</Canvas>
