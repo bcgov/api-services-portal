@@ -1,10 +1,5 @@
-import getSubjectToken from 'auth/auth-token';
 import { PolicyQuery, UMAPolicyService } from '../../uma2';
-import { getMyNamespaces } from '../../workflow';
-import {
-  EnvironmentContext,
-  NamespaceSummary,
-} from '../../workflow/get-namespaces';
+import { EnvironmentContext } from '../../workflow/get-namespaces';
 import { ReportOfNamespaces } from './namespaces';
 
 interface ReportOfNamespaceAccess {
@@ -14,7 +9,6 @@ interface ReportOfNamespaceAccess {
 }
 
 /*
-  Get Namespace Access
  */
 export async function getNamespaceAccess(
   envCtx: EnvironmentContext,
@@ -34,26 +28,20 @@ export async function getNamespaceAccess(
       // policies will either have users or clients
       let data: ReportOfNamespaceAccess[] = [];
       policies.forEach((policy) => {
+        function doScopes(subject: string) {
+          policy.scopes.forEach((scope) => {
+            data.push({
+              namespace: ns.name,
+              subject,
+              scope,
+            });
+          });
+        }
+
         if (policy.clients) {
-          policy.clients.forEach((subject) => {
-            policy.scopes.forEach((scope) => {
-              data.push({
-                namespace: ns.name,
-                subject,
-                scope,
-              });
-            });
-          });
+          policy.clients.forEach(doScopes);
         } else {
-          policy.users.forEach((subject) => {
-            policy.scopes.forEach((scope) => {
-              data.push({
-                namespace: ns.name,
-                subject,
-                scope,
-              });
-            });
-          });
+          policy.users.forEach(doScopes);
         }
       });
       return data;

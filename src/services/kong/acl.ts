@@ -2,9 +2,6 @@ import { checkStatus } from '../checkStatus';
 import fetch from 'node-fetch';
 import { Logger } from '../../logger';
 
-import { v4 as uuidv4 } from 'uuid';
-import { strict as assert } from 'assert';
-
 const logger = Logger('kong.acl');
 
 export interface KongACL {

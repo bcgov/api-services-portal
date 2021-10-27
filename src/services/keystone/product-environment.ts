@@ -1,10 +1,5 @@
 import { Logger } from '../../logger';
-import {
-  CredentialIssuer,
-  Environment,
-  EnvironmentWhereInput,
-  GatewayService,
-} from './types';
+import { Environment, EnvironmentWhereInput, GatewayService } from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.prod-env');
