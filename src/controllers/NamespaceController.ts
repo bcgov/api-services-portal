@@ -48,7 +48,10 @@ export class NamespaceController extends Controller {
   public async report(@Request() req: any): Promise<any> {
     const nsList = await this.list(req);
 
-    const workbookService = new WorkbookService(this.keystone.sudo(), nsList);
+    const workbookService = new WorkbookService(
+      this.keystone.createContext(req),
+      nsList
+    );
     const workbook = await workbookService.buildWorkbook();
     const buffer = await workbook.xlsx.writeBuffer();
 
