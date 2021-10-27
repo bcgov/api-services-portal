@@ -414,7 +414,7 @@ function findAllRelevantAclGroups(services: GatewayService[]) {
 
   function evalPlugin(_plugin: GatewayPlugin) {
     logger.info('Parsing %j', _plugin);
-    const config = _plugin.config ? JSON.parse(_plugin.config) : {};
+    const config = _plugin.config ? JSON.parse(_plugin.config) : { allow: [] };
     allGroups.push(...config.allow);
   }
 
