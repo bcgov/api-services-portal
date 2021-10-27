@@ -37,13 +37,3 @@ export function generateExcelWorkbook(data: any) {
 
   return workbook;
 }
-
-// alignment = { vertical: 'top', horizontal: 'left', wrapText: true }
-
-// sheet.getRow(2).font = {
-//   name: 'Comic Sans MS',
-//   family: 4,
-//   size: 16,
-//   underline: 'double',
-//   bold: true,
-// };

@@ -2,16 +2,16 @@ import { Keystone } from '@keystonejs/keystone';
 import ExcelJS from 'exceljs';
 import { getGwaProductEnvironment } from '../workflow/get-namespaces';
 import { generateExcelWorkbook } from './output/xls-generator';
-import { getNamespaces } from './data/namespaces';
-import { getNamespaceAccess } from './data/ns-access';
 import {
+  getConsumerControls,
+  getReportOfConsumerMetrics,
+  getConsumerAccess,
+  getGatewayControls,
+  getNamespaces,
+  getNamespaceAccess,
   getGatewayMetrics,
   ReportOfGatewayMetrics,
-} from './data/gateway-metrics';
-import { getGatewayControls } from './data/gateway-controls';
-import { getConsumerAccess } from './data/consumer-access';
-import { getReportOfConsumerMetrics } from './data/consumer-metrics';
-import { getConsumerControls } from './data/consumer-controls';
+} from './data';
 
 export class WorkbookService {
   keystone: Keystone;

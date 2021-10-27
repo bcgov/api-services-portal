@@ -73,7 +73,8 @@ export async function getServiceMetrics(
     variables: { service, days },
   });
   logger.debug(
-    '[getServiceMetrics] result row count %d',
+    '[getServiceMetrics] (%s) result row count %d',
+    service,
     result.data.allMetrics.length
   );
   return result.data.allMetrics;
@@ -93,7 +94,9 @@ export async function getConsumerMetrics(
     logger.error('[getConsumerMetrics] %j', result);
   }
   logger.debug(
-    '[getConsumerMetrics] result row count %d',
+    '[getConsumerMetrics] (%s,%s) result row count %d',
+    ns,
+    consumer,
     result.data?.allMetrics?.length
   );
   return result.data.allMetrics;

@@ -46,6 +46,7 @@ describe('Keycloak Service', function () {
         'csc',
         'cert',
         'jwks',
+        [],
         true
       );
       expect(result.registrationAccessToken).toBe('token-123');
@@ -63,6 +64,7 @@ describe('Keycloak Service', function () {
         'csc',
         'cert',
         'jwks',
+        [],
         true
       );
       expect(result.registrationAccessToken).toBe('token-123');
