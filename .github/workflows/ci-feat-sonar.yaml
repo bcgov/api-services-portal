@@ -2,7 +2,7 @@ name: Sonar Scanner
 
 on:
   push:
-    branches: [feat/*]
+    branches: [dev,feat/*]
 
 env:
   REGISTRY: ghcr.io
