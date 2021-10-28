@@ -17,7 +17,7 @@ import Head from 'next/head';
 import kebabCase from 'lodash/kebabCase';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
-import { Product } from '@/shared/types/query.types';
+import { Product, Dataset } from '@/shared/types/query.types';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
@@ -71,11 +71,11 @@ const detailItems: DetailItem[] = [
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
-  const queryKey = ['DiscoverableProduct', id];
+  const queryKey = ['DiscoverableDataset', id];
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<Product>(`/ds/api/directory/${id}`)
+    async () => await restApi<Dataset>(`/ds/api/directory/${id}`)
   );
 
   return {
@@ -90,12 +90,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
-  const { data } = useQuery<Product>(queryKey, () =>
-    restApi<Product>(`/ds/api/directory/${id}`)
+  const { data } = useQuery<Dataset>(queryKey, () =>
+    restApi<Dataset>(`/ds/api/directory/${id}`)
   );
 
-  const hasProtectedEnvironments = () =>
-    data?.environments?.filter((env) => env.flow !== 'public').length > 0;
+  const hasProtectedEnvironments = (prod) =>
+    prod.environments?.filter((env) => env.flow !== 'public').length > 0;
 
   return (
     <>
@@ -104,27 +104,15 @@ const ApiPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={
-            <NextLink href={`/devportal/requests/new/${id}`}>
-              <Button
-                colorScheme="green"
-                disabled={hasProtectedEnvironments() == false}
-              >
-                Request Access
-              </Button>
-            </NextLink>
-          }
           title={
-            data?.dataset?.isInCatalog ? (
+            data.isInCatalog ? (
               <Link
                 isExternal
-                href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                  data?.dataset?.title
-                )}`}
+                href={`https://catalogue.data.gov.bc.ca/dataset/${data.name}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                {data?.name}
+                {data.title}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -133,28 +121,27 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              <Text>{data?.name}</Text>
+              <Text>{data.title}</Text>
             )
           }
         >
-          {data.dataset?.organization && (
+          {data.organization && (
             <Box fontSize="sm" color="gray.600">
               <Text>
                 Published by the{' '}
                 <Text as="strong">
-                  {data.dataset.organization.title}
+                  {data.organization.title}
                   {' - '}
                 </Text>
-                {data.dataset.organizationUnit && (
-                  <Text as="strong">{data.dataset.organizationUnit.title}</Text>
+                {data.organizationUnit && (
+                  <Text as="strong">{data.organizationUnit.title}</Text>
                 )}
               </Text>
             </Box>
           )}
           <Box fontSize="sm" color="gray.600">
             <Text>
-              Licensed under{' '}
-              <Text as="strong">{data.dataset?.license_title}</Text>
+              Licensed under <Text as="strong">{data.license_title}</Text>
             </Text>
           </Box>
         </PageHeader>
@@ -167,7 +154,7 @@ const ApiPage: React.FC<
               <Divider />
               <Box p={4}>
                 <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
-                  {data.dataset?.notes}
+                  {data.notes}
                 </ReactMarkdownWithHtml>
               </Box>
               <Divider />
@@ -175,10 +162,10 @@ const ApiPage: React.FC<
                 <Heading as="h6" size="xs" mr={4}>
                   Tags
                 </Heading>
-                {data.dataset && (
+                {data && (
                   <TagsList
                     colorScheme="blue"
-                    data={data.dataset.tags}
+                    data={data.tags}
                     size="0.75rem"
                   />
                 )}
@@ -186,14 +173,14 @@ const ApiPage: React.FC<
             </Box>
           </GridItem>
           <GridItem as="aside" colSpan={3}>
-            {data.dataset &&
+            {data &&
               detailItems.map((d) => (
                 <Box key={d.title} mb={4}>
                   <Heading size="xs">{d.title}</Heading>
                   <Text fontSize="sm" color="gray.600">
-                    {!d.isBool && data.dataset[d.key]}
+                    {!d.isBool && data[d.key]}
                     {d.isBool &&
-                      (data.dataset[d.key] ? (
+                      (data[d.key] ? (
                         <>
                           <Icon as={FaCheckCircle} color="green.300" /> Yes
                         </>
@@ -207,6 +194,21 @@ const ApiPage: React.FC<
               ))}
           </GridItem>
         </Grid>
+        {(data as any).products
+          .filter((prod) => prod.environments.length > 0)
+          .map((prod) => (
+            <Box p={2}>
+              <Text>{prod.name}</Text>
+              <NextLink href={`/devportal/requests/new/${prod.id}`}>
+                <Button
+                  colorScheme="green"
+                  disabled={hasProtectedEnvironments(prod) == false}
+                >
+                  Request Access
+                </Button>
+              </NextLink>
+            </Box>
+          ))}
       </Container>
     </>
   );
