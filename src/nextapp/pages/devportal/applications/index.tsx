@@ -100,7 +100,7 @@ const ApplicationsPage: React.FC<
 
   // Table props
   const columns = [
-    { w: '25%', name: 'Application Name', key: 'name' },
+    { w: '25%', name: 'Name', key: 'name' },
     { w: '50%', name: 'App ID', key: 'appId' },
     { w: '25%', name: '' },
   ];
@@ -132,7 +132,7 @@ const ApplicationsPage: React.FC<
         >
           <Text>Applications allow you to access BC Government APIs.</Text>
         </PageHeader>
-        <Card heading="My Applications">
+        <Card heading="test">
           <Table
             sortable
             columns={columns}
