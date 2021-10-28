@@ -3,6 +3,8 @@ export const reportOrder = [
   'ns_access',
   'gateway_metrics',
   'gateway_controls',
+  'consumer_requests',
+  'service_access',
   'consumer_access',
   'consumer_metrics',
   'consumer_controls',
@@ -126,6 +128,27 @@ export const reportStructure: any = {
       { header: 'Created', key: 'req_created', width: 30 },
       { header: 'Reviewer', key: 'req_reviewer', width: 30 },
       { header: 'Result', key: 'req_result', width: 30 },
+    ],
+  },
+  service_access: {
+    label: 'Service Access',
+    fields: [
+      {
+        header: 'Namespace',
+        key: 'namespace',
+        width: 20,
+      },
+      { header: 'Consumer', key: 'consumer_username', width: 55 },
+      { header: 'Service', key: 'service_name', width: 55 },
+      { header: 'Routes', key: 'routes', width: 55 },
+      {
+        header: 'Plugin (acl+key-auth,jwt-keycloak)',
+        key: 'plugin',
+        width: 55,
+      },
+      { header: 'Perm [ACL]', key: 'perm_acl', width: 15 },
+      { header: 'Perm [Scope]', key: 'perm_scope', width: 150 },
+      { header: 'Perm [Role]', key: 'perm_role', width: 150 },
     ],
   },
   consumer_access: {

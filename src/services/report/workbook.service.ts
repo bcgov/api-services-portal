@@ -5,6 +5,7 @@ import { generateExcelWorkbook } from './output/xls-generator';
 import {
   getConsumerControls,
   getReportOfConsumerMetrics,
+  getServiceAccess,
   getConsumerAccess,
   getGatewayControls,
   getNamespaces,
@@ -37,6 +38,12 @@ export class WorkbookService {
       namespaces,
       serviceLookup
     );
+    const service_access = await getServiceAccess(
+      envCtx,
+      this.keystone,
+      namespaces,
+      serviceLookup
+    );
     const consumer_access = await getConsumerAccess(
       envCtx,
       this.keystone,
@@ -60,6 +67,7 @@ export class WorkbookService {
       ns_access,
       gateway_metrics,
       gateway_controls,
+      service_access,
       consumer_access,
       consumer_metrics,
       consumer_controls,
