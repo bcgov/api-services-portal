@@ -10,6 +10,8 @@ import { clientTemplateClientSecret } from './templates/client-template-client-s
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 
 import { default as KcAdminClient } from 'keycloak-admin';
+import { ClientMapper } from '../workflow/types';
+import { AudienceMapper } from './templates/protocol-mappers/audience';
 
 const logger = Logger('keycloak.ClientReg');
 
@@ -60,24 +62,25 @@ export class KeycloakClientRegistrationService {
     clientSecret: string,
     certificate: string,
     jwksUrl: string,
+    clientMappers: ClientMapper[],
     enabled: boolean = false
   ): Promise<ClientRegResponse> {
     const body =
       authenticator === ClientAuthenticator.ClientSecret
-        ? Object.assign(clientTemplateClientSecret, {
+        ? Object.assign(JSON.parse(clientTemplateClientSecret), {
             enabled,
             clientId,
             secret: clientSecret,
           })
         : authenticator === ClientAuthenticator.ClientJWT
-        ? Object.assign(clientTemplateClientJwt, {
+        ? Object.assign(JSON.parse(clientTemplateClientJwt), {
             enabled,
             clientId,
             attributes: {
               'jwt.credential.public.key': certificate,
             },
           })
-        : Object.assign(clientTemplateClientJwt, {
+        : Object.assign(JSON.parse(clientTemplateClientJwt), {
             enabled,
             clientId,
             attributes: {
@@ -86,6 +89,20 @@ export class KeycloakClientRegistrationService {
               'use.jwks.url': 'true',
             },
           });
+
+    clientMappers
+      .filter((mapper) => mapper.defaultValue !== '')
+      .forEach((mapper) => {
+        if (mapper.name == 'audience') {
+          logger.debug('[clientRegistration] adding mapper %s', mapper);
+          body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+        } else {
+          logger.warn(
+            '[clientRegistration] skipping unknown mapper %s',
+            mapper
+          );
+        }
+      });
 
     logger.debug('[clientRegistration] CALLING %s', this.registrationUrl);
     logger.debug('[clientRegistration] BODY %j', body);

@@ -68,6 +68,7 @@ module.exports = {
       isRequired: false,
       ref: 'Environment',
     },
+    labels: { type: Relationship, ref: 'Label', many: true },
   },
   access: EnforcementPoint,
   plugins: [atTracking()],

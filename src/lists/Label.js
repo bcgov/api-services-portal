@@ -2,12 +2,11 @@ const { Text } = require('@keystonejs/fields');
 
 module.exports = {
   fields: {
-    ref: {
+    name: {
       type: Text,
       isRequired: true,
-      isUnique: true,
     },
-    blob: {
+    value: {
       type: Text,
       isRequired: true,
     },
