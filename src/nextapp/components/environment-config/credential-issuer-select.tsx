@@ -23,11 +23,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
   flow,
   value,
 }) => {
-<<<<<<< HEAD
-  const variables = { flow: flow };
-=======
   const variables = { flow };
->>>>>>> dev
   const { data, isLoading, isSuccess } = useApi(
     ['environment-credential-users', flow],
     {
