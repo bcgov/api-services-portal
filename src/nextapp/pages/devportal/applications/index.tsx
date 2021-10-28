@@ -132,7 +132,7 @@ const ApplicationsPage: React.FC<
         >
           <Text>Applications allow you to access BC Government APIs.</Text>
         </PageHeader>
-        <Card heading="test">
+        <Card>
           <Table
             sortable
             columns={columns}
