@@ -9,22 +9,24 @@ import {
   ModalFooter,
   Radio,
   RadioGroup,
+  Text,
   VStack,
 } from '@chakra-ui/react';
 
 interface AuthenticationFormProps {
+  onChange: (value: string) => void;
   onCancel: () => void;
   onComplete: (value: FormData) => void;
+  value: string;
 }
 
 const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
+  onChange,
   onCancel,
   onComplete,
+  value,
 }) => {
   const form = React.useRef<HTMLFormElement>(null);
-  const [value, setValue] = React.useState<string>(
-    'client-credentials.client-secret'
-  );
 
   const handleCreate = () => {
     form.current?.requestSubmit();
@@ -40,8 +42,8 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
       <ModalBody>
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={8}>
-            <FormLabel>Profile Name</FormLabel>
-            <RadioGroup value={value} onChange={setValue}>
+            <FormLabel fontWeight="bold">Flow</FormLabel>
+            <RadioGroup value={value} onChange={onChange}>
               <VStack align="stretch" spacing={2}>
                 <Radio name="flow" value="client-credentials.client-secret">
                   Client Credential Flow, using Client ID and Secret
@@ -64,7 +66,9 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
           </FormControl>
           {value === 'kong-api-key-acl' && (
             <FormControl
+              isRequired
               ml={2}
+              mb={8}
               pl={5}
               width="50%"
               borderLeft="1px solid"
@@ -75,13 +79,31 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
             </FormControl>
           )}
         </form>
+        <Text color="bc-component" fontSize="sm">
+          <Text as="span" fontWeight="bold">
+            client-credentials
+          </Text>{' '}
+          implements the OAuth2 Client Credential Flow
+          <br />
+          <Text as="span" fontWeight="bold">
+            authorization-code
+          </Text>{' '}
+          implements the OAuth2 Authorization Code Flow
+          <br />
+          <Text as="span" fontWeight="bold">
+            kong-api-key-acl
+          </Text>{' '}
+          implements Kong&apos;s API Key and ACL flow
+        </Text>
       </ModalBody>
       <ModalFooter>
         <ButtonGroup>
           <Button onClick={onCancel} variant="secondary">
             Cancel
           </Button>
-          <Button onClick={handleCreate}>Continue</Button>
+          <Button onClick={handleCreate}>
+            {value === 'kong-api-key-acl' ? 'Create' : 'Continue'}
+          </Button>
         </ButtonGroup>
       </ModalFooter>
     </>

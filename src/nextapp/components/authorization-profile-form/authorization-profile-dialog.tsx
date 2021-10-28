@@ -6,9 +6,7 @@ import {
   Flex,
   Heading,
   Modal,
-  ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Tab,
@@ -38,17 +36,26 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   onClose,
 }) => {
   const { user } = useAuth();
+  const [flow, setFlow] = React.useState<string>(
+    'client-credentials.client-secret'
+  );
   const [tabIndex, setTabIndex] = React.useState<number>(0);
   const [name, setName] = React.useState<string>(() => data?.name ?? '');
+
   const showTabs = name ?? Boolean(id);
+  const isKongFlow = flow === 'kong-api-key-acl';
 
   // Events
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
   const handleAuthenticationComplete = React.useCallback(() => {
-    setTabIndex(1);
-  }, []);
+    if (isKongFlow) {
+      onClose();
+    } else {
+      setTabIndex(1);
+    }
+  }, [isKongFlow, onClose]);
 
   return (
     <Modal isOpen={open} onClose={onClose} size="3xl">
@@ -68,10 +75,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                   <Tab px={0} cursor="default">
                     Authentication
                   </Tab>
-                  <Tab px={0} ml={4} cursor="default">
+                  <Tab px={0} ml={4} cursor="default" isDisabled={isKongFlow}>
                     Authorization
                   </Tab>
-                  <Tab px={0} ml={4} cursor="default">
+                  <Tab px={0} ml={4} cursor="default" isDisabled={isKongFlow}>
                     Client Management
                   </Tab>
                   <Box flex={1} />
@@ -86,8 +93,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
             </ModalHeader>
             {tabIndex === 0 && (
               <AuthenticationForm
+                onChange={setFlow}
                 onCancel={onClose}
                 onComplete={handleAuthenticationComplete}
+                value={flow}
               />
             )}
             {tabIndex === 1 && <Text>Authorization</Text>}

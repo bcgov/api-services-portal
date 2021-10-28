@@ -12,7 +12,7 @@ interface AuthorizationProfileFormProps {
 
 const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   children,
-  data = {},
+  data,
   id,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
