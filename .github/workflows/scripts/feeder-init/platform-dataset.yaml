@@ -1,0 +1,10 @@
+entity: DraftDataset
+record:
+  name: 'api-gateway-services'
+  title: 'API Gateway Services'
+  notes: 'API Gateway Services provide a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.'
+  tags: ['gateway', 'kong', 'openapi']
+  sector: 'Service'
+  license_title: 'Access Only'
+  view_audience: 'Government'
+  security_class: 'LOW-PUBLIC'
