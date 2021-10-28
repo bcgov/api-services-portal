@@ -30,7 +30,7 @@ export class DirectoryController extends Controller {
       query: item,
       variables: { id },
     });
-    return transform(result.data.allDiscoverableProducts)[1];
+    return transform(result.data.allDiscoverableProducts)[0];
   }
 }
 
