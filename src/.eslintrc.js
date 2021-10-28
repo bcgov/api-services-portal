@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'react', 'jest'],
+  plugins: ['@typescript-eslint', 'react', 'jest', 'jsx-a11y'],
   env: {
     commonjs: true,
     es6: true,
@@ -15,6 +15,7 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
   ],
   settings: {
     react: {
