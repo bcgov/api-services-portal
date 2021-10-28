@@ -2,6 +2,7 @@
 
 python scripts/template.py scripts/feeder-init/legal.yaml legal.yaml
 python scripts/template.py scripts/feeder-init/platform-authz-profile.yaml platform-authz-profile.yaml
+python scripts/template.py scripts/feeder-init/platform-dataset.yaml platform-dataset.yaml
 python scripts/template.py scripts/feeder-init/platform-gwa-api.yaml platform-gwa-api.yaml
 
 while true; do
