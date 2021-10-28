@@ -8,12 +8,14 @@ interface AuthorizationProfileFormProps {
   children: React.ReactElement;
   data?: CredentialIssuer;
   id?: string;
+  open?: boolean;
 }
 
 const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
   children,
   data,
   id,
+  open,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   return (
@@ -21,7 +23,7 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
       <AuthorizationProfileDialog
         data={data}
         id={id}
-        open={isOpen}
+        open={open ?? isOpen}
         onClose={onClose}
       />
       {React.cloneElement(children, {

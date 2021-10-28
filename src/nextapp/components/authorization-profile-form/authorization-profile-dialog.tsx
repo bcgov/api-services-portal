@@ -1,8 +1,6 @@
 import * as React from 'react';
 import {
   Box,
-  Button,
-  ButtonGroup,
   Flex,
   Heading,
   Modal,
