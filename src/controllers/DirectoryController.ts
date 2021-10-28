@@ -35,25 +35,22 @@ export class DirectoryController extends Controller {
 }
 
 function transform(products: Product[]) {
-  return products.reduce(
-    (accumulator: any, prod: any) => {
-      if (prod.dataset === null) {
-        accumulator[0].products.push(prod);
+  return products.reduce((accumulator: any, prod: any) => {
+    if (prod.dataset === null) {
+      // drop it
+    } else {
+      const dataset = accumulator.filter(
+        (a: any) => a.name === prod.dataset?.name
+      );
+      if (dataset.length == 0) {
+        accumulator.push(prod.dataset);
+        prod.dataset.products = [{ ...prod, dataset: null }];
       } else {
-        const dataset = accumulator.filter(
-          (a: any) => a.name === prod.dataset?.name
-        );
-        if (dataset.length == 0) {
-          accumulator.push(prod.dataset);
-          prod.dataset.products = [{ ...prod, dataset: null }];
-        } else {
-          dataset[0].products.push({ ...prod, dataset: null });
-        }
+        dataset[0].products.push({ ...prod, dataset: null });
       }
-      return accumulator;
-    },
-    [{ products: [] }]
-  );
+    }
+    return accumulator;
+  }, []);
 }
 
 const list = gql`
