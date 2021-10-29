@@ -107,6 +107,7 @@ export async function getServiceAccess(
             data.push(
               ...(await fillClientScopeBasedAccess(resSvcCtx, partial))
             );
+            data.push(...(await fillClientRoleBasedAccess(resSvcCtx, partial)));
           }
         }
       }
@@ -219,6 +220,71 @@ async function fillClientScopeBasedAccess(
   return data;
 }
 
+/*
+ */
+async function fillClientRoleBasedAccess(
+  resSvcCtx: ResourceServerContext,
+  partial: ReportOfServiceAccess
+): Promise<ReportOfServiceAccess[]> {
+  const data: ReportOfServiceAccess[] = [];
+
+  const env = resSvcCtx.prodEnv;
+
+  const applicableRoles = env.credentialIssuer.clientRoles
+    ? JSON.parse(env.credentialIssuer.clientRoles)
+    : [];
+
+  const kcClient = new KeycloakClientService(resSvcCtx.openid.issuer, null);
+  await kcClient.login(
+    resSvcCtx.issuerEnvConfig.clientId,
+    resSvcCtx.issuerEnvConfig.clientSecret
+  );
+
+  const kcUser = new KeycloakUserService(resSvcCtx.openid.issuer);
+  await kcUser.login(
+    resSvcCtx.issuerEnvConfig.clientId,
+    resSvcCtx.issuerEnvConfig.clientSecret
+  );
+
+  const resClient = await kcClient.findByClientId(
+    resSvcCtx.issuerEnvConfig.clientId
+  );
+  const roles = await kcClient.listRoles(resClient.id);
+  for (const role of roles.filter((r: any) =>
+    applicableRoles.includes(r.name)
+  )) {
+    const users = await kcClient.findUsersWithRole(resClient.id, role.name);
+    // find the Clients that have these user IDs
+    for (const user of users) {
+      if (user.username.startsWith('service-account')) {
+        const serviceAccount = user.username
+          .substr('service-account-'.length)
+          .toUpperCase();
+
+        logger.debug(
+          '[[getServiceAccess]] role=%s : consumer=%s',
+          role.name,
+          serviceAccount
+        );
+
+        const username = serviceAccount;
+
+        data.push({
+          ...partial,
+          consumer_username: username,
+          perm_scope: role.name,
+        });
+      }
+    }
+  }
+  return data;
+}
+
 function buildRouteList(service: GatewayService) {
-  return [...service.routes?.map((route) => route.hosts)].join('\n');
+  return [].concat
+    .apply(
+      [],
+      service.routes?.map((route) => route.hosts)
+    )
+    .join('\n');
 }
