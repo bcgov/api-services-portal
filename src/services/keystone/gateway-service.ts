@@ -50,6 +50,9 @@ export async function lookupServicesByNamespace(
                             }
                             routes {
                                 name
+                                methods
+                                hosts
+                                paths
                                 plugins {
                                     name
                                     config

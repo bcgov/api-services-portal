@@ -47,10 +47,10 @@ const fullJson = {
   service_access: [
     {
       namespace: 'ns_1',
-      consumer_username: '535C4DF2-C9B0DCAC68DC45C9',
       service: 'alalala',
       routes: 'https://blahahfd.com\nhttps://bladkslk',
       plugin: 'jwt-keycloak',
+      consumer_username: '535C4DF2-C9B0DCAC68DC45C9',
       perm_acl: 'allow',
       perm_scope: 'System.*',
       perm_role: '',
