@@ -31,6 +31,8 @@ const Card: React.FC<CardProps> = ({
           pb={9}
           alignItems="center"
           justifyContent="space-between"
+          borderBottom="2px solid"
+          borderColor="bc-yellow"
         >
           <Heading size="sm">{heading}</Heading>
           {actions && <HStack spacing={4}>{actions}</HStack>}
