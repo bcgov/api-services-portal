@@ -211,10 +211,12 @@ async function fillClientScopeBasedAccess(
 
       const username = client.clientId;
 
-      data.push({
-        ...partial,
-        consumer_username: username,
-        perm_scope: client.defaultClientScopes.join(' '),
+      client.defaultClientScopes.forEach((perm_scope: string) => {
+        data.push({
+          ...partial,
+          consumer_username: username,
+          perm_scope,
+        });
       });
     });
   return data;
@@ -272,7 +274,7 @@ async function fillClientRoleBasedAccess(
         data.push({
           ...partial,
           consumer_username: username,
-          perm_scope: role.name,
+          perm_role: role.name,
         });
       }
     }
