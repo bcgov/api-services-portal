@@ -284,7 +284,7 @@ function buildRouteList(service: GatewayService) {
   return [].concat
     .apply(
       [],
-      service.routes?.map((route) => route.hosts)
+      service.routes?.map((route) => JSON.parse(route.hosts))
     )
     .join('\n');
 }
