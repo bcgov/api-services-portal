@@ -13,8 +13,11 @@ import {
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
 // import EmptyPane from '@/components/empty-pane';
+import Card from '@/components/card';
+import { DocHeader, InternalLink } from '@/components/docs';
 import get from 'lodash/get';
 import Head from 'next/head';
+import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { Dataset } from '@/shared/types/query.types';
 import { restApi } from '@/shared/services/api';
@@ -25,8 +28,7 @@ import { FaExternalLinkAlt, FaLock } from 'react-icons/fa';
 import { RiEarthFill } from 'react-icons/ri';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
-import { DocHeader, InternalLink } from '@/components/docs';
-import Card from '@/components/card';
+import { uid } from 'react-uid';
 
 const renderers = {
   link: InternalLink,
@@ -134,39 +136,42 @@ const ApiPage: React.FC<
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
-              <Flex
-                px={9}
-                py={7}
-                borderBottom="1px solid"
-                borderColor="bc-divider"
-              >
-                <Grid gap={4} flex={1}>
-                  <Flex align="center">
-                    <Icon as={FaLock} color="bc-blue" mr={2} />
-                    <Heading size="xs">Geocoder Parcels</Heading>
-                  </Flex>
-                </Grid>
-                <Button>Request Access</Button>
-              </Flex>
-              <Flex px={9} py={7}>
-                <Grid gap={4} flex={1} templateRows="auto" mr={12}>
-                  <GridItem>
-                    <Flex align="center" mb={2}>
-                      <Flex align="center" width={8}>
-                        <Icon as={RiEarthFill} color="bc-blue" boxSize="5" />
+              {[].map((p) => (
+                <Flex key={uid(p)} px={9} py={7}>
+                  <Grid gap={4} flex={1} templateRows="auto" mr={12}>
+                    <GridItem>
+                      <Flex align="center" mb={2}>
+                        <Flex align="center" width={8}>
+                          <Icon
+                            as={p.anonymous ? RiEarthFill : FaLock}
+                            color="bc-blue"
+                            boxSize="5"
+                          />
+                        </Flex>
+                        <Heading size="xs">{p.name}</Heading>
                       </Flex>
-                      <Heading size="xs">Geocoder (Public)Parcels</Heading>
-                    </Flex>
-                    <Text ml={8} fontSize="sm">
-                      Use the guides here to try Geocoder. Content defined by
-                      the API provider
-                    </Text>
-                  </GridItem>
-                </Grid>
-                <Button leftIcon={<Icon as={BiLinkExternal} />}>
-                  Try this API
-                </Button>
-              </Flex>
+                      {p.description && (
+                        <Text ml={8} fontSize="sm">
+                          {p.description}
+                        </Text>
+                      )}
+                    </GridItem>
+                  </Grid>
+                  <NextLink
+                    href={
+                      p.anonymous ? '#try-url' : `/devportal/requests/new/${id}`
+                    }
+                  >
+                    <Button
+                      rightIcon={
+                        p.anonymous ? <Icon as={BiLinkExternal} /> : undefined
+                      }
+                    >
+                      {p.anonymous ? 'Try this API' : 'Request Access'}
+                    </Button>
+                  </NextLink>
+                </Flex>
+              ))}
             </Card>
           </GridItem>
           <GridItem colSpan={1} />
@@ -211,6 +216,7 @@ const detailItems: DetailItem[] = [
     key: 'extSource',
   },
 ];
+// TODO: Not sure what the source of this data is for these contact items, should adjust
 const contactItems: DetailItem[] = [
   {
     title: 'Name',
