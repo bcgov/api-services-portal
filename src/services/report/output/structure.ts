@@ -127,6 +127,7 @@ export const reportStructure: any = {
       { header: 'Created', key: 'req_created', width: 30 },
       { header: 'Reviewer', key: 'req_reviewer', width: 30 },
       { header: 'Result', key: 'req_result', width: 30 },
+      { header: 'Consumer', key: 'consumer_username', width: 40 },
     ],
   },
   service_access: {

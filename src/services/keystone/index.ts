@@ -1,4 +1,5 @@
 export {
+  getAccessRequestsByNamespace,
   lookupEnvironmentAndApplicationByAccessRequest,
   linkServiceAccessToRequest,
   markAccessRequestAsNotIssued,

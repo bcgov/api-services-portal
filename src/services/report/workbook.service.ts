@@ -6,6 +6,7 @@ import {
   getConsumerControls,
   getReportOfConsumerMetrics,
   getServiceAccess,
+  getConsumerRequests,
   getConsumerAccess,
   getGatewayControls,
   getNamespaces,
@@ -44,6 +45,10 @@ export class WorkbookService {
       namespaces,
       serviceLookup
     );
+    const consumer_requests = await getConsumerRequests(
+      this.keystone,
+      namespaces
+    );
     const consumer_access = await getConsumerAccess(
       envCtx,
       this.keystone,
@@ -68,6 +73,7 @@ export class WorkbookService {
       gateway_metrics,
       gateway_controls,
       service_access,
+      consumer_requests,
       consumer_access,
       consumer_metrics,
       consumer_controls,
