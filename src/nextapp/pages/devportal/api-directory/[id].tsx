@@ -1,9 +1,8 @@
 import * as React from 'react';
+import ApiProductItem, { ApiDataset } from '@/components/api-product-item';
 import {
   Box,
-  Button,
   Container,
-  Flex,
   Grid,
   GridItem,
   Heading,
@@ -11,21 +10,17 @@ import {
   Link,
   Text,
 } from '@chakra-ui/react';
-import { BiLinkExternal } from 'react-icons/bi';
 // import EmptyPane from '@/components/empty-pane';
 import Card from '@/components/card';
 import { DocHeader, InternalLink } from '@/components/docs';
 import get from 'lodash/get';
 import Head from 'next/head';
-import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
-import { Dataset } from '@/shared/types/query.types';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import { FaExternalLinkAlt, FaLock } from 'react-icons/fa';
-import { RiEarthFill } from 'react-icons/ri';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { uid } from 'react-uid';
@@ -48,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<Dataset>(`/ds/api/directory/${id}`)
+    async () => await restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
 
   return {
@@ -63,8 +58,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
-  const { data } = useQuery<Dataset>(queryKey, () =>
-    restApi<Dataset>(`/ds/api/directory/${id}`)
+  const { data } = useQuery<ApiDataset>(queryKey, () =>
+    restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
   // TODO: Not sure if this is needed still
   // const hasProtectedEnvironments = (prod) =>
@@ -102,7 +97,7 @@ const ApiPage: React.FC<
                 target="_blank"
                 rel="noreferrer"
               >
-                {data.title}
+                {data?.name}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -111,7 +106,7 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              data.title
+              data?.name
             )
           }
         >
@@ -136,41 +131,8 @@ const ApiPage: React.FC<
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
-              {[].map((p) => (
-                <Flex key={uid(p)} px={9} py={7}>
-                  <Grid gap={4} flex={1} templateRows="auto" mr={12}>
-                    <GridItem>
-                      <Flex align="center" mb={2}>
-                        <Flex align="center" width={8}>
-                          <Icon
-                            as={p.anonymous ? RiEarthFill : FaLock}
-                            color="bc-blue"
-                            boxSize="5"
-                          />
-                        </Flex>
-                        <Heading size="xs">{p.name}</Heading>
-                      </Flex>
-                      {p.description && (
-                        <Text ml={8} fontSize="sm">
-                          {p.description}
-                        </Text>
-                      )}
-                    </GridItem>
-                  </Grid>
-                  <NextLink
-                    href={
-                      p.anonymous ? '#try-url' : `/devportal/requests/new/${id}`
-                    }
-                  >
-                    <Button
-                      rightIcon={
-                        p.anonymous ? <Icon as={BiLinkExternal} /> : undefined
-                      }
-                    >
-                      {p.anonymous ? 'Try this API' : 'Request Access'}
-                    </Button>
-                  </NextLink>
-                </Flex>
+              {data?.products?.map((p) => (
+                <ApiProductItem key={uid(p)} data={p} id={id} />
               ))}
             </Card>
           </GridItem>
