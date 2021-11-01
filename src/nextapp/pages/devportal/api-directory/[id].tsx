@@ -86,7 +86,7 @@ const ApiPage: React.FC<
       <Container maxW="6xl">
         <PageHeader
           breadcrumb={[
-            { text: 'API Directory', href: '/dev-portal/api-directory' },
+            { text: 'API Directory', href: '/devportal/api-directory' },
             { text: data.title },
           ]}
           title={
@@ -132,7 +132,7 @@ const ApiPage: React.FC<
             </Box>
             <Card heading="Products">
               {data?.products?.map((p) => (
-                <ApiProductItem key={uid(p)} data={p} id={id} />
+                <ApiProductItem key={uid(p)} data={p} id={p.id} />
               ))}
             </Card>
           </GridItem>
