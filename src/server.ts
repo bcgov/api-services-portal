@@ -15,6 +15,7 @@ const { generate } = require('@graphql-codegen/cli');
 const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
+const { ApiDSProxyApp } = require('./api-proxy-ds');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
 const { ApiOpenapiApp } = require('./api-openapi');
@@ -269,6 +270,7 @@ const apps = [
     },
   }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
+  new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
   new NextApp({ dir: 'nextapp' }),
 ];
 

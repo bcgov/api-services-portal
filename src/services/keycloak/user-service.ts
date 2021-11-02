@@ -15,6 +15,15 @@ export class KeycloakUserService {
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
   }
 
+  // public async findOne(id: string) {
+  //   logger.debug('[findOne] %s', id);
+  //   const user = await this.kcAdminClient.users.findOne({
+  //     id,
+  //   });
+  //   logger.debug('[findOne] : %j', user);
+  //   return user;
+  // }
+
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
     const users = await this.kcAdminClient.users.find({

@@ -12,13 +12,15 @@ import {
   Box,
   Text,
   Flex,
+  Link,
   IconButton,
   Divider,
+  Spacer,
   Center,
   Heading,
 } from '@chakra-ui/react';
 import type { NamespaceData } from '@/shared/types/app.types';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaDownload } from 'react-icons/fa';
 
 import NamespaceDelete from '../namespace-delete';
 
@@ -111,7 +113,12 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           </ModalBody>
           <Divider />
           <ModalFooter>
-            <ButtonGroup>
+            <ButtonGroup justifyItems="space-between" alignItems="center">
+              <Button leftIcon={<Icon as={FaDownload} />} variant="secondary">
+                <Link href="/int/api/namespaces/report" download>
+                  Export Report
+                </Link>
+              </Button>
               <Button onClick={onClose} variant="primary">
                 Done
               </Button>

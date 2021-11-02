@@ -35,7 +35,7 @@ export interface DiffResult {
   C: string[];
 }
 
-const logger = Logger('kong');
+const logger = Logger('kong.consumer');
 
 export class KongConsumerService {
   private kongUrl: string;
