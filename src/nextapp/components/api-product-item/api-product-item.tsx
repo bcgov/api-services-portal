@@ -73,7 +73,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
         )}
       </Flex>
       {isTiered && (
-        <Flex px={9} py={7} bg={'white'} my={-1}>
+        <Flex px={9} py={7} bg={'white'} my={-1} mb={'0.5'}>
           <Grid gap={4} flex={1} templateRows="auto" mr={12}>
             <GridItem>
               <Flex align="center" mb={2}>
