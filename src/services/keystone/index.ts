@@ -1,4 +1,5 @@
 export {
+  getAccessRequestsByNamespace,
   lookupEnvironmentAndApplicationByAccessRequest,
   linkServiceAccessToRequest,
   markAccessRequestAsNotIssued,
@@ -51,3 +52,9 @@ export {
   lookupUser,
   lookupUsersByNamespace,
 } from './user';
+
+export {
+  getServiceMetrics,
+  getConsumerMetrics,
+  calculateStats,
+} from './metrics';

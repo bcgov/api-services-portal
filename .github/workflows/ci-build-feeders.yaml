@@ -129,7 +129,7 @@ jobs:
             WORKING_PATH:
               value: '/tmp'
             KONG_ADMIN_URL:
-              value: 'http://kong-kong-admin:8001'
+              value: '${{ secrets.KONG_URL_DEV}}'
             CKAN_URL:
               value: 'https://catalog.data.gov.bc.ca'
             PROM_URL:

@@ -57,10 +57,81 @@ export async function lookupCredentialReferenceByServiceAccess(
   return result.data.allServiceAccesses[0];
 }
 
+export async function lookupDetailedServiceAccessesByNS(
+  context: any,
+  ns: string
+): Promise<ServiceAccess[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetDetailedServiceAccessesByNS($where: ServiceAccessWhereInput!) {
+                    allServiceAccesses(where: $where) {
+                        id
+                        consumerType
+                        productEnvironment {
+                            id
+                            appId
+                            name
+                            flow
+                            product {
+                              name
+                            }
+                            credentialIssuer {
+                              id
+                              name
+                            }
+                        }
+                        application {
+                          name
+                          appId
+                          owner {
+                            username
+                          }
+                        }
+                        consumer {
+                          id
+                          username
+                          customId
+                          extForeignKey
+                          updatedAt
+
+                          plugins {
+                            id
+                            name
+                            config
+                            service {
+                              id
+                              name
+                            }
+                            route {
+                              id
+                              name
+                              service {
+                                name
+                              }
+                            }
+                          }
+                        }
+                    }
+                }`,
+    variables: {
+      where: {
+        OR: [
+          { namespace: ns },
+          { productEnvironment: { product: { namespace: ns } } },
+        ],
+      },
+    },
+  });
+  logger.debug(
+    'Query [lookupDetailedServiceAccessesByNS] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  return result.data.allServiceAccesses;
+}
+
 export async function lookupServiceAccessesByNamespace(
   context: any,
   ns: string
-): Promise<ServiceAccess> {
+): Promise<ServiceAccess[]> {
   const result = await context.executeGraphQL({
     query: `query GetServiceAccessByNamespace($ns: String!) {
                     allServiceAccesses(where: {namespace: $ns}) {
@@ -72,7 +143,10 @@ export async function lookupServiceAccessesByNamespace(
                 }`,
     variables: { ns: ns },
   });
-  logger.debug('Query [lookupServiceAccessesByNamespace] result %j', result);
+  logger.debug(
+    '[lookupServiceAccessesByNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
   return result.data.allServiceAccesses;
 }
 

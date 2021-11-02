@@ -35,3 +35,48 @@ export async function lookupServices(
   );
   return result.data.allGatewayServices;
 }
+
+export async function lookupServicesByNamespace(
+  context: any,
+  ns: string
+): Promise<GatewayService[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetServices($ns: String!) {
+                    allGatewayServices(where: {namespace: $ns}) {
+                            name
+                            plugins {
+                                name
+                                config
+                            }
+                            routes {
+                                name
+                                methods
+                                hosts
+                                paths
+                                plugins {
+                                    name
+                                    config
+                                }
+                            }
+                            environment {
+                              name
+                              appId
+                              product {
+                                name
+                              }
+                            }
+                    }
+                }`,
+    variables: { ns: ns },
+  });
+  logger.debug('Query result %j', result);
+  result.data.allGatewayServices.forEach((svc: GatewayService) => {
+    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)));
+    svc.routes?.map((route) =>
+      route.plugins?.map(
+        (plugin) => (plugin.config = JSON.parse(plugin.config))
+      )
+    );
+  });
+  return result.data.allGatewayServices;
+}
