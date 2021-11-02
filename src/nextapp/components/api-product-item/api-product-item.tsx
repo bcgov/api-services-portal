@@ -2,6 +2,7 @@ import * as React from 'react';
 import { BiLinkExternal } from 'react-icons/bi';
 import {
   Button,
+  Box,
   Flex,
   Grid,
   GridItem,
@@ -40,7 +41,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
   return (
     <>
       {' '}
-      <Flex px={9} py={7}>
+      <Flex px={9} py={7} bg={'white'} mb={'0.5'}>
         <Grid gap={4} flex={1} templateRows="auto" mr={12}>
           <GridItem>
             <Flex align="center" mb={2}>
@@ -71,7 +72,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
         )}
       </Flex>
       {isPublic && (
-        <Flex px={9} py={7}>
+        <Flex px={9} py={7} bg={'white'} my={-1}>
           <Grid gap={4} flex={1} templateRows="auto" mr={12}>
             <GridItem>
               <Flex align="center" mb={2}>

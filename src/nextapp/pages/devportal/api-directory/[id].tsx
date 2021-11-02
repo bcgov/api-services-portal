@@ -130,9 +130,11 @@ const ApiPage: React.FC<
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
-              {data?.products?.map((p) => (
-                <ApiProductItem key={uid(p)} data={p} id={p.id} />
-              ))}
+              <Box bg={'gray.100'}>
+                {data?.products?.map((p) => (
+                  <ApiProductItem key={uid(p)} data={p} id={p.id} />
+                ))}
+              </Box>
             </Card>
           </GridItem>
           <GridItem colSpan={1} />
