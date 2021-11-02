@@ -71,18 +71,15 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
         <MenuButton
           px={2}
           py={1}
-          fontSize="sm"
           transition="all 0.2s"
-          borderColor="bc-blue-alt"
-          borderRadius="md"
-          borderWidth="1px"
-          _hover={{ bg: 'gray.400' }}
+          borderRadius={4}
+          _hover={{ bg: 'bc-link' }}
           _expanded={{ bg: 'blue.400' }}
           _focus={{ boxShadow: 'outline' }}
           data-testid="ns-dropdown-btn"
         >
-          <Icon as={FaNetworkWired} mr={2} color="rgba(255, 255, 255, 0.75)" />
-          {user?.namespace ?? 'No Active Namespace'} <Icon as={FaChevronDown} />
+          {user?.namespace ?? 'No Active Namespace'}{' '}
+          <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList color="gray.600">
           <>

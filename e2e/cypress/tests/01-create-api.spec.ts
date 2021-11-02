@@ -24,6 +24,7 @@ describe('Create API Spec', () => {
   it('authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
     })
   })
 

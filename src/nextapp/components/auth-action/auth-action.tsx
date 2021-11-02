@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Avatar,
   Box,
   Button,
   Icon,
@@ -7,10 +8,12 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Center,
+  HStack,
+  StackDivider,
 } from '@chakra-ui/react';
-import { FaChevronDown, FaUserCircle } from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
-import { useRouter } from 'next/router';
 import NamespaceMenu from '../namespace-menu';
 
 interface AuthActionProps {
@@ -19,9 +22,6 @@ interface AuthActionProps {
 
 const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
-  const router = useRouter();
-
-  const onNextLinkClick = (event) => router.push(event.target.value);
 
   if (site === 'redirect') {
     return <></>;
@@ -41,7 +41,12 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   }
 
   return (
-    <Box d="flex" alignItems="center" justifyContent="flex-end">
+    <HStack
+      divider={
+        <StackDivider borderColor="white" height="24px" alignSelf="center" />
+      }
+      spacing={4}
+    >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
       <Box
         as="span"
@@ -51,23 +56,31 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
         position="relative"
         zIndex={2}
       >
-        <Menu placement="right-start">
+        <Menu placement="bottom-end">
           <MenuButton
             as={Button}
-            alignItems="center"
-            display="flex"
-            variant="bc-blue-alt"
+            px={1}
+            variant="ghost"
+            _hover={{ textDecoration: 'none' }}
+            _active={{ outline: 'none' }}
             data-testid="auth-menu-user"
           >
-            <Icon as={FaUserCircle} mr={2} mt={-1} color="bc-blue-alt" />
-            {user.name}
-            <Icon size="sm" ml={2} as={FaChevronDown} color="white" />
+            <Center>
+              <Avatar name={user.name} size="sm" />
+              <Icon
+                aria-label="chevron down icon"
+                size="sm"
+                ml={2}
+                as={FaChevronDown}
+                color="white"
+              />
+            </Center>
           </MenuButton>
           <MenuList borderRadius={0}>
             <MenuItem
+              as="a"
               color="text"
-              onClick={onNextLinkClick}
-              value="/poc/my-profile"
+              href="/poc/my-profile"
               data-testid="auth-menu-user-profile"
             >
               My Profile
@@ -83,7 +96,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
           </MenuList>
         </Menu>
       </Box>
-    </Box>
+    </HStack>
   );
 };
 

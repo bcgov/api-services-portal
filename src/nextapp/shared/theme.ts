@@ -1,4 +1,6 @@
+import { getServerSideProps } from '@/pages/devportal/access';
 import { extendTheme, withDefaultVariant } from '@chakra-ui/react';
+import { mode, transparentize } from '@chakra-ui/theme-tools';
 
 const colors = {
   'bc-blue': '#003366',
@@ -12,6 +14,7 @@ const colors = {
   'bc-border-focus': '#3B99FC',
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
+  'bc-background': '#f1f1f1',
   ui: {
     500: '#606060',
   },
@@ -59,6 +62,54 @@ const _valid = {
   borderColor: 'bc-success',
 };
 
+const getAlertStatusColor = (color) => {
+  switch (color) {
+    case 'blue':
+      return 'bc-light-blue';
+    case 'green':
+      return 'bc-success';
+    case 'orange':
+      return 'bc-yellow';
+    case 'red':
+      return 'bc-error';
+    default:
+      return color;
+  }
+};
+
+const alertVariants = {
+  outline: (props) => {
+    const { colorScheme: c, theme: t } = props;
+    const color = getAlertStatusColor(c);
+    return {
+      container: {
+        paddingStart: 3,
+        borderWidth: '1px',
+        borderColor: color,
+        bg: transparentize(color, 0.1)(t),
+      },
+      icon: {
+        color: color,
+      },
+    };
+  },
+  status: (props) => {
+    const { colorScheme: c } = props;
+    const color = getAlertStatusColor(c);
+    return {
+      container: {
+        paddingStart: 3,
+        borderWidth: '1px',
+        borderColor: 'white',
+        bg: 'white',
+      },
+      icon: {
+        color: color,
+      },
+    };
+  },
+};
+
 const buttonVariants = {
   primary: {
     bg: 'bc-blue',
@@ -98,7 +149,21 @@ const buttonVariants = {
       bgColor: 'bc-gray',
     },
   },
+  ghost: {
+    borderColor: 'transparent',
+    _active: {
+      bgColor: '#F2F5F7',
+      boxShadow: 'none',
+      outlineColor: 'transparent',
+    },
+    _focus: {
+      bgColor: '#F2F5F7',
+      boxShadow: 'none',
+      outlineColor: 'transparent',
+    },
+  },
 };
+
 const theme = extendTheme(
   {
     colors,
@@ -110,7 +175,7 @@ const theme = extendTheme(
     styles: {
       global: {
         body: {
-          background: '#f1f1f1',
+          background: 'bc-background',
         },
         'body > div:first-of-type': {
           height: '100vh',
@@ -123,6 +188,12 @@ const theme = extendTheme(
       },
     },
     components: {
+      Alert: {
+        variants: alertVariants,
+        defaultProps: {
+          variant: 'status',
+        },
+      },
       IconButton: {
         variants: buttonVariants,
       },
@@ -226,8 +297,33 @@ const theme = extendTheme(
             display: 'none',
           },
           '& + div': {
-            mb: 4,
+            mb: 2,
+            mt: -2,
             color: 'component',
+          },
+        },
+      },
+      Menu: {
+        baseStyle: {
+          item: {
+            pr: 14,
+            pl: 5,
+          },
+        },
+      },
+      Modal: {
+        baseStyle: {
+          header: {
+            pt: 6,
+            px: 8,
+          },
+          body: {
+            px: 8,
+          },
+          footer: {
+            px: 8,
+            pb: 6,
+            pt: 8,
           },
         },
       },
@@ -247,7 +343,15 @@ const theme = extendTheme(
             th: {
               borderBottom: '2px solid',
               borderColor: 'bc-yellow',
+              fontWeight: 'normal',
               textTransform: 'none',
+              letterSpacing: 'normal',
+              color: 'text',
+              py: 5,
+              px: 9,
+            },
+            td: {
+              px: 9,
             },
           },
         },

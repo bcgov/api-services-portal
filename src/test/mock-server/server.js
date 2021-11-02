@@ -91,7 +91,8 @@ const server = mockServer(schemaWithMocks, {
     getPermissionTicketsForResource: () =>
       new MockList(6, (_, { id }) => ({ id })),
     getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
-    myServiceAccesses: () => new MockList(8, (_, { id }) => ({ id })),
+    myApplications: () => new MockList(8, (_, { id }) => ({ id })),
+    myServiceAccesses: () => new MockList(4, (_, { id }) => ({ id })),
     mySelf: () => db.get('user'),
     BusinessProfile: () => ({
       user: {
@@ -219,6 +220,7 @@ const server = mockServer(schemaWithMocks, {
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
     appId: casual.uuid,
+    description: casual.description,
   }),
   Namespace: () => ({
     name: casual.random_element(data.namespaces),
@@ -448,6 +450,10 @@ const server = mockServer(schemaWithMocks, {
     catalogContent: casual.word,
     isInCatalog: casual.coin_flip,
     record_publish_date: casual.date('YYYY-MM-DD'),
+  }),
+  ServiceAccess: () => ({
+    active: casual.boolean,
+    name: casual.random_element(db.get('products')).name,
   }),
   AccessRequest: () => ({
     name: 'Gateway Administration API FOR APSO_F APSO_L',

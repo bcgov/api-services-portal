@@ -1,0 +1,147 @@
+import { 
+  Box,
+  Button,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import {uid} from 'react-uid'
+import Table from './table';
+
+<Meta title="APS/Table" />
+
+export const Template = (args) => (
+  <Table 
+    columns={[{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}]}
+    data={[
+      {name: 'Application 1', id: '123', owner: 'George Bluth Sr.'},
+      {name: 'Application 2', id: '234', owner: 'Lucille Bluth'},
+      {name: 'Application 3', id: '345', owner: 'Michael Bluth'},
+      {name: 'Application 4 has a really long name', id: '456', owner: 'George Michael Bluth'},
+    ]}
+    {...args} 
+  />
+)
+
+# APS Table
+
+An extension of the core Chakra Table with some additional features like sorting and empty views.
+
+To use 
+
+```javascript
+import { Tr, Td } from '@chakra-ui/react';
+import Table from '@src/components/actions-menu';
+
+const MyComponent = ({ data }) => (
+  <Table 
+    columns={[{ name: 'Application Name', key: 'name' }, { name: 'Owner', key: 'owner'}]} 
+    data={data}>
+    {(item, index) => (
+      <Tr key={index}>
+        <Td>{d.name}</Td>
+        <Td>{d.owner}</Td>
+      </Tr> 
+    )}
+  </Table>
+);
+```
+
+|Property|Type|Description|
+|--------|----|-----------|
+|`columns`*|`{key: string, name: string}[]`|An array describing the columns. Required properties are `name` and `key`. Any Chakra `Th` component property can be passed as well for additional styling.|
+|`data`*|`any[]`|Any array of objects.|
+|`children`*|`Function`|A render function that passes the `#map` arguments. Use this function to return a `Tr` element or `React.Fragment` with multiple `Tr`s if additional UX is required|
+|`emptyView`|`React.Element`|If there is no content, render a empty content message|
+|`sorting`|`boolean`|Turns on sorting|
+
+<Canvas>
+  <Story 
+    name="Basic" 
+    args={{
+      children: (d, index) => (
+        <Tr key={d.id}>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+      )
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Sorting
+
+Enable sorting on a table by passing `sortable={true}`. The implementation is simple string based sorting.
+
+<Canvas>
+  <Story 
+    name="Sorting" 
+    args={{
+      children: (d, index) => (
+        <Tr key={d.id}>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+      ),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Empty Table
+
+Use the `emptyView` prop to return a helpful empty data view for users. The component will be wrapped in a `tr` with a single `td` with the `colSpan` set to the total amount of columns.
+
+<Canvas>
+  <Story 
+    name="Empty Table"
+    args={{
+      children: (d, index) => (
+      <React.Fragment key={uid(d.id,index)}>
+        <Tr>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+        {d.id === '234' && <Tr bgColor="gray.100"><Td colSpan={2}>Disclosed Content</Td></Tr>}
+      </React.Fragment>
+      ),
+      data: [],
+      emptyView: (<div>Custom no content message</div>),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Disclosure Rows
+
+Use `React.Fragment` to pass in multiple rows so you can use UI methods like disclosure rows.
+
+<Canvas>
+  <Story 
+    name="Disclosure Rows" 
+    args={{
+      children: (d, index) => (
+      <React.Fragment key={uid(d.id,index)}>
+        <Tr>
+          <Td>{d.name}</Td>
+          <Td>{d.owner}</Td>
+        </Tr> 
+        {d.id === '234' && <Tr bgColor="gray.100"><Td colSpan={2}>Disclosed Content</Td></Tr>}
+      </React.Fragment>
+      ),
+      sortable: true
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
