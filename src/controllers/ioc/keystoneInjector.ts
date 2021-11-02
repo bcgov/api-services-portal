@@ -1,7 +1,7 @@
 import { Keystone } from '@keystonejs/keystone';
 import { injectable } from 'tsyringe';
 import { scopes, scopesToRoles } from '../../auth/scope-role-utils';
-import { Logger } from '../../Logger';
+import { Logger } from '../../logger';
 
 const logger = Logger('controller');
 
