@@ -110,6 +110,7 @@ const ControlsList: React.FC<ControlsListProps> = ({
                       <DeleteControl
                         consumerId={consumerId}
                         pluginExtForeignKey={d.extForeignKey}
+                        queryKey={queryKey}
                       />
                     </ButtonGroup>
                   </GridItem>
