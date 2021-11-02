@@ -6,6 +6,8 @@ ACCESS MANAGER,,,AccessRequest,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,AccessRequest,,"update,delete",,,,access-manager,,,allow,
 ACCESS MANAGER,,allAccessRequestsByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentPackageNS
 ACCESS MANAGER,,allServiceAccessesByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentProductNSOrNS
+ACCESS MANAGER,,allProductsByNamespace,,,,,,,access-manager,,,allow,filterByUserNS
+ACCESS MANAGER,,allGatewayServicesByNamespace,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,getGatewayConsumerPlugins,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,deleteGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
