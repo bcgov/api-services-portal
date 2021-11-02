@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Grid } from '@chakra-ui/react';
-import { Product } from '@/shared/types/query.types';
+import { Dataset, Product } from '@/shared/types/query.types';
 
 import DiscoveryListItem from './discovery-list-item';
 
 interface DiscoveryListProps {
-  data: Product[];
+  data: Dataset[];
 }
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {

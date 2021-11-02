@@ -46,11 +46,8 @@ export class NamespaceController extends Controller {
   @Get('/report')
   @OperationId('report')
   public async report(@Request() req: any): Promise<any> {
-    const nsList = await this.list(req);
-
     const workbookService = new WorkbookService(
-      this.keystone.createContext(req),
-      nsList
+      this.keystone.createContext(req, true)
     );
     const workbook = await workbookService.buildWorkbook();
     const buffer = await workbook.xlsx.writeBuffer();
@@ -79,7 +76,6 @@ export class NamespaceController extends Controller {
   @Get()
   @OperationId('namespace-list')
   public async list(@Request() request: any): Promise<string[]> {
-    logger.debug('Request %j', request);
     const result = await this.keystone.executeGraphQL({
       context: this.keystone.createContext(request),
       query: list,

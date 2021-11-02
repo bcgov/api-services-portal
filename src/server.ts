@@ -217,9 +217,13 @@ const authStrategy =
             req: any,
             res: any
           ) => {
-            console.log('Token = ' + token);
-            console.log('Redirecting to /');
-            res.redirect(302, '/');
+            const redirect = req.query?.f ? req.query.f : '/';
+            // Doing a 302 redirect does not set the cookie properly because it is SameSite 'Strict'
+            // and the Origin of the request was from an IdP
+            res.header('Content-Type', 'text/html');
+            res.send(
+              `<html><head><meta http-equiv="refresh" content="0;URL='${redirect}'"></head></html>`
+            );
           },
         },
         hooks: {
@@ -284,26 +288,30 @@ const configureExpress = (app: any) => {
   //     console.log(req.path)
   //     req.path == "/" ? res.redirect('/home') : next()
   // })
-  app.get('/feed/:entity/:refKey/:refKeyValue', (req: any, res: any) =>
-    getFeedWorker(keystone, req, res).catch((err: any) => {
+  app.get('/feed/:entity/:refKey/:refKeyValue', (req: any, res: any) => {
+    const context = keystone.createContext({ skipAccessControl: true });
+    getFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
-    })
-  );
-  app.put('/feed/:entity', (req: any, res: any) =>
-    putFeedWorker(keystone, req, res).catch((err: any) => {
+    });
+  });
+  app.put('/feed/:entity', (req: any, res: any) => {
+    const context = keystone.createContext({ skipAccessControl: true });
+    putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
-    })
-  );
-  app.put('/feed/:entity/:id', (req: any, res: any) =>
-    putFeedWorker(keystone, req, res).catch((err: any) =>
+    });
+  });
+  app.put('/feed/:entity/:id', (req: any, res: any) => {
+    const context = keystone.createContext({ skipAccessControl: true });
+    putFeedWorker(context, req, res).catch((err: any) =>
       res.status(400).json({ result: 'error', error: '' + err })
-    )
-  );
-  app.delete('/feed/:entity/:id', (req: any, res: any) =>
-    deleteFeedWorker(keystone, req, res)
-  );
+    );
+  });
+  app.delete('/feed/:entity/:id', (req: any, res: any) => {
+    const context = keystone.createContext({ skipAccessControl: true });
+    deleteFeedWorker(context, req, res);
+  });
 
   app.put('/migration/import', async (req: any, res: any) => {
     const { MigrationFromV1 } = require('./batch/migrationV1');

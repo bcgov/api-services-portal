@@ -180,6 +180,12 @@ jobs:
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
               insecure-oidc-allow-unverified-email: 'true'
               oidc-email-claim: 'sub'
+              pass-basic-auth: 'false'
+              pass-access-token: 'true'
+              set-xauthrequest: 'true'
+              skip-jwt-bearer-tokens: 'false'
+              set-authorization-header: 'false'
+              pass-authorization-header: 'false'
 
           env:
             SESSION_SECRET:

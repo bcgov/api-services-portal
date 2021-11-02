@@ -3,6 +3,7 @@ import { Box, Center, Heading, Text } from '@chakra-ui/react';
 import Button from '@/components/button';
 import links from '@/shared/data/links';
 import { useRouter } from 'next/router';
+import querystring from 'querystring';
 
 import { useSession, UserSessionResult } from './use-session';
 
@@ -15,8 +16,14 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const session = useSession();
   const router = useRouter();
-  const route = links.find((d) => d.url === router?.pathname || d.altUrls?.includes(router?.pathname));
+  const route = links.find(
+    (d) => d.url === router?.pathname || d.altUrls?.includes(router?.pathname)
+  );
   const isUnauthorized = session.error && route?.access.length > 0;
+
+  if (session.status == 'loading') {
+    return <></>;
+  }
 
   return (
     <authContext.Provider value={session}>
@@ -33,7 +40,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Heading size="md">Unauthorized</Heading>
               <Text>You do not have permission to view this page.</Text>
             </Box>
-            <Button href="/admin/signin">Go to Home Page</Button>
+            <Button
+              href={`/admin/signin?${querystring.encode({
+                f: router?.asPath,
+              })}`}
+            >
+              Login
+            </Button>
           </Box>
         </Center>
       ) : (

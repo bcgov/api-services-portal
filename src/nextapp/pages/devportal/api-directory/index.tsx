@@ -6,7 +6,7 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
-import { Product } from '@/shared/types/query.types';
+import { Dataset } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
 
@@ -17,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<Product[]>('/ds/api/directory')
+    async () => await restApi<Dataset[]>('/ds/api/directory')
   );
 
   return {
@@ -32,7 +32,7 @@ const ApiDiscoveryPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
   const { data } = useQuery(queryKey, () =>
-    restApi<Product[]>('/ds/api/directory')
+    restApi<Dataset[]>('/ds/api/directory')
   );
 
   return (

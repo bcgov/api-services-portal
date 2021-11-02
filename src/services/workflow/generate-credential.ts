@@ -30,12 +30,14 @@ export const generateCredential = async (
   const flow = requestDetails.productEnvironment.flow;
 
   assert.strictEqual(
-    ['kong-api-key-acl', 'client-credentials'].includes(flow),
+    ['kong-api-key-acl', 'kong-api-key-only', 'client-credentials'].includes(
+      flow
+    ),
     true,
     'invalid_flow'
   );
 
-  if (flow == 'kong-api-key-acl') {
+  if (flow == 'kong-api-key-acl' || flow == 'kong-api-key-only') {
     const productEnvironment = await lookupProductEnvironmentServices(
       context,
       requestDetails.productEnvironment.id

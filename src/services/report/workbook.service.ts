@@ -17,11 +17,9 @@ import {
 
 export class WorkbookService {
   keystone: Keystone;
-  namespaces: string[];
 
-  constructor(keystone: Keystone, namespaces: string[]) {
+  constructor(keystone: Keystone) {
     this.keystone = keystone;
-    this.namespaces = namespaces;
   }
 
   public async buildWorkbook(): Promise<ExcelJS.Workbook> {

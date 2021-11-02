@@ -1,18 +1,8 @@
-import {
-  Controller,
-  OperationId,
-  Request,
-  Get,
-  Path,
-  Route,
-  Security,
-} from 'tsoa';
+import { Controller, OperationId, Get, Path, Route } from 'tsoa';
 import { KeystoneService } from './ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { syncRecords } from '../batch/feed-worker';
 import { gql } from 'graphql-request';
 import { Product } from '@/services/keystone/types';
-import { strict as assert } from 'assert';
 @injectable()
 @Route('/directory')
 export class DirectoryController extends Controller {
@@ -29,22 +19,61 @@ export class DirectoryController extends Controller {
       context: this.keystone.sudo(),
       query: list,
     });
-    return result.data.allDiscoverableProducts;
+    return transform(result.data.allDiscoverableProducts);
   }
 
   @Get('{id}')
   @OperationId('directory-item')
   public async get(@Path() id: string): Promise<any> {
-    const product: Product = (
-      await this.keystone.executeGraphQL({
-        context: this.keystone.sudo(),
-        query: item,
-        variables: { id },
-      })
-    ).data.DiscoverableProduct;
-    assert.strictEqual(product != null, true, `Product Not Found`);
-    return product;
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.sudo(),
+      query: item,
+      variables: { id },
+    });
+    return transform(
+      transformSetAnonymous(result.data.allDiscoverableProducts)
+    )[0];
   }
+}
+
+function transformSetAnonymous(products: Product[]) {
+  products.forEach((prod) => {
+    prod.environments.forEach((env) => {
+      env.services.forEach((svc) => {
+        svc.plugins &&
+          svc.plugins
+            .filter(
+              (plugin) =>
+                plugin.name == 'key-auth' || plugin.name == 'jwt-keycloak'
+            )
+            .forEach((plugin) => {
+              const config = JSON.parse(plugin.config);
+              if (config.anonymous) {
+                (env as any).anonymous = true;
+              }
+            });
+      });
+    });
+  });
+  return products;
+}
+function transform(products: Product[]) {
+  return products.reduce((accumulator: any, prod: any) => {
+    if (prod.dataset === null) {
+      // drop it
+    } else {
+      const dataset = accumulator.filter(
+        (a: any) => a.name === prod.dataset?.name
+      );
+      if (dataset.length == 0) {
+        accumulator.push(prod.dataset);
+        prod.dataset.products = [{ ...prod, dataset: null }];
+      } else {
+        dataset[0].products.push({ ...prod, dataset: null });
+      }
+    }
+    return accumulator;
+  }, []);
 }
 
 const list = gql`
@@ -58,6 +87,7 @@ const list = gql`
         flow
       }
       dataset {
+        id
         name
         title
         notes
@@ -74,19 +104,13 @@ const list = gql`
           title
         }
       }
-      organization {
-        title
-      }
-      organizationUnit {
-        title
-      }
     }
   }
 `;
 
 const item = gql`
   query GetProduct($id: ID!) {
-    DiscoverableProduct(where: { id: $id }) {
+    allDiscoverableProducts(where: { dataset: { id: $id } }) {
       id
       name
       environments {
@@ -96,6 +120,10 @@ const item = gql`
         services {
           name
           host
+          plugins {
+            name
+            config
+          }
         }
       }
       dataset {
@@ -115,12 +143,6 @@ const item = gql`
         organizationUnit {
           title
         }
-      }
-      organization {
-        title
-      }
-      organizationUnit {
-        title
       }
     }
   }
