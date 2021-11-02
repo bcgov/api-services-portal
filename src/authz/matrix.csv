@@ -115,6 +115,8 @@ Developer Role Rules,,,OrganizationUnit,read,,,,,portal-user,,,allow,
 Developer Role Rules,,,GatewayService,read,,,,,portal-user,,,allow,
 Developer Role Rules,,,GatewayRoute,read,,,,,portal-user,,,allow,
 Developer Role Rules,,,GatewayConsumer,read,,,,,portal-user,,,allow,
+Developer Role Rules,,,GatewayPlugin,read,,,,,portal-user,,,allow,
+Developer Role Rules,,,Metric,read,,,,,portal-user,,,allow,
 Developer Role Rules,,,Legal,read,,,,,portal-user,,,allow,
 Developer Role Rules,,,TemporaryIdentity,read,,,,,portal-user,,,allow,filterByTemporaryIdentity
 Developer Role Rules,,,User,read,,,,,portal-user,,,allow,filterBySelf
