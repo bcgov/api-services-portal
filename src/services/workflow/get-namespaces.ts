@@ -149,6 +149,13 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
 export async function getResourceServerContext(
   prodEnv: Environment
 ): Promise<ResourceServerContext> {
+  if (!prodEnv.credentialIssuer) {
+    logger.debug(
+      '[getResourceServerContext] Credential Issuer Undefined! %j',
+      prodEnv
+    );
+    return null;
+  }
   const issuerEnvConfig: IssuerEnvironmentConfig = checkIssuerEnvironmentConfig(
     prodEnv.credentialIssuer,
     prodEnv.name
