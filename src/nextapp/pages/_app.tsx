@@ -1,5 +1,12 @@
 import * as React from 'react';
-import { Box, ChakraProvider } from '@chakra-ui/react';
+import {
+  Box,
+  ChakraProvider,
+  Container,
+  Link,
+  List,
+  ListItem,
+} from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -22,6 +29,30 @@ import '@/shared/styles/global.css';
 
 import { AppWrapper } from './context';
 
+const footerItems = [
+  { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/about-gov-bc-ca',
+    text: 'About gov.bc.ca',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/disclaimer',
+    text: 'Disclaimer',
+  },
+  { href: 'http://www2.gov.bc.ca/gov/content/home/privacy', text: 'Privacy' },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/accessibility',
+    text: 'Accessibility',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/copyright',
+    text: 'Copyright',
+  },
+  {
+    href: 'http://www2.gov.bc.ca/gov/content/home/contact-us',
+    text: 'Contact Us',
+  },
+];
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
@@ -62,7 +93,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 name="viewport"
                 content="width=device-width, initial-scale=1, shrink-to-fit=no"
               />
-              <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+              <link href="/images/favicon.png" rel="icon" type="image/x-icon" />
             </Head>
             <Header site={site}>
               <AuthAction site={site} />
@@ -72,6 +103,48 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               <AppWrapper router={router}>
                 <Component {...pageProps} />
               </AppWrapper>
+            </Box>
+            <Box
+              as="footer"
+              mt={10}
+              bgColor="bc-blue"
+              borderTop="2px solid"
+              borderColor="bc-yellow"
+              color="white"
+            >
+              <Container
+                d="flex"
+                justifyContent="center"
+                flexDirection="column"
+                textAlign="center"
+                height={{ base: 'auto', md: '46px' }}
+                my={{ base: 4, md: 'none' }}
+                maxW="6xl"
+              >
+                <List
+                  display="flex"
+                  flexDirection={{ base: 'column', md: 'row' }}
+                  flexWrap={{ base: 'nowrap', md: 'wrap' }}
+                  alignItems="center"
+                  color="#fff"
+                  sx={{ '& li:last-child a': { border: 'none' } }}
+                >
+                  {footerItems.map((f) => (
+                    <ListItem key={f.text}>
+                      <Link
+                        href={f.href}
+                        d="inline-block"
+                        fontSize="xs"
+                        borderRight={{ base: 'none', md: '1px solid #4b5e7e' }}
+                        px="5px"
+                        py={{ base: '5px', md: 0 }}
+                      >
+                        {f.text}
+                      </Link>
+                    </ListItem>
+                  ))}
+                </List>
+              </Container>
             </Box>
           </AuthProvider>
         </ChakraProvider>

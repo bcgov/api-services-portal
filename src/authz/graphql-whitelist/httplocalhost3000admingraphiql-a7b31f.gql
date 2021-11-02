@@ -1,0 +1,15 @@
+{
+  myApplications {
+    id
+    appId
+    description
+    name
+    owner {
+      name
+    }
+  }
+  allTemporaryIdentities {
+    id
+    userId
+  }
+}

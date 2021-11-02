@@ -152,6 +152,7 @@ for (const _list of [
   'GatewayPlugin',
   'GatewayRoute',
   'GatewayService',
+  'Label',
   'Legal',
   'Metric',
   'Organization',
