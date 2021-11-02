@@ -77,7 +77,7 @@ export const ValidateActiveEnvironment = async (
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter((plugin: any) =>
             ['key-auth'].includes(plugin.name)
-          ).length != 2;
+          ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices

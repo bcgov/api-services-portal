@@ -30,10 +30,33 @@ export class DirectoryController extends Controller {
       query: item,
       variables: { id },
     });
-    return transform(result.data.allDiscoverableProducts)[0];
+    return transform(
+      transformSetAnonymous(result.data.allDiscoverableProducts)
+    )[0];
   }
 }
 
+function transformSetAnonymous(products: Product[]) {
+  products.forEach((prod) => {
+    prod.environments.forEach((env) => {
+      env.services.forEach((svc) => {
+        svc.plugins &&
+          svc.plugins
+            .filter(
+              (plugin) =>
+                plugin.name == 'key-auth' || plugin.name == 'jwt-keycloak'
+            )
+            .forEach((plugin) => {
+              const config = JSON.parse(plugin.config);
+              if (config.anonymous) {
+                (env as any).anonymous = true;
+              }
+            });
+      });
+    });
+  });
+  return products;
+}
 function transform(products: Product[]) {
   return products.reduce((accumulator: any, prod: any) => {
     if (prod.dataset === null) {
@@ -97,6 +120,10 @@ const item = gql`
         services {
           name
           host
+          plugins {
+            name
+            config
+          }
         }
       }
       dataset {
