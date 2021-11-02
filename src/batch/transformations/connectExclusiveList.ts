@@ -1,4 +1,9 @@
-export function connectExclusiveList(
+import { BatchService } from '../../services/keystone/batch-service';
+import { Logger } from '../../logger';
+
+const logger = Logger('batch.connectExclusiveList');
+
+export async function connectExclusiveList(
   keystone: any,
   transformInfo: any,
   currentData: any,
@@ -15,6 +20,15 @@ export function connectExclusiveList(
       .join(' ') === inputData[fieldKey + '_ids'].sort().join(' ')
   ) {
     return null;
+  }
+  // Because this is an exclusive list, delete records that are no longer relevant
+  const deleted = currentData[fieldKey]
+    .map((d: any) => d.id)
+    .filter((n: string) => !inputData[fieldKey + '_ids'].includes(n));
+  logger.debug('Deletions? %j', deleted);
+  if (deleted.length > 0) {
+    const batchService = new BatchService(keystone);
+    await batchService.removeAll(transformInfo.list, deleted);
   }
   return {
     disconnectAll: true,

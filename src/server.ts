@@ -216,9 +216,13 @@ const authStrategy =
             req: any,
             res: any
           ) => {
-            console.log('Token = ' + token);
-            console.log('Redirecting to /');
-            res.redirect(302, '/');
+            const redirect = req.query?.f ? req.query.f : '/';
+            // Doing a 302 redirect does not set the cookie properly because it is SameSite 'Strict'
+            // and the Origin of the request was from an IdP
+            res.header('Content-Type', 'text/html');
+            res.send(
+              `<html><head><meta http-equiv="refresh" content="0;URL='${redirect}'"></head></html>`
+            );
           },
         },
         hooks: {

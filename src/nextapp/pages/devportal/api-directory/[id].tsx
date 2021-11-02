@@ -87,7 +87,6 @@ const ApiPage: React.FC<
         <PageHeader
           breadcrumb={[
             { text: 'API Directory', href: '/devportal/api-directory' },
-            { text: data.title },
           ]}
           title={
             data.isInCatalog ? (
@@ -97,7 +96,7 @@ const ApiPage: React.FC<
                 target="_blank"
                 rel="noreferrer"
               >
-                {data?.name}
+                {data?.title}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -106,7 +105,7 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              data?.name
+              data?.title
             )
           }
         >
@@ -142,10 +141,10 @@ const ApiPage: React.FC<
               <Heading size="xs">Details</Heading>
             </Box>
             {data && detailItems.map((d) => <DetailItem detail={d} />)}
-            <Box as="header" my={4}>
+            {/* <Box as="header" my={4}>
               <Heading size="xs">Contact Info</Heading>
             </Box>
-            {data && contactItems.map((d) => <DetailItem detail={d} />)}
+            {data && contactItems.map((d) => <DetailItem detail={d} />)} */}
           </GridItem>
         </Grid>
       </Container>
@@ -173,10 +172,10 @@ const detailItems: DetailItem[] = [
     key: 'isInCatalog',
     isBool: true,
   },
-  {
-    title: 'More Info',
-    key: 'extSource',
-  },
+  // {
+  //   title: 'More Info',
+  //   key: 'extSource',
+  // },
 ];
 // TODO: Not sure what the source of this data is for these contact items, should adjust
 const contactItems: DetailItem[] = [

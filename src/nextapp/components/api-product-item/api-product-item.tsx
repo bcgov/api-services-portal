@@ -60,13 +60,15 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
             )}
           </GridItem>
         </Grid>
-        <NextLink href={isPublic ? '#try-url' : accessLink}>
-          <Button
-            rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
-          >
-            {isPublic ? 'Try this API' : 'Request Access'}
-          </Button>
-        </NextLink>
+        {!isPublic && (
+          <NextLink href={isPublic ? '#try-url' : accessLink}>
+            <Button
+              rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
+            >
+              {isPublic ? 'Try this API' : 'Request Access'}
+            </Button>
+          </NextLink>
+        )}
       </Flex>
       {isPublic && (
         <Flex px={9} py={7}>
@@ -82,11 +84,14 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
                 <Text ml={8} fontSize="sm">
                   Public access has a rate limit of 1000 requests per hour. For
                   elevated access, please{' '}
-                  <NextLink passHref href={accessLink}>
-                    <Link>Request Access</Link>
-                  </NextLink>
                 </Text>
               )}
+              <Text ml={8} fontSize="sm">
+                For elevated access, please{' '}
+                <NextLink passHref href={accessLink}>
+                  <Link>Request Access</Link>
+                </NextLink>
+              </Text>
             </GridItem>
           </Grid>
         </Flex>

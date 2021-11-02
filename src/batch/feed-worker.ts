@@ -59,7 +59,7 @@ const transformations = {
 //     return result
 // }
 
-export const putFeedWorker = async (keystone: any, req: any, res: any) => {
+export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
   const eid = 'id' in req.params ? req.params['id'] : req.body['id'];
   const json = req.body;
@@ -80,16 +80,16 @@ export const putFeedWorker = async (keystone: any, req: any, res: any) => {
       JSON.stringify(req.body)
   );
 
-  const context = keystone.createContext({ skipAccessControl: true });
+  //const context = keystone.createContext({ skipAccessControl: true });
   const result = await syncRecords(context, entity, eid, json);
   res.status(result.status).json(result);
 };
 
-export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
+export const deleteFeedWorker = async (context: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const eid = req.params['id'];
   const json = req.body;
-  const context = keystone.createContext({ skipAccessControl: true });
+  //const context = keystone.createContext({ skipAccessControl: true });
   const batchService = new BatchService(context);
 
   assert.strictEqual(feedEntity in metadata, true);
@@ -116,12 +116,12 @@ export const deleteFeedWorker = async (keystone: any, req: any, res: any) => {
   }
 };
 
-export const getFeedWorker = async (keystone: any, req: any, res: any) => {
+export const getFeedWorker = async (context: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const refKey = req.params['refKey'];
   const refKeyValue = req.params['refKeyValue'];
 
-  const context = keystone.createContext({ skipAccessControl: true });
+  //const context = keystone.createContext({ skipAccessControl: true });
   const batchService = new BatchService(context);
 
   assert.strictEqual(feedEntity in metadata, true);
@@ -190,7 +190,7 @@ function buildQueryResponse(md: any): string[] {
 }
 
 export const syncRecords = async function (
-  keystone: any,
+  context: any,
   feedEntity: string,
   eid: string,
   json: any,
@@ -205,7 +205,7 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
-  const batchService = new BatchService(keystone);
+  const batchService = new BatchService(context);
 
   // pre-lookup hook that can be used to handle special cases,
   // such as for Kong, cleaning up records where the service or route has been renamed
@@ -217,7 +217,7 @@ export const syncRecords = async function (
         true,
         `Hook ${hook} missing!`
       );
-      await hooks['pre-lookup'][hook](keystone, entity, md, eid, json);
+      await hooks['pre-lookup'][hook](context, entity, md, eid, json);
     }
   }
 
@@ -241,7 +241,7 @@ export const syncRecords = async function (
         if (transformInfo.syncFirst) {
           // handle these children independently first - return a list of IDs
           const allIds = await syncListOfRecords(
-            keystone,
+            context,
             transformInfo.list,
             json[transformKey]
           );
@@ -254,7 +254,7 @@ export const syncRecords = async function (
           json[transformKey + '_ids'] = allIds.map((status) => status.id);
         }
         const transformMutation = await transformations[transformInfo.name](
-          keystone,
+          context,
           transformInfo,
           null,
           json,
@@ -310,7 +310,7 @@ export const syncRecords = async function (
         if (transformInfo.syncFirst) {
           // handle these children independently first - return a list of IDs
           const allIds = await syncListOfRecords(
-            keystone,
+            context,
             transformInfo.list,
             json[transformKey]
           );
@@ -324,7 +324,7 @@ export const syncRecords = async function (
         }
 
         const transformMutation = await transformations[transformInfo.name](
-          keystone,
+          context,
           transformInfo,
           localRecord,
           json,

@@ -1,6 +1,9 @@
 import { Keystone } from '@keystonejs/keystone';
 import { injectable } from 'tsyringe';
 import { scopes, scopesToRoles } from '../../auth/scope-role-utils';
+import { Logger } from '../../Logger';
+
+const logger = Logger('controller');
 
 const resolveUsername = function (user: any) {
   for (const nm of ['preferred_username', 'clientId']) {
@@ -31,12 +34,13 @@ export class KeystoneService {
       id: null,
       username: resolveUsername(request.user),
       namespace: request.params.ns,
-      roles: scopesToRoles(_scopes),
+      roles: JSON.stringify(scopesToRoles(null, _scopes)),
       scopes: _scopes,
       userId: null,
     } as any;
+    logger.debug('identity %j', identity);
     const ctx = this.keystone.createContext({
-      skipAccessControl: true,
+      skipAccessControl: false,
       authentication: { item: identity },
     });
     ctx.req = request;

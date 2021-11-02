@@ -73,6 +73,24 @@ export const ValidateActiveEnvironment = async (
               '] missing or incomplete acl or key-auth plugin.'
           );
         }
+      } else if (flow == 'kong-api-key-only') {
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter((plugin: any) =>
+            ['key-auth'].includes(plugin.name)
+          ).length != 2;
+
+        // If we are changing the service list, then use that to look for violations, otherwise use what is current
+        const missing = resolvedServices
+          ? resolvedServices.filter(isServiceMissingAllPlugins)
+          : envServices.services.filter(isServiceMissingAllPlugins);
+
+        if (missing.length != 0) {
+          addValidationError(
+            '[' +
+              missing.map((s: any) => s.name).join(',') +
+              '] missing or incomplete key-auth plugin.'
+          );
+        }
       } else if (flow == 'kong-acl-only') {
         const isServiceMissingAllPlugins = (svc: any) =>
           svc.plugins.filter((plugin: any) => ['acl'].includes(plugin.name))

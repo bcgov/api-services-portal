@@ -41,6 +41,9 @@ export const getSessionL = async (): Promise<UserData> => {
     });
     if (req.ok) {
       const json = await req.json();
+      if (json.anonymous) {
+        throw new Error('Anonymous');
+      }
       return json.user;
     }
     if (req.status == 401 || req.status == 403) {
