@@ -35,7 +35,8 @@ export interface ApiProductItemProps {
 }
 
 const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
-  const isPublic = data.environments.some((e) => e.anonymous);
+  const isPublic = data.environments.some((e) => e.flow === 'public');
+  const isTiered = data.environments.some((e) => e.anonymous);
   const accessLink = `/devportal/requests/new/${id}`;
 
   return (
@@ -47,7 +48,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
             <Flex align="center" mb={2}>
               <Flex align="center" width={8}>
                 <Icon
-                  as={isPublic ? RiEarthFill : FaLock}
+                  as={isPublic || isTiered ? RiEarthFill : FaLock}
                   color="bc-blue"
                   boxSize="5"
                 />
@@ -61,7 +62,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
             )}
           </GridItem>
         </Grid>
-        {!isPublic && (
+        {!isPublic && !isTiered && (
           <NextLink href={isPublic ? '#try-url' : accessLink}>
             <Button
               rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
@@ -71,7 +72,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
           </NextLink>
         )}
       </Flex>
-      {isPublic && (
+      {isTiered && (
         <Flex px={9} py={7} bg={'white'} my={-1}>
           <Grid gap={4} flex={1} templateRows="auto" mr={12}>
             <GridItem>
@@ -83,8 +84,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               </Flex>
               {data.description && (
                 <Text ml={8} fontSize="sm">
-                  Public access has a rate limit of 1000 requests per hour. For
-                  elevated access, please{' '}
+                  Public access has a rate limit enforced.
                 </Text>
               )}
               <Text ml={8} fontSize="sm">
