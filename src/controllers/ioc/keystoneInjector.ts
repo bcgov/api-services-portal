@@ -28,7 +28,7 @@ export class KeystoneService {
     return this.keystone.createContext({ skipAccessControl: true });
   }
 
-  public createContext(request: any): any {
+  public createContext(request: any, skipAccessControl: boolean = false): any {
     const _scopes = scopes(request.user.scope);
     const identity = {
       id: null,
@@ -40,7 +40,7 @@ export class KeystoneService {
     } as any;
     logger.debug('identity %j', identity);
     const ctx = this.keystone.createContext({
-      skipAccessControl: false,
+      skipAccessControl,
       authentication: { item: identity },
     });
     ctx.req = request;
