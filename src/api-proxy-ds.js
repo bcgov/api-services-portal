@@ -22,7 +22,6 @@ class ApiDSProxyApp {
           'Authorization',
           `Bearer ${req.header('x-forwarded-access-token')}`
         );
-        console.log(proxyReq.headers);
       },
       onError: (err, req, res, target) => {
         console.log('CAUGHT ERROR!');

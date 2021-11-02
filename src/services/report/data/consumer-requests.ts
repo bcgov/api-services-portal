@@ -9,13 +9,14 @@ interface ReportOfConsumerRequest {
   namespace: string;
   prod_name: string;
   prod_env_name: string;
+  prod_env_app_id: string;
   prod_env_flow: string;
   app_name: string;
   app_id: string;
-  app_owner: string;
-  created: string;
-  reviewer: string;
-  result: string;
+  requestor: string;
+  req_created: string;
+  req_reviewer: string;
+  req_result: string;
   consumer_username: string;
 }
 
@@ -37,13 +38,14 @@ export async function getConsumerRequests(
           namespace: ns.name,
           prod_name: req.productEnvironment?.product?.name,
           prod_env_name: req.productEnvironment?.name,
+          prod_env_app_id: req.productEnvironment?.appId,
           prod_env_flow: req.productEnvironment?.flow,
           app_name: req.application.name,
           app_id: req.application.appId,
-          app_owner: req.application.owner.name,
-          created: req.createdAt,
-          reviewer: '',
-          result: req.isComplete
+          requestor: req.requestor.username,
+          req_created: req.createdAt,
+          req_reviewer: '',
+          req_result: req.isComplete
             ? req.isApproved
               ? 'Approved'
               : 'Rejected'

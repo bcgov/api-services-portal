@@ -19,12 +19,12 @@ export async function getAccessRequestsByNamespace(
         isApproved
         isIssued
         isComplete
+        requestor {
+          username
+        }
         application {
           name
           appId
-          owner {
-            username
-          }
         }
         requestor {
           username
@@ -43,6 +43,7 @@ export async function getAccessRequestsByNamespace(
             username
           }
         }
+        createdAt
       }
     }
   `;

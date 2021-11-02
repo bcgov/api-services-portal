@@ -1,6 +1,5 @@
-
-
 # Oauth Proxy
+
 ```
 export COOKIE_SECRET=""
 export OIDC_CLIENT_ID=""
@@ -29,9 +28,9 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --pass-access-token=true \
     --set-xauthrequest=true \
     --skip-jwt-bearer-tokens=false \
-    --set-authorization-header=true \
-    --pass-authorization-header=true \
-    --skip-auth-regex="/home|/public|/docs|/_next|/images|/devportal|/manager|/signout" \
+    --set-authorization-header=false \
+    --pass-authorization-header=false \
+    --skip-auth-regex="/home|/public|/docs|/_next|/images|/devportal|/manager|/ds/api|/signout" \
     --whitelist-domain="${OIDC_ISSUER_HOSTNAME}" \
     --upstream="http://${hostip}:3000"
 ```
