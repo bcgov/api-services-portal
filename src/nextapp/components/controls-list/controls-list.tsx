@@ -18,13 +18,19 @@ import ModelIcon from '../model-icon/model-icon';
 import IpRestriction from '../controls/ip-restriction';
 import RateLimiting from '../controls/rate-limiting';
 import DeleteControl from './delete-control';
+import { QueryKey } from 'react-query';
 
 interface ControlsListProps {
   consumerId: string;
   data: GatewayPlugin[];
+  queryKey: QueryKey;
 }
 
-const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
+const ControlsList: React.FC<ControlsListProps> = ({
+  consumerId,
+  data,
+  queryKey,
+}) => {
   const getIcon = React.useCallback((name: string) => {
     switch (name) {
       case 'rate-limiting':
@@ -89,7 +95,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                         <IpRestriction
                           data={d}
                           id={consumerId}
-                          queryKey={['consumer', consumerId]}
+                          queryKey={queryKey}
                           mode="edit"
                         />
                       )}
@@ -97,7 +103,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                         <RateLimiting
                           data={d}
                           id={consumerId}
-                          queryKey={['consumer', consumerId]}
+                          queryKey={queryKey}
                           mode="edit"
                         />
                       )}
@@ -147,6 +153,7 @@ const ControlsList: React.FC<ControlsListProps> = ({ consumerId, data }) => {
                       <DeleteControl
                         consumerId={consumerId}
                         pluginExtForeignKey={d.extForeignKey}
+                        queryKey={queryKey}
                       />
                     </ButtonGroup>
                   </GridItem>

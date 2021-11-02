@@ -188,10 +188,22 @@ const AccessRequestPage: React.FC<
                     borderRadius={4}
                     mb={4}
                   >
-                    <IpRestriction id={id} mode="create" queryKey={queryKey} />
-                    <RateLimiting id={id} mode="create" queryKey={queryKey} />
+                    <IpRestriction
+                      id={data?.AccessRequest.serviceAccess?.consumer.id}
+                      mode="create"
+                      queryKey={queryKey}
+                    />
+                    <RateLimiting
+                      id={data?.AccessRequest.serviceAccess?.consumer.id}
+                      mode="create"
+                      queryKey={queryKey}
+                    />
                   </HStack>
-                  <ControlsList consumerId={id} data={plugins} />
+                  <ControlsList
+                    consumerId={data?.AccessRequest.serviceAccess?.consumer.id}
+                    data={data?.AccessRequest.serviceAccess?.consumer.plugins}
+                    queryKey={queryKey}
+                  />
                 </TabPanel>
                 <TabPanel p={0}>
                   <FormControl>
@@ -322,6 +334,26 @@ const query = gql`
       }
       serviceAccess {
         id
+        consumer {
+          id
+          username
+          plugins {
+            id
+            name
+            extForeignKey
+            config
+            service {
+              id
+              name
+              extForeignKey
+            }
+            route {
+              id
+              name
+              extForeignKey
+            }
+          }
+        }
       }
       productEnvironment {
         name
