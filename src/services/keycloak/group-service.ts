@@ -20,7 +20,7 @@ export class KeycloakGroupService {
     clientId: string,
     clientSecret: string
   ): Promise<KeycloakGroupService> {
-    logger.debug('[login] %s:%s', clientId, clientSecret);
+    logger.debug('[login] %s', clientId);
 
     await this.kcAdminClient
       .auth({

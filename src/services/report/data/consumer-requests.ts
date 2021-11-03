@@ -50,7 +50,7 @@ export async function getConsumerRequests(
               ? 'Approved'
               : 'Rejected'
             : 'Pending',
-          consumer_username: req.serviceAccess.consumer.username,
+          consumer_username: req.serviceAccess?.consumer?.username,
         });
       });
       return data;
