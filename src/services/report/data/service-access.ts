@@ -101,9 +101,11 @@ export async function getServiceAccess(
             service.name,
             allowedIssuers
           );
-          for (const resSvcCtx of resSvcCtxs.filter((svcCtx) =>
-            allowedIssuers.includes(svcCtx.issuerEnvConfig.issuerUrl)
-          )) {
+          for (const resSvcCtx of resSvcCtxs
+            .filter((svcCtx) => svcCtx)
+            .filter((svcCtx) =>
+              allowedIssuers.includes(svcCtx.issuerEnvConfig.issuerUrl)
+            )) {
             data.push(
               ...(await fillClientScopeBasedAccess(resSvcCtx, partial))
             );
