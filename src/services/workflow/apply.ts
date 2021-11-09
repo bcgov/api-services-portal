@@ -306,6 +306,8 @@ async function setupAuthorizationAndEnable(
     );
 
     await markActiveTheServiceAccess(context, setup.serviceAccessId);
+  } else if (flow == 'kong-api-key-only') {
+    await markActiveTheServiceAccess(context, setup.serviceAccessId);
   }
 
   // Update the ACLs in Kong if they are enabled

@@ -10,6 +10,7 @@ const {
 const { Markdown } = require('@keystonejs/fields-markdown');
 const slugify = require('slugify');
 const { logger } = require('../logger');
+const { FieldEnforcementPoint } = require('../authz/enforcement');
 
 module.exports = {
   labelField: 'title',
@@ -44,6 +45,7 @@ module.exports = {
       adminConfig: {
         isReadOnly: false,
       },
+      access: FieldEnforcementPoint,
     },
     tags: {
       type: Text,

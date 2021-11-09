@@ -68,7 +68,7 @@ export function expressAuthentication(
             if (authzerr) {
               reject(new Error('Access Denied'));
             } else {
-              resolve(request.oauth_user);
+              resolve({ ...request.oauth_user, ...{ scope: scopes[0] } });
             }
           }
         );

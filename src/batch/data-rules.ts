@@ -396,13 +396,14 @@ export const metadata = {
       'order',
       'isPublic',
       'isComplete',
+      'namespace',
       'tags',
       'publishDate',
       'slug',
     ],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
-      namespace: { name: 'mapNamespace' },
+      namespace: { name: 'mapNamespace', update: false },
     },
   },
   ContentBySlug: {

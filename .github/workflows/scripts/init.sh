@@ -2,6 +2,7 @@
 
 python scripts/template.py scripts/feeder-init/legal.yaml legal.yaml
 python scripts/template.py scripts/feeder-init/platform-authz-profile.yaml platform-authz-profile.yaml
+python scripts/template.py scripts/feeder-init/platform-dataset.yaml platform-dataset.yaml
 python scripts/template.py scripts/feeder-init/platform-gwa-api.yaml platform-gwa-api.yaml
 
 while true; do
@@ -15,6 +16,7 @@ while true; do
         sleep 5
         curl --fail -v http://localhost:8080/push -F yaml=@legal.yaml
         curl --fail -v http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@platform-dataset.yaml
         curl --fail -v http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
         kill $FWD_PID
         break

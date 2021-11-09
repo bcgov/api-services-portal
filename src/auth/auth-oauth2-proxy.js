@@ -11,7 +11,7 @@ const querystring = require('querystring');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
-const { deriveRoleFromUsername } = require('./scope-role-utils');
+const { deriveRoleFromUsername, scopesToRoles } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
 const authLogoutUrl =
@@ -232,22 +232,7 @@ class Oauth2ProxyAuthStrategy {
   async assign_namespace(jti, newJti, username, umaAuthDetails) {
     const namespace = umaAuthDetails['rsname'];
     const scopes = umaAuthDetails['scopes'];
-    const _roles = [];
-    if (scopes.includes('Namespace.Manage')) {
-      _roles.push('api-owner');
-    }
-    if (scopes.includes('Namespace.View')) {
-      _roles.push('provider-user');
-    }
-    if (scopes.includes('CredentialIssuer.Admin')) {
-      _roles.push('credential-admin');
-    }
-    if (scopes.includes('Access.Manage')) {
-      _roles.push('access-manager');
-    }
-
-    _roles.push('portal-user');
-    _roles.push(deriveRoleFromUsername(username));
+    const _roles = scopesToRoles(username, scopes);
 
     const roles = JSON.stringify(_roles);
 

@@ -119,7 +119,7 @@ export class BatchService {
     logger.debug('[removeAll] : %s %s', entity, ids);
     const result = await this.context.executeGraphQL({
       query: `mutation ($ids: [ID!]) {
-              delete${entity}s(ids: $ids)
+              delete${entity}s(ids: $ids) { id }
             }`,
       variables: { ids: ids },
     });

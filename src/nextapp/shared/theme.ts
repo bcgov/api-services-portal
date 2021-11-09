@@ -1,6 +1,5 @@
-import { getServerSideProps } from '@/pages/devportal/access';
 import { extendTheme, withDefaultVariant } from '@chakra-ui/react';
-import { mode, transparentize } from '@chakra-ui/theme-tools';
+import { transparentize } from '@chakra-ui/theme-tools';
 
 const colors = {
   'bc-blue': '#003366',
@@ -15,6 +14,7 @@ const colors = {
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
   'bc-background': '#f1f1f1',
+  'bc-divider': '#e8e8e8',
   ui: {
     500: '#606060',
   },

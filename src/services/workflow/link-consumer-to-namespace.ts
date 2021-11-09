@@ -57,7 +57,7 @@ export const LinkConsumerToNamespace = async (
   // Create a ServiceAccess record
   const serviceAccessId = await addServiceAccess(
     context,
-    consumerUsername,
+    `${consumerUsername} access to ${namespace}`,
     true,
     false,
     consumerType,

@@ -20,7 +20,7 @@ export class KeycloakGroupService {
     clientId: string,
     clientSecret: string
   ): Promise<KeycloakGroupService> {
-    logger.debug('[login] %s:%s', clientId, clientSecret);
+    logger.debug('[login] %s', clientId);
 
     await this.kcAdminClient
       .auth({
@@ -54,6 +54,26 @@ export class KeycloakGroupService {
       logger.debug('[createIfMissing] CREATED %s', groupName);
     } else {
       logger.debug('[createIfMissing] EXISTS %s', groupName);
+    }
+  }
+
+  public async getGroup(parentGroupName: string, groupName: string) {
+    const groups = (await this.kcAdminClient.groups.find()).filter(
+      (group: GroupRepresentation) => group.name == parentGroupName
+    );
+    if (
+      groups[0].subGroups.filter(
+        (group: GroupRepresentation) => group.name == groupName
+      ).length == 0
+    ) {
+      logger.debug('[getGroup] MISSING %s', groupName);
+      return null;
+    } else {
+      logger.debug('[getGroup] FOUND   %s', groupName);
+      const grp = groups[0].subGroups.filter(
+        (group: GroupRepresentation) => group.name == groupName
+      )[0];
+      return await this.kcAdminClient.groups.findOne({ id: grp.id });
     }
   }
 }
