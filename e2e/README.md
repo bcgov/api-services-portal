@@ -1,121 +1,122 @@
-# End-to-End Test Automation
+# End-to-End Test Automation 
 
-This repository contains a testing solution, with the tests written in Cypress.
+The API Service Portal repository contains a testing solution with the tests written in Cypress.
 
-Additionally this app is configured to run tests locally and Docker.
+The API Service Portal is configured to run tests locally and in Docker.
 
-The tests are written to be directly compared to the official API Services Portal tests.
+The End-to-End (E2E) automation tests are written to be directly compared to the official API Services Portal tests.
 
-Each test covers the same functionality found in the official API Services Portal tests but utilizes the Cypress API.
+Each E2E test covers the same functionality found in the official API Services Portal tests, but uses the Cypress API.
 
-## Help + Testing
+## Help and Testing 
 
-The steps below will take you all the way through Cypress. It is assumed you have nothing installed except for node + git.
+The following steps will guide you through installing and configuring Cypress as well as running tests. Before installing Cypress ensure you have Node, Git, and Docker installed on your local machine.
 
-Using Cypress with Windows requires having WSL2 installed. Instructions on using Cypress with Windows can be found below.
+Note: Using Cypress with Windows requires having Windows Subsystem for Linux 2 (WSL 2) installed. Instructions on using Cypress with Windows can be found in the *Cypress on Windows* section.
 
-**If you get stuck, here is more help:**
+If you get stuck, here is more help: 
 
 - [Gitter Channel](https://gitter.im/cypress-io/cypress)
-- [Cypress Docs](https://on.cypress.io)
+- [Cypress Docs](https://on.cypress.io/)
 - [Cypress CLI Tool Docs](https://github.com/cypress-io/cypress-cli)
 
-### 1. Install Cypress
+## 1. Install Cypress 
 
-[Follow these instructions to install Cypress.](https://docs.cypress.io/guides/getting-started/installing-cypress)
+Install Cypress on your local machine by following [these instructions](https://docs.cypress.io/guides/getting-started/installing-cypress) on the Cypress website.
 
-### 1.1 Build Gateway API Image
+### 1.1 Build Gateway API Image 
 
-Clone and build the Dockerfile within the [bcgov / gwa-api](https://github.com/bcgov/gwa-api) repo. Dockerfile is located in `./microservices/gatewayApi`. Build with the following command: `docker build -t gateway-api:e2e-testing .`. Wait for the image to build before proceeding.
+- Clone and build the Dockerfile within the [bcgov / gwa-api](https://github.com/bcgov/gwa-api) repository. Dockerfile is located in `./microservices/gatewayApi`.
+- Use the following command to build the Dockerfile: `docker build -t gateway-api:e2e-testing .`.
+- **Important**: Wait for the image to build before proceeding.
 
-### 2. Run Tests
+## 2. Overview - Running Tests
 
-- Clone this repository
-- Run `./e2e $ npm install` to install all the dependencies
+- Clone the API Service Portal repository.
+- Run `./e2e $ npm i` to install all the dependencies.
 
-#### 2.1 Locally
+### 2.1 Running Cypress Locally 
 
-- Create a new file `cypress.json` from `cypress.local.json` and update any params if necessary
+- If `cypress.json` is not present in the ./e2e directory then copy `cypress.local.json` and rename to `cypress.json` and update any parameters, if necessary.
 
-##### 2.1.1 Cypress Test Runner
+#### 2.1.1 Cypress Test Runner 
 
-- Run `./e2e $ npm run cy:open` to open the test runner and execute tests selectively
+- Run `./e2e $ npm run cy:open` to open the test runner and selectively execute tests.
 
-##### 2.2.2 Cypress Headless
+#### 2.1.2 Cypress Headless 
 
-- Run `npm run cy:run` to run the tests and print the results to the console
-- Run `npm run cy:run:dev:html` to run the tests and generate `mochawesome` report under `results/report`
+- Run `npm run cy:run` to execute the tests and print the results to the console.
+- Run `npm run cy:run:dev:html` to execute the tests and generate the `mochawesome` report under `results/report`.
 
-#### 2.2 Docker Compose
+### 2.2 Docker Compose 
 
-- Run `docker-compose up` under parent folder `api-services-portal` to spin up a local environment, which includes cypress as one of the service and it executes the tests
-- Run `docker-compose down` to tear down the containers
+- Run `./ $ docker-compose up` to spin up a local environment, which includes Cypress as one of the services. Cypress executes the tests.
+- Run `./ $ docker-compose down` to tear down the development environment.
 
-#### 2.4 GitHub Actions
+#### 2.3 GitHub Actions 
 
-- Any new commit pushed to `feature/automation-*` branch triggers a job (`.github/workflows/aps-cypress-e2e.yaml`) and deploys a container to execute the test suite
+- Any new commit pushed to `feature/automation-*` branch triggers a job (`.github/workflows/aps-cypress-e2e.yaml`) and deploys a container to execute the test suite.
 
-## Cypress on Windows
+## 3. Cypress on Windows 
 
-You will need a copy of the project on both your local machine and within your WSL2/Linux distro. Instructions pertaining to either WSL2 or Local Machine will be prefaced with `WSL` and `LM` respectively.
+You will need a copy of the API Service Portal on both your local machine and within your WSL 2/Linux distribution. Instructions pertaining to either
 
-### 1. `WSL` AND `LM`: Clone Repos
+WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the following sections.
 
-- Clone a copy of [bcgov / api-services-portal](https://github.com/bcgov/api-services-portal).
-- In both the local machine and WSL application directories, switch to a branch for testing. Eg: `util/expand-automation`.
+### 3.1 `WSL`  and  `LM` : Clone Repositories 
 
-### 2. `WSL`: Build Gateway API Image
+- Clone [bcgov / api-services-portal](https://github.com/bcgov/api-services-portal).
+- In both your local machine and WSL application directories switch to a branch for testing (e.g., `util/expand-automation`).
 
-- Clone and build the Dockerfile within the [bcgov / gwa-api](https://github.com/bcgov/gwa-api) repo. Dockerfile is located in `./microservices/gatewayApi`.
-- Build with the following command: `docker build -t gateway-api:e2e-testing .`.
-- Wait for the image to build before proceeding.
+### 3.2 `WSL`: Build Gateway API Image 
 
-### 3. `WSL`: Build and Run Dev Environment
+- Clone and build the Dockerfile within the [bcgov / gwa-api](https://github.com/bcgov/gwa-api) repository. Dockerfile is located in `./microservices/gatewayApi`.
+- Build the Dockerfile using the `docker build -t gateway-api:e2e-testing .` command.
+- **Important**: Wait for the image to build before proceeding.
 
-- Inside `api-services-portal` directory, build/run the application by running `docker-compose up` at project root.
+### 3.3. `WSL`: Build and Run Dev Environment 
 
-### 4. `LM`: Install E2E Testing Dependencies
+- Inside the `api-services-portal` directory, build and run the application by running `docker-compose up` at the project root.
 
-- Inside `api-services-portal` directory, install npm dependencies: `./e2e $ npm i`.
+### 3.4 `LM`: Install E2E Testing Dependencies 
 
-### 5. `LM`: Run Cypress
+- Inside the `api-services-portal` directory, install npm dependencies using the `./e2e $ npm i` command.
 
-- Run Cypress using one of the run commands such as `./e2e $ npm run cy:open`.
+### 3.5 `LM`: Run Cypress 
 
-## Running Tests with cy:open
+- Run Cypress using a run command such as `./e2e $ npm run cy:open`.
 
-After running `npm run cy:open`, the Cypress console will open. Before continuing, be sure the `Electron` browser is selected from the drop down in the top-right corner of console.
+## 4. Creating Tests
 
-Each test file defined in the `./e2e/cypress/tests` directory will be visible. Click on a test in order to run all test cases in that file. A browser window will pop up and you will see your tests executed sequentially. 
+After you run `npm run cy:open`, the Cypress console will open. Before continuing, ensure the `Electron` browser is selected from the drop-down list of available browsers (top-right corner of the Cypress test runner).
 
-## Creating Tests
+Each test file defined in the `./e2e/cypress/tests` directory will be visible. Click on a test in order to run all test cases in that file. A new browser window will open and you will see your tests executed sequentially.
 
-### Test File Naming Convention and Location
+### 4.1 Test File Naming Convention and Location 
 
-- Test files follow this naming convention: `<num>-<test-name>.spec.ts`.
-  - Eg: `01-create-api.spec.ts`
-- Place test files in the `./e2e/cypress/tests` directory.
+- Test files follow this naming convention: `<num>-<test-name>.spec.ts`. (e.g., `01-create-api.spec.ts`)
+- Store the test files in the `./e2e/cypress/tests` directory.
 
-### Test File Structure
+### 4.2 Test File Structure 
 
-Test files will generally have the following structure.
+Test files will generally have the structure as shown in the following example.
 
-Note the `before()`, `beforeEach()`, and `after()` hooks which are generally added to each test file. You may add in additional functionality to each hook. [Additional hooks](https://docs.cypress.io/guides/references/bundled-tools#Mocha) are also available, including `afterEach()` and `skip()`.
+Note the `before()`, `beforeEach()`, and `after()` hooks, which are generally added to each test file. You can add additional functionality to each hook. [Additional hooks](https://docs.cypress.io/guides/references/bundled-tools#Mocha) are also available including `afterEach()` and `skip()`.
 
 ```js
 import MyPageObject from '../pageObjects/myPageObject'
 
 describe('Some set of tests', () => {
-  
+
   const pageObject = new MyPageObject();
-  
+
   // Runs prior to all tests in this file. 
   before(() => {
     cy.visit('/');
     cy.clearCookies();
     cy.reload();
   })
-  
+
   // Runs before each test. Must at least preserve cookies.
   beforeEach(() => {
     cy.preserveCookies();
@@ -124,13 +125,13 @@ describe('Some set of tests', () => {
     // If needed: visit path to page
     cy.visit(pageObject.path);
   })
-  
+
   it('tests something', () => {
     // Test case logic goes here
   });
-  
+
   // More test cases
-  
+
   // Runs after all tests.
   after(() => {
     cy.logout();
@@ -138,34 +139,31 @@ describe('Some set of tests', () => {
 })
 ```
 
-### Directory Structure
+### 4.3 Directory Structure 
 
-Be sure to place files necessary to run tests in the appropriate directory.
+Ensure that you place all the files necessary to run tests in the appropriate directory.
 
-Inside `./e2e/cypress`:
+Inside the `./e2e/cypress` directory:
 
-- `/downloads`: Any files that get downloaded while running the tests.
-- `/fixtures`: Files with fixed data to ensure repeatable test results. Includes things like like login credentials for API owners, developers, client IDs/secrets, etc.
-- `/pageObjects`: Test objects relevant to testing application.
-- `/plugins`: Files that enable you to tap into, modify, or extend the internal behavior of Cypress.
-- `/support`: Path to file to load before test files load.
-- `/tests`: Contains the actual test files.
+- `/downloads`: Any files downloaded while running the tests
+- `/fixtures`: Files with fixed data to ensure repeatable test results including items such a login credentials for API owners, developers, client IDs/secrets
+- `/pageObjects`: Test objects relevant to the testing application
+- `/plugins`: Files that enable you to tap into, modify, or extend the internal behavior of Cypress
+- `/support`: Path to the file to load before the test files load
+- `/tests`: Actual test files
 
-## Cypress IntelliSense
+### 4.4 Cypress IntelliSense 
 
-If you use modern IDE that supports TypeScript (like VSCode), you can benefit
-from Cypress type declarations included with the `cypress` NPM module. Just
-add `@ts-check` to the spec file and configure "dummy"
-[tsconfig.json](tsconfig.json) file and see IntelliSense over `cy.<something>`
-commands.
+If you use a modern Integrated Development Environment (IDE) that supports TypeScript (like VSCode), you can benefit from Cypress type declarations included with the `cypress` NPM module. Add `@ts-check` to the specification file and configure a dummy [tsconfig.json](https://github.com/bcgov/api-services-portal/blob/util/expand-automation/e2e/tsconfig.json) file and you will see the IntelliSense over `cy.<something>` commands.
 
-### Custom commands
+### 4.5 Custom Commands 
 
-- This project also adds several custom commands in [cypress/support/index.js](cypress/support/index.ts).
-- To let TypeScript compiler know that we have added a custom command and have IntelliSense working, I have described the type signature of the custom command in file [cypress/support/global.d.ts](cypress/support/global.d.ts).
-- To include the new ".d.ts" file into IntelliSense, I could update `tsconfig.json` or I could add another special comment to the JavaScript spec files - `/// <reference types="...>`.
+- Custom Cypress commands can be found in the [cypress/support/index.js](https://github.com/bcgov/api-services-portal/blob/util/expand-automation/e2e/cypress/support/index.ts) directory.
+- To let the TypeScript compiler know that a custom command has been added and ensure IntelliSense is working, the type signature of the custom command is described in file [cypress/support/global.d.ts](https://github.com/bcgov/api-services-portal/blob/util/expand-automation/e2e/cypress/support/global.d.ts).
+- To include the new `.d.ts` file in IntelliSense, you can update `tsconfig.json` or add another special comment to the JavaScript spec files -
+  `/// <reference types="...>`.
 
-```js
+```html
 // type definitions for Cypress object "cy"
 /// <reference types="cypress" />
 
@@ -173,4 +171,4 @@ commands.
 /// <reference types="../support" />
 ```
 
-**Related:** [IntelliSense for custom Chai assertions added to Cypress](https://github.com/cypress-io/cypress-example-recipes/tree/master/examples/extending-cypress__chai-assertions#code-completion)
+See the [Cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes) repository for information on IntelliSense and adding Chai assertions to Cypress.
