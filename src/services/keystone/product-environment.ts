@@ -6,11 +6,11 @@ const logger = Logger('keystone.prod-env');
 
 export async function lookupProductEnvironmentServices(
   context: any,
-  id: string
+  prodEnvId: string
 ): Promise<Environment> {
   const result = await context.executeGraphQL({
-    query: `query GetProductEnvironmentServices($id: ID!) {
-                    allEnvironments(where: {id: $id}) {
+    query: `query GetProductEnvironmentServices($prodEnvId: ID!) {
+                    allEnvironments(where: {id: $prodEnvId}) {
                         appId
                         id
                         name
@@ -40,13 +40,13 @@ export async function lookupProductEnvironmentServices(
                         }
                     }
                 }`,
-    variables: { id: id },
+    variables: { prodEnvId },
   });
-  logger.debug('Query result %j', result);
+  logger.debug('[lookupProductEnvironmentServices] result %j', result);
   assert.strictEqual(
     result.data.allEnvironments.length,
     1,
-    'ProductEnvironmentNotFound ' + id
+    'ProductEnvironmentNotFound ' + prodEnvId
   );
 
   result.data.allEnvironments[0].services.map((svc: GatewayService) =>
@@ -93,7 +93,7 @@ export async function lookupProductEnvironmentServicesBySlug(
                 }`,
     variables: { appId: appId },
   });
-  logger.debug('Query result %j', result);
+  logger.debug('[lookupProductEnvironmentServicesBySlug] result %j', result);
   assert.strictEqual(
     result.data.allEnvironments.length,
     1,
@@ -108,10 +108,10 @@ export async function lookupProductEnvironmentServicesBySlug(
 export async function lookupEnvironmentAndIssuerUsingWhereClause(
   context: any,
   where: EnvironmentWhereInput
-) {
+): Promise<Environment> {
   logger.debug('[lookupEnvironmentAndIssuerUsingWhereClause] WHERE %j', where);
   const result = await context.executeGraphQL({
-    query: `query GetCredentialIssuerByEnvironmentId($where: EnvironmentWhereInput!) {
+    query: `query GetCredentialIssuerByWhereClause($where: EnvironmentWhereInput!) {
                     allEnvironments(where: $where) {
                         id
                         name
@@ -145,6 +145,47 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
   return result.data.allEnvironments[0];
 }
 
+export async function lookupEnvironmentsByNS(
+  context: any,
+  ns: string
+): Promise<Environment[]> {
+  logger.debug('[lookupEnvironmentsByNS] WHERE ns=%s', ns);
+  const result = await context.executeGraphQL({
+    query: `query GetEnvironmentsByNamespace($ns: String!) {
+                    allEnvironments(where: { product: { namespace: $ns } }) {
+                        id
+                        appId
+                        name
+                        flow
+                        approval
+                        product {
+                          name
+                        }
+                        legal {
+                          reference
+                        }
+                        credentialIssuer {
+                          id
+                          name
+                          flow
+                          mode
+                          availableScopes
+                          clientRoles
+                          resourceType
+                          resourceAccessScope
+                          environmentDetails
+                        }
+                    }
+                }`,
+    variables: { ns },
+  });
+  logger.debug(
+    '[lookupEnvironmentsByNS] result count %d',
+    result.data.allEnvironments.length
+  );
+  return result.data.allEnvironments;
+}
+
 export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
   const result = await context.executeGraphQL({
     query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
@@ -167,7 +208,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                 }`,
     variables: { id: id },
   });
-  logger.debug('Query result %j', result);
+  logger.debug('[lookupEnvironmentAndIssuerById] result %j', result);
   assert.strictEqual(
     result.data.Environment == null,
     false,

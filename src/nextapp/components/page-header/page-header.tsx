@@ -7,7 +7,8 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
+import { uid } from 'react-uid';
+import { BsChevronRight } from 'react-icons/bs';
 
 interface PageHeaderProps {
   actions?: React.ReactNode;
@@ -22,25 +23,31 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   children,
   title,
 }) => {
-  const router = useRouter();
-
   return (
-    <Box bg="bc-gray" py={4}>
+    <Box bg="bc-gray" pt={!breadcrumb ? 10 : 4} pb={4}>
       <Box as="header" display="flex" flexDirection="column" mb={4}>
         {breadcrumb && (
           <Box as="hgroup" mb={2}>
-            <Breadcrumb fontSize="sm" color="gray.500">
-              <BreadcrumbItem>
-                <NextLink passHref href="/manager">
-                  <BreadcrumbLink>API</BreadcrumbLink>
-                </NextLink>
-              </BreadcrumbItem>
+            <Breadcrumb
+              fontSize="sm"
+              color="bc-link"
+              separator={<BsChevronRight color="bc-component" />}
+            >
               {breadcrumb.length > 0 &&
-                breadcrumb.map((b, index) => (
-                  <BreadcrumbItem key={index + b.text + b.href}>
-                    <NextLink passHref href={b.href || router?.asPath || '#'}>
-                      <BreadcrumbLink>{b.text}</BreadcrumbLink>
-                    </NextLink>
+                breadcrumb.map((b) => (
+                  <BreadcrumbItem key={uid(b)}>
+                    {b.href && (
+                      <NextLink passHref href={b.href}>
+                        <BreadcrumbLink textDecor="underline">
+                          {b.text}
+                        </BreadcrumbLink>
+                      </NextLink>
+                    )}
+                    {!b.href && (
+                      <BreadcrumbLink color="bc-component">
+                        {b.text}
+                      </BreadcrumbLink>
+                    )}
                   </BreadcrumbItem>
                 ))}
             </Breadcrumb>

@@ -2,18 +2,26 @@ export function scopes(scopeString: string) {
   return scopeString.split(' ');
 }
 
-export function scopesToRoles(scopes: string[]) {
+export function scopesToRoles(username: string, scopes: string[]): string[] {
   const _roles = [];
   if (scopes.includes('Namespace.Manage')) {
     _roles.push('api-owner');
-  } else {
-    // For now, make everyone an api-owner if they have access to a namespace
-    _roles.push('api-owner');
   }
-  if (scopes.includes('Namespace.Manage')) {
+  if (scopes.includes('Namespace.View')) {
+    _roles.push('provider-user');
+  }
+  if (scopes.includes('CredentialIssuer.Admin')) {
     _roles.push('credential-admin');
   }
-  return JSON.stringify(_roles);
+  if (scopes.includes('Access.Manage')) {
+    _roles.push('access-manager');
+  }
+
+  _roles.push('portal-user');
+  if (username != null) {
+    _roles.push(deriveRoleFromUsername(username));
+  }
+  return _roles;
 }
 
 export function deriveRoleFromUsername(username: string) {

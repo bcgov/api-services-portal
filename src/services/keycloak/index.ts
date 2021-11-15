@@ -1,6 +1,9 @@
 export { KeycloakClientService } from './client-service';
 
-export { KeycloakClientRegistrationService } from './client-registration-service';
+export {
+  KeycloakClientRegistrationService,
+  ClientAuthenticator,
+} from './client-registration-service';
 
 export type {
   ClientRegistration,

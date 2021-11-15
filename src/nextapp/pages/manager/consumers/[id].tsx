@@ -130,6 +130,7 @@ const ConsumersPage: React.FC<
           <ControlsList
             consumerId={id}
             data={consumer.plugins.filter((p) => p.route || p.service)}
+            queryKey={['consumer', id]}
           />
 
           <ConsumerAuthz

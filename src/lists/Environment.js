@@ -54,6 +54,7 @@ module.exports = {
           label: 'Oauth2 Client Credentials Flow',
         },
         { value: 'kong-acl-only', label: 'Kong ACL Only' },
+        { value: 'kong-api-key-only', label: 'Kong API Key Only' },
         { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
       ],
     },

@@ -47,9 +47,7 @@ export interface EnvironmentContext {
   accessToken?: string;
 }
 
-function isAuthzUsingUma2(prodEnv: {
-  credentialIssuer: { resourceType: string };
-}): boolean {
+function isAuthzUsingUma2(prodEnv: Environment): boolean {
   return (
     (prodEnv.credentialIssuer.resourceType == null ||
       prodEnv.credentialIssuer.resourceType === '') == false

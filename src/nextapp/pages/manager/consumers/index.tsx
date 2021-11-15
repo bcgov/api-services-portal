@@ -205,7 +205,12 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
-    allServiceAccessesByNamespace(first: 200, orderBy: "updatedAt_DESC") {
+    allServiceAccessesByNamespace(
+      first: 200
+      orderBy: "updatedAt_DESC"
+      where: { consumer: { username_not_starts_with: "sa-" } }
+    ) {
+      namespace
       consumer {
         id
         username

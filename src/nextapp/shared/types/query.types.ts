@@ -3874,6 +3874,99 @@ export type GatewayServicesCreateInput = {
 };
 
 /**  A keystone list  */
+export type Label = {
+  __typename?: 'Label';
+  /**
+   * This virtual field will be resolved in one of the following ways (in this order):
+   *  1. Execution of 'labelResolver' set on the Label List config, or
+   *  2. As an alias to the field set on 'labelField' in the Label List config, or
+   *  3. As an alias to a 'name' field on the Label List (if one exists), or
+   *  4. As an alias to the 'id' field on the Label List.
+   */
+  _label_?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+  value?: Maybe<Scalars['String']>;
+};
+
+export type LabelWhereInput = {
+  AND?: Maybe<Array<Maybe<LabelWhereInput>>>;
+  OR?: Maybe<Array<Maybe<LabelWhereInput>>>;
+  id?: Maybe<Scalars['ID']>;
+  id_not?: Maybe<Scalars['ID']>;
+  id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  name?: Maybe<Scalars['String']>;
+  name_not?: Maybe<Scalars['String']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_starts_with?: Maybe<Scalars['String']>;
+  name_not_starts_with?: Maybe<Scalars['String']>;
+  name_ends_with?: Maybe<Scalars['String']>;
+  name_not_ends_with?: Maybe<Scalars['String']>;
+  name_i?: Maybe<Scalars['String']>;
+  name_not_i?: Maybe<Scalars['String']>;
+  name_contains_i?: Maybe<Scalars['String']>;
+  name_not_contains_i?: Maybe<Scalars['String']>;
+  name_starts_with_i?: Maybe<Scalars['String']>;
+  name_not_starts_with_i?: Maybe<Scalars['String']>;
+  name_ends_with_i?: Maybe<Scalars['String']>;
+  name_not_ends_with_i?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  value?: Maybe<Scalars['String']>;
+  value_not?: Maybe<Scalars['String']>;
+  value_contains?: Maybe<Scalars['String']>;
+  value_not_contains?: Maybe<Scalars['String']>;
+  value_starts_with?: Maybe<Scalars['String']>;
+  value_not_starts_with?: Maybe<Scalars['String']>;
+  value_ends_with?: Maybe<Scalars['String']>;
+  value_not_ends_with?: Maybe<Scalars['String']>;
+  value_i?: Maybe<Scalars['String']>;
+  value_not_i?: Maybe<Scalars['String']>;
+  value_contains_i?: Maybe<Scalars['String']>;
+  value_not_contains_i?: Maybe<Scalars['String']>;
+  value_starts_with_i?: Maybe<Scalars['String']>;
+  value_not_starts_with_i?: Maybe<Scalars['String']>;
+  value_ends_with_i?: Maybe<Scalars['String']>;
+  value_not_ends_with_i?: Maybe<Scalars['String']>;
+  value_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  value_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type LabelWhereUniqueInput = {
+  id: Scalars['ID'];
+};
+
+export enum SortLabelsBy {
+  IdAsc = 'id_ASC',
+  IdDesc = 'id_DESC',
+  NameAsc = 'name_ASC',
+  NameDesc = 'name_DESC',
+  ValueAsc = 'value_ASC',
+  ValueDesc = 'value_DESC'
+}
+
+export type LabelUpdateInput = {
+  name?: Maybe<Scalars['String']>;
+  value?: Maybe<Scalars['String']>;
+};
+
+export type LabelsUpdateInput = {
+  id: Scalars['ID'];
+  data?: Maybe<LabelUpdateInput>;
+};
+
+export type LabelCreateInput = {
+  name?: Maybe<Scalars['String']>;
+  value?: Maybe<Scalars['String']>;
+};
+
+export type LabelsCreateInput = {
+  data?: Maybe<LabelCreateInput>;
+};
+
+/**  A keystone list  */
 export type Legal = {
   __typename?: 'Legal';
   /**
@@ -4980,6 +5073,13 @@ export type GatewayConsumerRelateToOneInput = {
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
+export type LabelRelateToManyInput = {
+  create?: Maybe<Array<Maybe<LabelCreateInput>>>;
+  connect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
+  disconnect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type ServiceAccess = {
   __typename?: 'ServiceAccess';
@@ -5003,8 +5103,32 @@ export type ServiceAccess = {
   consumer?: Maybe<GatewayConsumer>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
+  labels: Array<Label>;
+  _labelsMeta?: Maybe<_QueryMeta>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
+};
+
+
+/**  A keystone list  */
+export type ServiceAccessLabelsArgs = {
+  where?: Maybe<LabelWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortLabelsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+/**  A keystone list  */
+export type ServiceAccess_LabelsMetaArgs = {
+  where?: Maybe<LabelWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortLabelsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
 };
 
 export type ServiceAccessWhereInput = {
@@ -5118,6 +5242,12 @@ export type ServiceAccessWhereInput = {
   application_is_null?: Maybe<Scalars['Boolean']>;
   productEnvironment?: Maybe<EnvironmentWhereInput>;
   productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
+  /**  condition must be true for all nodes  */
+  labels_every?: Maybe<LabelWhereInput>;
+  /**  condition must be true for at least 1 node  */
+  labels_some?: Maybe<LabelWhereInput>;
+  /**  condition must be false for all nodes  */
+  labels_none?: Maybe<LabelWhereInput>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -5165,6 +5295,8 @@ export enum SortServiceAccessesBy {
   ApplicationDesc = 'application_DESC',
   ProductEnvironmentAsc = 'productEnvironment_ASC',
   ProductEnvironmentDesc = 'productEnvironment_DESC',
+  LabelsAsc = 'labels_ASC',
+  LabelsDesc = 'labels_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -5183,6 +5315,7 @@ export type ServiceAccessUpdateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
+  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessesUpdateInput = {
@@ -5202,6 +5335,7 @@ export type ServiceAccessCreateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
+  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessesCreateInput = {
@@ -6110,6 +6244,14 @@ export type Query = {
   _allGatewayServicesMeta?: Maybe<_QueryMeta>;
   /**  Retrieve the meta-data for the GatewayService list.  */
   _GatewayServicesMeta?: Maybe<_ListMeta>;
+  /**  Search for all Label items which match the where clause.  */
+  allLabels?: Maybe<Array<Maybe<Label>>>;
+  /**  Search for the Label item with the matching ID.  */
+  Label?: Maybe<Label>;
+  /**  Perform a meta-query on all Label items which match the where clause.  */
+  _allLabelsMeta?: Maybe<_QueryMeta>;
+  /**  Retrieve the meta-data for the Label list.  */
+  _LabelsMeta?: Maybe<_ListMeta>;
   /**  Search for all Legal items which match the where clause.  */
   allLegals?: Maybe<Array<Maybe<Legal>>>;
   /**  Search for the Legal item with the matching ID.  */
@@ -6554,6 +6696,31 @@ export type Query_AllGatewayServicesMetaArgs = {
   where?: Maybe<GatewayServiceWhereInput>;
   search?: Maybe<Scalars['String']>;
   sortBy?: Maybe<Array<SortGatewayServicesBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryAllLabelsArgs = {
+  where?: Maybe<LabelWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortLabelsBy>>;
+  orderBy?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryLabelArgs = {
+  where: LabelWhereUniqueInput;
+};
+
+
+export type Query_AllLabelsMetaArgs = {
+  where?: Maybe<LabelWhereInput>;
+  search?: Maybe<Scalars['String']>;
+  sortBy?: Maybe<Array<SortLabelsBy>>;
   orderBy?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -7098,6 +7265,18 @@ export type Mutation = {
   deleteGatewayService?: Maybe<GatewayService>;
   /**  Delete multiple GatewayService items by ID.  */
   deleteGatewayServices?: Maybe<Array<Maybe<GatewayService>>>;
+  /**  Create a single Label item.  */
+  createLabel?: Maybe<Label>;
+  /**  Create multiple Label items.  */
+  createLabels?: Maybe<Array<Maybe<Label>>>;
+  /**  Update a single Label item by ID.  */
+  updateLabel?: Maybe<Label>;
+  /**  Update multiple Label items by ID.  */
+  updateLabels?: Maybe<Array<Maybe<Label>>>;
+  /**  Delete a single Label item by ID.  */
+  deleteLabel?: Maybe<Label>;
+  /**  Delete multiple Label items by ID.  */
+  deleteLabels?: Maybe<Array<Maybe<Label>>>;
   /**  Create a single Legal item.  */
   createLegal?: Maybe<Legal>;
   /**  Create multiple Legal items.  */
@@ -7647,6 +7826,37 @@ export type MutationDeleteGatewayServiceArgs = {
 
 
 export type MutationDeleteGatewayServicesArgs = {
+  ids?: Maybe<Array<Scalars['ID']>>;
+};
+
+
+export type MutationCreateLabelArgs = {
+  data?: Maybe<LabelCreateInput>;
+};
+
+
+export type MutationCreateLabelsArgs = {
+  data?: Maybe<Array<Maybe<LabelsCreateInput>>>;
+};
+
+
+export type MutationUpdateLabelArgs = {
+  id: Scalars['ID'];
+  data?: Maybe<LabelUpdateInput>;
+};
+
+
+export type MutationUpdateLabelsArgs = {
+  data?: Maybe<Array<Maybe<LabelsUpdateInput>>>;
+};
+
+
+export type MutationDeleteLabelArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteLabelsArgs = {
   ids?: Maybe<Array<Scalars['ID']>>;
 };
 

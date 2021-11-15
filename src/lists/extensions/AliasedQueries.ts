@@ -45,8 +45,7 @@ module.exports = {
             issuers.forEach((data) => {
               const envDetails = JSON.parse(data.environmentDetails);
               envDetails.forEach(function (env: IssuerEnvironmentConfig) {
-                if (env.clientId || env.clientSecret) {
-                  env.clientId = '****';
+                if (env.clientSecret) {
                   env.clientSecret = '****';
                 } else if (env.initialAccessToken) {
                   env.initialAccessToken = '****';

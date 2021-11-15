@@ -1,0 +1,56 @@
+
+  query GetAccessRequest($id: ID!, $rid: String!) {
+    AccessRequest(where: { id: $id }) {
+      id
+      name
+      isApproved
+      isIssued
+      controls
+      additionalDetails
+      createdAt
+      requestor {
+        name
+        username
+        email
+      }
+      application {
+        name
+      }
+      serviceAccess {
+        id
+        consumer {
+          id
+          username
+        }
+      }
+      productEnvironment {
+        name
+        additionalDetailsToRequest
+        product {
+          name
+        }
+        credentialIssuer {
+          availableScopes
+          clientRoles
+        }
+      }
+    }
+
+    allActivities(sortBy: createdAt_DESC, where: { refId: $rid }) {
+      id
+      type
+      name
+      action
+      result
+      message
+      context
+      refId
+      namespace
+      extRefId
+      createdAt
+      actor {
+        name
+        username
+      }
+    }
+  }

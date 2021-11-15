@@ -15,7 +15,7 @@ import express from 'express';
 import multer from 'multer';
 import { DateTime, Markdown } from '@keystonejs/fields';
 
-interface Content {
+interface ContentSummary {
   kind?: string;
   externalLink: string;
   title?: string;
@@ -42,7 +42,7 @@ export class ContentController extends Controller {
   @OperationId('put-content')
   public async putContent(
     @Path() ns: string,
-    @Body() body: Content,
+    @Body() body: ContentSummary,
     @Request() request: any
   ): Promise<any> {
     return await syncRecords(

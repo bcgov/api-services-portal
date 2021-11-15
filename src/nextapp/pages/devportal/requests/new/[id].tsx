@@ -81,7 +81,7 @@ const NewRequestsPage: React.FC<
   const router = useRouter();
   const client = useQueryClient();
   const toast = useToast();
-  const { data } = useApi(
+  const { data, error } = useApi(
     queryKey,
     {
       query,
