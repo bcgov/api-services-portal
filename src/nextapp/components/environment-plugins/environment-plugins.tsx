@@ -6,6 +6,7 @@ import YamlViewer from '../yaml-viewer';
 import JwtKeycloak from './templates/jwt-keycloak';
 import KongAclOnly from './templates/kong-acl-only';
 import KongApiKeyAcl from './templates/kong-api-key-acl';
+import KongApiKeyOnly from './templates/kong-api-key-only';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 
@@ -47,6 +48,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
 
   const pluginConfigs = {
     'kong-api-key-acl': KongApiKeyAcl(data.product.namespace, data.appId),
+    'kong-api-key-only': KongApiKeyOnly(data.product.namespace, data.appId),
     'kong-acl-only': KongAclOnly(data.product.namespace, data.appId),
     'client-credentials': JwtKeycloak(
       data.product.namespace,

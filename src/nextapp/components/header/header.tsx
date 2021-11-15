@@ -48,14 +48,25 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
         flexGrow={{ base: 1, sm: 0 }}
       >
         <Link href={site == 'manager' ? '/' : '/'}>
-          <a>
+          <>
             <Box as="span" display={{ base: 'none', sm: 'block' }} maxW="154px">
-              <img src="/images/bc_logo_header.svg" width={154} height={43} />
+              <img
+                src="/images/bc_logo_header.svg"
+                width={154}
+                height={43}
+                title="BC Government"
+                alt="BC Government Logo"
+              />
             </Box>
             <Box as="span" display={{ base: 'block', sm: 'none' }}>
-              <img src="/images/bc_logo_vert.svg" width={50} height={44} />
+              <img
+                src="/images/bc_logo_vert.svg"
+                width={50}
+                height={44}
+                alt="Government of British Columbia"
+              />
             </Box>
-          </a>
+          </>
         </Link>
         <Heading isTruncated size="lg" ml={{ base: 3, sm: 6 }}>
           API {site == 'manager' ? 'Provider Console' : 'Services Portal'}

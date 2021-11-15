@@ -133,6 +133,7 @@ export function EnforcementPoint(params: any) {
         tid: item == null ? null : item.id,
         id: item == null ? null : item.userId,
         roles: roles,
+        scopes: item == null ? null : item.scopes,
         namespace: item == null ? null : item.namespace,
         item: originalInput,
       },

@@ -1,10 +1,8 @@
 import * as React from 'react';
+import ApiProductItem, { ApiDataset } from '@/components/api-product-item';
 import {
   Box,
-  Button,
   Container,
-  Divider,
-  Flex,
   Grid,
   GridItem,
   Heading,
@@ -13,24 +11,19 @@ import {
   Text,
 } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
+import Card from '@/components/card';
+import { DocHeader, InternalLink } from '@/components/docs';
+import get from 'lodash/get';
 import Head from 'next/head';
-import kebabCase from 'lodash/kebabCase';
-import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
-import { Product } from '@/shared/types/query.types';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import {
-  FaCheckCircle,
-  FaExternalLinkAlt,
-  FaTimesCircle,
-} from 'react-icons/fa';
-import TagsList from '@/components/tags-list';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
-import { DocHeader, InternalLink } from '@/components/docs';
+import { uid } from 'react-uid';
 
 const renderers = {
   link: InternalLink,
@@ -43,39 +36,14 @@ type DetailItem = {
   isBool?: boolean;
 };
 
-const detailItems: DetailItem[] = [
-  {
-    title: 'Published',
-    key: 'record_publish_date',
-  },
-  {
-    title: 'Sector',
-    key: 'sector',
-  },
-  {
-    title: 'Security',
-    key: 'security_class',
-  },
-  {
-    title: 'Private',
-    key: 'security_class',
-    isBool: true,
-  },
-  {
-    title: 'In BC Data Catalogue',
-    key: 'isInCatalog',
-    isBool: true,
-  },
-];
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
-  const queryKey = ['DiscoverableProduct', id];
+  const queryKey = ['DiscoverableDataset', id];
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<Product>(`/ds/api/directory/${id}`)
+    async () => await restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
 
   return {
@@ -90,12 +58,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
-  const { data } = useQuery<Product>(queryKey, () =>
-    restApi<Product>(`/ds/api/directory/${id}`)
+  const { data } = useQuery<ApiDataset>(queryKey, () =>
+    restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
-
-  const hasProtectedEnvironments = () =>
-    data?.environments?.filter((env) => env.flow !== 'public').length > 0;
+  // TODO: Not sure if this is needed still
+  // const hasProtectedEnvironments = (prod) =>
+  //   prod.environments?.some((env) => env.flow !== 'public');
+  function DetailItem({ detail }: { detail: DetailItem }) {
+    return (
+      <Box mb={5}>
+        <Heading fontWeight="normal" size="xs">
+          {detail.title}
+        </Heading>
+        <Text fontSize="sm" color="gray.600">
+          {!detail.isBool && get(data, detail.key, 'N/A')}
+          {detail.isBool && (data[detail.key] ? 'Yes' : 'No')}
+        </Text>
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -104,27 +85,18 @@ const ApiPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={
-            <NextLink href={`/devportal/requests/new/${id}`}>
-              <Button
-                colorScheme="green"
-                disabled={hasProtectedEnvironments() == false}
-              >
-                Request Access
-              </Button>
-            </NextLink>
-          }
+          breadcrumb={[
+            { text: 'API Directory', href: '/devportal/api-directory' },
+          ]}
           title={
-            data?.dataset?.isInCatalog ? (
+            data.isInCatalog ? (
               <Link
                 isExternal
-                href={`https://catalogue.data.gov.bc.ca/dataset/${kebabCase(
-                  data?.dataset?.title
-                )}`}
+                href={`https://catalogue.data.gov.bc.ca/dataset/${data.name}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                {data?.name}
+                {data?.title}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -133,78 +105,48 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              <Text>{data?.name}</Text>
+              data?.title
             )
           }
         >
-          {data.dataset?.organization && (
-            <Box fontSize="sm" color="gray.600">
-              <Text>
-                Published by the{' '}
-                <Text as="strong">
-                  {data.dataset.organization.title}
-                  {' - '}
-                </Text>
-                {data.dataset.organizationUnit && (
-                  <Text as="strong">{data.dataset.organizationUnit.title}</Text>
-                )}
-              </Text>
-            </Box>
-          )}
           <Box fontSize="sm" color="gray.600">
             <Text>
-              Licensed under{' '}
-              <Text as="strong">{data.dataset?.license_title}</Text>
+              Published by
+              <br />
+              {data?.organizationUnit && (
+                <Link color="bc-link">{data.organizationUnit.title}</Link>
+              )}
             </Text>
           </Box>
         </PageHeader>
         <Grid my={5} gap={4} templateColumns="repeat(12, 1fr)">
-          <GridItem colSpan={9}>
-            <Box bgColor="white">
-              <Box as="header" p={4}>
-                <Heading size="md">Details</Heading>
-              </Box>
-              <Divider />
-              <Box p={4}>
-                <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
-                  {data.dataset?.notes}
-                </ReactMarkdownWithHtml>
-              </Box>
-              <Divider />
-              <Flex bgColor="gray.50" p={4} align="center">
-                <Heading as="h6" size="xs" mr={4}>
-                  Tags
-                </Heading>
-                {data.dataset && (
-                  <TagsList
-                    colorScheme="blue"
-                    data={data.dataset.tags}
-                    size="0.75rem"
-                  />
-                )}
-              </Flex>
+          <GridItem as="article" colSpan={9}>
+            <Box as="header">
+              <Heading size="xs">About This Dataset</Heading>
             </Box>
+            <Box my={9}>
+              <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
+                {data.notes}
+              </ReactMarkdownWithHtml>
+            </Box>
+            <Card heading="Products">
+              <Box bg={'gray.100'}>
+                {data?.products?.map((p) => (
+                  <ApiProductItem key={uid(p)} data={p} id={p.id} />
+                ))}
+              </Box>
+            </Card>
           </GridItem>
-          <GridItem as="aside" colSpan={3}>
-            {data.dataset &&
-              detailItems.map((d) => (
-                <Box key={d.title} mb={4}>
-                  <Heading size="xs">{d.title}</Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    {!d.isBool && data.dataset[d.key]}
-                    {d.isBool &&
-                      (data.dataset[d.key] ? (
-                        <>
-                          <Icon as={FaCheckCircle} color="green.300" /> Yes
-                        </>
-                      ) : (
-                        <>
-                          <Icon as={FaTimesCircle} color="red.300" /> No
-                        </>
-                      ))}
-                  </Text>
-                </Box>
-              ))}
+          <GridItem colSpan={1} />
+          <GridItem as="aside" colSpan={2}>
+            <Box as="header" mb={4}>
+              <Heading size="xs">Details</Heading>
+            </Box>
+            {data && detailItems.map((d) => <DetailItem detail={d} />)}
+            {/* <Box as="header" my={4}>
+              <Heading size="xs">Contact Info</Heading>
+            </Box>
+            {data && contactItems.map((d) => <DetailItem detail={d} />)} */}
           </GridItem>
         </Grid>
       </Container>
@@ -213,3 +155,47 @@ const ApiPage: React.FC<
 };
 
 export default ApiPage;
+
+const detailItems: DetailItem[] = [
+  {
+    title: 'License',
+    key: 'license_title',
+  },
+  {
+    title: 'Published Date',
+    key: 'record_publish_date',
+  },
+  {
+    title: 'Security',
+    key: 'security_class',
+  },
+  {
+    title: 'In BC Data Catalogue',
+    key: 'isInCatalog',
+    isBool: true,
+  },
+  // {
+  //   title: 'More Info',
+  //   key: 'extSource',
+  // },
+];
+// TODO: Not sure what the source of this data is for these contact items, should adjust
+const contactItems: DetailItem[] = [
+  {
+    title: 'Name',
+    key: 'name',
+  },
+  {
+    title: 'Email',
+    key: 'email',
+  },
+  {
+    title: 'Organization',
+    key: 'organization.name',
+  },
+  {
+    title: 'Role',
+    key: 'role',
+  },
+  ,
+];

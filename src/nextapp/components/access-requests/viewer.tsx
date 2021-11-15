@@ -112,6 +112,7 @@ const AccessRequestViewer: React.FC<AccessRequestViewerProps> = ({
               <ControlsList
                 consumerId={index.toString()}
                 data={plugins ?? []}
+                queryKey={['consumer', index.toString()]}
               />
               <Box flex={1}>
                 <Box>

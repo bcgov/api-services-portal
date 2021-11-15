@@ -15,17 +15,19 @@ import {
 import { gql } from 'graphql-request';
 import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 
 interface DeleteControlProps {
   consumerId: string;
   pluginExtForeignKey: string;
+  queryKey: QueryKey;
 }
 
 const DeleteControl: React.FC<DeleteControlProps> = ({
   consumerId,
   pluginExtForeignKey,
+  queryKey,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -39,7 +41,7 @@ const DeleteControl: React.FC<DeleteControlProps> = ({
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync({ consumerId, pluginExtForeignKey });
-      queryClient.invalidateQueries(['consumer', consumerId]);
+      queryClient.invalidateQueries(queryKey);
       toast({
         title: 'Control removed',
         status: 'success',

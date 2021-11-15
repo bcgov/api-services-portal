@@ -5,6 +5,9 @@ export function connectExclusiveOne(
   inputData: any,
   fieldKey: string
 ) {
+  if (inputData[fieldKey + '_ids'].length == 0) {
+    return null;
+  }
   if (
     currentData != null &&
     currentData[fieldKey] &&

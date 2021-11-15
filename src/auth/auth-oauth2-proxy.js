@@ -11,7 +11,7 @@ const querystring = require('querystring');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
-const { deriveRoleFromUsername } = require('./scope-role-utils');
+const { deriveRoleFromUsername, scopesToRoles } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
 const authLogoutUrl =
@@ -156,6 +156,33 @@ class Oauth2ProxyAuthStrategy {
     );
 
     app.put(
+      '/admin/switch',
+      [verifyJWT, checkExpired],
+      async (req, res, next) => {
+        // Switch to "no namespace" - aka "clear namespace"
+        try {
+          const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+          const username = req['oauth_user']['preferred_username']; // Username included in token
+          // The oauth2_proxy is handling the refresh token; so there can be a new jti
+          logger.info(
+            '[ns-clear] %s -> %s : %s',
+            req.user.jti,
+            jti,
+            req.user.jti === jti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
+          );
+          await this.assign_namespace(req.user.jti, jti, username, {
+            rsname: null,
+            scopes: [],
+          });
+          res.json({ switch: true });
+        } catch (err) {
+          logger.error('Error clearing namespace %s', err);
+          res.status(400).json({ switch: false, error: 'ns_cleared_fail' });
+        }
+      }
+    );
+
+    app.put(
       '/admin/switch/:ns',
       [verifyJWT, checkExpired],
       async (req, res, next) => {
@@ -205,27 +232,13 @@ class Oauth2ProxyAuthStrategy {
   async assign_namespace(jti, newJti, username, umaAuthDetails) {
     const namespace = umaAuthDetails['rsname'];
     const scopes = umaAuthDetails['scopes'];
-    const _roles = [];
-    if (scopes.includes('Namespace.Manage')) {
-      _roles.push('api-owner');
-    }
-    if (scopes.includes('Namespace.View')) {
-      _roles.push('provider-user');
-    }
-    if (scopes.includes('CredentialIssuer.Admin')) {
-      _roles.push('credential-admin');
-    }
-    if (scopes.includes('Access.Manage')) {
-      _roles.push('access-manager');
-    }
-
-    _roles.push('portal-user');
-    _roles.push(deriveRoleFromUsername(username));
+    const _roles = scopesToRoles(username, scopes);
 
     const roles = JSON.stringify(_roles);
 
-    const users = this.keystone.getListByKey(this.listKey);
-    let results = await users.adapter.find({ jti: jti });
+    // should be TemporaryIdentity
+    const idList = this.keystone.getListByKey(this.listKey);
+    let results = await idList.adapter.find({ jti: jti });
     let tempId = results[0]['id'];
 
     const { errors } = await this.keystone.executeGraphQL({
