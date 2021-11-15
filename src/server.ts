@@ -18,6 +18,7 @@ const { ApiDSProxyApp } = require('./api-proxy-ds');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
 const { ApiOpenapiApp } = require('./api-openapi');
+const { ApiDSProxyApp } = require('./api-proxy-ds');
 
 var Keycloak = require('keycloak-connect');
 
@@ -272,6 +273,7 @@ const apps = [
       return true;
     },
   }),
+  new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
   new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
   new NextApp({ dir: 'nextapp' }),
