@@ -185,7 +185,7 @@ services:
         aliases:
           - redis.localtest.me
   gwa-api:
-    image: ghcr.io/bcgov/gwa-api/gwa-api:e2e
+    image: gwa-api:e2e
     container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
