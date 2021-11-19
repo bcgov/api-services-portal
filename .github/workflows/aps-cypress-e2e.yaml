@@ -15,6 +15,9 @@ env:
   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   GIT_REPO_URL: ${{ github.repository }}
 
+env:
+  DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
@@ -40,6 +43,7 @@ jobs:
           docker-compose up -d
       - name: Execute Tests & Clean Up
         run: |
+          export CYPRESS_PROJECT_ID=${{ env.DASHBOARD_PROJECT_ID }}
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               # cleanup
