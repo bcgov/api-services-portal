@@ -15,7 +15,6 @@ env:
   GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
   GIT_REPO_URL: ${{ github.repository }}
 
-
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
@@ -25,12 +24,8 @@ jobs:
           git clone https://github.com/bcgov/gwa-api.git -b dev
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
-<<<<<<< HEAD
       - name: Checkout Portal
         uses: actions/checkout@v2
-=======
-      - uses: actions/checkout@v1
->>>>>>> 89a8bf58 (updated cypress github action with correct gwa image)
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
@@ -45,7 +40,6 @@ jobs:
           docker-compose up -d
       - name: Execute Tests & Clean Up
         run: |
-          export CYPRESS_PROJECT_ID=${{ env.DASHBOARD_PROJECT_ID }}
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               # cleanup
