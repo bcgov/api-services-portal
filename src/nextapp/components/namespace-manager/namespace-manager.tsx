@@ -42,11 +42,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
     (name: string) => () => {
       setNamespaceToDelete(name);
     },
-    [setNamespaceToDelete]
+    [namespaceToDelete]
   );
   const handleCancel = React.useCallback(() => {
     setNamespaceToDelete(null);
-  }, [setNamespaceToDelete]);
+  }, [namespaceToDelete]);
 
   return (
     <>

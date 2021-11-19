@@ -56,9 +56,10 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       });
     }
   }, [client, deleteMutation, name, onClose, router, toast, user.namespace]);
+
   const handleCancel = React.useCallback(() => onCancel(), [onCancel]);
 
-  React.useEffect(() => onOpen(), [onOpen]);
+  React.useEffect(() => onOpen(), [name]);
 
   return (
     <>
