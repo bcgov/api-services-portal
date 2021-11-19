@@ -184,9 +184,9 @@ services:
       aps-net:
         aliases:
           - redis.localtest.me
-  gwa-gateway-api:
-    image: ghcr.io/bcgov/gwa-api/gwa-gateway-api:dev
-    container_name: gwa-gateway-api
+  gwa-api:
+    image: ghcr.io/bcgov/gwa-api/gwa-api:e2e
+    container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
       - 2000:2000
