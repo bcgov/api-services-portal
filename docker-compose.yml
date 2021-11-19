@@ -103,19 +103,19 @@ services:
       - ./local/feeder-init:/tmp
     networks:
       - aps-net
-  # cypress:
-  #   image: 'aps-cypress-e2e:latest'
-  #   container_name: cypress-e2e
-  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-  #   depends_on:
-  #     - feeder-seeding
-  #   build:
-  #     context: ./e2e
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./e2e/results/report:/e2e/results/report
-  #   networks:
-  #     - aps-net
+  cypress:
+    image: aps-cypress-e2e:latest
+    container_name: cypress-e2e
+    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    depends_on:
+      - feeder-seeding
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    volumes:
+      - ./e2e/results/report:/e2e/results/report
+    networks:
+      - aps-net
   kong-db:
     image: postgres:12.8
     container_name: kong-db
@@ -184,9 +184,9 @@ services:
       aps-net:
         aliases:
           - redis.localtest.me
-  gwa-gateway-api:
-    image: ghcr.io/bcgov/gwa-api/gwa-gateway-api:dev
-    container_name: gwa-gateway-api
+  gwa-api:
+    image: ghcr.io/bcgov/gwa-api/gwa-api:e2e
+    container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
       - 2000:2000
