@@ -25,8 +25,12 @@ jobs:
           git clone https://github.com/bcgov/gwa-api.git -b dev
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
+<<<<<<< HEAD
       - name: Checkout Portal
         uses: actions/checkout@v2
+=======
+      - uses: actions/checkout@v1
+>>>>>>> 89a8bf58 (updated cypress github action with correct gwa image)
       - name: Spin up API Services Portal and Run E2E Tests
         run: |
           export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
