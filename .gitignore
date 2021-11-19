@@ -112,6 +112,8 @@ _tmp
 
 kc.js
 
+.config
+
 # vs code settings
 .vscode
 e2e/cypress/fixtures/service-plugin.yml
