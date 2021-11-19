@@ -92,30 +92,20 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={8}>
               <FormLabel>Application Name</FormLabel>
-<<<<<<< HEAD
               <Input
-                placeholder=" Name"
                 name="name"
                 variant="bc-input"
                 data-testid="create-app-name-input"
               />
             </FormControl>
-            <FormControl isRequired as="fieldset">
-              <FormLabel>Description</FormLabel>
-              <Textarea
-                name="description"
-                placeholder="What does your application do?"
-                variant="bc-input"
-                data-testid="create-app-description-input"
-              />
-=======
-              <Input name="name" variant="bc-input" />
-            </FormControl>
             <FormControl>
               <FormLabel>Description (Optional)</FormLabel>
               <FormHelperText>What does your application do?</FormHelperText>
-              <Textarea name="description" variant="bc-input" />
->>>>>>> dev
+              <Textarea
+                name="description"
+                variant="bc-input"
+                data-testid="create-app-description-input"
+              />
             </FormControl>
           </form>
         </ModalBody>

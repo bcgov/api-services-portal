@@ -66,6 +66,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
           <NextLink href={isPublic ? '#try-url' : accessLink}>
             <Button
               rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
+              data-testid="api-rqst-access-btn"
             >
               {isPublic ? 'Try this API' : 'Request Access'}
             </Button>

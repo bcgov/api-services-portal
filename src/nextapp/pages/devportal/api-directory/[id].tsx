@@ -85,23 +85,9 @@ const ApiPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-<<<<<<< HEAD
-          actions={
-            <NextLink href={`/devportal/requests/new/${id}`}>
-              <Button
-                colorScheme="green"
-                disabled={hasProtectedEnvironments() == false}
-                data-testid="api-rqst-access-btn"
-              >
-                Request Access
-              </Button>
-            </NextLink>
-          }
-=======
           breadcrumb={[
             { text: 'API Directory', href: '/devportal/api-directory' },
           ]}
->>>>>>> dev
           title={
             data.isInCatalog ? (
               <Link
