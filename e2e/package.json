@@ -8,9 +8,11 @@
   "scripts": {
     "cy:open": "cypress open --config-file cypress.json",
     "cy:run": "cypress run --config-file cypress.json",
+    "cy:run:rcd": "cypress run --config-file cypress.json --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "moch:html": "marge results/bcgov-aps-e2e-report.json --reportDir results/report -i -t \"API Services Portal E2E Test Report\"",
-    "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html"
+    "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html",
+    "cy:run:rcd:html": "run-s --continue-on-error cy:run:rcd moch:json moch:html"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.4",
