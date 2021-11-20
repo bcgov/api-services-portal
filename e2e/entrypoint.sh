@@ -14,6 +14,7 @@ while true; do
             npm run cy:run:rcd:html
         else
             npm run cy:run:html
+        fi
         break
     else
         echo  "Waiting for Keycloak....."
