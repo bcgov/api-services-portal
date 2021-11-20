@@ -10,7 +10,7 @@ while true; do
         cd /e2e
         # added sleep to wait for initial data seeding
         sleep 1m
-        npm run cy:run:html
+        npm run cy:run:rcd:html
         break
     else
         echo  "Waiting for Keycloak....."
