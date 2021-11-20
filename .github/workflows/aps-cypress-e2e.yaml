@@ -6,9 +6,9 @@ on:
       - 'util/*automation*'
 
 env:
-  DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
-  DASHBOARD_RECORD_KEY: ${{ secrets.CY_DASHBOARD_RECORD_KEY }}
-  EXECUTION_ENV: prod
+  CY_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
+  CY_RECORD_KEY: ${{ secrets.CY_DASHBOARD_RECORD_KEY }}
+  CY_EXECUTION_ENV: prod
 
 jobs:
   cypress-run:
@@ -22,11 +22,7 @@ jobs:
       - name: Checkout Portal
         uses: actions/checkout@v2
       - name: Spin up API Services Portal and Run E2E Tests
-        run: |
-          export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
-          export CY_RECORD_KEY=${{ env.DASHBOARD_RECORD_KEY }}
-          export CY_PROJECT_ID=${{ env.DASHBOARD_PROJECT_ID }}
-          docker-compose up -d
+        run: docker-compose up -d
       - name: Execute Tests & Clean Up
         run: |
           while true; do
