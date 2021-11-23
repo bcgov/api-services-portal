@@ -15,6 +15,7 @@ export const GET_LIST = gql`
         title
       }
       dataset {
+        id
         name
         title
         notes
