@@ -8,7 +8,10 @@ export { DeleteGatewayConfig } from './delete-gateway-config';
 
 export { Validate } from './validate-access-request';
 
-export { ValidateActiveEnvironment } from './validate-active-environment';
+export {
+  ValidateActiveEnvironment,
+  isServiceMissingAllPluginsHandler,
+} from './validate-active-environment';
 
 export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 
