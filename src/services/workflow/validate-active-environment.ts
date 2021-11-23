@@ -189,8 +189,10 @@ export function isServiceMissingAllPluginsHandler(
 ) {
   return (svc: GatewayService) => {
     const serviceLevel =
-      svc.plugins.filter((plugin: any) => requiredPlugins.includes(plugin.name))
-        .length == requiredPlugins.length;
+      svc.plugins.filter(
+        (plugin: any) =>
+          requiredPlugins.includes(plugin.name) && additionalValidation(plugin)
+      ).length == requiredPlugins.length;
     if (serviceLevel) {
       return false;
     } else {
@@ -198,8 +200,10 @@ export function isServiceMissingAllPluginsHandler(
       return (
         svc.routes.filter(
           (route) =>
-            route.plugins.filter((plugin: any) =>
-              requiredPlugins.includes(plugin.name)
+            route.plugins.filter(
+              (plugin: any) =>
+                requiredPlugins.includes(plugin.name) &&
+                additionalValidation(plugin)
             ).length == requiredPlugins.length
         ).length == 0
       );

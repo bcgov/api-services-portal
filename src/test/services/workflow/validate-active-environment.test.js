@@ -90,6 +90,34 @@ describe('Validate Active Environment', function () {
       const result = isServiceMissingAllPluginsHandler(['acl'])(svc);
       expect(result).toBe(false);
     });
+    it('service not missing expected plugins with extra validation', async function () {
+      const svc = {
+        plugins: [{ name: 'acl', config: { url: 'https' } }],
+      };
+      function additionalValidation(plugin) {
+        return plugin.config.url == 'https';
+      }
+      const result = isServiceMissingAllPluginsHandler(
+        ['acl'],
+        additionalValidation
+      )(svc);
+      expect(result).toBe(false);
+    });
+
+    it('service missing expected plugins with extra validation', async function () {
+      const svc = {
+        routes: [],
+        plugins: [{ name: 'acl', config: { url: 'https:/invalid' } }],
+      };
+      function additionalValidation(plugin) {
+        return plugin.config.url == 'https';
+      }
+      const result = isServiceMissingAllPluginsHandler(
+        ['acl'],
+        additionalValidation
+      )(svc);
+      expect(result).toBe(true);
+    });
 
     it('service missing one plugin', async function () {
       const svc = {
