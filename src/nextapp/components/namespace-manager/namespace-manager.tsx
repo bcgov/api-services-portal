@@ -23,6 +23,7 @@ import type { NamespaceData } from '@/shared/types/app.types';
 import { FaTrash, FaDownload } from 'react-icons/fa';
 
 import NamespaceDelete from '../namespace-delete';
+import ExportReport from './export-report';
 
 interface NamespaceManagerProps {
   data: NamespaceData[];
@@ -114,11 +115,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           <Divider />
           <ModalFooter>
             <ButtonGroup justifyItems="space-between" alignItems="center">
-              <Button leftIcon={<Icon as={FaDownload} />} variant="secondary">
-                <Link href="/int/api/namespaces/report" download>
-                  Export Report
-                </Link>
-              </Button>
+              <ExportReport />
               <Button onClick={onClose} variant="primary">
                 Done
               </Button>
