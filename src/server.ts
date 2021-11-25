@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 import express from 'express';
 import request from 'graphql-request';
-import { AnyCnameRecord } from 'node:dns';
 const { Keystone } = require('@keystonejs/keystone');
 const { Checkbox, Password, Select } = require('@keystonejs/fields');
 //import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
@@ -345,6 +344,16 @@ const configureExpress = (app: any) => {
     const tasked = new Retry(process.env.WORKING_PATH, req.params['id']);
     await tasked.start();
     res.status(200).json({ result: 'ok' });
+  });
+
+  app.get('/about', (req: any, res: any) => {
+    res
+      .status(200)
+      .json({
+        version: process.env.APP_VERSION,
+        revision: process.env.APP_REVISION,
+        cluster: process.env.KUBE_CLUSTER,
+      });
   });
 
   // const { NotificationService } = require('./services/notification/notification.service')
