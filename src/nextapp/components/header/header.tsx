@@ -10,10 +10,11 @@ import MobileNavIcon from './mobile-nav-icon';
 
 interface HeaderProps {
   site: string;
+  maintenance: boolean;
   children?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ site, children }) => {
+const Header: React.FC<HeaderProps> = ({ site, maintenance, children }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const onNavClick = () => {
     setOpen((state) => !state);
@@ -32,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ site, children }) => {
       alignItems="center"
       justifyContent="space-between"
       pos="fixed"
-      top={0}
+      top={maintenance ? 65 : 0}
       w="100%"
       color="white"
       zIndex="1000"
