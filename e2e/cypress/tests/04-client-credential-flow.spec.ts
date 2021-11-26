@@ -30,9 +30,10 @@ describe('Client Credential Flow', () => {
   
   it('Creates Auth Profile', () => {
     cy.visit(authProfile.path)
-    cy.get('@apiowner').then(({ user }: any) => {
+    cy.get('@apiowner').then(({ ccAuthProfile }: any) => {
       cy.log("Hello!")
-      authProfile.createAuthProfile(user.ccAuthProfile);
+      console.log(ccAuthProfile)
+      authProfile.createAuthProfile(ccAuthProfile);
     })
   })
 

@@ -68,7 +68,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                 <GridItem>
                   <FormControl as="fieldset" isRequired>
                     <FormLabel as="legend">Environment</FormLabel>
-                    <RadioGroup defaultValue="dev">
+                    <RadioGroup defaultValue="dev" data-testid="ap-env-env">
                       <Stack>
                         <Radio name="environment" value="dev">
                           Development
@@ -104,7 +104,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                 <GridItem>
                   <FormControl isRequired as="fieldset">
                     <FormLabel as="legend">Client Registration</FormLabel>
-                    <RadioGroup onChange={setClientRegistration}>
+                    <RadioGroup onChange={setClientRegistration} data-testid="ap-env-client-reg">
                       <Stack>
                         <Radio name="clientRegistration" value="anonymous">
                           Anonymous
