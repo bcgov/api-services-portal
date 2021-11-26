@@ -8,6 +8,7 @@ export interface AuthFailedResponse {
 
 export interface UserSessionResult {
   ok: boolean;
+  maintenance: boolean;
   user?: UserData;
   status: QueryStatus;
   error?: Error;
@@ -69,6 +70,7 @@ export const useSession = (): UserSessionResult => {
   return {
     ok: !data,
     user: data,
+    maintenance: true,
     status,
     error,
   };
