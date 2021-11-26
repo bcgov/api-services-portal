@@ -68,7 +68,7 @@ const NewIssuerEnvironmentDialog: React.FC<NewIssuerEnvironmentDialog> = ({
             <Box p={4}>
                 <FormControl as="fieldset" isRequired>
                     <FormLabel as="legend">Environment</FormLabel>
-                    <RadioGroup defaultValue="dev" data-testid="ap-env-env">
+                    <RadioGroup defaultValue="dev">
                         <Stack>
                         <Radio name="environment" value="dev">
                             Development
@@ -107,7 +107,7 @@ const NewIssuerEnvironmentDialog: React.FC<NewIssuerEnvironmentDialog> = ({
 
                     <FormControl as="fieldset" isRequired>
                         <FormLabel as="legend">Client Registration</FormLabel>
-                        <RadioGroup defaultValue="" onChange={(e : string) => setEnv({...env, ...{clientRegistration:e}})} data-testid="ap-env-client-reg">
+                        <RadioGroup defaultValue="" onChange={(e : string) => setEnv({...env, ...{clientRegistration:e}})}>
                             <Stack>
                                 <Radio name="clientRegistration" value="anonymous">
                                     Anonymous
