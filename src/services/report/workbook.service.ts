@@ -53,12 +53,12 @@ export class WorkbookService {
       namespaces,
       serviceLookup
     );
-    const consumer_metrics = await getReportOfConsumerMetrics(
-      this.keystone,
-      namespaces,
-      serviceLookup,
-      consumer_access
-    );
+    // const consumer_metrics = await getReportOfConsumerMetrics(
+    //   this.keystone,
+    //   namespaces,
+    //   serviceLookup,
+    //   consumer_access
+    // );
     const consumer_controls = await getConsumerControls(
       this.keystone,
       namespaces,
@@ -73,7 +73,6 @@ export class WorkbookService {
       service_access,
       consumer_requests,
       consumer_access,
-      consumer_metrics,
       consumer_controls,
     };
 

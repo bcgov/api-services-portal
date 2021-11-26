@@ -116,7 +116,6 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
                   />
                   <FormHelperText>Must be unique</FormHelperText>
                 </FormControl>
-                <OrganizationSelect data={data} />
                 <DatasetInput dataset={data.dataset} />
               </VStack>
             </form>

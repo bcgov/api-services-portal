@@ -1,6 +1,4 @@
-import { gql } from 'graphql-request';
 
-export const GET_LIST = gql`
   query GET {
     allProductsByNamespace {
       id
@@ -38,4 +36,3 @@ export const GET_LIST = gql`
       }
     }
   }
-`;

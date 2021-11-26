@@ -26,7 +26,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
     ['dataset-search', search],
     {
       query: SEARCH_DATASETS,
-      variables: { search, first: 10 },
+      variables: { search, first: 25 },
     },
     {
       enabled: Boolean(search),
@@ -77,7 +77,6 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 Link to BC Data Catalogue
               </FormLabel>
               <Input
-                isDisabled={isLoading}
                 {...getRootProps(
                   { refKey: 'innerRef' },
                   { suppressRefError: true }
