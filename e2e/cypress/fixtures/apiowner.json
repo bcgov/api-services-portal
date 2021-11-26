@@ -22,5 +22,25 @@
         "serviceName": "a-service-for-platform"
       }
     }
+  },
+  "ccAuthProfile": {
+    "name": "cy-cc-auth",
+    "flow": "Client Credential Flow",
+    "apiKey": "",
+    "clientAuthenticator": "Client ID and Secret",
+    "mode": "Automatic",
+    "scopes": [],
+    "clientRoles": [],
+    "clientMappers": [],
+    "uma2ResourceType": "",
+    "resourceScopes": [],
+    "resourceAccessScope": "",
+    "environmentConfig": {
+      "environment": "Test",
+      "clientRegistration": "Managed",
+      "idpIssuerUrl": "http://localhost:9080",
+      "clientId": "cypress-auth-profile",
+      "secret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
+    }
   }
 }

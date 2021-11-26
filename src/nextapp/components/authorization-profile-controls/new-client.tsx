@@ -55,7 +55,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
 
   return (
     <>
-      <Button isDisabled={false} onClick={onOpen} variant="primary">
+      <Button isDisabled={false} onClick={onOpen} variant="primary" data-testid="ap-client-mgmt-add-env-btn">
         Add Environment
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
@@ -97,6 +97,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                       name="issuerUrl"
                       type="url"
                       variant="bc-input"
+                      data-testid="ap-env-idp-url"
                     />
                   </FormControl>
                 </GridItem>
@@ -132,6 +133,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Initial Acccess Token"
                           name="initialAccessToken"
                           variant="bc-input"
+                          data-testid="ap-env-init-token"
                         />
                       </FormControl>
                     </>
@@ -144,6 +146,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Client ID"
                           name="clientId"
                           variant="bc-input"
+                          data-testid="ap-env-client-id"
                         />
                       </FormControl>
 
@@ -153,6 +156,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Client Secret"
                           name="clientSecret"
                           variant="bc-input"
+                          data-testid="ap-env-client-secret"
                         />
                       </FormControl>
                     </>
@@ -166,7 +170,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
               <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={submitForm}>
+              <Button variant="primary" onClick={submitForm} data-testid="ap-env-add-btn">
                 Add
               </Button>
             </ButtonGroup>
