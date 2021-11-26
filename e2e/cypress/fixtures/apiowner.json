@@ -31,7 +31,7 @@
     "mode": "Automatic",
     "scopes": [],
     "clientRoles": [],
-    "clientMappers": [],
+    "clientMappers": "",
     "uma2ResourceType": "",
     "resourceScopes": [],
     "resourceAccessScope": "",
@@ -40,7 +40,7 @@
       "clientRegistration": "Managed",
       "idpIssuerUrl": "http://localhost:9080",
       "clientId": "cypress-auth-profile",
-      "secret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
+      "clientSecret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
     }
   }
 }

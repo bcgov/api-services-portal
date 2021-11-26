@@ -2,10 +2,10 @@ class AuthorizationProfile {
   path: string = '/manager/authorization-profiles'
   newProfileBtn: string = '[data-testid="create-new-auth-profile-btn"]'
   nameField: string = '[data-testid="ap-profile-name"]'
-  flow: string = '["ap-flow-select"]'
-  kongApiKey: string = '["ap-api-key"]'
-  clientAuthenticator: string = '["ap-client-aunthenticator"]'
-  mode: string = '["ap-mode"]'
+  flow: string = '[data-testid="ap-flow-select"]'
+  kongApiKey: string = '[data-testid="ap-api-key"]'
+  clientAuthenticator: string = '[data-testid="ap-client-aunthenticator"]'
+  mode: string = '[data-testid="ap-mode"]'
   scopes: string = '[data-testid="ap-authorization-scopes"]'
   clientRoles: string = '[data-testid="ap-authorization-client-roles"]'
   clientMappers: string = '[data-testid="ap-authorization-client-mappers"]'
@@ -28,67 +28,67 @@ class AuthorizationProfile {
 
     cy.get(this.newProfileBtn).click();
 
-    cy.log(authProfile)
+    cy.get(this.nameField).click().type(authProfile.name);
 
-    // cy.get(this.nameField).click().type(authProfile.name);
+    let flow = authProfile.flow;
 
-    // let flow = authProfile.flow;
+    cy.get(this.flow).contains(flow).click();
 
-    // cy.get(this.flow).select(flow);
-
-    // if (flow === "Kong API Key") {
-    //   cy.get(this.kongApiKey).type(authProfile.apiKey)
+    if (flow === "Kong API Key") {
+      cy.get(this.kongApiKey).type(authProfile.apiKey)
     
-    // } else if (flow === "Client Credential Flow") {
-    //   cy.get(this.clientAuthenticator).select(authProfile.clientAuthenticator);
+    } else if (flow === "Client Credential Flow") {
+      cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click();
       
-    //   if (authProfile.mode) cy.get(this.mode).select(authProfile.mode);
+      if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click();
 
-    //   if (authProfile.scopes) {
-    //     authProfile.scopes.forEach((s: string) => {
-    //       cy.get(this.scopes).click().type(`${s}{enter}`)
-    //     })
-    //   }
+      if (authProfile.scopes) {
+        authProfile.scopes.forEach((scope: string) => {
+          cy.get(this.scopes).click().type(`${scope}{enter}`)
+        })
+      }
 
-    //   if (authProfile.clientRoles) {
-    //     authProfile.clientRoles.forEach((cr: string) => {
-    //       cy.get(this.clientRoles).click().type(`${cr}{enter}`)
-    //     })
-    //   }
+      if (authProfile.clientRoles) {
+        authProfile.clientRoles.forEach((clientRole: string) => {
+          cy.get(this.clientRoles).click().type(`${clientRole}{enter}`)
+        })
+      }
 
-    //   if (authProfile.clientMappers) cy.get(this.clientMappers).click().type(authProfile.clientMappers)
+      if (authProfile.clientMappers) cy.get(this.clientMappers).click().type(authProfile.clientMappers)
 
-    //   if (authProfile.uma2ResourceType) cy.get(this.uma2ResourceType).click().type(authProfile.uma2ResourceType)
+      if (authProfile.uma2ResourceType) cy.get(this.uma2ResourceType).click().type(authProfile.uma2ResourceType)
 
-    //   if (authProfile.resourceScopes) {
-    //     authProfile.resourceScopes.forEach((rs: string) => {
-    //       cy.get(this.resourceScopes).click().type(`${rs}{enter}`)
-    //     })
-    //   }
+      if (authProfile.resourceScopes) {
+        authProfile.resourceScopes.forEach((resourceScope: string) => {
+          cy.get(this.resourceScopes).click().type(`${resourceScope}{enter}`)
+        })
+      }
 
-    //   if (authProfile.resourceAccessScope) cy.get(this.resourceAccessScope).type(authProfile.resourceAccessScope)
+      if (authProfile.resourceAccessScope) cy.get(this.resourceAccessScope).type(authProfile.resourceAccessScope)
 
-    //   if (authProfile.environmentConfig) {
-    //     cy.get(this.addEnvBtn).click()
+      if (authProfile.environmentConfig) {
+        cy.get(this.addEnvBtn).click()
 
-    //     if (authProfile.environmentConfig.environment) cy.get(this.envSelector).select(authProfile.environmentConfig.environment)
+        if (authProfile.environmentConfig.environment) cy.get(this.envSelector).contains(authProfile.environmentConfig.environment).click()
 
-    //     let clientReg = authProfile.environmentConfig.clientRegistration;
+        cy.get(this.idpIssuerUrl).click().type(authProfile.environmentConfig.idpIssuerUrl)
 
-    //     cy.get(this.clientRegistration).select(clientReg);
+        let clientReg = authProfile.environmentConfig.clientRegistration;
 
-    //     if (clientReg === "Initial Access Token") cy.get(this.initAccessToken).click().type(authProfile.environmentConfig.initAccessToken)
+        cy.get(this.clientRegistration).contains(clientReg).click();
+
+        if (clientReg === "Initial Access Token") cy.get(this.initAccessToken).click().type(authProfile.environmentConfig.initAccessToken)
         
-    //     if (clientReg === "Managed") {
-    //       cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId);
-    //       cy.get(this.clientSecret).click().type(authProfile.environmentConfig.clientSecret);
-    //     }
+        if (clientReg === "Managed") {
+          cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId);
+          cy.get(this.clientSecret).click().type(authProfile.environmentConfig.clientSecret);
+        }
 
-    //     cy.get(this.envAddBtn).click();
-    //   }
-    // }
+        cy.get(this.envAddBtn).click();
+      }
+    }
 
-    // // cy.get(this.createBtn).click();
+    cy.get(this.createBtn).click();
   }
 }
   
