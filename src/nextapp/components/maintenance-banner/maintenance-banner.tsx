@@ -46,6 +46,7 @@ const MaintenanceBanner: React.FC = () => {
         d="flex"
         pos="fixed"
         top={0}
+        left={0}
         w="100%"
         zIndex="1000"
         border="none"
