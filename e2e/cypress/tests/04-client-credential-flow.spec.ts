@@ -1,12 +1,16 @@
+import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 import AuthorizationProfile from '../pageObjects/authProfile'
-import HomePage from '../pageObjects/home'
+import NamespaceAccess from '../pageObjects/namespaceAccess'
+import Products from '../pageObjects/products';
 
 describe('Client Credential Flow', () => {
 
+  const home = new HomePage();
   const login = new LoginPage();
   const authProfile = new AuthorizationProfile();
-  const home = new HomePage();
+  const nsa = new NamespaceAccess();
+  const products = new Products();
 
   before(() => {
     cy.visit('/')
@@ -27,13 +31,29 @@ describe('Client Credential Flow', () => {
       home.useNamespace(namespace);
     })
   })
+
+  it('Gives API Owner CredentialIssuer.Admin permission', () => {
+    cy.visit(nsa.path);
+    cy.get('@apiowner').then(({ user, namespace, namespaceAccessPermissions }: any) => {
+      nsa.addNamespaceAccessPermissions(user.credentials.username, namespaceAccessPermissions);
+      // Need to log out and log back in for permissions to take effect
+      cy.logout();
+      cy.get(login.loginButton).click();
+      home.useNamespace(namespace);
+    })
+  })
   
   it('Creates Auth Profile', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ ccAuthProfile }: any) => {
-      cy.log("Hello!")
-      console.log(ccAuthProfile)
       authProfile.createAuthProfile(ccAuthProfile);
+    })
+  })
+
+  it('Adds a test environment to "Auto Test Product" product', () => {
+    cy.visit(products.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      products.addEnvToProduct(product.name, "Test");
     })
   })
 

@@ -1,6 +1,7 @@
 class AuthorizationProfile {
   path: string = '/manager/authorization-profiles'
   newProfileBtn: string = '[data-testid="create-new-auth-profile-btn"]'
+  profileTable: string = '[data-testid="ap-all-profiles-table"]'
   nameField: string = '[data-testid="ap-profile-name"]'
   flow: string = '[data-testid="ap-flow-select"]'
   kongApiKey: string = '[data-testid="ap-api-key"]'
@@ -23,24 +24,18 @@ class AuthorizationProfile {
   createBtn: string = '[data-testid="ap-create-btn"]'
 
   createAuthProfile(authProfile: any) {
+    cy.get(this.newProfileBtn).click()
+    cy.get(this.nameField).click().type(authProfile.name)
 
-    cy.log("Create Auth Profile")
+    let flow = authProfile.flow
+    cy.get(this.flow).contains(flow).click()
 
-    cy.get(this.newProfileBtn).click();
-
-    cy.get(this.nameField).click().type(authProfile.name);
-
-    let flow = authProfile.flow;
-
-    cy.get(this.flow).contains(flow).click();
-
-    if (flow === "Kong API Key") {
+    if (flow === 'Kong API Key') {
       cy.get(this.kongApiKey).type(authProfile.apiKey)
-    
-    } else if (flow === "Client Credential Flow") {
-      cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click();
-      
-      if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click();
+    } else if (flow === 'Client Credential Flow') {
+      cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
+
+      if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
 
       if (authProfile.scopes) {
         authProfile.scopes.forEach((scope: string) => {
@@ -54,9 +49,11 @@ class AuthorizationProfile {
         })
       }
 
-      if (authProfile.clientMappers) cy.get(this.clientMappers).click().type(authProfile.clientMappers)
+      if (authProfile.clientMappers)
+        cy.get(this.clientMappers).click().type(authProfile.clientMappers)
 
-      if (authProfile.uma2ResourceType) cy.get(this.uma2ResourceType).click().type(authProfile.uma2ResourceType)
+      if (authProfile.uma2ResourceType)
+        cy.get(this.uma2ResourceType).click().type(authProfile.uma2ResourceType)
 
       if (authProfile.resourceScopes) {
         authProfile.resourceScopes.forEach((resourceScope: string) => {
@@ -64,32 +61,42 @@ class AuthorizationProfile {
         })
       }
 
-      if (authProfile.resourceAccessScope) cy.get(this.resourceAccessScope).type(authProfile.resourceAccessScope)
+      if (authProfile.resourceAccessScope)
+        cy.get(this.resourceAccessScope).type(authProfile.resourceAccessScope)
 
       if (authProfile.environmentConfig) {
         cy.get(this.addEnvBtn).click()
 
-        if (authProfile.environmentConfig.environment) cy.get(this.envSelector).contains(authProfile.environmentConfig.environment).click()
+        if (authProfile.environmentConfig.environment)
+          cy.get(this.envSelector)
+            .contains(authProfile.environmentConfig.environment)
+            .click()
 
         cy.get(this.idpIssuerUrl).click().type(authProfile.environmentConfig.idpIssuerUrl)
 
-        let clientReg = authProfile.environmentConfig.clientRegistration;
+        let clientReg = authProfile.environmentConfig.clientRegistration
 
-        cy.get(this.clientRegistration).contains(clientReg).click();
+        cy.get(this.clientRegistration).contains(clientReg).click()
 
-        if (clientReg === "Initial Access Token") cy.get(this.initAccessToken).click().type(authProfile.environmentConfig.initAccessToken)
-        
-        if (clientReg === "Managed") {
-          cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId);
-          cy.get(this.clientSecret).click().type(authProfile.environmentConfig.clientSecret);
+        if (clientReg === 'Initial Access Token')
+          cy.get(this.initAccessToken)
+            .click()
+            .type(authProfile.environmentConfig.initAccessToken)
+
+        if (clientReg === 'Managed') {
+          cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId)
+          cy.get(this.clientSecret)
+            .click()
+            .type(authProfile.environmentConfig.clientSecret)
         }
 
-        cy.get(this.envAddBtn).click();
+        cy.get(this.envAddBtn).click()
       }
     }
 
-    cy.get(this.createBtn).click();
+    cy.get(this.createBtn).click()
+    cy.get(this.profileTable).contains(authProfile.name).should('exist')
   }
 }
-  
-export default AuthorizationProfile;
+
+export default AuthorizationProfile

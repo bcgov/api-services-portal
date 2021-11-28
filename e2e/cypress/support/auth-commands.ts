@@ -93,15 +93,21 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
+
   cy.log('< Logging out')
-  cy.getSession().then(() => {
-    cy.get('@session').then((res: any) => {
-      cy.contains(res.body.user.name).click()
-      cy.contains('Sign Out').click()
-      cy.removeCookies()
-    })
-  })
-  cy.log('> Logging out')
+  // cy.getSession().then(() => {
+  //   cy.get('@session').then((res: any) => {
+  //     console.log(res)
+  //     let userInitials = initials(res.body.user.name);
+  //     cy.contains(userInitials).click()
+  //     cy.contains('Sign Out').click()
+  //     cy.removeCookies()
+  //   })
+  // })
+  cy.get('[data-testid="auth-menu-user"]').click();
+  cy.contains('Sign Out').click();
+  cy.removeCookies();
+  cy.log('> Logging out');
 })
 
 Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string) => {
