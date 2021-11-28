@@ -98,6 +98,10 @@ class AuthorizationProfile {
     }
 
     cy.get(this.createBtn).click()
+<<<<<<< HEAD
+=======
+    cy.get(this.profileTable).contains(authProfile.name).should('exist')
+>>>>>>> dfd007f3 (Finishes up create auth profile test; adds adds test env to product test; adds in additional test IDs)
   }
 }
 
