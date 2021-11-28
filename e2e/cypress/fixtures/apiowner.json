@@ -23,6 +23,7 @@
       }
     }
   },
+  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
   "ccAuthProfile": {
     "name": "cy-cc-auth",
     "flow": "Client Credential Flow",

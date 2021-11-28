@@ -31,6 +31,13 @@ class Products {
     cy.get(this.updateBtn).click()
   }
 
+  addEnvToProduct(productName: string, envName:string) {
+    let pname: string = productName.toLowerCase().replaceAll(' ', '-');
+    cy.get(`[data-testid=${pname}-add-env-btn]`).click();
+    // TODO Fix this: like need to add product name to env. Eg: auto-test-product-env-item-test
+    cy.get(`[data-testid=prd-env-item-${envName.toLowerCase()}]`).click();
+  }
+
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-${envName}-edit-btn]`).click()

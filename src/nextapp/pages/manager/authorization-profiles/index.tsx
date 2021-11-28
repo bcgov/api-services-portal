@@ -90,7 +90,7 @@ const AuthorizationProfiles: React.FC<
             <Heading size="md">All Profiles</Heading>
           </Box>
           <Divider />
-          <Table variant="simple">
+          <Table variant="simple" data-testid="ap-all-profiles-table">
             <Thead>
               <Tr>
                 <Th>Name</Th>
