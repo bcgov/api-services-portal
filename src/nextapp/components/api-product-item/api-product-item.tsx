@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AccessRequestForm from '@/components/access-request-form';
 import { BiLinkExternal } from 'react-icons/bi';
 import {
   Button,
@@ -37,11 +38,9 @@ export interface ApiProductItemProps {
 const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
   const isPublic = data.environments.some((e) => e.flow === 'public');
   const isTiered = data.environments.some((e) => e.anonymous);
-  const accessLink = `/devportal/requests/new/${id}`;
 
   return (
     <>
-      {' '}
       <Flex px={9} py={7} bg={'white'} mb={'0.5'}>
         <Grid gap={4} flex={1} templateRows="auto" mr={12}>
           <GridItem>
@@ -63,14 +62,16 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
           </GridItem>
         </Grid>
         {!isPublic && !isTiered && (
-          <NextLink href={isPublic ? '#try-url' : accessLink}>
-            <Button
-              rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
-              data-testid="api-rqst-access-btn"
-            >
-              {isPublic ? 'Try this API' : 'Request Access'}
-            </Button>
-          </NextLink>
+          <>
+            {isPublic && (
+              <Button
+                rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
+              >
+                Try this API
+              </Button>
+            )}
+            {!isPublic && <AccessRequestForm disabled={false} />}
+          </>
         )}
       </Flex>
       {isTiered && (
@@ -90,11 +91,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               )}
               <Text ml={8} fontSize="sm">
                 For elevated access, please{' '}
-                <NextLink passHref href={accessLink}>
-                  <Link color="bc-link" textDecor="underline">
-                    Request Access
-                  </Link>
-                </NextLink>
+                <AccessRequestForm disabled={false} />
               </Text>
             </GridItem>
           </Grid>

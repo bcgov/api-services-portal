@@ -25,7 +25,6 @@ import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { uid } from 'react-uid';
-import { DocHeader, InternalLink } from '@/components/docs';
 import AccessRequestForm from '@/components/access-request-form';
 
 const renderers = {
@@ -143,7 +142,8 @@ const ApiPage: React.FC<
             <Box as="header" mb={4}>
               <Heading size="xs">Details</Heading>
             </Box>
-            {data && detailItems.map((d) => <DetailItem detail={d} />)}
+            {data &&
+              detailItems.map((d) => <DetailItem key={uid(d)} detail={d} />)}
             {/* <Box as="header" my={4}>
               <Heading size="xs">Contact Info</Heading>
             </Box>
@@ -181,22 +181,21 @@ const detailItems: DetailItem[] = [
   // },
 ];
 // TODO: Not sure what the source of this data is for these contact items, should adjust
-const contactItems: DetailItem[] = [
-  {
-    title: 'Name',
-    key: 'name',
-  },
-  {
-    title: 'Email',
-    key: 'email',
-  },
-  {
-    title: 'Organization',
-    key: 'organization.name',
-  },
-  {
-    title: 'Role',
-    key: 'role',
-  },
-  ,
-];
+// const contactItems: DetailItem[] = [
+//   {
+//     title: 'Name',
+//     key: 'name',
+//   },
+//   {
+//     title: 'Email',
+//     key: 'email',
+//   },
+//   {
+//     title: 'Organization',
+//     key: 'organization.name',
+//   },
+//   {
+//     title: 'Role',
+//     key: 'role',
+//   },
+// ];
