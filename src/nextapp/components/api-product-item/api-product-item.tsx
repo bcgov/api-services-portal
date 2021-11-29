@@ -70,7 +70,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
                 Try this API
               </Button>
             )}
-            {!isPublic && <AccessRequestForm disabled={false} />}
+            {!isPublic && <AccessRequestForm disabled={false} id={id} />}
           </>
         )}
       </Flex>
@@ -91,7 +91,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               )}
               <Text ml={8} fontSize="sm">
                 For elevated access, please{' '}
-                <AccessRequestForm disabled={false} />
+                <AccessRequestForm disabled={false} id={id} />
               </Text>
             </GridItem>
           </Grid>

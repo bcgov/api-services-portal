@@ -15,7 +15,6 @@ import Card from '@/components/card';
 import { DocHeader, InternalLink } from '@/components/docs';
 import get from 'lodash/get';
 import Head from 'next/head';
-import kebabCase from 'lodash/kebabCase';
 import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -25,7 +24,6 @@ import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { uid } from 'react-uid';
-import AccessRequestForm from '@/components/access-request-form';
 
 const renderers = {
   link: InternalLink,
