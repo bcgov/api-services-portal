@@ -7,15 +7,16 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { IoWarning } from 'react-icons/io5';
-import { useAuth } from '@/shared/services/auth';
 
-const MaintenanceBanner: React.FC = () => {
-  const { maintenance } = useAuth();
+interface MaintenanceBannerProps {
+  text?: string;
+  title?: string;
+}
 
-  if (!maintenance) {
-    return null;
-  }
-
+const MaintenanceBanner: React.FC<MaintenanceBannerProps> = ({
+  text = 'We expect to be back shortly. Thank you for your patience.',
+  title = 'The API Services Portal is currently down for maintenance.',
+}) => {
   return (
     <Box
       sx={{
@@ -55,12 +56,8 @@ const MaintenanceBanner: React.FC = () => {
       >
         <AlertIcon as={IoWarning} color="inherit" boxSize={8} />
         <Box flex="1">
-          <AlertTitle>
-            The API Services Portal is currently down for maintenance.
-          </AlertTitle>
-          <AlertDescription display="block">
-            We expect to be back shortly. Thank you for your patience.
-          </AlertDescription>
+          <AlertTitle>{title}</AlertTitle>
+          <AlertDescription display="block">{text}</AlertDescription>
         </Box>
       </Alert>
     </Box>

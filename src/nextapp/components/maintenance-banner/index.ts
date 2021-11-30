@@ -1,1 +1,1 @@
-export { default } from './maintenance-banner';
+export { default } from './maintenance-banner-wrapper';
