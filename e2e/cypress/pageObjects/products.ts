@@ -31,26 +31,60 @@ class Products {
     cy.get(this.updateBtn).click()
   }
 
-  addEnvToProduct(productName: string, envName:string) {
-    let pname: string = productName.toLowerCase().replaceAll(' ', '-');
-    cy.get(`[data-testid=${pname}-add-env-btn]`).click();
-    // TODO Fix this: like need to add product name to env. Eg: auto-test-product-env-item-test
-    cy.get(`[data-testid=prd-env-item-${envName.toLowerCase()}]`).click();
+  addEnvToProduct(productName: string, envName: string) {
+    let pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.get(`[data-testid=${pname}-add-env-btn]`).click()
+    cy.get(`[data-testid=${pname}-prd-env-item-${envName.toLowerCase()}]`).click()
   }
 
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.log('pname = ' + pname)
     cy.get(`[data-testid=${pname}-${envName}-edit-btn]`).click()
+    cy.log('Editing product env')
   }
 
   editProductEnvironmentConfig(config: any) {
+    
     cy.get(this.editPrdEnvConfigBtn).click()
-    cy.get(this.envCfgActivateRadio).click()
-    cy.get(this.envCfgApprovalCheckbox).click()
+
+    let envEnabled = document
+      .querySelector('[data-testid="prd-env-config-activate-radio"]')
+      ?.getElementsByClassName('chakra-switch__track')[0]
+      .hasAttribute('data-checked')
+
+    if (!config.environmentEnabled != !envEnabled)
+      cy.get(this.envCfgActivateRadio).click()
+
+    let approvalRequired = document
+      .querySelector('[data-testid="prd-env-config-approval-checkbox"]')
+      ?.getElementsByClassName('chakra-checkbox__control')[0]
+      .hasAttribute('data-active')
+
+    if (!config.approvalRequired != !approvalRequired)
+      cy.get(this.envCfgApprovalCheckbox).click()
+
+    // cy.get(this.envCfgActivateRadio).click()
+    // cy.get(this.envCfgApprovalCheckbox).click()
     cy.get(this.envCfgTermsDropdown).select(config.terms)
-    cy.get(this.envCfgAuthzDropdown).select(config.authorization)
+
+    let authType = config.authorization;
+    cy.get(this.envCfgAuthzDropdown).select(authType).then(() => {
+      if (authType === "Oauth2 Authorization Code Flow" || authType === "Oauth2 Client Credentials Flow")
+      cy.get('[name="credentialIssuer"]').select(`${config.authIssuer} (${config.authIssuerEnv.toLowerCase()})`);
+    })
+    
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-    cy.get(`[data-testid=${config.serviceName}`).click() //Adding service to list of active services
+
+    // TODO: Selecting available services might need to be refined
+    let serviceIsActive = document
+      .querySelector('[data-testid="prd-env-active-services"]')
+      ?.querySelector(`[data-testid="${config.serviceName}"]`)
+
+    if (!config.serviceName != !serviceIsActive)
+      cy.get(`[data-testid="${config.serviceName}"]`).click()
+
+    // cy.get(`[data-testid="${config.serviceName}"]`).click() //Adding service to list of active services
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
