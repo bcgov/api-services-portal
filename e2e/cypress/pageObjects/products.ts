@@ -26,8 +26,8 @@ class Products {
   editProduct(productName: string, orgName: string, orgUnitName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click()
-    cy.get(this.orgDropDown).select(orgName)
-    cy.get(this.orgUnitDropDown).select(orgUnitName)
+    // cy.get(this.orgDropDown).select(orgName)
+    // cy.get(this.orgUnitDropDown).select(orgUnitName)
     cy.get(this.updateBtn).click()
   }
 
@@ -47,45 +47,14 @@ class Products {
   editProductEnvironmentConfig(config: any) {
     
     cy.get(this.editPrdEnvConfigBtn).click()
-
-    let envEnabled = document
-      .querySelector('[data-testid="prd-env-config-activate-radio"]')
-      ?.getElementsByClassName('chakra-switch__track')[0]
-      .hasAttribute('data-checked')
-
-    if (!config.environmentEnabled != !envEnabled)
-      cy.get(this.envCfgActivateRadio).click()
-
-    let approvalRequired = document
-      .querySelector('[data-testid="prd-env-config-approval-checkbox"]')
-      ?.getElementsByClassName('chakra-checkbox__control')[0]
-      .hasAttribute('data-active')
-
-    if (!config.approvalRequired != !approvalRequired)
-      cy.get(this.envCfgApprovalCheckbox).click()
-
-    // cy.get(this.envCfgActivateRadio).click()
-    // cy.get(this.envCfgApprovalCheckbox).click()
-    cy.get(this.envCfgTermsDropdown).select(config.terms)
-
-    let authType = config.authorization;
-    cy.get(this.envCfgAuthzDropdown).select(authType).then(() => {
-      if (authType === "Oauth2 Authorization Code Flow" || authType === "Oauth2 Client Credentials Flow")
-      cy.get('[name="credentialIssuer"]').select(`${config.authIssuer} (${config.authIssuerEnv.toLowerCase()})`);
-    })
-    
+    cy.get(this.envCfgActivateRadio).click()
+    cy.get(this.envCfgApprovalCheckbox).click()
+    cy.get(this.envCfgTermsDropdown).select(config.terms,{ force: true }).invoke('val')
+    cy.get(this.envCfgAuthzDropdown).select(config.authorization,{ force: true }).invoke('val')
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-
-    // TODO: Selecting available services might need to be refined
-    let serviceIsActive = document
-      .querySelector('[data-testid="prd-env-active-services"]')
-      ?.querySelector(`[data-testid="${config.serviceName}"]`)
-
-    if (!config.serviceName != !serviceIsActive)
-      cy.get(`[data-testid="${config.serviceName}"]`).click()
-
-    // cy.get(`[data-testid="${config.serviceName}"]`).click() //Adding service to list of active services
+    //cy.get(`[data-testid=${config.serviceName}`).click() //Adding service to list of active services
     cy.get(this.envCfgApplyChangesBtn).click()
+    cy.wait(10000)
   }
 
   generateKongPluginConfig() {
