@@ -137,7 +137,7 @@ const ActiveServices: React.FC<ActiveServicesProps> = ({
             </Box>
           </Center>
         )}
-        <Wrap p={4}>
+        <Wrap p={4} data-testid="prd-env-active-services">
           {data
             .filter(
               (d) => d.name.toLowerCase().search(search.toLowerCase()) >= 0

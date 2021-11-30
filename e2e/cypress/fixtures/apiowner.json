@@ -21,6 +21,16 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-platform"
       }
+    },
+    "testEnvironment": {
+      "name": "test",
+      "config": {
+        "environmentEnabled": true,
+        "approvalRequired": true,
+        "terms": "Terms of Use for API Gateway",
+        "authorization": "Oauth2 Client Credentials Flow",
+        "optionalInstructions": "Editing test environment"
+      }
     }
   },
   "namespaceAccessPermissions": ["CredentialIssuer.Admin"],

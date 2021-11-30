@@ -68,7 +68,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
               key={e.value}
               onClick={onSelect(e.value)}
               value={e.value}
-              data-testid={'prd-env-item-' + e.value}
+              data-testid={productName.toLowerCase().replaceAll(' ', '-') + '-prd-env-item-' + e.value}
             >
               {e.name}
             </MenuItem>
