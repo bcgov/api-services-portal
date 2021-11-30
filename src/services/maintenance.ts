@@ -5,12 +5,19 @@ export class MaintenanceService {
 
   constructor() {
     if (process.env.SESSION_STORE === 'redis') {
-      const redis = this.getRedisClient();
-      this.handler = (() => {
+      this.handler = (async () => {
+        const client = this.getRedisClient();
+        client.on('error', (err: any) =>
+          console.log('Redis Client Error', err)
+        );
+
         return {
-          get: async () => redis.get('maintenance'),
-          set: async (maintenance: boolean) =>
-            redis.set('maintenance', maintenance),
+          get: async () => (await client.get('maintenance')) === 'true',
+          set: async (maintenance: boolean) => {
+            console.log('GET ' + (await client.get('maintenance')));
+            console.log(' THEN ' + maintenance);
+            await client.set('maintenance', '' + maintenance);
+          },
         };
       })();
     } else {
@@ -27,11 +34,11 @@ export class MaintenanceService {
   }
 
   public async set(maintenance: boolean) {
-    this.handler.set(maintenance);
+    (await this.handler).set(maintenance);
   }
 
   public async get(): Promise<boolean> {
-    return this.handler.get();
+    return (await this.handler).get();
   }
 
   private getRedisClient(): any {
