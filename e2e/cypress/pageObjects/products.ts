@@ -62,6 +62,7 @@ class Products {
   }
 
   editProductEnvironmentConfig(config: any) {
+    
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()

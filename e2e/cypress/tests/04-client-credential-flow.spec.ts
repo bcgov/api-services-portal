@@ -50,12 +50,23 @@ describe('Client Credential Flow', () => {
     })
   })
 
-  it('Adds a test environment to "Auto Test Product" product', () => {
+  it('Adds Test environment to "Auto Test Product" product', () => {
     cy.visit(products.path)
     cy.get('@apiowner').then(({ product }: any) => {
-      products.addEnvToProduct(product.name, "Test");
+      products.addEnvToProduct(product.name, product.testEnvironment.name);
     })
   })
+
+  it('Adds Client Credential Flow to Test environment', () => {
+    cy.visit(products.path)
+    cy.get('@apiowner').then(({ product, ccAuthProfile }: any) => {
+      products.editProductEnvironment(product.name, product.testEnvironment.name)
+      cy.log("Editing prd env config")
+      product.testEnvironment.config.authIssuer = ccAuthProfile.name;
+      product.testEnvironment.config.authIssuerEnv = ccAuthProfile.environmentConfig.environment;
+      products.editProductEnvironmentConfig(product.testEnvironment.config)
+    });
+  });
 
   after(() => {
     cy.logout()
