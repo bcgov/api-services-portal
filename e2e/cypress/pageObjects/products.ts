@@ -88,6 +88,7 @@ class Products {
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
 
     cy.get(this.envCfgApplyChangesBtn).click()
+    cy.wait(10000)
   }
 
   generateKongPluginConfig(filename: string) {
