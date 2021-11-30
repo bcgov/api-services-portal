@@ -8,6 +8,8 @@ const session = require('express-session');
 
 const querystring = require('querystring');
 
+const { maintenance } = require('../services/maintenance');
+
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
@@ -27,6 +29,7 @@ const { getUma2FromIssuer, Uma2WellKnown } = require('../services/keycloak');
 const toJson = (val) => (val ? JSON.parse(val) : null);
 
 const logger = Logger('auth');
+
 class Oauth2ProxyAuthStrategy {
   constructor(keystone, listKey, config) {
     this.keystone = keystone;
@@ -122,14 +125,15 @@ class Oauth2ProxyAuthStrategy {
       async (req, res, next) => {
         const response =
           req && req.user
-            ? { anonymous: false, user: req.user }
-            : { anonymous: true };
+            ? { anonymous: false, user: req.user, maintenance: false }
+            : { anonymous: true, maintenance: false };
         if (response.anonymous == false) {
           logger.debug('Session %j', response.user);
           response.user.groups = toJson(response.user.groups);
           response.user.roles = toJson(response.user.roles);
           response.user.scopes = toJson(response.user.scopes);
         }
+        response.maintenance = await maintenance.get();
         res.json(response);
       }
     );
