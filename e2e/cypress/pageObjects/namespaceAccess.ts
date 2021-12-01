@@ -12,7 +12,6 @@ class NamespaceAccess {
 
     cy.get(this.shareBtn).click()
 
-    // cy.get(':nth-child(2) > .css-15mzruk').should('exist') // or 'be.visible'?
   }
 }
     

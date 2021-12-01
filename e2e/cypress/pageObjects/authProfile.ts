@@ -6,7 +6,7 @@ class AuthorizationProfile {
   flow: string = '[data-testid="ap-flow-select"]'
   kongApiKey: string = '[data-testid="ap-api-key"]'
   clientAuthenticator: string = '[data-testid="ap-client-aunthenticator"]'
-  mode: string = '[data-testid="ap-mode"]'
+  mode: string = '[data-testid="ap-mode"]' 
   scopes: string = '[data-testid="ap-authorization-scopes"]'
   clientRoles: string = '[data-testid="ap-authorization-client-roles"]'
   clientMappers: string = '[data-testid="ap-authorization-client-mappers"]'
@@ -37,12 +37,14 @@ class AuthorizationProfile {
 
       if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
 
+      // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID
       if (authProfile.scopes) {
         authProfile.scopes.forEach((scope: string) => {
           cy.get(this.scopes).click().type(`${scope}{enter}`)
         })
       }
 
+      // TODO test this. May not work, and have similar issue as "Scopes"
       if (authProfile.clientRoles) {
         authProfile.clientRoles.forEach((clientRole: string) => {
           cy.get(this.clientRoles).click().type(`${clientRole}{enter}`)
@@ -55,6 +57,7 @@ class AuthorizationProfile {
       if (authProfile.uma2ResourceType)
         cy.get(this.uma2ResourceType).click().type(authProfile.uma2ResourceType)
 
+      // TODO test this. May not work, and have similar issue as "Scopes"
       if (authProfile.resourceScopes) {
         authProfile.resourceScopes.forEach((resourceScope: string) => {
           cy.get(this.resourceScopes).click().type(`${resourceScope}{enter}`)
@@ -95,7 +98,6 @@ class AuthorizationProfile {
     }
 
     cy.get(this.createBtn).click()
-    cy.get(this.profileTable).contains(authProfile.name).should('exist')
   }
 }
 

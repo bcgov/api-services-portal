@@ -32,12 +32,12 @@ describe('Request Access Spec', () => {
     })
   })
 
-  // it('creates an access request', () => {
-  //   cy.visit(apiDir.path)
-  //   cy.get('@developer').then(({ product, application, accessRequest }: any) => {
-  //     apiDir.createAccessRequest(product, application, accessRequest)
-  //   })
-  // })
+  it('creates an access request', () => {
+    cy.visit(apiDir.path)
+    cy.get('@developer').then(({ product, application, accessRequest }: any) => {
+      apiDir.createAccessRequest(product, application, accessRequest)
+    })
+  })
 
   after(() => {
     cy.logout()

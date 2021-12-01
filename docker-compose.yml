@@ -104,7 +104,7 @@ services:
     networks:
       - aps-net
   cypress:
-    image: 'aps-cypress-e2e:latest'
+    image: aps-cypress-e2e:latest
     container_name: cypress-e2e
     entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
     environment:
