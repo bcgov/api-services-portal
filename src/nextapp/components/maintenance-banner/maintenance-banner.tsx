@@ -19,6 +19,7 @@ const MaintenanceBanner: React.FC<MaintenanceBannerProps> = ({
 }) => {
   return (
     <Box
+      data-testid="maintenance-banner"
       sx={{
         '& + header': {
           top: '120px',
@@ -54,10 +55,22 @@ const MaintenanceBanner: React.FC<MaintenanceBannerProps> = ({
         color="#6C4A00"
         px={{ base: 4, sm: 16 }}
       >
-        <AlertIcon as={IoWarning} color="inherit" boxSize={8} />
+        <AlertIcon
+          as={IoWarning}
+          color="inherit"
+          boxSize={8}
+          aria-label="maintenance alert icon"
+        />
         <Box flex="1">
-          <AlertTitle>{title}</AlertTitle>
-          <AlertDescription display="block">{text}</AlertDescription>
+          <AlertTitle data-testid="maintenance-banner-title">
+            {title}
+          </AlertTitle>
+          <AlertDescription
+            display="block"
+            data-testid="maintenance-banner-description"
+          >
+            {text}
+          </AlertDescription>
         </Box>
       </Alert>
     </Box>
