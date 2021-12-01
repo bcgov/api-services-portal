@@ -6,7 +6,7 @@ class AuthorizationProfile {
   flow: string = '[data-testid="ap-flow-select"]'
   kongApiKey: string = '[data-testid="ap-api-key"]'
   clientAuthenticator: string = '[data-testid="ap-client-aunthenticator"]'
-  mode: string = '[data-testid="ap-mode"]'
+  mode: string = '[data-testid="ap-mode"]' 
   scopes: string = '[data-testid="ap-authorization-scopes"]'
   clientRoles: string = '[data-testid="ap-authorization-client-roles"]'
   clientMappers: string = '[data-testid="ap-authorization-client-mappers"]'
@@ -98,10 +98,8 @@ class AuthorizationProfile {
     }
 
     cy.get(this.createBtn).click()
-<<<<<<< HEAD
-=======
+
     cy.get(this.profileTable).contains(authProfile.name).should('exist')
->>>>>>> dfd007f3 (Finishes up create auth profile test; adds adds test env to product test; adds in additional test IDs)
   }
 }
 
