@@ -20,7 +20,6 @@ while true; do
         curl http://feeder.localtest.me:6000/push -F yaml=@cc-dataset-gwa.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@cc-product-initializer.yaml
         break
-
     else
         echo  "Waiting for Keycloak....."
         sleep 1m
