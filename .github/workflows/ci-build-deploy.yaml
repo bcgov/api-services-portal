@@ -167,7 +167,7 @@ jobs:
           oauthProxy:
             enabled: true
             image:
-              tag: v7.1.3          
+              tag: v7.2.0
             config:
               upstream: http://127.0.0.1:3000
               client-id: ${{ secrets.OIDC_CLIENT_ID }}
