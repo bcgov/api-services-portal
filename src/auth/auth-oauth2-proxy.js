@@ -116,12 +116,19 @@ class Oauth2ProxyAuthStrategy {
             }
           }
         }
+      } else if (!req.oauth_user && req.user) {
+        logger.warn(
+          'OAuth session out of sync with Keystone session - ending Keystone session 403'
+        );
+        await this._sessionManager.endAuthedSession(req);
+        return res.status(403).json({ error: 'proxy_session_expired' });
       }
+      next();
     };
 
     app.get(
       '/admin/session',
-      [detectSessionMismatch],
+      [verifyJWT, checkExpired, detectSessionMismatch],
       async (req, res, next) => {
         const response =
           req && req.user
