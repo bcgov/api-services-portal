@@ -1,6 +1,6 @@
 
   query Get($id: ID!) {
-    allDiscoverableProducts(where: {id: $id}) {
+    allDiscoverableProducts(where: { id: $id }) {
       id
       name
       environments {
