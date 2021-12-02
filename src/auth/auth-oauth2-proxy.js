@@ -98,10 +98,12 @@ class Oauth2ProxyAuthStrategy {
     };
 
     const detectSessionMismatch = async function (err, req, res, next) {
-      if (req.oauth_user) {
-        const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-        logger.debug('SESSION USER = %j', req.user);
-        if (req.user) {
+      // If there is a Keystone session, make sure it is not out of sync with the
+      // OAuth proxy session
+      if (req.user) {
+        if (req.oauth_user) {
+          const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+          logger.debug('SESSION USER = %j', req.user);
           if (jti != req.user.jti) {
             logger.warn('Looks like a different credential.. %s', jti);
             logger.warn(
@@ -115,13 +117,13 @@ class Oauth2ProxyAuthStrategy {
               return res.status(403).json({ error: 'invalid_session' });
             }
           }
+        } else {
+          logger.warn(
+            'OAuth session out of sync with Keystone session - ending Keystone session 403'
+          );
+          await this._sessionManager.endAuthedSession(req);
+          return res.status(403).json({ error: 'proxy_session_expired' });
         }
-      } else if (!req.oauth_user && req.user) {
-        logger.warn(
-          'OAuth session out of sync with Keystone session - ending Keystone session 403'
-        );
-        await this._sessionManager.endAuthedSession(req);
-        return res.status(403).json({ error: 'proxy_session_expired' });
       }
       next();
     };
