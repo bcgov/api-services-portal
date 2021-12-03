@@ -82,12 +82,12 @@ class Oauth2ProxyAuthStrategy {
     // X-Auth-Request-Access-Token
 
     const checkExpired = (err, req, res, next) => {
-      logger.debug('CHECK EXPIRED!! ' + err);
+      logger.debug('[check-error] ' + err);
 
       if (err) {
         if (err.name === 'UnauthorizedError') {
-          logger.debug('CODE = ' + err.code);
-          logger.debug('INNER = ' + err.inner);
+          logger.debug('[check-error] CODE = ' + err.code);
+          logger.debug('[check-error] INNER = ' + err.inner);
           return res
             .status(403)
             .json({ error: 'unauthorized_provider_access' });
@@ -99,27 +99,27 @@ class Oauth2ProxyAuthStrategy {
     const detectSessionMismatch = async function (req, res, next) {
       // If there is a Keystone session, make sure it is not out of sync with the
       // OAuth proxy session
-      logger.debug('detect-session-mismatch');
       if (req.user) {
         if (req.oauth_user) {
-          const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-          logger.debug('SESSION USER = %j', req.user);
-          if (jti != req.user.jti) {
-            logger.warn('Looks like a different credential.. %s', jti);
+          if (req['oauth_user']['sub'] != req.user.sub) {
             logger.warn(
-              'OK if subjects the same! %s %s',
-              req['oauth_user']['sub'],
-              req.user.sub
+              '[detect-session-mismatch] Different subject (%s) detected!  Ending session.',
+              req['oauth_user']['sub']
             );
-            if (req['oauth_user']['sub'] != req.user.sub) {
-              logger.warn('Subjects different too!  Ending session.');
-              await sessionManager.endAuthedSession(req);
-              return res.status(403).json({ error: 'invalid_session' });
+            await sessionManager.endAuthedSession(req);
+            return res.status(403).json({ error: 'invalid_session' });
+          } else {
+            const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+            if (jti != req.user.jti) {
+              logger.debug(
+                '[detect-session-mismatch] Refreshed credential %s',
+                jti
+              );
             }
           }
         } else {
           logger.warn(
-            'OAuth session out of sync with Keystone session - ending Keystone session 403'
+            '[detect-session-mismatch] OAuth session ended - ending Keystone session 403'
           );
           await sessionManager.endAuthedSession(req);
           return res.status(403).json({ error: 'proxy_session_expired' });
@@ -133,13 +133,11 @@ class Oauth2ProxyAuthStrategy {
       verifyJWT,
       detectSessionMismatch,
       async (req, res, next) => {
-        logger.debug('admin-session %j', req.oauth_user);
         const response =
           req && req.user
             ? { anonymous: false, user: req.user, maintenance: false }
             : { anonymous: true, maintenance: false };
         if (response.anonymous == false) {
-          logger.debug('Session %j', response.user);
           response.user.groups = toJson(response.user.groups);
           response.user.roles = toJson(response.user.roles);
           response.user.scopes = toJson(response.user.scopes);
