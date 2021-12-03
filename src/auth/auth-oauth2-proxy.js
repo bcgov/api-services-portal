@@ -91,11 +91,8 @@ class Oauth2ProxyAuthStrategy {
         if (err.name === 'UnauthorizedError') {
           logger.debug('[check-jwt-error] CODE = ' + err.code);
           logger.debug('[check-jwt-error] INNER = ' + err.inner);
-          return res
-            .status(401)
-            .json({ error: 'unauthorized_provider_access' });
         }
-        return res.status(401).json({ error: 'unexpected_error' });
+        res.redirect('/oauth2/start');
       }
       next();
     };
