@@ -92,14 +92,13 @@ class Oauth2ProxyAuthStrategy {
             .json({ error: 'unauthorized_provider_access' });
         }
         return res.status(403).json({ error: 'unexpected_error' });
-      } else {
-        next();
       }
     };
 
-    const detectSessionMismatch = async function (err, req, res, next) {
+    const detectSessionMismatch = async function (req, res, next) {
       // If there is a Keystone session, make sure it is not out of sync with the
       // OAuth proxy session
+      logger.debug('detect-session-mismatch');
       if (req.user) {
         if (req.oauth_user) {
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
@@ -131,7 +130,6 @@ class Oauth2ProxyAuthStrategy {
     app.get(
       '/admin/session',
       verifyJWT,
-      checkExpired,
       detectSessionMismatch,
       async (req, res, next) => {
         logger.debug('admin-session %j', req.oauth_user);
@@ -147,7 +145,8 @@ class Oauth2ProxyAuthStrategy {
         }
         response.maintenance = await maintenance.get();
         res.json(response);
-      }
+      },
+      checkExpired
     );
 
     app.get(
