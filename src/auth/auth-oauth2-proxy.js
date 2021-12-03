@@ -163,7 +163,16 @@ class Oauth2ProxyAuthStrategy {
 
     app.get(
       '/admin/signin',
-      [verifyJWT, checkExpired],
+      [
+        verifyJWT,
+        (err, req, res, next) => {
+          // If we are signing in and the token is not valid, then force a signout because
+          // the Oauth2 Proxy is not refreshing the token properly
+          if (err) {
+            res.redirect('/admin/signout');
+          }
+        },
+      ],
       async (req, res, next) => {
         await this.register_user(req, res, next);
       }
