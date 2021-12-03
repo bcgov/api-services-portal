@@ -94,9 +94,7 @@ class Oauth2ProxyAuthStrategy {
           logger.debug('[check-jwt-error] CODE = ' + err.code);
           logger.debug('[check-jwt-error] INNER = ' + err.inner);
         }
-        res.redirect(
-          '/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl)
-        );
+        res.status(401).json({ error: 'expired_token' });
         return;
       }
       next();
