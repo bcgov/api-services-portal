@@ -58,6 +58,7 @@ class Oauth2ProxyAuthStrategy {
   }
 
   prepareMiddleware(app) {
+    const sessionManager = this._sessionManager;
     app = express();
     app.set('trust proxy', true);
 
@@ -112,7 +113,7 @@ class Oauth2ProxyAuthStrategy {
             );
             if (req['oauth_user']['sub'] != req.user.sub) {
               logger.warn('Subjects different too!  Ending session.');
-              await this._sessionManager.endAuthedSession(req);
+              await sessionManager.endAuthedSession(req);
               return res.status(403).json({ error: 'invalid_session' });
             }
           }
@@ -120,7 +121,7 @@ class Oauth2ProxyAuthStrategy {
           logger.warn(
             'OAuth session out of sync with Keystone session - ending Keystone session 403'
           );
-          await this._sessionManager.endAuthedSession(req);
+          await sessionManager.endAuthedSession(req);
           return res.status(403).json({ error: 'proxy_session_expired' });
         }
       }
