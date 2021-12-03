@@ -85,7 +85,9 @@ class Oauth2ProxyAuthStrategy {
       logger.debug('[check-jwt-error] ' + err);
 
       if (err) {
-        logger.warn('[check-jwt-error] ending session');
+        logger.error(
+          '[check-jwt-error] ending session - oauth2 proxy should be refreshing this token!'
+        );
         await sessionManager.endAuthedSession(req);
 
         if (err.name === 'UnauthorizedError') {
