@@ -89,14 +89,15 @@ class Oauth2ProxyAuthStrategy {
         await sessionManager.endAuthedSession(req);
 
         if (err.name === 'UnauthorizedError') {
-          logger.debug('[check-error] CODE = ' + err.code);
-          logger.debug('[check-error] INNER = ' + err.inner);
+          logger.debug('[check-jwt-error] CODE = ' + err.code);
+          logger.debug('[check-jwt-error] INNER = ' + err.inner);
           return res
-            .status(403)
+            .status(401)
             .json({ error: 'unauthorized_provider_access' });
         }
-        return res.status(403).json({ error: 'unexpected_error' });
+        return res.status(401).json({ error: 'unexpected_error' });
       }
+      next();
     };
 
     const detectSessionMismatch = async function (req, res, next) {
@@ -111,7 +112,7 @@ class Oauth2ProxyAuthStrategy {
             );
             logger.warn('[detect-session-mismatch] ending session');
             await sessionManager.endAuthedSession(req);
-            return res.status(403).json({ error: 'invalid_session' });
+            return res.status(401).json({ error: 'invalid_session' });
           } else {
             const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
             if (jti != req.user.jti) {
@@ -127,7 +128,7 @@ class Oauth2ProxyAuthStrategy {
           );
           logger.warn('[detect-session-mismatch] ending session');
           await sessionManager.endAuthedSession(req);
-          return res.status(403).json({ error: 'proxy_session_expired' });
+          return res.status(401).json({ error: 'proxy_session_expired' });
         }
       }
       next();
