@@ -81,10 +81,13 @@ class Oauth2ProxyAuthStrategy {
     });
     // X-Auth-Request-Access-Token
 
-    const checkExpired = (err, req, res, next) => {
-      logger.debug('[check-error] ' + err);
+    const checkExpired = async (err, req, res, next) => {
+      logger.debug('[check-jwt-error] ' + err);
 
       if (err) {
+        logger.warn('[check-jwt-error] ending session');
+        await sessionManager.endAuthedSession(req);
+
         if (err.name === 'UnauthorizedError') {
           logger.debug('[check-error] CODE = ' + err.code);
           logger.debug('[check-error] INNER = ' + err.inner);
@@ -103,9 +106,10 @@ class Oauth2ProxyAuthStrategy {
         if (req.oauth_user) {
           if (req['oauth_user']['sub'] != req.user.sub) {
             logger.warn(
-              '[detect-session-mismatch] Different subject (%s) detected!  Ending session.',
+              '[detect-session-mismatch] Different subject (%s) detected!',
               req['oauth_user']['sub']
             );
+            logger.warn('[detect-session-mismatch] ending session');
             await sessionManager.endAuthedSession(req);
             return res.status(403).json({ error: 'invalid_session' });
           } else {
@@ -121,6 +125,7 @@ class Oauth2ProxyAuthStrategy {
           logger.warn(
             '[detect-session-mismatch] OAuth session ended - ending Keystone session 403'
           );
+          logger.warn('[detect-session-mismatch] ending session');
           await sessionManager.endAuthedSession(req);
           return res.status(403).json({ error: 'proxy_session_expired' });
         }
@@ -132,6 +137,7 @@ class Oauth2ProxyAuthStrategy {
       '/admin/session',
       verifyJWT,
       detectSessionMismatch,
+      checkExpired,
       async (req, res, next) => {
         const response =
           req && req.user
@@ -144,8 +150,7 @@ class Oauth2ProxyAuthStrategy {
         }
         response.maintenance = await maintenance.get();
         res.json(response);
-      },
-      checkExpired
+      }
     );
 
     app.get(
