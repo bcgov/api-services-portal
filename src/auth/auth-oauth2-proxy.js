@@ -130,7 +130,9 @@ class Oauth2ProxyAuthStrategy {
 
     app.get(
       '/admin/session',
-      [verifyJWT, checkExpired, detectSessionMismatch],
+      verifyJWT,
+      checkExpired,
+      detectSessionMismatch,
       async (req, res, next) => {
         const response =
           req && req.user
