@@ -134,6 +134,7 @@ class Oauth2ProxyAuthStrategy {
       checkExpired,
       detectSessionMismatch,
       async (req, res, next) => {
+        logger.debug('admin-session %j', req.oauth_user);
         const response =
           req && req.user
             ? { anonymous: false, user: req.user, maintenance: false }
