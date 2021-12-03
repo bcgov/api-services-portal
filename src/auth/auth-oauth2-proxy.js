@@ -154,26 +154,16 @@ class Oauth2ProxyAuthStrategy {
       }
     );
 
-    app.get(
-      '/admin/signout',
-      [verifyJWT, checkExpired],
-      async (req, res, next) => {
-        if (req.user) {
-          await this._sessionManager.endAuthedSession(req);
-        }
-        res.redirect(
-          '/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl)
-        );
+    app.get('/admin/signout', async (req, res, next) => {
+      if (req.user) {
+        await this._sessionManager.endAuthedSession(req);
       }
-    );
+      res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
+    });
 
-    app.get(
-      '/admin/signin',
-      [verifyJWT, checkExpired],
-      async (req, res, next) => {
-        await this.register_user(req, res, next);
-      }
-    );
+    app.get('/admin/signin', [verifyJWT], async (req, res, next) => {
+      await this.register_user(req, res, next);
+    });
 
     app.put(
       '/admin/switch',
