@@ -95,6 +95,7 @@ class Oauth2ProxyAuthStrategy {
           logger.debug('[check-jwt-error] INNER = ' + err.inner);
         }
         res.redirect('/oauth2/start');
+        return;
       }
       next();
     };
