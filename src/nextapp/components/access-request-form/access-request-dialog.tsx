@@ -43,7 +43,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const isAutoApproved = React.useRef<boolean>(false);
+  const [isAutoApproved, setIsAutoApproved] = React.useState<boolean>(false);
   const mutate = useApiMutation(mutation);
   const router = useRouter();
   const toast = useToast();
@@ -52,6 +52,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => setTab(defaultTab),
   });
+  const submitButtonText = isAutoApproved
+    ? 'Request Access & Continue'
+    : 'Request Access';
 
   // Events
   const handleAccessSubmit = React.useCallback(
@@ -79,12 +82,27 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           };
           await mutate.mutateAsync(payload);
           client.invalidateQueries('allAccessRequests');
-          setTab(1);
+
           toast({
             isClosable: true,
             title: 'Request submitted',
             status: 'success',
           });
+
+          // If auto approved go to the next tab, otherwise close modal and redirect
+          if (isAutoApproved) {
+            setTab(1);
+          } else {
+            toast({
+              isClosable: true,
+              status: 'warning',
+              title: 'Pending Approval',
+              description:
+                'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
+            });
+            onClose();
+            router?.push('/devportal/access');
+          }
         } catch (err) {
           toast({
             isClosable: true,
@@ -97,7 +115,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         }
       }
     },
-    [client, mutate, toast]
+    [client, isAutoApproved, mutate, onClose, router, toast]
   );
   const handleSubmit = React.useCallback(() => {
     formRef.current?.requestSubmit();
@@ -105,23 +123,13 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const handleDone = React.useCallback(() => {
     onClose();
     router?.push('/devportal/access');
-
-    if (tab === 1 && isAutoApproved.current) {
-      toast({
-        isClosable: true,
-        status: 'warning',
-        title: 'Pending Approval',
-        description:
-          'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
-      });
-    }
-  }, [onClose, router, tab, toast]);
+  }, [onClose, router]);
   const handleFormError = () => {
     setError(true);
   };
-  const handleEnviornmentSelect = React.useCallback(
+  const handleEnvironmentSelect = React.useCallback(
     (environment: Environment) => {
-      isAutoApproved.current = !environment.approval;
+      setIsAutoApproved(!environment.approval);
     },
     []
   );
@@ -174,7 +182,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                   <React.Suspense fallback={<AccessRequestFormLoading />}>
                     <AccessRequestForm
                       id={id}
-                      onEnvironmentSelect={handleEnviornmentSelect}
+                      onEnvironmentSelect={handleEnvironmentSelect}
                     />
                   </React.Suspense>
                 </ErrorBoundary>
@@ -193,7 +201,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                   isLoading={mutate.isLoading}
                   onClick={handleSubmit}
                 >
-                  Request Access & Continue
+                  {submitButtonText}
                 </Button>
               </ButtonGroup>
             )}
