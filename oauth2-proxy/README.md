@@ -63,9 +63,10 @@ Go to: `http://localhost:4180/public`
 Two session cookies are maintained - one for Oauth2 Proxy and the other for KeystoneJS, so some logic is required to handle different scenarios.
 
 - `Oauth2 Proxy`:
-  - The Proxy refreshes the JWT Token based on the `cookie-refresh` time. If this is less than the Access Token Lifespan configured in the IdP then Keystone `auth-oauth2-proxy : [check-jwt-error]` will trigger, which clears the KeystoneJS session and force a Signout (HTTP 302). If the cookie refresh is less, then it will continue to pass a valid JWT Token to KeystoneJS.
+  - The Proxy refreshes the JWT Token based on the `cookie-refresh` time. If this is less than the Access Token Lifespan configured in the IdP then Keystone `auth-oauth2-proxy : [check-jwt-error]` will trigger, which clears the KeystoneJS session and returns a 401. If the cookie refresh is less, then it will continue to pass a valid JWT Token to KeystoneJS.
 - `KeystoneJS`:
-  - /admin/session`: Bypasses the OAuth2 Proxy auth handling and returns successfully as long as the JWT Token exists, the JWT Token has not expired, and the Subject in the JWT Token matches the Subject in the KeystoneJS Session. If there is no JWT Token (Oauth2 Proxy cookie expired) or there is a Subject mismatch, then the KeystoneJS Session is ended and a 401 response is sent (the frontend NextJS app will show a "Unauthorized" page if a 401 response is returned). If the JWT has expired, then a forced Signout (HTTP 302) is returned as this is a special case that can be considered "mis-configuration" rather than expected functionality.
+  - `/admin/signin` : If there is an invalid token, then a forced signout occurs. Under normal circumstances a JWT Token should not become expired as the OAuth2 Proxy should be refreshing it
+  - `/admin/session`: Bypasses the OAuth2 Proxy auth handling and returns successfully as long as the JWT Token exists, the JWT Token has not expired, and the Subject in the JWT Token matches the Subject in the KeystoneJS Session. If there is no JWT Token (Oauth2 Proxy cookie expired) or there is a Subject mismatch, then the KeystoneJS Session is ended and a 401 response is sent (the frontend NextJS app will show a "Unauthorized" page if a 401 response is returned). If the JWT has expired, then a forced Signout (HTTP 302) is returned as this is a special case that can be considered "mis-configuration" rather than expected functionality.
 
 Scenarios:
 
