@@ -20,7 +20,7 @@ interface Column extends TableColumnHeaderProps {
 }
 
 interface ApsTableProps {
-  children: (d: unknown, index: number) => React.ReactNode;
+  children: (d: unknown, index: number) => React.ReactElement;
   columns: Column[];
   data: unknown[];
   emptyView?: React.ReactNode;
@@ -114,10 +114,16 @@ const ApsTable: React.FC<ApsTableProps> = ({
       <Tbody>
         {!data.length && (
           <Tr>
-            <Td colSpan={columns.length}>{emptyView}</Td>
+            <Td colSpan={columns.length} textAlign="center">
+              {emptyView}
+            </Td>
           </Tr>
         )}
-        {sorted.map((d, index) => children(d, index))}
+        {sorted.map((d, index) =>
+          React.cloneElement(children(d, index), {
+            key: uid(d),
+          })
+        )}
       </Tbody>
     </Table>
   );
