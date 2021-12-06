@@ -74,7 +74,6 @@ describe('Create API Spec', () => {
     })
   })
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
-
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)

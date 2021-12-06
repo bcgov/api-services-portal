@@ -30,10 +30,10 @@ class Products {
   }
 
   createNewProduct(productName: string, env: string) {
-    // cy.get(this.newProductBtn).click()
-    // cy.get(this.productNameInput).type(productName)
-    // cy.get(`[data-testid=prd-env-${env}-radio]`).click()
-    // cy.get(this.createBtn).click()
+    cy.get(this.newProductBtn).click()
+    cy.get(this.productNameInput).type(productName)
+    cy.get(`[data-testid=prd-env-${env}-radio]`).click()
+    cy.get(this.createBtn).click()
   }
 
   editProduct(productName: string) {
@@ -87,7 +87,6 @@ class Products {
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
     cy.get(this.envCfgApplyChangesBtn).click()
-    cy.wait(10000)
   }
 
   generateKongPluginConfig(filename: string) {

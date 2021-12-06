@@ -19,13 +19,13 @@ describe('API Owner Spec', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
-    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('access-manager').as('access-manager')
     cy.fixture('developer').as('developer')
     cy.visit(login.path)
   })
 
   it('approves an access request', () => {
-    cy.get('@apiowner').then(({ user, namespace }: any) => {
+    cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password).then(() => {
         cy.visit(consumers.path);
         home.useNamespace(namespace);

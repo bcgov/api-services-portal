@@ -1,7 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
-import LogoutPage from '../pageObjects/logout'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
@@ -96,7 +95,6 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 Cypress.Commands.add('logout', () => {
 
   cy.log('< Logging out')
-  const logout = new LogoutPage()
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').find("div[role='img']").should('have.attr', 'aria-label', res.body.user.name)
