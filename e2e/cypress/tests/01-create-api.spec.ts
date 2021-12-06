@@ -52,7 +52,6 @@ describe('Create API Spec', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.createNewProduct(product.name, product.environment.name)
-      pd.editProduct(product.name, product.orgName, product.orgUnitName)
     })
   })
   it('publish product to directory', () => {
@@ -68,6 +67,12 @@ describe('Create API Spec', () => {
       cy.get('@publishAPIResponse').then((res: any) => {
         cy.log(JSON.stringify(res.body))
       })
+    })
+  })
+  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
   after(() => {

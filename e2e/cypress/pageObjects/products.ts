@@ -15,18 +15,20 @@ class Products {
   envCfgOptText: string = '[data-testid=prd-env-config-optional-text]'
   envCfgAuthzDropdown: string = '[data-testid=prd-env-config-authz-dd]'
   envCfgApplyChangesBtn: string = '[data-testid=prd-env-config-apply-btn]'
+  catelogueDropDown: string = '[id=downshift-0-input]'
+  catelogueDropDownMenu: string = '[id=downshift-0-menu]'
 
   createNewProduct(productName: string, env: string) {
-    // cy.get(this.newProductBtn).click()
-    // cy.get(this.productNameInput).type(productName)
-    // cy.get(`[data-testid=prd-env-${env}-radio]`).click()
-    // cy.get(this.createBtn).click()
+    cy.get(this.newProductBtn).click()
+    cy.get(this.productNameInput).type(productName)
+    cy.get(`[data-testid=prd-env-${env}-radio]`).click()
+    cy.get(this.createBtn).click()
   }
 
-  editProduct(productName: string, orgName: string, orgUnitName: string) {
+  editProduct(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click()
-    cy.get(this.updateBtn).click()
+    // cy.get(this.updateBtn).click()
   }
 
   addEnvToProduct(productName: string, envName: string) {
@@ -51,7 +53,6 @@ class Products {
     cy.get(this.envCfgAuthzDropdown).select(config.authorization,{ force: true }).invoke('val')
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
     cy.get(this.envCfgApplyChangesBtn).click()
-    cy.wait(10000)
   }
 
   generateKongPluginConfig() {
@@ -62,6 +63,27 @@ class Products {
       })
     })
   }
+
+  updateDatasetNameToCatelogue(productName: string,env: string) {
+    this.editProduct(productName)
+    const search_input: string = productName.slice(0,1)
+    cy.get(this.catelogueDropDown).type(search_input,{
+      force: true
+   })
+    cy.get(this.catelogueDropDownMenu).find('div').find('p').each(($e1, index, $list) => {
+      if($e1.text()===productName)
+      {
+          cy.wrap($e1).click()
+      }
+    })
+    this.updateProduct()
+  }
+
+  updateProduct(){
+    cy.get(this.updateBtn).click()
+  }
+  
+
 }
 
 export default Products

@@ -53,5 +53,11 @@
       "clientId": "cypress-auth-profile",
       "clientSecret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
     }
+  },
+  "permission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage","Namespace.View"]
+    } 
   }
 }

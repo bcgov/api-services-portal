@@ -1,18 +1,29 @@
-class NamespaceAccess {
-  path: string = "/manager/namespace-access"
-  grantAccBtn: string = '[data-testid="nsa-grant-access-btn"]'
-  nameField: string = '[data-testid="nsa-gua-username-field"]'
-  shareBtn: string = '[data-testid="nsa-gua-share-btn"]'
+class NamespaceAccessPage {
 
-  addNamespaceAccessPermissions(username: string, permissions: Array<string>) {
-    cy.get(this.grantAccBtn).click();
-    cy.get(this.nameField).click().type(username);
+  userNameInput: string = ' input[name="username"]'
+  grantPermission(accessRqst : any) {
+    cy.get(this.userNameInput).type(accessRqst.userName);
+    let accessRole: Array<string> = accessRqst.accessRole
+    accessRole.forEach(function(accessName)
+    {
+      cy.contains("Permissions").next().find('ul').find('li').each(($el, index, $list) => {
 
-    permissions.forEach(p => cy.contains(p).click())
-
-    cy.get(this.shareBtn).click()
-
+        const textAccessRoleName=$el.text()
+        cy.log(textAccessRoleName)
+        if(textAccessRoleName===accessName)
+        {
+          cy.wrap($el).click()
+        }
+        })
+    })   
+    cy.contains("Share").click()
   }
-}
     
-export default NamespaceAccess;
+  path: string = '/manager/namespace-access'
+
+  clickGrantUserAccessButton() {
+    cy.contains("Grant User Access").click()
+  }   
+}
+  export default NamespaceAccessPage
+  
