@@ -743,8 +743,32 @@
       },
       "notBefore": 0,
       "groups": []
+    },{
+    "id" : "0cb6367d-605d-44ef-a15a-a180e5773bc2",
+    "createdTimestamp" : 1638573942042,
+    "username" : "mark",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "firstName" : "Mark F",
+    "lastName" : "Mark L",
+    "email" : "mark@gmail.com",
+    "credentials" : [ {
+      "id" : "51f9551c-700c-48a4-a8c9-741089fc8123",
+      "type" : "password",
+      "createdDate" : 1638573942161,
+      "secretData" : "{\"value\":\"I1XjV+HZkoHcNhSOHbICpyAlzyGyeqp/kPuIMvjcRP8oCD5x1FimGeZ8PISATtgcAq+QaSz3jx/ntodr3LbxOw==\",\"salt\":\"1Exw3iFjhc8E6DprXFm26w==\"}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "uma_authorization", "offline_access", "api-manager", "admin" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ]
     },
-    {
+    "notBefore" : 0,
+    "groups" : [ ]
+  },{
       "id": "7f9dcdfc-6100-4ec8-ba3f-8bd26d184585",
       "createdTimestamp": 1623537499547,
       "username": "local",

@@ -6,16 +6,19 @@ class ApiDirectoryPage {
   appSelect: string = '[data-testid=access-rqst-app-select]'
   additionalNotes: string = '[data-testid=access-rqst-add-notes-text]'
   submitBtn: string = '[data-testid=access-rqst-submit-btn]'
+  generateSecretsBtn: string = '[data-testid=access-rqst-gen-scrts-btn]'
 
   createAccessRequest(product: any, app: any, accessRqst: any) {
+    cy.contains('a',product.name, { timeout: 10000 }).should('be.visible');
     cy.contains(product.name).click()
     cy.get(this.rqstAccessBtn).click()
     cy.get(this.appSelect).select(app.name)
     cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').click()
     cy.get(this.additionalNotes).type(accessRqst.notes)
-    if (checkElementExists('Terms of Use for API Gateway'))
-      cy.contains('Terms of Use for API Gateway').click()
+    cy.contains('Terms of Use for API Gateway').click()
     cy.get(this.submitBtn).click()
+    cy.get(this.generateSecretsBtn).click()
+    cy.contains("API Key").should('be.visible')
   };
 }
 

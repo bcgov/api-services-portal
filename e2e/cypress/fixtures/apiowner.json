@@ -22,5 +22,11 @@
         "serviceName": "a-service-for-platform"
       }
     }
+  },
+  "permission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage","Namespace.View"]
+    } 
   }
 }
