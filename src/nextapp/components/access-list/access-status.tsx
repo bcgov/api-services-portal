@@ -28,7 +28,7 @@ const AccessStatus: React.FC<AccessStatusProps> = ({
     );
 
     if (isServiceAccess || isApproved) {
-      color = 'green.500';
+      color = 'bc-success';
       icon = FaCheckCircle;
       text = 'Approved';
     } else if (isIssued && !isComplete && !isApproved) {
