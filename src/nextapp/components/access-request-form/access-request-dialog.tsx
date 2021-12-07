@@ -155,7 +155,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           <ModalHeader>
             Access Request to Test NK API
             <Tabs defaultIndex={tab} index={tab}>
-              <TabList mt={4} mb={2}>
+              <TabList mt={4}>
                 <Tab px={0} cursor="default">
                   1. Request Access
                 </Tab>

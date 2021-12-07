@@ -131,7 +131,12 @@ const ApplicationSelect: React.FC = () => {
         </GridItem>
       </Grid>
       <Collapse animateOpacity in={isOpen}>
-        <Grid templateColumns="1fr 1fr" gap={4} templateRows="repeat(1fr, 3)">
+        <Grid
+          templateColumns="1fr 1fr"
+          gap={4}
+          templateRows="repeat(1fr, 3)"
+          mt={8}
+        >
           <GridItem>
             <FormControl isRequired={isOpen}>
               <FormLabel>Application Name</FormLabel>

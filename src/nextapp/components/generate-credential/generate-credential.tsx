@@ -14,6 +14,7 @@ import { useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/shared/types/query.types';
 
 import ViewSecret from '../view-secret';
+import { FaTimesCircle } from 'react-icons/fa';
 
 interface GenerateCredentialsProps {
   id: string;
@@ -62,7 +63,13 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
                 }Generate Secrets`}
               </Button>
               {credentialGenerator.isError && (
-                <Alert status="error" mt={4}>
+                <Alert
+                  status="error"
+                  mt={5}
+                  variant="outline"
+                  borderRadius="md"
+                >
+                  <AlertIcon as={FaTimesCircle} />
                   <AlertDescription>Unable to generate keys</AlertDescription>
                 </Alert>
               )}
