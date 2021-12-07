@@ -13,7 +13,8 @@ describe('API Owner Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.clearCookies()
+    cy.deleteAllCookies()
+    cy.clearCookies({log:true})
     cy.reload()
   })
 
@@ -31,7 +32,6 @@ describe('API Owner Spec', () => {
         home.useNamespace(namespace);
         cy.contains('Review').click()
         cy.contains('Approve').click()
-        // TODO this isn't working:
         cy.contains('span','Complete', { timeout: 10000 }).should('be.visible');
       })
     })
@@ -39,5 +39,7 @@ describe('API Owner Spec', () => {
 
   after(() => {
     cy.logout()
+    cy.clearLocalStorage({log:true})
+    cy.deleteAllCookies()
   })
 })

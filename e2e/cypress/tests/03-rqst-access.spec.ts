@@ -9,7 +9,8 @@ describe('Request Access Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.clearCookies()
+    cy.deleteAllCookies()
+    cy.clearCookies({log:true})
     cy.reload()
   })
 
@@ -41,5 +42,7 @@ describe('Request Access Spec', () => {
 
   after(() => {
     cy.logout()
+    cy.clearLocalStorage({log:true})
+    cy.deleteAllCookies()
   })
 })

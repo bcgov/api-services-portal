@@ -11,6 +11,8 @@ declare namespace Cypress {
 
     logout(): void
 
+    deleteAllCookies(): void
+
     preserveCookies(): void
 
     removeCookies(): void
