@@ -46,7 +46,11 @@ describe('Request Access Spec', () => {
 
   after(() => {
     cy.logout()
+<<<<<<< HEAD
     cy.clearLocalStorage({ log: true })
+=======
+    cy.clearLocalStorage({log:true})
+>>>>>>> 813ebb85 (Created a method to delete cookies using JavaScript method)
     cy.deleteAllCookies()
   })
 })

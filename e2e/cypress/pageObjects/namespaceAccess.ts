@@ -26,8 +26,4 @@ class NamespaceAccessPage {
   }   
 }
   export default NamespaceAccessPage
-<<<<<<< HEAD
   
-=======
-  
->>>>>>> ab59d526 (Made changes for ZenHub ticket #250)
