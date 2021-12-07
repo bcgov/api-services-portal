@@ -207,6 +207,59 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
   })
 })
 
+// Cypress.Commands.add('deleteAllCookies', () => {
+//   cy.log("Delete coockie started")
+//   var cookies = document.cookie.split(";");
+//     for (var i = 0; i < cookies.length; i++) {
+//         var cookie = cookies[i];
+//         var eqPos = cookie.indexOf("=");
+//         var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+//         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+//     }
+//     cy.log("Delete coockie completed")
+// })
+
+// Cypress.Commands.add('deleteAllCookies', () => {
+//   cy.log("Delete coockie started")
+//   var cookies = document.cookie.split("; ");
+//   for (var c = 0; c < cookies.length; c++) {
+//       var d = window.location.hostname.split(".");
+//       while (d.length > 0) {
+//           var cookieBase = encodeURIComponent(cookies[c].split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path=';
+//           var p = location.pathname.split('/');
+//           document.cookie = cookieBase + '/';
+//           while (p.length > 0) {
+//               document.cookie = cookieBase + p.join('/');
+//               p.pop();
+//           };
+//           d.shift();
+//       }
+//   }
+//   cy.log("Delete coockie completed")
+// })
+
+// Cypress.Commands.add('deleteAllCookies', () => {
+//   cy.log("Delete coockie started")
+//   const cookies = document.cookie.split(";");
+//   for (const cookie of cookies) {
+//     const eqPos = cookie.indexOf("=");
+//     const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+//     document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+//   }
+//   cy.log("Delete coockie completed")
+// })
+
+Cypress.Commands.add('deleteAllCookies', () => {
+  var cookies = document.cookie.split(";");
+
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+})
+
 const formDataRequest = (
   options: formDataRequestOptions,
   accessToken: string,
