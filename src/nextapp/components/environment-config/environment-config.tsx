@@ -250,7 +250,6 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                             value={data.credentialIssuer?.id}
                             environmentId={data.id}
                             flow={flow}
-                            data-testid="prd-env-auth-issuer-select"
                           />
                         </GridItem>
                       )}

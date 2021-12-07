@@ -43,6 +43,67 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.log('> Log in')
 })
 
+// Cypress.Commands.add('login', (username: string, password: string) => {
+//   cy.log('< Log in with user ' + username)
+//   const kcRoot = 'http://keycloak.localtest.me:9080';
+//   const kcRealm = 'master';
+//   const kcClient = 'aps-portal';
+//   const kcRedirectUri = 'http://oauth2proxy.localtest.me:4180/oauth2/callback';
+//   const loginPageRequest = {
+//     url: `${kcRoot}/auth/realms/${kcRealm}/protocol/openid-connect/auth`,
+//     qs: {
+//       client_id: kcClient,
+//       redirect_uri: kcRedirectUri,
+//       state: `${createUUID()}%3A%2Fadmin%2Fsignin`,
+//       nonce: createUUID(),
+//       response_mode: 'fragment',
+//       response_type: 'code',
+//       scope: 'openid',
+//       approval_prompt: 'force'
+//     }
+//   };
+//   // Open the KC login page, fill in the form with username and password and submit.
+//   return cy.request(loginPageRequest)
+//     .then(submitLoginForm);
+//   ////////////
+//   function submitLoginForm(response:any) {
+//     const _el = document.createElement('html');
+//     _el.innerHTML = response.body;
+//     // This should be more strict depending on your login page template.
+//     const loginForm = _el.getElementsByTagName('form');
+//     const isAlreadyLoggedIn = !loginForm.length;
+//     if (isAlreadyLoggedIn) {
+//       cy.log('> Already logged in')
+//       return;
+//     }
+//     cy.log('> Log in')
+//     return cy.request({
+//       form: true,
+//       method: 'POST',
+//       url: loginForm[0].action,
+//       followRedirect: true,
+//       body: {
+//         username: username,
+//         password: password        
+//       }
+//     });
+//   }
+//   // Copy-pasted code from KC javascript client. It probably doesn't need to be 
+//   // this complicated but I refused to spend time on figuring that out.
+//   function createUUID() {
+//     var s:any = [];
+//     var hexDigits = '0123456789abcdef';
+//     for (var i = 0; i < 36; i++) {
+//       s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+//     }
+//     s[14] = '4';
+//     s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
+//     s[8] = s[13] = s[18] = s[23] = '-';
+//     var uuid = s.join('');
+//     return uuid;
+//   }
+// })
+
 Cypress.Commands.add('getSession', () => {
   cy.log('< Get Session')
   cy.request({ method: 'GET', url: Cypress.config('baseUrl') + '/admin/session' }).then(
@@ -93,21 +154,16 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
-
   cy.log('< Logging out')
-  // cy.getSession().then(() => {
-  //   cy.get('@session').then((res: any) => {
-  //     console.log(res)
-  //     let userInitials = initials(res.body.user.name);
-  //     cy.contains(userInitials).click()
-  //     cy.contains('Sign Out').click()
-  //     cy.removeCookies()
-  //   })
-  // })
-  cy.get('[data-testid="auth-menu-user"]').click();
-  cy.contains('Sign Out').click();
-  cy.removeCookies();
-  cy.log('> Logging out');
+  cy.getSession().then(() => {
+    cy.get('@session').then((res: any) => {
+      cy.get('[data-testid=auth-menu-user]').find("div[role='img']").should('have.attr', 'aria-label', res.body.user.name)
+      cy.get('[data-testid=auth-menu-user]').click()
+      cy.contains('Sign Out').click()
+      cy.removeCookies()
+    })
+  })
+  cy.log('> Logging out')
 })
 
 Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string) => {

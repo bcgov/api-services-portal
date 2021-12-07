@@ -146,7 +146,6 @@ export const GET_LIST = gql`
         title
       }
       dataset {
-        id
         title
         notes
         sector

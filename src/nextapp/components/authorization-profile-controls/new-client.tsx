@@ -55,7 +55,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
 
   return (
     <>
-      <Button isDisabled={false} onClick={onOpen} variant="primary" data-testid="ap-client-mgmt-add-env-btn">
+      <Button isDisabled={false} onClick={onOpen} variant="primary">
         Add Environment
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
@@ -68,7 +68,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                 <GridItem>
                   <FormControl as="fieldset" isRequired>
                     <FormLabel as="legend">Environment</FormLabel>
-                    <RadioGroup defaultValue="dev" data-testid="ap-env-env">
+                    <RadioGroup defaultValue="dev">
                       <Stack>
                         <Radio name="environment" value="dev">
                           Development
@@ -97,14 +97,13 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                       name="issuerUrl"
                       type="url"
                       variant="bc-input"
-                      data-testid="ap-env-idp-url"
                     />
                   </FormControl>
                 </GridItem>
                 <GridItem>
                   <FormControl isRequired as="fieldset">
                     <FormLabel as="legend">Client Registration</FormLabel>
-                    <RadioGroup onChange={setClientRegistration} data-testid="ap-env-client-reg">
+                    <RadioGroup onChange={setClientRegistration}>
                       <Stack>
                         <Radio name="clientRegistration" value="anonymous">
                           Anonymous
@@ -133,7 +132,6 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Initial Acccess Token"
                           name="initialAccessToken"
                           variant="bc-input"
-                          data-testid="ap-env-init-token"
                         />
                       </FormControl>
                     </>
@@ -146,7 +144,6 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Client ID"
                           name="clientId"
                           variant="bc-input"
-                          data-testid="ap-env-client-id"
                         />
                       </FormControl>
 
@@ -156,7 +153,6 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
                           placeholder="Client Secret"
                           name="clientSecret"
                           variant="bc-input"
-                          data-testid="ap-env-client-secret"
                         />
                       </FormControl>
                     </>
@@ -170,7 +166,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
               <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={submitForm} data-testid="ap-env-add-btn">
+              <Button variant="primary" onClick={submitForm}>
                 Add
               </Button>
             </ButtonGroup>

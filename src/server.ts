@@ -346,16 +346,6 @@ const configureExpress = (app: any) => {
     res.status(200).json({ result: 'ok' });
   });
 
-  app.get('/about', (req: any, res: any) => {
-    res
-      .status(200)
-      .json({
-        version: process.env.APP_VERSION,
-        revision: process.env.APP_REVISION,
-        cluster: process.env.KUBE_CLUSTER,
-      });
-  });
-
   // const { NotificationService } = require('./services/notification/notification.service')
 
   // const nc = new NotificationService(new ConfigService())

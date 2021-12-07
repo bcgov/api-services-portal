@@ -82,7 +82,6 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
         leftIcon={<Icon as={FaPlusCircle} />}
         onClick={onOpen}
         variant="primary"
-        data-testid="nsa-grant-access-btn"
       >
         {title}
       </Button>
@@ -109,7 +108,6 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
                     name="username"
                     type="text"
                     placeholder="Enter username of team member you'd like to add"
-                    data-testid="nsa-gua-username-field"
                   />
                 </FormControl>
                 <FormControl>
@@ -132,7 +130,7 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
           <ModalFooter>
             <ButtonGroup>
               <Button variant="secondary" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSubmitClick} data-testid="nsa-gua-share-btn">
+              <Button onClick={handleSubmitClick}>
                 Share
               </Button>
             </ButtonGroup>

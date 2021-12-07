@@ -21,37 +21,12 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-platform"
       }
-    },
-    "testEnvironment": {
-      "name": "test",
-      "config": {
-        "environmentEnabled": true,
-        "approvalRequired": true,
-        "terms": "Terms of Use for API Gateway",
-        "authorization": "Oauth2 Client Credentials Flow",
-        "optionalInstructions": "Editing test environment"
-      }
     }
   },
-  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
-  "ccAuthProfile": {
-    "name": "cy-cc-auth",
-    "flow": "Client Credential Flow",
-    "apiKey": "",
-    "clientAuthenticator": "Client ID and Secret",
-    "mode": "Automatic",
-    "scopes": [],
-    "clientRoles": [],
-    "clientMappers": "",
-    "uma2ResourceType": "",
-    "resourceScopes": [],
-    "resourceAccessScope": "",
-    "environmentConfig": {
-      "environment": "Test",
-      "clientRegistration": "Managed",
-      "idpIssuerUrl": "http://localhost:9080",
-      "clientId": "cypress-auth-profile",
-      "clientSecret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
-    }
+  "permission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage","Namespace.View"]
+    } 
   }
 }

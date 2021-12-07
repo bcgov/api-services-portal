@@ -40,9 +40,9 @@ function transformSetAnonymous(products: Product[]) {
   products.forEach((prod) => {
     prod.environments.forEach((env) => {
       env.services.forEach((svc) => {
-        function setAnonymousIfApplicable(plugins: any[]) {
-          plugins
-            ?.filter(
+        svc.plugins &&
+          svc.plugins
+            .filter(
               (plugin) =>
                 plugin.name == 'key-auth' || plugin.name == 'jwt-keycloak'
             )
@@ -52,11 +52,6 @@ function transformSetAnonymous(products: Product[]) {
                 (env as any).anonymous = true;
               }
             });
-        }
-        setAnonymousIfApplicable(svc.plugins);
-        svc.routes?.forEach((route) => {
-          setAnonymousIfApplicable(route.plugins);
-        });
       });
     });
   });
@@ -128,12 +123,6 @@ const item = gql`
           plugins {
             name
             config
-          }
-          routes {
-            plugins {
-              name
-              config
-            }
           }
         }
       }

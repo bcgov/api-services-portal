@@ -6,12 +6,7 @@ import {
   lookupServices,
 } from '../keystone';
 import { Logger } from '../../logger';
-import {
-  CredentialIssuer,
-  Environment,
-  GatewayPlugin,
-  GatewayService,
-} from '../keystone/types';
+import { CredentialIssuer, Environment } from '../keystone/types';
 
 const logger = Logger('wf.ValidateActiveEnv');
 
@@ -61,10 +56,10 @@ export const ValidateActiveEnvironment = async (
       // for "client-credentials", make sure there is an 'jwt-keycloak' plugin on all Services of this environment
       // for "authorization-code", make sure there is an 'oidc' plugin on all Services of this environment
       if (flow == 'kong-api-key-acl') {
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler([
-          'acl',
-          'key-auth',
-        ]);
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter((plugin: any) =>
+            ['acl', 'key-auth'].includes(plugin.name)
+          ).length != 2;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices
@@ -79,9 +74,10 @@ export const ValidateActiveEnvironment = async (
           );
         }
       } else if (flow == 'kong-api-key-only') {
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler([
-          'key-auth',
-        ]);
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter((plugin: any) =>
+            ['key-auth'].includes(plugin.name)
+          ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices
@@ -96,9 +92,9 @@ export const ValidateActiveEnvironment = async (
           );
         }
       } else if (flow == 'kong-acl-only') {
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler([
-          'acl',
-        ]);
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter((plugin: any) => ['acl'].includes(plugin.name))
+            .length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices
@@ -121,11 +117,14 @@ export const ValidateActiveEnvironment = async (
 
         const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler(
-          ['jwt-keycloak'],
-          (plugin: any) =>
-            plugin.config['well_known_template'].startsWith(envConfig.issuerUrl)
-        );
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter(
+            (plugin: any) =>
+              plugin.name == 'jwt-keycloak' &&
+              plugin.config['well_known_template'].startsWith(
+                envConfig.issuerUrl
+              )
+          ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices
@@ -148,11 +147,12 @@ export const ValidateActiveEnvironment = async (
 
         const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler(
-          ['oidc'],
-          (plugin: any) =>
-            plugin.config['discovery'].startsWith(envConfig.issuerUrl)
-        );
+        const isServiceMissingAllPlugins = (svc: any) =>
+          svc.plugins.filter(
+            (plugin: any) =>
+              plugin.name == 'oidc' &&
+              plugin.config['discovery'].startsWith(envConfig.issuerUrl)
+          ).length != 1;
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
         const missing = resolvedServices
@@ -182,31 +182,3 @@ export const ValidateActiveEnvironment = async (
     }
   }
 };
-
-export function isServiceMissingAllPluginsHandler(
-  requiredPlugins: string[],
-  additionalValidation = (plugin: { name: string; config: object }) => true
-) {
-  return (svc: GatewayService) => {
-    const serviceLevel =
-      svc.plugins.filter(
-        (plugin: any) =>
-          requiredPlugins.includes(plugin.name) && additionalValidation(plugin)
-      ).length == requiredPlugins.length;
-    if (serviceLevel) {
-      return false;
-    } else {
-      // check that at least one route has these plugins
-      return (
-        svc.routes.filter(
-          (route) =>
-            route.plugins.filter(
-              (plugin: any) =>
-                requiredPlugins.includes(plugin.name) &&
-                additionalValidation(plugin)
-            ).length == requiredPlugins.length
-        ).length == 0
-      );
-    }
-  };
-}

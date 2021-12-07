@@ -23,14 +23,12 @@ interface AddEnvironmentProps {
   children: React.ReactNode;
   environments: string[];
   productId: string;
-  productName: string;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   children,
   environments,
   productId,
-  productName
 }) => {
   const toast = useToast();
   const client = useQueryClient();
@@ -57,7 +55,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 
   return (
     <Menu>
-      <MenuButton as={Button} variant="unstyled" data-testid={productName.toLowerCase().replaceAll(' ', '-') + "-add-env-btn"}>
+      <MenuButton as={Button} variant="unstyled" data-testid="prd-env-add-btn">
         {children}
       </MenuButton>
       <MenuList>
@@ -68,7 +66,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
               key={e.value}
               onClick={onSelect(e.value)}
               value={e.value}
-              data-testid={productName.toLowerCase().replaceAll(' ', '-') + '-prd-env-item-' + e.value}
+              data-testid={'prd-env-item-' + e.value}
             >
               {e.name}
             </MenuItem>

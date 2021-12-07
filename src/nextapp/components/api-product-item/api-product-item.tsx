@@ -91,9 +91,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               <Text ml={8} fontSize="sm">
                 For elevated access, please{' '}
                 <NextLink passHref href={accessLink}>
-                  <Link color="bc-link" textDecor="underline">
-                    Request Access
-                  </Link>
+                  <Link>Request Access</Link>
                 </NextLink>
               </Text>
             </GridItem>

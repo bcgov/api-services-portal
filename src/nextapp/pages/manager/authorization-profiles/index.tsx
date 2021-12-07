@@ -67,7 +67,7 @@ const AuthorizationProfiles: React.FC<
         <PageHeader
           actions={
             <NextLink passHref href="/manager/authorization-profiles/new">
-              <Button as="a" variant="primary" data-testid="create-new-auth-profile-btn">
+              <Button as="a" variant="primary">
                 New Profile
               </Button>
             </NextLink>
@@ -90,7 +90,7 @@ const AuthorizationProfiles: React.FC<
             <Heading size="md">All Profiles</Heading>
           </Box>
           <Divider />
-          <Table variant="simple" data-testid="ap-all-profiles-table">
+          <Table variant="simple">
             <Thead>
               <Tr>
                 <Th>Name</Th>

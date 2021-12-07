@@ -38,7 +38,6 @@ const AuthorizationProfileSection: React.FC<AuthorizationProfileSection> = ({
             name="name"
             variant="bc-input"
             defaultValue={issuer?.name}
-            data-testid="ap-profile-name"
           />
         </FormControl>
       </FormGroup>

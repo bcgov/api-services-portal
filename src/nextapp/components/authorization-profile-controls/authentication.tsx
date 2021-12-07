@@ -58,7 +58,7 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
       >
         <FormControl isRequired as="fieldset">
           <FormLabel as="legend">Flow</FormLabel>
-          <RadioGroup onChange={onChange} value={flow as string} data-testid="ap-flow-select">
+          <RadioGroup onChange={onChange} value={flow as string}>
             <Stack>
               <Radio name="flow" value="client-credentials">
                 Client Credential Flow
@@ -85,7 +85,6 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
                 name="apiKeyName"
                 variant="bc-input"
                 defaultValue={issuer?.apiKeyName}
-                data-testid="ap-api-key"
               />
             </FormControl>
           </Box>
@@ -97,7 +96,7 @@ const AuthorizationProfileAuthentication: React.FC<AuthorizationProfileAuthentic
           <FormGroup>
             <FormControl isRequired as="fieldset">
               <FormLabel as="legend">Client Authenticator</FormLabel>
-              <RadioGroup defaultValue={issuer?.clientAuthenticator} data-testid="ap-client-aunthenticator">
+              <RadioGroup defaultValue={issuer?.clientAuthenticator}>
                 <Stack>
                   <Radio name="clientAuthenticator" value="client-secret">
                     Client ID and Secret

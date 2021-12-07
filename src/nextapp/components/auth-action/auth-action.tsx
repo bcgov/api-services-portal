@@ -66,7 +66,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             data-testid="auth-menu-user"
           >
             <Center>
-              <Avatar name={user.name} size="sm"  />
+              <Avatar name={user.name} size="sm" />
               <Icon
                 aria-label="chevron down icon"
                 size="sm"

@@ -32,7 +32,6 @@ CREDENTIAL ADMIN,,,CredentialIssuer,,"create,read",namespace,,,credential-admin,
 CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,allCredentialIssuersByNamespace,,,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
-NS MANAGER,,,Dataset,,"create,update,delete",,,,api-owner,,,allow,
 NS MANAGER,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 NS MANAGER,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
 NS MANAGER,,getResourceOwners,,,,,,,api-owner,,,allow,
