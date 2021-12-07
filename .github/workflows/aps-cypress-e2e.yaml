@@ -34,7 +34,7 @@ jobs:
           export CY_COMMIT_BRANCH=${{ env.GIT_COMMIT_BRANCH }}
           export CY_COMMIT_SHA=${{ env.GIT_COMMIT_SHA }}
           export CY_COMMIT_AUTHOR=${{ env.GIT_COMMIT_AUTHOR }}
-          export CY_COMMIT_MESSAGE=${{ env.GIT_COMMIT_MESSAGE }}
+          export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }}) 
           docker-compose up -d
