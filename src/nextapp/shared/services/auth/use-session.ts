@@ -8,9 +8,15 @@ export interface AuthFailedResponse {
 
 export interface UserSessionResult {
   ok: boolean;
+  maintenance: boolean;
   user?: UserData;
   status: QueryStatus;
   error?: Error;
+}
+
+export interface SessionData {
+  user?: UserData;
+  maintenance?: boolean;
 }
 
 export const getSession = async (
@@ -34,7 +40,7 @@ export const getSession = async (
   }
 };
 
-export const getSessionL = async (): Promise<UserData> => {
+export const getSessionL = async (): Promise<SessionData> => {
   try {
     const req = await fetch(`${apiHost}/admin/session`, {
       headers: { 'Content-Type': 'application/json' },
@@ -42,9 +48,9 @@ export const getSessionL = async (): Promise<UserData> => {
     if (req.ok) {
       const json = await req.json();
       if (json.anonymous) {
-        throw new Error('Anonymous');
+        return { maintenance: json.maintenance };
       }
-      return json.user;
+      return { user: json.user, maintenance: json.maintenance };
     }
     if (req.status == 401 || req.status == 403) {
       throw new Error(req.statusText);
@@ -57,7 +63,7 @@ export const getSessionL = async (): Promise<UserData> => {
 };
 
 export const useSession = (): UserSessionResult => {
-  const { data, status, error } = useQuery<UserData, Error>(
+  const { data, status, error } = useQuery<SessionData, Error>(
     'user',
     getSessionL,
     {
@@ -68,7 +74,8 @@ export const useSession = (): UserSessionResult => {
 
   return {
     ok: !data,
-    user: data,
+    user: data?.user,
+    maintenance: data?.maintenance,
     status,
     error,
   };

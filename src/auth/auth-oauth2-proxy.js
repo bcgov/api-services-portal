@@ -8,6 +8,8 @@ const session = require('express-session');
 
 const querystring = require('querystring');
 
+const { maintenance } = require('../services/maintenance');
+
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
@@ -27,6 +29,7 @@ const { getUma2FromIssuer, Uma2WellKnown } = require('../services/keycloak');
 const toJson = (val) => (val ? JSON.parse(val) : null);
 
 const logger = Logger('auth');
+
 class Oauth2ProxyAuthStrategy {
   constructor(keystone, listKey, config) {
     this.keystone = keystone;
@@ -55,6 +58,7 @@ class Oauth2ProxyAuthStrategy {
   }
 
   prepareMiddleware(app) {
+    const sessionManager = this._sessionManager;
     app = express();
     app.set('trust proxy', true);
 
@@ -77,79 +81,98 @@ class Oauth2ProxyAuthStrategy {
     });
     // X-Auth-Request-Access-Token
 
-    const checkExpired = (err, req, res, next) => {
-      logger.debug('CHECK EXPIRED!! ' + err);
+    const checkExpired = async (err, req, res, next) => {
+      logger.debug('[check-jwt-error] ' + err);
 
       if (err) {
+        logger.error(
+          '[check-jwt-error] ending session - oauth2 proxy should be refreshing this token!'
+        );
+        await sessionManager.endAuthedSession(req);
+
         if (err.name === 'UnauthorizedError') {
-          logger.debug('CODE = ' + err.code);
-          logger.debug('INNER = ' + err.inner);
-          return res
-            .status(403)
-            .json({ error: 'unauthorized_provider_access' });
+          logger.debug('[check-jwt-error] CODE = ' + err.code);
+          logger.debug('[check-jwt-error] INNER = ' + err.inner);
         }
-        return res.status(403).json({ error: 'unexpected_error' });
-      } else {
-        next();
+        res.status(401).json({ error: 'expired_token' });
+        return;
       }
+      next();
     };
 
-    const detectSessionMismatch = async function (err, req, res, next) {
-      if (req.oauth_user) {
-        const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-        logger.debug('SESSION USER = %j', req.user);
-        if (req.user) {
-          if (jti != req.user.jti) {
-            logger.warn('Looks like a different credential.. %s', jti);
+    const detectSessionMismatch = async function (req, res, next) {
+      // If there is a Keystone session, make sure it is not out of sync with the
+      // OAuth proxy session
+      if (req.user) {
+        if (req.oauth_user) {
+          if (req['oauth_user']['sub'] != req.user.sub) {
             logger.warn(
-              'OK if subjects the same! %s %s',
-              req['oauth_user']['sub'],
-              req.user.sub
+              '[detect-session-mismatch] Different subject (%s) detected!',
+              req['oauth_user']['sub']
             );
-            if (req['oauth_user']['sub'] != req.user.sub) {
-              logger.warn('Subjects different too!  Ending session.');
-              await this._sessionManager.endAuthedSession(req);
-              return res.status(403).json({ error: 'invalid_session' });
+            logger.warn('[detect-session-mismatch] ending session');
+            await sessionManager.endAuthedSession(req);
+            return res.status(401).json({ error: 'invalid_session' });
+          } else {
+            const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+            if (jti != req.user.jti) {
+              logger.debug(
+                '[detect-session-mismatch] Refreshed credential %s',
+                jti
+              );
             }
           }
+        } else {
+          logger.warn(
+            '[detect-session-mismatch] OAuth session ended - ending Keystone session 403'
+          );
+          logger.warn('[detect-session-mismatch] ending session');
+          await sessionManager.endAuthedSession(req);
+          return res.status(401).json({ error: 'proxy_session_expired' });
         }
       }
+      next();
     };
 
     app.get(
       '/admin/session',
-      [detectSessionMismatch],
+      verifyJWT,
+      detectSessionMismatch,
+      checkExpired,
       async (req, res, next) => {
         const response =
           req && req.user
-            ? { anonymous: false, user: req.user }
-            : { anonymous: true };
+            ? { anonymous: false, user: req.user, maintenance: false }
+            : { anonymous: true, maintenance: false };
         if (response.anonymous == false) {
-          logger.debug('Session %j', response.user);
           response.user.groups = toJson(response.user.groups);
           response.user.roles = toJson(response.user.roles);
           response.user.scopes = toJson(response.user.scopes);
         }
+        response.maintenance = await maintenance.get();
         res.json(response);
       }
     );
 
-    app.get(
-      '/admin/signout',
-      [verifyJWT, checkExpired],
-      async (req, res, next) => {
-        if (req.user) {
-          await this._sessionManager.endAuthedSession(req);
-        }
-        res.redirect(
-          '/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl)
-        );
+    app.get('/admin/signout', async (req, res, next) => {
+      if (req.user) {
+        await this._sessionManager.endAuthedSession(req);
       }
-    );
+      res.redirect('/oauth2/sign_out?rd=' + querystring.escape(authLogoutUrl));
+    });
 
     app.get(
       '/admin/signin',
-      [verifyJWT, checkExpired],
+      [
+        verifyJWT,
+        (err, req, res, next) => {
+          // If we are signing in and the token is not valid, then force a signout because
+          // the Oauth2 Proxy is not refreshing the token properly
+          if (err) {
+            res.redirect('/admin/signout');
+          }
+        },
+      ],
       async (req, res, next) => {
         await this.register_user(req, res, next);
       }

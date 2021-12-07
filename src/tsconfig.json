@@ -14,7 +14,11 @@
       "@/logger": ["logger"],
       "@/services/*": ["services/*"],
       "@/controllers/*": ["controllers/*"],
-      "@/types": ["services/keystone/types.ts"]
+      "@/types": ["services/keystone/types.ts", "nextapp/shared/types/*"],
+      "@/components/*": ["nextapp/components/*"],
+      "@/shared/*": ["nextapp/shared/*"],
+      "@/layouts/*": ["nextapp/layouts/*"],
+      "@/*": ["nextapp/*"]
     }
   },
   "include": ["**/*.ts"],

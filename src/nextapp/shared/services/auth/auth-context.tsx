@@ -19,7 +19,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const route = links.find(
     (d) => d.url === router?.pathname || d.altUrls?.includes(router?.pathname)
   );
-  const isUnauthorized = session.error && route?.access.length > 0;
+  const isUnauthorized =
+    (session.error || !session.user) && route?.access.length > 0;
 
   if (session.status == 'loading') {
     return <></>;
