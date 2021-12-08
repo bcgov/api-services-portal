@@ -10,7 +10,6 @@ describe('Request Access Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.clearCookies({log:true})
     cy.reload()
   })
 
