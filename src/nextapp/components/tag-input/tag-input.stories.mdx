@@ -1,0 +1,39 @@
+import { 
+  Box,
+  Button,
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import TagInput from './tag-input';
+
+<Meta title="APS/TagInput" parameters={{
+  layout: 'centered',
+}}/>
+
+## General Usage
+
+All Chakra `Input` props are valid props for the `TagInput` component.
+
+<Canvas>
+  <Story name="Default">
+    <TagInput />
+  </Story>
+</Canvas>
+
+The values should be passed as comma-separated strings.
+
+```javascript
+// Bad
+<TagInput value={['Thing1', 'Thing2']} />
+
+// Good
+const value = JSON.stringify(['Thing1', 'Thing2'])
+<TagInput value={value}/>
+```
+
+Though in most instances the API will be returning the stringified JSON array, and the component will handle the bookkeeping.
+
+<Canvas>
+  <Story name="Passing initial values">
+    <TagInput value={JSON.stringify(['Thing1', 'Thing2'])}/>
+  </Story>
+</Canvas>
