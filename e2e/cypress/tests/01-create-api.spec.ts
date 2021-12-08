@@ -12,7 +12,6 @@ describe('Create API Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.clearCookies({log:true})
     cy.reload()
   })
 
