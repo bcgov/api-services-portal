@@ -14,7 +14,6 @@ describe('API Owner Spec', () => {
   before(() => {
     cy.visit('/')
     cy.deleteAllCookies()
-    cy.clearCookies({log:true})
     cy.reload()
   })
 
