@@ -31,6 +31,12 @@ class Products {
     // cy.get(this.updateBtn).click()
   }
 
+  updateOrg(orgName: string, orgUnitName: string) {
+    cy.get(this.orgDropDown).select(orgName)
+    cy.get(this.orgUnitDropDown).select(orgUnitName)
+    cy.get(this.updateBtn).click()
+  }
+
   addEnvToProduct(productName: string, envName: string) {
     let pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-add-env-btn]`).click()
@@ -47,11 +53,58 @@ class Products {
   editProductEnvironmentConfig(config: any) {
     
     cy.get(this.editPrdEnvConfigBtn).click()
-    cy.get(this.envCfgActivateRadio).click()
-    cy.get(this.envCfgApprovalCheckbox).click()
-    cy.get(this.envCfgTermsDropdown).select(config.terms,{ force: true }).invoke('val')
-    cy.get(this.envCfgAuthzDropdown).select(config.authorization,{ force: true }).invoke('val')
+
+    let envEnabled = document
+      .querySelector('[data-testid="prd-env-config-activate-radio"]')
+      ?.getElementsByClassName('chakra-switch__thumb')[0]
+      .hasAttribute('data-checked')
+
+    if (!config.environmentEnabled != !envEnabled) {
+      cy.log('Checking Environmnent enabled!')
+      cy.log('!config.environmentEnabled : ' + !config.environmentEnabled)
+      cy.log('!envEnabled : ' + !envEnabled)
+      cy.log('!config.environmentEnabled != !envEnabled : ' + (!config.environmentEnabled != !envEnabled))
+      cy.log('envEnabled value : ' + envEnabled)
+      cy.log('config.environmentEnabled value : ' + config.environmentEnabled)
+      cy.get(this.envCfgActivateRadio).click()
+    }
+    
+    let approvalRequired = document
+      .querySelector('[data-testid="prd-env-config-approval-checkbox"]')
+      ?.getElementsByClassName('chakra-checkbox__control')[0]
+      .hasAttribute('data-active')
+
+    if (!config.approvalRequired != !approvalRequired)
+      cy.get(this.envCfgApprovalCheckbox).click()
+
+    // cy.get(this.envCfgActivateRadio).click()
+    // cy.get(this.envCfgApprovalCheckbox).click()
+    cy.get(this.envCfgTermsDropdown).select(config.terms)
+
+    let authType = config.authorization
+    cy.get(this.envCfgAuthzDropdown)
+      .select(authType)
+      .then(() => {
+        if (
+          authType === 'Oauth2 Authorization Code Flow' ||
+          authType === 'Oauth2 Client Credentials Flow'
+        )
+          cy.get('[name="credentialIssuer"]').select(
+            `${config.authIssuer} (${config.authIssuerEnv.toLowerCase()})`
+          )
+      })
+
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+
+    // TODO: Selecting available services might need to be refined
+    let serviceIsActive = document
+      .querySelector('[data-testid="prd-env-active-services"]')
+      ?.querySelector(`[data-testid="${config.serviceName}"]`)
+
+    if (!config.serviceName != !serviceIsActive)
+      cy.get(`[data-testid="${config.serviceName}"]`).click()
+
+    // cy.get(`[data-testid="${config.serviceName}"]`).click() //Adding service to list of active services
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -64,25 +117,27 @@ class Products {
     })
   }
 
-  updateDatasetNameToCatelogue(productName: string,env: string) {
+  updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
-    const search_input: string = productName.slice(0,1)
-    cy.get(this.catelogueDropDown).type(search_input+'{enter}',{
-      force: true
-   })
-    cy.get(this.catelogueDropDownMenu).find('div').find('p').each(($e1, index, $list) => {
-      if($e1.text()===productName)
-      {
-          cy.wrap($e1).click()
-      }
+    const search_input: string = productName.slice(0, 1)
+    cy.get(this.catelogueDropDown).type(search_input, {
+      force: true,
     })
+    cy.get(this.catelogueDropDownMenu)
+      .find('div')
+      .find('p')
+      .each(($e1, index, $list) => {
+        if ($e1.text() === productName) {
+          cy.wrap($e1).click()
+        }
+      })
+
     this.updateProduct()
   }
 
-  updateProduct(){
+  updateProduct() {
     cy.get(this.updateBtn).click()
   }
-
 }
 
 export default Products
