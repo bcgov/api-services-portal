@@ -49,7 +49,7 @@
     "environmentConfig": {
       "environment": "Test",
       "clientRegistration": "Managed",
-      "idpIssuerUrl": "http://localhost:9080",
+      "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
       "clientId": "cypress-auth-profile",
       "clientSecret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
     }

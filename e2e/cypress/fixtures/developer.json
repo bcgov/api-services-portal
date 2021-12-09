@@ -14,6 +14,10 @@
     "name": "Auto Test App",
     "description": "Test application for auto test"
   },
+  "clientCredentialsApplication": {
+    "name": "Client Credentials App",
+    "description": "Application for testing client credential flow."
+  },
   "accessRequest": {
     "notes": "This is test access request"
   }

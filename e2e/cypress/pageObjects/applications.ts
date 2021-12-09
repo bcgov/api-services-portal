@@ -10,7 +10,7 @@ class ApplicationPage {
     cy.get(this.appName).type(app.name)
     cy.get(this.appDescription).type(app.description)
     cy.get(this.createAppSubmitBtn).click()
-    cy.get('table').contains('td', 'Auto Test App').should('be.visible');
+    cy.get('table').contains('td', app.name).should('be.visible');
   }
 }
 
