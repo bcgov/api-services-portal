@@ -86,6 +86,16 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+
+    // TODO: Selecting available services might need to be refined
+    let serviceIsActive = document
+      .querySelector('[data-testid="prd-env-active-services"]')
+      ?.querySelector(`[data-testid="${config.serviceName}"]`)
+
+    if (!config.serviceName != !serviceIsActive)
+      cy.get(`[data-testid="${config.serviceName}"]`).click()
+
+    // cy.get(`[data-testid="${config.serviceName}"]`).click() //Adding service to list of active services
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
