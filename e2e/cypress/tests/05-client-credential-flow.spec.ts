@@ -54,7 +54,7 @@ describe('Client Credential Flow', () => {
       nsa.clickGrantUserAccessButton()
       nsa.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
       cy.visit('/').then(() => {
-        // TODO there appears to be some flkainess with this logging in and logging out step
+        // TODO there appears to be some flakiness with this logging in and logging out step
         cy.logout()
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace)
@@ -93,27 +93,27 @@ describe('Client Credential Flow', () => {
     cy.logout()
   })
 
-  it('Developer logs in', () => {
-    cy.get('@developer').then(({ user, namespace }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-      // home.useNamespace(namespace)
-    })
-  })
+  // it('Developer logs in', () => {
+  //   cy.get('@developer').then(({ user, namespace }: any) => {
+  //     cy.login(user.credentials.username, user.credentials.password)
+  //     // home.useNamespace(namespace)
+  //   })
+  // })
 
-  it('creates an application', () => {
-    cy.visit(app.path)
-    cy.get('@developer').then(({ application }: any) => {
-      app.createApplication(application)
-    })
-  })
+  // it('creates an application', () => {
+  //   cy.visit(app.path)
+  //   cy.get('@developer').then(({ clientCredentialsApplication }: any) => {
+  //     app.createApplication(clientCredentialsApplication)
+  //   })
+  // })
 
-  it('creates an access request', () => {
-    cy.visit(apiDir.path)
-    cy.get('@developer').then(({ product, application, accessRequest }: any) => {
-      product.environment = 'test';
-      apiDir.createAccessRequest(product, application, accessRequest)
-    })
-  })
+  // it('creates an access request', () => {
+  //   cy.visit(apiDir.path)
+  //   cy.get('@developer').then(({ product, clientCredentialsApplication, accessRequest }: any) => {
+  //     product.environment = 'test';
+  //     apiDir.createAccessRequest(product, clientCredentialsApplication, accessRequest)
+  //   })
+  // })
 
   after(() => {
     cy.logout()
