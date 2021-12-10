@@ -16,10 +16,7 @@ while true; do
         curl http://feeder.localtest.me:6000/push -F yaml=@platform-gwa-api.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@organization-unit.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@dataset-gwa.yaml
-<<<<<<< HEAD
-
-=======
->>>>>>> 79c6452e1b184977b4b378108b0f495e973e8bbb
+        curl http://feeder.localtest.me:6000/push -F yaml=@product-initializer.yaml
         break
 
     else

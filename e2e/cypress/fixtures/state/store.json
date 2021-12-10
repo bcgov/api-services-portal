@@ -1,7 +1,3 @@
 {
-<<<<<<< HEAD
-  "credentials": "{\"clientId\": \"sa-platform-e0000000-1842c5a20d37\", \"clientSecret\": \"ee0356ab-a638-4986-823a-10cc191c0940\"}"
-=======
-  "credentials": "{\"clientId\": \"sa-platform-e0000000-a0007ad06c9a\", \"clientSecret\": \"7fbae875-c2f1-420d-95d8-5bc7e8d9d247\"}"
->>>>>>> 79c6452e1b184977b4b378108b0f495e973e8bbb
+  "credentials": "{\"clientId\": \"sa-platform-e0000000-8640256a465a\", \"clientSecret\": \"8bb66e70-42e4-4051-8675-e1d3d9b40368\"}"
 }
