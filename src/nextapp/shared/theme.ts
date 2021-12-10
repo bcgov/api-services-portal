@@ -48,9 +48,12 @@ const colors = {
   },
 };
 const _focus = {
-  outline: '4px solid',
-  outlineOffset: 1,
-  outlineColor: 'bc-border-focus',
+  // outline: '4px solid',
+  // outlineOffset: 1,
+  // outlineColor: 'bc-border-focus',
+  outline: 'none',
+  borderColor: 'bc-blue-alt',
+  boxShadow: 'lg',
 };
 const _disabled = {
   opacity: 0.3,
@@ -390,8 +393,11 @@ const theme = extendTheme(
             container: {
               borderRadius: 4,
               backgroundColor: '#E9F0F8',
-              borderColor: 'rgba(142, 142, 142, 0.35)',
+              borderColor: '#8E8E8E35',
               color: 'text',
+            },
+            closeButton: {
+              color: '#8E8E8E',
             },
           },
           drag: {

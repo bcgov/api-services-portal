@@ -5,9 +5,17 @@ import {
 import { Meta, Story, Canvas } from '@storybook/addon-docs';
 import TagInput from './tag-input';
 
-<Meta title="APS/TagInput" parameters={{
-  layout: 'centered',
-}}/>
+<Meta 
+  title="APS/TagInput" 
+  parameters={{
+    layout: 'centered',
+  }}
+  argTypes={{
+    onSubmit: {
+      action: "Form Submitted"
+    }
+  }}
+/>
 
 ## General Usage
 
@@ -37,3 +45,26 @@ Though in most instances the API will be returning the stringified JSON array, a
     <TagInput value={JSON.stringify(['Thing1', 'Thing2'])}/>
   </Story>
 </Canvas>
+
+## Escape key clears the input value and blurs focus
+
+Hitting enter while focused in this input will prevent event bubbling to the form
+
+<Canvas>
+  <Story name="Escape key event">
+    <TagInput placeholder="Try hitting escape" />
+  </Story>
+</Canvas>
+
+## Event propagation
+
+Hitting enter while focused in this input will prevent event bubbling to the form
+
+<Canvas>
+  <Story name="Event bubbling in forms">
+    <form onSubmit={() => console.log('submit')}>
+      <TagInput placeholder="Try hitting enter"/>
+    </form>
+  </Story>
+</Canvas>
+

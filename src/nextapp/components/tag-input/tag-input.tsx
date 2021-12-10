@@ -22,7 +22,7 @@ interface TagInputProps extends InputProps {
 const TagInput: React.FC<TagInputProps> = ({
   id,
   name,
-  placeholder = 'Press Enter to Add',
+  placeholder = 'Press enter to add',
   value = '',
   ...rest
 }) => {
@@ -38,14 +38,20 @@ const TagInput: React.FC<TagInputProps> = ({
   });
 
   // Events
-  const handleKeyPress = React.useCallback(
+  const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        if (inputRef.current) {
+      if (inputRef.current) {
+        if (event.key === 'Enter') {
+          event.stopPropagation();
+          event.preventDefault();
+
           setValues((state) => [...state, inputRef.current.value]);
           setTimeout(() => {
             inputRef.current.value = '';
           }, 10);
+        } else if (event.key === 'Escape') {
+          inputRef.current.value = '';
+          inputRef.current.blur();
         }
       }
     },
@@ -77,9 +83,12 @@ const TagInput: React.FC<TagInputProps> = ({
     <>
       <Box
         __css={fieldStyles}
-        pos="relative"
         display="flex"
         alignItems="center"
+        height="auto"
+        minHeight="40px"
+        pos="relative"
+        py={2}
         onClick={handleContainerClick}
       >
         <Wrap spacing={2}>
@@ -94,11 +103,11 @@ const TagInput: React.FC<TagInputProps> = ({
           <WrapItem>
             <Input
               {...rest}
+              borderRadius={0}
               ref={inputRef}
-              pl={1}
               onBlur={handleBlur}
               onFocus={handleFocus}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder={placeholder}
               variant="unstyled"
             />
