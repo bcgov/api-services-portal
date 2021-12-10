@@ -1,5 +1,6 @@
 import { 
   Button,
+  Icon,
   Table,
   Thead,
   Tbody,
@@ -9,7 +10,7 @@ import {
   Td,
   TableCaption,
 } from '@chakra-ui/react';
-import { FaPlus } from 'react-icons/fa'
+import { FaPen, FaPlus } from 'react-icons/fa'
 import { Meta, Story, Canvas } from '@storybook/addon-docs';
 
 
@@ -28,17 +29,29 @@ export const Template = (args) => (
       <Tr>
         <Td>Production</Td>
         <Td>Public</Td>
-        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+        <Td isNumeric>
+          <Button leftIcon={<Icon as={FaPen} />} variant="flat" size={args.size} sx={{ _hover: { bgColor: 'none' } }}>
+            Edit
+          </Button>
+        </Td>
       </Tr>
       <Tr>
         <Td>Conformance</Td>
         <Td>Client Credentials</Td>
-        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+        <Td isNumeric>
+          <Button leftIcon={<Icon as={FaPen} />} variant="flat" size={args.size} sx={{ _hover: { bgColor: 'none' } }}>
+            Edit
+          </Button>
+        </Td>
       </Tr>
       <Tr>
         <Td>Test</Td>
         <Td>Kong-API-Key-ACL</Td>
-        <Td isNumeric><Button variant="flat" size={args.size}>Edit</Button></Td>
+        <Td isNumeric>
+          <Button leftIcon={<Icon as={FaPen} />} variant="flat" size={args.size} sx={{ _hover: { bgColor: 'none' } }}>
+            Edit
+          </Button>
+        </Td>
       </Tr>
     </Tbody>
   </Table>

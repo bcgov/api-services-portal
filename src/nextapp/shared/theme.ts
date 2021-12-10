@@ -302,6 +302,14 @@ const theme = extendTheme(
           },
         },
       },
+      FormError: {
+        baseStyle: {
+          text: {
+            fontWeight: 'normal',
+            fontSize: 'md',
+          },
+        },
+      },
       Menu: {
         baseStyle: {
           item: {
