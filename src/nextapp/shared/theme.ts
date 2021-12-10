@@ -393,11 +393,12 @@ const theme = extendTheme(
             container: {
               borderRadius: 4,
               backgroundColor: '#E9F0F8',
-              borderColor: '#8E8E8E35',
+              boxShadow: 'inset 0 0 0 1px rgba(142, 142, 142, 0.35)',
               color: 'text',
             },
             closeButton: {
-              color: '#8E8E8E',
+              opacity: 1,
+              color: '#7C7C7C',
             },
           },
           drag: {
