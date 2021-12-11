@@ -1,0 +1,32 @@
+import { 
+  Box,
+} from '@chakra-ui/react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import SearchInput from './search-input';
+
+<Meta title="APS/SearchInput" parameters={{
+  layout: 'centered',
+  backgroundColor: '#e1e1e1'
+}}/>
+
+# Search Input
+
+A simple wrapper to compose the search styled input.
+
+<Canvas>
+  <Story name="Default">
+    <SearchInput/>
+  </Story>
+</Canvas>
+
+## With value
+
+This is a controlled component, so when there is a value property available, it will render a clear button.
+
+<Canvas>
+  <Story name="Clear button">
+    <SearchInput value="demo" />
+  </Story>
+</Canvas>
+
+

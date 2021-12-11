@@ -3,11 +3,10 @@ import {
   Input,
   InputGroup,
   Icon,
-  InputLeftElement,
   InputRightElement,
   IconButton,
 } from '@chakra-ui/react';
-import { FaRegTimesCircle, FaSearch } from 'react-icons/fa';
+import { FaTimes, FaSearch } from 'react-icons/fa';
 
 interface SearchInputProps {
   onChange: (value: string) => void;
@@ -39,30 +38,33 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     <InputGroup>
-      <InputLeftElement pointerEvents="none">
-        <Icon as={FaSearch} color="gray.300" />
-      </InputLeftElement>
       <Input
         ref={ref}
         placeholder={placeholder}
         type="search"
         variant="bc-input"
+        border="1px solid"
+        borderColor="#e1e1e5"
         value={value}
         onChange={handleChange}
       />
       <InputRightElement>
-        <IconButton
-          aria-label="Clear search button"
-          h="1.75rem"
-          size="sm"
-          mt={-0.5}
-          variant="unstyled"
-          color="gray.600"
-          onClick={handleReset}
-          opacity={value ? 1 : 0}
-        >
-          <Icon as={FaRegTimesCircle} boxSize="1rem" />
-        </IconButton>
+        {!value && <Icon as={FaSearch} color="bc-component" />}
+        {value && (
+          <IconButton
+            aria-label="Clear search button"
+            h="1.75rem"
+            size="sm"
+            mt={-0.5}
+            variant="unstyled"
+            color="bc-component"
+            onClick={handleReset}
+            _focus={{ outline: 'none', boxShadow: 'none' }}
+            _active={{ outline: 'none', boxShadow: 'none' }}
+          >
+            <Icon as={FaTimes} boxSize="1rem" />
+          </IconButton>
+        )}
       </InputRightElement>
     </InputGroup>
   );
