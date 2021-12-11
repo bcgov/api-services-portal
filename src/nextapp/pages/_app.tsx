@@ -14,6 +14,7 @@ import { Hydrate } from 'react-query/hydration';
 import { AuthProvider } from '@/shared/services/auth/auth-context';
 import Header from '@/components/header';
 import NavBar from '@/components/nav-bar';
+import MaintenanceBanner from '@/components/maintenance-banner';
 import theme from '@/shared/theme';
 import links from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
@@ -95,6 +96,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               />
               <link href="/images/favicon.png" rel="icon" type="image/x-icon" />
             </Head>
+            <MaintenanceBanner />
             <Header site={site}>
               <AuthAction site={site} />
             </Header>
