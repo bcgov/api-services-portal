@@ -5,10 +5,11 @@ import {
   Icon,
   InputRightElement,
   IconButton,
+  InputProps,
 } from '@chakra-ui/react';
 import { FaTimes, FaSearch } from 'react-icons/fa';
 
-interface SearchInputProps {
+interface SearchInputProps extends Omit<InputProps, 'onChange'> {
   onChange: (value: string) => void;
   placeholder?: string;
   value: string;
@@ -18,6 +19,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onChange,
   placeholder = 'Search',
   value,
+  ...rest
 }) => {
   const ref = React.useRef<HTMLInputElement>(null);
   const handleChange = React.useCallback(
@@ -41,12 +43,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
       <Input
         ref={ref}
         placeholder={placeholder}
-        type="search"
         variant="bc-input"
         border="1px solid"
         borderColor="#e1e1e5"
-        value={value}
+        {...rest}
         onChange={handleChange}
+        type="search"
+        value={value}
       />
       <InputRightElement>
         {!value && <Icon as={FaSearch} color="bc-component" />}

@@ -19,13 +19,21 @@ A simple wrapper to compose the search styled input.
   </Story>
 </Canvas>
 
+|Property|Type|Description|
+|--------|----|-----------|
+|`onChange`*|`(value: string) => void`|Event handler callback|
+|`placeholder`|`string`|Any placeholder string. Defaults to `Search`|
+|`value`*|`string`|This is a controlled component, so setting the value is required|
+
+Search input extends Chakra's `InputProps`, so any text input property can be passed, except `type` of course.
+
 ## With value
 
 This is a controlled component, so when there is a value property available, it will render a clear button.
 
 <Canvas>
   <Story name="Clear button">
-    <SearchInput value="demo" />
+    <SearchInput name="search" id="search" aria-label="search input" value="demo" />
   </Story>
 </Canvas>
 
