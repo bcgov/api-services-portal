@@ -50,6 +50,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={handleChange}
         type="search"
         value={value}
+        sx={{
+          '&::-webkit-search-cancel-button': {
+            display: 'none',
+          },
+        }}
       />
       <InputRightElement>
         {!value && <Icon as={FaSearch} color="bc-component" />}
