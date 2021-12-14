@@ -12,6 +12,12 @@ class ServiceAccountsPage {
     cy.get(this.shareBtn).click()
   }
 
+  checkClientCredentialsVisible() {
+    cy.get(this.clientId).should('be.visible');
+    cy.get(this.clientSecret).should('be.visible');
+    cy.get(this.tokenEndpoint).should('be.visible');
+  }
+
   saveServiceAcctCreds(): void {
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.clientSecret).then(($clientSecret) => {
@@ -27,7 +33,24 @@ class ServiceAccountsPage {
     })
   }
 
-
+  saveClientCredentials(): void {
+    cy.get(this.clientId).then(($clientId) => {
+      cy.get(this.clientSecret).then(($clientSecret) => {
+        cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
+          cy.saveState(
+            'clientCredentials',
+            '{"clientId": "' +
+              $clientId.text() +
+              '", "clientSecret": "' +
+              $clientSecret.text() +
+              '", "tokenEndpoint": "' +
+              $tokenEndpoint.text() +
+              '"}'
+          )
+        })
+      })
+    })
+  }
 
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {

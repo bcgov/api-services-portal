@@ -34,7 +34,6 @@ class ApiDirectoryPage {
     cy.contains('Terms of Use for API Gateway').click()
     cy.get(this.submitBtn).click()
     cy.get(this.generateSecretsBtn).click()
-    cy.contains("API Key").should('be.visible')
   };
 }
 
