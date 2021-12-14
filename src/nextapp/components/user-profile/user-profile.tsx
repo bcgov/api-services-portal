@@ -30,11 +30,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
           {isLoading && (
             <>
               <Flex align="center">
-                <Skeleton width="20%" height="20px" />
+                <Skeleton width="140px" height="20px" />
                 <SkeletonCircle size="2" mx={2} />
-                <Skeleton width="20%" height="20px" />
+                <Skeleton width="100px" height="20px" />
               </Flex>
-              <Skeleton width="35%" height="20px" />
+              <Skeleton width="135px" height="20px" />
             </>
           )}
           {!isLoading && (
