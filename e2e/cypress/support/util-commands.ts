@@ -54,7 +54,13 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       _.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
-  } else {
+  }if(key.includes('APIKey')) {
+    cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
+      currState.key=value
+      cy.writeFile('cypress/fixtures/state/store.json',currState)
+    })
+  } 
+  else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       currState[key] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
