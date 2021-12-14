@@ -21,7 +21,7 @@ declare namespace Cypress {
 
     saveState(key: string, value: string): void
 
-    getState(key: string): string
+    getState(key: string): Chainable<Cypress.Response<any>>
 
     resetState(): void
 
