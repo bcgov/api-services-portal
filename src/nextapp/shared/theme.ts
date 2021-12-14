@@ -307,6 +307,12 @@ const theme = extendTheme(
           text: {
             fontWeight: 'normal',
             fontSize: 'md',
+            clear: 'both',
+            overflow: 'hidden',
+
+            'textarea + &': {
+              mt: 0,
+            },
           },
         },
       },

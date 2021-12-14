@@ -38,6 +38,7 @@ export const WithHelperText = () => (
 export const WithErrorMessage = () => (
   <FormControl isRequired isInvalid mb={4}>
     <FormLabel>Requirements</FormLabel>
+    <FormHelperText>Helper text goes here</FormHelperText>
     <Textarea placeholder="Add requirements here" variant="bc-input" />
     <FormErrorMessage>There was an error</FormErrorMessage>
   </FormControl>
