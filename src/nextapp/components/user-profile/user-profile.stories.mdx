@@ -1,0 +1,24 @@
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import UserProfile from './user-profile';
+
+<Meta title="APS/UserProfile" />
+
+# User Profile
+
+<Canvas>
+  <Story name="Default">
+    <UserProfile data={{ 
+      name: 'Margaret Kilgallen', 
+      username: 'mkilgallen@idir',
+      email: 'mkilgallen@boc.gov.ca'
+    }} />
+  </Story>
+</Canvas>
+
+## Loading state
+
+<Canvas>
+  <Story name="Loading State">
+    <UserProfile isLoading />
+  </Story>
+</Canvas>
