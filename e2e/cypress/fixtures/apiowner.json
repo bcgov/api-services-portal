@@ -33,7 +33,7 @@
       }
     }
   },
-  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
+  "namespaceAccessPermissions": ["CredentialIssuer.Admin", "Access.Manage"],
   "ccAuthProfile": {
     "name": "cy-cc-auth",
     "flow": "Client Credential Flow",
@@ -50,8 +50,8 @@
       "environment": "Test",
       "clientRegistration": "Managed",
       "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
-      "clientId": "cypress-auth-profile",
-      "clientSecret": "dedc88a6-5af5-4a52-a769-5788f0cc3a34"
+      "clientId": "gwa-api",
+      "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
     }
   },
   "permission": {

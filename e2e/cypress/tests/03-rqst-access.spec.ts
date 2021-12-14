@@ -36,6 +36,7 @@ describe('Request Access Spec', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ product, application, accessRequest }: any) => {
       apiDir.createAccessRequest(product, application, accessRequest)
+      cy.contains("API Key").should('be.visible')
     })
   })
 

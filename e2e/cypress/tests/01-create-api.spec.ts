@@ -36,7 +36,8 @@ describe('Create API Spec', () => {
 
   it('creates a new service account', () => {
     cy.visit(sa.path)
-    cy.get('@apiowner').then(({ serviceAccount }: any) => {
+    cy.get('@apiowner').then(({ serviceAccount, namespace }: any) => {
+      // home.useNamespace(namespace)
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
