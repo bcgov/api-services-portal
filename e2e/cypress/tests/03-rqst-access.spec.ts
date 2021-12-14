@@ -1,11 +1,13 @@
 import ApiDirectoryPage from '../pageObjects/apiDirectory'
 import ApplicationPage from '../pageObjects/applications'
 import LoginPage from '../pageObjects/login'
+import MyAccessPage from '../pageObjects/myAccess'
 
 describe('Request Access Spec', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
+  const myAccessPage = new MyAccessPage()
 
   before(() => {
     cy.visit('/')
@@ -36,6 +38,8 @@ describe('Request Access Spec', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ product, application, accessRequest }: any) => {
       apiDir.createAccessRequest(product, application, accessRequest)
+      myAccessPage.clickOnGenerateSecretButton()
+      myAccessPage.saveAPIKeyValue()
     })
   })
 
