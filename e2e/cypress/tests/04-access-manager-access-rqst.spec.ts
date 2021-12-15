@@ -39,7 +39,7 @@ describe('API Owner Spec', () => {
 
   it('Verify that API is accessible with the generated API Key', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.getAPIRequest(product.environment.config.serviceName).then((response) => {
+      cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
         cy.log(response)
         expect(response.status).to.be.equal(200)
     })
