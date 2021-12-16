@@ -1,7 +1,6 @@
 import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 import ConsumersPage from '../pageObjects/consumers'
-import { debug } from 'console'
 
 describe('Manage Control-Rate Limiting Spec', () => {
   const login = new LoginPage()
@@ -34,13 +33,11 @@ describe('Manage Control-Rate Limiting Spec', () => {
 
   it('verify rate limit error when the API calls beyond the limit', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-        debugger
         cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
           expect(response.status).to.be.equal(200)
       })
       cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
         expect(response.status).to.be.equal(429)
-        debugger
         expect(response.body.message).to.be.contain('API rate limit exceeded')
     })
     })
