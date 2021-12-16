@@ -15,9 +15,7 @@ declare namespace Cypress {
 
     preserveCookies(): void
 
-    removeCookies(): void
-
-    getAPIRequest(serviceName : string): Chainable<any>
+    makeKongRequest(serviceName : string, methodType : string): Chainable<any>
 
     preserveCookiesDefaults(): void
 

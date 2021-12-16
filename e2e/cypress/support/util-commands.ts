@@ -17,14 +17,6 @@ Cypress.Commands.add('preserveCookies', () => {
   cy.log('> Saving Cookies')
 })
 
-Cypress.Commands.add('removeCookies', () => {
-  cy.log('< Removing Cookies')
-  listOfCookies.forEach((cookie) => {
-    cy.clearCookie(cookie)
-  })
-  cy.log('> Removing Cookies')
-})
-
 Cypress.Commands.add('preserveCookiesDefaults', () => {
   cy.log('< Saving Cookies as Defaults')
   Cypress.Cookies.defaults({
