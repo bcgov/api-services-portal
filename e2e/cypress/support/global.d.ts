@@ -19,8 +19,6 @@ declare namespace Cypress {
 
     getAPIRequest(serviceName : string): Chainable<any>
 
-    getAPIRequest(serviceName : string): Chainable<any>
-
     preserveCookiesDefaults(): void
 
     saveState(key: string, value: string): void
