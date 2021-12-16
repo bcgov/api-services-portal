@@ -2,7 +2,7 @@ import HomePage from '../pageObjects/home'
 import LoginPage from '../pageObjects/login'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 
-describe('Create API Spec', () => {
+describe('Team Access Spec', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
