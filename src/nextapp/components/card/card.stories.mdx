@@ -1,4 +1,5 @@
 import { 
+  Accordion,
   Box,
   Button,
   Table,
@@ -11,7 +12,11 @@ import {
   TableCaption
 } from '@chakra-ui/react';
 import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import { FaDoorClosed } from 'react-icons/fa';
+import { HiChartBar } from 'react-icons/hi';
 import Card from './card';
+import ExpandableCard from './expandable-card';
+import ExpandableCards from './expandable-cards';
 
 <Meta title="APS/Card" parameters={{
   layout: 'centered',
@@ -134,3 +139,48 @@ The card component can accept all `Box` props. See [Box component documentation]
   </Story>
 </Canvas>
 
+## Expandable Card
+
+When content would best be hidden by default and disclosed by the user when necessary, use an `ExpandableCard`. 
+Note this must be wrapped in the `ExpandableCards` component, which is an styled `Accordion` component.
+
+Example usage:
+
+```jsx
+import { ExpandableCards, ExpandableCard } from '@/components/card';
+
+
+<ExpandableCards>
+  <ExpandableCard heading="IP Restrictions">
+    IP Restrictions content
+  </ExpandableCard>
+</ExpandableCards>
+
+```
+
+<Canvas>
+  <Story name="Expandable Card">
+    <ExpandableCards>
+      <ExpandableCard heading="IP Restrictions">
+        IP Restrictions content
+      </ExpandableCard>
+    </ExpandableCards>
+  </Story>
+</Canvas>
+
+## Multiple Expandable Cards
+
+`ExpandableCards` is just a presentational wrapper around `Accordion`, which accepts multiple cards.
+
+<Canvas>
+  <Story name="Multiple Expandable Card">
+    <ExpandableCards>
+      <ExpandableCard icon={FaDoorClosed} heading="IP Restrictions">
+        IP Restrictions content
+      </ExpandableCard>
+      <ExpandableCard icon={HiChartBar} heading="Rate Limiting">
+        Rate Limiting content
+      </ExpandableCard>
+    </ExpandableCards>
+  </Story>
+</Canvas>
