@@ -10,9 +10,14 @@
     "cy:run": "cypress run --config-file cypress.json",
     "cy:run:rcd": "cypress run --config-file cypress.json --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
+    "cy:chromium": "cypress open --browser /usr/bin/chromium",
     "moch:html": "marge results/bcgov-aps-e2e-report.json --reportDir results/report -i -t \"API Services Portal E2E Test Report\"",
+    "cy:chrome": "cypress run --env TransferProtocol='http' --browser chrome",
     "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html",
-    "cy:run:rcd:html": "run-s --continue-on-error cy:run:rcd moch:json moch:html"
+    "cy:run:rcd:html": "run-s --continue-on-error cy:run:rcd moch:json moch:html",
+    "cy:chrome:headless": "cypress run --env TransferProtocol='http' --browser chrome --headless",
+    "cy:run:firefox": "cypress run --browser firefox",
+    "cy:firefox:headless": "cypress run --env TransferProtocol='http' --browser firefox --headless"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.4",
