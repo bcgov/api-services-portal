@@ -24,7 +24,7 @@ const TagInput: React.FC<TagInputProps> = ({
   name,
   placeholder = 'Press enter to add',
   value = '',
-  ...rest
+  ...props
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const styles = useMultiStyleConfig('Input', { variant: 'bc-input' });
@@ -90,11 +90,16 @@ const TagInput: React.FC<TagInputProps> = ({
         pos="relative"
         py={2}
         onClick={handleContainerClick}
+        data-testid={props['data-testid']}
       >
         <Wrap spacing={2}>
           {values.map((v, index) => (
             <WrapItem key={uid(v)}>
-              <Tag fontSize="sm" variant="outline">
+              <Tag
+                fontSize="sm"
+                variant="outline"
+                data-testid={`${props['data-testid']}-item-${index}`}
+              >
                 <TagLabel>{v}</TagLabel>
                 <TagCloseButton onClick={handleRemove(index)} />
               </Tag>
@@ -102,7 +107,7 @@ const TagInput: React.FC<TagInputProps> = ({
           ))}
           <WrapItem>
             <Input
-              {...rest}
+              {...props}
               borderRadius={0}
               ref={inputRef}
               onBlur={handleBlur}
@@ -110,6 +115,7 @@ const TagInput: React.FC<TagInputProps> = ({
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
               variant="unstyled"
+              data-testid={`${props['data-testid']}-input`}
             />
           </WrapItem>
         </Wrap>

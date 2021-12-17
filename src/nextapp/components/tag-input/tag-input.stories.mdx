@@ -19,11 +19,11 @@ import TagInput from './tag-input';
 
 ## General Usage
 
-All Chakra `Input` props are valid props for the `TagInput` component.
+All Chakra `Input` props are valid props for the `TagInput` component. `data-testid` is wrapped around the parent container div, and `{testid}-item-{index}` is passed to each tag, and `{testid}-input` on the `input` element.
 
 <Canvas>
   <Story name="Default">
-    <TagInput />
+    <TagInput data-testid="tag-input" />
   </Story>
 </Canvas>
 
