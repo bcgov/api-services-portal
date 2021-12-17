@@ -19,7 +19,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onChange,
   placeholder = 'Search',
   value,
-  ...rest
+  ...props
 }) => {
   const ref = React.useRef<HTMLInputElement>(null);
   const handleChange = React.useCallback(
@@ -46,7 +46,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         variant="bc-input"
         border="1px solid"
         borderColor="#e1e1e5"
-        {...rest}
+        {...props}
         onChange={handleChange}
         type="search"
         value={value}

@@ -15,9 +15,22 @@ A simple wrapper to compose the search styled input.
 
 <Canvas>
   <Story name="Default">
-    <SearchInput/>
+    <SearchInput data-testid="search"/>
   </Story>
 </Canvas>
+
+```
+import SearchInput from '@/components/search-input'
+
+const [value, setSearch] = React.useState('');
+
+<SearchInput 
+  placeholder="Search Here" 
+  onChange={(value) => setSearch(value)} 
+  value={value}
+  data-testid="a-search-input"
+/>
+```
 
 |Property|Type|Description|
 |--------|----|-----------|
