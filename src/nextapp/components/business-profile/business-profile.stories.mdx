@@ -3,22 +3,34 @@ import BusinessProfileContent from './business-profile-content';
 
 <Meta title="APS/Business Profile" />
 
-export const Template = (args) => (
+export const Template = ({ 
+  businessType, 
+  legalName,
+  suspended,
+  addressLine1,
+  addressLine2,
+  city,
+  province,
+  postal,
+  ...props
+}) => (
     <BusinessProfileContent
+      data-testid="business-profile"
       data={{ 
         institution: {
-          businessType: args.businessType,
-          legalName: args.legalName,
-          isSuspended: args.suspended,
+          businessType: businessType,
+          legalName: legalName,
+          isSuspended: suspended,
           address: {
-            addressLine1: args.addressLine1,
-            addressLine2: args.addressLine2,
-            city: args.city,
-            province: args.province,
-            postal: args.postal,
+            addressLine1: addressLine1,
+            addressLine2: addressLine2,
+            city: city,
+            province: province,
+            postal: postal,
           },
         },
       }}
+      {...props}
     />
 );
 
@@ -63,9 +75,33 @@ Business profiles can be suspended
 
 ## Loading state
 
+`BusinessProfile` loads its own data, but the loading state is visible here.
+
 <Canvas>
   <Story name="Loading State">
     <BusinessProfileContent isLoading />
   </Story>
 </Canvas>
 
+## Customizations
+
+The container extends a Chakra `Box`, so any layout props are accepted, though only if required.
+
+<Canvas>
+  <Story 
+    name="Customizations" 
+    args={{
+      legalName: 'Easy Drug Mart 51',
+      addressLine1: 'W Broadway Street',
+      addressLine2: '',
+      city: 'Vancouver',
+      province: 'BC',
+      postal: 'V8T 1E7',
+      bgColor: 'bc-yellow',
+      p: 4,
+      borderRadius: 'lg',
+      color: 'white',
+    }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>

@@ -1,15 +1,17 @@
 import * as React from 'react';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
+import { BoxProps } from '@chakra-ui/layout';
 
 import BusinessProfileContent from './business-profile-content';
 
-interface BusinessProfileProps {
+interface BusinessProfileProps extends BoxProps {
   serviceAccessId: string;
 }
 
 const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
   serviceAccessId,
+  ...props
 }) => {
   const { data, isLoading } = useApi(
     ['BusinessProfile', serviceAccessId],
@@ -21,7 +23,11 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
   );
 
   return (
-    <BusinessProfileContent data={data.BusinessProfile} isLoading={isLoading} />
+    <BusinessProfileContent
+      {...props}
+      data={data.BusinessProfile}
+      isLoading={isLoading}
+    />
   );
 };
 

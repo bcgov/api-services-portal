@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Avatar,
   Box,
+  BoxProps,
   Flex,
   Heading,
   Skeleton,
@@ -10,7 +11,7 @@ import {
 } from '@chakra-ui/react';
 import { UserData } from '@/shared/types/app.types';
 
-interface UserProfileProps {
+interface UserProfileProps extends BoxProps {
   data?: UserData;
   isLoading?: boolean;
 }
@@ -18,9 +19,11 @@ interface UserProfileProps {
 const UserProfile: React.FC<UserProfileProps> = ({
   data = {},
   isLoading = false,
+  ...props
 }) => {
+  const testId = props['data-testid'] ?? 'user-profile';
   return (
-    <Box>
+    <Box {...props}>
       <Heading size="sm" mb={3.5}>
         Administrator:
       </Heading>
@@ -40,17 +43,27 @@ const UserProfile: React.FC<UserProfileProps> = ({
           {!isLoading && (
             <>
               <Text lineHeight="1">
-                <Text as="span" fontWeight="bold">
+                <Text
+                  as="span"
+                  fontWeight="bold"
+                  data-testid={`${testId}-name`}
+                >
                   {data.name}
                 </Text>
-                <Text as="span" color="bc-component">
+                <Text
+                  as="span"
+                  color="bc-component"
+                  data-testid={`${testId}-username`}
+                >
                   <Text as="span" mx={1}>
                     &bull;
                   </Text>
                   {data.username}
                 </Text>
               </Text>
-              <Text color="bc-component">{data.email}</Text>
+              <Text color="bc-component" data-testid={`${testId}-email`}>
+                {data.email}
+              </Text>
             </>
           )}
         </Flex>

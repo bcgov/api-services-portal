@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Avatar,
   Box,
+  BoxProps,
   Flex,
   Heading,
   Icon,
@@ -12,7 +13,7 @@ import { BusinessProfile } from '@/shared/types/query.types';
 import compact from 'lodash/compact';
 import { FaBuilding } from 'react-icons/fa';
 
-interface BusinessProfileContentProps {
+interface BusinessProfileContentProps extends BoxProps {
   data?: BusinessProfile;
   isLoading?: boolean;
 }
@@ -20,7 +21,9 @@ interface BusinessProfileContentProps {
 const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
   data = {},
   isLoading,
+  ...props
 }) => {
+  const testId = props['data-testid'] ?? 'business-profile';
   const { addressItems, legalName } = React.useMemo(() => {
     let legalName = '';
     let addressItems = '';
@@ -42,7 +45,7 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
   }, [data]);
 
   return (
-    <Box>
+    <Box {...props}>
       <Heading size="sm" mb={3.5}>
         Business Profile:
       </Heading>
@@ -73,7 +76,7 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
           )}
           {!isLoading && (
             <>
-              <Text lineHeight="1">
+              <Text lineHeight="1" data-testid={`${testId}-name`}>
                 {legalName}
                 {data.institution?.isSuspended && (
                   <Text as="em" ml={2} color="bc-divider">
@@ -81,7 +84,7 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
                   </Text>
                 )}
               </Text>
-              <Text>{addressItems}</Text>
+              <Text data-testid={`${testId}-address`}>{addressItems}</Text>
             </>
           )}
         </Flex>
