@@ -141,7 +141,7 @@ The card component can accept all `Box` props. See [Box component documentation]
 
 ## Expandable Card
 
-When content would best be hidden by default and disclosed by the user when necessary, use an `ExpandableCard`. 
+When content would best be hidden by default and disclosed by the user when necessary, use an `ExpandableCard`. See [Chakra Docs](https://chakra-ui.com/docs/disclosure/accordion) for more. 
 Note this must be wrapped in the `ExpandableCards` component, which is an styled `Accordion` component.
 
 Example usage:
@@ -149,20 +149,23 @@ Example usage:
 ```jsx
 import { ExpandableCards, ExpandableCard } from '@/components/card';
 
-
 <ExpandableCards>
   <ExpandableCard heading="IP Restrictions">
     IP Restrictions content
   </ExpandableCard>
 </ExpandableCards>
-
 ```
+|Property|Type|Description|
+|--------|----|-----------|
+|`heading`*|`React.ReactElement string`|A heading string or element|
+|`icon`|`IconElement`|Renders beside the heading. Can be used in a [`Icon`](https://chakra-ui.com/docs/media-and-icons/icon) component.
+|`children`*|`React.ReactElement React.ReactElement[]`|Any child elements you would use with a Chakra `AccordionItem`|
 
 <Canvas>
   <Story name="Expandable Card">
-    <ExpandableCards>
-      <ExpandableCard heading="IP Restrictions">
-        IP Restrictions content
+    <ExpandableCards data-testid="card-parent">
+      <ExpandableCard heading="IP Restrictions" data-testid="card-child">
+        <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eleifend, ex at suscipit posuere, massa urna vulputate leo, consequat placerat mauris lectus nec nisi. Sed nec velit ultrices, accumsan neque interdum, imperdiet massa. Maecenas interdum diam sit amet mauris fermentum vehicula. Sed vel elit turpis. Curabitur vestibulum nibh est, sit amet dictum urna blandit eget. Pellentesque maximus ipsum et tempus accumsan. Aenean lacinia nulla tortor, eget convallis elit lobortis et. Nulla facilisi.</Text>
       </ExpandableCard>
     </ExpandableCards>
   </Story>

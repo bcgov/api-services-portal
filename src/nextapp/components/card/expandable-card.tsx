@@ -19,6 +19,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
   children,
   icon = FaRegCircle,
   heading,
+  ...props
 }) => {
   return (
     <AccordionItem
@@ -28,6 +29,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
           borderBottomWidth: 'none',
         },
       }}
+      {...props}
     >
       <h2>
         <AccordionButton
@@ -43,11 +45,11 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
           _expanded={{
             borderBottom: 'none',
             borderBottomRadius: 0,
-            pb: 6,
+            pb: 7,
           }}
         >
           <Box flex="1" textAlign="left">
-            <Icon as={icon} boxSize="5" color="bc-blue" mr={3} />
+            <Icon as={icon} boxSize="5" color="bc-blue" mr={2.5} />
             {heading}
           </Box>
           <AccordionIcon />

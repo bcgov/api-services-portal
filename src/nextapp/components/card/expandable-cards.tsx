@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { Accordion } from '@chakra-ui/react';
+import { Accordion, AccordionProps } from '@chakra-ui/react';
 
-interface ExpandableCardsProps {
+interface ExpandableCardsProps extends AccordionProps {
   children: React.ReactElement | React.ReactElement[];
 }
 
-const ExpandableCards: React.FC<ExpandableCardsProps> = ({ children }) => {
+const ExpandableCards: React.FC<ExpandableCardsProps> = ({
+  children,
+  ...props
+}) => {
   return (
     <Accordion
       allowToggle
@@ -15,6 +18,7 @@ const ExpandableCards: React.FC<ExpandableCardsProps> = ({ children }) => {
           mb: 4,
         },
       }}
+      {...props}
     >
       {children}
     </Accordion>
