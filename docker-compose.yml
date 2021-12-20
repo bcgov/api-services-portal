@@ -165,6 +165,9 @@ services:
     depends_on:
       - kong-migrations
       - kong-migrations-up
+    build:
+      context: local/kong
+      dockerfile: Dockerfile
     environment:
       <<: *common-variables
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
