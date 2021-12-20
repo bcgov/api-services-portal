@@ -70,7 +70,6 @@ describe('Create API Spec', () => {
       })
     })
   })
-
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
     cy.visit(pd.path)
