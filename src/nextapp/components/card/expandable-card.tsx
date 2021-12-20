@@ -39,6 +39,10 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
           borderX="1px solid"
           borderBottom="1px solid"
           borderColor="#e1e1e5"
+          _hover={{
+            bgColor: 'none',
+            color: 'bc-link',
+          }}
           _focus={{
             outline: 'none',
           }}
