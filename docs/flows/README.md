@@ -1,45 +1,31 @@
-# Process Flows
+# Key Flows
 
-# Credential Issuers
+## API Owner Login
 
-| Flow                           | Mode      | Registration            | Management                                             |
-|--------------------------------|-----------|-------------------------|--------------------------------------------------------|
-| Oauth2 Client Credentials Flow | Automatic | Anonymous Client Reg    | manage-clients (delete, activate, role assignment)     |
-| Oauth2 Client Credentials Flow | Automatic | Managed (create-client) | Registration Token (delete, activate, role assignment) |
-| Oauth2 Client Credentials Flow | Automatic | Initial Access Token    | Registration Token (delete, activate, role assignment) |
-| Oauth2 Authorization Code Flow | Automatic | N/A                     | manage-users (role assignment)                         |
-| Oauth2 Client Credentials Flow | Manual    | Anonymous Client Reg    | N/A                                                    |
-| Oauth2 Client Credentials Flow | Manual    | Managed (create-client) | N/A                                                    |
-| Oauth2 Client Credentials Flow | Manual    | Initial Access Token    | N/A                                                    |
-| Oauth2 Authorization Code Flow | Manual    | N/A                     | N/A                                                    |
-| Kong API Key with ACL Flow     | Automatic | Via Portal              | Via Portal                                             |
+![API Owner Login](./images/api-owner-login.png)
 
-## Onboarding a new API
+## Switch Namespace
 
-The USER-JOURNEY.md documentation under `gwa-api` provides the steps required to configure the Gateway and make the API available for discovery.
+![Switch Namespace](./images/switch-namespace.png)
 
-![New API](./images/NewAPI.png)
+## Create Service Account
 
+![Create Service Account](./images/create-service-account.png)
 
-[new-api websequencediagram](new-api.md)
+## Request Access
 
-## Support Authentication Flows
+![Request Access](./images/request-access.png)
 
-### API Key w/ ACL
+## Approve Access
 
-![API Key](./images/ApiKey.png)
+![Approve Access](./images/approve-access.png)
 
-### Anonymous Client Registration (auto issuing)
+## Maintain Consumer
 
-In this scenario, the APS Portal requires the `manage-clients` role in the Realm of the particular OIDC Provider.
+### Maintain Consumer Roles
 
-![Anon Reg with Auto Issuing](./images/AnonReg.png)
+![Maintain Consumer Roles](./images/maintain-consumer-roles.png)
 
-### Others
+### Maintain Consumer Scopes
 
-* OIDC with Anonymous Client Registration (manage-clients) (auto enable) - API Portal has `manage-clients`
-* OIDC with Anonymous Client Registration (manually enable) - API Portal has no authorization
-* OIDC with Managed Client Registration (manage-clients) (auto enable) - API Portal has `manage-clients`
-* OIDC with Managed Client Registration (create-client) (manually enable) - API Portal has `create-client`
-* OIDC with IAT Client Registration - API Portal has limited `create-client` permissions
-
+![Maintain Consumer Scopes](./images/maintain-consumer-scopes.png)
