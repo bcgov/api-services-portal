@@ -160,7 +160,6 @@ Cypress.Commands.add('logout', () => {
       cy.get('[data-testid=auth-menu-user]').find("div[role='img']").should('have.attr', 'aria-label', res.body.user.name)
       cy.get('[data-testid=auth-menu-user]').click()
       cy.contains('Sign Out').click()
-      cy.removeCookies()
     })
   })
   cy.log('> Logging out')
@@ -205,6 +204,32 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
       }
     )
   })
+})
+
+Cypress.Commands.add('deleteAllCookies', () => {
+  cy.clearCookie('keystone.sid')
+  cy.clearCookie('_oauth2_proxy') 
+  cy.exec('npm cache clear --force')
+  var cookies = document.cookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i];
+      var eqPos = cookie.indexOf("=");
+      var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  }
+})
+
+Cypress.Commands.add('makeKongRequest', (serviceName : string, methodType : string) => {
+  cy.fixture('state/store').then((creds: any) => {
+    const token = creds.key
+    const service = serviceName
+    return cy.request({
+    url: Cypress.env('KONG_URL'),
+    method: methodType,
+    headers: { 'x-api-key': `${token}`, 'Host': `${service}`+'.api.gov.bc.ca'},
+    failOnStatusCode: false
+  })
+})
 })
 
 const formDataRequest = (

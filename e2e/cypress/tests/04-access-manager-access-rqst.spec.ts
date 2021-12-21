@@ -13,7 +13,7 @@ describe('API Owner Spec', () => {
 
   before(() => {
     cy.visit('/')
-    cy.clearCookies()
+    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -21,6 +21,8 @@ describe('API Owner Spec', () => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('developer').as('developer')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('state/store').as('store')
     cy.visit(login.path)
   })
 
@@ -31,13 +33,23 @@ describe('API Owner Spec', () => {
         home.useNamespace(namespace);
         cy.contains('Review').click()
         cy.contains('Approve').click()
-        // TODO this isn't working:
         cy.contains('span','Complete', { timeout: 10000 }).should('be.visible');
       })
     })
   })
 
+  it('Verify that API is accessible with the generated API Key', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
+        cy.log(response)
+        expect(response.status).to.be.equal(200)
+    })
+  })
+})
+
   after(() => {
     cy.logout()
+    cy.clearLocalStorage({log:true})
+    cy.deleteAllCookies()
   })
 })

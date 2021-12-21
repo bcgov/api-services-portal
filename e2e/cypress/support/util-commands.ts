@@ -17,14 +17,6 @@ Cypress.Commands.add('preserveCookies', () => {
   cy.log('> Saving Cookies')
 })
 
-Cypress.Commands.add('removeCookies', () => {
-  cy.log('< Removing Cookies')
-  listOfCookies.forEach((cookie) => {
-    cy.clearCookie(cookie)
-  })
-  cy.log('> Removing Cookies')
-})
-
 Cypress.Commands.add('preserveCookiesDefaults', () => {
   cy.log('< Saving Cookies as Defaults')
   Cypress.Cookies.defaults({
@@ -54,7 +46,13 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       _.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
-  } else {
+  }if(key.includes('APIKey')) {
+    cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
+      currState.key=value
+      cy.writeFile('cypress/fixtures/state/store.json',currState)
+    })
+  } 
+  else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       currState[key] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)

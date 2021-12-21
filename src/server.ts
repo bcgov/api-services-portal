@@ -16,6 +16,7 @@ const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
 const { ApiHealthApp } = require('./api-health');
+const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
 
@@ -255,6 +256,7 @@ const {
 const apps = [
   new ApiHealthApp(state),
   new ApiOpenapiApp(),
+  new MaintenanceApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
   }),
