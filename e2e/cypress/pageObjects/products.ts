@@ -53,32 +53,9 @@ class Products {
   editProductEnvironmentConfig(config: any) {
     
     cy.get(this.editPrdEnvConfigBtn).click()
+    cy.get(this.envCfgActivateRadio).click()
+    cy.get(this.envCfgApprovalCheckbox).click()
 
-    let envEnabled = document
-      .querySelector('[data-testid="prd-env-config-activate-radio"]')
-      ?.getElementsByClassName('chakra-switch__thumb')[0]
-      .hasAttribute('data-checked')
-
-    if (!config.environmentEnabled != !envEnabled) {
-      cy.log('Checking Environmnent enabled!')
-      cy.log('!config.environmentEnabled : ' + !config.environmentEnabled)
-      cy.log('!envEnabled : ' + !envEnabled)
-      cy.log('!config.environmentEnabled != !envEnabled : ' + (!config.environmentEnabled != !envEnabled))
-      cy.log('envEnabled value : ' + envEnabled)
-      cy.log('config.environmentEnabled value : ' + config.environmentEnabled)
-      cy.get(this.envCfgActivateRadio).click()
-    }
-    
-    let approvalRequired = document
-      .querySelector('[data-testid="prd-env-config-approval-checkbox"]')
-      ?.getElementsByClassName('chakra-checkbox__control')[0]
-      .hasAttribute('data-active')
-
-    if (!config.approvalRequired != !approvalRequired)
-      cy.get(this.envCfgApprovalCheckbox).click()
-
-    // cy.get(this.envCfgActivateRadio).click()
-    // cy.get(this.envCfgApprovalCheckbox).click()
     cy.get(this.envCfgTermsDropdown).select(config.terms)
 
     let authType = config.authorization
@@ -96,15 +73,6 @@ class Products {
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
 
-    // TODO: Selecting available services might need to be refined
-    let serviceIsActive = document
-      .querySelector('[data-testid="prd-env-active-services"]')
-      ?.querySelector(`[data-testid="${config.serviceName}"]`)
-
-    if (!config.serviceName != !serviceIsActive)
-      cy.get(`[data-testid="${config.serviceName}"]`).click()
-
-    // cy.get(`[data-testid="${config.serviceName}"]`).click() //Adding service to list of active services
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 

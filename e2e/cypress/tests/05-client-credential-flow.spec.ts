@@ -9,7 +9,7 @@ import ServiceAccountsPage from '../pageObjects/serviceAccounts'
 import ConsumersPage from '../pageObjects/consumers'
 
 
-describe('Client Credential Flow', () => {
+describe('Test Client Credential Flow', () => {
   /*
   TODO:
   * The following parameters can be added to fixtures/apiowner.json. Functionality executed in pageObjects/authProfile.createAuthProfile *
@@ -42,6 +42,7 @@ describe('Client Credential Flow', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
+    cy.fixture('access-manager').as('access-manager')
     cy.visit(login.path)
   })
 
@@ -52,13 +53,12 @@ describe('Client Credential Flow', () => {
     })
   })
 
-  it('Gives API Owner CredentialIssuer.Admin and Access.Manage permission', () => {
+  it('Gives API Owner CredentialIssuer.Admin permission', () => {
     cy.visit(nsa.path)
     cy.get('@apiowner').then(({ user, namespace, namespaceAccessPermissions }: any) => {
       nsa.clickGrantUserAccessButton()
       nsa.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
       cy.visit('/').then(() => {
-        // TODO there appears to be some flakiness with this logging in and logging out step
         cy.logout()
         cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace)
@@ -66,24 +66,22 @@ describe('Client Credential Flow', () => {
     })
   })
 
-  it('Creates Auth Profile', () => {
+  it('API Owner creates authorization profile', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ ccAuthProfile }: any) => {
       authProfile.createAuthProfile(ccAuthProfile)
       cy.get(authProfile.profileTable).contains(ccAuthProfile.name).should('be.visible')
     })
-    
-    cy.log('profile created!')
   })
 
-  it('Adds Test environment to "Auto Test Product" product', () => {
+  it('API Owner adds Test environment to "Auto Test Product" product', () => {
     cy.visit(products.path)
     cy.get('@apiowner').then(({ product }: any) => {
       products.addEnvToProduct(product.name, product.testEnvironment.name)
     })
   })
 
-  it('Adds Client Credential Flow to Test environment, generates template with jwt-keycloak plugin', () => {
+  it('Adds client credential flow to Test environment, generates service template with jwt-keycloak plugin', () => {
     cy.visit(products.path)
     cy.get('@apiowner').then(({ product, ccAuthProfile }: any) => {
       products.editProductEnvironment(product.name, product.testEnvironment.name)
@@ -94,7 +92,7 @@ describe('Client Credential Flow', () => {
     products.generateKongPluginConfig()
   })
 
-  it('applies authorization plugin to service published to Kong Gateway', () => {
+  it('Applies authorization plugin to service published to Kong Gateway', () => {
     cy.publishApi('service-plugin.yml').then(() => {
       cy.get('@publishAPIResponse').then((res: any) => {
         cy.log(JSON.stringify(res.body))
@@ -109,18 +107,17 @@ describe('Client Credential Flow', () => {
   it('Developer logs in', () => {
     cy.get('@developer').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      // home.useNamespace(namespace)
     })
   })
 
-  it('creates an application', () => {
+  it('Creates an application', () => {
     cy.visit(app.path)
     cy.get('@developer').then(({ clientCredentialsApplication }: any) => {
       app.createApplication(clientCredentialsApplication)
     })
   })
 
-  it('creates an access request', () => {
+  it('Creates an access request', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ product, clientCredentialsApplication, accessRequest }: any) => {
       product.environment = 'test';
@@ -130,35 +127,31 @@ describe('Client Credential Flow', () => {
     })
   })
 
-  it('developer logs out', () => {
+  it('Developer logs out', () => {
     cy.logout();
   })
 
-  it('API Owner Logs in', () => {
-    cy.get('@apiowner').then(({ user, namespace }: any) => {
+  it('Access Manager logs in', () => {
+    cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       home.useNamespace(namespace)
     })
   })
 
-  it('approves an access request', () => {
-    // TODO: change this so it uses access-manager
-    cy.get('@apiowner').then(({ user, namespace }: any) => {
+  it('Access Manager approves developer access request', () => {
+    cy.get('@access-manager').then(({ user, namespace }: any) => {
         cy.visit(consumers.path);
         cy.contains('Review').click()
         cy.contains('Approve').click()
-        // TODO this isn't working:
-        // cy.contains('span','Complete', { timeout: 10000 }).should('be.visible');
     })
   })
 
-  it('Gets access token using client ID and secret; make API request', () => {
-    cy.readFile('cypress/fixtures/state/store.json').then((res) => {
-      let cc = JSON.parse(res.clientCredentials);
+  it('Get access token using client ID and secret; make API request', () => {
+    cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
+      let cc = JSON.parse(store_res.clientCredentials);
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
-        cy.get('@accessTokenResponse').then((res : any) => {
-          let token = res.body.access_token
-          cy.log(token)
+        cy.get('@accessTokenResponse').then((token_res : any) => {
+          let token = token_res.body.access_token
           cy.request({
             url: Cypress.env('KONG_URL'),
             headers: {
@@ -179,5 +172,3 @@ describe('Client Credential Flow', () => {
     cy.logout()
   })
 })
-
-// TODO send request to API after get token
