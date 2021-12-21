@@ -24,7 +24,6 @@ describe('Create API Spec', () => {
   it('authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
     })
   })
 
@@ -37,7 +36,6 @@ describe('Create API Spec', () => {
   it('creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount, namespace }: any) => {
-      // home.useNamespace(namespace)
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
