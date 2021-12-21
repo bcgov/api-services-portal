@@ -4,8 +4,10 @@ const toPath = (_path) => path.join(process.cwd(), _path);
 
 module.exports = {
   typescript: {
-    check: false,
-    checkOptions: {},
+    check: true,
+    checkOptions: {
+      tsconfig: toPath('nextapp/tsconfig.json'),
+    },
     reactDocgen: 'react-docgen-typescript',
     reactDocgenTypescriptOptions: {
       shouldExtractLiteralValuesFromEnum: true,
@@ -17,7 +19,6 @@ module.exports = {
     '../stories/**/*.stories.mdx',
     '../stories/**/*.stories.@(js|jsx|ts|tsx|mdx)',
     '../nextapp/components/**/*.stories.@(js|jsx|ts|tsx|mdx)',
-    '../nextapp/components/**/*.stories.mdx',
   ],
   addons: ['@storybook/addon-links', '@storybook/addon-essentials'],
   webpackFinal: async (config) => {
@@ -27,6 +28,7 @@ module.exports = {
         ...config.resolve,
         alias: {
           ...config.resolve.alias,
+          '@': toPath('nextapp'),
           '@emotion/core': toPath('node_modules/@emotion/react'),
           'emotion-theming': toPath('node_modules/@emotion/react'),
         },

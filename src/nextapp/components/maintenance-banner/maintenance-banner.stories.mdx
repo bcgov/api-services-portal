@@ -1,0 +1,90 @@
+import { Box } from '@chakra-ui/react';
+import { FaPlus } from 'react-icons/fa'
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import MaintenanceBanner from './maintenance-banner';
+
+<Meta title="APS/MaintenanceBanner" component={MaintenanceBanner} />
+
+The maintenance banner reads the `maintenance` boolean value from the `useAuth` hook to render a persistent banner globally when the site is under maintenance.
+
+# Default Presentation
+
+On its own the banner will display a default title and body copy.
+
+<Canvas>
+  <Story name="Default Presentation">
+    <MaintenanceBanner />
+  </Story>
+</Canvas>
+
+# Title/Text Props
+
+If needed however, this can be customized. The background and icon cannot be customized at this time.
+
+<Canvas>
+  <Story name="Custom Text/Title">
+    <MaintenanceBanner 
+      title="You shall not pass"
+      text="Because we are currently implementing new changes" 
+    />
+  </Story>
+</Canvas>
+
+# Layout and interaction with siblings
+
+In an effort to be stand alone, the component relies on relative CSS selectors to adjust the fixed banner, nav and body.
+
+```jsx
+<MaintenanceBanner />
+<Header />
+<NavBar  />
+<Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
+  <AppWrapper router={router}>
+    <Component {...pageProps} />
+  </AppWrapper>
+</Box>
+<Box as="footer">
+//...
+```
+
+**NOTE** If the structure of the `_app.tsx` changes in any way, the layout will break. Be sure to update the CSS selectors for this component if any layout changes are made to the main HTML structure.
+
+<Canvas>
+  <Story name="Interaction with other components">
+    <Box pos="relative">
+      <MaintenanceBanner />
+      <Box
+        as="header"
+        pos="fixed"
+        height="65px"
+        d="flex"
+        alignItems="center"
+        pl={8}
+        bg="bc-blue"
+        color="white"
+        left="0"
+        width="100%"
+      >
+        Header is automtically positioned relative to the banner
+      </Box>
+      <Box
+        as="nav"
+        pos="fixed"
+        height="50px"
+        d="flex"
+        alignItems="center"
+        pl={8}
+        bg="bc-blue-alt"
+        color="white"
+        left="0"
+        width="100%"
+      >
+        Nav is automtically positioned relative to the banner
+      </Box>
+      <Box as="main" mt="165px" pl={8}>
+        Main is automtically positioned relative to the banner
+      </Box>
+    </Box>
+  </Story>
+</Canvas>
+

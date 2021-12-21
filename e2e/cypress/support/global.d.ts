@@ -11,9 +11,11 @@ declare namespace Cypress {
 
     logout(): void
 
+    deleteAllCookies(): void
+
     preserveCookies(): void
 
-    removeCookies(): void
+    makeKongRequest(serviceName : string, methodType : string): Chainable<any>
 
     preserveCookiesDefaults(): void
 
