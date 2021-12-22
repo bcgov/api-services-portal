@@ -84,18 +84,10 @@ class Products {
 
   updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
-
-    const search_input: string = productName.slice(0,1)
-    cy.get(this.catelogueDropDown).type(search_input+'{enter}',{
-      force: true
-   })
-    cy.get(this.catelogueDropDownMenu).find('div').find('p').each(($e1, index, $list) => {
-      if($e1.text()===productName)
-      {
-          cy.wrap($e1).click()
-      }
+    const search_input: string = productName.slice(0, 1)
+    cy.get(this.catelogueDropDown).type(search_input + '{enter}', {
+      force: true,
     })
-
     cy.get(this.catelogueDropDownMenu)
       .find('div')
       .find('p')
@@ -104,7 +96,6 @@ class Products {
           cy.wrap($e1).click()
         }
       })
-
     this.updateProduct()
   }
 
