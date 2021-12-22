@@ -330,6 +330,7 @@ CREATE TABLE public."CredentialIssuer" (
     "clientRoles" text,
     "resourceScopes" text,
     "resourceType" text,
+    "clientMappers" text,
     "resourceAccessScope" text,
     "apiKeyName" text NOT NULL,
     owner integer,

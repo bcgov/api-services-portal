@@ -1,4 +1,5 @@
 {
-  "credentials": "{\"clientId\": \"sa-platform-e0000000-cbfc5f7c9fba\", \"clientSecret\": \"97ccbf88-b4cd-48a7-9d47-5ba749981074\"}",
-  "key": "iUGjZbZGJZlqLs61NS2fJDs2F4LiRlmq"
+  "credentials": "{\"clientId\": \"sa-platform-e0000000-2010b5687836\", \"clientSecret\": \"6bde3d29-506e-4855-bf39-aa4ac85158d0\"}",
+  "clientCredentials": "{\"clientId\": \"3FCBCBF8-FAF50369621\", \"clientSecret\": \"d896de15-4a8f-4af5-9a0b-4da9b7633fb1\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
+  "key": "36CfXD4galSiBsjBnWbyoqbxg4THwttm"
 }
