@@ -21,6 +21,27 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-platform"
       }
+    },
+    "testEnvironment": {
+      "name": "test",
+      "config": {
+        "terms": "Terms of Use for API Gateway",
+        "authorization": "Oauth2 Client Credentials Flow",
+        "optionalInstructions": "Editing test environment"
+      }
+    }
+  },
+  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
+  "ccAuthProfile": {
+    "name": "cy-cc-auth",
+    "flow": "Client Credential Flow",
+    "clientAuthenticator": "Client ID and Secret",
+    "environmentConfig": {
+      "environment": "Test",
+      "clientRegistration": "Managed",
+      "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+      "clientId": "cypress-auth-profile",
+      "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
     }
   },
   "permission": {

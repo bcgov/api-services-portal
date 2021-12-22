@@ -77,6 +77,7 @@ const ProductsList: React.FC = () => {
                     <AddEnvironment
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
+                      productName={d.name}
                     >
                       <Box
                         as="span"
@@ -109,6 +110,7 @@ const ProductsList: React.FC = () => {
                     <AddEnvironment
                       productId={d.id}
                       environments={d.environments.map((d) => d.name)}
+                      productName={d.name}
                     >
                       Add Environment
                     </AddEnvironment>
