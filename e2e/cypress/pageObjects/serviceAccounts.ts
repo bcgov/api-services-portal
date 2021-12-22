@@ -4,18 +4,12 @@ class ServiceAccountsPage {
   newServiceAccountBtn: string = '[data-testid=sa-create-second-btn]'
   clientId: string = '[data-testid=sa-new-creds-client-id]'
   clientSecret: string = '[data-testid=sa-new-creds-client-secret]'
-  tokenEndpoint: string = '[data-testid=sa-new-creds-token-endpoint]'
+
 
   createServiceAccount(scopes: string[]): void {
     cy.get(this.newServiceAccountBtn).first().click()
     this.selectPermissions(scopes)
     cy.get(this.shareBtn).click()
-  }
-
-  checkClientCredentialsVisible() {
-    cy.get(this.clientId).should('be.visible');
-    cy.get(this.clientSecret).should('be.visible');
-    cy.get(this.tokenEndpoint).should('be.visible');
   }
 
   saveServiceAcctCreds(): void {
@@ -33,24 +27,7 @@ class ServiceAccountsPage {
     })
   }
 
-  saveClientCredentials(): void {
-    cy.get(this.clientId).then(($clientId) => {
-      cy.get(this.clientSecret).then(($clientSecret) => {
-        cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
-          cy.saveState(
-            'clientCredentials',
-            '{"clientId": "' +
-              $clientId.text() +
-              '", "clientSecret": "' +
-              $clientSecret.text() +
-              '", "tokenEndpoint": "' +
-              $tokenEndpoint.text() +
-              '"}'
-          )
-        })
-      })
-    })
-  }
+
 
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {

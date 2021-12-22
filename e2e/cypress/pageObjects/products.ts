@@ -88,7 +88,7 @@ class Products {
   updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
     const search_input: string = productName.slice(0, 1)
-    cy.get(this.catelogueDropDown).type(search_input, {
+    cy.get(this.catelogueDropDown).type(search_input + '{enter}', {
       force: true,
     })
     cy.get(this.catelogueDropDownMenu)
@@ -99,7 +99,6 @@ class Products {
           cy.wrap($e1).click()
         }
       })
-
     this.updateProduct()
   }
 
