@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "credentials": "{\"clientId\": \"sa-platform-e0000000-83b38038053d\", \"clientSecret\": \"2e1372fe-0c7b-4f7a-a491-ace51f14b8ad\"}",
   "clientCredentials": "{\"clientId\": \"D90B35DD-BF0B55D86E1\", \"clientSecret\": \"15b5f0ad-4d17-4d34-a405-d26a03bfe026\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
   "key": "MRvO1M71gjyfSf1HbqWBuBR85utgPOQE",
@@ -7,3 +8,9 @@
   "jwksUrlCredentials": "{\"clientId\": \"F58ABC02-361109B209E\", \"issuer\": \"http://keycloak.localtest.me:9080/auth/realms/master\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
   "jwtKeyPairCredentials": "{\"clientId\": \"7A615A20-37DF4576546\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}"
 }
+=======
+  "credentials": "{\"clientId\": \"sa-platform-e0000000-ca1eeac07c2d\", \"clientSecret\": \"18cb1c8e-40bc-4cd0-9c57-e9d7b0418ca0\"}",
+  "clientCredentials": "{\"clientId\": \"E09485C6-E3D95B0804D\", \"clientSecret\": \"35791784-406f-4b09-b032-57512d74bd17\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
+  "key": "ezPKpQZjP5pIKULtn5uwH5y53JWp5Kor"
+}
+>>>>>>> 92175575 (Adds chrome browser to Cypress test execution)
