@@ -1,9 +1,8 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import ConsumersPage from '../pageObjects/consumers'
-import { debug } from 'console'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import ConsumersPage from '../../pageObjects/consumers'
 
-describe('Manage Control-IP Restriction Spec', () => {
+describe('Manage Control-IP Restriction Spec - Route as Scope', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const consumers = new ConsumersPage()
@@ -21,13 +20,13 @@ describe('Manage Control-IP Restriction Spec', () => {
     cy.visit(login.path)
   })
 
-  it('set IP address that is not accessible in the network as allowed IP', () => {
+  it('set IP address that is not accessible in the network as allowed IP and set service as scope', () => {
     cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password).then(() => {
         home.useNamespace(namespace);
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
-        consumers.setAllowedIPAddress('127.0.0.2')
+        consumers.setAllowedIPAddress('127.0.0.2',"Route")
       })
     })
   })
@@ -41,12 +40,11 @@ describe('Manage Control-IP Restriction Spec', () => {
     })
   })
 
-  it('set IP address that is accessible in the network as allowed IP', () => {
+  it('set IP address that is accessible in the network as allowed IP and set service as scope', () => {
     cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.visit(consumers.path);
       consumers.clickOnTheFirstConsumerID()  
-      consumers.deleteControl()
-      consumers.setAllowedIPAddress('192.168.0.1/0')
+      consumers.setAllowedIPAddress('192.168.0.1/0',"Route")
     })
   })
 
@@ -57,6 +55,5 @@ describe('Manage Control-IP Restriction Spec', () => {
       })
     })
   })
-
 })
 

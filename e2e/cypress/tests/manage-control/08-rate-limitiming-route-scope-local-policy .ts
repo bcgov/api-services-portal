@@ -1,8 +1,8 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import ConsumersPage from '../pageObjects/consumers'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import ConsumersPage from '../../pageObjects/consumers'
 
-describe('Manage Control-Rate Limiting Spec', () => {
+describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const consumers = new ConsumersPage()
@@ -20,13 +20,13 @@ describe('Manage Control-Rate Limiting Spec', () => {
     cy.visit(login.path)
   })
 
-  it('set api rate limit to 1 request per min', () => {
+  it('set api rate limit to 1 request per min, Local Policy and Scope as Route', () => {
     cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password).then(() => {
         home.useNamespace(namespace);
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
-        consumers.setRateLimiting('1')
+        consumers.setRateLimiting('1',"Route")
       })
     })
   })
