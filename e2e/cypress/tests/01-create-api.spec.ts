@@ -24,7 +24,6 @@ describe('Create API Spec', () => {
   it('authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
     })
   })
 
@@ -36,7 +35,7 @@ describe('Create API Spec', () => {
 
   it('creates a new service account', () => {
     cy.visit(sa.path)
-    cy.get('@apiowner').then(({ serviceAccount }: any) => {
+    cy.get('@apiowner').then(({ serviceAccount, namespace }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
@@ -71,6 +70,7 @@ describe('Create API Spec', () => {
     })
   })
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)

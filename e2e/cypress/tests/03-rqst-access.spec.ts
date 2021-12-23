@@ -39,6 +39,7 @@ describe('Request Access Spec', () => {
     cy.get('@developer').then(({ product, application, accessRequest }: any) => {
       apiDir.createAccessRequest(product, application, accessRequest)
       myAccessPage.clickOnGenerateSecretButton()
+      cy.contains("API Key").should('be.visible')
       myAccessPage.saveAPIKeyValue()
     })
   })

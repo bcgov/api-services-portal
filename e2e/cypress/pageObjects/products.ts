@@ -31,6 +31,18 @@ class Products {
     // cy.get(this.updateBtn).click()
   }
 
+  updateOrg(orgName: string, orgUnitName: string) {
+    cy.get(this.orgDropDown).select(orgName)
+    cy.get(this.orgUnitDropDown).select(orgUnitName)
+    cy.get(this.updateBtn).click()
+  }
+
+  addEnvToProduct(productName: string, envName: string) {
+    let pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.get(`[data-testid=${pname}-add-env-btn]`).click()
+    cy.get(`[data-testid=${pname}-prd-env-item-${envName.toLowerCase()}]`).click()
+  }
+
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-${envName}-edit-btn]`).click()
@@ -40,9 +52,24 @@ class Products {
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
-    cy.get(this.envCfgTermsDropdown).select(config.terms,{ force: true }).invoke('val')
-    cy.get(this.envCfgAuthzDropdown).select(config.authorization,{ force: true }).invoke('val')
+
+    cy.get(this.envCfgTermsDropdown).select(config.terms)
+
+    let authType = config.authorization
+    cy.get(this.envCfgAuthzDropdown)
+      .select(authType)
+      .then(() => {
+        if (
+          authType === 'Oauth2 Authorization Code Flow' ||
+          authType === 'Oauth2 Client Credentials Flow'
+        )
+          cy.get('[name="credentialIssuer"]').select(
+            `${config.authIssuer} (${config.authIssuerEnv.toLowerCase()})`
+          )
+      })
+
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -55,25 +82,26 @@ class Products {
     })
   }
 
-  updateDatasetNameToCatelogue(productName: string,env: string) {
+  updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
-    const search_input: string = productName.slice(0,1)
-    cy.get(this.catelogueDropDown).type(search_input+'{enter}',{
-      force: true
-   })
-    cy.get(this.catelogueDropDownMenu).find('div').find('p').each(($e1, index, $list) => {
-      if($e1.text()===productName)
-      {
-          cy.wrap($e1).click()
-      }
+    const search_input: string = productName.slice(0, 1)
+    cy.get(this.catelogueDropDown).type(search_input + '{enter}', {
+      force: true,
     })
+    cy.get(this.catelogueDropDownMenu)
+      .find('div')
+      .find('p')
+      .each(($e1, index, $list) => {
+        if ($e1.text() === productName) {
+          cy.wrap($e1).click()
+        }
+      })
     this.updateProduct()
   }
 
-  updateProduct(){
+  updateProduct() {
     cy.get(this.updateBtn).click()
   }
-
 }
 
 export default Products

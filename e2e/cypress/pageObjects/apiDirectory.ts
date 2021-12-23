@@ -6,6 +6,10 @@ class ApiDirectoryPage {
   appSelect: string = '[data-testid=access-rqst-app-select]'
   additionalNotes: string = '[data-testid=access-rqst-add-notes-text]'
   submitBtn: string = '[data-testid=access-rqst-submit-btn]'
+  generateSecretsBtn: string = '[data-testid=access-rqst-gen-scrts-btn]'
+  clientIdField: string = '[data-testid=sa-new-creds-client-id]';
+  clientSecretField: string = '[data-testid=sa-new-creds-client-secret]';
+  tokenEndpointField: string = '[data-testid=sa-new-creds-token-endpoint]';
 
   createAccessRequest(product: any, app: any, accessRqst: any) {
     cy.contains('a',product.name, { timeout: 10000 }).should('be.visible');

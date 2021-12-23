@@ -1,6 +1,6 @@
 class NamespaceAccessPage {
 
-  userNameInput: string = ' input[name="username"]'
+  userNameInput: string = 'input[name="username"]'
   grantPermission(accessRqst : any) {
     cy.get(this.userNameInput).type(accessRqst.userName);
     let accessRole: Array<string> = accessRqst.accessRole

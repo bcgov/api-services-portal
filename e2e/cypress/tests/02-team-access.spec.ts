@@ -20,25 +20,32 @@ describe('Team Access Spec', () => {
   })
 
   it('authenticates api owner', () => {
-    cy.get('@apiowner').then(({ user }: any) => {
+    cy.get('@apiowner').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
+      home.useNamespace(namespace)
     })
   })
 
   it('grant namespace access to access manager(Mark)', () => {
-    cy.get('@apiowner').then(({ permission, namespace }: any) => {
-        cy.visit(na.path);
-        home.useNamespace(namespace);
-        na.clickGrantUserAccessButton()
-        na.grantPermission(permission.Mark)
-
+    cy.get('@apiowner').then(({ permission }: any) => {
+      cy.visit(na.path)
+      na.clickGrantUserAccessButton()
+      na.grantPermission(permission.Mark)
+    })
   })
-})
-  
+
+  it('Grant CredentialIssuer.Admin permission to API Owner (awsummer)', () => {
+    cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
+      cy.visit(na.path)
+      na.clickGrantUserAccessButton()
+      na.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
+    })
+  })
+
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({log:true})
+    cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
 })
