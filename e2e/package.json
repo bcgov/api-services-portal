@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "cy:open": "cypress open --config-file cypress.json",
-    "cy:run": "cypress run --config-file cypress.json",
+    "cy:run": "cypress run --config-file --browser chrome cypress.json",
     "cy:run:rcd": "cypress run --config-file cypress.json --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
