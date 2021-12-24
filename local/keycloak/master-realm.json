@@ -726,6 +726,9 @@
       "firstName": "Awesome",
       "lastName": "Summers",
       "email": "awsummers@gmail.com",
+      "attributes": {
+        "displayName": "XT:Summers,Awesome"
+      },
       "credentials": [
         {
           "id": "fa2ee157-09ea-466e-b9f6-378fd6f4dcdc",
@@ -1051,6 +1054,21 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientAddress",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "3b48a101-20f6-486c-b7ac-965c04e93c00",
+          "name": "Display Name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "displayName",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "name",
             "jsonType.label": "String"
           }
         }
