@@ -19,6 +19,8 @@ import ProfileCard from '../profile-card';
 import AuthenticationForm from './authentication-form';
 import { useAuth } from '@/shared/services/auth';
 import { CredentialIssuer } from '@/shared/types/query.types';
+import AuthorizationForm from './authorization-form';
+import ClientManagement from './client-management';
 
 interface AuthorizationProfileDialogProps {
   data?: CredentialIssuer;
@@ -97,8 +99,8 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                 value={flow}
               />
             )}
-            {tabIndex === 1 && <Text>Authorization</Text>}
-            {tabIndex === 2 && <Text>Client Management</Text>}
+            {tabIndex === 1 && <AuthorizationForm />}
+            {tabIndex === 2 && <ClientManagement />}
           </>
         )}
       </ModalContent>

@@ -1,12 +1,16 @@
 import * as React from 'react';
+import { action } from '@storybook/addon-actions';
+import { Modal, Button } from '@chakra-ui/react';
 import noop from 'lodash/noop';
 
 import AuthorizationProfileDialog from './authorization-profile-dialog';
 import AuthorizationProfilesForm from './authorization-profile-form';
 import AuthenticationForm from './authentication-form';
+import AuthorizationForm from './authorization-form';
+import EnvironmentForm from './environment-form';
+import ClientManagement from './client-management';
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
-import { Button } from '@chakra-ui/button';
 
 export default {
   title: 'APS/AuthorizationProfilesForm',
@@ -34,19 +38,39 @@ export const ProfilesForm = () => (
   </AuthorizationProfilesForm>
 );
 
-export const AuthForm = () => (
-  <AuthenticationForm
-    onChange={noop}
-    onComplete={noop}
-    onCancel={noop}
-    value="test"
-  />
+export const AuthenticationFormView = () => (
+  <Modal isOpen onClose={noop}>
+    <AuthenticationForm
+      onChange={noop}
+      onComplete={noop}
+      onCancel={noop}
+      value="test"
+    />
+  </Modal>
+);
+
+export const AuthorizationFormView = () => (
+  <Modal isOpen onClose={noop}>
+    <AuthorizationForm />
+  </Modal>
+);
+
+export const ClientManagementView = () => (
+  <Modal isOpen onClose={noop}>
+    <ClientManagement />
+  </Modal>
 );
 
 export const NewProfileForm = () => (
-  <NewProfile onCancel={noop} onComplete={noop} />
+  <Modal isOpen onClose={noop}>
+    <NewProfile onCancel={noop} onComplete={noop} />
+  </Modal>
 );
 
 export const NameControl = () => (
   <ProfileNameControl id="123" name="Demo Name" />
+);
+
+export const EnvironmentFormView = () => (
+  <EnvironmentForm open onSubmit={action('environment-submitted')} />
 );

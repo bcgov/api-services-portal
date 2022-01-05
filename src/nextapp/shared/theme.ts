@@ -298,7 +298,7 @@ const theme = extendTheme(
           '& > span': {
             display: 'none',
           },
-          '& + div.chakra-form__helper-text': {
+          '& + div:not(.chakra-select__wrapper)': {
             mb: 2,
             mt: -2,
             color: 'bc-component',
