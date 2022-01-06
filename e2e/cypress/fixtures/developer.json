@@ -6,9 +6,14 @@
     }
   },
   "namespace": "platform",
+  "ccNamespace": "ccplatform",
   "product": {
     "name": "Auto Test Product",
     "environment": "dev"
+  },
+  "ccProduct": {
+    "name": "Client Credentials Test Product",
+    "environment": "test"
   },
   "application": {
     "name": "Auto Test App",

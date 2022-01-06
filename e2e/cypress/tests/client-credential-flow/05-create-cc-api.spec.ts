@@ -1,13 +1,15 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import Products from '../pageObjects/products'
-import ServiceAccountsPage from '../pageObjects/serviceAccounts'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import Products from '../../pageObjects/products'
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
+import AuthorizationProfile from '../../pageObjects/authProfile'
 
 describe('Create API Spec', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
+  const authProfile = new AuthorizationProfile()
 
   before(() => {
     cy.visit('/')
@@ -27,9 +29,9 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.createNamespace(namespace)
+  it('Activates cc namespace', () => {
+    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
+      home.useNamespace(clientCredentialsNamespace)
     })
   })
 
@@ -42,28 +44,31 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.publishApi('service.yml').then(() => {
+    cy.publishApi('cc-service.yml').then(() => {
       cy.get('@publishAPIResponse').then((res: any) => {
         cy.log(JSON.stringify(res.body))
       })
     })
   })
+
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.createNewProduct(product.name, product.environment.name)
+    cy.get('@apiowner').then(({ clientCredentialsProduct }: any) => {
+      pd.createNewProduct(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
     })
   })
   it('publish product to directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.editProductEnvironment(product.name, product.environment.name)
-      pd.editProductEnvironmentConfig(product.environment.config)
+    cy.get('@apiowner').then(({ clientCredentialsProduct, ccAuthProfile }: any) => {
+      pd.editProductEnvironment(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
+      clientCredentialsProduct.environment.config.authIssuer = ccAuthProfile.name
+      clientCredentialsProduct.environment.config.authIssuerEnv = ccAuthProfile.environmentConfig.environment
+      pd.editProductEnvironmentConfig(clientCredentialsProduct.environment.config)
     })
-    pd.generateKongPluginConfig('service.yml')
+    pd.generateKongPluginConfig('cc-service.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.publishApi('service-plugin.yml').then(() => {
+    cy.publishApi('cc-service-plugin.yml').then(() => {
       cy.get('@publishAPIResponse').then((res: any) => {
         cy.log(JSON.stringify(res.body))
       })
@@ -72,8 +77,8 @@ describe('Create API Spec', () => {
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
+    cy.get('@apiowner').then(({ clientCredentialsProduct }: any) => {
+      pd.updateDatasetNameToCatelogue(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
     })
   })
   after(() => {

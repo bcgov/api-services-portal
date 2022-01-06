@@ -116,4 +116,4 @@ kc.js
 
 # vs code settings
 .vscode
-e2e/cypress/fixtures/service-plugin.yml
+e2e/cypress/fixtures/*-plugin.yml

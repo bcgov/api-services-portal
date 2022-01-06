@@ -38,9 +38,8 @@ describe('Developer creates an access request', () => {
 
   it('Creates an access request', () => {
     cy.visit(apiDir.path)
-    cy.get('@developer').then(({ product, clientCredentialsApplication, accessRequest }: any) => {
-      product.environment = 'test';
-      apiDir.createAccessRequest(product, clientCredentialsApplication, accessRequest)
+    cy.get('@developer').then(({ ccProduct, clientCredentialsApplication, accessRequest }: any) => {
+      apiDir.createAccessRequest(ccProduct, clientCredentialsApplication, accessRequest)
       ma.clickOnGenerateSecretButton()
       
       cy.contains("Client ID").should('be.visible');

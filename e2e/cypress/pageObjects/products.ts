@@ -73,11 +73,12 @@ class Products {
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
-  generateKongPluginConfig() {
+  generateKongPluginConfig(filename: string) {
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
-      cy.readFile('cypress/fixtures/service.yml').then((content) => {
-        cy.writeFile('cypress/fixtures/service-plugin.yml', content + '\n' + $el.text())
+      cy.readFile('cypress/fixtures/' + filename).then((content) => {
+        let pluginFilename = filename.replace('.', '-plugin.')
+        cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
       })
     })
   }

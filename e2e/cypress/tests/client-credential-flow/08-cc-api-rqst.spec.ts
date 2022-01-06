@@ -23,7 +23,7 @@ describe('Make an API request using client ID, secret, and access token', () => 
           cy.request({
             url: Cypress.env('KONG_URL'),
             headers: {
-              Host: 'a-service-for-platform.api.gov.bc.ca',
+              Host: 'cc-service-for-platform.api.gov.bc.ca',
             },
             auth: {
               bearer: token,

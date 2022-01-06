@@ -1,0 +1,13 @@
+kind: Product
+appId: 2B04C28E08AW
+name: Client Credentials Test Product
+dataset: client-credentials-test-product
+environments:
+  - id: 2G8DB030
+    name: dev
+    active: true
+    approval: true
+    legal: terms-of-use-for-api-gateway-1
+    flow: kong-api-key-acl
+    additionalDetailsToRequest: Please provide a bit more of this
+    services: []
