@@ -55,9 +55,29 @@ export const AuthorizationFormView = () => (
   </Modal>
 );
 
-export const ClientManagementView = () => (
+export const ClientManagementEmptyView = () => (
   <Modal isOpen onClose={noop}>
     <ClientManagement />
+  </Modal>
+);
+
+export const ClientManagementView = () => (
+  <Modal isOpen onClose={noop}>
+    <ClientManagement
+      data={JSON.stringify([
+        {
+          environment: 'dev',
+          issuerUrl: 'https://abc.def.ghi.jkl.hostname.xyz/auth',
+          clientRegistration: 'anonymous',
+        },
+        {
+          environment: 'dev',
+          issuerUrl: 'https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky',
+          clientRegistration: 'anonymous',
+          clientId: '230ufsfjew0j',
+        },
+      ])}
+    />
   </Modal>
 );
 

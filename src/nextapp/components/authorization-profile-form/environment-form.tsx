@@ -11,9 +11,7 @@ import {
   Select,
   useDisclosure,
 } from '@chakra-ui/react';
-import { FaPlusCircle } from 'react-icons/fa';
-
-import { EnvironmentItem } from './types';
+import { FaPlusCircle, FaTimesCircle } from 'react-icons/fa';
 
 interface EnvironmentFormProps {
   open?: boolean;
@@ -28,6 +26,8 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
     defaultIsOpen: open,
   });
   const [method, setMethod] = React.useState<string>('anonymous');
+  const ButtonIcon = isOpen ? FaTimesCircle : FaPlusCircle;
+  const buttonText = isOpen ? 'Cancel' : 'Add Environment';
 
   // Events
   const handleRegistrationChange = React.useCallback(
@@ -50,11 +50,11 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
     <>
       <Button
         onClick={onToggle}
-        leftIcon={<Icon as={FaPlusCircle} />}
+        leftIcon={<Icon as={ButtonIcon} />}
         size="sm"
         variant="flat"
       >
-        Add Environment
+        {buttonText}
       </Button>
       {isOpen && (
         <Box as="form" px={3} mt={5} onSubmit={handleSubmit}>
@@ -73,7 +73,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               <FormLabel>idP Issuer URL</FormLabel>
               <Input
                 type="url"
-                name="idpIssuerUrl"
+                name="issuerUrl"
                 placeholder="Enter idP Issuer URL"
               />
             </FormControl>
@@ -111,7 +111,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               </>
             )}
           </Grid>
-          <Box mt={5} d="flex" justifyContent="flex-end">
+          <Box mt={5} d="flex">
             <Button type="submit">Add Environment</Button>
           </Box>
         </Box>
