@@ -14,7 +14,7 @@ import TagInput from '../tag-input';
 
 interface AuthorizationFormProps {
   onCancel: () => void;
-  onComplete: () => void;
+  onComplete: (payload: FormData) => void;
 }
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
@@ -30,8 +30,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 
       if (formRef?.current.checkValidity()) {
         const formData = new FormData(formRef.current);
-        console.log(Object.fromEntries(formData));
-        onComplete();
+        onComplete(formData);
       }
     },
     [onComplete]
