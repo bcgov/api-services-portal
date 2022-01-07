@@ -47,7 +47,7 @@ const TagInput: React.FC<TagInputProps> = ({
 
           setValues((state) => [...state, inputRef.current.value]);
           setTimeout(() => {
-            inputRef.current.value = '';
+            inputRef.current.value = ' ';
           }, 10);
         } else if (event.key === 'Escape') {
           inputRef.current.value = '';
@@ -59,7 +59,12 @@ const TagInput: React.FC<TagInputProps> = ({
   );
   const handleRemove = React.useCallback(
     (index: number) => () => {
-      setValues((state) => state.filter((_, i) => i !== index));
+      setValues((state) => {
+        if (state.length === 1) {
+          inputRef.current.value = '';
+        }
+        return state.filter((_, i) => i !== index);
+      });
     },
     []
   );
@@ -67,7 +72,15 @@ const TagInput: React.FC<TagInputProps> = ({
     inputRef.current?.focus();
   }, []);
   const handleFocus = React.useCallback(() => setIsFocused(true), []);
-  const handleBlur = React.useCallback(() => setIsFocused(false), []);
+  const handleBlur = React.useCallback(() => {
+    if (inputRef.current.value.trim()) {
+      setValues((state) => [...state, inputRef.current.value]);
+      setTimeout(() => {
+        inputRef.current.value = ' ';
+      }, 10);
+    }
+    setIsFocused(false);
+  }, []);
   const fieldStyles = React.useMemo(() => {
     if (isFocused) {
       return {

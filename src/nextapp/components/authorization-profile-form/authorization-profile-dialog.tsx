@@ -10,7 +10,6 @@ import {
   Tab,
   TabList,
   Tabs,
-  Text,
 } from '@chakra-ui/react';
 
 import NewProfile from './new-profile';
@@ -56,6 +55,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       setTabIndex(1);
     }
   }, [isKongFlow, onClose]);
+  const handleAuthorizationComplete = React.useCallback(() => {
+    setTabIndex(2);
+  }, []);
 
   return (
     <Modal isOpen={open} onClose={onClose} size="3xl">
@@ -99,7 +101,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                 value={flow}
               />
             )}
-            {tabIndex === 1 && <AuthorizationForm />}
+            {tabIndex === 1 && (
+              <AuthorizationForm onComplete={handleAuthorizationComplete} />
+            )}
             {tabIndex === 2 && <ClientManagement />}
           </>
         )}
