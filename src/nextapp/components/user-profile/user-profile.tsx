@@ -42,10 +42,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
           )}
           {!isLoading && (
             <>
-              <Text lineHeight="1">
+              <Text fontWeight="normal" lineHeight="1">
                 <Text
                   as="span"
                   fontWeight="bold"
+                  fontSize="md"
                   data-testid={`${testId}-name`}
                 >
                   {data.name}
@@ -53,6 +54,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 <Text
                   as="span"
                   color="bc-component"
+                  fontSize="md"
                   data-testid={`${testId}-username`}
                 >
                   <Text as="span" mx={1}>
@@ -61,7 +63,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   {data.username}
                 </Text>
               </Text>
-              <Text color="bc-component" data-testid={`${testId}-email`}>
+              <Text
+                color="bc-component"
+                data-testid={`${testId}-email`}
+                fontSize="md"
+                fontWeight="normal"
+              >
                 {data.email}
               </Text>
             </>

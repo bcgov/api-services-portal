@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Box,
   Flex,
-  Heading,
   Modal,
   ModalContent,
   ModalHeader,
@@ -15,7 +14,7 @@ import {
 
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
-import ProfileCard from '../profile-card';
+import UserProfile from '../user-profile';
 import AuthenticationForm from './authentication-form';
 import { useAuth } from '@/shared/services/auth';
 import {
@@ -100,11 +99,11 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         });
       }
     },
-    [client, flow, mutateAsync, onClose, payload, toast]
+    [client, flow, mutateAsync, name, onClose, payload, toast]
   );
 
   return (
-    <Modal isOpen={open} onClose={onClose} size="3xl">
+    <Modal isOpen={open} onClose={onClose} size="4xl">
       <ModalOverlay />
       <ModalContent>
         {!showTabs && (
@@ -116,7 +115,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
               <Flex align="center" justify="space-between">
                 <ProfileNameControl id={id} name={name} />
               </Flex>
-              <Tabs index={tabIndex}>
+              <Tabs index={tabIndex} pos="relative">
                 <TabList mt={4} mb={2}>
                   <Tab px={0} cursor="default">
                     Authentication
@@ -128,11 +127,8 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                     Client Management
                   </Tab>
                   <Box flex={1} />
-                  <Box p="relative" mt={-4} mb={2}>
-                    <Heading size="xs" mb={2}>
-                      Administrator:
-                    </Heading>
-                    <ProfileCard data={user} />
+                  <Box p="relative" mt={-6} mb={2}>
+                    <UserProfile data={user} />
                   </Box>
                 </TabList>
               </Tabs>

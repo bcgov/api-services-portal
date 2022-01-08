@@ -52,6 +52,7 @@ export const AuthenticationFormView = () => (
 export const AuthorizationFormView = () => (
   <Modal isOpen onClose={noop}>
     <AuthorizationForm
+      flow="automatic"
       onCancel={noop}
       onComplete={action('authorization-complete')}
     />
