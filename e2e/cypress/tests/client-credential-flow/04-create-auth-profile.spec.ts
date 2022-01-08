@@ -33,8 +33,6 @@ describe('Creates an authorization and applies it to a product environment', () 
     cy.visit(login.path)
   })
 
-
-  // Might want to combine this file with create-cc-api
   it('authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
@@ -42,8 +40,8 @@ describe('Creates an authorization and applies it to a product environment', () 
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
-      home.useNamespace(clientCredentialsNamespace)
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      home.useNamespace(namespace)
     })
   })
 

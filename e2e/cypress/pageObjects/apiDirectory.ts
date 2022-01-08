@@ -10,6 +10,7 @@ class ApiDirectoryPage {
   clientIdField: string = '[data-testid=sa-new-creds-client-id]';
   clientSecretField: string = '[data-testid=sa-new-creds-client-secret]';
   tokenEndpointField: string = '[data-testid=sa-new-creds-token-endpoint]';
+  acceptTermsBtn: string = '[data-testid=access-rqst-legal-terms-cb]';
 
   createAccessRequest(product: any, app: any, accessRqst: any) {
     cy.contains('a',product.name, { timeout: 10000 }).should('be.visible');
@@ -17,8 +18,14 @@ class ApiDirectoryPage {
     cy.get(this.rqstAccessBtn).click()
     cy.get(this.appSelect).select(app.name)
     cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').click()
+
+    cy.document().then((doc) => {
+      if (doc.querySelector(this.acceptTermsBtn)) {
+        cy.contains('Terms of Use for API Gateway').click()
+      }
+    })
+
     cy.get(this.additionalNotes).type(accessRqst.notes)
-    cy.contains('Terms of Use for API Gateway').click()
     cy.get(this.submitBtn).click()
   };
 }

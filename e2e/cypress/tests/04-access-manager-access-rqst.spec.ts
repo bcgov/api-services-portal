@@ -44,7 +44,7 @@ describe('API Owner Spec', () => {
         cy.log(response)
         expect(response.status).to.be.equal(200)
     })
-  })
+  }) 
 })
 
   after(() => {

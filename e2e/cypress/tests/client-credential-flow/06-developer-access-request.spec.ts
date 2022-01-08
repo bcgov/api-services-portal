@@ -24,7 +24,7 @@ describe('Developer creates an access request', () => {
   })
 
   it('Developer logs in', () => {
-    cy.get('@developer').then(({ user, namespace }: any) => {
+    cy.get('@developer').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
   })

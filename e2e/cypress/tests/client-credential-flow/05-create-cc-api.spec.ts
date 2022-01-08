@@ -30,8 +30,8 @@ describe('Create API Spec', () => {
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
-      home.useNamespace(clientCredentialsNamespace)
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      home.useNamespace(namespace)
     })
   })
 

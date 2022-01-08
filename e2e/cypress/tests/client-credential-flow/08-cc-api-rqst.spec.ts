@@ -13,7 +13,8 @@ describe('Make an API request using client ID, secret, and access token', () => 
     cy.preserveCookies()
     cy.visit(login.path)
   })
-
+  // TODO this only seems to work when the API is created in the 'platform' ns
+  // if changing namespaces in files don't forget to update the 2 in the cc-service.yml file
   it('Get access token using client ID and secret; make API request', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
       let cc = JSON.parse(store_res.clientCredentials)
