@@ -31,7 +31,6 @@ class ApiDirectoryPage {
     })
 
     cy.get(this.additionalNotes).type(accessRqst.notes)
-    cy.contains('Terms of Use for API Gateway').click()
     cy.get(this.submitBtn).click()
   };
 }
