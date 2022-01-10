@@ -186,7 +186,7 @@ services:
           - kong.localtest.me
     restart: on-failure:5
   redis:
-    image: bitnami/redis:latest
+    image: bitnami/latest
     container_name: redis
     environment:
       - REDIS_PASSWORD=s3cr3t
