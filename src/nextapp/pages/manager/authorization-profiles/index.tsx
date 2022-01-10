@@ -211,6 +211,13 @@ const query = gql`
           name
         }
       }
+      environmentDetails
+      availableScopes
+      clientRoles
+      clientMappers
+      resourceType
+      resourceScopes
+      resourceAccessScope
     }
   }
 `;

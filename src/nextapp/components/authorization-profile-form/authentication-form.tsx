@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 
 interface AuthenticationFormProps {
+  id?: string;
   onChange: (value: string) => void;
   onCancel: () => void;
   onComplete: (value: FormData) => void;
@@ -21,12 +22,14 @@ interface AuthenticationFormProps {
 }
 
 const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
+  id,
   onChange,
   onCancel,
   onComplete,
   value,
 }) => {
   const form = React.useRef<HTMLFormElement>(null);
+  const submitButtonText = id ? 'Save' : 'Create';
 
   const handleCreate = () => {
     form.current?.requestSubmit();
@@ -36,6 +39,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
     const data = new FormData(event.currentTarget);
     onComplete(data);
   };
+  // TODO: Figure out how to split the flow values and which values go where
 
   return (
     <>
@@ -102,7 +106,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
             Cancel
           </Button>
           <Button onClick={handleCreate}>
-            {value === 'kong-api-key-acl' ? 'Create' : 'Continue'}
+            {value === 'kong-api-key-acl' ? submitButtonText : 'Continue'}
           </Button>
         </ButtonGroup>
       </ModalFooter>

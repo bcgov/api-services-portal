@@ -28,6 +28,12 @@ import { gql } from 'graphql-request';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 
+/* TODO
+ * - Validation of required Tag-inputs
+ * - Parsing the flow radios
+ * - Pass environments
+ */
+
 interface AuthorizationProfileDialogProps {
   data?: CredentialIssuer;
   id?: string;
@@ -42,7 +48,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   onClose,
 }) => {
   const { user } = useAuth();
-  const [payload, setPayload] = React.useState<CredentialIssuerCreateInput>({});
+  const [payload, setPayload] = React.useState<CredentialIssuerCreateInput>(
+    () => data ?? {}
+  );
   const [flow, setFlow] = React.useState<string>(
     'client-credentials.client-secret'
   );
@@ -50,9 +58,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const [name, setName] = React.useState<string>(() => data?.name ?? '');
   const client = useQueryClient();
   const toast = useToast();
-  const { mutateAsync } = useApiMutation(mutation);
+  const createMutate = useApiMutation(createMutation);
+  const editMutate = useApiMutation(editMutation);
 
-  const showTabs = name ?? Boolean(id);
+  const showTabs = React.useMemo(() => name ?? Boolean(id), [name, id]);
   const isKongFlow = flow === 'kong-api-key-acl';
 
   // Events
@@ -77,19 +86,34 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleClientManagementComplete = React.useCallback(
     async (environments: EnvironmentItem[]) => {
       try {
-        await mutateAsync({
-          data: {
-            ...payload,
-            flow,
-            environmentDetails: JSON.stringify(environments),
-            name,
-          },
-        });
+        if (id) {
+          await editMutate.mutateAsync({
+            data: {
+              ...payload,
+              flow,
+              environmentDetails: JSON.stringify(environments),
+              name,
+            },
+          });
+          toast({
+            title: 'Profile updated',
+            status: 'success',
+          });
+        } else {
+          await createMutate.mutateAsync({
+            data: {
+              ...payload,
+              flow,
+              environmentDetails: JSON.stringify(environments),
+              name,
+            },
+          });
+          toast({
+            title: 'Profile created',
+            status: 'success',
+          });
+        }
         client.invalidateQueries('authorizationProfiles');
-        toast({
-          title: 'Profile created',
-          status: 'success',
-        });
         onClose();
       } catch (e) {
         toast({
@@ -99,11 +123,18 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         });
       }
     },
-    [client, flow, mutateAsync, name, onClose, payload, toast]
+    [client, flow, createMutate, editMutate, id, name, onClose, payload, toast]
   );
+  const handleClose = React.useCallback(() => {
+    if (!id) {
+      setName('');
+    }
+    setTabIndex(0);
+    onClose();
+  }, [id, onClose]);
 
   return (
-    <Modal isOpen={open} onClose={onClose} size="4xl">
+    <Modal isOpen={open} onClose={handleClose} size="5xl">
       <ModalOverlay />
       <ModalContent>
         {!showTabs && (
@@ -135,21 +166,27 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
             </ModalHeader>
             {tabIndex === 0 && (
               <AuthenticationForm
+                id={id}
                 onChange={setFlow}
-                onCancel={onClose}
+                onCancel={handleClose}
                 onComplete={handleAuthenticationComplete}
                 value={flow}
               />
             )}
             {tabIndex === 1 && (
               <AuthorizationForm
-                onCancel={onClose}
+                data={data}
+                id={id}
+                onCancel={handleClose}
                 onComplete={handleAuthorizationComplete}
+                ownerName={user?.name}
               />
             )}
             {tabIndex === 2 && (
               <ClientManagement
-                onCancel={onClose}
+                data={data?.environmentDetails}
+                id={id}
+                onCancel={handleClose}
                 onComplete={handleClientManagementComplete}
               />
             )}
@@ -162,9 +199,17 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
 
 export default AuthorizationProfileDialog;
 
-const mutation = gql`
+const createMutation = gql`
   mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {
     createCredentialIssuer(data: $data) {
+      id
+    }
+  }
+`;
+
+const editMutation = gql`
+  mutation UpdateAuthzProfile($id: ID!, $data: CredentialIssuerUpdateInput!) {
+    updateCredentialIssuer(id: $id, data: $data) {
       id
     }
   }

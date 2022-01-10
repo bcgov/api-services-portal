@@ -12,17 +12,24 @@ import {
 } from '@chakra-ui/react';
 import TagInput from '@/components/tag-input';
 import RadioCardGroup from '@/components/radio-card-group';
+import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationFormProps {
+  data?: CredentialIssuer;
+  id?: string;
   flow?: string;
   onCancel: () => void;
   onComplete: (payload: FormData) => void;
+  ownerName: string;
 }
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
+  data,
+  id,
   flow = '',
   onCancel,
   onComplete,
+  ownerName,
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
 
@@ -67,21 +74,19 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <RadioCardGroup
               isRequired
               name="flow"
+              defaultValue={flow}
               options={[
                 {
                   title: 'Manual',
-                  description:
-                    'Manual issuing of the credential means that this owner (Aidan Cope) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means.',
+                  description: `Manual issuing of the credential means that this owner (${ownerName}) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means.`,
                   value: 'manual',
                 },
                 {
                   title: 'Automatic',
-                  description:
-                    'Automatic issuing of the credential means that this owner (Aidan Cope) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.',
+                  description: `Automatic issuing of the credential means that this owner (${ownerName}) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.`,
                   value: 'automatic',
                 },
               ]}
-              defaultValue={flow}
             />
           </fieldset>
           <fieldset>
@@ -94,6 +99,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               isRequired
               placeholder="Enter Scopes"
               name="availableScopes"
+              value={data?.availableScopes}
             />
           </fieldset>
           <fieldset>
@@ -103,7 +109,11 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               Client Roles that will be used to manage access to the APIs that
               are protected with this Authorization configuration.
             </Text>
-            <TagInput placeholder="Enter Client Roles" name="clientRoles" />
+            <TagInput
+              placeholder="Enter Client Roles"
+              name="clientRoles"
+              value={data?.clientRoles}
+            />
           </fieldset>
           <fieldset>
             <Legend>Client Mappers (optional)</Legend>
@@ -115,6 +125,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
                 <TagInput
                   placeholder="Enter Client Mappers"
                   name="clientMappers"
+                  value={data?.clientMappers}
                 />
               </GridItem>
             </Grid>
@@ -124,6 +135,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <TagInput
               placeholder="Enter UMA2 Resource Type"
               name="resourceType"
+              value={data?.resourceType}
             />
           </fieldset>
           <fieldset>
@@ -135,6 +147,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <TagInput
               placeholder="Enter Resource Scopes"
               name="resourceScopes"
+              value={data?.resourceScopes}
             />
           </fieldset>
           <fieldset>
@@ -147,7 +160,8 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             </Text>
             <Input
               placeholder="Enter Resource Access Scope"
-              name="resourceScopes"
+              name="resourceAccessScope"
+              value={data?.resourceAccessScope}
             />
           </fieldset>
         </form>

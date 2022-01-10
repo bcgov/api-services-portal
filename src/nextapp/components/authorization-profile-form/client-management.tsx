@@ -18,12 +18,14 @@ import { EnvironmentItem } from './types';
 
 interface ClientManagementProps {
   data?: string;
+  id?: string;
   onCancel: () => void;
   onComplete: (environments: EnvironmentItem[]) => void;
 }
 
 const ClientManagement: React.FC<ClientManagementProps> = ({
   data = '',
+  id,
   onCancel,
   onComplete,
 }) => {
@@ -46,6 +48,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
     ],
     []
   );
+  const submitButtonText = id ? 'Save' : 'Create';
 
   // Events
   const handleNewEnvironment = React.useCallback((payload: FormData) => {
@@ -98,7 +101,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
           <Button onClick={onCancel} variant="secondary">
             Cancel
           </Button>
-          <Button onClick={handleCreate}>Continue</Button>
+          <Button onClick={handleCreate}>{submitButtonText}</Button>
         </ButtonGroup>
       </ModalFooter>
     </>

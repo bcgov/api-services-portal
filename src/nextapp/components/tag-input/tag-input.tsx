@@ -31,6 +31,10 @@ const TagInput: React.FC<TagInputProps> = ({
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
   const [values, setValues] = React.useState<string[]>(() => {
     try {
+      if (!value) {
+        return [];
+      }
+
       return JSON.parse(value);
     } catch {
       return [];
@@ -77,7 +81,7 @@ const TagInput: React.FC<TagInputProps> = ({
       setValues((state) => [...state, inputRef.current.value]);
       setTimeout(() => {
         inputRef.current.value = ' ';
-      }, 10);
+      }, 1);
     }
     setIsFocused(false);
   }, []);
