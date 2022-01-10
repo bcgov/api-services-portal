@@ -38,7 +38,9 @@ Cypress.Commands.add('preserveCookiesDefaults', () => {
 
 Cypress.Commands.add('saveState', (key: string, value: string) => {
   cy.log('< Saving State')
+  debugger
   cy.log(key, value)
+  const keyValue = key.toLowerCase()
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
@@ -46,15 +48,10 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       _.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
-  }if(key.includes('APIKey')) {
-    cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
-      currState.key=value
-      cy.writeFile('cypress/fixtures/state/store.json',currState)
-    })
-  } 
+  }
   else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
-      currState[key] = value
+      currState[keyValue] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
     })
   }
@@ -74,6 +71,27 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
+Cypress.Commands.add('getPayload', (name: string) => {
+  let payload = {}
+  const connections = {
+    rate_limiting: {
+      "name": "rate-limiting",
+      "config.hour": "20",
+      "config.policy": "local"
+    },
+    ip_restriction: {
+      "name": "ip-restriction",
+      "config.allow": "192.168.0.1/0"
+    }
+  }
+  if (name === 'rate-limiting')
+    payload = connections.rate_limiting
+  else
+    payload = connections.ip_restriction
+  return JSON.stringify(payload)
+})
+
+
 Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}
@@ -81,3 +99,4 @@ Cypress.Commands.add('resetState', () => {
   })
   cy.log('Test state was reset')
 })
+

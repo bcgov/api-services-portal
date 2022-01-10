@@ -123,6 +123,19 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
   cy.log('> Get Token')
 })
 
+Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
+  const config = configType.toLowerCase()
+  debugger
+  cy.request({
+    method: 'GET',
+    url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
+  }).then((res) => {
+    expect(res.status).to.eq(200)
+    cy.log("ID->" + res.body.data[0].id)
+    cy.saveState(config + 'ID', res.body.data[0].id)
+  })
+})
+
 Cypress.Commands.add('publishApi', (fileName: string) => {
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
