@@ -25,7 +25,7 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
   return (
     <BusinessProfileContent
       {...props}
-      data={data.BusinessProfile}
+      data={data?.BusinessProfile}
       isLoading={isLoading}
     />
   );
