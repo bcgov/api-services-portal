@@ -106,7 +106,7 @@ describe('Manage Control-IP Restriction Spec - Route as Scope', () => {
 
 })
 
-describe('Manage Control -Apply Global IP Restriction at Service level', () => {
+describe('Manage Control -Apply IP Restriction to Global and Consumer at Service level', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
@@ -153,7 +153,7 @@ describe('Manage Control -Apply Global IP Restriction at Service level', () => {
     })
 })
 
-describe('Manage Control -Apply Global IP Restriction at Route level', () => {
+describe('Manage Control -Apply IP Restriction to Global and Consumer at Route level', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
