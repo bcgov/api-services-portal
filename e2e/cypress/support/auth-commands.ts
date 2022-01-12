@@ -160,28 +160,59 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
 
 Cypress.Commands.add('deleteAllCookies', () => {
   cy.clearCookie('keystone.sid')
-  cy.clearCookie('_oauth2_proxy') 
+  cy.clearCookie('_oauth2_proxy')
   cy.exec('npm cache clear --force')
   var cookies = document.cookie.split(";");
   for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i];
-      var eqPos = cookie.indexOf("=");
-      var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    var cookie = cookies[i];
+    var eqPos = cookie.indexOf("=");
+    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }
 })
 
-Cypress.Commands.add('makeKongRequest', (serviceName : string, methodType : string) => {
+Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string) => {
   cy.fixture('state/store').then((creds: any) => {
-    const token = creds.key
+    const token = creds.apikey
     const service = serviceName
     return cy.request({
-    url: Cypress.env('KONG_URL'),
-    method: methodType,
-    headers: { 'x-api-key': `${token}`, 'Host': `${service}`+'.api.gov.bc.ca'},
-    failOnStatusCode: false
+      url: Cypress.env('KONG_URL'),
+      method: methodType,
+      headers: { 'x-api-key': `${token}`, 'Host': `${service}` + '.api.gov.bc.ca' },
+      failOnStatusCode: false
+    })
   })
 })
+
+Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string) => {
+  cy.fixture('state/store').then((creds: any) => {
+    let body = {}
+    const connections = {
+      rate_limiting: {
+        "name": "rate-limiting",
+        "config.hour": "20",
+        "config.policy": "local"
+      },
+      ip_restriction: {
+        "name": "ip-restriction",
+        "config.allow": "192.168.0.1/0"
+      }
+    }
+    const pluginID = pluginName.toLowerCase() + 'id'
+    const id = creds[pluginID]
+    const endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    if(name==='ip-restriction')
+      body = connections.ip_restriction
+    else
+      body = connections.rate_limiting
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + endpoint,
+      method: 'POST',
+      body: body,
+      form: true,
+      failOnStatusCode: false
+    })
+  })
 })
 
 const formDataRequest = (

@@ -76,7 +76,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
     })
 })
 
-describe('Manage Control-Rate Limiting Spec for Route as Scope and Redish Policy', () => {
+describe('Manage Control-Rate Limiting Spec for Route as Scope and Redis Policy', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
@@ -108,7 +108,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Redish Policy
     })
 })
 
-describe('Manage Control-Rate Limiting Spec for Service as Scope and Redish Policy', () => {
+describe('Manage Control-Rate Limiting Spec for Service as Scope and Redis Policy', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
@@ -140,7 +140,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Redish Poli
     })
 })
 
-describe('Manage Control-Apply Global Rate limiting at Service level ', () => {
+describe('Manage Control-Apply Rate limiting to Global and Consumer at Service level ', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
@@ -191,7 +191,7 @@ describe('Manage Control-Apply Global Rate limiting at Service level ', () => {
     })
 })
 
-describe('Manage Control-Apply Global Rate limiting at Route level ', () => {
+describe('Manage Control-Apply Rate limiting to Global and Consumer at Route level ', () => {
     const login = new LoginPage()
     const home = new HomePage()
     const consumers = new ConsumersPage()
