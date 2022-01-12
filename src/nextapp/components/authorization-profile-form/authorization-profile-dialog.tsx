@@ -11,28 +11,22 @@ import {
   Tabs,
   useToast,
 } from '@chakra-ui/react';
-
-import NewProfile from './new-profile';
-import ProfileNameControl from './profile-name-control';
-import UserProfile from '../user-profile';
-import AuthenticationForm from './authentication-form';
+import { gql } from 'graphql-request';
+import { useQueryClient } from 'react-query';
+import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
 import {
   CredentialIssuer,
   CredentialIssuerCreateInput,
 } from '@/shared/types/query.types';
+
+import NewProfile from './new-profile';
+import ProfileNameControl from './profile-name-control';
+import UserProfile from '../user-profile';
+import AuthenticationForm from './authentication-form';
 import AuthorizationForm from './authorization-form';
 import ClientManagement from './client-management';
 import { EnvironmentItem } from './types';
-import { gql } from 'graphql-request';
-import { useQueryClient } from 'react-query';
-import { useApiMutation } from '@/shared/services/api';
-
-/* TODO
- * - Validation of required Tag-inputs
- * - Parsing the flow radios
- * - Pass environments
- */
 
 interface AuthorizationProfileDialogProps {
   data?: CredentialIssuer;
@@ -51,9 +45,25 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const [payload, setPayload] = React.useState<CredentialIssuerCreateInput>(
     () => data ?? {}
   );
-  const [flow, setFlow] = React.useState<string>(
-    'client-credentials.client-secret'
-  );
+  const kongFlow = 'kong-api-key-acl';
+  const [flow, setFlow] = React.useState<string>(() => {
+    // The radios are a combo of flow + clientAuthenticator, joined by a '.'
+    if (data) {
+      // ... expect Kong ACL
+      if (data.flow === kongFlow) {
+        return data.flow;
+      }
+
+      return `${data.flow}.${data.clientAuthenticator}`;
+    }
+    return 'client-credentials.client-secret';
+  });
+  const [flowValue, clientAuthenticator]: string[] = React.useMemo(() => {
+    if (flow === kongFlow) {
+      return [kongFlow];
+    }
+    return flow.split('.');
+  }, [flow, kongFlow]);
   const [tabIndex, setTabIndex] = React.useState<number>(0);
   const [name, setName] = React.useState<string>(() => data?.name ?? '');
   const client = useQueryClient();
@@ -62,37 +72,97 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const editMutate = useApiMutation(editMutation);
 
   const showTabs = React.useMemo(() => name ?? Boolean(id), [name, id]);
-  const isKongFlow = flow === 'kong-api-key-acl';
+  const isKongFlow = flow === kongFlow;
 
   // Events
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
+  const handleKongProfile = React.useCallback(async () => {
+    try {
+      const data = {
+        ...payload,
+        name,
+        flow: flowValue,
+        clientAuthenticator,
+        id: undefined,
+        owner: undefined,
+      };
+
+      if (id) {
+        await editMutate.mutateAsync({
+          id,
+          data,
+        });
+      } else {
+        await createMutate.mutateAsync({
+          data,
+        });
+      }
+    } catch (e) {
+      const requestType = id ? 'update' : 'create';
+      toast({
+        title: `Profile ${requestType} failed`,
+        status: 'error',
+        description: Array.isArray(e) ? e[0].message : '',
+      });
+    }
+  }, [
+    clientAuthenticator,
+    createMutate,
+    editMutate,
+    flowValue,
+    id,
+    name,
+    payload,
+    toast,
+  ]);
   const handleAuthenticationComplete = React.useCallback(
     (payload: FormData) => {
-      setPayload((state) => ({ ...state, ...Object.fromEntries(payload) }));
+      const formData = Object.fromEntries(payload) as { flow: string };
+      const [flow, clientAuthenticator] = formData.flow.split('.');
+
+      setPayload((state) => ({
+        ...state,
+        ...formData,
+        flow,
+        clientAuthenticator,
+      }));
+
       if (isKongFlow) {
+        handleKongProfile();
         onClose();
       } else {
         setTabIndex(1);
       }
     },
-    [isKongFlow, onClose]
+    [handleKongProfile, isKongFlow, onClose]
   );
   const handleAuthorizationComplete = React.useCallback((payload: FormData) => {
     setPayload((state) => ({ ...state, ...Object.fromEntries(payload) }));
     setTabIndex(2);
   }, []);
+  const handleClose = React.useCallback(() => {
+    if (!id) {
+      setName('');
+    }
+    setTabIndex(0);
+    onClose();
+  }, [id, onClose]);
   const handleClientManagementComplete = React.useCallback(
     async (environments: EnvironmentItem[]) => {
       try {
         if (id) {
           await editMutate.mutateAsync({
+            id,
             data: {
               ...payload,
-              flow,
+              flow: flowValue,
+              clientAuthenticator,
               environmentDetails: JSON.stringify(environments),
               name,
+              id: undefined,
+              owner: undefined,
             },
           });
           toast({
@@ -103,7 +173,8 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
           await createMutate.mutateAsync({
             data: {
               ...payload,
-              flow,
+              flow: flowValue,
+              clientAuthenticator,
               environmentDetails: JSON.stringify(environments),
               name,
             },
@@ -114,24 +185,29 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
           });
         }
         client.invalidateQueries('authorizationProfiles');
-        onClose();
+        handleClose();
       } catch (e) {
+        const requestType = id ? 'update' : 'create';
         toast({
-          title: 'Profile creation failed',
+          title: `Profile ${requestType} failed`,
           status: 'error',
           description: Array.isArray(e) ? e[0].message : '',
         });
       }
     },
-    [client, flow, createMutate, editMutate, id, name, onClose, payload, toast]
+    [
+      client,
+      clientAuthenticator,
+      flowValue,
+      createMutate,
+      editMutate,
+      handleClose,
+      id,
+      name,
+      payload,
+      toast,
+    ]
   );
-  const handleClose = React.useCallback(() => {
-    if (!id) {
-      setName('');
-    }
-    setTabIndex(0);
-    onClose();
-  }, [id, onClose]);
 
   return (
     <Modal isOpen={open} onClose={handleClose} size="5xl">
@@ -144,7 +220,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
           <>
             <ModalHeader>
               <Flex align="center" justify="space-between">
-                <ProfileNameControl id={id} name={name} />
+                <ProfileNameControl id={id} name={name} onChange={setName} />
               </Flex>
               <Tabs index={tabIndex} pos="relative">
                 <TabList mt={4} mb={2}>
@@ -176,7 +252,6 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
             {tabIndex === 1 && (
               <AuthorizationForm
                 data={data}
-                id={id}
                 onCancel={handleClose}
                 onComplete={handleAuthorizationComplete}
                 ownerName={user?.name}

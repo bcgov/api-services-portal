@@ -80,7 +80,7 @@ const TagInput: React.FC<TagInputProps> = ({
     if (inputRef.current.value.trim()) {
       setValues((state) => [...state, inputRef.current.value]);
       setTimeout(() => {
-        inputRef.current.value = ' ';
+        inputRef.current.value = '';
       }, 1);
     }
     setIsFocused(false);
@@ -125,6 +125,7 @@ const TagInput: React.FC<TagInputProps> = ({
           <WrapItem>
             <Input
               {...props}
+              isRequired={false}
               borderRadius={0}
               ref={inputRef}
               onBlur={handleBlur}
@@ -137,7 +138,13 @@ const TagInput: React.FC<TagInputProps> = ({
           </WrapItem>
         </Wrap>
       </Box>
-      <input id={id} name={name} type="hidden" value={JSON.stringify(values)} />
+      <input
+        required={props.isRequired}
+        id={id}
+        name={name}
+        value={JSON.stringify(values)}
+        style={{ visibility: 'hidden', height: 0, position: 'absolute' }}
+      />
     </>
   );
 };

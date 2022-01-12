@@ -205,16 +205,12 @@ const query = gql`
         username
         email
       }
-      environments {
-        name
-        product {
-          name
-        }
-      }
       environmentDetails
       availableScopes
+      clientAuthenticator
       clientRoles
       clientMappers
+      apiKeyName
       resourceType
       resourceScopes
       resourceAccessScope

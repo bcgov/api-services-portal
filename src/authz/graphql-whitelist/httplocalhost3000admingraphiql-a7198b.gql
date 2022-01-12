@@ -1,0 +1,6 @@
+
+  mutation CreateAuthzProfile($data: CredentialIssuerCreateInput!) {
+    createCredentialIssuer(data: $data) {
+      id
+    }
+  }

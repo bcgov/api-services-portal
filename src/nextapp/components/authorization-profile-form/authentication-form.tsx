@@ -31,6 +31,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
   const form = React.useRef<HTMLFormElement>(null);
   const submitButtonText = id ? 'Save' : 'Create';
 
+  // Events
   const handleCreate = () => {
     form.current?.requestSubmit();
   };
@@ -39,7 +40,6 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
     const data = new FormData(event.currentTarget);
     onComplete(data);
   };
-  // TODO: Figure out how to split the flow values and which values go where
 
   return (
     <>

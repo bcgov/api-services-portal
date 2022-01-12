@@ -16,8 +16,6 @@ import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationFormProps {
   data?: CredentialIssuer;
-  id?: string;
-  flow?: string;
   onCancel: () => void;
   onComplete: (payload: FormData) => void;
   ownerName: string;
@@ -25,8 +23,6 @@ interface AuthorizationFormProps {
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   data,
-  id,
-  flow = '',
   onCancel,
   onComplete,
   ownerName,
@@ -73,37 +69,36 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <Legend>Mode</Legend>
             <RadioCardGroup
               isRequired
-              name="flow"
-              defaultValue={flow}
+              name="mode"
+              defaultValue={data?.mode ?? 'auto'}
               options={[
+                {
+                  title: 'Automatic',
+                  description: `Automatic issuing of the credential means that this owner (${ownerName}) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.`,
+                  value: 'auto',
+                },
                 {
                   title: 'Manual',
                   description: `Manual issuing of the credential means that this owner (${ownerName}) will complete setup of the new credential with the particular OIDC Provider, and communicate that to the requestor via email or other means.`,
                   value: 'manual',
                 },
-                {
-                  title: 'Automatic',
-                  description: `Automatic issuing of the credential means that this owner (${ownerName}) has configured appropriate credentials here to allow the API Manager to manage Clients on the particular OIDC Provider.`,
-                  value: 'automatic',
-                },
               ]}
             />
           </fieldset>
           <fieldset>
-            <Legend>Scopes</Legend>
+            <Legend>Client Scopes (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               If your APIs are protected by Scope, then provide the full list of
               Scopes setup in the idP.
             </Text>
             <TagInput
-              isRequired
               placeholder="Enter Scopes"
               name="availableScopes"
               value={data?.availableScopes}
             />
           </fieldset>
           <fieldset>
-            <Legend>Client Roles</Legend>
+            <Legend>Client Roles (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               If your APIs are protected by Roles, provide the full list of
               Client Roles that will be used to manage access to the APIs that
@@ -131,7 +126,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             </Grid>
           </fieldset>
           <fieldset>
-            <Legend>UMA2 Resource Type</Legend>
+            <Legend>UMA2 Resource Type (optional)</Legend>
             <TagInput
               placeholder="Enter UMA2 Resource Type"
               name="resourceType"
@@ -139,7 +134,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             />
           </fieldset>
           <fieldset>
-            <Legend>Resource Scopes</Legend>
+            <Legend>Resource Scopes (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               If your APIs are using UMA2 Resource Scopes, then provide the full
               list of Scopes setup in the idP.
@@ -151,7 +146,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             />
           </fieldset>
           <fieldset>
-            <Legend>Resource Access Scope</Legend>
+            <Legend>Resource Access Scope (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               The Resource Access Scope identifies a Resource Scope that, when
               granted to a user, allows them to administer permissions for the
