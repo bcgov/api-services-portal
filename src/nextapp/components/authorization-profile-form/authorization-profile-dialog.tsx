@@ -209,6 +209,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     ]
   );
 
+  React.useEffect(() => {
+    setName(data?.name);
+  }, [data?.name]);
+
   return (
     <Modal isOpen={open} onClose={handleClose} size="5xl">
       <ModalOverlay />

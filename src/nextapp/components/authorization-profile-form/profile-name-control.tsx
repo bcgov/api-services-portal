@@ -15,7 +15,7 @@ import { MdModeEditOutline } from 'react-icons/md';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
-import { CredentialIssuer, Mutation, Query } from '@/shared/types/query.types';
+import { Mutation, Query } from '@/shared/types/query.types';
 
 interface ProfileNameControlProps {
   id: string;
