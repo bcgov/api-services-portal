@@ -36,6 +36,8 @@ import { QueryClient, useQueryClient } from 'react-query';
 import { Mutation, Query } from '@/shared/types/query.types';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import ActionsMenu from '@/components/actions-menu';
+import EmptyPane from '@/components/empty-pane';
+import { useAuth } from '@/shared/services/auth';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'authorizationProfiles';
@@ -71,6 +73,7 @@ const AuthorizationProfiles: React.FC<
     },
   ]);
   const client = useQueryClient();
+  const { user } = useAuth();
   const { data } = useApi(queryKey, { query }, { suspense: false });
   const { mutateAsync } = useApiMutation(mutation);
   const toast = useToast();
@@ -94,6 +97,17 @@ const AuthorizationProfiles: React.FC<
     },
     [client, mutateAsync, toast, queryKey]
   );
+  const authorizationProfileForm = (
+    <AuthorizationProfileForm>
+      <Button
+        as="a"
+        variant="primary"
+        data-testid="create-new-auth-profile-btn"
+      >
+        Create New Profile
+      </Button>
+    </AuthorizationProfileForm>
+  );
 
   return (
     <>
@@ -102,17 +116,7 @@ const AuthorizationProfiles: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          actions={
-            <AuthorizationProfileForm>
-              <Button
-                as="a"
-                variant="primary"
-                data-testid="create-new-auth-profile-btn"
-              >
-                Create New Profile
-              </Button>
-            </AuthorizationProfileForm>
-          }
+          actions={authorizationProfileForm}
           breadcrumb={breadcrumbs}
           title="Authorization Profiles"
         >
@@ -142,6 +146,21 @@ const AuthorizationProfiles: React.FC<
               </Tr>
             </Thead>
             <Tbody>
+              {data.allCredentialIssuersByNamespace?.length === 0 && (
+                <Tr>
+                  <Td align="center" colspan={5}>
+                    <EmptyPane
+                      action={authorizationProfileForm}
+                      title="Create your first Authorization Profile"
+                      message={
+                        user?.namespace
+                          ? 'Manage authentication, authorization and clients access to your API'
+                          : 'Select a namespace first to view its profiles'
+                      }
+                    />
+                  </Td>
+                </Tr>
+              )}
               {data.allCredentialIssuersByNamespace?.map((c) => (
                 <Tr key={c.id}>
                   <Td>{c.name}</Td>
