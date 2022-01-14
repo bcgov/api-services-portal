@@ -71,26 +71,6 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
-Cypress.Commands.add('getPayload', (name: string) => {
-  let payload = {}
-  const connections = {
-    rate_limiting: {
-      "name": "rate-limiting",
-      "config.hour": "20",
-      "config.policy": "local"
-    },
-    ip_restriction: {
-      "name": "ip-restriction",
-      "config.allow": "192.168.0.1/0"
-    }
-  }
-  if (name === 'rate-limiting')
-    payload = connections.rate_limiting
-  else
-    payload = connections.ip_restriction
-  return JSON.stringify(payload)
-})
-
 
 Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
