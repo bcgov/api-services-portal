@@ -1,9 +1,9 @@
 export default class ConsumersPage {
   path: string = '/manager/consumers'
-  rateLimitHourInput: string = 'input#hour'
-  ipRestrictionAllowInput: string ='input[id="allow"]'
+  rateLimitHourInput: string = '[id=hour]'
+  ipRestrictionAllowInput: string ='[id=allow]'
   removeIPRestrictionButton : string = '[aria-label="remove control button"]'
-  policyDropDown : string = 'select[id="policy"]'
+  policyDropDown : string = '[id=policy]'
 
   clickOnTheFirstConsumerID()
   {

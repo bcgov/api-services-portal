@@ -5,7 +5,7 @@ import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
 import { checkElementExists } from '.'
-
+const config = require('../fixtures/manage-control/kong-plugin-config.json')
 interface formDataRequestOptions {
   method: string
   url: string
@@ -188,24 +188,10 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
 Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string) => {
   cy.fixture('state/store').then((creds: any) => {
     let body = {}
-    const connections = {
-      rate_limiting: {
-        "name": "rate-limiting",
-        "config.hour": "20",
-        "config.policy": "local"
-      },
-      ip_restriction: {
-        "name": "ip-restriction",
-        "config.allow": "192.168.0.1/0"
-      }
-    }
     const pluginID = pluginName.toLowerCase() + 'id'
     const id = creds[pluginID]
     const endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
-    if(name==='ip-restriction')
-      body = connections.ip_restriction
-    else
-      body = connections.rate_limiting
+    body = config[name]
     return cy.request({
       url: Cypress.env('KONG_CONFIG_URL') + '/' + endpoint,
       method: 'POST',
