@@ -107,7 +107,7 @@ const ConsumersPage: React.FC<
             <Heading size="md">All Consumers</Heading>
           </Box>
           <Divider />
-          <Table variant="simple">
+          <Table data-testid="all-consumer-control-tbl" variant="simple">
             <Thead>
               <Tr>
                 <Th>Name/Id</Th>
