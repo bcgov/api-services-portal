@@ -1,5 +1,5 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import AuthorizationProfileForm from '@/components/authorization-profile-form';
 import {
   Box,
@@ -23,6 +23,8 @@ import {
   Text,
   Avatar,
   Icon,
+  MenuItem,
+  useToast,
 } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
@@ -31,8 +33,9 @@ import PageHeader from '@/components/page-header';
 import { MdModeEditOutline } from 'react-icons/md';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { Mutation, Query } from '@/shared/types/query.types';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import ActionsMenu from '@/components/actions-menu';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'authorizationProfiles';
@@ -68,6 +71,27 @@ const AuthorizationProfiles: React.FC<
     },
   ]);
   const { data } = useApi(queryKey, { query }, { suspense: false });
+  const { mutateAsync } = useApiMutation(mutation);
+  const toast = useToast();
+
+  // Events
+  const handleDelete = React.useCallback(
+    (id: string) => async () => {
+      try {
+        const res: Mutation = await mutateAsync({ id });
+        toast({
+          title: `${res.deleteCredentialIssuer?.name} deleted`,
+          status: 'success',
+        });
+      } catch (err) {
+        toast({
+          title: 'Unable to delete Credential Issuer',
+          status: 'error',
+        });
+      }
+    },
+    [mutateAsync, toast]
+  );
 
   return (
     <>
@@ -170,7 +194,7 @@ const AuthorizationProfiles: React.FC<
                       </Portal>
                     </Popover>
                   </Td>
-                  <Td>
+                  <Td align="right">
                     <AuthorizationProfileForm id={c.id} data={c}>
                       <Button
                         leftIcon={<Icon as={MdModeEditOutline} />}
@@ -180,6 +204,9 @@ const AuthorizationProfiles: React.FC<
                         Edit
                       </Button>
                     </AuthorizationProfileForm>
+                    <ActionsMenu>
+                      <MenuItem onClick={handleDelete(c.id)}>Delete</MenuItem>
+                    </ActionsMenu>
                   </Td>
                 </Tr>
               ))}
@@ -214,6 +241,14 @@ const query = gql`
       resourceType
       resourceScopes
       resourceAccessScope
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation DeleteCredentialIssuer($id: ID!) {
+    deleteCredentialIssuer(id: $id) {
+      name
     }
   }
 `;

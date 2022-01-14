@@ -216,6 +216,12 @@ const server = mockServer(schemaWithMocks, {
         }),
       };
     },
+    deleteCredentialIssuer: (req) => {
+      return { name: 'issuer name profile' };
+    },
+    updateCredentialIssuer: (req) => {
+      return req.data;
+    },
   }),
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
