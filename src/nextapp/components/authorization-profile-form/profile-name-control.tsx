@@ -104,10 +104,19 @@ const ProfileNameControl: React.FC<ProfileNameControlProps> = ({
       <Box ml={2}>
         {isEditing && (
           <ButtonGroup>
-            <Button variant="secondary" size="sm" {...getCancelButtonProps()}>
+            <Button
+              variant="secondary"
+              size="sm"
+              {...getCancelButtonProps()}
+              data-testid="ap-profile-name-cancel-btn"
+            >
               Cancel
             </Button>
-            <Button size="sm" {...getSubmitButtonProps()}>
+            <Button
+              size="sm"
+              {...getSubmitButtonProps()}
+              data-testid="ap-profile-name-done-btn"
+            >
               Done
             </Button>
           </ButtonGroup>
@@ -135,7 +144,7 @@ const ProfileNameControl: React.FC<ProfileNameControlProps> = ({
       onSubmit={handleSubmit}
     >
       <EditablePreview />
-      <EditableInput />
+      <EditableInput data-testid="ap-profile-name" />
       {!isLoading && <EditableControls />}
       {isLoading && <Text>Saving...</Text>}
     </Editable>

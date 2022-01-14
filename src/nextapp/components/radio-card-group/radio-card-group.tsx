@@ -3,8 +3,9 @@ import { HStack } from '@chakra-ui/layout';
 import { useRadioGroup } from '@chakra-ui/radio';
 
 import RadioCard from './radio-card';
+import { ChakraProps } from '@chakra-ui/system';
 
-interface RadioCardGroupProps {
+interface RadioCardGroupProps extends ChakraProps {
   defaultValue?: string;
   isRequired?: boolean;
   name: string;
@@ -22,6 +23,7 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
   name,
   options,
   onChange,
+  ...props
 }) => {
   const { getRootProps, getRadioProps } = useRadioGroup({
     name,
@@ -31,7 +33,7 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
   const group = getRootProps();
 
   return (
-    <HStack {...group} spacing={4}>
+    <HStack {...group} {...props} spacing={4}>
       {options.map(({ description, title, value }) => {
         const radio = getRadioProps({ value });
         return (

@@ -101,7 +101,9 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
           <Button onClick={onCancel} variant="secondary">
             Cancel
           </Button>
-          <Button onClick={handleCreate}>{submitButtonText}</Button>
+          <Button onClick={handleCreate} data-testid="ap-create-btn">
+            {submitButtonText}
+          </Button>
         </ButtonGroup>
       </ModalFooter>
     </>

@@ -71,6 +71,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               isRequired
               name="mode"
               defaultValue={data?.mode ?? 'auto'}
+              data-testid="ap-mode"
               options={[
                 {
                   title: 'Automatic',
@@ -95,6 +96,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               placeholder="Enter Scopes"
               name="availableScopes"
               value={data?.availableScopes}
+              data-testid="ap-authorization-scopes"
             />
           </fieldset>
           <fieldset>
@@ -108,6 +110,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               placeholder="Enter Client Roles"
               name="clientRoles"
               value={data?.clientRoles}
+              data-testid="ap-authorization-client-roles"
             />
           </fieldset>
           <fieldset>
@@ -121,6 +124,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
                   placeholder="Enter Client Mappers"
                   name="clientMappers"
                   value={data?.clientMappers}
+                  data-testid="ap-authorization-client-mappers"
                 />
               </GridItem>
             </Grid>
@@ -131,6 +135,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               placeholder="Enter UMA2 Resource Type"
               name="resourceType"
               value={data?.resourceType}
+              data-testid="ap-authorization-uma2-resource-type"
             />
           </fieldset>
           <fieldset>
@@ -143,6 +148,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               placeholder="Enter Resource Scopes"
               name="resourceScopes"
               value={data?.resourceScopes}
+              data-testid="ap-authorization-resource-scopes"
             />
           </fieldset>
           <fieldset>
@@ -157,16 +163,26 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               placeholder="Enter Resource Access Scope"
               name="resourceAccessScope"
               value={data?.resourceAccessScope}
+              data-testid="ap-authorization-resource-access-scope"
             />
           </fieldset>
         </form>
       </ModalBody>
       <ModalFooter>
         <ButtonGroup>
-          <Button onClick={onCancel} variant="secondary">
+          <Button
+            onClick={onCancel}
+            variant="secondary"
+            data-testid="ap-authorization-form-cancel-btn"
+          >
             Cancel
           </Button>
-          <Button onClick={handleCreate}>Continue</Button>
+          <Button
+            onClick={handleCreate}
+            data-testid="ap-authorization-form-continue-btn"
+          >
+            Continue
+          </Button>
         </ButtonGroup>
       </ModalFooter>
     </>

@@ -47,7 +47,11 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={8}>
             <FormLabel fontWeight="bold">Flow</FormLabel>
-            <RadioGroup value={value} onChange={onChange}>
+            <RadioGroup
+              value={value}
+              onChange={onChange}
+              data-testid="ap-flow-select"
+            >
               <VStack align="stretch" spacing={2}>
                 <Radio name="flow" value="client-credentials.client-secret">
                   Client Credential Flow, using Client ID and Secret
@@ -79,7 +83,11 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
               borderColor="bc-component"
             >
               <FormLabel>Key Name</FormLabel>
-              <Input name="apiKeyName" placeholder="X-API-KEY" />
+              <Input
+                name="apiKeyName"
+                placeholder="X-API-KEY"
+                data-testid="ap-api-key"
+              />
             </FormControl>
           )}
         </form>
@@ -102,10 +110,17 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
       </ModalBody>
       <ModalFooter>
         <ButtonGroup>
-          <Button onClick={onCancel} variant="secondary">
+          <Button
+            onClick={onCancel}
+            variant="secondary"
+            data-testid="ap-authentication-form-cancel-btn"
+          >
             Cancel
           </Button>
-          <Button onClick={handleCreate}>
+          <Button
+            onClick={handleCreate}
+            data-testid="ap-authentication-form-continue-btn"
+          >
             {value === 'kong-api-key-acl' ? submitButtonText : 'Continue'}
           </Button>
         </ButtonGroup>

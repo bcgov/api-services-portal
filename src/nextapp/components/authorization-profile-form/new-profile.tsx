@@ -35,16 +35,30 @@ const NewProfile: React.FC<NewProfileProps> = ({ onCancel, onComplete }) => {
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={8}>
             <FormLabel>Profile Name</FormLabel>
-            <Input id="name" name="name" variant="bc-input" />
+            <Input
+              id="name"
+              name="name"
+              variant="bc-input"
+              data-testid="ap-profile-name"
+            />
           </FormControl>
         </form>
       </ModalBody>
       <ModalFooter>
         <ButtonGroup>
-          <Button onClick={onCancel} variant="secondary">
+          <Button
+            onClick={onCancel}
+            variant="secondary"
+            data-testid="ap-profile-name-cancel-btn"
+          >
             Cancel
           </Button>
-          <Button onClick={handleCreate}>Continue</Button>
+          <Button
+            onClick={handleCreate}
+            data-testid="ap-profile-name-submit-btn"
+          >
+            Continue
+          </Button>
         </ButtonGroup>
       </ModalFooter>
     </>

@@ -32,7 +32,7 @@ import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { MdModeEditOutline } from 'react-icons/md';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient } from 'react-query';
+import { QueryClient, useQueryClient } from 'react-query';
 import { Mutation, Query } from '@/shared/types/query.types';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import ActionsMenu from '@/components/actions-menu';
@@ -70,6 +70,7 @@ const AuthorizationProfiles: React.FC<
       text: 'Authorization Profiles',
     },
   ]);
+  const client = useQueryClient();
   const { data } = useApi(queryKey, { query }, { suspense: false });
   const { mutateAsync } = useApiMutation(mutation);
   const toast = useToast();
@@ -83,6 +84,7 @@ const AuthorizationProfiles: React.FC<
           title: `${res.deleteCredentialIssuer?.name} deleted`,
           status: 'success',
         });
+        client.invalidateQueries(queryKey);
       } catch (err) {
         toast({
           title: 'Unable to delete Credential Issuer',
@@ -90,7 +92,7 @@ const AuthorizationProfiles: React.FC<
         });
       }
     },
-    [mutateAsync, toast]
+    [client, mutateAsync, toast, queryKey]
   );
 
   return (
@@ -102,7 +104,11 @@ const AuthorizationProfiles: React.FC<
         <PageHeader
           actions={
             <AuthorizationProfileForm>
-              <Button as="a" variant="primary">
+              <Button
+                as="a"
+                variant="primary"
+                data-testid="create-new-auth-profile-btn"
+              >
                 Create New Profile
               </Button>
             </AuthorizationProfileForm>
