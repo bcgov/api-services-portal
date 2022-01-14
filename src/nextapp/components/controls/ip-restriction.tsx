@@ -106,6 +106,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       mode={mode}
       onSubmit={onSubmit}
       title="IP Restriction"
+      data-testid="ip-restriction-control-btn"
     >
       <ControlTypeSelect
         serviceId={data?.service?.id}
@@ -117,6 +118,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
           variant="bc-input"
           name="allow"
           defaultValue={config.allow?.join(',')}
+          data-testid="allow-ip-restriction-input"
         />
         <FormHelperText>
           Comma-separated list, i.e. 1.1.1.1, 0.0.0.0
