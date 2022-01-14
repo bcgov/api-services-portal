@@ -2,6 +2,7 @@ import { wrap } from "module"
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
+<<<<<<< HEAD
   rateLimitHourInput: string = '[data-testid="ratelimit-hour-input"]'
   ipRestrictionAllowInput: string = '[data-testid="allow-ip-restriction-input"]'
   removeIPRestrictionButton: string = '[data-testid="remove-control-btn"]'
@@ -9,6 +10,12 @@ export default class ConsumersPage {
   applyBtn: string = '[data-testid="control-dialog-apply-btn"]'
   allConsumerTable: string = '[data-testid="all-consumer-control-tbl"]'
   aclSwitch: string = '[data-testid="acls-switch"]'
+=======
+  rateLimitHourInput: string = '[id=hour]'
+  ipRestrictionAllowInput: string ='[id=allow]'
+  removeIPRestrictionButton : string = '[aria-label="remove control button"]'
+  policyDropDown : string = '[id=policy]'
+>>>>>>> 9e66bc15 (Made following changes as per review comments)
 
   clickOnTheFirstConsumerID() {
     cy.get(this.allConsumerTable).find('a').first().click()
