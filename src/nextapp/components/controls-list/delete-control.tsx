@@ -64,7 +64,7 @@ const DeleteControl: React.FC<DeleteControlProps> = ({
         size="xs"
         onClick={onOpen}
         colorScheme="red"
-        data-testid = "remove-control-btn"
+        data-testid="remove-control-btn"
       />
       <AlertDialog
         isCentered
