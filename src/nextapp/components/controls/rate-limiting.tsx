@@ -136,7 +136,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
             name="second"
             placeholder="00"
             defaultValue={config.second}
-            data-testid = "ratelimit-second-input"
+            data-testid="ratelimit-second-input"
           />
         </FormControl>
         <FormControl id="minute">
@@ -146,7 +146,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
             name="minute"
             placeholder="00"
             defaultValue={config.minute}
-            data-testid = "ratelimit-minute-input"
+            data-testid="ratelimit-minute-input"
           />
         </FormControl>
         <FormControl id="hour">
@@ -156,7 +156,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
             name="hour"
             placeholder="00"
             defaultValue={config.hour}
-            data-testid = "ratelimit-hour-input"
+            data-testid="ratelimit-hour-input"
           />
         </FormControl>
         <FormControl id="day">
@@ -166,13 +166,13 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
             name="day"
             placeholder="00"
             defaultValue={config.day}
-            data-testid = "ratelimit-day-input"
+            data-testid="ratelimit-day-input"
           />
         </FormControl>
       </HStack>
       <FormControl id="policy">
         <FormLabel>Policy</FormLabel>
-        <Select name="policy" variant="bc-input" data-testid = "ratelimit-policy-dropdown" defaultValue={config.policy}>
+        <Select name="policy" variant="bc-input" data-testid="ratelimit-policy-dropdown" defaultValue={config.policy}>
           <option value="local">Local</option>
           <option value="redis">Redis</option>
         </Select>
