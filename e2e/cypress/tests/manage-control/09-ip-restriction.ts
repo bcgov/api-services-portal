@@ -27,7 +27,9 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
                 home.useNamespace(namespace);
                 cy.visit(consumers.path);
                 consumers.clickOnTheFirstConsumerID()
-                consumers.setAllowedIPAddress('127.0.0.2', 'Route')
+                cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                    consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid, 'Route')
+                })
             })
         })
     })
@@ -45,7 +47,9 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setAllowedIPAddress('192.168.0.1/0')
+            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                consumers.setAllowedIPAddress(ipRestriction.ipRange_valid)
+            })
         })
     })
 
@@ -75,7 +79,9 @@ describe('Manage Control-IP Restriction Spec - Route as Scope', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setAllowedIPAddress('127.0.0.2', "Route")
+            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid, "Route")
+            })
         })
     })
 
@@ -92,7 +98,9 @@ describe('Manage Control-IP Restriction Spec - Route as Scope', () => {
         cy.get('@access-manager').then(() => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setAllowedIPAddress('192.168.0.1/0', "Route")
+            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                consumers.setAllowedIPAddress(ipRestriction.ipRange_valid, "Route")
+            })
         })
     })
 
@@ -139,7 +147,9 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
         cy.get('@access-manager').then(({ user, namespace }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setAllowedIPAddress('127.0.0.2')
+            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
+            })
         })
     })
 
@@ -186,7 +196,9 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.get('@access-manager').then(({ user, namespace }: any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setAllowedIPAddress('127.0.0.2')
+            cy.get('@manage-control-config-setting').then(({ipRestriction} : any) => {
+                consumers.setAllowedIPAddress(ipRestriction.ipRange_inValid)
+            })
         })
     })
 

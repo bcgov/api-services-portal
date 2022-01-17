@@ -1,13 +1,15 @@
 export default class ConsumersPage {
   path: string = '/manager/consumers'
-  rateLimitHourInput: string = '[id=hour]'
-  ipRestrictionAllowInput: string ='[id=allow]'
-  removeIPRestrictionButton : string = '[aria-label="remove control button"]'
-  policyDropDown : string = '[id=policy]'
+  rateLimitHourInput: string = '[data-testid="ratelimit-hour-input"]'
+  ipRestrictionAllowInput: string ='[data-testid="allow-ip-restriction-input"]'
+  removeIPRestrictionButton : string = '[data-testid="remove-control-btn"]'
+  policyDropDown : string = '[data-testid="ratelimit-policy-dropdown"]'
+  applyBtn : string = '[data-testid="control-dialog-apply-btn"]'
+  allConsumerTable : string = '[data-testid="all-consumer-control-tbl"]'
 
   clickOnTheFirstConsumerID()
   {
-    cy.get('[role="table"] a').first().click()
+    cy.get(this.allConsumerTable).find('a').first().click()
     cy.contains('Add Controls').should('be.visible')
   }
   clickOnRateLimitingOption()
@@ -33,7 +35,7 @@ export default class ConsumersPage {
     {
       cy.get(this.policyDropDown).select(policy,{ force: true }).invoke('val')
     }
-    cy.contains('button','Apply').click()
+    cy.get(this.applyBtn).click()
   }
 
   setAllowedIPAddress(allowIP : string, scope ='Service')
@@ -45,7 +47,7 @@ export default class ConsumersPage {
     {
       cy.contains('span','Route').click()
     }
-    cy.contains('button','Apply').click()
+    cy.get(this.applyBtn).click()
     cy.contains('h2','ip-restriction').should('be.visible')
   }
 
@@ -54,10 +56,10 @@ export default class ConsumersPage {
     cy.contains('h4','rate-limiting').should('be.visible')
   }
 
-  editIPRestrictionSetting()
-  {
-    cy.contains('button','Edit').click()
-  }
+  // editIPRestrictionSetting()
+  // {
+  //   cy.contains('button','Edit').click()
+  // }
 
   deleteControl()
   {
@@ -69,11 +71,11 @@ export default class ConsumersPage {
     })
   }
 
-  editAllowedIPAddress(allowIP : string)
-  {
-    this.editIPRestrictionSetting()
-    cy.get(this.ipRestrictionAllowInput).type(allowIP)
-    cy.contains('button','Apply').click()
-    cy.contains('h2','ip-restriction').should('be.visible')
-  }
+  // editAllowedIPAddress(allowIP : string)
+  // {
+  //   this.editIPRestrictionSetting()
+  //   cy.get(this.ipRestrictionAllowInput).type(allowIP)
+  //   cy.contains('button','Apply').click()
+  //   cy.contains('h2','ip-restriction').should('be.visible')
+  // }
 };
