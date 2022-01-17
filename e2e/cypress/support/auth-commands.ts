@@ -131,7 +131,6 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
   }).then((res) => {
     expect(res.status).to.eq(200)
-    cy.log("ID->" + res.body.data[0].id)
     cy.saveState(config + 'ID', res.body.data[0].id)
   })
 })

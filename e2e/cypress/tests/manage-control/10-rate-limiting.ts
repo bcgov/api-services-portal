@@ -17,16 +17,19 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
-    it('set api rate limit to 1 request per min, Local Policy and Scope as Service', () => {
+    it('set api rate limit as per the test config, Local Policy and Scope as Service', () => {
         cy.get('@access-manager').then(({ user, namespace }: any) => {
             cy.login(user.credentials.username, user.credentials.password).then(() => {
                 home.useNamespace(namespace);
                 cy.visit(consumers.path);
                 consumers.clickOnTheFirstConsumerID()
-                consumers.setRateLimiting('1')
+                cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
+                    consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer)
+                })
             })
         })
     })
@@ -55,11 +58,11 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
         cy.fixture('apiowner').as('apiowner')
         cy.visit(login.path)
     })
-    it('set api rate limit to 1 request per min, Local Policy and Scope as Route', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
+    it('set api rate limit as per the test config, Local Policy and Scope as Route', () => {
+        cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('1', "Route")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route")
         })
     })
 
@@ -87,11 +90,11 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Redis Policy'
         cy.fixture('apiowner').as('apiowner')
         cy.visit(login.path)
     })
-    it('set api rate limit to 1 request per hour, Redis Policy and Scope as Route', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
+    it('set api rate limit as per the test config, Redis Policy and Scope as Route', () => {
+        cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('1', "Route", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Route", "Redis")
         })
     })
 
@@ -119,11 +122,11 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Redis Polic
         cy.fixture('apiowner').as('apiowner')
         cy.visit(login.path)
     })
-    it('set api rate limit to 1 request per hour, Redis Policy and Scope as Service', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
+    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+        cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('1', "Service", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Consumer, "Service", "Redis")
         })
     })
 
@@ -170,11 +173,11 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         })
     })
 
-    it('set api rate limit to 1 request per min, Redis Policy and Scope as Service', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
+    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+        cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('2', "Service", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Global, "Service", "Redis")
         })
     })
 
@@ -221,11 +224,11 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         })
     })
 
-    it('set api rate limit to 1 request per min, Redis Policy and Scope as Service', () => {
-        cy.get('@access-manager').then(({ user, namespace }: any) => {
+    it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
+        cy.get('@manage-control-config-setting').then(({rateLimiting} : any) => {
             cy.visit(consumers.path);
             consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('2', "Route", "Redis")
+            consumers.setRateLimiting(rateLimiting.requestPerHour_Global, "Route", "Redis")
         })
     })
 
