@@ -141,6 +141,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         disabled={disabled}
         variant="solid"
         onClick={onOpen}
+        data-testid="request-access-button"
       >
         Request Access
       </Button>
@@ -193,13 +194,18 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           <ModalFooter>
             {tab === 0 && (
               <ButtonGroup>
-                <Button variant="secondary" onClick={onClose}>
+                <Button
+                  variant="secondary"
+                  onClick={onClose}
+                  data-testid="access-request-cancel-button"
+                >
                   Cancel
                 </Button>
                 <Button
                   isDisabled={hasError}
                   isLoading={mutate.isLoading}
                   onClick={handleSubmit}
+                  data-testid="access-request-submit-button"
                 >
                   {submitButtonText}
                 </Button>

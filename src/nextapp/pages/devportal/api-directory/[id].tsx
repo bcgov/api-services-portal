@@ -128,7 +128,7 @@ const ApiPage: React.FC<
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
-              <Box bg={'gray.100'}>
+              <Box bg="gray.100">
                 {data?.products?.map((p) => (
                   <ApiProductItem key={uid(p)} data={p} id={p.id} />
                 ))}

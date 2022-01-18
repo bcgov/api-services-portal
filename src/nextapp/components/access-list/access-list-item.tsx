@@ -84,8 +84,9 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Heading size="inherit">{product.name}</Heading>
         </Flex>
       }
+      data-testid={`access-list-item-${product.name}`}
     >
-      <Table>
+      <Table data-testid="access-list-item-table">
         <Thead>
           <Tr>
             <Th>Status</Th>
@@ -94,7 +95,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
             <Th />
           </Tr>
         </Thead>
-        {data.map((d: AccessRequest & ServiceAccess) => (
+        {data.map((d: AccessRequest & ServiceAccess, index) => (
           <Tr key={uid(d.id)}>
             <Td>
               <AccessStatus
@@ -113,7 +114,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
               </Tag>
             </Td>
             <Td>{d.application?.name}</Td>
-            <Td isNumeric>
+            <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
               {!d.isApproved && !d.isIssued && !d.isComplete && (
                 <GenerateCredentialsDialog id={d.id} />
               )}

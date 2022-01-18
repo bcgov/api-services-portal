@@ -49,9 +49,15 @@ const AccessStatus: React.FC<AccessStatusProps> = ({
   }, [isApproved, isComplete, isIssued]);
 
   return (
-    <Flex align="center">
-      <Icon as={icon} mr={2} boxSize={6} color={color} />
-      <Text>{text}</Text>
+    <Flex align="center" className="access-status">
+      <Icon
+        as={icon}
+        className="access-status-icon"
+        mr={2}
+        boxSize={6}
+        color={color}
+      />
+      <Text className="access-status-text">{text}</Text>
     </Flex>
   );
 };

@@ -32,6 +32,7 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
         variant="secondary"
         mr={4}
         onClick={onOpen}
+        data-testid="generate-credentials-button"
       >
         Collect Credentials
       </Button>
@@ -48,7 +49,12 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
             <AccessRequestCredentials id={id} />
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onClose}>Done</Button>
+            <Button
+              onClick={onClose}
+              data-testid="generate-credentials-done-button"
+            >
+              Done
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -66,6 +66,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
             {isPublic && (
               <Button
                 rightIcon={isPublic ? <Icon as={BiLinkExternal} /> : undefined}
+                data-testid="api-product-try-button"
               >
                 Try this API
               </Button>

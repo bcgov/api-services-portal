@@ -4,8 +4,12 @@ import { Dataset, Product } from '@/shared/types/query.types';
 
 import DiscoveryListItem from './discovery-list-item';
 
+interface DiscoveryDataset extends Dataset {
+  products: Product[];
+}
+
 interface DiscoveryListProps {
-  data: Dataset[];
+  data: DiscoveryDataset[];
 }
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
@@ -18,8 +22,12 @@ const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
         md: 'repeat(3, 1fr)',
       }}
     >
-      {data?.map((p) => (
-        <DiscoveryListItem key={p.id} data={p} />
+      {data?.map((p, index) => (
+        <DiscoveryListItem
+          key={p.id}
+          data={p}
+          data-testid={`discovery-item-${index}`}
+        />
       ))}
     </Grid>
   );

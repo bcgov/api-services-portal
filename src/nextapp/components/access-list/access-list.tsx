@@ -36,7 +36,7 @@ const AccessList: React.FC<AccessListProps> = ({
   }, [approved, requested]);
 
   return (
-    <Box>
+    <Box data-testid="access-list">
       {products.map((p) => (
         <AccessListItem
           key={p.id}

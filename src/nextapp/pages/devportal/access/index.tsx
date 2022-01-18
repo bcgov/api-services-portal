@@ -58,7 +58,7 @@ const ApiAccessPage: React.FC<
 
         {data?.myServiceAccesses?.length === 0 &&
           data?.myAccessRequests?.length === 0 && (
-            <Card>
+            <Card data-testid="access-empty-pane">
               <EmptyPane
                 action={
                   <NextLink passHref href="/devportal/api-directory">
