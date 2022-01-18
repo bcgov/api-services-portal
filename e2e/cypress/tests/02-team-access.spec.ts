@@ -19,7 +19,7 @@ describe('Team Access Spec', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates api owner', () => {
+  it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -27,7 +27,7 @@ describe('Team Access Spec', () => {
     })
   })
 
-  it('grant namespace access to access manager(Mark)', () => {
+  it('grant namespace access to Mark (access manager)', () => {
     cy.get('@apiowner').then(({ permission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
@@ -35,7 +35,7 @@ describe('Team Access Spec', () => {
     })
   })
 
-  it('Grant CredentialIssuer.Admin permission to API Owner (awsummer)', () => {
+  it('Grant CredentialIssuer.Admin permission to Janis (API Owner)', () => {
     cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()

@@ -56,6 +56,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Local Policy'
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
     it('set api rate limit as per the test config, Local Policy and Scope as Route', () => {
@@ -88,6 +89,7 @@ describe('Manage Control-Rate Limiting Spec for Route as Scope and Redis Policy'
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
     it('set api rate limit as per the test config, Redis Policy and Scope as Route', () => {
@@ -120,6 +122,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Redis Polic
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
     it('set api rate limit as per the test config, Redis Policy and Scope as Service', () => {
@@ -152,6 +155,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
@@ -203,6 +207,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
