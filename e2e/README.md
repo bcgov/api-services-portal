@@ -72,12 +72,6 @@ WSL 2 or your local machine are prefaced with `WSL` and `LM` respectively in the
 - Clone [bcgov / api-services-portal](https://github.com/bcgov/api-services-portal).
 - In both your local machine and WSL application directories switch to a branch for testing (e.g., `util/expand-automation`).
 
-### `WSL`: Build Gateway API Image
-
-- Clone and build the Dockerfile within the [bcgov / gwa-api](https://github.com/bcgov/gwa-api) repository. Dockerfile is located in `./microservices/gatewayApi`.
-- Build the Dockerfile using the `docker build -t gateway-api:e2e-testing .` command.
-- **Important**: Wait for the image to build before proceeding.
-
 ### `WSL`: Build and Run Dev Environment
 
 - Inside the `api-services-portal` directory, build and run the application by running `docker-compose up` at the project root.

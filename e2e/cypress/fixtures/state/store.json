@@ -1,5 +1,6 @@
 {
-  "credentials": "{\"clientId\": \"sa-platform-e0000000-fc5461f89a7d\", \"clientSecret\": \"b10cb9b7-6bde-49e6-8bc5-dbe5f4e3863a\"}",
-  "clientCredentials": "{\"clientId\": \"C591E293-E2CBA96623D\", \"clientSecret\": \"c11a20cb-b0ee-454a-a49b-3aefa305ac97\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
-  "key": "wyiiVTXfViIO5zzXeqLcsC1NJ6RLSoCv"
+  "credentials": "{\"clientId\": \"sa-ccplatform-e0000000-157af42de381\", \"clientSecret\": \"85de3ff3-d52f-46ed-81d1-9ba464124eb4\"}",
+  "clientCredentials": "{\"clientId\": \"10DEDD0C-EB0DAD1469E\", \"clientSecret\": \"7feffdf0-5489-4e92-bb7b-2b579409d50d\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
+  "key": "nRvqMfxuOJhssOrLws5rvSXnvJrolrSS",
+  "jwksCredentials": "{\"clientId\": \"58573244-607E1394EB8\", \"privateKey\": \"PRIVATEKEY\", \"publicKey\": \"PUBLICKEY\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}"
 }

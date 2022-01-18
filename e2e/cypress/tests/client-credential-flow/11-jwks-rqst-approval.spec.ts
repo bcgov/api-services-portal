@@ -2,6 +2,7 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
 
+
 describe('Access manager approves developer access request', () => {
   const home = new HomePage()
   const login = new LoginPage()
@@ -38,3 +39,4 @@ describe('Access manager approves developer access request', () => {
     cy.logout()
   })
 })
+

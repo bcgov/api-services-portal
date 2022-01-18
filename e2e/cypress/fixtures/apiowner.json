@@ -50,6 +50,29 @@
       "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
     }
   },
+  "jwksAuthProfile": {
+    "name": "cy-jwks-auth",
+    "flow": "Client Credential Flow",
+    "clientAuthenticator": "Signed JWT - Generated Key Pair",
+    "environmentConfig": {
+      "environment": "Development",
+      "clientRegistration": "Managed",
+      "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+      "clientId": "cypress-auth-profile",
+      "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+    }
+  },
+  "jwksProduct": {
+    "name": "Client Credentials Test Product",
+    "environment": {
+      "name": "Development",
+      "config": {
+        "terms": "Terms of Use for API Gateway",
+        "authorization": "Oauth2 Client Credentials Flow",
+        "optionalInstructions": "Editing dev environment"
+      }
+    }
+  },
   "permission": {
     "Mark":{
       "userName" :"mark",

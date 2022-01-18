@@ -40,8 +40,8 @@ describe('Creates an authorization and applies it to a product environment', () 
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.useNamespace(namespace)
+    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
+      home.useNamespace(clientCredentialsNamespace)
     })
   })
 
@@ -52,32 +52,6 @@ describe('Creates an authorization and applies it to a product environment', () 
       cy.get(authProfile.profileTable).contains(ccAuthProfile.name).should('be.visible')
     })
   })
-
-  // it('API Owner adds Test environment to "Auto Test Product" product', () => {
-  //   cy.visit(products.path)
-  //   cy.get('@apiowner').then(({ product }: any) => {
-  //     products.addEnvToProduct(product.name, product.testEnvironment.name)
-  //   })
-  // })
-
-  // it('Adds client credential flow to Test environment, generates service template with jwt-keycloak plugin', () => {
-  //   cy.visit(products.path)
-  //   cy.get('@apiowner').then(({ product, ccAuthProfile }: any) => {
-  //     products.editProductEnvironment(product.name, product.testEnvironment.name)
-  //     product.testEnvironment.config.authIssuer = ccAuthProfile.name
-  //     product.testEnvironment.config.authIssuerEnv = ccAuthProfile.environmentConfig.environment
-  //     products.editProductEnvironmentConfig(product.testEnvironment.config)
-  //   })
-  //   // products.generateKongPluginConfig()
-  // })
-
-  // it('Applies authorization plugin to service published to Kong Gateway', () => {
-  //   cy.publishApi('service-plugin.yml').then(() => {
-  //     cy.get('@publishAPIResponse').then((res: any) => {
-  //       cy.log(JSON.stringify(res.body))
-  //     })
-  //   })
-  // })
 
   after(() => {
     cy.logout()

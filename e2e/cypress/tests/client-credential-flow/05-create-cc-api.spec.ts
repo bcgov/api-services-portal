@@ -2,14 +2,13 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
-import AuthorizationProfile from '../../pageObjects/authProfile'
+
 
 describe('Create API Spec', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
-  const authProfile = new AuthorizationProfile()
 
   before(() => {
     cy.visit('/')
@@ -30,8 +29,8 @@ describe('Create API Spec', () => {
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.useNamespace(namespace)
+    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
+      home.useNamespace(clientCredentialsNamespace)
     })
   })
 
@@ -44,9 +43,11 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.publishApi('cc-service.yml').then(() => {
-      cy.get('@publishAPIResponse').then((res: any) => {
-        cy.log(JSON.stringify(res.body))
+    cy.get('@apiowner').then(({clientCredentialsNamespace}: any) => {
+      cy.publishApi('cc-service.yml', clientCredentialsNamespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
       })
     })
   })
@@ -68,9 +69,11 @@ describe('Create API Spec', () => {
     pd.generateKongPluginConfig('cc-service.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.publishApi('cc-service-plugin.yml').then(() => {
-      cy.get('@publishAPIResponse').then((res: any) => {
-        cy.log(JSON.stringify(res.body))
+    cy.get('@apiowner').then(({clientCredentialsNamespace}: any) => {
+      cy.publishApi('cc-service-plugin.yml', clientCredentialsNamespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
       })
     })
   })
