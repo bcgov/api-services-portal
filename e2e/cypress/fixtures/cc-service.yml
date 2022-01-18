@@ -1,13 +1,13 @@
 services:
 - name: cc-service-for-platform
   host: httpbin.org
-  tags: [ns.platform]
+  tags: [ns.ccplatform]
   port: 443
   protocol: https
   retries: 0
   routes:
   - name: cc-service-for-platform-route
-    tags: [ns.platform]
+    tags: [ns.ccplatform]
     hosts:
       - cc-service-for-platform.api.gov.bc.ca
     paths:

@@ -38,6 +38,7 @@ declare namespace Cypress {
     ): Chainable<Cypress.Response<any>>
 
     updateKongPlugin(pluginName : string, name : string): Chainable<Cypress.Response<any>>
-
+    
+    publishApi(content: any, namespace: string): Chainable<Cypress.Response<any>>
   }
 }

@@ -1,14 +1,10 @@
-import ApiDirectoryPage from '../pageObjects/apiDirectory'
 import ConsumersPage from '../pageObjects/consumers'
 import LoginPage from '../pageObjects/login'
-import ApplicationPage from '../pageObjects/applications'
 import HomePage from '../pageObjects/home'
 
 describe('API Owner Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
-  const app = new ApplicationPage()
-  const apiDir = new ApiDirectoryPage()
   const home = new HomePage()
 
   before(() => {
