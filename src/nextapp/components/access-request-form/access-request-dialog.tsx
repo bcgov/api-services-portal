@@ -27,6 +27,7 @@ import { Environment } from '@/shared/types/query.types';
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
 import AccessRequestFormLoading from './access-request-form-loading';
+import { useAuth } from '@/shared/services/auth';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -42,6 +43,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   open,
 }) => {
   const client = useQueryClient();
+  const auth = useAuth();
   const formRef = React.useRef<HTMLFormElement>(null);
   const [isAutoApproved, setIsAutoApproved] = React.useState<boolean>(false);
   const mutate = useApiMutation(mutation);
@@ -55,6 +57,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const submitButtonText = isAutoApproved
     ? 'Request Access & Continue'
     : 'Request Access';
+  const requestAccessButtonText = auth.ok
+    ? 'Request Access'
+    : 'Sign in to request access';
 
   // Events
   const handleAccessSubmit = React.useCallback(
@@ -138,12 +143,12 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     <>
       <Button
         colorScheme="green"
-        disabled={disabled}
+        disabled={!auth.ok ?? disabled}
         variant="solid"
         onClick={onOpen}
         data-testid="request-access-button"
       >
-        Request Access
+        {requestAccessButtonText}
       </Button>
       <Modal
         isOpen={open || isOpen}
