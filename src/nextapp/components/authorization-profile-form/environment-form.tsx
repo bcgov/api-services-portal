@@ -102,11 +102,14 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               <>
                 <FormControl isRequired as={GridItem}>
                   <FormLabel>Client ID</FormLabel>
-                  <Input placeholder="Enter Client ID" />
+                  <Input name="clientId" placeholder="Enter Client ID" />
                 </FormControl>
                 <FormControl isRequired as={GridItem}>
                   <FormLabel>Client Secret</FormLabel>
-                  <Input placeholder="Enter Client Secret" />
+                  <Input
+                    name="clientSecret"
+                    placeholder="Enter Client Secret"
+                  />
                 </FormControl>
               </>
             )}
