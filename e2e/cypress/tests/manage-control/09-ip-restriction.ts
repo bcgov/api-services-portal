@@ -18,6 +18,7 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
@@ -71,6 +72,7 @@ describe('Manage Control-IP Restriction Spec - Route as Scope', () => {
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
@@ -123,6 +125,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
@@ -172,6 +175,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.preserveCookies()
         cy.fixture('access-manager').as('access-manager')
         cy.fixture('apiowner').as('apiowner')
+        cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
         cy.visit(login.path)
     })
 
