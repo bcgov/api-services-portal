@@ -99,29 +99,31 @@ describe('Creates an authorization and applies it to a product environment', () 
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
-      home.useNamespace(clientCredentialsNamespace)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      home.useNamespace(clientCredentials.namespace)
     })
   })
 
-  it('API Owner creates authorization profile for JWKS', () => {
+  it('API Owner creates authorization profile for JWT - Key Pair', () => {
     cy.visit(authProfile.path)
-    cy.get('@apiowner').then(({ jwksAuthProfile }: any) => {
-      authProfile.createAuthProfile(jwksAuthProfile)
-      cy.get(authProfile.profileTable).contains(jwksAuthProfile.name).should('be.visible')
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let ap = clientCredentials.jwtKeyPair.authProfile
+      authProfile.createAuthProfile(ap)
+      cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
   })
 
-  it('API Adds Environment for JWKS to Client Credentials Test Product', () => {
+  it('API Adds Environment for JWT - Key Pair to Client Credentials Test Product', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ jwksProduct, jwksAuthProfile }: any) => {
-      pd.addEnvToProduct(jwksProduct.name, jwksProduct.environment.name)
-      pd.editProductEnvironment(jwksProduct.name, jwksProduct.environment.name)
-      jwksProduct.environment.config.authIssuer = jwksAuthProfile.name
-      jwksProduct.environment.config.authIssuerEnv = jwksAuthProfile.environmentConfig.environment
-      pd.editProductEnvironmentConfig(jwksProduct.environment.config)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let prod = clientCredentials.jwtKeyPair.product
+      let ap = clientCredentials.jwtKeyPair.authProfile
+      pd.addEnvToProduct(prod.name, prod.environment.name)
+      pd.editProductEnvironment(prod.name, prod.environment.name)
+      prod.environment.config.authIssuer = ap.name
+      prod.environment.config.authIssuerEnv = ap.environmentConfig.environment
+      pd.editProductEnvironmentConfig(prod.environment.config)
     })
-    // pd.generateKongPluginConfig('cc-service.yml')
   })
 
   after(() => {

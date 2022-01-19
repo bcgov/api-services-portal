@@ -45,14 +45,12 @@ class myAccessPage {
               'jwksCredentials',
               '{"clientId": "' +
                 $clientId.text() +
-                '", "privateKey": "' +
-                $privateKey.text() +
-                '", "publicKey": "' +
-                $publicKey.text() +
                 '", "tokenEndpoint": "' +
                 $tokenEndpoint.text() +
                 '"}'
             )
+            cy.writeFile('cypress/fixtures/state/privateKey.pem', $privateKey.text())
+            cy.writeFile('cypress/fixtures/state/publicKey.pub', $publicKey.text())
           })
         })
       })

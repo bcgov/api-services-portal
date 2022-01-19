@@ -6,5 +6,7 @@
     }
   },
   "namespace": "platform",
-  "clientCredentialsNamespace": "ccplatform"
+  "clientCredentials": {
+    "namespace": "ccplatform"
+  }
 }

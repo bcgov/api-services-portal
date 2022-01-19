@@ -31,15 +31,17 @@ describe('Developer creates an access request', () => {
 
   it('Creates an application', () => {
     cy.visit(app.path)
-    cy.get('@developer').then(({ jwksApplication }: any) => {
-      app.createApplication(jwksApplication)
+    cy.get('@developer').then(({ clientCredentials }: any) => {
+      app.createApplication(clientCredentials.jwtKeyPair.application)
     })
   })
 
   it('Creates an access request', () => {
     cy.visit(apiDir.path)
-    cy.get('@developer').then(({ jwksProduct, jwksApplication, accessRequest }: any) => {
-      apiDir.createAccessRequest(jwksProduct, jwksApplication, accessRequest)
+    cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
+      let jwtkp = clientCredentials.jwtKeyPair
+      
+      apiDir.createAccessRequest(jwtkp.product, jwtkp.application, accessRequest)
       ma.clickOnGenerateSecretButton()
       
       cy.contains("Client ID").should('be.visible');

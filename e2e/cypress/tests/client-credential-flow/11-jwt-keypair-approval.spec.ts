@@ -21,9 +21,9 @@ describe('Access manager approves developer access request', () => {
   })
 
   it('Access Manager logs in', () => {
-    cy.get('@access-manager').then(({ user, clientCredentialsNamespace }: any) => {
+    cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      home.useNamespace(clientCredentialsNamespace)
+      home.useNamespace(clientCredentials.namespace)
     })
   })
 

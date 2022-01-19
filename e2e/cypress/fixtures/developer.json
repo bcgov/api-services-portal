@@ -6,32 +6,38 @@
     }
   },
   "namespace": "platform",
-  "ccNamespace": "ccplatform",
   "product": {
     "name": "Auto Test Product",
     "environment": "dev"
-  },
-  "ccProduct": {
-    "name": "Client Credentials Test Product",
-    "environment": "test"
   },
   "application": {
     "name": "Auto Test App",
     "description": "Test application for auto test"
   },
-  "clientCredentialsApplication": {
-    "name": "Client Credentials App",
-    "description": "Application for testing client credential flow."
-  },
-  "jwksApplication": {
-    "name": "JWKS App",
-    "description": "Application for JWKS flow."
-  },
-  "jwksProduct": {
-    "name": "Client Credentials Test Product",
-    "environment": "dev"
-  },
   "accessRequest": {
     "notes": "This is test access request"
+  },
+  "clientCredentials": {
+    "namespace": "ccplatform",
+    "clientIdSecret": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "jwtKeyPair": {
+      "application": {
+        "name": "JWT Key Pair App",
+        "description": "Application for JWT Key Pair flow."
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "dev"
+      }
+    }
   }
 }
