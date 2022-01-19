@@ -109,6 +109,7 @@ const ApplicationSelect: React.FC = () => {
               name="applicationId"
               onChange={handleSelectApplication}
               value={application}
+              data-testid="access-application-select"
             >
               <option value="">No Application Selected</option>
               {data?.myApplications?.map((a) => (
@@ -125,6 +126,7 @@ const ApplicationSelect: React.FC = () => {
             px={2}
             onClick={handleOpenForm}
             variant="flat"
+            data-testid="access-application-create-app-button"
           >
             Create Application
           </Button>
@@ -140,21 +142,37 @@ const ApplicationSelect: React.FC = () => {
           <GridItem>
             <FormControl isRequired={isOpen}>
               <FormLabel>Application Name</FormLabel>
-              <Input ref={nameInput} isDisabled={mutate.isLoading} />
+              <Input
+                ref={nameInput}
+                isDisabled={mutate.isLoading}
+                data-testid="access-application-name-input"
+              />
             </FormControl>
           </GridItem>
           <GridItem>
             <FormControl>
               <FormLabel>Description (optional)</FormLabel>
-              <Input ref={descriptionInput} isDisabled={mutate.isLoading} />
+              <Input
+                ref={descriptionInput}
+                isDisabled={mutate.isLoading}
+                data-testid="access-application-description-input"
+              />
             </FormControl>
           </GridItem>
           <GridItem d="flex" alignItems="center" colSpan={2}>
             <ButtonGroup isDisabled={mutate.isLoading}>
-              <Button variant="secondary" onClick={handleCancel}>
+              <Button
+                variant="secondary"
+                onClick={handleCancel}
+                data-testid="access-application-cancel-button"
+              >
                 Cancel
               </Button>
-              <Button isLoading={mutate.isLoading} onClick={handleCreate}>
+              <Button
+                isLoading={mutate.isLoading}
+                onClick={handleCreate}
+                data-testid="access-application-create-button"
+              >
                 Create
               </Button>
             </ButtonGroup>
