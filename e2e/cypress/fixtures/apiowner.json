@@ -6,7 +6,6 @@
     }
   },
   "namespace": "platform",
-  "clientCredentialsNamespace": "ccplatform",
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },

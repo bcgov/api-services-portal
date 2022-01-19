@@ -39,7 +39,11 @@ describe('Developer creates an access request for Client ID/Secret flow', () => 
     cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
       let product = clientCredentials.clientIdSecret.product
       let app = clientCredentials.clientIdSecret.application
+<<<<<<< HEAD:e2e/cypress/tests/client-credential-flow/03-cids-access-rqst.ts
 
+=======
+      
+>>>>>>> 39f3e81f (Clean up and finishes JWT generated key pair test suite; start JWKS url test suite):e2e/cypress/tests/client-credential-flow/06-developer-access-request.spec.ts
       apiDir.createAccessRequest(product, app, accessRequest)
       ma.clickOnGenerateSecretButton()
 

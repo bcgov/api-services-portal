@@ -18,7 +18,6 @@ class myAccessPage {
       cy.saveState('apikey', $apiKey.text())
     })
   }
-
   saveClientCredentials(): void {
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.clientSecret).then(($clientSecret) => {
@@ -38,45 +37,27 @@ class myAccessPage {
     })
   }
 
-<<<<<<< HEAD
   saveJwtKeyPairCredentials(): void {
-=======
-  saveJwksCredentials(): void {
->>>>>>> 56672ed1 (Divvies up jwk tests; work on generating, saving keys for jwk)
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.privateKey).then(($privateKey) => {
         cy.get(this.publicKey).then(($publicKey) => {
           cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
             cy.saveState(
-<<<<<<< HEAD
               'jwtkeypaircredentials',
               '{"clientId": "' +
                 $clientId.text() +
-=======
-              'jwksCredentials',
-              '{"clientId": "' +
-                $clientId.text() +
-                '", "privateKey": "' +
-                $privateKey.text() +
-                '", "publicKey": "' +
-                $publicKey.text() +
->>>>>>> 56672ed1 (Divvies up jwk tests; work on generating, saving keys for jwk)
                 '", "tokenEndpoint": "' +
                 $tokenEndpoint.text() +
                 '"}'
             )
-<<<<<<< HEAD
             cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey.text())
             cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey.text())
-=======
->>>>>>> 56672ed1 (Divvies up jwk tests; work on generating, saving keys for jwk)
           })
         })
       })
     })
   }
 
-<<<<<<< HEAD
   saveJwksUrlCredentials(): void {
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.issuer).then(($issuer) => {
@@ -95,8 +76,6 @@ class myAccessPage {
       })
     })
   }
-=======
->>>>>>> 56672ed1 (Divvies up jwk tests; work on generating, saving keys for jwk)
 }
 
 export default myAccessPage

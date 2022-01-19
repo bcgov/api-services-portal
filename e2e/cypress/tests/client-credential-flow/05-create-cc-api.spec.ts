@@ -29,8 +29,8 @@ describe('Create API Spec', () => {
   })
 
   it('Activates cc namespace', () => {
-    cy.get('@apiowner').then(({ clientCredentialsNamespace }: any) => {
-      home.useNamespace(clientCredentialsNamespace)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      home.useNamespace(clientCredentials.namespace)
     })
   })
 
@@ -43,8 +43,8 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({clientCredentialsNamespace}: any) => {
-      cy.publishApi('cc-service.yml', clientCredentialsNamespace).then(() => {
+    cy.get('@apiowner').then(({clientCredentials}: any) => {
+      cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
@@ -54,23 +54,25 @@ describe('Create API Spec', () => {
 
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentialsProduct }: any) => {
-      pd.createNewProduct(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      pd.createNewProduct(clientCredentials.clientIdSecret.product.name, clientCredentials.clientIdSecret.product.environment.name)
     })
   })
   it('publish product to directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentialsProduct, ccAuthProfile }: any) => {
-      pd.editProductEnvironment(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
-      clientCredentialsProduct.environment.config.authIssuer = ccAuthProfile.name
-      clientCredentialsProduct.environment.config.authIssuerEnv = ccAuthProfile.environmentConfig.environment
-      pd.editProductEnvironmentConfig(clientCredentialsProduct.environment.config)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let product = clientCredentials.clientIdSecret.product
+      let authProfile = clientCredentials.clientIdSecret.authProfile
+      pd.editProductEnvironment(product.name, product.environment.name)
+      product.environment.config.authIssuer = authProfile.name
+      product.environment.config.authIssuerEnv = authProfile.environmentConfig.environment
+      pd.editProductEnvironmentConfig(product.environment.config)
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({clientCredentialsNamespace}: any) => {
-      cy.publishApi('cc-service-plugin.yml', clientCredentialsNamespace).then(() => {
+    cy.get('@apiowner').then(({clientCredentials}: any) => {
+      cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
@@ -80,8 +82,9 @@ describe('Create API Spec', () => {
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentialsProduct }: any) => {
-      pd.updateDatasetNameToCatelogue(clientCredentialsProduct.name, clientCredentialsProduct.environment.name)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let product = clientCredentials.clientIdSecret.product
+      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
   after(() => {
