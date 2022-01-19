@@ -57,7 +57,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const submitButtonText = isAutoApproved
     ? 'Request Access & Continue'
     : 'Request Access';
-  const requestAccessButtonText = auth.ok
+  const requestAccessButtonText = auth.user
     ? 'Request Access'
     : 'Sign in to request access';
 
@@ -143,7 +143,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     <>
       <Button
         colorScheme="green"
-        disabled={!auth.ok ?? disabled}
+        disabled={!auth.user ?? disabled}
         variant="solid"
         onClick={onOpen}
         data-testid="request-access-button"
