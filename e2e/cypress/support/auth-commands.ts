@@ -126,7 +126,6 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
 
 Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   const config = configType.toLowerCase()
-  debugger
   cy.request({
     method: 'GET',
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
