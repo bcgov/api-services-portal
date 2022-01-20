@@ -3,11 +3,9 @@ import ApplicationPage from '../../pageObjects/applications'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-
-describe('Developer creates an access request', () => {
-
+describe('Developer creates an access request for JWKS URL', () => {
   const login = new LoginPage()
-  const apiDir = new ApiDirectoryPage()  
+  const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const ma = new MyAccessPage()
 
@@ -32,24 +30,23 @@ describe('Developer creates an access request', () => {
   it('Creates an application', () => {
     cy.visit(app.path)
     cy.get('@developer').then(({ clientCredentials }: any) => {
-      app.createApplication(clientCredentials.clientIdSecret.application)
+      app.createApplication(clientCredentials.jwksUrl.application)
     })
   })
 
   it('Creates an access request', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
-      let product = clientCredentials.clientIdSecret.product
-      let app = clientCredentials.clientIdSecret.application
-      
-      apiDir.createAccessRequest(product, app, accessRequest)
-      ma.clickOnGenerateSecretButton()
-      
-      cy.contains("Client ID").should('be.visible');
-      cy.contains("Client Secret").should('be.visible');
-      cy.contains("Token Endpoint").should('be.visible');
+      let jwksUrl = clientCredentials.jwksUrl
 
-      ma.saveClientCredentials();
+      apiDir.createAccessRequest(jwksUrl.product, jwksUrl.application, accessRequest)
+      ma.clickOnGenerateSecretButton()
+
+      cy.contains('Client ID').should('be.visible')
+      cy.contains('Issuer').should('be.visible')
+      cy.contains('Token Endpoint').should('be.visible')
+
+      ma.saveJwksUrlCredentials()
     })
   })
 

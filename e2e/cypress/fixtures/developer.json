@@ -38,6 +38,16 @@
         "name": "Client Credentials Test Product",
         "environment": "dev"
       }
+    },
+    "jwksUrl": {
+      "application": {
+        "name": "JWKS URL App",
+        "description": "Application for JWKS URLS flow."
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "sandbox"
+      }
     }
   }
 }

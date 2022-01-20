@@ -6,6 +6,8 @@ class myAccessPage {
   tokenEndpoint: string = '[data-testid=sa-new-creds-token-endpoint]'
   privateKey: string = '[data-testid=sa-new-creds-signing-private-key]'
   publicKey: string = '[data-testid=sa-new-creds-signing-public-certificate]'
+  issuer: string = '[data-testid=sa-new-creds-issuer]'
+  
 
   clickOnGenerateSecretButton() {
     cy.get(this.generateSecretsBtn).click()
@@ -36,27 +38,45 @@ class myAccessPage {
     })
   }
 
-  saveJwksCredentials(): void {
+  saveJwtKeyPairCredentials(): void {
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.privateKey).then(($privateKey) => {
         cy.get(this.publicKey).then(($publicKey) => {
           cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
             cy.saveState(
-              'jwksCredentials',
+              'jwtKeyPairCredentials',
               '{"clientId": "' +
                 $clientId.text() +
                 '", "tokenEndpoint": "' +
                 $tokenEndpoint.text() +
                 '"}'
             )
-            cy.writeFile('cypress/fixtures/state/privateKey.pem', $privateKey.text())
-            cy.writeFile('cypress/fixtures/state/publicKey.pub', $publicKey.text())
+            cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey.text())
+            cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey.text())
           })
         })
       })
     })
   }
 
+  saveJwksUrlCredentials(): void {
+    cy.get(this.clientId).then(($clientId) => {
+      cy.get(this.issuer).then(($issuer) => {
+        cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
+          cy.saveState(
+            'jwksUrlCredentials',
+            '{"clientId": "' +
+            $clientId.text() +
+            '", "issuer": "' +
+            $issuer.text() +
+            '", "tokenEndpoint": "' +
+            $tokenEndpoint.text() +
+            '"}'
+          )
+        })
+      })
+    })
+  }
 }
 
 export default myAccessPage

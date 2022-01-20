@@ -11,6 +11,8 @@ class ApiDirectoryPage {
   clientSecretField: string = '[data-testid=sa-new-creds-client-secret]';
   tokenEndpointField: string = '[data-testid=sa-new-creds-token-endpoint]';
   acceptTermsBtn: string = '[data-testid=access-rqst-legal-terms-cb]';
+  jwksUrlField: string = '[data-testid=access-rqst-jwks-url]';
+  
 
   createAccessRequest(product: any, app: any, accessRqst: any) {
     cy.contains('a',product.name, { timeout: 10000 }).should('be.visible');
@@ -22,6 +24,9 @@ class ApiDirectoryPage {
     cy.document().then((doc) => {
       if (doc.querySelector(this.acceptTermsBtn)) {
         cy.contains('Terms of Use for API Gateway').click()
+      }
+      if (doc.querySelector(this.jwksUrlField)) {
+        cy.get(this.jwksUrlField).click().type(Cypress.env('JWKS_URL'))
       }
     })
 

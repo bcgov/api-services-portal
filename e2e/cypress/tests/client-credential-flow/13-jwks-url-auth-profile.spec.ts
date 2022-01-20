@@ -3,8 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 import Products from '../../pageObjects/products'
 
-
-describe('Creates an authorization and applies it to a product environment', () => {
+describe('Creates an authorization profile for JWT - JWKS URL and applies it to a product environment', () => {
   const home = new HomePage()
   const login = new LoginPage()
   const authProfile = new AuthorizationProfile()
@@ -34,7 +33,7 @@ describe('Creates an authorization and applies it to a product environment', () 
     })
   })
 
-  it('API Owner creates authorization profile for JWKS', () => {
+  it('API Owner creates authorization profile for JWKS URL', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let ap = clientCredentials.jwks.authProfile
@@ -43,7 +42,7 @@ describe('Creates an authorization and applies it to a product environment', () 
     })
   })
 
-  it('API Adds Environment for JWKS to Client Credentials Test Product', () => {
+  it('API Adds Environment for JWKS URL to Client Credentials Test Product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let prod = clientCredentials.jwks.product

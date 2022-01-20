@@ -2,7 +2,7 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
-describe('Create API Spec', () => {
+describe('Grant appropriate permissions to team members for client credential flow', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -43,7 +43,7 @@ describe('Create API Spec', () => {
     cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
+      na.grantPermission({ userName: user.credentials.username, accessRole: namespaceAccessPermissions })
     })
   })
 

@@ -2,7 +2,7 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
 
-describe('Access manager approves developer access request', () => {
+describe('Access manager approves developer access request for JWT - Generated Key Pair', () => {
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()
