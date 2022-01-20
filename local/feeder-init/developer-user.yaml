@@ -1,6 +1,6 @@
 entity: User
 record:
-  id: 'local'
-  name: 'local F local L'
-  email: 'local@development.me'
+  id: 'harley'
+  name: 'Harley Jones'
+  email: 'harley@test.com'
   isAdmin: false

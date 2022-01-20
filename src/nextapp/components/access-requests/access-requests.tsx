@@ -28,6 +28,11 @@ const query = gql`
     allAccessRequestsByNamespace(where: { isIssued_not: true }) {
       id
       name
+      productEnvironment {
+        product {
+          name
+        }
+      }
       requestor {
         name
         username
@@ -125,7 +130,7 @@ const AccessRequests: React.FC = () => {
                         </>
                       )}
                       <Text as="span" fontWeight="bold">
-                        {d.name}
+                        {d.productEnvironment?.product?.name || d.name}
                       </Text>
                     </Link>
                   </NextLink>

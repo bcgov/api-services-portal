@@ -274,7 +274,7 @@ const NewRequestsPage: React.FC<
                     <Box>
                       <Text
                         fontWeight="bold"
-                        data-testid={'access-rqst-app-env-' + e.name}
+                        data-testid={`access-rqst-app-env-${e.name}`}
                       >
                         {e.name}
                       </Text>
