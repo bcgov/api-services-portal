@@ -97,7 +97,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                       <MenuItem
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
-                        data-testid={'ns-dropdown-item-' + n.name}
+                        data-testid={`ns-dropdown-item-${n.name}`}
                       >
                         {n.name}
                       </MenuItem>
