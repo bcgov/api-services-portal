@@ -147,7 +147,15 @@ const buttonVariants = {
   flat: {
     color: 'bc-blue',
     _hover: {
-      bgColor: 'bc-gray',
+      boxShadow: 'none',
+      color: 'bc-link',
+      opacity: 1,
+    },
+    _active: {
+      boxShadow: 'none',
+    },
+    _focus: {
+      boxShadow: 'none',
     },
   },
   ghost: {

@@ -72,12 +72,20 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const editMutate = useApiMutation(editMutation);
 
   const showTabs = React.useMemo(() => name ?? Boolean(id), [name, id]);
-  const isKongFlow = flow === kongFlow;
+  const isKongFlow = React.useMemo(() => flow === kongFlow, [flow, kongFlow]);
 
   // Events
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
+  const handleTabChange = React.useCallback(
+    (index) => {
+      if (id) {
+        setTabIndex(index);
+      }
+    },
+    [id]
+  );
   const handleKongProfile = React.useCallback(async () => {
     try {
       const data = {
@@ -219,6 +227,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       isOpen={open}
       onClose={handleClose}
       size="5xl"
+      scrollBehavior="inside"
     >
       <ModalOverlay />
       <ModalContent>
@@ -231,7 +240,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
               <Flex align="center" justify="space-between">
                 <ProfileNameControl id={id} name={name} onChange={setName} />
               </Flex>
-              <Tabs index={tabIndex} pos="relative">
+              <Tabs index={tabIndex} pos="relative" onChange={handleTabChange}>
                 <TabList mt={4} mb={2}>
                   <Tab px={0} cursor="default">
                     Authentication
@@ -243,7 +252,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                     Client Management
                   </Tab>
                   <Box flex={1} />
-                  <Box p="relative" mt={-6} mb={2}>
+                  <Box p="relative" mt={-10} mb={2}>
                     <UserProfile data={user} />
                   </Box>
                 </TabList>

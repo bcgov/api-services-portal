@@ -80,15 +80,22 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
               message="Once you add environments, they will be listed here"
             />
           }
+          sx={{
+            'th:first-child': {
+              pl: 3,
+            },
+          }}
         >
           {(d: EnvironmentItem, index) => (
             <Tr key={index}>
-              <Td textTransform="capitalize">{d.environment}</Td>
+              <Td textTransform="capitalize" pl={3}>
+                {d.environment}
+              </Td>
               <Td>{d.issuerUrl}</Td>
               <Td textTransform="capitalize">{d.clientRegistration}</Td>
-              <Td>{d.clientId}</Td>
+              <Td width="20%">{d.clientId}</Td>
               <Td>
-                <ActionsMenu>
+                <ActionsMenu placement="bottom-start">
                   <MenuItem onClick={handleDelete(index)}>Delete</MenuItem>
                 </ActionsMenu>
               </Td>

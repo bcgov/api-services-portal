@@ -93,7 +93,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               Scopes setup in the idP.
             </Text>
             <TagInput
-              placeholder="Enter Scopes"
+              placeholder="Press Enter to add Scopes"
               name="availableScopes"
               value={data?.availableScopes}
               data-testid="ap-authorization-scopes"
@@ -107,7 +107,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               are protected with this Authorization configuration.
             </Text>
             <TagInput
-              placeholder="Enter Client Roles"
+              placeholder="Press Enter to add Client Roles"
               name="clientRoles"
               value={data?.clientRoles}
               data-testid="ap-authorization-client-roles"
@@ -121,7 +121,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               </GridItem>
               <GridItem>
                 <TagInput
-                  placeholder="Enter Client Mappers"
+                  placeholder="Press Enter to add Client Mappers"
                   name="clientMappers"
                   value={data?.clientMappers}
                   data-testid="ap-authorization-client-mappers"
@@ -132,7 +132,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           <fieldset>
             <Legend>UMA2 Resource Type (optional)</Legend>
             <TagInput
-              placeholder="Enter UMA2 Resource Type"
+              placeholder="Press Enter to add UMA2 Resource Type"
               name="resourceType"
               value={data?.resourceType}
               data-testid="ap-authorization-uma2-resource-type"
@@ -145,7 +145,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               list of Scopes setup in the idP.
             </Text>
             <TagInput
-              placeholder="Enter Resource Scopes"
+              placeholder="Press Enter to add Resource Scopes"
               name="resourceScopes"
               value={data?.resourceScopes}
               data-testid="ap-authorization-resource-scopes"

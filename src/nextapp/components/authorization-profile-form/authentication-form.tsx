@@ -45,8 +45,10 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
     <>
       <ModalBody>
         <form ref={form} onSubmit={handleSubmit}>
-          <FormControl isRequired mb={8}>
-            <FormLabel fontWeight="bold">Flow</FormLabel>
+          <FormControl isRequired mb={4}>
+            <FormLabel fontWeight="bold" mb={6}>
+              Flow
+            </FormLabel>
             <RadioGroup
               value={value}
               onChange={onChange}
@@ -83,11 +85,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
               borderColor="bc-component"
             >
               <FormLabel>Key Name</FormLabel>
-              <Input
-                name="apiKeyName"
-                placeholder="X-API-KEY"
-                data-testid="ap-api-key"
-              />
+              <Input name="apiKeyName" data-testid="ap-api-key" />
             </FormControl>
           )}
         </form>
