@@ -2,7 +2,7 @@ import ConsumersPage from '../pageObjects/consumers'
 import LoginPage from '../pageObjects/login'
 import HomePage from '../pageObjects/home'
 
-describe('API Owner Spec', () => {
+describe('Approve Pending Request Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -11,6 +11,8 @@ describe('API Owner Spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
+    cy.getServiceOrRouteID('services')
+    cy.getServiceOrRouteID('routes')
   })
 
   beforeEach(() => {

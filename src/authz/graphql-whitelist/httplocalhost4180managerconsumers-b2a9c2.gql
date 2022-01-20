@@ -1,0 +1,19 @@
+
+  query GetPendingAccessRequests {
+    allAccessRequestsByNamespace(where: { isIssued_not: true }) {
+      id
+      name
+      productEnvironment {
+        product {
+          name
+        }
+      }
+      requestor {
+        name
+        username
+      }
+      serviceAccess {
+        id
+      }
+    }
+  }

@@ -1,6 +1,6 @@
 entity: User
 record:
-  id: 'awsummer@idir'
-  name: 'Awesome Summers'
-  email: 'awsummer@gmail.com'
+  id: 'janis@idir'
+  name: 'Janis Smith'
+  email: 'janis@testmail.com'
   isAdmin: false

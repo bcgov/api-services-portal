@@ -196,7 +196,7 @@ services:
     networks:
       aps-net:
         aliases:
-          - redis.localtest.me
+          - redis-master
   gwa-api:
     image: gwa-api:e2e
     container_name: gwa-api

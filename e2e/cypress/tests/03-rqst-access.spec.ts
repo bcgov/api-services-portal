@@ -21,7 +21,7 @@ describe('Request Access Spec', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates developer', () => {
+  it('authenticates Harley (developer)', () => {
     cy.get('@developer').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
@@ -46,7 +46,7 @@ describe('Request Access Spec', () => {
 
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({log:true})
+    cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
 })

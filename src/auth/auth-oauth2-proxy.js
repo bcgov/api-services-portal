@@ -350,7 +350,7 @@ class Oauth2ProxyAuthStrategy {
 
     let _results = await _users.adapter.find({ username: username });
 
-    let userId = _results.length == 1 ? _results[0].id : null;
+    let userId = _results.length == 0 ? null : _results[0].id;
 
     if (_results.length == 0) {
       // auto-create a user record
@@ -370,6 +370,31 @@ class Oauth2ProxyAuthStrategy {
       }
 
       userId = data.createUser.id;
+    } else {
+      // update if "name" or "email" has changed
+      const saved = _results[0];
+      if (saved.name != name || saved.email != email) {
+        logger.info(
+          'register_user - updating name (%s) and email (%s) for %s',
+          name,
+          email,
+          username
+        );
+        const { data, errors } = await this.keystone.executeGraphQL({
+          context: this.keystone.createContext({ skipAccessControl: true }),
+          query: `mutation ($name: String, $email: String, $userId: ID!) {
+                          updateUser(id: $userId, data: {name: $name, email: $email }) {
+                              id
+                      } }`,
+          variables: { name, email, userId },
+        });
+        if (errors) {
+          logger.error(
+            'register_user - NO! Something went wrong creating user ' + errors
+          );
+          throw new Error('Error updating user ' + errors);
+        }
+      }
     }
 
     let results = await users.adapter.find({ jti: jti });
