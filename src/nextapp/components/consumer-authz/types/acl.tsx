@@ -57,6 +57,7 @@ const ConsumerACL: React.FC<ConsumerACLProps> = ({
     <Box p={2}>
       <Switch
         name="acls"
+        data-testid="acls-switch"
         value={env.id}
         defaultIsChecked={aclGroups.includes(env.appId)}
         onChange={handleGrantToggle(env.id, env.appId)}
