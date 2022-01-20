@@ -22,7 +22,7 @@ import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
 import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
-import { kebabCase } from 'lodash';
+import kebabCase from 'lodash/kebabCase';
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
 import OrganizationSelect from './organization-select';
@@ -94,7 +94,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         variant="tertiary"
         leftIcon={<Icon as={FaPenSquare} />}
         onClick={onOpen}
-        data-testid={kebabCase(data.name) + '-edit-btn'}
+        data-testid={`${kebabCase(data.name)}-edit-btn`}
       >
         Edit
       </Button>

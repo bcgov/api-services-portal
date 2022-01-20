@@ -13,7 +13,7 @@ import {
 import { FaClipboard } from 'react-icons/fa';
 import has from 'lodash/has';
 import isNil from 'lodash/isNil';
-import { kebabCase } from 'lodash';
+import kebabCase from 'lodash/kebabCase';
 
 interface ViewSecretProps {
   credentials: Record<string, string>;
@@ -66,7 +66,7 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
                     as="code"
                     wordBreak="break-all"
                     noOfLines={1}
-                    data-testid={'sa-new-creds-' + kebabCase(c.label)}
+                    data-testid={`sa-new-creds-${kebabCase(c.label)}`}
                   >
                     {credentials[c.name]}
                   </Text>

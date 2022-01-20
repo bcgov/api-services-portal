@@ -17,7 +17,7 @@ import { UPDATE_ENVIRONMENT_ACTIVE } from '@/shared/queries/products-queries';
 import DeleteEnvironment from './delete-environment';
 import { getAuthToken } from '@/shared/services/utils';
 import { useApiMutation } from '@/shared/services/api';
-import { kebabCase } from 'lodash';
+import kebabCase from 'lodash/kebabCase';
 
 interface EnvironmentsListProps {
   data: Environment[];
@@ -127,7 +127,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
                 <Button
                   size="xs"
                   variant="outline"
-                  data-testid={kebabCase(product.name) + `-${e.name}-edit-btn`}
+                  data-testid={`${kebabCase(product.name)}-${e.name}-edit-btn`}
                 >
                   Edit
                 </Button>
