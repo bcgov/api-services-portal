@@ -45,13 +45,10 @@ class Products {
 
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-    cy.log('pname = ' + pname)
     cy.get(`[data-testid=${pname}-${envName}-edit-btn]`).click()
-    cy.log('Editing product env')
   }
 
   editProductEnvironmentConfig(config: any) {
-    
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
