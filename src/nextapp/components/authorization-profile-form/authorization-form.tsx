@@ -16,6 +16,7 @@ import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationFormProps {
   data?: CredentialIssuer;
+  id?: string;
   onCancel: () => void;
   onComplete: (payload: FormData) => void;
   ownerName: string;
@@ -23,11 +24,13 @@ interface AuthorizationFormProps {
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   data,
+  id,
   onCancel,
   onComplete,
   ownerName,
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
+  const submitButtonText = id ? 'Save' : 'Continue';
 
   // Events
   const handleSubmit = React.useCallback(
@@ -181,7 +184,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             onClick={handleCreate}
             data-testid="ap-authorization-form-continue-btn"
           >
-            Continue
+            {submitButtonText}
           </Button>
         </ButtonGroup>
       </ModalFooter>

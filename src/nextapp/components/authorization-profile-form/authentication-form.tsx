@@ -29,7 +29,9 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
   value,
 }) => {
   const form = React.useRef<HTMLFormElement>(null);
-  const submitButtonText = id ? 'Save' : 'Create';
+  const isKong = value === 'kong-api-key-acl';
+  const createText = isKong ? 'Create' : 'Continue';
+  const submitButtonText = id ? 'Save' : createText;
 
   // Events
   const handleCreate = () => {
@@ -119,7 +121,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
             onClick={handleCreate}
             data-testid="ap-authentication-form-continue-btn"
           >
-            {value === 'kong-api-key-acl' ? submitButtonText : 'Continue'}
+            {submitButtonText}
           </Button>
         </ButtonGroup>
       </ModalFooter>

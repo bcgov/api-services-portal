@@ -15,10 +15,7 @@ import { gql } from 'graphql-request';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
-import {
-  CredentialIssuer,
-  CredentialIssuerCreateInput,
-} from '@/shared/types/query.types';
+import { CredentialIssuer } from '@/shared/types/query.types';
 
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
@@ -42,9 +39,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   onClose,
 }) => {
   const { user } = useAuth();
-  const [payload, setPayload] = React.useState<CredentialIssuerCreateInput>(
-    () => data ?? {}
-  );
+  // Cache the authorization page data so we don't loose it between steps while not having to
+  // manage the state of the form
+  const newAuthorizationData = React.useRef<CredentialIssuer>();
   const kongFlow = 'kong-api-key-acl';
   const [flow, setFlow] = React.useState<string>(() => {
     // The radios are a combo of flow + clientAuthenticator, joined by a '.'
@@ -75,6 +72,14 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const isKongFlow = React.useMemo(() => flow === kongFlow, [flow, kongFlow]);
 
   // Events
+  const handleClose = React.useCallback(() => {
+    if (!id) {
+      setName('');
+    }
+    setTabIndex(0);
+    setFlow('client-credentials.client-secret');
+    onClose();
+  }, [id, onClose]);
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
@@ -86,135 +91,132 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     },
     [id]
   );
-  const handleKongProfile = React.useCallback(async () => {
-    try {
-      const data = {
-        ...payload,
-        name,
-        flow: flowValue,
-        clientAuthenticator,
-        id: undefined,
-        owner: undefined,
-      };
-
-      if (id) {
-        await editMutate.mutateAsync({
-          id,
-          data,
-        });
-      } else {
-        await createMutate.mutateAsync({
-          data,
-        });
-      }
-    } catch (e) {
-      const requestType = id ? 'update' : 'create';
-      toast({
-        title: `Profile ${requestType} failed`,
-        status: 'error',
-        description: Array.isArray(e) ? e[0].message : '',
-      });
-    }
-  }, [
-    clientAuthenticator,
-    createMutate,
-    editMutate,
-    flowValue,
-    id,
-    name,
-    payload,
-    toast,
-  ]);
-  const handleAuthenticationComplete = React.useCallback(
-    (payload: FormData) => {
-      const formData = Object.fromEntries(payload) as { flow: string };
-      const [flow, clientAuthenticator] = formData.flow.split('.');
-
-      setPayload((state) => ({
-        ...state,
-        ...formData,
-        flow,
-        clientAuthenticator,
-      }));
-
-      if (isKongFlow) {
-        handleKongProfile();
-        onClose();
-      } else {
-        setTabIndex(1);
-      }
-    },
-    [handleKongProfile, isKongFlow, onClose]
-  );
-  const handleAuthorizationComplete = React.useCallback((payload: FormData) => {
-    setPayload((state) => ({ ...state, ...Object.fromEntries(payload) }));
-    setTabIndex(2);
-  }, []);
-  const handleClose = React.useCallback(() => {
-    if (!id) {
-      setName('');
-    }
-    setTabIndex(0);
-    onClose();
-  }, [id, onClose]);
-  const handleClientManagementComplete = React.useCallback(
-    async (environments: EnvironmentItem[]) => {
+  const handleCreateProfile = React.useCallback(
+    async (payload: CredentialIssuer) => {
       try {
-        if (id) {
-          await editMutate.mutateAsync({
-            id,
-            data: {
-              ...payload,
-              flow: flowValue,
-              clientAuthenticator,
-              environmentDetails: JSON.stringify(environments),
-              name,
-              id: undefined,
-              owner: undefined,
-            },
-          });
-          toast({
-            title: 'Profile updated',
-            status: 'success',
-          });
-        } else {
-          await createMutate.mutateAsync({
-            data: {
-              ...payload,
-              flow: flowValue,
-              clientAuthenticator,
-              environmentDetails: JSON.stringify(environments),
-              name,
-            },
-          });
-          toast({
-            title: 'Profile created',
-            status: 'success',
-          });
-        }
+        await createMutate.mutateAsync({
+          data: {
+            ...payload,
+            ...newAuthorizationData.current,
+            flow: flowValue,
+            clientAuthenticator,
+            name,
+          },
+        });
+        toast({
+          title: 'Profile created',
+          status: 'success',
+        });
         client.invalidateQueries('authorizationProfiles');
         handleClose();
-      } catch (e) {
-        const requestType = id ? 'update' : 'create';
+      } catch (err) {
         toast({
-          title: `Profile ${requestType} failed`,
+          title: 'Profile create failed',
           status: 'error',
-          description: Array.isArray(e) ? e[0].message : '',
         });
       }
     },
     [
       client,
       clientAuthenticator,
-      flowValue,
       createMutate,
+      flowValue,
+      handleClose,
+      name,
+      toast,
+    ]
+  );
+  const handleSaveProfile = React.useCallback(
+    async (payload: CredentialIssuer) => {
+      try {
+        await editMutate.mutateAsync({
+          id,
+          data: {
+            ...payload,
+            flow: flowValue,
+            clientAuthenticator,
+            name,
+            id: undefined,
+            owner: undefined,
+          },
+        });
+        toast({
+          title: 'Profile updated',
+          status: 'success',
+        });
+        client.invalidateQueries();
+        handleClose();
+      } catch (err) {
+        toast({
+          title: 'Profile save failed',
+          status: 'error',
+        });
+      }
+    },
+    [
+      client,
+      clientAuthenticator,
       editMutate,
+      flowValue,
       handleClose,
       id,
       name,
-      payload,
       toast,
     ]
+  );
+  const handleAuthenticationComplete = React.useCallback(
+    (form: FormData) => {
+      const formData = Object.fromEntries(form) as { flow: string };
+      const [flow, clientAuthenticator] = formData.flow.split('.');
+
+      const payload = {
+        ...data,
+        ...formData,
+        flow,
+        clientAuthenticator,
+      };
+
+      if (id) {
+        handleSaveProfile(payload);
+      } else {
+        if (isKongFlow) {
+          handleCreateProfile(payload);
+        } else {
+          setTabIndex(1);
+        }
+      }
+    },
+    [data, handleCreateProfile, handleSaveProfile, id, isKongFlow]
+  );
+  const handleAuthorizationComplete = React.useCallback(
+    (payload: FormData) => {
+      const formData = Object.fromEntries(payload);
+      if (id) {
+        handleSaveProfile({ ...data, ...formData });
+      } else {
+        newAuthorizationData.current = {
+          ...newAuthorizationData.current,
+          ...formData,
+        };
+        setTabIndex(2);
+      }
+    },
+    [data, handleSaveProfile, id]
+  );
+  const handleClientManagementComplete = React.useCallback(
+    (environments: EnvironmentItem[]) => {
+      const payload = {
+        ...data,
+        environmentDetails: JSON.stringify(environments),
+      };
+
+      if (id) {
+        handleSaveProfile(payload);
+      } else {
+        handleCreateProfile(payload);
+      }
+    },
+    [data, handleCreateProfile, handleSaveProfile, id]
   );
 
   React.useEffect(() => {
@@ -270,6 +272,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
             {tabIndex === 1 && (
               <AuthorizationForm
                 data={data}
+                id={id}
                 onCancel={handleClose}
                 onComplete={handleAuthorizationComplete}
                 ownerName={user?.name}

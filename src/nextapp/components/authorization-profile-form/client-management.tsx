@@ -88,11 +88,15 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
         >
           {(d: EnvironmentItem, index) => (
             <Tr key={index}>
-              <Td textTransform="capitalize" pl={3}>
+              <Td textTransform="capitalize" pl={3} width="10%">
                 {d.environment}
               </Td>
-              <Td>{d.issuerUrl}</Td>
-              <Td textTransform="capitalize">{d.clientRegistration}</Td>
+              <Td width="40%" wordBreak="break-all">
+                {d.issuerUrl}
+              </Td>
+              <Td textTransform="capitalize" width="10%">
+                {d.clientRegistration}
+              </Td>
               <Td width="20%">{d.clientId}</Td>
               <Td>
                 <ActionsMenu placement="bottom-start">

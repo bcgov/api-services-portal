@@ -107,6 +107,7 @@ const TagInput: React.FC<TagInputProps> = ({
         pos="relative"
         py={2}
         onClick={handleContainerClick}
+        cursor="text"
         data-testid={props['data-testid']}
       >
         <Wrap spacing={2}>
