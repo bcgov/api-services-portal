@@ -14,6 +14,7 @@ import {
 import NextLink from 'next/link';
 import { Dataset, Product } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
+import kebabCase from 'lodash/kebabCase';
 
 interface DiscoveryListItemProps {
   data: Dataset;
@@ -46,7 +47,9 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
             {data ? (
               <>
                 <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
-                  <Link>{data.title}</Link>
+                  <Link data-testid={`api-${kebabCase(data.title)}`}>
+                    {data.title}
+                  </Link>
                 </NextLink>
               </>
             ) : (
