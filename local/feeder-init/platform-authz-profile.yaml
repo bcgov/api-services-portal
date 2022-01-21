@@ -17,7 +17,7 @@ record:
     - Access.Manage
     - GatewayConfig.Publish
     - Content.Publish
-  owner: awsummer@idir
+  owner: janis@idir
   environmentDetails:
     - environment: prod
       issuerUrl: http://keycloak.localtest.me:9080/auth/realms/master

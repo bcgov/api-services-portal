@@ -104,9 +104,19 @@ services:
     networks:
       - aps-net
   cypress:
-    image: 'aps-cypress-e2e:latest'
+    image: aps-cypress-e2e:latest
     container_name: cypress-e2e
     entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+    environment:
+      - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
+      - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
+      - RUN_ENV=${CY_EXECUTION_ENV}
+      - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
+      - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
+      - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
+      - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
+      - COMMIT_INFO_REMOTE=${CY_REPO_URL}
+      - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
     depends_on:
       - feeder-seeding
     build:
@@ -155,6 +165,9 @@ services:
     depends_on:
       - kong-migrations
       - kong-migrations-up
+    build:
+      context: local/kong
+      dockerfile: Dockerfile
     environment:
       <<: *common-variables
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -183,10 +196,10 @@ services:
     networks:
       aps-net:
         aliases:
-          - redis.localtest.me
-  gwa-gateway-api:
-    image: ghcr.io/bcgov/gwa-api/gwa-gateway-api:dev
-    container_name: gwa-gateway-api
+          - redis-master
+  gwa-api:
+    image: gwa-api:e2e
+    container_name: gwa-api
     entrypoint: sh -c "chmod +x /tmp/gwa/entrypoint.sh && sh /tmp/gwa/entrypoint.sh"
     ports:
       - 2000:2000

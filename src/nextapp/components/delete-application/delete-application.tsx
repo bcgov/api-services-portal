@@ -55,6 +55,7 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
         onClick={onOpen}
         variant="outline"
         size="sm"
+        data-testid="app-delete-icon"
       />
       <AlertDialog
         isCentered
@@ -72,10 +73,19 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
             undone.
           </AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button
+              ref={cancelRef}
+              onClick={onClose}
+              data-testid="app-delete-cancel-btn"
+            >
               Cancel
             </Button>
-            <Button colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button
+              colorScheme="red"
+              ml={3}
+              onClick={handleDelete}
+              data-testid="app-delete-submit-btn"
+            >
               Yes, Delete
             </Button>
           </AlertDialogFooter>

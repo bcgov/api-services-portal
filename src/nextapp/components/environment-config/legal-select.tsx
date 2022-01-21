@@ -14,14 +14,14 @@ const query = gql`
 `;
 
 interface LegalSelectProps {
-    value: string
+  value: string;
 }
 
-const LegalSelect: React.FC<LegalSelectProps> = ({value}) => {
+const LegalSelect: React.FC<LegalSelectProps> = ({ value }) => {
   const { data, isLoading, isSuccess } = useApi(
     'legal-selector',
     {
-      query
+      query,
     },
     {
       suspense: false,
@@ -29,7 +29,7 @@ const LegalSelect: React.FC<LegalSelectProps> = ({value}) => {
   );
 
   if (isLoading) {
-      return <></>
+    return <></>;
   }
 
   return (
@@ -42,6 +42,7 @@ const LegalSelect: React.FC<LegalSelectProps> = ({value}) => {
       isLoading={isLoading}
       isDisabled={!isSuccess}
       defaultValue={value}
+      data-testid="legal-terms-dd"
     >
       <option></option>
       {data?.allLegals.map((d) => (

@@ -326,6 +326,7 @@ CREATE TABLE public."CredentialIssuer" (
     "initialAccessToken" text,
     "clientId" text,
     "clientSecret" text,
+    "clientMappers" text,
     "availableScopes" text,
     "clientRoles" text,
     "resourceScopes" text,

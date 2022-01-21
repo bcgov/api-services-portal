@@ -89,7 +89,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
       >
         <FormControl as="fieldset" isRequired>
           <FormLabel as="legend">Mode</FormLabel>
-          <RadioGroup value={mode as string} onChange={onModeChange}>
+          <RadioGroup value={mode as string} onChange={onModeChange} data-testid="ap-mode">
             <Stack>
               <Radio name="mode" value="manual">
                 Manual
@@ -118,6 +118,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           label="Scopes"
           name="availableScopes"
           value={issuer?.availableScopes}
+          data-testid="ap-authorization-scopes"
         />
       </FormGroup>
       <Divider />
@@ -138,6 +139,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           label="Client Roles"
           name="clientRoles"
           value={issuer?.clientRoles}
+          data-testid="ap-authorization-client-roles"
         />
       </FormGroup>
       <Divider />
@@ -162,6 +164,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
                   variant="bc-input"
                   value={audienceValue}
                   onChange={handleAudienceUpdate}
+                  data-testid="ap-authorization-client-mappers"
                 />
               </Td>
             </Tr>
@@ -177,6 +180,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
             name="resourceType"
             variant="bc-input"
             defaultValue={issuer?.resourceType}
+            data-testid="ap-authorization-uma2-resource-type"
           />
         </FormControl>
       </FormGroup>
@@ -197,6 +201,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
           label="Resource Scopes"
           name="resourceScopes"
           value={issuer?.resourceScopes}
+          data-testid="ap-authorization-resource-scopes"
         />
       </FormGroup>
       <Divider />
@@ -220,6 +225,7 @@ const AuthorizationProfileAuthorization: React.FC<AuthorizationProfileAuthorizat
             name="resourceAccessScope"
             variant="bc-input"
             defaultValue={issuer?.resourceAccessScope}
+            data-testid="ap-authorization-resource-access-scope"
           />
         </FormControl>
       </FormGroup>

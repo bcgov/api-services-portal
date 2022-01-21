@@ -11,7 +11,11 @@ declare namespace Cypress {
 
     logout(): void
 
+    deleteAllCookies(): void
+
     preserveCookies(): void
+
+    makeKongRequest(serviceName : string, methodType : string): Chainable<any>
 
     preserveCookiesDefaults(): void
 
@@ -26,6 +30,11 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
+    getServiceOrRouteID(configType: string
+    ): Chainable<Cypress.Response<any>>
+
+    updateKongPlugin(pluginName : string, name : string): Chainable<Cypress.Response<any>>
+    
     publishApi(content: any): Chainable<Cypress.Response<any>>
   }
 }

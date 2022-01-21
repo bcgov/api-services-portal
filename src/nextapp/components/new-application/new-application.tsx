@@ -16,7 +16,12 @@ const NewApplication: React.FC<NewApplicationProps> = ({
 
   return (
     <>
-      <Button isDisabled={!userId} onClick={onOpen} variant="primary">
+      <Button
+        isDisabled={!userId}
+        onClick={onOpen}
+        variant="primary"
+        data-testid="create-app-btn"
+      >
         Create Application
       </Button>
       <NewApplicationDialog

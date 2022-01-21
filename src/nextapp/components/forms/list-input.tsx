@@ -27,6 +27,7 @@ interface ListInputProps {
   placeholder?: string;
   required?: boolean;
   value: string;
+  buttonTestId?: string;
 }
 
 const ListInput: React.FC<ListInputProps> = ({
@@ -36,6 +37,7 @@ const ListInput: React.FC<ListInputProps> = ({
   placeholder = 'Press enter to add',
   required,
   value = '',
+  buttonTestId,
 }) => {
   const fieldsetRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -110,6 +112,7 @@ const ListInput: React.FC<ListInputProps> = ({
                 size="sm"
                 onClick={handleRemove(index)}
                 variant="link"
+                data-testid={buttonTestId}
               />
             </Flex>
             <Divider />
