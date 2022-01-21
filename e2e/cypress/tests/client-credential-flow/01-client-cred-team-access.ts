@@ -2,6 +2,7 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
+
 describe('Grant appropriate permissions to team members for client credential flow', () => {
   const login = new LoginPage()
   const home = new HomePage()

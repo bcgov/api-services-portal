@@ -24,7 +24,7 @@ class myAccessPage {
       cy.get(this.clientSecret).then(($clientSecret) => {
         cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
           cy.saveState(
-            'clientCredentials',
+            'clientIdSecret',
             '{"clientId": "' +
               $clientId.text() +
               '", "clientSecret": "' +

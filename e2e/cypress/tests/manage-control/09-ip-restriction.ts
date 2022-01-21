@@ -11,7 +11,6 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
         cy.visit('/')
         cy.deleteAllCookies()
         cy.reload()
-
     })
 
     beforeEach(() => {

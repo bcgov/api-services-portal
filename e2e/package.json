@@ -7,13 +7,8 @@
   "license": "MIT",
   "scripts": {
     "cy:open": "cypress open --config-file cypress.json",
-<<<<<<< HEAD
-    "cy:run": "cypress run --config-file --browser chrome cypress.json",
-    "cy:run:rcd": "cypress run --config-file cypress.json --record",
-=======
     "cy:run": "cypress run --config-file cypress.json",
     "cy:run:rcd": "cypress run --config-file cypress.json --record --env TransferProtocol='http' --browser chrome",
->>>>>>> 228f92570774495c9e4dfe57e284a3f7e7b65996
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
     "cy:edge": "npx cypress run --browser edge",

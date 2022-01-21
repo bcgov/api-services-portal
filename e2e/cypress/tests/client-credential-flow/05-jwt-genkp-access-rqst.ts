@@ -3,7 +3,7 @@ import ApplicationPage from '../../pageObjects/applications'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-describe('Developer creates an access request for JWKS URL', () => {
+describe('Developer creates an access request for JWT Generated Key Pair', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
@@ -11,7 +11,7 @@ describe('Developer creates an access request for JWKS URL', () => {
 
   before(() => {
     cy.visit('/')
-    cy.clearCookies()
+    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -30,27 +30,30 @@ describe('Developer creates an access request for JWKS URL', () => {
   it('Creates an application', () => {
     cy.visit(app.path)
     cy.get('@developer').then(({ clientCredentials }: any) => {
-      app.createApplication(clientCredentials.jwksUrl.application)
+      app.createApplication(clientCredentials.jwtKeyPair.application)
     })
   })
 
   it('Creates an access request', () => {
     cy.visit(apiDir.path)
     cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
-      let jwksUrl = clientCredentials.jwksUrl
+      let jwtkp = clientCredentials.jwtKeyPair
 
-      apiDir.createAccessRequest(jwksUrl.product, jwksUrl.application, accessRequest)
+      apiDir.createAccessRequest(jwtkp.product, jwtkp.application, accessRequest)
       ma.clickOnGenerateSecretButton()
 
       cy.contains('Client ID').should('be.visible')
-      cy.contains('Issuer').should('be.visible')
+      cy.contains('Signing Private Key').should('be.visible')
+      cy.contains('Signing Public Certificate').should('be.visible')
       cy.contains('Token Endpoint').should('be.visible')
 
-      ma.saveJwksUrlCredentials()
+      ma.saveJwtKeyPairCredentials()
     })
   })
 
   after(() => {
     cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

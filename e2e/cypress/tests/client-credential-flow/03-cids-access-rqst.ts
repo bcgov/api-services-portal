@@ -11,7 +11,7 @@ describe('Developer creates an access request for Client ID/Secret', () => {
 
   before(() => {
     cy.visit('/')
-    cy.clearCookies()
+    cy.deleteAllCookies()
     cy.reload()
   })
 
@@ -53,5 +53,8 @@ describe('Developer creates an access request for Client ID/Secret', () => {
 
   after(() => {
     cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })
+ 
