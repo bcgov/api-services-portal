@@ -2,20 +2,6 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
-<<<<<<< HEAD
-=======
-<<<<<<<< HEAD:e2e/cypress/tests/client-credential-flow/01-client-cred-team-access.ts
-
-========
->>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
-<<<<<<< HEAD:e2e/cypress/tests/client-credential-flow/01-client-cred-team-access.ts
-
-=======
->>>>>>> 5b71799c (Finishes JWKS URL test suite):e2e/cypress/tests/client-credential-flow/03-client-cred-team-access.spec.ts
-<<<<<<< HEAD
-=======
->>>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files):e2e/cypress/tests/client-credential-flow/03-client-cred-team-access.spec.ts
->>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
 describe('Grant appropriate permissions to team members for client credential flow', () => {
   const login = new LoginPage()
   const home = new HomePage()

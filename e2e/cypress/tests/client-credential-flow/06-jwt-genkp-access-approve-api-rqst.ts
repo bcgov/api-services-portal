@@ -4,11 +4,8 @@ import ConsumersPage from '../../pageObjects/consumers'
 
 const njwt = require('njwt')
 
-<<<<<<< HEAD
 describe('Access manager approves developer access request for JWT - Generated Key Pair flow', () => {
-=======
-describe('Access manager approves developer access request for JWT - Generated Key Pair', () => {
->>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
+
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()
