@@ -3,7 +3,11 @@ import ApplicationPage from '../../pageObjects/applications'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import MyAccessPage from '../../pageObjects/myAccess'
 
+<<<<<<< HEAD
 describe('Developer creates an access request for JWT Generated Key Pair flow', () => {
+=======
+describe('Developer creates an access request for JWT Generated Key Pair', () => {
+>>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()

@@ -2,7 +2,11 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
 
+<<<<<<< HEAD
 describe('Access manager approves developer access request for Client ID/Secret flow', () => {
+=======
+describe('Access manager approves developer access request for client ID/secret', () => {
+>>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()
@@ -41,7 +45,11 @@ describe('Access manager approves developer access request for Client ID/Secret 
   })
 })
 
+<<<<<<< HEAD
 describe('Make an API request using Client ID, Secret, and Access Token', () => {
+=======
+describe('Make an API request using client ID, secret, and access token', () => {
+>>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
   it('Get access token using client ID and secret; make API request', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
@@ -65,4 +73,9 @@ describe('Make an API request using Client ID, Secret, and Access Token', () => 
       })
     })
   })
+<<<<<<< HEAD
+=======
+
+  
+>>>>>>> b1808e5d (Resolves util/expand-automation conflicts; condenses cc tests into fewer files)
 })
