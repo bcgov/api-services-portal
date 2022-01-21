@@ -5,7 +5,7 @@ import ConsumersPage from '../../pageObjects/consumers'
 const njwt = require('njwt')
 const jose = require('node-jose')
 
-describe('Access manager approves developer access request for JWKS URL', () => {
+describe('Access manager approves developer access request for JWKS URL flow', () => {
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()

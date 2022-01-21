@@ -6,7 +6,7 @@ import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 
 
-describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles to Product', () => {
+describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles to Product Environments', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
@@ -24,17 +24,17 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.fixture('apiowner').as('apiowner')
     cy.visit(login.path)
   })
-  it('authenticates api owner', () => {
+  it('Authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
   })
-  it('Activates cc namespace', () => {
+  it('Activates names for client credentials', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       home.useNamespace(clientCredentials.namespace)
     })
   })
-  it('API Owner creates authorization profile for client ID/Secret', () => {
+  it('Creates authorization profile for Client ID/Secret', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let ap = clientCredentials.clientIdSecret.authProfile
@@ -42,7 +42,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
   })
-  it('API Owner creates authorization profile for JWT - Generated Key Pair', () => {
+  it('Creates authorization profile for JWT - Generated Key Pair', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let ap = clientCredentials.jwtKeyPair.authProfile
@@ -50,7 +50,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
   })
-  it('API Owner creates authorization profile for JWKS URL', () => {
+  it('Creates authorization profile for JWKS URL', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let ap = clientCredentials.jwks.authProfile
@@ -58,14 +58,14 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
   })
-  it('creates a new service account', () => {
+  it('Creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
   })
-  it('publishes a new API to Kong Gateway', () => {
+  it('Publishes a new API to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
@@ -74,7 +74,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
-  it('creates a new product in the directory', () => {
+  it('Creates a new product in the directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       pd.createNewProduct(
@@ -83,7 +83,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       )
     })
   })
-  it('Adds client ID/Secret Env to Client Credentials Test Product', () => {
+  it('Adds environment with Client ID/Secret flow to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let product = clientCredentials.clientIdSecret.product
@@ -95,7 +95,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
-  it('Adds Environment for JWT - Generated Key Pair to Client Credentials Test Product', () => {
+  it('Adds environment with JWT - Generated Key Pair flow to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let prod = clientCredentials.jwtKeyPair.product
@@ -108,7 +108,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
-  it('API Adds Environment for JWKS URL to Client Credentials Test Product', () => {
+  it('Adds environment with JWT - JWKS URL flow to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let prod = clientCredentials.jwks.product
@@ -121,7 +121,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
-  it('applies authorization plugin to service published to Kong Gateway', () => {
+  it('Applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
@@ -130,7 +130,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
-  it('update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
+  it('Update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let product = clientCredentials.clientIdSecret.product

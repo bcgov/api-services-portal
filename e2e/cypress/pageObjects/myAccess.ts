@@ -15,7 +15,7 @@ class myAccessPage {
 
   saveAPIKeyValue(): void {
     cy.get(this.apiKyeValueTxt).then(($apiKey) => {
-      cy.saveState('APIKey', $apiKey.text())
+      cy.saveState('apikey', $apiKey.text())
     })
   }
 
@@ -24,7 +24,7 @@ class myAccessPage {
       cy.get(this.clientSecret).then(($clientSecret) => {
         cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
           cy.saveState(
-            'clientIdSecret',
+            'clientidsecret',
             '{"clientId": "' +
               $clientId.text() +
               '", "clientSecret": "' +
@@ -44,7 +44,7 @@ class myAccessPage {
         cy.get(this.publicKey).then(($publicKey) => {
           cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
             cy.saveState(
-              'jwtKeyPairCredentials',
+              'jwtkeypaircredentials',
               '{"clientId": "' +
                 $clientId.text() +
                 '", "tokenEndpoint": "' +
@@ -64,7 +64,7 @@ class myAccessPage {
       cy.get(this.issuer).then(($issuer) => {
         cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
           cy.saveState(
-            'jwksUrlCredentials',
+            'jwksurlcredentials',
             '{"clientId": "' +
             $clientId.text() +
             '", "issuer": "' +

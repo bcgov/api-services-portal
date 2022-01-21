@@ -20,19 +20,19 @@ describe('Grant appropriate permissions to team members for client credential fl
     cy.visit(login.path)
   })
 
-  it('authenticates api owner', () => {
+  it('Authenticates api owner', () => {
     cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
     })
   })
 
-  it('creates and activates new namespace', () => {
+  it('Creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       home.createNamespace(clientCredentials.namespace)
     })
   })
 
-  it('grant namespace access to access manager(Mark)', () => {
+  it('Grant namespace access to access manager(Mark)', () => {
     cy.get('@apiowner').then(({ permission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
@@ -40,7 +40,7 @@ describe('Grant appropriate permissions to team members for client credential fl
     })
   })
 
-  it('Grant CredentialIssuer.Admin permission to API Owner (awsummer)', () => {
+  it('Grant CredentialIssuer.Admin permission to API Owner', () => {
     cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()

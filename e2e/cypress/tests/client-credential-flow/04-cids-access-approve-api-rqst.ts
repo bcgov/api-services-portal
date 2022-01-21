@@ -2,7 +2,7 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import ConsumersPage from '../../pageObjects/consumers'
 
-describe('Access manager approves developer access request for client ID/secret', () => {
+describe('Access manager approves developer access request for Client ID/Secret flow', () => {
   const home = new HomePage()
   const login = new LoginPage()
   const consumers = new ConsumersPage()
@@ -41,7 +41,7 @@ describe('Access manager approves developer access request for client ID/secret'
   })
 })
 
-describe('Make an API request using client ID, secret, and access token', () => {
+describe('Make an API request using Client ID, Secret, and Access Token', () => {
   it('Get access token using client ID and secret; make API request', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
@@ -65,6 +65,4 @@ describe('Make an API request using client ID, secret, and access token', () => 
       })
     })
   })
-
-  
 })

@@ -9,7 +9,7 @@ describe('Generates public/private key and publishes public key to JWKS URL', ()
   it('Generates, saves keys', () => {
     let keyStore = jose.JWK.createKeyStore()
     keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' }).then((result: any) => {
-      cy.saveState('jwksUrlKeys', JSON.stringify(keyStore.toJSON(true), null, '  '))
+      cy.saveState('jwksurlkeys', JSON.stringify(keyStore.toJSON(true), null, '  '))
     })
   })
 

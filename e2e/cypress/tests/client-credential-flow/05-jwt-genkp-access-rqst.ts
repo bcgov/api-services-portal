@@ -3,7 +3,7 @@ import ApplicationPage from '../../pageObjects/applications'
 import ApiDirectoryPage from '../../pageObjects/apiDirectory'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-describe('Developer creates an access request for JWT Generated Key Pair', () => {
+describe('Developer creates an access request for JWT Generated Key Pair flow', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
