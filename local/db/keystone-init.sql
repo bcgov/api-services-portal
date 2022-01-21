@@ -324,7 +324,6 @@ CREATE TABLE public."CredentialIssuer" (
     "environmentDetails" text NOT NULL,
     "oidcDiscoveryUrl" text,
     "initialAccessToken" text,
-    "clientMappers" text,
     "clientId" text,
     "clientSecret" text,
     "clientMappers" text,

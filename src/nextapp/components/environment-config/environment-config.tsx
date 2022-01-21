@@ -286,7 +286,6 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                     isDisabled={!hasChanged}
                     isLoading={mutation.isLoading}
                     type="submit"
-                    variant="primary"
                     data-testid="prd-env-config-apply-btn"
                   >
                     Apply Changes
