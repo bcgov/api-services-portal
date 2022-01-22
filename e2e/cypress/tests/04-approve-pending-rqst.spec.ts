@@ -66,7 +66,7 @@ describe('Turn off the Authentication', () => {
     cy.fixture('state/store').as('store')
   })
 
-  it('approves an access request', () => {
+  it('Turn off the authentication switch', () => {
     cy.visit(consumers.path);
     consumers.clickOnTheFirstConsumerID()
     consumers.turnOnTheSwitch(false)
