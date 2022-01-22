@@ -3,6 +3,6 @@
   "clientCredentials": "{\"clientId\": \"E09485C6-E3D95B0804D\", \"clientSecret\": \"35791784-406f-4b09-b032-57512d74bd17\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
   "key": "7p9JDfcpFpnRKN923CK0P5jGpjPZBwJ3",
   "apikey": "j67PoYDYKbY83UrlG8sCI149mDt32XYU",
-  "servicesid": "c28cd755-b7fa-4851-bc41-48532f822fb8",
-  "routesid": "fd00c2da-1027-4f6d-a65f-f090388e3bda"
+  "servicesid": "ddf28723-f9c9-4153-b1c6-9b976126f5fd",
+  "routesid": "db7a2d00-9218-4891-9ed0-e75c344e7a9d"
 }
