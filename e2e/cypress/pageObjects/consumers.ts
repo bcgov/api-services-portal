@@ -50,7 +50,7 @@ export default class ConsumersPage {
     cy.contains('h4', 'rate-limiting').should('be.visible')
   }
 
-  turnOnTheSwitch(flag: Boolean) {
+  turnOnACLSwitch(flag: Boolean) {
     debugger
     cy.get(this.aclSwitch).find('input').then(($btn) => {
       if ($btn.is(':checked') != flag){

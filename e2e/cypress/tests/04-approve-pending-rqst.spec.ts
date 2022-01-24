@@ -69,7 +69,7 @@ describe('Turn off the Authentication', () => {
   it('Turn off the authentication switch', () => {
     cy.visit(consumers.path);
     consumers.clickOnTheFirstConsumerID()
-    consumers.turnOnTheSwitch(false)
+    consumers.turnOnACLSwitch(false)
   })
 
   it('Verify that API is not accessible with the generated API Key', () => {
@@ -82,7 +82,7 @@ describe('Turn off the Authentication', () => {
 })
 
   after(() => {
-    consumers.turnOnTheSwitch(true)
+    consumers.turnOnACLSwitch(true)
     cy.logout()
     cy.clearLocalStorage({log:true})
     cy.deleteAllCookies()
