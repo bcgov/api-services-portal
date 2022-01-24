@@ -49,7 +49,40 @@ describe('Approve Pending Request Spec', () => {
   })
 })
 
+})
+
+describe('Turn off the Authentication', () => {
+  const login = new LoginPage()
+  const consumers = new ConsumersPage()
+  const app = new ApplicationPage()
+  const apiDir = new ApiDirectoryPage()
+  const home = new HomePage()
+
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('developer').as('developer')
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('state/store').as('store')
+  })
+
+  it('Turn off the authentication switch', () => {
+    cy.visit(consumers.path);
+    consumers.clickOnTheFirstConsumerID()
+    consumers.turnOnACLSwitch(false)
+  })
+
+  it('Verify that API is not accessible with the generated API Key', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
+        expect(response.status).to.be.equal(403)
+        expect(response.body.message).to.be.contain('You cannot consume this service')
+    })
+  })
+})
+
   after(() => {
+    consumers.turnOnACLSwitch(true)
     cy.logout()
     cy.clearLocalStorage({log:true})
     cy.deleteAllCookies()
