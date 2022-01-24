@@ -50,8 +50,8 @@ describe('Approve Pending Request Spec', () => {
 describe('Turn off the Authentication', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
-  const app = new ApplicationPage()
-  const apiDir = new ApiDirectoryPage()
+  // const app = new ApplicationPage()
+  // const apiDir = new ApiDirectoryPage()
   const home = new HomePage()
 
   beforeEach(() => {
