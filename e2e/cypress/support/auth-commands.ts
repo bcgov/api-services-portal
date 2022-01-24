@@ -93,6 +93,7 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
+
   cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "credentials": "{\"clientId\": \"sa-ccplatform-e0000000-9a8dd3a69dae\", \"clientSecret\": \"6ba2218c-559d-4ec8-98d1-eab1ffdaf5d4\"}",
   "clientcredentials": "{\"clientId\": \"4FB68156-CFB7CDC2B12\", \"clientSecret\": \"56886533-e1ea-43ea-ba53-13db48e43744\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
@@ -9,3 +10,6 @@
   "servicesid": "77c852fa-0482-49e9-a93c-929267ff1cb6",
   "routesid": "619b3caa-3c67-46cd-8fd8-e19ad64a39f4"
 }
+=======
+  {}
+>>>>>>> util/expand-automation
