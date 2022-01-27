@@ -220,6 +220,3 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.deleteAllCookies()
     })
 })
-
-
-
