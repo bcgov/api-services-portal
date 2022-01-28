@@ -212,5 +212,18 @@ services:
       aps-net:
         aliases:
           - gwa-api.localtest.me
+  cypress-jwks-url:
+    build:
+      context: ./local/cypress-jwks-url
+      dockerfile: Dockerfile
+    volumes:
+      - ./local/cypress-jwks-url:/src
+    command: npm start
+    ports:
+      - "3500:3500"
+    networks:
+      aps-net:
+        aliases:
+          - cypress-jwks-url.localtest.me
 networks:
   aps-net: {}

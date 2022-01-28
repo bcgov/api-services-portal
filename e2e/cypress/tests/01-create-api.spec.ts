@@ -35,16 +35,18 @@ describe('Create API Spec', () => {
 
   it('creates a new service account', () => {
     cy.visit(sa.path)
-    cy.get('@apiowner').then(({ serviceAccount, namespace }: any) => {
+    cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.publishApi('service.yml').then(() => {
-      cy.get('@publishAPIResponse').then((res: any) => {
-        cy.log(JSON.stringify(res.body))
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.publishApi('service.yml', namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
       })
     })
   })
@@ -60,12 +62,14 @@ describe('Create API Spec', () => {
       pd.editProductEnvironment(product.name, product.environment.name)
       pd.editProductEnvironmentConfig(product.environment.config)
     })
-    pd.generateKongPluginConfig()
+    pd.generateKongPluginConfig('service.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.publishApi('service-plugin.yml').then(() => {
-      cy.get('@publishAPIResponse').then((res: any) => {
-        cy.log(JSON.stringify(res.body))
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.publishApi('service-plugin.yml', namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
       })
     })
   })
