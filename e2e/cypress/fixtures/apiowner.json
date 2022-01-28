@@ -51,9 +51,9 @@
         }
       }
     },
-    "jwks": {
+    "jwksUrl": {
       "authProfile": {
-        "name": "cy-jwks-auth",
+        "name": "cy-jwks-url-auth",
         "flow": "Client Credential Flow",
         "clientAuthenticator": "Signed JWT with JWKS URL",
         "environmentConfig": {

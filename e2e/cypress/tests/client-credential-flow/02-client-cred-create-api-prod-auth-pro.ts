@@ -53,7 +53,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   it('Creates authorization profile for JWKS URL', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.jwks.authProfile
+      let ap = clientCredentials.jwksUrl.authProfile
       authProfile.createAuthProfile(ap)
       cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
@@ -111,8 +111,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   it('Adds environment with JWT - JWKS URL authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let prod = clientCredentials.jwks.product
-      let ap = clientCredentials.jwks.authProfile
+      let prod = clientCredentials.jwksUrl.product
+      let ap = clientCredentials.jwksUrl.authProfile
       pd.addEnvToProduct(prod.name, prod.environment.name)
       pd.editProductEnvironment(prod.name, prod.environment.name)
       prod.environment.config.authIssuer = ap.name
