@@ -140,7 +140,7 @@ const ApplicationsPage: React.FC<
             emptyView={empty}
           >
             {(d: Application) => (
-              <React.Fragment key={d.id}>
+              <React.Fragment>
                 <Tr>
                   <Td>{d.name}</Td>
                   <Td>{d.appId}</Td>
