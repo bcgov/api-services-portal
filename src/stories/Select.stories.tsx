@@ -12,9 +12,18 @@ export default {
   title: 'BCGov/Dropdown',
 };
 
+// NOTE: The focus dropdown is for demonstration purpose only. See theme.ts for implementation
 export const Dropdown = () => (
   <VStack spacing={4}>
     <Select placeholder="Select One">
+      <option>Option 1</option>
+      <option>Option 2</option>
+    </Select>
+    <Select
+      placeholder="Focused Dropdown"
+      borderColor="bc-blue-alt"
+      boxShadow="lg"
+    >
       <option>Option 1</option>
       <option>Option 2</option>
     </Select>
@@ -30,9 +39,9 @@ export const Dropdown = () => (
 );
 
 export const DropdownHelpText = () => (
-  <FormControl isInvalid>
-    <FormLabel>Dropdown with Error</FormLabel>
-    <FormHelperText>Must be a valid selection</FormHelperText>
+  <FormControl>
+    <FormLabel>Dropdown with Help Text</FormLabel>
+    <FormHelperText>Include helpful instructions here</FormHelperText>
     <Select placeholder="Select One" variant="bc-input">
       <option>Option 1</option>
       <option>Option 2</option>
@@ -43,6 +52,9 @@ export const DropdownHelpText = () => (
 export const DropdownErrorMessage = () => (
   <FormControl isInvalid>
     <FormLabel>Dropdown with Error</FormLabel>
+    <FormHelperText>
+      Looks like the helpful text was not read ;-)
+    </FormHelperText>
     <Select placeholder="Error Dropdown" variant="bc-input">
       <option>Option 1</option>
       <option>Option 2</option>

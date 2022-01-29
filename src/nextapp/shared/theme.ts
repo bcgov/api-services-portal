@@ -1,6 +1,5 @@
-import { getServerSideProps } from '@/pages/devportal/access';
 import { extendTheme, withDefaultVariant } from '@chakra-ui/react';
-import { mode, transparentize } from '@chakra-ui/theme-tools';
+import { transparentize } from '@chakra-ui/theme-tools';
 
 const colors = {
   'bc-blue': '#003366',
@@ -66,7 +65,7 @@ const _valid = {
   borderColor: 'bc-success',
 };
 
-const getAlertStatusColor = (color) => {
+const getAlertStatusColor = (color: string) => {
   switch (color) {
     case 'blue':
       return 'bc-light-blue';
@@ -82,24 +81,22 @@ const getAlertStatusColor = (color) => {
 };
 
 const alertVariants = {
-  outline: (props) => {
-    const { colorScheme: c, theme: t } = props;
-    const color = getAlertStatusColor(c);
+  outline: ({ colorScheme, theme }) => {
+    const color = getAlertStatusColor(colorScheme);
     return {
       container: {
         paddingStart: 3,
         borderWidth: '1px',
         borderColor: color,
-        bg: transparentize(color, 0.1)(t),
+        bg: transparentize(color, 0.1)(theme),
       },
       icon: {
         color: color,
       },
     };
   },
-  status: (props) => {
-    const { colorScheme: c } = props;
-    const color = getAlertStatusColor(c);
+  status: ({ colorScheme }) => {
+    const color = getAlertStatusColor(colorScheme);
     return {
       container: {
         paddingStart: 3,
@@ -161,8 +158,9 @@ const buttonVariants = {
       outlineColor: 'transparent',
     },
     _focus: {
+      borderColor: 'bc-blue-alt',
+      boxShadow: 'lg',
       bgColor: '#F2F5F7',
-      boxShadow: 'none',
       outlineColor: 'transparent',
     },
   },
@@ -300,10 +298,24 @@ const theme = extendTheme(
           '& > span': {
             display: 'none',
           },
-          '& + div': {
+          '& + div.chakra-form__helper-text': {
             mb: 2,
             mt: -2,
-            color: 'component',
+            color: 'bc-component',
+          },
+        },
+      },
+      FormError: {
+        baseStyle: {
+          text: {
+            fontWeight: 'normal',
+            fontSize: 'md',
+            clear: 'both',
+            overflow: 'hidden',
+
+            'textarea + &': {
+              mt: 0,
+            },
           },
         },
       },
