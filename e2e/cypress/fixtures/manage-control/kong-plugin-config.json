@@ -1,0 +1,11 @@
+{
+    "rate-limiting": {
+      "name": "rate-limiting",
+      "config.hour": "20",
+      "config.policy": "local"
+    },
+    "ip-restriction": {
+      "name": "ip-restriction",
+      "config.allow": "192.168.0.1/0"
+    }
+  }

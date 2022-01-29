@@ -277,11 +277,9 @@ const AccessRequestPage: React.FC<
                   <Flex>
                     <Avatar name={requestor.name} size="sm" mr={2} />
                     <Box ml={2}>
-                      <Text fontWeight="bold">
-                        {requestor.name}{' '}
-                        <Text as="span" fontWeight="normal" color="gray.400">
-                          {requestor.username}
-                        </Text>
+                      <Text fontWeight="bold">{requestor.name}</Text>
+                      <Text as="span" fontWeight="normal" color="gray.400">
+                        {requestor.username}
                       </Text>
                       <Text fontSize="xs">{requestor.email}</Text>
                     </Box>

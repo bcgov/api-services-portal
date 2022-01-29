@@ -1,0 +1,6 @@
+entity: User
+record:
+  id: 'mark'
+  name: 'mark F mark L'
+  email: 'mark@development.me'
+  isAdmin: false

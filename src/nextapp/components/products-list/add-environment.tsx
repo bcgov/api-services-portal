@@ -10,6 +10,7 @@ import {
 import { useQueryClient } from 'react-query';
 import { ADD_ENVIRONMENT } from '@/shared/queries/products-queries';
 import { useApiMutation } from '@/shared/services/api';
+import kebabCase from 'lodash/kebabCase';
 
 const options: { name: string; value: string }[] = [
   { name: 'Development', value: 'dev' },
@@ -23,12 +24,14 @@ interface AddEnvironmentProps {
   children: React.ReactNode;
   environments: string[];
   productId: string;
+  productName: string;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   children,
   environments,
   productId,
+  productName,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
@@ -55,7 +58,11 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 
   return (
     <Menu>
-      <MenuButton as={Button} variant="unstyled" data-testid="prd-env-add-btn">
+      <MenuButton
+        as={Button}
+        variant="unstyled"
+        data-testid={`${kebabCase(productName)}-add-env-btn`}
+      >
         {children}
       </MenuButton>
       <MenuList>
@@ -66,7 +73,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
               key={e.value}
               onClick={onSelect(e.value)}
               value={e.value}
-              data-testid={'prd-env-item-' + e.value}
+              data-testid={`${kebabCase(productName)}-prd-env-item-${e.value}`}
             >
               {e.name}
             </MenuItem>

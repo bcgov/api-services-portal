@@ -13,3 +13,12 @@ Cypress.on('test:after:run', (test: Mocha.Test, runnable: Mocha.Runnable) => {
     addContext({ test }, screenshot)
   }
 })
+
+export const checkElementExists = (elm: any): boolean => {
+  cy.get('body').then(($body) => {
+    if ($body.find(elm).length > 0) {
+      return true
+    }
+  })
+  return false
+}

@@ -10,7 +10,11 @@ while true; do
         cd /e2e
         # added sleep to wait for initial data seeding
         sleep 1m
-        npm run cy:run:html
+        if [[ "$RUN_ENV" == "prod" ]]; then
+            npm run cy:run:rcd:html
+        else
+            npm run cy:run:html
+        fi
         break
     else
         echo  "Waiting for Keycloak....."

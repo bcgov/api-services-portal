@@ -1,31 +1,18 @@
+const listOfCookies = [
+  'AUTH_SESSION_ID_LEGACY',
+  'KC_RESTART',
+  'KEYCLOAK_IDENTITY_LEGACY',
+  'KEYCLOAK_LOCALE',
+  'KEYCLOAK_REMEMBER_ME',
+  'KEYCLOAK_SESSION_LEGACY',
+  '_oauth2_proxy',
+  '_oauth2_proxy_csrf',
+  'keystone.sid',
+]
+
 Cypress.Commands.add('preserveCookies', () => {
   cy.log('< Saving Cookies')
-  Cypress.Cookies.preserveOnce(
-    ...[
-      'AUTH_SESSION_ID_LEGACY',
-      'KC_RESTART',
-      'KEYCLOAK_IDENTITY_LEGACY',
-      'KEYCLOAK_LOCALE',
-      'KEYCLOAK_LOCALE',
-      'KEYCLOAK_SESSION_LEGACY',
-      '_oauth2_proxy',
-      '_oauth2_proxy_csrf',
-      'keystone.sid',
-    ]
-  )
-  // Cypress.Cookies.defaults({
-  //   preserve: [
-  //     'AUTH_SESSION_ID_LEGACY',
-  //     'KC_RESTART',
-  //     'KEYCLOAK_IDENTITY_LEGACY',
-  //     'KEYCLOAK_LOCALE',
-  //     'KEYCLOAK_LOCALE',
-  //     'KEYCLOAK_SESSION_LEGACY',
-  //     '_oauth2_proxy',
-  //     '_oauth2_proxy_csrf',
-  //     'keystone.sid',
-  //   ],
-  // })
+  Cypress.Cookies.preserveOnce(...listOfCookies)
   Cypress.Cookies.debug(true)
   cy.log('> Saving Cookies')
 })
@@ -51,7 +38,9 @@ Cypress.Commands.add('preserveCookiesDefaults', () => {
 
 Cypress.Commands.add('saveState', (key: string, value: string) => {
   cy.log('< Saving State')
+  debugger
   cy.log(key, value)
+  const keyValue = key.toLowerCase()
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
@@ -59,9 +48,10 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       _.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
-  } else {
+  }
+  else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
-      currState[key] = value
+      currState[keyValue] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
     })
   }
@@ -81,6 +71,7 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
+
 Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}
@@ -88,3 +79,4 @@ Cypress.Commands.add('resetState', () => {
   })
   cy.log('Test state was reset')
 })
+

@@ -92,21 +92,35 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
           <form ref={form} onSubmit={onSubmit}>
             <FormControl isRequired mb={8}>
               <FormLabel>Application Name</FormLabel>
-              <Input name="name" variant="bc-input" />
+              <Input
+                name="name"
+                variant="bc-input"
+                data-testid="create-app-name-input"
+              />
             </FormControl>
             <FormControl>
               <FormLabel>Description (Optional)</FormLabel>
               <FormHelperText>What does your application do?</FormHelperText>
-              <Textarea name="description" variant="bc-input" />
+              <Textarea
+                name="description"
+                variant="bc-input"
+                data-testid="create-app-description-input"
+              />
             </FormControl>
           </form>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose} variant="secondary">
+            <Button
+              onClick={onClose}
+              variant="secondary"
+              data-testid="create-app-cancel-btn"
+            >
               Cancel
             </Button>
-            <Button onClick={submitForm}>Create</Button>
+            <Button onClick={submitForm} data-testid="create-app-submit-btn">
+              Create
+            </Button>
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>

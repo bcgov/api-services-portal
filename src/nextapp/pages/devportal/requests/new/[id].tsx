@@ -218,6 +218,7 @@ const NewRequestsPage: React.FC<
                   onChange={(e) => {
                     setSelectedApplication(e.target.value);
                   }}
+                  data-testid="access-rqst-app-select"
                 >
                   <option value="">No Application Selected</option>
                   {data.myApplications.map((a) => (
@@ -271,7 +272,12 @@ const NewRequestsPage: React.FC<
                   icon: FaBook,
                   label: (
                     <Box>
-                      <Text fontWeight="bold">{e.name}</Text>
+                      <Text
+                        fontWeight="bold"
+                        data-testid={`access-rqst-app-env-${e.name}`}
+                      >
+                        {e.name}
+                      </Text>
                       <Text fontSize="sm" color="gray.400">
                         {e.flow}
                       </Text>
@@ -316,6 +322,7 @@ const NewRequestsPage: React.FC<
               name="additionalDetails"
               placeholder="Add any addtional notes for the API Provider"
               variant="bc-input"
+              data-testid="access-rqst-add-notes-text"
             />
             {selectedEnvironment?.legal && hasNotAgreedLegal && (
               <Flex
@@ -325,7 +332,11 @@ const NewRequestsPage: React.FC<
                 bgColor="blue.50"
                 borderRadius={4}
               >
-                <Checkbox colorScheme="blue" name="acceptLegal">
+                <Checkbox
+                  colorScheme="blue"
+                  name="acceptLegal"
+                  data-testid="access-rqst-legal-terms-cb"
+                >
                   {selectedEnvironment.legal.title}
                 </Checkbox>
                 <Link
@@ -343,10 +354,16 @@ const NewRequestsPage: React.FC<
           <Box mt={4} bgColor="white">
             <Flex justify="flex-end" p={4}>
               <ButtonGroup>
-                <Button variant="secondary" onClick={handleCancel}>
+                <Button
+                  variant="secondary"
+                  onClick={handleCancel}
+                  data-testid="access-rqst-cancel-btn"
+                >
                   Cancel
                 </Button>
-                <Button type="submit">Submit</Button>
+                <Button type="submit" data-testid="access-rqst-submit-btn">
+                  Submit
+                </Button>
               </ButtonGroup>
             </Flex>
           </Box>
