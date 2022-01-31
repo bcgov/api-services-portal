@@ -5,5 +5,8 @@
       "password": "mark"
     }
   },
-  "namespace": "platform"
+  "namespace": "platform",
+  "clientCredentials": {
+    "namespace": "ccplatform"
+  }
 }

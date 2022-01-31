@@ -135,7 +135,7 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string) => {
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
   cy.fixture('state/store').then((creds: any) => {
@@ -145,7 +145,7 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
-            url: Cypress.env('GWA_API_URL') + '/namespaces/platform/gateway',
+            url: Cypress.env('GWA_API_URL') + '/namespaces/' + namespace + '/gateway',
           }
           formDataRequest(options, res.body.access_token, fileName, requestName)
           cy.wait(`@${requestName}`).then((res: any) => {

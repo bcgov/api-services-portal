@@ -45,10 +45,9 @@ describe('Approve Pending Request Spec', () => {
       cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
         cy.log(response)
         expect(response.status).to.be.equal(200)
+      })
     })
   })
-})
-
 })
 
 describe('Turn off the Authentication', () => {
@@ -77,9 +76,9 @@ describe('Turn off the Authentication', () => {
       cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
         expect(response.status).to.be.equal(403)
         expect(response.body.message).to.be.contain('You cannot consume this service')
+      })
     })
   })
-})
 
   after(() => {
     consumers.turnOnACLSwitch(true)

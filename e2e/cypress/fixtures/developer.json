@@ -14,11 +14,40 @@
     "name": "Auto Test App",
     "description": "Test application for auto test"
   },
-  "clientCredentialsApplication": {
-    "name": "Client Credentials App",
-    "description": "Application for testing client credential flow."
-  },
   "accessRequest": {
     "notes": "This is test access request"
+  },
+  "clientCredentials": {
+    "namespace": "ccplatform",
+    "clientIdSecret": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "jwtKeyPair": {
+      "application": {
+        "name": "JWT Key Pair App",
+        "description": "Application for JWT Key Pair flow."
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "dev"
+      }
+    },
+    "jwksUrl": {
+      "application": {
+        "name": "JWKS URL App",
+        "description": "Application for JWKS URLS flow."
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "sandbox"
+      }
+    }
   }
 }

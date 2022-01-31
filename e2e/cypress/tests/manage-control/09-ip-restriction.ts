@@ -11,7 +11,6 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
         cy.visit('/')
         cy.deleteAllCookies()
         cy.reload()
-
     })
 
     beforeEach(() => {
@@ -221,6 +220,3 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.deleteAllCookies()
     })
 })
-
-
-
