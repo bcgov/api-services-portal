@@ -1,11 +1,23 @@
 {
-    "rate-limiting": {
-      "name": "rate-limiting",
-      "config.hour": "20",
-      "config.policy": "local"
-    },
-    "ip-restriction": {
-      "name": "ip-restriction",
-      "config.allow": "192.168.0.1/0"
-    }
+  "1234": "c94ef817-2a7d-4780-8d63-834ccb286792",
+  "rate-limiting": {
+    "name": "rate-limiting",
+    "config.hour": "20",
+    "config.policy": "local"
+  },
+  "rate-limiting-consumer": {
+    "name": "rate-limiting",
+    "config.hour": "100",
+    "config.policy": "local"
+  },
+  "ip-restriction": {
+    "name": "ip-restriction",
+    "config.allow": "192.168.0.1/0"
+  },
+  "create-consumer": {
+    "username": "consumer1"
+  },
+  "key-auth": {
+    "config.anonymous": "9a150e29-1539-4796-a4e0-d4a766218ae5"
   }
+}
