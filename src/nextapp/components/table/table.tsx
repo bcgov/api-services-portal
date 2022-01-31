@@ -21,7 +21,7 @@ interface Column extends TableColumnHeaderProps {
 }
 
 interface ApsTableProps extends TableProps {
-  children: (d: unknown, index: number) => React.ReactNode;
+  children: (d: unknown, index: number) => React.ReactElement;
   columns: Column[];
   data: unknown[];
   emptyView?: React.ReactNode;
