@@ -1,29 +1,21 @@
 import * as React from 'react';
-import AccessRequests from '@/components/access-requests';
 import api, { useApi } from '@/shared/services/api';
 import {
   Box,
-  Button,
-  ButtonGroup,
-  Center,
   Container,
-  Divider,
   Heading,
-  Link,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Text,
-  Alert,
-  AlertIcon,
-  IconButton,
   Icon,
-  Badge,
+  Link,
+  Td,
+  Tr,
+  Input,
+  InputGroup,
+  InputRightElement,
   Wrap,
   WrapItem,
+  Tag,
+  MenuItem,
+  Flex,
 } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -31,14 +23,19 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import { Query } from '@/shared/types/query.types';
+import { GatewayConsumer, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
-import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
 import TagsList from '@/components/tags-list';
 import LinkConsumer from '@/components/link-consumer';
+import Table from '@/components/table';
 
 import breadcrumbs from '@/components/ns-breadcrumb';
+import EmptyPane from '@/components/empty-pane';
+import { uid } from 'react-uid';
+import { HiOutlineSearch } from 'react-icons/hi';
+import ActionsMenu from '@/components/actions-menu';
+import InlineManageLabels from '@/components/inline-manage-labels';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -62,6 +59,7 @@ const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
   const queryKey = ['allConsumers'];
+  const [search, setSearch] = React.useState('');
   const { data } = useApi(
     queryKey,
     {
@@ -69,10 +67,33 @@ const ConsumersPage: React.FC<
     },
     { suspense: false }
   );
-  const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
-  const totalConsumers = data?.allServiceAccessesByNamespace?.length ?? 0;
+  const consumers = React.useMemo(() => {
+    if (!data?.allServiceAccessesByNamespace) {
+      return [];
+    }
+    const result = data.allServiceAccessesByNamespace
+      ?.filter((d) => !!d.consumer)
+      .map((d) => d.consumer);
 
-  const actions = [<LinkConsumer queryKey={queryKey} />];
+    if (!search) {
+      return result;
+    }
+
+    return result.filter((d) => {
+      return (
+        d.username.search(search) >= 0 ||
+        d.id.search(search) >= 0 ||
+        d.tags.search(search) >= 0
+      );
+    });
+  }, [data, search]);
+  const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
+  const totalConsumers = consumers.length ?? 0;
+
+  // Events
+  const handleSearchChange = React.useCallback((event) => {
+    setSearch(event.target.value);
+  }, []);
 
   return (
     <>
@@ -85,115 +106,89 @@ const ConsumersPage: React.FC<
         <PageHeader
           title="Consumers"
           breadcrumb={breadcrumbs([])}
-          actions={actions}
+          actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <Box mb={4}>
-          {totalRequests === 0 && (
-            <Alert status="info">
-              <AlertIcon />
-              Once you add consumers to your API, access requests will be listed
-              here.
-            </Alert>
-          )}
-          {totalRequests > 0 && <AccessRequests />}
-        </Box>
         <Box bgColor="white" mb={4}>
           <Box
+            as="header"
             p={4}
+            pl={9}
             display="flex"
             alignItems="center"
             justifyContent="space-between"
           >
-            <Heading size="md">All Consumers</Heading>
+            <Heading
+              size="sm"
+              fontWeight="normal"
+            >{`${totalConsumers} Consumer${
+              totalConsumers === 1 ? '' : 's'
+            }`}</Heading>
+            <Box>
+              <InputGroup>
+                <Input
+                  borderColor="#e1e1e5"
+                  placeholder="Search by Name/ID or Label"
+                  variant="outline"
+                  onChange={handleSearchChange}
+                  value={search}
+                />
+                <InputRightElement>
+                  <Icon as={HiOutlineSearch} color="bc-component" />
+                </InputRightElement>
+              </InputGroup>
+            </Box>
           </Box>
-          <Divider />
-          <Table data-testid="all-consumer-control-tbl" variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Name/Id</Th>
-                <Th>Controls</Th>
-                <Th>Tags</Th>
-                <Th colSpan={2}>Last Updated</Th>
+          <Table
+            sortable
+            columns={[
+              { name: 'Name/ID', key: 'name' },
+              {
+                name: <InlineManageLabels />,
+                key: 'tags',
+                sortable: false,
+              },
+              { name: 'Updated', key: 'updatedAt' },
+            ]}
+            data={consumers}
+            data-testid="all-consumer-control-tbl"
+            emptyView={
+              <EmptyPane
+                title="Create your first consumer"
+                message="Consumers access your API under restrictions you set"
+              />
+            }
+          >
+            {(consumer: GatewayConsumer) => (
+              <Tr key={uid(consumer.id)}>
+                <Td width="25%">
+                  <NextLink passHref href={`/consumers/${consumer.id}`}>
+                    <Link color="bc-link" textDecor="underline">
+                      {consumer.username}
+                    </Link>
+                  </NextLink>
+                </Td>
+                <Td width="50%">
+                  <Wrap spacing={2.5}>
+                    {JSON.parse(consumer.tags).map((t) => (
+                      <WrapItem key={uid(t)}>
+                        <Tag bgColor="white" variant="outline">
+                          {t}
+                        </Tag>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </Td>
+                <Td width="25%">
+                  <Flex align="center" justify="space-between">
+                    {formatDistanceToNow(new Date(consumer.updatedAt))} ago
+                    <ActionsMenu>
+                      <MenuItem color="bc-link">Grant Access</MenuItem>
+                      <MenuItem color="red">Delete Consumer</MenuItem>
+                    </ActionsMenu>
+                  </Flex>
+                </Td>
               </Tr>
-            </Thead>
-            <Tbody>
-              {totalConsumers === 0 && (
-                <Tr>
-                  <Td colSpan={5}>
-                    <Center>
-                      <Box m={8} textAlign="center">
-                        <Heading mb={2} size="md">
-                          Create your first consumer
-                        </Heading>
-                        <Text color="gray.600">
-                          Consumers access your API under restrictions you set
-                        </Text>
-                      </Box>
-                    </Center>
-                  </Td>
-                </Tr>
-              )}
-              {data.allServiceAccessesByNamespace
-                ?.filter((d) => !!d.consumer)
-                .map((d) => d.consumer)
-                .map((d) => (
-                  <Tr key={d.id}>
-                    <Td>
-                      <NextLink passHref href={`/manager/consumers/${d.id}`}>
-                        <Link>{d.customId ?? d.username}</Link>
-                      </NextLink>
-                    </Td>
-                    <Td>
-                      <Wrap>
-                        {d.plugins?.length === 0 ? (
-                          <NextLink href={`/manager/consumers/${d.id}`}>
-                            <Button
-                              leftIcon={<Icon as={FaPlusCircle} />}
-                              size="xs"
-                              variant="ghost"
-                              color="gray"
-                            >
-                              Add Controls
-                            </Button>
-                          </NextLink>
-                        ) : (
-                          d.plugins.map((d) => (
-                            <WrapItem key={d.id}>
-                              <Badge variant="outline">{d.name}</Badge>
-                            </WrapItem>
-                          ))
-                        )}
-                      </Wrap>
-                    </Td>
-                    <Td>
-                      <TagsList data={d.tags} size="xs" />
-                    </Td>
-                    <Td>{`${formatDistanceToNow(
-                      new Date(d.updatedAt)
-                    )} ago`}</Td>
-                    <Td textAlign="right">
-                      <ButtonGroup size="sm">
-                        <NextLink href={`/manager/consumers/${d.id}`}>
-                          <Button
-                            variant="outline"
-                            color="bc-blue-alt"
-                            leftIcon={<Icon as={FaPen} />}
-                          >
-                            Edit
-                          </Button>
-                        </NextLink>
-                        <IconButton
-                          aria-label="disable consumer button"
-                          icon={<Icon as={FaStop} />}
-                          variant="outline"
-                          colorScheme="red"
-                          disabled={true}
-                        />
-                      </ButtonGroup>
-                    </Td>
-                  </Tr>
-                ))}
-            </Tbody>
+            )}
           </Table>
         </Box>
       </Container>
