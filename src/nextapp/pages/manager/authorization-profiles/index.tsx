@@ -25,6 +25,10 @@ import {
   Icon,
   MenuItem,
   useToast,
+  Grid,
+  Wrap,
+  WrapItem,
+  GridItem,
 } from '@chakra-ui/react';
 import { dehydrate } from 'react-query/hydration';
 import { gql } from 'graphql-request';
@@ -176,6 +180,7 @@ const AuthorizationProfiles: React.FC<
                       <Portal>
                         <PopoverContent
                           border="1px solid"
+                          width="auto"
                           borderColor="bc-component"
                         >
                           <PopoverArrow
@@ -190,30 +195,21 @@ const AuthorizationProfiles: React.FC<
                             p={4}
                           >
                             <Avatar name={c.owner?.name} />
-                            <Box as="dl" color="bc-component">
-                              <Text
-                                as="dt"
-                                float="left"
-                                fontWeight="bold"
-                                mr={1}
-                              >
+                            <Grid
+                              as="dl"
+                              color="bc-component"
+                              columnGap={2}
+                              templateColumns="auto 1fr"
+                            >
+                              <GridItem as="dt" fontWeight="bold">
                                 Username:
-                              </Text>
-                              <Text as="dd" d="inline">
-                                {c.owner?.name}
-                              </Text>
-                              <Text
-                                as="dt"
-                                float="left"
-                                fontWeight="bold"
-                                mr={1}
-                              >
+                              </GridItem>
+                              <GridItem as="dd">{c.owner?.name}</GridItem>
+                              <GridItem as="dt" fontWeight="bold" mr={1}>
                                 Email:
-                              </Text>
-                              <Text as="dd" d="inline">
-                                {c.owner?.email}
-                              </Text>
-                            </Box>
+                              </GridItem>
+                              <GridItem as="dd">{c.owner?.email}</GridItem>
+                            </Grid>
                           </PopoverBody>
                         </PopoverContent>
                       </Portal>

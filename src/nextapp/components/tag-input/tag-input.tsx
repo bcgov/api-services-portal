@@ -133,6 +133,7 @@ const TagInput: React.FC<TagInputProps> = ({
               onFocus={handleFocus}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
+              minWidth={placeholder.length * 10}
               variant="unstyled"
               data-testid={`${props['data-testid']}-input`}
             />
