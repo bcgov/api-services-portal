@@ -105,13 +105,17 @@ const ApplicationSelect: React.FC = () => {
             </FormHelperText>
             <Select
               isRequired
-              isDisabled={isLoading}
+              isDisabled={isLoading ?? data?.myApplications?.length === 0}
               name="applicationId"
               onChange={handleSelectApplication}
               value={application}
               data-testid="access-application-select"
             >
-              <option value="">No Application Selected</option>
+              <option value="">
+                {data?.myApplications?.length === 0
+                  ? 'You have no applications'
+                  : 'No Application Selected'}
+              </option>
               {data?.myApplications?.map((a) => (
                 <option key={uid(a)} value={a.id}>
                   {a.name}

@@ -48,6 +48,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
   const selectedEnvironment: Environment = React.useMemo(() => {
     return dataset.environments.find((e) => e.id === environment);
   }, [dataset, environment]);
+  const isCommentsRequired = Boolean(
+    selectedEnvironment?.additionalDetailsToRequest
+  );
   const clientAuthenticator =
     selectedEnvironment?.credentialIssuer?.clientAuthenticator;
   const hasNotAgreedLegal = React.useMemo(() => {
@@ -116,9 +119,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
       </Fieldset>
       {environment && (
         <Fieldset
-          label="Comments"
+          label={`Comments${isCommentsRequired ? '' : ' (optional)'}`}
           icon={FaCommentDots}
-          isRequired={Boolean(selectedEnvironment?.additionalDetailsToRequest)}
+          isRequired={isCommentsRequired}
         >
           <Box mb={2}>
             {selectedEnvironment?.additionalDetailsToRequest && (
