@@ -51,10 +51,8 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
     })
   }
   if (key == 'config.anonymous') {
-    cy.log("Inside Save State for Annouymous")
     cy.readFile('cypress/fixtures/manage-control/kong-plugin-config.json').then((currState) => {
-      // _.set(newState, currState["key-auth"]["config.anonymous"], value)
-      currState["key-auth"]["config.anonymous"] = value
+      currState["keyAuth"]["config.anonymous"] = value
       cy.writeFile('cypress/fixtures/manage-control/kong-plugin-config.json', currState)
     })
   }

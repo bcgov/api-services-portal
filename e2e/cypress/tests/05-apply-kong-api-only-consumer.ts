@@ -1,4 +1,4 @@
-describe('Approve Pending Request Spec', () => {
+describe('Apply Kong API key only plugin', () => {
   var consumerID: string
   var consumerKey: string
   var pluginID: string
@@ -18,7 +18,7 @@ describe('Approve Pending Request Spec', () => {
     cy.fixture('state/store').as('store')
   })
 
-  it('applies authorization plugin to service published to Kong Gateway', () => {
+  it('Apply Key-auth only authorization plugin to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
       cy.publishApi('service-plugin-key-auth-only.yml', namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
@@ -35,15 +35,15 @@ describe('Approve Pending Request Spec', () => {
     })
   })
 
-  it('Create a new consumer and save the customer id', () => {
-    cy.makeKongGatewayRequest('consumers', 'create-consumer', 'POST').then((response) => {
+  it('Create a new consumer and save the consumer Id', () => {
+    cy.makeKongGatewayRequest('consumers', 'createConsumer', 'POST').then((response) => {
       expect(response.status).to.be.equal(201)
       consumerID = response.body.id
       cy.saveState("consumersid", consumerID)
     })
   })
 
-  it('Create a key for the newly created customer', () => {
+  it('Create a key for the newly created consumer', () => {
     const endpoint = 'consumers/' + consumerID + '/key-auth'
     cy.makeKongGatewayRequest(endpoint, '', 'POST').then((response) => {
       expect(response.status).to.be.equal(201)
@@ -54,7 +54,7 @@ describe('Approve Pending Request Spec', () => {
 
   it('Update the Kong key-auth plugin the new consumer', () => {
     cy.saveState("config.anonymous", consumerID)
-    cy.updateKongPlugin('', 'key-auth', 'plugins/' + pluginID, 'PATCH').then((response) => {
+    cy.updateKongPlugin('', 'keyAuth', 'plugins/' + pluginID, 'PATCH').then((response) => {
       expect(response.status).to.be.equal(200)
     })
   })

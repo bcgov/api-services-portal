@@ -1,5 +1,5 @@
 
-describe('Check the API key for free and elivated access', () => {
+describe('Check the API key for free and elevated access', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
@@ -18,7 +18,7 @@ describe('Check the API key for free and elivated access', () => {
     })
   })
 
-  it('Verify the service is accessibale with API key for elivated access', () => {
+  it('Verify the service is accessible with API key for elevated access', () => {
     cy.get('@apiowner').then(async ({ product }: any) => {
       cy.fixture('state/store').then((creds: any) => {
         const key = creds.consumerKey
@@ -39,7 +39,7 @@ describe('Apply Rate limiting for Free Access', () => {
   })
 
   it('set api rate limit to free access', () => {
-    cy.updateKongPlugin('consumers', 'rate-limiting-consumer').then((response) => {
+    cy.updateKongPlugin('consumers', 'rateLimitingConsumer').then((response) => {
       expect(response.status).to.be.equal(201)
     })
   })

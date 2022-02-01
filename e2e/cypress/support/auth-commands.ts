@@ -173,7 +173,8 @@ Cypress.Commands.add('deleteAllCookies', () => {
 
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   cy.fixture('state/store').then((creds: any) => {
-    let token = (typeof key !== 'undefined') ?  key : creds.apikey
+    let token = key || creds.apikey
+    token = (typeof key !== 'undefined') ?  key : creds.apikey
     cy.log("Token->"+token)
     const service = serviceName
     return cy.request({
