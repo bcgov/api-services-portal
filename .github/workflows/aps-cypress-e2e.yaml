@@ -60,12 +60,10 @@ jobs:
       #     name: code-coverage
       #     path: ${{ github.workspace }}/e2e/coverage
 
-      - name: Init Sonar Scan
-        run: |
-          cd e2e
-
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: e2e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
