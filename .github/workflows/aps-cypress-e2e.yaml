@@ -2,8 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches:
-      - 'util/*automation*'
+    branches: ['util/*automation*', 'util/cy-code-cover']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
