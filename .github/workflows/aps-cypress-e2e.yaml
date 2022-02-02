@@ -18,44 +18,54 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
-      - name: Build GWA API Image
+      # - name: Build GWA API Image
+      #   run: |
+      #     git clone https://github.com/bcgov/gwa-api.git -b dev
+      #     cd gwa-api/microservices/gatewayApi
+      #     docker build -t gwa-api:e2e .
+      # - name: Checkout Portal
+      #   uses: actions/checkout@v2
+      # - name: Spin up API Services Portal and Run E2E Tests
+      #   run: |
+      #     export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
+      #     export CY_RECORD_KEY=${{ env.DASHBOARD_RECORD_KEY }}
+      #     export CY_PROJECT_ID=${{ env.DASHBOARD_PROJECT_ID }}
+      #     export CY_COMMIT_BRANCH=${{ env.GIT_COMMIT_BRANCH }}
+      #     export CY_COMMIT_SHA=${{ env.GIT_COMMIT_SHA }}
+      #     export CY_COMMIT_AUTHOR=${{ env.GIT_COMMIT_AUTHOR }}
+      #     export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
+      #     export CY_REPO_URL=${{ env.GIT_REPO_URL }}
+      #     export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
+      #     docker-compose up -d
+      # - name: Execute Tests & Clean Up
+      #   run: |
+      #     while true; do
+      #       if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
+      #         # cleanup
+      #         docker-compose down
+      #         break
+      #       else
+      #         echo  "Waiting for Cypress to Complete E2E Tests....."
+      #         sleep 1m
+      #       fi
+      #     done
+      # - name: Upload E2E Test Results Report
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: test-results
+      #     path: ${{ github.workspace }}/e2e/results/report
+      # - name: Upload E2E Code Coverage Report
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: code-coverage
+      #     path: ${{ github.workspace }}/e2e/coverage
+
+      - name: Init Sonar Scan
         run: |
-          git clone https://github.com/bcgov/gwa-api.git -b dev
-          cd gwa-api/microservices/gatewayApi
-          docker build -t gwa-api:e2e .
-      - name: Checkout Portal
-        uses: actions/checkout@v2
-      - name: Spin up API Services Portal and Run E2E Tests
-        run: |
-          export CY_EXECUTION_ENV=${{ env.EXECUTION_ENV }}
-          export CY_RECORD_KEY=${{ env.DASHBOARD_RECORD_KEY }}
-          export CY_PROJECT_ID=${{ env.DASHBOARD_PROJECT_ID }}
-          export CY_COMMIT_BRANCH=${{ env.GIT_COMMIT_BRANCH }}
-          export CY_COMMIT_SHA=${{ env.GIT_COMMIT_SHA }}
-          export CY_COMMIT_AUTHOR=${{ env.GIT_COMMIT_AUTHOR }}
-          export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
-          export CY_REPO_URL=${{ env.GIT_REPO_URL }}
-          export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }}) 
-          docker-compose up -d
-      - name: Execute Tests & Clean Up
-        run: |
-          while true; do
-            if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
-              # cleanup
-              docker-compose down
-              break
-            else
-              echo  "Waiting for Cypress to Complete E2E Tests....."
-              sleep 1m
-            fi
-          done
-      - name: Upload E2E Test Results Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: ${{ github.workspace }}/e2e/results/report
-      - name: Upload E2E Code Coverage Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: code-coverage
-          path: ${{ github.workspace }}/e2e/coverage
+          cd e2e
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
