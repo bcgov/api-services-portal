@@ -65,7 +65,7 @@ services:
       - keycloak
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.E2E
     env_file:
       - .env.local
     ports:
@@ -220,7 +220,7 @@ services:
       - ./local/cypress-jwks-url:/src
     command: npm start
     ports:
-      - "3500:3500"
+      - '3500:3500'
     networks:
       aps-net:
         aliases:
