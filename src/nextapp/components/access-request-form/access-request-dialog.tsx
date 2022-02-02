@@ -33,6 +33,7 @@ interface AccessRequestDialogProps {
   defaultTab?: number;
   disabled: boolean;
   id: string;
+  name: string;
   open?: boolean;
 }
 
@@ -40,6 +41,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   defaultTab = 0,
   disabled,
   id,
+  name,
   open,
 }) => {
   const client = useQueryClient();
@@ -161,7 +163,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         <ModalOverlay />
         <ModalContent minW="75%">
           <ModalHeader>
-            Access Request to Test NK API
+            {`Access Request to ${name}`}
             <Tabs defaultIndex={tab} index={tab}>
               <TabList mt={4}>
                 <Tab px={0} cursor="default">

@@ -3,18 +3,15 @@ import AccessRequestForm from '@/components/access-request-form';
 import { BiLinkExternal } from 'react-icons/bi';
 import {
   Button,
-  Box,
   Flex,
   Grid,
   GridItem,
   Heading,
   Icon,
-  Link,
   Text,
 } from '@chakra-ui/react';
 import { FaLock } from 'react-icons/fa';
 import { HiChartBar } from 'react-icons/hi';
-import NextLink from 'next/link';
 import { RiEarthFill } from 'react-icons/ri';
 import { Dataset, Environment, Product } from '@/shared/types/query.types';
 
@@ -71,7 +68,9 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
                 Try this API
               </Button>
             )}
-            {!isPublic && <AccessRequestForm disabled={false} id={id} />}
+            {!isPublic && (
+              <AccessRequestForm disabled={false} id={id} name={data.name} />
+            )}
           </>
         )}
       </Flex>
@@ -92,7 +91,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               )}
               <Text ml={8} fontSize="sm">
                 For elevated access, please{' '}
-                <AccessRequestForm disabled={false} id={id} />
+                <AccessRequestForm disabled={false} id={id} name={data.name} />
               </Text>
             </GridItem>
           </Grid>
