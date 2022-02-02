@@ -93,7 +93,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <Legend>Client Scopes (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               If your APIs are protected by Scope, then provide the full list of
-              Scopes setup in the idP.
+              Scopes setup in the IdP.
             </Text>
             <TagInput
               placeholder="Press Enter to add Scopes"
@@ -123,8 +123,8 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
                 Audience
               </GridItem>
               <GridItem>
-                <TagInput
-                  placeholder="Press Enter to add Client Mappers"
+                <Input
+                  placeholder="Enter the Audience"
                   name="clientMappers"
                   value={data?.clientMappers}
                   data-testid="ap-authorization-client-mappers"
@@ -134,7 +134,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           </fieldset>
           <fieldset>
             <Legend>UMA2 Resource Type (optional)</Legend>
-            <TagInput
+            <Input
               placeholder="Press Enter to add UMA2 Resource Type"
               name="resourceType"
               value={data?.resourceType}
@@ -145,7 +145,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             <Legend>Resource Scopes (optional)</Legend>
             <Text fontSize="sm" color="bc-component">
               If your APIs are using UMA2 Resource Scopes, then provide the full
-              list of Scopes setup in the idP.
+              list of Scopes setup in the IdP.
             </Text>
             <TagInput
               placeholder="Press Enter to add Resource Scopes"

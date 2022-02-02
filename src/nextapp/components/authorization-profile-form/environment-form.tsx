@@ -70,11 +70,11 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               </Select>
             </FormControl>
             <FormControl isRequired as={GridItem} colSpan={2}>
-              <FormLabel>idP Issuer URL</FormLabel>
+              <FormLabel>IdP Issuer URL</FormLabel>
               <Input
                 type="url"
                 name="issuerUrl"
-                placeholder="Enter idP Issuer URL"
+                placeholder="Enter IdP Issuer URL"
               />
             </FormControl>
             <FormControl isRequired as={GridItem} gridRowStart="row-start">
@@ -93,7 +93,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               <FormControl isRequired as={GridItem} colSpan={2}>
                 <FormLabel>Initial Acccess Token</FormLabel>
                 <Input
-                  placeholder="Enter Client ID"
+                  placeholder="Enter Initial Access Token"
                   name="initialAccessToken"
                 />
               </FormControl>

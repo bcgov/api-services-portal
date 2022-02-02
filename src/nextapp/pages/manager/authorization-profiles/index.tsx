@@ -174,7 +174,7 @@ const AuthorizationProfiles: React.FC<
                     <Popover isLazy trigger="hover">
                       <PopoverTrigger>
                         <Link color="bc-blue" fontWeight="bold">
-                          {c.owner?.username}
+                          {c.owner?.name}
                         </Link>
                       </PopoverTrigger>
                       <Portal>
