@@ -48,7 +48,8 @@ const ApiAccessPage: React.FC<
           List of the BC Government Service APIs that you have access to.
         </PageHeader>
 
-        {data.myAccessRequests?.length > 0 && (
+        {(data.myServiceAccesses?.length > 0 ||
+          data.myAccessRequests?.length > 0) && (
           <AccessList
             approved={data?.myServiceAccesses}
             requested={data?.myAccessRequests}

@@ -22,7 +22,7 @@ import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
-import { Environment } from '@/shared/types/query.types';
+import { Environment, Mutation } from '@/shared/types/query.types';
 
 import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
@@ -60,6 +60,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const requestAccessButtonText = auth.user
     ? 'Request Access'
     : 'Sign in to request access';
+  const [accessRequestId, setAccessRequestId] = React.useState<string>('');
 
   // Events
   const handleAccessSubmit = React.useCallback(
@@ -85,7 +86,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             additionalDetails: formData.get('additionalDetails'),
             acceptLegal: formData.has('acceptLegal') ? true : false,
           };
-          await mutate.mutateAsync(payload);
+          const res: Mutation = await mutate.mutateAsync(payload);
           client.invalidateQueries('allAccessRequests');
 
           toast({
@@ -96,6 +97,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 
           // If auto approved go to the next tab, otherwise close modal and redirect
           if (isAutoApproved) {
+            setAccessRequestId(res.createAccessRequest.id);
             setTab(1);
           } else {
             toast({
@@ -194,7 +196,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 </ErrorBoundary>
               </form>
             )}
-            {tab === 1 && <AccessRequestCredentials id={id} />}
+            {tab === 1 && <AccessRequestCredentials id={accessRequestId} />}
           </ModalBody>
           <ModalFooter>
             {tab === 0 && (
