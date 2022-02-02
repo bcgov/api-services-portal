@@ -62,12 +62,12 @@ jobs:
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
-        args: >
-          -Dsonar.organization=bcgov-oss
-          -Dsonar.projectKey=aps-portal-e2e
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.sources=e2e
-          -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
+          args: >
+            -Dsonar.organization=bcgov-oss
+            -Dsonar.projectKey=aps-portal-e2e
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=e2e
+            -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
