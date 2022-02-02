@@ -62,6 +62,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
           args: >
             -Dsonar.organization=bcgov-oss
             -Dsonar.projectKey=aps-portal-e2e
