@@ -21,7 +21,6 @@
     "cy:firefox:headless": "cypress run --env TransferProtocol='http' --browser firefox --headless"
   },
   "devDependencies": {
-    "@cypress/code-coverage": "^3.9.12",
     "@types/jsonwebtoken": "^8.5.4",
     "@types/mocha": "^8.2.3",
     "@types/mochawesome": "^6.2.0",
@@ -39,6 +38,7 @@
     "prettier": "^2.3.2"
   },
   "dependencies": {
+    "@cypress/code-coverage": "^3.9.12",
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
