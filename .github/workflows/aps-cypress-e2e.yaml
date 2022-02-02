@@ -50,8 +50,13 @@ jobs:
               sleep 1m
             fi
           done
-      - name: Upload E2E Test Report as Artifact
+      - name: Upload E2E Test Report
         uses: actions/upload-artifact@v2
         with:
-          name: report
+          name: test-suite-report
           path: ${{ github.workspace }}/e2e/results/report
+      - name: Upload E2E Code Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: ${{ github.workspace }}/e2e/coverage
