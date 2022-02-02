@@ -124,6 +124,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./e2e/results/report:/e2e/results/report
+      - ./e2e/coverage:/e2e/coverage
     networks:
       - aps-net
   kong-db:
