@@ -68,8 +68,8 @@ jobs:
             -Dsonar.projectKey=aps-portal-e2e
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=e2e
-            -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
-            -Dsonar.javascript.coveragePlugin=lcov
+            -Dsonar.typescript.lcov.reportPaths=./e2e/coverage/lcov.info
+            -Dsonar.typescript.coveragePlugin=lcov
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
