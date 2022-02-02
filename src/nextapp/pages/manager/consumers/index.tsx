@@ -26,7 +26,6 @@ import Head from 'next/head';
 import { GatewayConsumer, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import NextLink from 'next/link';
-import TagsList from '@/components/tags-list';
 import LinkConsumer from '@/components/link-consumer';
 import Table from '@/components/table';
 
@@ -36,6 +35,7 @@ import { uid } from 'react-uid';
 import { HiOutlineSearch } from 'react-icons/hi';
 import ActionsMenu from '@/components/actions-menu';
 import InlineManageLabels from '@/components/inline-manage-labels';
+import Filters from '@/components/filters';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -71,6 +71,8 @@ const ConsumersPage: React.FC<
     if (!data?.allServiceAccessesByNamespace) {
       return [];
     }
+
+    const searchTerm = new RegExp(search, 'i');
     const result = data.allServiceAccessesByNamespace
       ?.filter((d) => !!d.consumer)
       .map((d) => d.consumer);
@@ -81,9 +83,9 @@ const ConsumersPage: React.FC<
 
     return result.filter((d) => {
       return (
-        d.username.search(search) >= 0 ||
-        d.id.search(search) >= 0 ||
-        d.tags.search(search) >= 0
+        d.username.search(searchTerm) >= 0 ||
+        d.id.search(searchTerm) >= 0 ||
+        d.tags.search(searchTerm) >= 0
       );
     });
   }, [data, search]);
@@ -108,6 +110,7 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
+        <Filters mb={4} />
         <Box bgColor="white" mb={4}>
           <Box
             as="header"
