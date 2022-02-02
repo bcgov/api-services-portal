@@ -103,11 +103,7 @@ const AuthorizationProfiles: React.FC<
   );
   const authorizationProfileForm = (
     <AuthorizationProfileForm>
-      <Button
-        as="a"
-        variant="primary"
-        data-testid="create-new-auth-profile-btn"
-      >
+      <Button variant="primary" data-testid="create-new-auth-profile-btn">
         Create New Profile
       </Button>
     </AuthorizationProfileForm>

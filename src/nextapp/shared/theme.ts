@@ -249,6 +249,11 @@ const theme = extendTheme(
         },
       },
       Radio: {
+        baseStyle: {
+          control: {
+            cursor: 'pointer',
+          },
+        },
         defaultProps: {
           size: 'lg',
           colorScheme: 'primary',
