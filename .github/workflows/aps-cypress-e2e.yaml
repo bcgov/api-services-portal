@@ -64,7 +64,9 @@ jobs:
 
       - name: Format LCOV Report
         run: |
-          sed  -i -r 's/\.*\/app\/nextapp\///g' ./e2e/coverage/lcov.info
+          cd ./e2e/coverage
+          chmod +w .
+          sed  -i -r 's/\.*\/app\/nextapp\///g' lcov.info
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
