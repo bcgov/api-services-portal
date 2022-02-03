@@ -123,8 +123,8 @@ services:
       context: ./e2e
       dockerfile: Dockerfile
     volumes:
-      - ./e2e/results/report:/e2e/results/report
       - ./e2e/coverage:/e2e/coverage
+      - ./e2e/results:/e2e/results
     networks:
       - aps-net
   kong-db:
