@@ -42,6 +42,7 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
           { name: 'clientPublicKey', label: 'Signing Public Certificate' },
           { name: 'issuer', label: 'Issuer' },
           { name: 'tokenEndpoint', label: 'Token Endpoint' },
+          { name: 'callbackUrl', label: 'Callback URL' },
         ]
           .filter(
             (c) => has(credentials, c.name) && !isNil(credentials[c.name])

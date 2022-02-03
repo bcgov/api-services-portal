@@ -11,6 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
 import { QueryClient } from 'react-query';
 import EnvironmentPlugins from '@/components/environment-plugins';
+import EnvironmentAuthCodeClient from '@/components/environment-auth-code';
 import EnvironmentConfig from '@/components/environment-config';
 import EnvironmentNav from '@/components/environment-nav';
 import { dehydrate } from 'react-query/hydration';
@@ -88,6 +89,7 @@ const EnvironmentPage: React.FC<
         </PageHeader>
         <Box>
           <EnvironmentConfig data={data.OwnedEnvironment} />
+          <EnvironmentAuthCodeClient data={data.OwnedEnvironment} />
           <EnvironmentPlugins data={data.OwnedEnvironment} />
         </Box>
         <Box my={5}>

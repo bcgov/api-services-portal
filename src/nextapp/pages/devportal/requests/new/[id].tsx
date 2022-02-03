@@ -101,6 +101,10 @@ const NewRequestsPage: React.FC<
   const clientAuthenticator =
     selectedEnvironment?.credentialIssuer?.clientAuthenticator;
 
+  const isAuthCodeFlow =
+    dataset.environments.filter((e) => e.flow === 'authorization-code').length >
+    0;
+
   const apiTitle = data.allDiscoverableProducts.reduce((memo: string, d) => {
     if (isEmpty(memo) && d.id !== id) {
       return 'API';
@@ -156,7 +160,10 @@ const NewRequestsPage: React.FC<
         additionalDetails: formData.get('additionalDetails'),
         acceptLegal: formData.has('acceptLegal') ? true : false,
       };
-      const result = await graphql(mutation, payload);
+      const result = await graphql(
+        isAuthCodeFlow ? mutationForAuthCodeFlow : mutation,
+        payload
+      );
       client.invalidateQueries('allAccessRequests');
       toast({
         title: 'Request submitted',
@@ -187,7 +194,7 @@ const NewRequestsPage: React.FC<
         <title>API Program Services | API Discovery</title>
       </Head>
       <Container maxW="6xl">
-        {data.allApplications?.length === 0 && (
+        {!isAuthCodeFlow && data.allApplications?.length === 0 && (
           <Alert status="warning">
             <AlertIcon />
             {'To get started, you must '}
@@ -200,6 +207,7 @@ const NewRequestsPage: React.FC<
           </Alert>
         )}
         <PageHeader title="New Access Request" />
+
         <NewApplicationDialog
           open={isOpen}
           onClose={onClose}
@@ -209,53 +217,77 @@ const NewRequestsPage: React.FC<
         />
         <form onSubmit={handleSubmit}>
           <FieldsetBox title={apiTitle}>
-            <HStack spacing={4}>
-              <Box flex={1}>
-                <Select
-                  name="applicationId"
-                  isRequired={true}
-                  value={selectedApplication}
-                  onChange={(e) => {
-                    setSelectedApplication(e.target.value);
-                  }}
-                  data-testid="access-rqst-app-select"
-                >
-                  <option value="">No Application Selected</option>
-                  {data.myApplications.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-                </Select>
-              </Box>
-              <Tooltip
-                label="Create New Application"
-                fontSize="md"
-                placement="top"
-                hasArrow
-              >
-                <Box mx={4}>
-                  <Icon as={FaPlusCircle} boxSize={6} onClick={onOpen} />
+            {isAuthCodeFlow && (
+              <HStack spacing={4}>
+                <Box mx={4} w={100}>
+                  <Center>for</Center>
                 </Box>
-              </Tooltip>
-              <Box mx={4} w={100}>
-                <Center>as</Center>
-              </Box>
-              <Box flex={1}>
-                <Flex>
-                  <Avatar name={requestor.name} />
-                  <Box ml={2}>
-                    <Text fontWeight="bold">
-                      {requestor.name}{' '}
-                      <Text as="span" fontWeight="normal" color="gray.400">
-                        {requestor.username}
+                <Box flex={1}>
+                  <Flex>
+                    <Avatar name={requestor.name} />
+                    <Box ml={2}>
+                      <Text fontWeight="bold">
+                        {requestor.name}{' '}
+                        <Text as="span" fontWeight="normal" color="gray.400">
+                          {requestor.username}
+                        </Text>
                       </Text>
-                    </Text>
-                    <Text fontSize="xs">{requestor.email}</Text>
+                      <Text fontSize="xs">{requestor.email}</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+              </HStack>
+            )}
+
+            {!isAuthCodeFlow && (
+              <HStack spacing={4}>
+                <Box flex={1}>
+                  <Select
+                    name="applicationId"
+                    isRequired={true}
+                    value={selectedApplication}
+                    onChange={(e) => {
+                      setSelectedApplication(e.target.value);
+                    }}
+                    data-testid="access-rqst-app-select"
+                  >
+                    <option value="">No Application Selected</option>
+                    {data.myApplications.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Box>
+                <Tooltip
+                  label="Create New Application"
+                  fontSize="md"
+                  placement="top"
+                  hasArrow
+                >
+                  <Box mx={4}>
+                    <Icon as={FaPlusCircle} boxSize={6} onClick={onOpen} />
                   </Box>
-                </Flex>
-              </Box>
-            </HStack>
+                </Tooltip>
+                <Box mx={4} w={100}>
+                  <Center>as</Center>
+                </Box>
+                <Box flex={1}>
+                  <Flex>
+                    <Avatar name={requestor.name} />
+                    <Box ml={2}>
+                      <Text fontWeight="bold">
+                        {requestor.name}{' '}
+                        <Text as="span" fontWeight="normal" color="gray.400">
+                          {requestor.username}
+                        </Text>
+                      </Text>
+                      <Text fontSize="xs">{requestor.email}</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+              </HStack>
+            )}
           </FieldsetBox>
           <FieldsetBox
             isRequired
@@ -286,6 +318,22 @@ const NewRequestsPage: React.FC<
                 }))}
               value={environment}
             />
+            {selectedEnvironment?.flow === 'authorization-code' && (
+              <Box pt={4}>
+                <FormControl>
+                  <HStack spacing={4}>
+                    <Box flex={1}>
+                      <Link
+                        href={`/devportal/authv/${selectedEnvironment.id}/auth`}
+                      >
+                        <Button>Confirm Identity</Button>
+                      </Link>
+                    </Box>
+                  </HStack>
+                </FormControl>
+              </Box>
+            )}
+
             {clientAuthenticator === 'client-jwt-jwks-url' && (
               <Box pt={4}>
                 <FormControl>
@@ -442,6 +490,36 @@ const mutation = gql`
         additionalDetails: $additionalDetails
         requestor: { connect: { id: $requestor } }
         application: { connect: { id: $applicationId } }
+        productEnvironment: { connect: { id: $productEnvironmentId } }
+      }
+    ) {
+      id
+    }
+  }
+`;
+
+const mutationForAuthCodeFlow = gql`
+  mutation AddAccessRequest(
+    $name: String!
+    $controls: String
+    $requestor: ID!
+    $productEnvironmentId: ID!
+    $additionalDetails: String
+    $acceptLegal: Boolean!
+  ) {
+    acceptLegal(
+      productEnvironmentId: $productEnvironmentId
+      acceptLegal: $acceptLegal
+    ) {
+      legalsAgreed
+    }
+
+    createAccessRequest(
+      data: {
+        name: $name
+        controls: $controls
+        additionalDetails: $additionalDetails
+        requestor: { connect: { id: $requestor } }
         productEnvironment: { connect: { id: $productEnvironmentId } }
       }
     ) {

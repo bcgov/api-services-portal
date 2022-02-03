@@ -4,6 +4,7 @@ import { FaCircle, FaCode } from 'react-icons/fa';
 import { Environment } from '@/shared/types/query.types';
 import YamlViewer from '../yaml-viewer';
 import JwtKeycloak from './templates/jwt-keycloak';
+import JwtKeycloakAuthCode from './templates/jwt-keycloak-auth-code';
 import KongAclOnly from './templates/kong-acl-only';
 import KongApiKeyAcl from './templates/kong-api-key-acl';
 import KongApiKeyOnly from './templates/kong-api-key-only';
@@ -50,6 +51,11 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
     'kong-api-key-acl': KongApiKeyAcl(data.product.namespace, data.appId),
     'kong-api-key-only': KongApiKeyOnly(data.product.namespace, data.appId),
     'kong-acl-only': KongAclOnly(data.product.namespace, data.appId),
+    'authorization-code': JwtKeycloakAuthCode(
+      data.product.namespace,
+      data.name,
+      issuerDetails.issuer
+    ),
     'client-credentials': JwtKeycloak(
       data.product.namespace,
       data.name,

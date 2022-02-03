@@ -1,0 +1,7 @@
+
+  query GetEnvironment {
+    Environment($id: ID!) {
+      id
+      name
+    }
+  }

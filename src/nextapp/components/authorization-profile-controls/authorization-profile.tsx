@@ -73,7 +73,7 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
         issuer={issuer}
         onChange={setFlow}
       />
-      {flow === 'client-credentials' && (
+      {(flow === 'authorization-code' || flow === 'client-credentials') && (
         <>
           <AuthorizationProfileAuthorization
             issuer={issuer}
@@ -94,7 +94,9 @@ const AuthorizationProfileForm: React.FC<AuthorizationProfileFormProps> = ({
           <NextLink href="/manager/authorization-profiles">
             <Button variant="secondary">Cancel</Button>
           </NextLink>
-          <Button type="submit" data-testid="ap-create-btn">{issuer ? 'Save Changes' : 'Create'}</Button>
+          <Button type="submit" data-testid="ap-create-btn">
+            {issuer ? 'Save Changes' : 'Create'}
+          </Button>
         </ButtonGroup>
       </Flex>
     </form>
