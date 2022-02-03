@@ -60,6 +60,10 @@ jobs:
       #     name: code-coverage
       #     path: ${{ github.workspace }}/e2e/coverage
 
+      - name: Format LCOV Report
+        run: |
+          sed  -i -r 's/\.*\/app\/nextapp\///g' ./e2e/coverage/lcov.info
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
