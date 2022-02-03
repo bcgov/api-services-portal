@@ -7,7 +7,7 @@ on:
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
   DASHBOARD_RECORD_KEY: ${{ secrets.CY_DASHBOARD_RECORD_KEY }}
-  EXECUTION_ENV: prod
+  EXECUTION_ENV: dev
   GIT_COMMIT_BRANCH: ${{ github.ref_name }}
   GIT_COMMIT_SHA: ${{ github.sha }}
   GIT_COMMIT_AUTHOR: ${{ github.actor }}
@@ -65,7 +65,7 @@ jobs:
       - name: Format LCOV Report
         run: |
           cd ./e2e/coverage
-          chmod +w .
+          sudo chmod +w .
           sed  -i -r 's/\.*\/app\/nextapp\///g' lcov.info
 
       - name: SonarCloud Scan
