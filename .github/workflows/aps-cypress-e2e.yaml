@@ -2,12 +2,12 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['util/*automation*', 'util/cy-code-cover']
+    branches: ['util/*automation*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
   DASHBOARD_RECORD_KEY: ${{ secrets.CY_DASHBOARD_RECORD_KEY }}
-  EXECUTION_ENV: dev
+  EXECUTION_ENV: prod
   GIT_COMMIT_BRANCH: ${{ github.ref_name }}
   GIT_COMMIT_SHA: ${{ github.sha }}
   GIT_COMMIT_AUTHOR: ${{ github.actor }}
