@@ -19,7 +19,7 @@ const fields = [
   { name: 'Username', key: 'username' },
 ];
 
-const MyProfilePage: React.FC = () => {
+const ProfilePage: React.FC = () => {
   const { user } = useAuth();
 
   return (
@@ -42,12 +42,6 @@ const MyProfilePage: React.FC = () => {
                 <Text>{user[f.key] ?? '-'}</Text>
               </GridItem>
             ))}
-            <GridItem>
-              <Text color="bc-component" opacity={0.6}>
-                Roles
-              </Text>
-              <Text>{user?.roles.join(', ')}</Text>
-            </GridItem>
           </Grid>
         </Flex>
       </Container>
@@ -55,4 +49,4 @@ const MyProfilePage: React.FC = () => {
   );
 };
 
-export default MyProfilePage;
+export default ProfilePage;
