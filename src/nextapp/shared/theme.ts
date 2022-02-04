@@ -151,7 +151,12 @@ const buttonVariants = {
     },
   },
   ghost: {
+    color: 'bc-blue',
     borderColor: 'transparent',
+    _hover: {
+      bgColor: 'transparent',
+      textDecor: 'none',
+    },
     _active: {
       bgColor: '#F2F5F7',
       boxShadow: 'none',
