@@ -119,5 +119,3 @@ kc.js
 e2e/cypress/fixtures/*-plugin.yml
 e2e/cypress/fixtures/state/*.pub
 e2e/cypress/fixtures/state/*.pem
-e2e/cypress/fixtures/state/store.json
-local/cypress-jwks-url/keys.json

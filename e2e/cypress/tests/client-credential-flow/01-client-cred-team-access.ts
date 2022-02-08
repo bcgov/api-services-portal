@@ -12,7 +12,6 @@ describe('Grant appropriate permissions to team members for client credential fl
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.resetState()
   })
 
   beforeEach(() => {
