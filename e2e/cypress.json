@@ -4,7 +4,7 @@
   "screenshotOnRunFailure": true,
   "screenshotsFolder": "results/report/assets",
   "video": false,
-  "watchForFileChanges": true,
+  "watchForFileChanges": false,
   "reporter": "mochawesome",
   "reporterOptions": {
     "reportDir": "results",
