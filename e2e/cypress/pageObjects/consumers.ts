@@ -1,3 +1,4 @@
+import { Assertion } from "chai"
 import { wrap } from "module"
 
 export default class ConsumersPage {
@@ -9,6 +10,7 @@ export default class ConsumersPage {
   applyBtn: string = '[data-testid="control-dialog-apply-btn"]'
   allConsumerTable: string = '[data-testid="all-consumer-control-tbl"]'
   aclSwitch: string = '[data-testid="acls-switch"]'
+  pendingRequestTable: string = '[data-testid="pending-request-tbl"]'
 
   clickOnTheFirstConsumerID() {
     cy.get(this.allConsumerTable).find('a').first().click()
@@ -66,6 +68,14 @@ export default class ConsumersPage {
       if ($body.find(this.removeIPRestrictionButton).length > 0) {
         cy.get(this.removeIPRestrictionButton).first().click()
         cy.contains('button', 'Yes, Delete').click()
+      }
+    })
+  }
+
+  checkApproveAccess(){
+    cy.get('body', { log: false }).then(($body) => {
+      if ($body.find(this.pendingRequestTable).length > 0) {
+        throw "Mark can Approve the pending request even if 'Access.Manager' role is revoked"
       }
     })
   }

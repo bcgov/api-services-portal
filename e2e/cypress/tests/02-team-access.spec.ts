@@ -28,10 +28,10 @@ describe('Team Access Spec', () => {
   })
 
   it('grant namespace access to Mark (access manager)', () => {
-    cy.get('@apiowner').then(({ permission }: any) => {
+    cy.get('@apiowner').then(({ grantPermission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission(permission.Mark)
+      na.grantPermission(grantPermission.Mark)
     })
   })
 

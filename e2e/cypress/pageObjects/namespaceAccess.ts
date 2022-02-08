@@ -18,7 +18,15 @@ class NamespaceAccessPage {
     })   
     cy.contains("Share").click()
   }
-    
+  
+  revokePermission(accessRqst : any) {
+    let accessRole: Array<string> = accessRqst.accessRole
+    accessRole.forEach(function(accessName)
+    {
+      cy.contains(accessName).find('button').click()
+    })   
+  }
+
   path: string = '/manager/namespace-access'
 
   clickGrantUserAccessButton() {

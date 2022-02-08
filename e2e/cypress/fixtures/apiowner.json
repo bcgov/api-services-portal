@@ -104,10 +104,16 @@
       }
     }
   },
-  "permission": {
+  "grantPermission": {
     "Mark":{
       "userName" :"mark",
       "accessRole" :["Access.Manage","Namespace.View"]
+    } 
+  },
+  "revokePermission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage"]
     } 
   }
 }

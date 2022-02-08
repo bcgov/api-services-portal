@@ -99,7 +99,7 @@ Cypress.Commands.add('logout', () => {
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').find("div[role='img']").should('have.attr', 'aria-label', res.body.user.name)
-      cy.get('[data-testid=auth-menu-user]').click()
+      cy.get('[data-testid=auth-menu-user]').click({force:true})
       cy.contains('Sign Out').click()
     })
   })
@@ -159,6 +159,7 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
 })
 
 Cypress.Commands.add('deleteAllCookies', () => {
+  cy.clearCookies()
   cy.clearCookie('keystone.sid')
   cy.clearCookie('_oauth2_proxy')
   cy.exec('npm cache clear --force')
