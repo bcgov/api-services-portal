@@ -71,7 +71,6 @@ Cypress.Commands.add('getState', (key: string) => {
   }
 })
 
-
 Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}

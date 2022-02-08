@@ -6,6 +6,9 @@ import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
 import { checkElementExists } from '.'
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
+
+const jose = require('node-jose')
+
 interface formDataRequestOptions {
   method: string
   url: string
@@ -199,6 +202,12 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string) => {
     })
   })
 })
+
+Cypress.Commands.add("generateKeystore", async () => {
+  let keyStore = jose.JWK.createKeyStore()
+  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
+  return JSON.stringify(keyStore.toJSON(true), null, '  ') 
+});
 
 const formDataRequest = (
   options: formDataRequestOptions,
