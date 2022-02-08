@@ -40,6 +40,7 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
   cy.log('< Saving State')
   debugger
   cy.log(key, value)
+  let newState
   const keyValue = key.toLowerCase()
   if (key.includes('>')) {
     let keyItems = key.split('>')
@@ -49,12 +50,19 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
   }
+  if (key == 'config.anonymous') {
+    cy.readFile('cypress/fixtures/manage-control/kong-plugin-config.json').then((currState) => {
+      currState["keyAuth"]["config.anonymous"] = value
+      cy.writeFile('cypress/fixtures/manage-control/kong-plugin-config.json', currState)
+    })
+  }
   else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       currState[keyValue] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
     })
   }
+
   cy.log('< Saving State')
 })
 

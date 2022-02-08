@@ -5,6 +5,7 @@ import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
 import { checkElementExists } from '.'
+
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
@@ -173,9 +174,10 @@ Cypress.Commands.add('deleteAllCookies', () => {
   }
 })
 
-Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string) => {
+Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   cy.fixture('state/store').then((creds: any) => {
-    const token = creds.apikey
+    let token = key || creds.apikey
+    cy.log("Token->"+token)
     const service = serviceName
     return cy.request({
       url: Cypress.env('KONG_URL'),
@@ -186,16 +188,39 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   })
 })
 
-Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string) => {
+Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName:string, methodType: string) => {  
+    let body = {}
+    var serviceEndPoint = endpoint
+    body = config[requestName]
+    if (requestName=='')
+    {
+      body = {}
+    }
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + serviceEndPoint,
+      method: methodType,
+      body: body,
+      form: true,
+      failOnStatusCode: false
+    })
+})
+
+Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endPoint?: string, verb = 'POST') => {
   cy.fixture('state/store').then((creds: any) => {
     let body = {}
     const pluginID = pluginName.toLowerCase() + 'id'
     const id = creds[pluginID]
-    const endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    let endpoint 
+    if (pluginName=='')
+      endpoint = 'plugins'
+    else
+      endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    endpoint = (typeof endPoint !== 'undefined') ?  endPoint : endpoint
     body = config[name]
+    cy.log("Body->"+body)
     return cy.request({
       url: Cypress.env('KONG_CONFIG_URL') + '/' + endpoint,
-      method: 'POST',
+      method: verb,
       body: body,
       form: true,
       failOnStatusCode: false
