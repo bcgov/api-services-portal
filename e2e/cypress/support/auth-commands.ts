@@ -7,6 +7,9 @@ import { url } from 'inspector'
 import { checkElementExists } from '.'
 
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
+
+const jose = require('node-jose')
+
 interface formDataRequestOptions {
   method: string
   url: string
@@ -175,7 +178,6 @@ Cypress.Commands.add('deleteAllCookies', () => {
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   cy.fixture('state/store').then((creds: any) => {
     let token = key || creds.apikey
-    token = (typeof key !== 'undefined') ?  key : creds.apikey
     cy.log("Token->"+token)
     const service = serviceName
     return cy.request({
@@ -226,6 +228,12 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
     })
   })
 })
+
+Cypress.Commands.add("generateKeystore", async () => {
+  let keyStore = jose.JWK.createKeyStore()
+  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
+  return JSON.stringify(keyStore.toJSON(true), null, '  ') 
+});
 
 const formDataRequest = (
   options: formDataRequestOptions,
