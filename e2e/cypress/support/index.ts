@@ -2,6 +2,7 @@ import './commands'
 import 'cypress-xpath'
 import './auth-commands'
 import './util-commands'
+import '@cypress/code-coverage/support'
 const _ = require('lodash')
 const YAML = require('yamljs')
 
