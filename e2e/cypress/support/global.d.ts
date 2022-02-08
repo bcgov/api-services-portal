@@ -39,5 +39,6 @@ declare namespace Cypress {
 
     makeKongGatewayRequest(endpoint: string, requestName:string, methodType: string): Chainable<Cypress.Response<any>>
 
+    generateKeystore() : Chainable<any>
   }
 }
