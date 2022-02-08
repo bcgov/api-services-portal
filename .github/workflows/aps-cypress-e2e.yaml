@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['util/*automation*', 'util/cy-code-cover']
+    branches: ['util/*automation*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -35,7 +35,7 @@ jobs:
           export CY_COMMIT_AUTHOR=${{ env.GIT_COMMIT_AUTHOR }}
           export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
-          export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }}) 
+          export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
       - name: Execute Tests & Clean Up
         run: |
@@ -49,13 +49,32 @@ jobs:
               sleep 1m
             fi
           done
+
       - name: Upload E2E Test Results Report
         uses: actions/upload-artifact@v2
         with:
           name: test-results
           path: ${{ github.workspace }}/e2e/results/report
+
       - name: Upload E2E Code Coverage Report
         uses: actions/upload-artifact@v2
         with:
           name: code-coverage
           path: ${{ github.workspace }}/e2e/coverage
+
+      - name: Format LCOV Report
+        run: |
+          sudo sed  -i -r 's/\.*\/app\/nextapp\///g' ./e2e/coverage/lcov.info
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.organization=bcgov-oss
+            -Dsonar.projectKey=aps-portal-e2e
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=src/nextapp
+            -Dsonar.javascript.lcov.reportPaths=./e2e/coverage/lcov.info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
