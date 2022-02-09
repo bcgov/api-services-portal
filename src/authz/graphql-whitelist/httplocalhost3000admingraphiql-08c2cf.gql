@@ -1,0 +1,6 @@
+
+  mutation DeleteConsumer($id: String) {
+    deleteGatewayConsumer(id: $id) {
+      id
+    }
+  }

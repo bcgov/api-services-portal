@@ -5,26 +5,48 @@ import {
   Button,
   Grid,
   GridItem,
+  Heading,
   Icon,
   Select,
   Tag,
   TagCloseButton,
   Text,
-  useDisclosure,
   useToast,
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
-import { RiFilterFill } from 'react-icons/ri';
-import { FaSave, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { uid } from 'react-uid';
 
-interface FiltersProps extends BoxProps {}
+interface FiltersProps extends BoxProps {
+  cacheId: string;
+  filterTypeOptions: { name: string; value: string }[];
+  filterValueOptions?: Record<string, { name: string; value: string }[]>;
+}
 
-const Filters: React.FC<FiltersProps> = ({ ...props }) => {
-  const { isOpen, onClose, onOpen, onToggle } = useDisclosure();
-  const [filters, setFilters] = React.useState<string[]>([]);
+const Filters: React.FC<FiltersProps> = ({
+  cacheId,
+  children,
+  filterTypeOptions,
+  filterValueOptions,
+  ...props
+}) => {
+  const [filters, setFilters] = React.useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(cacheId));
+    } catch {
+      return [];
+    }
+  });
+  const [filterType, setFilterType] = React.useState<string>(
+    filterTypeOptions[0]?.value ?? ''
+  );
   const toast = useToast();
+
+  // Events
+  const handleFilterTypeSelect = React.useCallback((event) => {
+    setFilterType(event.target.value);
+  }, []);
 
   const handleSubmit = React.useCallback(
     (event) => {
@@ -33,31 +55,33 @@ const Filters: React.FC<FiltersProps> = ({ ...props }) => {
       const filterType = form.get('type');
       const filterValue = form.get('value');
       const newFilter = `${filterType}=${filterValue}`;
-      setFilters((state) => [...state, newFilter]);
-      onClose();
+      setFilters((state) => {
+        const updatedState = [...state, newFilter];
+        localStorage.setItem(cacheId, JSON.stringify(updatedState));
+        return updatedState;
+      });
+      event.currentTarget.reset();
+      toast({
+        title: 'Filters Added',
+        status: 'success',
+      });
     },
-    [onClose]
+    [cacheId, toast]
   );
   const handleRemove = React.useCallback(
     (index: number) => () => {
-      setFilters((state) => state.filter((_, i) => index !== i));
+      setFilters((state) => {
+        const updatedState = state.filter((_, i) => index !== i);
+        localStorage.setItem(cacheId, JSON.stringify(updatedState));
+        return updatedState;
+      });
     },
-    []
+    [cacheId]
   );
-  const handleSave = React.useCallback(() => {
-    onClose();
-    toast({
-      status: 'success',
-      description: 'Filters saved',
-    });
-  }, [onClose, toast]);
   const handleClear = React.useCallback(() => {
     setFilters([]);
-    toast({
-      status: 'success',
-      description: 'Filters cleared',
-    });
-  }, [toast]);
+    localStorage.setItem(cacheId, '[]');
+  }, [cacheId]);
 
   return (
     <Box bgColor="white" {...props} py={5} px={9}>
@@ -68,41 +92,41 @@ const Filters: React.FC<FiltersProps> = ({ ...props }) => {
         templateColumns="auto 1fr 1fr auto"
         onSubmit={handleSubmit}
       >
-        <Button
-          isDisabled={isOpen}
-          leftIcon={<Icon as={RiFilterFill} />}
-          onClick={onOpen}
-          variant="secondary"
+        <GridItem d="flex" alignItems="center">
+          <Heading size="sm" fontWeight="normal">
+            Filter By
+          </Heading>
+        </GridItem>
+        <Select
+          name="type"
+          onChange={handleFilterTypeSelect}
+          value={filterType}
         >
-          Add Filter
-        </Button>
-        {isOpen && (
-          <>
-            <Select name="type">
-              <option value="Product">Product</option>
-              <option value="Role">Role</option>
-              <option value="Scope">Scope</option>
-            </Select>
-            <Select name="value">
-              <option value="Pharmanet Electronic Processing">
-                Pharmanet Electronic Processing
+          {filterTypeOptions.map((f) => (
+            <option key={uid(f)} value={f.value}>
+              {f.name}
+            </option>
+          ))}
+        </Select>
+        {!filterValueOptions &&
+          children &&
+          React.Children.map(children, (c) =>
+            React.cloneElement(c as React.ReactElement<any>, {
+              value: filterType,
+            })
+          )}
+        {filterValueOptions && (
+          <Select name="value">
+            {filterValueOptions[filterType]?.map((f) => (
+              <option key={uid(f)} value={f.value}>
+                {f.name}
               </option>
-              <option value="System/Patient*">System/Patient*</option>
-              <option value="api_owner">api_owner</option>
-            </Select>
-            <GridItem>
-              <Button type="submit">Apply</Button>
-              <Button
-                type="reset"
-                leftIcon={<Icon as={FaTimes} />}
-                variant="ghost"
-                onClick={onToggle}
-              >
-                Cancel
-              </Button>
-            </GridItem>
-          </>
+            ))}
+          </Select>
         )}
+        <GridItem>
+          <Button type="submit">Apply</Button>
+        </GridItem>
       </Grid>
       <Box>
         {filters.length === 0 && (
@@ -125,15 +149,6 @@ const Filters: React.FC<FiltersProps> = ({ ...props }) => {
               </Wrap>
             </GridItem>
             <GridItem>
-              <Button
-                color="bc-blue"
-                leftIcon={<Icon as={FaSave} />}
-                variant="ghost"
-                size="sm"
-                onClick={handleSave}
-              >
-                Save
-              </Button>
               <Button
                 color="bc-blue"
                 leftIcon={<Icon as={FaTimes} />}

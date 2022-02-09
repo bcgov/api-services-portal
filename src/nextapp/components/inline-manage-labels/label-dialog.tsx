@@ -19,23 +19,41 @@ interface LabelDialogProps {
 }
 
 const LabelDialog: React.FC<LabelDialogProps> = ({ isOpen, onClose }) => {
+  const formRef = React.useRef<HTMLFormElement>();
+
+  const handleSubmit = React.useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (event.currentTarget?.checkValidity()) {
+        const formData = new FormData(event.currentTarget);
+        onClose();
+      }
+    },
+    [onClose]
+  );
+  const handleSubmitClick = React.useCallback(() => {
+    formRef?.current.requestSubmit();
+  }, []);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Manage Group Labels</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl isRequired>
-            <FormLabel>Group labels</FormLabel>
-            <TagInput name="labels" />
-          </FormControl>
+          <form ref={formRef} onSubmit={handleSubmit}>
+            <FormControl isRequired>
+              <FormLabel>Group labels</FormLabel>
+              <TagInput name="tags" />
+            </FormControl>
+          </form>
         </ModalBody>
         <ModalFooter>
           <Button variant="secondary" mr={3} onClick={onClose}>
             Cancel
           </Button>
-          <Button>Save Changes</Button>
+          <Button onClick={handleSubmitClick}>Save Changes</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
