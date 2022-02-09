@@ -124,10 +124,10 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               </GridItem>
               <GridItem>
                 <Input
+                  defaultValue={data?.clientMappers}
+                  data-testid="ap-authorization-client-mappers"
                   placeholder="Enter the Audience"
                   name="clientMappers"
-                  value={data?.clientMappers}
-                  data-testid="ap-authorization-client-mappers"
                 />
               </GridItem>
             </Grid>
@@ -135,10 +135,10 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           <fieldset>
             <Legend>UMA2 Resource Type (optional)</Legend>
             <Input
+              defaultValue={data?.resourceType}
+              data-testid="ap-authorization-uma2-resource-type"
               placeholder="Press Enter to add UMA2 Resource Type"
               name="resourceType"
-              value={data?.resourceType}
-              data-testid="ap-authorization-uma2-resource-type"
             />
           </fieldset>
           <fieldset>
@@ -163,10 +163,10 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               the owner of the resource.
             </Text>
             <Input
+              defaultValue={data?.resourceAccessScope}
+              data-testid="ap-authorization-resource-access-scope"
               placeholder="Enter Resource Access Scope"
               name="resourceAccessScope"
-              value={data?.resourceAccessScope}
-              data-testid="ap-authorization-resource-access-scope"
             />
           </fieldset>
         </form>
