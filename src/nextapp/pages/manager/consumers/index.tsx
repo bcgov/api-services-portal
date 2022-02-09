@@ -1,41 +1,38 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
+import ActionsMenu from '@/components/actions-menu';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
   Container,
   Heading,
-  Icon,
   Link,
   Td,
   Tr,
-  Input,
-  InputGroup,
-  InputRightElement,
   Wrap,
   WrapItem,
   Tag,
   MenuItem,
   Flex,
+  useToast,
 } from '@chakra-ui/react';
-import PageHeader from '@/components/page-header';
+import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
-import { QueryClient } from 'react-query';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import Head from 'next/head';
+import { QueryClient, useQueryClient } from 'react-query';
+import EmptyPane from '@/components/empty-pane';
+import Filters from '@/components/filters';
 import { GatewayConsumer, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
-import NextLink from 'next/link';
-import LinkConsumer from '@/components/link-consumer';
-import Table from '@/components/table';
-
-import breadcrumbs from '@/components/ns-breadcrumb';
-import EmptyPane from '@/components/empty-pane';
-import { uid } from 'react-uid';
-import { HiOutlineSearch } from 'react-icons/hi';
-import ActionsMenu from '@/components/actions-menu';
+import Head from 'next/head';
 import InlineManageLabels from '@/components/inline-manage-labels';
-import Filters from '@/components/filters';
+import LinkConsumer from '@/components/link-consumer';
+import PageHeader from '@/components/page-header';
+import NextLink from 'next/link';
+import SearchInput from '@/components/search-input';
+import Table from '@/components/table';
+import { uid } from 'react-uid';
+import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import ConsumerFilters from '@/components/consumer-filters';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
@@ -58,6 +55,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
+  const toast = useToast();
+  const client = useQueryClient();
   const queryKey = ['allConsumers'];
   const [search, setSearch] = React.useState('');
   const { data } = useApi(
@@ -67,6 +66,8 @@ const ConsumersPage: React.FC<
     },
     { suspense: false }
   );
+  const grantMutate = useApiMutation(grantMutation);
+  const deleteMutate = useApiMutation(deleteMutation);
   const consumers = React.useMemo(() => {
     if (!data?.allServiceAccessesByNamespace) {
       return [];
@@ -93,8 +94,46 @@ const ConsumersPage: React.FC<
   const totalConsumers = consumers.length ?? 0;
 
   // Events
-  const handleSearchChange = React.useCallback((event) => {
-    setSearch(event.target.value);
+  const handleDelete = React.useCallback(
+    (id: string) => async () => {
+      try {
+        await deleteMutate.mutateAsync({ id });
+        client.invalidateQueries(queryKey);
+        toast({
+          title: 'Consumer deleted',
+          status: 'success',
+        });
+      } catch (err) {
+        toast({
+          title: 'Consumer delete failed',
+          description: err?.map((e) => e.message).join(', '),
+          status: 'error',
+        });
+      }
+    },
+    [client, deleteMutate, queryKey, toast]
+  );
+  const handleGrant = React.useCallback(
+    (id: string) => async () => {
+      try {
+        await grantMutate.mutateAsync({ id });
+        client.invalidateQueries(queryKey);
+        toast({
+          title: 'Consumer access granted',
+          status: 'success',
+        });
+      } catch (err) {
+        toast({
+          title: 'Consumer access grant failed',
+          description: err?.map((e) => e.message).join(', '),
+          status: 'error',
+        });
+      }
+    },
+    [client, grantMutate, queryKey, toast]
+  );
+  const handleSearchChange = React.useCallback((value: string) => {
+    setSearch(value);
   }, []);
 
   return (
@@ -110,7 +149,13 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <Filters mb={4} />
+        <Filters
+          cacheId="consumers"
+          filterTypeOptions={filterTypeOptions}
+          mb={4}
+        >
+          <ConsumerFilters />
+        </Filters>
         <Box bgColor="white" mb={4}>
           <Box
             as="header"
@@ -127,18 +172,7 @@ const ConsumersPage: React.FC<
               totalConsumers === 1 ? '' : 's'
             }`}</Heading>
             <Box>
-              <InputGroup>
-                <Input
-                  borderColor="#e1e1e5"
-                  placeholder="Search by Name/ID or Label"
-                  variant="outline"
-                  onChange={handleSearchChange}
-                  value={search}
-                />
-                <InputRightElement>
-                  <Icon as={HiOutlineSearch} color="bc-component" />
-                </InputRightElement>
-              </InputGroup>
+              <SearchInput onChange={handleSearchChange} value={search} />
             </Box>
           </Box>
           <Table
@@ -185,8 +219,15 @@ const ConsumersPage: React.FC<
                   <Flex align="center" justify="space-between">
                     {formatDistanceToNow(new Date(consumer.updatedAt))} ago
                     <ActionsMenu>
-                      <MenuItem color="bc-link">Grant Access</MenuItem>
-                      <MenuItem color="red">Delete Consumer</MenuItem>
+                      <MenuItem
+                        color="bc-link"
+                        onClick={handleGrant(consumer.id)}
+                      >
+                        Grant Access
+                      </MenuItem>
+                      <MenuItem color="red" onClick={handleDelete(consumer.id)}>
+                        Delete Consumer
+                      </MenuItem>
                     </ActionsMenu>
                   </Flex>
                 </Td>
@@ -231,3 +272,41 @@ const query = gql`
     }
   }
 `;
+
+const grantMutation = gql`
+  mutation GrantConsumerAccess(
+    $prodEnvId: ID!
+    $consumerUsername: String!
+    $roleName: String!
+    $grant: Boolean!
+  ) {
+    updateConsumerRoleAssignment(
+      prodEnvId: $prodEnvId
+      consumerUsername: $consumerUsername
+      roleName: $roleName
+      grant: $grant
+    ) {
+      id
+    }
+  }
+`;
+
+const deleteMutation = gql`
+  mutation DeleteConsumer($id: ID!) {
+    deleteGatewayConsumer(id: $id) {
+      id
+    }
+  }
+`;
+
+const filterTypeOptions = [
+  {
+    name: 'Products',
+    value: 'products',
+  },
+  { name: 'Environment', value: 'environment' },
+
+  { name: 'Scopes', value: 'scopes' },
+
+  { name: 'Roles', value: 'roles' },
+];

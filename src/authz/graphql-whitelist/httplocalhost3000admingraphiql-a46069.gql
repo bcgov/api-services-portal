@@ -1,0 +1,7 @@
+
+  query GetFilterConsumers($namespace: String!) {
+    allProductsByNamespace(where: { namespace: $namespace }) {
+      name
+      id
+    }
+  }
