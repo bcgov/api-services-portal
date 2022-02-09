@@ -95,7 +95,7 @@ const query = gql`
         }
       }
     }
-    myAccessRequests(where: { serviceAccess_is_null: true }) {
+    myAccessRequests {
       id
       application {
         name

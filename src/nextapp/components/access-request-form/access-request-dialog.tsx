@@ -100,7 +100,6 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           // If auto approved go to the next tab, otherwise close modal and redirect
           if (isAutoApproved) {
             setAccessRequestId(res.createAccessRequest.id);
-            setTab(1);
           } else {
             toast({
               isClosable: true,
@@ -109,9 +108,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
               description:
                 'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
             });
-            onClose();
-            router?.push('/devportal/access');
           }
+          setTab(1);
         } catch (err) {
           toast({
             isClosable: true,
@@ -124,7 +122,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         }
       }
     },
-    [client, isAutoApproved, mutate, onClose, router, toast]
+    [client, isAutoApproved, mutate, toast]
   );
   const handleSubmit = React.useCallback(() => {
     formRef.current?.requestSubmit();

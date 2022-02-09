@@ -115,9 +115,12 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
             </Td>
             <Td>{d.application?.name}</Td>
             <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
-              {!d.isApproved && !d.isIssued && !d.isComplete && (
-                <GenerateCredentialsDialog id={d.id} />
-              )}
+              {(has(d, 'isApproved') ||
+                has(d, 'isIssued') ||
+                has(d, 'isComplete')) &&
+                (!d.isIssued || !d.isApproved) && (
+                  <GenerateCredentialsDialog id={d.id} />
+                )}
               <Menu>
                 <MenuButton
                   as={IconButton}
@@ -131,7 +134,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
                     color="bc-error"
                     onClick={handleRevoke(d.id, has(d, 'isIssued'))}
                   >
-                    Cancel Request
+                    Revoke Access
                   </MenuItem>
                 </MenuList>
               </Menu>
