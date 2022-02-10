@@ -16,12 +16,15 @@ export class BatchService {
     fields: string[]
   ) {
     logger.debug('[list] : %s :: %s == %s', query, refKey, refKeyId);
+    const queryString = `query($id: String) {
+      ${query}(where: { ${refKey} : $id }) {
+        id, ${fields.join(',')}
+      }
+    }`;
+    logger.debug('[list] %s', queryString);
+
     const result = await this.context.executeGraphQL({
-      query: `query($id: String) {
-              ${query}(where: { ${refKey} : $id }) {
-                id, ${fields.join(',')}
-              }
-            }`,
+      query: queryString,
       variables: { id: refKeyId },
     });
     logger.debug('[list] RESULT %j', result);
@@ -56,17 +59,18 @@ export class BatchService {
     fields: string[]
   ) {
     logger.debug('[lookup] : %s :: %s == %s', query, refKey, eid);
+    const queryString = `query($id: String) {
+      ${query}(where: { ${refKey} : $id }) {
+        id, ${fields.join(',')}
+      }
+    }`;
+    logger.debug('[lookup] %s', queryString);
     const result = await this.context.executeGraphQL({
-      query: `query($id: String) {
-              ${query}(where: { ${refKey} : $id }) {
-                id, ${fields.join(',')}
-              }
-            }`,
+      query: queryString,
       variables: { id: eid },
     });
     logger.debug('[lookup] RESULT %j', result);
-
-    if (result['data'][query].length > 1) {
+    if (result['data'][query] == null || result['data'][query].length > 1) {
       throw Error(
         'Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid
       );

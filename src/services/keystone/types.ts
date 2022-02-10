@@ -6065,6 +6065,7 @@ export type UmaPolicy = {
   owner: Scalars['String'];
   users?: Maybe<Array<Maybe<Scalars['String']>>>;
   clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  groups?: Maybe<Array<Maybe<Scalars['String']>>>;
   scopes: Array<Maybe<Scalars['String']>>;
 };
 

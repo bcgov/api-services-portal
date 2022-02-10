@@ -13,6 +13,17 @@ export interface NewCredential {
   clientPrivateKey?: string;
 }
 
+// Subject Identity when a Product is requested using the Authentication Code Flow
+// this is collected during a "Confirm Identity" step during Request
+
+export interface SubjectIdentity {
+  sub: string;
+  azp: string;
+  scope?: string;
+  name?: string;
+  preferred_username?: string;
+  email?: string;
+}
 export interface RequestControls {
   defaultClientScopes?: string[];
   defaultOptionalScopes?: string[];
@@ -22,6 +33,7 @@ export interface RequestControls {
   clientCertificate?: string;
   clientGenCertificate?: boolean;
   jwksUrl?: string;
+  subject?: SubjectIdentity;
 }
 
 export interface ClientMapper {
