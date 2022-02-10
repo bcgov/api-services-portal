@@ -98,17 +98,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           });
 
           // If auto approved go to the next tab, otherwise close modal and redirect
-          if (isAutoApproved) {
-            setAccessRequestId(res.createAccessRequest.id);
-          } else {
-            toast({
-              isClosable: true,
-              status: 'warning',
-              title: 'Pending Approval',
-              description:
-                'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
-            });
-          }
+          setAccessRequestId(res.createAccessRequest.id);
           setTab(1);
         } catch (err) {
           toast({
@@ -122,15 +112,24 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         }
       }
     },
-    [client, isAutoApproved, mutate, toast]
+    [client, mutate, toast]
   );
   const handleSubmit = React.useCallback(() => {
     formRef.current?.requestSubmit();
   }, []);
   const handleDone = React.useCallback(() => {
     onClose();
+    if (!isAutoApproved) {
+      toast({
+        isClosable: true,
+        status: 'warning',
+        title: 'Pending Approval',
+        description:
+          'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
+      });
+    }
     router?.push('/devportal/access');
-  }, [onClose, router]);
+  }, [isAutoApproved, onClose, router, toast]);
   const handleFormError = () => {
     setError(true);
   };
