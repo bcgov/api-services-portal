@@ -189,6 +189,32 @@ function buildQueryResponse(md: any): string[] {
   return response;
 }
 
+export const getRecord = async function (
+  context: any,
+  feedEntity: string,
+  eid: string,
+  children = false
+): Promise<any> {
+  const md = (metadata as any)[feedEntity];
+
+  assert.strictEqual(
+    children == false && md.childOnly === true,
+    false,
+    'This entity is only part of a child.'
+  );
+
+  const batchService = new BatchService(context);
+
+  const localRecord = await batchService.lookup(
+    md.query,
+    md.refKey,
+    eid,
+    buildQueryResponse(md)
+  );
+
+  return localRecord;
+};
+
 export const syncRecords = async function (
   context: any,
   feedEntity: string,
