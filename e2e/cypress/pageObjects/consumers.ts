@@ -1,4 +1,4 @@
-import { wrap } from "module"
+import { wrap } from 'module'
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
@@ -51,14 +51,15 @@ export default class ConsumersPage {
   }
 
   turnOnACLSwitch(flag: Boolean) {
-    debugger
-    cy.get(this.aclSwitch).find('input').then(($btn) => {
-      if ($btn.is(':checked') != flag){
-        cy.wrap($btn).invoke('show')
-        cy.wrap($btn).click({force: true})
-        cy.wait(3000)
-      }
-    })
+    cy.get(this.aclSwitch)
+      .find('input')
+      .then(($btn) => {
+        if ($btn.is(':checked') != flag) {
+          cy.wrap($btn).invoke('show')
+          cy.wrap($btn).click({ force: true })
+          cy.wait(3000)
+        }
+      })
   }
 
   deleteControl() {
@@ -69,4 +70,4 @@ export default class ConsumersPage {
       }
     })
   }
-};
+}
