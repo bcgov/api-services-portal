@@ -36,9 +36,17 @@ const ApsTable: React.FC<ApsTableProps> = ({
   sortable,
   ...props
 }) => {
-  const [sortKey, setSortKey] = React.useState<string>(columns[0]?.key ?? '');
+  const [sortKey, setSortKey] = React.useState<string>(() => {
+    if (sortable) {
+      return columns[0]?.key;
+    }
+    return '';
+  });
   const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
   const sorted = React.useMemo(() => {
+    if (!sortKey) {
+      return data;
+    }
     const sortedAsc = sortBy(data, sortKey);
 
     if (sortDir === 'desc') {

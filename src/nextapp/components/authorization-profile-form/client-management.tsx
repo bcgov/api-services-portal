@@ -11,9 +11,10 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import Table from '@/components/table';
+import { uid } from 'react-uid';
+
 import EmptyPane from '../empty-pane';
 import EnvironmentForm from './environment-form';
-
 import { EnvironmentItem } from './types';
 
 interface ClientManagementProps {
@@ -87,7 +88,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
           }}
         >
           {(d: EnvironmentItem, index) => (
-            <Tr key={index}>
+            <Tr key={uid(d, index)}>
               <Td textTransform="capitalize" pl={3} width="10%">
                 {d.environment}
               </Td>
