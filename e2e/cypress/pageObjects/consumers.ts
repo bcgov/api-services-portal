@@ -55,9 +55,9 @@ export default class ConsumersPage {
   turnOnACLSwitch(flag: Boolean) {
     debugger
     cy.get(this.aclSwitch).find('input').then(($btn) => {
-      if ($btn.is(':checked') != flag){
+      if ($btn.is(':checked') != flag) {
         cy.wrap($btn).invoke('show')
-        cy.wrap($btn).click({force: true})
+        cy.wrap($btn).click({ force: true })
         cy.wait(3000)
       }
     })
@@ -72,7 +72,7 @@ export default class ConsumersPage {
     })
   }
 
-  checkApproveAccess(){
+  checkApproveAccess() {
     cy.get('body', { log: false }).then(($body) => {
       if ($body.find(this.pendingRequestTable).length > 0) {
         throw "Mark can Approve the pending request even if 'Access.Manager' role is revoked"

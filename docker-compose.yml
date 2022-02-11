@@ -65,7 +65,7 @@ services:
       - keycloak
     build:
       context: .
-      dockerfile: Dockerfile.E2E
+      dockerfile: ./local/portal/Dockerfile.E2E
     env_file:
       - .env.local
     ports:
