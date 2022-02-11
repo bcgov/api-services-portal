@@ -23,7 +23,7 @@ export class WorkbookService {
   }
 
   public async buildWorkbook(): Promise<ExcelJS.Workbook> {
-    const envCtx = await getGwaProductEnvironment(this.keystone);
+    const envCtx = await getGwaProductEnvironment(this.keystone, true);
 
     const namespaces = await getNamespaces(envCtx);
     const ns_access = await getNamespaceAccess(envCtx, namespaces);

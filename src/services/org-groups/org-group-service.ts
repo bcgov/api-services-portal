@@ -17,14 +17,18 @@ import PolicyRepresentation, {
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 
+import { root } from './group-converter-utils';
+import { User } from '../keystone/types';
+import { GroupPermission, UserReference } from './types';
+
 const logger = Logger('org-groups');
 
 enum RoleGroups {
-  'data-custodians',
+  'data-custodian',
   'test',
 }
 
-interface OrganizationGroup {
+export interface OrganizationGroup {
   name: string;
   parent?: string;
 }
@@ -63,6 +67,12 @@ export class OrgGroupService {
     return this;
   }
 
+  public getValidRoles(): string[] {
+    return Object.keys(RoleGroups).filter((item) => {
+      return isNaN(Number(item));
+    });
+  }
+
   public async backfillGroups(): Promise<void> {
     this.groups = await this.keycloakService.getAllGroups();
   }
@@ -89,12 +99,31 @@ export class OrgGroupService {
         );
       } else if (parts.length == 2 || parts.length == 3) {
         // parts: /<role>/<org>/<orgunit>
-        let rootGroup: GroupRepresentation = this.groups.filter(
+        const rootGroups: GroupRepresentation[] = this.groups.filter(
           (group: GroupRepresentation) => group.name == parts[1]
-        )[0];
+        );
+
+        let rootGroup: GroupRepresentation;
+
+        if (rootGroups.length == 0) {
+          logger.debug(
+            "[createGroupIfMissing] Root '%s' not found - creating",
+            parts[1]
+          );
+          const newGroupName = parts[1];
+          if (newGroupName in RoleGroups) {
+            const newGroup = await this.keycloakService.createRootGroup(
+              newGroupName
+            );
+            rootGroup = await this.keycloakService.getGroupById(newGroup.id);
+          } else {
+            throwError(`Invalid organization role ${newGroupName}`);
+          }
+        } else {
+          rootGroup = rootGroups[0];
+        }
 
         parts.push(orgGroup.name);
-
         for (let i = 2; i < parts.length; i++) {
           const groupMatch = rootGroup.subGroups.filter(
             (group: GroupRepresentation) => group.name == parts[i]
@@ -144,10 +173,12 @@ export class OrgGroupService {
 
     const name = this.getGroupPermissionName(orgGroup, resourceName);
 
-    const permissionPolicy = await clientPolicyService.findPolicyByName(
+    const permissionPolicies: PolicyRepresentation[] = await clientPolicyService.findPermissionsByName(
       cid,
       name
     );
+    const permissionPolicy =
+      permissionPolicies.length == 0 ? undefined : permissionPolicies[0];
 
     logger.debug(
       '[createOrUpdateGroupPermission] Exists? %j',
@@ -164,7 +195,7 @@ export class OrgGroupService {
 
     const resources = [(resource as any)._id];
 
-    const policies = [
+    const policies: string[] = [
       (
         await clientPolicyService.findPolicyByName(
           cid,
@@ -172,6 +203,12 @@ export class OrgGroupService {
         )
       ).id,
     ];
+
+    assert.strictEqual(
+      typeof policies[0] != 'undefined',
+      true,
+      'Policy not found - ' + this.getGroupPolicyName(orgGroup)
+    );
 
     const permission: any = {
       decisionStrategy: DecisionStrategy.UNANIMOUS,
@@ -185,9 +222,17 @@ export class OrgGroupService {
 
     if (permissionPolicy) {
       logger.debug(
-        'Updating permission (%s) %j',
+        'Updating permission (%s) %j %j',
         permissionPolicy.id,
         permission
+      );
+      const existingPolicyId = (permissionPolicy.config
+        .policies[0] as PolicyRepresentation).id;
+
+      assert.strictEqual(
+        existingPolicyId,
+        policies[0],
+        `Permission has different policy assigned, unable to update (Existing ${existingPolicyId} != ${policies[0]})`
       );
       await clientPolicyService.updatePermission(
         cid,
@@ -229,6 +274,26 @@ export class OrgGroupService {
     await clientPolicyService.createOrUpdatePolicy(cid, policy);
   }
 
+  public async getGroupPathsByGroupName(name: string): Promise<string[]> {
+    // traverse to find exact name matches
+    const groups = await this.keycloakService.search(name);
+    return this.traverse(groups, name, []);
+  }
+
+  private traverse(
+    groups: GroupRepresentation[],
+    name: string,
+    paths: string[]
+  ): string[] {
+    const matches = groups.filter((g) => g.name === name);
+    if (matches.length > 0) {
+      paths.push(...matches.map((g) => g.path));
+    } else {
+      groups.forEach((g) => this.traverse(g.subGroups, name, paths));
+    }
+    return paths;
+  }
+
   public listGroups(orgGroup: OrganizationGroup): GroupRepresentation[] {
     const branches = this.getGroupBranches(orgGroup);
     const isLeaf = (index: number) => index + 1 == branches.length;
@@ -236,6 +301,30 @@ export class OrgGroupService {
     return this.getGroupBranches(orgGroup).map((group, index) =>
       this.traverseGroupBranches(group, isLeaf(index))
     );
+  }
+
+  public async getPermissionsForGroupPolicy(
+    groupPath: string
+  ): Promise<GroupPermission[]> {
+    const clientService = new KeycloakClientService(null).useAdminClient(
+      this.keycloakService.getAdminClient()
+    );
+
+    const clientPolicyService = new KeycloakClientPolicyService(
+      null
+    ).useAdminClient(this.keycloakService.getAdminClient());
+
+    const cid = (await clientService.findByClientId(this.clientId)).id;
+
+    const permissions = await clientPolicyService.findPermissionsByName(
+      cid,
+      groupPath
+    );
+
+    return permissions.map((perm) => ({
+      resource: perm.config.resources[0].name,
+      scopes: perm.config.scopes.map((sc: any) => sc.name),
+    }));
   }
 
   public async getGroupPermissions(
@@ -270,7 +359,8 @@ export class OrgGroupService {
     group: GroupRepresentation,
     isLeaf: boolean
   ): GroupRepresentation {
-    const maskedGroup: { name: string; subGroups?: any } = {
+    const maskedGroup: { id: string; name: string; subGroups?: any } = {
+      id: group.id,
       name: group.name,
     };
 
@@ -284,16 +374,14 @@ export class OrgGroupService {
     return maskedGroup;
   }
 
-  public async listMembers(
-    orgGroup: OrganizationGroup
-  ): Promise<UserRepresentation[]> {
+  public async listMembers(orgGroup: OrganizationGroup): Promise<User[]> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     let allGroupMembers: UserRepresentation[] = [];
     for (const group of groupIds) {
       const groupMembers = await this.keycloakService.listMembers(group.id);
       allGroupMembers = [
         ...allGroupMembers,
-        ...groupMembers.filter(
+        ...groupMembers?.filter(
           (u) => this.isExistingInList(u, allGroupMembers) == false
         ),
       ];
@@ -303,6 +391,60 @@ export class OrgGroupService {
       username: user.username,
       email: user.email,
     }));
+  }
+
+  public async listMembersForLeafOnly(
+    orgGroup: OrganizationGroup
+  ): Promise<UserReference[]> {
+    const groupIds = this.getGroupBranchToLeaf(orgGroup);
+    const group = groupIds[groupIds.length - 1];
+    const groupMembers = await this.keycloakService.listMembers(group.id);
+    return groupMembers.map((user) => ({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+    }));
+  }
+
+  public async syncMembers(
+    orgGroup: OrganizationGroup,
+    memberUsernames: UserReference[]
+  ) {
+    const groupIds = this.getGroupBranchToLeaf(orgGroup);
+    const group = groupIds[groupIds.length - 1];
+
+    logger.debug(
+      '[syncMembers] %s (%s) %j',
+      orgGroup.name,
+      group.id,
+      memberUsernames
+    );
+
+    const currentMembers = (await this.listMembersForLeafOnly(orgGroup)).map(
+      (u) => u.id
+    );
+    const desiredMembers = (
+      await Promise.all(
+        memberUsernames.map((u) =>
+          this.keycloakService.lookupMemberByUsername(u.username)
+        )
+      )
+    ).filter((s) => s);
+
+    const deletions = currentMembers.filter((u) => !desiredMembers.includes(u));
+    const additions = desiredMembers.filter((u) => !currentMembers.includes(u));
+
+    for (const userId of deletions) {
+      await this.keycloakService.delMemberFromGroup(userId, group.id);
+    }
+
+    for (const userId of additions) {
+      await this.keycloakService.addMemberToGroup(userId, group.id);
+    }
+
+    if (deletions.length == 0 && additions.length == 0) {
+      logger.debug('[syncMembers] %s no updated needed.', orgGroup.name);
+    }
   }
 
   private isExistingInList(
@@ -323,7 +465,7 @@ export class OrgGroupService {
     orgGroup: OrganizationGroup,
     resourceName: string
   ): string {
-    return `${resourceName} permission for group ${orgGroup.parent}/${orgGroup.name}`;
+    return `${resourceName} permission for role ${root(orgGroup.parent)}`;
   }
 
   private getGroupPolicyDescription(orgGroup: OrganizationGroup): string {
@@ -345,9 +487,14 @@ export class OrgGroupService {
     const parts = orgGroup.parent ? orgGroup.parent.split('/') : [''];
     parts.push(orgGroup.name);
 
-    let rootGroup: GroupRepresentation = this.groups.filter(
+    const rootGroups: GroupRepresentation[] = this.groups.filter(
       (group: GroupRepresentation) => group.name == parts[1]
-    )[0];
+    );
+
+    if (rootGroups.length == 0) {
+      return [];
+    }
+    let rootGroup = rootGroups[0];
 
     hierarchy.push(rootGroup);
 

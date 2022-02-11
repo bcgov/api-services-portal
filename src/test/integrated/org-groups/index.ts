@@ -24,10 +24,19 @@ import { KeycloakGroupService } from '../../../services/keycloak';
 
   const org = {
     name: 'databc',
-    parent: '/data-custodians/ministry-citizens-services',
+    parent: '/data-custodian/ministry-citizens-services',
+  };
+
+  const org2 = {
+    name: 'databc2',
+    parent: '/data-custodian/ministry-citizens-services',
   };
 
   console.log(JSON.stringify(await kc.listMembers(org), null, 4));
+
+  console.log(await kc.getValidRoles());
+  console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
+  console.log(await kc.getGroupPathsByGroupName('databc'));
 
   if (true) {
     await kc.createGroupIfMissing(org);
@@ -41,26 +50,31 @@ import { KeycloakGroupService } from '../../../services/keycloak';
 
     await kc.createGroupIfMissing({
       name: 'data-innovation',
-      parent: '/data-custodians/ministry-citizens-services',
+      parent: '/data-custodian/ministry-citizens-services',
     });
 
     await kc.createGroupIfMissing({
       name: 'test1',
-      parent: '/data-custodians/ministry-citizens-services',
+      parent: '/data-custodian/ministry-citizens-services',
     });
 
     await kc.backfillGroups();
     await kc.deleteGroup({
       name: 'test1',
-      parent: '/data-custodians/ministry-citizens-services',
+      parent: '/data-custodian/ministry-citizens-services',
     });
+
+    await kc.createOrUpdateGroupPermission(org2, 'orgcontrol', [
+      'Namespace.View',
+      'Namepsace.Manage',
+    ]);
   }
 
   console.log(
     JSON.stringify(
       kc.listGroups({
         name: 'ministry-citizens-services',
-        parent: '/data-custodians',
+        parent: '/data-custodian',
       }),
       null,
       3
@@ -71,7 +85,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     JSON.stringify(
       kc.listGroups({
         name: 'databc',
-        parent: '/data-custodians/ministry-citizens-services',
+        parent: '/data-custodian/ministry-citizens-services',
       }),
       null,
       3

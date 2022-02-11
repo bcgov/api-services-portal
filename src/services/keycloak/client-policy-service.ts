@@ -98,16 +98,57 @@ export class KeycloakClientPolicyService {
     id: string,
     name: string
   ): Promise<PolicyRepresentation> {
+    const lkup = await this.findPermissionsByName(id, name);
+    assert.strictEqual(
+      lkup.length,
+      1,
+      'Unexpected number of permissions returned'
+    );
+    return lkup[0];
+  }
+
+  public async findPermissionsByName(
+    id: string,
+    name: string
+  ): Promise<PolicyRepresentation[]> {
     logger.debug('[findPermissionByName] %s', name);
-    const lkup = await this.kcAdminClient.clients
+    const lkup: PolicyRepresentation[] = await this.kcAdminClient.clients
       .findPermissions({ id, name })
       .catch((e: any) => {
         logger.error('Err %s', JSON.stringify(e, null, 3));
         throw e;
       });
-    assert.strictEqual(lkup.length, 1, 'Permission not found ' + name);
 
-    return await this.enrichWithAssociations(id, lkup[0]);
+    for (const perm of lkup) {
+      await this.enrichWithAssociations(id, perm);
+
+      assert.strictEqual(
+        perm.type,
+        'scope',
+        `Permission Type Unexpected ${perm.type}`
+      );
+      assert.strictEqual(
+        perm.logic,
+        'POSITIVE',
+        `Permission Logic Unexpected ${perm.logic}`
+      );
+      assert.strictEqual(
+        perm.decisionStrategy,
+        'UNANIMOUS',
+        `Permission Decision Unexpected ${perm.decisionStrategy}`
+      );
+      assert.strictEqual(
+        perm.config.policies.length,
+        1,
+        `Permission Policy Count Error ${perm.config.policies.length}`
+      );
+      assert.strictEqual(
+        perm.config.resources.length,
+        1,
+        `Permission Resource Count Error ${perm.config.resources.length}`
+      );
+    }
+    return lkup;
   }
 
   public async findPolicyByName(
@@ -121,6 +162,7 @@ export class KeycloakClientPolicyService {
         logger.error('Err %s', JSON.stringify(e, null, 3));
         throw e;
       });
+    logger.debug('[findPolicyByName] %j', policy);
     return policy;
   }
 

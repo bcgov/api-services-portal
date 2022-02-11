@@ -87,7 +87,7 @@ const apps = [new GraphQLApp()];
     const body = {
       name: 'abcxx',
       parent: '/ddd',
-      roles: [
+      roles: JSON.stringify([
         {
           name: 'data-custodians',
           members: [{ username: 'acope@idir' }],
@@ -98,7 +98,7 @@ const apps = [new GraphQLApp()];
             },
           ],
         },
-      ],
+      ]),
     };
     const batchResult = await syncRecords(
       context,

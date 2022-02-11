@@ -113,4 +113,25 @@ export class UMAResourceRegistrationService {
     logger.debug('[listResources] RESULT %j', result);
     return result;
   }
+
+  public async findResourceByName(name: string): Promise<ResourceSet> {
+    const requestQuery = querystring.stringify({
+      name,
+      exactName: true,
+    } as any);
+    const url = `${this.resourceRegistrationEndpoint}?${requestQuery}`;
+    logger.debug('[findResourceByName] %s', url);
+    const result = await fetch(url, {
+      method: 'get',
+      headers: headers(this.accessToken) as any,
+    })
+      .then(checkStatus)
+      .then((res) => res.json())
+      .then((json) => json as string[]);
+    logger.debug('[findResourceByName] RESULT %j', result);
+
+    return result.length == 0
+      ? undefined
+      : await this.getResourceSet(result[0]);
+  }
 }

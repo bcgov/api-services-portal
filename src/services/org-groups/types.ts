@@ -1,6 +1,4 @@
-import { User } from '../keystone/types';
-
-export interface OrganizationGroupAccess {
+export interface GroupAccess {
   name: string;
   parent?: string;
   roles: GroupRole[];
@@ -9,10 +7,16 @@ export interface OrganizationGroupAccess {
 export interface GroupRole {
   name: string;
   permissions: GroupPermission[];
-  members: User[];
+  members: UserReference[];
 }
 
 export interface GroupPermission {
   resource: string;
   scopes: string[];
+}
+
+export interface UserReference {
+  id?: string;
+  username: string;
+  email?: string;
 }

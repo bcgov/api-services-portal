@@ -44,6 +44,12 @@ import { Policy, UMAPolicyService } from '../../../services/uma2';
   );
   console.log(JSON.stringify(permissions, null, 3));
 
+  const pol = await kc.findPermissionByName(
+    cid,
+    '/data-custodians/ministry-citizens-services/databc'
+  );
+  console.log(JSON.stringify(pol, null, 3));
+
   if (false) {
     const pol: any = {
       decisionStrategy: DecisionStrategy.UNANIMOUS,
