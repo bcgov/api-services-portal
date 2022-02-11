@@ -20,11 +20,16 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient, useQueryClient } from 'react-query';
 import EmptyPane from '@/components/empty-pane';
-import Filters from '@/components/filters';
-import { GatewayConsumer, Query } from '@/shared/types/query.types';
+// TODO:  Once we get API support for filters circle back and add back in
+// import Filters from '@/components/filters';
+import {
+  Application,
+  GatewayConsumer,
+  Query,
+} from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-import InlineManageLabels from '@/components/inline-manage-labels';
+// import InlineManageLabels from '@/components/inline-manage-labels';
 import LinkConsumer from '@/components/link-consumer';
 import PageHeader from '@/components/page-header';
 import NextLink from 'next/link';
@@ -32,13 +37,19 @@ import SearchInput from '@/components/search-input';
 import Table from '@/components/table';
 import { uid } from 'react-uid';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import ConsumerFilters from '@/components/consumer-filters';
+// import ConsumerFilters from '@/components/consumer-filters';
+
+interface ConsumerListItem {
+  application: Application;
+  consumer: GatewayConsumer;
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
+  const queryKey = ['allConsumers'];
 
   await queryClient.prefetchQuery(
-    ['allConsumers'],
+    queryKey,
     async () =>
       await api<Query>(query, null, {
         headers: context.req.headers as HeadersInit,
@@ -48,16 +59,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
+      queryKey,
     },
   };
 };
 
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = () => {
+> = ({ queryKey }) => {
   const toast = useToast();
   const client = useQueryClient();
-  const queryKey = ['allConsumers'];
   const [search, setSearch] = React.useState('');
   const { data } = useApi(
     queryKey,
@@ -76,7 +87,9 @@ const ConsumersPage: React.FC<
     const searchTerm = new RegExp(search, 'i');
     const result = data.allServiceAccessesByNamespace
       ?.filter((d) => !!d.consumer)
-      .map((d) => d.consumer);
+      .map((d) => {
+        return d;
+      });
 
     if (!search) {
       return result;
@@ -84,9 +97,9 @@ const ConsumersPage: React.FC<
 
     return result.filter((d) => {
       return (
-        d.username.search(searchTerm) >= 0 ||
+        d.consumer.username.search(searchTerm) >= 0 ||
         d.id.search(searchTerm) >= 0 ||
-        d.tags.search(searchTerm) >= 0
+        d.consumer.tags.search(searchTerm) >= 0
       );
     });
   }, [data, search]);
@@ -114,9 +127,14 @@ const ConsumersPage: React.FC<
     [client, deleteMutate, queryKey, toast]
   );
   const handleGrant = React.useCallback(
-    (id: string) => async () => {
+    (d: ConsumerListItem) => async () => {
       try {
-        await grantMutate.mutateAsync({ id });
+        await grantMutate.mutateAsync({
+          prodEnvId: d.application.appId,
+          consumerId: d.consumer.id,
+          group: d.consumer.aclGroups,
+          grant: true,
+        });
         client.invalidateQueries(queryKey);
         toast({
           title: 'Consumer access granted',
@@ -125,7 +143,9 @@ const ConsumersPage: React.FC<
       } catch (err) {
         toast({
           title: 'Consumer access grant failed',
-          description: err?.map((e) => e.message).join(', '),
+          description: Array.isArray(err)
+            ? err?.map((e) => e.message).join(', ')
+            : err.message,
           status: 'error',
         });
       }
@@ -135,6 +155,11 @@ const ConsumersPage: React.FC<
   const handleSearchChange = React.useCallback((value: string) => {
     setSearch(value);
   }, []);
+  //const filterEl = (
+  //  <Filters cacheId="consumers" filterTypeOptions={filterTypeOptions} mb={4}>
+  //    <ConsumerFilters />
+  //  </Filters>
+  //);
 
   return (
     <>
@@ -149,13 +174,7 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <Filters
-          cacheId="consumers"
-          filterTypeOptions={filterTypeOptions}
-          mb={4}
-        >
-          <ConsumerFilters />
-        </Filters>
+
         <Box bgColor="white" mb={4}>
           <Box
             as="header"
@@ -180,7 +199,7 @@ const ConsumersPage: React.FC<
             columns={[
               { name: 'Name/ID', key: 'name' },
               {
-                name: <InlineManageLabels />,
+                name: 'Labels',
                 key: 'tags',
                 sortable: false,
               },
@@ -195,18 +214,18 @@ const ConsumersPage: React.FC<
               />
             }
           >
-            {(consumer: GatewayConsumer) => (
-              <Tr key={uid(consumer.id)}>
+            {(d: ConsumerListItem) => (
+              <Tr key={uid(d.consumer.id)}>
                 <Td width="25%">
-                  <NextLink passHref href={`/consumers/${consumer.id}`}>
+                  <NextLink passHref href={`/consumers/${d.consumer.id}`}>
                     <Link color="bc-link" textDecor="underline">
-                      {consumer.username}
+                      {d.consumer.username}
                     </Link>
                   </NextLink>
                 </Td>
                 <Td width="50%">
                   <Wrap spacing={2.5}>
-                    {JSON.parse(consumer.tags).map((t) => (
+                    {JSON.parse(d.consumer.tags).map((t) => (
                       <WrapItem key={uid(t)}>
                         <Tag bgColor="white" variant="outline">
                           {t}
@@ -217,15 +236,15 @@ const ConsumersPage: React.FC<
                 </Td>
                 <Td width="25%">
                   <Flex align="center" justify="space-between">
-                    {formatDistanceToNow(new Date(consumer.updatedAt))} ago
+                    {formatDistanceToNow(new Date(d.consumer.updatedAt))} ago
                     <ActionsMenu>
-                      <MenuItem
-                        color="bc-link"
-                        onClick={handleGrant(consumer.id)}
-                      >
+                      <MenuItem color="bc-link" onClick={handleGrant(d)}>
                         Grant Access
                       </MenuItem>
-                      <MenuItem color="red" onClick={handleDelete(consumer.id)}>
+                      <MenuItem
+                        color="red"
+                        onClick={handleDelete(d.consumer.id)}
+                      >
                         Delete Consumer
                       </MenuItem>
                     </ActionsMenu>
@@ -274,20 +293,18 @@ const query = gql`
 `;
 
 const grantMutation = gql`
-  mutation GrantConsumerAccess(
+  mutation ToggleConsumerACLMembership(
     $prodEnvId: ID!
-    $consumerUsername: String!
-    $roleName: String!
+    $consumerId: ID!
+    $group: String!
     $grant: Boolean!
   ) {
-    updateConsumerRoleAssignment(
+    updateConsumerGroupMembership(
       prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
-      roleName: $roleName
+      consumerId: $consumerId
+      group: $group
       grant: $grant
-    ) {
-      id
-    }
+    )
   }
 `;
 
@@ -299,14 +316,14 @@ const deleteMutation = gql`
   }
 `;
 
-const filterTypeOptions = [
-  {
-    name: 'Products',
-    value: 'products',
-  },
-  { name: 'Environment', value: 'environment' },
-
-  { name: 'Scopes', value: 'scopes' },
-
-  { name: 'Roles', value: 'roles' },
-];
+//const filterTypeOptions = [
+//  {
+//    name: 'Products',
+//    value: 'products',
+//  },
+//  { name: 'Environment', value: 'environment' },
+//
+//  { name: 'Scopes', value: 'scopes' },
+//
+//  { name: 'Roles', value: 'roles' },
+//];
