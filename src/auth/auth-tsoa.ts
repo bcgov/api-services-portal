@@ -50,13 +50,18 @@ export function expressAuthentication(
         if (scopes.length == 0) {
           return resolve(request.oauth_user);
         }
+        const permission =
+          securityName === 'jwt-org'
+            ? `org/${request.params.org}:${scopes[0]}`
+            : `${request.params.ns}:${scopes[0]}`;
+
         logger.debug(
-          "Resource Authorization on '%s'",
-          `${request.params.ns}:${scopes[0]}`
+          "[%s] Resource Authorization on '%s'",
+          securityName,
+          permission
         );
-        const resp: any = keycloak.enforcer(
-          `${request.params.ns}:${scopes[0]}`
-        )(
+
+        const resp: any = keycloak.enforcer(permission)(
           request,
           {
             status: (s: number) => {
