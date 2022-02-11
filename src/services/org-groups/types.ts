@@ -20,3 +20,8 @@ export interface UserReference {
   username: string;
   email?: string;
 }
+
+export interface OrgNamespace {
+  name: string;
+  orgUnit: string;
+}

@@ -304,7 +304,8 @@ export class OrgGroupService {
   }
 
   public async getPermissionsForGroupPolicy(
-    groupPath: string
+    orgGroup: OrganizationGroup,
+    roleName: string
   ): Promise<GroupPermission[]> {
     const clientService = new KeycloakClientService(null).useAdminClient(
       this.keycloakService.getAdminClient()
@@ -316,9 +317,10 @@ export class OrgGroupService {
 
     const cid = (await clientService.findByClientId(this.clientId)).id;
 
-    const permissions = await clientPolicyService.findPermissionsByName(
+    const permissions = await clientPolicyService.findPermissionsMatchingPolicy(
       cid,
-      groupPath
+      roleName,
+      this.getGroupPolicyName(orgGroup)
     );
 
     return permissions.map((perm) => ({

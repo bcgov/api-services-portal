@@ -7,6 +7,7 @@ import {
   KeycloakClientPolicyService,
   KeycloakClientService,
   KeycloakGroupService,
+  Uma2WellKnown,
 } from '../keycloak';
 import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
@@ -17,24 +18,31 @@ import PolicyRepresentation, {
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 import { GroupAccess, GroupRole } from './types';
-import { OrganizationGroup, OrgGroupService } from './org-group-service';
+import { OrganizationGroup, OrgGroupService, OrgAuthzService } from './index';
 import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
 
 const logger = Logger('group-access');
 
 export class GroupAccessService {
   private orgGroupService;
+  private orgAuthzService;
 
-  constructor(issuerUrl: string) {
-    this.orgGroupService = new OrgGroupService(issuerUrl);
+  constructor(uma2: Uma2WellKnown) {
+    this.orgGroupService = new OrgGroupService(uma2.issuer);
+    this.orgAuthzService = new OrgAuthzService(uma2);
   }
 
   async login(clientId: string, clientSecret: string) {
     await this.orgGroupService.login(clientId, clientSecret);
     await this.orgGroupService.backfillGroups();
+    await this.orgAuthzService.login(clientId, clientSecret);
   }
 
   async createOrUpdateGroupAccess(access: GroupAccess): Promise<void> {
+    // CreateIfMissing the Resource for the "org unit" (if this GroupAccess is for an Org Unit)
+    // CreateIfMissing the Authorization Scopes for: GroupAccess.Manage, Namespace.Assign, Dataset.Manage
+    await this.orgAuthzService.createIfMissingResource(access.name);
+
     for (const groupRole of access.roles) {
       const parent = access.parent ? access.parent : '';
       const orgGroup: OrganizationGroup = {
@@ -101,8 +109,10 @@ export class GroupAccessService {
       role.members = await this.orgGroupService.listMembersForLeafOnly(
         orgGroup
       );
+
       role.permissions = await this.orgGroupService.getPermissionsForGroupPolicy(
-        groupPath
+        orgGroup,
+        role.name
       );
 
       groupAccess.roles.push(role);

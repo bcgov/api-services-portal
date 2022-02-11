@@ -113,20 +113,27 @@ export class KeycloakGroupService {
     return await this.kcAdminClient.groups.find();
   }
 
-  public async search(search: string): Promise<GroupRepresentation[]> {
+  public async search(
+    search: string,
+    briefRepresentation: boolean = true
+  ): Promise<GroupRepresentation[]> {
     const result = await this.kcAdminClient.groups.find({
       search,
       first: 0,
       max: 500,
+      briefRepresentation,
     });
     logger.debug('[search] %j', result);
     return result;
   }
 
-  public async getGroups(parentGroupName: string) {
-    return (await this.kcAdminClient.groups.find()).filter(
-      (group: GroupRepresentation) => group.name == parentGroupName
-    );
+  public async getGroups(
+    parentGroupName: string,
+    briefRepresentation: boolean = true
+  ) {
+    return (
+      await this.kcAdminClient.groups.find({ briefRepresentation })
+    ).filter((group: GroupRepresentation) => group.name == parentGroupName);
   }
 
   public async getGroupById(id: string) {

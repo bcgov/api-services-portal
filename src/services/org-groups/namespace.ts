@@ -16,7 +16,7 @@ import PolicyRepresentation, {
 } from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
 import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
-import { GroupAccess, GroupRole } from './types';
+import { GroupAccess, GroupRole, OrgNamespace } from './types';
 import { OrganizationGroup, OrgGroupService } from './org-group-service';
 import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
 
@@ -98,5 +98,28 @@ export class NamespaceService {
       delete group.attributes['org-unit'];
       await this.groupService.updateGroup(group);
     }
+  }
+
+  async listAssignedNamespacesByOrg(org: string): Promise<OrgNamespace[]> {
+    const groups = await this.groupService.getGroups('ns', false);
+    assert.strictEqual(
+      groups.length == 1 && groups[0].name == 'ns',
+      true,
+      'Unexpected data returned'
+    );
+
+    const namespaceGroups = groups[0].subGroups;
+
+    const matches = namespaceGroups
+      .filter(
+        (group) =>
+          'org' in group.attributes && group.attributes['org'][0] === org
+      )
+      .map((group) => ({
+        name: group.name,
+        orgUnit: group.attributes['org-unit'][0],
+      }));
+    logger.debug('[listAssignedNamespaces] [%s] Result %j', org, matches);
+    return matches;
   }
 }

@@ -94,6 +94,62 @@ export class KeycloakClientPolicyService {
     return permissions;
   }
 
+  public async findPermissionsMatchingPolicy(
+    id: string,
+    roleName: string,
+    policyName: string
+  ): Promise<PolicyRepresentation[]> {
+    logger.debug('[findPermissionByName] r=%s p=%s', roleName, policyName);
+    const result = [];
+    const lkup: PolicyRepresentation[] = await this.kcAdminClient.clients
+      .findPermissions({ id, name: roleName })
+      .catch((e: any) => {
+        logger.error('Err %s', JSON.stringify(e, null, 3));
+        throw e;
+      });
+
+    for (const perm of lkup) {
+      const policies = await (this.kcAdminClient
+        .clients as any).getAssociatedPolicies({
+        id,
+        permissionId: perm.id,
+      });
+
+      if (policies.length == 1 && policies[0].name === policyName) {
+        await this.enrichWithAssociations(id, perm);
+
+        assert.strictEqual(
+          perm.type,
+          'scope',
+          `Permission Type Unexpected ${perm.type}`
+        );
+        assert.strictEqual(
+          perm.logic,
+          'POSITIVE',
+          `Permission Logic Unexpected ${perm.logic}`
+        );
+        assert.strictEqual(
+          perm.decisionStrategy,
+          'UNANIMOUS',
+          `Permission Decision Unexpected ${perm.decisionStrategy}`
+        );
+        assert.strictEqual(
+          perm.config.policies.length,
+          1,
+          `Permission Policy Count Error ${perm.config.policies.length}`
+        );
+        assert.strictEqual(
+          perm.config.resources.length,
+          1,
+          `Permission Resource Count Error ${perm.config.resources.length}`
+        );
+
+        result.push(perm);
+      }
+    }
+    return result;
+  }
+
   public async findPermissionByName(
     id: string,
     name: string
