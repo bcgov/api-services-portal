@@ -3,13 +3,6 @@ describe('Apply Kong API key only plugin', () => {
   var consumerKey: string
   var pluginID: string
 
-  before(() => {
-    cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
-
-  })
-
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
