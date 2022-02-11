@@ -98,7 +98,7 @@ const ConsumersPage: React.FC<
     return result.filter((d) => {
       return (
         d.consumer.username.search(searchTerm) >= 0 ||
-        d.id.search(searchTerm) >= 0 ||
+        d.consumer.id.search(searchTerm) >= 0 ||
         d.consumer.tags.search(searchTerm) >= 0
       );
     });
