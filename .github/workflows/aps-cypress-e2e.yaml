@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['util/*automation*', 'util/cy-create-bug-ticket']
+    branches: ['util/*automation*']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -84,8 +84,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
-          if [[ "$FAILURE_COUNT" -ge 0 ]]; then
-            FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==false) | .title')
+          if [[ "$FAILURE_COUNT" -gt 0 ]]; then
+            FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==true) | .title')
             STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats')
             echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
             export MSG=$(cat msg)
