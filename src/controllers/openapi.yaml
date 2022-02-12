@@ -226,6 +226,158 @@ paths:
                 -
                     jwt: []
             parameters: []
+    /organizations:
+        get:
+            operationId: organization-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            security: []
+            parameters: []
+    '/organizations/{org}':
+        get:
+            operationId: organization-units
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/access':
+        get:
+            operationId: get-organization-access
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt-org:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+        put:
+            operationId: put-organization-access
+            responses:
+                '204':
+                    description: 'No content'
+            security:
+                -
+                    jwt-org:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: {}
+    '/organizations/{org}/namespaces':
+        get:
+            operationId: organization-namespaces
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            security:
+                -
+                    jwt-org:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/{orgUnit}/namespaces/{ns}':
+        put:
+            operationId: assign-namespace-to-organization
+            responses:
+                '204':
+                    description: 'No content'
+            security:
+                -
+                    jwt-org:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+        delete:
+            operationId: unassign-namespace-from-organization
+            responses:
+                '204':
+                    description: 'No content'
+            security:
+                -
+                    jwt-org:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
     '/namespaces/{ns}/products':
         put:
             operationId: put-product

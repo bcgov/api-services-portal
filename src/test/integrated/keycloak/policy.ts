@@ -23,6 +23,7 @@ import { AnyElement } from 'soap/lib/wsdl/elements';
 import { KeycloakTokenService } from '../../../services/keycloak';
 import { KeycloakClientPolicyService } from '../../../services/keycloak';
 import { Policy, UMAPolicyService } from '../../../services/uma2';
+import { o } from '../util';
 
 (async () => {
   const kc = new KeycloakClientPolicyService(process.env.ISSUER);
@@ -44,11 +45,23 @@ import { Policy, UMAPolicyService } from '../../../services/uma2';
   );
   console.log(JSON.stringify(permissions, null, 3));
 
-  const pol = await kc.findPermissionByName(
-    cid,
-    '/data-custodians/ministry-citizens-services/databc'
+  o(
+    await kc.findPolicyById(
+      cid,
+      'group',
+      '5f84d050-f50d-4a2b-946c-9a9fa6cb3317'
+    )
   );
-  console.log(JSON.stringify(pol, null, 3));
+
+  // for each Group, get the members
+
+  // from the permission get the policy
+
+  // const pol = await kc.findPermissionByName(
+  //   cid,
+  //   '/data-custodians/ministry-citizens-services/databc'
+  // );
+  // console.log(JSON.stringify(pol, null, 3));
 
   if (false) {
     const pol: any = {

@@ -20,6 +20,7 @@ import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/de
 import { root } from './group-converter-utils';
 import { User } from '../keystone/types';
 import { GroupPermission, UserReference } from './types';
+import { Policy } from '../uma2';
 
 const logger = Logger('org-groups');
 
@@ -55,6 +56,7 @@ export class OrgGroupService {
   private groups: GroupRepresentation[];
 
   constructor(issuerUrl: string) {
+    logger.debug('[OrgGroupService] %s', issuerUrl);
     this.keycloakService = new KeycloakGroupService(issuerUrl);
   }
 
@@ -64,6 +66,7 @@ export class OrgGroupService {
   ): Promise<OrgGroupService> {
     this.clientId = _clientId;
     await this.keycloakService.login(_clientId, _clientSecret);
+    logger.debug('[OrgGroupService] Login OK');
     return this;
   }
 
@@ -77,6 +80,21 @@ export class OrgGroupService {
     this.groups = await this.keycloakService.getAllGroups();
   }
 
+  public findGroup(id: string): string {
+    return this.findGroupTraverse(id, this.groups);
+  }
+
+  private findGroupTraverse(id: string, groups: GroupRepresentation[]): string {
+    const match = groups.filter((group) => group.id == id);
+    if (match.length == 1) {
+      return match[0].path;
+    }
+    return groups
+      .map((group) => this.findGroupTraverse(id, group.subGroups))
+      .filter((result) => result)
+      .pop();
+  }
+
   // public async getGroups(parentGroupName: string) {
   //   return await this.keycloakService.getGroups(parentGroupName);
   // }
@@ -84,6 +102,58 @@ export class OrgGroupService {
   public async deleteGroup(orgGroup: OrganizationGroup) {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     await this.keycloakService.deleteGroup(groupIds.pop().id);
+  }
+
+  public async getGroupPermissionsByResource(resourceId: string) {
+    logger.debug('[getGroupPermissionsByResource] %s', resourceId);
+    const clientService = new KeycloakClientService(null).useAdminClient(
+      this.keycloakService.getAdminClient()
+    );
+
+    const clientPolicyService = new KeycloakClientPolicyService(
+      null
+    ).useAdminClient(this.keycloakService.getAdminClient());
+
+    const cid = (await clientService.findByClientId(this.clientId)).id;
+
+    //const resource = await clientService.findResourceByName(cid, resourceName);
+
+    const permissions = await clientPolicyService.listPermissionsByResource(
+      cid,
+      resourceId
+    );
+
+    const result: Policy[] = [];
+
+    for (const permission of permissions) {
+      const policy = await clientPolicyService.findPolicyById(
+        cid,
+        permission.policies[0].type,
+        permission.policies[0].id
+      );
+
+      const groupIds: string[] = policy.groups.map((g: any) => g.id);
+
+      const members = await this.listMembersOfGroups(groupIds);
+
+      const groups = groupIds.map((gid) => this.findGroup(gid));
+
+      const perm: Policy = {
+        id: policy.id,
+        name: policy.name,
+        type: policy.type,
+        logic: policy.logic,
+        decisionStrategy: permission.decisionStrategy,
+        owner: cid,
+        description: policy.description,
+        scopes: permission.scopes.map((s) => s.name),
+        users: members.map((u) => u.username),
+        groups: groups.sort(),
+      };
+
+      result.push(perm);
+    }
+    return result;
   }
 
   public async createGroupIfMissing(
@@ -378,9 +448,13 @@ export class OrgGroupService {
 
   public async listMembers(orgGroup: OrganizationGroup): Promise<User[]> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
+    return await this.listMembersOfGroups(groupIds.map((g) => g.id));
+  }
+
+  public async listMembersOfGroups(groupIds: string[]): Promise<User[]> {
     let allGroupMembers: UserRepresentation[] = [];
-    for (const group of groupIds) {
-      const groupMembers = await this.keycloakService.listMembers(group.id);
+    for (const groupId of groupIds) {
+      const groupMembers = await this.keycloakService.listMembers(groupId);
       allGroupMembers = [
         ...allGroupMembers,
         ...groupMembers?.filter(

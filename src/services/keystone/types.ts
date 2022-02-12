@@ -6342,6 +6342,7 @@ export type Query = {
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   usersByNamespace?: Maybe<Array<Maybe<UserContact>>>;
+  getOrgPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getResourceSet?: Maybe<UmaResourceSet>;
@@ -7065,6 +7066,12 @@ export type QueryConsumerScopesAndRolesArgs = {
 export type QueryUsersByNamespaceArgs = {
   namespace: Scalars['String'];
   scopeName?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetOrgPoliciesForResourceArgs = {
+  prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
 };
 
 

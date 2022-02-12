@@ -96,6 +96,7 @@ export class KeycloakClientService {
       await this.kcAdminClient.clients.listResources({ id, name })
     ).filter((r) => r.name === name);
     assert.strictEqual(lkup.length, 1, 'Resource not found ' + name);
+    logger.debug('[findResourceByName] [%s] Found - %s', name, lkup[0]._id);
     return lkup[0];
   }
 

@@ -38,7 +38,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
   console.log(await kc.getGroupPathsByGroupName('databc'));
 
-  if (true) {
+  if (false) {
     await kc.createGroupIfMissing(org);
 
     await kc.createOrUpdateGroupPolicy(org);

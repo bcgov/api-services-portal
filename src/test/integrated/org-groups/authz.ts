@@ -10,28 +10,25 @@ export CID=""
 export CSC=""
 export ISSUER=""
 npm run ts-watch
-node dist/test/integrated/org-groups/group-access.js
+node dist/test/integrated/org-groups/authz.js
 
 */
 
-import fetch from 'node-fetch';
-import { GroupAccessService } from '../../../services/org-groups';
+import { OrgAuthzService } from '../../../services/org-groups';
 import {
   KeycloakGroupService,
   Uma2WellKnown,
 } from '../../../services/keycloak';
+import fetch from 'node-fetch';
 
 (async () => {
   const uma2: Uma2WellKnown = await (
     await fetch(process.env.ISSUER + '/.well-known/uma2-configuration')
   ).json();
 
-  const kc = new GroupAccessService(uma2);
+  const kc = new OrgAuthzService(uma2);
 
   await kc.login(process.env.CID, process.env.CSC);
 
-  const access = await kc.getGroupAccess('databc');
-  console.log(JSON.stringify(access, null, 4));
-
-  //await kc.createOrUpdateGroupAccess(access);
+  await kc.createIfMissingResource('databc');
 })();

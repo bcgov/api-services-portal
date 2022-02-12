@@ -6,6 +6,7 @@ import KeycloakAdminClient, {
 import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clients';
 import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
+import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
 
 //import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
@@ -68,9 +69,9 @@ export class KeycloakClientPolicyService {
     id: string,
     resourceId: string
   ): Promise<ResourceServerRepresentation[]> {
-    logger.debug('[listPermissionsByResource] %s', id);
-    const permissions = await this.kcAdminClient.clients
-      .listPermissionsByResource({ id, resourceId })
+    logger.debug('[listPermissionsByResource] %s %s', id, resourceId);
+    const permissions: any = await this.kcAdminClient.clients
+      .listPolicies({ id, resource: resourceId })
       .catch((e: any) => {
         logger.error('Err %s', JSON.stringify(e, null, 3));
         throw e;
@@ -84,6 +85,20 @@ export class KeycloakClientPolicyService {
     }
 
     for (const perm of permissions) {
+      perm.resources = await this.kcAdminClient.clients.getAssociatedResources({
+        id,
+        permissionId: perm.id,
+      });
+      assert.strictEqual(
+        perm.resources.filter(
+          (r: ResourceRepresentation) => r._id != resourceId
+        ).length,
+        0,
+        'Permission search inconsistent!'
+      );
+    }
+
+    for (const perm of permissions) {
       perm.policies = await (this.kcAdminClient
         .clients as any).getAssociatedPolicies({
         id,
@@ -91,7 +106,24 @@ export class KeycloakClientPolicyService {
       });
     }
 
+    logger.debug('[listPermissionsByResource] %j', permissions);
     return permissions;
+  }
+
+  public async findPolicyById(
+    id: string,
+    type: string,
+    policyId: string
+  ): Promise<any> {
+    logger.debug('[findPolicyById] c=%s p=%s', id, policyId);
+
+    const policy = (await this.kcAdminClient.clients.findOnePolicy({
+      id,
+      type,
+      policyId,
+    })) as unknown;
+    logger.debug('[findPolicyById] RESULT %j', policy);
+    return policy;
   }
 
   public async findPermissionsMatchingPolicy(
@@ -158,7 +190,7 @@ export class KeycloakClientPolicyService {
     assert.strictEqual(
       lkup.length,
       1,
-      'Unexpected number of permissions returned'
+      'Unexpected number of permissions returned ' + lkup.length
     );
     return lkup[0];
   }

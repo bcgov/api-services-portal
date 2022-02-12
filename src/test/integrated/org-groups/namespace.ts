@@ -28,9 +28,13 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     'databc'
   );
 
-  await kc.unassignNamespaceFromOrganization(
-    'refactortime',
-    'ministry-citizens-services',
-    'databc'
+  // await kc.unassignNamespaceFromOrganization(
+  //   'refactortime',
+  //   'ministry-citizens-services',
+  //   'databc'
+  // );
+
+  console.log(
+    await kc.listAssignedNamespacesByOrg('ministry-citizens-services')
   );
 })();
