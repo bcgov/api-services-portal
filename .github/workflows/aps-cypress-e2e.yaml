@@ -78,3 +78,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Check for failed tests and create Issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FAILURE_COUNT=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats.failures')
+          if [[ "$FAILURE_COUNT" -gt 0 ]]; then
+            FAILED_TESTS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.results | .[] | .suites | .[].tests | .[] | select(.fail==true) | .title')
+            STATS=$(cat ${{ github.workspace }}/e2e/results/bcgov-aps-e2e-report.json | jq '.stats')
+            echo -e "Stats: $STATS\n\nFailed Tests:\n$FAILED_TESTS\n\nRun Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > msg
+            export MSG=$(cat msg)
+            gh issue create --title "FAILED: Automated Tests($FAILURE_COUNT)" --body "$MSG" --label "automation" --assignee "${{ env.GIT_COMMIT_AUTHOR }}"
+          fi
