@@ -31,6 +31,10 @@ const TagInput: React.FC<TagInputProps> = ({
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
   const [values, setValues] = React.useState<string[]>(() => {
     try {
+      if (!value) {
+        return [];
+      }
+
       return JSON.parse(value);
     } catch {
       return [];
@@ -47,7 +51,7 @@ const TagInput: React.FC<TagInputProps> = ({
 
           setValues((state) => [...state, inputRef.current.value]);
           setTimeout(() => {
-            inputRef.current.value = '';
+            inputRef.current.value = ' ';
           }, 10);
         } else if (event.key === 'Escape') {
           inputRef.current.value = '';
@@ -59,7 +63,12 @@ const TagInput: React.FC<TagInputProps> = ({
   );
   const handleRemove = React.useCallback(
     (index: number) => () => {
-      setValues((state) => state.filter((_, i) => i !== index));
+      setValues((state) => {
+        if (state.length === 1) {
+          inputRef.current.value = '';
+        }
+        return state.filter((_, i) => i !== index);
+      });
     },
     []
   );
@@ -67,7 +76,15 @@ const TagInput: React.FC<TagInputProps> = ({
     inputRef.current?.focus();
   }, []);
   const handleFocus = React.useCallback(() => setIsFocused(true), []);
-  const handleBlur = React.useCallback(() => setIsFocused(false), []);
+  const handleBlur = React.useCallback(() => {
+    if (inputRef.current.value.trim()) {
+      setValues((state) => [...state, inputRef.current.value]);
+      setTimeout(() => {
+        inputRef.current.value = '';
+      }, 1);
+    }
+    setIsFocused(false);
+  }, []);
   const fieldStyles = React.useMemo(() => {
     if (isFocused) {
       return {
@@ -90,6 +107,7 @@ const TagInput: React.FC<TagInputProps> = ({
         pos="relative"
         py={2}
         onClick={handleContainerClick}
+        cursor="text"
         data-testid={props['data-testid']}
       >
         <Wrap spacing={2}>
@@ -108,19 +126,27 @@ const TagInput: React.FC<TagInputProps> = ({
           <WrapItem>
             <Input
               {...props}
+              isRequired={false}
               borderRadius={0}
               ref={inputRef}
               onBlur={handleBlur}
               onFocus={handleFocus}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
+              minWidth={placeholder.length * 10}
               variant="unstyled"
               data-testid={`${props['data-testid']}-input`}
             />
           </WrapItem>
         </Wrap>
       </Box>
-      <input id={id} name={name} type="hidden" value={JSON.stringify(values)} />
+      <input
+        required={props.isRequired}
+        id={id}
+        name={name}
+        value={JSON.stringify(values)}
+        style={{ visibility: 'hidden', height: 0, position: 'absolute' }}
+      />
     </>
   );
 };
