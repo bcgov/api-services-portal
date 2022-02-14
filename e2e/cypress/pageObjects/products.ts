@@ -18,6 +18,17 @@ class Products {
   catelogueDropDown: string = '[id=downshift-0-input]'
   catelogueDropDownMenu: string = '[id=downshift-0-menu]'
 
+  getTestIdEnvName(env: string) : string {
+    switch (env) {
+      case "Development":
+        return "dev"
+      case "Production":
+        return "prod"
+      default:
+        return env.toLowerCase()
+    }
+  }
+
   createNewProduct(productName: string, env: string) {
     cy.get(this.newProductBtn).click()
     cy.get(this.productNameInput).type(productName)
@@ -39,16 +50,19 @@ class Products {
 
   addEnvToProduct(productName: string, envName: string) {
     let pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-add-env-btn]`).click()
-    cy.get(`[data-testid=${pname}-prd-env-item-${envName.toLowerCase()}]`).click()
+    cy.get(`[data-testid=${pname}-prd-env-item-${env}]`).click()
   }
 
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-    cy.get(`[data-testid=${pname}-${envName}-edit-btn]`).click()
+    let env = this.getTestIdEnvName(envName);
+    cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
   }
 
   editProductEnvironmentConfig(config: any) {
+    
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
@@ -62,10 +76,13 @@ class Products {
         if (
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
-        )
+        ) {
+          let env = this.getTestIdEnvName(config.authIssuerEnv)
           cy.get('[name="credentialIssuer"]').select(
-            `${config.authIssuer} (${config.authIssuerEnv.toLowerCase()})`
+            `${config.authIssuer} (${env})`
           )
+        }
+          
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
@@ -73,11 +90,12 @@ class Products {
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
-  generateKongPluginConfig() {
+  generateKongPluginConfig(filename: string) {
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
-      cy.readFile('cypress/fixtures/service.yml').then((content) => {
-        cy.writeFile('cypress/fixtures/service-plugin.yml', content + '\n' + $el.text())
+      cy.readFile('cypress/fixtures/' + filename).then((content) => {
+        let pluginFilename = filename.replace('.', '-plugin.')
+        cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
       })
     })
   }

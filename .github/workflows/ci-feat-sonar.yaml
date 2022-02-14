@@ -2,7 +2,7 @@ name: Sonar Scanner
 
 on:
   push:
-    branches: [dev,feat/*]
+    branches: [dev, feat/*]
 
 env:
   REGISTRY: ghcr.io
@@ -29,6 +29,13 @@ jobs:
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.organization=bcgov-oss
+            -Dsonar.projectKey=aps-portal-e2e
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=src/auth,src/authz,src/batch,src/services
+            -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
