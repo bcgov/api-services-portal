@@ -23,7 +23,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   await await kc.login(process.env.CID, process.env.CSC);
 
   await kc.assignNamespaceToOrganization(
-    'refactortime',
+    'feature-myacc',
     'ministry-citizens-services',
     'databc'
   );

@@ -38,12 +38,12 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
   console.log(await kc.getGroupPathsByGroupName('databc'));
 
-  if (false) {
+  if (true) {
     await kc.createGroupIfMissing(org);
 
     await kc.createOrUpdateGroupPolicy(org);
 
-    await kc.createOrUpdateGroupPermission(org, 'orgcontrol', [
+    await kc.createOrUpdateGroupPermission(org, 'feature-myacc', [
       'Namespace.View',
       'Namepsace.Manage',
     ]);
@@ -64,7 +64,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
       parent: '/data-custodian/ministry-citizens-services',
     });
 
-    await kc.createOrUpdateGroupPermission(org2, 'orgcontrol', [
+    await kc.createOrUpdateGroupPermission(org2, 'feature-myacc', [
       'Namespace.View',
       'Namepsace.Manage',
     ]);
@@ -93,7 +93,11 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   );
 
   console.log(
-    JSON.stringify(await kc.getGroupPermissions(org, ['orgcontrol']), null, 3)
+    JSON.stringify(
+      await kc.getGroupPermissions(org, ['feature-myacc']),
+      null,
+      3
+    )
   );
 
   // await kc.createOrUpdateGroupPermission(
@@ -101,7 +105,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   //     name: 'databc',
   //     parent: '/data-custodians/ministry-citizens-services',
   //   },
-  //   'orgcontrol',
+  //   'feature-myacc',
   //   ['read-private'],
   //   false
   // );
