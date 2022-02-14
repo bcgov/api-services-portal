@@ -1,8 +1,10 @@
 import * as React from 'react';
 import ActionsMenu from '@/components/actions-menu';
+import AccessRequest from '@/components/access-request';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
+  Button,
   Container,
   Heading,
   Link,
@@ -14,6 +16,8 @@ import {
   MenuItem,
   Flex,
   useToast,
+  Icon,
+  Text,
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -175,6 +179,9 @@ const ConsumersPage: React.FC<
           actions={<LinkConsumer queryKey={queryKey} />}
         />
 
+        {data?.allAccessRequestsByNamespace.map((a) => (
+          <AccessRequest key={a.id} data={a} />
+        ))}
         <Box bgColor="white" mb={4}>
           <Box
             as="header"
@@ -288,6 +295,14 @@ const query = gql`
 
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {
       id
+      name
+      createdAt
+      requestor {
+        name
+      }
+      application {
+        name
+      }
     }
   }
 `;
