@@ -18,13 +18,19 @@ import { FaTimesCircle } from 'react-icons/fa';
 
 interface GenerateCredentialsProps {
   id: string;
+  onCredentialGenerated: () => void;
 }
 
-const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({ id }) => {
+const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
+  id,
+  onCredentialGenerated,
+}) => {
   const [credentials, setCredentials] = React.useState<Record<string, string>>(
     {}
   );
-  const credentialGenerator = useApiMutation(mutation);
+  const credentialGenerator = useApiMutation(mutation, {
+    onSuccess: onCredentialGenerated,
+  });
   const generateCredentials = React.useCallback(async () => {
     const res: Mutation = await credentialGenerator.mutateAsync({ id });
     if (res.updateAccessRequest.credential !== 'NEW') {

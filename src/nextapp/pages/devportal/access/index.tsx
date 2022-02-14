@@ -36,7 +36,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ApiAccessPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = () => {
-  const { data } = useApi(queryKey, { query }, { suspense: false });
+  const { data } = useApi(
+    queryKey,
+    { query },
+    { refetchOnWindowFocus: true, suspense: false }
+  );
 
   return (
     <>

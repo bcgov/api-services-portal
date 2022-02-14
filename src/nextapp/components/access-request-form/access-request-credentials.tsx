@@ -6,10 +6,12 @@ import GenerateCredential from '../generate-credential';
 
 interface AccessRequestCredentialsProps {
   id: string;
+  onCredentialGenerated: () => void;
 }
 
 const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = ({
   id,
+  onCredentialGenerated,
 }) => {
   return (
     <Box border="1px solid" borderColor="bc-outline" p={4} borderRadius={4}>
@@ -23,7 +25,10 @@ const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = ({
         <Icon as={FaKey} color="bc-blue" mr={3} /> Your Credentials
       </Heading>
       <Box>
-        <GenerateCredential id={id} />
+        <GenerateCredential
+          id={id}
+          onCredentialGenerated={onCredentialGenerated}
+        />
       </Box>
     </Box>
   );

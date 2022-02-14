@@ -6,7 +6,6 @@ import {
   FaQuestionCircle,
   FaTimesCircle,
 } from 'react-icons/fa';
-import isUndefined from 'lodash/isUndefined';
 
 interface AccessStatusProps {
   isApproved: boolean;
@@ -23,11 +22,8 @@ const AccessStatus: React.FC<AccessStatusProps> = ({
     let color = 'blue.500';
     let icon = FaQuestionCircle;
     let text = 'Queued';
-    const isServiceAccess = [isApproved, isComplete, isIssued].every(
-      isUndefined
-    );
 
-    if (isServiceAccess || isApproved) {
+    if (isApproved) {
       color = 'bc-success';
       icon = FaCheckCircle;
       text = 'Approved';

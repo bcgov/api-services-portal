@@ -46,6 +46,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const auth = useAuth();
+  // Keep track of a credenials collection so we can display the toast if needed
+  const hasCollectedCredentials = React.useRef<boolean>(false);
   const formRef = React.useRef<HTMLFormElement>(null);
   const [isAutoApproved, setIsAutoApproved] = React.useState<boolean>(false);
   const mutate = useApiMutation(mutation);
@@ -119,7 +121,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   }, []);
   const handleDone = React.useCallback(() => {
     onClose();
-    if (!isAutoApproved) {
+    if (!isAutoApproved && hasCollectedCredentials.current) {
       toast({
         isClosable: true,
         status: 'warning',
@@ -139,6 +141,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     },
     []
   );
+  const handleCredentialGenerated = React.useCallback(() => {
+    hasCollectedCredentials.current = true;
+  }, []);
 
   return (
     <>
@@ -195,7 +200,12 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 </ErrorBoundary>
               </form>
             )}
-            {tab === 1 && <AccessRequestCredentials id={accessRequestId} />}
+            {tab === 1 && (
+              <AccessRequestCredentials
+                id={accessRequestId}
+                onCredentialGenerated={handleCredentialGenerated}
+              />
+            )}
           </ModalBody>
           <ModalFooter>
             {tab === 0 && (
