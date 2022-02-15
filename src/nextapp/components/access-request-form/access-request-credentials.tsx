@@ -6,7 +6,7 @@ import GenerateCredential from '../generate-credential';
 
 interface AccessRequestCredentialsProps {
   id: string;
-  onCredentialGenerated: () => void;
+  onCredentialGenerated?: () => void;
 }
 
 const AccessRequestCredentials: React.FC<AccessRequestCredentialsProps> = ({
