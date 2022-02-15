@@ -47,7 +47,12 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
       {!isEmpty(credentials) && (
         <Box my={8}>
           <ViewSecret credentials={credentials} />
-          <Alert status="warning" mt={8} mb={5}>
+          <Alert
+            status="warning"
+            mt={8}
+            mb={5}
+            data-testid="generate-secrets-instructions"
+          >
             <AlertIcon />
             <AlertDescription>
               Please store your new API key somewhere safe because as soon as
@@ -67,6 +72,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
               <Button
                 isLoading={credentialGenerator.isLoading}
                 onClick={generateCredentials}
+                data-testid="generate-secrets-button"
               >
                 {`${
                   credentialGenerator.isError ? 'Retry ' : ''
@@ -78,6 +84,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
                   mt={5}
                   variant="outline"
                   borderRadius="md"
+                  data-testid="generate-secrets-error-message"
                 >
                   <AlertIcon as={FaTimesCircle} />
                   <AlertDescription>Unable to generate keys</AlertDescription>
