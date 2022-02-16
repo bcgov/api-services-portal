@@ -241,7 +241,7 @@ const theme = extendTheme(
           },
         },
         defaultProps: {
-          size: 'lg',
+          // size: 'lg',
           colorScheme: 'primary',
         },
       },
