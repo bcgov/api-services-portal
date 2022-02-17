@@ -27,7 +27,7 @@ const Controls: React.FC = () => {
   );
 
   // Events
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
 
