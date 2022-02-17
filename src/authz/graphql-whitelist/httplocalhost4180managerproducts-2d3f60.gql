@@ -1,0 +1,6 @@
+
+  mutation Update($id: ID!, $callbackUrl: String!) {
+    updateEnvironmentClient(id: $id, data: { callbackUrl: $callbackUrl }) {
+      callbackUrl
+    }
+  }

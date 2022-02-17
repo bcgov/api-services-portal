@@ -119,6 +119,7 @@ const query = gql`
       resourceScopes
       resourceType
       resourceAccessScope
+      identityProviderPrefix
       environmentDetails
       owner {
         id

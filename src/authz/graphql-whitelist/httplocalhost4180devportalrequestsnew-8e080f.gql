@@ -1,0 +1,13 @@
+
+  query GET($environmentId: String) {
+    getAccountLinking(id: $environmentId) {
+      linkingUrl
+      linkedIdentities
+      environment {
+        name
+        product {
+          name
+        }
+      }
+    }
+  }

@@ -91,7 +91,7 @@ export async function lookupKongConsumerIdByName(
   return result.data.allGatewayConsumers[0].extForeignKey;
 }
 
-export async function lookupKongConsumerByCustomId(
+export async function searchKongConsumerByCustomId(
   context: any,
   name: string
 ): Promise<GatewayConsumer> {
@@ -111,12 +111,24 @@ export async function lookupKongConsumerByCustomId(
   });
   logger.debug('Query [lookupKongConsumerByCustomId] result %j', result);
 
+  if ('error' in result || result.data.allGatewayConsumers.length == 0) {
+    return undefined;
+  } else {
+    return result.data.allGatewayConsumers[0];
+  }
+}
+
+export async function lookupKongConsumerByCustomId(
+  context: any,
+  name: string
+): Promise<GatewayConsumer> {
+  const consumer = await searchKongConsumerByCustomId(context, name);
   assert.strictEqual(
-    result.data.allGatewayConsumers.length,
-    1,
+    typeof consumer === 'undefined',
+    false,
     'Unexpected data returned for Consumer lookup'
   );
-  return result.data.allGatewayConsumers[0];
+  return consumer;
 }
 
 export async function lookupKongConsumerByUsername(
@@ -170,5 +182,5 @@ export async function addKongConsumer(
     variables: { username, customId, extForeignKey },
   });
   logger.debug('Mutation [addKongConsumer] result %j', result);
-  return result.data.createGatewayConsumer.id;
+  return 'error' in result ? null : result.data.createGatewayConsumer.id;
 }

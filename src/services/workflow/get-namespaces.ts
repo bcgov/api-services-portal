@@ -66,7 +66,8 @@ export async function getMyNamespaces(
 export async function getEnvironmentContext(
   context: any,
   prodEnvId: string,
-  access: any
+  access: any,
+  subjectOptional: boolean = false
 ): Promise<EnvironmentContext> {
   const noauthContext = context.createContext({ skipAccessControl: true });
   const prodEnv = await lookupEnvironmentAndIssuerUsingWhereClause(
@@ -90,8 +91,8 @@ export async function getEnvironmentContext(
   const uma2 = usesUma2
     ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
     : null;
-  const subjectToken = getSubjectToken(context.req);
-  const subjectUuid = context.req.user.sub;
+  const subjectToken = subjectOptional ? null : getSubjectToken(context.req);
+  const subjectUuid = subjectOptional ? null : context.req.user.sub;
 
   return {
     subjectToken,
@@ -206,8 +207,8 @@ function isAuthzUsingUma2(prodEnv: Environment): boolean {
 }
 
 export interface EnvironmentContext {
-  subjectToken: string;
-  subjectUuid: string;
+  subjectToken?: string;
+  subjectUuid?: string;
   prodEnv: Environment;
   issuerEnvConfig: IssuerEnvironmentConfig;
   openid: OpenidWellKnown;

@@ -22,6 +22,7 @@ export async function lookupProductEnvironmentServices(
                         credentialIssuer {
                             id
                             flow
+                            identityProviderPrefix
                             environmentDetails
                         }
                         services {
@@ -67,6 +68,7 @@ export async function lookupProductEnvironmentServicesBySlug(
                         name
                         flow
                         product {
+                            name
                             namespace
                         }
                         credentialIssuer {
@@ -215,4 +217,20 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
     'ProductEnvironmentNotFound ' + id
   );
   return result.data.Environment;
+}
+
+export async function updateCallbackUrl(
+  context: any,
+  id: string,
+  callbackUrl: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation UpdateEnvironment($id: ID!, $callbackUrl: String) {
+                    updateEnvironment(id: $id, data: { callbackUrl: $callbackUrl }) {
+                        callbackUrl
+                    }
+                }`,
+    variables: { id, callbackUrl },
+  });
+  logger.debug('[updateCallbackUrl] result %j', result);
 }

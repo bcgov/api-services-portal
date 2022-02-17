@@ -1,0 +1,11 @@
+
+  query GET($environmentId: ID!) {
+    getAccountLinking(id: $environmentId) {
+      linkingUrl
+      linkedIdentities
+      environmentName
+      productName
+      brokerAlias
+      issuerUrl
+    }
+  }

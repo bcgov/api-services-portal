@@ -1,0 +1,8 @@
+
+  mutation Update($id: ID!, $data: EnvironmentUpdateInput) {
+    updateEnvironment(id: $id, data: $data) {
+      name
+      id
+      credentials
+    }
+  }

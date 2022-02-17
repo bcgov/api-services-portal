@@ -28,6 +28,37 @@ export async function lookupCredentialIssuerById(
   return result.data.CredentialIssuer;
 }
 
+export async function lookupByIdentityProviderPrefix(
+  context: any,
+  prefixList: string[]
+): Promise<CredentialIssuer[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetCredentialIssuerById($prefixList: [String]!) {
+                    allCredentialIssuers(where: {identityProviderPrefix_in: $prefixList}) {
+                        id
+                        name
+                        flow
+                        mode
+                        clientRegistration
+                        clientAuthenticator
+                        clientMappers
+                        identityProviderPrefix
+                        resourceType
+                        environmentDetails
+                        environments {
+                          name
+                          product {
+                            name
+                          }
+                        }
+                    }
+                }`,
+    variables: { prefixList },
+  });
+  logger.debug('Query [lookupByIdentityProviderPrefix] result %j', result);
+  return result.data.allCredentialIssuers;
+}
+
 export function updateEnvironmentDetails(
   origJsonString: string,
   updatesJsonString: string

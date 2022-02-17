@@ -1,3 +1,4 @@
+import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
 export function isProductID(id: string): boolean {
@@ -18,4 +19,8 @@ export function newApplicationID(): string {
 }
 export function newEnvironmentID(): string {
   return uuidv4().replace(/-/g, '').toUpperCase().substr(0, 8);
+}
+
+export function newIdentityProviderID(): string {
+  return uuidv4().replace(/-/g, '').toLowerCase().substr(0, 4);
 }

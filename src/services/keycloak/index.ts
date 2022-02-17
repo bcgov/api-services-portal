@@ -32,3 +32,5 @@ export {
   getOpenidFromIssuer,
   getUma2FromIssuer,
 } from './keycloak-api';
+
+export { KeycloakIdPService } from './identity-providers';

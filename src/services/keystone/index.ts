@@ -6,6 +6,11 @@ export {
   updateAccessRequestState,
 } from './access-request';
 
+export {
+  lookupBrokeredIdentities,
+  createBrokeredIdentity,
+} from './brokered-identity';
+
 export { recordActivity } from './activity';
 
 export { lookupApplication } from './application';
@@ -15,6 +20,7 @@ export { deleteRecord, deleteRecords } from './common-delete-record';
 export {
   lookupCredentialIssuerById,
   updateEnvironmentDetails,
+  lookupByIdentityProviderPrefix,
 } from './credential-issuer';
 
 export {
@@ -24,6 +30,7 @@ export {
   lookupKongConsumerIdByName,
   lookupKongConsumerByCustomId,
   lookupKongConsumerByUsername,
+  searchKongConsumerByCustomId,
 } from './gateway-consumer';
 
 export { lookupServices } from './gateway-service';
@@ -33,6 +40,7 @@ export {
   lookupEnvironmentAndIssuerById,
   lookupProductEnvironmentServices,
   lookupProductEnvironmentServicesBySlug,
+  updateCallbackUrl,
 } from './product-environment';
 
 export {

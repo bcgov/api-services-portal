@@ -133,6 +133,7 @@ module.exports = {
                     clientRoles: userRoles.map((r: any) => r.name),
                   } as any;
                 } else {
+                  // TODO: Logic here will be different depending on if this is an App or BrokeredIdentity
                   const userId = await kcUserService.lookupUserByUsername(
                     args.consumerUsername
                   );
@@ -219,6 +220,9 @@ module.exports = {
                   envCtx.issuerEnvConfig.clientId
                 );
 
+                // TODO: Logic here will be different depending on the Flow of the Environment
+                // authorization-code will use Roles from the app-XXX client
+                // client-credentials will use Roles from the client.id
                 const availableRoles = await kcClientService.listRoles(
                   client.id
                 );
@@ -255,6 +259,7 @@ module.exports = {
                     args.grant ? [] : selectedRole
                   );
                 } else {
+                  // TODO: Logic here needs to use the BrokeredIdentity details
                   const userId = await kcUserService.lookupUserByUsername(
                     args.consumerUsername
                   );

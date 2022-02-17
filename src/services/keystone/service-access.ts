@@ -1,6 +1,8 @@
 import { Logger } from '../../logger';
 import {
   Application,
+  BrokeredIdentity,
+  // BrokeredIdentity,
   Environment,
   ServiceAccess,
   ServiceAccessCreateInput,
@@ -161,7 +163,8 @@ export async function addServiceAccess(
   consumerPK: string,
   productEnvironment: Environment,
   application: Application,
-  namespace: string = null
+  namespace: string = null,
+  brokeredIdentity: BrokeredIdentity = undefined
 ): Promise<string> {
   const data = {
     name,
@@ -176,6 +179,8 @@ export async function addServiceAccess(
     (data.productEnvironment = { connect: { id: productEnvironment.id } });
   application != null &&
     (data.application = { connect: { id: application.id } });
+  brokeredIdentity != null &&
+    (data.brokeredIdentity = { connect: { id: brokeredIdentity.id } });
   credentialReference != null &&
     (data.credentialReference = JSON.stringify(credentialReference));
   data.namespace = namespace;

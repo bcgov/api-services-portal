@@ -1,5 +1,5 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
+import api, { useApiMutation } from '@/shared/services/api';
 import {
   Box,
   Button,
@@ -22,17 +22,26 @@ import {
 } from '@chakra-ui/react';
 // import ClientRequest from '@/components/client-request';
 import { UPDATE_ENVIRONMENT } from '@/shared/queries/products-queries';
-import { Environment, EnvironmentUpdateInput } from '@/types/query.types';
-import { useMutation, useQueryClient } from 'react-query';
+import {
+  Environment,
+  EnvironmentUpdateInput,
+  Mutation,
+} from '@/types/query.types';
+import { useMutation, UseMutationResult, useQueryClient } from 'react-query';
 import { FaCircle } from 'react-icons/fa';
 import CredentialIssuerSelect from './credential-issuer-select';
+import EnvironmentAuthCodeClient from '@/components/environment-auth-code';
 import LegalSelect from './legal-select';
 
 interface EnvironmentConfigProps {
   data: Environment;
+  showCredentials: Function;
 }
 
-const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
+const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({
+  data,
+  showCredentials,
+}) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [flow, setFlow] = React.useState<string>(data.flow);
@@ -52,7 +61,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
 
   // Updates
   const client = useQueryClient();
-  const mutation = useMutation(
+  const mutation: UseMutationResult = useMutation(
     async (changes: unknown) =>
       await api(UPDATE_ENVIRONMENT, changes, { ssr: false })
   );
@@ -86,16 +95,22 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
     });
 
     try {
-      await mutation.mutateAsync({
+      const response: Mutation = await mutation.mutateAsync({
         id: data.id,
         data: payload,
       });
+
       client.invalidateQueries(['environment', data.id]);
       toast({
         title: 'Environment Updated',
         status: 'success',
       });
       setEditing(false);
+      showCredentials(
+        response.updateEnvironment.credentials
+          ? response.updateEnvironment.credentials
+          : ''
+      );
     } catch (err) {
       toast({
         title: 'Environment Update Failed',

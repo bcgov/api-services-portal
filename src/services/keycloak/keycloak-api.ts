@@ -5,6 +5,8 @@ export interface OpenidWellKnown {
   issuer: string;
   token_endpoint: string;
   registration_endpoint: string;
+  jwks_uri: string;
+  authorization_endpoint: string;
 }
 
 export interface Uma2WellKnown {

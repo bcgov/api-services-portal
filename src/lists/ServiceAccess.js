@@ -63,6 +63,11 @@ module.exports = {
     },
     consumer: { type: Relationship, isRequired: true, ref: 'GatewayConsumer' },
     application: { type: Relationship, isRequired: false, ref: 'Application' },
+    brokeredIdentity: {
+      type: Relationship,
+      isRequired: false,
+      ref: 'BrokeredIdentity',
+    },
     productEnvironment: {
       type: Relationship,
       isRequired: false,

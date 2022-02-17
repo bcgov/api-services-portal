@@ -25,6 +25,7 @@ import {
 import { Logger } from '../../logger';
 import { AccessRequest, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
+import { registerUserConsumer } from '.';
 
 const logger = Logger('wf.Apply');
 
@@ -43,6 +44,13 @@ export const Apply = async (
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
         context,
         existingItem.id
+      );
+
+      const flow = requestDetails.productEnvironment.flow;
+      assert.strictEqual(
+        ['authorization-code'].includes(flow),
+        true,
+        'invalid_action_for_auth_code_flow'
       );
 
       const newCredential = await generateCredential(context, requestDetails);
@@ -170,6 +178,24 @@ export const Apply = async (
       message.text = 'rejected access request';
     } else if (isRequested(existingItem, updatedItem)) {
       message.text = 'requested access';
+
+      const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
+        context,
+        updatedItem.id
+      );
+
+      const flow = requestDetails.productEnvironment.flow;
+      if (flow === 'authorization-code') {
+        const newCredential = await registerUserConsumer(
+          context,
+          requestDetails
+        );
+        if (newCredential != null) {
+          updatedItem['credential'] = JSON.stringify(newCredential);
+          message.text = 'processed credentials';
+        }
+      }
+      // handle if approval is not required
     }
 
     const refId = updatedItem.id;
@@ -305,6 +331,8 @@ async function setupAuthorizationAndEnable(
       true
     );
 
+    await markActiveTheServiceAccess(context, setup.serviceAccessId);
+  } else if (flow == 'authorization-code') {
     await markActiveTheServiceAccess(context, setup.serviceAccessId);
   } else if (flow == 'kong-api-key-only') {
     await markActiveTheServiceAccess(context, setup.serviceAccessId);

@@ -62,6 +62,9 @@ export async function lookupEnvironmentAndApplicationByAccessRequest(
                   AccessRequest(where: {id: $id}) {
                       id
                       controls
+                      requestor {
+                        id
+                      }
                       productEnvironment {
                           appId
                           id

@@ -11,7 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { useAuth } from '@/shared/services/auth';
 import { QueryClient } from 'react-query';
 import EnvironmentPlugins from '@/components/environment-plugins';
-import EnvironmentAuthCodeClient from '@/components/environment-auth-code';
+import { AuthCodeConfig as EnvironmentAuthCodeClient } from '@/components/environment-auth-code';
 import EnvironmentConfig from '@/components/environment-config';
 import EnvironmentNav from '@/components/environment-nav';
 import { dehydrate } from 'react-query/hydration';
@@ -49,6 +49,7 @@ const EnvironmentPage: React.FC<
     query: GET_ENVIRONMENT,
     variables: { id },
   });
+  const [credentials, showCredentials] = React.useState<string>('');
   const title = `${data.OwnedEnvironment?.product.name} Environment`;
   const breadcrumb = [
     { href: '/manager/products', text: 'Products' },
@@ -88,7 +89,10 @@ const EnvironmentPage: React.FC<
           </>
         </PageHeader>
         <Box>
-          <EnvironmentConfig data={data.OwnedEnvironment} />
+          <EnvironmentConfig
+            data={data.OwnedEnvironment}
+            showCredentials={showCredentials}
+          />
           <EnvironmentAuthCodeClient data={data.OwnedEnvironment} />
           <EnvironmentPlugins data={data.OwnedEnvironment} />
         </Box>

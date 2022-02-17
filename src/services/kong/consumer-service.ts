@@ -79,7 +79,7 @@ export class KongConsumerService {
       logger.debug('createOrGetConsumer - CATCH ERROR %s', err);
       const result = await this.createKongConsumer(username, customId);
       logger.debug('createOrGetConsumer - CATCH RESULT %j', result);
-      return { created: false, consumer: result };
+      return { created: true, consumer: result };
     }
   }
 

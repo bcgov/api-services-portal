@@ -1,0 +1,9 @@
+
+  mutation Update($id: ID!, $callbackUrl: String!) {
+    updateEnvironmentClient(
+      productEnvironmentId: $id
+      callbackUrl: $callbackUrl
+    ) {
+      callbackUrl
+    }
+  }

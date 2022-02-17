@@ -1,5 +1,8 @@
 import { CredentialIssuer } from '../keystone/types';
 import { strict as assert } from 'assert';
+import { Environment } from '../keystone/types';
+import FederatedIdentityRepresentation from 'keycloak-admin/lib/defs/federatedIdentityRepresentation';
+
 export interface KeystoneContext {}
 
 export interface NewCredential {
@@ -8,6 +11,7 @@ export interface NewCredential {
   clientSecret?: string;
   issuer?: string;
   tokenEndpoint?: string;
+  callbackUrl?: string;
   apiKey?: string;
   clientPublicKey?: string;
   clientPrivateKey?: string;
@@ -22,6 +26,7 @@ export interface RequestControls {
   clientCertificate?: string;
   clientGenCertificate?: boolean;
   jwksUrl?: string;
+  callbackUrl?: string;
 }
 
 export interface ClientMapper {
@@ -57,6 +62,15 @@ export interface IssuerEnvironmentConfig {
   clientId?: string;
   clientSecret?: string;
   initialAccessToken?: string;
+}
+
+export interface AccountLink {
+  environmentName: string;
+  productName: string;
+  brokerAlias: string;
+  issuerUrl: string;
+  linkedIdentities: FederatedIdentityRepresentation[];
+  linkingUrl: string;
 }
 
 export function checkIssuerEnvironmentConfig(

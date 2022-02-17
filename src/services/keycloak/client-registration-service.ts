@@ -8,10 +8,13 @@ import { strict as assert } from 'assert';
 
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
+import { clientTemplateClientAcctLink } from './templates/client-template-acct-link';
+import { clientTemplateUserPublic } from './templates/client-template-user-public';
 
 import { default as KcAdminClient } from 'keycloak-admin';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
+import { UsernameMapper } from './templates/protocol-mappers/username';
 
 const logger = Logger('keycloak.ClientReg');
 
@@ -63,32 +66,70 @@ export class KeycloakClientRegistrationService {
     certificate: string,
     jwksUrl: string,
     clientMappers: ClientMapper[],
-    enabled: boolean = false
+    enabled: boolean = false,
+    template: string = undefined,
+    callbackUrl: string = undefined
   ): Promise<ClientRegResponse> {
-    const body =
-      authenticator === ClientAuthenticator.ClientSecret
-        ? Object.assign(JSON.parse(clientTemplateClientSecret), {
-            enabled,
-            clientId,
-            secret: clientSecret,
-          })
-        : authenticator === ClientAuthenticator.ClientJWT
-        ? Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': certificate,
-            },
-          })
-        : Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': '',
-              'jwks.url': jwksUrl,
-              'use.jwks.url': 'true',
-            },
-          });
+    let body: any;
+
+    switch (template || authenticator) {
+      case ClientAuthenticator.ClientSecret:
+        body = Object.assign(JSON.parse(clientTemplateClientSecret), {
+          enabled,
+          clientId,
+          secret: clientSecret,
+        });
+        break;
+      case ClientAuthenticator.ClientJWT:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': certificate,
+          },
+        });
+        break;
+      case ClientAuthenticator.ClientJWTwithJWKS:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': '',
+            'jwks.url': jwksUrl,
+            'use.jwks.url': 'true',
+          },
+        });
+        break;
+      case 'idp-account-link':
+        body = Object.assign(JSON.parse(clientTemplateClientAcctLink), {
+          enabled,
+          clientId,
+          redirectUris: [callbackUrl],
+          attributes: {
+            'jwt.credential.public.key': '',
+            'jwks.url': jwksUrl,
+            'use.jwks.url': 'true',
+          },
+        });
+        break;
+
+      case 'user-public':
+        body = Object.assign(JSON.parse(clientTemplateUserPublic), {
+          enabled,
+          clientId,
+          redirectUris: [callbackUrl],
+          attributes: {},
+        });
+        break;
+
+      default:
+        logger.error(
+          'Invalid template for creating client %s %s',
+          template,
+          authenticator
+        );
+        throw Error('Invalid template for creating client');
+    }
 
     clientMappers
       .filter((mapper) => mapper.defaultValue !== '')
@@ -96,6 +137,9 @@ export class KeycloakClientRegistrationService {
         if (mapper.name == 'audience') {
           logger.debug('[clientRegistration] adding mapper %s', mapper);
           body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+        } else if (mapper.name == 'username') {
+          logger.debug('[clientRegistration] adding mapper %s', mapper);
+          body.protocolMappers.push(UsernameMapper());
         } else {
           logger.warn(
             '[clientRegistration] skipping unknown mapper %s',

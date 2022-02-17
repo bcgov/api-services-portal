@@ -48,6 +48,7 @@ import {
   FaPlusCircle,
 } from 'react-icons/fa';
 import NewApplicationDialog from '@/components/new-application/new-application-dialog';
+import { LinkIdentity } from '@/components/environment-auth-code';
 
 const queryKey = 'newAccessRequest';
 
@@ -216,30 +217,8 @@ const NewRequestsPage: React.FC<
           handleAfterCreate={handleAfterCreate}
         />
         <form onSubmit={handleSubmit}>
-          <FieldsetBox title={apiTitle}>
-            {isAuthCodeFlow && (
-              <HStack spacing={4}>
-                <Box mx={4} w={100}>
-                  <Center>for</Center>
-                </Box>
-                <Box flex={1}>
-                  <Flex>
-                    <Avatar name={requestor.name} />
-                    <Box ml={2}>
-                      <Text fontWeight="bold">
-                        {requestor.name}{' '}
-                        <Text as="span" fontWeight="normal" color="gray.400">
-                          {requestor.username}
-                        </Text>
-                      </Text>
-                      <Text fontSize="xs">{requestor.email}</Text>
-                    </Box>
-                  </Flex>
-                </Box>
-              </HStack>
-            )}
-
-            {!isAuthCodeFlow && (
+          {!isAuthCodeFlow && (
+            <FieldsetBox title={apiTitle}>
               <HStack spacing={4}>
                 <Box flex={1}>
                   <Select
@@ -287,12 +266,9 @@ const NewRequestsPage: React.FC<
                   </Flex>
                 </Box>
               </HStack>
-            )}
-          </FieldsetBox>
-          <FieldsetBox
-            isRequired
-            title={`Which ${dataset?.name} API Environment?`}
-          >
+            </FieldsetBox>
+          )}
+          <FieldsetBox isRequired title={`Which ${dataset?.name} Environment?`}>
             <RadioGroup
               name="environmentId"
               onChange={setEnvironment}
@@ -318,21 +294,6 @@ const NewRequestsPage: React.FC<
                 }))}
               value={environment}
             />
-            {selectedEnvironment?.flow === 'authorization-code' && (
-              <Box pt={4}>
-                <FormControl>
-                  <HStack spacing={4}>
-                    <Box flex={1}>
-                      <Link
-                        href={`/devportal/authv/${selectedEnvironment.id}/auth`}
-                      >
-                        <Button>Confirm Identity</Button>
-                      </Link>
-                    </Box>
-                  </HStack>
-                </FormControl>
-              </Box>
-            )}
 
             {clientAuthenticator === 'client-jwt-jwks-url' && (
               <Box pt={4}>
@@ -350,6 +311,33 @@ const NewRequestsPage: React.FC<
               </Box>
             )}
           </FieldsetBox>
+
+          {selectedEnvironment?.flow === 'authorization-code' && (
+            <FieldsetBox isRequired title={`Requesting for User`}>
+              <HStack spacing={4}>
+                <Box pt={4}>
+                  <LinkIdentity environmentId={selectedEnvironment.id} />
+                </Box>
+                <Box mx={4} w={100}>
+                  <Center>by</Center>
+                </Box>
+                <Box flex={1}>
+                  <Flex>
+                    <Avatar name={requestor.name} />
+                    <Box ml={2}>
+                      <Text fontWeight="bold">
+                        {requestor.name}{' '}
+                        <Text as="span" fontWeight="normal" color="gray.400">
+                          {requestor.username}
+                        </Text>
+                      </Text>
+                      <Text fontSize="xs">{requestor.email}</Text>
+                    </Box>
+                  </Flex>
+                </Box>
+              </HStack>
+            </FieldsetBox>
+          )}
 
           <FieldsetBox
             isRequired={

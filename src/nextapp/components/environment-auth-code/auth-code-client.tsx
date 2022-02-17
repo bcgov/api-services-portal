@@ -25,13 +25,28 @@ import {
 import ViewSecret from '../view-secret';
 
 interface AuthCodeClientConfigProps {
-  data: Environment;
+  credentials: string;
+}
+
+interface AuthCodeClient {
+  flow: string;
+  clientId: string;
+  clientSecret: string;
+  issuer: string;
+  callbackUrl: string;
 }
 
 const AuthCodeClientConfig: React.FC<AuthCodeClientConfigProps> = ({
-  data,
+  credentials,
 }) => {
-  const flow = data.flow;
+  const {
+    flow,
+    clientId,
+    clientSecret,
+    issuer,
+    callbackUrl,
+  }: AuthCodeClient = JSON.parse(credentials);
+
   return (
     flow === 'authorization-code' && (
       <Box my={4} bgColor="white">
@@ -48,9 +63,10 @@ const AuthCodeClientConfig: React.FC<AuthCodeClientConfigProps> = ({
         <Box p={4} bg="white">
           <ViewSecret
             credentials={{
-              clientId: '1234',
-              clientSecret: '12221',
-              callbackUrl: 'https://callbach.com',
+              clientId,
+              clientSecret,
+              issuer,
+              callbackUrl,
             }}
           />
 

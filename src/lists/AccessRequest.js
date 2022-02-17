@@ -116,6 +116,7 @@ module.exports = {
       fieldPath, // exists only for field hooks
     }) {
       const noauthContext = context.createContext({ skipAccessControl: true });
+      noauthContext.req = context.req;
 
       await Apply(
         noauthContext,

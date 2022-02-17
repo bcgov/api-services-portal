@@ -33,7 +33,10 @@ export async function registerClient(
   environment: string,
   credentialIssuerPK: string,
   controls: RequestControls,
-  newClientId: string
+  newClientId: string,
+  enabled: boolean = false,
+  template: string = undefined,
+  extraClientMappers: any[] = []
 ) {
   // Find the credential issuer and based on its type, go do the appropriate action
   const issuer: CredentialIssuer = await lookupCredentialIssuerById(
@@ -80,10 +83,32 @@ export async function registerClient(
     uuidv4(),
     controls.clientCertificate,
     controls.jwksUrl,
-    clientMappers,
-    false
+    clientMappers.concat(extraClientMappers),
+    enabled,
+    template,
+    controls.callbackUrl
   );
   assert.strictEqual(client.clientId, newClientId);
+
+  return {
+    openid,
+    client,
+  };
+}
+
+export async function searchForClient(
+  context: any,
+  environment: string,
+  credentialIssuerPK: string,
+  clientId: string
+) {
+  const { openid, kcClientService } = await loginToRemoteIdP(
+    context,
+    environment,
+    credentialIssuerPK
+  );
+
+  const client = await kcClientService.searchForClientId(clientId);
 
   return {
     openid,
@@ -97,6 +122,25 @@ export async function findClient(
   credentialIssuerPK: string,
   clientId: string
 ) {
+  const { openid, kcClientService } = await loginToRemoteIdP(
+    context,
+    environment,
+    credentialIssuerPK
+  );
+
+  const client = await kcClientService.findByClientId(clientId);
+
+  return {
+    openid,
+    client,
+  };
+}
+
+export async function loginToRemoteIdP(
+  context: any,
+  environment: string,
+  credentialIssuerPK: string
+): Promise<any> {
   // Find the credential issuer and based on its type, go do the appropriate action
   const issuer: CredentialIssuer = await lookupCredentialIssuerById(
     context,
@@ -123,10 +167,8 @@ export async function findClient(
     issuerEnvConfig.clientSecret
   );
 
-  const client = await kcClientService.findByClientId(clientId);
-
   return {
     openid,
-    client,
+    kcClientService,
   };
 }

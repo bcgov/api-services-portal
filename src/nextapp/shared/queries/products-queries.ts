@@ -53,6 +53,20 @@ export const UPDATE_ENVIRONMENT = gql`
     updateEnvironment(id: $id, data: $data) {
       name
       id
+      credentials
+    }
+  }
+`;
+
+export const UPDATE_ENVIRONMENT_CALLBACK_URL = gql`
+  mutation Update($id: ID!, $callbackUrl: String!) {
+    updateEnvironmentClient(
+      productEnvironmentId: $id
+      callbackUrl: $callbackUrl
+    ) {
+      id
+      credentials
+      callbackUrl
     }
   }
 `;
@@ -113,6 +127,7 @@ export const GET_ENVIRONMENT = gql`
         id
       }
       approval
+      callbackUrl
       additionalDetailsToRequest
       product {
         name

@@ -224,6 +224,8 @@ describe('KeystoneJS', function () {
           issuer: 'http://issuer/realms/abc',
           token_endpoint: 'http://issuer/realms/abc/token',
           registration_endpoint: 'http://issuer/realms/abc/client_registration',
+          jwks_uri: 'http://issuer/realms/abc/jwks_uri',
+          authorization_endpoint: 'http://issuer/realms/abc/auth',
         },
         uma2: {
           issuer: 'http://issuer/realms/abc',

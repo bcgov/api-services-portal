@@ -19,6 +19,8 @@ const {
 } = require('../authz/enforcement');
 const { updateEnvironmentDetails } = require('../services/keystone');
 
+const { newIdentityProviderID } = require('../services/identifiers');
+
 const { Logger } = require('../logger');
 const logger = Logger('lists.credentialissuer');
 
@@ -145,6 +147,10 @@ module.exports = {
       isRequired: false,
       defaultValue: 'X-API-KEY',
     },
+    identityProviderPrefix: {
+      type: Text,
+      isRequired: false,
+    },
     owner: {
       type: Relationship,
       ref: 'User',
@@ -180,6 +186,30 @@ module.exports = {
         }
       }
 
+      if (
+        operation == 'update' &&
+        existingItem['flow'] === 'authorization-code' &&
+        !('identityProviderPrefix' in existingItem)
+      ) {
+        resolvedData['identityProviderPrefix'] =
+          'aps-' + existingItem['namespace'] + '-' + newIdentityProviderID();
+      } else if (
+        operation === 'create' &&
+        resolvedData['flow'] === 'authorization-code'
+      ) {
+        resolvedData['identityProviderPrefix'] =
+          'aps-' + resolvedData['namespace'] + '-' + newIdentityProviderID();
+      } else if (
+        'identityProviderPrefix' in existingItem &&
+        'identityProviderPrefix' in resolvedData
+      ) {
+        logger.warn(
+          'Once Prefix is set, it can not be changed %s %s',
+          existingItem['identityProviderPrefix'],
+          resolvedData['identityProviderPrefix']
+        );
+        delete resolvedData['identityProviderPrefix'];
+      }
       return resolvedData;
     },
   },
