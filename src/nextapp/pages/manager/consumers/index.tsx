@@ -83,6 +83,12 @@ const ConsumersPage: React.FC<
   );
   const grantMutate = useApiMutation(grantMutation);
   const deleteMutate = useApiMutation(deleteMutation);
+  const accessRequests = React.useMemo(() => {
+    if (!data?.allAccessRequestsByNamespace) {
+      return [];
+    }
+    return data.allAccessRequestsByNamespace;
+  }, [data]);
   const consumers = React.useMemo(() => {
     if (!data?.allServiceAccessesByNamespace) {
       return [];
@@ -107,7 +113,7 @@ const ConsumersPage: React.FC<
       );
     });
   }, [data, search]);
-  const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
+  const totalRequests = accessRequests.length ?? 0;
   const totalConsumers = consumers.length ?? 0;
 
   // Events
@@ -179,7 +185,7 @@ const ConsumersPage: React.FC<
           actions={<LinkConsumer queryKey={queryKey} />}
         />
 
-        {data?.allAccessRequestsByNamespace.map((a) => (
+        {accessRequests.map((a) => (
           <AccessRequest key={a.id} data={a} />
         ))}
         <Box bgColor="white" mb={4}>
