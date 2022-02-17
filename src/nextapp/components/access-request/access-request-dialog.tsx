@@ -12,6 +12,8 @@ import {
   Tabs,
   TabList,
   Tab,
+  TabPanel,
+  TabPanels,
 } from '@chakra-ui/react';
 
 import RequestDetails from './request-details';
@@ -34,14 +36,27 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
+  const handleAccept = () => {
+    // @ts-ignore
+    const { ipRestrictionForm, rateLimitingForm } = document.forms;
+    const ipRestriction = new FormData(ipRestrictionForm);
+    const rateLimiting = new FormData(rateLimitingForm);
+    const result = {
+      ...Object.fromEntries(ipRestriction),
+      ...Object.fromEntries(rateLimiting),
+    };
+    console.log(result);
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl">
+    <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="4xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          {title}
+        <ModalHeader>{title}</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
           <Tabs index={tabIndex} pos="relative" onChange={handleTabChange}>
-            <TabList mt={4} mb={2}>
+            <TabList mb={5}>
               <Tab px={0} cursor="default">
                 Request Details
               </Tab>
@@ -52,17 +67,22 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 Authorization
               </Tab>
             </TabList>
+            <TabPanels>
+              <TabPanel p={0}>
+                <RequestDetails />
+              </TabPanel>
+              <TabPanel p={0}>
+                <RequestControls />
+              </TabPanel>
+              <TabPanel p={0}>
+                <RequestAuthorization />
+              </TabPanel>
+            </TabPanels>
           </Tabs>
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          {tabIndex === 0 && <RequestDetails />}
-          {tabIndex === 1 && <RequestControls />}
-          {tabIndex === 2 && <RequestAuthorization />}{' '}
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button variant="solid" colorScheme="green">
+            <Button variant="solid" colorScheme="green" onClick={handleAccept}>
               Accept
             </Button>
             <Button variant="solid" colorScheme="red">

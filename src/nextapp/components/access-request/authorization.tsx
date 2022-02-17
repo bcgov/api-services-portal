@@ -21,6 +21,8 @@ const Authorization: React.FC = () => {
         </Heading>
       </Grid>
       <Grid
+        as="form"
+        name="authorizationForm"
         templateColumns="repeat(3, 1fr)"
         gap={8}
         borderBottom="1px solid"
