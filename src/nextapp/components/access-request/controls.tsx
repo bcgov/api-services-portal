@@ -25,6 +25,26 @@ const Controls: React.FC = () => {
     { query },
     { suspense: false }
   );
+  const ipRestrictionOptions = React.useMemo(() => {
+    switch (restrictionType) {
+      case 'service':
+        return data?.allGatewayServicesByNamespace;
+      case 'route':
+        return data?.allGatewayServicesByNamespace.map((s) => s.routes).flat();
+      default:
+        return [];
+    }
+  }, [data, restrictionType]);
+  const rateLimitingOptions = React.useMemo(() => {
+    switch (rateLimitingType) {
+      case 'service':
+        return data?.allGatewayServicesByNamespace;
+      case 'route':
+        return data?.allGatewayServicesByNamespace.map((s) => s.routes).flat();
+      default:
+        return [];
+    }
+  }, [data, rateLimitingType]);
 
   // Events
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -38,7 +58,11 @@ const Controls: React.FC = () => {
           <form onSubmit={handleSubmit} name="ipRestrictionsForm">
             <FormControl mb={5}>
               <FormLabel>Scope</FormLabel>
-              <RadioGroup onChange={setRestrictionType} value={restrictionType}>
+              <RadioGroup
+                name="scope"
+                onChange={setRestrictionType}
+                value={restrictionType}
+              >
                 <HStack spacing={4}>
                   <Radio value="service">Service</Radio>
                   <Radio value="route">Route</Radio>
@@ -52,8 +76,13 @@ const Controls: React.FC = () => {
               px={4}
               maxW="50%"
             >
-              <Select isDisabled={isLoading} mb={5} name={restrictionType}>
-                {data?.allGatewayServicesByNamespace.map((s) => (
+              <Select
+                isDisabled={isLoading}
+                mb={5}
+                name={restrictionType}
+                data-testid="ip-restriction-service-dropdown"
+              >
+                {ipRestrictionOptions.map((s) => (
                   <option key={s.id} value={s.extForeignKey}>
                     {s.name}
                   </option>
@@ -64,7 +93,7 @@ const Controls: React.FC = () => {
                 <FormHelperText>
                   Comma-separated list, i.e. 1.1.1.1, 0.0.0.0
                 </FormHelperText>
-                <Input name="allow" />
+                <Input name="allow" data-testid="allow-ip-restriction-input" />
               </FormControl>
             </Box>
           </form>
@@ -74,6 +103,7 @@ const Controls: React.FC = () => {
             <FormControl mb={5}>
               <FormLabel>Scope</FormLabel>
               <RadioGroup
+                name="scope"
                 onChange={setRateLimitingType}
                 value={rateLimitingType}
               >
@@ -90,8 +120,13 @@ const Controls: React.FC = () => {
               px={4}
               maxW="50%"
             >
-              <Select isDisabled={isLoading} mb={5} name={rateLimitingType}>
-                {data?.allGatewayServicesByNamespace.map((s) => (
+              <Select
+                isDisabled={isLoading}
+                mb={5}
+                name={rateLimitingType}
+                data-testid="ratelimit-service-dropdown"
+              >
+                {rateLimitingOptions.map((s) => (
                   <option key={s.id} value={s.extForeignKey}>
                     {s.name}
                   </option>
@@ -112,7 +147,7 @@ const Controls: React.FC = () => {
               </HStack>
               <FormControl>
                 <FormLabel>Policy</FormLabel>
-                <Select name="policy">
+                <Select name="policy" data-testid="ratelimit-policy-dropdown">
                   <option value="local">Local</option>
                   <option value="redis">Redis</option>
                 </Select>
