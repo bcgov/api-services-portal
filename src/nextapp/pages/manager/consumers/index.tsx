@@ -89,8 +89,8 @@ const ConsumersPage: React.FC<
     }
 
     const searchTerm = new RegExp(search, 'i');
-    const result = data.allServiceAccessesByNamespace
-      ?.filter((d) => !!d.consumer)
+    const result = consumers
+      .filter((d) => !!d.consumer)
       .map((d) => {
         return d;
       });
