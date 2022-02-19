@@ -43,8 +43,8 @@ const ScopesComponent: React.FC<ScopesProps> = ({
   prodEnvId,
   credentialIssuer,
 }) => {
-  const queryKey = ['consumer-scopes', prodEnvId, consumerUsername];
-  const variables = { prodEnvId, consumerUsername };
+  const queryKey = ['consumer-scopes', prodEnvId, consumerId];
+  const variables = { prodEnvId, consumerId };
   const { data, isFetching, isLoading, isSuccess } = useApi(
     queryKey,
     {
@@ -76,7 +76,7 @@ const ScopesComponent: React.FC<ScopesProps> = ({
         await grantMutation.mutateAsync({
           prodEnvId,
           scopeName,
-          consumerUsername,
+          consumerId,
           grant,
         });
         toast({
@@ -134,13 +134,13 @@ export default ScopesComponent;
 const mutation = gql`
   mutation ToggleConsumerScopes(
     $prodEnvId: ID!
-    $consumerUsername: String!
+    $consumerId: String!
     $scopeName: String!
     $grant: Boolean!
   ) {
     updateConsumerScopeAssignment(
       prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
+      consumerId: $consumerId
       scopeName: $scopeName
       grant: $grant
     )
@@ -148,11 +148,8 @@ const mutation = gql`
 `;
 
 const query = gql`
-  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerUsername: ID!) {
-    consumerScopesAndRoles(
-      prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
-    ) {
+  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerId: ID!) {
+    consumerScopesAndRoles(prodEnvId: $prodEnvId, consumerId: $consumerId) {
       id
       consumerType
       defaultScopes
