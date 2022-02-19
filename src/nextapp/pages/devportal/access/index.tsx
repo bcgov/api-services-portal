@@ -49,7 +49,7 @@ const ApiAccessPage: React.FC<
         <Stack spacing={10} my={4}>
           <Alert status="info">
             <AlertIcon />
-            List of the BC Government Service APIs that you have access to.
+            List of the BC Government Services that you have access to.
           </Alert>
         </Stack>
 

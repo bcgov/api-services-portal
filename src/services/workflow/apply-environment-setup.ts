@@ -104,7 +104,7 @@ export const ApplyEnvironmentSetup = async (
   const clientId = `app-${productEnvironment.appId.toLowerCase()}`;
   const result = await createOrUpdateRemoteIdPClient(
     context,
-    'user-public',
+    'user-confidential',
     clientId,
     {
       callbackUrl: callbackUrl,
@@ -131,6 +131,7 @@ export const ApplyEnvironmentSetup = async (
     newCreds.issuer = result.openid.issuer;
     newCreds.clientId = result.client.clientId;
     newCreds.clientSecret = result.client.clientSecret;
+    newCreds.callbackUrl = callbackUrl;
     returnedEnvironment['credentials'] = JSON.stringify(newCreds);
   } else {
     const newCreds: NewCredential = {

@@ -10,6 +10,7 @@ import { clientTemplateClientSecret } from './templates/client-template-client-s
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 import { clientTemplateClientAcctLink } from './templates/client-template-acct-link';
 import { clientTemplateUserPublic } from './templates/client-template-user-public';
+import { clientTemplateUserConfidential } from './templates/client-template-user-confidential';
 
 import { default as KcAdminClient } from 'keycloak-admin';
 import { ClientMapper } from '../workflow/types';
@@ -122,6 +123,16 @@ export class KeycloakClientRegistrationService {
         });
         break;
 
+      case 'user-confidential':
+        body = Object.assign(JSON.parse(clientTemplateUserConfidential), {
+          enabled,
+          clientId,
+          secret: clientSecret,
+          redirectUris: [callbackUrl],
+          attributes: {},
+        });
+        break;
+
       default:
         logger.error(
           'Invalid template for creating client %s %s',
@@ -164,7 +175,8 @@ export class KeycloakClientRegistrationService {
       enabled: response['enabled'],
       clientId: response['clientId'],
       clientSecret:
-        authenticator === ClientAuthenticator.ClientSecret
+        authenticator === ClientAuthenticator.ClientSecret ||
+        template === 'user-confidential'
           ? clientSecret
           : null,
       registrationAccessToken: response['registrationAccessToken'],

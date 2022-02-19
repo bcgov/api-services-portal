@@ -125,7 +125,7 @@ const MyApplicationsPage = () => {
         <Stack spacing={10} className="m-5">
           <Alert status="info">
             <AlertIcon />
-            List of the BC Government Service APIs that you have access to.
+            List of the BC Government Services that you have access to.
           </Alert>
         </Stack>
 
