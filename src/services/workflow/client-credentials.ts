@@ -91,6 +91,7 @@ export async function registerClient(
   assert.strictEqual(client.clientId, newClientId);
 
   return {
+    created: true,
     openid,
     client,
   };
@@ -111,6 +112,7 @@ export async function searchForClient(
   const client = await kcClientService.searchForClientId(clientId);
 
   return {
+    created: false,
     openid,
     client,
   };

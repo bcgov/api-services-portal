@@ -22,6 +22,8 @@ export async function lookupProductEnvironmentServices(
                         credentialIssuer {
                             id
                             flow
+                            clientRoles
+                            availableScopes
                             identityProviderPrefix
                             environmentDetails
                         }
@@ -117,6 +119,7 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
                     allEnvironments(where: $where) {
                         id
                         name
+                        appId
                         approval
                         legal {
                             reference

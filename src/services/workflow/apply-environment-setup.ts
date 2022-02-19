@@ -14,6 +14,8 @@ import { strict as assert } from 'assert';
 import {
   KeycloakClientRegistrationService,
   KeycloakTokenService,
+  KeycloakUserService,
+  KeycloakClientService,
   getOpenidFromIssuer,
   OpenidWellKnown,
   ClientRegResponse,
@@ -111,6 +113,9 @@ export const ApplyEnvironmentSetup = async (
     envName
   );
 
+  // Add the relevant roles to it
+  await syncClientRoles(issuer, envConfig, result.client.id);
+
   // If the Product Environment Client was created, then return the CID/CSC/ISSUER
   const returnedEnvironment: Environment = {
     id: productEnvironment.id,
@@ -119,7 +124,7 @@ export const ApplyEnvironmentSetup = async (
     services: null,
   };
 
-  if (result) {
+  if (result.created) {
     const newCreds: NewCredential = {
       flow: 'authorization-code',
     };
@@ -179,8 +184,9 @@ export async function createOrUpdateRemoteIdPClient(
   remoteIssuer: CredentialIssuer,
   env: string
 ): Promise<{
+  created: boolean;
   openid: OpenidWellKnown;
-  client: ClientRegResponse;
+  client: any;
 }> {
   const existing = await searchForClient(
     context,
@@ -206,7 +212,7 @@ export async function createOrUpdateRemoteIdPClient(
       '[createOrUpdateRemoteIdPClient] EXISTING %j',
       existing.client
     );
-    return undefined;
+    return existing;
   }
 }
 
@@ -371,3 +377,71 @@ async function lookupBrokerAlias(
     issuerUrl: envConfig.issuerUrl,
   };
 }
+
+export async function syncClientRoles(
+  issuer: CredentialIssuer,
+  issuerEnvConfig: IssuerEnvironmentConfig,
+  clientUuid: string
+) {
+  const kcClientService = new KeycloakClientService(
+    issuerEnvConfig.issuerUrl,
+    null
+  );
+
+  await kcClientService.login(
+    issuerEnvConfig.clientId,
+    issuerEnvConfig.clientSecret
+  );
+
+  const desired: string[] = issuer.clientRoles
+    ? JSON.parse(issuer.clientRoles)
+    : [];
+
+  logger.debug('[syncClientRoles] %s %j', clientUuid, desired);
+
+  const existing = await kcClientService.listRoles(clientUuid);
+
+  const additions = desired.filter(
+    (roleName) => existing.filter((role) => role.name === roleName).length == 0
+  );
+  const deletions = existing
+    .filter(
+      (role) => desired.filter((roleName) => role.name === roleName).length == 0
+    )
+    .map((role) => role.name);
+
+  await kcClientService.syncRoles(clientUuid, additions, deletions);
+}
+
+// async function syncClientRoles(context: Keystone, issuer: CredentialIssuer, issuerEnvConfig: IssuerEnvironmentConfig, clientUuid: string) {
+//   const kcUserService = new KeycloakUserService(
+//     issuerEnvConfig.issuerUrl,
+//   );
+
+//   const kcClientService = new KeycloakClientService(
+//     issuerEnvConfig.issuerUrl,
+//     null
+//   );
+
+//   await kcUserService.login(
+//     issuerEnvConfig.clientId,
+//     issuerEnvConfig.clientSecret
+//   );
+
+//   await kcClientService.login(
+//     issuerEnvConfig.clientId,
+//     issuerEnvConfig.clientSecret
+//   );
+
+//   const userId = await kcClientService.lookupServiceAccountUserId(
+//     clientUuid
+//   );
+
+//   await kcUserService.syncUserClientRoles(
+//     userId,
+//     client.id,
+//     args.grant ? selectedRole : [],
+//     args.grant ? [] : selectedRole
+//   );
+
+// }

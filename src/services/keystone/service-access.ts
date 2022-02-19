@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { strict as assert } from 'assert';
 import {
   Application,
   BrokeredIdentity,
@@ -8,7 +9,6 @@ import {
   ServiceAccessCreateInput,
 } from './types';
 
-const assert = require('assert').strict;
 const logger = Logger('keystone.svc-access');
 
 export async function lookupCredentialReferenceByServiceAccess(
@@ -150,6 +150,44 @@ export async function lookupServiceAccessesByNamespace(
     result.data.allServiceAccesses.length
   );
   return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessByConsumerAndEnvironment(
+  context: any,
+  prodEnvId: string,
+  consumerId: string
+): Promise<ServiceAccess> {
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByConsumerAndEnv($prodEnvId: ID!, $consumerId: ID!) {
+                    allServiceAccesses(where: {consumer: { id: $consumerId }, productEnvironment: { id: $prodEnvId } }) {
+                        id
+                        application {
+                          appId
+                        }
+                        brokeredIdentity {
+                          username
+                          userId
+                          providerAlias
+                        }
+                        consumer {
+                            username
+                            customId
+                        }
+                    }
+                }`,
+    variables: { prodEnvId, consumerId },
+  });
+  logger.debug(
+    '[lookupServiceAccessesByConsumerAndEnvironment] result %j',
+    result.data.allServiceAccesses
+  );
+
+  assert.strictEqual(
+    result.data.allServiceAccesses.length,
+    1,
+    'Unexpected Service Access Response'
+  );
+  return result.data.allServiceAccesses[0];
 }
 
 export async function addServiceAccess(

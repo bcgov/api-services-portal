@@ -43,8 +43,8 @@ const RolesComponent: React.FC<RolesProps> = ({
   prodEnvId,
   credentialIssuer,
 }) => {
-  const queryKey = ['consumer-roles', prodEnvId, consumerUsername];
-  const variables = { prodEnvId, consumerUsername };
+  const queryKey = ['consumer-roles', prodEnvId, consumerId];
+  const variables = { prodEnvId, consumerId };
   const { data, isFetching, isLoading, isSuccess } = useApi(
     queryKey,
     {
@@ -76,7 +76,7 @@ const RolesComponent: React.FC<RolesProps> = ({
         await grantMutation.mutateAsync({
           prodEnvId,
           roleName,
-          consumerUsername,
+          consumerId,
           grant,
         });
         toast({
@@ -134,13 +134,13 @@ export default RolesComponent;
 const mutation = gql`
   mutation ToggleConsumerRoles(
     $prodEnvId: ID!
-    $consumerUsername: String!
+    $consumerId: ID!
     $roleName: String!
     $grant: Boolean!
   ) {
     updateConsumerRoleAssignment(
       prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
+      consumerId: $consumerId
       roleName: $roleName
       grant: $grant
     )
@@ -148,11 +148,8 @@ const mutation = gql`
 `;
 
 const query = gql`
-  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerUsername: ID!) {
-    consumerScopesAndRoles(
-      prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
-    ) {
+  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerId: ID!) {
+    consumerScopesAndRoles(prodEnvId: $prodEnvId, consumerId: $consumerId) {
       id
       consumerType
       defaultScopes

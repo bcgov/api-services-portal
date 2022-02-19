@@ -1,0 +1,10 @@
+query allServiceAccessesByNamespace {
+  allServiceAccesses(where: {consumer: {username_not_starts_with: "sa-"}, productEnvironment: {product: {namespace: "erx-demo"}}}) {
+    id
+    name
+    namespace
+    consumer {
+      username
+    }
+  }
+}

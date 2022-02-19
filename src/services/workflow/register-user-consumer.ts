@@ -7,7 +7,7 @@ import {
   lookupBrokeredIdentities,
   createBrokeredIdentity,
 } from '../keystone';
-import crypto from 'crypto';
+import crypto, { createHmac } from 'crypto';
 import { strict as assert } from 'assert';
 import {
   AddClientConsumer,
@@ -67,7 +67,8 @@ export const registerUserConsumer = async (
   if (accountLink.linkedIdentities.length === 1) {
     const linkedUser = accountLink.linkedIdentities[0];
     const id: BrokeredIdentityCreateInput = {
-      providerAlias: linkedUser.identityProvider,
+      issuerUrl: accountLink.issuerUrl,
+      providerAlias: accountLink.brokerAlias,
       userId: linkedUser.userId,
       username: linkedUser.userName,
       owner: { connect: { id: context.authedItem.userId } },
@@ -86,21 +87,13 @@ export const registerUserConsumer = async (
     .pop();
 
   logger.debug('[registerUserConsumer] Broker ID %j', matchedBrokerIdentity);
-  // use the Requester user username to lookup in Authz the User ID, and then to get the Federated Identities
-  // for the Subject ID
 
-  // const application = await lookupApplication(
-  //   context,
-  //   requestDetails.application.id
-  // );
+  const hashIssuerUrl = createHmac('sha256', '')
+    .update(matchedBrokerIdentity.issuerUrl)
+    .digest('hex');
 
-  // clientId will be the remote Subject ID
-  // nickname will be the username '@' brokerAlias
-  //
-  const _username = matchedBrokerIdentity.username.replace(/@/g, '-');
   const subjectId = matchedBrokerIdentity.userId;
-
-  const nickname = `${_username}@${brokerAlias}`;
+  const nickname = `${matchedBrokerIdentity.username}-${hashIssuerUrl}`;
 
   controls.clientCertificate = null;
 

@@ -114,7 +114,8 @@ const ConsumerAuthz: React.FC<ConsumerACLProps> = ({
                                 </Text>
                               </Box>
                             </Box>
-                            {e.flow === 'client-credentials' && (
+                            {(e.flow === 'client-credentials' ||
+                              e.flow === 'authorization-code') && (
                               <Box width="20%" mr={10}>
                                 <RolesComponent
                                   prodEnvId={e.id}
@@ -124,7 +125,8 @@ const ConsumerAuthz: React.FC<ConsumerACLProps> = ({
                                 ></RolesComponent>
                               </Box>
                             )}
-                            {e.flow === 'client-credentials' && (
+                            {(e.flow === 'client-credentials' ||
+                              e.flow == 'authorization-code') && (
                               <Box width="20%" mr={10}>
                                 <ScopesComponent
                                   prodEnvId={e.id}

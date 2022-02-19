@@ -15,6 +15,7 @@ export async function lookupBrokeredIdentities(
     query: `query GetBrokeredIdentity($owner: ID!) {
                     allBrokeredIdentities(where: {owner: {id: $id}}) {
                         id
+                        issuerUrl
                         providerAlias
                         userId
                         username
@@ -34,6 +35,7 @@ export async function createBrokeredIdentity(
   const result = await context.executeGraphQL({
     query: `mutation ($data: BrokeredIdentityCreateInput) {
                     createBrokeredIdentity(data: $data) {
+                        issuerUrl
                         providerAlias
                         userId
                         username

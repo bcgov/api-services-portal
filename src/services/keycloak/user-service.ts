@@ -24,6 +24,20 @@ export class KeycloakUserService {
   //   return user;
   // }
 
+  public async lookupUserById(id: string) {
+    logger.debug('[lookupUserById] %s', id);
+    const user = await this.kcAdminClient.users.findOne({
+      id,
+    });
+    logger.debug('[lookupUserById] : %j', user);
+    assert.strictEqual(
+      typeof user === 'undefined',
+      false,
+      'User not found ' + id
+    );
+    return user;
+  }
+
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
     const users = await this.kcAdminClient.users.find({

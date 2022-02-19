@@ -10,7 +10,7 @@ export CID=""
 export CSC=""
 export ISSUER=""
 npm run ts-watch
-node dist/test/integrated/keystonejs/brokered-identity.js
+node dist/test/integrated/keystonejs/service-access.js
 */
 
 import { v4 as uuid } from 'uuid';
@@ -21,6 +21,7 @@ import InitKeystone from '../keystonejs/init';
 import {
   createBrokeredIdentity,
   lookupCredentialIssuerById,
+  lookupServiceAccessByConsumerAndEnvironment,
 } from '../../../services/keystone';
 import {
   IssuerEnvironmentConfig,
@@ -40,14 +41,13 @@ import {
 
   //const owner = '15a3cbbe-95b5-49f0-84ee-434a9b92d04a';
 
-  const id: BrokeredIdentityCreateInput = {
-    issuerUrl: 'https://dev',
-    providerAlias: 'abc',
-    userId: '111',
-    username: 'acope@idir',
-  };
-
-  await createBrokeredIdentity(keystone, id);
+  const prodEnvId = '620bfe448eb14a86cab4ab73';
+  const consumerId = '620d779a85b71310b7ca6789';
+  await lookupServiceAccessByConsumerAndEnvironment(
+    keystone,
+    prodEnvId,
+    consumerId
+  );
 
   await keystone.disconnect();
 })();

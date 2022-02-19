@@ -48,6 +48,7 @@ export {
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
   lookupServiceAccessesByNamespace,
+  lookupServiceAccessByConsumerAndEnvironment,
   markActiveTheServiceAccess,
 } from './service-access';
 

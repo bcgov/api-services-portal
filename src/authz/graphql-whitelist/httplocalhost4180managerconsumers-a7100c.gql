@@ -1,0 +1,14 @@
+
+  mutation ToggleConsumerRoles(
+    $prodEnvId: ID!
+    $consumerId: ID!
+    $roleName: String!
+    $grant: Boolean!
+  ) {
+    updateConsumerRoleAssignment(
+      prodEnvId: $prodEnvId
+      consumerId: $consumerId
+      roleName: $roleName
+      grant: $grant
+    )
+  }

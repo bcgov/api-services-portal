@@ -22,6 +22,7 @@ import {
   createOrUpdateRemoteIdPClient,
   getAccountLinkUrl,
   getAllUserAccountLinks,
+  syncClientRoles,
 } from '../../../services/workflow/apply-environment-setup';
 import InitKeystone from '../keystonejs/init';
 import { lookupCredentialIssuerById } from '../../../services/keystone';
@@ -29,6 +30,7 @@ import {
   IssuerEnvironmentConfig,
   getIssuerEnvironmentConfig,
 } from '../../../services/workflow/types';
+import { CredentialIssuer } from '../../../services/keystone/types';
 
 import { updateCallbackUrl } from '../../../services/keystone';
 
@@ -94,7 +96,7 @@ import { updateCallbackUrl } from '../../../services/keystone';
     console.log(JSON.stringify(result, null, 4));
   }
 
-  if (true) {
+  if (false) {
     keystone.req = {};
     keystone.req['user'] = {};
     keystone.req.user.sub = '123';

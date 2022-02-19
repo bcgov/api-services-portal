@@ -1,6 +1,7 @@
 import {
   lookupEnvironmentAndIssuerUsingWhereClause,
   lookupKongConsumerId,
+  lookupServiceAccessByConsumerAndEnvironment,
 } from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
 import { FeederService } from '../../services/feeder';
@@ -60,7 +61,7 @@ module.exports = {
         queries: [
           {
             schema:
-              'consumerScopesAndRoles(prodEnvId: ID!, consumerUsername: ID!): ConsumerScopesAndRoles',
+              'consumerScopesAndRoles(prodEnvId: ID!, consumerId: ID!): ConsumerScopesAndRoles',
             resolver: async (
               item: any,
               args: any,
@@ -102,17 +103,21 @@ module.exports = {
                   envCtx.issuerEnvConfig.clientSecret
                 );
 
-                const client = await kcClientService.findByClientId(
-                  envCtx.issuerEnvConfig.clientId
+                const clientId = `app-${envCtx.prodEnv.appId.toLowerCase()}`;
+
+                const client = await kcClientService.findByClientId(clientId);
+
+                const serviceAccess = await lookupServiceAccessByConsumerAndEnvironment(
+                  context,
+                  envCtx.prodEnv.id,
+                  args.consumerId
                 );
 
-                const isClient = await kcClientService.isClient(
-                  args.consumerUsername
-                );
+                const isClient = serviceAccess.application ? true : false;
 
                 if (isClient) {
                   const consumerClient = await kcClientService.findByClientId(
-                    args.consumerUsername
+                    serviceAccess.consumer.customId
                   );
                   const userId = await kcClientService.lookupServiceAccountUserId(
                     consumerClient.id
@@ -133,16 +138,15 @@ module.exports = {
                     clientRoles: userRoles.map((r: any) => r.name),
                   } as any;
                 } else {
-                  // TODO: Logic here will be different depending on if this is an App or BrokeredIdentity
-                  const userId = await kcUserService.lookupUserByUsername(
-                    args.consumerUsername
+                  const user = await kcUserService.lookupUserById(
+                    serviceAccess.brokeredIdentity.userId
                   );
                   const userRoles = await kcUserService.listUserClientRoles(
-                    userId,
+                    user.id,
                     client.id
                   );
                   return {
-                    id: userId,
+                    id: user.id,
                     consumerType: 'user',
                     defaultScopes: [],
                     optionalScopes: [],
@@ -187,7 +191,7 @@ module.exports = {
           },
           {
             schema:
-              'updateConsumerRoleAssignment( prodEnvId: ID!, consumerUsername: String!, roleName: String!, grant: Boolean! ): Boolean',
+              'updateConsumerRoleAssignment( prodEnvId: ID!, consumerId: ID!, roleName: String!, grant: Boolean! ): Boolean',
             resolver: async (
               item: any,
               args: any,
@@ -216,9 +220,9 @@ module.exports = {
                   envCtx.issuerEnvConfig.clientSecret
                 );
 
-                const client = await kcClientService.findByClientId(
-                  envCtx.issuerEnvConfig.clientId
-                );
+                const clientId = `app-${envCtx.prodEnv.appId.toLowerCase()}`;
+
+                const client = await kcClientService.findByClientId(clientId);
 
                 // TODO: Logic here will be different depending on the Flow of the Environment
                 // authorization-code will use Roles from the app-XXX client
@@ -241,13 +245,17 @@ module.exports = {
                   selectedRole
                 );
 
-                const isClient = await kcClientService.isClient(
-                  args.consumerUsername
+                const serviceAccess = await lookupServiceAccessByConsumerAndEnvironment(
+                  context,
+                  envCtx.prodEnv.id,
+                  args.consumerId
                 );
+
+                const isClient = serviceAccess.application ? true : false;
 
                 if (isClient) {
                   const consumerClient = await kcClientService.findByClientId(
-                    args.consumerUsername
+                    serviceAccess.consumer.customId
                   );
                   const userId = await kcClientService.lookupServiceAccountUserId(
                     consumerClient.id
@@ -259,12 +267,11 @@ module.exports = {
                     args.grant ? [] : selectedRole
                   );
                 } else {
-                  // TODO: Logic here needs to use the BrokeredIdentity details
-                  const userId = await kcUserService.lookupUserByUsername(
-                    args.consumerUsername
+                  const user = await kcUserService.lookupUserById(
+                    serviceAccess.brokeredIdentity.userId
                   );
                   await kcUserService.syncUserClientRoles(
-                    userId,
+                    user.id,
                     client.id,
                     args.grant ? selectedRole : [],
                     args.grant ? [] : selectedRole
@@ -284,7 +291,7 @@ module.exports = {
           },
           {
             schema:
-              'updateConsumerScopeAssignment( prodEnvId: ID!, consumerUsername: String!, scopeName: String!, grant: Boolean! ): Boolean',
+              'updateConsumerScopeAssignment( prodEnvId: ID!, consumerId: ID!, scopeName: String!, grant: Boolean! ): Boolean',
             resolver: async (
               item: any,
               args: any,
@@ -336,9 +343,13 @@ module.exports = {
                   selectedScope
                 );
 
-                const isClient = await kcClientService.isClient(
-                  args.consumerUsername
+                const serviceAccess = await lookupServiceAccessByConsumerAndEnvironment(
+                  context,
+                  envCtx.prodEnv.id,
+                  args.consumerId
                 );
+
+                const isClient = serviceAccess.application ? true : false;
 
                 assert.strictEqual(
                   isClient,
@@ -347,7 +358,7 @@ module.exports = {
                 );
 
                 await kcClientRegService.syncClientScopes(
-                  args.consumerUsername,
+                  serviceAccess.consumer.username,
                   client.id,
                   args.grant ? selectedScope : [],
                   args.grant ? [] : selectedScope

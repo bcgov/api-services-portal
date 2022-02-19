@@ -1,0 +1,7 @@
+query allServiceAccessesByNamespace {
+  allServiceAccesses(where: {}) {
+    id
+    name
+    namespace
+  }
+}

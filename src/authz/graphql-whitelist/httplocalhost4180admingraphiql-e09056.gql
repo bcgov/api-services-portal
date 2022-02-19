@@ -1,0 +1,10 @@
+query allServiceAccessesByNamespace {
+  allServiceAccessesByNamespace {
+    id
+    name
+    namespace
+    consumer {
+      username
+    }
+  }
+}

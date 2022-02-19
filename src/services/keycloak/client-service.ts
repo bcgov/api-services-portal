@@ -1,6 +1,7 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { default as KcAdminClient } from 'keycloak-admin';
+import RoleRepresentation from 'keycloak-admin/lib/defs/groupRepresentation';
 
 const logger = Logger('kc.client');
 
@@ -51,12 +52,27 @@ export class KeycloakClientService {
     return us.id;
   }
 
-  public async listRoles(id: string) {
+  public async listRoles(id: string): Promise<RoleRepresentation[]> {
     const roles = await this.kcAdminClient.clients.listRoles({
       id,
     });
     logger.debug('[listRoles] (%s) RESULT %j', id, roles);
     return roles;
+  }
+
+  public async syncRoles(id: string, add: string[], del: string[]) {
+    logger.debug('[syncRoles] %s A=%j D=%j', id, add, del);
+    for (const roleName of add) {
+      await this.kcAdminClient.clients.createRole({
+        id,
+        name: roleName,
+      });
+      logger.debug('[syncRoles] %s %j ADDED', id, roleName);
+    }
+    for (const roleName of del) {
+      await this.kcAdminClient.clients.delRole({ id, roleName });
+      logger.debug('[syncRoles] %s %j DELETED', id, roleName);
+    }
   }
 
   public async findUsersWithRole(id: string, roleName: string) {

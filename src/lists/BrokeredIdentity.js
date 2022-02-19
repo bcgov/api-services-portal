@@ -12,6 +12,10 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    issuerUrl: {
+      type: Text,
+      isRequired: true,
+    },
     userId: {
       type: Text,
       isRequired: true,

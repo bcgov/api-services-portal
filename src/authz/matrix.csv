@@ -45,6 +45,8 @@ NS MANAGER,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
+API Owner Role Rules,,,BrokeredIdentity,,"read,update,delete",,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,,BrokeredIdentity,,create,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Application,,"read,update,delete",,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Application,,create,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Content,read,,,,,api-owner,,,allow,

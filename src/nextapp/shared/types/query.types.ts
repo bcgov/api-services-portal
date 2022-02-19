@@ -1040,6 +1040,7 @@ export type BrokeredIdentity = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   providerAlias?: Maybe<Scalars['String']>;
+  issuerUrl?: Maybe<Scalars['String']>;
   userId?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
   owner?: Maybe<User>;
@@ -1072,6 +1073,24 @@ export type BrokeredIdentityWhereInput = {
   providerAlias_not_ends_with_i?: Maybe<Scalars['String']>;
   providerAlias_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   providerAlias_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  issuerUrl?: Maybe<Scalars['String']>;
+  issuerUrl_not?: Maybe<Scalars['String']>;
+  issuerUrl_contains?: Maybe<Scalars['String']>;
+  issuerUrl_not_contains?: Maybe<Scalars['String']>;
+  issuerUrl_starts_with?: Maybe<Scalars['String']>;
+  issuerUrl_not_starts_with?: Maybe<Scalars['String']>;
+  issuerUrl_ends_with?: Maybe<Scalars['String']>;
+  issuerUrl_not_ends_with?: Maybe<Scalars['String']>;
+  issuerUrl_i?: Maybe<Scalars['String']>;
+  issuerUrl_not_i?: Maybe<Scalars['String']>;
+  issuerUrl_contains_i?: Maybe<Scalars['String']>;
+  issuerUrl_not_contains_i?: Maybe<Scalars['String']>;
+  issuerUrl_starts_with_i?: Maybe<Scalars['String']>;
+  issuerUrl_not_starts_with_i?: Maybe<Scalars['String']>;
+  issuerUrl_ends_with_i?: Maybe<Scalars['String']>;
+  issuerUrl_not_ends_with_i?: Maybe<Scalars['String']>;
+  issuerUrl_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  issuerUrl_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   userId?: Maybe<Scalars['String']>;
   userId_not?: Maybe<Scalars['String']>;
   userId_contains?: Maybe<Scalars['String']>;
@@ -1137,6 +1156,8 @@ export enum SortBrokeredIdentitiesBy {
   IdDesc = 'id_DESC',
   ProviderAliasAsc = 'providerAlias_ASC',
   ProviderAliasDesc = 'providerAlias_DESC',
+  IssuerUrlAsc = 'issuerUrl_ASC',
+  IssuerUrlDesc = 'issuerUrl_DESC',
   UserIdAsc = 'userId_ASC',
   UserIdDesc = 'userId_DESC',
   UsernameAsc = 'username_ASC',
@@ -1151,6 +1172,7 @@ export enum SortBrokeredIdentitiesBy {
 
 export type BrokeredIdentityUpdateInput = {
   providerAlias?: Maybe<Scalars['String']>;
+  issuerUrl?: Maybe<Scalars['String']>;
   userId?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
 };
@@ -1162,6 +1184,7 @@ export type BrokeredIdentitiesUpdateInput = {
 
 export type BrokeredIdentityCreateInput = {
   providerAlias?: Maybe<Scalars['String']>;
+  issuerUrl?: Maybe<Scalars['String']>;
   userId?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
   owner?: Maybe<UserRelateToOneInput>;
@@ -6567,6 +6590,7 @@ export type Query = {
   getAccountLinking?: Maybe<AccountLinking>;
   getAllUserAccountLinks?: Maybe<Array<Maybe<AccountLinking>>>;
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
+  getUserAccountLinking?: Maybe<Array<Maybe<AccountLinking>>>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
@@ -7334,7 +7358,7 @@ export type QueryBusinessProfileArgs = {
 
 export type QueryConsumerScopesAndRolesArgs = {
   prodEnvId: Scalars['ID'];
-  consumerUsername: Scalars['ID'];
+  consumerId: Scalars['ID'];
 };
 
 
@@ -8476,7 +8500,7 @@ export type MutationLinkConsumerToNamespaceArgs = {
 
 export type MutationUpdateConsumerRoleAssignmentArgs = {
   prodEnvId: Scalars['ID'];
-  consumerUsername: Scalars['String'];
+  consumerId: Scalars['ID'];
   roleName: Scalars['String'];
   grant: Scalars['Boolean'];
 };
@@ -8484,7 +8508,7 @@ export type MutationUpdateConsumerRoleAssignmentArgs = {
 
 export type MutationUpdateConsumerScopeAssignmentArgs = {
   prodEnvId: Scalars['ID'];
-  consumerUsername: Scalars['String'];
+  consumerId: Scalars['ID'];
   scopeName: Scalars['String'];
   grant: Scalars['Boolean'];
 };

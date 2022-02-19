@@ -1,0 +1,13 @@
+
+  query GetConsumerScopesAndRoles($prodEnvId: ID!, $consumerId: ID!) {
+    consumerScopesAndRoles(
+      prodEnvId: $prodEnvId
+      consumerUsername: $consumerUsername
+    ) {
+      id
+      consumerType
+      defaultScopes
+      optionalScopes
+      clientRoles
+    }
+  }

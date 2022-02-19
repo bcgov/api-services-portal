@@ -1,0 +1,7 @@
+query allServiceAccessesByNamespace {
+  allServiceAccesses(where: {productEnvironment: {product: {namespace: "erx-demo"}}}) {
+    id
+    name
+    namespace
+  }
+}
