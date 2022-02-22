@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { Grid, GridItem, Tag, Text } from '@chakra-ui/react';
+import { AccessRequest } from '@/shared/types/query.types';
+import BusinessDetails from './business-details';
+import { ErrorBoundary } from 'react-error-boundary';
+import format from 'date-fns/format';
 
-const RequestDetails: React.FC = () => {
+interface RequestDetailsProps {
+  data: AccessRequest;
+}
+
+const RequestDetails: React.FC<RequestDetailsProps> = ({ data }) => {
   return (
     <Grid
       templateColumns="205px 1fr"
@@ -16,25 +24,33 @@ const RequestDetails: React.FC = () => {
       <GridItem as="dt">Environment</GridItem>
       <GridItem as="dd">
         <Tag bgColor="#fed77680" variant="outline">
-          Dev
+          {data.productEnvironment?.name}
         </Tag>
       </GridItem>
       <GridItem as="dt">Application</GridItem>
-      <GridItem as="dd">Easy Mart Store 122</GridItem>
+      <GridItem as="dd">{data.application.name}</GridItem>
       <GridItem as="dt">Request Date</GridItem>
-      <GridItem as="dd">July 16th, 2021</GridItem>
+      <GridItem as="dd">
+        <time>{format(new Date(data.createdAt), 'MMM do, yyyy')}</time>
+      </GridItem>
       <GridItem as="dt">Business Profile</GridItem>
       <GridItem as="dd">
-        Easy Drug Mart 51, W Broadway Vancouver BC V8T 1E7
+        <ErrorBoundary
+          fallback={
+            <Text as="em" color="bc-component">
+              Unable to load business profile
+            </Text>
+          }
+        >
+          <React.Suspense fallback="Loading...">
+            <BusinessDetails id={data.id} />
+          </React.Suspense>
+        </ErrorBoundary>
       </GridItem>
       <GridItem as="dt">Instructions from the API Provider</GridItem>
-      <GridItem as="dd">
-        Access to this API requires a BCeID. Your request will be rejected if
-        you did not log into the Portal with a valid Business BCeID. To
-        continue, please provide your contact phone number below.
-      </GridItem>
+      <GridItem as="dd">{data.additionalDetails}</GridItem>
       <GridItem as="dt">Requester Comments</GridItem>
-      <GridItem as="dd">Phone Number 204-896-6325 & 204-896-7700. </GridItem>
+      <GridItem as="dd">{data.communication}</GridItem>
     </Grid>
   );
 };

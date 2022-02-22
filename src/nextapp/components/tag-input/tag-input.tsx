@@ -96,6 +96,16 @@ const TagInput: React.FC<TagInputProps> = ({
     return styles.field;
   }, [isFocused, styles.field]);
 
+  React.useEffect(() => {
+    const handleReset = () => setValues([]);
+    const ref = inputRef?.current;
+    ref.form?.addEventListener('reset', handleReset);
+
+    return () => {
+      ref.form.removeEventListener('reset', handleReset);
+    };
+  }, []);
+
   return (
     <>
       <Box

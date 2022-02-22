@@ -16,8 +16,6 @@ import {
   MenuItem,
   Flex,
   useToast,
-  Icon,
-  Text,
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
@@ -302,11 +300,16 @@ const query = gql`
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {
       id
       name
+      additionalDetails
+      communication
       createdAt
       requestor {
         name
       }
       application {
+        name
+      }
+      productEnvironment {
         name
       }
     }

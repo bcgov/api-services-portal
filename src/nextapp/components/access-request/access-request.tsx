@@ -13,6 +13,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
   return (
     <>
       <AccessRequestDialog
+        data={data}
         isOpen={isOpen}
         onClose={onClose}
         title={data.application?.name}
