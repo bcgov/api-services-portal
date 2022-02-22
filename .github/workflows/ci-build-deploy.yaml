@@ -170,14 +170,14 @@ jobs:
               tag: v7.2.0
             config:
               upstream: http://127.0.0.1:3000
-              client-id: ${{ secrets.OIDC_CLIENT_ID }}
-              client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
-              oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
+              client-id: ${{ secrets.OIDC_CLIENT_ID_FOR_DEV }}
+              client-secret: ${{ secrets.OIDC_CLIENT_SECRET_FOR_DEV }}
+              oidc-issuer-url: ${{ secrets.OIDC_ISSUER_FOR_DEV }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
               skip-auth-regex: '/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
-              profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
+              profile-url: ${{ secrets.OIDC_ISSUER_FOR_DEV }}/protocol/openid-connect/userinfo
               insecure-oidc-allow-unverified-email: 'true'
               oidc-email-claim: 'sub'
               pass-basic-auth: 'false'
@@ -209,9 +209,9 @@ jobs:
               value: '${{ secrets.GH_TOKEN_FOR_CONTENT}}'
               secure: true
             OIDC_ISSUER:  
-              value: '${{ secrets.OIDC_ISSUER }}'
+              value: '${{ secrets.OIDC_ISSUER_FOR_DEV }}'
             JWKS_URL:
-              value: '${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/certs'
+              value: '${{ secrets.OIDC_ISSUER_FOR_DEV }}/protocol/openid-connect/certs'
             EXTERNAL_URL:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'
             SSR_API_ROOT:
@@ -225,9 +225,9 @@ jobs:
             GWA_PROD_ENV_SLUG:
               value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
-              value: '${{ secrets.OIDC_CLIENT_ID }}'
+              value: '${{ secrets.OIDC_CLIENT_ID_FOR_DEV }}'
             GWA_RES_SVR_CLIENT_SECRET:
-              value: '${{ secrets.OIDC_CLIENT_SECRET }}'
+              value: '${{ secrets.OIDC_CLIENT_SECRET_FOR_DEV }}'
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
@@ -276,7 +276,7 @@ jobs:
           cd .github/workflows
           SERVICE=proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder-generic-api \
           PORTAL_URL=https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca \
-          OIDC_ISSUER=${{ secrets.OIDC_ISSUER }} \
-          OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
-          OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
+          OIDC_ISSUER=${{ secrets.OIDC_ISSUER_FOR_DEV }} \
+          OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID_FOR_DEV }} \
+          OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET_FOR_DEV }} \
           ./scripts/init.sh
