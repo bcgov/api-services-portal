@@ -231,7 +231,7 @@ jobs:
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
-              value: '${{ secrets.KEYCLOAK_REALM }}'
+              value: 'aps'
             COOKIE_SECURE:
               value: 'true'
             EMAIL_ENABLED:
