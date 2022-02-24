@@ -12,6 +12,14 @@ export type IpRestrictionPayload = {
   tags: string[];
 };
 
+export type RateLimitingConfig = {
+  second: FormDataEntryValue;
+  minute: FormDataEntryValue;
+  hour: FormDataEntryValue;
+  day: FormDataEntryValue;
+  policy: FormDataEntryValue;
+};
+
 export type RateLimitingPayload = {
   name: string;
   protocols: string[];
@@ -21,12 +29,6 @@ export type RateLimitingPayload = {
   service?: {
     id: string;
   };
-  config: {
-    second: number;
-    minute: number;
-    hour: number;
-    day: number;
-    policy: string;
-  };
+  config: RateLimitingConfig;
   tags: string[];
 };

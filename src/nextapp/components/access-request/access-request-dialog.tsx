@@ -13,12 +13,16 @@ import {
   Tabs,
   TabList,
   Tab,
+  useToast,
 } from '@chakra-ui/react';
 import { AccessRequest } from '@/shared/types/query.types';
 
 import RequestDetails from './request-details';
 import RequestControls from './controls';
 import RequestAuthorization from './authorization';
+import { gql } from 'graphql-request';
+import { useApiMutation } from '@/shared/services/api';
+import { useQueryClient } from 'react-query';
 
 interface AccessRequestDialogProps {
   data: AccessRequest;
@@ -33,27 +37,70 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   onClose,
   title,
 }) => {
+  const client = useQueryClient();
   const [tabIndex, setTabIndex] = React.useState(0);
+  const [restrictions, setRestrictions] = React.useState([]);
+  const [rateLimits, setRateLimits] = React.useState([]);
+  const approveMutate = useApiMutation(approveMutation);
+  const rejectMutate = useApiMutation(rejectMutation);
+  const toast = useToast();
 
+  const handleUpdateRateLimits = React.useCallback((payload) => {
+    setRateLimits((state) => [...state, payload]);
+  }, []);
+  const handleUpdateRestrictions = React.useCallback((payload) => {
+    setRestrictions((state) => [...state, payload]);
+  }, []);
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
-  const handleReject = () => {
+  const handleReject = async () => {
     onClose();
     setTabIndex(0);
+    try {
+      await rejectMutate.mutateAsync({
+        id: data.id,
+      });
+      toast({
+        status: 'warning',
+        title: 'Access Request Rejected',
+        description: 'The consumer will not be able to access your API',
+        duration: null,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Access Rejection Failed',
+        description: err.message,
+      });
+    }
   };
-  const handleAccept = () => {
-    // @ts-ignore
-    const { ipRestrictionForm, rateLimitingForm } = document.forms;
-    const ipRestriction = new FormData(ipRestrictionForm);
-    const rateLimiting = new FormData(rateLimitingForm);
-    const result = {
-      ...Object.fromEntries(ipRestriction),
-      ...Object.fromEntries(rateLimiting),
-    };
+  const handleAccept = async () => {
     onClose();
     setTabIndex(0);
-    console.log(result);
+    try {
+      await approveMutate.mutateAsync({
+        id: data.id,
+        controls: JSON.stringify({
+          plugins: [...restrictions, ...rateLimits],
+        }),
+      });
+      client.invalidateQueries(['allConsumers']);
+      toast({
+        status: 'success',
+        title: 'Access Request Approved',
+        description: 'The consumer can now access your API',
+        duration: null,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Access Rejection Failed',
+        description: err.message,
+      });
+    }
   };
 
   return (
@@ -75,13 +122,13 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             onChange={handleTabChange}
           >
             <TabList mb={5}>
-              <Tab px={0} cursor="default">
+              <Tab px={0} cursor="pointer">
                 Request Details
               </Tab>
-              <Tab px={0} ml={4} cursor="default">
+              <Tab px={0} ml={4} cursor="pointer">
                 Controls
               </Tab>
-              <Tab px={0} ml={4} cursor="default">
+              <Tab px={0} ml={4} cursor="pointer">
                 Authorization
               </Tab>
             </TabList>
@@ -99,13 +146,18 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             hidden={tabIndex !== 1}
             display={tabIndex === 1 ? 'block' : 'none'}
           >
-            <RequestControls />
+            <RequestControls
+              onUpdateRateLimits={handleUpdateRateLimits}
+              onUpdateRestrictions={handleUpdateRestrictions}
+              rateLimits={rateLimits}
+              restrictions={restrictions}
+            />
           </Box>
           <Box
             hidden={tabIndex !== 2}
             display={tabIndex === 2 ? 'block' : 'none'}
           >
-            <RequestAuthorization />
+            <RequestAuthorization id={data.id} />
           </Box>
         </ModalBody>
         <ModalFooter>
@@ -124,3 +176,30 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 };
 
 export default AccessRequestDialog;
+
+const approveMutation = gql`
+  mutation FulfillRequest($id: ID!, $controls: String!) {
+    updateAccessRequest(
+      id: $id
+      data: {
+        isApproved: true
+        isIssued: true
+        isComplete: true
+        controls: $controls
+      }
+    ) {
+      id
+    }
+  }
+`;
+
+const rejectMutation = gql`
+  mutation Approve($id: ID!) {
+    updateAccessRequest(
+      id: $id
+      data: { isApproved: false, isComplete: true }
+    ) {
+      id
+    }
+  }
+`;

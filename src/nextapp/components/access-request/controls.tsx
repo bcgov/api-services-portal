@@ -15,7 +15,9 @@ import {
   Radio,
   RadioGroup,
   Select,
+  Text,
   UnorderedList,
+  useToast,
 } from '@chakra-ui/react';
 import { ExpandableCards, ExpandableCard } from '@/components/card';
 import { FaDoorClosed } from 'react-icons/fa';
@@ -25,19 +27,36 @@ import { gql } from 'graphql-request';
 import { uid } from 'react-uid';
 import { useApi } from '@/shared/services/api';
 
-import type { IpRestrictionPayload, RateLimitingPayload } from './types';
+import type {
+  IpRestrictionPayload,
+  RateLimitingConfig,
+  RateLimitingPayload,
+} from './types';
 import TagInput from '../tag-input';
 
-const Controls: React.FC = () => {
+interface ControlsProps {
+  onUpdateRateLimits: (payload: RateLimitingPayload) => void;
+  onUpdateRestrictions: (payload: IpRestrictionPayload) => void;
+  rateLimits: RateLimitingPayload[];
+  restrictions: IpRestrictionPayload[];
+}
+
+const Controls: React.FC<ControlsProps> = ({
+  rateLimits,
+  restrictions,
+  onUpdateRateLimits,
+  onUpdateRestrictions,
+}) => {
+  const toast = useToast();
   const [restrictionType, setRestrictionType] = React.useState('service');
   const [rateLimitingType, setRateLimitingType] = React.useState('service');
-  const [restrictions, setRestrictions] = React.useState([]);
-  const [rateLimits, setRateLimits] = React.useState([]);
   const { data, isLoading } = useApi(
     'consumerControls',
     { query },
     { suspense: false }
   );
+
+  // Map the options for each of the route/service dropdowns
   const ipRestrictionOptions = React.useMemo(() => {
     if (data?.allGatewayServicesByNamespace) {
       if (restrictionType === 'route') {
@@ -58,7 +77,7 @@ const Controls: React.FC = () => {
     }
     return [];
   }, [data, rateLimitingType]);
-  // Look up a service or route based on the
+  // Look up a service or route based on the control. Returns a name
   const getControlName = (control): string => {
     if (control.name === 'rate-limiting') {
       if (control.config.service) {
@@ -91,14 +110,14 @@ const Controls: React.FC = () => {
     event.preventDefault();
     if (event.currentTarget.checkValidity()) {
       const formData = new FormData(event.currentTarget);
-      const entries = Object.fromEntries(formData);
+      const entries = Object.fromEntries(formData) as RateLimitingConfig;
       const payload: RateLimitingPayload = {
         name: 'rate-limiting',
         protocols: ['http', 'https'],
         config: entries,
         tags: [],
       };
-      setRateLimits((state) => [...state, payload]);
+      onUpdateRateLimits(payload);
       event.currentTarget.reset();
     }
   };
@@ -106,8 +125,9 @@ const Controls: React.FC = () => {
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-    if (event.currentTarget.checkValidity()) {
-      const formData = new FormData(event.currentTarget);
+    const formData = new FormData(event.currentTarget);
+
+    if (event.currentTarget.checkValidity() && formData.get('allow') !== '[]') {
       const entries = Object.fromEntries(formData);
       const payload: IpRestrictionPayload = {
         name: 'ip-restriction',
@@ -125,8 +145,13 @@ const Controls: React.FC = () => {
           id: entries.service as string,
         };
       }
-      setRestrictions((state) => [...state, payload]);
+      onUpdateRestrictions(payload);
       event.currentTarget.reset();
+    } else {
+      toast({
+        status: 'error',
+        title: 'Missing allowed IP address entries',
+      });
     }
   };
 
@@ -186,8 +211,13 @@ const Controls: React.FC = () => {
             </form>
             <GridItem>
               <Heading size="sm" fontWeight="normal" mb={3}>
-                Applied Controls
+                Controls
               </Heading>
+              {restrictions.length === 0 && (
+                <Text fontStyle="italic" color="bc-component">
+                  There are no controls applied yet
+                </Text>
+              )}
               <UnorderedList>
                 {restrictions.map((r) => (
                   <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
@@ -260,8 +290,13 @@ const Controls: React.FC = () => {
             </form>
             <GridItem>
               <Heading size="sm" fontWeight="normal" mb={3}>
-                Applied Controls
+                Controls
               </Heading>
+              {rateLimits.length === 0 && (
+                <Text fontStyle="italic" color="bc-component">
+                  There are no controls applied yet
+                </Text>
+              )}
               <UnorderedList>
                 {rateLimits.map((r) => (
                   <ListItem key={uid(r)}>{getControlName(r)}</ListItem>

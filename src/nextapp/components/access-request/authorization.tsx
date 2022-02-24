@@ -5,20 +5,46 @@ import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 
-const Authorization: React.FC = () => {
+interface AuthorizationProps {
+  id: string;
+}
+
+const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
   const { data, isSuccess } = useApi(
-    'requestRolesAndScopes',
+    ['GetAccessRequestAuth', id],
     {
       query,
       variables: {
-        prodEnvId: 1,
-        consumerUsername: 2,
+        id,
       },
     },
     {
       suspense: false,
     }
   );
+  const scopes: string[] = React.useMemo(() => {
+    if (isSuccess) {
+      try {
+        return JSON.parse(
+          data?.AccessRequest.productEnvironment.credentialIssuer
+            ?.availableScopes
+        );
+      } catch {
+        return [];
+      }
+    }
+  }, [data, isSuccess]);
+  const roles: string[] = React.useMemo(() => {
+    if (isSuccess) {
+      try {
+        return JSON.parse(
+          data?.AccessRequest.productEnvironment.credentialIssuer?.clientRoles
+        );
+      } catch {
+        return [];
+      }
+    }
+  }, [data, isSuccess]);
 
   return (
     <Box>
@@ -49,14 +75,14 @@ const Authorization: React.FC = () => {
         {isSuccess && (
           <>
             <VStack align="flex-start" spacing={3}>
-              {data.consumerScopesAndRoles?.defaultScopes.map((s, index) => (
+              {scopes?.map((s, index) => (
                 <Checkbox key={uid(s, index)} value={s}>
                   {s}
                 </Checkbox>
               ))}
             </VStack>
             <VStack align="flex-start" spacing={3}>
-              {data.consumerScopesAndRoles?.clientRoles.map((r, index) => (
+              {roles?.map((r, index) => (
                 <Checkbox key={uid(r, index)} value={r}>
                   {r}
                 </Checkbox>
@@ -72,13 +98,15 @@ const Authorization: React.FC = () => {
 export default Authorization;
 
 const query = gql`
-  query RequestRolesAndScopes($prodEnvId: ID!, $consumerUsername: ID!) {
-    consumerScopesAndRoles(
-      prodEnvId: $prodEnvId
-      consumerUsername: $consumerUsername
-    ) {
-      defaultScopes
-      clientRoles
+  query GetAccessRequestAuth($id: ID!) {
+    AccessRequest(where: { id: $id }) {
+      controls
+      productEnvironment {
+        credentialIssuer {
+          availableScopes
+          clientRoles
+        }
+      }
     }
   }
 `;
