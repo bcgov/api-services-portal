@@ -87,6 +87,7 @@ const query = gql`
     myServiceAccesses {
       id
       name
+      active
       application {
         name
       }
