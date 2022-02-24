@@ -3,6 +3,7 @@
     myServiceAccesses {
       id
       name
+      active
       application {
         name
       }
