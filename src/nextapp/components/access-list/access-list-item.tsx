@@ -99,9 +99,9 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           <Tr key={uid(d.id)}>
             <Td>
               <AccessStatus
-                isIssued={d.isIssued}
-                isComplete={d.isComplete}
-                isApproved={d.isApproved}
+                isIssued={d.isIssued ?? d.active === false}
+                isComplete={d.isComplete ?? d.active === false}
+                isApproved={d.isApproved ?? d.active}
               />
             </Td>
             <Td>

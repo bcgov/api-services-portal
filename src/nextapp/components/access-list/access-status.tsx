@@ -27,14 +27,14 @@ const AccessStatus: React.FC<AccessStatusProps> = ({
       color = 'bc-success';
       icon = FaCheckCircle;
       text = 'Approved';
-    } else if (isIssued && !isComplete && !isApproved) {
-      color = 'bc-error';
-      icon = FaTimesCircle;
-      text = 'Rejected';
     } else if (isIssued && isComplete && !isApproved) {
       color = 'bc-yellow';
       icon = FaClock;
       text = 'Pending Approval';
+    } else if (isIssued && !isComplete && !isApproved) {
+      color = 'bc-error';
+      icon = FaTimesCircle;
+      text = 'Rejected';
     }
 
     return {
