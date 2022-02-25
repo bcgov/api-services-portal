@@ -10,6 +10,7 @@ import {
   ModalOverlay,
   useDisclosure,
 } from '@chakra-ui/react';
+import { useQueryClient } from 'react-query';
 
 import AccessRequestCredentials from './access-request-credentials';
 import { FaKey } from 'react-icons/fa';
@@ -23,7 +24,13 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
   id,
   open,
 }) => {
+  const client = useQueryClient();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleClose = React.useCallback(() => {
+    client.invalidateQueries('allServiceAccesses');
+    onClose();
+  }, [client, onClose]);
 
   return (
     <>
@@ -38,7 +45,7 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
       </Button>
       <Modal
         isOpen={open || isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         scrollBehavior="inside"
         size="xl"
       >
@@ -50,7 +57,7 @@ const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <Button
-              onClick={onClose}
+              onClick={handleClose}
               data-testid="generate-credentials-done-button"
             >
               Done
