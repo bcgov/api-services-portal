@@ -19,6 +19,7 @@ while true; do
         curl http://feeder.localtest.me:6000/push -F yaml=@product-initializer.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@cc-dataset-gwa.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@cc-product-initializer.yaml
+        curl http://feeder.localtest.me:6000/push -F yaml=@permission-dataset-gwa.yaml
         break
 
     else

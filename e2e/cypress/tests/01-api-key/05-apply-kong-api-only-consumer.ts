@@ -53,4 +53,32 @@ describe('Apply Kong API key only plugin', () => {
   })
 })
 
+describe('Check the API key for free and elevated access', () => {
+
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('state/store').as('store')
+  })
+
+  it('Verify the service is accessibale with API key for free access', () => {
+    cy.get('@apiowner').then(async ({ product }: any) => {
+      cy.fixture('state/store').then((creds: any) => {
+        const key = creds.consumerKey
+        cy.makeKongRequest(product.environment.config.serviceName, 'GET', key).then((response) => {
+          expect(response.status).to.be.equal(200)
+        })
+      })
+    })
+  })
+
+  it('Verify the service is accessible with API key for elevated access', () => {
+    cy.get('@apiowner').then(async ({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
+  })
+})
+
 

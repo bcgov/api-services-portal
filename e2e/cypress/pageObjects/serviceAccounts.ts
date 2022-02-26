@@ -12,6 +12,11 @@ class ServiceAccountsPage {
     cy.get(this.shareBtn).click()
   }
 
+checkServiceAccountNotExist() : void
+  {
+    cy.get(this.newServiceAccountBtn).should('not.exist')
+  }
+
   saveServiceAcctCreds(): void {
     cy.get(this.clientId).then(($clientId) => {
       cy.get(this.clientSecret).then(($clientSecret) => {
