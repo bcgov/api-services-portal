@@ -76,14 +76,24 @@ const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
           <>
             <VStack align="flex-start" spacing={3}>
               {scopes?.map((s, index) => (
-                <Checkbox key={uid(s, index)} value={s}>
+                <Checkbox
+                  key={uid(s, index)}
+                  name="defaultClientScopes"
+                  value={s}
+                  data-testid={`client-scope-${s}`}
+                >
                   {s}
                 </Checkbox>
               ))}
             </VStack>
             <VStack align="flex-start" spacing={3}>
               {roles?.map((r, index) => (
-                <Checkbox key={uid(r, index)} value={r}>
+                <Checkbox
+                  key={uid(r, index)}
+                  name="roles"
+                  value={r}
+                  data-testid={`client-role-${r}`}
+                >
                   {r}
                 </Checkbox>
               ))}

@@ -30,7 +30,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
         boxShadow="md"
       >
         <Icon as={FaExclamationCircle} boxSize="8" color="bc-yellow" />
-        <Box flex={1} mx={4}>
+        <Box flex={1} mx={4} data-testid="ar-request-description">
           <Text>
             <Text as="strong">{data.requestor?.name}</Text> has requested access
             to <Text as="strong">{data.application?.name}</Text>
@@ -43,6 +43,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
           leftIcon={<Icon as={FaExclamationCircle} />}
           variant="secondary"
           onClick={onOpen}
+          data-testid="ar-review-btn"
         >
           Review
         </Button>

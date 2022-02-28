@@ -20,6 +20,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ data }) => {
           content: '":"',
         },
       }}
+      data-testid="ar-request-details"
     >
       <GridItem as="dt">Environment</GridItem>
       <GridItem as="dd">

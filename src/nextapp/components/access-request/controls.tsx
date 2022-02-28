@@ -158,7 +158,11 @@ const Controls: React.FC<ControlsProps> = ({
   return (
     <Box>
       <ExpandableCards>
-        <ExpandableCard heading="IP Restrictions" icon={FaDoorClosed}>
+        <ExpandableCard
+          heading="IP Restrictions"
+          icon={FaDoorClosed}
+          data-testid="ratelimit-card"
+        >
           <Grid templateColumns="1fr 1fr" gap={9}>
             <form
               onSubmit={handleIpRestrictionSubmit}
@@ -172,8 +176,15 @@ const Controls: React.FC<ControlsProps> = ({
                   value={restrictionType}
                 >
                   <HStack spacing={4}>
-                    <Radio value="service">Service</Radio>
-                    <Radio value="route">Route</Radio>
+                    <Radio
+                      value="service"
+                      data-testid="iprestrction-service-radio"
+                    >
+                      Service
+                    </Radio>
+                    <Radio value="route" data-testid="iprestrction-route-radio">
+                      Route
+                    </Radio>
                   </HStack>
                 </RadioGroup>
               </FormControl>
@@ -203,10 +214,16 @@ const Controls: React.FC<ControlsProps> = ({
                 </FormControl>
               </Box>
               <ButtonGroup mt={9}>
-                <Button type="reset" variant="secondary">
+                <Button
+                  type="reset"
+                  variant="secondary"
+                  data-testid="iprestrction-clear-btn"
+                >
                   Clear
                 </Button>
-                <Button type="submit">Apply</Button>
+                <Button type="submit" data-testid="iprestrction-submit-btn">
+                  Apply
+                </Button>
               </ButtonGroup>
             </form>
             <GridItem>
@@ -218,7 +235,7 @@ const Controls: React.FC<ControlsProps> = ({
                   There are no controls applied yet
                 </Text>
               )}
-              <UnorderedList>
+              <UnorderedList data-testid="iprestrction-results">
                 {restrictions.map((r) => (
                   <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
                 ))}
@@ -226,7 +243,11 @@ const Controls: React.FC<ControlsProps> = ({
             </GridItem>
           </Grid>
         </ExpandableCard>
-        <ExpandableCard heading="Rate Limiting" icon={HiChartBar}>
+        <ExpandableCard
+          heading="Rate Limiting"
+          icon={HiChartBar}
+          data-testid="ratelimit-card"
+        >
           <Grid templateColumns="1fr 1fr" gap={9}>
             <form onSubmit={handleRateLimitingSubmit} name="rateLimitingForm">
               <FormControl mb={5}>
@@ -237,8 +258,15 @@ const Controls: React.FC<ControlsProps> = ({
                   value={rateLimitingType}
                 >
                   <HStack spacing={4}>
-                    <Radio value="service">Service</Radio>
-                    <Radio value="route">Route</Radio>
+                    <Radio
+                      value="service"
+                      data-testid="ratelimit-service-radio"
+                    >
+                      Service
+                    </Radio>
+                    <Radio value="route" data-testid="ratelimit-route-radio">
+                      Route
+                    </Radio>
                   </HStack>
                 </RadioGroup>
               </FormControl>
@@ -282,10 +310,16 @@ const Controls: React.FC<ControlsProps> = ({
                 </FormControl>
               </Box>
               <ButtonGroup mt={9}>
-                <Button type="reset" variant="secondary">
+                <Button
+                  type="reset"
+                  variant="secondary"
+                  data-testid="ratelimit-clear-btn"
+                >
                   Clear
                 </Button>
-                <Button type="submit">Apply</Button>
+                <Button type="submit" data-testid="ratelimit-submit-btn">
+                  Apply
+                </Button>
               </ButtonGroup>
             </form>
             <GridItem>
@@ -297,7 +331,7 @@ const Controls: React.FC<ControlsProps> = ({
                   There are no controls applied yet
                 </Text>
               )}
-              <UnorderedList>
+              <UnorderedList data-testid="ratelimit-results">
                 {rateLimits.map((r) => (
                   <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
                 ))}

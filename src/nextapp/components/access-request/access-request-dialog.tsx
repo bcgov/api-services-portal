@@ -80,10 +80,16 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     onClose();
     setTabIndex(0);
     try {
+      const formEl = document.forms['authorizationForm'];
+      const formData = new FormData(formEl);
+      const defaultClientScopes = formData.getAll('defaultClientScopes');
+      const roles = formData.getAll('roles');
       await approveMutate.mutateAsync({
         id: data.id,
         controls: JSON.stringify({
           plugins: [...restrictions, ...rateLimits],
+          defaultClientScopes,
+          roles,
         }),
       });
       client.invalidateQueries(['allConsumers']);
@@ -121,14 +127,12 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             pos="relative"
             onChange={handleTabChange}
           >
-            <TabList mb={5}>
-              <Tab px={0} cursor="pointer">
-                Request Details
-              </Tab>
-              <Tab px={0} ml={4} cursor="pointer">
+            <TabList mb={5} data-testid="ar-tabs">
+              <Tab px={0}>Request Details</Tab>
+              <Tab px={0} ml={4}>
                 Controls
               </Tab>
-              <Tab px={0} ml={4} cursor="pointer">
+              <Tab px={0} ml={4}>
                 Authorization
               </Tab>
             </TabList>
@@ -162,10 +166,20 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button variant="solid" colorScheme="green" onClick={handleAccept}>
+            <Button
+              variant="solid"
+              colorScheme="green"
+              onClick={handleAccept}
+              data-testid="ar-approve-btn"
+            >
               Accept
             </Button>
-            <Button variant="solid" colorScheme="red" onClick={handleReject}>
+            <Button
+              variant="solid"
+              colorScheme="red"
+              onClick={handleReject}
+              data-testid="ar-reject-btn"
+            >
               Reject
             </Button>
           </ButtonGroup>

@@ -20,7 +20,7 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ id }) => {
     compact([address.postal, address.country]).join(' '),
   ].join(', ');
   return (
-    <Text as="span">
+    <Text as="span" data-testid="ar-business-address">
       {legalName} - {text}
     </Text>
   );
