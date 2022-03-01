@@ -1,8 +1,8 @@
-import ApiDirectoryPage from '../pageObjects/apiDirectory'
-import ConsumersPage from '../pageObjects/consumers'
-import LoginPage from '../pageObjects/login'
-import ApplicationPage from '../pageObjects/applications'
-import HomePage from '../pageObjects/home'
+import ApiDirectoryPage from '../../pageObjects/apiDirectory'
+import ConsumersPage from '../../pageObjects/consumers'
+import LoginPage from '../../pageObjects/login'
+import ApplicationPage from '../../pageObjects/applications'
+import HomePage from '../../pageObjects/home'
 
 describe('Approve Pending Request Spec', () => {
   const login = new LoginPage()

@@ -1,6 +1,6 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import NamespaceAccessPage from '../pageObjects/namespaceAccess'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
 describe('Team Access Spec', () => {
   const login = new LoginPage()

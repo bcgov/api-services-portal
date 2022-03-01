@@ -72,11 +72,15 @@ export default class ConsumersPage {
     })
   }
 
-  checkApproveAccess() {
+  isApproveAccessEnabled(expStatus : boolean) {
+    var actStatus = false
     cy.get('body', { log: false }).then(($body) => {
-      if ($body.find(this.pendingRequestTable).length > 0) {
-        throw "Mark can Approve the pending request even if 'Access.Manager' role is revoked"
-      }
+      cy.wait(1000)
+      if ($body.find(this.pendingRequestTable).length > 0)
+        actStatus = true
+      else
+        actStatus = false
+      assert.strictEqual (actStatus,expStatus,"Approve Request option staus is other than expected status")
     })
   }
-};
+}

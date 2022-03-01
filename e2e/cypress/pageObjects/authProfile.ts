@@ -23,7 +23,7 @@ class AuthorizationProfile {
   envAddBtn: string = '[data-testid="ap-env-add-btn"]'
   createBtn: string = '[data-testid="ap-create-btn"]'
 
-  createAuthProfile(authProfile: any, isCreated='true') {
+  createAuthProfile(authProfile: any, isCreated=true) {
     cy.get(this.newProfileBtn).click()
     cy.get(this.nameField).click().type(authProfile.name)
 
@@ -99,7 +99,7 @@ class AuthorizationProfile {
 
     cy.get(this.createBtn).click()
     cy.wait(2000)
-    if (isCreated === 'true')
+    if (isCreated === true)
       cy.get(this.profileTable).contains(authProfile.name).should('exist')
     else
       cy.get(this.profileTable).should('not.exist')

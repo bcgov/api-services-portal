@@ -137,6 +137,10 @@
         "userName" :"mark",
         "accessRole" :["Namespace.View"]
       },
+      "Mark_AM":{
+        "userName" :"mark",
+        "accessRole" :["Access.Manage"]
+      },
       "Wendy":{
         "userName" :"wendy",
         "accessRole" :["Namespace.Manage"]

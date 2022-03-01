@@ -1,7 +1,7 @@
-import ApiDirectoryPage from '../pageObjects/apiDirectory'
-import ApplicationPage from '../pageObjects/applications'
-import LoginPage from '../pageObjects/login'
-import MyAccessPage from '../pageObjects/myAccess'
+import ApiDirectoryPage from '../../pageObjects/apiDirectory'
+import ApplicationPage from '../../pageObjects/applications'
+import LoginPage from '../../pageObjects/login'
+import MyAccessPage from '../../pageObjects/myAccess'
 
 describe('Request Access Spec', () => {
   const login = new LoginPage()

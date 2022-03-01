@@ -1,7 +1,7 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import Products from '../pageObjects/products'
-import ServiceAccountsPage from '../pageObjects/serviceAccounts'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import Products from '../../pageObjects/products'
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
 describe('Create API Spec', () => {
   const login = new LoginPage()

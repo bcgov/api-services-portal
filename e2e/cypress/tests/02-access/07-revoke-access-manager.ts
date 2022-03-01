@@ -1,12 +1,11 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import NameSpacePage from '../../pageObjects/namespace'
 import MyProfilePage from '../../pageObjects/myProfile'
-import ToolBar from '../../pageObjects/toolbar'
-import AuthorizationProfile from '../../pageObjects/authProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import ConsumersPage from '../../pageObjects/consumers'
 
-describe('Revoke Credential Issuer Role', () => {
+
+describe('Revoke Credential Issuer Role to Mark', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -31,12 +30,12 @@ describe('Revoke Credential Issuer Role', () => {
     })
   })
 
-  it('revoke "CredentialIssuer.Admin" access and only assign "Namespace.Manage" permission to Wendy', () => {
+  it('revoke "Access.Manage" access and only assign "Namespace.View" permission to Mark', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Wendy)
-      na.revokePermission(checkPermission.revokePermission.Wendy_ci)
+      na.grantPermission(checkPermission.grantPermission.Mark)
+      na.revokePermission(checkPermission.revokePermission.Mark_AM)
     })
   })
 
@@ -47,14 +46,13 @@ describe('Revoke Credential Issuer Role', () => {
   })
 })
 
-describe('Verify that Wendy is unable to create authorization profile', () => {
+describe('Verify that Mark is unable to approve pending request', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const ns = new NameSpacePage()
   const mp = new MyProfilePage()
-  const tb = new ToolBar()
-  const authProfile = new AuthorizationProfile()
+  const consumers = new ConsumersPage()
+  const na = new NamespaceAccessPage()
 
   before(() => {
     cy.visit('/')
@@ -65,11 +63,11 @@ describe('Verify that Wendy is unable to create authorization profile', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
-    cy.fixture('apiowner').as('apiowner')
+    cy.fixture('access-manager').as('access-manager')
   })
 
-  it('authenticates Wendy (Credential-Issuer)', () => {
-    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
+  it('authenticates Mark', () => {
+    cy.get('@access-manager').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -78,24 +76,16 @@ describe('Verify that Wendy is unable to create authorization profile', () => {
     })
   })
 
-  it('Verify that only "Namespace.Manage" permission is displayed in the profile', () => {
-    mp.checkScopeOfProfile("Namespace.Manage")
+  it('Verify that only "Namespace.View" permission is displayed in the profile', () => {
+    mp.checkScopeOfProfile("Namespace.View")
   })
 
-  it('Verify that authorization profile for Client ID/Secret is not generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.authProfile
-      authProfile.createAuthProfile(ap,false)
-    })
+  it('Navigate to Consumer Page to see the Approve Request option', ()=> {
+    cy.visit(consumers.path)
   })
 
-  it('Verify that authorization profile for Kong API key is not generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ kongAPI }: any) => {
-      let ap = kongAPI.authProfile
-      authProfile.createAuthProfile(ap,false)
-    })
+  it('Verify that the option to approve request is not displayed', ()=> {
+      consumers.isApproveAccessEnabled(false)
   })
 
   after(() => {
