@@ -104,7 +104,54 @@
       }
     }
   },
-  "permission": {
+  "checkPermission": {
+    "namespace": "permission",
+    "product": {
+      "name": "New-Auto Test Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-platform"
+        }
+      }
+    },
+    "grantPermission": {
+      "Mark":{
+        "userName" :"mark",
+        "accessRole" :["Access.Manage","Namespace.View"]
+      },
+      "Wendy":{
+        "userName" :"wendy",
+        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
+      },
+      "Janis":{
+        "userName" :"janis@idir",
+        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
+      }  
+    },
+    "revokePermission": {
+      "Mark":{
+        "userName" :"mark",
+        "accessRole" :["Namespace.View"]
+      },
+      "Mark_AM":{
+        "userName" :"mark",
+        "accessRole" :["Access.Manage"]
+      },
+      "Wendy":{
+        "userName" :"wendy",
+        "accessRole" :["Namespace.Manage"]
+      },
+      "Wendy_ci":{
+        "userName" :"wendy",
+        "accessRole" :["CredentialIssuer.Admin"]
+      }  
+    }
+  },
+  "grantPermission": {
     "Mark":{
       "userName" :"mark",
       "accessRole" :["Access.Manage","Namespace.View"]

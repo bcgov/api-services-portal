@@ -18,7 +18,19 @@ class NamespaceAccessPage {
     })   
     cy.contains("Share").click()
   }
-    
+  
+  revokePermission(revokePermission : any) {
+    cy.contains(revokePermission.userName).parents('tr').find('td:nth-child(2)').find('span').each(($e1, index, $list) => {
+
+      const text=$e1.text()
+      if(text.includes(revokePermission.accessRole))
+      {
+        cy.wrap($e1).find('button').click()
+      }
+    })
+    cy.wait(1000)
+  }
+
   path: string = '/manager/namespace-access'
 
   clickGrantUserAccessButton() {

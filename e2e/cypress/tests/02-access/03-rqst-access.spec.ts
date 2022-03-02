@@ -1,7 +1,7 @@
-import ApiDirectoryPage from '../pageObjects/apiDirectory'
-import ApplicationPage from '../pageObjects/applications'
-import LoginPage from '../pageObjects/login'
-import MyAccessPage from '../pageObjects/myAccess'
+import ApiDirectoryPage from '../../pageObjects/apiDirectory'
+import ApplicationPage from '../../pageObjects/applications'
+import LoginPage from '../../pageObjects/login'
+import MyAccessPage from '../../pageObjects/myAccess'
 
 describe('Request Access Spec', () => {
   const login = new LoginPage()
@@ -29,18 +29,17 @@ describe('Request Access Spec', () => {
 
   it('creates an application', () => {
     cy.visit(app.path)
-    cy.get('@developer').then(({ application }: any) => {
-      app.createApplication(application)
+    cy.get('@developer').then(({ checkPermission }: any) => {
+      app.createApplication(checkPermission.application)
     })
   })
 
   it('creates an access request', () => {
     cy.visit(apiDir.path)
-    cy.get('@developer').then(({ product, application, accessRequest }: any) => {
-      apiDir.createAccessRequest(product, application, accessRequest)
+    cy.get('@developer').then(({ checkPermission, accessRequest }: any) => {
+      apiDir.createAccessRequest(checkPermission.product, checkPermission.application, accessRequest)
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
-      myAccessPage.saveAPIKeyValue()
     })
   })
 
