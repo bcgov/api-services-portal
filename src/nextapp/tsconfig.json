@@ -2,11 +2,24 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/shared/*": ["shared/*"],
-      "@/layouts/*": ["layouts/*"],
-      "@/types/*": ["shared/types/*"],
-      "@/*": ["./*"]
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/pages/*": [
+        "pages/*"
+      ],
+      "@/shared/*": [
+        "shared/*"
+      ],
+      "@/layouts/*": [
+        "layouts/*"
+      ],
+      "@/types/*": [
+        "shared/types/*"
+      ],
+      "@/*": [
+        "./*"
+      ]
     },
     "target": "ES2017",
     "lib": [
