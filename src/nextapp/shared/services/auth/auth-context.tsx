@@ -7,7 +7,11 @@ import querystring from 'querystring';
 
 import { useSession, UserSessionResult } from './use-session';
 
-const authContext = React.createContext<UserSessionResult>({});
+const authContext = React.createContext<UserSessionResult>({
+  ok: false,
+  maintenance: false,
+  status: 'idle',
+});
 
 interface AuthProviderProps {
   children: React.ReactNode;
