@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
   useMutation,
+  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -96,10 +97,14 @@ export const useApi = (
   );
 };
 
-export const useApiMutation = <T>(mutation: string): UseMutationResult => {
+export const useApiMutation = <T>(
+  mutation: string,
+  options = {}
+): UseMutationResult => {
   const mutate = useMutation(
     async (variables: T) =>
-      await api<Query>(mutation, variables, { ssr: false })
+      await api<Query>(mutation, variables, { ssr: false }),
+    options
   );
   return mutate;
 };

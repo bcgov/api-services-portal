@@ -9,6 +9,7 @@ import {
   Icon,
   TableColumnHeaderProps,
   Box,
+  TableProps,
 } from '@chakra-ui/react';
 import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
 import sortBy from 'lodash/sortBy';
@@ -19,8 +20,8 @@ interface Column extends TableColumnHeaderProps {
   key?: string;
 }
 
-interface ApsTableProps {
-  children: (d: unknown, index: number) => React.ReactNode;
+interface ApsTableProps extends TableProps {
+  children: (d: unknown, index: number) => React.ReactElement;
   columns: Column[];
   data: unknown[];
   emptyView?: React.ReactNode;
@@ -33,10 +34,19 @@ const ApsTable: React.FC<ApsTableProps> = ({
   data,
   emptyView,
   sortable,
+  ...props
 }) => {
-  const [sortKey, setSortKey] = React.useState<string>(columns[0]?.key ?? '');
+  const [sortKey, setSortKey] = React.useState<string>(() => {
+    if (sortable) {
+      return columns[0]?.key;
+    }
+    return '';
+  });
   const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
   const sorted = React.useMemo(() => {
+    if (!sortKey) {
+      return data;
+    }
     const sortedAsc = sortBy(data, sortKey);
 
     if (sortDir === 'desc') {
@@ -56,7 +66,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
   );
 
   return (
-    <Table>
+    <Table {...props}>
       <Thead>
         <Tr>
           {columns.map(({ key, name, ...rest }) => (
@@ -114,10 +124,16 @@ const ApsTable: React.FC<ApsTableProps> = ({
       <Tbody>
         {!data.length && (
           <Tr>
-            <Td colSpan={columns.length}>{emptyView}</Td>
+            <Td colSpan={columns.length} textAlign="center">
+              {emptyView}
+            </Td>
           </Tr>
         )}
-        {sorted.map((d, index) => children(d, index))}
+        {sorted.map((d, index) =>
+          React.cloneElement(children(d, index), {
+            key: uid(d),
+          })
+        )}
       </Tbody>
     </Table>
   );

@@ -10,7 +10,7 @@ import {
 
 interface CardProps extends BoxProps {
   actions?: React.ReactNode;
-  children: React.ReactNode;
+  children: JSX.Element | JSX.Element[];
   heading?: React.ReactNode;
 }
 
@@ -21,6 +21,11 @@ const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   const styles = useStyleConfig('Box');
+  const hasTable = React.Children.toArray(children).some(
+    (c: JSX.Element) => c.type?.displayName === 'Table'
+  );
+  const borderBottom = hasTable ? 'none' : '2px solid';
+  const paddingBottom = hasTable ? 4 : 9;
 
   return (
     <Box bgColor="white" sx={styles} {...props}>
@@ -28,10 +33,10 @@ const Card: React.FC<CardProps> = ({
         <Flex
           px={9}
           pt={9}
-          pb={9}
+          pb={paddingBottom}
           alignItems="center"
           justifyContent="space-between"
-          borderBottom="2px solid"
+          borderBottom={borderBottom}
           borderColor="bc-yellow"
         >
           <Heading size="sm">{heading}</Heading>

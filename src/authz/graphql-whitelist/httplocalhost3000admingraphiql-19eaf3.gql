@@ -1,0 +1,6 @@
+
+  mutation DeleteCredentialIssuer($id: ID!) {
+    deleteCredentialIssuer(id: $id) {
+      name
+    }
+  }
