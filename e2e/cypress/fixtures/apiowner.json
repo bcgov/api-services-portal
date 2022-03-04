@@ -148,7 +148,10 @@
       "Wendy_ci":{
         "userName" :"wendy",
         "accessRole" :["CredentialIssuer.Admin"]
-      }  
+      },
+      "serviceAccount": {
+        "scopes": ["Namespace.Manage", "Content.Publish"]  
+      }
     }
   },
   "grantPermission": {
