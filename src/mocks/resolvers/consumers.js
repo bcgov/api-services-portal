@@ -30,7 +30,7 @@ const consumers = {
         aclGroups: JSON.stringify([]),
       },
       application: {
-        id: 'a2',
+        appId: 'a2',
       },
     },
     // This ID will throw a delete failure
@@ -44,13 +44,27 @@ const consumers = {
         aclGroups: JSON.stringify([]),
       },
       application: {
-        id: 'a1',
+        appId: 'a1',
       },
     },
   ],
   allAccessRequestsByNamespace: [
     {
       id: '123',
+      name: '',
+      additionalDetails:
+        'Access to this API requires a BCeID. Your request will be rejected if you did not log into the Portal with a valid Business BCeID. To continue, please provide your contact phone number below.',
+      communication: 'Phone Number 204-896-6325 &  204-896-7700. ',
+      createdAt: subDays(today, 6).toISOString(),
+      requestor: {
+        name: 'Harley Jones',
+      },
+      application: {
+        name: 'Easy Mart Store 122',
+      },
+      productEnvironment: {
+        name: 'dev',
+      },
     },
   ],
 };
@@ -120,4 +134,45 @@ export const grantConsumerHandler = (req, res, ctx) => {
   }
 
   return res(ctx.data({}));
+};
+
+export const accessRequestAuthHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      AccessRequest: {
+        controls: '',
+        productEnvironment: {
+          credentialIssuer: {
+            availableScopes: JSON.stringify([
+              'System/Patient',
+              'System/MedicationRequest',
+              'System/CheeseSlicesChalkCheesy',
+            ]),
+            clientRoles: JSON.stringify(['a.role', 'b.role', 'c.role']),
+          },
+        },
+      },
+    })
+  );
+};
+
+export const gatewayServicesHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allGatewayServicesByNamespace: [
+        {
+          id: '1',
+          name: 'name',
+          extForeignKey: '1231',
+          routes: [
+            {
+              id: 'r1',
+              name: 'route',
+              extForeignKey: '12',
+            },
+          ],
+        },
+      ],
+    })
+  );
 };
