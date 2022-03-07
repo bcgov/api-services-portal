@@ -1,0 +1,11 @@
+entity: Dataset
+record:
+  id: "B234567890000000"
+  name: "client-credentials-test-product"
+  title: "Client Credentials Test Product"
+  notes: "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them."
+  tags: [ 'gateway', 'kong', 'openapi' ]
+  sector: "Service"
+  license_title: "Access Only"
+  view_audience: "Government"
+  security_class: "LOW-PUBLIC"

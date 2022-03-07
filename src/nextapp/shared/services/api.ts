@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
   useMutation,
+  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -47,7 +48,7 @@ const api = async <T extends ApiResponse>(
     ...options,
   };
   const targetUrl = settings.ssr ? apiInternalHost : apiHost;
-  console.log('[GRAPHQL] TARGET = ' + targetUrl);
+  // console.log('[GRAPHQL] TARGET = ' + targetUrl);
 
   const apiClient = new GraphQLClient(`${targetUrl}/gql/api`, {
     headers: {
@@ -69,7 +70,7 @@ const api = async <T extends ApiResponse>(
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
     } else {
-      throw err.response.errors;
+      throw err;
     }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
@@ -96,10 +97,14 @@ export const useApi = (
   );
 };
 
-export const useApiMutation = <T>(mutation: string): UseMutationResult => {
+export const useApiMutation = <T>(
+  mutation: string,
+  options = {}
+): UseMutationResult => {
   const mutate = useMutation(
     async (variables: T) =>
-      await api<Query>(mutation, variables, { ssr: false })
+      await api<Query>(mutation, variables, { ssr: false }),
+    options
   );
   return mutate;
 };
@@ -128,7 +133,7 @@ export async function restApi(
       ...options,
     };
     const targetUrl = config.ssr ? apiInternalHost : apiHost;
-    console.log('[REST] TARGET = ' + targetUrl + url);
+    // console.log('[REST] TARGET = ' + targetUrl + url);
 
     const response = await fetch(targetUrl + url, config);
     const contentType = response.headers.get('Content-Type');

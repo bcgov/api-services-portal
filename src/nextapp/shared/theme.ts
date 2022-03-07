@@ -147,7 +147,15 @@ const buttonVariants = {
   flat: {
     color: 'bc-blue',
     _hover: {
-      bgColor: 'bc-gray',
+      boxShadow: 'none',
+      color: 'bc-link',
+      opacity: 1,
+    },
+    _active: {
+      boxShadow: 'none',
+    },
+    _focus: {
+      boxShadow: 'none',
     },
   },
   ghost: {
@@ -246,6 +254,11 @@ const theme = extendTheme(
         },
       },
       Radio: {
+        baseStyle: {
+          control: {
+            cursor: 'pointer',
+          },
+        },
         defaultProps: {
           size: 'lg',
           colorScheme: 'primary',
@@ -303,7 +316,7 @@ const theme = extendTheme(
           '& > span': {
             display: 'none',
           },
-          '& + div.chakra-form__helper-text': {
+          '& + div:not(.chakra-select__wrapper)': {
             mb: 2,
             mt: -2,
             color: 'bc-component',

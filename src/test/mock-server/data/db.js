@@ -16,9 +16,9 @@ class MockDatabase {
     this.db.set('user', {
       id: casual.uuid,
       userId: casual.uuid,
-      name: 'Viktor Vaughn',
-      username: 'vikvaughn',
-      email: 'villain@doom.net',
+      name: 'Nathaniel Merriweather',
+      username: 'nmerriweather',
+      email: 'nmerriweather@hbms.com',
       roles: [role, 'portal-user'],
       isAdmin: false,
       namespace,

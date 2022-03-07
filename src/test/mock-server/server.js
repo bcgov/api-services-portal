@@ -217,6 +217,12 @@ const server = mockServer(schemaWithMocks, {
         }),
       };
     },
+    deleteCredentialIssuer: (req) => {
+      return { name: 'issuer name profile' };
+    },
+    updateCredentialIssuer: (req) => {
+      return req.data;
+    },
   }),
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
@@ -364,7 +370,6 @@ const server = mockServer(schemaWithMocks, {
       resourceType: null,
       apiKeyName: 'keyname',
       ...credentialValues,
-      environments: () => JSON.stringify([]),
       environmentDetails:
         '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
     };

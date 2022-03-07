@@ -163,7 +163,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Service l
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
         consumers.deleteControl()
-        cy.updateKongPlugin('services','rate-limiting').then((response) => {
+        cy.updateKongPlugin('services','rateLimiting').then((response) => {
             expect(response.status).to.be.equal(201)
         })
     })
@@ -215,7 +215,7 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
         consumers.deleteControl()
-        cy.updateKongPlugin('routes','rate-limiting').then((response) => {
+        cy.updateKongPlugin('routes','rateLimiting').then((response) => {
             expect(response.status).to.be.equal(201)
         })
     })
@@ -253,5 +253,6 @@ describe('Manage Control-Apply Rate limiting to Global and Consumer at Route lev
         cy.logout()
         cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
+        cy.resetState()
     })
 })

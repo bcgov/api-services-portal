@@ -4,7 +4,6 @@ import AccessRequest from '@/components/access-request';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
-  Button,
   Container,
   Heading,
   Link,
@@ -80,7 +79,11 @@ const ConsumersPage: React.FC<
     { suspense: false }
   );
   const grantMutate = useApiMutation(grantMutation);
-  const deleteMutate = useApiMutation(deleteMutation);
+  const deleteMutate = useApiMutation(deleteMutation, {
+    onSuccess() {
+      client.invalidateQueries(queryKey);
+    },
+  });
   const accessRequests = React.useMemo(() => {
     if (!data?.allAccessRequestsByNamespace) {
       return [];
@@ -93,8 +96,8 @@ const ConsumersPage: React.FC<
     }
 
     const searchTerm = new RegExp(search, 'i');
-    const result = data?.allServiceAccessesByNamespace
-      .filter((d) => !!d.consumer)
+    const result = data.allServiceAccessesByNamespace
+      ?.filter((d) => !!d.consumer)
       .map((d) => {
         return d;
       });
@@ -127,7 +130,9 @@ const ConsumersPage: React.FC<
       } catch (err) {
         toast({
           title: 'Consumer delete failed',
-          description: err?.map((e) => e.message).join(', '),
+          description: Array.isArray(err)
+            ? err.map((e) => e.message).join(', ')
+            : '',
           status: 'error',
         });
       }
@@ -202,7 +207,11 @@ const ConsumersPage: React.FC<
               totalConsumers === 1 ? '' : 's'
             }`}</Heading>
             <Box>
-              <SearchInput onChange={handleSearchChange} value={search} />
+              <SearchInput
+                onChange={handleSearchChange}
+                value={search}
+                data-testid="consumer-search-input"
+              />
             </Box>
           </Box>
           <Table
@@ -248,13 +257,18 @@ const ConsumersPage: React.FC<
                 <Td width="25%">
                   <Flex align="center" justify="space-between">
                     {formatDistanceToNow(new Date(d.consumer.updatedAt))} ago
-                    <ActionsMenu>
-                      <MenuItem color="bc-link" onClick={handleGrant(d)}>
+                    <ActionsMenu data-testid={`consumer-${d.consumer.id}-menu`}>
+                      <MenuItem
+                        color="bc-link"
+                        onClick={handleGrant(d)}
+                        data-testid="consumer-grant-menuitem"
+                      >
                         Grant Access
                       </MenuItem>
                       <MenuItem
                         color="red"
                         onClick={handleDelete(d.consumer.id)}
+                        data-testid="consumer-delete-menuitem"
                       >
                         Delete Consumer
                       </MenuItem>

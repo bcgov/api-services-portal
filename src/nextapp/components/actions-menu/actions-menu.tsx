@@ -18,6 +18,7 @@ const ActionsMenu: React.FC<ActionsMenuProps> = ({ children, ...rest }) => {
         borderColor="transparent"
         color="bc-component"
         variant="ghost"
+        data-testid={rest['data-testid']}
         _hover={{ color: 'bc-blue', bgColor: '#00336505' }}
         _expanded={{ color: 'bc-blue', borderColor: 'none' }}
         _focus={{ boxShadow: 'none', bgColor: '#00336505' }}

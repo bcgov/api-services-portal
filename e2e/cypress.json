@@ -4,7 +4,7 @@
   "screenshotOnRunFailure": true,
   "screenshotsFolder": "results/report/assets",
   "video": false,
-  "watchForFileChanges": true,
+  "watchForFileChanges": false,
   "reporter": "mochawesome",
   "reporterOptions": {
     "reportDir": "results",
@@ -20,6 +20,7 @@
     "TOKEN_URL": "http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token",
     "GWA_API_URL": "http://gwa-api.localtest.me:2000/v2",
     "KONG_URL": "http://kong.localtest.me:8000",
+    "JWKS_URL": "http://cypress-jwks-url.localtest.me:3500",
     "KONG_CONFIG_URL": "http://kong.localtest.me:8001"
   }
 }
