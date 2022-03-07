@@ -115,6 +115,7 @@ const ConsumersPage: React.FC<
     (id: string) => async () => {
       try {
         await deleteMutate.mutateAsync({ id });
+        client.invalidateQueries(queryKey);
         toast({
           title: 'Consumer deleted',
           status: 'success',

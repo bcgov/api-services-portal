@@ -4,6 +4,7 @@ import { setLogger } from 'react-query';
 import '@testing-library/jest-dom/extend-expect';
 
 import { queryClient } from './test/wrapper';
+import { resetAll } from '../mocks/handlers';
 import { server } from '../mocks/server';
 
 const originalError = console.error;
@@ -22,6 +23,7 @@ beforeAll(() => {
 afterEach(() => {
   queryClient.clear();
   server.resetHandlers();
+  resetAll();
 });
 
 afterAll(() => {

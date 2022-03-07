@@ -1,9 +1,18 @@
 import { graphql, rest } from 'msw';
-import subDays from 'date-fns/subDays';
 import casual from 'casual-browserify';
 
+import {
+  deleteConsumersHandler,
+  getConsumersHandler,
+  grantConsumerHandler,
+  store as consumersStore,
+} from './resolvers/consumers';
+
+export function resetAll() {
+  consumersStore.reset();
+}
+
 export const keystone = graphql.link('*/gql/api');
-const today = new Date();
 
 const harley = {
   id: '78f5c377-9a15-40ba-a95b-06fc9cef3cec',
@@ -19,38 +28,8 @@ const harley = {
   sub: 'sub',
 };
 
-const consumers = {
-  allServiceAccessesByNamespace: [
-    {
-      namespace: 'loc',
-      consumer: {
-        id: '120912301',
-        username: 'sa-moh-proto-ca853245-9d9af1b3c417',
-        tags:
-          '["Facility - London Drugs #5602", "Phone Number - 555-555-5555"]',
-        updatedAt: subDays(today, 3).toISOString(),
-      },
-    },
-    {
-      namespace: 'loc',
-      consumer: {
-        id: '94901091230',
-        username: 'Test Consumer for Shoppers',
-        tags:
-          '["Facility - Shoppers Drug Mart #2222", "Phone Number - 444-444-4444"]',
-        updatedAt: subDays(today, 5).toISOString(),
-      },
-    },
-  ],
-  allAccessRequestsByNamespace: [
-    {
-      id: '123',
-    },
-  ],
-};
-
 export const handlers = [
-  rest.get('*/admin/session', (req, res, ctx) => {
+  rest.get('*/admin/session', (_, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -70,20 +49,7 @@ export const handlers = [
       })
     );
   }),
-  keystone.query('GetConsumers', (_, res, ctx) => {
-    return res(ctx.data(consumers));
-  }),
-  keystone.mutation('DeleteConsumer', (req, res, ctx) => {
-    const { id } = req.variables;
-    consumers.allServiceAccessesByNamespace = consumers.allServiceAccessesByNamespace.filter(
-      (c) => c.consumer.id !== id
-    );
-    return res(
-      ctx.data({
-        deleteGatewayConsumer: {
-          id,
-        },
-      })
-    );
-  }),
+  keystone.query('GetConsumers', getConsumersHandler),
+  keystone.mutation('DeleteConsumer', deleteConsumersHandler),
+  keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
 ];

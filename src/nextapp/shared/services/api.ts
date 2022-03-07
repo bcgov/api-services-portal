@@ -70,7 +70,7 @@ const api = async <T extends ApiResponse>(
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
     } else {
-      throw err.response.errors;
+      throw err;
     }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
