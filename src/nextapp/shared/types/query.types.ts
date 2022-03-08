@@ -2490,7 +2490,6 @@ export type EnvironmentUpdateInput = {
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   additionalDetailsToRequest?: Maybe<Scalars['String']>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
-  product?: Maybe<ProductRelateToOneInput>;
 };
 
 export type EnvironmentsUpdateInput = {
@@ -5033,7 +5032,6 @@ export enum SortProductsBy {
 export type ProductUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
   organization?: Maybe<OrganizationRelateToOneInput>;
@@ -6026,6 +6024,9 @@ export type Namespace = {
   name: Scalars['String'];
   scopes: Array<Maybe<UmaScope>>;
   prodEnvId?: Maybe<Scalars['String']>;
+  permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
+  permDataPlane?: Maybe<Array<Maybe<Scalars['String']>>>;
+  permProtected?: Maybe<Scalars['String']>;
 };
 
 export type NamespaceInput = {
@@ -6323,6 +6324,8 @@ export type Query = {
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
+  allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
+  allContentsByNamespace?: Maybe<Array<Maybe<Content>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
   allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
   allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
@@ -6341,6 +6344,7 @@ export type Query = {
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
+  namespace?: Maybe<Namespace>;
   usersByNamespace?: Maybe<Array<Maybe<UserContact>>>;
   getOrgPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
@@ -6955,6 +6959,22 @@ export type QueryAllGatewayServicesByNamespaceArgs = {
 };
 
 
+export type QueryAllGatewayRoutesByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<GatewayRouteWhereInput>;
+};
+
+
+export type QueryAllContentsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<ContentWhereInput>;
+};
+
+
 export type QueryAllProductsByNamespaceArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -7060,6 +7080,11 @@ export type QueryBusinessProfileArgs = {
 export type QueryConsumerScopesAndRolesArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['ID'];
+};
+
+
+export type QueryNamespaceArgs = {
+  ns: Scalars['String'];
 };
 
 

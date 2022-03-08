@@ -1,0 +1,1043 @@
+components:
+    examples: {}
+    headers: {}
+    parameters: {}
+    requestBodies: {}
+    responses: {}
+    schemas:
+        BatchResult:
+            properties:
+                status:
+                    type: number
+                    format: double
+                result:
+                    type: string
+                reason:
+                    type: string
+                id:
+                    type: string
+                childResults:
+                    items:
+                        $ref: '#/components/schemas/BatchResult'
+                    type: array
+            required:
+                - status
+                - result
+            type: object
+            additionalProperties: false
+        Content:
+            properties:
+                externalLink:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                content:
+                    type: string
+                githubRepository:
+                    type: string
+                readme:
+                    type: string
+                order:
+                    type: number
+                    format: double
+                isPublic:
+                    type: boolean
+                isComplete:
+                    type: boolean
+                namespace:
+                    type: string
+                publishDate:
+                    type: string
+                slug:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+            type: object
+            additionalProperties: false
+            example:
+                externalLink: 'https://externalsite/my_content'
+                title: my_content
+                description: 'Summary of what my content is'
+                content: 'Markdown content'
+                order: 0
+                isPublic: true
+                isComplete: true
+                tags:
+                    - tag1
+                    - tag2
+        GatewayServiceRefID:
+            type: string
+        GatewayRouteRefID:
+            type: string
+        GatewayPlugin:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                config: {}
+                service:
+                    $ref: '#/components/schemas/GatewayServiceRefID'
+                route:
+                    $ref: '#/components/schemas/GatewayRouteRefID'
+            type: object
+            additionalProperties: false
+        GatewayRoute:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                namespace:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                methods:
+                    items:
+                        type: string
+                    type: array
+                paths:
+                    items:
+                        type: string
+                    type: array
+                hosts:
+                    items:
+                        type: string
+                    type: array
+                service:
+                    $ref: '#/components/schemas/GatewayServiceRefID'
+                plugins:
+                    items:
+                        $ref: '#/components/schemas/GatewayPlugin'
+                    type: array
+            type: object
+            additionalProperties: false
+        UserRefID:
+            type: string
+        CredentialIssuer:
+            properties:
+                name:
+                    type: string
+                namespace:
+                    type: string
+                description:
+                    type: string
+                flow:
+                    type: string
+                    enum:
+                        - client-credentials
+                    nullable: false
+                clientRegistration:
+                    type: string
+                    enum:
+                        - managed
+                    nullable: false
+                mode:
+                    type: string
+                    enum:
+                        - auto
+                    nullable: false
+                authPlugin:
+                    type: string
+                clientAuthenticator:
+                    type: string
+                    enum:
+                        - client-secret
+                        - client-jwt
+                        - client-jwt-jwks-url
+                instruction:
+                    type: string
+                oidcDiscoveryUrl:
+                    type: string
+                initialAccessToken:
+                    type: string
+                clientId:
+                    type: string
+                clientSecret:
+                    type: string
+                resourceType:
+                    type: string
+                resourceAccessScope:
+                    type: string
+                apiKeyName:
+                    type: string
+                availableScopes:
+                    items:
+                        type: string
+                    type: array
+                resourceScopes:
+                    items:
+                        type: string
+                    type: array
+                clientRoles:
+                    items:
+                        type: string
+                    type: array
+                clientMappers:
+                    items:
+                        type: string
+                    type: array
+                environmentDetails: {}
+                owner:
+                    $ref: '#/components/schemas/UserRefID'
+            type: object
+            additionalProperties: false
+        UmaScope:
+            properties:
+                name:
+                    type: string
+                __typename:
+                    type: string
+                    enum:
+                        - UMAScope
+                    nullable: false
+            required:
+                - name
+            type: object
+        Maybe_UmaScope_:
+            allOf:
+                -
+                    $ref: '#/components/schemas/UmaScope'
+            nullable: true
+        Maybe_Scalars-at-String_:
+            type: string
+            nullable: true
+        Maybe_Array_Maybe_Scalars-at-String___:
+            items:
+                $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+            type: array
+            nullable: true
+        Namespace:
+            properties:
+                permProtected:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                permDataPlane:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                permDomains:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                prodEnvId:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                scopes:
+                    items:
+                        $ref: '#/components/schemas/Maybe_UmaScope_'
+                    type: array
+                name:
+                    type: string
+                id:
+                    type: string
+                __typename:
+                    type: string
+                    enum:
+                        - Namespace
+                    nullable: false
+            required:
+                - scopes
+                - name
+                - id
+            type: object
+        GroupPermission:
+            properties:
+                resource:
+                    type: string
+                scopes:
+                    items:
+                        type: string
+                    type: array
+            required:
+                - resource
+                - scopes
+            type: object
+            additionalProperties: false
+        UserReference:
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
+                email:
+                    type: string
+            required:
+                - username
+            type: object
+            additionalProperties: false
+        GroupRole:
+            properties:
+                name:
+                    type: string
+                permissions:
+                    items:
+                        $ref: '#/components/schemas/GroupPermission'
+                    type: array
+                members:
+                    items:
+                        $ref: '#/components/schemas/UserReference'
+                    type: array
+            required:
+                - name
+                - permissions
+                - members
+            type: object
+            additionalProperties: false
+        GroupMember:
+            properties:
+                member:
+                    $ref: '#/components/schemas/UserReference'
+                roles:
+                    items:
+                        type: string
+                    type: array
+            required:
+                - member
+                - roles
+            type: object
+            additionalProperties: false
+        GroupAccess:
+            properties:
+                name:
+                    type: string
+                parent:
+                    type: string
+                roles:
+                    items:
+                        $ref: '#/components/schemas/GroupRole'
+                    type: array
+                members:
+                    items:
+                        $ref: '#/components/schemas/GroupMember'
+                    type: array
+            required:
+                - name
+                - roles
+            type: object
+            additionalProperties: false
+        OrgNamespace:
+            properties:
+                name:
+                    type: string
+                orgUnit:
+                    type: string
+            required:
+                - name
+                - orgUnit
+            type: object
+            additionalProperties: false
+        OrganizationRefID:
+            type: string
+        OrganizationUnitRefID:
+            type: string
+        Dataset:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                license_title:
+                    type: string
+                security_class:
+                    type: string
+                view_audience:
+                    type: string
+                download_audience:
+                    type: string
+                record_publish_date:
+                    type: string
+                notes:
+                    type: string
+                title:
+                    type: string
+                isInCatalog:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
+            type: object
+            additionalProperties: false
+        DraftDatasetRefID:
+            type: string
+        LegalRefID:
+            type: string
+        CredentialIssuerRefID:
+            type: string
+        Environment:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                    enum:
+                        - dev
+                        - test
+                        - prod
+                        - other
+                active:
+                    type: boolean
+                approval:
+                    type: boolean
+                flow:
+                    type: string
+                    enum:
+                        - public
+                        - authorization-code
+                        - client-credentials
+                        - kong-acl-only
+                        - kong-api-key-only
+                        - kong-api-key-acl
+                additionalDetailsToRequest:
+                    type: string
+                services:
+                    items:
+                        $ref: '#/components/schemas/GatewayServiceRefID'
+                    type: array
+                legal:
+                    $ref: '#/components/schemas/LegalRefID'
+                credentialIssuer:
+                    $ref: '#/components/schemas/CredentialIssuerRefID'
+            type: object
+            additionalProperties: false
+            example:
+                name: dev
+                active: false
+                approval: false
+                flow: public
+                appId: '00000000'
+        Product:
+            properties:
+                appId:
+                    type: string
+                name:
+                    type: string
+                namespace:
+                    type: string
+                dataset:
+                    $ref: '#/components/schemas/DraftDatasetRefID'
+                environments:
+                    items:
+                        $ref: '#/components/schemas/Environment'
+                    type: array
+            type: object
+            additionalProperties: false
+            example:
+                name: my-new-product
+                appId: '000000000000'
+                environments:
+                    -
+                        name: dev
+                        active: false
+                        approval: false
+                        flow: public
+                        appId: '00000000'
+    securitySchemes:
+        jwt:
+            type: oauth2
+            description: 'Authz Client Credential'
+            flows:
+                clientCredentials:
+                    tokenUrl: 'https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token'
+                    scopes: {}
+        portal:
+            type: http
+            description: 'Authz Portal Login'
+            scheme: bearer
+            bearerFormat: JWT
+info:
+    title: bcgov-aps-portal
+    version: 0.1.0
+    description: 'API Services Portal by BC Gov API Programme Services'
+    license:
+        name: MIT
+    contact:
+        name: 'BC Gov APS'
+openapi: 3.0.0
+paths:
+    '/namespaces/{ns}/contents':
+        put:
+            operationId: put-content
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            tags:
+                - Documentation
+            security:
+                -
+                    jwt:
+                        - Content.Publish
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Content'
+        get:
+            operationId: get-gateway-routes
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            tags:
+                - Documentation
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    /directory:
+        get:
+            operationId: directory-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - 'API Directory'
+            security: []
+            parameters: []
+    '/directory/{id}':
+        get:
+            operationId: directory-item
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - 'API Directory'
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    /documentation:
+        get:
+            operationId: document-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - Documentation
+            security: []
+            parameters: []
+    '/documentation/{slug}':
+        get:
+            operationId: document-item
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - Documentation
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: slug
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/gateway':
+        get:
+            operationId: get-gateway-routes
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/GatewayRoute'
+                                type: array
+            tags:
+                - 'Gateway Services'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/identifiers/{type}':
+        get:
+            operationId: GetNewID
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            tags:
+                - 'New Identifiers'
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: type
+                    required: true
+                    schema:
+                        type: string
+                        enum:
+                            - environment
+                            - product
+                            - application
+    '/namespaces/{ns}/issuers':
+        put:
+            operationId: put-issuer
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            tags:
+                - 'Authorization Profiles'
+            security:
+                -
+                    jwt:
+                        - CredentialIssuer.Admin
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CredentialIssuer'
+        get:
+            operationId: get-issuers
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/CredentialIssuer'
+                                type: array
+            tags:
+                - 'Authorization Profiles'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    /namespaces/report:
+        get:
+            operationId: report
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt: []
+            parameters: []
+    /namespaces:
+        get:
+            operationId: namespace-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    type: string
+                                type: array
+            summary: 'List of Namespace names'
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt: []
+            parameters: []
+    '/namespaces/{ns}':
+        get:
+            operationId: namespace-profile
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Namespace'
+            description: "Get details about the namespace, such as permissions for what the namespace can do.\n> `Required Scope:` Namespace.Manage"
+            summary: 'Namespace Summary'
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    /organizations:
+        get:
+            operationId: organization-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            tags:
+                - Organizations
+            security: []
+            parameters: []
+    '/organizations/{org}':
+        get:
+            operationId: organization-units
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items: {}
+                                type: array
+            tags:
+                - Organizations
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/access':
+        get:
+            operationId: get-organization-access
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GroupAccess'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+        put:
+            operationId: put-organization-access
+            responses:
+                '204':
+                    description: 'No content'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GroupAccess'
+    '/organizations/{org}/namespaces':
+        get:
+            operationId: organization-namespaces
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/OrgNamespace'
+                                type: array
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{orgUnit}/namespaces/{ns}':
+        put:
+            operationId: assign-namespace-to-organization
+            responses:
+                '204':
+                    description: 'No content'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+        delete:
+            operationId: unassign-namespace-from-organization
+            responses:
+                '204':
+                    description: 'No content'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{orgUnit}/datasets':
+        get:
+            operationId: organization-datasets
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Dataset'
+                                type: array
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+        put:
+            operationId: put-organization-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Dataset'
+    '/namespaces/{ns}/products':
+        put:
+            operationId: put-product
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            tags:
+                - Products
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Product'
+        get:
+            operationId: get-products
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Product'
+                                type: array
+            tags:
+                - Products
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+servers:
+    -
+        url: /ds/api/v2
+tags:
+    -
+        name: 'API Directory'
+        description: 'Discover all the great BC Government APIs'
+    -
+        name: Organizations
+        description: 'Manage organizational access control'
+    -
+        name: Namespaces
+        description: 'Get aggregated information about namespaces'
+    -
+        name: 'Gateway Services'
+        description: 'View your Gateway Service details'
+    -
+        name: Products
+        description: 'Manage your Products and Environments for publishing to the API Directory'
+    -
+        name: 'Authorization Profiles'
+        description: 'Configure the integration to external Identity Providers'
+    -
+        name: Documentation
+        description: 'View public documentation and publish documentation for your APIs'

@@ -6,15 +6,17 @@ import {
   Path,
   Route,
   Security,
+  Tags,
 } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
-import { WorkbookService } from '../services/report/workbook.service';
-import { Namespace } from '@/services/keystone/types';
-import { Logger } from '../logger';
+import { WorkbookService } from '../../services/report/workbook.service';
+import { Namespace } from '../../services/keystone/types';
+import { Logger } from '../../logger';
 
 import { Readable } from 'stream';
+import { removeEmpty } from '../../batch/feed-worker';
 
 /**
  * @param binary Buffer
@@ -36,6 +38,7 @@ const logger = Logger('controllers.Namespace');
 @injectable()
 @Route('/namespaces')
 @Security('jwt')
+@Tags('Namespaces')
 export class NamespaceController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -73,6 +76,11 @@ export class NamespaceController extends Controller {
     return null;
   }
 
+  /**
+   * @summary List of Namespace names
+   * @param request
+   * @returns
+   */
   @Get()
   @OperationId('namespace-list')
   public async list(@Request() request: any): Promise<string[]> {
@@ -83,12 +91,51 @@ export class NamespaceController extends Controller {
     logger.debug('Result %j', result);
     return result.data.allNamespaces.map((ns: Namespace) => ns.name);
   }
+
+  /**
+   * Get details about the namespace, such as permissions for what the namespace can do.
+   * > `Required Scope:` Namespace.Manage
+   *
+   * @summary Namespace Summary
+   * @param ns
+   * @param request
+   * @returns
+   */
+  @Get('/{ns}')
+  @OperationId('namespace-profile')
+  @Security('jwt', ['Namespace.Manage'])
+  public async profile(
+    @Path() ns: string,
+    @Request() request: any
+  ): Promise<Namespace> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: item,
+      variables: { ns },
+    });
+    logger.debug('Result %j', result);
+    return result.data.namespace;
+  }
 }
 
 const list = gql`
   query Namespaces {
     allNamespaces {
       name
+    }
+  }
+`;
+
+const item = gql`
+  query Namespace($ns: String!) {
+    namespace(ns: $ns) {
+      name
+      scopes {
+        name
+      }
+      permDomains
+      permDataPlane
+      permProtected
     }
   }
 `;

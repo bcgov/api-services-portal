@@ -1,21 +1,21 @@
 import {
+  Body,
   Controller,
-  Request,
   OperationId,
+  Request,
   Put,
   Path,
   Route,
   Security,
-  Body,
 } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { syncRecords } from '../batch/feed-worker';
+import { syncRecords } from '../../batch/feed-worker';
 
 @injectable()
-@Route('/namespaces/{ns}/issuers')
-@Security('jwt', ['CredentialIssuer.Admin'])
-export class IssuerController extends Controller {
+@Route('/namespaces/{ns}/datasets')
+@Security('jwt', ['Namespace.Manage'])
+export class DatasetController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
@@ -23,7 +23,7 @@ export class IssuerController extends Controller {
   }
 
   @Put()
-  @OperationId('put-issuer')
+  @OperationId('put-dataset')
   public async put(
     @Path() ns: string,
     @Body() body: any,
@@ -31,9 +31,9 @@ export class IssuerController extends Controller {
   ): Promise<any> {
     return await syncRecords(
       this.keystone.createContext(request),
-      'CredentialIssuer',
-      body['name'],
-      body
+      'DraftDataset',
+      request.body['name'],
+      request.body
     );
   }
 }

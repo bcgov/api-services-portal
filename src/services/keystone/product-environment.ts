@@ -216,3 +216,23 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
   );
   return result.data.Environment;
 }
+
+export async function lookupProduct(context: any, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($id: ID!) {
+                    Product(where: {id: $id}) {
+                        environments {
+                          id
+                        }
+                    }
+                }`,
+    variables: { id: id },
+  });
+  logger.debug('[lookupProduct] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
+}

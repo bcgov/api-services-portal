@@ -2,11 +2,47 @@ import { Logger } from '../../logger';
 
 const logger = Logger('ks.batch');
 
+export interface BatchWhereClause {
+  query: string; // '$org: String'
+  clause: string; // '{ org: $org }'
+  variables: object;
+}
 export class BatchService {
   private context: any;
 
   constructor(context: any) {
     this.context = context;
+  }
+
+  public async listAll(
+    query: any,
+    fields: string[],
+    where: BatchWhereClause = undefined
+  ) {
+    logger.debug('[listAll] : %s', query);
+    let queryString;
+    if (where) {
+      queryString = `query(${where.query}) {
+        ${query}(where: ${where.clause}) {
+          id, ${fields.join(',')}
+        }
+      }`;
+    } else {
+      queryString = `query {
+        ${query} {
+          id, ${fields.join(',')}
+        }
+      }`;
+    }
+    logger.debug('[listAll] %s', queryString);
+
+    const result = await this.context.executeGraphQL({
+      query: queryString,
+      variables: where ? where.variables : {},
+    });
+    logger.debug('[listAll] RESULT %j', result);
+
+    return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 
   public async list(

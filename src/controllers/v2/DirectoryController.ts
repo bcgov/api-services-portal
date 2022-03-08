@@ -1,10 +1,18 @@
-import { Controller, OperationId, Get, Path, Route } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { Controller, OperationId, Get, Path, Route, Tags } from 'tsoa';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { Product } from '@/services/keystone/types';
+import {
+  removeEmpty,
+  removeKeys,
+  parseJsonString,
+  transformAllRefID,
+} from '../../batch/feed-worker';
+
 @injectable()
 @Route('/directory')
+@Tags('API Directory')
 export class DirectoryController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
@@ -63,7 +71,7 @@ function transformSetAnonymous(products: Product[]) {
   return products;
 }
 function transform(products: Product[]) {
-  return products.reduce((accumulator: any, prod: any) => {
+  const records: Product[] = products.reduce((accumulator: any, prod: any) => {
     if (prod.dataset === null) {
       // drop it
     } else {
@@ -79,12 +87,15 @@ function transform(products: Product[]) {
     }
     return accumulator;
   }, []);
+
+  return records
+    .map((o) => removeEmpty(o))
+    .map((o) => parseJsonString(o, ['tags']));
 }
 
 const list = gql`
   query Directory {
     allDiscoverableProducts(where: { environments_some: { active: true } }) {
-      id
       name
       environments {
         name
@@ -96,16 +107,17 @@ const list = gql`
         name
         title
         notes
-        sector
         license_title
         view_audience
         security_class
         record_publish_date
         tags
         organization {
+          name
           title
         }
         organizationUnit {
+          name
           title
         }
       }
@@ -116,7 +128,6 @@ const list = gql`
 const item = gql`
   query GetProduct($id: ID!) {
     allDiscoverableProducts(where: { dataset: { id: $id } }) {
-      id
       name
       environments {
         name
@@ -141,7 +152,6 @@ const item = gql`
         name
         title
         notes
-        sector
         license_title
         security_class
         view_audience
@@ -149,9 +159,11 @@ const item = gql`
         record_publish_date
         isInCatalog
         organization {
+          name
           title
         }
         organizationUnit {
+          name
           title
         }
       }

@@ -8,9 +8,9 @@ import {
   Body,
   OperationId,
 } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { syncRecords } from '../batch/feed-worker';
+import { syncRecords } from '../../batch/feed-worker';
 import express from 'express';
 import multer from 'multer';
 import { DateTime, Markdown } from '@keystonejs/fields';

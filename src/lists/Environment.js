@@ -5,7 +5,10 @@ const {
   isEnvironmentID,
 } = require('../services/identifiers');
 
-const { ValidateActiveEnvironment } = require('../services/workflow');
+const {
+  ValidateActiveEnvironment,
+  DeleteEnvironment,
+} = require('../services/workflow');
 
 const {
   FieldEnforcementPoint,
@@ -74,7 +77,12 @@ module.exports = {
       ref: 'GatewayService.environment',
       many: true,
     },
-    product: { type: Relationship, ref: 'Product.environments', many: false },
+    product: {
+      type: Relationship,
+      ref: 'Product.environments',
+      many: false,
+      access: { update: false },
+    },
   },
   access: EnforcementPoint,
   hooks: {
@@ -122,6 +130,19 @@ module.exports = {
         originalInput,
         resolvedData,
         addValidationError
+      );
+    },
+    beforeDelete: async function ({
+      operation,
+      existingItem,
+      context,
+      listKey,
+      fieldPath, // exists only for field hooks
+    }) {
+      await DeleteEnvironment(
+        context.createContext({ skipAccessControl: true }),
+        operation,
+        { environmentId: existingItem.id }
       );
     },
   },

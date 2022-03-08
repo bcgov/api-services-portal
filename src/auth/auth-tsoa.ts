@@ -1,8 +1,9 @@
-import jwt from 'express-jwt';
+import jwt, { UnauthorizedError } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { Logger } from '../logger';
 import express from 'express';
 import Keycloak from 'keycloak-connect';
+import GetRequestAuthToken from './auth-token';
 
 const logger = Logger('auth-tsoa');
 
@@ -16,6 +17,7 @@ const jwtCheck = jwksRsa.expressJwtSecret({
 const verifyJWT = jwt({
   secret: jwtCheck,
   algorithms: ['RS256'],
+  getToken: (req) => GetRequestAuthToken(req),
   credentialsRequired: true,
   requestProperty: 'oauth_user',
 });
@@ -44,35 +46,57 @@ export function expressAuthentication(
         return reject(err);
       } else {
         logger.debug('RESOLVED %j', request.oauth_user);
-        // Check if JWT contains all required scopes
-        const tokenScopes = request.oauth_user.scope.split(' ');
-        logger.debug('Token Scopes = %s', tokenScopes);
+
         if (scopes.length == 0) {
           return resolve(request.oauth_user);
         }
-        const permission =
-          securityName === 'jwt-org'
-            ? `org/${request.params.org}:${scopes[0]}`
-            : `${request.params.ns}:${scopes[0]}`;
+        const resource =
+          'orgUnit' in request.params
+            ? `org/${request.params.orgUnit}`
+            : 'org' in request.params
+            ? `org/${request.params.org}`
+            : `${request.params.ns}`;
+
+        const permissions: string[] =
+          scopes.length == 1
+            ? [`${resource}:${scopes[0]}`]
+            : scopes.map((s) => `${resource}:${s}`);
 
         logger.debug(
-          "[%s] Resource Authorization on '%s'",
+          "[%s] Resource Authorization on '%j'",
           securityName,
-          permission
+          permissions
         );
 
-        const resp: any = keycloak.enforcer(permission)(
+        // keycloak enforcer() needs the subject_token to be the "Authorization: Bearer"
+        // so ensure that this is set; is applicable when the user has authenticated via the Portal
+        request.headers.authorization = `Bearer ${GetRequestAuthToken(
+          request
+        )}`;
+
+        const resp: any = keycloak.enforcer(permissions)(
           request,
           {
             status: (s: number) => {
-              reject(new Error('JWT does not contain required scope.'));
+              logger.error('invalid_token (%d) for %j', s, request.oauth_user);
+              reject(
+                new UnauthorizedError('invalid_token', {
+                  message: `Missing authorization scope. (${s})`,
+                })
+              );
             },
             end: (text: string) => false,
           } as any,
           (authzerr: any) => {
             if (authzerr) {
-              reject(new Error('Access Denied'));
+              reject(
+                new UnauthorizedError('invalid_token', {
+                  message: 'Denied access to resource',
+                })
+              );
             } else {
+              logger.debug('Returned Permissions %j', request.permissions);
+
               resolve({ ...request.oauth_user, ...{ scope: scopes[0] } });
             }
           }

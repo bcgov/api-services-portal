@@ -1,31 +1,29 @@
 {
   "entryFile": "server.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
-  "controllerPathGlobs": ["**/*Controller.ts"],
+  "controllerPathGlobs": ["**/v1/*Controller.ts"],
   "spec": {
-    "outputDirectory": "controllers",
+    "outputDirectory": "controllers/v1",
     "specVersion": 3,
     "basePath": "/ds/api",
     "specFileBaseName": "openapi",
-    "yaml": true
+    "yaml": true,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "oauth2",
+        "description": "Authz IdP Authentication",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "flow": "application",
+        "tokenUrl": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token"
+      }
+    }
   },
   "routes": {
-    "routesDir": "controllers",
+    "routesDir": "controllers/v1",
     "basePath": "/ds/api",
     "iocModule": "controllers/ioc",
     "authenticationModule": "./auth/auth-tsoa"
   },
-  "ignore": ["**/node_modules/**"],
-  "securityDefinitions": {
-    "jwt": {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT"
-    },
-    "jwt-org": {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT"
-    }
-  }
+  "ignore": ["**/node_modules/**"]
 }

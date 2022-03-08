@@ -1,5 +1,5 @@
-import { Controller, OperationId, Get, Path, Route } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { Controller, OperationId, Get, Path, Route, Tags } from 'tsoa';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { Content } from '@/services/keystone/types';
@@ -7,6 +7,7 @@ import { strict as assert } from 'assert';
 
 @injectable()
 @Route('/documentation')
+@Tags('Documentation')
 export class DocumentationController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {

@@ -2,6 +2,12 @@ export interface GroupAccess {
   name: string;
   parent?: string;
   roles: GroupRole[];
+  members?: GroupMember[];
+}
+
+export interface GroupMember {
+  member: UserReference;
+  roles: string[];
 }
 
 export interface GroupRole {

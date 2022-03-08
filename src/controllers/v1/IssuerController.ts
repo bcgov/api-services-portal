@@ -8,14 +8,14 @@ import {
   Security,
   Body,
 } from 'tsoa';
-import { KeystoneService } from './ioc/keystoneInjector';
+import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
-import { syncRecords } from '../batch/feed-worker';
+import { syncRecords } from '../../batch/feed-worker';
 
 @injectable()
-@Route('/namespaces/{ns}/products')
-@Security('jwt', ['Namespace.Manage'])
-export class ProductController extends Controller {
+@Route('/namespaces/{ns}/issuers')
+@Security('jwt', ['CredentialIssuer.Admin'])
+export class IssuerController extends Controller {
   private keystone: KeystoneService;
   constructor(@inject('KeystoneService') private _keystone: KeystoneService) {
     super();
@@ -23,7 +23,7 @@ export class ProductController extends Controller {
   }
 
   @Put()
-  @OperationId('put-product')
+  @OperationId('put-issuer')
   public async put(
     @Path() ns: string,
     @Body() body: any,
@@ -31,8 +31,8 @@ export class ProductController extends Controller {
   ): Promise<any> {
     return await syncRecords(
       this.keystone.createContext(request),
-      'Product',
-      body['appId'],
+      'CredentialIssuer',
+      body['name'],
       body
     );
   }

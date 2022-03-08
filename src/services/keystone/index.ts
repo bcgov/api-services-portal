@@ -59,4 +59,4 @@ export {
   calculateStats,
 } from './metrics';
 
-export { getOrganizations } from './organization';
+export { getOrganizations, getOrganizationUnit } from './organization';

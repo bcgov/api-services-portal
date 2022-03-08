@@ -1,4 +1,4 @@
-export const metadata = {
+const metadata = {
   Organization: {
     query: 'allOrganizations',
     refKey: 'extForeignKey',
@@ -13,7 +13,7 @@ export const metadata = {
       'extRecordHash',
     ],
     transformations: {
-      tags: { name: 'toString' },
+      tags: { name: 'toStringDefaultArray' },
       orgUnits: {
         name: 'connectExclusiveList',
         list: 'OrganizationUnit',
@@ -42,7 +42,6 @@ export const metadata = {
     refKey: 'extForeignKey',
     sync: [
       'name',
-      'sector',
       'license_title',
       'security_class',
       'view_audience',
@@ -58,7 +57,7 @@ export const metadata = {
       'extRecordHash',
     ],
     transformations: {
-      tags: { name: 'toString' },
+      tags: { name: 'toStringDefaultArray' },
       organization: {
         name: 'connectOne',
         key: 'org',
@@ -80,7 +79,6 @@ export const metadata = {
     refKey: 'name',
     sync: [
       'name',
-      'sector',
       'license_title',
       'security_class',
       'view_audience',
@@ -94,7 +92,7 @@ export const metadata = {
       'tags',
     ],
     transformations: {
-      tags: { name: 'toString' },
+      tags: { name: 'toStringDefaultArray' },
       organization: {
         name: 'connectOne',
         list: 'allOrganizations',
@@ -134,11 +132,11 @@ export const metadata = {
     refKey: 'extRefId',
     sync: ['name'],
     transformations: {
-      members: {
-        name: 'connectExclusiveList',
-        list: 'Member',
-        syncFirst: true,
-      },
+      // members: {
+      //   name: 'connectExclusiveList',
+      //   list: 'MemberRole',
+      //   syncFirst: true,
+      // },
     },
   },
   MemberRole: {
@@ -148,7 +146,6 @@ export const metadata = {
     transformations: {
       user: {
         name: 'connectOne',
-        key: 'metric.service',
         list: 'allUsers',
         refKey: 'name',
       },
@@ -317,17 +314,21 @@ export const metadata = {
         name: 'connectExclusiveList',
         list: 'Environment',
         syncFirst: true,
+        refKey: 'appId',
       },
-      organization: {
-        name: 'connectOne',
-        list: 'allOrganizations',
-        refKey: 'name',
-      },
-      organizationUnit: {
-        name: 'connectOne',
-        list: 'allOrganizationUnits',
-        refKey: 'name',
-      },
+    },
+    example: {
+      name: 'my-new-product',
+      appId: '000000000000',
+      environments: [
+        {
+          name: 'dev',
+          active: false,
+          approval: false,
+          flow: 'public',
+          appId: '00000000',
+        },
+      ],
     },
   },
   Environment: {
@@ -346,6 +347,29 @@ export const metadata = {
         list: 'allCredentialIssuers',
         refKey: 'name',
       },
+    },
+    validations: {
+      active: { type: 'boolean' },
+      approval: { type: 'boolean' },
+      name: { type: 'enum', values: ['dev', 'test', 'prod', 'other'] },
+      flow: {
+        type: 'enum',
+        values: [
+          'public',
+          'authorization-code',
+          'client-credentials',
+          'kong-acl-only',
+          'kong-api-key-only',
+          'kong-api-key-acl',
+        ],
+      },
+    },
+    example: {
+      name: 'dev',
+      active: false,
+      approval: false,
+      flow: 'public',
+      appId: '00000000',
     },
   },
   CredentialIssuer: {
@@ -383,6 +407,21 @@ export const metadata = {
       environmentDetails: { name: 'toString' },
       owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
     },
+    validations: {
+      flow: {
+        type: 'enum',
+        values: ['client-credentials'],
+      },
+      clientRegistration: {
+        type: 'enum',
+        values: ['managed'],
+      },
+      mode: { type: 'enum', values: ['auto'] },
+      clientAuthenticator: {
+        type: 'enum',
+        values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url'],
+      },
+    },
   },
   Content: {
     query: 'allContents',
@@ -404,6 +443,21 @@ export const metadata = {
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       namespace: { name: 'mapNamespace', update: false },
+    },
+    validations: {
+      order: { type: 'number' },
+      isPublic: { type: 'boolean' },
+      isComplete: { type: 'boolean' },
+    },
+    example: {
+      externalLink: 'https://externalsite/my_content',
+      title: 'my_content',
+      description: 'Summary of what my content is',
+      content: 'Markdown content',
+      order: 0,
+      isPublic: true,
+      isComplete: true,
+      tags: ['tag1', 'tag2'],
     },
   },
   ContentBySlug: {
@@ -470,3 +524,5 @@ export const metadata = {
     transformations: {},
   },
 };
+
+module.exports.metadata = metadata;

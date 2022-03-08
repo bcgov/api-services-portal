@@ -127,6 +127,19 @@ export class KeycloakGroupService {
     return result;
   }
 
+  public async findByName(
+    root: string,
+    name: string,
+    briefRepresentation: boolean = true
+  ) {
+    const result = await this.search(name, briefRepresentation);
+    const selectedBranch = result.filter((g) => g.name === root);
+    if (selectedBranch.length == 0) {
+      return null;
+    }
+    return this.searchTree(selectedBranch, name, 'name', false);
+  }
+
   public async getGroups(
     parentGroupName: string,
     briefRepresentation: boolean = true
@@ -192,5 +205,15 @@ export class KeycloakGroupService {
   public async deleteGroup(id: string): Promise<void> {
     logger.debug('[deleteGroup] %s', id);
     await this.kcAdminClient.groups.del({ id });
+  }
+
+  private searchTree(tree: any, value: string, key = 'id', reverse = false) {
+    const stack = [tree[0]];
+    while (stack.length) {
+      const node = stack[reverse ? 'pop' : 'shift']();
+      if (node[key] === value) return node;
+      node.subGroups && stack.push(...node.subGroups);
+    }
+    return null;
   }
 }
