@@ -1,7 +1,26 @@
 import subDays from 'date-fns/subDays';
 import cloneDeep from 'lodash/cloneDeep';
+import casual from 'casual-browserify';
 
 const today = new Date();
+
+export const harleyAccessRequest = {
+  id: '123',
+  name: '',
+  additionalDetails:
+    'Access to this API requires a BCeID. Your request will be rejected if you did not log into the Portal with a valid Business BCeID. To continue, please provide your contact phone number below.',
+  communication: 'Phone Number 204-896-6325 &  204-896-7700. ',
+  createdAt: subDays(today, 6).toISOString(),
+  requestor: {
+    name: 'Harley Jones',
+  },
+  application: {
+    name: 'Easy Mart Store 122',
+  },
+  productEnvironment: {
+    name: 'dev',
+  },
+};
 
 const consumers = {
   allServiceAccessesByNamespace: [
@@ -48,25 +67,7 @@ const consumers = {
       },
     },
   ],
-  allAccessRequestsByNamespace: [
-    {
-      id: '123',
-      name: '',
-      additionalDetails:
-        'Access to this API requires a BCeID. Your request will be rejected if you did not log into the Portal with a valid Business BCeID. To continue, please provide your contact phone number below.',
-      communication: 'Phone Number 204-896-6325 &  204-896-7700. ',
-      createdAt: subDays(today, 6).toISOString(),
-      requestor: {
-        name: 'Harley Jones',
-      },
-      application: {
-        name: 'Easy Mart Store 122',
-      },
-      productEnvironment: {
-        name: 'dev',
-      },
-    },
-  ],
+  allAccessRequestsByNamespace: [harleyAccessRequest],
 };
 
 class Store {
@@ -136,6 +137,32 @@ export const grantConsumerHandler = (req, res, ctx) => {
   return res(ctx.data({}));
 };
 
+export const fullfillRequestHandler = (req, res, ctx) => {
+  store.update({
+    ...store.data,
+    allServiceAccessesByNamespace: [
+      ...store.data.allServiceAccessesByNamespace,
+      {
+        namespace: 'loc',
+        consumer: {
+          id: '919191919',
+          username: 'new-consumer',
+          tags:
+            '["Facility - London Drugs #5602", "Phone Number - 555-555-5555"]',
+          updatedAt: subDays(today, 3).toISOString(),
+          aclGroups: JSON.stringify([]),
+        },
+        application: {
+          id: 'a1',
+        },
+      },
+    ],
+    allAccessRequestsByNamespace: [],
+  });
+
+  return res(ctx.data({ id: req.variables.id }));
+};
+
 export const accessRequestAuthHandler = (req, res, ctx) => {
   return res(
     ctx.data({
@@ -161,13 +188,13 @@ export const gatewayServicesHandler = (req, res, ctx) => {
     ctx.data({
       allGatewayServicesByNamespace: [
         {
-          id: '1',
-          name: 'name',
+          id: 's1',
+          name: 'service-aps-portal-dev-api',
           extForeignKey: '1231',
           routes: [
             {
               id: 'r1',
-              name: 'route',
+              name: 'route-aps-portal-dev-api',
               extForeignKey: '12',
             },
           ],

@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { Box, Button, Flex, Icon, Text, useDisclosure } from '@chakra-ui/react';
 import { FaExclamationCircle } from 'react-icons/fa';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { AccessRequest as AccessRequestData } from '@/shared/types/query.types';
+
 import AccessRequestDialog from './access-request-dialog';
 
 interface AccessRequestProps {
@@ -28,6 +30,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
         px={9}
         py={4}
         boxShadow="md"
+        role="alert"
       >
         <Icon as={FaExclamationCircle} boxSize="8" color="bc-yellow" />
         <Box flex={1} mx={4} data-testid="ar-request-description">
@@ -36,7 +39,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
             to <Text as="strong">{data.application?.name}</Text>
           </Text>
           <Text as="small" color="bc-component">
-            2 days ago
+            {formatDistanceToNow(new Date(data.createdAt))} ago
           </Text>
         </Box>
         <Button

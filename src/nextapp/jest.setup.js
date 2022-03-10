@@ -23,6 +23,7 @@ beforeAll(() => {
 afterEach(() => {
   queryClient.clear();
   server.resetHandlers();
+  server.restoreHandlers();
   resetAll();
 });
 

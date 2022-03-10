@@ -138,7 +138,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             </TabList>
           </Tabs>
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton data-testid="access-request-close-btn" />
         <ModalBody>
           <Box
             hidden={tabIndex !== 0}
