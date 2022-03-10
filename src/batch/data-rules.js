@@ -510,6 +510,23 @@ const metadata = {
         syncFirst: true,
       },
     },
+    validations: {
+      action: {
+        type: 'enum',
+        values: ['add', 'update', 'create', 'delete', 'validate', 'publish'],
+      },
+      result: {
+        type: 'enum',
+        values: ['', 'received', 'failed', 'completed', 'success'],
+      },
+      updatedAt: {
+        type: 'DateTime',
+      },
+      createdAt: {
+        type: 'DateTime',
+      },
+    },
+    read: ['updatedAt', 'createdAt'],
   },
   User: {
     query: 'allUsers',

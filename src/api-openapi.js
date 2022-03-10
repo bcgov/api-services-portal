@@ -6,7 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const { Logger } = require('./logger');
 
 var options = {
-  explorer: true,
+  explorer: false,
 };
 
 const { Register } = require('./controllers/ioc/registry');
@@ -88,15 +88,16 @@ class ApiOpenapiApp {
         });
       }
       if (err instanceof AssertionError) {
-        logger.error('Assertion Error (%s)', req.path, err);
+        logger.error(err);
+        logger.error('AssertionError PATH: %s', req.path);
         return res.status(422).json({
           message: err.message,
         });
       }
 
       if (err instanceof Error) {
-        console.error(err);
-        logger.error('Unexpected Error (%s)', req.path, err);
+        logger.error(err);
+        logger.error('Error PATH: %s', req.path);
         return res.status(500).json({
           message: 'Internal Server Error',
         });

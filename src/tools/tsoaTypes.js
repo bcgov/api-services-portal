@@ -8,6 +8,7 @@ let content = `
 /***** RUNING: npm run tsoa-gen-types     ***/
 /********************************************/
 
+export type DateTime = any;
 `;
 
 const refIdList = {};
@@ -32,6 +33,7 @@ Object.keys(metadata).forEach((m) => {
   const fields = [];
   fields.push(`  ${md.refKey}?: string; // Primary Key`);
   md.sync
+    .concat(md.read ? md.read : [])
     .filter((s) => !relationshipFields.includes(s))
     .filter((s) => !objectFields.includes(s))
     .filter((s) => s != md.refKey)

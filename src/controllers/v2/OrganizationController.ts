@@ -6,6 +6,7 @@ import {
   Put,
   Path,
   Route,
+  Query,
   Security,
   Body,
   Get,
@@ -20,6 +21,7 @@ import {
   parseJsonString,
   removeEmpty,
   removeKeys,
+  transformAllRefID,
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
@@ -29,6 +31,9 @@ import { getGwaProductEnvironment } from '../../services/workflow';
 import { GroupAccess, OrgNamespace } from '../../services/org-groups/types';
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { BatchResult } from '../../batch/types';
+import { getActivity } from '../../services/keystone/activity';
+import { Activity } from './types';
+import { query } from 'express';
 // import {
 //   DraftDatasetData,
 //   OrganizationData,
@@ -150,6 +155,37 @@ export class OrganizationController extends Controller {
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
     await svc.unassignNamespaceFromOrganization(ns, org.name, orgUnit);
+  }
+
+  @Get('{orgUnit}/namespaces/{ns}/activity')
+  @OperationId('namespace-activity')
+  @Security('jwt', ['Namespace.Assign'])
+  public async namespaceActivity(
+    @Path() orgUnit: string,
+    @Path() ns: string,
+    @Query() first: number = 20,
+    @Query() skip: number = 0
+  ): Promise<Activity[]> {
+    const ctx = this.keystone.sudo();
+    const org = await getOrganizationUnit(ctx, orgUnit);
+    assert.strictEqual(org != null, true, 'Invalid Organization Unit');
+
+    const prodEnv = await getGwaProductEnvironment(ctx, false);
+    const envConfig = prodEnv.issuerEnvConfig;
+
+    const svc = new NamespaceService(envConfig.issuerUrl);
+    await svc.login(envConfig.clientId, envConfig.clientSecret);
+    const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org.name);
+    assert.strictEqual(
+      assignedNamespaces.filter((n) => n.name === ns).length,
+      1,
+      'Namespace not assigned to this organization'
+    );
+    const records = await getActivity(ctx, first > 50 ? 50 : first, skip);
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['blob']))
+      .map((o) => parseJsonString(o, ['context', 'blob']));
   }
 }
 

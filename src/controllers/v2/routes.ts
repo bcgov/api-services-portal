@@ -224,6 +224,30 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DateTime": {
+        "dataType": "refAlias",
+        "type": {"dataType":"any","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Activity": {
+        "dataType": "refObject",
+        "properties": {
+            "extRefId": {"dataType":"string"},
+            "type": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "action": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["add"]},{"dataType":"enum","enums":["update"]},{"dataType":"enum","enums":["create"]},{"dataType":"enum","enums":["delete"]},{"dataType":"enum","enums":["validate"]},{"dataType":"enum","enums":["publish"]}]},
+            "result": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":[""]},{"dataType":"enum","enums":["received"]},{"dataType":"enum","enums":["failed"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["success"]}]},
+            "message": {"dataType":"string"},
+            "refId": {"dataType":"string"},
+            "namespace": {"dataType":"string"},
+            "blob": {"dataType":"string"},
+            "updatedAt": {"ref":"DateTime"},
+            "createdAt": {"ref":"DateTime"},
+            "actor": {"ref":"UserRefID"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "OrganizationRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -884,6 +908,38 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.unassignNamespace.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/organizations/:orgUnit/namespaces/:ns/activity',
+            authenticateMiddleware([{"jwt":["Namespace.Assign"]}]),
+
+            async function OrganizationController_namespaceActivity(request: any, response: any, next: any) {
+            const args = {
+                    orgUnit: {"in":"path","name":"orgUnit","required":true,"dataType":"string"},
+                    ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    first: {"default":20,"in":"query","name":"first","dataType":"double"},
+                    skip: {"default":0,"in":"query","name":"skip","dataType":"double"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrganizationController>(OrganizationController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.namespaceActivity.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

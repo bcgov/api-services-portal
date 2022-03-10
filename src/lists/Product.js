@@ -6,7 +6,10 @@ const {
   EnforcementPoint,
 } = require('../authz/enforcement');
 const { logger } = require('../logger');
-const { lookupProduct } = require('../services/keystone/product-environment');
+const {
+  DeleteProductValidate,
+  DeleteProductEnvironments,
+} = require('../services/workflow/delete-product');
 const { strict: assert } = require('assert');
 
 module.exports = {
@@ -56,24 +59,19 @@ module.exports = {
       return resolvedData;
     },
 
-    validateDelete: async function ({
-      operation,
-      existingItem,
-      context,
-      listKey,
-      fieldPath, // exists only for field hooks
-      addValidationError,
-    }) {
-      // Don't delete a Product if there are Environments
-      logger.error('Before Delete %j', existingItem);
+    validateDelete: async function ({ existingItem, context }) {
+      await DeleteProductValidate(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
+      );
+    },
 
-      const product = await lookupProduct(context, existingItem.id);
-      logger.error('Product %j', product);
-
-      assert.strictEqual(
-        product.environments.length == 0,
-        true,
-        'All Environments must be deleted first.'
+    beforeDelete: async function ({ existingItem, context }) {
+      await DeleteProductEnvironments(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
       );
     },
   },

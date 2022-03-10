@@ -377,11 +377,13 @@ export class KongConsumerService {
   }
 
   public async deleteConsumer(consumerId: string): Promise<void> {
+    logger.debug('[deleteConsumer] Delete %s', consumerId);
     await fetch(`${this.kongUrl}/consumers/${consumerId}`, {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json',
       },
     }).then(checkStatus);
+    logger.debug('[deleteConsumer] DELETED %s', consumerId);
   }
 }

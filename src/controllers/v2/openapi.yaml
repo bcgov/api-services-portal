@@ -339,6 +339,49 @@ components:
                 - orgUnit
             type: object
             additionalProperties: false
+        DateTime:
+            description: '*****************************************'
+        Activity:
+            properties:
+                extRefId:
+                    type: string
+                type:
+                    type: string
+                name:
+                    type: string
+                action:
+                    type: string
+                    enum:
+                        - add
+                        - update
+                        - create
+                        - delete
+                        - validate
+                        - publish
+                result:
+                    type: string
+                    enum:
+                        - ""
+                        - received
+                        - failed
+                        - completed
+                        - success
+                message:
+                    type: string
+                refId:
+                    type: string
+                namespace:
+                    type: string
+                blob:
+                    type: string
+                updatedAt:
+                    $ref: '#/components/schemas/DateTime'
+                createdAt:
+                    $ref: '#/components/schemas/DateTime'
+                actor:
+                    $ref: '#/components/schemas/UserRefID'
+            type: object
+            additionalProperties: false
         OrganizationRefID:
             type: string
         OrganizationUnitRefID:
@@ -910,6 +953,53 @@ paths:
                     required: true
                     schema:
                         type: string
+    '/organizations/{orgUnit}/namespaces/{ns}/activity':
+        get:
+            operationId: namespace-activity
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Activity'
+                                type: array
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - Namespace.Assign
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: first
+                    required: false
+                    schema:
+                        default: 20
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: skip
+                    required: false
+                    schema:
+                        default: 0
+                        format: double
+                        type: number
     '/organizations/{orgUnit}/datasets':
         get:
             operationId: organization-datasets

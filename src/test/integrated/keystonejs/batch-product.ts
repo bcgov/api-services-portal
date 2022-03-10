@@ -17,6 +17,7 @@ import {
   syncRecords,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
+import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -40,11 +41,11 @@ import { o } from '../util';
   });
 
   if (true) {
-    o(await deleteRecord(ctx, 'Product', '000000000000'));
+    //o(await deleteRecord(ctx, 'Product', '000000000000'));
     // o(await deleteRecord(ctx, 'Product', '000000000002'));
   }
 
-  if (true) {
+  if (false) {
     // scenario 1: Product tries to highjack another Environment
 
     const product1 = {
@@ -80,6 +81,13 @@ import { o } from '../util';
 
     const result2 = await syncRecords(ctx, 'Product', '000000000002', product2);
     o(result2);
+  }
+  if (true) {
+    o(
+      await lookupServiceAccessesByEnvironment(ctx, 'platform', [
+        '6227a8f2778cbf71626ca628',
+      ])
+    );
   }
 
   await keystone.disconnect();

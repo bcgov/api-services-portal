@@ -182,5 +182,13 @@ module.exports = {
 
       return resolvedData;
     },
+
+    validateDelete: async function ({ existingItem, context }) {
+      await DeleteIssuerValidate(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
+      );
+    },
   },
 };

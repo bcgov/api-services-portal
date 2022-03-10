@@ -5,8 +5,7 @@ import {
   ServiceAccess,
   ServiceAccessCreateInput,
 } from './types';
-
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
 const logger = Logger('keystone.svc-access');
 
 export async function lookupCredentialReferenceByServiceAccess(
@@ -145,6 +144,38 @@ export async function lookupServiceAccessesByNamespace(
   });
   logger.debug(
     '[lookupServiceAccessesByNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessesByEnvironment(
+  context: any,
+  ns: string,
+  envIds: string[]
+): Promise<ServiceAccess[]> {
+  logger.debug('[lookupServiceAccessesByEnvironment] lookup %j', envIds);
+
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByNamespace($ns: String!, $envIds: [ID]!) {
+                    allServiceAccesses(where: { productEnvironment: { id_in: $envIds, product: { namespace: $ns } } }) {
+                        id
+                        active
+                        consumer {
+                            username
+                        }
+                    }
+                }`,
+    variables: { ns, envIds },
+  });
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  logger.debug(
+    '[lookupServiceAccessesByEnvironment] result row count %d',
     result.data.allServiceAccesses.length
   );
   return result.data.allServiceAccesses;

@@ -33,6 +33,7 @@ export {
   lookupEnvironmentAndIssuerById,
   lookupProductEnvironmentServices,
   lookupProductEnvironmentServicesBySlug,
+  lookupProduct,
 } from './product-environment';
 
 export {
@@ -40,6 +41,7 @@ export {
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
   lookupServiceAccessesByNamespace,
+  lookupServiceAccessesByEnvironment,
   markActiveTheServiceAccess,
 } from './service-access';
 

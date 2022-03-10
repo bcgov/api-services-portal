@@ -6,6 +6,7 @@ import {
   lookupCredentialReferenceByServiceAccess,
   lookupCredentialIssuerById,
   lookupServiceAccessesByEnvironment,
+  lookupProduct,
 } from '../keystone';
 import {
   KeycloakClientRegistrationService,
@@ -17,41 +18,28 @@ import { KongConsumerService } from '../kong';
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
 import { Logger } from '../../logger';
 import { UMAPolicyService } from '../uma2';
+import { Environment } from '../keystone/types';
 
-const logger = Logger('wf.DeleteEnvironment');
+const logger = Logger('wf.DeleteIssuer');
 
-export const DeleteEnvironment = async (
+export const DeleteIssuerValidate = async (
   context: any,
   ns: string,
-  id: string,
-  force: boolean
-) => {
-  logger.debug(
-    'Deleting Service Accesses for Environment ns=%s, id=%s - force? %s',
-    ns,
-    id,
-    force
-  );
+  id: string
+): Promise<void> => {
+  logger.debug('Validate Deleting Issuer ns=%s, id=%s', ns, id);
 
-  const accessList = await lookupServiceAccessesByEnvironment(context, ns, [
-    id,
-  ]);
+  const issuer = await lookupCredentialIssuerById(context, id);
+
+  const ids = issuer.environments.map((e: Environment) => e.id);
+
+  const accessList = await lookupServiceAccessesByEnvironment(context, ns, ids);
 
   assert.strictEqual(
-    force === true || accessList.length == 0,
+    accessList.length == 0,
     true,
     `${accessList.length} ${
       accessList.length == 1 ? 'consumer has' : 'consumers have'
-    } access to this environment.`
+    } access using this authorization profile.`
   );
-
-  await deleteRecords(
-    context,
-    'ServiceAccess',
-    { productEnvironment: { id } },
-    true,
-    ['id']
-  );
-
-  await deleteRecords(context, 'Environment', { id }, false, ['id']);
 };

@@ -132,18 +132,40 @@ module.exports = {
         addValidationError
       );
     },
-    beforeDelete: async function ({
-      operation,
-      existingItem,
-      context,
-      listKey,
-      fieldPath, // exists only for field hooks
-    }) {
-      await DeleteEnvironment(
-        context.createContext({ skipAccessControl: true }),
-        operation,
-        { environmentId: existingItem.id }
-      );
-    },
+    // beforeDelete: async function ({
+    //   operation,
+    //   existingItem,
+    //   context,
+    //   listKey,
+    //   fieldPath, // exists only for field hooks
+    // }) {
+    //   await DeleteEnvironment(
+    //     context.createContext({ skipAccessControl: true }),
+    //     operation,
+    //     { environmentId: existingItem.id }
+    //   );
+    // },
   },
+  extensions: [
+    (keystone) => {
+      keystone.extendGraphQLSchema({
+        mutations: [
+          {
+            schema:
+              'forceDeleteEnvironment(id: ID!, force: Boolean!): Environment',
+            resolver: async (item, args, context, info, { query, access }) => {
+              console.log('ForceDelete! ' + JSON.stringify(args));
+              return await DeleteEnvironment(
+                context.createContext({ skipAccessControl: true }),
+                context.authedItem['namespace'],
+                args.id,
+                args.force
+              );
+            },
+            access: EnforcementPoint,
+          },
+        ],
+      });
+    },
+  ],
 };

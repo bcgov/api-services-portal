@@ -36,8 +36,10 @@ export default async function InitKeystone(
   });
 
   for (const _list of [
+    'Activity',
     'Application',
     'AccessRequest',
+    'Blob',
     'Content',
     'Organization',
     'OrganizationUnit',

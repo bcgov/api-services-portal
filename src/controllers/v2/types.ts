@@ -4,6 +4,7 @@
 /***** RUNING: npm run tsoa-gen-types     ***/
 /********************************************/
 
+export type DateTime = any;
 
 
 /**
@@ -389,12 +390,14 @@ export interface Activity {
   extRefId?: string; // Primary Key
   type?: string;
   name?: string;
-  action?: string;
-  result?: string;
+  action?: "add" | "update" | "create" | "delete" | "validate" | "publish";
+  result?: "" | "received" | "failed" | "completed" | "success";
   message?: string;
   refId?: string;
   namespace?: string;
   blob?: string;
+  updatedAt?: DateTime;
+  createdAt?: DateTime;
   actor?: UserRefID;
 }
 
