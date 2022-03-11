@@ -84,4 +84,63 @@ export class OrgDatasetController extends Controller {
       body
     );
   }
+
+  @Get('/{orgUnit}/datasets/{name}')
+  @OperationId('get-organization-dataset')
+  @Security('jwt', ['Dataset.Manage'])
+  public async getDataset(
+    @Path() orgUnit: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<Dataset[]> {
+    const ctx = this.keystone.createContext(request);
+
+    const records = await getRecords(
+      ctx,
+      'DraftDataset',
+      undefined,
+      ['organization', 'organizationUnit'],
+      {
+        query: '$orgUnit: String!, $name: String!',
+        clause: '{ organizationUnit: { name: $orgUnit }, name: $name }',
+        variables: { orgUnit, name },
+      }
+    );
+
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, []))
+      .map((o) => parseJsonString(o, ['tags', 'contacts', 'resources']))
+      .map((o) =>
+        removeKeys(o, [
+          'id',
+          'namespace',
+          'extSource',
+          'extForeignKey',
+          'extRecordHash',
+          'orgUnits',
+        ])
+      )
+      .map((o) => transformContacts(o))
+      .map((o) => transformResources(o));
+  }
+}
+
+function transformResources(o: any) {
+  o.resources = o.resources?.map((res: any) => ({
+    name: res.name,
+    url: res.url,
+    bcdc_type: res.bcdc_type,
+    format: res.format,
+  }));
+  return o;
+}
+
+function transformContacts(o: any) {
+  o.contacts = o.contacts?.map((con: any) => ({
+    role: con.role,
+    name: con.name,
+    email: con.email,
+  }));
+  return o;
 }

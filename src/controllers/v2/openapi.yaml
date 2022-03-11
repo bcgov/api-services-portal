@@ -408,6 +408,8 @@ components:
                     type: string
                 isInCatalog:
                     type: string
+                contacts:
+                    type: string
                 extSource:
                     type: string
                 extRecordHash:
@@ -416,6 +418,7 @@ components:
                     items:
                         type: string
                     type: array
+                resources: {}
                 organization:
                     $ref: '#/components/schemas/OrganizationRefID'
                 organizationUnit:
@@ -1053,6 +1056,37 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Dataset'
+    '/organizations/{orgUnit}/datasets/{name}':
+        get:
+            operationId: organization-datasets
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Dataset'
+                                type: array
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: orgUnit
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
+                    required: true
+                    schema:
+                        type: string
     '/namespaces/{ns}/products':
         put:
             operationId: put-product

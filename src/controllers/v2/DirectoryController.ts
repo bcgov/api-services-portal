@@ -38,6 +38,10 @@ export class DirectoryController extends Controller {
       query: item,
       variables: { id },
     });
+    if (result.data.allDiscoverableProducts.length == 0) {
+      return null;
+    }
+
     return transform(
       transformSetAnonymous(result.data.allDiscoverableProducts)
     )[0];

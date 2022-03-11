@@ -1896,6 +1896,7 @@ export type Dataset = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
   notes?: Maybe<Scalars['String']>;
@@ -2078,6 +2079,24 @@ export type DatasetWhereInput = {
   contacts_not_ends_with_i?: Maybe<Scalars['String']>;
   contacts_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   contacts_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resources?: Maybe<Scalars['String']>;
+  resources_not?: Maybe<Scalars['String']>;
+  resources_contains?: Maybe<Scalars['String']>;
+  resources_not_contains?: Maybe<Scalars['String']>;
+  resources_starts_with?: Maybe<Scalars['String']>;
+  resources_not_starts_with?: Maybe<Scalars['String']>;
+  resources_ends_with?: Maybe<Scalars['String']>;
+  resources_not_ends_with?: Maybe<Scalars['String']>;
+  resources_i?: Maybe<Scalars['String']>;
+  resources_not_i?: Maybe<Scalars['String']>;
+  resources_contains_i?: Maybe<Scalars['String']>;
+  resources_not_contains_i?: Maybe<Scalars['String']>;
+  resources_starts_with_i?: Maybe<Scalars['String']>;
+  resources_not_starts_with_i?: Maybe<Scalars['String']>;
+  resources_ends_with_i?: Maybe<Scalars['String']>;
+  resources_not_ends_with_i?: Maybe<Scalars['String']>;
+  resources_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resources_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   organizationUnit?: Maybe<OrganizationUnitWhereInput>;
@@ -2221,6 +2240,8 @@ export enum SortDatasetsBy {
   TagsDesc = 'tags_DESC',
   ContactsAsc = 'contacts_ASC',
   ContactsDesc = 'contacts_DESC',
+  ResourcesAsc = 'resources_ASC',
+  ResourcesDesc = 'resources_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   OrganizationUnitAsc = 'organizationUnit_ASC',
@@ -2252,6 +2273,7 @@ export type DatasetUpdateInput = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   notes?: Maybe<Scalars['String']>;
@@ -2279,6 +2301,7 @@ export type DatasetCreateInput = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   notes?: Maybe<Scalars['String']>;

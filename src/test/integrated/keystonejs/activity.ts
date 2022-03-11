@@ -45,7 +45,7 @@ import {
     authentication: { item: identity },
   });
 
-  if (true) {
+  if (false) {
     const r = await recordActivityWithBlob(
       ctx,
       'delete',

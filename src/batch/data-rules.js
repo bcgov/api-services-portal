@@ -53,11 +53,14 @@ const metadata = {
       'organizationUnit',
       'isInCatalog',
       'tags',
+      'contacts',
+      'resources',
       'extSource',
       'extRecordHash',
     ],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
+      resources: { name: 'toString' },
       organization: {
         name: 'connectOne',
         key: 'org',

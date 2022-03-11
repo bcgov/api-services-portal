@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { updateEnvironmentDetails } from '../../services/keystone';
+import { updateEnvironmentDetails } from '../../../services/keystone';
 
 describe('updateEnvironmentDetails', function () {
   const server = setupServer(

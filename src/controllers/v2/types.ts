@@ -55,9 +55,11 @@ export interface Dataset {
   notes?: string;
   title?: string;
   isInCatalog?: string;
+  contacts?: string;
   extSource?: string;
   extRecordHash?: string;
   tags?: string[];
+  resources?: any; // toString
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
 }

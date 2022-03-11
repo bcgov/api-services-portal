@@ -1,0 +1,117 @@
+name: default
+products:
+  - appId: CB6A56704E69
+    name: 'My API'
+    environments:
+      - appId: 'DBA44A4F'
+        active: false
+        approval: true
+        flow: kong-api-key-acl
+        name: dev
+        product:
+          namespace: platform
+        services:
+          - name: 'SERVICE-1'
+            plugins:
+              - name: 'acl'
+                config: '{}'
+            routes:
+              - name: 'SERVICE-ROUTE-1'
+                plugins:
+                  - name: 'rate-limiting'
+                    config: '{}'
+
+      - id: '61204beaa988d4127e1d4892'
+        appId: '72C528EF'
+        name: 'dev'
+        approval: false
+        legal:
+          reference: 'terms-of-use-for-api-gateway-1'
+        credentialIssuer:
+          name: 'GWA API Resource Server'
+          flow: 'client-credentials'
+          mode: 'auto'
+          environmentDetails: '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps-v2","clientId":"gwa-api","clientRegistration":"managed","clientSecret":"66919256-e415-47a8-b468-40b0d8161f85"}]'
+          resourceType: 'namespace'
+          resourceAccessScope: 'Namespace.Manage'
+
+credentialIssuers:
+  - id: '0001'
+    name: ISSUER-001
+    flow: kong-api-key-acl
+    mode: auto
+consumers:
+  - id: '6125e341423a8b576188bc4f'
+    username: 'DBA44A4F-06C16D06EB334F7D'
+    aclGroups: '[]'
+    customId: 'DBA44A4F-06C16D06EB334F7D'
+    extForeignKey: '85a9bdba-5bc4-434a-895b-a3decabd389f'
+    namespace: null
+    plugins:
+      - id: '6172f0b81955bb79b67279d6'
+        name: 'ip-restriction'
+        config: '{"allow":["2.2.2.2"],"deny":null}'
+        service: { id: '6120467ba988d4127e1d483c', name: 'aps-authz' }
+        route: null
+      - id: '6172f0c11955bb79b67279d8'
+        name: 'rate-limiting'
+        config: '{"hide_client_headers":false,"minute":null,"policy":"local","month":null,"redis_timeout":2000,"limit_by":"consumer","redis_password":"****","second":5,"day":null,"redis_database":0,"year":null,"hour":null,"redis_host":"****","redis_port":6379,"header_name":null,"fault_tolerant":true}'
+        service:
+          id: '6120467ba988d4127e1d4844'
+          name: 'aps-portal'
+        route: null
+      - id: '6172f0cc1955bb79b67279da'
+        name: 'rate-limiting'
+        config: '{"hide_client_headers":false,"minute":100,"policy":"redis","month":null,"redis_timeout":2000,"limit_by":"consumer","redis_password":"****","second":null,"day":null,"redis_database":0,"year":null,"hour":null,"redis_host":"****","redis_port":6379,"header_name":null,"fault_tolerant":true}'
+        service: null
+        route:
+          id: '6120467ba988d4127e1d4868'
+          name: 'aps-portal'
+    tags: '["aps-portal"]'
+    createdAt: '2021-08-25T06:29:21.200Z'
+
+serviceAccesses:
+  - id: '3335e34140008b576188bc23'
+    consumer:
+      username: 'DBA44A4F-06C16D06EB334F7D'
+
+accessRequests:
+  - credentialReference: ''
+    application:
+      appId: 'APP-01'
+    productEnvironment:
+      name: 'ENV-NAME'
+      credentialIssuer:
+        id: 'ISSUER-01'
+
+serviceMetrics:
+  - query: 'kong_http_requests_hourly_service'
+    day: '2021-10-17'
+    metric: '{"service":"aps-authz"}'
+    values: '[[1634454000,"0"],[1634457600,"0"],[1634461200,"0"],[1634464800,"0"],[1634468400,"0"],[1634472000,"0"],[1634475600,"6.02510460251046"],[1634479200,"70.2928870292887"],[1634482800,"0"],[1634486400,"0"],[1634490000,"0"],[1634493600,"0"],[1634497200,"0"],[1634500800,"0"],[1634504400,"0"],[1634508000,"0"],[1634511600,"0"],[1634515200,"0"],[1634518800,"0"],[1634522400,"31.12999450722631"],[1634526000,"1.00418410041841"],[1634529600,"0"],[1634533200,"0"],[1634536800,"0"]]'
+    service:
+      name: 'aps-authz'
+  - query: 'kong_http_requests_hourly_service'
+    day: '2021-10-18'
+    metric: '{"service":"aps-authz"}'
+    values: '[[1634540400,"0"],[1634544000,"0"],[1634547600,"0"],[1634551200,"0"],[1634554800,"0"],[1634558400,"0"],[1634562000,"0"],[1634565600,"0"],[1634569200,"0"],[1634572800,"0"],[1634576400,"5.02092050209205"],[1634580000,"166.69574218576506"],[1634583600,"2.00836820083682"],[1634587200,"0"],[1634590800,"1.00418410041841"],[1634594400,"0"],[1634598000,"15.06276150627615"],[1634601600,"64.26800399851074"],[1634605200,"7.02928870292887"],[1634608800,"1.00418410041841"],[1634612400,"0"],[1634616000,"0"],[1634619600,"0"],[1634623200,"0"]]'
+    service:
+      name: 'aps-authz'
+  - query: 'kong_http_requests_hourly_service'
+    day: '2021-10-19'
+    metric: '{"service":"aps-authz"}'
+    values: '[[1634626800,"0"],[1634630400,"0"],[1634634000,"0"],[1634637600,"0"],[1634641200,"0"],[1634644800,"0"],[1634648400,"0"],[1634652000,"0"],[1634655600,"0"],[1634659200,"4.01673640167364"],[1634662800,"2.0112523984883204"],[1634666400,"0"],[1634670000,"12.071579602510461"],[1634673600,"1.00418410041841"],[1634677200,"40.20372177799439"],[1634680800,"36.15063601831215"],[1634684400,"4.01673640167364"],[1634688000,"1.00418410041841"],[1634691600,"0"],[1634695200,"0"],[1634698800,"0"],[1634702400,"0"],[1634706000,"0"],[1634709600,"0"]]'
+    service:
+      name: 'aps-authz'
+  - query: 'kong_http_requests_hourly_service'
+    day: '2021-10-20'
+    metric: '{"service":"aps-authz"}'
+    values: '[[1634713200,"0"],[1634716800,"0"],[1634720400,"0"],[1634724000,"0"],[1634727600,"0"],[1634731200,"0"],[1634734800,"0"],[1634738400,"1.00418410041841"],[1634742000,"0"],[1634745600,"0"],[1634749200,"7.02928870292887"],[1634752800,"8.03347280334728"],[1634756400,"27.11297071129707"],[1634760000,"26.10878661087866"],[1634763600,"0"],[1634767200,"34.14225941422594"],[1634770800,"539.7861234638355"],[1634774400,"173.72384937238493"],[1634778000,"32.13389121338912"],[1634781600,"96.40167364016735"],[1634785200,"0"],[1634788800,"0"],[1634792400,"0"],[1634796000,"0"]]'
+    service:
+      name: 'aps-authz'
+  - query: 'kong_http_requests_hourly_service'
+    day: '2021-10-21'
+    metric: '{"service":"aps-authz"}'
+    values: '[[1634799600,"0"],[1634803200,"0"],[1634806800,"0"],[1634810400,"0"],[1634814000,"0"],[1634817600,"0"],[1634821200,"3.01255230125523"],[1634824800,"0"],[1634828400,"0"],[1634832000,"235.98326359832637"],[1634835600,"226.9734996155761"],[1634839200,"4.01673640167364"],[1634842800,"28.11715481171548"],[1634846400,"10.0418410041841"],[1634850000,"38.15899581589958"],[1634853600,"14.05857740585774"],[1634857200,"15.06276150627615"],[1634860800,"15.06276150627615"],[1634864400,"0"],[1634868000,"0"],[1634871600,"0"],[1634875200,"0"],[1634878800,"3.01255230125523"],[1634882400,"0"]]'
+    service:
+      name: 'aps-authz'
