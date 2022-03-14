@@ -25,6 +25,20 @@ groupMembers:
         id: 'u-003'
         email: 'user3@local'
 
+groupDetails:
+  - id: 11839829-740d-4310-90ae-1093341a5cba
+    name: orgcontrol
+    path: /ns/orgcontrol
+    subGroups: []
+    attributes: {}
+  - id: 22839829-740d-4310-90ae-1093341a5cba
+    name: orgcontrol_2
+    path: /ns/orgcontrol_2
+    subGroups: []
+    attributes:
+      org: ['ministry-of-citizens-services']
+      'org-unit': ['databc']
+
 groups:
   - id: a6902d51-38c1-43ca-8748-8d2c7209b1e1
     name: ns
@@ -34,10 +48,25 @@ groups:
         name: test-1
         path: /ns/test-1
         subGroups: []
+        attributes: {}
       - id: b8839829-740d-4310-90ae-1093341a5cba
         name: test-2
         path: /ns/test-2
         subGroups: []
+        attributes: {}
+      - id: 11839829-740d-4310-90ae-1093341a5cba
+        name: orgcontrol
+        path: /ns/orgcontrol
+        subGroups: []
+        attributes: {}
+      - id: 22839829-740d-4310-90ae-1093341a5cba
+        name: orgcontrol_2
+        path: /ns/orgcontrol_2
+        subGroups: []
+        attributes:
+          org: ['ministry-of-citizens-services']
+          'org-unit': ['databc']
+
   - id: 5978a996-c215-4c3f-a17e-a76396a9d6a4
     name: data-custodian
     path: /data-custodian

@@ -8,7 +8,6 @@ import {
 } from '../../../services/keycloak';
 import fetch from 'node-fetch';
 import { o } from '../../integrated/util';
-import { lchmod } from 'fs';
 
 describe('Org Group Access Service', function () {
   it('it should getGroupAccess', async function () {
@@ -17,9 +16,9 @@ describe('Org Group Access Service', function () {
     ).json();
 
     const kc = new GroupAccessService(uma2);
-    kc.login(null, null);
+    await kc.login(null, null);
 
-    // const access = await kc.getGroupAccess('databc');
-    // o(access);
+    const access = await kc.getGroupAccess('databc');
+    o(access);
   });
 });

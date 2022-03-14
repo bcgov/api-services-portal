@@ -40,7 +40,7 @@ export class NamespaceService {
     ns: string,
     org: string,
     orgUnit: string
-  ) {
+  ): Promise<boolean> {
     const group = await this.groupService.getGroup('ns', ns);
 
     logger.debug('[assignNamespaceToOrganization] %s - Group = %j', ns, group);
@@ -63,12 +63,13 @@ export class NamespaceService {
       group.attributes['org-unit'][0] === orgUnit
     ) {
       logger.debug('[assignNamespaceToOrganization] %s - Already assigned', ns);
-      return;
+      return false;
     }
 
     group.attributes['org'] = [org];
     group.attributes['org-unit'] = [orgUnit];
     await this.groupService.updateGroup(group);
+    return true;
   }
 
   async unassignNamespaceFromOrganization(
