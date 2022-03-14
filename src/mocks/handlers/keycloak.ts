@@ -87,12 +87,20 @@ const calls: any = {
 
   'https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/policy': (
     _: any,
-    query: any
+    { resource }: any
   ) => {
     return def.clientPermissions
-      .filter((p: any) => p.resource.id === query.resource)
+      .filter((p: any) => p.resource.id === resource)
       .map((p: any) => p.permissions)
       .pop();
+  },
+
+  'https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/policy/search': (
+    _: any,
+    { name }: any
+  ) => {
+    // ?name=group-data-custodian-ministry-citizens-services-databc-policy
+    return def.clientPolicies.filter((p: any) => p.name === name).pop();
   },
 
   'https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/policy/group/:gid': (
@@ -131,6 +139,34 @@ const calls: any = {
       .map((p: any) => p.policies)
       .pop();
   },
+
+  'https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/permission': (
+    _: any,
+    { name }: any
+  ) => {
+    const result = def.clientPermissions[0].permissions.filter(
+      (p: any) => p.name.indexOf(name) != -1
+    );
+    logger.info('Returning %j', result);
+    return result;
+  },
+
+  'https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/resource': (
+    _: any,
+    query: any
+  ) => {
+    return def.clientResourceServers[0].resources.filter(
+      (p: any) => p.name === query.name
+    );
+  },
+
+  'put https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/permission/scope/0d793387-6617-4cb4-87a3-76478c368849': {},
+
+  'post https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/permission/scope': {},
+
+  'put https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/policy/group/5f84d050-f50d-4a2b-946c-9a9fa6cb3317': {},
+
+  'post https://provider/auth/admin/realms/abc/clients/acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81/authz/resource-server/policy/group': {},
 
   'https://provider/protection/resource_set/:rid': (
     { rid }: any,

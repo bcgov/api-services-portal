@@ -97,6 +97,7 @@ export class KeycloakClientService {
     ).filter((r) => r.name === name);
     assert.strictEqual(lkup.length, 1, 'Resource not found ' + name);
     logger.debug('[findResourceByName] [%s] Found - %s', name, lkup[0]._id);
+    logger.debug('[findResourceByName] [%s] Found - %j', name, lkup[0]);
     return lkup[0];
   }
 

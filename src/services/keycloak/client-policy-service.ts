@@ -134,6 +134,7 @@ export class KeycloakClientPolicyService {
   ): Promise<PolicyRepresentation[]> {
     logger.debug('[findPermissionByName] r=%s p=%s', roleName, policyName);
     const result = [];
+    // first find permissions that have 'roleName' in the name
     const lkup: PolicyRepresentation[] = await this.kcAdminClient.clients
       .findPermissions({ id, name: roleName })
       .catch((e: any) => {
@@ -141,12 +142,15 @@ export class KeycloakClientPolicyService {
         throw e;
       });
 
+    // then for each, look up the policies and do an exact match
+    // of the 'policyName' to the policy name
     for (const perm of lkup) {
       const policies = await (this.kcAdminClient
         .clients as any).getAssociatedPolicies({
         id,
         permissionId: perm.id,
       });
+      logger.debug('[findPermissionByName] Associated %j', policies);
 
       if (policies.length == 1 && policies[0].name === policyName) {
         await this.enrichWithAssociations(id, perm);

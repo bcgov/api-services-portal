@@ -295,7 +295,7 @@ export class OrgGroupService {
 
     if (permissionPolicy) {
       logger.debug(
-        'Updating permission (%s) %j %j',
+        'Updating permission (PolicyID=%s) %j',
         permissionPolicy.id,
         permission
       );
@@ -533,14 +533,14 @@ export class OrgGroupService {
     return allGroupMembers.filter((u) => u.id === user.id).length == 1;
   }
 
-  private getGroupPolicyName(orgGroup: OrganizationGroup): string {
+  public getGroupPolicyName(orgGroup: OrganizationGroup): string {
     return `group${orgGroup.parent}/${orgGroup.name}-policy`.replace(
       /\//g,
       '-'
     );
   }
 
-  private getGroupPermissionName(
+  public getGroupPermissionName(
     orgGroup: OrganizationGroup,
     resourceName: string
   ): string {

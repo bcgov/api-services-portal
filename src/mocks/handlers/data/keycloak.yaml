@@ -155,6 +155,52 @@ clientResourceServers:
           - name: Dataset.Manage
           - name: Namespace.Assign
 
+      - name: orgcontrol
+        type: namespace
+        owner:
+          id: e96342a6-7615-4158-b3de-983a8b893d07
+          name: gwa-api
+        ownerManagedAccess: true
+        attributes: {}
+        _id: b444a5a1-8e14-4f92-9005-8b476b977e25
+        uris: []
+        scopes:
+          - id: e349c1dc-a0ee-4072-8644-ef476fe891cb
+            name: GatewayConfig.Publish
+          - id: 6c150f0a-a0a1-40e2-9f1c-227424055c8b
+            name: Namespace.Manage
+          - id: 7e9a6313-f5a5-4e03-8703-e35ec55c101f
+            name: Access.Manage
+          - id: 5cf9a3b4-32f4-478b-9cf5-937fc1d949d9
+            name: Content.Publish
+          - id: c11ee577-be1a-4f99-95e2-4d63788640e4
+            name: Namespace.View
+          - id: 68541256-4db8-42ed-86a9-643e013ba63b
+            name: CredentialIssuer.Admin
+
+      - name: ns2
+        type: namespace
+        owner:
+          id: e96342a6-7615-4158-b3de-983a8b893d07
+          name: gwa-api
+        ownerManagedAccess: true
+        attributes: {}
+        _id: b444a5a1-8e14-4f92-9005-8b476b977e00
+        uris: []
+        scopes:
+          - id: e349c1dc-a0ee-4072-8644-ef476fe891cb
+            name: GatewayConfig.Publish
+          - id: 6c150f0a-a0a1-40e2-9f1c-227424055c8b
+            name: Namespace.Manage
+          - id: 7e9a6313-f5a5-4e03-8703-e35ec55c101f
+            name: Access.Manage
+          - id: 5cf9a3b4-32f4-478b-9cf5-937fc1d949d9
+            name: Content.Publish
+          - id: c11ee577-be1a-4f99-95e2-4d63788640e4
+            name: Namespace.View
+          - id: 68541256-4db8-42ed-86a9-643e013ba63b
+            name: CredentialIssuer.Admin
+
     policies: []
 
 policyAssociations:
