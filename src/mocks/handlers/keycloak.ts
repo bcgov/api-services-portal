@@ -20,6 +20,11 @@ const calls: any = {
 
   'https://elsewhere/auth/realms/my-realm/.well-known/openid-configuration': null,
 
+  // 'post https://provider/auth/realms/abc/protocol/openid-connect/token': {
+  //   access_token: 'xxx',
+  // },
+  // 'post https://provider/token': {},
+
   'post https://provider/auth/realms/my-realm/clients-registrations/default': {
     id: '001',
     clientId: 'cid',
@@ -51,8 +56,23 @@ const calls: any = {
   'https://provider/admin/realms/abc/clients': def.clients,
 
   'https://provider/groups': def.groups,
-  'https://provider/auth/admin/realms/abc/groups': def.groups,
-  'https://provider/admin/realms/abc/groups': def.groups,
+  'https://provider/admin/realms/abc/groups': (_: any, { search }: any) => {
+    return search === 'test-2' ? [def.groups[0]] : def.groups;
+  },
+  'https://provider/auth/admin/realms/abc/groups': (
+    _: any,
+    { search }: any
+  ) => {
+    switch (search) {
+      case 'test-2':
+        return [def.groups[0]];
+      case 'databc':
+        return [def.groups[1]];
+      default:
+        return def.groups;
+    }
+  },
+  // 'https://provider/admin/realms/abc/groups': def.groups,
 
   'https://provider/auth/admin/realms/abc/groups/:group/members': (
     { group }: any,
