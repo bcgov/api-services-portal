@@ -1,29 +1,9 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
-import {
-  KeycloakClientPolicyService,
-  KeycloakClientService,
-  KeycloakGroupService,
-  KeycloakTokenService,
-  Uma2WellKnown,
-} from '../keycloak';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
-import PolicyRepresentation, {
-  DecisionStrategy,
-  Logic,
-} from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
-import { GroupAccess, GroupRole, OrgNamespace } from './types';
-import { OrganizationGroup, OrgGroupService } from './org-group-service';
-import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
+import { KeycloakTokenService, Uma2WellKnown } from '../keycloak';
 import { UMAResourceRegistrationService } from '../uma2';
 
-const logger = Logger('org-group.ns');
+const logger = Logger('org-group.authz');
 
 export const AllOrgAuthzScopes: string[] = [
   'GroupAccess.Manage',
@@ -47,7 +27,7 @@ export class OrgAuthzService {
     );
   }
 
-  async createIfMissingResource(org: string) {
+  async createIfMissingResource(org: string): Promise<string> {
     logger.debug('[createIfMissingResource] %s', org);
 
     const svc = new UMAResourceRegistrationService(
@@ -63,14 +43,16 @@ export class OrgAuthzService {
         "[createIfMissingResource] '%s' already exists",
         resourceName
       );
+      return res.id;
     } else {
-      await svc.createResourceSet({
+      const created = await svc.createResourceSet({
         name: resourceName,
         type: 'organization',
         resource_scopes: AllOrgAuthzScopes,
         ownerManagedAccess: true,
       });
       logger.debug("[createIfMissingResource] '%s' CREATED", resourceName);
+      return created.id;
     }
   }
 }

@@ -26,7 +26,6 @@ const logger = Logger('org-groups');
 
 enum RoleGroups {
   'data-custodian',
-  'test',
 }
 
 export interface OrganizationGroup {
@@ -85,6 +84,10 @@ export class OrgGroupService {
   }
 
   private findGroupTraverse(id: string, groups: GroupRepresentation[]): string {
+    if (typeof groups === 'undefined') {
+      logger.error('[findGroupTraverse] Failed to find %s', id);
+      return undefined;
+    }
     const match = groups.filter((group) => group.id == id);
     if (match.length == 1) {
       return match[0].path;
@@ -99,7 +102,7 @@ export class OrgGroupService {
   //   return await this.keycloakService.getGroups(parentGroupName);
   // }
 
-  public async deleteGroup(orgGroup: OrganizationGroup) {
+  public async deleteGroup(orgGroup: OrganizationGroup): Promise<void> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     await this.keycloakService.deleteGroup(groupIds.pop().id);
   }

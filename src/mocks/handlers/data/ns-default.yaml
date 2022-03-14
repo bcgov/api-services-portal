@@ -40,6 +40,7 @@ credentialIssuers:
     name: ISSUER-001
     flow: kong-api-key-acl
     mode: auto
+
 consumers:
   - id: '6125e341423a8b576188bc4f'
     username: 'DBA44A4F-06C16D06EB334F7D'

@@ -1,3 +1,5 @@
+import YAML from 'js-yaml';
+
 export function o(s: any) {
-  console.log(JSON.stringify(s, null, 3));
+  console.log(YAML.dump(s, { indent: 2 }));
 }

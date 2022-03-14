@@ -10,7 +10,9 @@ const nsDefault = YAML.load(
   fs.readFileSync('./mocks/handlers/data/ns-default.yaml', 'utf8')
 );
 
-const scenarios: { [key: string]: any } = {
+const scenarios: {
+  [key: string]: { [queryName: string]: any };
+} = {
   default: {
     GetCredentialIssuerById: {
       data: {

@@ -76,6 +76,7 @@ export class KeycloakClientPolicyService {
         logger.error('Err %s', JSON.stringify(e, null, 3));
         throw e;
       });
+    logger.debug('[listPermissionsByResource] %j', permissions);
 
     for (const perm of permissions) {
       perm.scopes = await this.kcAdminClient.clients.getAssociatedScopes({

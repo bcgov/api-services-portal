@@ -135,6 +135,7 @@ export class KeycloakGroupService {
     const result = await this.search(name, briefRepresentation);
     const selectedBranch = result.filter((g) => g.name === root);
     if (selectedBranch.length == 0) {
+      logger.error('[findByName] %s - not found', root);
       return null;
     }
     return this.searchTree(selectedBranch, name, 'name', false);
