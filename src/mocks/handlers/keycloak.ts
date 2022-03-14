@@ -209,6 +209,13 @@ const calls: any = {
 };
 
 const catchAll = [
+  rest.post(
+    'https://provider/auth/admin/realms/abc/groups/:group/children',
+    (req, res, ctx) => {
+      logger.info('Returning Location for %s', req.url);
+      return res(ctx.set('Location', 'https://id'));
+    }
+  ),
   rest.get('https://provider/*', (req, res, ctx) => {
     logger.error('No match for %s', req.url);
   }),

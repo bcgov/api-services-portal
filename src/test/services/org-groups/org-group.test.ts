@@ -73,6 +73,38 @@ describe('Org Group Access Service', function () {
     await kc.deleteGroup(orgGroup);
   });
 
+  it('it should createGroupIfMissing', async function () {
+    const uma2: Uma2WellKnown = await (
+      await fetch('https://provider/.well-known/uma2-configuration')
+    ).json();
+
+    const kc = new OrgGroupService(uma2.issuer);
+    await kc.backfillGroups();
+
+    const orgGroup: OrganizationGroup = {
+      name: 'databc',
+      parent: '/data-custodian/ministry-citizens-services',
+    };
+
+    await kc.createGroupIfMissing(orgGroup);
+  });
+
+  // it('it should createGroupIfMissing (missing)', async function () {
+  //   const uma2: Uma2WellKnown = await (
+  //     await fetch('https://provider/.well-known/uma2-configuration')
+  //   ).json();
+
+  //   const kc = new OrgGroupService(uma2.issuer);
+  //   await kc.backfillGroups();
+
+  //   const orgGroup: OrganizationGroup = {
+  //     name: 'databc_2',
+  //     parent: '/data-custodian/ministry-citizens-services',
+  //   };
+
+  //   await kc.createGroupIfMissing(orgGroup);
+  // });
+
   it('it should getGroupPermissionsByResource', async function () {
     const uma2: Uma2WellKnown = await (
       await fetch('https://provider/.well-known/uma2-configuration')
