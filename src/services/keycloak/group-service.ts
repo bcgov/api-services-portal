@@ -110,7 +110,7 @@ export class KeycloakGroupService {
   }
 
   public async getAllGroups() {
-    return await this.kcAdminClient.groups.find();
+    return this.kcAdminClient.groups.find();
   }
 
   public async search(
@@ -152,7 +152,7 @@ export class KeycloakGroupService {
 
   public async getGroupById(id: string) {
     logger.debug('[getGroupById] %s', id);
-    return await this.kcAdminClient.groups.findOne({ id });
+    return this.kcAdminClient.groups.findOne({ id });
   }
 
   public async getGroup(parentGroupName: string, groupName: string) {
@@ -171,17 +171,17 @@ export class KeycloakGroupService {
       const grp = groups[0].subGroups.filter(
         (group: GroupRepresentation) => group.name == groupName
       )[0];
-      return await this.kcAdminClient.groups.findOne({ id: grp.id });
+      return this.kcAdminClient.groups.findOne({ id: grp.id });
     }
   }
 
   public async listMembers(id: string): Promise<UserRepresentation[]> {
-    return await this.kcAdminClient.groups.listMembers({ id });
+    return this.kcAdminClient.groups.listMembers({ id });
   }
 
   public async addMemberToGroup(id: string, groupId: string): Promise<string> {
     logger.debug('[addMemberToGroup] %s from %s', id, groupId);
-    return await this.kcAdminClient.users.addToGroup({ id, groupId });
+    return this.kcAdminClient.users.addToGroup({ id, groupId });
   }
 
   public async delMemberFromGroup(
@@ -189,7 +189,7 @@ export class KeycloakGroupService {
     groupId: string
   ): Promise<string> {
     logger.debug('[delMemberFromGroup] %s from %s', id, groupId);
-    return await this.kcAdminClient.users.delFromGroup({ id, groupId });
+    return this.kcAdminClient.users.delFromGroup({ id, groupId });
   }
 
   public async lookupMemberByUsername(username: string): Promise<string> {

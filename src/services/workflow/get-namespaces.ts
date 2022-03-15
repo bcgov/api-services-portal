@@ -43,7 +43,7 @@ export async function getGwaProductEnvironment(
     process.env.GWA_PROD_ENV_SLUG
   );
 
-  return await getEnvironmentContext(context, prodEnvId, {}, withSubject);
+  return getEnvironmentContext(context, prodEnvId, {}, withSubject);
 }
 
 export async function getMyNamespaces(

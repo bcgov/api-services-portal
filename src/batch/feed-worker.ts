@@ -11,7 +11,6 @@ import {
   toString,
 } from './transformations';
 import { handleNameChange } from './hooks';
-import union from 'lodash/union';
 
 import { BatchResult } from './types';
 import {
@@ -50,19 +49,6 @@ const transformations = {
   alwaysTrue: alwaysTrue,
   alwaysFalse: alwaysFalse,
 } as any;
-
-// const importFeedWorker = async (keystone: any, entity: string, json: any) => {
-//     const eid = json['id']
-//     console.log(JSON.stringify(json, null, 4))
-
-//     assert.strictEqual(entity in metadata, true)
-//     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
-
-//     assert.strictEqual(typeof eid == 'string', true, 'Unique ID is not a string! ' + JSON.stringify(json))
-
-//     const result = await syncRecords(keystone, entity, eid, json)
-//     return result
-// }
 
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
@@ -221,7 +207,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
         .map((entity) => (metadata as any)[entity])
         .pop();
       if (children.includes(field)) {
-        delete children[children.indexOf(field)];
+        children.splice(children.indexOf(field), 1);
         response.push(
           `${field} { id, ${buildQueryResponse(mdRelField, children)} }`
         );
@@ -242,32 +228,6 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
   return response;
 }
 
-// export const getRecord = async function (
-//   context: any,
-//   feedEntity: string,
-//   eid: string,
-//   children = false
-// ): Promise<any> {
-//   const md = (metadata as any)[feedEntity];
-
-//   assert.strictEqual(
-//     children == false && md.childOnly === true,
-//     false,
-//     'This entity is only part of a child.'
-//   );
-
-//   const batchService = new BatchService(context);
-
-//   const localRecord = await batchService.lookup(
-//     md.query,
-//     md.refKey,
-//     eid,
-//     buildQueryResponse(md)
-//   );
-
-//   return localRecord;
-// };
-
 export const getRecords = async function (
   context: any,
   feedEntity: string,
@@ -279,13 +239,11 @@ export const getRecords = async function (
 
   const batchService = new BatchService(context);
 
-  const localRecord = await batchService.listAll(
+  return await batchService.listAll(
     query ? query : md.query,
     buildQueryResponse(md, children),
     where
   );
-
-  return localRecord;
 };
 
 export const syncRecords = async function (

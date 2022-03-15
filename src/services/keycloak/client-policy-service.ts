@@ -57,7 +57,7 @@ export class KeycloakClientPolicyService {
     query?: PolicyQuery
   ): Promise<PolicyRepresentation[]> {
     logger.debug('[listPolicies] %s', id);
-    return await this.kcAdminClient.clients
+    return this.kcAdminClient.clients
       .listPolicies({ ...{ id, max: 1000 }, ...query })
       .catch((e: any) => {
         logger.error('Err %s', JSON.stringify(e, null, 3));

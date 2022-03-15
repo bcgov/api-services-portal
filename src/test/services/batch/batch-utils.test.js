@@ -3,6 +3,7 @@ import {
   transformAllRefID,
   removeEmpty,
   removeKeys,
+  dot,
 } from '../../../batch/feed-worker';
 
 describe('Batch Utilities', function () {
@@ -16,9 +17,9 @@ describe('Batch Utilities', function () {
       tags: ['tag1', 'tag2'],
     };
 
-    expect(JSON.stringify(parseJsonString(input, ['tags']))).toBe(
-      JSON.stringify(output)
-    );
+    const result = parseJsonString(input, ['tags']);
+
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
   });
 
   it('should transform reference IDs', async function () {
@@ -55,7 +56,9 @@ describe('Batch Utilities', function () {
       nested: {},
     };
 
-    expect(JSON.stringify(removeEmpty(input))).toBe(JSON.stringify(output));
+    const result = removeEmpty(input);
+
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
   });
 
   it('should remove keys', async function () {
@@ -79,8 +82,21 @@ describe('Batch Utilities', function () {
       },
     };
 
-    expect(JSON.stringify(removeKeys(input, ['id', 'block']))).toBe(
-      JSON.stringify(output)
-    );
+    const result = removeKeys(input, ['id', 'block']);
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
+  });
+
+  it('should test dot', async function () {
+    const value = {
+      name: 'joe',
+      child: {
+        name: 'bill',
+      },
+    };
+    expect(dot(value, 'child.name')).toBe('bill');
+    expect(dot(value, 'child.invalid')).toBe(undefined);
+    expect(dot(value, 'name')).toBe('joe');
+    expect(dot(value, '.nowhere')).toBe(null);
+    expect(dot(value, 'a.b.c')).toBe(null);
   });
 });

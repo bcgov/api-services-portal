@@ -451,7 +451,7 @@ export class OrgGroupService {
 
   public async listMembers(orgGroup: OrganizationGroup): Promise<User[]> {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
-    return await this.listMembersOfGroups(groupIds.map((g) => g.id));
+    return this.listMembersOfGroups(groupIds.map((g) => g.id));
   }
 
   public async listMembersOfGroups(groupIds: string[]): Promise<User[]> {

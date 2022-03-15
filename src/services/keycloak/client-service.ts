@@ -25,7 +25,7 @@ export class KeycloakClientService {
   }
 
   public async list() {
-    return await this.kcAdminClient.clients.find();
+    return this.kcAdminClient.clients.find();
   }
 
   public async searchForClientId(clientId: string) {
@@ -116,6 +116,6 @@ export class KeycloakClientService {
   }
 
   public async findRealmClientScopes(): Promise<ClientScopeRepresentation[]> {
-    return await this.kcAdminClient.clientScopes.find();
+    return this.kcAdminClient.clientScopes.find();
   }
 }
