@@ -20,6 +20,18 @@ class NameSpacePage {
         cy.get(this.serviceAccountsLink).should('not.exist')
         cy.get(this.deleteNamespaceLink).should('not.exist')
     }
+
+    verifyThatAllOptionsAreDisplayed()
+    {
+        cy.get(this.gatewayServiceLink).should('exist')
+        cy.get(this.productsLink).should('exist')
+        cy.get(this.consumersLink).should('exist')
+        cy.get(this.activityLink).should('exist')
+        cy.get(this.authorizationProfileLink).should('exist')
+        cy.get(this.namespaceAccessLink).should('exist')
+        cy.get(this.serviceAccountsLink).should('exist')
+        cy.get(this.deleteNamespaceLink).should('exist')
+    }
 }
 
 export default NameSpacePage

@@ -32,7 +32,14 @@ checkServiceAccountNotExist() : void
     })
   }
 
-
+  isShareButtonVisible(expStatus : boolean) {
+    var actStatus = false
+    cy.get(this.shareBtn).then($button => {
+      if ($button.is(':visible'))
+        actStatus =true
+      assert.strictEqual (actStatus,expStatus,"Share button status is other than expected status")
+  })
+}
 
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {

@@ -57,20 +57,21 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
               data-testid="ap-flow-select"
             >
               <VStack align="stretch" spacing={2}>
-                <Radio name="flow" value="client-credentials.client-secret">
+                <Radio name="flow" data-testid="cc-id-secret-chkBox" value="client-credentials.client-secret">
                   Client Credential Flow, using Client ID and Secret
                 </Radio>
-                <Radio name="flow" value="client-credentials.client-jwt">
+                <Radio name="flow" data-testid="cc-jwt-key-chkBox" value="client-credentials.client-jwt">
                   Client Credential Flow, using signed JWT with Generated Key
                   Pair
                 </Radio>
                 <Radio
                   name="flow"
                   value="client-credentials.client-jwt-jwks-url"
+                  data-testid="cc-jwt-jwks-chkBox"
                 >
                   Client Credential Flow, using signed JWT with JWKS URL
                 </Radio>
-                <Radio name="flow" value="kong-api-key-acl">
+                <Radio name="flow" data-testid="kong-api-key-chkBox" value="kong-api-key-acl">
                   Kong API Key
                 </Radio>
               </VStack>
