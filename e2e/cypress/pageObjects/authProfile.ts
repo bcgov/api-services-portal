@@ -13,28 +13,39 @@ class AuthorizationProfile {
   uma2ResourceType: string = '[data-testid="ap-authorization-uma2-resource-type"]'
   resourceScopes: string = '[data-testid="ap-authorization-resource-scopes"]'
   resourceAccessScope: string = '[data-testid="ap-authorization-resource-access-scope"]'
-  addEnvBtn: string = '[data-testid="ap-client-mgmt-add-env-btn"]'
-  envSelector: string = '[data-testid="ap-env-env"]'
-  clientRegistration: string = '[data-testid="ap-env-client-reg"]'
-  idpIssuerUrl: string = '[data-testid="ap-env-idp-url"]'
+  addEnvBtn: string = '[data-testid="ap-client-mgmt-add-env-Add Environment"]'
+  envSelector: string = '[data-testid="cm-environment-dropdown"]'
+  clientRegistration: string = '[data-testid="cm-client-registration-dropdown"]'
+  idpIssuerUrl: string = '[data-testid="idp-issuer-url"]'
   initAccessToken: string = '[data-testid="ap-env-init-token"]'
-  clientId: string = '[data-testid="ap-env-client-id"]'
-  clientSecret: string = '[data-testid="ap-env-client-secret"]'
+  clientId: string = '[data-testid="cm-client-id"]'
+  clientSecret: string = '[data-testid="cm-client-secret"]'
   envAddBtn: string = '[data-testid="ap-env-add-btn"]'
   createBtn: string = '[data-testid="ap-create-btn"]'
+  continueBtn: string = '[data-testid="ap-profile-name-submit-btn"]'
+  authenticationContinueBtn: string = '[data-testid="ap-authentication-form-continue-btn"]'
+  authorizationContinueBtn: string = '[data-testid="ap-authorization-form-continue-btn"]'
+  kongAPIKeyFlow: string = '[data-testid="kong-api-key-chkBox"]'
+  clientCredentialFlow: string = '[data-testid="cc-id-secret-chkBox"]'
+
 
   createAuthProfile(authProfile: any, isCreated=true) {
-    cy.get(this.newProfileBtn).click()
+    cy.get(this.newProfileBtn).first().click()
     cy.get(this.nameField).click().type(authProfile.name)
-
+    cy.get(this.continueBtn).click()
     let flow = authProfile.flow
-    cy.get(this.flow).contains(flow).click()
 
     if (flow === 'Kong API Key') {
+      cy.get(this.kongAPIKeyFlow).click()
+      cy.get(this.authenticationContinueBtn).click()
       cy.get(this.kongApiKey).type(authProfile.apiKey)
+      cy.get(this.authenticationContinueBtn).click()
     } else if (flow === 'Client Credential Flow') {
-      cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
-
+      cy.get(this.clientCredentialFlow).click()
+      cy.get(this.authenticationContinueBtn).click()
+      cy.get(this.authorizationContinueBtn).click()
+      // cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
+      debugger
       if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
 
       // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID
@@ -72,14 +83,14 @@ class AuthorizationProfile {
 
         if (authProfile.environmentConfig.environment)
           cy.get(this.envSelector)
-            .contains(authProfile.environmentConfig.environment)
-            .click()
+            .select(authProfile.environmentConfig.environment)
+            .invoke('val')
 
         cy.get(this.idpIssuerUrl).click().type(authProfile.environmentConfig.idpIssuerUrl)
 
         let clientReg = authProfile.environmentConfig.clientRegistration
 
-        cy.get(this.clientRegistration).contains(clientReg).click()
+        cy.get(this.clientRegistration).select(clientReg).invoke('val')
 
         if (clientReg === 'Initial Access Token')
           cy.get(this.initAccessToken)
@@ -87,12 +98,12 @@ class AuthorizationProfile {
             .type(authProfile.environmentConfig.initAccessToken)
 
         if (clientReg === 'Managed') {
+
           cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId)
           cy.get(this.clientSecret)
             .click()
             .type(authProfile.environmentConfig.clientSecret)
         }
-
         cy.get(this.envAddBtn).click()
       }
     }

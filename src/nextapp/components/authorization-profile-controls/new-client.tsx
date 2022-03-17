@@ -55,7 +55,7 @@ const NewClient: React.FC<NewClientProps> = ({ onCreate, mode }) => {
 
   return (
     <>
-      <Button isDisabled={false} onClick={onOpen} variant="primary" data-testid="ap-client-mgmt-add-env-btn">
+      <Button isDisabled={false} onClick={onOpen} variant="primary">
         Add Environment
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">

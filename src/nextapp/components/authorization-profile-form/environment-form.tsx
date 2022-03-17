@@ -49,10 +49,12 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
   return (
     <>
       <Button
+        data-testid={`ap-client-mgmt-add-env-${buttonText}`}
         onClick={onToggle}
         leftIcon={<Icon as={ButtonIcon} />}
         size="sm"
         variant="flat"
+
       >
         {buttonText}
       </Button>
@@ -61,7 +63,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
           <Grid templateColumns="repeat(3, 1fr)" gap={4}>
             <FormControl isRequired as={GridItem}>
               <FormLabel>Environment</FormLabel>
-              <Select defaultValue="dev" name="environment">
+              <Select data-testid="cm-environment-dropdown" defaultValue="dev" name="environment">
                 <option value="dev">Development</option>
                 <option value="sandbox">Sandbox</option>
                 <option value="test">Test</option>
@@ -75,6 +77,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
                 type="url"
                 name="issuerUrl"
                 placeholder="Enter IdP Issuer URL"
+                data-testid="idp-issuer-url"
               />
             </FormControl>
             <FormControl isRequired as={GridItem} gridRowStart="row-start">
@@ -83,6 +86,7 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
                 name="clientRegistration"
                 onChange={handleRegistrationChange}
                 value={method}
+                data-testid="cm-client-registration-dropdown"
               >
                 <option value="anonymous">Anonymous</option>
                 <option value="iat">Initial Access Token</option>
@@ -102,20 +106,21 @@ const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
               <>
                 <FormControl isRequired as={GridItem}>
                   <FormLabel>Client ID</FormLabel>
-                  <Input name="clientId" placeholder="Enter Client ID" />
+                  <Input name="clientId" data-testid="cm-client-id" placeholder="Enter Client ID" />
                 </FormControl>
                 <FormControl isRequired as={GridItem}>
                   <FormLabel>Client Secret</FormLabel>
                   <Input
                     name="clientSecret"
                     placeholder="Enter Client Secret"
+                    data-testid="cm-client-secret"
                   />
                 </FormControl>
               </>
             )}
           </Grid>
           <Box mt={5} d="flex">
-            <Button type="submit">Add Environment</Button>
+            <Button data-testid="ap-env-add-btn" type="submit">Add Environment</Button>
           </Box>
         </Box>
       )}

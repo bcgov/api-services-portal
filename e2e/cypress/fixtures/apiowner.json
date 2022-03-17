@@ -127,6 +127,10 @@
         "userName" :"wendy",
         "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
       },
+      "Wendy_GC":{
+        "userName" :"wendy",
+        "accessRole" :["GatewayConfig.Publish","Namespace.View"]
+      },
       "Janis":{
         "userName" :"janis@idir",
         "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
@@ -135,7 +139,7 @@
     "revokePermission": {
       "Mark":{
         "userName" :"mark",
-        "accessRole" :["Namespace.View"]
+        "accessRole" :["Namespace.View","Access.Manage"]
       },
       "Mark_AM":{
         "userName" :"mark",
@@ -155,6 +159,12 @@
     }
   },
   "grantPermission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage","Namespace.View"]
+    } 
+  },
+  "permission": {
     "Mark":{
       "userName" :"mark",
       "accessRole" :["Access.Manage","Namespace.View"]

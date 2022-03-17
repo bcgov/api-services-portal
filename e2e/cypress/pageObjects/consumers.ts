@@ -73,14 +73,9 @@ export default class ConsumersPage {
   }
 
   isApproveAccessEnabled(expStatus : boolean) {
-    var actStatus = false
-    cy.get('body', { log: false }).then(($body) => {
-      cy.wait(1000)
-      if ($body.find(this.pendingRequestTable).length > 0)
-        actStatus = true
-      else
-        actStatus = false
-      assert.strictEqual (actStatus,expStatus,"Approve Request option staus is other than expected status")
-    })
+    if(expStatus)
+      cy.contains('Review').should('be.visible')
+    else
+      cy.contains('Review').should('not.exist')
   }
 }

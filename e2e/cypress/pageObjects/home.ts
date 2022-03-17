@@ -25,7 +25,6 @@ class HomePage {
     cy.wait(2000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el.text().trim()).to.eq(name)
-      debugger
       flag = true
     })
     return flag

@@ -11,5 +11,8 @@
   },
   "checkPermission": {
     "namespace": "permission"
+  },
+  "serviceAccount": {
+    "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   }
 }
