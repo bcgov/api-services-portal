@@ -6,7 +6,7 @@ export {
   updateAccessRequestState,
 } from './access-request';
 
-export { recordActivity } from './activity';
+export { recordActivity, recordActivityWithBlob } from './activity';
 
 export { lookupApplication } from './application';
 
@@ -26,7 +26,7 @@ export {
   lookupKongConsumerByUsername,
 } from './gateway-consumer';
 
-export { lookupServices } from './gateway-service';
+export { lookupServices, lookupServicesByNamespace } from './gateway-service';
 
 export {
   lookupEnvironmentAndIssuerUsingWhereClause,

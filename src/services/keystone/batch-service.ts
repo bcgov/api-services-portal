@@ -164,6 +164,10 @@ export class BatchService {
       variables: { ids: ids },
     });
     logger.debug('[removeAll] RESULT %j', result);
+    if ('errors' in result) {
+      logger.error('[removeAll] %j', result);
+    }
+
     return 'errors' in result ? null : result['data'][`delete${entity}s`];
   }
 }

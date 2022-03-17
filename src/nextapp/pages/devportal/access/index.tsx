@@ -78,7 +78,7 @@ export default ApiAccessPage;
 
 const query = gql`
   query GetMyServiceAccesses {
-    myServiceAccesses {
+    myServiceAccesses(where: { productEnvironment_is_null: false }) {
       id
       name
       active
@@ -105,7 +105,9 @@ const query = gql`
         }
       }
     }
-    myAccessRequests(where: { serviceAccess_is_null: true }) {
+    myAccessRequests(
+      where: { productEnvironment_is_null: false, serviceAccess_is_null: true }
+    ) {
       id
       productEnvironment {
         id

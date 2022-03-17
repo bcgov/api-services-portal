@@ -224,6 +224,10 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
       response.push(`${field} { id }`);
     });
   }
+  if ('ownedBy' in md) {
+    response.push(`${md.ownedBy} { id }`);
+  }
+
   logger.debug('[buildQueryResponse] FINAL (%s) %j', md.query, response);
   return response;
 }
@@ -310,6 +314,12 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
+          assert.strictEqual(
+            allIds.filter((record) => typeof record.ownedBy != 'undefined')
+              .length,
+            0,
+            'There are some child records that have exclusive ownership already!'
+          );
           json[transformKey + '_ids'] = allIds.map((status) => status.id);
 
           childResults.push(...allIds);
@@ -381,6 +391,17 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
+          logger.warn('%j', localRecord);
+          assert.strictEqual(
+            allIds.filter(
+              (record) =>
+                typeof record.ownedBy != 'undefined' &&
+                record.ownedBy != localRecord.id
+            ).length,
+            0,
+            'There are some child records that had ownership already (w/ local record)!'
+          );
+
           json[transformKey + '_ids'] = allIds.map((status) => status.id);
           childResults.push(...allIds);
         }
@@ -404,7 +425,16 @@ export const syncRecords = async function (
       }
     }
     if (Object.keys(data).length === 0) {
-      return { status: 200, result: 'no-change', id: localRecord['id'] };
+      return {
+        status: 200,
+        result: 'no-change',
+        id: localRecord['id'],
+        childResults,
+        ownedBy:
+          md.ownedBy && localRecord[md.ownedBy]
+            ? localRecord[md.ownedBy].id
+            : undefined,
+      };
     }
     logger.debug('keys triggering update %j', Object.keys(data));
     const nr = await batchService.update(entity, localRecord.id, data);
@@ -412,7 +442,16 @@ export const syncRecords = async function (
       logger.error('UPDATE FAILED (%s) %j', nr, data);
       return { status: 400, result: 'update-failed', childResults };
     } else {
-      return { status: 200, result: 'updated', id: nr, childResults };
+      return {
+        status: 200,
+        result: 'updated',
+        id: nr,
+        childResults,
+        ownedBy:
+          md.ownedBy && localRecord[md.ownedBy]
+            ? localRecord[md.ownedBy].id
+            : undefined,
+      };
     }
   }
 };

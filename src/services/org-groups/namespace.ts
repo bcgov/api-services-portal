@@ -45,6 +45,8 @@ export class NamespaceService {
 
     logger.debug('[assignNamespaceToOrganization] %s - Group = %j', ns, group);
 
+    assert.strictEqual(group === null, false, 'Namespace not found');
+
     assert.strictEqual(
       'org' in group.attributes && org != group.attributes['org'],
       false,
@@ -76,7 +78,7 @@ export class NamespaceService {
     ns: string,
     org: string,
     orgUnit: string
-  ) {
+  ): Promise<boolean> {
     const group = await this.groupService.getGroup('ns', ns);
 
     logger.debug(
@@ -98,7 +100,9 @@ export class NamespaceService {
       delete group.attributes['org'];
       delete group.attributes['org-unit'];
       await this.groupService.updateGroup(group);
+      return true;
     }
+    return false;
   }
 
   async listAssignedNamespacesByOrg(org: string): Promise<OrgNamespace[]> {

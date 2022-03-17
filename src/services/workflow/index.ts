@@ -6,7 +6,10 @@ export { DeleteAccess } from './delete-access';
 
 export { DeleteGatewayConfig } from './delete-gateway-config';
 
-export { DeleteEnvironment } from './delete-environment';
+export {
+  DeleteEnvironment,
+  DeleteEnvironmentValidate,
+} from './delete-environment';
 
 export { Validate } from './validate-access-request';
 

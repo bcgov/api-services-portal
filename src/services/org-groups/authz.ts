@@ -5,6 +5,11 @@ import { UMAResourceRegistrationService } from '../uma2';
 
 const logger = Logger('org-group.authz');
 
+/**
+ * GroupAccess.Manage - allows a user to administer Organization Access for current org and any child
+ * Namespace.Assign - allows a user to assign a Namespace to the current orgUnit
+ * Dataset.Manage - allows a user to manage Datasets for the current orgUnit
+ */
 export const AllOrgAuthzScopes: string[] = [
   'GroupAccess.Manage',
   'Namespace.Assign',

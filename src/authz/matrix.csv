@@ -35,6 +35,7 @@ CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
 NS MANAGER,,,Dataset,,"create,update,delete",,,,api-owner,,,allow,
 NS MANAGER,,getPermissionTicketsForResource,,,,,,,api-owner,,,allow,
 NS MANAGER,,getUmaPoliciesByResourceName,,,,,,,api-owner,,,allow,
+NS MANAGER,,getOrgPoliciesForResource,,,,,,,api-owner,,,allow,
 NS MANAGER,,getResourceOwners,,,,,,,api-owner,,,allow,
 NS MANAGER,,OwnedCredentialIssuer,,,,,,,api-owner,,,allow,
 NS MANAGER,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentPackageNS
@@ -51,8 +52,9 @@ API Owner Role Rules,,,CredentialIssuer,read,,,,,,,"api-owner,provider-user",all
 API Owner Role Rules,,OwnedEnvironment,,,,active,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,OwnedEnvironment,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Dataset,read,,,,,api-owner,,,allow,
-API Owner Role Rules,,,Environment,create,,active,,,api-owner,,,deny,
+API Owner Role Rules,,,Environment,create,,active,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,,"update,delete,read",active,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,deleteEnvironments,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,update,,,,,api-owner,,,allow,
@@ -90,7 +92,8 @@ API Owner Role Rules,,,TemporaryIdentity,read,,,,,,,"api-owner,provider-user",al
 API Owner Role Rules,,,User,read,,,,,,,"api-owner,provider-user",allow,
 Portal User Namespaces,,allNamespaces,,,,,,,portal-user,,,allow,
 API Owner Role Rules,,createNamespace,,,,,,,idir-user,,,allow,
-API Owner Role Rules,,deleteNamespace,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,forceDeleteNamespace,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,namespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,currentNamespace,,,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,revokePermissions,,,,,,,api-owner,,,allow,
@@ -158,6 +161,7 @@ Portal User,,DiscoverableProduct,,,,,,,portal-user,,,allow,
 Portal User,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
 Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS

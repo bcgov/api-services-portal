@@ -16,6 +16,7 @@ node dist/test/integrated/org-groups/index.js
 
 import { OrgGroupService } from '../../../services/org-groups';
 import { KeycloakGroupService } from '../../../services/keycloak';
+import { o } from '../util';
 
 (async () => {
   const kc = new OrgGroupService(process.env.ISSUER);
@@ -38,7 +39,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   console.log(await kc.getGroupPathsByGroupName('ministry-citizens-services'));
   console.log(await kc.getGroupPathsByGroupName('databc'));
 
-  if (true) {
+  if (false) {
     await kc.createGroupIfMissing(org);
 
     await kc.createOrUpdateGroupPolicy(org);
@@ -70,36 +71,47 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     ]);
   }
 
-  console.log(
-    JSON.stringify(
-      kc.listGroups({
-        name: 'ministry-citizens-services',
-        parent: '/data-custodian',
-      }),
-      null,
-      3
-    )
-  );
+  if (false) {
+    console.log(
+      JSON.stringify(
+        kc.listGroups({
+          name: 'ministry-citizens-services',
+          parent: '/data-custodian',
+        }),
+        null,
+        3
+      )
+    );
 
-  console.log(
-    JSON.stringify(
-      kc.listGroups({
-        name: 'databc',
-        parent: '/data-custodian/ministry-citizens-services',
-      }),
-      null,
-      3
-    )
-  );
+    console.log(
+      JSON.stringify(
+        kc.listGroups({
+          name: 'databc',
+          parent: '/data-custodian/ministry-citizens-services',
+        }),
+        null,
+        3
+      )
+    );
 
-  console.log(
-    JSON.stringify(
-      await kc.getGroupPermissions(org, ['feature-myacc']),
-      null,
-      3
-    )
-  );
+    console.log(
+      JSON.stringify(
+        await kc.getGroupPermissions(org, ['feature-myacc']),
+        null,
+        3
+      )
+    );
+  }
 
+  const result = await kc.getPermissionsForGroupPolicy(org, 'org/databc');
+  o(result);
+
+  if (true) {
+    await kc.createOrUpdateOrgPermission(org, [
+      'Namespace.View',
+      'Namepsace.Manage',
+    ]);
+  }
   // await kc.createOrUpdateGroupPermission(
   //   {
   //     name: 'databc',

@@ -9,13 +9,13 @@ describe('Group Access', function () {
   it('should get correct leaf', async function () {
     expect(leaf('/role/parent/child')).toBe('child');
     expect(leaf('/role/parent')).toBe('parent');
-    expect(leaf('/role')).toBe('role');
+    expect(leaf('/role')).toBe('');
   });
 
   it('should get correct root', async function () {
     expect(root('/role/parent/child')).toBe('role');
     expect(root('/role/parent')).toBe('role');
-    expect(root('/role')).toBe('');
+    expect(root('/role')).toBe('role');
   });
 
   it('should get correct parents', async function () {

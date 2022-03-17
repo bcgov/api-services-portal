@@ -23,7 +23,7 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'platform';
+  const ns = 'simple';
   const skipAccessControl = false;
 
   const identity = {
@@ -45,44 +45,44 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
     // o(await deleteRecord(ctx, 'Product', '000000000002'));
   }
 
-  if (false) {
+  if (true) {
     // scenario 1: Product tries to highjack another Environment
 
     const product1 = {
       name: 'my-new-product',
-      appId: '000000000000',
+      appId: '100000000000',
       environments: [
         {
           name: 'dev',
           approval: false,
           flow: 'public',
-          appId: '00000000',
+          appId: '10000000',
         },
       ],
     };
 
-    const result = await syncRecords(ctx, 'Product', '000000000000', product1);
+    const result = await syncRecords(ctx, 'Product', product1.appId, product1);
     o(result);
   }
 
-  if (false) {
+  if (true) {
     const product2 = {
       name: 'my-new-product-2',
-      appId: '000000000002',
+      appId: '100000000002',
       environments: [
         {
           name: 'dev',
           approval: false,
           flow: 'public',
-          appId: '00000000',
+          appId: '10000000',
         },
       ],
     };
 
-    const result2 = await syncRecords(ctx, 'Product', '000000000002', product2);
+    const result2 = await syncRecords(ctx, 'Product', product2.appId, product2);
     o(result2);
   }
-  if (true) {
+  if (false) {
     o(
       await lookupServiceAccessesByEnvironment(ctx, 'platform', [
         '6227a8f2778cbf71626ca628',

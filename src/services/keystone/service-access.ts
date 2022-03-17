@@ -162,7 +162,22 @@ export async function lookupServiceAccessesByEnvironment(
                         id
                         active
                         consumer {
-                            username
+                          username
+                          customId
+                        }
+                        application {
+                          name
+                          owner {
+                            name
+                            email
+                          }
+                        }
+                        productEnvironment {
+                          name
+                          flow
+                          product {
+                            name
+                          }
                         }
                     }
                 }`,

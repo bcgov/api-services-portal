@@ -1,5 +1,6 @@
 import { BatchService } from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
+import { strict as assert } from 'assert';
 
 const logger = Logger('batch.connectExclusiveList');
 
@@ -29,7 +30,12 @@ export async function connectExclusiveList(
     logger.debug('Deletions? %j', deleted);
     if (deleted.length > 0) {
       const batchService = new BatchService(keystone);
-      await batchService.removeAll(transformInfo.list, deleted);
+      const result = await batchService.removeAll(transformInfo.list, deleted);
+      assert.strictEqual(
+        result === null,
+        false,
+        'Failed to complete batch request'
+      );
     }
   }
   return {

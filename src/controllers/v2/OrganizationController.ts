@@ -30,16 +30,8 @@ import {
 import { getGwaProductEnvironment } from '../../services/workflow';
 import { GroupAccess, OrgNamespace } from '../../services/org-groups/types';
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
-import { BatchResult } from '../../batch/types';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity } from './types';
-import { query } from 'express';
-// import {
-//   DraftDatasetData,
-//   OrganizationData,
-//   OrganizationUnitData,
-// } from './types';
-//import { GroupAccess } from '@/services/org-groups/types';
 
 @injectable()
 @Route('/organizations')
@@ -76,6 +68,9 @@ export class OrganizationController extends Controller {
       }));
   }
 
+  /**
+   * > `Required Scope:` GroupAccess.Manage
+   */
   @Get('{org}/access')
   @OperationId('get-organization-access')
   @Security('jwt', ['GroupAccess.Manage'])
@@ -89,6 +84,9 @@ export class OrganizationController extends Controller {
     return await groupAccessService.getGroupAccess(org);
   }
 
+  /**
+   * > `Required Scope:` GroupAccess.Manage
+   */
   @Put('{org}/access')
   @OperationId('put-organization-access')
   @Security('jwt', ['GroupAccess.Manage'])
@@ -107,6 +105,9 @@ export class OrganizationController extends Controller {
     await groupAccessService.createOrUpdateGroupAccess(body as GroupAccess);
   }
 
+  /**
+   * > `Required Scope:` Namespace.Assign
+   */
   @Get('{org}/namespaces')
   @OperationId('organization-namespaces')
   @Security('jwt', ['Namespace.Assign'])
@@ -119,13 +120,16 @@ export class OrganizationController extends Controller {
     return await svc.listAssignedNamespacesByOrg(org);
   }
 
+  /**
+   * > `Required Scope:` Namespace.Assign
+   */
   @Put('{orgUnit}/namespaces/{ns}')
   @OperationId('assign-namespace-to-organization')
   @Security('jwt', ['Namespace.Assign'])
   public async assignNamespace(
     @Path() orgUnit: string,
     @Path() ns: string
-  ): Promise<void> {
+  ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const org = await getOrganizationUnit(ctx, orgUnit);
     assert.strictEqual(org != null, true, 'Invalid Organization');
@@ -135,16 +139,28 @@ export class OrganizationController extends Controller {
 
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    await svc.assignNamespaceToOrganization(ns, org.name, orgUnit);
+    const answer = await svc.assignNamespaceToOrganization(
+      ns,
+      org.name,
+      orgUnit
+    );
+    return {
+      result: answer
+        ? 'namespace-assigned'
+        : 'no-update-namespace-already-assigned',
+    };
   }
 
+  /**
+   * > `Required Scope:` Namespace.Assign
+   */
   @Delete('{orgUnit}/namespaces/{ns}')
   @OperationId('unassign-namespace-from-organization')
   @Security('jwt', ['Namespace.Assign'])
   public async unassignNamespace(
     @Path() orgUnit: string,
     @Path() ns: string
-  ): Promise<void> {
+  ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const org = await getOrganizationUnit(ctx, orgUnit);
     assert.strictEqual(org != null, true, 'Invalid Organization');
@@ -154,15 +170,32 @@ export class OrganizationController extends Controller {
 
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    await svc.unassignNamespaceFromOrganization(ns, org.name, orgUnit);
+    const answer = await svc.unassignNamespaceFromOrganization(
+      ns,
+      org.name,
+      orgUnit
+    );
+    return {
+      result: answer
+        ? 'namespace-unassigned'
+        : 'no-update-namespace-not-assigned',
+    };
   }
 
-  @Get('{orgUnit}/namespaces/{ns}/activity')
+  /**
+   * > `Required Scope:` Namespace.Assign
+   *
+   * @summary Get Namespace Activity for namespaces associated with this Organization Unit
+   * @param orgUnit
+   * @param first
+   * @param skip
+   * @returns Activity[]
+   */
+  @Get('{orgUnit}/activity')
   @OperationId('namespace-activity')
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() orgUnit: string,
-    @Path() ns: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
   ): Promise<Activity[]> {
@@ -176,25 +209,15 @@ export class OrganizationController extends Controller {
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
     const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org.name);
-    assert.strictEqual(
-      assignedNamespaces.filter((n) => n.name === ns).length,
-      1,
-      'Namespace not assigned to this organization'
+    const records = await getActivity(
+      ctx,
+      assignedNamespaces.map((n) => n.name),
+      first > 50 ? 50 : first,
+      skip
     );
-    const records = await getActivity(ctx, first > 50 ? 50 : first, skip);
     return records
       .map((o) => removeEmpty(o))
       .map((o) => transformAllRefID(o, ['blob']))
       .map((o) => parseJsonString(o, ['context', 'blob']));
   }
 }
-
-/**
- * export PAYLOAD='{"name":"databc","parent":"/ministry-citizens-services","roles":[{"name":"data-custodians","members":[{"id":"2bb26c01-d781-427e-8078-4351f5ada064","username":"platform","email":"platform@nowhere"}],"permissions":[{"resource":"orgcontrol","scopes":["Namespace.View"]}]}]}'
- * curl -v -H "Content-Type: application/json" http://localhost:3000/ds/api/organizations/databc/access -X PUT -d $PAYLOAD
- *
- * curl -v http://localhost:3000/ds/api/organizations/databc/access
-
-
- * curl -v http://localhost:3000/ds/api/organizations
-* */

@@ -7440,6 +7440,7 @@ export type Mutation = {
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   createNamespace?: Maybe<Namespace>;
   deleteNamespace?: Maybe<Scalars['Boolean']>;
+  forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
@@ -8233,6 +8234,12 @@ export type MutationCreateNamespaceArgs = {
 
 export type MutationDeleteNamespaceArgs = {
   namespace: Scalars['String'];
+};
+
+
+export type MutationForceDeleteNamespaceArgs = {
+  namespace: Scalars['String'];
+  force: Scalars['Boolean'];
 };
 
 

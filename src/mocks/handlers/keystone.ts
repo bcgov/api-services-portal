@@ -29,10 +29,10 @@ const scenarios: {
         allGatewayConsumers: nsDefault.consumers,
       },
     },
-    GetProductEnvironmentServices: (variables: any) => ({
+    GetProductEnvironmentServices: ({ id }: any) => ({
       data: {
         allEnvironments: nsDefault.products[0].environments.filter(
-          (e: Environment) => e.id === variables.id
+          (e: Environment) => e.id === id
         ),
       },
     }),

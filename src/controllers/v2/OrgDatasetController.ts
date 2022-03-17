@@ -43,11 +43,19 @@ export class OrgDatasetController extends Controller {
   ): Promise<Dataset[]> {
     const ctx = this.keystone.createContext(request);
 
-    const records = await getRecords(ctx, 'DraftDataset', undefined, [], {
+    const batchClause = {
       query: '$orgUnit: String',
       clause: '{ organizationUnit: { name: $orgUnit } }',
       variables: { orgUnit },
-    });
+    };
+
+    const records = await getRecords(
+      ctx,
+      'DraftDataset',
+      undefined,
+      [],
+      batchClause
+    );
 
     return records
       .map((o) => removeEmpty(o))

@@ -42,14 +42,7 @@ import { DeleteEnvironment } from '../../../services/workflow';
   });
 
   if (true) {
-    o(
-      await DeleteEnvironment(
-        ctx,
-        'orgcontrol',
-        '62270cb8120e2144a8773ed3',
-        true
-      )
-    );
+    o(await DeleteEnvironment(ctx, 'orgcontrol', '62270cb8120e2144a8773ed3'));
     await new Promise((r) => setTimeout(r, 10000));
   }
 

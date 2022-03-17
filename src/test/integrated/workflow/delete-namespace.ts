@@ -3,10 +3,10 @@ Wire up directly with Keycloak and use the Services
 To run:
 npm run ts-build
 npm run ts-watch
-node dist/test/integrated/keystonejs/activity.js
+node dist/test/integrated/workflow/delete-environment.js
 */
 
-import InitKeystone from './init';
+import InitKeystone from '../keystonejs/init';
 import {
   getRecords,
   deleteRecord,
@@ -18,18 +18,16 @@ import {
 } from '../../../batch/feed-worker';
 import { o } from '../util';
 import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
-import {
-  getActivity,
-  recordActivity,
-  recordActivityWithBlob,
-} from '../../../services/keystone/activity';
+import { DeleteEnvironment } from '../../../services/workflow';
+import { DeleteNamespaceRecordActivity } from '../../../services/workflow/delete-namespace';
+import { updateActivity } from '../../../services/keystone/activity';
 
 (async () => {
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'orgcontrol';
-  const skipAccessControl = true;
+  const ns = 'platform';
+  const skipAccessControl = false;
 
   const identity = {
     id: null,
@@ -45,27 +43,11 @@ import {
     authentication: { item: identity },
   });
 
-  if (false) {
-    const r = await recordActivityWithBlob(
-      ctx,
-      'delete',
-      'Namespace',
-      'orgcontrol',
-      'Deleted orgcontrol namespace',
-      'success',
-      undefined,
-      { name: 'Joe' }
-    );
+  if (true) {
+    const a = await DeleteNamespaceRecordActivity(ctx, 'orgcontrol');
+    o(a);
+    await updateActivity(ctx.sudo(), a.id, 'success', undefined);
   }
-
-  const records = await getActivity(ctx, ['orgcontrol'], 1);
-
-  o(
-    records
-      .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']))
-  );
 
   await keystone.disconnect();
 })();

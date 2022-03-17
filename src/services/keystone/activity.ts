@@ -20,8 +20,10 @@ export async function recordActivityWithBlob(
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivityWithBlob] userid=%s name=%s', userId, name);
 
+  const actor = userId ? 'actor: { connect: { id : $userId }} }' : '';
+
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: String, $blob: String, $blobRef: String) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $blob: String, $blobRef: String) {
                 createActivity(data: {
                   type: $type, 
                   name: $name, 
@@ -37,7 +39,8 @@ export async function recordActivityWithBlob(
                       blob: $blob
                     }
                   }
-                  actor: { connect: { id : $userId }} }) {
+                }
+            ) {
                     id
             } }`,
     variables: {
@@ -49,16 +52,50 @@ export async function recordActivityWithBlob(
       message,
       result,
       activityContext,
-      userId,
       blob: JSON.stringify(blob),
       blobRef: `${name} ${uuidv4()}`,
     },
   });
+  logger.debug('[recordActivity] result %j', activity);
   if ('errors' in activity) {
     logger.error('[recordActivity] %j', activity);
   }
-  logger.debug('[recordActivity] result %j', activity);
+  assert.strictEqual(
+    'errors' in activity,
+    false,
+    'Saving activity gave an error'
+  );
   return activity.data.createActivity;
+}
+
+export async function updateActivity(
+  context: any,
+  id: string,
+  result: string,
+  activityContext: string = ''
+) {
+  // const userId = context.authedItem.userId;
+  // const namespace = context.authedItem.namespace;
+  logger.debug('[updateActivity] id=%s %s', id, result);
+
+  const activity = await context.executeGraphQL({
+    query: `mutation ($id: ID!, $activityContext: String!, $result: String!) {
+                updateActivity(id: $id, data: {
+                  context: $activityContext, 
+                  result: $result
+                })
+            }`,
+    variables: {
+      id,
+      result,
+      activityContext,
+    },
+  });
+  if ('errors' in activity) {
+    logger.error('[updateActivity] %j', activity);
+  }
+  logger.debug('[updateActivity] result %j', activity);
+  return activity.data.updateActivity;
 }
 
 export async function recordActivity(
@@ -100,14 +137,15 @@ export async function recordActivity(
 
 export async function getActivity(
   context: any,
+  namespaces: string[],
   first: number = 10,
   skip: number = 0
 ): Promise<any[]> {
   logger.debug('[getActivity] %d / %d', first, skip);
 
   const activities = await context.executeGraphQL({
-    query: `query NamespaceActivities($first: Int, $skip: Int) {
-              allActivities(first:$first, skip: $skip, sortBy: createdAt_DESC) {
+    query: `query NamespaceActivities($namespaces: [String]!, $first: Int, $skip: Int) {
+              allActivities(where: { namespace_in: $namespaces }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
                 type
                 name
                 action
@@ -126,7 +164,7 @@ export async function getActivity(
               }
             }
       `,
-    variables: { first, skip },
+    variables: { namespaces, first, skip },
   });
   logger.debug(
     '[getActivity] returned=%d',

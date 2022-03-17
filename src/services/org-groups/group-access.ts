@@ -54,11 +54,23 @@ export class GroupAccessService {
       await this.orgGroupService.createOrUpdateGroupPolicy(orgGroup);
 
       for (const perm of groupRole.permissions) {
-        await this.orgGroupService.createOrUpdateGroupPermission(
-          orgGroup,
-          perm.resource,
-          perm.scopes
-        );
+        if (perm.resource.startsWith('org/')) {
+          assert.strictEqual(
+            perm.resource,
+            `org/${orgGroup.name}`,
+            'Invalid organization resource in permission'
+          );
+          await this.orgGroupService.createOrUpdateOrgPermission(
+            orgGroup,
+            perm.scopes
+          );
+        } else {
+          await this.orgGroupService.createOrUpdateGroupPermission(
+            orgGroup,
+            perm.resource,
+            perm.scopes
+          );
+        }
       }
 
       await this.orgGroupService.syncMembers(orgGroup, groupRole.members);

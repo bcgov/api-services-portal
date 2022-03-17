@@ -27,7 +27,6 @@ import { BatchResult } from '../../batch/types';
 
 @injectable()
 @Route('/namespaces/{ns}/contents')
-@Security('jwt', ['Content.Publish'])
 @Tags('Documentation')
 export class ContentController extends Controller {
   private keystone: KeystoneService;
@@ -36,8 +35,20 @@ export class ContentController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Get documentation for the namespace
+   * > `Required Scope:` Content.Publish
+   *
+   * @summary Update Documentation
+   *
+   * @param ns
+   * @param body
+   * @param request
+   * @returns
+   */
   @Put()
   @OperationId('put-content')
+  @Security('jwt', ['Content.Publish'])
   public async putContent(
     @Path() ns: string,
     @Body() body: Content,
@@ -53,7 +64,7 @@ export class ContentController extends Controller {
   }
 
   @Get()
-  @OperationId('get-gateway-routes')
+  @OperationId('get-contents')
   @Security('jwt', ['Namespace.Manage'])
   public async get(
     @Path() ns: string,

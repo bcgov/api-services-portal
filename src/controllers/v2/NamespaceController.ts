@@ -7,7 +7,10 @@ import {
   Route,
   Security,
   Tags,
+  Delete,
+  Query,
 } from 'tsoa';
+import { ValidateError, FieldErrors } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
@@ -116,6 +119,39 @@ export class NamespaceController extends Controller {
     logger.debug('Result %j', result);
     return result.data.namespace;
   }
+
+  /**
+   * Delete the namespace
+   * > `Required Scope:` Namespace.Manage
+   *
+   * @summary Delete Namespace
+   * @param ns
+   * @param request
+   * @returns
+   */
+  @Delete('/{ns}')
+  @OperationId('delete-namespace')
+  @Security('jwt', ['Namespace.Manage'])
+  public async delete(
+    @Path() ns: string,
+    @Query() force: boolean = false,
+    @Request() request: any
+  ): Promise<Namespace> {
+    const result = await this.keystone.executeGraphQL({
+      context: this.keystone.createContext(request),
+      query: deleteNS,
+      variables: { ns, force },
+    });
+    logger.debug('Result %j', result);
+    if (result.errors) {
+      const errors: FieldErrors = {};
+      result.errors.forEach((err: any, ind: number) => {
+        errors[`d${ind}`] = { message: err.message };
+      });
+      throw new ValidateError(errors, 'Unable to delete namespace');
+    }
+    return result.data.forceDeleteNamespace;
+  }
 }
 
 const list = gql`
@@ -137,5 +173,11 @@ const item = gql`
       permDataPlane
       permProtected
     }
+  }
+`;
+
+const deleteNS = gql`
+  mutation ForceDeleteNamespace($ns: String!, $force: Boolean!) {
+    forceDeleteNamespace(namespace: $ns, force: $force)
   }
 `;

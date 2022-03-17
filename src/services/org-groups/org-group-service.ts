@@ -28,6 +28,15 @@ enum RoleGroups {
   'data-custodian',
 }
 
+/**
+ * OrganizationGroup describes a full Group path for managing role-based group access
+ * Three typical scenarios:
+ * - name: data-custodian
+ * - name: ministry-of-citizens-services
+ *   parent: /data-custodian
+ * - name: databc
+ *   parent: /data-custodian/ministry-of-citizens-services
+ */
 export interface OrganizationGroup {
   name: string;
   parent?: string;
@@ -228,8 +237,39 @@ export class OrgGroupService {
     }
   }
 
+  public async createOrUpdateOrgPermission(
+    orgGroup: OrganizationGroup,
+    scopeNames: string[]
+  ): Promise<void> {
+    const policyName = this.getGroupPolicyName(orgGroup);
+    const resourceName = `org/${orgGroup.name}`;
+    const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
+    await this.createOrUpdatePermission(
+      policyName,
+      permissionName,
+      resourceName,
+      scopeNames
+    );
+  }
+
   public async createOrUpdateGroupPermission(
     orgGroup: OrganizationGroup,
+    resourceName: string,
+    scopeNames: string[]
+  ): Promise<void> {
+    const policyName = this.getGroupPolicyName(orgGroup);
+    const permissionName = this.getGroupPermissionName(orgGroup, resourceName);
+    await this.createOrUpdatePermission(
+      policyName,
+      permissionName,
+      resourceName,
+      scopeNames
+    );
+  }
+
+  public async createOrUpdatePermission(
+    policyName: string,
+    permissionName: string,
     resourceName: string,
     scopeNames: string[]
   ): Promise<void> {
@@ -244,19 +284,14 @@ export class OrgGroupService {
     // Assume that the client we are authenticating with is the Resource Server
     const cid = (await clientService.findByClientId(this.clientId)).id;
 
-    const name = this.getGroupPermissionName(orgGroup, resourceName);
-
     const permissionPolicies: PolicyRepresentation[] = await clientPolicyService.findPermissionsByName(
       cid,
-      name
+      permissionName
     );
     const permissionPolicy =
       permissionPolicies.length == 0 ? undefined : permissionPolicies[0];
 
-    logger.debug(
-      '[createOrUpdateGroupPermission] Exists? %j',
-      permissionPolicy
-    );
+    logger.debug('[createOrUpdatePermission] Exists? %j', permissionPolicy);
 
     const resource = await clientService.findResourceByName(cid, resourceName);
 
@@ -269,24 +304,19 @@ export class OrgGroupService {
     const resources = [(resource as any)._id];
 
     const policies: string[] = [
-      (
-        await clientPolicyService.findPolicyByName(
-          cid,
-          this.getGroupPolicyName(orgGroup)
-        )
-      ).id,
+      (await clientPolicyService.findPolicyByName(cid, policyName)).id,
     ];
 
     assert.strictEqual(
       typeof policies[0] != 'undefined',
       true,
-      'Policy not found - ' + this.getGroupPolicyName(orgGroup)
+      'Policy not found - ' + policyName
     );
 
     const permission: any = {
       decisionStrategy: DecisionStrategy.UNANIMOUS,
       logic: Logic.POSITIVE,
-      name,
+      name: permissionName,
       policies,
       resources,
       scopes,
@@ -378,7 +408,7 @@ export class OrgGroupService {
 
   public async getPermissionsForGroupPolicy(
     orgGroup: OrganizationGroup,
-    roleName: string
+    permSearchTerm: string
   ): Promise<GroupPermission[]> {
     const clientService = new KeycloakClientService(null).useAdminClient(
       this.keycloakService.getAdminClient()
@@ -392,10 +422,11 @@ export class OrgGroupService {
 
     const permissions = await clientPolicyService.findPermissionsMatchingPolicy(
       cid,
-      roleName,
+      permSearchTerm,
       this.getGroupPolicyName(orgGroup)
     );
 
+    logger.debug('PERMS %j', permissions);
     return permissions.map((perm) => ({
       resource: perm.config.resources[0].name,
       scopes: perm.config.scopes.map((sc: any) => sc.name),
@@ -540,11 +571,25 @@ export class OrgGroupService {
     );
   }
 
+  // public getOrgPermissionName(
+  //   _: OrganizationGroup,
+  //   resourceName: string
+  // ): string {
+  //   return `${resourceName} Group Access`;
+  // }
+
   public getGroupPermissionName(
     orgGroup: OrganizationGroup,
     resourceName: string
   ): string {
-    return `${resourceName} permission for role ${root(orgGroup.parent)}`;
+    assert.strictEqual(
+      root(orgGroup.parent) === '',
+      false,
+      `Did not get a role from ${orgGroup.parent}`
+    );
+    return `Access to '${resourceName}' services for role ${root(
+      orgGroup.parent
+    )}`;
   }
 
   private getGroupPolicyDescription(orgGroup: OrganizationGroup): string {
@@ -554,9 +599,11 @@ export class OrgGroupService {
   private getGroupBranchToLeaf(
     orgGroup: OrganizationGroup
   ): PolicyGroupReference[] {
-    return this.getGroupBranches(orgGroup).map((group) => ({
+    const groupBranches = this.getGroupBranches(orgGroup);
+    // extend to children to true on leaf
+    return groupBranches.map((group, index) => ({
       id: group.id,
-      extendChildren: false,
+      extendChildren: groupBranches.length == index + 1 ? true : false,
     }));
   }
 

@@ -1,5 +1,5 @@
 export interface GroupAccess {
-  name: string;
+  name?: string;
   parent?: string;
   roles: GroupRole[];
   members?: GroupMember[];

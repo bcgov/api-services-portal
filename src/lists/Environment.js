@@ -8,12 +8,14 @@ const {
 const {
   ValidateActiveEnvironment,
   DeleteEnvironment,
+  DeleteEnvironmentValidate,
 } = require('../services/workflow');
 
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -114,15 +116,10 @@ module.exports = {
       listKey,
       fieldPath, // Field hooks only
     }) {
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(existingItem, null, 3)
-      );
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(originalInput, null, 3)
-      );
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(resolvedData, null, 3)
-      );
+      if (operation == 'update' && 'product' in resolvedData) {
+        logger.warn('%j %j %j', existingItem, originalInput, resolvedData);
+        addValidationError('Product can not be changed for an Environment');
+      }
       await ValidateActiveEnvironment(
         context,
         operation,
@@ -130,6 +127,13 @@ module.exports = {
         originalInput,
         resolvedData,
         addValidationError
+      );
+    },
+    validateDelete: async function ({ existingItem, context }) {
+      await DeleteEnvironmentValidate(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
       );
     },
     // beforeDelete: async function ({
@@ -154,13 +158,21 @@ module.exports = {
             schema:
               'forceDeleteEnvironment(id: ID!, force: Boolean!): Environment',
             resolver: async (item, args, context, info, { query, access }) => {
-              console.log('ForceDelete! ' + JSON.stringify(args));
-              return await DeleteEnvironment(
-                context.createContext({ skipAccessControl: true }),
-                context.authedItem['namespace'],
-                args.id,
-                args.force
-              );
+              console.log('ForceDeleteEnvironment! ' + JSON.stringify(args));
+              if (args.force) {
+                return await DeleteEnvironment(
+                  context.createContext({ skipAccessControl: true }),
+                  context.authedItem['namespace'],
+                  args.id,
+                  args.force
+                );
+              } else {
+                return await DeleteEnvironmentValidate(
+                  context.createContext({ skipAccessControl: true }),
+                  context.authedItem['namespace'],
+                  args.id
+                );
+              }
             },
             access: EnforcementPoint,
           },

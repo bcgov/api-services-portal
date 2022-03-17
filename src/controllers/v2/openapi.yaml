@@ -16,6 +16,8 @@ components:
                     type: string
                 id:
                     type: string
+                ownedBy:
+                    type: string
                 childResults:
                     items:
                         $ref: '#/components/schemas/BatchResult'
@@ -382,6 +384,18 @@ components:
                     $ref: '#/components/schemas/UserRefID'
             type: object
             additionalProperties: false
+            example:
+                type: Namespace
+                name: 'delete Namespace[ns_x]'
+                action: delete
+                refId: ns_x
+                result: success
+                message: 'Deleted ns_x namespace'
+                actor:
+                    name: 'XT:Blink, James CITZ:IN'
+                blob: {}
+                createdAt: '2022-03-11T00:47:42.947Z'
+                updatedAt: '2022-03-11T00:47:42.947Z'
         OrganizationRefID:
             type: string
         OrganizationUnitRefID:
@@ -532,6 +546,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
+            description: "Get documentation for the namespace\n> `Required Scope:` Content.Publish"
+            summary: 'Update Documentation'
             tags:
                 - Documentation
             security:
@@ -552,7 +568,7 @@ paths:
                         schema:
                             $ref: '#/components/schemas/Content'
         get:
-            operationId: get-gateway-routes
+            operationId: get-contents
             responses:
                 '200':
                     description: Ok
@@ -799,6 +815,37 @@ paths:
                     required: true
                     schema:
                         type: string
+        delete:
+            operationId: delete-namespace
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Namespace'
+            description: "Delete the namespace\n> `Required Scope:` Namespace.Manage"
+            summary: 'Delete Namespace'
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: force
+                    required: false
+                    schema:
+                        default: false
+                        type: boolean
     /organizations:
         get:
             operationId: organization-list
@@ -845,6 +892,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GroupAccess'
+            description: '> `Required Scope:` GroupAccess.Manage'
             tags:
                 - Organizations
             security:
@@ -863,6 +911,7 @@ paths:
             responses:
                 '204':
                     description: 'No content'
+            description: '> `Required Scope:` GroupAccess.Manage'
             tags:
                 - Organizations
             security:
@@ -894,6 +943,7 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/OrgNamespace'
                                 type: array
+            description: '> `Required Scope:` Namespace.Assign'
             tags:
                 - Organizations
             security:
@@ -911,8 +961,17 @@ paths:
         put:
             operationId: assign-namespace-to-organization
             responses:
-                '204':
-                    description: 'No content'
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    result: {type: string}
+                                required:
+                                    - result
+                                type: object
+            description: '> `Required Scope:` Namespace.Assign'
             tags:
                 - Organizations
             security:
@@ -935,8 +994,17 @@ paths:
         delete:
             operationId: unassign-namespace-from-organization
             responses:
-                '204':
-                    description: 'No content'
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    result: {type: string}
+                                required:
+                                    - result
+                                type: object
+            description: '> `Required Scope:` Namespace.Assign'
             tags:
                 - Organizations
             security:
@@ -956,18 +1024,20 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{orgUnit}/namespaces/{ns}/activity':
+    '/organizations/{orgUnit}/activity':
         get:
             operationId: namespace-activity
             responses:
                 '200':
-                    description: Ok
+                    description: 'Activity[]'
                     content:
                         application/json:
                             schema:
                                 items:
                                     $ref: '#/components/schemas/Activity'
                                 type: array
+            description: '> `Required Scope:` Namespace.Assign'
+            summary: 'Get Namespace Activity for namespaces associated with this Organization Unit'
             tags:
                 - Organizations
             security:
@@ -978,12 +1048,6 @@ paths:
                 -
                     in: path
                     name: orgUnit
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
-                    name: ns
                     required: true
                     schema:
                         type: string
@@ -1058,7 +1122,7 @@ paths:
                             $ref: '#/components/schemas/Dataset'
     '/organizations/{orgUnit}/datasets/{name}':
         get:
-            operationId: organization-datasets
+            operationId: get-organization-dataset
             responses:
                 '200':
                     description: Ok

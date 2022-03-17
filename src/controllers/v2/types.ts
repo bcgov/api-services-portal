@@ -386,7 +386,20 @@ export interface Legal {
 
 /**
  * @tsoaModel
- *
+ * @example {
+ *   "type": "Namespace",
+ *   "name": "delete Namespace[ns_x]",
+ *   "action": "delete",
+ *   "refId": "ns_x",
+ *   "result": "success",
+ *   "message": "Deleted ns_x namespace",
+ *   "actor": {
+ *     "name": "XT:Blink, James CITZ:IN"
+ *   },
+ *   "blob": {},
+ *   "createdAt": "2022-03-11T00:47:42.947Z",
+ *   "updatedAt": "2022-03-11T00:47:42.947Z"
+ * }
  */  
 export interface Activity {
   extRefId?: string; // Primary Key

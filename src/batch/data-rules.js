@@ -338,6 +338,7 @@ const metadata = {
     query: 'allEnvironments',
     refKey: 'appId',
     sync: ['name', 'active', 'approval', 'flow', 'additionalDetailsToRequest'],
+    ownedBy: 'product',
     transformations: {
       services: {
         name: 'connectMany',
@@ -530,6 +531,20 @@ const metadata = {
       },
     },
     read: ['updatedAt', 'createdAt'],
+    example: {
+      type: 'Namespace',
+      name: 'delete Namespace[ns_x]',
+      action: 'delete',
+      refId: 'ns_x',
+      result: 'success',
+      message: 'Deleted ns_x namespace',
+      actor: {
+        name: 'XT:Blink, James CITZ:IN',
+      },
+      blob: {},
+      createdAt: '2022-03-11T00:47:42.947Z',
+      updatedAt: '2022-03-11T00:47:42.947Z',
+    },
   },
   User: {
     query: 'allUsers',
