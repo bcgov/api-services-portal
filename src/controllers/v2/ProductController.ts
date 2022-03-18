@@ -31,7 +31,7 @@ import { BatchResult } from '../../batch/types';
 import { Logger } from '../../logger';
 import { gql } from 'graphql-request';
 import { strict as assert } from 'assert';
-import { isEnvironmentID, isProductID } from '@/services/identifiers';
+import { isEnvironmentID, isProductID } from '../../services/identifiers';
 
 const logger = Logger('controllers.Product');
 

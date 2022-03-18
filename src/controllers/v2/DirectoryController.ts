@@ -2,7 +2,7 @@ import { Controller, OperationId, Get, Path, Route, Tags } from 'tsoa';
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
-import { Product } from '@/services/keystone/types';
+import { Product } from '../../services/keystone/types';
 import {
   removeEmpty,
   removeKeys,
