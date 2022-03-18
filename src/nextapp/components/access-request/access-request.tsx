@@ -8,9 +8,10 @@ import AccessRequestDialog from './access-request-dialog';
 
 interface AccessRequestProps {
   data: AccessRequestData;
+  queryKey: string;
 }
 
-const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
+const AccessRequest: React.FC<AccessRequestProps> = ({ data, queryKey }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   return (
     <>
@@ -18,6 +19,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
         data={data}
         isOpen={isOpen}
         onClose={onClose}
+        queryKey={queryKey}
         title={data.application?.name}
       />
       <Flex
@@ -31,6 +33,7 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data }) => {
         py={4}
         boxShadow="md"
         role="alert"
+        data-testid={`access-request-banner-${data.id}`}
       >
         <Icon as={FaExclamationCircle} boxSize="8" color="bc-yellow" />
         <Box flex={1} mx={4} data-testid="ar-request-description">

@@ -219,7 +219,7 @@ const ConsumersPage: React.FC<
         />
 
         {accessRequests.map((a) => (
-          <AccessRequest key={a.id} data={a} />
+          <AccessRequest key={a.id} data={a} queryKey={queryKey} />
         ))}
         <Box bgColor="white" mb={4}>
           <Box

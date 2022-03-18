@@ -85,7 +85,7 @@ class Store {
   }
 
   reset() {
-    this._data = this._cached;
+    this._data = cloneDeep(this._cached);
   }
 }
 
@@ -163,6 +163,18 @@ export const fullfillRequestHandler = (req, res, ctx) => {
   return res(ctx.data({ id: req.variables.id }));
 };
 
+export const rejectRequestHandler = (req, res, ctx) => {
+  store.update({
+    ...store.data,
+    allAccessRequestsByNamespace: [],
+  });
+  return res(
+    ctx.data({
+      id: req.variables.id,
+    })
+  );
+};
+
 export const accessRequestAuthHandler = (req, res, ctx) => {
   return res(
     ctx.data({
@@ -196,6 +208,18 @@ export const gatewayServicesHandler = (req, res, ctx) => {
               id: 'r1',
               name: 'route-aps-portal-dev-api',
               extForeignKey: '12',
+            },
+          ],
+        },
+        {
+          id: 's2',
+          name: 'service-aps-portal-prod-api',
+          extForeignKey: '3123',
+          routes: [
+            {
+              id: 'r2',
+              name: 'route-aps-portal-prod-api',
+              extForeignKey: '22',
             },
           ],
         },

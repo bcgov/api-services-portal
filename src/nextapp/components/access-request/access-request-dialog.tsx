@@ -15,7 +15,7 @@ import {
   Tab,
   useToast,
 } from '@chakra-ui/react';
-import { AccessRequest } from '@/shared/types/query.types';
+import { AccessRequest, Query } from '@/shared/types/query.types';
 
 import RequestDetails from './request-details';
 import RequestControls from './controls';
@@ -28,6 +28,7 @@ interface AccessRequestDialogProps {
   data: AccessRequest;
   isOpen: boolean;
   onClose: () => void;
+  queryKey: string;
   title: string;
 }
 
@@ -35,22 +36,45 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   data,
   isOpen,
   onClose,
+  queryKey,
   title,
 }) => {
   const client = useQueryClient();
   const [tabIndex, setTabIndex] = React.useState(0);
   const [restrictions, setRestrictions] = React.useState([]);
   const [rateLimits, setRateLimits] = React.useState([]);
-  const approveMutate = useApiMutation(approveMutation);
-  const rejectMutate = useApiMutation(rejectMutation);
+  const approveMutate = useApiMutation(approveMutation, {
+    onSuccess() {
+      client.invalidateQueries(queryKey);
+    },
+  });
+  const rejectMutate = useApiMutation(rejectMutation, {
+    onMutate: async () => {
+      await client.cancelQueries('todos');
+      const prevAccessRequests = client.getQueryData(queryKey);
+      client.setQueryData(queryKey, (cached: Query) => ({
+        ...cached,
+        allAccessRequestsByNamespace: cached.allAccessRequestsByNamespace.filter(
+          (d) => d.id !== data.id
+        ),
+      }));
+      return { prevAccessRequests };
+    },
+    onError: (err: Error, context) => {
+      client.setQueryData(queryKey, context.prevAccessRequests);
+    },
+    onSettled: () => {
+      client.invalidateQueries(queryKey);
+    },
+  });
   const toast = useToast();
 
   const handleUpdateRateLimits = React.useCallback((payload) => {
     setRateLimits((state) => [...state, payload]);
   }, []);
-  const handleUpdateRestrictions = React.useCallback((payload) => {
+  const handleUpdateRestrictions = (payload) => {
     setRestrictions((state) => [...state, payload]);
-  }, []);
+  };
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
@@ -143,12 +167,14 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           <Box
             hidden={tabIndex !== 0}
             display={tabIndex === 0 ? 'block' : 'none'}
+            data-testid="ar-request-details-tab"
           >
             <RequestDetails data={data} />
           </Box>
           <Box
             hidden={tabIndex !== 1}
             display={tabIndex === 1 ? 'block' : 'none'}
+            data-testid="ar-controls-tab"
           >
             <RequestControls
               onUpdateRateLimits={handleUpdateRateLimits}
@@ -160,6 +186,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           <Box
             hidden={tabIndex !== 2}
             display={tabIndex === 2 ? 'block' : 'none'}
+            data-testid="ar-authorization-tab"
           >
             <RequestAuthorization id={data.id} />
           </Box>
@@ -208,7 +235,7 @@ const approveMutation = gql`
 `;
 
 const rejectMutation = gql`
-  mutation Approve($id: ID!) {
+  mutation RejectAccessRequest($id: ID!) {
     updateAccessRequest(
       id: $id
       data: { isApproved: false, isComplete: true }

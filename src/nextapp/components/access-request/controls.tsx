@@ -79,6 +79,9 @@ const Controls: React.FC<ControlsProps> = ({
   }, [data, rateLimitingType]);
   // Look up a service or route based on the control. Returns a name
   const getControlName = (control): string => {
+    if (!data?.allGatewayServicesByNamespace) {
+      return '';
+    }
     if (control.name === 'rate-limiting') {
       if (control.config.service) {
         return data.allGatewayServicesByNamespace.find(
@@ -161,7 +164,7 @@ const Controls: React.FC<ControlsProps> = ({
         <ExpandableCard
           heading="IP Restrictions"
           icon={FaDoorClosed}
-          data-testid="ratelimit-card"
+          data-testid="ip-restrictions-card"
         >
           <Grid templateColumns="1fr 1fr" gap={9}>
             <form
@@ -178,11 +181,14 @@ const Controls: React.FC<ControlsProps> = ({
                   <HStack spacing={4}>
                     <Radio
                       value="service"
-                      data-testid="iprestrction-service-radio"
+                      data-testid="ip-restriction-service-radio"
                     >
                       Service
                     </Radio>
-                    <Radio value="route" data-testid="iprestrction-route-radio">
+                    <Radio
+                      value="route"
+                      data-testid="ip-restriction-route-radio"
+                    >
                       Route
                     </Radio>
                   </HStack>
@@ -217,11 +223,11 @@ const Controls: React.FC<ControlsProps> = ({
                 <Button
                   type="reset"
                   variant="secondary"
-                  data-testid="iprestrction-clear-btn"
+                  data-testid="ip-restriction-clear-btn"
                 >
                   Clear
                 </Button>
-                <Button type="submit" data-testid="iprestrction-submit-btn">
+                <Button type="submit" data-testid="ip-restriction-submit-btn">
                   Apply
                 </Button>
               </ButtonGroup>
@@ -235,7 +241,7 @@ const Controls: React.FC<ControlsProps> = ({
                   There are no controls applied yet
                 </Text>
               )}
-              <UnorderedList data-testid="iprestrction-results">
+              <UnorderedList data-testid="ip-restriction-results">
                 {restrictions.map((r) => (
                   <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
                 ))}

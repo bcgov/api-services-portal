@@ -8,6 +8,7 @@ import {
   gatewayServicesHandler,
   getConsumersHandler,
   grantConsumerHandler,
+  rejectRequestHandler,
   store as consumersStore,
 } from './resolvers/consumers';
 import { allProductsByNamespaceHandler } from './resolvers/products';
@@ -53,9 +54,9 @@ export const handlers = [
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),
+  keystone.mutation('RejectAccessRequest', rejectRequestHandler),
   keystone.query('RequestDetailsBusinessProfile', (req, res, ctx) => {
     return res(
-      ctx.delay(),
       ctx.data({
         BusinessProfile: {
           institution: harley.business,
