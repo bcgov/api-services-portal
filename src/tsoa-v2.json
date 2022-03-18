@@ -3,6 +3,8 @@
   "noImplicitAdditionalProperties": "throw-on-extras",
   "controllerPathGlobs": ["controllers/v2/*Controller.ts"],
   "spec": {
+    "name": "APS Directory API",
+    "description": "",
     "outputDirectory": "controllers/v2",
     "specVersion": 3,
     "basePath": "/ds/api/v2",
