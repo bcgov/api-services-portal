@@ -28,7 +28,7 @@ import { DateTime, Markdown } from '@keystonejs/fields';
 import { Content } from './types';
 import { BatchResult } from '../../batch/types';
 import { strict as assert } from 'assert';
-x;
+
 @injectable()
 @Route('/namespaces/{ns}/contents')
 @Tags('Documentation')
