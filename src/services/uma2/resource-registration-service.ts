@@ -134,4 +134,24 @@ export class UMAResourceRegistrationService {
       ? undefined
       : await this.getResourceSet(result[0]);
   }
+
+  public async findResourceByUri(uri: string): Promise<ResourceSet> {
+    const requestQuery = querystring.stringify({
+      uri,
+    } as any);
+    const url = `${this.resourceRegistrationEndpoint}?${requestQuery}`;
+    logger.debug('[findResourceByUri] %s', url);
+    const result = await fetch(url, {
+      method: 'get',
+      headers: headers(this.accessToken) as any,
+    })
+      .then(checkStatus)
+      .then((res) => res.json())
+      .then((json) => json as string[]);
+    logger.debug('[findResourceByUri] RESULT %j', result);
+
+    return result.length == 0
+      ? undefined
+      : await this.getResourceSet(result[0]);
+  }
 }

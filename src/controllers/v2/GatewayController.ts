@@ -31,6 +31,12 @@ export class GatewayController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Get a summary of your Gateway Services
+   * > `Required Scope:` Namespace.Manage
+   *
+   * @summary Get Gateway Services
+   */
   @Get()
   @OperationId('get-gateway-routes')
   @Security('jwt', ['Namespace.Manage'])

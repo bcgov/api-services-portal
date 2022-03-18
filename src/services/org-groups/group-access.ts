@@ -49,28 +49,29 @@ export class GroupAccessService {
         name: access.name,
         parent: `/${groupRole.name}${parent}`,
       };
+      // assert.strictEqual(
+      //   groupRole.permissions && parent != '',
+      //   true,
+      //   'Permissions are only supported at the leaf (org unit) level.'
+      // );
+
       await this.orgGroupService.createGroupIfMissing(orgGroup);
 
       await this.orgGroupService.createOrUpdateGroupPolicy(orgGroup);
 
       for (const perm of groupRole.permissions) {
-        if (perm.resource.startsWith('org/')) {
+        if (perm.resource && perm.resource.startsWith('org/')) {
           assert.strictEqual(
             perm.resource,
             `org/${orgGroup.name}`,
             'Invalid organization resource in permission'
           );
-          await this.orgGroupService.createOrUpdateOrgPermission(
-            orgGroup,
-            perm.scopes
-          );
-        } else {
-          await this.orgGroupService.createOrUpdateGroupPermission(
-            orgGroup,
-            perm.resource,
-            perm.scopes
-          );
         }
+        await this.orgGroupService.createOrUpdateGroupPermission(
+          orgGroup,
+          perm.resource,
+          perm.scopes
+        );
       }
 
       await this.orgGroupService.syncMembers(orgGroup, groupRole.members);

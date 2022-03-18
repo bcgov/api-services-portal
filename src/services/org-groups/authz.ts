@@ -1,3 +1,4 @@
+import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { KeycloakTokenService, Uma2WellKnown } from '../keycloak';
@@ -30,6 +31,16 @@ export class OrgAuthzService {
       clientId,
       clientSecret
     );
+  }
+
+  async findResourceByUri(uri: string): Promise<ResourceRepresentation> {
+    logger.debug('[findResourceByUri] %s', uri);
+
+    const svc = new UMAResourceRegistrationService(
+      this.uma2.resource_registration_endpoint,
+      this.accessToken
+    );
+    return await svc.findResourceByUri(uri);
   }
 
   async createIfMissingResource(org: string): Promise<string> {

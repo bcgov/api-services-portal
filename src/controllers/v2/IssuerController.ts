@@ -1,6 +1,7 @@
 import {
   Controller,
   Request,
+  Delete,
   Get,
   OperationId,
   Put,
@@ -19,9 +20,12 @@ import {
   removeKeys,
   parseJsonString,
   transformAllRefID,
+  getRecord,
+  deleteRecord,
 } from '../../batch/feed-worker';
 import { CredentialIssuer } from './types';
 import { BatchResult } from '../../batch/types';
+import { strict as assert } from 'assert';
 
 @injectable()
 @Route('/namespaces/{ns}/issuers')
@@ -33,6 +37,12 @@ export class IssuerController extends Controller {
     this.keystone = _keystone;
   }
 
+  /**
+   * Create or Update Authorization Profiles
+   * > `Required Scope:` CredentialIssuer.Admin
+   *
+   * @summary Manage Authorization Profiles
+   */
   @Put()
   @OperationId('put-issuer')
   @Security('jwt', ['CredentialIssuer.Admin'])
@@ -49,6 +59,12 @@ export class IssuerController extends Controller {
     );
   }
 
+  /**
+   * Get Authorization Profiles setup in this namespace
+   * > `Required Scope:` Namespace.Manage
+   *
+   * @summary Get Authorization Profiles
+   */
   @Get()
   @OperationId('get-issuers')
   @Security('jwt', ['Namespace.Manage'])
@@ -87,13 +103,26 @@ export class IssuerController extends Controller {
       );
   }
 
-  // /issuers/<issuer>/applications
-  // - any applications configured with this Authorization Profile
-  // Add to the GatewayConfig the plugins to protect this
+  /**
+   * Delete an Authorization Profile
+   * > `Required Scope:` CredentialIssuer.Admin
+   *
+   * @summary Delete Profile
+   */
+  @Delete('/{name}')
+  @OperationId('delete-issuer')
+  @Security('jwt', ['CredentialIssuer.Admin'])
+  public async delete(
+    @Path() ns: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const context = this.keystone.createContext(request);
 
-  // /issuers/<issuer>/applications/<appid>/clients
-  // - any clients configured for this <appid>
+    const current = await getRecord(context, 'CredentialIssuer', name);
+    assert.strictEqual(current.namespace === ns, true, 'Issuer invalid');
+    assert.strictEqual(current === null, false, 'Issuer not found');
 
-  // {ns}/applications
-  // - applications available
+    return await deleteRecord(context, 'CredentialIssuer', name);
+  }
 }

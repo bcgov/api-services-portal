@@ -34,19 +34,25 @@ export class OrgDatasetController extends Controller {
     this.keystone = _keystone;
   }
 
-  @Get('/{orgUnit}/datasets')
+  /**
+   * Get metadata about Datasets that are available by API for this organization
+   * > `Required Scope:` Dataset.Manage
+   *
+   * @summary Get Organization Datasets
+   */
+  @Get('/{org}/datasets')
   @OperationId('organization-datasets')
   @Security('jwt', ['Dataset.Manage'])
   public async getDatasets(
-    @Path() orgUnit: string,
+    @Path() org: string,
     @Request() request: any
   ): Promise<Dataset[]> {
     const ctx = this.keystone.createContext(request);
 
     const batchClause = {
-      query: '$orgUnit: String',
-      clause: '{ organizationUnit: { name: $orgUnit } }',
-      variables: { orgUnit },
+      query: '$org: String',
+      clause: '{ organization: { name: $org } }',
+      variables: { org },
     };
 
     const records = await getRecords(
@@ -72,19 +78,21 @@ export class OrgDatasetController extends Controller {
       );
   }
 
-  @Put('{orgUnit}/datasets')
+  /**
+   * Manage metadata about Datasets that are available by API for this organization
+   * > `Required Scope:` Dataset.Manage
+   *
+   * @summary Manage Organization Datasets
+   */
+  @Put('{org}/datasets')
   @OperationId('put-organization-dataset')
   @Security('jwt', ['Dataset.Manage'])
   public async putDataset(
-    @Path() orgUnit: string,
+    @Path() org: string,
     @Body() body: Dataset,
     @Request() request: any
   ): Promise<BatchResult> {
-    assert.strictEqual(
-      orgUnit,
-      body['organizationUnit'],
-      'Organization Unit Mismatch'
-    );
+    assert.strictEqual(org, body['organization'], 'Organization Unit Mismatch');
     return await syncRecords(
       this.keystone.createContext(request),
       'DraftDataset',
@@ -93,14 +101,20 @@ export class OrgDatasetController extends Controller {
     );
   }
 
-  @Get('/{orgUnit}/datasets/{name}')
+  /**
+   * Get metadata about a Dataset that are available by API for this organization
+   * > `Required Scope:` Dataset.Manage
+   *
+   * @summary Get Organization Dataset
+   */
+  @Get('/{org}/datasets/{name}')
   @OperationId('get-organization-dataset')
   @Security('jwt', ['Dataset.Manage'])
   public async getDataset(
-    @Path() orgUnit: string,
+    @Path() org: string,
     @Path() name: string,
     @Request() request: any
-  ): Promise<Dataset[]> {
+  ): Promise<Dataset> {
     const ctx = this.keystone.createContext(request);
 
     const records = await getRecords(
@@ -109,9 +123,9 @@ export class OrgDatasetController extends Controller {
       undefined,
       ['organization', 'organizationUnit'],
       {
-        query: '$orgUnit: String!, $name: String!',
-        clause: '{ organizationUnit: { name: $orgUnit }, name: $name }',
-        variables: { orgUnit, name },
+        query: '$org: String!, $name: String!',
+        clause: '{ organization: { name: $org }, name: $name }',
+        variables: { org, name },
       }
     );
 
@@ -130,7 +144,8 @@ export class OrgDatasetController extends Controller {
         ])
       )
       .map((o) => transformContacts(o))
-      .map((o) => transformResources(o));
+      .map((o) => transformResources(o))
+      .pop();
   }
 }
 

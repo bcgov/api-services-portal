@@ -123,27 +123,28 @@ export class OrganizationController extends Controller {
   /**
    * > `Required Scope:` Namespace.Assign
    */
-  @Put('{orgUnit}/namespaces/{ns}')
+  @Put('{org}/{orgUnit}/namespaces/{ns}')
   @OperationId('assign-namespace-to-organization')
   @Security('jwt', ['Namespace.Assign'])
   public async assignNamespace(
+    @Path() org: string,
     @Path() orgUnit: string,
     @Path() ns: string
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
-    const org = await getOrganizationUnit(ctx, orgUnit);
-    assert.strictEqual(org != null, true, 'Invalid Organization');
+    const orgLookup = await getOrganizationUnit(ctx, orgUnit);
+    assert.strictEqual(
+      orgLookup != null && orgLookup.name === org,
+      true,
+      'Invalid Organization'
+    );
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
     const envConfig = prodEnv.issuerEnvConfig;
 
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const answer = await svc.assignNamespaceToOrganization(
-      ns,
-      org.name,
-      orgUnit
-    );
+    const answer = await svc.assignNamespaceToOrganization(ns, org, orgUnit);
     return {
       result: answer
         ? 'namespace-assigned'
@@ -154,16 +155,21 @@ export class OrganizationController extends Controller {
   /**
    * > `Required Scope:` Namespace.Assign
    */
-  @Delete('{orgUnit}/namespaces/{ns}')
+  @Delete('{org}/{orgUnit}/namespaces/{ns}')
   @OperationId('unassign-namespace-from-organization')
   @Security('jwt', ['Namespace.Assign'])
   public async unassignNamespace(
+    @Path() org: string,
     @Path() orgUnit: string,
     @Path() ns: string
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
-    const org = await getOrganizationUnit(ctx, orgUnit);
-    assert.strictEqual(org != null, true, 'Invalid Organization');
+    const orgLookup = await getOrganizationUnit(ctx, orgUnit);
+    assert.strictEqual(
+      orgLookup != null && orgLookup.name === org,
+      true,
+      'Invalid Organization'
+    );
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
     const envConfig = prodEnv.issuerEnvConfig;
@@ -172,7 +178,7 @@ export class OrganizationController extends Controller {
     await svc.login(envConfig.clientId, envConfig.clientSecret);
     const answer = await svc.unassignNamespaceFromOrganization(
       ns,
-      org.name,
+      org,
       orgUnit
     );
     return {
@@ -191,24 +197,24 @@ export class OrganizationController extends Controller {
    * @param skip
    * @returns Activity[]
    */
-  @Get('{orgUnit}/activity')
+  @Get('{org}/activity')
   @OperationId('namespace-activity')
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
-    @Path() orgUnit: string,
+    @Path() org: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
   ): Promise<Activity[]> {
     const ctx = this.keystone.sudo();
-    const org = await getOrganizationUnit(ctx, orgUnit);
-    assert.strictEqual(org != null, true, 'Invalid Organization Unit');
+    //const org = await getOrganizationUnit(ctx, orgUnit);
+    //assert.strictEqual(org != null, true, 'Invalid Organization Unit');
 
     const prodEnv = await getGwaProductEnvironment(ctx, false);
     const envConfig = prodEnv.issuerEnvConfig;
 
     const svc = new NamespaceService(envConfig.issuerUrl);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org.name);
+    const assignedNamespaces = await svc.listAssignedNamespacesByOrg(org);
     const records = await getActivity(
       ctx,
       assignedNamespaces.map((n) => n.name),

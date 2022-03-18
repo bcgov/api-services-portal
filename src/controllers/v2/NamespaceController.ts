@@ -16,10 +16,12 @@ import { inject, injectable } from 'tsyringe';
 import { gql } from 'graphql-request';
 import { WorkbookService } from '../../services/report/workbook.service';
 import { Namespace } from '../../services/keystone/types';
-import { Logger } from '../../logger';
 
 import { Readable } from 'stream';
 import { removeEmpty } from '../../batch/feed-worker';
+
+import { Logger } from '../../logger';
+const logger = Logger('controllers.Namespace');
 
 /**
  * @param binary Buffer
@@ -35,8 +37,6 @@ function bufferToStream(binary: any) {
 
   return readableInstanceStream;
 }
-
-const logger = Logger('controllers.Namespace');
 
 @injectable()
 @Route('/namespaces')

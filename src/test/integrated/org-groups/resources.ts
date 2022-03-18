@@ -60,5 +60,5 @@ import fetch from 'node-fetch';
 
   o(result);
 
-  // o(await kc.getGroupPermissionsByResource('platform'));
+  o(await kc.getGroupPermissionsByResource('platform'));
 })();

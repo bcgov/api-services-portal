@@ -17,7 +17,7 @@ export interface GroupRole {
 }
 
 export interface GroupPermission {
-  resource: string;
+  resource?: string;
   scopes: string[];
 }
 

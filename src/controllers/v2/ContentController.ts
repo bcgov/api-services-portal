@@ -1,6 +1,7 @@
 import {
   Controller,
   Request,
+  Delete,
   Get,
   Put,
   Path,
@@ -13,6 +14,8 @@ import {
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import {
+  deleteRecord,
+  getRecord,
   getRecords,
   parseJsonString,
   removeEmpty,
@@ -24,6 +27,8 @@ import multer from 'multer';
 import { DateTime, Markdown } from '@keystonejs/fields';
 import { Content } from './types';
 import { BatchResult } from '../../batch/types';
+import { strict as assert } from 'assert';
+import { isServiceMissingAllPluginsHandler } from '@/services/workflow';
 
 @injectable()
 @Route('/namespaces/{ns}/contents')
@@ -65,7 +70,7 @@ export class ContentController extends Controller {
 
   @Get()
   @OperationId('get-contents')
-  @Security('jwt', ['Namespace.Manage'])
+  @Security('jwt', ['Namespace.View'])
   public async get(
     @Path() ns: string,
     @Request() request: any
@@ -82,6 +87,29 @@ export class ContentController extends Controller {
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['tags']))
       .map((o) => removeKeys(o, ['id', 'namespace']));
+  }
+
+  /**
+   * Delete Documention that was created for this namespace
+   * > `Required Scope:` Content.Publish
+   *
+   * @summary Delete Documentation
+   */
+  @Delete('/{externalLink}')
+  @OperationId('delete-content')
+  @Security('jwt', ['Content.Publish'])
+  public async delete(
+    @Path() ns: string,
+    @Path() externalLink: string,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const context = this.keystone.createContext(request);
+
+    const current = await getRecord(context, 'Content', externalLink);
+    assert.strictEqual(current === null, false, 'Content not found');
+    assert.strictEqual(current.namespace === ns, true, 'Content invalid');
+
+    return await deleteRecord(context, 'Content', externalLink);
   }
 
   // @Put('{contentId}/markdown')

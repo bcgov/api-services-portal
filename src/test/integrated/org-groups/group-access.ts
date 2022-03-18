@@ -35,10 +35,10 @@ import {
     console.log(JSON.stringify(access, null, 4));
   }
 
-  if (true) {
+  if (false) {
     const access = {
       name: 'databc',
-      parent: '/ministry-citizens-services',
+      parent: '/ministry-of-citizens-services',
       roles: [
         {
           name: 'data-custodian',
@@ -72,7 +72,7 @@ import {
     await kc.createOrUpdateGroupAccess(access);
   }
 
-  if (false) {
+  if (true) {
     const access = {
       name: 'ministry-of-citizens-services',
       roles: [
@@ -80,15 +80,16 @@ import {
           name: 'data-custodian',
           members: [
             {
-              id: '15a3cbbe-95b5-49f0-84ee-434a9b92d04a',
               username: 'acope@idir',
-              email: 'acope@nowhere.com',
+            },
+            {
+              username: 'platform',
             },
           ],
           permissions: [
             {
               resource: 'org/ministry-of-citizens-services',
-              scopes: ['Namespace.Assign'],
+              scopes: ['Namespace.Assign', 'Dataset.Manage'],
             },
           ],
         },

@@ -250,6 +250,23 @@ export const getRecords = async function (
   );
 };
 
+export const getRecord = async function (
+  context: any,
+  feedEntity: string,
+  eid: string
+): Promise<any> {
+  const md = (metadata as any)[feedEntity];
+
+  const batchService = new BatchService(context);
+
+  return await batchService.lookup(
+    md.query,
+    md.refKey,
+    eid,
+    buildQueryResponse(md)
+  );
+};
+
 export const syncRecords = async function (
   context: any,
   feedEntity: string,

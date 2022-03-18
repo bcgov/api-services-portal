@@ -7,6 +7,7 @@ import { PolicyQuery } from '@keycloak/keycloak-admin-client/lib/resources/clien
 import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
 import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
 import ResourceRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceRepresentation';
+import ScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/scopeRepresentation';
 
 //import KeycloakAdminClient, { default as KcAdminClient } from 'keycloak-admin';
 // import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
@@ -236,12 +237,19 @@ export class KeycloakClientPolicyService {
         `Permission Policy Count Error ${perm.config.policies.length}`
       );
       assert.strictEqual(
-        perm.config.resources.length,
-        1,
+        perm.config.resources.length <= 1,
+        true,
         `Permission Resource Count Error ${perm.config.resources.length}`
       );
     }
     return lkup;
+  }
+
+  public async getAllClientAuthzScopes(
+    id: string
+  ): Promise<ScopeRepresentation[]> {
+    logger.debug('[getAllScopes] %s', id);
+    return await this.kcAdminClient.clients.listAllScopes({ id });
   }
 
   public async findPolicyByName(

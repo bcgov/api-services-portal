@@ -230,6 +230,9 @@ export class OrgGroupService {
           ).length == 0
         ) {
           await this.keycloakService.createGroup(orgGroup.name);
+
+          // refresh cached list of groups
+          await this.backfillGroups();
         }
       } else {
         throwError(`Invalid organization role ${orgGroup.name}`);
@@ -293,15 +296,28 @@ export class OrgGroupService {
 
     logger.debug('[createOrUpdatePermission] Exists? %j', permissionPolicy);
 
-    const resource = await clientService.findResourceByName(cid, resourceName);
+    let scopes: string[];
+    let resources: string[] = [];
 
-    const scopes = resource.scopes
-      .filter((scope: ClientScopeRepresentation) =>
-        scopeNames.includes(scope.name)
-      )
-      .map((c) => c.id);
+    if (resourceName) {
+      const resource = await clientService.findResourceByName(
+        cid,
+        resourceName
+      );
 
-    const resources = [(resource as any)._id];
+      resources = [(resource as any)._id];
+
+      scopes = resource.scopes
+        .filter((scope: ClientScopeRepresentation) =>
+          scopeNames.includes(scope.name)
+        )
+        .map((c) => c.id);
+    } else {
+      const allScopes = await clientPolicyService.getAllClientAuthzScopes(cid);
+      scopes = allScopes
+        .filter((scope) => scopeNames.includes(scope.name))
+        .map((c) => c.id);
+    }
 
     const policies: string[] = [
       (await clientPolicyService.findPolicyByName(cid, policyName)).id,
@@ -335,7 +351,7 @@ export class OrgGroupService {
       assert.strictEqual(
         existingPolicyId,
         policies[0],
-        `Permission has different policy assigned, unable to update (Existing ${existingPolicyId} != ${policies[0]})`
+        `Permission (${permissionName}) has different policy assigned, unable to update (Existing ${existingPolicyId} != ${policies[0]})`
       );
       await clientPolicyService.updatePermission(
         cid,
@@ -601,9 +617,9 @@ export class OrgGroupService {
   ): PolicyGroupReference[] {
     const groupBranches = this.getGroupBranches(orgGroup);
     // extend to children to true on leaf
-    return groupBranches.map((group, index) => ({
+    return groupBranches.map((group) => ({
       id: group.id,
-      extendChildren: groupBranches.length == index + 1 ? true : false,
+      extendChildren: false,
     }));
   }
 

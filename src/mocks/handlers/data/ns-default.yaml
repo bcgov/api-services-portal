@@ -31,7 +31,7 @@ products:
           name: 'GWA API Resource Server'
           flow: 'client-credentials'
           mode: 'auto'
-          environmentDetails: '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps-v2","clientId":"gwa-api","clientRegistration":"managed","clientSecret":"66919256-e415-47a8-b468-40b0d8161f85"}]'
+          environmentDetails: '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps-v2","clientId":"gwa-api","clientRegistration":"managed","clientSecret":"****"}]'
           resourceType: 'namespace'
           resourceAccessScope: 'Namespace.Manage'
 

@@ -20,6 +20,7 @@ import {
   Uma2WellKnown,
 } from '../../../services/keycloak';
 import fetch from 'node-fetch';
+import { o } from '../util';
 
 (async () => {
   const uma2: Uma2WellKnown = await (
@@ -30,5 +31,10 @@ import fetch from 'node-fetch';
 
   await kc.login(process.env.CID, process.env.CSC);
 
-  await kc.createIfMissingResource('databc');
+  //  await kc.createIfMissingResource('databc');
+  o(
+    await kc.findResourceByUri(
+      '/organizations/ministry-of-citizen-services/databc1'
+    )
+  );
 })();
