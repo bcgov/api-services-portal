@@ -28,9 +28,7 @@ import { strict as assert } from 'assert';
 
 import { Logger } from '../../logger';
 import { Activity } from './types';
-import { getGwaProductEnvironment } from '@/services/workflow';
-import { NamespaceService } from '@/services/org-groups';
-import { getActivity } from '@/services/keystone/activity';
+import { getActivity } from '../../services/keystone/activity';
 const logger = Logger('controllers.Namespace');
 
 /**
