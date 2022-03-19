@@ -50,6 +50,9 @@ export class ProductController extends Controller {
    * > `Required Scope:` Namespace.Manage
    *
    * @summary Manage Products
+   * @param ns
+   * @param body
+   * @param request
    */
   @Put()
   @OperationId('put-product')
@@ -72,6 +75,9 @@ export class ProductController extends Controller {
    * > `Required Scope:` Namespace.Manage
    *
    * @summary Get Products
+   * @param ns
+   * @param request
+   * @returns
    */
   @Get()
   @OperationId('get-products')
@@ -102,6 +108,7 @@ export class ProductController extends Controller {
         removeKeys(o, [
           'id',
           'namespace',
+          'product',
           'extSource',
           'extRecordHash',
           'extForeignKey',
@@ -114,6 +121,10 @@ export class ProductController extends Controller {
    * > `Required Scope:` Namespace.Manage
    *
    * @summary Manage Products
+   * @param ns
+   * @param appId
+   * @param request
+   * @returns
    */
   @Delete('/{appId}')
   @OperationId('delete-product')
@@ -139,6 +150,8 @@ export class ProductController extends Controller {
    *
    * @summary Delete a Product Environment
    * @param ns
+   * @param appId
+   * @param force
    * @param request
    * @returns
    */
@@ -155,13 +168,13 @@ export class ProductController extends Controller {
 
     assert.strictEqual(isEnvironmentID(appId), true, 'Invalid appId');
 
-    const current = await getRecord(
-      this.keystone.createContext(request),
-      'Environment',
-      appId
-    );
+    const current = await getRecord(context, 'Environment', appId, ['product']);
     assert.strictEqual(current === null, false, 'Environment not found');
-    assert.strictEqual(current.namespace === ns, true, 'Environment invalid');
+    assert.strictEqual(
+      current.product.namespace === ns,
+      true,
+      'Environment invalid'
+    );
 
     const result = await this.keystone.executeGraphQL({
       context,

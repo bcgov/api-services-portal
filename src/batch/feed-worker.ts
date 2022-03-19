@@ -253,7 +253,8 @@ export const getRecords = async function (
 export const getRecord = async function (
   context: any,
   feedEntity: string,
-  eid: string
+  eid: string,
+  children: string[] = undefined
 ): Promise<any> {
   const md = (metadata as any)[feedEntity];
 
@@ -263,7 +264,7 @@ export const getRecord = async function (
     md.query,
     md.refKey,
     eid,
-    buildQueryResponse(md)
+    buildQueryResponse(md, children)
   );
 };
 

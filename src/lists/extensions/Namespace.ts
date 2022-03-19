@@ -47,7 +47,7 @@ type Namespace {
     scopes: [UMAScope]!,
     prodEnvId: String,
     permDomains: [String],
-    permDataPlane: [String],
+    permDataPlane: String,
     permProtected: String
 }
 `;
@@ -228,7 +228,7 @@ module.exports = {
               (detail as any).permDataPlane =
                 'perm-data-plane' in nsPermissions.attributes
                   ? nsPermissions.attributes['perm-data-plane'][0]
-                  : [];
+                  : '';
               return detail;
             },
             access: EnforcementPoint,
@@ -480,7 +480,7 @@ module.exports = {
                 resourcesApi.deleteResourceSet(nsResource[0].id);
                 return true;
               } else {
-                return await DeleteNamespaceValidate(
+                await DeleteNamespaceValidate(
                   context.createContext({ skipAccessControl: true }),
                   args.namespace
                 );

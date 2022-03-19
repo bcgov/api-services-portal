@@ -40,8 +40,13 @@ export class BatchService {
       query: queryString,
       variables: where ? where.variables : {},
     });
-    logger.debug('[listAll] RESULT %j', result);
 
+    if ('errors' in result) {
+      logger.error('[listAll] RESULT %j', result);
+      return null;
+    }
+
+    logger.debug('[listAll] RESULT %j', result);
     return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 

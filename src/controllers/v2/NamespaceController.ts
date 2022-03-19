@@ -18,9 +18,19 @@ import { WorkbookService } from '../../services/report/workbook.service';
 import { Namespace } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
-import { removeEmpty } from '../../batch/feed-worker';
+import {
+  parseJsonString,
+  removeEmpty,
+  transformAllRefID,
+} from '../../batch/feed-worker';
+
+import { strict as assert } from 'assert';
 
 import { Logger } from '../../logger';
+import { Activity } from './types';
+import { getGwaProductEnvironment } from '@/services/workflow';
+import { NamespaceService } from '@/services/org-groups';
+import { getActivity } from '@/services/keystone/activity';
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -117,6 +127,7 @@ export class NamespaceController extends Controller {
       variables: { ns },
     });
     logger.debug('Result %j', result);
+    assert.strictEqual('errors' in result, false, 'Unable to process request');
     return result.data.namespace;
   }
 
@@ -151,6 +162,31 @@ export class NamespaceController extends Controller {
       throw new ValidateError(errors, 'Unable to delete namespace');
     }
     return result.data.forceDeleteNamespace;
+  }
+
+  /**
+   * > `Required Scope:` Namespace.View
+   *
+   * @summary Get Namespace Activity for this namespace
+   * @param ns
+   * @param first
+   * @param skip
+   * @returns Activity[]
+   */
+  @Get('/{ns}/activity')
+  @OperationId('namespace-activity')
+  @Security('jwt', ['Namespace.View'])
+  public async namespaceActivity(
+    @Path() ns: string,
+    @Query() first: number = 20,
+    @Query() skip: number = 0
+  ): Promise<Activity[]> {
+    const ctx = this.keystone.sudo();
+    const records = await getActivity(ctx, [ns], first > 50 ? 50 : first, skip);
+    return records
+      .map((o) => removeEmpty(o))
+      .map((o) => transformAllRefID(o, ['blob']))
+      .map((o) => parseJsonString(o, ['context', 'blob']));
   }
 }
 

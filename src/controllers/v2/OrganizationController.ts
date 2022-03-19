@@ -198,7 +198,7 @@ export class OrganizationController extends Controller {
    * @returns Activity[]
    */
   @Get('{org}/activity')
-  @OperationId('namespace-activity')
+  @OperationId('org-namespace-activity')
   @Security('jwt', ['Namespace.Assign'])
   public async namespaceActivity(
     @Path() org: string,

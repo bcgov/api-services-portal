@@ -171,7 +171,9 @@ export class KeycloakGroupService {
       const grp = groups[0].subGroups.filter(
         (group: GroupRepresentation) => group.name == groupName
       )[0];
-      return this.kcAdminClient.groups.findOne({ id: grp.id });
+      const group = this.kcAdminClient.groups.findOne({ id: grp.id });
+      logger.debug('[getGroup] FOUND   %j', group);
+      return group;
     }
   }
 
