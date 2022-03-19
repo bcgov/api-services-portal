@@ -1,16 +1,26 @@
 import * as React from 'react';
-import { Box, Grid, Heading, VStack } from '@chakra-ui/layout';
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Center,
+  Grid,
+  Heading,
+  VStack,
+} from '@chakra-ui/react';
 import { Checkbox } from '@chakra-ui/checkbox';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
+import { _ip } from 'casual-browserify';
 
 interface AuthorizationProps {
   id: string;
 }
 
 const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
-  const { data, isSuccess } = useApi(
+  const { data, isError, isLoading, isSuccess } = useApi(
     ['GetAccessRequestAuth', id],
     {
       query,
@@ -63,6 +73,15 @@ const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
           Roles
         </Heading>
       </Grid>
+      {isLoading && <Box role="status">Loading...</Box>}
+      {isError && (
+        <Center>
+          <Alert status="error">
+            <AlertIcon />
+            <AlertTitle>Unable to load</AlertTitle>
+          </Alert>
+        </Center>
+      )}
       <Grid
         as="form"
         name="authorizationForm"

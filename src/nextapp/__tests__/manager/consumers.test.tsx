@@ -5,7 +5,6 @@ jest.mock('../../shared/config', () => ({
 }));
 import {
   fireEvent,
-  prettyDOM,
   render,
   screen,
   waitFor,

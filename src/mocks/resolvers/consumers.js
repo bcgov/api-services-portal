@@ -1,6 +1,5 @@
 import subDays from 'date-fns/subDays';
 import cloneDeep from 'lodash/cloneDeep';
-import casual from 'casual-browserify';
 
 const today = new Date();
 
@@ -12,13 +11,17 @@ export const harleyAccessRequest = {
   communication: 'Phone Number 204-896-6325 &  204-896-7700. ',
   createdAt: subDays(today, 6).toISOString(),
   requestor: {
+    id: 'u1',
     name: 'Harley Jones',
   },
   application: {
+    id: 'app1',
     name: 'Easy Mart Store 122',
   },
   productEnvironment: {
+    id: 'pe1',
     name: 'dev',
+    services: [],
   },
 };
 
@@ -176,6 +179,20 @@ export const rejectRequestHandler = (req, res, ctx) => {
 };
 
 export const accessRequestAuthHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+
+  if (id === 'd1') {
+    return res(
+      ctx.data({
+        errors: [
+          {
+            message: 'Unavailable',
+          },
+        ],
+      })
+    );
+  }
+
   return res(
     ctx.data({
       AccessRequest: {

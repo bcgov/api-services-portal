@@ -38,7 +38,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ data }) => {
       <GridItem as="dd">
         <ErrorBoundary
           fallback={
-            <Text as="em" color="bc-component">
+            <Text as="em" color="bc-component" role="alert">
               Unable to load business profile
             </Text>
           }
