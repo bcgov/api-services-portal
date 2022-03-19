@@ -24,9 +24,9 @@ ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayRoute,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayService,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
-CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByOwner
+CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
-CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,update,,namespace,,,credential-admin,,,deny,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"create,read",namespace,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
@@ -153,6 +153,7 @@ Developer Role Rules - Fields,,,AccessRequest,,"read,update",credential,,,portal
 Developer Role Rules - Fields,,,AccessRequest,read,,"name,controls,application,productEnvironment,isIssued",,,portal-user,,,allow,
 Developer Role Rules - Fields,,,ServiceAccess,read,,"consumer,application",,,portal-user,,,allow,
 Content Publisher,,,Content,,create,,,,,Content.Publish,,allow,
+Content Publisher,,,Content,,create,namespace,,,,Content.Publish,,allow,
 Content Publisher,,,Content,,update,,,,,Content.Publish,,allow,filterByUserNS
 Content Publisher,,,Content,,update,namespace,,,,,,deny,
 Content Publisher,,allContentsByNamespace,,,,,,,,Content.Publish,,allow,filterByUserNS

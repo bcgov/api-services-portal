@@ -148,6 +148,7 @@ export async function getActivity(
               allActivities(where: { namespace_in: $namespaces }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
                 type
                 name
+                namespace
                 action
                 refId
                 result

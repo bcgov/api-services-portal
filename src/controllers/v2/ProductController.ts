@@ -32,6 +32,7 @@ import { Logger } from '../../logger';
 import { gql } from 'graphql-request';
 import { strict as assert } from 'assert';
 import { isEnvironmentID, isProductID } from '../../services/identifiers';
+import { Product as KSProduct } from '../../services/keystone/types';
 
 const logger = Logger('controllers.Product');
 
@@ -87,7 +88,7 @@ export class ProductController extends Controller {
     @Request() request: any
   ): Promise<Product[]> {
     const ctx = this.keystone.createContext(request);
-    const records: Product[] = await getRecords(
+    const records: KSProduct[] = await getRecords(
       ctx,
       'Product',
       'allProductsByNamespace',
@@ -168,18 +169,31 @@ export class ProductController extends Controller {
 
     assert.strictEqual(isEnvironmentID(appId), true, 'Invalid appId');
 
-    const current = await getRecord(context, 'Environment', appId, ['product']);
-    assert.strictEqual(current === null, false, 'Environment not found');
-    assert.strictEqual(
-      current.product.namespace === ns,
-      true,
-      'Environment invalid'
+    const records: KSProduct[] = await getRecords(
+      context,
+      'Product',
+      'allProductsByNamespace',
+      ['environments']
     );
+    const product = records
+      .filter((p) => p.environments.filter((e) => e.appId === appId).length > 0)
+      .pop();
+
+    assert.strictEqual(
+      typeof product === 'undefined',
+      false,
+      'Environment not found'
+    );
+    assert.strictEqual(product.namespace === ns, true, 'Environment invalid');
+
+    const environment = product.environments
+      .filter((e) => e.appId === appId)
+      .pop();
 
     const result = await this.keystone.executeGraphQL({
       context,
       query: deleteEnvironment,
-      variables: { id: current.id, force },
+      variables: { id: environment.id, force },
     });
     logger.debug('Result %j', result);
     if (result.errors) {
