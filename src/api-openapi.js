@@ -39,7 +39,7 @@ class ApiOpenapiApp {
   prepareV2(app) {
     const { RegisterRoutes } = require('./controllers/v2/routes');
     const specFile = fs.realpathSync('controllers/v2/openapi.yaml');
-    const specObject = YAML.load(specFile);
+    const specObject = YAML.load(fs.readFileSync(specFile));
 
     /*
       The 'tokenUrl' should be set with the 'OIDC_ISSUER' = '/protocol/openid-connect/token'

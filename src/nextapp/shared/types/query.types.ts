@@ -6048,7 +6048,7 @@ export type Namespace = {
   scopes: Array<Maybe<UmaScope>>;
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
-  permDataPlane?: Maybe<Array<Maybe<Scalars['String']>>>;
+  permDataPlane?: Maybe<Scalars['String']>;
   permProtected?: Maybe<Scalars['String']>;
 };
 

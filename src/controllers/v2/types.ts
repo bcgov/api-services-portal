@@ -289,22 +289,25 @@ export interface Environment {
 
 /**
  * @tsoaModel
- *
+ * @example {
+ *   "name": "my-auth-profile",
+ *   "description": "Auth connection to my IdP",
+ *   "flow": "client-credentials",
+ *   "clientAuthenticator": "client-secret",
+ *   "mode": "auto",
+ *   "environmentDetails": [],
+ *   "owner": "acope@idir"
+ * }
  */  
 export interface CredentialIssuer {
   name?: string; // Primary Key
   namespace?: string;
   description?: string;
   flow?: "client-credentials";
-  clientRegistration?: "managed";
   mode?: "auto";
   authPlugin?: string;
   clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url";
   instruction?: string;
-  oidcDiscoveryUrl?: string;
-  initialAccessToken?: string;
-  clientId?: string;
-  clientSecret?: string;
   resourceType?: string;
   resourceAccessScope?: string;
   apiKeyName?: string;

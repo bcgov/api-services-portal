@@ -68,8 +68,8 @@ export const UPDATE_ENVIRONMENT_ACTIVE = gql`
 `;
 
 export const REMOVE_ENVIRONMENT = gql`
-  mutation Remove($id: ID!) {
-    deleteEnvironment(id: $id) {
+  mutation Remove($id: ID!, $force: Boolean!) {
+    forceDeleteEnvironment(id: $id, force: $force) {
       name
       id
     }

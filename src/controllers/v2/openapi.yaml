@@ -147,11 +147,6 @@ components:
                     enum:
                         - client-credentials
                     nullable: false
-                clientRegistration:
-                    type: string
-                    enum:
-                        - managed
-                    nullable: false
                 mode:
                     type: string
                     enum:
@@ -166,14 +161,6 @@ components:
                         - client-jwt
                         - client-jwt-jwks-url
                 instruction:
-                    type: string
-                oidcDiscoveryUrl:
-                    type: string
-                initialAccessToken:
-                    type: string
-                clientId:
-                    type: string
-                clientSecret:
                     type: string
                 resourceType:
                     type: string
@@ -202,6 +189,14 @@ components:
                     $ref: '#/components/schemas/UserRefID'
             type: object
             additionalProperties: false
+            example:
+                name: my-auth-profile
+                description: 'Auth connection to my IdP'
+                flow: client-credentials
+                clientAuthenticator: client-secret
+                mode: auto
+                environmentDetails: []
+                owner: acope@idir
         UmaScope:
             properties:
                 name:
@@ -255,6 +250,61 @@ components:
                 - name
                 - id
             type: object
+        DateTime:
+            description: '*****************************************'
+        Activity:
+            properties:
+                extRefId:
+                    type: string
+                type:
+                    type: string
+                name:
+                    type: string
+                action:
+                    type: string
+                    enum:
+                        - add
+                        - update
+                        - create
+                        - delete
+                        - validate
+                        - publish
+                result:
+                    type: string
+                    enum:
+                        - ""
+                        - received
+                        - failed
+                        - completed
+                        - success
+                message:
+                    type: string
+                refId:
+                    type: string
+                namespace:
+                    type: string
+                blob:
+                    type: string
+                updatedAt:
+                    $ref: '#/components/schemas/DateTime'
+                createdAt:
+                    $ref: '#/components/schemas/DateTime'
+                actor:
+                    $ref: '#/components/schemas/UserRefID'
+            type: object
+            additionalProperties: false
+            example:
+                type: Namespace
+                name: 'delete Namespace[ns_x]'
+                action: delete
+                refId: ns_x
+                result: success
+                message: 'Deleted ns_x namespace'
+                actor:
+                    name: 'XT:Blink, James CITZ:IN'
+                blob: {}
+                createdAt: '2022-03-11T00:47:42.947Z'
+                updatedAt: '2022-03-11T00:47:42.947Z'
         GroupPermission:
             properties:
                 resource:
@@ -264,7 +314,6 @@ components:
                         type: string
                     type: array
             required:
-                - resource
                 - scopes
             type: object
             additionalProperties: false
@@ -326,7 +375,6 @@ components:
                         $ref: '#/components/schemas/GroupMember'
                     type: array
             required:
-                - name
                 - roles
             type: object
             additionalProperties: false
@@ -341,61 +389,6 @@ components:
                 - orgUnit
             type: object
             additionalProperties: false
-        DateTime:
-            description: '*****************************************'
-        Activity:
-            properties:
-                extRefId:
-                    type: string
-                type:
-                    type: string
-                name:
-                    type: string
-                action:
-                    type: string
-                    enum:
-                        - add
-                        - update
-                        - create
-                        - delete
-                        - validate
-                        - publish
-                result:
-                    type: string
-                    enum:
-                        - ""
-                        - received
-                        - failed
-                        - completed
-                        - success
-                message:
-                    type: string
-                refId:
-                    type: string
-                namespace:
-                    type: string
-                blob:
-                    type: string
-                updatedAt:
-                    $ref: '#/components/schemas/DateTime'
-                createdAt:
-                    $ref: '#/components/schemas/DateTime'
-                actor:
-                    $ref: '#/components/schemas/UserRefID'
-            type: object
-            additionalProperties: false
-            example:
-                type: Namespace
-                name: 'delete Namespace[ns_x]'
-                action: delete
-                refId: ns_x
-                result: success
-                message: 'Deleted ns_x namespace'
-                actor:
-                    name: 'XT:Blink, James CITZ:IN'
-                blob: {}
-                createdAt: '2022-03-11T00:47:42.947Z'
-                updatedAt: '2022-03-11T00:47:42.947Z'
         OrganizationRefID:
             type: string
         OrganizationUnitRefID:
@@ -519,7 +512,7 @@ components:
             description: 'Authz Client Credential'
             flows:
                 clientCredentials:
-                    tokenUrl: 'https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token'
+                    tokenUrl: 'https://token_endpoint'
                     scopes: {}
         portal:
             type: http
@@ -527,7 +520,7 @@ components:
             scheme: bearer
             bearerFormat: JWT
 info:
-    title: bcgov-aps-portal
+    title: 'APS Directory API'
     version: 0.1.0
     description: 'API Services Portal by BC Gov API Programme Services'
     license:
@@ -582,11 +575,42 @@ paths:
             security:
                 -
                     jwt:
-                        - Namespace.Manage
+                        - Namespace.View
             parameters:
                 -
                     in: path
                     name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/contents/{externalLink}':
+        delete:
+            operationId: delete-content
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Delete Documention that was created for this namespace\n> `Required Scope:` Content.Publish"
+            summary: 'Delete Documentation'
+            tags:
+                - Documentation
+            security:
+                -
+                    jwt:
+                        - Content.Publish
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: externalLink
                     required: true
                     schema:
                         type: string
@@ -666,6 +690,8 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/GatewayRoute'
                                 type: array
+            description: "Get a summary of your Gateway Services\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get Gateway Services'
             tags:
                 - 'Gateway Services'
             security:
@@ -713,6 +739,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
+            description: "Create or Update Authorization Profiles\n> `Required Scope:` CredentialIssuer.Admin"
+            summary: 'Manage Authorization Profiles'
             tags:
                 - 'Authorization Profiles'
             security:
@@ -743,6 +771,8 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/CredentialIssuer'
                                 type: array
+            description: "Get Authorization Profiles setup in this namespace\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get Authorization Profiles'
             tags:
                 - 'Authorization Profiles'
             security:
@@ -753,6 +783,37 @@ paths:
                 -
                     in: path
                     name: ns
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/issuers/{name}':
+        delete:
+            operationId: delete-issuer
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Delete an Authorization Profile\n> `Required Scope:` CredentialIssuer.Admin"
+            summary: 'Delete Profile'
+            tags:
+                - 'Authorization Profiles'
+            security:
+                -
+                    jwt:
+                        - CredentialIssuer.Admin
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
                     required: true
                     schema:
                         type: string
@@ -846,6 +907,49 @@ paths:
                     schema:
                         default: false
                         type: boolean
+    '/namespaces/{ns}/activity':
+        get:
+            operationId: namespace-activity
+            responses:
+                '200':
+                    description: 'Activity[]'
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Activity'
+                                type: array
+            description: '> `Required Scope:` Namespace.View'
+            summary: 'Get Namespace Activity for this namespace'
+            tags:
+                - Namespaces
+            security:
+                -
+                    jwt:
+                        - Namespace.View
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: first
+                    required: false
+                    schema:
+                        default: 20
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: skip
+                    required: false
+                    schema:
+                        default: 0
+                        format: double
+                        type: number
     /organizations:
         get:
             operationId: organization-list
@@ -957,7 +1061,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{orgUnit}/namespaces/{ns}':
+    '/organizations/{org}/{orgUnit}/namespaces/{ns}':
         put:
             operationId: assign-namespace-to-organization
             responses:
@@ -979,6 +1083,12 @@ paths:
                     jwt:
                         - Namespace.Assign
             parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
                 -
                     in: path
                     name: orgUnit
@@ -1014,6 +1124,12 @@ paths:
             parameters:
                 -
                     in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
                     name: orgUnit
                     required: true
                     schema:
@@ -1024,9 +1140,9 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{orgUnit}/activity':
+    '/organizations/{org}/activity':
         get:
-            operationId: namespace-activity
+            operationId: org-namespace-activity
             responses:
                 '200':
                     description: 'Activity[]'
@@ -1047,7 +1163,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: orgUnit
+                    name: org
                     required: true
                     schema:
                         type: string
@@ -1067,7 +1183,7 @@ paths:
                         default: 0
                         format: double
                         type: number
-    '/organizations/{orgUnit}/datasets':
+    '/organizations/{org}/datasets':
         get:
             operationId: organization-datasets
             responses:
@@ -1079,6 +1195,8 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Dataset'
                                 type: array
+            description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Get Organization Datasets'
             tags:
                 - 'API Directory'
             security:
@@ -1088,7 +1206,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: orgUnit
+                    name: org
                     required: true
                     schema:
                         type: string
@@ -1101,6 +1219,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
+            description: "Manage metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Manage Organization Datasets'
             tags:
                 - 'API Directory'
             security:
@@ -1110,7 +1230,7 @@ paths:
             parameters:
                 -
                     in: path
-                    name: orgUnit
+                    name: org
                     required: true
                     schema:
                         type: string
@@ -1120,18 +1240,18 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/Dataset'
-    '/organizations/{orgUnit}/datasets/{name}':
-        get:
-            operationId: get-organization-dataset
+    '/organizations/{org}/datasets/{name}':
+        delete:
+            operationId: delete-dataset
             responses:
                 '200':
                     description: Ok
                     content:
                         application/json:
                             schema:
-                                items:
-                                    $ref: '#/components/schemas/Dataset'
-                                type: array
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Delete a Dataset\n> `Required Scope:` Dataset.Manage"
+            summary: 'Delete a dataset'
             tags:
                 - 'API Directory'
             security:
@@ -1141,7 +1261,37 @@ paths:
             parameters:
                 -
                     in: path
-                    name: orgUnit
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
+                    required: true
+                    schema:
+                        type: string
+        get:
+            operationId: get-organization-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Dataset'
+            description: "Get metadata about a Dataset that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Get Organization Dataset'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
                     required: true
                     schema:
                         type: string
@@ -1161,6 +1311,8 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/BatchResult'
+            description: "Manage Products for APIs that will appear on the API Directory\n> `Required Scope:` Namespace.Manage"
+            summary: 'Manage Products'
             tags:
                 - Products
             security:
@@ -1191,6 +1343,8 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/Product'
                                 type: array
+            description: "Get Products describing APIs that will appear on the API Directory\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get Products'
             tags:
                 - Products
             security:
@@ -1204,6 +1358,71 @@ paths:
                     required: true
                     schema:
                         type: string
+    '/namespaces/{ns}/products/{appId}':
+        delete:
+            operationId: delete-product
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Delete a Product\n> `Required Scope:` Namespace.Manage"
+            summary: 'Manage Products'
+            tags:
+                - Products
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: appId
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/products/environments/{appId}':
+        delete:
+            operationId: delete-product-environment
+            responses:
+                '204':
+                    description: 'No content'
+            description: "Delete a Product Environment\n> `Required Scope:` Namespace.Manage"
+            summary: 'Delete a Product Environment'
+            tags:
+                - Products
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: appId
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: force
+                    required: false
+                    schema:
+                        default: false
+                        type: boolean
 servers:
     -
         url: /ds/api/v2
