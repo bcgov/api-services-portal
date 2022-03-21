@@ -11,6 +11,7 @@ const colors = {
   'bc-light-blue': '#77ACF1',
   'bc-gray': '#f2f2f2',
   'bc-border-focus': '#3B99FC',
+  'bc-outline': '#e1e1e5',
   'bc-error': '#D8292F',
   'bc-success': '#2E8540',
   'bc-background': '#f1f1f1',
@@ -390,9 +391,17 @@ const theme = extendTheme(
           line: {
             tab: {
               color: 'bc-component',
+              _notFirst: {
+                ml: 6,
+              },
               _selected: {
                 fontWeight: 'bold',
                 color: 'bc-blue',
+                outline: 'none',
+                borderBottomWidth: 3,
+              },
+              _focus: {
+                boxShadow: 'none',
               },
             },
           },
@@ -414,17 +423,35 @@ const theme = extendTheme(
               backgroundColor: 'bc-light-blue',
             },
           },
-          outline: {
-            container: {
-              borderRadius: 4,
-              backgroundColor: '#E9F0F8',
-              boxShadow: 'inset 0 0 0 1px rgba(142, 142, 142, 0.35)',
-              color: 'text',
-            },
-            closeButton: {
-              opacity: 1,
-              color: '#7C7C7C',
-            },
+          outline: (props) => {
+            const getLabelBgColor = (env: string) => {
+              switch (env) {
+                case 'prod':
+                  return '#C2ED9850';
+                case 'sandbox':
+                  return '#333ed420';
+                case 'test':
+                  return '#8ed2cd40';
+                case 'dev':
+                  return '#fed77650';
+                case 'conformance':
+                  return '#f59b7c40';
+                case 'other':
+                  return '#f1f48730';
+                default:
+                  return '#e9f0f8';
+              }
+            };
+
+            return {
+              container: {
+                borderRadius: 4,
+                backgroundColor: getLabelBgColor(props.colorScheme),
+                border: '1px solid #8e8e8e30',
+                color: 'text',
+                boxShadow: 'none',
+              },
+            };
           },
           drag: {
             container: {

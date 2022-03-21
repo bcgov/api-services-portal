@@ -5,9 +5,9 @@
       name
       environments {
         id
+        approval
         name
         active
-        approval
         flow
         additionalDetailsToRequest
         legal {
