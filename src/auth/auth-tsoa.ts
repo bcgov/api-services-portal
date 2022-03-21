@@ -50,17 +50,17 @@ export function expressAuthentication(
         if (scopes.length == 0) {
           return resolve(request.oauth_user);
         }
-        const resource =
-          'orgUnit' in request.params
-            ? `org/${request.params.orgUnit}`
-            : 'org' in request.params
-            ? `org/${request.params.org}`
-            : `${request.params.ns}`;
+        let resource: string;
+        if ('orgUnit' in request.params) {
+          resource = `org/${request.params.orgUnit}`;
+        } else if ('org' in request.params) {
+          resource = `org/${request.params.org}`;
+        } else {
+          // assume it is namespace-based protection
+          resource = request.params.ns;
+        }
 
-        const permissions: string[] =
-          scopes.length == 1
-            ? [`${resource}:${scopes[0]}`]
-            : scopes.map((s) => `${resource}:${s}`);
+        const permissions: string[] = scopes.map((s) => `${resource}:${s}`);
 
         logger.debug(
           "[%s] Resource Authorization on '%j'",
@@ -74,7 +74,7 @@ export function expressAuthentication(
           request
         )}`;
 
-        const resp: any = keycloak.enforcer(permissions)(
+        keycloak.enforcer(permissions)(
           request,
           {
             status: (s: number) => {
