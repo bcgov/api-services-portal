@@ -9,6 +9,7 @@ import {
   Body,
   Get,
   Tags,
+  Delete,
 } from 'tsoa';
 import { strict as assert } from 'assert';
 import { KeystoneService } from '../ioc/keystoneInjector';
@@ -20,6 +21,7 @@ import {
   removeEmpty,
   removeKeys,
   transformAllRefID,
+  deleteRecord,
 } from '../../batch/feed-worker';
 import { BatchResult } from '../../batch/types';
 import { Dataset } from './types';
@@ -99,6 +101,43 @@ export class OrgDatasetController extends Controller {
       body['name'],
       body
     );
+  }
+
+  /**
+   * Delete a Dataset
+   * > `Required Scope:` Dataset.Manage
+   *
+   * @summary Delete a dataset
+   * @param ns
+   * @param appId
+   * @param request
+   * @returns
+   */
+  @Delete('/{org}/datasets/{name}')
+  @OperationId('delete-dataset')
+  @Security('jwt', ['Dataset.Manage'])
+  public async delete(
+    @Path() org: string,
+    @Path() name: string,
+    @Request() request: any
+  ): Promise<BatchResult> {
+    const context = this.keystone.createContext(request);
+
+    const records = await getRecords(
+      context,
+      'DraftDataset',
+      undefined,
+      ['organization', 'organizationUnit'],
+      {
+        query: '$org: String!, $name: String!',
+        clause: '{ organization: { name: $org }, name: $name }',
+        variables: { org, name },
+      }
+    );
+
+    assert.strictEqual(records.length == 0, false, 'Dataset not found');
+
+    return await deleteRecord(context, 'Dataset', records.pop().name);
   }
 
   /**
