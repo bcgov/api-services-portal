@@ -156,7 +156,7 @@ Content Publisher,,,Content,,create,,,,,Content.Publish,,allow,
 Content Publisher,,,Content,,create,namespace,,,,Content.Publish,,allow,
 Content Publisher,,,Content,,update,,,,,Content.Publish,,allow,filterByUserNS
 Content Publisher,,,Content,,update,namespace,,,,,,deny,
-Content Publisher,,allContentsByNamespace,,,,,,,,Content.Publish,,allow,filterByUserNS
+Content Publisher,,allContentsByNamespace,,,,,,,,Namespace.View,,allow,filterByUserNS
 API Owner Role - All Fields,,,,,read,,*,,,,"api-owner,provider-user",allow,
 API Owner Role - All Fields,,,,,"update,create",,*,,api-owner,,,allow,
 Portal User,,DiscoverableProduct,,,,,,,portal-user,,,allow,
