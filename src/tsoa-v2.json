@@ -17,7 +17,7 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "flow": "application",
-        "tokenUrl": "https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token"
+        "tokenUrl": "https://token_endpoint"
       },
       "portal": {
         "type": "http",

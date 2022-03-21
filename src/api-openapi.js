@@ -1,6 +1,6 @@
 const fs = require('fs');
 const express = require('express');
-const YAML = require('yamljs');
+const YAML = require('js-yaml');
 const { ValidateError } = require('tsoa');
 const swaggerUi = require('swagger-ui-express');
 const { Logger } = require('./logger');
@@ -39,7 +39,20 @@ class ApiOpenapiApp {
   prepareV2(app) {
     const { RegisterRoutes } = require('./controllers/v2/routes');
     const specFile = fs.realpathSync('controllers/v2/openapi.yaml');
-    const spec = fs.readFileSync(specFile);
+    const specObject = YAML.load(specFile);
+
+    /*
+      The 'tokenUrl' should be set with the 'OIDC_ISSUER' = '/protocol/openid-connect/token'
+
+      securitySchemes:
+        jwt:
+            type: oauth2
+            description: 'Authz Client Credential'
+            flows:
+                clientCredentials:
+                    tokenUrl
+    */
+    specObject.components.securitySchemes.jwt.flows.clientCredentials.tokenUrl = `${process.env.OIDC_ISSUER}/protocol/openid-connect/token`;
 
     RegisterRoutes(app);
 
@@ -52,13 +65,13 @@ class ApiOpenapiApp {
 
     app.get('/ds/api/v2/openapi.yaml', (req, res) => {
       res.setHeader('Content-Type', 'application/yaml');
-      res.send(spec);
+      res.send(YAML.dump(specObject));
     });
 
     app.use(
       '/ds/api/v2/console',
       swaggerUi.serve,
-      swaggerUi.setup(YAML.load(specFile), options)
+      swaggerUi.setup(specObject, options)
     );
   }
 
