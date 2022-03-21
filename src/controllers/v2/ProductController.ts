@@ -193,7 +193,7 @@ export class ProductController extends Controller {
     const result = await this.keystone.executeGraphQL({
       context,
       query: deleteEnvironment,
-      variables: { id: environment.id, force },
+      variables: { prodEnvId: environment.id, force },
     });
     logger.debug('Result %j', result);
     if (result.errors) {
