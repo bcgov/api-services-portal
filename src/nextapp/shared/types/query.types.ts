@@ -7429,7 +7429,7 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
-  forceDeleteEnvironment?: Maybe<Environment>;
+  forceDeleteEnvironment?: Maybe<Scalars['Boolean']>;
   createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;

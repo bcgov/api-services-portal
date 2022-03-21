@@ -227,7 +227,7 @@ components:
                 permProtected:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
-                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDomains:
                     $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
                 prodEnvId:
