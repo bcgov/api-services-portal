@@ -18,6 +18,7 @@ const {
   FieldEnforcementPoint,
 } = require('../authz/enforcement');
 const { updateEnvironmentDetails } = require('../services/keystone');
+const { DeleteIssuerValidate } = require('../services/workflow');
 
 const { Logger } = require('../logger');
 const logger = Logger('lists.credentialissuer');

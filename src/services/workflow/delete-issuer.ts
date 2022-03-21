@@ -1,24 +1,10 @@
 import { strict as assert } from 'assert';
-
 import {
-  deleteRecord,
-  deleteRecords,
-  lookupCredentialReferenceByServiceAccess,
   lookupCredentialIssuerById,
   lookupServiceAccessesByEnvironment,
-  lookupProduct,
 } from '../keystone';
-import {
-  KeycloakClientRegistrationService,
-  KeycloakTokenService,
-  getOpenidFromIssuer,
-  getUma2FromIssuer,
-} from '../keycloak';
-import { KongConsumerService } from '../kong';
-import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
-import { Logger } from '../../logger';
-import { UMAPolicyService } from '../uma2';
 import { Environment } from '../keystone/types';
+import { Logger } from '../../logger';
 
 const logger = Logger('wf.DeleteIssuer');
 

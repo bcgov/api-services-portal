@@ -443,7 +443,7 @@ module.exports = {
               context: any,
               info: any,
               { query, access }: any
-            ) => {
+            ): Promise<boolean> => {
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
@@ -472,20 +472,18 @@ module.exports = {
               );
               assert.strictEqual(nsResource.length, 1, 'Invalid Namespace');
 
-              if (args.force) {
-                await DeleteNamespace(
-                  context.createContext({ skipAccessControl: true }),
-                  args.namespace
-                );
-                resourcesApi.deleteResourceSet(nsResource[0].id);
-                return true;
-              } else {
+              if (args.force === false) {
                 await DeleteNamespaceValidate(
                   context.createContext({ skipAccessControl: true }),
                   args.namespace
                 );
-                return false;
               }
+              await DeleteNamespace(
+                context.createContext({ skipAccessControl: true }),
+                args.namespace
+              );
+              resourcesApi.deleteResourceSet(nsResource[0].id);
+              return true;
             },
             access: EnforcementPoint,
           },

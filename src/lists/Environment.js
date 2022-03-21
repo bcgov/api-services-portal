@@ -155,24 +155,23 @@ module.exports = {
       keystone.extendGraphQLSchema({
         mutations: [
           {
-            schema:
-              'forceDeleteEnvironment(id: ID!, force: Boolean!): Environment',
+            schema: 'forceDeleteEnvironment(id: ID!, force: Boolean!): Boolean',
             resolver: async (item, args, context, info, { query, access }) => {
               console.log('ForceDeleteEnvironment! ' + JSON.stringify(args));
-              if (args.force) {
-                return await DeleteEnvironment(
-                  context.createContext({ skipAccessControl: true }),
-                  context.authedItem['namespace'],
-                  args.id,
-                  args.force
-                );
-              } else {
-                return await DeleteEnvironmentValidate(
+              if (args.force === false) {
+                await DeleteEnvironmentValidate(
                   context.createContext({ skipAccessControl: true }),
                   context.authedItem['namespace'],
                   args.id
                 );
               }
+              await DeleteEnvironment(
+                context.createContext({ skipAccessControl: true }),
+                context.authedItem['namespace'],
+                args.id,
+                args.force
+              );
+              return true;
             },
             access: EnforcementPoint,
           },
