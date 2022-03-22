@@ -1,4 +1,4 @@
-FROM node:17.7.2-alpine3.15
+FROM node:16.14.2-alpine3.15
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
