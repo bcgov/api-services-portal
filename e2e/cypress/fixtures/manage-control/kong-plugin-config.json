@@ -1,0 +1,22 @@
+{
+  "rateLimiting": {
+    "name": "rate-limiting",
+    "config.hour": "20",
+    "config.policy": "local"
+  },
+  "rateLimitingConsumer": {
+    "name": "rate-limiting",
+    "config.hour": "100",
+    "config.policy": "local"
+  },
+  "ipRestriction": {
+    "name": "ip-restriction",
+    "config.allow": "192.168.0.1/0"
+  },
+  "createConsumer": {
+    "username": "consumer1"
+  },
+  "keyAuth": {
+    "config.anonymous": "d1f72cad-35f3-4afa-8419-2869fe0eb885"
+  }
+}

@@ -1,0 +1,6 @@
+
+  mutation CancelAccessRequest($id: ID!) {
+    deleteAccessRequest(id: $id) {
+      id
+    }
+  }

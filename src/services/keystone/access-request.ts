@@ -58,7 +58,7 @@ export async function lookupEnvironmentAndApplicationByAccessRequest(
   id: string
 ): Promise<AccessRequest> {
   const result = await context.executeGraphQL({
-    query: `query GetSpecificEnvironment($id: ID!) {
+    query: `query GetSpecificAccessRequest($id: ID!) {
                   AccessRequest(where: {id: $id}) {
                       id
                       controls

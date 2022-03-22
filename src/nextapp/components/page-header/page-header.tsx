@@ -34,17 +34,23 @@ const PageHeader: React.FC<PageHeaderProps> = ({
               separator={<BsChevronRight color="bc-component" />}
             >
               {breadcrumb.length > 0 &&
-                breadcrumb.map((b) => (
+                breadcrumb.map((b, index, arr) => (
                   <BreadcrumbItem key={uid(b)}>
-                    {b.href && (
+                    {index < arr.length - 1 && (
                       <NextLink passHref href={b.href}>
                         <BreadcrumbLink textDecor="underline">
                           {b.text}
                         </BreadcrumbLink>
                       </NextLink>
                     )}
-                    {!b.href && (
-                      <BreadcrumbLink color="bc-component">
+                    {index >= arr.length - 1 && (
+                      <BreadcrumbLink
+                        color="text"
+                        textDecor="none"
+                        sx={{
+                          _hover: { cursor: 'default', textDecor: 'none' },
+                        }}
+                      >
                         {b.text}
                       </BreadcrumbLink>
                     )}

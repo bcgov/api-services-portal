@@ -56,6 +56,7 @@ export const CreateServiceAccount = async (
     extraIdentifier
   ).toLowerCase();
 
+  // ClientRepresentation or ClientRegResponse
   const client =
     existingClientId != null
       ? await findClient(
@@ -98,12 +99,12 @@ export const CreateServiceAccount = async (
   const backToUser: NewCredential = {
     flow: productEnvironment.flow,
     clientId: client.client.clientId,
-    clientSecret: client.client.clientSecret,
+    clientSecret: (client.client as any).clientSecret,
     tokenEndpoint: client.openid.token_endpoint,
   };
 
   //updatedItem['credential'] = JSON.stringify(backToUser)
-  logger.debug('Back to user %j', backToUser);
+  //logger.debug('Back to user %j', backToUser);
   /*
         {
             "flow": "client-credentials",

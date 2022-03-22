@@ -1,7 +1,3 @@
-import fetch from 'node-fetch';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-
 import {
   lookupProductEnvironmentServices,
   linkCredRefsToServiceAccess,
@@ -12,83 +8,18 @@ import {
   addServiceAccess,
 } from '../../../services/keystone';
 
-describe('KeystoneJS', function () {
-  const context = {
-    executeGraphQL: (q) => {
-      if (q.query.indexOf('GetProductEnvironmentServices') != -1) {
-        return {
-          data: {
-            allEnvironments: [
-              {
-                name: 'ENV-NAME-1',
-                services: [
-                  {
-                    name: 'SERVICE-1',
-                    plugins: [
-                      {
-                        name: 'acl',
-                        config: '{}',
-                      },
-                    ],
-                    routes: [
-                      {
-                        name: 'SERVICE-ROUTE-1',
-                        plugins: [
-                          {
-                            name: 'rate-limiting',
-                            config: '{}',
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        };
-      }
-      if (q.query.indexOf('GetSpecificEnvironment') != -1) {
-        return {
-          data: {
-            AccessRequest: {
-              credentialReference: '',
-              application: { appId: 'APP-01' },
-              productEnvironment: {
-                name: 'ENV-NAME',
-                credentialIssuer: { id: 'ISSUER-01' },
-              },
-            },
-          },
-        };
-      }
-      if (q.query.indexOf('FindConsumerByUsername') != -1) {
-        return {
-          data: { allGatewayConsumers: [{ extForeignKey: 'CONSUMER-001' }] },
-        };
-      }
-      if (q.query.indexOf('GetCredentialIssuerById') != -1) {
-        return { data: { CredentialIssuer: { name: 'ISSUER-001' } } };
-      }
-      if (q.query.indexOf('CreateNewConsumer') != -1) {
-        return { data: { createGatewayConsumer: { id: 'CONSUMER-001' } } };
-      }
-      if (q.query.indexOf('CreateServiceAccess') != -1) {
-        return { data: { createServiceAccess: { id: 'SVC-ACCESS-002' } } };
-      }
-      if (q.query.indexOf('UpdateConsumerInServiceAccess') != -1) {
-        return { data: { updateServiceAccess: { id: 'SVC-ACCESS-001' } } };
-      }
-    },
-  };
+import Context from '../../../mocks/handlers/keystone';
 
+const context = Context('default');
+
+describe('KeystoneJS', function () {
   describe('test lookupProductEnvironmentServices', function () {
     it('it should be successful', async function () {
       const result = await lookupProductEnvironmentServices(
         context,
         'PROD-ENV-ID-1'
       );
-      expect(result.name).toBe('ENV-NAME-1');
+      expect(result.name).toBe('dev');
       expect(result.services.length).toBe(1);
     });
   });

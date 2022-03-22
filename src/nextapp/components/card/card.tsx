@@ -10,7 +10,7 @@ import {
 
 interface CardProps extends BoxProps {
   actions?: React.ReactNode;
-  children: React.ReactNode;
+  children: JSX.Element | JSX.Element[];
   heading?: React.ReactNode;
 }
 
@@ -26,13 +26,20 @@ const Card: React.FC<CardProps> = ({
     <Box bgColor="white" sx={styles} {...props}>
       {heading && (
         <Flex
-          px={9}
-          pt={9}
-          pb={9}
+          as="header"
+          p={9}
           alignItems="center"
           justifyContent="space-between"
-          borderBottom="2px solid"
-          borderColor="bc-yellow"
+          sx={{
+            '& + :not(table)': {
+              borderTop: '2px solid',
+              borderColor: 'bc-yellow',
+            },
+            '& + table': {
+              position: 'relative',
+              mt: -5,
+            },
+          }}
         >
           <Heading size="sm">{heading}</Heading>
           {actions && <HStack spacing={4}>{actions}</HStack>}

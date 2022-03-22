@@ -114,7 +114,7 @@ const AvailableServices: React.FC<AvailableServicesProps> = ({
               }
             })
             .map((d) => (
-              <WrapItem key={d.id}>
+              <WrapItem key={d.id} data-testid={d.name}>
                 <Tag
                   draggable
                   colorScheme="gray"

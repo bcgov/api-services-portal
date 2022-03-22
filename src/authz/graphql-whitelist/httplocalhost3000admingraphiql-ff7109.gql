@@ -1,0 +1,35 @@
+
+  query GetMyServiceAccesses {
+    myServiceAccesses {
+      id
+      name
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+    }
+    myAccessRequests {
+      id
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+      isComplete
+      isApproved
+      isIssued
+    }
+  }

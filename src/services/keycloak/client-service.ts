@@ -1,26 +1,31 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import { default as KcAdminClient } from 'keycloak-admin';
+import KeycloakAdminClient, {
+  default as KcAdminClient,
+} from '@keycloak/keycloak-admin-client';
+import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 
 const logger = Logger('kc.client');
 
 export class KeycloakClientService {
-  private issuerUrl: string;
-  private accessToken: string;
-  private kcAdminClient: any;
+  private kcAdminClient: KeycloakAdminClient;
   private session: boolean = false;
 
   constructor(issuerUrl: string, accessToken?: string) {
-    this.issuerUrl = issuerUrl;
-    this.accessToken = accessToken;
     if (issuerUrl != null) {
       const baseUrl = issuerUrl.substr(0, issuerUrl.indexOf('/realms'));
       const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
       this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
     }
   }
+
+  public useAdminClient(_kcAdminClient: KeycloakAdminClient) {
+    this.kcAdminClient = _kcAdminClient;
+    return this;
+  }
+
   public async list() {
-    return await this.kcAdminClient.clients.find();
+    return this.kcAdminClient.clients.find();
   }
 
   public async searchForClientId(clientId: string) {
@@ -41,7 +46,6 @@ export class KeycloakClientService {
   public async findByClientId(clientId: string) {
     const lkup = await this.kcAdminClient.clients.find({ clientId: clientId });
     assert.strictEqual(lkup.length, 1, 'Client ID not found ' + clientId);
-    //logger.debug('[findByClientId] (%s) RESULT %j', clientId, lkup[0]);
     return lkup[0];
   }
 
@@ -69,7 +73,9 @@ export class KeycloakClientService {
     return users;
   }
 
-  public async listDefaultScopes(id: string) {
+  public async listDefaultScopes(
+    id: string
+  ): Promise<ClientScopeRepresentation[]> {
     logger.debug('[listDefaultScopes] For %s', id);
     const scopes = await this.kcAdminClient.clients.listDefaultClientScopes({
       id,
@@ -85,6 +91,16 @@ export class KeycloakClientService {
     return scopes;
   }
 
+  public async findResourceByName(id: string, name: string) {
+    const lkup = await (
+      await this.kcAdminClient.clients.listResources({ id, name })
+    ).filter((r) => r.name === name);
+    assert.strictEqual(lkup.length, 1, 'Resource not found ' + name);
+    logger.debug('[findResourceByName] [%s] Found - %s', name, lkup[0]._id);
+    logger.debug('[findResourceByName] [%s] Found - %j', name, lkup[0]);
+    return lkup[0];
+  }
+
   public async login(clientId: string, clientSecret: string): Promise<void> {
     await this.kcAdminClient
       .auth({
@@ -97,5 +113,9 @@ export class KeycloakClientService {
         throw err;
       });
     this.session = true;
+  }
+
+  public async findRealmClientScopes(): Promise<ClientScopeRepresentation[]> {
+    return this.kcAdminClient.clientScopes.find();
   }
 }

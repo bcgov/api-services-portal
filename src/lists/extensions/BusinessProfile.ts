@@ -73,10 +73,13 @@ module.exports = {
 
               const fullUsername = serviceAccess.application?.owner.username;
 
-              if (fullUsername != null && fullUsername.endsWith('@bceid')) {
+              if (
+                fullUsername != null &&
+                fullUsername.endsWith('@bceid-business')
+              ) {
                 const username = fullUsername.substring(
                   0,
-                  fullUsername.length - 6
+                  fullUsername.lastIndexOf('@')
                 );
 
                 const bc = new BCeIDService(new ConfigService());

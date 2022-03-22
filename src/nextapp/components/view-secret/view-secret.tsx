@@ -1,18 +1,18 @@
 import * as React from 'react';
 import {
   Box,
-  Divider,
+  Button,
   Flex,
-  Grid,
   Icon,
-  IconButton,
+  Input,
   Text,
   Tooltip,
   useToast,
 } from '@chakra-ui/react';
-import { FaClipboard } from 'react-icons/fa';
 import has from 'lodash/has';
 import isNil from 'lodash/isNil';
+import { IoCopy } from 'react-icons/io5';
+import { kebabCase } from 'lodash';
 
 interface ViewSecretProps {
   credentials: Record<string, string>;
@@ -20,6 +20,18 @@ interface ViewSecretProps {
 
 const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
   const toast = useToast();
+  const items = React.useMemo(
+    () => [
+      { name: 'apiKey', label: 'API Key' },
+      { name: 'clientId', label: 'Client ID' },
+      { name: 'clientSecret', label: 'Client Secret' },
+      { name: 'clientPrivateKey', label: 'Signing Private Key' },
+      { name: 'clientPublicKey', label: 'Signing Public Certificate' },
+      { name: 'issuer', label: 'Issuer' },
+      { name: 'tokenEndpoint', label: 'Token Endpoint' },
+    ],
+    []
+  );
   const handleClipboard = React.useCallback(
     (text: string) => async () => {
       await navigator.clipboard.writeText(text);
@@ -30,69 +42,46 @@ const ViewSecret: React.FC<ViewSecretProps> = ({ credentials }) => {
     },
     [toast]
   );
+
   return (
-    <>
-      <Box flex="1">
-        {[
-          { name: 'apiKey', label: 'API Key' },
-          { name: 'clientId', label: 'Client ID' },
-          { name: 'clientSecret', label: 'Client Secret' },
-          { name: 'clientPrivateKey', label: 'Signing Private Key' },
-          { name: 'clientPublicKey', label: 'Signing Public Certificate' },
-          { name: 'issuer', label: 'Issuer' },
-          { name: 'tokenEndpoint', label: 'Token Endpoint' },
-        ]
-          .filter(
-            (c) => has(credentials, c.name) && !isNil(credentials[c.name])
-          )
-          .map((c) => (
-            <React.Fragment key={c.name}>
-              <Divider />
-              <Grid
-                templateColumns="260px 1fr"
-                gap={4}
-                lineHeight={2}
-                px={4}
-                py={1}
-                bgColor="green.50"
-                color="green.900"
+    <Box>
+      {items
+        .filter((c) => has(credentials, c.name) && !isNil(credentials[c.name]))
+        .map((c) => (
+          <React.Fragment key={c.name}>
+            <Text fontWeight="bold" mb={2}>
+              {c.label}
+            </Text>
+            <Flex align="center" mb={4}>
+              <Input
+                readOnly
+                borderColor="#c2ed98"
+                data-testid={`sa-new-creds-${kebabCase(c.label)}`}
+                border="1px solid"
+                bgColor="#c2ed9825"
+                borderRadius={4}
+                value={credentials[c.name]}
+              />
+              <Tooltip
+                label="Copy to clipboard"
+                aria-label="Copy to clipboard tooltip"
               >
-                <Text fontWeight="bold" textAlign="right">
-                  {c.label}
-                </Text>
-                <Flex>
-                  <Text
-                    as="code"
-                    wordBreak="break-all"
-                    noOfLines={1}
-                    data-testid={
-                      'sa-new-creds-' + c.label.toLowerCase().replace(' ', '-')
-                    }
-                  >
-                    {credentials[c.name]}
-                  </Text>
-                  <Tooltip
-                    label="Copy to clipboard"
-                    aria-label="Copy to clipboard tooltip"
-                  >
-                    <IconButton
-                      aria-label="Copy to clipboard button"
-                      ml={3}
-                      size="xs"
-                      variant="outline"
-                      color="bc-link"
-                      bgColor="white"
-                      onClick={handleClipboard(credentials[c.name])}
-                    >
-                      <Icon as={FaClipboard} />
-                    </IconButton>
-                  </Tooltip>
-                </Flex>
-              </Grid>
-            </React.Fragment>
-          ))}
-      </Box>
-    </>
+                <Button
+                  ml={3}
+                  leftIcon={<Icon as={IoCopy} />}
+                  px={4}
+                  bgColor="white"
+                  onClick={handleClipboard(credentials[c.name])}
+                  variant="secondary"
+                  data-testid="view-secret-copy-button"
+                >
+                  Copy
+                </Button>
+              </Tooltip>
+            </Flex>
+          </React.Fragment>
+        ))}
+    </Box>
   );
 };
 

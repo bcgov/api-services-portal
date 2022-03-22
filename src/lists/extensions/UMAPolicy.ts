@@ -28,6 +28,7 @@ type UMAPolicy {
     owner: String!
     users: [String]
     clients: [String]
+    groups: [String]
     scopes: [String]!
 }
 `;

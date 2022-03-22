@@ -9,7 +9,9 @@ import { strict as assert } from 'assert';
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 
-import { default as KcAdminClient } from 'keycloak-admin';
+import KeycloakAdminClient, {
+  default as KcAdminClient,
+} from '@keycloak/keycloak-admin-client';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
 

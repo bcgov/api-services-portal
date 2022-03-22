@@ -80,7 +80,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             <MenuItem
               as="a"
               color="text"
-              href="/poc/my-profile"
+              href="/profile"
               data-testid="auth-menu-user-profile"
             >
               My Profile

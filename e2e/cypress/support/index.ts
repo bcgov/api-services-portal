@@ -2,6 +2,7 @@ import './commands'
 import 'cypress-xpath'
 import './auth-commands'
 import './util-commands'
+import '@cypress/code-coverage/support'
 const _ = require('lodash')
 const YAML = require('yamljs')
 
@@ -13,3 +14,12 @@ Cypress.on('test:after:run', (test: Mocha.Test, runnable: Mocha.Runnable) => {
     addContext({ test }, screenshot)
   }
 })
+
+export const checkElementExists = (elm: any): boolean => {
+  cy.get('body').then(($body) => {
+    if ($body.find(elm).length > 0) {
+      return true
+    }
+  })
+  return false
+}

@@ -97,6 +97,7 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
         'customId',
       ]);
 
+    // Asynchronously do the deletion of the backend IdP and Kong
     svc.consumer != null &&
       svc.consumerType == 'client' &&
       kongApi.deleteConsumer(svc.consumer.extForeignKey).then(async () => {

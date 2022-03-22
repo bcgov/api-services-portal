@@ -1,7 +1,10 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import { default as KcAdminClient } from 'keycloak-admin';
-import { RoleMappingPayload } from 'keycloak-admin/lib/defs/roleRepresentation';
+
+import KeycloakAdminClient, {
+  default as KcAdminClient,
+} from '@keycloak/keycloak-admin-client';
+import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
 
 const logger = Logger('kc.user');
 

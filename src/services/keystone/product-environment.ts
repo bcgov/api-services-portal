@@ -1,5 +1,10 @@
 import { Logger } from '../../logger';
-import { Environment, EnvironmentWhereInput, GatewayService } from './types';
+import {
+  Environment,
+  EnvironmentWhereInput,
+  GatewayService,
+  Product,
+} from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.prod-env');
@@ -215,4 +220,24 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
     'ProductEnvironmentNotFound ' + id
   );
   return result.data.Environment;
+}
+
+export async function lookupProduct(context: any, ns: string, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($ns: String!, $id: ID!) {
+                    Product(where: {namespace: $ns, id: $id}) {
+                        environments {
+                          id
+                        }
+                    }
+                }`,
+    variables: { ns, id },
+  });
+  logger.debug('[lookupProduct] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
 }

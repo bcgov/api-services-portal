@@ -7,4 +7,5 @@ module.exports = {
   coverageDirectory: '__coverage__',
   coverageReporters: ['lcov', 'text-summary'],
   moduleDirectories: ['node_modules', 'nextapp/test', 'test'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

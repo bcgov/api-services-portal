@@ -1,6 +1,9 @@
 import { 
   Box,
   Button,
+  Center,
+  Heading,
+  Text,
   Tbody,
   Tfoot,
   Tr,
@@ -9,7 +12,8 @@ import {
   TableCaption
 } from '@chakra-ui/react';
 import { Meta, Story, Canvas } from '@storybook/addon-docs';
-import {uid} from 'react-uid'
+import { uid } from 'react-uid'
+import EmptyPane from '../empty-pane';
 import Table from './table';
 
 <Meta title="APS/Table" />
@@ -114,7 +118,9 @@ Use the `emptyView` prop to return a helpful empty data view for users. The comp
       </React.Fragment>
       ),
       data: [],
-      emptyView: (<div>Custom no content message</div>),
+      emptyView: (
+        <EmptyPane title="Empty view example" message="This example uses the EmptyPane component" />
+      ),
       sortable: true
     }}
   >
@@ -124,19 +130,19 @@ Use the `emptyView` prop to return a helpful empty data view for users. The comp
 
 ## Disclosure Rows
 
-Use `React.Fragment` to pass in multiple rows so you can use UI methods like disclosure rows.
+Use `React.Fragment` to pass in multiple rows so you can use UI methods like disclosure rows. Note that disclosed rows should have a background color of `#f6f6f6`.
 
 <Canvas>
   <Story 
     name="Disclosure Rows" 
     args={{
       children: (d, index) => (
-      <React.Fragment key={uid(d.id,index)}>
+      <React.Fragment>
         <Tr>
           <Td>{d.name}</Td>
           <Td>{d.owner}</Td>
         </Tr> 
-        {d.id === '234' && <Tr bgColor="gray.100"><Td colSpan={2}>Disclosed Content</Td></Tr>}
+        {d.id === '234' && <Tr bgColor="#f6f6f6" boxShadow="inner"><Td colSpan={2}>Disclosed Content</Td></Tr>}
       </React.Fragment>
       ),
       sortable: true

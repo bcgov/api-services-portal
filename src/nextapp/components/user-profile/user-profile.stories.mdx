@@ -1,0 +1,46 @@
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import UserProfile from './user-profile';
+
+<Meta title="APS/UserProfile" />
+
+# User Profile
+
+The user profile component decorates a `UserData` object.
+
+<Canvas>
+  <Story name="Default">
+    <UserProfile data={{ 
+      name: 'Margaret Kilgallen', 
+      username: 'mkilgallen@idir',
+      email: 'mkilgallen@boc.gov.ca'
+    }} data-testid="user-profile"/>
+  </Story>
+</Canvas>
+
+## Loading state
+
+<Canvas>
+  <Story name="Loading State">
+    <UserProfile isLoading />
+  </Story>
+</Canvas>
+
+
+## Customization
+
+The container extends a Chakra `Box`, so any layout props are accepted, though only if required.
+
+<Canvas>
+  <Story name="Customizations">
+    <UserProfile data={{ 
+        name: 'Margaret Kilgallen', 
+        username: 'mkilgallen@idir',
+        email: 'mkilgallen@boc.gov.ca'
+      }} 
+      bgColor="bc-blue" 
+      color="white" 
+      borderRadius="lg" 
+      p={4}
+    />
+  </Story>
+</Canvas>

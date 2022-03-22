@@ -4,6 +4,11 @@ import LoginPage from '../pageObjects/login'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
+import { checkElementExists } from '.'
+
+const config = require('../fixtures/manage-control/kong-plugin-config.json')
+
+const jose = require('node-jose')
 
 interface formDataRequestOptions {
   method: string
@@ -22,10 +27,16 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     message: [`🔐 Authenticating | ${username}`],
     autoEnd: false,
   })
-  cy.wait(1500) // wait added to evade login timeout
-  cy.get(login.usernameInput).type(username)
-  cy.get(login.passwordInput).type(password)
+  cy.get(login.usernameInput).click().type(username)
+  cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+
+  if (checkElementExists('.alert')) {
+    cy.reload()
+    cy.get(login.usernameInput).click().type(username)
+    cy.get(login.passwordInput).click().type(password)
+    cy.get(login.loginSubmitButton).click()
+  }
 
   log.end()
   cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
@@ -86,12 +97,13 @@ Cypress.Commands.add('loginByAuthAPI', (username: string, password: string) => {
 })
 
 Cypress.Commands.add('logout', () => {
+
   cy.log('< Logging out')
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
-      cy.contains(res.body.user.name).click()
+      cy.get('[data-testid=auth-menu-user]').find("div[role='img']").should('have.attr', 'aria-label', res.body.user.name)
+      cy.get('[data-testid=auth-menu-user]').click()
       cy.contains('Sign Out').click()
-      cy.clearCookies()
     })
   })
   cy.log('> Logging out')
@@ -116,7 +128,18 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
   cy.log('> Get Token')
 })
 
-Cypress.Commands.add('publishApi', (fileName: string) => {
+Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
+  const config = configType.toLowerCase()
+  cy.request({
+    method: 'GET',
+    url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
+  }).then((res) => {
+    expect(res.status).to.eq(200)
+    cy.saveState(config + 'ID', res.body.data[0].id)
+  })
+})
+
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
   cy.fixture('state/store').then((creds: any) => {
@@ -126,7 +149,7 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
-            url: Cypress.env('GWA_API_URL') + '/namespaces/platform/gateway',
+            url: Cypress.env('GWA_API_URL') + '/namespaces/' + namespace + '/gateway',
           }
           formDataRequest(options, res.body.access_token, fileName, requestName)
           cy.wait(`@${requestName}`).then((res: any) => {
@@ -137,6 +160,79 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
     )
   })
 })
+
+Cypress.Commands.add('deleteAllCookies', () => {
+  cy.clearCookie('keystone.sid')
+  cy.clearCookie('_oauth2_proxy')
+  cy.exec('npm cache clear --force')
+  var cookies = document.cookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i];
+    var eqPos = cookie.indexOf("=");
+    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  }
+})
+
+Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
+  cy.fixture('state/store').then((creds: any) => {
+    let token = key || creds.apikey
+    cy.log("Token->"+token)
+    const service = serviceName
+    return cy.request({
+      url: Cypress.env('KONG_URL'),
+      method: methodType,
+      headers: { 'x-api-key': `${token}`, 'Host': `${service}` + '.api.gov.bc.ca' },
+      failOnStatusCode: false
+    })
+  })
+})
+
+Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName:string, methodType: string) => {  
+    let body = {}
+    var serviceEndPoint = endpoint
+    body = config[requestName]
+    if (requestName=='')
+    {
+      body = {}
+    }
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + serviceEndPoint,
+      method: methodType,
+      body: body,
+      form: true,
+      failOnStatusCode: false
+    })
+})
+
+Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endPoint?: string, verb = 'POST') => {
+  cy.fixture('state/store').then((creds: any) => {
+    let body = {}
+    const pluginID = pluginName.toLowerCase() + 'id'
+    const id = creds[pluginID]
+    let endpoint 
+    if (pluginName=='')
+      endpoint = 'plugins'
+    else
+      endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    endpoint = (typeof endPoint !== 'undefined') ?  endPoint : endpoint
+    body = config[name]
+    cy.log("Body->"+body)
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + endpoint,
+      method: verb,
+      body: body,
+      form: true,
+      failOnStatusCode: false
+    })
+  })
+})
+
+Cypress.Commands.add("generateKeystore", async () => {
+  let keyStore = jose.JWK.createKeyStore()
+  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
+  return JSON.stringify(keyStore.toJSON(true), null, '  ') 
+});
 
 const formDataRequest = (
   options: formDataRequestOptions,
@@ -155,7 +251,7 @@ const formDataRequest = (
         .then((blob) => {
           const xhr = new win.XMLHttpRequest()
           data.set('configFile', blob, fileName)
-          data.set('dryRun', 'true')
+          data.set('dryRun', 'false')
           xhr.open(options.method, options.url)
           xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
           xhr.send(data)

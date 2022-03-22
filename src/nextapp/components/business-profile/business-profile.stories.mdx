@@ -1,0 +1,107 @@
+import { Meta, Story, Canvas } from '@storybook/addon-docs';
+import BusinessProfileContent from './business-profile-content';
+
+<Meta title="APS/Business Profile" />
+
+export const Template = ({ 
+  businessType, 
+  legalName,
+  suspended,
+  addressLine1,
+  addressLine2,
+  city,
+  province,
+  postal,
+  ...props
+}) => (
+    <BusinessProfileContent
+      data-testid="business-profile"
+      data={{ 
+        institution: {
+          businessType: businessType,
+          legalName: legalName,
+          isSuspended: suspended,
+          address: {
+            addressLine1: addressLine1,
+            addressLine2: addressLine2,
+            city: city,
+            province: province,
+            postal: postal,
+          },
+        },
+      }}
+      {...props}
+    />
+);
+
+# Business Profile
+
+Displays the address information of a registered vendor.
+
+<Canvas>
+  <Story 
+    name="Default" 
+    args={{
+      legalName: 'Easy Drug Mart 51',
+      addressLine1: 'W Broadway Street',
+      addressLine2: '',
+      city: 'Vancouver',
+      province: 'BC',
+      postal: 'V8T 1E7',
+    }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Suspended State
+
+Business profiles can be suspended
+
+<Canvas>
+  <Story 
+    name="Suspended" 
+    args={{
+      legalName: 'Easy Drug Mart 51',
+      addressLine1: 'W Broadway Street',
+      addressLine2: '',
+      city: 'Vancouver',
+      province: 'BC',
+      postal: 'V8T 1E7',
+      suspended: true,
+    }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+## Loading state
+
+`BusinessProfile` loads its own data, but the loading state is visible here.
+
+<Canvas>
+  <Story name="Loading State">
+    <BusinessProfileContent isLoading />
+  </Story>
+</Canvas>
+
+## Customizations
+
+The container extends a Chakra `Box`, so any layout props are accepted, though only if required.
+
+<Canvas>
+  <Story 
+    name="Customizations" 
+    args={{
+      legalName: 'Easy Drug Mart 51',
+      addressLine1: 'W Broadway Street',
+      addressLine2: '',
+      city: 'Vancouver',
+      province: 'BC',
+      postal: 'V8T 1E7',
+      bgColor: 'bc-yellow',
+      p: 4,
+      borderRadius: 'lg',
+      color: 'white',
+    }}>
+    {Template.bind({})}
+  </Story>
+</Canvas>

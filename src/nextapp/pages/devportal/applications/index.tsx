@@ -140,7 +140,7 @@ const ApplicationsPage: React.FC<
             emptyView={empty}
           >
             {(d: Application) => (
-              <React.Fragment key={d.id}>
+              <React.Fragment>
                 <Tr>
                   <Td>{d.name}</Td>
                   <Td>{d.appId}</Td>
@@ -191,7 +191,7 @@ const ApplicationsPage: React.FC<
                             }
                           >
                             <React.Suspense fallback={<Text>Loading...</Text>}>
-                              <ApplicationServices appId={d.id} />
+                              <ApplicationServices appId={d.appId} />
                             </React.Suspense>
                           </ErrorBoundary>
                         </GridItem>

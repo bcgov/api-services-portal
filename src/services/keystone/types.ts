@@ -1896,6 +1896,7 @@ export type Dataset = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
   notes?: Maybe<Scalars['String']>;
@@ -2078,6 +2079,24 @@ export type DatasetWhereInput = {
   contacts_not_ends_with_i?: Maybe<Scalars['String']>;
   contacts_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   contacts_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resources?: Maybe<Scalars['String']>;
+  resources_not?: Maybe<Scalars['String']>;
+  resources_contains?: Maybe<Scalars['String']>;
+  resources_not_contains?: Maybe<Scalars['String']>;
+  resources_starts_with?: Maybe<Scalars['String']>;
+  resources_not_starts_with?: Maybe<Scalars['String']>;
+  resources_ends_with?: Maybe<Scalars['String']>;
+  resources_not_ends_with?: Maybe<Scalars['String']>;
+  resources_i?: Maybe<Scalars['String']>;
+  resources_not_i?: Maybe<Scalars['String']>;
+  resources_contains_i?: Maybe<Scalars['String']>;
+  resources_not_contains_i?: Maybe<Scalars['String']>;
+  resources_starts_with_i?: Maybe<Scalars['String']>;
+  resources_not_starts_with_i?: Maybe<Scalars['String']>;
+  resources_ends_with_i?: Maybe<Scalars['String']>;
+  resources_not_ends_with_i?: Maybe<Scalars['String']>;
+  resources_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  resources_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   organization?: Maybe<OrganizationWhereInput>;
   organization_is_null?: Maybe<Scalars['Boolean']>;
   organizationUnit?: Maybe<OrganizationUnitWhereInput>;
@@ -2221,6 +2240,8 @@ export enum SortDatasetsBy {
   TagsDesc = 'tags_DESC',
   ContactsAsc = 'contacts_ASC',
   ContactsDesc = 'contacts_DESC',
+  ResourcesAsc = 'resources_ASC',
+  ResourcesDesc = 'resources_DESC',
   OrganizationAsc = 'organization_ASC',
   OrganizationDesc = 'organization_DESC',
   OrganizationUnitAsc = 'organizationUnit_ASC',
@@ -2252,6 +2273,7 @@ export type DatasetUpdateInput = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   notes?: Maybe<Scalars['String']>;
@@ -2279,6 +2301,7 @@ export type DatasetCreateInput = {
   private?: Maybe<Scalars['Boolean']>;
   tags?: Maybe<Scalars['String']>;
   contacts?: Maybe<Scalars['String']>;
+  resources?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   notes?: Maybe<Scalars['String']>;
@@ -2490,7 +2513,6 @@ export type EnvironmentUpdateInput = {
   credentialIssuer?: Maybe<CredentialIssuerRelateToOneInput>;
   additionalDetailsToRequest?: Maybe<Scalars['String']>;
   services?: Maybe<GatewayServiceRelateToManyInput>;
-  product?: Maybe<ProductRelateToOneInput>;
 };
 
 export type EnvironmentsUpdateInput = {
@@ -5033,7 +5055,6 @@ export enum SortProductsBy {
 export type ProductUpdateInput = {
   appId?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  namespace?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   dataset?: Maybe<DatasetRelateToOneInput>;
   organization?: Maybe<OrganizationRelateToOneInput>;
@@ -6026,6 +6047,9 @@ export type Namespace = {
   name: Scalars['String'];
   scopes: Array<Maybe<UmaScope>>;
   prodEnvId?: Maybe<Scalars['String']>;
+  permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
+  permDataPlane?: Maybe<Scalars['String']>;
+  permProtected?: Maybe<Scalars['String']>;
 };
 
 export type NamespaceInput = {
@@ -6065,6 +6089,7 @@ export type UmaPolicy = {
   owner: Scalars['String'];
   users?: Maybe<Array<Maybe<Scalars['String']>>>;
   clients?: Maybe<Array<Maybe<Scalars['String']>>>;
+  groups?: Maybe<Array<Maybe<Scalars['String']>>>;
   scopes: Array<Maybe<Scalars['String']>>;
 };
 
@@ -6322,6 +6347,8 @@ export type Query = {
   getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
+  allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
+  allContentsByNamespace?: Maybe<Array<Maybe<Content>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
   allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
   allServiceAccessesByNamespace?: Maybe<Array<Maybe<ServiceAccess>>>;
@@ -6340,7 +6367,9 @@ export type Query = {
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
+  namespace?: Maybe<Namespace>;
   usersByNamespace?: Maybe<Array<Maybe<UserContact>>>;
+  getOrgPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
   getResourceSet?: Maybe<UmaResourceSet>;
@@ -6953,6 +6982,22 @@ export type QueryAllGatewayServicesByNamespaceArgs = {
 };
 
 
+export type QueryAllGatewayRoutesByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<GatewayRouteWhereInput>;
+};
+
+
+export type QueryAllContentsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<ContentWhereInput>;
+};
+
+
 export type QueryAllProductsByNamespaceArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -7061,9 +7106,20 @@ export type QueryConsumerScopesAndRolesArgs = {
 };
 
 
+export type QueryNamespaceArgs = {
+  ns: Scalars['String'];
+};
+
+
 export type QueryUsersByNamespaceArgs = {
   namespace: Scalars['String'];
   scopeName?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetOrgPoliciesForResourceArgs = {
+  prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
 };
 
 
@@ -7373,6 +7429,7 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
+  forceDeleteEnvironment?: Maybe<Scalars['Boolean']>;
   createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
@@ -7383,6 +7440,7 @@ export type Mutation = {
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   createNamespace?: Maybe<Namespace>;
   deleteNamespace?: Maybe<Scalars['Boolean']>;
+  forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
@@ -8109,6 +8167,12 @@ export type MutationDeleteUsersArgs = {
 };
 
 
+export type MutationForceDeleteEnvironmentArgs = {
+  id: Scalars['ID'];
+  force: Scalars['Boolean'];
+};
+
+
 export type MutationCreateGatewayConsumerPluginArgs = {
   id: Scalars['ID'];
   plugin: Scalars['String'];
@@ -8170,6 +8234,12 @@ export type MutationCreateNamespaceArgs = {
 
 export type MutationDeleteNamespaceArgs = {
   namespace: Scalars['String'];
+};
+
+
+export type MutationForceDeleteNamespaceArgs = {
+  namespace: Scalars['String'];
+  force: Scalars['Boolean'];
 };
 
 
