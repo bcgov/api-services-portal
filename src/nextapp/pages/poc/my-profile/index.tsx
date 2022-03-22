@@ -25,7 +25,7 @@ const MyProfilePage = () => {
         <div style={styles.app}>
             <h1 style={styles.mainHeading}>My Profile</h1>
             <p style={styles.introText}>
-                <pre>
+                <pre data-testid="my_profile_json" >
                     {JSON.stringify(user, null, 3)}
                 </pre>
             </p>

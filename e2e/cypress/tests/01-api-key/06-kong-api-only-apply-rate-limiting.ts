@@ -21,7 +21,6 @@ describe('Check the API key for free and elevated access', () => {
   it('Verify the service is accessible with API key for elevated access', () => {
     cy.get('@apiowner').then(async ({ product }: any) => {
       cy.fixture('state/store').then((creds: any) => {
-        const key = creds.consumerKey
         cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
           expect(response.status).to.be.equal(200)
         })

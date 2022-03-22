@@ -82,7 +82,7 @@ const AccessRequests: React.FC = () => {
         alignItems="center"
       >
         <Icon as={FaExclamationTriangle} mr={2} />
-        <Heading size="sm">Access Requests</Heading>
+        <Heading data-testid="pending-request-tbl" size="sm">Access Requests</Heading>
       </Box>
       <Table size="sm" variant="simple" borderRadius={4}>
         <Tbody>

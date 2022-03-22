@@ -8,5 +8,8 @@
   "namespace": "platform",
   "clientCredentials": {
     "namespace": "ccplatform"
+  },
+  "checkPermission": {
+    "namespace": "permission"
   }
 }

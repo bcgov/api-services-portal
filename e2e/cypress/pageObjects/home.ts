@@ -5,6 +5,7 @@ class HomePage {
   namespaceNameInput: string = '[data-testid=ns-modal-name-input]'
   nsCreateBtn: string = '[data-testid=ns-modal-create-btn]'
   nsSelectNamespace: string = '[data-testid=ns-dropdown-item-]'
+  userMenu: string = '[data-testid=auth-menu-user]'
 
   createNamespace(name: string): void {
     cy.get(this.nsDropdown).click()
@@ -17,18 +18,23 @@ class HomePage {
     })
   }
 
-  useNamespace(name: string): void {
+  useNamespace(name: string): Boolean {
+    var flag = new Boolean(false);
     cy.get(this.nsDropdown).click()
     cy.get(this.getNamespaceTestId(name)).click()
     cy.wait(2000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el.text().trim()).to.eq(name)
+      debugger
+      flag = true
     })
+    return flag
   }
 
   getNamespaceTestId(name: string): string {
     return '[data-testid=ns-dropdown-item-' + name + ']'
   }
+
 }
 
 export default HomePage
