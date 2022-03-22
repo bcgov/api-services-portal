@@ -1,0 +1,41 @@
+
+  query GetMyServiceAccesses {
+    myServiceAccesses(where: { productEnvironment_is_null: false }) {
+      id
+      name
+      active
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        flow
+        services {
+          id
+          name
+        }
+        credentialIssuer {
+          id
+          name
+          flow
+          resourceType
+        }
+        product {
+          id
+          name
+        }
+      }
+    }
+    myAccessRequests(where: { serviceAccess_is_null: true }) {
+      id
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+    }
+  }

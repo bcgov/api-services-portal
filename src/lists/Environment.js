@@ -5,12 +5,17 @@ const {
   isEnvironmentID,
 } = require('../services/identifiers');
 
-const { ValidateActiveEnvironment } = require('../services/workflow');
+const {
+  ValidateActiveEnvironment,
+  DeleteEnvironment,
+  DeleteEnvironmentValidate,
+} = require('../services/workflow');
 
 const {
   FieldEnforcementPoint,
   EnforcementPoint,
 } = require('../authz/enforcement');
+const { logger } = require('../logger');
 
 module.exports = {
   fields: {
@@ -74,7 +79,12 @@ module.exports = {
       ref: 'GatewayService.environment',
       many: true,
     },
-    product: { type: Relationship, ref: 'Product.environments', many: false },
+    product: {
+      type: Relationship,
+      ref: 'Product.environments',
+      many: false,
+      access: { update: false },
+    },
   },
   access: EnforcementPoint,
   hooks: {
@@ -106,15 +116,10 @@ module.exports = {
       listKey,
       fieldPath, // Field hooks only
     }) {
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(existingItem, null, 3)
-      );
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(originalInput, null, 3)
-      );
-      console.log(
-        'VALIDATE ' + operation + ' ' + JSON.stringify(resolvedData, null, 3)
-      );
+      if (operation == 'update' && 'product' in resolvedData) {
+        logger.warn('%j %j %j', existingItem, originalInput, resolvedData);
+        addValidationError('Product can not be changed for an Environment');
+      }
       await ValidateActiveEnvironment(
         context,
         operation,
@@ -124,5 +129,54 @@ module.exports = {
         addValidationError
       );
     },
+    validateDelete: async function ({ existingItem, context }) {
+      await DeleteEnvironmentValidate(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
+      );
+    },
+    // beforeDelete: async function ({
+    //   operation,
+    //   existingItem,
+    //   context,
+    //   listKey,
+    //   fieldPath, // exists only for field hooks
+    // }) {
+    //   await DeleteEnvironment(
+    //     context.createContext({ skipAccessControl: true }),
+    //     operation,
+    //     { environmentId: existingItem.id }
+    //   );
+    // },
   },
+  extensions: [
+    (keystone) => {
+      keystone.extendGraphQLSchema({
+        mutations: [
+          {
+            schema: 'forceDeleteEnvironment(id: ID!, force: Boolean!): Boolean',
+            resolver: async (item, args, context, info, { query, access }) => {
+              console.log('ForceDeleteEnvironment! ' + JSON.stringify(args));
+              if (args.force === false) {
+                await DeleteEnvironmentValidate(
+                  context.createContext({ skipAccessControl: true }),
+                  context.authedItem['namespace'],
+                  args.id
+                );
+              }
+              await DeleteEnvironment(
+                context.createContext({ skipAccessControl: true }),
+                context.authedItem['namespace'],
+                args.id,
+                args.force
+              );
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+        ],
+      });
+    },
+  ],
 };

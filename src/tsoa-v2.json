@@ -1,0 +1,67 @@
+{
+  "entryFile": "server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["controllers/v2/*Controller.ts"],
+  "spec": {
+    "name": "APS Directory API",
+    "description": "",
+    "outputDirectory": "controllers/v2",
+    "specVersion": 3,
+    "basePath": "/ds/api/v2",
+    "specFileBaseName": "openapi",
+    "yaml": true,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "oauth2",
+        "description": "Authz Client Credential",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "flow": "application",
+        "tokenUrl": "https://token_endpoint"
+      },
+      "portal": {
+        "type": "http",
+        "description": "Authz Portal Login",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "tags": [
+      {
+        "name": "API Directory",
+        "description": "Discover all the great BC Government APIs"
+      },
+      {
+        "name": "Organizations",
+        "description": "Manage organizational access control"
+      },
+      {
+        "name": "Namespaces",
+        "description": "Get aggregated information about namespaces"
+      },
+      {
+        "name": "Gateway Services",
+        "description": "View your Gateway Service details"
+      },
+      {
+        "name": "Products",
+        "description": "Manage your Products and Environments for publishing to the API Directory"
+      },
+      {
+        "name": "Authorization Profiles",
+        "description": "Configure the integration to external Identity Providers"
+      },
+      {
+        "name": "Documentation",
+        "description": "View public documentation and publish documentation for your APIs"
+      }
+    ]
+  },
+  "routes": {
+    "routesDir": "controllers/v2",
+    "basePath": "/ds/api/v2",
+    "iocModule": "controllers/ioc",
+    "authenticationModule": "./auth/auth-tsoa"
+  },
+  "ignore": ["**/node_modules/**"]
+}

@@ -2,17 +2,17 @@ import fetch from 'node-fetch';
 import { checkStatus } from '../checkStatus';
 import { logger } from '../../logger';
 export interface OpenidWellKnown {
-  issuer: string;
-  token_endpoint: string;
-  registration_endpoint: string;
+  issuer: string; // Frontend URL
+  token_endpoint: string; // Requested URL
+  registration_endpoint: string; // Requested URL
 }
 
 export interface Uma2WellKnown {
-  issuer: string;
-  token_endpoint: string;
-  resource_registration_endpoint: string;
-  permission_endpoint: string;
-  policy_endpoint: string;
+  issuer: string; // Frontend URL
+  token_endpoint: string; // Requested URL
+  resource_registration_endpoint: string; // Frontend URL
+  permission_endpoint: string; // Frontend URL
+  policy_endpoint: string; // Frontend URL
 }
 
 export function headers(accessToken: string): HeadersInit {

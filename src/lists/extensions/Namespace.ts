@@ -27,6 +27,10 @@ import { Logger } from '../../logger';
 const logger = Logger('ext.Namespace');
 
 import { strict as assert } from 'assert';
+import {
+  DeleteNamespace,
+  DeleteNamespaceValidate,
+} from '../../services/workflow/delete-namespace';
 
 const typeUserContact = `
   type UserContact {
@@ -41,7 +45,10 @@ type Namespace {
     id: String!
     name: String!,
     scopes: [UMAScope]!,
-    prodEnvId: String
+    prodEnvId: String,
+    permDomains: [String],
+    permDataPlane: String,
+    permProtected: String
 }
 `;
 
@@ -149,6 +156,80 @@ module.exports = {
                 scopes: ns.resource_scopes,
                 prodEnvId: prodEnv.id,
               }));
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'namespace(ns: String!): Namespace',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
+
+              const resourceIds = await getNamespaceResourceSets(envCtx);
+              const resourcesApi = new UMAResourceRegistrationService(
+                envCtx.uma2.resource_registration_endpoint,
+                envCtx.accessToken
+              );
+              const namespaces = await resourcesApi.listResourcesByIdList(
+                resourceIds
+              );
+
+              const detail = namespaces
+                .filter((ns) => ns.name === args.ns)
+                .map((ns: ResourceSet) => ({
+                  id: ns.id,
+                  name: ns.name,
+                  scopes: ns.resource_scopes,
+                  prodEnvId: prodEnv.id,
+                }))
+                .pop();
+
+              const kcGroupService = new KeycloakGroupService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await kcGroupService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+
+              const nsPermissions = await kcGroupService.getGroup(
+                'ns',
+                args.ns
+              );
+
+              // perm-protected-ns
+              // perm-domains
+              // perm-data-plane
+
+              (detail as any).permProtected =
+                'perm-protected-ns' in nsPermissions.attributes
+                  ? nsPermissions.attributes['perm-protected-ns'][0]
+                  : 'deny';
+              (detail as any).permDomains =
+                'perm-domains' in nsPermissions.attributes
+                  ? nsPermissions.attributes['perm-domains']
+                  : [];
+              (detail as any).permDataPlane =
+                'perm-data-plane' in nsPermissions.attributes
+                  ? nsPermissions.attributes['perm-data-plane'][0]
+                  : '';
+              return detail;
             },
             access: EnforcementPoint,
           },
@@ -347,6 +428,60 @@ module.exports = {
               );
               assert.strictEqual(nsResource.length, 1, 'Invalid Namespace');
 
+              resourcesApi.deleteResourceSet(nsResource[0].id);
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+
+          {
+            schema:
+              'forceDeleteNamespace(namespace: String!, force: Boolean!): Boolean',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
+
+              const resourceIds = await getResourceSets(envCtx);
+
+              const resourcesApi = new UMAResourceRegistrationService(
+                envCtx.uma2.resource_registration_endpoint,
+                envCtx.accessToken
+              );
+
+              const namespaces = await resourcesApi.listResourcesByIdList(
+                resourceIds
+              );
+              const nsResource = namespaces.filter(
+                (ns) => ns.name === args.namespace
+              );
+              assert.strictEqual(nsResource.length, 1, 'Invalid Namespace');
+
+              if (args.force === false) {
+                await DeleteNamespaceValidate(
+                  context.createContext({ skipAccessControl: true }),
+                  args.namespace
+                );
+              }
+              await DeleteNamespace(
+                context.createContext({ skipAccessControl: true }),
+                args.namespace
+              );
               resourcesApi.deleteResourceSet(nsResource[0].id);
               return true;
             },

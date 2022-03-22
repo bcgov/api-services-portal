@@ -56,7 +56,7 @@ export async function getServiceAccess(
         .map(
           async (env: Environment): Promise<ResourceServerContext> => {
             if (env.flow === 'client-credentials') {
-              return await getResourceServerContext(env);
+              return getResourceServerContext(env);
             }
             return;
           }

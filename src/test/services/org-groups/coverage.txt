@@ -1,0 +1,28 @@
+authz
+- createIfMissingResource
+
+group-acccess
+- createOrUpdateGroupAccess
+- getGroupAccess
+
+namespace
+- assignNamespaceToOrganization
+- unassignNamespaceFromOrganization
+- listAssignedNamespacesByOrg
+
+org-group-service
+- getValidRoles
+- findGroup
+- deleteGroup
+- getGroupPermissionsByResource
+- createGroupIfMissing
+- createOrUpdateGroupPermission
+- createOrUpdateGroupPolicy
+- getGroupPathsByGroupName
+- listGroups
+- getPermissionsForGroupPolicy
+- getGroupPermissions
+- listMembers
+- listMembersOfGroups
+- listMembersForLeafOnly
+- syncMembers

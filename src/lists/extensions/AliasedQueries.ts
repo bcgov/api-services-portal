@@ -23,6 +23,16 @@ module.exports = {
           type: SchemaType.ListQuery,
         },
         {
+          gqlName: 'allGatewayRoutesByNamespace',
+          list: 'GatewayRoute',
+          type: SchemaType.ListQuery,
+        },
+        {
+          gqlName: 'allContentsByNamespace',
+          list: 'Content',
+          type: SchemaType.ListQuery,
+        },
+        {
           gqlName: 'allProductsByNamespace',
           list: 'Product',
           type: SchemaType.ListQuery,

@@ -20,6 +20,9 @@ export async function lookupCredentialIssuerById(
                         clientMappers
                         resourceType
                         environmentDetails
+                        environments {
+                          id
+                        }
                     }
                 }`,
     variables: { id: id },
