@@ -55,6 +55,24 @@ casual.define('route', () => {
   return `route-${ns}-${env}-${casual.word}`;
 });
 
+let productIndex = 0;
+const productNames = [
+  'BC Address Geocoder Web Service',
+  'API Gateway Services',
+  'Address List Editor',
+  'Document Generation',
+  'BC Route Planner',
+  'Service BC Office Locations',
+  'Welcome BC Settlement Service Providers - Interactive Web Map Data',
+  'Laboratory Services in BC',
+  'Immunization Services in BC',
+  'BC Health Care Facilities (Hospital)',
+  'BC Health Care Facilities (Clinic)',
+  'BC Finance Budget',
+  'BC Finance Budget',
+  'LiDAR',
+];
+
 const schema = makeExecutableSchema({ typeDefs: schemas });
 const schemaWithMocks = addMocksToSchema({
   schema,
@@ -77,7 +95,7 @@ const server = mockServer(schemaWithMocks, {
     allDatasets: () => new MockList(40, (_, { id }) => ({ id })),
     allOrganizations: () => new MockList(8, (_, { id }) => ({ id })),
     allOrganizationUnits: () => new MockList(18, (_, { id }) => ({ id })),
-    allAccessRequests: () => new MockList(6, (_, { id }) => ({ id })),
+    allAccessRequests: () => new MockList(2, (_, { id }) => ({ id })),
     allNamespaceServiceAccounts: () => new MockList(2, (_, { id }) => ({ id })),
     allGatewayConsumers: () => new MockList(4, (_, { id }) => ({ id })),
     allPlugins: () => new MockList(4, (_, { id }) => ({ id })),
@@ -216,6 +234,12 @@ const server = mockServer(schemaWithMocks, {
         }),
       };
     },
+    deleteCredentialIssuer: (req) => {
+      return { name: 'issuer name profile' };
+    },
+    updateCredentialIssuer: (req) => {
+      return req.data;
+    },
   }),
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
@@ -232,33 +256,26 @@ const server = mockServer(schemaWithMocks, {
       name: `sa-${user.namespace}-${casual.uuid}`,
     };
   },
-  Product: () => ({
-    name: casual.random_element([
-      'BC Address Geocoder Web Service',
-      'API Gateway Services',
-      'Address List Editor',
-      'Document Generation',
-      'BC Route Planner',
-      'Service BC Office Locations',
-      'Welcome BC Settlement Service Providers - Interactive Web Map Data',
-      'Laboratory Services in BC',
-      'Immunization Services in BC',
-      'BC Health Care Facilities (Hospital)',
-    ]),
-    description: casual.words(10),
-    kongRouteId: casual.uuid,
-    kongServiceId: casual.uuid,
-    namespace: casual.namespace,
-    host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
-    methods: 'GET',
-    paths: casual.domain,
-    isActive: casual.coin_flip,
-    tags: casual.words(3),
-    environments: () => new MockList(3, (_, { id }) => ({ id })),
-    dataset: randomNullValue(),
-    organization: randomNullValue(),
-    organizationUnit: randomNullValue(),
-  }),
+  Product: () => {
+    const name = productNames[productIndex];
+    productIndex++;
+    return {
+      name,
+      description: casual.words(10),
+      kongRouteId: casual.uuid,
+      kongServiceId: casual.uuid,
+      namespace: casual.namespace,
+      host: casual.populate('svr{{day_of_year}}.api.gov.bc.ca'),
+      methods: 'GET',
+      paths: casual.domain,
+      isActive: casual.coin_flip,
+      tags: casual.words(3),
+      environments: () => new MockList(3, (_, { id }) => ({ id })),
+      dataset: randomNullValue(),
+      organization: randomNullValue(),
+      organizationUnit: randomNullValue(),
+    };
+  },
   Organization: () => ({
     name: casual.random_element(data.organizations.map((o) => kebabCase(o))),
     sector: casual.random_element([
@@ -363,7 +380,6 @@ const server = mockServer(schemaWithMocks, {
       resourceType: null,
       apiKeyName: 'keyname',
       ...credentialValues,
-      environments: () => JSON.stringify([]),
       environmentDetails:
         '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
     };

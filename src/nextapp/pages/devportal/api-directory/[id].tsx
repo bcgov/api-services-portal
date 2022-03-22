@@ -61,9 +61,7 @@ const ApiPage: React.FC<
   const { data } = useQuery<ApiDataset>(queryKey, () =>
     restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
-  // TODO: Not sure if this is needed still
-  // const hasProtectedEnvironments = (prod) =>
-  //   prod.environments?.some((env) => env.flow !== 'public');
+
   function DetailItem({ detail }: { detail: DetailItem }) {
     return (
       <Box mb={5}>
@@ -130,7 +128,7 @@ const ApiPage: React.FC<
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
-              <Box bg={'gray.100'}>
+              <Box bg="gray.100">
                 {data?.products?.map((p) => (
                   <ApiProductItem key={uid(p)} data={p} id={p.id} />
                 ))}
@@ -142,7 +140,8 @@ const ApiPage: React.FC<
             <Box as="header" mb={4}>
               <Heading size="xs">Details</Heading>
             </Box>
-            {data && detailItems.map((d) => <DetailItem detail={d} />)}
+            {data &&
+              detailItems.map((d) => <DetailItem key={uid(d)} detail={d} />)}
             {/* <Box as="header" my={4}>
               <Heading size="xs">Contact Info</Heading>
             </Box>
@@ -180,22 +179,21 @@ const detailItems: DetailItem[] = [
   // },
 ];
 // TODO: Not sure what the source of this data is for these contact items, should adjust
-const contactItems: DetailItem[] = [
-  {
-    title: 'Name',
-    key: 'name',
-  },
-  {
-    title: 'Email',
-    key: 'email',
-  },
-  {
-    title: 'Organization',
-    key: 'organization.name',
-  },
-  {
-    title: 'Role',
-    key: 'role',
-  },
-  ,
-];
+// const contactItems: DetailItem[] = [
+//   {
+//     title: 'Name',
+//     key: 'name',
+//   },
+//   {
+//     title: 'Email',
+//     key: 'email',
+//   },
+//   {
+//     title: 'Organization',
+//     key: 'organization.name',
+//   },
+//   {
+//     title: 'Role',
+//     key: 'role',
+//   },
+// ];

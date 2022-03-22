@@ -65,7 +65,7 @@ services:
       - keycloak
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./local/portal/Dockerfile.E2E
     env_file:
       - .env.local
     ports:
@@ -123,7 +123,8 @@ services:
       context: ./e2e
       dockerfile: Dockerfile
     volumes:
-      - ./e2e/results/report:/e2e/results/report
+      - ./e2e/coverage:/e2e/coverage
+      - ./e2e/results:/e2e/results
     networks:
       - aps-net
   kong-db:
@@ -212,5 +213,18 @@ services:
       aps-net:
         aliases:
           - gwa-api.localtest.me
+  cypress-jwks-url:
+    build:
+      context: ./local/cypress-jwks-url
+      dockerfile: Dockerfile
+    volumes:
+      - ./local/cypress-jwks-url:/src
+    command: npm start
+    ports:
+      - '3500:3500'
+    networks:
+      aps-net:
+        aliases:
+          - cypress-jwks-url.localtest.me
 networks:
   aps-net: {}

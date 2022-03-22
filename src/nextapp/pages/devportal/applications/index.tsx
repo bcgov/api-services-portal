@@ -191,7 +191,7 @@ const ApplicationsPage: React.FC<
                             }
                           >
                             <React.Suspense fallback={<Text>Loading...</Text>}>
-                              <ApplicationServices appId={d.id} />
+                              <ApplicationServices appId={d.appId} />
                             </React.Suspense>
                           </ErrorBoundary>
                         </GridItem>

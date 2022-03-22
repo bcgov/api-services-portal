@@ -17,20 +17,23 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <Flex
+      align="center"
       boxShadow={isRaised ? 'md' : 'none'}
       p={isRaised ? 4 : 0}
       borderRadius={4}
       {...rest}
     >
-      <Avatar name={data.name} />
-      <Box ml={2}>
-        <Text fontWeight="bold">
-          {data.name}{' '}
+      <Avatar name={data.name} size="sm" />
+      <Box ml={2} lineHeight="4">
+        <Text fontSize="sm" fontWeight="bold">
+          {data.name}
           <Text as="span" fontWeight="normal" color="gray.400">
-            {data.username}
+            {` • ${data.username}`}
           </Text>
         </Text>
-        <Text fontSize="xs">{data.email}</Text>
+        <Text fontWeight="normal" fontSize="xs" color="bc-component">
+          {data.email}
+        </Text>
       </Box>
     </Flex>
   );

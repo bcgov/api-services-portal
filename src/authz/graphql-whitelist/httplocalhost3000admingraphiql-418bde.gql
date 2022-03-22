@@ -1,0 +1,42 @@
+
+  query Get($id: ID!) {
+    allDiscoverableProducts(where: { id: $id }) {
+      id
+      name
+      environments {
+        id
+        approval
+        name
+        active
+        flow
+        additionalDetailsToRequest
+        legal {
+          title
+          description
+          link
+          reference
+        }
+        credentialIssuer {
+          clientAuthenticator
+        }
+      }
+    }
+    myApplications {
+      id
+      appId
+      name
+      owner {
+        name
+      }
+    }
+    mySelf {
+      legalsAgreed
+    }
+    allTemporaryIdentities {
+      id
+      userId
+      name
+      username
+      email
+    }
+  }

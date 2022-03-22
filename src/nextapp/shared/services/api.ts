@@ -2,6 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
   useMutation,
+  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -10,7 +11,7 @@ import {
 import omit from 'lodash/omit';
 import { Query } from '@/types/query.types';
 
-import { apiHost, apiInternalHost } from '../config';
+import { apiHost, apiInternalHost, env } from '../config';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -96,10 +97,14 @@ export const useApi = (
   );
 };
 
-export const useApiMutation = <T>(mutation: string): UseMutationResult => {
+export const useApiMutation = <T>(
+  mutation: string,
+  options = {}
+): UseMutationResult => {
   const mutate = useMutation(
     async (variables: T) =>
-      await api<Query>(mutation, variables, { ssr: false })
+      await api<Query>(mutation, variables, { ssr: false }),
+    options
   );
   return mutate;
 };
@@ -120,7 +125,8 @@ export async function restApi(
 ): Promise<string> {
   try {
     const config = {
-      ssr: true,
+      // NOTE: will need to have a better way to handle traffic for ssr in dev
+      ssr: env === 'development' ? false : true,
       method: 'GET',
       headers: {
         Accept: 'application/json',

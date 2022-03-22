@@ -98,6 +98,8 @@ class AuthorizationProfile {
     }
 
     cy.get(this.createBtn).click()
+
+    cy.get(this.profileTable).contains(authProfile.name).should('exist')
   }
 }
 

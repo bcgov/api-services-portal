@@ -15,13 +15,13 @@ declare namespace Cypress {
 
     preserveCookies(): void
 
-    makeKongRequest(serviceName : string, methodType : string): Chainable<any>
+    makeKongRequest(serviceName : string, methodType : string, key?: string): Chainable<any>
 
     preserveCookiesDefaults(): void
 
-    saveState(key: string, value: string): void
+    saveState(key: string, value: string): Chainable<any>
 
-    getState(key: string): string
+    getState(key: string): Chainable<any>
 
     resetState(): void
 
@@ -30,11 +30,15 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
+    publishApi(content: any, namespace: string): Chainable<Cypress.Response<any>>
+    
     getServiceOrRouteID(configType: string
     ): Chainable<Cypress.Response<any>>
 
-    updateKongPlugin(pluginName : string, name : string): Chainable<Cypress.Response<any>>
-    
-    publishApi(content: any): Chainable<Cypress.Response<any>>
+    updateKongPlugin(pluginName : string, name : string, endPoint?: string, verb?: string): Chainable<Cypress.Response<any>>
+
+    makeKongGatewayRequest(endpoint: string, requestName:string, methodType: string): Chainable<Cypress.Response<any>>
+
+    generateKeystore() : Chainable<any>
   }
 }

@@ -21,23 +21,25 @@ const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   const styles = useStyleConfig('Box');
-  const hasTable = React.Children.toArray(children).some(
-    (c: JSX.Element) => c.type?.displayName === 'Table'
-  );
-  const borderBottom = hasTable ? 'none' : '2px solid';
-  const paddingBottom = hasTable ? 4 : 9;
 
   return (
     <Box bgColor="white" sx={styles} {...props}>
       {heading && (
         <Flex
-          px={9}
-          pt={9}
-          pb={paddingBottom}
+          as="header"
+          p={9}
           alignItems="center"
           justifyContent="space-between"
-          borderBottom={borderBottom}
-          borderColor="bc-yellow"
+          sx={{
+            '& + :not(table)': {
+              borderTop: '2px solid',
+              borderColor: 'bc-yellow',
+            },
+            '& + table': {
+              position: 'relative',
+              mt: -5,
+            },
+          }}
         >
           <Heading size="sm">{heading}</Heading>
           {actions && <HStack spacing={4}>{actions}</HStack>}

@@ -1,0 +1,36 @@
+
+  query GetMyServiceAccesses {
+    myServiceAccesses {
+      id
+      name
+      active
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+    }
+    myAccessRequests(where: { serviceAccess_is_null: true }) {
+      id
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        product {
+          id
+          name
+        }
+      }
+      isComplete
+      isApproved
+      isIssued
+    }
+  }

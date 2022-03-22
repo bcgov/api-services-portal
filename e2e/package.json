@@ -7,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "cy:open": "cypress open --config-file cypress.json",
-    "cy:run": "cypress run --config-file cypress.json",
-    "cy:run:rcd": "cypress run --config-file cypress.json --record --env TransferProtocol='http' --browser chrome",
+    "cy:run": "cypress run --config-file cypress.json --env TransferProtocol='http' --browser chrome",
+    "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
     "cy:edge": "npx cypress run --browser edge",
@@ -38,7 +38,7 @@
     "prettier": "^2.3.2"
   },
   "dependencies": {
-    "@cypress/code-coverage": "^3.9.8",
+    "@cypress/code-coverage": "^3.9.12",
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
@@ -46,6 +46,10 @@
     "lodash": "^4.17.21",
     "mochawesome": "^6.2.2",
     "mochawesome-merge": "^4.2.0",
+    "ms": "^2.1.3",
+    "njwt": "^1.2.0",
+    "node-fetch": "^3.1.1",
+    "node-jose": "^2.0.0",
     "npm-run-all": "^4.1.5",
     "request": "^2.88.2",
     "typescript": "^4.3.5",

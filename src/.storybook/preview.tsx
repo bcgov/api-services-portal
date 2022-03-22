@@ -16,18 +16,18 @@ const client = new QueryClient({
 
 export const decorators = [
   (Story) => (
-    <ChakraProvider theme={theme}>
-      <QueryClientProvider client={client}>
-        <AuthProvider>
+    <QueryClientProvider client={client}>
+      <AuthProvider>
+        <ChakraProvider theme={theme}>
           <div
             dir="ltr"
             style={{ minHeight: '100vh', backgroundColor: 'white' }}
           >
             <Story />
           </div>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ChakraProvider>
+        </ChakraProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   ),
 ];
 export const parameters = {

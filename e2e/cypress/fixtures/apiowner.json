@@ -9,6 +9,7 @@
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
+  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
   "product": {
     "name": "Auto Test Product",
     "orgName": "Ministry of Health",
@@ -21,27 +22,86 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-platform"
       }
-    },
-    "testEnvironment": {
-      "name": "test",
-      "config": {
-        "terms": "Terms of Use for API Gateway",
-        "authorization": "Oauth2 Client Credentials Flow",
-        "optionalInstructions": "Editing test environment"
-      }
     }
   },
-  "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
-  "ccAuthProfile": {
-    "name": "cy-cc-auth",
-    "flow": "Client Credential Flow",
-    "clientAuthenticator": "Client ID and Secret",
-    "environmentConfig": {
-      "environment": "Test",
-      "clientRegistration": "Managed",
-      "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
-      "clientId": "cypress-auth-profile",
-      "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+  "clientCredentials": {
+    "namespace": "ccplatform",
+    "jwtKeyPair": {
+      "authProfile": {
+        "name": "cy-jwt-kp-auth",
+        "flow": "Client Credential Flow",
+        "clientAuthenticator": "Signed JWT - Generated Key Pair",
+        "environmentConfig": {
+          "environment": "Development",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": {
+          "name": "Development",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      }
+    },
+    "jwksUrl": {
+      "authProfile": {
+        "name": "cy-jwks-url-auth",
+        "flow": "Client Credential Flow",
+        "clientAuthenticator": "Signed JWT with JWKS URL",
+        "environmentConfig": {
+          "environment": "Sandbox",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      },
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": {
+          "name": "Sandbox",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      }
+    },
+    "clientIdSecret": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      },
+      "authProfile": {
+        "name": "cy-client-id-secret-auth",
+        "flow": "Client Credential Flow",
+        "clientAuthenticator": "Client ID and Secret",
+        "environmentConfig": {
+          "environment": "Test",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      }
     }
   },
   "permission": {
