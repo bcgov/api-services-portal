@@ -255,7 +255,7 @@ clientPermissions:
       id: b444a5a1-8e14-4f92-9005-8b476b977e25
     permissions:
       - id: 0d793387-6617-4cb4-87a3-76478c368849
-        name: orgcontrol permission for role data-custodian
+        name: Access to 'orgcontrol' services for role data-custodian
         type: scope
         logic: POSITIVE
         decisionStrategy: UNANIMOUS

@@ -31,7 +31,7 @@ describe('Org Group Access Service', function () {
       parent: '/data-custodian/ministry-citizens-services',
     };
     const name = kc.getGroupPermissionName(orgGroup, 'res123');
-    expect(name).toBe('res123 permission for role data-custodian');
+    expect(name).toBe("Access to 'res123' services for role data-custodian");
   });
 
   it('it should getValidRoles', async function () {
@@ -238,7 +238,7 @@ describe('Org Group Access Service', function () {
     o(result);
     expect(result.length).toBe(1);
     expect(result[0].name).toBe(
-      'orgcontrol permission for role data-custodian'
+      "Access to 'orgcontrol' services for role data-custodian"
     );
     expect(result[0].config.policies[0].name).toBe(
       'group-data-custodian-ministry-citizens-services-databc-policy'
