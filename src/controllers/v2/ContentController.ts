@@ -94,21 +94,21 @@ export class ContentController extends Controller {
    *
    * @summary Delete Documentation
    */
-  @Delete('/{externalLink}')
+  @Delete('/{slug}')
   @OperationId('delete-content')
   @Security('jwt', ['Content.Publish'])
   public async delete(
     @Path() ns: string,
-    @Path() externalLink: string,
+    @Path() slug: string,
     @Request() request: any
   ): Promise<BatchResult> {
     const context = this.keystone.createContext(request);
 
-    const current = await getRecord(context, 'Content', externalLink);
+    const current = await getRecord(context, 'ContentBySlug', slug);
     assert.strictEqual(current === null, false, 'Content not found');
     assert.strictEqual(current.namespace === ns, true, 'Content invalid');
 
-    return await deleteRecord(context, 'Content', externalLink);
+    return await deleteRecord(context, 'ContentBySlug', slug);
   }
 
   // @Put('{contentId}/markdown')
