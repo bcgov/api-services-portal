@@ -295,6 +295,7 @@ const NewRequestsPage: React.FC<
                   <Input
                     placeholder="https://"
                     name="jwksUrl"
+                    data-testid="access-rqst-jwks-url"
                     variant="bc-input"
                     defaultValue=""
                   />

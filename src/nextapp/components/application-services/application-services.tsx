@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { ListItem, UnorderedList } from '@chakra-ui/layout';
+import { Badge, ListItem, UnorderedList } from '@chakra-ui/layout';
 import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { uid } from 'react-uid';
+import { Tooltip } from '@chakra-ui/tooltip';
 
 interface ApplicationServicesProps {
   appId: string;
@@ -20,8 +21,11 @@ const ApplicationServices: React.FC<ApplicationServicesProps> = ({ appId }) => {
         <ListItem fontSize="sm">No Service Accesses</ListItem>
       )}
       {data.myServiceAccesses.map((s) => (
-        <ListItem key={uid(s.id)} fontSize="sm">
-          {s.name}
+        <ListItem key={uid(s.id)} fontSize="sm" d="flex" alignItems="center">
+          {s.productEnvironment?.product?.name}
+          <Tooltip label={s.name} aria-label={`${s.name} tooltip`}>
+            <Badge ml={2}>{s.productEnvironment?.name}</Badge>
+          </Tooltip>
         </ListItem>
       ))}
     </UnorderedList>

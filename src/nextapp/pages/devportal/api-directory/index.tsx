@@ -6,10 +6,13 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
-import { Dataset } from '@/shared/types/query.types';
+import { Dataset, Product } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
 
+interface DiscoveryDataset extends Dataset {
+  products: Product[];
+}
 const queryKey = ['allProducts', 'discovery'];
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -17,7 +20,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   await queryClient.prefetchQuery(
     queryKey,
-    async () => await restApi<Dataset[]>('/ds/api/directory')
+    async () => await restApi<DiscoveryDataset[]>('/ds/api/directory')
   );
 
   return {
@@ -32,7 +35,7 @@ const ApiDiscoveryPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
   const { data } = useQuery(queryKey, () =>
-    restApi<Dataset[]>('/ds/api/directory')
+    restApi<DiscoveryDataset[]>('/ds/api/directory')
   );
 
   return (

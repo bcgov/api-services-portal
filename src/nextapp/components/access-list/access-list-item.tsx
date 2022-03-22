@@ -1,34 +1,40 @@
 import * as React from 'react';
 import {
-  Box,
-  Button,
-  Divider,
   Flex,
   Heading,
-  HStack,
   Icon,
-  Spacer,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Table,
   Tag,
-  Text,
+  Td,
+  Th,
+  Thead,
+  Tr,
   useToast,
 } from '@chakra-ui/react';
-import { ServiceAccess, Product } from '@/shared/types/query.types';
 import {
-  FaCheck,
-  FaChevronRight,
-  FaFolder,
-  FaHourglass,
-  FaMinusCircle,
-  FaTimes,
-} from 'react-icons/fa';
-import CircleIcon from '../circle-icon';
+  ServiceAccess,
+  Product,
+  AccessRequest,
+} from '@/shared/types/query.types';
+import { FaBook } from 'react-icons/fa';
+import has from 'lodash/has';
 import { gql } from 'graphql-request';
-import NextLink from 'next/link';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
+import { IoEllipsisHorizontal } from 'react-icons/io5';
+import Card from '@/components/card';
+import { uid } from 'react-uid';
+
+import AccessStatus from './access-status';
+import GenerateCredentialsDialog from '../access-request-form/generate-credentials-dialog';
 
 interface AccessListItemProps {
-  data: ServiceAccess[];
+  data: (AccessRequest | ServiceAccess)[];
   product: Product;
   queryKey: QueryKey;
 }
@@ -39,15 +45,20 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
   queryKey,
 }) => {
   const client = useQueryClient();
-  const revoke = useApiMutation(mutation);
+  const revokeAccess = useApiMutation(accessMutation);
+  const cancelRequest = useApiMutation(requestMutation);
   const toast = useToast();
   const handleRevoke = React.useCallback(
-    (id) => async (event: React.MouseEvent<HTMLButtonElement>) => {
+    (id, isRequest) => async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
 
       try {
-        await revoke.mutateAsync({ id });
+        if (isRequest) {
+          await cancelRequest.mutateAsync({ id });
+        } else {
+          await revokeAccess.mutateAsync({ id });
+        }
         client.invalidateQueries(queryKey);
         toast({
           title: 'Access Revoked',
@@ -61,109 +72,93 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
         });
       }
     },
-    [client, queryKey, revoke, toast]
+    [cancelRequest, client, queryKey, revokeAccess, toast]
   );
 
   return (
-    <Box bgColor="white" mb={4}>
-      <Flex as="header" align="center" justify="space-between" p={4}>
+    <Card
+      mb={4}
+      heading={
         <Flex as="hgroup" align="center">
-          <Icon as={FaFolder} color="bc-blue-alt" mr={2} boxSize="6" />
-          <Heading size="md">{product.name}</Heading>
+          <Icon as={FaBook} color="bc-blue-alt" mr={2} boxSize="5" />
+          <Heading size="inherit">{product.name}</Heading>
         </Flex>
-        <Spacer />
-        {data.filter((e) => e.productEnvironment.credentialIssuer?.resourceType)
-          .length > 0 && (
-          <NextLink href={`/devportal/access/${product.id}`}>
-            <Button
-              size="sm"
-              variant="primary"
-              display="flex"
-              rightIcon={<Icon as={FaChevronRight} />}
-            >
-              Manage Resources
-            </Button>
-          </NextLink>
-        )}
-      </Flex>
-      <Divider />
-      {data.map((d, index, arr) => (
-        <Flex
-          key={d.id}
-          px={4}
-          py={2}
-          borderColor="blue.100"
-          borderBottomWidth={index === arr.length - 1 ? 0 : 1}
-          bgColor="blue.50"
-        >
-          <Flex flex={1}>
-            <Box mr={2}>
-              {d.active && (
-                <CircleIcon
-                  label={`Approved for ${d.application?.name}`}
-                  color="green"
-                >
-                  <Icon as={FaCheck} />
-                </CircleIcon>
-              )}
-              {!d.active && (
-                <CircleIcon
-                  label={`Pending for ${d.application?.name}`}
-                  color="orange"
-                >
-                  <Icon as={FaHourglass} />
-                </CircleIcon>
-              )}
-            </Box>
-            <Box display="flex" alignItems="center">
-              <Text
-                display="inline-block"
-                fontSize="sm"
-                bgColor="blue.300"
-                color="white"
-                textTransform="uppercase"
-                px={2}
-                borderRadius={2}
+      }
+      data-testid={`access-list-item-${product.name}`}
+    >
+      <Table data-testid="access-list-item-table">
+        <Thead>
+          <Tr>
+            <Th>Status</Th>
+            <Th>Environments</Th>
+            <Th>Application</Th>
+            <Th />
+          </Tr>
+        </Thead>
+        {data.map((d: AccessRequest & ServiceAccess, index) => (
+          <Tr key={uid(d.id)}>
+            <Td>
+              <AccessStatus
+                isIssued={d.isIssued ?? d.active === false}
+                isComplete={d.isComplete ?? d.active === false}
+                isApproved={d.isApproved ?? d.active}
+              />
+            </Td>
+            <Td>
+              <Tag
+                colorScheme={d.productEnvironment?.name}
+                variant="outline"
+                textTransform="capitalize"
               >
-                {d.productEnvironment.name}
-              </Text>
-              <HStack ml={3}>
-                {d.productEnvironment.services?.map((s) => (
-                  <Tag
-                    key={s.id}
-                    borderRadius="full"
-                    variant="subtle"
-                    colorScheme="cyan"
+                {d.productEnvironment?.name}
+              </Tag>
+            </Td>
+            <Td>{d.application?.name}</Td>
+            <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
+              {(has(d, 'isApproved') ||
+                has(d, 'isIssued') ||
+                has(d, 'isComplete')) &&
+                (!d.isIssued || !d.isApproved) && (
+                  <GenerateCredentialsDialog id={d.id} />
+                )}
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  aria-label="product actions"
+                  icon={<Icon as={IoEllipsisHorizontal} />}
+                  color="bc-blue"
+                  variant="ghost"
+                />
+                <MenuList>
+                  <MenuItem
+                    color="bc-error"
+                    onClick={handleRevoke(d.id, has(d, 'isIssued'))}
                   >
-                    {s.name}
-                  </Tag>
-                ))}
-              </HStack>
-            </Box>
-          </Flex>
-          <Box display="flex" alignItems="center" justifyContent="flex-end">
-            <Button
-              color={d.active ? 'red' : 'orange'}
-              variant="outline"
-              bgColor="white"
-              size="xs"
-              leftIcon={<Icon as={d.active ? FaMinusCircle : FaTimes} />}
-              onClick={handleRevoke(d.id)}
-            >
-              {d.active ? 'Revoke Access' : 'Cancel Request'}
-            </Button>
-          </Box>
-        </Flex>
-      ))}
-    </Box>
+                    Revoke Access
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </Td>
+          </Tr>
+        ))}
+      </Table>
+    </Card>
   );
 };
 
 export default AccessListItem;
 
-const mutation = gql`
+const accessMutation = gql`
   mutation CancelAccess($id: ID!) {
     deleteServiceAccess(id: $id) {
+      id
+    }
+  }
+`;
+
+const requestMutation = gql`
+  mutation CancelAccessRequest($id: ID!) {
+    deleteAccessRequest(id: $id) {
       id
     }
   }

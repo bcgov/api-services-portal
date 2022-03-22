@@ -1,0 +1,23 @@
+
+  query GetCredentialIssuers {
+    allCredentialIssuersByNamespace {
+      id
+      name
+      flow
+      mode
+      owner {
+        name
+        username
+        email
+      }
+      environmentDetails
+      availableScopes
+      clientAuthenticator
+      clientRoles
+      clientMappers
+      apiKeyName
+      resourceType
+      resourceScopes
+      resourceAccessScope
+    }
+  }

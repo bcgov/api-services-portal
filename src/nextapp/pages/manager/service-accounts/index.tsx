@@ -103,7 +103,9 @@ const ServiceAccountsPage: React.FC<
                 text file.
               </Text>
             </Box>
-            <ViewSecret credentials={credentials} />
+            <Box p={4}>
+              <ViewSecret credentials={credentials} />
+            </Box>
           </Box>
         )}
         <Box bgColor="white" mb={4}>

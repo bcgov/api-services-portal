@@ -150,7 +150,7 @@ Developer Role Rules - Fields,,,ServiceAccess,read,,"name,active,productEnvironm
 Developer Role Rules - Fields,,,CredentialIssuer,read,,"id,name,flow,resourceType",,,portal-user,,,allow,
 Developer Role Rules - Fields,,,AccessRequest,create,,"name,controls,requestor,application,productEnvironment",,,portal-user,,,allow,
 Developer Role Rules - Fields,,,AccessRequest,,"read,update",credential,,,portal-user,,,allow,
-Developer Role Rules - Fields,,,AccessRequest,read,,"name,controls,application,productEnvironment,isIssued",,,portal-user,,,allow,
+Developer Role Rules - Fields,,,AccessRequest,read,,"name,controls,application,productEnvironment,isApproved,isIssued",,,portal-user,,,allow,
 Developer Role Rules - Fields,,,ServiceAccess,read,,"consumer,application",,,portal-user,,,allow,
 Content Publisher,,,Content,,create,,,,,Content.Publish,,allow,
 Content Publisher,,,Content,,create,namespace,,,,Content.Publish,,allow,

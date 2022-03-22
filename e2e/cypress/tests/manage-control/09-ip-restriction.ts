@@ -11,7 +11,6 @@ describe('Manage Control-IP Restriction Spec - Service as Scope', () => {
         cy.visit('/')
         cy.deleteAllCookies()
         cy.reload()
-
     })
 
     beforeEach(() => {
@@ -133,7 +132,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Service
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
         consumers.deleteControl()
-        cy.updateKongPlugin('services', 'ip-restriction').then((response) => {
+        cy.updateKongPlugin('services', 'ipRestriction').then((response) => {
             expect(response.status).to.be.equal(201)
         })
     })
@@ -183,7 +182,7 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.visit(consumers.path);
         consumers.clickOnTheFirstConsumerID()
         consumers.deleteControl()
-        cy.updateKongPlugin('routes', 'ip-restriction').then((response) => {
+        cy.updateKongPlugin('routes', 'ipRestriction').then((response) => {
             expect(response.status).to.be.equal(201)
         })
     })
@@ -221,6 +220,3 @@ describe('Manage Control -Apply IP Restriction to Global and Consumer at Route l
         cy.deleteAllCookies()
     })
 })
-
-
-

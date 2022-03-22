@@ -5,7 +5,11 @@ import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
 import { checkElementExists } from '.'
+
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
+
+const jose = require('node-jose')
+
 interface formDataRequestOptions {
   method: string
   url: string
@@ -135,7 +139,7 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string) => {
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
   cy.fixture('state/store').then((creds: any) => {
@@ -145,7 +149,7 @@ Cypress.Commands.add('publishApi', (fileName: string) => {
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
-            url: Cypress.env('GWA_API_URL') + '/namespaces/platform/gateway',
+            url: Cypress.env('GWA_API_URL') + '/namespaces/' + namespace + '/gateway',
           }
           formDataRequest(options, res.body.access_token, fileName, requestName)
           cy.wait(`@${requestName}`).then((res: any) => {
@@ -170,9 +174,10 @@ Cypress.Commands.add('deleteAllCookies', () => {
   }
 })
 
-Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string) => {
+Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   cy.fixture('state/store').then((creds: any) => {
-    const token = creds.apikey
+    let token = key || creds.apikey
+    cy.log("Token->"+token)
     const service = serviceName
     return cy.request({
       url: Cypress.env('KONG_URL'),
@@ -183,22 +188,51 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   })
 })
 
-Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string) => {
+Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName:string, methodType: string) => {  
+    let body = {}
+    var serviceEndPoint = endpoint
+    body = config[requestName]
+    if (requestName=='')
+    {
+      body = {}
+    }
+    return cy.request({
+      url: Cypress.env('KONG_CONFIG_URL') + '/' + serviceEndPoint,
+      method: methodType,
+      body: body,
+      form: true,
+      failOnStatusCode: false
+    })
+})
+
+Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endPoint?: string, verb = 'POST') => {
   cy.fixture('state/store').then((creds: any) => {
     let body = {}
     const pluginID = pluginName.toLowerCase() + 'id'
     const id = creds[pluginID]
-    const endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    let endpoint 
+    if (pluginName=='')
+      endpoint = 'plugins'
+    else
+      endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
+    endpoint = (typeof endPoint !== 'undefined') ?  endPoint : endpoint
     body = config[name]
+    cy.log("Body->"+body)
     return cy.request({
       url: Cypress.env('KONG_CONFIG_URL') + '/' + endpoint,
-      method: 'POST',
+      method: verb,
       body: body,
       form: true,
       failOnStatusCode: false
     })
   })
 })
+
+Cypress.Commands.add("generateKeystore", async () => {
+  let keyStore = jose.JWK.createKeyStore()
+  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
+  return JSON.stringify(keyStore.toJSON(true), null, '  ') 
+});
 
 const formDataRequest = (
   options: formDataRequestOptions,

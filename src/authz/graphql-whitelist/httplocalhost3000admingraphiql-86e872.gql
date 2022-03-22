@@ -1,0 +1,6 @@
+
+  mutation genCredential($id: ID!) {
+    updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+      credential
+    }
+  }

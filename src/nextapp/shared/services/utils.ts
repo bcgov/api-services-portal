@@ -35,3 +35,9 @@ export const getAuthToken = (method: string): IconType => {
       return FaLockOpen;
   }
 };
+
+export const delay = async (timeout = 100): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+};

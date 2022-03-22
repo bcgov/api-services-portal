@@ -12,8 +12,7 @@ const useNamespaceBreadcrumbs = (
 
   if (user) {
     return [
-      { href: '/manager/namespaces', text: 'Namespaces' },
-      { href: '/manager/namespaces', text: user.namespace },
+      { href: '/manager/namespaces', text: `Namespaces (${user.namespace})` },
       ...appendedBreadcrumbs,
     ];
   }
