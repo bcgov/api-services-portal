@@ -14,9 +14,6 @@ import {
 import { toast } from '@chakra-ui/react';
 
 import Controls from '../controls';
-import { keystone } from '../../../../mocks/handlers';
-import { server } from '../../../../mocks/server';
-import { harleyAccessRequest } from '../../../../mocks/resolvers/consumers';
 import wrapper from '../../../test/wrapper';
 
 describe('access-request/controls', () => {
@@ -140,6 +137,131 @@ describe('access-request/controls', () => {
       expect(screen.getByTestId('ip-restriction-service-dropdown')).toHaveValue(
         '1231'
       );
+    });
+  });
+
+  describe('Rate Limiting', () => {
+    it('should set a rate limit', async () => {
+      const result1 = {
+        name: 'rate-limiting',
+        protocols: ['http', 'https'],
+        config: {
+          second: '20',
+          minute: '20',
+          hour: '2',
+          day: '1',
+          policy: 'redis',
+          service: '1231',
+        },
+        service: {
+          id: '1231',
+        },
+        tags: [],
+      };
+      const result2 = {
+        name: 'rate-limiting',
+        protocols: ['http', 'https'],
+        config: {
+          second: '30',
+          minute: '10',
+          hour: '6',
+          day: '14',
+          policy: 'local',
+          route: '12',
+        },
+        route: {
+          id: '12',
+        },
+        tags: [],
+      };
+      const spy = jest.fn();
+      const { rerender } = render(
+        <Controls
+          onUpdateRateLimits={spy}
+          onUpdateRestrictions={jest.fn()}
+          rateLimits={[]}
+          restrictions={[]}
+        />,
+        {
+          wrapper,
+        }
+      );
+      fireEvent.click(screen.getByTestId('ratelimit-card'));
+      await waitFor(() => screen.findByTestId('ratelimit-card'));
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('ratelimit-service-dropdown')
+        ).not.toBeDisabled();
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-second-input'), {
+        target: { value: '20' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-minute-input'), {
+        target: { value: '20' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-hour-input'), {
+        target: { value: '2' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-day-input'), {
+        target: { value: '1' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-policy-dropdown'), {
+        target: { value: 'redis' },
+      });
+      fireEvent.click(screen.getByTestId('ratelimit-submit-btn'));
+      rerender(
+        <Controls
+          onUpdateRateLimits={spy}
+          onUpdateRestrictions={jest.fn()}
+          rateLimits={[result1]}
+          restrictions={[]}
+        />
+      );
+      expect(spy).toHaveBeenCalledWith(result1);
+      await waitFor(() => {
+        expect(screen.getByTestId('ratelimit-results')).toHaveTextContent(
+          'service-aps-portal-dev-api'
+        );
+      });
+      expect(screen.getByTestId('ratelimit-second-input')).toHaveValue(null);
+      expect(screen.getByTestId('ratelimit-minute-input')).toHaveValue(null);
+      expect(screen.getByTestId('ratelimit-hour-input')).toHaveValue(null);
+      expect(screen.getByTestId('ratelimit-day-input')).toHaveValue(null);
+      expect(screen.getByTestId('ratelimit-policy-dropdown')).toHaveValue(
+        'local'
+      );
+      // Form has been reset, add another
+      fireEvent.click(screen.getByTestId('ratelimit-route-radio'));
+      expect(screen.getByTestId('ratelimit-service-dropdown')).toHaveValue(
+        '12'
+      );
+      fireEvent.change(screen.getByTestId('ratelimit-second-input'), {
+        target: { value: '30' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-minute-input'), {
+        target: { value: '10' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-hour-input'), {
+        target: { value: '6' },
+      });
+      fireEvent.change(screen.getByTestId('ratelimit-day-input'), {
+        target: { value: '14' },
+      });
+      fireEvent.click(screen.getByTestId('ratelimit-submit-btn'));
+      rerender(
+        <Controls
+          onUpdateRateLimits={spy}
+          onUpdateRestrictions={jest.fn()}
+          rateLimits={[result1, result2]}
+          restrictions={[]}
+        />
+      );
+      expect(spy).toHaveBeenLastCalledWith(result2);
+      await waitFor(() => {
+        expect(screen.getByTestId('ratelimit-results')).toHaveTextContent(
+          'service-aps-portal-dev-apiroute-aps-portal-dev-api'
+        );
+      });
     });
   });
 });

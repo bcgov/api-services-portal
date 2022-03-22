@@ -1,8 +1,4 @@
-jest.mock('../../shared/config', () => ({
-  apiHost: 'http://localhost:4000',
-  grafanaUrl: 'http://grafana.url',
-  apiInternalHost: 'http://localhost:3000',
-}));
+jest.mock('@/shared/config');
 import {
   fireEvent,
   render,
@@ -12,14 +8,11 @@ import {
 } from '@testing-library/react';
 import ConsumersPage from '@/pages/manager/consumers';
 import { toast } from '@chakra-ui/react';
-import { PortalManager } from '@chakra-ui/portal';
 
 import { keystone } from '../../../mocks/handlers';
 import { server } from '../../../mocks/server';
 import wrapper from '../../test/wrapper';
-
-const renderWithPortal = (ui: React.ReactElement) =>
-  render(<PortalManager>{ui}</PortalManager>, { wrapper });
+import { renderWithPortal } from '../../test/utils';
 
 describe('managers/consumers', () => {
   beforeEach(async () => {
@@ -213,31 +206,6 @@ describe('managers/consumers', () => {
       expect(screen.getByText('new-consumer')).toBeInTheDocument();
     });
 
-    it('should load business address', async () => {
-      jest.setTimeout(timeout);
-      const page = renderWithPortal(<ConsumersPage queryKey="acceptRequest" />);
-      await waitFor(() => screen.findByTestId('access-request-banner-123'));
-      fireEvent.click(page.getByTestId('ar-review-btn'));
-      const address = await page.findByTestId('ar-business-address');
-      expect(address).toHaveTextContent(
-        'Easy Drug Mart - 51, W Broadway, Vancouver BC, V8T 1E7 Canada'
-      );
-    });
-
-    it('should toggle detail tabs', async () => {
-      jest.setTimeout(timeout);
-      const page = renderWithPortal(<ConsumersPage queryKey="acceptRequest" />);
-      await waitFor(() => screen.findByTestId('access-request-banner-123'));
-      fireEvent.click(page.getByTestId('ar-review-btn'));
-      const tabs = page.getByTestId('ar-tabs');
-      fireEvent.click(tabs.querySelector('button:nth-child(1)'));
-      expect(screen.getByTestId('ar-controls-tab')).toBeInTheDocument();
-      fireEvent.click(tabs.querySelector('button:nth-child(2)'));
-      expect(screen.getByTestId('ar-authorization-tab')).toBeInTheDocument();
-      fireEvent.click(tabs.querySelector('button:first-child'));
-      expect(screen.getByTestId('ar-request-details-tab')).toBeInTheDocument();
-    });
-
     it('should alert the user if they have not entered ip restrictions', async () => {
       jest.setTimeout(timeout);
       const page = renderWithPortal(<ConsumersPage queryKey="acceptRequest" />);
@@ -369,7 +337,6 @@ describe('managers/consumers', () => {
       fireEvent.change(page.getByTestId('ratelimit-day-input'), {
         target: { value: '1' },
       });
-      fireEvent.blur(page.getByTestId('allow-ip-restriction-input-input'));
       fireEvent.click(page.getByTestId('ratelimit-submit-btn'));
       await waitFor(() => {
         expect(page.getByTestId('ratelimit-results')).toHaveTextContent(

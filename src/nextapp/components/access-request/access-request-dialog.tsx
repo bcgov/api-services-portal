@@ -52,11 +52,12 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     onMutate: async () => {
       await client.cancelQueries('todos');
       const prevAccessRequests = client.getQueryData(queryKey);
-      client.setQueryData(queryKey, (cached: Query) => ({
+      client.setQueryData(queryKey, (cached: Query = {}) => ({
         ...cached,
-        allAccessRequestsByNamespace: cached.allAccessRequestsByNamespace.filter(
-          (d) => d.id !== data.id
-        ),
+        allAccessRequestsByNamespace:
+          cached.allAccessRequestsByNamespace?.filter(
+            (d) => d.id !== data.id
+          ) ?? [],
       }));
       return { prevAccessRequests };
     },
@@ -143,7 +144,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
+        <ModalHeader data-testid="ar-modal-header">
           {title}
           <Tabs
             index={tabIndex}

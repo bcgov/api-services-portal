@@ -1,4 +1,4 @@
-export type IpRestrictionPayload = {
+export interface IpRestrictionPayload {
   name: string;
   route?: {
     id: string;
@@ -10,17 +10,25 @@ export type IpRestrictionPayload = {
     allow: string[];
   };
   tags: string[];
-};
+}
 
-export type RateLimitingConfig = {
+export interface RateLimitingConfig {
   second: FormDataEntryValue;
   minute: FormDataEntryValue;
   hour: FormDataEntryValue;
   day: FormDataEntryValue;
   policy: FormDataEntryValue;
-};
+  service?: FormDataEntryValue;
+  route?: FormDataEntryValue;
+}
 
-export type RateLimitingPayload = {
+// The form has more values in it
+export interface RateLimitingForm extends RateLimitingConfig {
+  scope?: string;
+  route?: string;
+  service?: string;
+}
+export interface RateLimitingPayload {
   name: string;
   protocols: string[];
   route?: {
@@ -31,4 +39,4 @@ export type RateLimitingPayload = {
   };
   config: RateLimitingConfig;
   tags: string[];
-};
+}

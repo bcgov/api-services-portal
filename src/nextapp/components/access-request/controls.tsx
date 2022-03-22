@@ -30,6 +30,7 @@ import { useApi } from '@/shared/services/api';
 import type {
   IpRestrictionPayload,
   RateLimitingConfig,
+  RateLimitingForm,
   RateLimitingPayload,
 } from './types';
 import TagInput from '../tag-input';
@@ -113,13 +114,30 @@ const Controls: React.FC<ControlsProps> = ({
     event.preventDefault();
     if (event.currentTarget.checkValidity()) {
       const formData = new FormData(event.currentTarget);
-      const entries = Object.fromEntries(formData) as RateLimitingConfig;
+      const entries = Object.fromEntries(formData) as any;
       const payload: RateLimitingPayload = {
         name: 'rate-limiting',
         protocols: ['http', 'https'],
-        config: entries,
+        config: {
+          second: entries.second,
+          minute: entries.minute,
+          hour: entries.hour,
+          day: entries.day,
+          policy: entries.policy,
+          service: entries.service,
+          route: entries.route,
+        },
         tags: [],
       };
+      if (entries.scope === 'route') {
+        payload.route = {
+          id: entries.route,
+        };
+      } else {
+        payload.service = {
+          id: entries.service,
+        };
+      }
       onUpdateRateLimits(payload);
       event.currentTarget.reset();
     }
