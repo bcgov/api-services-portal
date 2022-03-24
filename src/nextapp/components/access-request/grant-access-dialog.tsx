@@ -25,14 +25,14 @@ import { gql } from 'graphql-request';
 import RequestControls from './controls';
 import RequestAuthorization from './authorization';
 import { useApi, useApiMutation } from '@/shared/services/api';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useAuth } from '@/shared/services/auth';
 
 interface GrantAccessDialogProps {
   consumer: any;
   isOpen: boolean;
   onClose: () => void;
-  queryKey: string[];
+  queryKey: QueryKey;
 }
 
 const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
@@ -47,6 +47,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const [restrictions, setRestrictions] = React.useState([]);
   const [rateLimits, setRateLimits] = React.useState([]);
   const [product, setProduct] = React.useState(null);
+  const environmentRef = React.useRef<HTMLSelectElement>(null);
   const { data, isLoading, isSuccess } = useApi(
     'GetConsumerProductsAndEnvironments',
     {
@@ -73,21 +74,23 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
-  const handleProductChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setProduct(event.target.value);
-    },
-    []
-  );
-  const handleGrant = React.useCallback(async () => {
+  const handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setProduct(event.target.value);
+  };
+  const handleGrant = async () => {
     try {
+      const prodEnvId = environmentRef.current?.value;
+      if (!prodEnvId || !product) {
+        throw 'Missing values product and/or environment';
+      }
       await grantMutate.mutateAsync({
-        prodEnvId: '123',
-        consumerId: '123123',
-        group: '123',
+        prodEnvId,
+        consumerId: consumer.id,
+        group: product,
         grant: true,
       });
       onClose();
+      setProduct(null);
       toast({
         title: 'Access granted',
         status: 'success',
@@ -95,12 +98,14 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
     } catch (err) {
       toast({
         title: 'Access grant failed',
+        description: err,
         status: 'error',
       });
     }
-  }, [grantMutate, onClose, toast]);
+  };
   const handleClose = React.useCallback(() => {
     setTabIndex(0);
+    setProduct(null);
     onClose();
   }, [onClose]);
 
@@ -124,6 +129,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
                   isDisabled={isLoading}
                   placeholder="Select Product"
                   onChange={handleProductChange}
+                  data-testid="ar-product-select"
                 >
                   {isSuccess &&
                     data?.allProductsByNamespace.map((p) => (
@@ -136,8 +142,13 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
             </GridItem>
             <GridItem>
               <FormControl>
-                <FormLabel>Environment</FormLabel>
-                <Select isDisabled={!product} placeholder="Select Environment">
+                <FormLabel>Environment {product}</FormLabel>
+                <Select
+                  isDisabled={!product}
+                  placeholder="Select Environment"
+                  ref={environmentRef}
+                  data-testid="ar-environment-select"
+                >
                   {product &&
                     data?.allProductsByNamespace
                       .find((p) => p.id === product)
@@ -170,6 +181,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
         {consumer && (
           <ModalBody>
             <Box
+              data-testid="ar-controls-tab"
               hidden={tabIndex !== 0}
               display={tabIndex === 0 ? 'block' : 'none'}
             >
@@ -181,6 +193,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               />
             </Box>
             <Box
+              data-testid="ar-authorization-tab"
               hidden={tabIndex !== 1}
               display={tabIndex === 1 ? 'block' : 'none'}
             >
