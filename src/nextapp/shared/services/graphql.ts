@@ -12,8 +12,6 @@ const graphql = function (query, variables = {}) {
   })
     .then((x) => x.json())
     .then((json) => {
-      console.log(query);
-      console.log(JSON.stringify(json, null, 4));
       if ('errors' in json) {
         const err = json['errors'][0];
         if ('data' in err) {
