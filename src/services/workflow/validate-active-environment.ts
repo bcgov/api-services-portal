@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { getIssuerEnvironmentConfig } from './types';
+import { getIssuerEnvironmentConfig, KeystoneContext } from './types';
 import {
   lookupCredentialIssuerById,
   lookupProductEnvironmentServices,
@@ -12,6 +12,9 @@ import {
   GatewayPlugin,
   GatewayService,
 } from '../keystone/types';
+import { getGwaProductEnvironment } from '.';
+import { Keystone } from '@keystonejs/keystone';
+import { KeycloakGroupService } from '../keycloak';
 
 const logger = Logger('wf.ValidateActiveEnv');
 
@@ -35,6 +38,23 @@ export const ValidateActiveEnvironment = async (
         existingItem == null
           ? ({} as Environment)
           : await lookupProductEnvironmentServices(context, existingItem.id);
+
+      logger.warn('[dataset] %j', envServices.product.dataset);
+      const envDataset = envServices.product.dataset;
+      const nsOrgDetails = await getNamespaceOrganizationDetails(
+        context,
+        envServices.product.namespace
+      );
+      if (
+        nsOrgDetails &&
+        nsOrgDetails.org === envDataset?.organization?.name &&
+        nsOrgDetails.orgUnit === envDataset?.organizationUnit?.name
+      ) {
+      } else {
+        addValidationError(
+          `[dataset] Namespace and Dataset must belong to the same Organization Unit (ns:${nsOrgDetails.orgUnit}, dataset:${envDataset?.organizationUnit?.name})`
+        );
+      }
 
       const issuer =
         'credentialIssuer' in resolvedData
@@ -209,4 +229,23 @@ export function isServiceMissingAllPluginsHandler(
       );
     }
   };
+}
+
+async function getNamespaceOrganizationDetails(ctx: Keystone, ns: string) {
+  const prodEnv = await getGwaProductEnvironment(ctx, false);
+  const envConfig = prodEnv.issuerEnvConfig;
+
+  const svc = new KeycloakGroupService(envConfig.issuerUrl);
+  await svc.login(envConfig.clientId, envConfig.clientSecret);
+
+  const nsGroup = await svc.findByName('ns', ns, false);
+
+  if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+    return {
+      org: nsGroup.attributes['org'].pop(),
+      orgUnit: nsGroup.attributes['org-unit'].pop(),
+    };
+  } else {
+    return undefined;
+  }
 }

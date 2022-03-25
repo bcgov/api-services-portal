@@ -1,10 +1,12 @@
 import {
   parseJsonString,
+  parseBlobString,
   transformAllRefID,
   removeEmpty,
   removeKeys,
   dot,
 } from '../../../batch/feed-worker';
+import YAML from 'js-yaml';
 
 describe('Batch Utilities', function () {
   it('should get correct json result', async function () {
@@ -18,6 +20,42 @@ describe('Batch Utilities', function () {
     };
 
     const result = parseJsonString(input, ['tags']);
+
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
+  });
+
+  it('should get correct json blob result', async function () {
+    const input = {
+      name: 'sample name',
+      blob: {
+        type: 'json',
+        blob: JSON.stringify(['tag1', 'tag2']),
+      },
+    };
+    const output = {
+      name: 'sample name',
+      blob: ['tag1', 'tag2'],
+    };
+
+    const result = parseBlobString(input, ['blob']);
+
+    expect(JSON.stringify(result)).toBe(JSON.stringify(output));
+  });
+
+  it('should get correct yaml blob result', async function () {
+    const input = {
+      name: 'sample name',
+      blob: {
+        type: 'yaml',
+        blob: YAML.dump(['tag1', 'tag2']),
+      },
+    };
+    const output = {
+      name: 'sample name',
+      blob: ['tag1', 'tag2'],
+    };
+
+    const result = parseBlobString(input);
 
     expect(JSON.stringify(result)).toBe(JSON.stringify(output));
   });

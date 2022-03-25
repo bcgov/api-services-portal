@@ -13,7 +13,7 @@ export type DateTime = any;
 
 const refIdList = {};
 
-Object.keys(metadata).forEach((m) => {
+Object.keys(metadata).forEach(function (m) {
   const md = metadata[m];
 
   const relationshipFields = Object.keys(
@@ -24,10 +24,11 @@ Object.keys(metadata).forEach((m) => {
     )
   );
 
-  const objectFields = Object.keys(md.transformations).filter((tranField) =>
-    ['toString', 'toStringDefaultArray'].includes(
-      md.transformations[tranField].name
-    )
+  const objectFields = Object.keys(md.transformations).filter(
+    (tranField) =>
+      ['toString', 'toStringDefaultArray'].includes(
+        md.transformations[tranField].name
+      ) && !Object.keys(md.validations || {}).includes(tranField)
   );
 
   const fields = [];
@@ -43,12 +44,16 @@ Object.keys(metadata).forEach((m) => {
         md.validations && f in md.validations
           ? md.validations[f].type
           : 'string';
-      if (type == 'enum') {
+      if (type === 'enum') {
         fields.push(
           `  ${f}?: ${md.validations[f].values
             .map((v) => `"${v}"`)
             .join(' | ')};`
         );
+      } else if (type === 'entityArray') {
+        fields.push(`  ${f}?: ${md.validations[f].entity}[];`);
+      } else if (type === 'entity') {
+        fields.push(`  ${f}?: ${md.validations[f].entity};`);
       } else {
         fields.push(`  ${f}?: ${type};`);
       }

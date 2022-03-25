@@ -23,6 +23,15 @@ export async function lookupProductEnvironmentServices(
                         approval
                         product {
                             namespace
+                            dataset {
+                              id
+                              organization {
+                                name
+                              }
+                              organizationUnit {
+                                name
+                              }
+                            }
                         }
                         credentialIssuer {
                             id

@@ -3,7 +3,7 @@ Wire up directly with Keycloak and use the Services
 To run:
 npm run ts-build
 npm run ts-watch
-node dist/test/integrated/keystonejs/activity.js
+node dist/test/integrated/keystonejs/user.js
 */
 
 import InitKeystone from './init';
@@ -16,6 +16,7 @@ import {
   removeKeys,
   syncRecords,
   parseBlobString,
+  getRecord,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
 import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
@@ -46,27 +47,9 @@ import {
     authentication: { item: identity },
   });
 
-  if (false) {
-    const r = await recordActivityWithBlob(
-      ctx,
-      'delete',
-      'Namespace',
-      'orgcontrol',
-      'Deleted orgcontrol namespace',
-      'success',
-      undefined,
-      { name: 'Joe' }
-    );
-  }
+  const record = await getRecord(ctx, 'User', 'acope@idir');
 
-  const records = await getActivity(ctx, ['orgcontrol'], 1);
-
-  o(
-    records
-      .map((o) => removeEmpty(o))
-      // .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseBlobString(o))
-  );
+  o([record].map((o) => removeEmpty(o)));
 
   await keystone.disconnect();
 })();

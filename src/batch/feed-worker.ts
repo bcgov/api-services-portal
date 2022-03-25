@@ -11,7 +11,7 @@ import {
   toString,
 } from './transformations';
 import { handleNameChange } from './hooks';
-
+import YAML from 'js-yaml';
 import { BatchResult } from './types';
 import {
   BatchService,
@@ -501,11 +501,40 @@ export const parseJsonString = (obj: any, keys: string[]) => {
   return obj;
 };
 
+export const parseBlobString = (obj: any, keys: string[] = ['blob']) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      keys.includes(key) &&
+      (obj[key] =
+        obj['type'] === 'json'
+          ? JSON.parse(Object.values(val).pop())
+          : YAML.load(Object.values(val).pop()))
+  );
+  return obj;
+};
+
 export const transformAllRefID = (obj: any, keys: string[]) => {
   Object.entries(obj).forEach(
     ([key, val]) =>
       (val && keys.includes(key) && (obj[key] = Object.values(val).pop())) ||
       (val && typeof val === 'object' && transformAllRefID(val, keys))
+  );
+  return obj;
+};
+
+export const transformArrayKeyToString = (
+  obj: any,
+  arrayKey: string,
+  childKey: string
+) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val &&
+        arrayKey === key &&
+        (obj[key] = (val as any).map((v: any) => v[childKey]))) ||
+      (val &&
+        typeof val === 'object' &&
+        transformArrayKeyToString(val, arrayKey, childKey))
   );
   return obj;
 };

@@ -36,6 +36,7 @@ export async function recordActivityWithBlob(
                   blob: {
                     create: {
                       ref: $blobRef,
+                      type: "json",
                       blob: $blob
                     }
                   }
@@ -158,6 +159,7 @@ export async function getActivity(
                   name
                 }
                 blob {
+                  type
                   blob
                 }
                 createdAt

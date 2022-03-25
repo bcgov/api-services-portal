@@ -52,6 +52,7 @@ const metadata = {
       'organization',
       'organizationUnit',
       'isInCatalog',
+      'isInDraft',
       'tags',
       'contacts',
       'resources',
@@ -74,6 +75,7 @@ const metadata = {
         refKey: 'extForeignKey',
       },
       isInCatalog: { name: 'alwaysTrue' },
+      isInDraft: { name: 'alwaysFalse' },
     },
   },
   DraftDataset: {
@@ -92,6 +94,9 @@ const metadata = {
       'organization',
       'organizationUnit',
       'isInCatalog',
+      'isInDraft',
+      'contacts',
+      'resources',
       'tags',
     ],
     transformations: {
@@ -107,6 +112,61 @@ const metadata = {
         refKey: 'name',
       },
       isInCatalog: { name: 'alwaysFalse' },
+    },
+    validation: {
+      /* Ref: https://github.com/bcgov/ckanext-bcgov/blob/main/ckanext/bcgov/scripts/data/edc-vocabs.json */
+      /* db.datasets.aggregate({ $group : { _id: "$view_audience", count: { $sum: 1 } } }) */
+      security_class: {
+        type: 'enum',
+        values: [
+          'HIGH-CABINET',
+          'HIGH-CONFIDENTIAL',
+          'HIGH-SENSITIVITY',
+          'MEDIUM-SENSITIVITY',
+          'MEDIUM-PERSONAL',
+          'LOW-SENSITIVITY',
+          'LOW-PUBLIC',
+          'PUBLIC',
+          'PROTECTED A',
+          'PROTECTED B',
+          'PROTECTED C',
+        ],
+      },
+      view_audience: {
+        type: 'enum',
+        values: [
+          'Public',
+          'Government',
+          'Named users',
+          'Government and Business BCeID',
+        ],
+      },
+      download_audience: {
+        type: 'enum',
+        values: [
+          'Public',
+          'Government',
+          'Named users',
+          'Government and Business BCeID',
+        ],
+      },
+      isInCatalog: { type: 'boolean' },
+      isInDraft: { type: 'boolean' },
+      // contacts : TBD
+      // resources: TBD
+    },
+    example: {
+      name: 'my_sample_dataset',
+      license_title: 'Open Government Licence - British Columbia',
+      security_class: 'PUBLIC',
+      view_audience: 'Public',
+      download_audience: 'Public',
+      record_publish_date: '2017-09-05',
+      notes: 'Some notes',
+      title: 'A title about my dataset',
+      tags: ['tag1', 'tag2'],
+      organization: 'ministry-of-citizens-services',
+      organizationUnit: 'databc',
     },
   },
   Metric: {
@@ -355,7 +415,10 @@ const metadata = {
     validations: {
       active: { type: 'boolean' },
       approval: { type: 'boolean' },
-      name: { type: 'enum', values: ['dev', 'test', 'prod', 'other'] },
+      name: {
+        type: 'enum',
+        values: ['dev', 'test', 'prod', 'sandbox', 'other'],
+      },
       flow: {
         type: 'enum',
         values: [
@@ -416,6 +479,10 @@ const metadata = {
         type: 'enum',
         values: ['client-secret', 'client-jwt', 'client-jwt-jwks-url'],
       },
+      environmentDetails: {
+        type: 'entityArray',
+        entity: 'IssuerEnvironmentConfig',
+      },
     },
     example: {
       name: 'my-auth-profile',
@@ -425,6 +492,38 @@ const metadata = {
       mode: 'auto',
       environmentDetails: [],
       owner: 'acope@idir',
+    },
+  },
+  IssuerEnvironmentConfig: {
+    transient: true,
+    refKey: 'environment',
+    transformations: {},
+    sync: [
+      'exists',
+      'environment',
+      'issuerUrl',
+      'clientRegistration',
+      'clientId',
+      'clientSecret',
+      'initialAccessToken',
+    ],
+    validations: {
+      exists: { type: 'boolean' },
+      environment: {
+        type: 'enum',
+        values: ['dev', 'test', 'prod', 'sandbox', 'other'],
+      },
+      clientRegistration: {
+        type: 'enum',
+        values: ['anonymous', 'managed', 'iat'],
+      },
+    },
+    example: {
+      environment: 'dev',
+      issuerUrl: 'https://idp.site/auth/realms/my-realm',
+      clientRegistration: 'managed',
+      clientId: 'a-client-id',
+      clientSecret: 'a-client-secret',
     },
   },
   Content: {
@@ -478,6 +577,7 @@ const metadata = {
       'order',
       'isPublic',
       'isComplete',
+      'namespace',
       'tags',
       'publishDate',
     ],
@@ -549,13 +649,24 @@ const metadata = {
   User: {
     query: 'allUsers',
     refKey: 'username',
-    sync: ['name', 'username', 'email'],
+    sync: ['name', 'username', 'email', 'legalsAgreed'],
+    transformations: {
+      legalsAgreed: { name: 'toStringDefaultArray' },
+    },
+    validations: {
+      legalsAgreed: { type: 'entityArray', entity: 'UserLegalsAgreed' },
+    },
+  },
+  UserLegalsAgreed: {
+    transient: true,
+    refKey: 'reference',
     transformations: {},
+    sync: ['reference', 'agreedTimestamp'],
   },
   Blob: {
     query: 'allBlobs',
     refKey: 'ref',
-    sync: ['ref', 'blob'],
+    sync: ['ref', 'type', 'blob'],
     transformations: {},
   },
 };

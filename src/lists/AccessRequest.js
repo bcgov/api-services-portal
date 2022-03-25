@@ -33,20 +33,20 @@ module.exports = {
     },
     isApproved: {
       type: Checkbox,
-      isRequired: false,
-      default: false,
+      isRequired: true,
+      defaultValue: false,
       access: FieldEnforcementPoint,
     },
     isIssued: {
       type: Checkbox,
-      isRequired: false,
-      default: false,
+      isRequired: true,
+      defaultValue: false,
       access: FieldEnforcementPoint,
     },
     isComplete: {
       type: Checkbox,
-      isRequired: false,
-      default: false,
+      isRequired: true,
+      defaultValue: false,
     },
     credential: {
       type: Text,

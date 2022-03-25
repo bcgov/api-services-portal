@@ -33,12 +33,12 @@ module.exports = {
     active: {
       type: Checkbox,
       isRequired: true,
-      default: false,
+      defaultValue: false,
     },
     aclEnabled: {
       type: Checkbox,
       isRequired: true,
-      default: false,
+      defaultValue: false,
     },
     consumerType: {
       type: Select,

@@ -1,0 +1,4 @@
+
+  mutation DeleteNamespace($name: String!, $force: Boolean!) {
+    forceDeleteNamespace(namespace: $name, force: $force)
+  }

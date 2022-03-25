@@ -6,6 +6,7 @@ import {
   lookupCredentialReferenceByServiceAccess,
   lookupCredentialIssuerById,
   lookupServiceAccessesByEnvironment,
+  lookupServiceAccessesForNamespace,
   lookupProduct,
   lookupServicesByNamespace,
   recordActivityWithBlob,
@@ -24,6 +25,7 @@ import { Environment } from '../keystone/types';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { FieldErrors } from 'tsoa';
 import { updateActivity } from '../keystone/activity';
+import { CascadeDeleteEnvironment } from './delete-environment';
 
 const logger = Logger('wf.DeleteNamespace');
 
@@ -41,6 +43,11 @@ export const DeleteNamespaceValidate = async (
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, ids);
 
+  const serviceAccountAccessList = await lookupServiceAccessesForNamespace(
+    context,
+    ns
+  );
+
   const messages = [];
   if (accessList.length > 0) {
     messages.push(
@@ -54,6 +61,15 @@ export const DeleteNamespaceValidate = async (
       `${gwServices.length} ${
         gwServices.length == 1 ? 'service has' : 'services have'
       } been configured in this namespace.`
+    );
+  }
+  if (serviceAccountAccessList.length > 0) {
+    messages.push(
+      `${serviceAccountAccessList.length} ${
+        serviceAccountAccessList.length == 1
+          ? 'service account exists'
+          : 'service accounts exist'
+      } in this namespace.`
     );
   }
 
@@ -75,6 +91,10 @@ export const DeleteNamespaceRecordActivity = async (
   const ids = envs.map((e: Environment) => e.id);
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, ids);
+  const serviceAccountAccessList = await lookupServiceAccessesForNamespace(
+    context,
+    ns
+  );
 
   const r = await recordActivityWithBlob(
     context.sudo(),
@@ -84,13 +104,18 @@ export const DeleteNamespaceRecordActivity = async (
     `Deleted ${ns} namespace`,
     'pending',
     undefined,
-    { access: accessList }
+    { access: accessList, serviceAccounts: serviceAccountAccessList }
   );
   return r;
 };
 
 export const DeleteNamespace = async (context: any, ns: string) => {
   logger.debug('Deleting Namespace ns=%s', ns);
+  assert.strictEqual(
+    typeof ns === 'string' && ns.length > 0,
+    true,
+    'Invalid namespace'
+  );
 
   const gwServices = await lookupServicesByNamespace(context, ns);
 
@@ -107,26 +132,14 @@ export const DeleteNamespace = async (context: any, ns: string) => {
   const activity = await DeleteNamespaceRecordActivity(context, ns);
 
   for (const envId of ids) {
-    await deleteRecords(
-      context,
-      'ServiceAccess',
-      { productEnvironment: { id: envId } },
-      true,
-      ['id']
-    );
-
-    await deleteRecords(
-      context,
-      'AccessRequest',
-      { productEnvironment: { id: envId } },
-      true,
-      ['id']
-    );
-
-    await deleteRecords(context, 'Environment', { id: envId }, false, ['id']);
+    await CascadeDeleteEnvironment(context, ns, envId);
   }
 
-  await deleteRecords(context, 'Product', { namespace: ns }, false, ['id']);
+  await deleteRecords(context, 'ServiceAccess', { namespace: ns }, true, [
+    'id',
+  ]);
+
+  await deleteRecords(context, 'Product', { namespace: ns }, true, ['id']);
 
   await updateActivity(context.sudo(), activity.id, 'success', undefined);
 };
