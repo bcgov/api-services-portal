@@ -284,6 +284,12 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
+  assert.strictEqual(
+    typeof eid === 'string' && eid.length > 0,
+    true,
+    `Invalid ID for ${feedEntity}`
+  );
+
   const batchService = new BatchService(context);
 
   // pre-lookup hook that can be used to handle special cases,
