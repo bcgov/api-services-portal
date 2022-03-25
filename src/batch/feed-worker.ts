@@ -52,6 +52,10 @@ const transformations = {
 
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
+  // This assumption that "id" must be there is really due to the Feeder
+  // sending payloads from Kong, CKAN, Prometheus
+  // Using V2 of the Discovery API does not require this and the normal 'refKey'
+  // can be used
   const eid = 'id' in req.params ? req.params['id'] : req.body['id'];
   const json = req.body;
 
