@@ -22,22 +22,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isUnauthorized =
     (session.error || !session.user) && route?.access.length > 0;
 
-  console.log(route?.access);
-  console.log(JSON.stringify(session.user));
-
   if (session.status == 'loading') {
     return <></>;
   }
 
-  // A logged in user trying to access a Namespace'd page
-  // and not having the 'provider-user' role, will be unauthorized
+  // A logged in user trying to access a Namespace'd page (page that is not protected with "portal-user" role)
+  // and no namespace set, then redirect to home page
   const isUnauthorizedProvider =
     session.user &&
     route?.access &&
-    route?.access.indexOf('provider-user') != -1 &&
-    session.user.roles.indexOf('api-owner') == -1;
+    route?.access.length > 0 &&
+    route?.access.indexOf('portal-user') == -1 &&
+    !session.user.namespace;
 
-  console.log(isUnauthorizedProvider);
   if (isUnauthorizedProvider) {
     router?.push('/');
     return <></>;
