@@ -52,16 +52,30 @@ const transformations = {
 
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
+  assert.strictEqual(entity in metadata, true);
+
+  const md = metadata[entity];
+  const refKey = md.refKey;
+
   // This assumption that "id" must be there is really due to the Feeder
   // sending payloads from Kong, CKAN, Prometheus
   // Using V2 of the Discovery API does not require this and the normal 'refKey'
   // can be used
-  const eid = 'id' in req.params ? req.params['id'] : req.body['id'];
+  let eid;
+  if ('id' in req.params) {
+    eid = req.params['id'];
+  } else if (refKey in req.body) {
+    eid = req.body[refKey];
+  } else {
+    eid = req.body['id'];
+  }
   const json = req.body;
 
-  assert.strictEqual(entity in metadata, true);
   assert.strictEqual(
-    eid === null || json === null || typeof json == 'undefined',
+    eid === null ||
+      typeof eid == 'undefined' ||
+      json === null ||
+      typeof json == 'undefined',
     false,
     'Either entity or ID are missing ' + eid + json
   );
@@ -69,7 +83,7 @@ export const putFeedWorker = async (context: any, req: any, res: any) => {
   assert.strictEqual(
     typeof eid == 'string',
     true,
-    'Unique ID is not a string! ' +
+    `Unique ID (${eid}) is not a string! ` +
       JSON.stringify(req.params) +
       ' :: ' +
       JSON.stringify(req.body)
@@ -154,9 +168,9 @@ const syncListOfRecords = async function (
   if (records == null || typeof records == 'undefined') {
     return [];
   }
+  const recordKey = 'refKey' in transformInfo ? transformInfo['refKey'] : 'id';
+
   for (const record of records) {
-    const recordKey =
-      'refKey' in transformInfo ? transformInfo['refKey'] : 'id';
     result.push(
       await syncRecords(
         keystone,
@@ -291,7 +305,7 @@ export const syncRecords = async function (
   assert.strictEqual(
     typeof eid === 'string' && eid.length > 0,
     true,
-    `Invalid ID for ${feedEntity}`
+    `Invalid ID for ${feedEntity} ${eid}`
   );
 
   const batchService = new BatchService(context);
@@ -419,7 +433,7 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
-          logger.warn('%j', localRecord);
+          logger.debug('%j', localRecord);
           assert.strictEqual(
             allIds.filter(
               (record) =>
