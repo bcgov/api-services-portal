@@ -17,6 +17,10 @@ class Products {
   envCfgApplyChangesBtn: string = '[data-testid=prd-env-config-apply-btn]'
   catelogueDropDown: string = '[id=downshift-0-input]'
   catelogueDropDownMenu: string = '[id=downshift-0-menu]'
+  deleteProductEnvBtn: string = '[data-testid="prd-env-delete-btn"]'
+  deleteProductBtn: string = '[data-testid="prd-edit-delete-btn"]'
+  deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
+  deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
 
   getTestIdEnvName(env: string) : string {
     switch (env) {
@@ -119,6 +123,19 @@ class Products {
 
   updateProduct() {
     cy.get(this.updateBtn).click()
+  }
+
+  deleteProductEnvironment(productName: string, envName: string){
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    let env = this.getTestIdEnvName(envName);
+    cy.get(`[data-testid=${pname}-${env}-edit-btn]`).siblings(this.deleteProductEnvBtn).click()
+    cy.get(this.deleteConfirmationBtn).click()
+  }
+
+  deleteProduct(productName: string){
+    this.editProduct(productName)
+    cy.get(this.deleteProductBtn).click()
+    cy.get(this.deleteProductConfirmationBtn).click()
   }
 }
 

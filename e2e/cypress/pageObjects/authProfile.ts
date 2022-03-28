@@ -45,7 +45,6 @@ class AuthorizationProfile {
       cy.get(this.authenticationContinueBtn).click()
       cy.get(this.authorizationContinueBtn).click()
       // cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
-      debugger
       if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
 
       // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID

@@ -2,12 +2,10 @@ class NamespaceAccessPage {
 
   userNameInput: string = 'input[name="username"]'
   grantPermission(accessRqst: any) {
-    debugger
     cy.get(this.userNameInput).type(accessRqst.userName);
     let accessRole: Array<string> = accessRqst.accessRole
     accessRole.forEach(function (accessName) {
       cy.contains("Permissions").next().find('ul').find('li').each(($el, index, $list) => {
-
         const textAccessRoleName = $el.text()
         cy.log(textAccessRoleName)
         if (textAccessRoleName === accessName) {
@@ -33,7 +31,6 @@ class NamespaceAccessPage {
 
   revokeAllPermission(user :string)
   {
-    debugger
     cy.contains(user).parents('tr').find('td:nth-child(3)').find('button').click()
   }
   

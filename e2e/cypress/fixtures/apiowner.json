@@ -9,6 +9,9 @@
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
+  "deleteResources": {
+    "namespace": "platform1"
+  },
   "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
   "product": {
     "name": "Auto Test Product",

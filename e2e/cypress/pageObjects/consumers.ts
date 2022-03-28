@@ -53,7 +53,6 @@ export default class ConsumersPage {
   }
 
   turnOnACLSwitch(flag: Boolean) {
-    debugger
     cy.get(this.aclSwitch).find('input').then(($btn) => {
       if ($btn.is(':checked') != flag) {
         cy.wrap($btn).invoke('show')

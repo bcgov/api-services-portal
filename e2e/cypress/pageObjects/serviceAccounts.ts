@@ -4,7 +4,9 @@ class ServiceAccountsPage {
   newServiceAccountBtn: string = '[data-testid=sa-create-second-btn]'
   clientId: string = '[data-testid=sa-new-creds-client-id]'
   clientSecret: string = '[data-testid=sa-new-creds-client-secret]'
-
+  serviceAccountTbl: string = '[data-testid="service-account-table"]'
+  serviceAcctDeleteBtn: string = '[data-testid=service-account-delete-btn]'
+  deleteServiceAcctConfirmationBtn: string = '[data-testid="confirm-delete-service-acct-btn"]'
 
   createServiceAccount(scopes: string[]): void {
     cy.get(this.newServiceAccountBtn).first().click()
@@ -44,6 +46,13 @@ checkServiceAccountNotExist() : void
   selectPermissions(scopes: string[]): void {
     scopes.forEach((scope) => {
       cy.contains(scope).click()
+    })
+  }
+
+  deleteAllServiceAccounts(){
+    cy.get(this.serviceAccountTbl).find('tr').each(($e1, index, $list) => {
+      cy.wrap($e1).eq(index).find(this.serviceAcctDeleteBtn).first().click()
+      cy.get(this.deleteServiceAcctConfirmationBtn).click()
     })
   }
 }

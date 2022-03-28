@@ -33,7 +33,7 @@ describe('Grant Gateway Config Role to Wendy', () => {
     })
   })
 
-  it('Grant "CredentialIssuer.Admin" and "Namespace.View" access to Wendy (access manager)', () => {
+  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.revokePermission(checkPermission.grantPermission.Wendy)
@@ -79,11 +79,10 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     })
   })
 
-  it('Verify that GWA API does not let user to publish the API to Kong gateway', () => {
+  it('Verify that GWA API allows user to publish the API to Kong gateway', () => {
     cy.get('@credential-issuer').then(({ checkPermission }: any) => {
       cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
-          debugger
           expect(JSON.stringify(res.body.message)).to.be.contain('Sync successful.')
           expect(res.statusCode).to.be.equal(200)
         })

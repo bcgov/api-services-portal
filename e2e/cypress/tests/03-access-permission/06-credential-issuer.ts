@@ -79,7 +79,7 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     mp.checkScopeOfProfile("CredentialIssuer.Admin")
   })
 
-  it('Verify that Authorization Profile option is displayed in Namespace page', () => {
+  it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
     cy.visit(ns.path)
     ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
   })

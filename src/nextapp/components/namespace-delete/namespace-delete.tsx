@@ -81,7 +81,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
             <Button ref={cancelRef} onClick={handleCancel}>
               Cancel
             </Button>
-            <Button colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button data-testid="confirm-delete-namespace-btn" colorScheme="red" ml={3} onClick={handleDelete}>
               Yes, Delete
             </Button>
           </AlertDialogFooter>

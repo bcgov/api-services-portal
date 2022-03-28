@@ -55,6 +55,7 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
         onClick={onOpen}
         variant="outline"
         size="sm"
+        data-testid="service-account-delete-btn"
       />
       <AlertDialog
         isCentered
@@ -75,7 +76,7 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button data-testid="confirm-delete-service-acct-btn" colorScheme="red" ml={3} onClick={handleDelete}>
               Yes, Delete
             </Button>
           </AlertDialogFooter>
