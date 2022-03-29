@@ -59,7 +59,11 @@ export const ValidateActiveEnvironment = async (
         context,
         envServices.product.namespace
       );
-      if (
+      if (envServices.product.dataset === null) {
+        addValidationError(
+          `[dataset] The product must be associated with a Dataset before the environment can be active.`
+        );
+      } else if (
         nsOrgDetails &&
         nsOrgDetails.org === envDataset?.organization?.name &&
         nsOrgDetails.orgUnit === envDataset?.organizationUnit?.name
