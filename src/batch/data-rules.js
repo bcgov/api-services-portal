@@ -52,7 +52,7 @@ const metadata = {
       'organization',
       'organizationUnit',
       'isInCatalog',
-      'isInDraft',
+      'isDraft',
       'tags',
       'contacts',
       'resources',
@@ -75,7 +75,7 @@ const metadata = {
         refKey: 'extForeignKey',
       },
       isInCatalog: { name: 'alwaysTrue' },
-      isInDraft: { name: 'alwaysFalse' },
+      isDraft: { name: 'alwaysFalse' },
     },
   },
   DraftDataset: {
@@ -94,7 +94,7 @@ const metadata = {
       'organization',
       'organizationUnit',
       'isInCatalog',
-      'isInDraft',
+      'isDraft',
       'contacts',
       'resources',
       'tags',
@@ -151,7 +151,7 @@ const metadata = {
         ],
       },
       isInCatalog: { type: 'boolean' },
-      isInDraft: { type: 'boolean' },
+      isDraft: { type: 'boolean' },
       // contacts : TBD
       // resources: TBD
     },
