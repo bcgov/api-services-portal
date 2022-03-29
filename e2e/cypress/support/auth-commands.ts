@@ -11,6 +11,7 @@ const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
+let headers : any
 interface formDataRequestOptions {
   method: string
   url: string
@@ -58,7 +59,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
   cy.fixture('apiowner').as('apiowner')
   cy.preserveCookies()
   cy.visit(login.path)
-  cy.get('@apiowner').then(({ user, checkPermission}: any) => {
+  cy.get('@apiowner').then(({ user, checkPermission }: any) => {
     cy.login(user.credentials.username, user.credentials.password)
     cy.log('Logged in!')
     home.useNamespace(checkPermission.namespace)
@@ -254,6 +255,27 @@ Cypress.Commands.add("generateKeystore", async () => {
   await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
   return JSON.stringify(keyStore.toJSON(true), null, '  ')
 });
+
+Cypress.Commands.add('setHeaders', (headerValues: any) => {
+  headers = headerValues
+})
+
+Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) => {
+  let body = {}
+  // var serviceEndPoint = endpoint
+  // body = config[requestName]
+  // if (requestName == '') {
+  //   body = {}
+  // }
+  return cy.request({
+    url: Cypress.env('BASE_URL') + '/' + endPoint,
+    method: methodType,
+    body: body,
+    form: true,
+    headers:headers,
+    failOnStatusCode: false
+  })
+})
 
 const formDataRequest = (
   options: formDataRequestOptions,
