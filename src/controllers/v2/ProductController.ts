@@ -24,6 +24,7 @@ import {
   transformAllRefID,
   deleteRecord,
   getRecord,
+  transformArrayKeyToString,
 } from '../../batch/feed-worker';
 import { Product } from './types';
 import { BatchResult } from '../../batch/types';
@@ -98,13 +99,9 @@ export class ProductController extends Controller {
     return records
       .map((o) => removeEmpty(o))
       .map((o) =>
-        transformAllRefID(o, [
-          'credentialIssuer',
-          'dataset',
-          'services',
-          'legal',
-        ])
+        transformAllRefID(o, ['credentialIssuer', 'dataset', 'legal'])
       )
+      .map((o) => transformArrayKeyToString(o, 'services', 'name'))
       .map((o) =>
         removeKeys(o, [
           'id',

@@ -48,9 +48,15 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
           : 'Environment Disabled',
         status: res.updateEnvironment.active ? 'success' : 'warning',
       });
-    } catch {
+    } catch (err) {
       toast({
         title: 'Action Failed',
+        description: err
+          .map((e) =>
+            e.data?.messages ? e.data.messages.join(',') : e.message
+          )
+          .join(', '),
+
         status: 'error',
       });
     }

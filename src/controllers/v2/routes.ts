@@ -5,6 +5,10 @@ import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, H
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ContentController } from './ContentController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrgDatasetController } from './OrgDatasetController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { DatasetController } from './DatasetController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DirectoryController } from './DirectoryController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DocumentationController } from './DocumentationController';
@@ -18,8 +22,6 @@ import { IssuerController } from './IssuerController';
 import { NamespaceController } from './NamespaceController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrganizationController } from './OrganizationController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { OrgDatasetController } from './OrgDatasetController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductController } from './ProductController';
 import { expressAuthentication } from './../../auth/auth-tsoa';
@@ -61,6 +63,63 @@ const models: TsoaRoute.Models = {
             "publishDate": {"dataType":"string"},
             "slug": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrganizationRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrganizationUnitRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Dataset": {
+        "dataType": "refObject",
+        "properties": {
+            "extForeignKey": {"dataType":"string"},
+            "name": {"dataType":"string"},
+            "license_title": {"dataType":"string"},
+            "security_class": {"dataType":"string"},
+            "view_audience": {"dataType":"string"},
+            "download_audience": {"dataType":"string"},
+            "record_publish_date": {"dataType":"string"},
+            "notes": {"dataType":"string"},
+            "title": {"dataType":"string"},
+            "isInCatalog": {"dataType":"string"},
+            "isInDraft": {"dataType":"string"},
+            "contacts": {"dataType":"string"},
+            "extSource": {"dataType":"string"},
+            "extRecordHash": {"dataType":"string"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "resources": {"dataType":"any"},
+            "organization": {"ref":"OrganizationRefID"},
+            "organizationUnit": {"ref":"OrganizationUnitRefID"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DraftDataset": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "license_title": {"dataType":"string"},
+            "security_class": {"dataType":"string"},
+            "view_audience": {"dataType":"string"},
+            "download_audience": {"dataType":"string"},
+            "record_publish_date": {"dataType":"string"},
+            "notes": {"dataType":"string"},
+            "title": {"dataType":"string"},
+            "isInCatalog": {"dataType":"string"},
+            "isInDraft": {"dataType":"string"},
+            "contacts": {"dataType":"string"},
+            "resources": {"dataType":"string"},
+            "tags": {"dataType":"array","array":{"dataType":"string"}},
+            "organization": {"ref":"OrganizationRefID"},
+            "organizationUnit": {"ref":"OrganizationUnitRefID"},
         },
         "additionalProperties": false,
     },
@@ -108,6 +167,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IssuerEnvironmentConfig": {
+        "dataType": "refObject",
+        "properties": {
+            "environment": {"dataType":"string"},
+            "exists": {"dataType":"boolean"},
+            "issuerUrl": {"dataType":"string"},
+            "clientRegistration": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anonymous"]},{"dataType":"enum","enums":["managed"]},{"dataType":"enum","enums":["iat"]}]},
+            "clientId": {"dataType":"string"},
+            "clientSecret": {"dataType":"string"},
+            "initialAccessToken": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -124,6 +197,7 @@ const models: TsoaRoute.Models = {
             "authPlugin": {"dataType":"string"},
             "clientAuthenticator": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["client-secret"]},{"dataType":"enum","enums":["client-jwt"]},{"dataType":"enum","enums":["client-jwt-jwks-url"]}]},
             "instruction": {"dataType":"string"},
+            "environmentDetails": {"dataType":"array","array":{"dataType":"refObject","ref":"IssuerEnvironmentConfig"}},
             "resourceType": {"dataType":"string"},
             "resourceAccessScope": {"dataType":"string"},
             "apiKeyName": {"dataType":"string"},
@@ -131,7 +205,6 @@ const models: TsoaRoute.Models = {
             "resourceScopes": {"dataType":"array","array":{"dataType":"string"}},
             "clientRoles": {"dataType":"array","array":{"dataType":"string"}},
             "clientMappers": {"dataType":"array","array":{"dataType":"string"}},
-            "environmentDetails": {"dataType":"any"},
             "owner": {"ref":"UserRefID"},
         },
         "additionalProperties": false,
@@ -244,40 +317,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "OrganizationRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "OrganizationUnitRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Dataset": {
-        "dataType": "refObject",
-        "properties": {
-            "extForeignKey": {"dataType":"string"},
-            "name": {"dataType":"string"},
-            "license_title": {"dataType":"string"},
-            "security_class": {"dataType":"string"},
-            "view_audience": {"dataType":"string"},
-            "download_audience": {"dataType":"string"},
-            "record_publish_date": {"dataType":"string"},
-            "notes": {"dataType":"string"},
-            "title": {"dataType":"string"},
-            "isInCatalog": {"dataType":"string"},
-            "contacts": {"dataType":"string"},
-            "extSource": {"dataType":"string"},
-            "extRecordHash": {"dataType":"string"},
-            "tags": {"dataType":"array","array":{"dataType":"string"}},
-            "resources": {"dataType":"any"},
-            "organization": {"ref":"OrganizationRefID"},
-            "organizationUnit": {"ref":"OrganizationUnitRefID"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DraftDatasetRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -297,7 +336,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "appId": {"dataType":"string"},
-            "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["other"]}]},
+            "name": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dev"]},{"dataType":"enum","enums":["test"]},{"dataType":"enum","enums":["prod"]},{"dataType":"enum","enums":["sandbox"]},{"dataType":"enum","enums":["other"]}]},
             "active": {"dataType":"boolean"},
             "approval": {"dataType":"boolean"},
             "flow": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["public"]},{"dataType":"enum","enums":["authorization-code"]},{"dataType":"enum","enums":["client-credentials"]},{"dataType":"enum","enums":["kong-acl-only"]},{"dataType":"enum","enums":["kong-api-key-only"]},{"dataType":"enum","enums":["kong-api-key-acl"]}]},
@@ -392,13 +431,13 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.delete('/ds/api/v2/namespaces/:ns/contents/:externalLink',
+        app.delete('/ds/api/v2/namespaces/:ns/contents/:slug',
             authenticateMiddleware([{"jwt":["Content.Publish"]}]),
 
             async function ContentController_delete(request: any, response: any, next: any) {
             const args = {
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
-                    externalLink: {"in":"path","name":"externalLink","required":true,"dataType":"string"},
+                    slug: {"in":"path","name":"slug","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -417,6 +456,191 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.delete.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/organizations/:org/datasets',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgDatasetController_getDatasets(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getDatasets.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v2/organizations/:org/datasets',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgDatasetController_putDataset(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"Dataset"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.putDataset.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/ds/api/v2/organizations/:org/datasets/:name',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgDatasetController_delete(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    name: {"in":"path","name":"name","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.delete.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/organizations/:org/datasets/:name',
+            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
+
+            async function OrgDatasetController_getDataset(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+                    name: {"in":"path","name":"name","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getDataset.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/ds/api/v2/namespaces/:ns/datasets',
+            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+
+            async function DatasetController_put(request: any, response: any, next: any) {
+            const args = {
+                    ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    body: {"in":"body","name":"body","required":true,"ref":"DraftDataset"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<DatasetController>(DatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.put.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/namespaces/:ns/datasets/:name',
+            authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
+
+            async function DatasetController_getDataset(request: any, response: any, next: any) {
+            const args = {
+                    ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    name: {"in":"path","name":"name","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<DatasetController>(DatasetController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getDataset.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -1063,129 +1287,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.namespaceActivity.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/ds/api/v2/organizations/:org/datasets',
-            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
-
-            async function OrgDatasetController_getDatasets(request: any, response: any, next: any) {
-            const args = {
-                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
-
-
-              const promise = controller.getDatasets.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.put('/ds/api/v2/organizations/:org/datasets',
-            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
-
-            async function OrgDatasetController_putDataset(request: any, response: any, next: any) {
-            const args = {
-                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"Dataset"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
-
-
-              const promise = controller.putDataset.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.delete('/ds/api/v2/organizations/:org/datasets/:name',
-            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
-
-            async function OrgDatasetController_delete(request: any, response: any, next: any) {
-            const args = {
-                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    name: {"in":"path","name":"name","required":true,"dataType":"string"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
-
-
-              const promise = controller.delete.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/ds/api/v2/organizations/:org/datasets/:name',
-            authenticateMiddleware([{"jwt":["Dataset.Manage"]}]),
-
-            async function OrgDatasetController_getDataset(request: any, response: any, next: any) {
-            const args = {
-                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    name: {"in":"path","name":"name","required":true,"dataType":"string"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-                const controller: any = await container.get<OrgDatasetController>(OrgDatasetController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
-
-
-              const promise = controller.getDataset.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

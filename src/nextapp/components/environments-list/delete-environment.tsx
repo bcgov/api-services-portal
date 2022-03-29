@@ -38,9 +38,15 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
         title: 'Environment Deleted',
         status: 'success',
       });
-    } catch {
+    } catch (err) {
       toast({
         title: 'Environment Delete Failed',
+        description: err
+          .map((e) =>
+            e.data?.messages ? e.data.messages.join(',') : e.message
+          )
+          .join(', '),
+
         status: 'error',
       });
     }

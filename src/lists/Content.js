@@ -78,6 +78,7 @@ module.exports = {
     },
     isComplete: {
       type: Checkbox,
+      isRequired: true,
       defaultValue: false,
     },
     isPublic: {

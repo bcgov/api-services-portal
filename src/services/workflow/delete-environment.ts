@@ -1,25 +1,13 @@
 import { strict as assert } from 'assert';
-
 import {
-  deleteRecord,
   deleteRecords,
-  lookupCredentialReferenceByServiceAccess,
-  lookupCredentialIssuerById,
   lookupServiceAccessesByEnvironment,
   recordActivityWithBlob,
 } from '../keystone';
-import {
-  KeycloakClientRegistrationService,
-  KeycloakTokenService,
-  getOpenidFromIssuer,
-  getUma2FromIssuer,
-} from '../keycloak';
-import { KongConsumerService } from '../kong';
-import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
 import { Logger } from '../../logger';
-import { UMAPolicyService } from '../uma2';
 import { ServiceAccess } from '../keystone/types';
 import { updateActivity } from '../keystone/activity';
+import { Keystone } from '@keystonejs/keystone';
 
 const logger = Logger('wf.DeleteEnvironment');
 
@@ -39,7 +27,7 @@ export const DeleteEnvironmentValidate = async (
     messages.push(
       `${accessList.length} ${
         accessList.length == 1 ? 'consumer has' : 'consumers have'
-      } access to products in this namespace.`
+      } access to this environment.`
     );
   }
 
@@ -95,6 +83,16 @@ export const DeleteEnvironment = async (
     accessList
   );
 
+  await CascadeDeleteEnvironment(context, ns, prodEnvId);
+
+  await updateActivity(context.sudo(), activity.id, 'success', undefined);
+};
+
+export const CascadeDeleteEnvironment = async (
+  context: Keystone,
+  ns: string,
+  prodEnvId: string
+): Promise<void> => {
   await deleteRecords(
     context,
     'ServiceAccess',
@@ -112,6 +110,4 @@ export const DeleteEnvironment = async (
   );
 
   await deleteRecords(context, 'Environment', { id: prodEnvId }, false, ['id']);
-
-  await updateActivity(context.sudo(), activity.id, 'success', undefined);
 };

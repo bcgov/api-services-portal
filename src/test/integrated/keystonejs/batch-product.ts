@@ -15,6 +15,7 @@ import {
   removeEmpty,
   removeKeys,
   syncRecords,
+  transformArrayKeyToString,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
 import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
@@ -23,7 +24,7 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'simple';
+  const ns = 'refactortime';
   const skipAccessControl = false;
 
   const identity = {
@@ -45,7 +46,7 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
     // o(await deleteRecord(ctx, 'Product', '000000000002'));
   }
 
-  if (true) {
+  if (false) {
     // scenario 1: Product tries to highjack another Environment
 
     const product1 = {
@@ -65,7 +66,7 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
     o(result);
   }
 
-  if (true) {
+  if (false) {
     const product2 = {
       name: 'my-new-product-2',
       appId: '100000000002',
@@ -84,11 +85,30 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
   }
   if (false) {
     o(
-      await lookupServiceAccessesByEnvironment(ctx, 'platform', [
-        '6227a8f2778cbf71626ca628',
+      await lookupServiceAccessesByEnvironment(ctx, 'refactortime', [
+        '6180f94c39761d93ba662af0',
       ])
     );
   }
 
+  const records = await getRecords(ctx, 'Product', 'allProductsByNamespace', [
+    'environments',
+  ]);
+
+  const out = records
+    .map((o) => removeEmpty(o))
+    .map((o) => transformAllRefID(o, ['credentialIssuer', 'dataset', 'legal']))
+    .map((o) => transformArrayKeyToString(o, 'services', 'name'))
+    .map((o) =>
+      removeKeys(o, [
+        'id',
+        'namespace',
+        'product',
+        'extSource',
+        'extRecordHash',
+        'extForeignKey',
+      ])
+    );
+  o(out);
   await keystone.disconnect();
 })();

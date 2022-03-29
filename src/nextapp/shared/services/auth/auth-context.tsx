@@ -26,6 +26,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return <></>;
   }
 
+  // A logged in user trying to access a Namespace'd page (page that is not protected with "portal-user" role)
+  // and no namespace set, then redirect to home page
+  const isUnauthorizedProvider =
+    session.user &&
+    route?.access &&
+    route?.access.length > 0 &&
+    route?.access.indexOf('portal-user') == -1 &&
+    !session.user.namespace;
+
+  if (isUnauthorizedProvider) {
+    router?.push('/');
+    return <></>;
+  }
+
   return (
     <authContext.Provider value={session}>
       {isUnauthorized ? (

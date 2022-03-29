@@ -55,6 +55,7 @@ export interface Dataset {
   notes?: string;
   title?: string;
   isInCatalog?: string;
+  isInDraft?: string;
   contacts?: string;
   extSource?: string;
   extRecordHash?: string;
@@ -67,7 +68,22 @@ export interface Dataset {
 
 /**
  * @tsoaModel
- *
+ * @example {
+ *   "name": "my_sample_dataset",
+ *   "license_title": "Open Government Licence - British Columbia",
+ *   "security_class": "PUBLIC",
+ *   "view_audience": "Public",
+ *   "download_audience": "Public",
+ *   "record_publish_date": "2017-09-05",
+ *   "notes": "Some notes",
+ *   "title": "A title about my dataset",
+ *   "tags": [
+ *     "tag1",
+ *     "tag2"
+ *   ],
+ *   "organization": "ministry-of-citizens-services",
+ *   "organizationUnit": "databc"
+ * }
  */  
 export interface DraftDataset {
   name?: string; // Primary Key
@@ -79,6 +95,9 @@ export interface DraftDataset {
   notes?: string;
   title?: string;
   isInCatalog?: string;
+  isInDraft?: string;
+  contacts?: string;
+  resources?: string;
   tags?: string[];
   organization?: OrganizationRefID;
   organizationUnit?: OrganizationUnitRefID;
@@ -276,7 +295,7 @@ export interface Product {
  */  
 export interface Environment {
   appId?: string; // Primary Key
-  name?: "dev" | "test" | "prod" | "other";
+  name?: "dev" | "test" | "prod" | "sandbox" | "other";
   active?: boolean;
   approval?: boolean;
   flow?: "public" | "authorization-code" | "client-credentials" | "kong-acl-only" | "kong-api-key-only" | "kong-api-key-acl";
@@ -308,6 +327,7 @@ export interface CredentialIssuer {
   authPlugin?: string;
   clientAuthenticator?: "client-secret" | "client-jwt" | "client-jwt-jwks-url";
   instruction?: string;
+  environmentDetails?: IssuerEnvironmentConfig[];
   resourceType?: string;
   resourceAccessScope?: string;
   apiKeyName?: string;
@@ -315,8 +335,28 @@ export interface CredentialIssuer {
   resourceScopes?: string[];
   clientRoles?: string[];
   clientMappers?: string[];
-  environmentDetails?: any; // toString
   owner?: UserRefID;
+}
+
+
+/**
+ * @tsoaModel
+ * @example {
+ *   "environment": "dev",
+ *   "issuerUrl": "https://idp.site/auth/realms/my-realm",
+ *   "clientRegistration": "managed",
+ *   "clientId": "a-client-id",
+ *   "clientSecret": "a-client-secret"
+ * }
+ */  
+export interface IssuerEnvironmentConfig {
+  environment?: string; // Primary Key
+  exists?: boolean;
+  issuerUrl?: string;
+  clientRegistration?: "anonymous" | "managed" | "iat";
+  clientId?: string;
+  clientSecret?: string;
+  initialAccessToken?: string;
 }
 
 
@@ -368,6 +408,7 @@ export interface ContentBySlug {
   order?: string;
   isPublic?: string;
   isComplete?: string;
+  namespace?: string;
   publishDate?: string;
   tags?: string[];
 }
@@ -428,6 +469,17 @@ export interface User {
   username?: string; // Primary Key
   name?: string;
   email?: string;
+  legalsAgreed?: UserLegalsAgreed[];
+}
+
+
+/**
+ * @tsoaModel
+ *
+ */  
+export interface UserLegalsAgreed {
+  reference?: string; // Primary Key
+  agreedTimestamp?: string;
 }
 
 
@@ -437,6 +489,7 @@ export interface User {
  */  
 export interface Blob {
   ref?: string; // Primary Key
+  type?: string;
   blob?: string;
 }
 

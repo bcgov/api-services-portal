@@ -29,6 +29,7 @@ module.exports = {
     name: {
       type: Text,
       isRequired: true,
+      isUnique: true,
     },
     // bcdc_id: {
     //     type: Text,
@@ -61,7 +62,7 @@ module.exports = {
     private: {
       type: Checkbox,
       isRequired: false,
-      default: false,
+      defaultValue: false,
     },
     tags: {
       type: Text,
@@ -92,7 +93,12 @@ module.exports = {
     isInCatalog: {
       type: Checkbox,
       isRequired: true,
-      default: false,
+      defaultValue: false,
+    },
+    isDraft: {
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: true,
     },
   },
   access: EnforcementPoint,

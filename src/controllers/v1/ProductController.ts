@@ -11,6 +11,7 @@ import {
 import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { syncRecords } from '../../batch/feed-worker';
+import { Environment } from '@/services/keystone/types';
 
 @injectable()
 @Route('/namespaces/{ns}/products')
@@ -29,6 +30,10 @@ export class ProductController extends Controller {
     @Body() body: any,
     @Request() request: any
   ): Promise<any> {
+    // transform to be compatible with V2 of this API
+    body.environments?.forEach((e: Environment) => {
+      e.appId = e.id;
+    });
     return await syncRecords(
       this.keystone.createContext(request),
       'Product',

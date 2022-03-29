@@ -23,6 +23,15 @@ export async function lookupProductEnvironmentServices(
                         approval
                         product {
                             namespace
+                            dataset {
+                              id
+                              organization {
+                                name
+                              }
+                              organizationUnit {
+                                name
+                              }
+                            }
                         }
                         credentialIssuer {
                             id
@@ -234,6 +243,34 @@ export async function lookupProduct(context: any, ns: string, id: string) {
     variables: { ns, id },
   });
   logger.debug('[lookupProduct] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
+}
+
+export async function lookupProductDataset(context: any, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($id: ID!) {
+                    Product(where: {id: $id}) {
+                      namespace
+                      dataset {
+                        id
+                        name
+                        organization {
+                          name
+                        }
+                        organizationUnit {
+                          name
+                        }
+                      }
+                    }
+                }`,
+    variables: { id },
+  });
+  logger.debug('[lookupProductDataset] result %j', result);
   assert.strictEqual(
     result.data.Product == null,
     false,

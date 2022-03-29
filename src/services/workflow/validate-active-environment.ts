@@ -2,16 +2,15 @@ import { strict as assert } from 'assert';
 import { getIssuerEnvironmentConfig } from './types';
 import {
   lookupCredentialIssuerById,
+  lookupProductDataset,
   lookupProductEnvironmentServices,
   lookupServices,
 } from '../keystone';
 import { Logger } from '../../logger';
-import {
-  CredentialIssuer,
-  Environment,
-  GatewayPlugin,
-  GatewayService,
-} from '../keystone/types';
+import { Environment, GatewayService } from '../keystone/types';
+import { getGwaProductEnvironment } from '.';
+import { Keystone } from '@keystonejs/keystone';
+import { KeycloakGroupService } from '../keycloak';
 
 const logger = Logger('wf.ValidateActiveEnv');
 
@@ -23,6 +22,10 @@ export const ValidateActiveEnvironment = async (
   resolvedData: any,
   addValidationError: any
 ) => {
+  if (operation === 'create' && !('product' in resolvedData)) {
+    return;
+  }
+
   if (
     ('active' in originalInput && originalInput['active'] == true) ||
     (operation == 'update' &&
@@ -31,10 +34,45 @@ export const ValidateActiveEnvironment = async (
       !('active' in originalInput && originalInput['active'] == false))
   ) {
     try {
-      const envServices =
-        existingItem == null
-          ? ({} as Environment)
-          : await lookupProductEnvironmentServices(context, existingItem.id);
+      let envServices;
+      if (existingItem == null) {
+        //resolvedData {"name":"dev","active":false,"approval":false,"flow":"public","product":"624249d8d63e657bab7865fd","appId":"E27097AB"}
+
+        const product = await lookupProductDataset(
+          context,
+          resolvedData.product
+        );
+
+        envServices = {
+          product,
+        } as Environment;
+      } else {
+        envServices = await lookupProductEnvironmentServices(
+          context,
+          existingItem.id
+        );
+      }
+
+      logger.warn('[dataset] %j', envServices.product.dataset);
+      const envDataset = envServices.product.dataset;
+      const nsOrgDetails = await getNamespaceOrganizationDetails(
+        context,
+        envServices.product.namespace
+      );
+      if (envServices.product.dataset === null) {
+        addValidationError(
+          `[dataset] The product must be associated with a Dataset before the environment can be active.`
+        );
+      } else if (
+        nsOrgDetails &&
+        nsOrgDetails.org === envDataset?.organization?.name &&
+        nsOrgDetails.orgUnit === envDataset?.organizationUnit?.name
+      ) {
+      } else {
+        addValidationError(
+          `[dataset] Namespace and Dataset must belong to the same Organization Unit (ns:${nsOrgDetails.orgUnit}, dataset:${envDataset?.organizationUnit?.name})`
+        );
+      }
 
       const issuer =
         'credentialIssuer' in resolvedData
@@ -209,4 +247,23 @@ export function isServiceMissingAllPluginsHandler(
       );
     }
   };
+}
+
+async function getNamespaceOrganizationDetails(ctx: Keystone, ns: string) {
+  const prodEnv = await getGwaProductEnvironment(ctx, false);
+  const envConfig = prodEnv.issuerEnvConfig;
+
+  const svc = new KeycloakGroupService(envConfig.issuerUrl);
+  await svc.login(envConfig.clientId, envConfig.clientSecret);
+
+  const nsGroup = await svc.findByName('ns', ns, false);
+
+  if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+    return {
+      org: nsGroup.attributes['org'].pop(),
+      orgUnit: nsGroup.attributes['org-unit'].pop(),
+    };
+  } else {
+    return undefined;
+  }
 }

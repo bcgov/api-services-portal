@@ -947,6 +947,7 @@ export type Blob = {
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   ref?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
   blob?: Maybe<Scalars['String']>;
 };
 
@@ -975,6 +976,10 @@ export type BlobWhereInput = {
   ref_not_ends_with_i?: Maybe<Scalars['String']>;
   ref_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   ref_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  type?: Maybe<Scalars['String']>;
+  type_not?: Maybe<Scalars['String']>;
+  type_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  type_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   blob?: Maybe<Scalars['String']>;
   blob_not?: Maybe<Scalars['String']>;
   blob_contains?: Maybe<Scalars['String']>;
@@ -1004,12 +1009,15 @@ export enum SortBlobsBy {
   IdDesc = 'id_DESC',
   RefAsc = 'ref_ASC',
   RefDesc = 'ref_DESC',
+  TypeAsc = 'type_ASC',
+  TypeDesc = 'type_DESC',
   BlobAsc = 'blob_ASC',
   BlobDesc = 'blob_DESC'
 }
 
 export type BlobUpdateInput = {
   ref?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
   blob?: Maybe<Scalars['String']>;
 };
 
@@ -1020,6 +1028,7 @@ export type BlobsUpdateInput = {
 
 export type BlobCreateInput = {
   ref?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
   blob?: Maybe<Scalars['String']>;
 };
 
@@ -1903,6 +1912,7 @@ export type Dataset = {
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  isDraft?: Maybe<Scalars['Boolean']>;
   extSource?: Maybe<Scalars['String']>;
   extForeignKey?: Maybe<Scalars['String']>;
   extRecordHash?: Maybe<Scalars['String']>;
@@ -2157,6 +2167,8 @@ export type DatasetWhereInput = {
   catalogContent_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
   isInCatalog_not?: Maybe<Scalars['Boolean']>;
+  isDraft?: Maybe<Scalars['Boolean']>;
+  isDraft_not?: Maybe<Scalars['Boolean']>;
   extSource?: Maybe<Scalars['String']>;
   extSource_not?: Maybe<Scalars['String']>;
   extSource_contains?: Maybe<Scalars['String']>;
@@ -2254,6 +2266,8 @@ export enum SortDatasetsBy {
   CatalogContentDesc = 'catalogContent_DESC',
   IsInCatalogAsc = 'isInCatalog_ASC',
   IsInCatalogDesc = 'isInCatalog_DESC',
+  IsDraftAsc = 'isDraft_ASC',
+  IsDraftDesc = 'isDraft_DESC',
   ExtSourceAsc = 'extSource_ASC',
   ExtSourceDesc = 'extSource_DESC',
   ExtForeignKeyAsc = 'extForeignKey_ASC',
@@ -2280,6 +2294,7 @@ export type DatasetUpdateInput = {
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  isDraft?: Maybe<Scalars['Boolean']>;
   extSource?: Maybe<Scalars['String']>;
   extForeignKey?: Maybe<Scalars['String']>;
   extRecordHash?: Maybe<Scalars['String']>;
@@ -2308,6 +2323,7 @@ export type DatasetCreateInput = {
   title?: Maybe<Scalars['String']>;
   catalogContent?: Maybe<Scalars['String']>;
   isInCatalog?: Maybe<Scalars['Boolean']>;
+  isDraft?: Maybe<Scalars['Boolean']>;
   extSource?: Maybe<Scalars['String']>;
   extForeignKey?: Maybe<Scalars['String']>;
   extRecordHash?: Maybe<Scalars['String']>;
