@@ -22,6 +22,10 @@ export const ValidateActiveEnvironment = async (
   resolvedData: any,
   addValidationError: any
 ) => {
+  if (operation === 'create' && !('product' in resolvedData)) {
+    return;
+  }
+
   if (
     ('active' in originalInput && originalInput['active'] == true) ||
     (operation == 'update' &&
