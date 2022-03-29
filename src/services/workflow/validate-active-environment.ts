@@ -1,17 +1,13 @@
 import { strict as assert } from 'assert';
-import { getIssuerEnvironmentConfig, KeystoneContext } from './types';
+import { getIssuerEnvironmentConfig } from './types';
 import {
   lookupCredentialIssuerById,
+  lookupProductDataset,
   lookupProductEnvironmentServices,
   lookupServices,
 } from '../keystone';
 import { Logger } from '../../logger';
-import {
-  CredentialIssuer,
-  Environment,
-  GatewayPlugin,
-  GatewayService,
-} from '../keystone/types';
+import { Environment, GatewayService } from '../keystone/types';
 import { getGwaProductEnvironment } from '.';
 import { Keystone } from '@keystonejs/keystone';
 import { KeycloakGroupService } from '../keycloak';
@@ -34,10 +30,24 @@ export const ValidateActiveEnvironment = async (
       !('active' in originalInput && originalInput['active'] == false))
   ) {
     try {
-      const envServices =
-        existingItem == null
-          ? ({} as Environment)
-          : await lookupProductEnvironmentServices(context, existingItem.id);
+      let envServices;
+      if (existingItem == null) {
+        //resolvedData {"name":"dev","active":false,"approval":false,"flow":"public","product":"624249d8d63e657bab7865fd","appId":"E27097AB"}
+
+        const product = await lookupProductDataset(
+          context,
+          resolvedData.product
+        );
+
+        envServices = {
+          product,
+        } as Environment;
+      } else {
+        envServices = await lookupProductEnvironmentServices(
+          context,
+          existingItem.id
+        );
+      }
 
       logger.warn('[dataset] %j', envServices.product.dataset);
       const envDataset = envServices.product.dataset;

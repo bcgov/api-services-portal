@@ -250,3 +250,31 @@ export async function lookupProduct(context: any, ns: string, id: string) {
   );
   return result.data.Product;
 }
+
+export async function lookupProductDataset(context: any, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($id: ID!) {
+                    Product(where: {id: $id}) {
+                      namespace
+                      dataset {
+                        id
+                        name
+                        organization {
+                          name
+                        }
+                        organizationUnit {
+                          name
+                        }
+                      }
+                    }
+                }`,
+    variables: { id },
+  });
+  logger.debug('[lookupProductDataset] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
+}

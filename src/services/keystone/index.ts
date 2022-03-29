@@ -34,6 +34,7 @@ export {
   lookupProductEnvironmentServices,
   lookupProductEnvironmentServicesBySlug,
   lookupProduct,
+  lookupProductDataset,
 } from './product-environment';
 
 export {

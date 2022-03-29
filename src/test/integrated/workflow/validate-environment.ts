@@ -14,7 +14,7 @@ import { ValidateActiveEnvironment } from '../../../services/workflow';
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'platform';
+  const ns = 'simple';
   const skipAccessControl = false;
 
   const identity = {
@@ -31,7 +31,7 @@ import { ValidateActiveEnvironment } from '../../../services/workflow';
     authentication: { item: identity },
   });
 
-  if (true) {
+  if (false) {
     const operation = 'update';
     const existingItem = {
       id: '6180d1078a98e36cae8d061f',
@@ -40,6 +40,34 @@ import { ValidateActiveEnvironment } from '../../../services/workflow';
       active: true,
     };
     const resolvedData = {};
+    const addValidationError = (err: any) => {
+      console.error('Validation error');
+      o(err);
+    };
+
+    o(
+      await ValidateActiveEnvironment(
+        ctx,
+        operation,
+        existingItem,
+        originalInput,
+        resolvedData,
+        addValidationError
+      )
+    );
+    // await new Promise((r) => setTimeout(r, 10000));
+  }
+
+  if (true) {
+    const operation = 'create';
+    const existingItem = null as any;
+    const originalInput = {
+      active: true,
+    };
+    const resolvedData = {
+      active: true,
+      product: '62311e97519e570efbe35905',
+    };
     const addValidationError = (err: any) => {
       console.error('Validation error');
       o(err);
