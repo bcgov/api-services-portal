@@ -98,6 +98,71 @@ export const getConsumersHandler = (_, res, ctx) => {
   return res(ctx.data(store.data));
 };
 
+export const getConsumerHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+  const { consumer } = store.data.allServiceAccessesByNamespace.find(
+    (d) => d.consumer.id === id
+  );
+  return res(
+    ctx.data({
+      getGatewayConsumerPlugins: { ...consumer, plugins: [] },
+      allServiceAccesses: [
+        {
+          application: {
+            appId: '123',
+            name: 'Easy Drug Mart 51',
+            owner: {
+              name: 'Benedict Cumberbatch',
+              username: 'benedict.cumberbatch@idir',
+              email: 'benedict_cumberbatch9956522@gmail.com',
+            },
+          },
+        },
+      ],
+      allProductsByNamespace: [
+        {
+          id: '111',
+          name: 'Pharmanet Electronic Prescribing',
+          environments: [
+            {
+              id: '64',
+              appId: 'E0000001',
+              name: 'prod',
+              active: true,
+              flow: 'client-credentials',
+              credentialIssuer: {
+                id: '42',
+                availableScopes: '[]',
+                clientRoles: '[]',
+              },
+              services: [],
+            },
+          ],
+        },
+        {
+          id: '112',
+          name: 'Another App',
+          environments: [
+            {
+              id: '64',
+              appId: 'E0000001',
+              name: 'prod',
+              active: true,
+              flow: 'client-credentials',
+              credentialIssuer: {
+                id: '42',
+                availableScopes: '[]',
+                clientRoles: '[]',
+              },
+              services: [],
+            },
+          ],
+        },
+      ],
+    })
+  );
+};
+
 export const deleteConsumersHandler = (req, res, ctx) => {
   const { id } = req.variables;
 

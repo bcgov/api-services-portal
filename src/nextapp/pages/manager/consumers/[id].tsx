@@ -1,37 +1,50 @@
 import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
+  Avatar,
   Box,
-  Button,
   Container,
   Divider,
+  Flex,
   Heading,
-  HStack,
+  Icon,
+  Table,
+  Tag,
+  Th,
+  Tr,
+  Tbody,
+  Td,
   Text,
-  Switch,
+  Thead,
+  Wrap,
+  WrapItem,
+  Button,
+  useDisclosure,
 } from '@chakra-ui/react';
+import breadcrumbs from '@/components/ns-breadcrumb';
+import Card from '@/components/card';
 import PageHeader from '@/components/page-header';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import { Environment, Product, Query } from '@/shared/types/query.types';
+import { Product, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
-import ControlsList from '@/components/controls-list';
-import IpRestriction from '@/components/controls/ip-restriction';
-import RateLimiting from '@/components/controls/rate-limiting';
-import ModelIcon from '@/components/model-icon/model-icon';
-import ConsumerAuthz from '@/components/consumer-authz';
-import ConsumerACL from '@/components/consumer-acl';
-
-import breadcrumbs from '@/components/ns-breadcrumb';
+import { IoLayers } from 'react-icons/io5';
+import BusinessProfile from '@/components/business-profile';
+import ClientRequest from '@/components/client-request';
+import ProfileCard from '@/components/profile-card';
+import { uid } from 'react-uid';
+import { FaPen } from 'react-icons/fa';
+import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
   const queryClient = new QueryClient();
+  const queryKey = ['consumer', id];
 
   await queryClient.prefetchQuery(
-    ['consumer', id],
+    queryKey,
     async () =>
       await api<Query>(
         query,
@@ -46,14 +59,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       id,
       dehydratedState: dehydrate(queryClient),
+      queryKey,
     },
   };
 };
 
-const ConsumersPage: React.FC<
+const ConsumerPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id }) => {
-  const queryKey = ['consumer', id];
+> = ({ id, queryKey }) => {
   const { data } = useApi(
     queryKey,
     {
@@ -62,8 +75,9 @@ const ConsumersPage: React.FC<
     },
     { suspense: false }
   );
-
+  const { isOpen, onClose, onToggle } = useDisclosure();
   const consumer = data?.getGatewayConsumerPlugins;
+  const application = data?.allServiceAccesses[0]?.application;
   const consumerAclGroups = consumer?.aclGroups
     ? JSON.parse(consumer?.aclGroups)
     : [];
@@ -78,82 +92,131 @@ const ConsumersPage: React.FC<
           ).length != 0
       ).length != 0;
 
+  function Detail({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title?: string;
+  }) {
+    return (
+      <Box px={9} py={4} flex={1} overflow="hidden">
+        {title && (
+          <Heading size="sm" mb={2}>
+            {title}:
+          </Heading>
+        )}
+        {children}
+      </Box>
+    );
+  }
+
   return (
-    consumer && (
-      <>
-        <Head>
-          <title>{`Consumers | ${consumer.username}`}</title>
-        </Head>
-        <Container maxW="6xl">
-          <PageHeader
-            breadcrumb={breadcrumbs([
-              { href: '/manager/consumers', text: 'Consumers' },
-            ])}
-            title={
-              <Box as="span" display="flex" alignItems="center">
-                <ModelIcon model="consumer" size="sm" mr={2} />
-                {consumer.username}
-              </Box>
-            }
-          >
-            <Text fontSize="sm">
-              <Text as="span" mr={1} fontWeight="bold">
-                Namespace
-              </Text>
-              <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                {consumer.namespace ?? '-'}
-              </Text>
-              <Text as="span" ml={3} mr={1} fontWeight="bold">
-                Kong Consumer ID
-              </Text>
-              <Text as="span" bgColor="gray.200" borderRadius={2} px={1}>
-                {consumer.extForeignKey}
-              </Text>
-            </Text>
-          </PageHeader>
-
-          <Box as="header" bgColor="white" p={4}>
-            <Heading size="md">Add Controls</Heading>
+    <>
+      <Head>
+        <title>{`Consumers | ${consumer.username}`}</title>
+      </Head>
+      <GrantAccessDialog
+        consumer={consumer}
+        isOpen={isOpen}
+        onClose={onClose}
+        queryKey={queryKey}
+      />
+      <Container maxW="6xl">
+        <PageHeader
+          actions={<Button onClick={onToggle}>Grant Access</Button>}
+          breadcrumb={breadcrumbs([
+            { href: '/manager/consumers', text: 'Consumers' },
+            {
+              href: `/manager/consumers/${consumer.id}`,
+              text: consumer.username,
+            },
+          ])}
+          title={consumer.username}
+        />
+        <Box as="section" mb={9}>
+          <Box as="header" mb={4}>
+            <Heading size="md">Consumer Details</Heading>
           </Box>
+          <Flex bgColor="white">
+            <Detail title="Application">
+              <Flex align="center">
+                <Avatar icon={<Icon as={IoLayers} />} bg="bc-gray" />
+                <Text ml={2}>{application.name}</Text>
+              </Flex>
+            </Detail>
+            <Detail title="Application Owner">
+              <ProfileCard data={application.owner} overflow="hidden" />
+            </Detail>
+          </Flex>
           <Divider />
-          <HStack
-            bgColor="white"
-            spacing={4}
-            p={4}
-            borderRadius={4}
-            mb={4}
-            justify="stretch"
-          >
-            <IpRestriction id={id} queryKey={queryKey} mode="create" />
-            <RateLimiting id={id} queryKey={queryKey} mode="create" />
-          </HStack>
-          <ControlsList
-            consumerId={id}
-            data={consumer.plugins.filter((p) => p.route || p.service)}
-            queryKey={['consumer', id]}
-          />
-
-          <ConsumerAuthz
-            queryKey={queryKey}
-            consumerId={id}
-            consumerUsername={consumer.username}
-            consumerAclGroups={consumerAclGroups}
-            products={data.allProductsByNamespace}
-          />
-
-          {hasEnvironmentWithAclBasedFlow(data.allProductsByNamespace) && (
-            <ConsumerACL
-              products={data.allProductsByNamespace}
-              aclGroups={consumerAclGroups}
-            />
-          )}
-        </Container>
-      </>
-    )
+          <Flex bgColor="white">
+            <Detail title="Labels">
+              <Wrap spacing={2.5}>
+                {JSON.parse(consumer.tags).map((t) => (
+                  <WrapItem key={uid(t)}>
+                    <Tag bgColor="white" variant="outline">
+                      {t}
+                    </Tag>
+                  </WrapItem>
+                ))}
+              </Wrap>
+            </Detail>
+            <Detail>
+              <ClientRequest fallback="loading...">
+                <BusinessProfile serviceAccessId="123" />
+              </ClientRequest>
+            </Detail>
+          </Flex>
+        </Box>
+        <Box as="section">
+          <Box as="header" mb={4}>
+            <Heading size="md">{`Products (${
+              data?.allProductsByNamespace?.length ?? 0
+            })`}</Heading>
+          </Box>
+          {data?.allProductsByNamespace?.map((d) => (
+            <Card key={uid(d.id)} heading={d.name} mb={9}>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th width="25%">Environment</Th>
+                    <Th colSpan={2}>Restrictions</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {d.environments.map((e) => (
+                    <Tr key={uid(e)}>
+                      <Td>
+                        <Tag variant="outline">{e.name}</Tag>
+                      </Td>
+                      <Td>
+                        <Text as="em" color="bc-component">
+                          No restrictions added
+                        </Text>
+                      </Td>
+                      <Td textAlign="right">
+                        <Button
+                          leftIcon={<Icon as={FaPen} />}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          Edit
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Card>
+          ))}
+        </Box>
+      </Container>
+    </>
   );
 };
 
-export default ConsumersPage;
+export default ConsumerPage;
 
 const query = gql`
   query GetConsumer($id: ID!) {

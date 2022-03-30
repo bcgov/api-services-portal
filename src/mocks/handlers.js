@@ -7,6 +7,7 @@ import {
   fullfillRequestHandler,
   gatewayServicesHandler,
   getConsumersHandler,
+  getConsumerHandler,
   grantConsumerHandler,
   rejectRequestHandler,
   store as consumersStore,
@@ -45,6 +46,7 @@ export const handlers = [
     );
   }),
   keystone.query('GetConsumers', getConsumersHandler),
+  keystone.query('GetConsumer', getConsumerHandler),
   keystone.query('GetAccessRequestAuth', accessRequestAuthHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
   keystone.query(
@@ -55,6 +57,15 @@ export const handlers = [
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),
   keystone.mutation('RejectAccessRequest', rejectRequestHandler),
+  keystone.query('GetBusinessProfile', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        BusinessProfile: {
+          institution: harley.business,
+        },
+      })
+    );
+  }),
   keystone.query('RequestDetailsBusinessProfile', (req, res, ctx) => {
     return res(
       ctx.data({

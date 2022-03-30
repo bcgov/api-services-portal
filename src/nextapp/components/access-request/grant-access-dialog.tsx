@@ -27,9 +27,10 @@ import RequestAuthorization from './authorization';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useAuth } from '@/shared/services/auth';
+import { GatewayConsumer } from '@/shared/types/query.types';
 
 interface GrantAccessDialogProps {
-  consumer: any;
+  consumer: GatewayConsumer;
   isOpen: boolean;
   onClose: () => void;
   queryKey: QueryKey;

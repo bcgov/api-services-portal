@@ -267,7 +267,10 @@ const ConsumersPage: React.FC<
             {(d: ConsumerListItem) => (
               <Tr key={uid(d.consumer.id)}>
                 <Td width="25%">
-                  <NextLink passHref href={`/consumers/${d.consumer.id}`}>
+                  <NextLink
+                    passHref
+                    href={`/manager/consumers/${d.consumer.id}`}
+                  >
                     <Link color="bc-link" textDecor="underline">
                       {d.consumer.username}
                     </Link>
