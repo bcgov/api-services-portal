@@ -37,6 +37,7 @@ import ProfileCard from '@/components/profile-card';
 import { uid } from 'react-uid';
 import { FaPen } from 'react-icons/fa';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
+import EnvironmentTag from '@/components/environment-tag';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -81,16 +82,6 @@ const ConsumerPage: React.FC<
   const consumerAclGroups = consumer?.aclGroups
     ? JSON.parse(consumer?.aclGroups)
     : [];
-
-  const hasEnvironmentWithAclBasedFlow = (products: Product[]): boolean =>
-    products
-      .filter((p) => p.environments.length != 0)
-      .filter(
-        (p) =>
-          p.environments.filter((e) =>
-            ['kong-api-key-acl', 'kong-acl-only'].includes(e.flow)
-          ).length != 0
-      ).length != 0;
 
   function Detail({
     children,
@@ -141,7 +132,11 @@ const ConsumerPage: React.FC<
           <Flex bgColor="white">
             <Detail title="Application">
               <Flex align="center">
-                <Avatar icon={<Icon as={IoLayers} />} bg="bc-gray" />
+                <Avatar
+                  bgColor="bc-gray"
+                  icon={<Icon as={IoLayers} color="bc-blue" />}
+                  bg="bc-gray"
+                />
                 <Text ml={2}>{application.name}</Text>
               </Flex>
             </Detail>
@@ -188,12 +183,26 @@ const ConsumerPage: React.FC<
                   {d.environments.map((e) => (
                     <Tr key={uid(e)}>
                       <Td>
-                        <Tag variant="outline">{e.name}</Tag>
+                        <EnvironmentTag name={e.name} />
                       </Td>
                       <Td>
-                        <Text as="em" color="bc-component">
-                          No restrictions added
-                        </Text>
+                        {e.services.length > 0 &&
+                          e.services.map((d) => {
+                            return (
+                              <Tag key={d.name} variant="outline">
+                                {
+                                  data.getGatewayConsumerPlugins.plugins.find(
+                                    (p) => p.service.name === d.name
+                                  )?.name
+                                }
+                              </Tag>
+                            );
+                          })}
+                        {e.services.length === 0 && (
+                          <Text as="em" color="bc-component">
+                            No restrictions added
+                          </Text>
+                        )}
                       </Td>
                       <Td textAlign="right">
                         <Button

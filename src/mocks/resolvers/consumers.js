@@ -105,7 +105,20 @@ export const getConsumerHandler = (req, res, ctx) => {
   );
   return res(
     ctx.data({
-      getGatewayConsumerPlugins: { ...consumer, plugins: [] },
+      getGatewayConsumerPlugins: {
+        ...consumer,
+        plugins: [
+          {
+            name: 'Rate Limiting',
+            service: {
+              name: 'service-1',
+            },
+            route: {
+              // null or populated
+            },
+          },
+        ],
+      },
       allServiceAccesses: [
         {
           application: {
@@ -117,6 +130,16 @@ export const getConsumerHandler = (req, res, ctx) => {
               email: 'benedict_cumberbatch9956522@gmail.com',
             },
           },
+          productEnvironment: {
+            product: {
+              name: 'Pharmanet Electronic Prescribing',
+            },
+            services: [
+              {
+                name: 'service-1',
+              },
+            ],
+          },
         },
       ],
       allProductsByNamespace: [
@@ -125,16 +148,10 @@ export const getConsumerHandler = (req, res, ctx) => {
           name: 'Pharmanet Electronic Prescribing',
           environments: [
             {
-              id: '64',
-              appId: 'E0000001',
-              name: 'prod',
+              id: '14',
+              name: 'dev',
               active: true,
               flow: 'client-credentials',
-              credentialIssuer: {
-                id: '42',
-                availableScopes: '[]',
-                clientRoles: '[]',
-              },
               services: [],
             },
           ],
@@ -145,15 +162,20 @@ export const getConsumerHandler = (req, res, ctx) => {
           environments: [
             {
               id: '64',
-              appId: 'E0000001',
               name: 'prod',
               active: true,
               flow: 'client-credentials',
-              credentialIssuer: {
-                id: '42',
-                availableScopes: '[]',
-                clientRoles: '[]',
-              },
+              services: [
+                {
+                  name: 'service-1',
+                },
+              ],
+            },
+            {
+              id: '100',
+              name: 'sandbox',
+              active: true,
+              flow: 'client-credentials',
               services: [],
             },
           ],
