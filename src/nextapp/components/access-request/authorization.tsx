@@ -13,13 +13,27 @@ import { Checkbox } from '@chakra-ui/checkbox';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
-import { _ip } from 'casual-browserify';
+import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationProps {
+  credentialIssuer: CredentialIssuer;
   id: string;
 }
 
-const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
+const Authorization: React.FC<AuthorizationProps> = ({
+  credentialIssuer,
+  id,
+}) => {
+  const defaultValues: string[] = React.useMemo(() => {
+    try {
+      const availableScopes = JSON.parse(credentialIssuer.availableScopes);
+      const clientRoles = JSON.parse(credentialIssuer.clientRoles);
+
+      return [...availableScopes, ...clientRoles];
+    } catch {
+      return [];
+    }
+  }, [credentialIssuer]);
   const { data, isError, isLoading, isSuccess } = useApi(
     ['GetAccessRequestAuth', id],
     {
@@ -97,6 +111,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
               {scopes?.map((s, index) => (
                 <Checkbox
                   key={uid(s, index)}
+                  defaultChecked={defaultValues.includes(s)}
                   name="defaultClientScopes"
                   value={s}
                   data-testid={`client-scope-${s}`}
@@ -109,6 +124,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ id }) => {
               {roles?.map((r, index) => (
                 <Checkbox
                   key={uid(r, index)}
+                  defaultChecked={defaultValues.includes(r)}
                   name="roles"
                   value={r}
                   data-testid={`client-role-${r}`}
@@ -129,7 +145,6 @@ export default Authorization;
 const query = gql`
   query GetAccessRequestAuth($id: ID!) {
     AccessRequest(where: { id: $id }) {
-      controls
       productEnvironment {
         credentialIssuer {
           availableScopes

@@ -109,21 +109,21 @@ export const getConsumerHandler = (req, res, ctx) => {
         ...consumer,
         plugins: [
           {
-            name: 'Rate Limiting',
+            name: 'rate-limiting',
             service: {
               name: 'service-1',
             },
             route: null,
           },
           {
-            name: 'IP Restriction',
+            name: 'ip-restriction',
             service: {
               name: 'service-1',
             },
             route: null,
           },
           {
-            name: '',
+            name: 'rate-limiting',
             service: null,
             route: {
               name: 'route-1',
@@ -164,7 +164,16 @@ export const getConsumerHandler = (req, res, ctx) => {
               name: 'dev',
               active: true,
               flow: 'client-credentials',
-              services: [],
+              credentialIssuer: {
+                id: 'c1',
+                availableScopes: '["System/Patient"]',
+                clientRoles: '["b.role"]',
+              },
+              services: [
+                {
+                  name: 'route-1',
+                },
+              ],
             },
           ],
         },

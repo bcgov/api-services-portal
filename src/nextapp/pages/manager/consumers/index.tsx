@@ -236,7 +236,7 @@ const ConsumersPage: React.FC<
             >{`${totalConsumers} Consumer${
               totalConsumers === 1 ? '' : 's'
             }`}</Heading>
-            <Box>
+            <Box minW="400px">
               <SearchInput
                 onChange={handleSearchChange}
                 value={search}

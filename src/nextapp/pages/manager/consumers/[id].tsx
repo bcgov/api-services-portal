@@ -28,14 +28,19 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import { GatewayService, Product, Query } from '@/shared/types/query.types';
+import {
+  Environment,
+  GatewayService,
+  Product,
+  Query,
+} from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import { IoLayers } from 'react-icons/io5';
 import BusinessProfile from '@/components/business-profile';
 import ClientRequest from '@/components/client-request';
+import ConsumerEditDialog from '@/components/access-request/edit-dialog';
 import ProfileCard from '@/components/profile-card';
 import { uid } from 'react-uid';
-import { FaPen } from 'react-icons/fa';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
 
@@ -79,25 +84,45 @@ const ConsumerPage: React.FC<
   const { isOpen, onClose, onToggle } = useDisclosure();
   const consumer = data?.getGatewayConsumerPlugins;
   const application = data?.allServiceAccesses[0]?.application;
-  const consumerAclGroups = consumer?.aclGroups
-    ? JSON.parse(consumer?.aclGroups)
-    : [];
 
-  function renderRestrictions(services: GatewayService[]) {
-    const result = [];
-    services.forEach((d) => {
+  function renderRow(product: Product, environment: Environment) {
+    const tags = [];
+    environment.services.forEach((d) => {
       data.getGatewayConsumerPlugins.plugins
-        .filter((p) => p.service?.name === d.name)
+        .filter((p) => p.service?.name === d.name || p.route?.name === d.name)
         .forEach((p) => {
-          result.push(
+          tags.push(
             <Tag key={d.name} variant="outline">
               {p.name}
             </Tag>
           );
         });
     });
-    return result;
+
+    return (
+      <Tr key={uid(environment.id)}>
+        <Td>
+          <EnvironmentTag name={environment.name} />
+        </Td>
+        <Td>
+          {environment.services.length > 0 && <Wrap spacing={2}>{tags}</Wrap>}
+          {environment.services.length === 0 && (
+            <Text as="em" color="bc-component">
+              No restrictions added
+            </Text>
+          )}
+        </Td>
+        <Td textAlign="right">
+          <ConsumerEditDialog
+            data={environment}
+            queryKey={queryKey}
+            product={product}
+          />
+        </Td>
+      </Tr>
+    );
   }
+
   function Detail({
     children,
     title,
@@ -106,7 +131,7 @@ const ConsumerPage: React.FC<
     title?: string;
   }) {
     return (
-      <Box px={9} py={4} flex={1} overflow="hidden">
+      <Box px={9} py={6} flex={1} overflow="hidden">
         {title && (
           <Heading size="sm" mb={2}>
             {title}:
@@ -194,36 +219,7 @@ const ConsumerPage: React.FC<
                     <Th colSpan={2}>Restrictions</Th>
                   </Tr>
                 </Thead>
-                <Tbody>
-                  {d.environments.map((e) => (
-                    <Tr key={uid(e)}>
-                      <Td>
-                        <EnvironmentTag name={e.name} />
-                      </Td>
-                      <Td>
-                        {e.services.length > 0 && (
-                          <Wrap spacing={2}>
-                            {renderRestrictions(e.services)}
-                          </Wrap>
-                        )}
-                        {e.services.length === 0 && (
-                          <Text as="em" color="bc-component">
-                            No restrictions added
-                          </Text>
-                        )}
-                      </Td>
-                      <Td textAlign="right">
-                        <Button
-                          leftIcon={<Icon as={FaPen} />}
-                          variant="ghost"
-                          size="sm"
-                        >
-                          Edit
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
+                <Tbody>{d.environments.map(renderRow.bind(null, d))}</Tbody>
               </Table>
             </Card>
           ))}

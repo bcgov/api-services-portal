@@ -10,17 +10,22 @@ import {
   GridItem,
   Heading,
   HStack,
+  Icon,
+  IconButton,
   Input,
   ListItem,
   Radio,
   RadioGroup,
   Select,
+  Tab,
+  TabList,
+  Tabs,
   Text,
   UnorderedList,
   useToast,
 } from '@chakra-ui/react';
 import { ExpandableCards, ExpandableCard } from '@/components/card';
-import { FaDoorClosed } from 'react-icons/fa';
+import { FaDoorClosed, FaTrash } from 'react-icons/fa';
 import { HiChartBar } from 'react-icons/hi';
 import startCase from 'lodash/startCase';
 import { gql } from 'graphql-request';
@@ -56,6 +61,19 @@ const Controls: React.FC<ControlsProps> = ({
     { query },
     { suspense: false }
   );
+  // Restriction form
+  const [restrictionTabIndex, setRestrictionTabIndex] = React.useState(() => {
+    if (restrictions.length > 0) {
+      return 0;
+    }
+    return -1;
+  });
+  const currentRestriction = React.useMemo(() => {
+    if (restrictionTabIndex >= 0) {
+      return restrictions[restrictionTabIndex];
+    }
+  }, [restrictions, restrictionTabIndex]);
+  // TODO: pre-populate the form
 
   // Map the options for each of the route/service dropdowns
   const ipRestrictionOptions = React.useMemo(() => {
@@ -108,6 +126,11 @@ const Controls: React.FC<ControlsProps> = ({
   };
 
   // Events
+  const handleRemoveRestriction = (config: IpRestrictionPayload) => (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    onUpdateRestrictions(config);
+  };
   const handleRateLimitingSubmit = (
     event: React.FormEvent<HTMLFormElement>
   ) => {
@@ -259,11 +282,28 @@ const Controls: React.FC<ControlsProps> = ({
                   There are no controls applied yet
                 </Text>
               )}
-              <UnorderedList data-testid="ip-restriction-results">
-                {restrictions.map((r) => (
-                  <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
-                ))}
-              </UnorderedList>
+              <Tabs
+                align="start"
+                data-testid="ip-restriction-results"
+                orientation="vertical"
+                size="sm"
+                width="100%"
+                onChange={setRestrictionTabIndex}
+              >
+                <TabList width="100%">
+                  {restrictions.map((r) => (
+                    <Tab key={uid(r)} justifyContent="space-between">
+                      {getControlName(r)}
+                      <IconButton
+                        aria-label="delete restriction"
+                        icon={<Icon as={FaTrash} />}
+                        variant="ghost"
+                        onClick={handleRemoveRestriction(r)}
+                      />
+                    </Tab>
+                  ))}
+                </TabList>
+              </Tabs>
             </GridItem>
           </Grid>
         </ExpandableCard>
