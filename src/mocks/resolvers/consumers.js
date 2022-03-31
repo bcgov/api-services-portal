@@ -113,8 +113,20 @@ export const getConsumerHandler = (req, res, ctx) => {
             service: {
               name: 'service-1',
             },
+            route: null,
+          },
+          {
+            name: 'IP Restriction',
+            service: {
+              name: 'service-1',
+            },
+            route: null,
+          },
+          {
+            name: '',
+            service: null,
             route: {
-              // null or populated
+              name: 'route-1',
             },
           },
         ],

@@ -1,5 +1,6 @@
-import { Tag } from '@chakra-ui/tag';
 import * as React from 'react';
+import startCase from 'lodash/startCase';
+import { Tag } from '@chakra-ui/tag';
 
 interface EnvironmentTagProps {
   name: string;
@@ -24,7 +25,7 @@ const EnvironmentTag: React.FC<EnvironmentTagProps> = ({ name }) => {
   };
   return (
     <Tag bgColor={bgColor()} variant="outline">
-      {name}
+      {startCase(name)}
     </Tag>
   );
 };

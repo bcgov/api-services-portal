@@ -28,7 +28,7 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import { Product, Query } from '@/shared/types/query.types';
+import { GatewayService, Product, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import { IoLayers } from 'react-icons/io5';
 import BusinessProfile from '@/components/business-profile';
@@ -83,6 +83,21 @@ const ConsumerPage: React.FC<
     ? JSON.parse(consumer?.aclGroups)
     : [];
 
+  function renderRestrictions(services: GatewayService[]) {
+    const result = [];
+    services.forEach((d) => {
+      data.getGatewayConsumerPlugins.plugins
+        .filter((p) => p.service?.name === d.name)
+        .forEach((p) => {
+          result.push(
+            <Tag key={d.name} variant="outline">
+              {p.name}
+            </Tag>
+          );
+        });
+    });
+    return result;
+  }
   function Detail({
     children,
     title,
@@ -186,18 +201,11 @@ const ConsumerPage: React.FC<
                         <EnvironmentTag name={e.name} />
                       </Td>
                       <Td>
-                        {e.services.length > 0 &&
-                          e.services.map((d) => {
-                            return (
-                              <Tag key={d.name} variant="outline">
-                                {
-                                  data.getGatewayConsumerPlugins.plugins.find(
-                                    (p) => p.service.name === d.name
-                                  )?.name
-                                }
-                              </Tag>
-                            );
-                          })}
+                        {e.services.length > 0 && (
+                          <Wrap spacing={2}>
+                            {renderRestrictions(e.services)}
+                          </Wrap>
+                        )}
                         {e.services.length === 0 && (
                           <Text as="em" color="bc-component">
                             No restrictions added
