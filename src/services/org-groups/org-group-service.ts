@@ -197,6 +197,7 @@ export class OrgGroupService {
             const newGroup = await this.keycloakService.createRootGroup(
               newGroupName
             );
+            await this.backfillGroups();
             rootGroup = await this.keycloakService.getGroupById(newGroup.id);
           } else {
             throwError(`Invalid organization role ${newGroupName}`);
@@ -213,11 +214,15 @@ export class OrgGroupService {
           if (groupMatch.length == 1) {
             rootGroup = groupMatch[0];
           } else {
-            const newGroup = await this.keycloakService.createIfMissingForParentGroup(
+            const {
+              created,
+              id,
+            } = await this.keycloakService.createIfMissingForParentGroup(
               rootGroup,
               parts[i]
             );
-            rootGroup = await this.keycloakService.getGroupById(newGroup.id);
+            created && (await this.backfillGroups());
+            rootGroup = await this.keycloakService.getGroupById(id);
           }
         }
       }
