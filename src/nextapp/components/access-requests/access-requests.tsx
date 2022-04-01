@@ -82,7 +82,7 @@ const AccessRequests: React.FC = () => {
         alignItems="center"
       >
         <Icon as={FaExclamationTriangle} mr={2} />
-        <Heading data-testid="pending-request-tbl" size="sm">Access Requests</Heading>
+        <Heading size="sm">Access Requests</Heading>
       </Box>
       <Table size="sm" variant="simple" borderRadius={4}>
         <Tbody>
@@ -142,6 +142,7 @@ const AccessRequests: React.FC = () => {
                       leftIcon={<Icon as={FaMicroscope} />}
                       size="sm"
                       variant="secondary"
+                      data-testid="pending-request-tbl"
                     >
                       Review
                     </Button>

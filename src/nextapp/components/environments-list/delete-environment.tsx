@@ -84,7 +84,7 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={onDelete} ml={3}>
+              <Button data-testid="delete-env-confirmation-btn" colorScheme="red" onClick={onDelete} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>

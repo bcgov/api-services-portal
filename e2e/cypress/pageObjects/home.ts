@@ -6,6 +6,8 @@ class HomePage {
   nsCreateBtn: string = '[data-testid=ns-modal-create-btn]'
   nsSelectNamespace: string = '[data-testid=ns-dropdown-item-]'
   userMenu: string = '[data-testid=auth-menu-user]'
+  manageNamespace: string = '[data-testid="ns-dropdown-manage-btn"]'
+  confirmDeleteNamespaceBtn: string = '[data-testid="confirm-delete-namespace-btn"]'
 
   createNamespace(name: string): void {
     cy.get(this.nsDropdown).click()
@@ -25,7 +27,6 @@ class HomePage {
     cy.wait(2000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el.text().trim()).to.eq(name)
-      debugger
       flag = true
     })
     return flag
@@ -33,6 +34,13 @@ class HomePage {
 
   getNamespaceTestId(name: string): string {
     return '[data-testid=ns-dropdown-item-' + name + ']'
+  }
+
+  deleteNamespace(name: string) {
+    cy.get(this.nsDropdown).click()
+    cy.get(this.manageNamespace).click()
+    cy.get(`[data-testid=${name}-namespace-delete-btn]`).click()
+    cy.get(this.confirmDeleteNamespaceBtn).click()
   }
 
 }

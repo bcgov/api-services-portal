@@ -1,15 +1,18 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
-import NameSpacePage from '../../pageObjects/namespace'
 import MyProfilePage from '../../pageObjects/myProfile'
-import ToolBar from '../../pageObjects/toolbar'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import AuthorizationProfile from '../../pageObjects/authProfile'
+import ToolBar from '../../pageObjects/toolbar'
+import NameSpacePage from '../../pageObjects/namespace'
 
-describe('Revoke Access Manager Role', () => {
+
+describe('Grant Gateway Config Role to Wendy', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
+  const sa = new ServiceAccountsPage()
 
   before(() => {
     cy.visit('/')
@@ -26,15 +29,16 @@ describe('Revoke Access Manager Role', () => {
   it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
       home.useNamespace(checkPermission.namespace)
     })
   })
 
-  it('revoke "Namespace.Manager" access to Wendy (access manager)', () => {
+  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokePermission(checkPermission.revokePermission.Wendy)
+      na.revokePermission(checkPermission.grantPermission.Wendy)
+      na.clickGrantUserAccessButton()
+      na.grantPermission(checkPermission.grantPermission.Wendy_GC)
     })
   })
 
@@ -45,7 +49,7 @@ describe('Revoke Access Manager Role', () => {
   })
 })
 
-describe('Verify that Mark is unable to view the Namespace', () => {
+describe('Verify that Wendy is able to generate authorization profile', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
@@ -65,7 +69,7 @@ describe('Verify that Mark is unable to view the Namespace', () => {
     cy.fixture('credential-issuer').as('credential-issuer')
   })
 
-  it('authenticates Wendy (Credential-Issuer)', () => {
+  it('Authenticates Wendy (Credential-Issuer)', () => {
     cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
@@ -75,28 +79,14 @@ describe('Verify that Mark is unable to view the Namespace', () => {
     })
   })
 
-  it('Verify that only "CredentialIssuer.Admin" permission is displayed in the profile', () => {
-    mp.checkScopeOfProfile("CredentialIssuer.Admin")
-  })
-
-  it('Verify that Authorization Profile option is displayed in Namespace page', () => {
-    cy.visit(ns.path)
-    ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
-  })
-
-  it('Verify that authorization profile for Client ID/Secret is generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.authProfile
-      authProfile.createAuthProfile(ap)
-    })
-  })
-
-  it('Verify that authorization profile for Kong API key is generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ kongAPI }: any) => {
-      let ap = kongAPI.authProfile
-      authProfile.createAuthProfile(ap)
+  it('Verify that GWA API allows user to publish the API to Kong gateway', () => {
+    cy.get('@credential-issuer').then(({ checkPermission }: any) => {
+      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          expect(JSON.stringify(res.body.message)).to.be.contain('Sync successful.')
+          expect(res.statusCode).to.be.equal(200)
+        })
+      })
     })
   })
 
@@ -104,5 +94,6 @@ describe('Verify that Mark is unable to view the Namespace', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.resetCredential('Wendy')
   })
 })

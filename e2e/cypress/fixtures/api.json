@@ -1,0 +1,15 @@
+{
+  "organization": {
+    "headers": {
+      "accept": "application/json"
+    },
+    "endPoint": "ds/api/v2/organizations",
+    "orgExpectedList": [
+      {
+        "name": "planning-and-innovation-division",
+        "title": "Planning and Innovation Division"
+      }
+    ],
+    "orgName" : "ministry-of-health"
+  }
+}

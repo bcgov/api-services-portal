@@ -1,12 +1,12 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
-import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import NameSpacePage from '../../pageObjects/namespace'
-import ToolBar from '../../pageObjects/toolbar'
 import MyProfilePage from '../../pageObjects/myProfile'
+import ToolBar from '../../pageObjects/toolbar'
+import AuthorizationProfile from '../../pageObjects/authProfile'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
-describe('Revoke Access Manager Role', () => {
+describe('Grant Namespace Manage Role', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -23,7 +23,7 @@ describe('Revoke Access Manager Role', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
+  it('Authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -31,10 +31,12 @@ describe('Revoke Access Manager Role', () => {
     })
   })
 
-  it('revoke "Namespace.View" access to Mark (access manager)', () => {
+  it('Grant only "Namespace.Manage" permission to Wendy', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokePermission(checkPermission.revokePermission.Mark)
+      na.clickGrantUserAccessButton()
+      na.grantPermission(checkPermission.grantPermission.Wendy)
+      na.revokePermission(checkPermission.revokePermission.Wendy_ci)
     })
   })
 
@@ -45,14 +47,14 @@ describe('Revoke Access Manager Role', () => {
   })
 })
 
-describe('Verify that Mark is unable to view the Namespace', () => {
+describe('Verify that Wendy is able to see all the options for the Namespace', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const sa = new ServiceAccountsPage()
+  const ns = new NameSpacePage()
   const mp = new MyProfilePage()
-  const na = new NamespaceAccessPage()
-
+  const tb = new ToolBar()
+  const authProfile = new AuthorizationProfile()
 
   before(() => {
     cy.visit('/')
@@ -62,11 +64,12 @@ describe('Verify that Mark is unable to view the Namespace', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
-    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('credential-issuer').as('credential-issuer')
+    cy.fixture('apiowner').as('apiowner')
   })
 
-  it('authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, checkPermission }: any) => {
+  it('Authenticates Wendy (Credential-Issuer)', () => {
+    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -75,18 +78,15 @@ describe('Verify that Mark is unable to view the Namespace', () => {
     })
   })
 
-  it('Verify that only "Access.Manager" permission is displayed in the profile', () => {
-      mp.checkScopeOfProfile("Access.Manage")
-  })
-
-  it('Verify that Service Account option does not display', () => {
-    cy.visit(na.path)
-    sa.checkServiceAccountNotExist()
+  it('Verify that all the namespace options and activities are displayed', () => {
+    cy.visit(ns.path)
+    ns.verifyThatAllOptionsAreDisplayed()
   })
 
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.resetCredential('Wendy')
   })
 })

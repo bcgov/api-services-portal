@@ -29,8 +29,8 @@ describe('Create API Spec', () => {
   })
 
   it('creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      home.createNamespace(checkPermission.namespace)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      home.createNamespace(deleteResources.namespace)
     })
   })
 
@@ -43,46 +43,42 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
       })
     })
   })
-
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.createNewProduct(checkPermission.product.name, checkPermission.product.environment.name)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.createNewProduct(product.name, product.environment.name)
     })
   })
-
   it('publish product to directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.editProductEnvironment(checkPermission.product.name, checkPermission.product.environment.name)
-      pd.editProductEnvironmentConfig(checkPermission.product.environment.config)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.editProductEnvironment(product.name, product.environment.name)
+      pd.editProductEnvironmentConfig(product.environment.config)
     })
     pd.generateKongPluginConfig('service.yml')
   })
-
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-plugin.yml', checkPermission.namespace).then(() => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service-plugin.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
       })
     })
   })
-
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.updateDatasetNameToCatelogue(checkPermission.product.name, checkPermission.product.environment.name)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
   after(() => {
