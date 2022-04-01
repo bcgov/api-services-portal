@@ -97,7 +97,7 @@ components:
                     type: string
                 isInCatalog:
                     type: string
-                isInDraft:
+                isDraft:
                     type: string
                 contacts:
                     type: string
@@ -136,7 +136,7 @@ components:
                     type: string
                 isInCatalog:
                     type: string
-                isInDraft:
+                isDraft:
                     type: string
                 contacts:
                     type: string

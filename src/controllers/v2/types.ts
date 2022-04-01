@@ -55,7 +55,7 @@ export interface Dataset {
   notes?: string;
   title?: string;
   isInCatalog?: string;
-  isInDraft?: string;
+  isDraft?: string;
   contacts?: string;
   extSource?: string;
   extRecordHash?: string;
@@ -95,7 +95,7 @@ export interface DraftDataset {
   notes?: string;
   title?: string;
   isInCatalog?: string;
-  isInDraft?: string;
+  isDraft?: string;
   contacts?: string;
   resources?: string;
   tags?: string[];
