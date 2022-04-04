@@ -1,11 +1,10 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import MyProfilePage from '../../pageObjects/myProfile'
 import ConsumersPage from '../../pageObjects/consumers'
 
-
-describe('Revoke Credential Issuer Role to Mark', () => {
+describe('Grant Access Manager Role', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -30,12 +29,11 @@ describe('Revoke Credential Issuer Role to Mark', () => {
     })
   })
 
-  it('revoke "Access.Manage" access and only assign "Namespace.View" permission to Mark', () => {
+  it('Grant "Access.Manager" and "Namespace.View" access to Mark (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
       na.grantPermission(checkPermission.grantPermission.Mark)
-      na.revokePermission(checkPermission.revokePermission.Mark_AM)
     })
   })
 
@@ -46,13 +44,14 @@ describe('Revoke Credential Issuer Role to Mark', () => {
   })
 })
 
-describe('Verify that Mark is unable to approve pending request', () => {
+describe('Verify that Mark is able to view the pending request', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const mp = new MyProfilePage()
   const consumers = new ConsumersPage()
+  const mp = new MyProfilePage()
   const na = new NamespaceAccessPage()
+  
 
   before(() => {
     cy.visit('/')
@@ -62,11 +61,10 @@ describe('Verify that Mark is unable to approve pending request', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
-    cy.fixture('credential-issuer').as('credential-issuer')
     cy.fixture('access-manager').as('access-manager')
   })
 
-  it('authenticates Mark', () => {
+  it('Authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
@@ -76,21 +74,18 @@ describe('Verify that Mark is unable to approve pending request', () => {
     })
   })
 
-  it('Verify that only "Namespace.View" permission is displayed in the profile', () => {
-    mp.checkScopeOfProfile("Namespace.View")
-  })
-
   it('Navigate to Consumer Page to see the Approve Request option', ()=> {
     cy.visit(consumers.path)
   })
 
-  it('Verify that the option to approve request is not displayed', ()=> {
-      consumers.isApproveAccessEnabled(false)
+  it('Verify that the option to approve request is displayed', ()=> {
+      consumers.isApproveAccessEnabled(true)
   })
 
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.resetCredential('Mark')
   })
 })

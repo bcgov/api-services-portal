@@ -74,7 +74,7 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={onDelete} ml={3}>
+              <Button data-testid="confirm-delete-product-btn" colorScheme="red" onClick={onDelete} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>
