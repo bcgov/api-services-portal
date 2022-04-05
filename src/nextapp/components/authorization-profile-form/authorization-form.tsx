@@ -47,6 +47,11 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 
       if (formRef?.current.checkValidity()) {
         const formData = new FormData(formRef.current);
+        const clientMappers = formData.get('clientMappers');
+        formData.set(
+          'clientMappers',
+          JSON.stringify([{ name: 'audience', defaultValue: clientMappers }])
+        );
         onComplete(formData);
       }
     },
