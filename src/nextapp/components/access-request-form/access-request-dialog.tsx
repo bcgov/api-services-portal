@@ -61,9 +61,6 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const submitButtonText = isAutoApproved
     ? 'Request Access & Continue'
     : 'Request Access';
-  const requestAccessButtonText = auth.user
-    ? 'Request Access'
-    : 'Sign in to request access';
   const [accessRequestId, setAccessRequestId] = React.useState<string>('');
 
   // Events
@@ -147,15 +144,22 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 
   return (
     <>
-      <Button
-        colorScheme="green"
-        disabled={!auth.user ?? disabled}
-        variant="solid"
-        onClick={onOpen}
-        data-testid="request-access-button"
-      >
-        {requestAccessButtonText}
-      </Button>
+      {auth.user && (
+        <Button
+          colorScheme="green"
+          disabled={disabled}
+          variant="solid"
+          onClick={onOpen}
+          data-testid="request-access-button"
+        >
+          Request Access
+        </Button>
+      )}
+      {!auth.user && (
+        <Button as="a" href="/admin/signin">
+          Request Access
+        </Button>
+      )}
       <Modal
         isOpen={open || isOpen}
         onClose={onClose}
