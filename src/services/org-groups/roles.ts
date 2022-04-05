@@ -1,6 +1,6 @@
 export const PredefinedRolePermissions = {
-  'data-custodian': {
-    label: 'Data Custodian',
+  'organization-admin': {
+    label: 'Organization Administrator',
     permissions: [
       {
         resourceType: 'organization',
