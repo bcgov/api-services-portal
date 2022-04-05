@@ -63,6 +63,10 @@ export const ValidateActiveEnvironment = async (
         addValidationError(
           `[dataset] The product must be associated with a Dataset before the environment can be active.`
         );
+      } else if (nsOrgDetails && typeof nsOrgDetails.org === 'undefined') {
+        addValidationError(
+          `[dataset] Namespace must be assigned to an Organization before an Environment can be active.`
+        );
       } else if (
         nsOrgDetails &&
         nsOrgDetails.org === envDataset?.organization?.name &&
