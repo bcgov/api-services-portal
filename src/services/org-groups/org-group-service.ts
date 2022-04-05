@@ -175,11 +175,11 @@ export class OrgGroupService {
 
     if (orgGroup.parent) {
       const parts = orgGroup.parent.split('/');
-      if (parts.length > 3) {
+      if (parts.length > 4) {
         throwError(
-          `Only two levels of organization structure are supported ${orgGroup.parent}`
+          `Only three levels of organization structure are supported ${orgGroup.parent}`
         );
-      } else if (parts.length == 2 || parts.length == 3) {
+      } else if (parts.length == 2 || parts.length == 3 || parts.length == 4) {
         // parts: /<role>/<org>/<orgunit>
         const rootGroups: GroupRepresentation[] = this.groups.filter(
           (group: GroupRepresentation) => group.name == parts[1]
@@ -273,6 +273,21 @@ export class OrgGroupService {
       resourceName,
       scopeNames
     );
+  }
+
+  public async deletePermission(permissionName: string): Promise<void> {
+    const clientService = new KeycloakClientService(null).useAdminClient(
+      this.keycloakService.getAdminClient()
+    );
+
+    const clientPolicyService = new KeycloakClientPolicyService(
+      null
+    ).useAdminClient(this.keycloakService.getAdminClient());
+
+    // Assume that the client we are authenticating with is the Resource Server
+    const cid = (await clientService.findByClientId(this.clientId)).id;
+
+    await clientPolicyService.deletePermissionByName(cid, permissionName);
   }
 
   public async createOrUpdatePermission(

@@ -25,10 +25,15 @@ import {
 } from '../../batch/feed-worker';
 import {
   GroupAccessService,
+  leaf,
   NamespaceService,
 } from '../../services/org-groups';
 import { getGwaProductEnvironment } from '../../services/workflow';
-import { GroupAccess, OrgNamespace } from '../../services/org-groups/types';
+import {
+  GroupAccess,
+  GroupMembership,
+  OrgNamespace,
+} from '../../services/org-groups/types';
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity } from './types';
@@ -56,25 +61,31 @@ export class OrganizationController extends Controller {
 
   @Get('{org}')
   @OperationId('organization-units')
-  public async listOrganizationUnits(@Path() org: string): Promise<any[]> {
+  public async listOrganizationUnits(@Path() org: string): Promise<any> {
     const orgs = await getOrganizations(this.keystone.sudo());
-    return orgs
-      .filter((o) => o.name === org)
-      .pop()
-      .orgUnits.map((o) => ({
+    const match = orgs.filter((o) => o.name === org).pop();
+    assert.strictEqual(
+      typeof match === 'undefined',
+      false,
+      'Organization not found.'
+    );
+
+    return {
+      orgUnits: match.orgUnits.map((o) => ({
         name: o.name,
         title: o.title,
         description: o.description,
-      }));
+      })),
+    };
   }
 
   /**
    * > `Required Scope:` GroupAccess.Manage
    */
-  @Get('{org}/access')
-  @OperationId('get-organization-access')
+  @Get('{org}/roles')
+  @OperationId('get-organization-roles')
   @Security('jwt', ['GroupAccess.Manage'])
-  public async get(@Path() org: string): Promise<GroupAccess> {
+  public async getPolicies(@Path() org: string): Promise<GroupAccess> {
     const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
     const envConfig = prodEnv.issuerEnvConfig;
 
@@ -87,14 +98,35 @@ export class OrganizationController extends Controller {
   /**
    * > `Required Scope:` GroupAccess.Manage
    */
+  @Get('{org}/access')
+  @OperationId('get-organization-access')
+  @Security('jwt', ['GroupAccess.Manage'])
+  public async get(@Path() org: string): Promise<GroupMembership> {
+    const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
+    const envConfig = prodEnv.issuerEnvConfig;
+
+    const groupAccessService = new GroupAccessService(prodEnv.uma2);
+    await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
+
+    return await groupAccessService.getGroupMembership(org);
+  }
+
+  /**
+   * > `Required Scope:` GroupAccess.Manage
+   */
   @Put('{org}/access')
   @OperationId('put-organization-access')
   @Security('jwt', ['GroupAccess.Manage'])
   public async put(
     @Path() org: string,
-    @Body() body: GroupAccess
+    @Body() body: GroupMembership
   ): Promise<void> {
-    assert.strictEqual(org, body.name, 'Organization mismatch');
+    // must match either the 'name' or the leaf of the 'parent'
+    assert.strictEqual(
+      org === body.name || org === leaf(body.parent),
+      true,
+      'Organization mismatch'
+    );
 
     const prodEnv = await getGwaProductEnvironment(this.keystone.sudo(), false);
     const envConfig = prodEnv.issuerEnvConfig;
@@ -102,7 +134,7 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body as GroupAccess);
+    await groupAccessService.createOrUpdateGroupAccess(body);
   }
 
   /**
@@ -142,9 +174,9 @@ export class OrganizationController extends Controller {
     const prodEnv = await getGwaProductEnvironment(ctx, false);
     const envConfig = prodEnv.issuerEnvConfig;
 
-    const svc = new NamespaceService(envConfig.issuerUrl);
+    const svc = new GroupAccessService(prodEnv.uma2);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const answer = await svc.assignNamespaceToOrganization(ns, org, orgUnit);
+    const answer = await svc.assignNamespace(ns, org, orgUnit);
     return {
       result: answer
         ? 'namespace-assigned'
@@ -174,13 +206,9 @@ export class OrganizationController extends Controller {
     const prodEnv = await getGwaProductEnvironment(ctx, false);
     const envConfig = prodEnv.issuerEnvConfig;
 
-    const svc = new NamespaceService(envConfig.issuerUrl);
+    const svc = new GroupAccessService(prodEnv.uma2);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const answer = await svc.unassignNamespaceFromOrganization(
-      ns,
-      org,
-      orgUnit
-    );
+    const answer = await svc.unassignNamespace(ns, org, orgUnit);
     return {
       result: answer
         ? 'namespace-unassigned'

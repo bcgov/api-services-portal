@@ -23,6 +23,8 @@ import { NamespaceController } from './NamespaceController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { OrganizationController } from './OrganizationController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrgRoleController } from './OrgRoleController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductController } from './ProductController';
 import { expressAuthentication } from './../../auth/auth-tsoa';
 // @ts-ignore - no great way to install types from subpackage
@@ -268,22 +270,31 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GroupRole": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "permissions": {"dataType":"array","array":{"dataType":"refObject","ref":"GroupPermission"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "GroupAccess": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "parent": {"dataType":"string"},
+            "roles": {"dataType":"array","array":{"dataType":"refObject","ref":"GroupRole"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserReference": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string"},
             "username": {"dataType":"string","required":true},
             "email": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "GroupRole": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string","required":true},
-            "permissions": {"dataType":"array","array":{"dataType":"refObject","ref":"GroupPermission"},"required":true},
-            "members": {"dataType":"array","array":{"dataType":"refObject","ref":"UserReference"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -297,12 +308,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "GroupAccess": {
+    "GroupMembership": {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string"},
             "parent": {"dataType":"string"},
-            "roles": {"dataType":"array","array":{"dataType":"refObject","ref":"GroupRole"},"required":true},
             "members": {"dataType":"array","array":{"dataType":"refObject","ref":"GroupMember"}},
         },
         "additionalProperties": false,
@@ -1112,6 +1122,35 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/organizations/:org/policies',
+            authenticateMiddleware([{"jwt":["GroupAccess.Manage"]}]),
+
+            async function OrganizationController_getPolicies(request: any, response: any, next: any) {
+            const args = {
+                    org: {"in":"path","name":"org","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrganizationController>(OrganizationController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getPolicies.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/ds/api/v2/organizations/:org/access',
             authenticateMiddleware([{"jwt":["GroupAccess.Manage"]}]),
 
@@ -1147,7 +1186,7 @@ export function RegisterRoutes(app: express.Router) {
             async function OrganizationController_put(request: any, response: any, next: any) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"GroupAccess"},
+                    body: {"in":"body","name":"body","required":true,"ref":"GroupMembership"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1287,6 +1326,33 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.namespaceActivity.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ds/api/v2/roles',
+
+            async function OrgRoleController_getRoles(request: any, response: any, next: any) {
+            const args = {
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<OrgRoleController>(OrgRoleController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getRoles.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
