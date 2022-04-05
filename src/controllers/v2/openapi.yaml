@@ -1251,9 +1251,9 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/organizations/{org}/policies':
+    '/organizations/{org}/roles':
         get:
-            operationId: get-organization-policies
+            operationId: get-organization-roles
             responses:
                 '200':
                     description: Ok
@@ -1573,7 +1573,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/products/environments/{appId}':
+    '/namespaces/{ns}/environments/{appId}':
         delete:
             operationId: delete-product-environment
             responses:

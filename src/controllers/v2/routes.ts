@@ -1122,7 +1122,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/ds/api/v2/organizations/:org/policies',
+        app.get('/ds/api/v2/organizations/:org/roles',
             authenticateMiddleware([{"jwt":["GroupAccess.Manage"]}]),
 
             async function OrganizationController_getPolicies(request: any, response: any, next: any) {
@@ -1451,7 +1451,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.delete('/ds/api/v2/namespaces/:ns/products/environments/:appId',
+        app.delete('/ds/api/v2/namespaces/:ns/environments/:appId',
             authenticateMiddleware([{"jwt":["Namespace.Manage"]}]),
 
             async function ProductController_deleteEnvironment(request: any, response: any, next: any) {
