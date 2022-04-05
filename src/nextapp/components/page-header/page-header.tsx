@@ -44,15 +44,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                       </NextLink>
                     )}
                     {index >= arr.length - 1 && (
-                      <BreadcrumbLink
-                        color="text"
-                        textDecor="none"
-                        sx={{
-                          _hover: { cursor: 'default', textDecor: 'none' },
-                        }}
-                      >
-                        {b.text}
-                      </BreadcrumbLink>
+                      <NextLink passHref href={b.href}>
+                        <BreadcrumbLink color="text" textDecor="none">
+                          {b.text}
+                        </BreadcrumbLink>
+                      </NextLink>
                     )}
                   </BreadcrumbItem>
                 ))}
