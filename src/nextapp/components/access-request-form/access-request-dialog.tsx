@@ -75,7 +75,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           const payload = {
             name: formData.get('name'),
             controls: JSON.stringify({
-              clientGenCertificate: formData.get('clientAuthenticator'),
+              clientGenCertificate:
+                formData.get('clientAuthenticator') === 'client-jwt',
               jwksUrl:
                 formData.get('clientAuthenticator') === 'client-jwt-jwks-url'
                   ? formData.get('jwksUrl')
