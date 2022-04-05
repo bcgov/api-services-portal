@@ -21,6 +21,7 @@
     "GWA_API_URL": "http://gwa-api.localtest.me:2000/v2",
     "KONG_URL": "http://kong.localtest.me:8000",
     "JWKS_URL": "http://cypress-jwks-url.localtest.me:3500",
-    "KONG_CONFIG_URL": "http://kong.localtest.me:8001"
+    "KONG_CONFIG_URL": "http://kong.localtest.me:8001",
+    "BASE_URL": "http://oauth2proxy.localtest.me:4180"
   }
 }
