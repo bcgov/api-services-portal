@@ -20,7 +20,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
 (async () => {
   const kc = new NamespaceService(process.env.ISSUER);
 
-  await await kc.login(process.env.CID, process.env.CSC);
+  await kc.login(process.env.CID, process.env.CSC);
 
   await kc.assignNamespaceToOrganization(
     'feature-myacc',

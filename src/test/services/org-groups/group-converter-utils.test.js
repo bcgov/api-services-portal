@@ -37,6 +37,12 @@ describe('Group Access', function () {
     expect(og.parent).toBe('/role/parent');
   });
 
+  it('should get correct orgGroup conversion 4 level', async function () {
+    const og = convertToOrgGroup('/role/parent1/parent2/child');
+    expect(og.name).toBe('child');
+    expect(og.parent).toBe('/role/parent1/parent2');
+  });
+
   it('should get correct orgGroup conversion 2 level', async function () {
     const og = convertToOrgGroup('/role/parent');
     expect(og.name).toBe('parent');

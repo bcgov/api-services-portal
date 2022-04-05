@@ -24,7 +24,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
 
   const org = {
     name: 'databc',
-    parent: '/data-custodian/ministry-citizens-services',
+    parent: '/data-custodian/ca.bc.gov/ministry-of-citizens-services',
   };
 
   await kc.syncMembers(org, [
@@ -33,14 +33,14 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     { username: 'platform' },
   ]);
 
-  await kc.syncMembers(org, [{ username: 'acope@idir' }]);
+  // await kc.syncMembers(org, [{ username: 'acope@idir' }]);
 
-  await kc.syncMembers(org, []);
+  // await kc.syncMembers(org, []);
 
-  await kc.syncMembers(org, []);
+  // await kc.syncMembers(org, []);
 
-  await kc.syncMembers(org, [
-    { username: 'acope@idir' },
-    { username: 'platform' },
-  ]);
+  // await kc.syncMembers(org, [
+  //   { username: 'acope@idir' },
+  //   { username: 'platform' },
+  // ]);
 })();

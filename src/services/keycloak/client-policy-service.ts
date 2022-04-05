@@ -188,6 +188,23 @@ export class KeycloakClientPolicyService {
     return result;
   }
 
+  public async deletePermissionByName(id: string, name: string): Promise<void> {
+    logger.debug('[deletePermissionByName] %s', name);
+    const lkup = await this.findPermissionsByName(id, name);
+    assert.strictEqual(
+      lkup.length,
+      1,
+      'Unexpected number of permissions returned ' + lkup.length
+    );
+    const perm = lkup[0];
+    await this.kcAdminClient.clients.delPermission({
+      id,
+      type: perm.type,
+      permissionId: perm.id,
+    });
+    logger.debug('[deletePermissionByName] DELETED %s', name);
+  }
+
   public async findPermissionByName(
     id: string,
     name: string

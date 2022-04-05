@@ -97,7 +97,7 @@ components:
                     type: string
                 isInCatalog:
                     type: string
-                isInDraft:
+                isDraft:
                     type: string
                 contacts:
                     type: string
@@ -136,7 +136,7 @@ components:
                     type: string
                 isInCatalog:
                     type: string
-                isInDraft:
+                isDraft:
                     type: string
                 contacts:
                     type: string
@@ -443,6 +443,33 @@ components:
                 - scopes
             type: object
             additionalProperties: false
+        GroupRole:
+            properties:
+                name:
+                    type: string
+                permissions:
+                    items:
+                        $ref: '#/components/schemas/GroupPermission'
+                    type: array
+            required:
+                - name
+                - permissions
+            type: object
+            additionalProperties: false
+        GroupAccess:
+            properties:
+                name:
+                    type: string
+                parent:
+                    type: string
+                roles:
+                    items:
+                        $ref: '#/components/schemas/GroupRole'
+                    type: array
+            required:
+                - roles
+            type: object
+            additionalProperties: false
         UserReference:
             properties:
                 id:
@@ -453,24 +480,6 @@ components:
                     type: string
             required:
                 - username
-            type: object
-            additionalProperties: false
-        GroupRole:
-            properties:
-                name:
-                    type: string
-                permissions:
-                    items:
-                        $ref: '#/components/schemas/GroupPermission'
-                    type: array
-                members:
-                    items:
-                        $ref: '#/components/schemas/UserReference'
-                    type: array
-            required:
-                - name
-                - permissions
-                - members
             type: object
             additionalProperties: false
         GroupMember:
@@ -486,22 +495,16 @@ components:
                 - roles
             type: object
             additionalProperties: false
-        GroupAccess:
+        GroupMembership:
             properties:
                 name:
                     type: string
                 parent:
                     type: string
-                roles:
-                    items:
-                        $ref: '#/components/schemas/GroupRole'
-                    type: array
                 members:
                     items:
                         $ref: '#/components/schemas/GroupMember'
                     type: array
-            required:
-                - roles
             type: object
             additionalProperties: false
         OrgNamespace:
@@ -1237,12 +1240,34 @@ paths:
                     description: Ok
                     content:
                         application/json:
-                            schema:
-                                items: {}
-                                type: array
+                            schema: {}
             tags:
                 - Organizations
             security: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/policies':
+        get:
+            operationId: get-organization-policies
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GroupAccess'
+            description: '> `Required Scope:` GroupAccess.Manage'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
             parameters:
                 -
                     in: path
@@ -1259,7 +1284,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GroupAccess'
+                                $ref: '#/components/schemas/GroupMembership'
             description: '> `Required Scope:` GroupAccess.Manage'
             tags:
                 - Organizations
@@ -1298,7 +1323,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GroupAccess'
+                            $ref: '#/components/schemas/GroupMembership'
     '/organizations/{org}/namespaces':
         get:
             operationId: organization-namespaces
@@ -1447,6 +1472,19 @@ paths:
                         default: 0
                         format: double
                         type: number
+    /roles:
+        get:
+            operationId: GetRoles
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - Organizations
+            security: []
+            parameters: []
     '/namespaces/{ns}/products':
         put:
             operationId: put-product
