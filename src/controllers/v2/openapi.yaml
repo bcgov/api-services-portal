@@ -71,6 +71,101 @@ components:
                 tags:
                     - tag1
                     - tag2
+        OrganizationRefID:
+            type: string
+        OrganizationUnitRefID:
+            type: string
+        Dataset:
+            properties:
+                extForeignKey:
+                    type: string
+                name:
+                    type: string
+                license_title:
+                    type: string
+                security_class:
+                    type: string
+                view_audience:
+                    type: string
+                download_audience:
+                    type: string
+                record_publish_date:
+                    type: string
+                notes:
+                    type: string
+                title:
+                    type: string
+                isInCatalog:
+                    type: string
+                isDraft:
+                    type: string
+                contacts:
+                    type: string
+                extSource:
+                    type: string
+                extRecordHash:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                resources: {}
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
+            type: object
+            additionalProperties: false
+        DraftDataset:
+            properties:
+                name:
+                    type: string
+                license_title:
+                    type: string
+                security_class:
+                    type: string
+                view_audience:
+                    type: string
+                download_audience:
+                    type: string
+                record_publish_date:
+                    type: string
+                notes:
+                    type: string
+                title:
+                    type: string
+                isInCatalog:
+                    type: string
+                isDraft:
+                    type: string
+                contacts:
+                    type: string
+                resources:
+                    type: string
+                tags:
+                    items:
+                        type: string
+                    type: array
+                organization:
+                    $ref: '#/components/schemas/OrganizationRefID'
+                organizationUnit:
+                    $ref: '#/components/schemas/OrganizationUnitRefID'
+            type: object
+            additionalProperties: false
+            example:
+                name: my_sample_dataset
+                license_title: 'Open Government Licence - British Columbia'
+                security_class: PUBLIC
+                view_audience: Public
+                download_audience: Public
+                record_publish_date: '2017-09-05'
+                notes: 'Some notes'
+                title: 'A title about my dataset'
+                tags:
+                    - tag1
+                    - tag2
+                organization: ministry-of-citizens-services
+                organizationUnit: databc
         GatewayServiceRefID:
             type: string
         GatewayRouteRefID:
@@ -132,6 +227,34 @@ components:
                     type: array
             type: object
             additionalProperties: false
+        IssuerEnvironmentConfig:
+            properties:
+                environment:
+                    type: string
+                exists:
+                    type: boolean
+                issuerUrl:
+                    type: string
+                clientRegistration:
+                    type: string
+                    enum:
+                        - anonymous
+                        - managed
+                        - iat
+                clientId:
+                    type: string
+                clientSecret:
+                    type: string
+                initialAccessToken:
+                    type: string
+            type: object
+            additionalProperties: false
+            example:
+                environment: dev
+                issuerUrl: 'https://idp.site/auth/realms/my-realm'
+                clientRegistration: managed
+                clientId: a-client-id
+                clientSecret: a-client-secret
         UserRefID:
             type: string
         CredentialIssuer:
@@ -162,6 +285,10 @@ components:
                         - client-jwt-jwks-url
                 instruction:
                     type: string
+                environmentDetails:
+                    items:
+                        $ref: '#/components/schemas/IssuerEnvironmentConfig'
+                    type: array
                 resourceType:
                     type: string
                 resourceAccessScope:
@@ -184,7 +311,6 @@ components:
                     items:
                         type: string
                     type: array
-                environmentDetails: {}
                 owner:
                     $ref: '#/components/schemas/UserRefID'
             type: object
@@ -317,6 +443,33 @@ components:
                 - scopes
             type: object
             additionalProperties: false
+        GroupRole:
+            properties:
+                name:
+                    type: string
+                permissions:
+                    items:
+                        $ref: '#/components/schemas/GroupPermission'
+                    type: array
+            required:
+                - name
+                - permissions
+            type: object
+            additionalProperties: false
+        GroupAccess:
+            properties:
+                name:
+                    type: string
+                parent:
+                    type: string
+                roles:
+                    items:
+                        $ref: '#/components/schemas/GroupRole'
+                    type: array
+            required:
+                - roles
+            type: object
+            additionalProperties: false
         UserReference:
             properties:
                 id:
@@ -327,24 +480,6 @@ components:
                     type: string
             required:
                 - username
-            type: object
-            additionalProperties: false
-        GroupRole:
-            properties:
-                name:
-                    type: string
-                permissions:
-                    items:
-                        $ref: '#/components/schemas/GroupPermission'
-                    type: array
-                members:
-                    items:
-                        $ref: '#/components/schemas/UserReference'
-                    type: array
-            required:
-                - name
-                - permissions
-                - members
             type: object
             additionalProperties: false
         GroupMember:
@@ -360,22 +495,16 @@ components:
                 - roles
             type: object
             additionalProperties: false
-        GroupAccess:
+        GroupMembership:
             properties:
                 name:
                     type: string
                 parent:
                     type: string
-                roles:
-                    items:
-                        $ref: '#/components/schemas/GroupRole'
-                    type: array
                 members:
                     items:
                         $ref: '#/components/schemas/GroupMember'
                     type: array
-            required:
-                - roles
             type: object
             additionalProperties: false
         OrgNamespace:
@@ -387,49 +516,6 @@ components:
             required:
                 - name
                 - orgUnit
-            type: object
-            additionalProperties: false
-        OrganizationRefID:
-            type: string
-        OrganizationUnitRefID:
-            type: string
-        Dataset:
-            properties:
-                extForeignKey:
-                    type: string
-                name:
-                    type: string
-                license_title:
-                    type: string
-                security_class:
-                    type: string
-                view_audience:
-                    type: string
-                download_audience:
-                    type: string
-                record_publish_date:
-                    type: string
-                notes:
-                    type: string
-                title:
-                    type: string
-                isInCatalog:
-                    type: string
-                contacts:
-                    type: string
-                extSource:
-                    type: string
-                extRecordHash:
-                    type: string
-                tags:
-                    items:
-                        type: string
-                    type: array
-                resources: {}
-                organization:
-                    $ref: '#/components/schemas/OrganizationRefID'
-                organizationUnit:
-                    $ref: '#/components/schemas/OrganizationUnitRefID'
             type: object
             additionalProperties: false
         DraftDatasetRefID:
@@ -448,6 +534,7 @@ components:
                         - dev
                         - test
                         - prod
+                        - sandbox
                         - other
                 active:
                     type: boolean
@@ -583,7 +670,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/contents/{externalLink}':
+    '/namespaces/{ns}/contents/{slug}':
         delete:
             operationId: delete-content
             responses:
@@ -610,7 +697,187 @@ paths:
                         type: string
                 -
                     in: path
-                    name: externalLink
+                    name: slug
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/datasets':
+        get:
+            operationId: organization-datasets
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Dataset'
+                                type: array
+            description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Get Organization Datasets'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+        put:
+            operationId: put-organization-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Manage metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Manage Organization Datasets'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Dataset'
+    '/organizations/{org}/datasets/{name}':
+        delete:
+            operationId: delete-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Delete a Dataset\n> `Required Scope:` Dataset.Manage"
+            summary: 'Delete a dataset'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
+                    required: true
+                    schema:
+                        type: string
+        get:
+            operationId: get-organization-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Dataset'
+            description: "Get metadata about a Dataset that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
+            summary: 'Get Organization Dataset'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Dataset.Manage
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/datasets':
+        put:
+            operationId: put-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchResult'
+            description: "Update metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
+            summary: 'Update Dataset'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DraftDataset'
+    '/namespaces/{ns}/datasets/{name}':
+        get:
+            operationId: get-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Dataset'
+            description: "Get metadata about a Dataset\n> `Required Scope:` Namespace.Manage"
+            summary: 'Get Dataset'
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: name
                     required: true
                     schema:
                         type: string
@@ -973,12 +1240,34 @@ paths:
                     description: Ok
                     content:
                         application/json:
-                            schema:
-                                items: {}
-                                type: array
+                            schema: {}
             tags:
                 - Organizations
             security: []
+            parameters:
+                -
+                    in: path
+                    name: org
+                    required: true
+                    schema:
+                        type: string
+    '/organizations/{org}/roles':
+        get:
+            operationId: get-organization-roles
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GroupAccess'
+            description: '> `Required Scope:` GroupAccess.Manage'
+            tags:
+                - Organizations
+            security:
+                -
+                    jwt:
+                        - GroupAccess.Manage
             parameters:
                 -
                     in: path
@@ -995,7 +1284,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GroupAccess'
+                                $ref: '#/components/schemas/GroupMembership'
             description: '> `Required Scope:` GroupAccess.Manage'
             tags:
                 - Organizations
@@ -1034,7 +1323,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GroupAccess'
+                            $ref: '#/components/schemas/GroupMembership'
     '/organizations/{org}/namespaces':
         get:
             operationId: organization-namespaces
@@ -1183,124 +1472,19 @@ paths:
                         default: 0
                         format: double
                         type: number
-    '/organizations/{org}/datasets':
+    /roles:
         get:
-            operationId: organization-datasets
+            operationId: GetRoles
             responses:
                 '200':
                     description: Ok
                     content:
                         application/json:
-                            schema:
-                                items:
-                                    $ref: '#/components/schemas/Dataset'
-                                type: array
-            description: "Get metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
-            summary: 'Get Organization Datasets'
+                            schema: {}
             tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Dataset.Manage
-            parameters:
-                -
-                    in: path
-                    name: org
-                    required: true
-                    schema:
-                        type: string
-        put:
-            operationId: put-organization-dataset
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchResult'
-            description: "Manage metadata about Datasets that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
-            summary: 'Manage Organization Datasets'
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Dataset.Manage
-            parameters:
-                -
-                    in: path
-                    name: org
-                    required: true
-                    schema:
-                        type: string
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Dataset'
-    '/organizations/{org}/datasets/{name}':
-        delete:
-            operationId: delete-dataset
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchResult'
-            description: "Delete a Dataset\n> `Required Scope:` Dataset.Manage"
-            summary: 'Delete a dataset'
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Dataset.Manage
-            parameters:
-                -
-                    in: path
-                    name: org
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
-                    name: name
-                    required: true
-                    schema:
-                        type: string
-        get:
-            operationId: get-organization-dataset
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Dataset'
-            description: "Get metadata about a Dataset that are available by API for this organization\n> `Required Scope:` Dataset.Manage"
-            summary: 'Get Organization Dataset'
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Dataset.Manage
-            parameters:
-                -
-                    in: path
-                    name: org
-                    required: true
-                    schema:
-                        type: string
-                -
-                    in: path
-                    name: name
-                    required: true
-                    schema:
-                        type: string
+                - Organizations
+            security: []
+            parameters: []
     '/namespaces/{ns}/products':
         put:
             operationId: put-product
@@ -1389,7 +1573,7 @@ paths:
                     required: true
                     schema:
                         type: string
-    '/namespaces/{ns}/products/environments/{appId}':
+    '/namespaces/{ns}/environments/{appId}':
         delete:
             operationId: delete-product-environment
             responses:

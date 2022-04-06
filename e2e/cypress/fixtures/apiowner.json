@@ -9,6 +9,9 @@
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
+  "deleteResources": {
+    "namespace": "platform1"
+  },
   "namespaceAccessPermissions": ["CredentialIssuer.Admin"],
   "product": {
     "name": "Auto Test Product",
@@ -103,6 +106,66 @@
         }
       }
     }
+  },
+  "checkPermission": {
+    "namespace": "permission",
+    "product": {
+      "name": "New-Auto Test Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-platform"
+        }
+      }
+    },
+    "grantPermission": {
+      "Mark":{
+        "userName" :"mark",
+        "accessRole" :["Access.Manage","Namespace.View"]
+      },
+      "Wendy":{
+        "userName" :"wendy",
+        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
+      },
+      "Wendy_GC":{
+        "userName" :"wendy",
+        "accessRole" :["GatewayConfig.Publish","Namespace.View"]
+      },
+      "Janis":{
+        "userName" :"janis@idir",
+        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
+      }  
+    },
+    "revokePermission": {
+      "Mark":{
+        "userName" :"mark",
+        "accessRole" :["Namespace.View","Access.Manage"]
+      },
+      "Mark_AM":{
+        "userName" :"mark",
+        "accessRole" :["Access.Manage"]
+      },
+      "Wendy":{
+        "userName" :"wendy",
+        "accessRole" :["Namespace.Manage"]
+      },
+      "Wendy_ci":{
+        "userName" :"wendy",
+        "accessRole" :["CredentialIssuer.Admin"]
+      },
+      "serviceAccount": {
+        "scopes": ["Namespace.Manage", "Content.Publish"]  
+      }
+    }
+  },
+  "grantPermission": {
+    "Mark":{
+      "userName" :"mark",
+      "accessRole" :["Access.Manage","Namespace.View"]
+    } 
   },
   "permission": {
     "Mark":{

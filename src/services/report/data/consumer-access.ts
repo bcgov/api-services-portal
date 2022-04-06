@@ -17,8 +17,10 @@ import { KongACLService, KongACL, KongConsumers } from '../../kong';
 import { ReportOfGatewayMetrics } from './gateway-metrics';
 import { lookupEnvironmentsByNS } from '../../keystone/product-environment';
 import { KeycloakClientService, KeycloakUserService } from '../../keycloak';
-import { logger } from '../../../logger';
+import { Logger } from '../../../logger';
 import { lookupServicesByNamespace } from '../../keystone/gateway-service';
+
+const logger = Logger('report.access');
 
 export interface ReportOfConsumerAccess {
   namespace: string;
@@ -64,7 +66,11 @@ export async function getConsumerAccess(
       const accesses = await lookupDetailedServiceAccessesByNS(ksCtx, ns.name);
       const consumerLookup: any = {};
       accesses.forEach((access: ServiceAccess) => {
-        consumerLookup[access.consumer.username] = access;
+        if (access.consumer === null) {
+          logger.warn('Service Access with Missing Consumer! %j', access);
+        } else {
+          consumerLookup[access.consumer.username] = access;
+        }
       });
 
       // lookup Product Environment Credential Issuer

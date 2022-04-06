@@ -188,7 +188,7 @@ export class OrgDatasetController extends Controller {
   }
 }
 
-function transformResources(o: any) {
+export function transformResources(o: any) {
   o.resources = o.resources?.map((res: any) => ({
     name: res.name,
     url: res.url,
@@ -198,7 +198,7 @@ function transformResources(o: any) {
   return o;
 }
 
-function transformContacts(o: any) {
+export function transformContacts(o: any) {
   o.contacts = o.contacts?.map((con: any) => ({
     role: con.role,
     name: con.name,

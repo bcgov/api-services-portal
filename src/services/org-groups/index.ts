@@ -5,3 +5,7 @@ export { OrgAuthzService } from './authz';
 export { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
 
 export type { OrganizationGroup } from './org-group-service';
+
+export { PredefinedRolePermissions } from './roles';
+
+export { buildGroupAccess } from './org-role';

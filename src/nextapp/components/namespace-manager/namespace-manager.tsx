@@ -105,6 +105,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                   opacity={0}
                   variant="outline"
                   className="namespace-manager-delete"
+                  data-testid={`${n.name}-namespace-delete-btn`}
                   onClick={handleDeleteNamespace(n.name)}
                 >
                   <Icon as={FaTrash} />

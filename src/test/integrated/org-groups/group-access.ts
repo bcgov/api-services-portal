@@ -15,11 +15,16 @@ node dist/test/integrated/org-groups/group-access.js
 */
 
 import fetch from 'node-fetch';
-import { GroupAccessService } from '../../../services/org-groups';
+import {
+  buildGroupAccess,
+  GroupAccessService,
+} from '../../../services/org-groups';
 import {
   KeycloakGroupService,
   Uma2WellKnown,
 } from '../../../services/keycloak';
+import { o } from '../util';
+import { GroupMembership } from '@/services/org-groups/types';
 
 (async () => {
   const uma2: Uma2WellKnown = await (
@@ -30,41 +35,19 @@ import {
 
   await kc.login(process.env.CID, process.env.CSC);
 
-  if (false) {
+  if (true) {
     const access = await kc.getGroupAccess('databc');
     console.log(JSON.stringify(access, null, 4));
   }
 
-  if (false) {
-    const access = {
+  if (true) {
+    const access: GroupMembership = {
       name: 'databc',
-      parent: '/ministry-of-citizens-services',
-      roles: [
+      parent: '/ca.bc.gov/ministry-of-citizens-services',
+      members: [
         {
-          name: 'data-custodian',
-          members: [
-            {
-              username: 'acope@idir',
-            },
-          ],
-          permissions: [
-            {
-              resource: 'orgcontrol',
-              scopes: ['Namespace.View'],
-            },
-            {
-              resource: 'simple',
-              scopes: ['Access.Manage', 'Namespace.View'],
-            },
-            {
-              resource: 'erx-demo',
-              scopes: ['Access.Manage', 'Namespace.View'],
-            },
-            {
-              resource: 'org/databc',
-              scopes: ['Namespace.Assign'],
-            },
-          ],
+          member: { username: 'acope@idir' },
+          roles: ['data-custodian'],
         },
       ],
     };
@@ -72,7 +55,7 @@ import {
     await kc.createOrUpdateGroupAccess(access);
   }
 
-  if (true) {
+  if (false) {
     const access = {
       name: 'ministry-of-citizens-services',
       roles: [
@@ -121,6 +104,37 @@ import {
       ],
     };
 
+    //await kc.createOrUpdateGroupAccess(access);
+  }
+
+  if (false) {
+    const access = buildGroupAccess(
+      'databc',
+      '/ca.bc.gov/ministry-of-citizens-services',
+      'namespace',
+      'erx-demo'
+    );
     await kc.createOrUpdateGroupAccess(access);
   }
+  if (false) {
+    o(await kc.getGroupMembership('databc'));
+    await kc.assignNamespace(
+      'ministry-of-citizens-services',
+      'databc',
+      'erx-demo'
+    );
+  }
+
+  if (false) {
+    await kc.unassignNamespace(
+      'ministry-of-citizens-services',
+      'databc',
+      'erx-demo'
+    );
+  }
+
+  // if (true) {
+  //   const access = await kc.getGroupAccess('databc');
+  //   console.log(JSON.stringify(access, null, 4));
+  // }
 })();

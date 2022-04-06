@@ -15,6 +15,7 @@ import {
   removeEmpty,
   removeKeys,
   syncRecords,
+  parseBlobString,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
 import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
@@ -63,8 +64,8 @@ import {
   o(
     records
       .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['blob']))
+      // .map((o) => transformAllRefID(o, ['blob']))
+      .map((o) => parseBlobString(o))
   );
 
   await keystone.disconnect();

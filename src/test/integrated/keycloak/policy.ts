@@ -31,27 +31,29 @@ import { o } from '../util';
 
   const cid = 'e96342a6-7615-4158-b3de-983a8b893d07';
 
-  // Get the Group Leaf policy
-  const group =
-    'group-data-custodians-ministry-citizens-services-databc-policy';
-  const policies = await kc.listPolicies(cid, { name: group, type: 'group' });
-  console.log(policies);
+  if (false) {
+    // Get the Group Leaf policy
+    const group =
+      'group-data-custodians-ministry-citizens-services-databc-policy';
+    const policies = await kc.listPolicies(cid, { name: group, type: 'group' });
+    console.log(policies);
 
-  const perm =
-    'orgcontrol permission for /data-custodians/ministry-citizens-services/databc';
-  const permissions = await kc.listPermissionsByResource(
-    cid,
-    'b444a5a1-8e14-4f92-9005-8b476b977e25'
-  );
-  console.log(JSON.stringify(permissions, null, 3));
-
-  o(
-    await kc.findPolicyById(
+    const perm =
+      'orgcontrol permission for /data-custodians/ministry-citizens-services/databc';
+    const permissions = await kc.listPermissionsByResource(
       cid,
-      'group',
-      '5f84d050-f50d-4a2b-946c-9a9fa6cb3317'
-    )
-  );
+      'b444a5a1-8e14-4f92-9005-8b476b977e25'
+    );
+    console.log(JSON.stringify(permissions, null, 3));
+
+    o(
+      await kc.findPolicyById(
+        cid,
+        'group',
+        '5f84d050-f50d-4a2b-946c-9a9fa6cb3317'
+      )
+    );
+  }
 
   // for each Group, get the members
 
@@ -101,5 +103,11 @@ import { o } from '../util';
 
     const up = await kc.createOrUpdatePolicy(cid, pol);
     console.log(JSON.stringify(up, null, 4));
+  }
+  if (true) {
+    await kc.deletePermissionByName(
+      cid,
+      "Access to 'simple' services for role data-custodian"
+    );
   }
 })();

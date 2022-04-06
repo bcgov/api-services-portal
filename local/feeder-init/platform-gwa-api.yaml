@@ -1,10 +1,10 @@
 entity: Product
 record:
-  id: 748D98F1F56C
+  appId: 748D98F1F56C
   name: Gateway Services API
   namespace: platform
   environments:
-    - id: E0000000
+    - appId: E0000000
       name: prod
       active: true
       approval: true

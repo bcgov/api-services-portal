@@ -1,7 +1,7 @@
-import HomePage from '../pageObjects/home'
-import LoginPage from '../pageObjects/login'
-import Products from '../pageObjects/products'
-import ServiceAccountsPage from '../pageObjects/serviceAccounts'
+import HomePage from '../../pageObjects/home'
+import LoginPage from '../../pageObjects/login'
+import Products from '../../pageObjects/products'
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
 describe('Create API Spec', () => {
   const login = new LoginPage()
@@ -29,8 +29,8 @@ describe('Create API Spec', () => {
   })
 
   it('creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.createNamespace(namespace)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      home.createNamespace(deleteResources.namespace)
     })
   })
 
@@ -43,8 +43,8 @@ describe('Create API Spec', () => {
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service.yml', namespace).then(() => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
@@ -66,8 +66,8 @@ describe('Create API Spec', () => {
     pd.generateKongPluginConfig('service.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service-plugin.yml', namespace).then(() => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service-plugin.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })

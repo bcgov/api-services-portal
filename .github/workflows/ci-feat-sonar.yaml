@@ -32,7 +32,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=bcgov-oss
-            -Dsonar.projectKey=aps-portal-e2e
+            -Dsonar.projectKey=aps-portal
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src/auth,src/authz,src/batch,src/services
             -Dsonar.javascript.lcov.reportPaths=./src/__coverage__/lcov.info

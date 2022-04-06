@@ -1,14 +1,12 @@
-import ApiDirectoryPage from '../pageObjects/apiDirectory'
-import ConsumersPage from '../pageObjects/consumers'
-import LoginPage from '../pageObjects/login'
-import ApplicationPage from '../pageObjects/applications'
-import HomePage from '../pageObjects/home'
+import ApiDirectoryPage from '../../pageObjects/apiDirectory'
+import ConsumersPage from '../../pageObjects/consumers'
+import LoginPage from '../../pageObjects/login'
+import ApplicationPage from '../../pageObjects/applications'
+import HomePage from '../../pageObjects/home'
 
 describe('Approve Pending Request Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
-  const app = new ApplicationPage()
-  const apiDir = new ApiDirectoryPage()
   const home = new HomePage()
 
   before(() => {
@@ -26,6 +24,15 @@ describe('Approve Pending Request Spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('state/store').as('store')
     cy.visit(login.path)
+  })
+
+  it('Verify that API is not accessible with the generated API Key when the request is not approved', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.environment.config.serviceName,'GET').then((response) => {
+        expect(response.status).to.be.equal(403)
+        expect(response.body.message).to.be.contain('You cannot consume this service')
+      })
+    })
   })
 
   it('approves an access request', () => {
@@ -51,11 +58,7 @@ describe('Approve Pending Request Spec', () => {
 })
 
 describe('Turn off the Authentication', () => {
-  const login = new LoginPage()
   const consumers = new ConsumersPage()
-  const app = new ApplicationPage()
-  const apiDir = new ApiDirectoryPage()
-  const home = new HomePage()
 
   beforeEach(() => {
     cy.preserveCookies()

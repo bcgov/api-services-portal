@@ -142,6 +142,7 @@ const AccessRequests: React.FC = () => {
                       leftIcon={<Icon as={FaMicroscope} />}
                       size="sm"
                       variant="secondary"
+                      data-testid="pending-request-tbl"
                     >
                       Review
                     </Button>

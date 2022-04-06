@@ -1,0 +1,8 @@
+{
+  "organization": {
+    "headers": {
+      "accept": "application/json"
+    },
+    "endPoint": "ds/api/v2/organizations"
+  }
+}

@@ -11,7 +11,7 @@ import {
   toString,
 } from './transformations';
 import { handleNameChange } from './hooks';
-
+import YAML from 'js-yaml';
 import { BatchResult } from './types';
 import {
   BatchService,
@@ -52,12 +52,30 @@ const transformations = {
 
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
-  const eid = 'id' in req.params ? req.params['id'] : req.body['id'];
+  assert.strictEqual(entity in metadata, true);
+
+  const md = metadata[entity];
+  const refKey = md.refKey;
+
+  // This assumption that "id" must be there is really due to the Feeder
+  // sending payloads from Kong, CKAN, Prometheus
+  // Using V2 of the Discovery API does not require this and the normal 'refKey'
+  // can be used
+  let eid;
+  if ('id' in req.params) {
+    eid = req.params['id'];
+  } else if (refKey in req.body) {
+    eid = req.body[refKey];
+  } else {
+    eid = req.body['id'];
+  }
   const json = req.body;
 
-  assert.strictEqual(entity in metadata, true);
   assert.strictEqual(
-    eid === null || json === null || typeof json == 'undefined',
+    eid === null ||
+      typeof eid == 'undefined' ||
+      json === null ||
+      typeof json == 'undefined',
     false,
     'Either entity or ID are missing ' + eid + json
   );
@@ -65,7 +83,7 @@ export const putFeedWorker = async (context: any, req: any, res: any) => {
   assert.strictEqual(
     typeof eid == 'string',
     true,
-    'Unique ID is not a string! ' +
+    `Unique ID (${eid}) is not a string! ` +
       JSON.stringify(req.params) +
       ' :: ' +
       JSON.stringify(req.body)
@@ -150,9 +168,9 @@ const syncListOfRecords = async function (
   if (records == null || typeof records == 'undefined') {
     return [];
   }
+  const recordKey = 'refKey' in transformInfo ? transformInfo['refKey'] : 'id';
+
   for (const record of records) {
-    const recordKey =
-      'refKey' in transformInfo ? transformInfo['refKey'] : 'id';
     result.push(
       await syncRecords(
         keystone,
@@ -284,6 +302,12 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
+  assert.strictEqual(
+    typeof eid === 'string' && eid.length > 0,
+    true,
+    `Invalid ID for ${feedEntity} ${eid}`
+  );
+
   const batchService = new BatchService(context);
 
   // pre-lookup hook that can be used to handle special cases,
@@ -409,7 +433,7 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
-          logger.warn('%j', localRecord);
+          logger.debug('%j', localRecord);
           assert.strictEqual(
             allIds.filter(
               (record) =>
@@ -501,11 +525,40 @@ export const parseJsonString = (obj: any, keys: string[]) => {
   return obj;
 };
 
+export const parseBlobString = (obj: any, keys: string[] = ['blob']) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      keys.includes(key) &&
+      (obj[key] =
+        obj['type'] === 'json'
+          ? JSON.parse(Object.values(val).pop())
+          : YAML.load(Object.values(val).pop()))
+  );
+  return obj;
+};
+
 export const transformAllRefID = (obj: any, keys: string[]) => {
   Object.entries(obj).forEach(
     ([key, val]) =>
       (val && keys.includes(key) && (obj[key] = Object.values(val).pop())) ||
       (val && typeof val === 'object' && transformAllRefID(val, keys))
+  );
+  return obj;
+};
+
+export const transformArrayKeyToString = (
+  obj: any,
+  arrayKey: string,
+  childKey: string
+) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val &&
+        arrayKey === key &&
+        (obj[key] = (val as any).map((v: any) => v[childKey]))) ||
+      (val &&
+        typeof val === 'object' &&
+        transformArrayKeyToString(val, arrayKey, childKey))
   );
   return obj;
 };

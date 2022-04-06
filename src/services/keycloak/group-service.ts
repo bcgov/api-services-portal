@@ -69,7 +69,10 @@ export class KeycloakGroupService {
     await this.kcAdminClient.groups.update({ id: group.id }, group);
   }
 
-  public async createIfMissing(parentGroupName: string, groupName: string) {
+  public async createIfMissing(
+    parentGroupName: string,
+    groupName: string
+  ): Promise<void> {
     const groups = (await this.kcAdminClient.groups.find()).filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
@@ -89,7 +92,7 @@ export class KeycloakGroupService {
   public async createIfMissingForParentGroup(
     parentGroup: GroupRepresentation,
     groupName: string
-  ): Promise<GroupRepresentation> {
+  ): Promise<{ created: boolean; id: string }> {
     const match = parentGroup.subGroups.filter(
       (group: GroupRepresentation) => group.name == groupName
     );
@@ -102,10 +105,10 @@ export class KeycloakGroupService {
         }
       );
       logger.info('[createIfMissing] CREATED %s', groupName);
-      return newGroup;
+      return { created: true, id: newGroup.id };
     } else {
       logger.debug('[createIfMissing] EXISTS %s', groupName);
-      return match[0];
+      return { created: false, id: match[0].id };
     }
   }
 
