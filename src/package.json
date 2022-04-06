@@ -2,7 +2,7 @@
   "name": "bcgov-aps-portal",
   "description": "API Services Portal by BC Gov API Programme Services",
   "private": true,
-  "version": "1.1",
+  "version": "1.1.0",
   "author": "BC Gov APS",
   "repository": "https://github.com/keystonejs/keystone/tree/master/packages/create-keystone-app/example-projects/starter",
   "homepage": "https://github.com/keystonejs/keystone",
