@@ -25,7 +25,7 @@ import { Policy } from '../uma2';
 const logger = Logger('org-groups');
 
 enum RoleGroups {
-  'data-custodian',
+  'organization-admin',
 }
 
 /**
