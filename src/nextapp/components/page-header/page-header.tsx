@@ -43,12 +43,17 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         </BreadcrumbLink>
                       </NextLink>
                     )}
-                    {index >= arr.length - 1 && (
+                    {index >= arr.length - 1 && b.href && (
                       <NextLink passHref href={b.href}>
                         <BreadcrumbLink color="text" textDecor="none">
                           {b.text}
                         </BreadcrumbLink>
                       </NextLink>
+                    )}
+                    {index >= arr.length - 1 && !b.href && (
+                      <BreadcrumbLink color="text" textDecor="none">
+                        {b.text}
+                      </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
                 ))}
