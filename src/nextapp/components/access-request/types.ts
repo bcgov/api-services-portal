@@ -7,7 +7,7 @@ export interface IpRestrictionPayload {
     id: string;
   };
   config: {
-    allow: string[];
+    allow: string;
   };
   tags: string[];
 }

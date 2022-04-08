@@ -106,7 +106,7 @@ const TagInput: React.FC<TagInputProps> = ({
     ref.form?.addEventListener('reset', handleReset);
 
     return () => {
-      ref.form.removeEventListener('reset', handleReset);
+      ref.form?.removeEventListener('reset', handleReset);
     };
   }, []);
 

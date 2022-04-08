@@ -114,6 +114,7 @@ const ConsumerPage: React.FC<
         </Td>
         <Td textAlign="right">
           <ConsumerEditDialog
+            consumer={consumer}
             data={environment}
             queryKey={queryKey}
             product={product}

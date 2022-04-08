@@ -22,6 +22,7 @@ import {
 import {
   AccessRequest,
   Environment,
+  GatewayConsumer,
   Product,
   Query,
 } from '@/shared/types/query.types';
@@ -35,27 +36,53 @@ import RequestControls from './controls';
 import RequestAuthorization from './authorization';
 
 interface ConsumerEditDialogProps {
+  consumer: GatewayConsumer;
   data: Environment;
   product: Product;
   queryKey: string;
 }
 
 const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
+  consumer,
   data,
   product,
   queryKey,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tabIndex, setTabIndex] = React.useState(0);
-  const [restrictions, setRestrictions] = React.useState([]);
-  const [rateLimits, setRateLimits] = React.useState([]);
+  const [restrictions, setRestrictions] = React.useState(() => {
+    const restrictionConfigs = consumer.plugins
+      .filter((p) => p.name === 'ip-restriction')
+      .filter((p) => {
+        const name = p.service?.name ?? p.route?.name;
+        return data.services.some((s) => s.name === name);
+      });
+    return restrictionConfigs;
+  });
+  const [rateLimits, setRateLimits] = React.useState(() => {
+    const restrictionConfigs = consumer.plugins
+      .filter((p) => p.name === 'rate-limiting')
+      .filter((p) => {
+        const name = p.service?.name ?? p.route?.name;
+        return data.services.some((s) => s.name === name);
+      });
+    return restrictionConfigs;
+  });
 
   // Events
   const handleUpdateRateLimits = React.useCallback((payload) => {
     setRateLimits((state) => [...state, payload]);
   }, []);
-  const handleUpdateRestrictions = (payload) => {
+  const handleUpdateRestrictions = (payload: any, index?: number) => {
     setRestrictions((state) => {
+      if (index !== undefined) {
+        return state.map((s, i) => {
+          if (i === index) {
+            return payload;
+          }
+          return s;
+        });
+      }
       if (state.includes(payload)) {
         return state.filter((s) => s !== payload);
       } else {
@@ -66,6 +93,9 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
+  const handleSave = React.useCallback(() => {
+    console.log(restrictions);
+  }, [restrictions]);
 
   return (
     <>
@@ -95,12 +125,12 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               onChange={handleTabChange}
             >
               <TabList mb={5} data-testid="ar-tabs">
-                <Tab px={0}>Request Details</Tab>
-                <Tab px={0} ml={4}>
-                  Controls
-                </Tab>
+                <Tab px={0}>Controls</Tab>
                 <Tab px={0} ml={4}>
                   Authorization
+                </Tab>
+                <Tab px={0} ml={4}>
+                  Request Details
                 </Tab>
               </TabList>
             </Tabs>
@@ -110,6 +140,28 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
             <Box
               hidden={tabIndex !== 0}
               display={tabIndex === 0 ? 'block' : 'none'}
+              data-testid="ar-controls-tab"
+            >
+              <RequestControls
+                onUpdateRateLimits={handleUpdateRateLimits}
+                onUpdateRestrictions={handleUpdateRestrictions}
+                rateLimits={rateLimits}
+                restrictions={restrictions}
+              />
+            </Box>
+            <Box
+              hidden={tabIndex !== 1}
+              display={tabIndex === 1 ? 'block' : 'none'}
+              data-testid="ar-authorization-tab"
+            >
+              <RequestAuthorization
+                credentialIssuer={data.credentialIssuer}
+                id={data.id}
+              />
+            </Box>
+            <Box
+              hidden={tabIndex !== 2}
+              display={tabIndex === 2 ? 'block' : 'none'}
               data-testid="ar-request-details-tab"
             >
               <Grid
@@ -133,28 +185,6 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 <GridItem as="dd">-</GridItem>
               </Grid>
             </Box>
-            <Box
-              hidden={tabIndex !== 1}
-              display={tabIndex === 1 ? 'block' : 'none'}
-              data-testid="ar-controls-tab"
-            >
-              <RequestControls
-                onUpdateRateLimits={handleUpdateRateLimits}
-                onUpdateRestrictions={handleUpdateRestrictions}
-                rateLimits={rateLimits}
-                restrictions={restrictions}
-              />
-            </Box>
-            <Box
-              hidden={tabIndex !== 2}
-              display={tabIndex === 2 ? 'block' : 'none'}
-              data-testid="ar-authorization-tab"
-            >
-              <RequestAuthorization
-                credentialIssuer={data.credentialIssuer}
-                id={data.id}
-              />
-            </Box>
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
@@ -165,7 +195,9 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               >
                 Cancel
               </Button>
-              <Button data-testid="ar-edit-save-btn">Save</Button>
+              <Button data-testid="ar-edit-save-btn" onClick={handleSave}>
+                Save
+              </Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

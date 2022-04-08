@@ -1,8 +1,14 @@
 import * as React from 'react';
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
   Button,
   ButtonGroup,
+  Flex,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -17,9 +23,6 @@ import {
   Radio,
   RadioGroup,
   Select,
-  Tab,
-  TabList,
-  Tabs,
   Text,
   UnorderedList,
   useToast,
@@ -42,7 +45,7 @@ import TagInput from '../tag-input';
 
 interface ControlsProps {
   onUpdateRateLimits: (payload: RateLimitingPayload) => void;
-  onUpdateRestrictions: (payload: IpRestrictionPayload) => void;
+  onUpdateRestrictions: (payload: IpRestrictionPayload, index?: number) => void;
   rateLimits: RateLimitingPayload[];
   restrictions: IpRestrictionPayload[];
 }
@@ -61,19 +64,6 @@ const Controls: React.FC<ControlsProps> = ({
     { query },
     { suspense: false }
   );
-  // Restriction form
-  const [restrictionTabIndex, setRestrictionTabIndex] = React.useState(() => {
-    if (restrictions.length > 0) {
-      return 0;
-    }
-    return -1;
-  });
-  const currentRestriction = React.useMemo(() => {
-    if (restrictionTabIndex >= 0) {
-      return restrictions[restrictionTabIndex];
-    }
-  }, [restrictions, restrictionTabIndex]);
-  // TODO: pre-populate the form
 
   // Map the options for each of the route/service dropdowns
   const ipRestrictionOptions = React.useMemo(() => {
@@ -113,6 +103,7 @@ const Controls: React.FC<ControlsProps> = ({
         .find((d) => d.extForeignKey === control.config.route)?.name;
     } else {
       if (control.service) {
+        console.log(data.allGatewayServicesByNamespace, control.service.id);
         return data.allGatewayServicesByNamespace.find(
           (d) => d.extForeignKey === control.service.id
         )?.name;
@@ -130,6 +121,11 @@ const Controls: React.FC<ControlsProps> = ({
     event.stopPropagation();
     event.preventDefault();
     onUpdateRestrictions(config);
+  };
+  const handleRemoveRateLimiting = (config: RateLimitingPayload) => (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    onUpdateRateLimits(config);
   };
   const handleRateLimitingSubmit = (
     event: React.FormEvent<HTMLFormElement>
@@ -176,7 +172,7 @@ const Controls: React.FC<ControlsProps> = ({
       const payload: IpRestrictionPayload = {
         name: 'ip-restriction',
         config: {
-          allow: [entries.allow as string],
+          allow: entries.allow as string,
         },
         tags: ['consumer'],
       };
@@ -198,6 +194,21 @@ const Controls: React.FC<ControlsProps> = ({
       });
     }
   };
+  const handleRestrictionUpdate = React.useCallback(
+    (config, index: number) => (event: React.FormEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.target as HTMLFormElement);
+      const allow = formData.get('allow');
+      const payload = {
+        ...config,
+        config: {
+          allow,
+        },
+      };
+      onUpdateRestrictions(payload, index);
+    },
+    [onUpdateRestrictions]
+  );
 
   return (
     <Box>
@@ -243,7 +254,7 @@ const Controls: React.FC<ControlsProps> = ({
                   data-testid="ip-restriction-service-dropdown"
                 >
                   {ipRestrictionOptions.map((s) => (
-                    <option key={s.id} value={s.extForeignKey}>
+                    <option key={uid(s.id)} value={s.extForeignKey}>
                       {s.name}
                     </option>
                   ))}
@@ -274,36 +285,63 @@ const Controls: React.FC<ControlsProps> = ({
               </ButtonGroup>
             </form>
             <GridItem>
-              <Heading size="sm" fontWeight="normal" mb={3}>
-                Controls
+              <Heading size="sm" fontWeight="normal" mb={3} pl={3}>
+                Applied Controls
               </Heading>
               {restrictions.length === 0 && (
-                <Text fontStyle="italic" color="bc-component">
+                <Text fontStyle="italic" color="bc-component" pl={3}>
                   There are no controls applied yet
                 </Text>
               )}
-              <Tabs
-                align="start"
-                data-testid="ip-restriction-results"
-                orientation="vertical"
-                size="sm"
-                width="100%"
-                onChange={setRestrictionTabIndex}
-              >
-                <TabList width="100%">
-                  {restrictions.map((r) => (
-                    <Tab key={uid(r)} justifyContent="space-between">
-                      {getControlName(r)}
-                      <IconButton
-                        aria-label="delete restriction"
-                        icon={<Icon as={FaTrash} />}
-                        variant="ghost"
-                        onClick={handleRemoveRestriction(r)}
+              <Accordion reduceMotion>
+                {restrictions.map((r, index) => (
+                  <AccordionItem key={uid(r, index)} border="none" p2={3}>
+                    <h2>
+                      <AccordionButton
+                        px={3}
+                        borderLeft="2px solid"
+                        borderLeftColor="bc-gray"
+                        sx={{
+                          _expanded: {
+                            borderLeftColor: 'bc-blue',
+                          },
+                        }}
+                      >
+                        <Box flex="1" textAlign="left">
+                          {getControlName(r)}
+                          <IconButton
+                            aria-label="delete restriction"
+                            icon={<Icon as={FaTrash} />}
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveRateLimiting(r)}
+                          />
+                        </Box>
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel
+                      as="form"
+                      px={3}
+                      pb={3}
+                      borderLeft="2px solid"
+                      borderLeftColor="bc-gray"
+                      onSubmit={handleRestrictionUpdate(r, index)}
+                    >
+                      <TagInput
+                        isRequired
+                        name="allow"
+                        data-testid="allow-ip-restriction-input"
+                        value={r.config.allow}
                       />
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
+                      <Box mt={2}>
+                        <Button type="submit" size="sm">
+                          Apply
+                        </Button>
+                      </Box>
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </GridItem>
           </Grid>
         </ExpandableCard>
@@ -347,7 +385,7 @@ const Controls: React.FC<ControlsProps> = ({
                   data-testid="ratelimit-service-dropdown"
                 >
                   {rateLimitingOptions.map((s) => (
-                    <option key={s.id} value={s.extForeignKey}>
+                    <option key={uid(s.id)} value={s.extForeignKey}>
                       {s.name}
                     </option>
                   ))}
@@ -395,11 +433,74 @@ const Controls: React.FC<ControlsProps> = ({
                   There are no controls applied yet
                 </Text>
               )}
-              <UnorderedList data-testid="ratelimit-results">
-                {rateLimits.map((r) => (
-                  <ListItem key={uid(r)}>{getControlName(r)}</ListItem>
+              <Accordion reduceMotion>
+                {rateLimits.map((r, index) => (
+                  <AccordionItem key={uid(r, index)} border="none" p2={3}>
+                    <h2>
+                      <AccordionButton
+                        px={3}
+                        borderLeft="2px solid"
+                        borderLeftColor="bc-gray"
+                        sx={{
+                          _expanded: {
+                            borderLeftColor: 'bc-blue',
+                          },
+                        }}
+                      >
+                        <Box flex="1" textAlign="left">
+                          {getControlName(r)}
+                          <IconButton
+                            aria-label="delete restriction"
+                            icon={<Icon as={FaTrash} />}
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveRestriction(r)}
+                          />
+                        </Box>
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel
+                      as="form"
+                      px={3}
+                      pb={3}
+                      borderLeft="2px solid"
+                      borderLeftColor="bc-gray"
+                      onSubmit={handleRestrictionUpdate(r, index)}
+                    >
+                      <HStack spacing={5} mb={5}>
+                        {['second', 'minute', 'hour', 'day'].map((t) => (
+                          <FormControl key={t}>
+                            <FormLabel>{startCase(t)}</FormLabel>
+                            <Input
+                              defaultValue={r.config[t]}
+                              placeholder="00"
+                              type="number"
+                              name={t}
+                              data-testid={`ratelimit-${t}-input`}
+                            />
+                          </FormControl>
+                        ))}
+                      </HStack>
+                      <FormControl>
+                        <FormLabel>Policy</FormLabel>
+                        <Select
+                          name="policy"
+                          defaultValue={r.config.policy as string}
+                          data-testid="ratelimit-policy-dropdown"
+                        >
+                          <option value="local">Local</option>
+                          <option value="redis">Redis</option>
+                        </Select>
+                      </FormControl>
+                      <Box mt={2}>
+                        <Button type="submit" size="sm">
+                          Apply
+                        </Button>
+                      </Box>
+                    </AccordionPanel>
+                  </AccordionItem>
                 ))}
-              </UnorderedList>
+              </Accordion>
             </GridItem>
           </Grid>
         </ExpandableCard>
