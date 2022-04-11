@@ -272,7 +272,7 @@ const apps = [
     isAccessAllowed: (user: any) => {
       // console.log('isAllowed?');
       // console.log(JSON.stringify(user));
-      return true;
+      return false;
     },
   }),
   new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
