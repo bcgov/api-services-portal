@@ -15,6 +15,7 @@ import {
 import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
+import Link from 'next/link';
 
 interface AuthActionProps {
   site: string;
@@ -29,14 +30,11 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   if (!user) {
     return (
-      <Button
-        as="a"
-        variant="secondary"
-        href="/admin/signin"
-        data-testid="login-btn"
-      >
-        Login
-      </Button>
+      <Link passHref href="/login">
+        <Button as="a" variant="secondary" data-testid="login-btn">
+          Login
+        </Button>
+      </Link>
     );
   }
 
