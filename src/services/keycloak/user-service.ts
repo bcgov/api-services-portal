@@ -42,7 +42,7 @@ export class KeycloakUserService {
     clientId: string,
     clientSecret: string
   ): Promise<KeycloakUserService> {
-    logger.debug('[login] %s:%s', clientId, clientSecret);
+    logger.debug('[login] %s', clientId);
 
     await this.kcAdminClient
       .auth({

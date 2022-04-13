@@ -37,6 +37,7 @@ import {
 import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity } from './types';
+import { isParent } from '../../services/org-groups/group-converter-utils';
 
 @injectable()
 @Route('/organizations')
@@ -123,7 +124,7 @@ export class OrganizationController extends Controller {
   ): Promise<void> {
     // must match either the 'name' or the leaf of the 'parent'
     assert.strictEqual(
-      org === body.name || org === leaf(body.parent),
+      org === body.name || isParent(body.parent, org),
       true,
       'Organization mismatch'
     );
