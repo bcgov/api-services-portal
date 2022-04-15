@@ -26,7 +26,7 @@ export class GWAService {
     const url = `${this.gwaUrl}/v2/namespaces/${ns}`;
     logger.debug('[deleteAllGatewayConfiguration] ns=%s', ns);
     return await fetch(url, {
-      method: 'post',
+      method: 'delete',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer $subjectToken`,
