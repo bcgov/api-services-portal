@@ -31,8 +31,6 @@ export class GWAService {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${subjectToken}`,
       },
-    })
-      .then(checkStatus)
-      .then((res) => res.json());
+    }).then(checkStatus);
   }
 }
