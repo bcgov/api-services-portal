@@ -29,7 +29,7 @@ export class GWAService {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer $subjectToken`,
+        Authorization: `Bearer ${subjectToken}`,
       },
     })
       .then(checkStatus)
