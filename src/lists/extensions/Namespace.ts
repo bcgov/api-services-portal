@@ -36,6 +36,7 @@ import {
   camelCaseAttributes,
   transformSingleValueAttributes,
 } from '../../services/utils';
+import getSubjectToken from '../../auth/auth-token';
 
 const typeUserContact = `
   type UserContact {
@@ -498,6 +499,7 @@ module.exports = {
               }
               await DeleteNamespace(
                 context.createContext({ skipAccessControl: true }),
+                getSubjectToken(context.req),
                 args.namespace
               );
               resourcesApi.deleteResourceSet(nsResource[0].id);

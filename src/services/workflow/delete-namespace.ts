@@ -111,7 +111,11 @@ export const DeleteNamespaceRecordActivity = async (
   return r;
 };
 
-export const DeleteNamespace = async (context: any, ns: string) => {
+export const DeleteNamespace = async (
+  context: any,
+  subjectToken: string,
+  ns: string
+) => {
   logger.debug('Deleting Namespace ns=%s', ns);
   assert.strictEqual(
     typeof ns === 'string' && ns.length > 0,
@@ -127,10 +131,7 @@ export const DeleteNamespace = async (context: any, ns: string) => {
 
   const gwaService = new GWAService(process.env.GWA_API_URL);
 
-  await gwaService.deleteAllGatewayConfiguration(
-    getSubjectToken(context.req),
-    ns
-  );
+  await gwaService.deleteAllGatewayConfiguration(subjectToken, ns);
 
   const activity = await DeleteNamespaceRecordActivity(context, ns);
 
