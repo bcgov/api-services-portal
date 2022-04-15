@@ -350,7 +350,11 @@ components:
             nullable: true
         Namespace:
             properties:
-                permProtected:
+                orgUnit:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                org:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'

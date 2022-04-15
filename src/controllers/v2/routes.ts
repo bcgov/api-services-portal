@@ -234,7 +234,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Namespace": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"permProtected":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgUnit":{"ref":"Maybe_Scalars-at-String_"},"org":{"ref":"Maybe_Scalars-at-String_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DateTime": {

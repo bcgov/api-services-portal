@@ -59,7 +59,7 @@ import {
     );
   }
 
-  const records = await getActivity(ctx, ['orgcontrol'], 1);
+  const records = await getActivity(ctx, ['simple'], 5);
 
   o(
     records
