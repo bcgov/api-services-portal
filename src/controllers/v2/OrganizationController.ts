@@ -122,7 +122,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Body() body: GroupMembership
   ): Promise<void> {
-    // must match either the 'name' or the leaf of the 'parent'
+    // must match either the 'name' or one of the parent nodes
     assert.strictEqual(
       org === body.name || isParent(body.parent, org),
       true,
