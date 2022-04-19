@@ -59,12 +59,13 @@ import {
     );
   }
 
-  const records = await getActivity(ctx, ['orgcontrol'], 1);
+  const records = await getActivity(ctx, ['simple'], 20);
 
   o(
     records
       .map((o) => removeEmpty(o))
       // .map((o) => transformAllRefID(o, ['blob']))
+      .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o))
   );
 

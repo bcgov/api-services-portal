@@ -4,12 +4,19 @@ import {
   root,
   convertToOrgGroup,
 } from '../../../services/org-groups';
+import { isParent } from '../../../services/org-groups/group-converter-utils';
 
 describe('Group Access', function () {
   it('should get correct leaf', async function () {
     expect(leaf('/role/parent/child')).toBe('child');
     expect(leaf('/role/parent')).toBe('parent');
     expect(leaf('/role')).toBe('');
+  });
+
+  it('should get correct true leaf', async function () {
+    expect(leaf('/role/parent/child', true)).toBe('child');
+    expect(leaf('/role/parent', true)).toBe('parent');
+    expect(leaf('/role', true)).toBe('role');
   });
 
   it('should get correct root', async function () {
@@ -53,5 +60,13 @@ describe('Group Access', function () {
     const og = convertToOrgGroup('/role');
     expect(og.name).toBe('role');
     expect(og.parent).toBe('');
+  });
+
+  it('should get correct parent', async function () {
+    expect(isParent('/role/parent/child', 'role')).toBe(true);
+    expect(isParent('/role/parent/child', 'parent')).toBe(true);
+    expect(isParent('/role/parent/child', 'child')).toBe(true);
+    expect(isParent('/role/parent/child', 'other')).toBe(false);
+    expect(isParent('/role', 'role')).toBe(true);
   });
 });

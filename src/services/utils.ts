@@ -14,3 +14,38 @@ export function dateRange(days = 5): string[] {
 
   return result;
 }
+
+export function transformSingleValueAttributes(
+  object: any,
+  keys: string[]
+): void {
+  keys.forEach((k) => {
+    const data = object[k];
+    if (data && data.length > 0) {
+      object[k] = data[0];
+    } else {
+      delete object[k];
+    }
+  });
+}
+
+function camelize(str: string) {
+  return str
+    .replace(/-/g, ' ')
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word: string, index: number) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, '');
+}
+
+export function camelCaseAttributes(object: any, keys: string[]): void {
+  keys.forEach((k) => {
+    if (object[k]) {
+      const newKey = camelize(k);
+      if (newKey != k) {
+        object[newKey] = object[k];
+        delete object[k];
+      }
+    }
+  });
+}

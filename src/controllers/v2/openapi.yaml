@@ -350,7 +350,11 @@ components:
             nullable: true
         Namespace:
             properties:
-                permProtected:
+                orgUnit:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                org:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
@@ -608,7 +612,7 @@ components:
             bearerFormat: JWT
 info:
     title: 'APS Directory API'
-    version: 0.1.0
+    version: 1.1.0
     description: 'API Services Portal by BC Gov API Programme Services'
     license:
         name: MIT

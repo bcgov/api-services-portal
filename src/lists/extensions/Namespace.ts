@@ -31,6 +31,13 @@ import {
   DeleteNamespace,
   DeleteNamespaceValidate,
 } from '../../services/workflow/delete-namespace';
+import { GWAService } from '../../services/gwaapi';
+import {
+  camelCaseAttributes,
+  transformSingleValueAttributes,
+} from '../../services/utils';
+import getSubjectToken from '../../auth/auth-token';
+import { NamespaceService } from '../../services/org-groups';
 
 const typeUserContact = `
   type UserContact {
@@ -48,7 +55,9 @@ type Namespace {
     prodEnvId: String,
     permDomains: [String],
     permDataPlane: String,
-    permProtected: String
+    permProtectedNs: String,
+    org: String,
+    orgUnit: String
 }
 `;
 
@@ -213,23 +222,34 @@ module.exports = {
                 args.ns
               );
 
-              // perm-protected-ns
-              // perm-domains
-              // perm-data-plane
+              transformSingleValueAttributes(nsPermissions.attributes, [
+                'perm-data-plane',
+                'perm-protected-ns',
+                'org',
+                'org-unit',
+              ]);
 
-              (detail as any).permProtected =
-                'perm-protected-ns' in nsPermissions.attributes
-                  ? nsPermissions.attributes['perm-protected-ns'][0]
-                  : 'deny';
-              (detail as any).permDomains =
-                'perm-domains' in nsPermissions.attributes
-                  ? nsPermissions.attributes['perm-domains']
-                  : [];
-              (detail as any).permDataPlane =
-                'perm-data-plane' in nsPermissions.attributes
-                  ? nsPermissions.attributes['perm-data-plane'][0]
-                  : '';
-              return detail;
+              logger.debug('[namespace] %j', nsPermissions.attributes);
+
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
+
+              logger.debug('[namespace] Default Settings %j', defaultSettings);
+
+              const merged = {
+                ...detail,
+                ...defaultSettings,
+                ...nsPermissions.attributes,
+              };
+              camelCaseAttributes(merged, [
+                'perm-domains',
+                'perm-data-plane',
+                'perm-protected-ns',
+                'org',
+                'org-unit',
+              ]);
+              logger.debug('[namespace] Result %j', merged);
+              return merged;
             },
             access: EnforcementPoint,
           },
@@ -338,9 +358,18 @@ module.exports = {
                 access
               );
 
+              const nsService = new NamespaceService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              await nsService.checkNamespaceAvailable(args.namespace);
+
               // This function gets all resources but also sets the accessToken in envCtx
               // which we need to create the resource set
-              const resourceIds = await getResourceSets(envCtx);
+              await getResourceSets(envCtx);
 
               const resourceApi = new UMAResourceRegistrationService(
                 envCtx.uma2.resource_registration_endpoint,
@@ -480,9 +509,21 @@ module.exports = {
               }
               await DeleteNamespace(
                 context.createContext({ skipAccessControl: true }),
+                getSubjectToken(context.req),
                 args.namespace
               );
               resourcesApi.deleteResourceSet(nsResource[0].id);
+
+              // Last thing to do is mark the Namespace group 'decommissioned'
+              const nsService = new NamespaceService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              await nsService.markNamespaceAsDecommissioned(args.namespace);
+
               return true;
             },
             access: EnforcementPoint,
