@@ -37,6 +37,7 @@ import {
   transformSingleValueAttributes,
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
+import { NamespaceService } from '../../services/org-groups';
 
 const typeUserContact = `
   type UserContact {
@@ -357,9 +358,18 @@ module.exports = {
                 access
               );
 
+              const nsService = new NamespaceService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              await nsService.checkNamespaceAvailable(args.namespace);
+
               // This function gets all resources but also sets the accessToken in envCtx
               // which we need to create the resource set
-              const resourceIds = await getResourceSets(envCtx);
+              await getResourceSets(envCtx);
 
               const resourceApi = new UMAResourceRegistrationService(
                 envCtx.uma2.resource_registration_endpoint,
@@ -503,6 +513,17 @@ module.exports = {
                 args.namespace
               );
               resourcesApi.deleteResourceSet(nsResource[0].id);
+
+              // Last thing to do is mark the Namespace group 'decommissioned'
+              const nsService = new NamespaceService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              await nsService.markNamespaceAsDecommissioned(args.namespace);
+
               return true;
             },
             access: EnforcementPoint,

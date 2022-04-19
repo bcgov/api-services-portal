@@ -28,7 +28,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   //const groups = await kc.search('orgcontrol');
   //o(groups);
 
-  const groupByName = await kc.findByName('ns', 'orgcontrol', false);
+  const groupByName = await kc.findByName('ns', 'simple', false);
   o(groupByName);
 
   // console.log(await kc.listMembers('660cadef-9233-4532-ba45-5393beaddea4'));

@@ -123,17 +123,13 @@ export const DeleteNamespace = async (
     'Invalid namespace'
   );
 
-  //const gwServices = await lookupServicesByNamespace(context, ns);
-
-  const envs = await lookupEnvironmentsByNS(context, ns);
-
-  const ids = envs.map((e: Environment) => e.id);
+  const activity = await DeleteNamespaceRecordActivity(context, ns);
 
   const gwaService = new GWAService(process.env.GWA_API_URL);
-
   await gwaService.deleteAllGatewayConfiguration(subjectToken, ns);
 
-  const activity = await DeleteNamespaceRecordActivity(context, ns);
+  const envs = await lookupEnvironmentsByNS(context, ns);
+  const ids = envs.map((e: Environment) => e.id);
 
   for (const envId of ids) {
     await CascadeDeleteEnvironment(context, ns, envId);

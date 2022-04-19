@@ -105,6 +105,29 @@ export class NamespaceService {
     return false;
   }
 
+  async markNamespaceAsDecommissioned(ns: string): Promise<boolean> {
+    const group = await this.groupService.getGroup('ns', ns);
+
+    logger.debug('[markNamespaceAsDecommissioned] %s - Group = %j', ns, group);
+
+    assert.strictEqual(group === null, false, 'Namespace not found');
+
+    assert.strictEqual(
+      'decommissioned' in group.attributes,
+      false,
+      `[${ns}] Namespace already decommissioned`
+    );
+
+    group.attributes['decommissioned'] = ['true'];
+    await this.groupService.updateGroup(group);
+    return true;
+  }
+
+  async checkNamespaceAvailable(ns: string): Promise<void> {
+    const group = await this.groupService.getGroup('ns', ns);
+    assert.strictEqual(group === null, true, 'Namespace already exists');
+  }
+
   async listAssignedNamespacesByOrg(org: string): Promise<OrgNamespace[]> {
     const groups = await this.groupService.getGroups('ns', false);
     assert.strictEqual(
