@@ -35,6 +35,17 @@ const OrgGroupsList: React.FC<OrgGroupsListProps> = ({
   const client = useQueryClient();
   const list = data?.sort((a, b) => a.name.localeCompare(b.name));
 
+  function camelize(str) {
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word: string) {
+        return word.toUpperCase();
+      })
+      .replace(/\s+/g, ' ');
+  }
+
+  const format = (s: string, i: number) =>
+    camelize(s.split('/')[i + 1].replace(/-/g, ' '));
+
   return (
     <>
       <Table variant="simple">
@@ -52,8 +63,10 @@ const OrgGroupsList: React.FC<OrgGroupsListProps> = ({
             .map((item) => (
               <Tr key={item.id}>
                 <Td>
-                  {item.groups.map((g) => (
-                    <p>{g}</p>
+                  {item.groups.map((g, i) => (
+                    <span>
+                      {i > 0 && ' > '} {format(g, i)}
+                    </span>
                   ))}
                 </Td>
                 <Td>

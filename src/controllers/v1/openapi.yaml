@@ -46,7 +46,7 @@ components:
                     scopes: {}
 info:
     title: bcgov-aps-portal
-    version: 0.1.0
+    version: 1.1.0
     description: 'API Services Portal by BC Gov API Programme Services'
     license:
         name: MIT

@@ -26,6 +26,8 @@ import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { FieldErrors } from 'tsoa';
 import { updateActivity } from '../keystone/activity';
 import { CascadeDeleteEnvironment } from './delete-environment';
+import { GWAService } from '../gwaapi';
+import getSubjectToken from '../../auth/auth-token';
 
 const logger = Logger('wf.DeleteNamespace');
 
@@ -109,7 +111,11 @@ export const DeleteNamespaceRecordActivity = async (
   return r;
 };
 
-export const DeleteNamespace = async (context: any, ns: string) => {
+export const DeleteNamespace = async (
+  context: any,
+  subjectToken: string,
+  ns: string
+) => {
   logger.debug('Deleting Namespace ns=%s', ns);
   assert.strictEqual(
     typeof ns === 'string' && ns.length > 0,
@@ -117,19 +123,13 @@ export const DeleteNamespace = async (context: any, ns: string) => {
     'Invalid namespace'
   );
 
-  const gwServices = await lookupServicesByNamespace(context, ns);
+  const activity = await DeleteNamespaceRecordActivity(context, ns);
+
+  const gwaService = new GWAService(process.env.GWA_API_URL);
+  await gwaService.deleteAllGatewayConfiguration(subjectToken, ns);
 
   const envs = await lookupEnvironmentsByNS(context, ns);
-
   const ids = envs.map((e: Environment) => e.id);
-
-  assert.strictEqual(
-    gwServices.length == 0,
-    true,
-    `Gateway Services still exist for this namespace.`
-  );
-
-  const activity = await DeleteNamespaceRecordActivity(context, ns);
 
   for (const envId of ids) {
     await CascadeDeleteEnvironment(context, ns, envId);

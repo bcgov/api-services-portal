@@ -22,11 +22,13 @@ import { KeycloakGroupService } from '../../../services/keycloak';
 
   await kc.login(process.env.CID, process.env.CSC);
 
-  await kc.assignNamespaceToOrganization(
-    'feature-myacc',
-    'ministry-citizens-services',
-    'databc'
-  );
+  if (false) {
+    await kc.assignNamespaceToOrganization(
+      'feature-myacc',
+      'ministry-citizens-services',
+      'databc'
+    );
+  }
 
   // await kc.unassignNamespaceFromOrganization(
   //   'refactortime',
@@ -37,4 +39,7 @@ import { KeycloakGroupService } from '../../../services/keycloak';
   console.log(
     await kc.listAssignedNamespacesByOrg('ministry-citizens-services')
   );
+
+  console.log(await kc.checkNamespaceAvailable('simple'));
+  //  await kc.markNamespaceAsDecommissioned('simple');
 })();
