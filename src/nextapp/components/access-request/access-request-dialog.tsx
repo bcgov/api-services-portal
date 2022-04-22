@@ -41,8 +41,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const [tabIndex, setTabIndex] = React.useState(0);
-  const [restrictions, setRestrictions] = React.useState([]);
-  const [rateLimits, setRateLimits] = React.useState([]);
+  const restrictions = React.useState([]);
+  const rateLimits = React.useState([]);
   const approveMutate = useApiMutation(approveMutation, {
     onSuccess() {
       client.invalidateQueries(queryKey);
@@ -70,12 +70,6 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   });
   const toast = useToast();
 
-  const handleUpdateRateLimits = React.useCallback((payload) => {
-    setRateLimits((state) => [...state, payload]);
-  }, []);
-  const handleUpdateRestrictions = (payload) => {
-    setRestrictions((state) => [...state, payload]);
-  };
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
@@ -112,7 +106,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       await approveMutate.mutateAsync({
         id: data.id,
         controls: JSON.stringify({
-          plugins: [...restrictions, ...rateLimits],
+          plugins: [...restrictions[0], ...rateLimits[0]],
           defaultClientScopes,
           roles,
         }),
@@ -178,8 +172,6 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             data-testid="ar-controls-tab"
           >
             <RequestControls
-              onUpdateRateLimits={handleUpdateRateLimits}
-              onUpdateRestrictions={handleUpdateRestrictions}
               rateLimits={rateLimits}
               restrictions={restrictions}
             />

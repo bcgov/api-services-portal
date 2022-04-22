@@ -16,7 +16,7 @@ import { uid } from 'react-uid';
 import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationProps {
-  credentialIssuer: CredentialIssuer;
+  credentialIssuer?: CredentialIssuer;
   id: string;
 }
 
@@ -26,8 +26,8 @@ const Authorization: React.FC<AuthorizationProps> = ({
 }) => {
   const defaultValues: string[] = React.useMemo(() => {
     try {
-      const availableScopes = JSON.parse(credentialIssuer.availableScopes);
-      const clientRoles = JSON.parse(credentialIssuer.clientRoles);
+      const availableScopes = JSON.parse(credentialIssuer?.availableScopes);
+      const clientRoles = JSON.parse(credentialIssuer?.clientRoles);
 
       return [...availableScopes, ...clientRoles];
     } catch {

@@ -45,8 +45,8 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const client = useQueryClient();
   const { user } = useAuth();
   const [tabIndex, setTabIndex] = React.useState(0);
-  const [restrictions, setRestrictions] = React.useState([]);
-  const [rateLimits, setRateLimits] = React.useState([]);
+  const restrictions = React.useState([]);
+  const rateLimits = React.useState([]);
   const [product, setProduct] = React.useState(null);
   const environmentRef = React.useRef<HTMLSelectElement>(null);
   const { data, isLoading, isSuccess } = useApi(
@@ -65,13 +65,6 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
     },
   });
   const toast = useToast();
-
-  const handleUpdateRateLimits = React.useCallback((payload) => {
-    setRateLimits((state) => [...state, payload]);
-  }, []);
-  const handleUpdateRestrictions = React.useCallback((payload) => {
-    setRestrictions((state) => [...state, payload]);
-  }, []);
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
@@ -187,8 +180,6 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               display={tabIndex === 0 ? 'block' : 'none'}
             >
               <RequestControls
-                onUpdateRateLimits={handleUpdateRateLimits}
-                onUpdateRestrictions={handleUpdateRestrictions}
                 rateLimits={rateLimits}
                 restrictions={restrictions}
               />

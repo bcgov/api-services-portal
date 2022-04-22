@@ -112,25 +112,27 @@ export const getConsumerHandler = (req, res, ctx) => {
             name: 'rate-limiting',
             service: {
               id: '1231',
-              name: 'service-1',
+              name: 'service-aps-portal-dev-api',
             },
             route: null,
             protocols: ['http', 'https'],
-            config: {
+            config: JSON.stringify({
               second: '1',
               minute: '1',
               hour: '1',
               day: '1',
               policy: 'local',
               service: '1231',
-            },
+            }),
           },
           {
             name: 'ip-restriction',
-            config: { allow: '["1.1.1.1","2.2.2.2"]' },
+            config: JSON.stringify({
+              allow: JSON.stringify(['1.1.1.1', '2.2.2.2']),
+            }),
             service: {
               id: '1231',
-              name: 'service-1',
+              name: 'service-aps-portal-dev-api',
             },
             route: null,
           },
@@ -139,17 +141,17 @@ export const getConsumerHandler = (req, res, ctx) => {
             service: null,
             route: {
               id: '22',
-              name: 'route-1',
+              name: 'route-aps-portal-dev-api',
             },
             protocols: ['http', 'https'],
-            config: {
+            config: JSON.stringify({
               second: '20',
               minute: '20',
               hour: '20',
               day: '20',
               policy: 'redis',
               service: '1231',
-            },
+            }),
           },
         ],
       },
@@ -170,7 +172,7 @@ export const getConsumerHandler = (req, res, ctx) => {
             },
             services: [
               {
-                name: 'service-1',
+                name: 'service-aps-portal-dev-api',
               },
             ],
           },
@@ -193,7 +195,7 @@ export const getConsumerHandler = (req, res, ctx) => {
               },
               services: [
                 {
-                  name: 'route-1',
+                  name: 'route-aps-portal-dev-api',
                 },
               ],
             },
@@ -210,7 +212,7 @@ export const getConsumerHandler = (req, res, ctx) => {
               flow: 'client-credentials',
               services: [
                 {
-                  name: 'service-1',
+                  name: 'service-aps-portal-dev-api',
                 },
               ],
             },

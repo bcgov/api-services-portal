@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   Box,
+  FormErrorMessage,
   Input,
   InputProps,
   Tag,
@@ -13,6 +14,7 @@ import {
 import { uid } from 'react-uid';
 
 interface TagInputProps extends InputProps {
+  error?: string;
   id?: string;
   name?: string;
   placeholder?: string;
@@ -27,7 +29,9 @@ const TagInput: React.FC<TagInputProps> = ({
   ...props
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const styles = useMultiStyleConfig('Input', { variant: 'bc-input' });
+  const styles = useMultiStyleConfig('Input', {
+    variant: 'bc-input',
+  });
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
   const [values, setValues] = React.useState<string[]>(() => {
     try {
@@ -123,6 +127,7 @@ const TagInput: React.FC<TagInputProps> = ({
         onClick={handleContainerClick}
         cursor="text"
         data-testid={props['data-testid']}
+        borderColor={props.isInvalid ? 'bc-error' : 'bc-component'}
       >
         <Wrap spacing={2}>
           {values.map((v, index) => (

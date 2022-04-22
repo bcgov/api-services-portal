@@ -1,15 +1,20 @@
-export interface IpRestrictionPayload {
-  name: string;
-  route?: {
-    id: string;
-  };
-  service?: {
-    id: string;
-  };
-  config: {
-    allow: string;
-  };
-  tags: string[];
+import {
+  GatewayPlugin,
+  GatewayPluginCreateInput,
+} from '@/shared/types/query.types';
+
+export interface IpRestrictionConfig {
+  allow: string;
+}
+export interface IpRestrictionPayload
+  extends Omit<GatewayPluginCreateInput, 'config'> {
+  config: IpRestrictionConfig;
+}
+
+export interface IpRestrictionRecord
+  extends Omit<GatewayPlugin, 'config' | 'id'> {
+  id?: string;
+  config: IpRestrictionConfig;
 }
 
 export interface RateLimitingConfig {
@@ -28,15 +33,21 @@ export interface RateLimitingForm extends RateLimitingConfig {
   route?: string;
   service?: string;
 }
-export interface RateLimitingPayload {
-  name: string;
-  protocols: string[];
-  route?: {
-    id: string;
-  };
-  service?: {
-    id: string;
-  };
+
+export interface RateLimitingPayload
+  extends Omit<GatewayPluginCreateInput, 'config'> {
   config: RateLimitingConfig;
-  tags: string[];
 }
+
+export interface RateLimitingPayload
+  extends Omit<GatewayPluginCreateInput, 'config'> {
+  config: RateLimitingConfig;
+}
+export interface RateLimitingRecord
+  extends Omit<GatewayPlugin, 'config' | 'id'> {
+  id?: string;
+  config: RateLimitingConfig;
+}
+
+export type RateLimitingItem = RateLimitingPayload | RateLimitingRecord;
+export type IpRestrictionItem = IpRestrictionPayload | IpRestrictionRecord;

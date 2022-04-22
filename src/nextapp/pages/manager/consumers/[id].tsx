@@ -87,10 +87,12 @@ const ConsumerPage: React.FC<
 
   function renderRow(product: Product, environment: Environment) {
     const tags = [];
+    const plugins = [];
     environment.services.forEach((d) => {
       data.getGatewayConsumerPlugins.plugins
         .filter((p) => p.service?.name === d.name || p.route?.name === d.name)
         .forEach((p) => {
+          plugins.push(p);
           tags.push(
             <Tag key={d.name} variant="outline">
               {p.name}
@@ -115,7 +117,8 @@ const ConsumerPage: React.FC<
         <Td textAlign="right">
           <ConsumerEditDialog
             consumer={consumer}
-            data={environment}
+            environment={environment}
+            data={plugins}
             queryKey={queryKey}
             product={product}
           />

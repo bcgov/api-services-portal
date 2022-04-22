@@ -13,23 +13,19 @@ import {
   Tabs,
   TabList,
   Tab,
-  useToast,
   Icon,
   useDisclosure,
   GridItem,
   Grid,
 } from '@chakra-ui/react';
 import {
-  AccessRequest,
+  CredentialIssuer,
   Environment,
   GatewayConsumer,
+  GatewayPlugin,
+  GatewayPluginCreateInput,
   Product,
-  Query,
 } from '@/shared/types/query.types';
-import format from 'date-fns/format';
-import { gql } from 'graphql-request';
-import { useApiMutation } from '@/shared/services/api';
-import { useQueryClient } from 'react-query';
 import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
@@ -37,65 +33,45 @@ import RequestAuthorization from './authorization';
 
 interface ConsumerEditDialogProps {
   consumer: GatewayConsumer;
-  data: Environment;
+  data: GatewayPlugin[];
+  environment: Environment;
   product: Product;
   queryKey: string;
 }
 
 const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   consumer,
+  environment,
   data,
   product,
   queryKey,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tabIndex, setTabIndex] = React.useState(0);
-  const [restrictions, setRestrictions] = React.useState(() => {
-    const restrictionConfigs = consumer.plugins
-      .filter((p) => p.name === 'ip-restriction')
-      .filter((p) => {
-        const name = p.service?.name ?? p.route?.name;
-        return data.services.some((s) => s.name === name);
-      });
-    return restrictionConfigs;
+  const restrictions = React.useState<
+    (GatewayPlugin | GatewayPluginCreateInput)[]
+  >(() => {
+    return data.filter((p) => p.name === 'ip-restriction');
   });
-  const [rateLimits, setRateLimits] = React.useState(() => {
-    const restrictionConfigs = consumer.plugins
-      .filter((p) => p.name === 'rate-limiting')
-      .filter((p) => {
-        const name = p.service?.name ?? p.route?.name;
-        return data.services.some((s) => s.name === name);
-      });
-    return restrictionConfigs;
+  const rateLimits = React.useState(() => {
+    return data.filter((p) => p.name === 'rate-limiting');
   });
-
   // Events
-  const handleUpdateRateLimits = React.useCallback((payload) => {
-    setRateLimits((state) => [...state, payload]);
-  }, []);
-  const handleUpdateRestrictions = (payload: any, index?: number) => {
-    setRestrictions((state) => {
-      if (index !== undefined) {
-        return state.map((s, i) => {
-          if (i === index) {
-            return payload;
-          }
-          return s;
-        });
-      }
-      if (state.includes(payload)) {
-        return state.filter((s) => s !== payload);
-      } else {
-        return [...state, payload];
-      }
-    });
-  };
   const handleTabChange = React.useCallback((index) => {
     setTabIndex(index);
   }, []);
   const handleSave = React.useCallback(() => {
-    console.log(restrictions);
-  }, [restrictions]);
+    const [restrictsionsData] = restrictions;
+    const [rateLimitsData] = rateLimits;
+    console.log('ip-restriction', restrictsionsData, rateLimitsData);
+  }, [restrictions, rateLimits]);
+  const handleClose = () => {
+    const [, setRestrictions] = restrictions;
+    const [, setRateLimits] = rateLimits;
+    setRestrictions(data.filter((p) => p.name === 'ip-restriction'));
+    setRateLimits(data.filter((p) => p.name === 'rate-limiting'));
+    onClose();
+  };
 
   return (
     <>
@@ -110,7 +86,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       <Modal
         closeOnEsc={false}
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         scrollBehavior="inside"
         size="4xl"
       >
@@ -135,7 +111,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               </TabList>
             </Tabs>
           </ModalHeader>
-          <ModalCloseButton data-testid="access-request-close-btn" />
+          <ModalCloseButton data-testid="consumer-edit-close-btn" />
           <ModalBody>
             <Box
               hidden={tabIndex !== 0}
@@ -143,8 +119,6 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               data-testid="ar-controls-tab"
             >
               <RequestControls
-                onUpdateRateLimits={handleUpdateRateLimits}
-                onUpdateRestrictions={handleUpdateRestrictions}
                 rateLimits={rateLimits}
                 restrictions={restrictions}
               />
@@ -155,8 +129,8 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               data-testid="ar-authorization-tab"
             >
               <RequestAuthorization
-                credentialIssuer={data.credentialIssuer}
-                id={data.id}
+                credentialIssuer={environment.credentialIssuer}
+                id={environment.id}
               />
             </Box>
             <Box
@@ -191,7 +165,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               <Button
                 variant="secondary"
                 data-testid="ar-edit-cancel-btn"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 Cancel
               </Button>
