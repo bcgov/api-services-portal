@@ -83,14 +83,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
-  const handleTabChange = React.useCallback(
-    (index) => {
-      if (id) {
-        setTabIndex(index);
-      }
-    },
-    [id]
-  );
+  const handleTabChange = React.useCallback((index) => {
+    setTabIndex(index);
+  }, []);
   const handleCreateProfile = React.useCallback(
     async (payload: CredentialIssuer) => {
       try {
@@ -247,10 +242,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                   <Tab px={0} cursor="default">
                     Authentication
                   </Tab>
-                  <Tab px={0} ml={4} cursor="default" isDisabled={isKongFlow}>
+                  <Tab px={0} ml={4} cursor="default">
                     Authorization
                   </Tab>
-                  <Tab px={0} ml={4} cursor="default" isDisabled={isKongFlow}>
+                  <Tab px={0} ml={4} cursor="default">
                     Client Management
                   </Tab>
                   <Box flex={1} />
