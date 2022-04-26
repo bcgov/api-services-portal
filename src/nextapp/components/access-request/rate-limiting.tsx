@@ -32,12 +32,7 @@ import {
 } from '@/shared/types/query.types';
 
 import ScopeControl from './scope-control';
-import type {
-  IpRestrictionItem,
-  IpRestrictionConfig,
-  RateLimitingConfig,
-  RateLimitingItem,
-} from './types';
+import type { RateLimitingConfig, RateLimitingItem } from './types';
 
 interface RateLimitingProps {
   getControlName: (plugin: unknown) => string;
@@ -91,7 +86,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
     event.preventDefault();
     setRateLimits((state) => state.filter((_, i) => i !== index));
   };
-  const handleUpdate = (_, index: number) => (event) => {
+  const handleUpdate = (index: number) => (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const config = Object.fromEntries(form);
@@ -119,7 +114,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
           <ScopeControl
             routeOptions={routeOptions}
             serviceOptions={serviceOptions}
-            testId="ip-restriction"
+            testId="rate-limiting"
           >
             <HStack spacing={5} mb={5}>
               {['second', 'minute', 'hour', 'day'].map((t) => (
@@ -201,7 +196,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                     pb={3}
                     borderLeft="2px solid"
                     borderLeftColor="bc-gray"
-                    onSubmit={handleUpdate(r, index)}
+                    onSubmit={handleUpdate(index)}
                   >
                     <HStack spacing={5} mb={5}>
                       {['second', 'minute', 'hour', 'day'].map((t) => (

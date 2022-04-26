@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import { ExpandableCards } from '@/components/card';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
@@ -12,11 +12,6 @@ import {
 
 import IpRestrictions from './ip-restriction';
 import RateLimiting from './rate-limiting';
-import type {
-  RateLimitingItem,
-  IpRestrictionItem,
-  RateLimitingConfig,
-} from './types';
 
 interface ControlsProps {
   rateLimits: [
@@ -34,7 +29,11 @@ interface ControlsProps {
 }
 
 const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
-  const { data } = useApi('consumerControls', { query }, { suspense: false });
+  const { data, isLoading } = useApi(
+    'consumerControls',
+    { query },
+    { suspense: false }
+  );
 
   // Map the options for each of the route/service dropdowns
   const serviceOptions: GatewayService[] = React.useMemo(() => {
@@ -73,7 +72,8 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
   };
 
   return (
-    <Box>
+    <Box data-testid="controls">
+      {isLoading && <Text data-testid="controls-loading">Loading...</Text>}
       <ExpandableCards>
         <IpRestrictions
           getControlName={getControlName}

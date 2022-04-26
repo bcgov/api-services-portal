@@ -73,7 +73,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
         config: JSON.stringify({
           allow: entries.allow,
         }),
-        tags: "['consumer']",
+        tags: '["consumer"]',
       };
       if (entries.scope === 'route') {
         payload.route = {

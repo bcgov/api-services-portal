@@ -151,9 +151,12 @@ describe('access-request/access-request-dialog', () => {
             plugins: [
               {
                 name: 'ip-restriction',
-                config: { allow: ['["1.1.1.1"]'] },
-                tags: ['consumer'],
-                service: {},
+                config: JSON.stringify({ allow: '["1.1.1.1"]' }),
+                tags: '["consumer"]',
+                service: {
+                  // TODO: This should have a value, something isn't propagating
+                  connect: {},
+                },
               },
             ],
             defaultClientScopes: ['System/Patient'],
