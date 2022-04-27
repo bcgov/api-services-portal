@@ -89,6 +89,7 @@ const alertVariants = {
         paddingStart: 3,
         borderWidth: '1px',
         borderColor: color,
+        borderRadius: 4,
         bg: transparentize(color, 0.1)(theme),
       },
       icon: {

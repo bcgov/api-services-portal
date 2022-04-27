@@ -22,16 +22,13 @@ import {
   AccessRequest,
 } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
-import has from 'lodash/has';
 import { gql } from 'graphql-request';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
-import { IoEllipsisHorizontal } from 'react-icons/io5';
 import Card from '@/components/card';
 import { uid } from 'react-uid';
 
-import AccessStatus from './access-status';
-import GenerateCredentialsDialog from '../access-request-form/generate-credentials-dialog';
+import AccessListRow from './access-list-row';
 
 interface AccessListItemProps {
   data: (AccessRequest | ServiceAccess)[];
@@ -96,50 +93,12 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
           </Tr>
         </Thead>
         {data.map((d: AccessRequest & ServiceAccess, index) => (
-          <Tr key={uid(d.id)}>
-            <Td>
-              <AccessStatus
-                isIssued={d.isIssued ?? d.active === false}
-                isComplete={d.isComplete ?? d.active === false}
-                isApproved={d.isApproved ?? d.active}
-              />
-            </Td>
-            <Td>
-              <Tag
-                colorScheme={d.productEnvironment?.name}
-                variant="outline"
-                textTransform="capitalize"
-              >
-                {d.productEnvironment?.name}
-              </Tag>
-            </Td>
-            <Td>{d.application?.name}</Td>
-            <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
-              {(has(d, 'isApproved') ||
-                has(d, 'isIssued') ||
-                has(d, 'isComplete')) &&
-                (!d.isIssued || !d.isApproved) && (
-                  <GenerateCredentialsDialog id={d.id} />
-                )}
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  aria-label="product actions"
-                  icon={<Icon as={IoEllipsisHorizontal} />}
-                  color="bc-blue"
-                  variant="ghost"
-                />
-                <MenuList>
-                  <MenuItem
-                    color="bc-error"
-                    onClick={handleRevoke(d.id, has(d, 'isIssued'))}
-                  >
-                    Revoke Access
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            </Td>
-          </Tr>
+          <AccessListRow
+            key={uid(d.id)}
+            data={d}
+            index={index}
+            onRevoke={handleRevoke}
+          />
         ))}
       </Table>
     </Card>
