@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Button,
-  CircularProgress,
   Modal,
   ModalBody,
   ModalContent,
@@ -9,50 +8,54 @@ import {
   ModalOverlay,
   ModalHeader,
   Icon,
-  Box,
-  Text,
-  Link,
-  VStack,
   useDisclosure,
+  Progress,
 } from '@chakra-ui/react';
 import { FaDownload } from 'react-icons/fa';
 
-interface ExportReportProps {}
+// TODO: Investigate this api https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/downloads/download
+interface ExportReportProps {
+  onSubmit: () => boolean;
+  selected: string[];
+}
 
-const ExportReport: React.FC<ExportReportProps> = ({}) => {
+const ExportReport: React.FC<ExportReportProps> = ({ onSubmit, selected }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const search = React.useMemo(() => {
+    const params = new URLSearchParams({
+      ids: JSON.stringify(selected),
+    });
+    return params.toString();
+  }, [selected]);
+
+  const handleSubmit = () => {
+    const isValid = onSubmit();
+    if (isValid) {
+      onOpen();
+    }
+  };
 
   return (
     <>
       <Button
+        download
+        href={`/int/api/namespaces/report?${search}`}
         leftIcon={<Icon as={FaDownload} />}
-        variant="secondary"
-        onClick={onOpen}
+        onClick={handleSubmit}
       >
-        <Link href="/int/api/namespaces/report" download>
-          Export Report
-        </Link>
+        Export to Excel
       </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Generating Report</ModalHeader>
-          <ModalBody>
-            <VStack>
-              <Text>
-                The report can take a minute or two to create. After the report
-                is generated, it will be automatically downloaded.
-              </Text>
-              <Box>
-                <CircularProgress isIndeterminate color="green.300" />
-              </Box>
-            </VStack>
+          <ModalHeader>Exporting Reports</ModalHeader>
+          <ModalBody pt={8}>
+            <Progress isIndeterminate color="bc-blue" size="md" />
           </ModalBody>
-
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
+            <Button mr={3} onClick={onClose} variant="secondary">
+              Cancel
             </Button>
           </ModalFooter>
         </ModalContent>

@@ -1,17 +1,14 @@
 import * as React from 'react';
 import {
-  Button,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalOverlay,
   ModalHeader,
-  Icon,
   Box,
   Text,
   Flex,
-  Link,
   Divider,
   Center,
   Heading,
@@ -19,9 +16,7 @@ import {
   Checkbox,
 } from '@chakra-ui/react';
 import type { NamespaceData } from '@/shared/types/app.types';
-import { FaDownload } from 'react-icons/fa';
 
-import NamespaceDelete from '../namespace-delete';
 import ExportReport from './export-report';
 
 interface NamespaceManagerProps {
@@ -39,6 +34,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
   const [selected, setSelected] = React.useState<string[]>([]);
   const [isInvalid, setInvalid] = React.useState(false);
 
+  const handleClose = () => {
+    setSelectAll(false);
+    setSelected([]);
+    onClose();
+  };
   const handleChecked = React.useCallback(
     (id: string) => () => {
       setInvalid(false);
@@ -57,12 +57,14 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
     setSelectAll(event.target.checked);
     setInvalid(false);
   };
+  const handleClear = () => setSelectAll(false);
   const handleSubmit = React.useCallback(() => {
     if (selected.length === 0) {
       setInvalid(true);
-    } else {
-      setInvalid(false);
+      return false;
     }
+    setInvalid(false);
+    return true;
   }, [selected]);
 
   React.useEffect(() => {
@@ -77,21 +79,57 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
     <>
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         scrollBehavior="inside"
         size="xl"
       >
         <ModalOverlay />
         <ModalContent>
           <ModalCloseButton />
-          <ModalHeader>Export Namespace Report</ModalHeader>
-          <ModalBody px={0} maxH={300}>
-            <Box px={8} pb={4}>
+          <ModalHeader pb={0}>
+            <Heading size="inherit">Export Namespace Report</Heading>
+            <Box fontSize="md" fontWeight="normal" width="100%" mt={4}>
               <Text>
                 Export a detailed report of your namespace metrics and
                 activities
               </Text>
+              <Flex
+                align="center"
+                justify="space-between"
+                height={14}
+                borderBottom="2px solid"
+                borderColor="bc-yellow"
+              >
+                <Checkbox
+                  isChecked={selectAll}
+                  isInvalid={isInvalid}
+                  onChange={handleToggleSelectAll}
+                >
+                  {selected.length === data.length
+                    ? 'Select None'
+                    : 'Select All'}
+                </Checkbox>
+                <Box>
+                  {selected.length > 0 && (
+                    <Flex>
+                      <Text color="bc-component">{`${selected.length} selected`}</Text>
+                      <Text
+                        role="button"
+                        color="bc-componet"
+                        textDecor="underline"
+                        size="sm"
+                        ml={2}
+                        onClick={handleClear}
+                      >
+                        Clear
+                      </Text>
+                    </Flex>
+                  )}
+                </Box>
+              </Flex>
             </Box>
+          </ModalHeader>
+          <ModalBody px={0} maxH={300}>
             {data.length <= 0 && (
               <Center>
                 <Box my={8}>
@@ -102,22 +140,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                 </Box>
               </Center>
             )}
-            <Flex
-              align="center"
-              justify="space-between"
-              height={14}
-              mx={8}
-              borderBottom="2px solid"
-              borderColor="bc-yellow"
-            >
-              <Checkbox checked={selectAll} onChange={handleToggleSelectAll} />
-              {selected.length > 0 && (
-                <Text color="bc-component">{`${selected.length} selected`}</Text>
-              )}
-            </Flex>
             {data.map((n) => (
               <Flex
                 key={n.id}
+                as="label"
+                cursor="pointer"
                 height={14}
                 mx={8}
                 align="center"
@@ -142,11 +169,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                 <Text color="bc-error">*Please select a namespace</Text>
               )}
             </Box>
-            <Button leftIcon={<Icon as={FaDownload} />} onClick={handleSubmit}>
-              <Link href="/int/api/namespaces/report" download>
-                Export to Excel
-              </Link>
-            </Button>
+            <ExportReport selected={selected} onSubmit={handleSubmit} />
           </ModalFooter>
         </ModalContent>
       </Modal>
