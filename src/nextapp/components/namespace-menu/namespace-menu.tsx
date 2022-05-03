@@ -11,12 +11,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import {
-  FaChevronDown,
-  FaEdit,
-  FaNetworkWired,
-  FaPlusCircle,
-} from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
@@ -81,7 +76,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           {user?.namespace ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
-        <MenuList color="gray.600">
+        <MenuList
+          color="gray.600"
+          sx={{
+            '.chakra-menu__group__title': {
+              fontWeight: 'normal',
+              fontSize: 'md',
+              px: 1,
+            },
+          }}
+        >
           <>
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
             {isError && (
@@ -107,10 +111,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
               </>
             )}
           </>
-          <MenuOptionGroup
-            title="Namespace Actions"
-            sx={{ '& p': { fontWeight: 'normal' } }}
-          >
+          <MenuOptionGroup title="Namespace Actions">
             <MenuItem
               onClick={newNamespaceDisclosure.onOpen}
               color="bc-blue-alt"
