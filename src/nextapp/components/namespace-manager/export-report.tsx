@@ -10,17 +10,27 @@ import {
   Icon,
   useDisclosure,
   Progress,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from '@chakra-ui/react';
-import { FaDownload } from 'react-icons/fa';
+import { FaDownload, FaTimesCircle } from 'react-icons/fa';
 
-// TODO: Investigate this api https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/downloads/download
 interface ExportReportProps {
+  onComplete: () => void;
   onSubmit: () => boolean;
   selected: string[];
 }
 
-const ExportReport: React.FC<ExportReportProps> = ({ onSubmit, selected }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const ExportReport: React.FC<ExportReportProps> = ({
+  onComplete,
+  onSubmit,
+  selected,
+}) => {
+  const [isError, setError] = React.useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    onClose: () => setError(false),
+  });
   const search = React.useMemo(() => {
     const params = new URLSearchParams({
       ids: JSON.stringify(selected),
@@ -28,20 +38,37 @@ const ExportReport: React.FC<ExportReportProps> = ({ onSubmit, selected }) => {
     return params.toString();
   }, [selected]);
 
+  const handleDownload = async () => {
+    try {
+      const req = await fetch(`/int/api/namespaces/report?${search}`);
+      const blob = await req.blob();
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('download', 'namespace-report.xlsx');
+      link.setAttribute('href', href);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+      onComplete();
+    } catch {
+      setError(true);
+    }
+  };
   const handleSubmit = () => {
     const isValid = onSubmit();
     if (isValid) {
       onOpen();
+      handleDownload();
     }
   };
 
   return (
     <>
       <Button
-        download
-        href={`/int/api/namespaces/report?${search}`}
         leftIcon={<Icon as={FaDownload} />}
         onClick={handleSubmit}
+        data-testid="export-report-export-btn"
       >
         Export to Excel
       </Button>
@@ -51,10 +78,28 @@ const ExportReport: React.FC<ExportReportProps> = ({ onSubmit, selected }) => {
         <ModalContent>
           <ModalHeader>Exporting Reports</ModalHeader>
           <ModalBody pt={8}>
-            <Progress isIndeterminate color="bc-blue" size="md" />
+            {isError && (
+              <Alert
+                status="error"
+                mt={5}
+                variant="outline"
+                borderRadius="md"
+                data-testid="export-report-error-message"
+              >
+                <AlertIcon as={FaTimesCircle} />
+                <AlertDescription>Unable to generate keys</AlertDescription>
+              </Alert>
+            )}
+
+            {!isError && <Progress isIndeterminate color="bc-blue" size="md" />}
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} onClick={onClose} variant="secondary">
+            <Button
+              mr={3}
+              onClick={onClose}
+              variant="secondary"
+              data-testid="export-report-cancel-btn"
+            >
               Cancel
             </Button>
           </ModalFooter>

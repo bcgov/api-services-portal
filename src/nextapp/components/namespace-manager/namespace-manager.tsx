@@ -104,6 +104,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                   isChecked={selectAll}
                   isInvalid={isInvalid}
                   onChange={handleToggleSelectAll}
+                  data-testid="export-report-select-all-check"
                 >
                   {selected.length === data.length
                     ? 'Select None'
@@ -133,7 +134,11 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
             {data.length <= 0 && (
               <Center>
                 <Box my={8}>
-                  <Heading mb={2} size="sm">
+                  <Heading
+                    mb={2}
+                    size="sm"
+                    data-testid="export-report-empty-text"
+                  >
                     You have no namespaces
                   </Heading>
                   <Text fontSize="sm">Create a namespace to manage.</Text>
@@ -156,6 +161,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                   isInvalid={isInvalid}
                   value={n.id}
                   onChange={handleChecked(n.id)}
+                  data-testid={`export-report-${n.id}`}
                 >
                   {n.name}
                 </Checkbox>
@@ -166,10 +172,16 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           <ModalFooter justifyContent="space-between">
             <Box>
               {isInvalid && (
-                <Text color="bc-error">*Please select a namespace</Text>
+                <Text color="bc-error" data-testid="export-report-select-error">
+                  *Please select a namespace
+                </Text>
               )}
             </Box>
-            <ExportReport selected={selected} onSubmit={handleSubmit} />
+            <ExportReport
+              onComplete={handleClose}
+              onSubmit={handleSubmit}
+              selected={selected}
+            />
           </ModalFooter>
         </ModalContent>
       </Modal>
