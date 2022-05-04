@@ -57,7 +57,10 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
     setSelectAll(event.target.checked);
     setInvalid(false);
   };
-  const handleClear = () => setSelectAll(false);
+  const handleClear = () => {
+    setSelectAll(false);
+    setSelected([]);
+  };
   const handleSubmit = React.useCallback(() => {
     if (selected.length === 0) {
       setInvalid(true);
@@ -81,7 +84,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
         isOpen={isOpen}
         onClose={handleClose}
         scrollBehavior="inside"
-        size="xl"
+        size="2xl"
       >
         <ModalOverlay />
         <ModalContent>
@@ -89,7 +92,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           <ModalHeader pb={0}>
             <Heading size="inherit">Export Namespace Report</Heading>
             <Box fontSize="md" fontWeight="normal" width="100%" mt={4}>
-              <Text>
+              <Text color="bc-component" mb={2.5}>
                 Export a detailed report of your namespace metrics and
                 activities
               </Text>
@@ -102,8 +105,12 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
               >
                 <Checkbox
                   isChecked={selectAll}
+                  isIndeterminate={
+                    selected.length > 0 && selected.length < data.length
+                  }
                   isInvalid={isInvalid}
                   onChange={handleToggleSelectAll}
+                  size="md"
                   data-testid="export-report-select-all-check"
                 >
                   {selected.length === data.length
@@ -161,6 +168,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                   isInvalid={isInvalid}
                   value={n.id}
                   onChange={handleChecked(n.id)}
+                  size="md"
                   data-testid={`export-report-${n.id}`}
                 >
                   {n.name}

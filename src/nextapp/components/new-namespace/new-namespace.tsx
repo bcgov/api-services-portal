@@ -88,7 +88,11 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
-            <Button onClick={onClose} data-testid="ns-modal-cancel-btn">
+            <Button
+              onClick={onClose}
+              data-testid="ns-modal-cancel-btn"
+              variant="secondary"
+            >
               Cancel
             </Button>
             <Button
