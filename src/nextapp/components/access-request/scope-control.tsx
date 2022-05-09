@@ -48,7 +48,11 @@ const ScopeControl: React.FC<ScopeControlProps> = ({
         </RadioGroup>
       </FormControl>
       <Box as="fieldset" borderLeft="1px solid" borderColor="ui" px={4}>
-        <Select mb={5} name={target} data-testid={`${testId}-service-dropdown`}>
+        <Select
+          mb={5}
+          name={target}
+          data-testid={`${testId}-${target}-dropdown`}
+        >
           {options.map((s) => (
             <option key={uid(s.id)} value={s.extForeignKey}>
               {s.name}

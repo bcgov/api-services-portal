@@ -59,7 +59,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
   ) => {
     event.stopPropagation();
     event.preventDefault();
-    setRestrictions((state) => state.filter((_, i) => i !== index));
+    setRestrictions(restrictions.filter((_, i) => i !== index));
   };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,7 +88,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
           },
         };
       }
-      setRestrictions((state) => [...state, payload]);
+      setRestrictions([...restrictions, payload]);
       event.currentTarget.reset();
     } else {
       setError(true);
@@ -98,8 +98,8 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const allow = form.get('allow');
-    setRestrictions((state) =>
-      state.map((r, i) => {
+    setRestrictions(
+      restrictions.map((r, i) => {
         if (i === index) {
           return {
             ...r,
@@ -160,7 +160,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
               There are no controls applied yet
             </Text>
           )}
-          <Accordion reduceMotion>
+          <Accordion reduceMotion data-testid="ip-restrictions-list">
             {restrictions
               .map((r) => ({
                 ...r,
@@ -178,8 +178,13 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
                           borderLeftColor: 'bc-blue',
                         },
                       }}
+                      data-testid={`ip-restriction-item-btn-${index}`}
                     >
-                      <Box flex="1" textAlign="left">
+                      <Box
+                        flex="1"
+                        textAlign="left"
+                        data-testid={`ip-restriction-item-title-${index}`}
+                      >
                         {getControlName(r)}
                         <IconButton
                           aria-label="delete restriction"
@@ -187,6 +192,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={handleRemove(index)}
+                          data-testid={`ip-restriction-item-delete-btn-${index}`}
                         />
                       </Box>
                     </AccordionButton>
@@ -198,15 +204,20 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
                     borderLeft="2px solid"
                     borderLeftColor="bc-gray"
                     onSubmit={handleUpdate(index)}
+                    data-testid={`ip-restriction-item-form-${index}`}
                   >
                     <TagInput
                       isRequired
                       name="allow"
-                      data-testid="allow-ip-restriction-input"
+                      data-testid={`allow-ip-restriction-input-${index}`}
                       value={r.config.allow}
                     />
                     <Box mt={2}>
-                      <Button type="submit" size="sm">
+                      <Button
+                        type="submit"
+                        size="sm"
+                        data-testid={`ip-restriction-item-save-btn-${index}`}
+                      >
                         Save
                       </Button>
                     </Box>
