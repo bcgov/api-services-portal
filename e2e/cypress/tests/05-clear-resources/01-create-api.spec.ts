@@ -8,6 +8,8 @@ describe('Create API Spec', () => {
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
+  var nameSpace: string
+  let userSession: string
 
   before(() => {
     cy.visit('/')
@@ -19,6 +21,7 @@ describe('Create API Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('api').as('api')
     cy.visit(login.path)
   })
 
@@ -29,8 +32,14 @@ describe('Create API Spec', () => {
   })
 
   it('creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
-      home.createNamespace(deleteResources.namespace)
+    cy.getUserSession().then(() => {
+      cy.get('@apiowner').then(({ deleteResources }: any) => {
+        nameSpace = deleteResources.namespace
+        home.createNamespace(deleteResources.namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
+        })
+      })
     })
   })
 
@@ -53,34 +62,47 @@ describe('Create API Spec', () => {
   })
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.createNewProduct(product.name, product.environment.name)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.createNewProduct(deleteResources.product.name, deleteResources.product.environment.name)
     })
   })
+
+  it('Associate Namespace to the organization Unit', () => {
+    cy.get('@api').then(({ organization }: any) => {
+      cy.setHeaders(organization.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
+  })
+
+  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.updateDatasetNameToCatelogue(deleteResources.product.name, deleteResources.product.environment.name)
+    })
+  })
+  
   it('publish product to directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.editProductEnvironment(product.name, product.environment.name)
-      pd.editProductEnvironmentConfig(product.environment.config)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
+      pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
     })
-    pd.generateKongPluginConfig('service.yml')
+    pd.generateKongPluginConfig('service-clear-resources.yml')
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
-      cy.publishApi('service-plugin.yml', deleteResources.namespace).then(() => {
+      cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
       })
     })
   })
-  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
-    })
-  })
   after(() => {
     cy.logout()
     cy.clearLocalStorage({log:true})

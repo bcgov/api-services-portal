@@ -77,10 +77,6 @@ describe('Verify that Mark is unable to create service account', () => {
     })
   })
 
-  it('Verify that only "Namespace.View" permission is displayed in the profile', () => {
-    mp.checkScopeOfProfile("Namespace.View")
-  })
-
   it('Navigate to Consumer Page to see the Approve Request option', () => {
     cy.visit(consumers.path)
   })

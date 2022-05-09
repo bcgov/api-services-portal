@@ -19,7 +19,7 @@ describe('Delete created resources', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    // cy.visit(login.path)
+    cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
@@ -35,23 +35,21 @@ describe('Delete created resources', () => {
   })
 
   it('Delete Product Environment', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      // cy.visit(pd.path)
-      pd.deleteProductEnvironment(product.name, product.environment.name)
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.deleteProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
     })
   })
 
   it('Delete the Product', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.deleteProduct(product.name)
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.deleteProduct(deleteResources.product.name)
     })
   })
 
-  it('Navigates to Service Account Page', () => {
-    cy.visit(sa.path)
-  })
-
   it('Delete Service Accounts', () => {
+    cy.visit(sa.path)
     sa.deleteAllServiceAccounts()
   })
 

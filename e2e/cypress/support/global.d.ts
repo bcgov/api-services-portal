@@ -47,6 +47,14 @@ declare namespace Cypress {
 
     setHeaders(headerValues : any) : void
 
+    setRequestBody(requestBody : any) : void
+
+    setAuthorizationToken (token : string) : void
+
     makeAPIRequest(endPoint: string,methodType: string): Chainable<Cypress.Response<any>>
+
+    getUserSession(): Chainable<Cypress.Response<any>>
+
+    compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
   }
 }

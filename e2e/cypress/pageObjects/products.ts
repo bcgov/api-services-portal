@@ -69,7 +69,7 @@ class Products {
     
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
-    // cy.get(this.envCfgApprovalCheckbox).click()
+    cy.get(this.envCfgApprovalCheckbox).click()
 
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
@@ -91,8 +91,7 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-    cy.get(`[data-testid=${config.serviceName}`).click()
-    cy.wait(120000)
+    // cy.get(`[data-testid=${config.serviceName}`).click()
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -138,6 +137,11 @@ class Products {
     this.editProduct(productName)
     cy.get(this.deleteProductBtn).click()
     cy.get(this.deleteProductConfirmationBtn).click()
+  }
+
+  verifyProductIsVisible(productName: string)
+  {
+    cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
   }
 }
 

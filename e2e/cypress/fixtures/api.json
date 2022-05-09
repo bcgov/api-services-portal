@@ -4,12 +4,73 @@
       "accept": "application/json"
     },
     "endPoint": "ds/api/v2/organizations",
-    "orgExpectedList": [
+    "orgExpectedList":
       {
         "name": "planning-and-innovation-division",
         "title": "Planning and Innovation Division"
-      }
-    ],
-    "orgName" : "ministry-of-health"
+      },
+    "orgName": "ministry-of-health"
+  },
+  "documentation": {
+    "endPoint": "ds/api/v2/namespaces/apiplatform/contents",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "body": {
+      "externalLink": "https://externalsite/my_content",
+      "title": "my_content",
+      "description": "Summary of Test content",
+      "content": "Markdown content",
+      "order": 0,
+      "isPublic": true,
+      "isComplete": true,
+      "tags": ["tag1", "tag2"]
+    }
+  },
+  "authorizationProfiles": {
+    "body": {
+      "name": "my-auth-profile",
+      "description": "Auth connection to my IdP",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+        {
+          "environment": "dev",
+          "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientRegistration": "managed",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      ],
+      "owner": "janis@idir"
+    },
+    "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    }
+  },
+  "products": {
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "endPoint": "ds/api/v2/namespaces/apiplatform/products",
+    "deleteEnvironmentEndPoint": "ds/api/v2/namespaces/apiplatform/environments",
+    "body": {
+      "name": "my-new-product",
+      "appId": "DRE123456",
+      "environments": [
+        {
+          "name": "test",
+          "active": false,
+          "approval": false,
+          "flow": "public",
+          "appId": "6754"
+        }
+      ]
+    }
   }
 }

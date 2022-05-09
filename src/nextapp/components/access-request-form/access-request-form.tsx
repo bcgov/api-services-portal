@@ -95,7 +95,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
               .filter((e) => e.active)
               .filter((e) => e.flow !== 'public')
               .map((e) => (
-                <Radio key={uid(e.id)} value={e.id}>
+                <Radio key={uid(e.id)} value={e.id} data-testid={`access-rqst-app-env-${e.name}`} >
                   {e.name}
                 </Radio>
               ))}
@@ -131,12 +131,12 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
               </Text>
             )}
           </Box>
-          <Textarea name="additionalDetails" />
+          <Textarea name="additionalDetails" data-testid="access-rqst-add-notes-text"/>
         </Fieldset>
       )}
       {selectedEnvironment?.legal && hasNotAgreedLegal && (
         <Box mt={4} p={4} bgColor="#f2f2f2" borderRadius={4}>
-          <Checkbox isRequired colorScheme="blue" name="acceptLegal">
+          <Checkbox isRequired colorScheme="blue" data-testid="acceptLegalTerm" name="acceptLegal">
             {selectedEnvironment.legal.title}
           </Checkbox>
           <Box mt={2} ml={7}>

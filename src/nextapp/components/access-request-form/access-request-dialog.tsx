@@ -227,7 +227,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 </Button>
               </ButtonGroup>
             )}
-            {tab === 1 && <Button onClick={handleDone}>Done</Button>}
+            {tab === 1 && <Button onClick={handleDone} data-testid="doneAcceptRequest">Done</Button>}
           </ModalFooter>
         </ModalContent>
       </Modal>
