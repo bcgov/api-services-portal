@@ -31,7 +31,6 @@ describe('Delete created resources', () => {
 
   it('Navigates to Product page', () => {
     cy.visit(pd.path)
-    cy.wait(3000)
   })
 
   it('Delete Product Environment', () => {
