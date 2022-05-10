@@ -1,44 +1,11 @@
 import { Accordion } from '@chakra-ui/react';
-import {
-  fireEvent,
-  prettyDOM,
-  render,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-import { keystone } from '../../../../mocks/handlers';
-import { server } from '../../../../mocks/server';
 import wrapper from '../../../test/wrapper';
-
+import { serviceOptions, routeOptions } from './shared';
 import IpRestriction from '../ip-restriction';
 
 const emptyState = [[], jest.fn()];
-const serviceOptions = [
-  {
-    id: 1,
-    name: 'Service 1',
-    extForeignKey: 's1',
-  },
-  {
-    id: 2,
-    name: 'Service 2',
-    extForeignKey: 's2',
-  },
-];
-const routeOptions = [
-  {
-    id: 1,
-    name: 'Route 1',
-    extForeignKey: 'r1',
-  },
-  {
-    id: 2,
-    name: 'Route 2',
-    extForeignKey: 'r2',
-  },
-];
 
 describe('IP Restrictions', () => {
   it('should render empty message and show initial services', () => {

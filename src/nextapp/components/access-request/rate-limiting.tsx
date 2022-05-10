@@ -58,40 +58,42 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
     const formData = new FormData(event.currentTarget);
 
     if (event.currentTarget.checkValidity()) {
-      const entries = Object.fromEntries(formData);
+      const { route, service, scope, ...entries } = Object.fromEntries(
+        formData
+      );
       const payload: GatewayPluginCreateInput = {
         name: 'rate-limiting',
         config: JSON.stringify(entries),
-        tags: "['consumer']",
+        tags: '["consumer"]',
       };
-      if (entries.scope === 'route') {
+      if (scope === 'route') {
         payload.route = {
           connect: {
-            id: entries.route as string,
+            id: route as string,
           },
         };
       } else {
         payload.service = {
           connect: {
-            id: entries.service as string,
+            id: service as string,
           },
         };
       }
-      setRateLimits((state) => [...state, payload]);
+      setRateLimits([...rateLimits, payload]);
       event.currentTarget.reset();
     }
   };
   const handleRemove = (index: number) => (event) => {
     event.stopPropagation();
     event.preventDefault();
-    setRateLimits((state) => state.filter((_, i) => i !== index));
+    setRateLimits(rateLimits.filter((_, i) => i !== index));
   };
   const handleUpdate = (index: number) => (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const config = Object.fromEntries(form);
-    setRateLimits((state) =>
-      state.map((r, i) => {
+    setRateLimits(
+      rateLimits.map((r, i) => {
         if (i === index) {
           return {
             ...r,
@@ -114,7 +116,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
           <ScopeControl
             routeOptions={routeOptions}
             serviceOptions={serviceOptions}
-            testId="rate-limiting"
+            testId="ratelimit"
           >
             <HStack spacing={5} mb={5}>
               {['second', 'minute', 'hour', 'day'].map((t) => (
@@ -177,8 +179,13 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                           borderLeftColor: 'bc-blue',
                         },
                       }}
+                      data-testid={`ratelimit-item-btn-${index}`}
                     >
-                      <Box flex="1" textAlign="left">
+                      <Box
+                        flex="1"
+                        textAlign="left"
+                        data-testid={`ratelimit-item-title-${index}`}
+                      >
                         {getControlName(r)}
                         <IconButton
                           aria-label="delete restriction"
@@ -186,6 +193,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={handleRemove(index)}
+                          data-testid={`ratelimit-item-delete-btn-${index}`}
                         />
                       </Box>
                     </AccordionButton>
@@ -197,6 +205,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                     borderLeft="2px solid"
                     borderLeftColor="bc-gray"
                     onSubmit={handleUpdate(index)}
+                    data-testid={`ratelimit-item-form-${index}`}
                   >
                     <HStack spacing={5} mb={5}>
                       {['second', 'minute', 'hour', 'day'].map((t) => (
@@ -207,7 +216,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                             placeholder="00"
                             type="number"
                             name={t}
-                            data-testid={`ratelimit-${t}-input`}
+                            data-testid={`ratelimit-item-form-${t}-input-${index}`}
                           />
                         </FormControl>
                       ))}
@@ -217,15 +226,19 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
                       <Select
                         name="policy"
                         defaultValue={r.config.policy as string}
-                        data-testid="ratelimit-policy-dropdown"
+                        data-testid={`ratelimit-item-form-policy-dropdown-${index}`}
                       >
                         <option value="local">Local</option>
                         <option value="redis">Redis</option>
                       </Select>
                     </FormControl>
                     <Box mt={2}>
-                      <Button type="submit" size="sm">
-                        Apply
+                      <Button
+                        type="submit"
+                        size="sm"
+                        data-testid={`ratelimit-item-save-btn-${index}`}
+                      >
+                        Save
                       </Button>
                     </Box>
                   </AccordionPanel>
