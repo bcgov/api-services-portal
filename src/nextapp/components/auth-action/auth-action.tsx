@@ -31,7 +31,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Button
         as="a"
-        variant="header"
+        variant="secondary"
         href="/admin/signin"
         data-testid="login-btn"
       >
@@ -84,6 +84,15 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               data-testid="auth-menu-user-profile"
             >
               My Profile
+            </MenuItem>
+            <MenuItem
+              as="a"
+              color="text"
+              target="_blank"
+              href="/ds/api/v2/console"
+              data-testid="auth-menu-api-docs"
+            >
+              API Docs
             </MenuItem>
             <MenuItem
               as="a"

@@ -38,7 +38,7 @@ import { Product as KSProduct } from '../../services/keystone/types';
 const logger = Logger('controllers.Product');
 
 @injectable()
-@Route('/namespaces/{ns}/products')
+@Route('/namespaces/{ns}')
 @Tags('Products')
 export class ProductController extends Controller {
   private keystone: KeystoneService;
@@ -56,7 +56,7 @@ export class ProductController extends Controller {
    * @param body
    * @param request
    */
-  @Put()
+  @Put('/products')
   @OperationId('put-product')
   @Security('jwt', ['Namespace.Manage'])
   public async put(
@@ -81,7 +81,7 @@ export class ProductController extends Controller {
    * @param request
    * @returns
    */
-  @Get()
+  @Get('/products')
   @OperationId('get-products')
   @Security('jwt', ['Namespace.Manage'])
   public async get(
@@ -124,7 +124,7 @@ export class ProductController extends Controller {
    * @param request
    * @returns
    */
-  @Delete('/{appId}')
+  @Delete('/products/{appId}')
   @OperationId('delete-product')
   @Security('jwt', ['Namespace.Manage'])
   public async delete(

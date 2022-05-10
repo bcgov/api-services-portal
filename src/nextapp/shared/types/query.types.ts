@@ -6065,7 +6065,9 @@ export type Namespace = {
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
   permDataPlane?: Maybe<Scalars['String']>;
-  permProtected?: Maybe<Scalars['String']>;
+  permProtectedNs?: Maybe<Scalars['String']>;
+  org?: Maybe<Scalars['String']>;
+  orgUnit?: Maybe<Scalars['String']>;
 };
 
 export type NamespaceInput = {

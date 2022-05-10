@@ -40,8 +40,10 @@ export async function getNamespaceAccess(
 
         if (policy.clients) {
           policy.clients.forEach(doScopes);
-        } else {
+        } else if (policy.users) {
           policy.users.forEach(doScopes);
+        } else if (policy.groups) {
+          policy.groups.forEach(doScopes);
         }
       });
       return data;

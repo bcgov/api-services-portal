@@ -25,7 +25,7 @@ import { Policy } from '../uma2';
 const logger = Logger('org-groups');
 
 enum RoleGroups {
-  'data-custodian',
+  'organization-admin',
 }
 
 /**
@@ -175,11 +175,11 @@ export class OrgGroupService {
 
     if (orgGroup.parent) {
       const parts = orgGroup.parent.split('/');
-      if (parts.length > 3) {
+      if (parts.length > 4) {
         throwError(
-          `Only two levels of organization structure are supported ${orgGroup.parent}`
+          `Only three levels of organization structure are supported ${orgGroup.parent}`
         );
-      } else if (parts.length == 2 || parts.length == 3) {
+      } else if (parts.length == 2 || parts.length == 3 || parts.length == 4) {
         // parts: /<role>/<org>/<orgunit>
         const rootGroups: GroupRepresentation[] = this.groups.filter(
           (group: GroupRepresentation) => group.name == parts[1]
@@ -197,6 +197,7 @@ export class OrgGroupService {
             const newGroup = await this.keycloakService.createRootGroup(
               newGroupName
             );
+            await this.backfillGroups();
             rootGroup = await this.keycloakService.getGroupById(newGroup.id);
           } else {
             throwError(`Invalid organization role ${newGroupName}`);
@@ -213,11 +214,15 @@ export class OrgGroupService {
           if (groupMatch.length == 1) {
             rootGroup = groupMatch[0];
           } else {
-            const newGroup = await this.keycloakService.createIfMissingForParentGroup(
+            const {
+              created,
+              id,
+            } = await this.keycloakService.createIfMissingForParentGroup(
               rootGroup,
               parts[i]
             );
-            rootGroup = await this.keycloakService.getGroupById(newGroup.id);
+            created && (await this.backfillGroups());
+            rootGroup = await this.keycloakService.getGroupById(id);
           }
         }
       }
@@ -268,6 +273,21 @@ export class OrgGroupService {
       resourceName,
       scopeNames
     );
+  }
+
+  public async deletePermission(permissionName: string): Promise<void> {
+    const clientService = new KeycloakClientService(null).useAdminClient(
+      this.keycloakService.getAdminClient()
+    );
+
+    const clientPolicyService = new KeycloakClientPolicyService(
+      null
+    ).useAdminClient(this.keycloakService.getAdminClient());
+
+    // Assume that the client we are authenticating with is the Resource Server
+    const cid = (await clientService.findByClientId(this.clientId)).id;
+
+    await clientPolicyService.deletePermissionByName(cid, permissionName);
   }
 
   public async createOrUpdatePermission(

@@ -19,6 +19,7 @@ import { Namespace } from '../../services/keystone/types';
 
 import { Readable } from 'stream';
 import {
+  parseBlobString,
   parseJsonString,
   removeEmpty,
   transformAllRefID,
@@ -183,8 +184,8 @@ export class NamespaceController extends Controller {
     const records = await getActivity(ctx, [ns], first > 50 ? 50 : first, skip);
     return records
       .map((o) => removeEmpty(o))
-      .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['context', 'blob']));
+      .map((o) => parseJsonString(o, ['context']))
+      .map((o) => parseBlobString(o));
   }
 }
 
@@ -205,7 +206,9 @@ const item = gql`
       }
       permDomains
       permDataPlane
-      permProtected
+      permProtectedNs
+      org
+      orgUnit
     }
   }
 `;
