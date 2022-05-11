@@ -81,7 +81,13 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
             variant="ghost"
           />
           <MenuList>
-            <MenuItem onClick={onOpen}>Regenerate Credentials</MenuItem>
+            {[
+              'kong-api-key-only',
+              'kong-api-key-acl',
+              'client-credentials',
+            ].includes(data.productEnvironment.flow) && (
+              <MenuItem onClick={onOpen}>Regenerate Credentials</MenuItem>
+            )}
             <MenuItem
               color="bc-error"
               onClick={handleRevoke(data.id, has(data, 'isIssued'))}

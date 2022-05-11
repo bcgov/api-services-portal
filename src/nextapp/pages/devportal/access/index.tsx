@@ -94,6 +94,7 @@ const query = gql`
       productEnvironment {
         id
         name
+        flow
         product {
           id
           name

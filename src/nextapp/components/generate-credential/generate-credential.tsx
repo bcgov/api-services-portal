@@ -32,13 +32,16 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
   const [credentials, setCredentials] = React.useState<Record<string, string>>(
     {}
   );
-  const credentialGenerator = useApiMutation(mutation, {
-    onSuccess() {
-      if (onCredentialGenerated) {
-        onCredentialGenerated();
-      }
-    },
-  });
+  const credentialGenerator = useApiMutation(
+    regenerate ? mutationRegenerate : mutation,
+    {
+      onSuccess() {
+        if (onCredentialGenerated) {
+          onCredentialGenerated();
+        }
+      },
+    }
+  );
   const buttonText = React.useMemo(() => {
     let result = 'Generate Secrets';
 
@@ -52,12 +55,17 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
 
     return result;
   }, [credentialGenerator.isError, regenerate]);
-  const generateCredentials = React.useCallback(async () => {
-    const res: Mutation = await credentialGenerator.mutateAsync({ id });
-    if (res.updateAccessRequest.credential !== 'NEW') {
-      setCredentials(JSON.parse(res.updateAccessRequest.credential));
-    }
-  }, [credentialGenerator, id, setCredentials]);
+  const generateCredentials = mutationRegenerate
+    ? React.useCallback(async () => {
+        const res: Mutation = await credentialGenerator.mutateAsync({ id });
+        setCredentials(JSON.parse(res.regenerateCredentials.credential));
+      }, [credentialGenerator, id, setCredentials])
+    : React.useCallback(async () => {
+        const res: Mutation = await credentialGenerator.mutateAsync({ id });
+        if (res.updateAccessRequest.credential !== 'NEW') {
+          setCredentials(JSON.parse(res.updateAccessRequest.credential));
+        }
+      }, [credentialGenerator, id, setCredentials]);
 
   return (
     <>
@@ -122,6 +130,14 @@ export default GenerateCredentials;
 const mutation = gql`
   mutation genCredential($id: ID!) {
     updateAccessRequest(id: $id, data: { credential: "NEW" }) {
+      credential
+    }
+  }
+`;
+
+const mutationRegenerate = gql`
+  mutation genCredential($id: ID!) {
+    regenerateCredentials(id: $id) {
       credential
     }
   }

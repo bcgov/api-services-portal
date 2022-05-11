@@ -1,4 +1,4 @@
-schema: http://localhost:3000/admin/api
+schema: http://localhost:3000/gql/api
 generates:
   ./nextapp/shared/types/query.types.ts:
     plugins:
