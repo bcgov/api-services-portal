@@ -46,10 +46,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
   const cancelRequest = useApiMutation(requestMutation);
   const toast = useToast();
   const handleRevoke = React.useCallback(
-    (id, isRequest) => async (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-
+    async (id, isRequest) => {
       try {
         if (isRequest) {
           await cancelRequest.mutateAsync({ id });
