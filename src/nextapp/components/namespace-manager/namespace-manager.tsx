@@ -91,7 +91,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
           <ModalCloseButton />
           <ModalHeader pb={0}>
             <Heading size="inherit">Export Namespace Report</Heading>
-            <Box fontSize="md" fontWeight="normal" width="100%" mt={4}>
+            <Box fontSize="md" fontWeight="normal" width="100%" mt={3}>
               <Text color="bc-component" mb={2.5}>
                 Export a detailed report of your namespace metrics and
                 activities
@@ -186,6 +186,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
               )}
             </Box>
             <ExportReport
+              isAllSelected={selectAll}
               onComplete={handleClose}
               onSubmit={handleSubmit}
               selected={selected}

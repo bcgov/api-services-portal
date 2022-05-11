@@ -17,12 +17,14 @@ import {
 import { FaDownload, FaTimesCircle } from 'react-icons/fa';
 
 interface ExportReportProps {
+  isAllSelected: boolean;
   onComplete: () => void;
   onSubmit: () => boolean;
   selected: string[];
 }
 
 const ExportReport: React.FC<ExportReportProps> = ({
+  isAllSelected,
   onComplete,
   onSubmit,
   selected,
@@ -32,11 +34,14 @@ const ExportReport: React.FC<ExportReportProps> = ({
     onClose: () => setError(false),
   });
   const search = React.useMemo(() => {
-    const params = new URLSearchParams({
-      ids: JSON.stringify(selected),
-    });
-    return params.toString();
-  }, [selected]);
+    if (!isAllSelected) {
+      const params = new URLSearchParams({
+        ids: JSON.stringify(selected),
+      });
+      return params.toString();
+    }
+    return '';
+  }, [isAllSelected, selected]);
 
   const handleDownload = async () => {
     try {
