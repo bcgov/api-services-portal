@@ -132,7 +132,7 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -v 11.2.0 -f values.yaml bitnami/mongodb
 
       - name: 'Deploy Backend'
         run: |
