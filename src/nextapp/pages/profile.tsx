@@ -33,7 +33,12 @@ const ProfilePage: React.FC = () => {
         </Box>
         <Flex as="article" bgColor="white" p={12} align="center">
           <Avatar name={user.name} size="xl" mr={12} />
-          <Grid flex={1} templateColumns="224px 1fr" gridRowGap={8}>
+          <Grid
+            flex={1}
+            templateColumns="max(280px, 25%) 1fr"
+            gridRowGap={8}
+            gap={8}
+          >
             {fields.map((f) => (
               <GridItem key={uid(f)}>
                 <Text color="bc-component" opacity={0.6}>
