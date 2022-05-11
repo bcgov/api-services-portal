@@ -62,6 +62,41 @@ describe('Rate Limiting', () => {
     ]);
   });
 
+  it('should submit a route rate limit', () => {
+    const spy = jest.fn();
+    render(
+      <Accordion>
+        <RateLimiting
+          getControlName={jest.fn()}
+          routeOptions={routeOptions}
+          serviceOptions={serviceOptions}
+          state={[[], spy]}
+        />
+      </Accordion>,
+      { wrapper }
+    );
+    fireEvent.click(screen.getByTestId('ratelimit-route-radio'));
+    fireEvent.click(screen.getByTestId('ratelimit-submit-btn'));
+    expect(spy).toHaveBeenCalledWith([
+      {
+        name: 'rate-limiting',
+        config: JSON.stringify({
+          second: '',
+          minute: '',
+          hour: '',
+          day: '',
+          policy: 'local',
+        }),
+        tags: '["consumer"]',
+        route: {
+          connect: {
+            id: 'r1',
+          },
+        },
+      },
+    ]);
+  });
+
   it('should clear a form', () => {
     render(
       <Accordion>
@@ -212,29 +247,47 @@ describe('Rate Limiting', () => {
 
   it('should update an item', () => {
     const spy = jest.fn();
-    const data = {
-      name: 'rate-limiting',
-      config: JSON.stringify({
-        scope: 'service',
-        second: '1',
-        minute: '1',
-        hour: '1',
-        day: '1',
-        policy: 'local',
-      }),
-      tags: '["consumer"]',
-      service: {
-        id: 's1',
-        name: 'Service 1',
+    const data = [
+      {
+        name: 'rate-limiting',
+        config: JSON.stringify({
+          scope: 'service',
+          second: '1',
+          minute: '1',
+          hour: '1',
+          day: '1',
+          policy: 'local',
+        }),
+        tags: '["consumer"]',
+        service: {
+          id: 's1',
+          name: 'Service 1',
+        },
       },
-    };
+      {
+        name: 'rate-limiting',
+        config: JSON.stringify({
+          scope: 'service',
+          second: '1',
+          minute: '1',
+          hour: '1',
+          day: '1',
+          policy: 'local',
+        }),
+        tags: '["consumer"]',
+        service: {
+          id: 's2',
+          name: 'Service 2',
+        },
+      },
+    ];
     render(
       <Accordion>
         <RateLimiting
           getControlName={() => 'Service 1'}
           routeOptions={routeOptions}
           serviceOptions={serviceOptions}
-          state={[[data], spy]}
+          state={[data, spy]}
         />
       </Accordion>,
       { wrapper }
@@ -282,6 +335,22 @@ describe('Rate Limiting', () => {
         service: {
           id: 's1',
           name: 'Service 1',
+        },
+      },
+      {
+        name: 'rate-limiting',
+        config: JSON.stringify({
+          scope: 'service',
+          second: '1',
+          minute: '1',
+          hour: '1',
+          day: '1',
+          policy: 'local',
+        }),
+        tags: '["consumer"]',
+        service: {
+          id: 's2',
+          name: 'Service 2',
         },
       },
     ]);

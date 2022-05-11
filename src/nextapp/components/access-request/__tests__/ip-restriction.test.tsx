@@ -111,34 +111,42 @@ describe('IP Restrictions', () => {
   it('should render pre-existing restrictions', () => {
     const spy = jest.fn();
     const nameSpy = jest.fn(() => 'Service 1');
-    const data = {
-      name: 'ip-restriction',
-      service: {
-        id: 's1',
-        name: 'Service 1',
+    const data = [
+      {
+        name: 'ip-restriction',
+        service: {
+          id: 's1',
+          name: 'Service 1',
+        },
+        config: JSON.stringify({
+          allow: JSON.stringify(['1.1.1.1']),
+        }),
+        tags: '["consumer"]',
       },
-      config: JSON.stringify({
-        allow: JSON.stringify(['1.1.1.1']),
-      }),
-      tags: '["consumer"]',
-    };
+      {
+        name: 'ip-restriction',
+        service: {
+          id: 's2',
+          name: 'Service 2',
+        },
+        config: JSON.stringify({
+          allow: JSON.stringify(['3.3.3.3']),
+        }),
+        tags: '["consumer"]',
+      },
+    ];
     render(
       <Accordion defaultIndex={0}>
         <IpRestriction
           getControlName={nameSpy}
           routeOptions={routeOptions}
           serviceOptions={serviceOptions}
-          state={[[data], spy]}
+          state={[data, spy]}
         />
       </Accordion>,
       { wrapper }
     );
-    expect(nameSpy).toHaveBeenCalledWith({
-      ...data,
-      config: {
-        allow: JSON.stringify(['1.1.1.1']),
-      },
-    });
+    expect(nameSpy).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId('ip-restriction-item-title-0')).toHaveTextContent(
       'Service 1'
     );
@@ -162,6 +170,17 @@ describe('IP Restrictions', () => {
           id: 's1',
           name: 'Service 1',
         },
+      },
+      {
+        name: 'ip-restriction',
+        service: {
+          id: 's2',
+          name: 'Service 2',
+        },
+        config: JSON.stringify({
+          allow: JSON.stringify(['3.3.3.3']),
+        }),
+        tags: '["consumer"]',
       },
     ]);
   });
