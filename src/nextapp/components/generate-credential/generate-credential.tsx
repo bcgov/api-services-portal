@@ -55,7 +55,7 @@ const GenerateCredentials: React.FC<GenerateCredentialsProps> = ({
 
     return result;
   }, [credentialGenerator.isError, regenerate]);
-  const generateCredentials = mutationRegenerate
+  const generateCredentials = regenerate
     ? React.useCallback(async () => {
         const res: Mutation = await credentialGenerator.mutateAsync({ id });
         setCredentials(JSON.parse(res.regenerateCredentials.credential));
