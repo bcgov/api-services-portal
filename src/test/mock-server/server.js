@@ -240,6 +240,13 @@ const server = mockServer(schemaWithMocks, {
     updateCredentialIssuer: (req) => {
       return req.data;
     },
+    genCredential: () => {
+      return {
+        regenerateCredentials: {
+          credential: casual.uuid,
+        },
+      };
+    },
   }),
   Application: () => ({
     name: `My Application ${random(1, 100)}`,
