@@ -1,0 +1,13 @@
+entity: Dataset
+record:
+  id: 'B234567890000000'
+  name: 'test-feature-product'
+  title: 'Test Feature Product'
+  notes: 'Product Notes'
+  tags: ['gateway', 'feature']
+  sector: 'Service'
+  license_title: 'Access Only'
+  view_audience: 'Government'
+  security_class: 'LOW-PUBLIC'
+  org: '7a66db63-26f4-4052-9cd5-3272b63910f8'
+  sub_org: '319b3297-846d-4b97-8095-ceb3ec505fb8'
