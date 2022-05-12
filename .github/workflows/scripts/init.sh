@@ -18,8 +18,8 @@ while true; do
         curl --fail -v http://localhost:8080/push -F yaml=@platform-authz-profile.yaml
         curl --fail -v http://localhost:8080/push -F yaml=@platform-dataset.yaml
         curl --fail -v http://localhost:8080/push -F yaml=@platform-gwa-api.yaml
-        curl --fail -v http://localhost:8080/push -F yaml=@organization-unit.yaml
-        curl --fail -v http://localhost:8080/push -F yaml=@dataset-test.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@scripts/feeder-init/organization-unit.yaml
+        curl --fail -v http://localhost:8080/push -F yaml=@scripts/feeder-init/dataset-test.yaml
         kill $FWD_PID
         break
     else
