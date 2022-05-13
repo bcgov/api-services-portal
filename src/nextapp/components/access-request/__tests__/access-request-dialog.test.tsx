@@ -11,7 +11,7 @@ import { renderWithPortal, toastManager } from '../../../test/utils';
 describe('access-request/access-request-dialog', () => {
   beforeEach(toastManager);
 
-  it('render correctly', () => {
+  it('should render correctly', () => {
     renderWithPortal(
       <AccessRequestDialog
         isOpen

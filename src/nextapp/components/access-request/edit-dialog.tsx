@@ -17,9 +17,9 @@ import {
   useDisclosure,
   GridItem,
   Grid,
+  useToast,
 } from '@chakra-ui/react';
 import {
-  CredentialIssuer,
   Environment,
   GatewayConsumer,
   GatewayPlugin,
@@ -30,13 +30,14 @@ import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
 import RequestAuthorization from './authorization';
+import { QueryKey, useQueryClient } from 'react-query';
 
 interface ConsumerEditDialogProps {
   consumer: GatewayConsumer;
   data: GatewayPlugin[];
   environment: Environment;
   product: Product;
-  queryKey: string;
+  queryKey: QueryKey;
 }
 
 const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
@@ -46,6 +47,8 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   product,
   queryKey,
 }) => {
+  const client = useQueryClient();
+  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tabIndex, setTabIndex] = React.useState(0);
   const restrictions = React.useState<
@@ -57,20 +60,34 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     return data.filter((p) => p.name === 'rate-limiting');
   });
   // Events
-  const handleTabChange = React.useCallback((index) => {
+  const handleTabChange = (index: number) => {
     setTabIndex(index);
-  }, []);
-  const handleSave = React.useCallback(() => {
-    const [restrictsionsData] = restrictions;
-    const [rateLimitsData] = rateLimits;
-    console.log('ip-restriction', restrictsionsData, rateLimitsData);
-  }, [restrictions, rateLimits]);
+  };
   const handleClose = () => {
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
     setRestrictions(data.filter((p) => p.name === 'ip-restriction'));
     setRateLimits(data.filter((p) => p.name === 'rate-limiting'));
     onClose();
+  };
+  const handleSave = () => {
+    const [restrictsionsData] = restrictions;
+    const [rateLimitsData] = rateLimits;
+    onClose();
+    // TODO: wire this to API
+    console.log('ip-restriction', restrictsionsData, rateLimitsData);
+    try {
+      toast({
+        title: `${consumer.username} Saved`,
+        status: 'success',
+      });
+      client.invalidateQueries(queryKey);
+    } catch {
+      toast({
+        title: `${consumer.username} save failed`,
+        status: 'error',
+      });
+    }
   };
 
   return (
@@ -80,6 +97,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         variant="ghost"
         size="sm"
         onClick={onOpen}
+        data-testid={`${consumer.id}-edit-btn`}
       >
         Edit
       </Button>
@@ -91,7 +109,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         size="4xl"
       >
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent data-testid="edit-consumer-dialog">
           <ModalHeader data-testid="ar-modal-header">
             {product.name}
             <Tabs

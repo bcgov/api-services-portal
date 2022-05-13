@@ -28,12 +28,7 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import {
-  Environment,
-  GatewayService,
-  Product,
-  Query,
-} from '@/shared/types/query.types';
+import { Environment, Product, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import { IoLayers } from 'react-icons/io5';
 import BusinessProfile from '@/components/business-profile';
