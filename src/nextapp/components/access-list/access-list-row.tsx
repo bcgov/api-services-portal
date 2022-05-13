@@ -92,7 +92,7 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
               color="bc-error"
               onClick={handleRevoke(data.id, has(data, 'isIssued'))}
             >
-              Revoke Access
+              {data.active === false ? 'Cancel Request' : 'Revoke Access'}
             </MenuItem>
           </MenuList>
         </Menu>
