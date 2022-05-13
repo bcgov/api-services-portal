@@ -72,7 +72,13 @@ const LoginPage: React.FC = () => {
               to login to the APS Portal.
             </Text>
             <Box mt={7}>
-              <Button>IDIR</Button>
+              <Button
+                as="a"
+                variant="primary"
+                href="/oauth2/start?kc_idp_hint=idir"
+              >
+                IDIR
+              </Button>
             </Box>
           </GridItem>
         </Grid>
