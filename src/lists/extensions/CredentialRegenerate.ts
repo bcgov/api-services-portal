@@ -31,8 +31,11 @@ module.exports = {
               );
 
               const flow = serviceAccess.productEnvironment.flow;
+              const clientAuthenticator =
+                serviceAccess.productEnvironment?.credentialIssuer
+                  ?.clientAuthenticator;
 
-              if (flow == 'kong-api-key-acl' || flow == 'kong-api-key-only') {
+              if (flow === 'kong-api-key-acl' || flow === 'kong-api-key-only') {
                 const clientId = serviceAccess.consumer.customId;
 
                 const newApiKey = await replaceApiKey(
@@ -61,7 +64,7 @@ module.exports = {
                 return {
                   credential: JSON.stringify(newCredential),
                 };
-              } else if (flow == 'client-credentials') {
+              } else if (flow === 'client-credentials') {
                 const noauthContext = keystone.createContext({
                   skipAccessControl: true,
                 });
@@ -90,10 +93,13 @@ module.exports = {
                 const newCredential = {
                   flow: serviceAccess.productEnvironment.flow,
                   clientId: serviceAccess.consumer.customId,
-                  clientSecret: newSecret,
                   issuer: envCtx.openid.issuer,
                   tokenEndpoint: envCtx.openid.token_endpoint,
                 } as NewCredential;
+
+                if (clientAuthenticator === 'client-secret') {
+                  newCredential['clientSecret'] = newSecret;
+                }
 
                 return {
                   credential: JSON.stringify(newCredential),
