@@ -7,6 +7,7 @@ export interface AuthFailedResponse {
 }
 
 export interface UserSessionResult {
+  isLoading: boolean;
   ok: boolean;
   maintenance: boolean;
   user?: UserData;
@@ -63,7 +64,7 @@ export const getSessionL = async (): Promise<SessionData> => {
 };
 
 export const useSession = (): UserSessionResult => {
-  const { data, status, error } = useQuery<SessionData, Error>(
+  const { data, status, error, isLoading } = useQuery<SessionData, Error>(
     'user',
     getSessionL,
     {
@@ -73,7 +74,8 @@ export const useSession = (): UserSessionResult => {
   );
 
   return {
-    ok: !data,
+    isLoading,
+    ok: Boolean(data?.user),
     user: data?.user,
     maintenance: data?.maintenance,
     status,

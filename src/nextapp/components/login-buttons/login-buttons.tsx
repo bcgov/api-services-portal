@@ -1,17 +1,18 @@
 import * as React from 'react';
 import { Button, ButtonGroup } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import querystring from 'querystring';
 
 function buildUrl(hint: string, path: string) {
-  const redirect = `/admin/signin?${querystring.encode({
+  const f = new URLSearchParams({
     f: path,
-  })}`;
-
-  return `/oauth2/start?${querystring.encode({
+  });
+  const redirect = `/admin/signin?${f.toString()}`;
+  const search = new URLSearchParams({
     kc_idp_hint: hint,
     rd: redirect,
-  })}`;
+  });
+
+  return `/oauth2/start?${search.toString()}`;
 }
 
 const LoginButtons: React.FC = () => {
