@@ -1,4 +1,9 @@
-describe('API Tests for Organization Manage Control End points', () => {
+import HomePage from "../../pageObjects/home"
+import LoginPage from "../../pageObjects/login"
+let userSession: string
+var nameSpace: string
+
+describe('API Tests to verify the Organization details in the response (/Organization end point', () => {
 
     beforeEach(() => {
         cy.preserveCookies()
@@ -40,12 +45,198 @@ describe('Verify /Organization/{Org} end point', () => {
 
     it('Get the resource and verify the org Names in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint +'/'+ organization.orgName, 'GET').then((response) => {
-                debugger
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response) => {        
                 expect(response.status).to.be.equal(200)
-                var expectedResult = organization.orgExpectedList
-                assert.isTrue(_.isEqual(response.body.orgUnits[0], organization.orgExpectedList))
+                assert.isTrue(Cypress._.isEqual(response.body.orgUnits[0], organization.orgExpectedList))
             })
+        })
+    })
+})
+
+describe('Get the user session token', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+
+    before(() => {
+        cy.visit('/')
+        cy.deleteAllCookies()
+        cy.reload()
+    })
+
+    beforeEach(() => {
+        cy.preserveCookies()
+        cy.fixture('apiowner').as('apiowner')
+        cy.visit(login.path)
+    })
+
+    it('authenticates Janis (api owner) to get the user session token', () => {
+        cy.getUserSession().then(() => {
+            cy.get('@apiowner').then(({ user, apiTest }: any) => {
+                cy.login(user.credentials.username, user.credentials.password)
+                home.useNamespace(apiTest.namespace)
+                cy.get('@login').then(function (xhr: any) {
+                    userSession = xhr.response.headers['x-auth-request-access-token']
+                })
+            })
+        })
+    })
+
+})
+
+describe('Get the Organization Role', () => {
+
+    var response: any
+    var actualResponse: any = {}
+    var expectedResponse: any = {}
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.setHeaders(organization.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Get the resource and verify the success code in the response', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/roles', 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+                response = res.body
+            })
+        })
+    })
+
+    it('Compare the scope values in response against the expected values', () => {
+        cy.get('@api').then(({ organization }: any) => {          
+            actualResponse = response.roles[0].permissions[0].scopes
+            expectedResponse = organization.expectedScope
+            assert.isTrue(Cypress._.isEqual(actualResponse, expectedResponse))
+        })
+    })
+
+})
+
+describe('Get the Namespace associated with the organization', () => {
+
+    var response: any
+    var actualResponse: any = {}
+    var expectedResponse: any = {}
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.setHeaders(organization.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Get the resource and verify the success code in the response', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+                response = res.body
+                nameSpace = response[0].name
+            })
+        })
+    })
+
+    it('Compare the Namespace values in response against the expected values', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            expectedResponse = organization.expectedNamespace
+            assert.isTrue(Cypress._.isEqual(response, expectedResponse))
+        })
+    })
+
+})
+
+describe('Delete the Namespace associated with the organization', () => {
+
+    var response: any
+    var actualResponse: any = {}
+    var expectedResponse: any = {}
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+        cy.fixture('apiowner').as('apiowner')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.setHeaders(organization.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Delete the namespace associated with the organization, organization unit and verify the success code in the response', () => {
+        cy.get('@apiowner').then(({ namespace }: any) => {
+            cy.get('@api').then(({ organization }: any) => {
+                cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'DELETE').then((res) => {
+                    expect(res.status).to.be.equal(200)
+                    response = res.body
+                })
+            })
+        })
+    })
+
+    it('Verify that the deleted Namespace is not displayed in Get Call', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
+                debugger
+                expect(res.status).to.be.equal(200)
+                response = res.body
+                assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace),-1)
+            })
+        })
+    })
+})
+
+describe('Add and Get Organization Access', () => {
+
+    var response: any
+    var actualResponse: any = {}
+    var expectedResponse: any = {}
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+        cy.fixture('apiowner').as('apiowner')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.setHeaders(organization.headers)
+            cy.setAuthorizationToken(userSession)
+            cy.setRequestBody(organization.body)
+        })
+    })
+
+    it('Add the access of the organization to the specific user and verify the success code in the response', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'PUT').then((res) => {
+                debugger
+                expect(res.status).to.be.equal(204)
+            })
+        })
+    })
+
+    it('Get the resource and verify the success code in the response', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+                response = res.body
+            })
+        })
+    })
+
+    it('Compare the Namespace values in response against the expected values', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.compareJSONObjects(response, organization.body)
         })
     })
 })

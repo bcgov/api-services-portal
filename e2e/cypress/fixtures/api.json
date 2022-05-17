@@ -1,15 +1,38 @@
 {
   "organization": {
     "headers": {
-      "accept": "application/json"
+      "accept": "application/json",
+      "content-type": "application/json"
     },
     "endPoint": "ds/api/v2/organizations",
-    "orgExpectedList":
+    "orgExpectedList": {
+      "name": "planning-and-innovation-division",
+      "title": "Planning and Innovation Division"
+    },
+    "orgName": "ministry-of-health",
+    "expectedScope": ["Dataset.Manage", "GroupAccess.Manage", "Namespace.Assign"],
+    "expectedNamespace": [
       {
-        "name": "planning-and-innovation-division",
-        "title": "Planning and Innovation Division"
+        "name": "newplatform",
+        "orgUnit": "planning-and-innovation-division"
       },
-    "orgName": "ministry-of-health"
+      {
+        "name": "platform",
+        "orgUnit": "planning-and-innovation-division"
+      }
+    ],
+    "body": {
+      "name": "ministry-of-health",
+      "parent": "/ca.bc.gov",
+      "members": [
+        {
+          "member": {
+            "username": "janis@idir"
+          },
+          "roles": ["organization-admin"]
+        }
+      ]
+    }
   },
   "documentation": {
     "endPoint": "ds/api/v2/namespaces/apiplatform/contents",
@@ -72,5 +95,12 @@
         }
       ]
     }
+  },
+  "namespaces": {
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "endPoint": "ds/api/v2/namespaces"
   }
 }

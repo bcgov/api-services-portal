@@ -27,7 +27,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
 
   cy.get('header').then(($a) => { 
     if ($a.text().includes('Login')) {
-      debugger
+
       cy.get(login.loginButton).click()
       const log = Cypress.log({
         name: 'Login to Dev',
@@ -40,7 +40,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
       cy.get(login.loginSubmitButton).click()
     }
   })
-  debugger
+
   if (checkElementExists('.alert')) {
     cy.reload()
     cy.get(login.usernameInput).click().type(username)
