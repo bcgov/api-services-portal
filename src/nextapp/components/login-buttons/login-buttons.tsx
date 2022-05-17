@@ -15,16 +15,25 @@ function buildUrl(hint: string, path: string) {
   return `/oauth2/start?${search.toString()}`;
 }
 
-const LoginButtons: React.FC = () => {
+interface LoginButtonsProps {
+  buttons: string[];
+}
+
+const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
   const router = useRouter();
-  return (
-    <ButtonGroup spacing={7}>
+
+  const buttonComponents = {
+    idir: (
       <Button as="a" variant="primary" href={buildUrl('idir', router?.asPath)}>
         IDIR
       </Button>
+    ),
+    bceid: (
       <Button as="a" variant="primary" href={buildUrl('bceid', router?.asPath)}>
         BCeID
       </Button>
+    ),
+    github: (
       <Button
         as="a"
         variant="secondary"
@@ -35,6 +44,12 @@ const LoginButtons: React.FC = () => {
       >
         Github
       </Button>
+    ),
+  };
+
+  return (
+    <ButtonGroup spacing={7}>
+      {buttons.map((button) => buttonComponents[button])}
     </ButtonGroup>
   );
 };

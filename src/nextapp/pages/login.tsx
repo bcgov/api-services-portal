@@ -87,7 +87,7 @@ const LoginPage: React.FC = () => {
                   one of the options available below.
                 </Text>
                 <Box mt={7}>
-                  <LoginButtons />
+                  <LoginButtons buttons={['idir', 'bceid', 'github']} />
                 </Box>
               </GridItem>
               <GridItem bgColor="white" p={10}>
@@ -100,13 +100,7 @@ const LoginPage: React.FC = () => {
                   IDIR to login to the APS Portal.
                 </Text>
                 <Box mt={7}>
-                  <Button
-                    as="a"
-                    variant="primary"
-                    href="/oauth2/start?kc_idp_hint=idir"
-                  >
-                    IDIR
-                  </Button>
+                  <LoginButtons buttons={['idir']} />
                 </Box>
               </GridItem>
             </Grid>
