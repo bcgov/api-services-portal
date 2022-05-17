@@ -41,7 +41,7 @@ class AuthorizationProfile {
       cy.get(this.kongApiKey).type(authProfile.apiKey)
       cy.get(this.authenticationContinueBtn).click()
     } else if (flow === 'Client Credential Flow') {
-      cy.get(this.clientCredentialFlow).click()
+      cy.get('[data-testid='+ authProfile.element + '-chkBox]').click()
       cy.get(this.authenticationContinueBtn).click()
       cy.get(this.authorizationContinueBtn).click()
       // cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
@@ -106,7 +106,6 @@ class AuthorizationProfile {
         cy.get(this.envAddBtn).click()
       }
     }
-
     cy.get(this.createBtn).click()
     cy.wait(2000)
     if (isCreated === true)

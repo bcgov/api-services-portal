@@ -71,12 +71,13 @@ class Products {
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
 
-    cy.get(this.envCfgTermsDropdown).select(config.terms)
+    cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
     let authType = config.authorization
     cy.get(this.envCfgAuthzDropdown)
-      .select(authType)
+      .select(authType, { force: true }).invoke('val')
       .then(() => {
+
         if (
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
@@ -90,7 +91,7 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-
+    // cy.get(`[data-testid=${config.serviceName}`).click()
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -136,6 +137,11 @@ class Products {
     this.editProduct(productName)
     cy.get(this.deleteProductBtn).click()
     cy.get(this.deleteProductConfirmationBtn).click()
+  }
+
+  verifyProductIsVisible(productName: string)
+  {
+    cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
   }
 }
 

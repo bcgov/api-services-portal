@@ -1,10 +1,10 @@
 kind: Product
-appId: 2B04C28E08AW
-name: Client Credentials Test Product
-dataset: client-credentials-test-product
-namespace: ccplatform
+appId: 2B04C28E08AT
+name: New-Auto Test Product
+dataset: new-auto-test-product
+namespace: permission
 environments:
-  - id: 2G8DB030
+  - id: 1F7CA929
     name: dev
     active: true
     approval: true

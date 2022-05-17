@@ -24,7 +24,7 @@ describe('Apply Kong API key only plugin', () => {
   it('Get the plugin ID of Key-auth plugin', () => {
     cy.makeKongGatewayRequest('plugins', '', 'GET').then((response) => {
       expect(response.status).to.be.equal(200)
-      pluginID = response.body.data[0].id
+      pluginID = _.get((_.filter(response.body.data,["name","key-auth"]))[0],'id')
     })
   })
 

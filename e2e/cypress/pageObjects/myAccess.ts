@@ -1,5 +1,5 @@
 class myAccessPage {
-  generateSecretsBtn: string = '[data-testid=access-rqst-gen-scrts-btn]'
+  generateSecretsBtn: string = '[data-testid=generate-secrets-button]'
   apiKyeValueTxt: string = '[data-testid=sa-new-creds-api-key]'
   clientId: string = '[data-testid=sa-new-creds-client-id]'
   clientSecret: string = '[data-testid=sa-new-creds-client-secret]'
@@ -7,74 +7,80 @@ class myAccessPage {
   privateKey: string = '[data-testid=sa-new-creds-signing-private-key]'
   publicKey: string = '[data-testid=sa-new-creds-signing-public-certificate]'
   issuer: string = '[data-testid=sa-new-creds-issuer]'
+  closeRequestAccesss: string = '[data-testid=doneAcceptRequest]'
 
   clickOnGenerateSecretButton() {
     cy.get(this.generateSecretsBtn).click()
   }
 
   saveAPIKeyValue(): void {
-    cy.get(this.apiKyeValueTxt).then(($apiKey) => {
-      cy.saveState('apikey', $apiKey.text())
+    cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
+      debugger
+      cy.saveState('apikey', $apiKey)
     })
+    cy.get(this.closeRequestAccesss).click()
   }
 
   saveClientCredentials(): void {
-    cy.get(this.clientId).then(($clientId) => {
-      cy.get(this.clientSecret).then(($clientSecret) => {
-        cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
+    cy.get(this.clientId).invoke('val').then(($clientId: any) => {
+      cy.get(this.clientSecret).invoke('val').then(($clientSecret: any) => {
+        cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {
           cy.saveState(
             'clientidsecret',
             '{"clientId": "' +
-              $clientId.text() +
+              $clientId +
               '", "clientSecret": "' +
-              $clientSecret.text() +
+              $clientSecret +
               '", "tokenEndpoint": "' +
-              $tokenEndpoint.text() +
+              $tokenEndpoint +
               '"}'
           )
         })
       })
     })
+    cy.get(this.closeRequestAccesss).click()
   }
 
   saveJwtKeyPairCredentials(): void {
-    cy.get(this.clientId).then(($clientId) => {
-      cy.get(this.privateKey).then(($privateKey) => {
-        cy.get(this.publicKey).then(($publicKey) => {
-          cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
+    cy.get(this.clientId).invoke('val').then(($clientId:any) => {
+      cy.get(this.privateKey).invoke('val').then(($privateKey:any) => {
+        cy.get(this.publicKey).invoke('val').then(($publicKey:any) => {
+          cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint:any) => {
             cy.saveState(
               'jwtkeypaircredentials',
               '{"clientId": "' +
-                $clientId.text() +
+                $clientId +
                 '", "tokenEndpoint": "' +
-                $tokenEndpoint.text() +
+                $tokenEndpoint +
                 '"}'
             )
-            cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey.text())
-            cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey.text())
+            cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey)
+            cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey)
           })
         })
       })
     })
+    cy.get(this.closeRequestAccesss).click()
   }
 
   saveJwksUrlCredentials(): void {
-    cy.get(this.clientId).then(($clientId) => {
-      cy.get(this.issuer).then(($issuer) => {
-        cy.get(this.tokenEndpoint).then(($tokenEndpoint) => {
+    cy.get(this.clientId).invoke('val').then(($clientId:any) => {
+      cy.get(this.issuer).invoke('val').then(($issuer:any) => {
+        cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint:any) => {
           cy.saveState(
             'jwksurlcredentials',
             '{"clientId": "' +
-            $clientId.text() +
+            $clientId +
             '", "issuer": "' +
-            $issuer.text() +
+            $issuer +
             '", "tokenEndpoint": "' +
-            $tokenEndpoint.text() +
+            $tokenEndpoint +
             '"}'
           )
         })
       })
     })
+    cy.get(this.closeRequestAccesss).click()
   }
 }
 

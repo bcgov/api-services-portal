@@ -332,7 +332,9 @@
         "containerId" : "62f2227e-e1ac-4c74-b278-1eab7f7664ae",
         "attributes" : { }
       } ],
+      "sa-platform-e0000000-fa46551361b4" : [ ],
       "security-admin-console" : [ ],
+      "sa-platform1-e0000000-5be82156d61f" : [ ],
       "admin-cli" : [ ],
       "account-console" : [ ],
       "broker" : [ {
@@ -576,13 +578,48 @@
     "realmRoles" : [ ],
     "clientRoles" : { },
     "subGroups" : [ {
-      "id" : "69f338a9-a264-4a22-ad97-a99c45e3165d",
+      "id" : "5c875007-2e0e-4c01-8418-143e2a420722",
       "name" : "platform",
       "path" : "/ns/platform",
-      "attributes" : { },
+      "attributes" : {
+        "org-unit" : [ "planning-and-innovation-division" ],
+        "org" : [ "ministry-of-health" ]
+      },
       "realmRoles" : [ ],
       "clientRoles" : { },
       "subGroups" : [ ]
+    } ]
+  }, {
+    "id" : "6a0b857d-3951-444d-823e-193bf9f12f67",
+    "name" : "organization-admin",
+    "path" : "/organization-admin",
+    "attributes" : { },
+    "realmRoles" : [ ],
+    "clientRoles" : { },
+    "subGroups" : [ {
+      "id" : "17434902-eda6-4d6a-a366-2dbfdbf3866c",
+      "name" : "ca.bc.gov",
+      "path" : "/organization-admin/ca.bc.gov",
+      "attributes" : { },
+      "realmRoles" : [ ],
+      "clientRoles" : { },
+      "subGroups" : [ {
+        "id" : "711b0078-fb8c-4ce9-aa50-06a690360508",
+        "name" : "ministry-of-health",
+        "path" : "/organization-admin/ca.bc.gov/ministry-of-health",
+        "attributes" : { },
+        "realmRoles" : [ ],
+        "clientRoles" : { },
+        "subGroups" : [ {
+          "id" : "614278c5-b60c-4101-9986-3d031720dec0",
+          "name" : "planning-and-innovation-division",
+          "path" : "/organization-admin/ca.bc.gov/ministry-of-health/planning-and-innovation-division",
+          "attributes" : { },
+          "realmRoles" : [ ],
+          "clientRoles" : { },
+          "subGroups" : [ ]
+        } ]
+      } ]
     } ]
   } ],
   "defaultRoles" : [ "uma_authorization", "offline_access" ],
@@ -683,7 +720,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "uma_authorization", "offline_access", "api-owner" ],
+    "realmRoles" : [ "uma_authorization", "aps-admin", "offline_access", "api-owner" ],
     "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
     },
@@ -789,7 +826,41 @@
     "realmRoles" : [ "uma_authorization", "offline_access" ],
     "clientRoles" : {
       "gwa-api" : [ "uma_protection" ],
-      "master-realm" : [ "manage-clients", "view-users", "create-client", "manage-users" ],
+      "master-realm" : [ "manage-clients", "view-users", "create-client", "manage-users", "manage-authorization" ],
+      "account" : [ "manage-account", "view-profile" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "c795236e-fb09-4b4e-93e0-8bffb7dda7b3",
+    "createdTimestamp" : 1650644631111,
+    "username" : "service-account-sa-platform1-e0000000-5be82156d61f",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "serviceAccountClientId" : "sa-platform1-e0000000-5be82156d61f",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "uma_authorization", "offline_access" ],
+    "clientRoles" : {
+      "account" : [ "manage-account", "view-profile" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "54adc719-3687-4886-9a7c-18c719a31014",
+    "createdTimestamp" : 1651510581479,
+    "username" : "service-account-sa-platform-e0000000-fa46551361b4",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "serviceAccountClientId" : "sa-platform-e0000000-fa46551361b4",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "uma_authorization", "offline_access" ],
+    "clientRoles" : {
       "account" : [ "manage-account", "view-profile" ]
     },
     "notBefore" : 0,
@@ -1279,6 +1350,105 @@
         "attributes" : { },
         "_id" : "054b9d22-ce05-4b1c-86bf-424eb7f3ca13",
         "uris" : [ "/*" ]
+      }, {
+        "name" : "platform1",
+        "type" : "namespace",
+        "ownerManagedAccess" : true,
+        "attributes" : { },
+        "_id" : "fa9f93b8-b1c1-45ab-ad65-672befbdaedc",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GatewayConfig.Publish"
+        }, {
+          "name" : "Namespace.Manage"
+        }, {
+          "name" : "Access.Manage"
+        }, {
+          "name" : "Content.Publish"
+        }, {
+          "name" : "Namespace.View"
+        }, {
+          "name" : "CredentialIssuer.Admin"
+        } ]
+      }, {
+        "name" : "platform2",
+        "type" : "namespace",
+        "ownerManagedAccess" : true,
+        "attributes" : { },
+        "_id" : "c6ad734c-6d8f-4b90-bcf9-cb9c19eadc22",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GatewayConfig.Publish"
+        }, {
+          "name" : "Namespace.Manage"
+        }, {
+          "name" : "Access.Manage"
+        }, {
+          "name" : "Content.Publish"
+        }, {
+          "name" : "Namespace.View"
+        }, {
+          "name" : "CredentialIssuer.Admin"
+        } ]
+      }, {
+        "name" : "platform",
+        "type" : "namespace",
+        "ownerManagedAccess" : true,
+        "attributes" : { },
+        "_id" : "501a70b7-546a-43f3-8992-a4c170f0bab7",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GatewayConfig.Publish"
+        }, {
+          "name" : "Namespace.Manage"
+        }, {
+          "name" : "Access.Manage"
+        }, {
+          "name" : "Content.Publish"
+        }, {
+          "name" : "Namespace.View"
+        }, {
+          "name" : "CredentialIssuer.Admin"
+        } ]
+      }, {
+        "name" : "org/ca.bc.gov",
+        "type" : "organization",
+        "ownerManagedAccess" : true,
+        "displayName" : "org/ca.bc.gov",
+        "attributes" : { },
+        "_id" : "228c26be-3ef4-43d6-92ec-8441ebf5887c",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GroupAccess.Manage"
+        } ]
+      }, {
+        "name" : "org/ministry-of-health",
+        "type" : "organization",
+        "ownerManagedAccess" : true,
+        "attributes" : { },
+        "_id" : "2367ab08-6c6e-42e4-b1db-3a86de3a028d",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GroupAccess.Manage"
+        }, {
+          "name" : "Dataset.Manage"
+        }, {
+          "name" : "Namespace.Assign"
+        } ]
+      }, {
+        "name" : "org/planning-and-innovation-division",
+        "type" : "organization",
+        "ownerManagedAccess" : true,
+        "attributes" : { },
+        "_id" : "032644b7-a3a0-489e-bda3-193bd14d861a",
+        "uris" : [ ],
+        "scopes" : [ {
+          "name" : "GroupAccess.Manage"
+        }, {
+          "name" : "Dataset.Manage"
+        }, {
+          "name" : "Namespace.Assign"
+        } ]
       } ],
       "policies" : [ {
         "id" : "35dcd837-d215-4036-84fe-452605b0a065",
@@ -1291,6 +1461,45 @@
           "code" : "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
         }
       }, {
+        "id" : "ca06ef6c-d7f8-42c9-b0d6-0c9be85c1cc1",
+        "name" : "janis",
+        "type" : "user",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "users" : "[\"janis@idir\"]"
+        }
+      }, {
+        "id" : "c3848ff4-76b0-4f2d-afe9-7dfd77467fcb",
+        "name" : "group-organization-admin-ca.bc.gov-policy",
+        "description" : "Group '/organization-admin' / 'ca.bc.gov' Policy",
+        "type" : "group",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "groups" : "[{\"path\":\"/organization-admin\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov\",\"extendChildren\":false}]"
+        }
+      }, {
+        "id" : "6f49c571-fbbb-4f86-a72a-c1591a446bb3",
+        "name" : "group-organization-admin-ca.bc.gov-ministry-of-health-policy",
+        "description" : "Group '/organization-admin/ca.bc.gov' / 'ministry-of-health' Policy",
+        "type" : "group",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "groups" : "[{\"path\":\"/organization-admin\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov\",\"extendChildren\":false}]"
+        }
+      }, {
+        "id" : "99fdf1a9-d5ec-48c7-a2cd-1ddeb130b058",
+        "name" : "group-organization-admin-ca.bc.gov-ministry-of-health-planning-and-innovation-division-policy",
+        "description" : "Group '/organization-admin/ca.bc.gov/ministry-of-health' / 'planning-and-innovation-division' Policy",
+        "type" : "group",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "groups" : "[{\"path\":\"/organization-admin/ca.bc.gov/ministry-of-health\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov/ministry-of-health/planning-and-innovation-division\",\"extendChildren\":false},{\"path\":\"/organization-admin\",\"extendChildren\":false},{\"path\":\"/organization-admin/ca.bc.gov\",\"extendChildren\":false}]"
+        }
+      }, {
         "id" : "31be7436-e9d8-42a3-b42e-69a1869a7eea",
         "name" : "Default Permission",
         "description" : "A permission that applies to the default resource type",
@@ -1300,6 +1509,60 @@
         "config" : {
           "defaultResourceType" : "urn:gwa-api:resources:default",
           "applyPolicies" : "[\"Default Policy\"]"
+        }
+      }, {
+        "id" : "65f0c0a4-e2ac-4364-800d-ebd4e11ce393",
+        "name" : "janis full access",
+        "type" : "scope",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "scopes" : "[\"GroupAccess.Manage\",\"Namespace.Assign\"]",
+          "applyPolicies" : "[\"janis\"]"
+        }
+      }, {
+        "id" : "854f0dfe-952d-48f8-9d53-d49b0b4ed122",
+        "name" : "Access to 'org/ca.bc.gov' services for role organization-admin",
+        "type" : "scope",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "resources" : "[\"org/ca.bc.gov\"]",
+          "scopes" : "[\"GroupAccess.Manage\"]",
+          "applyPolicies" : "[\"group-organization-admin-ca.bc.gov-policy\"]"
+        }
+      }, {
+        "id" : "3f934d3f-d231-48fc-9f5a-924da7808989",
+        "name" : "Access to 'org/ministry-of-health' services for role organization-admin",
+        "type" : "scope",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "resources" : "[\"org/ministry-of-health\"]",
+          "scopes" : "[\"Dataset.Manage\",\"GroupAccess.Manage\",\"Namespace.Assign\"]",
+          "applyPolicies" : "[\"group-organization-admin-ca.bc.gov-ministry-of-health-policy\"]"
+        }
+      }, {
+        "id" : "56a4857d-a0be-472c-85d0-2dca93a1fdac",
+        "name" : "Access to 'org/planning-and-innovation-division' services for role organization-admin",
+        "type" : "scope",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "resources" : "[\"org/planning-and-innovation-division\"]",
+          "scopes" : "[\"Dataset.Manage\",\"GroupAccess.Manage\",\"Namespace.Assign\"]",
+          "applyPolicies" : "[\"group-organization-admin-ca.bc.gov-ministry-of-health-planning-and-innovation-division-policy\"]"
+        }
+      }, {
+        "id" : "f2e764aa-c355-4e81-a5e6-e76ffb86041f",
+        "name" : "Access to 'platform' services for role organization-admin",
+        "type" : "scope",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "resources" : "[\"platform\"]",
+          "scopes" : "[\"Namespace.View\"]",
+          "applyPolicies" : "[\"group-organization-admin-ca.bc.gov-ministry-of-health-planning-and-innovation-division-policy\"]"
         }
       } ],
       "scopes" : [ {
@@ -1320,6 +1583,17 @@
       }, {
         "id" : "dfc132ca-aa87-40b5-bc33-3e972a88f638",
         "name" : "CredentialIssuer.Admin"
+      }, {
+        "id" : "95893c25-6b83-4e59-9518-a25568d95542",
+        "name" : "GroupAccess.Manage",
+        "iconUri" : "",
+        "displayName" : "GroupAccess.Manage"
+      }, {
+        "id" : "b0b007b1-1ecb-4b3f-9f0c-41b3fa34754c",
+        "name" : "Dataset.Manage"
+      }, {
+        "id" : "f3bf8d43-54a4-4594-aeea-f61b99411f92",
+        "name" : "Namespace.Assign"
       } ],
       "decisionStrategy" : "AFFIRMATIVE"
     }
@@ -1350,6 +1624,175 @@
     "nodeReRegistrationTimeout" : 0,
     "defaultClientScopes" : [ "web-origins", "role_list", "roles", "profile", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+  }, {
+    "id" : "4bbc355d-7a87-4476-9593-7f9359dc8859",
+    "clientId" : "sa-platform1-e0000000-5be82156d61f",
+    "name" : "",
+    "description" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "secret" : "c01a7839-2679-4cdd-96c4-173223b49ee6",
+    "redirectUris" : [ "https://*" ],
+    "webOrigins" : [ "*" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : false,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : false,
+    "serviceAccountsEnabled" : true,
+    "publicClient" : false,
+    "frontchannelLogout" : false,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "saml.assertion.signature" : "false",
+      "saml.multivalued.roles" : "false",
+      "saml.force.post.binding" : "false",
+      "saml.encrypt" : "false",
+      "saml.server.signature" : "false",
+      "saml.server.signature.keyinfo.ext" : "false",
+      "exclude.session.state.from.auth.response" : "false",
+      "client_credentials.use_refresh_token" : "false",
+      "saml_force_name_id_format" : "false",
+      "saml.client.signature" : "false",
+      "tls.client.certificate.bound.access.tokens" : "false",
+      "saml.authnstatement" : "false",
+      "display.on.consent.screen" : "false",
+      "saml.onetimeuse.condition" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : false,
+    "nodeReRegistrationTimeout" : -1,
+    "protocolMappers" : [ {
+      "id" : "d5b56ac0-01af-4241-991e-1cd25edeb739",
+      "name" : "Client ID",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientId",
+        "userinfo.token.claim" : "true",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientId",
+        "jsonType.label" : "String"
+      }
+    }, {
+      "id" : "8c119e4b-b308-41aa-be7b-91e1d299e499",
+      "name" : "Client Host",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientHost",
+        "userinfo.token.claim" : "true",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientHost",
+        "jsonType.label" : "String"
+      }
+    }, {
+      "id" : "3ba852b4-71b8-4942-950b-80968346b0e2",
+      "name" : "Client IP Address",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientAddress",
+        "userinfo.token.claim" : "true",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientAddress",
+        "jsonType.label" : "String"
+      }
+    } ],
+    "defaultClientScopes" : [ ],
+    "optionalClientScopes" : [ ]
+  }, {
+    "id" : "25ee1923-6323-4c4c-ae70-178615ace3b2",
+    "clientId" : "sa-platform-e0000000-fa46551361b4",
+    "name" : "",
+    "description" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "secret" : "dc96e3d3-23cc-4345-aa5e-6f89b5d20c91",
+    "redirectUris" : [ "https://*" ],
+    "webOrigins" : [ "*" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : false,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : false,
+    "serviceAccountsEnabled" : true,
+    "publicClient" : false,
+    "frontchannelLogout" : false,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "saml.assertion.signature" : "false",
+      "saml.multivalued.roles" : "false",
+      "saml.force.post.binding" : "false",
+      "saml.encrypt" : "false",
+      "saml.server.signature" : "false",
+      "saml.server.signature.keyinfo.ext" : "false",
+      "exclude.session.state.from.auth.response" : "false",
+      "client_credentials.use_refresh_token" : "false",
+      "saml_force_name_id_format" : "false",
+      "saml.client.signature" : "false",
+      "tls.client.certificate.bound.access.tokens" : "false",
+      "saml.authnstatement" : "false",
+      "display.on.consent.screen" : "false",
+      "saml.onetimeuse.condition" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : false,
+    "nodeReRegistrationTimeout" : -1,
+    "protocolMappers" : [ {
+      "id" : "270af568-11bf-4208-bccd-58583e44f09c",
+      "name" : "Client IP Address",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientAddress",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientAddress",
+        "jsonType.label" : "String"
+      }
+    }, {
+      "id" : "9dda9072-1e47-43fd-a482-6830b252ca5b",
+      "name" : "Client Host",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientHost",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientHost",
+        "jsonType.label" : "String"
+      }
+    }, {
+      "id" : "a35858ac-39ad-46bc-9227-e40698049c62",
+      "name" : "Client ID",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usersessionmodel-note-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.session.note" : "clientId",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "clientId",
+        "jsonType.label" : "String"
+      }
+    } ],
+    "defaultClientScopes" : [ ],
+    "optionalClientScopes" : [ ]
   }, {
     "id" : "5c797848-2f03-4085-a03a-e4f7c22d0050",
     "clientId" : "security-admin-console",
@@ -1912,7 +2355,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "oidc-address-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "oidc-usermodel-attribute-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "saml-user-attribute-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper" ]
       }
     }, {
       "id" : "013bd2ad-80e7-40fe-ba41-b90642d536cd",
@@ -1956,7 +2399,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "oidc-usermodel-property-mapper", "oidc-full-name-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {
@@ -2005,7 +2448,7 @@
   "internationalizationEnabled" : false,
   "supportedLocales" : [ ],
   "authenticationFlows" : [ {
-    "id" : "b5f79174-a900-4c45-9468-4c542234d96c",
+    "id" : "99f94050-3509-41c8-849c-0db912e12b62",
     "alias" : "Account verification options",
     "description" : "Method with which to verity the existing account",
     "providerId" : "basic-flow",
@@ -2025,7 +2468,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "d601b0d5-66eb-4b1a-8a58-451b7581d9d4",
+    "id" : "1b0955d1-c468-4c8f-aaa3-1e41274fb587",
     "alias" : "Authentication Options",
     "description" : "Authentication options.",
     "providerId" : "basic-flow",
@@ -2051,7 +2494,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "34547866-749c-4daf-993c-ced46c4712cd",
+    "id" : "17b48f55-526a-48fb-93bd-71d660425f5a",
     "alias" : "Browser - Conditional OTP",
     "description" : "Flow to determine if the OTP is required for the authentication",
     "providerId" : "basic-flow",
@@ -2071,7 +2514,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "613cb1c6-9d00-40cc-990c-31f5f4d72962",
+    "id" : "644d063a-434e-45ea-9030-822fdba2d996",
     "alias" : "Direct Grant - Conditional OTP",
     "description" : "Flow to determine if the OTP is required for the authentication",
     "providerId" : "basic-flow",
@@ -2091,7 +2534,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "e1cc9426-e1ac-4d2f-b64c-b122f8380ce9",
+    "id" : "e9b97743-3468-451a-8f5b-17458b452ed8",
     "alias" : "First broker login - Conditional OTP",
     "description" : "Flow to determine if the OTP is required for the authentication",
     "providerId" : "basic-flow",
@@ -2111,7 +2554,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "6ce277b3-48ed-4043-a109-d7ac4a90e1a9",
+    "id" : "a0b9df12-356f-4862-8fa7-e966b77e6428",
     "alias" : "Handle Existing Account",
     "description" : "Handle what to do if there is existing account with same email/username like authenticated identity provider",
     "providerId" : "basic-flow",
@@ -2131,7 +2574,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "d9f67f05-e98a-47be-93bb-fd0471c1aab2",
+    "id" : "f2bd5d3a-70d8-4ec7-ad18-57d7a8b9688c",
     "alias" : "Reset - Conditional OTP",
     "description" : "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
     "providerId" : "basic-flow",
@@ -2151,7 +2594,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "45578930-9168-42a5-b30f-8129bcd2a678",
+    "id" : "160f38f1-8e2f-4517-8e73-815d47c34336",
     "alias" : "User creation or linking",
     "description" : "Flow for the existing/non-existing user alternatives",
     "providerId" : "basic-flow",
@@ -2172,7 +2615,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "7b2f5eaa-2588-487b-8663-f0954abd9d6b",
+    "id" : "85ee86bf-920e-4e7b-a787-c3a6c350fdf7",
     "alias" : "Verify Existing Account by Re-authentication",
     "description" : "Reauthentication of existing account",
     "providerId" : "basic-flow",
@@ -2192,7 +2635,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "eafcda3d-e7f8-4198-b3ef-1d3a3b722567",
+    "id" : "877f1367-38ac-4922-a924-bda1eda0b4b6",
     "alias" : "browser",
     "description" : "browser based authentication",
     "providerId" : "basic-flow",
@@ -2224,7 +2667,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "ecb43ad1-63af-40e7-832a-f12476f0687a",
+    "id" : "0473e270-f900-4aca-b0d8-ec957f6ab913",
     "alias" : "clients",
     "description" : "Base authentication for clients",
     "providerId" : "client-flow",
@@ -2256,7 +2699,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "221fa3ed-50e8-4001-a294-fc1c6605e5f2",
+    "id" : "3010f038-6084-4b93-b1f1-81f81e4fd904",
     "alias" : "direct grant",
     "description" : "OpenID Connect Resource Owner Grant",
     "providerId" : "basic-flow",
@@ -2282,7 +2725,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "7d1b8e0a-b145-49b6-a728-510b61ecb7a6",
+    "id" : "5188ae51-fdb3-4fb6-af25-9698748b07ee",
     "alias" : "docker auth",
     "description" : "Used by Docker clients to authenticate against the IDP",
     "providerId" : "basic-flow",
@@ -2296,7 +2739,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "a518be11-48ed-47fc-942f-b4fe50948313",
+    "id" : "956daebc-8f19-4cc2-90e0-00ee7b2377b4",
     "alias" : "first broker login",
     "description" : "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
     "providerId" : "basic-flow",
@@ -2317,7 +2760,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "1253f50b-dc27-4410-8e46-cb23282f473d",
+    "id" : "82795879-c9c0-4a2d-9121-3007b501ed39",
     "alias" : "forms",
     "description" : "Username, password, otp and other auth forms.",
     "providerId" : "basic-flow",
@@ -2337,7 +2780,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "760aff36-b4c7-438b-b076-ca1349da7c6c",
+    "id" : "12a20ef9-613b-41ce-83ad-0dc0dc6b4e59",
     "alias" : "http challenge",
     "description" : "An authentication flow based on challenge-response HTTP Authentication Schemes",
     "providerId" : "basic-flow",
@@ -2357,7 +2800,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "f80b39a0-a6ac-4ee3-93e2-9991239cdd11",
+    "id" : "84ac627e-e416-46b6-abb8-67de4decf98c",
     "alias" : "registration",
     "description" : "registration flow",
     "providerId" : "basic-flow",
@@ -2372,7 +2815,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "902c4a30-a3aa-49fc-aa92-af3c312c6f7f",
+    "id" : "0a0ee5b0-77e7-44c9-9bda-ab2367b02f9b",
     "alias" : "registration form",
     "description" : "registration form",
     "providerId" : "form-flow",
@@ -2404,7 +2847,7 @@
       "autheticatorFlow" : false
     } ]
   }, {
-    "id" : "3720edba-f95f-4757-b297-cfb355000c71",
+    "id" : "9c731f7f-6171-4b70-ae31-af22322cbc38",
     "alias" : "reset credentials",
     "description" : "Reset credentials for a user if they forgot their password or something",
     "providerId" : "basic-flow",
@@ -2436,7 +2879,7 @@
       "autheticatorFlow" : true
     } ]
   }, {
-    "id" : "ff451d58-4027-4128-aa4e-b72d789d84f8",
+    "id" : "46519bb6-519f-48ba-a8ca-45ffed695ed1",
     "alias" : "saml ecp",
     "description" : "SAML ECP Profile Authentication Flow",
     "providerId" : "basic-flow",
@@ -2451,13 +2894,13 @@
     } ]
   } ],
   "authenticatorConfig" : [ {
-    "id" : "0dd16f84-6fc7-4bbd-9eb0-913c9c5d050c",
+    "id" : "3e5ee503-2681-4e20-b0c8-9fed28637e10",
     "alias" : "create unique user config",
     "config" : {
       "require.password.update.after.registration" : "false"
     }
   }, {
-    "id" : "8716e3b6-36f3-4679-a494-f3ff63bd8abf",
+    "id" : "41f8a23b-fa93-4fb9-81a3-efe1bc4da394",
     "alias" : "review profile config",
     "config" : {
       "update.profile.on.first.login" : "missing"

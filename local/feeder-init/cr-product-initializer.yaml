@@ -1,8 +1,8 @@
 kind: Product
 appId: 2B04C28E08AW
-name: Client Credentials Test Product
-dataset: client-credentials-test-product
-namespace: ccplatform
+name: Delete-Auto Test Product
+dataset: delete-auto-test-product
+namespace: deleteplatform
 environments:
   - id: 2G8DB030
     name: dev

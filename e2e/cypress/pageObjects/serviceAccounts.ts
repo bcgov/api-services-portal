@@ -20,14 +20,14 @@ checkServiceAccountNotExist() : void
   }
 
   saveServiceAcctCreds(): void {
-    cy.get(this.clientId).then(($clientId) => {
-      cy.get(this.clientSecret).then(($clientSecret) => {
+    cy.get(this.clientId).invoke('val').then(($clientId) => {
+      cy.get(this.clientSecret).invoke('val').then(($clientSecret) => {
         cy.saveState(
           'credentials',
           '{"clientId": "' +
-            $clientId.text() +
+            $clientId +
             '", "clientSecret": "' +
-            $clientSecret.text() +
+            $clientSecret +
             '"}'
         )
       })

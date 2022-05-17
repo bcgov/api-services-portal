@@ -5,7 +5,7 @@
       "password": "local"
     }
   },
-  "namespace": "platform",
+  "namespace": "newplatform",
   "product": {
     "name": "Auto Test Product",
     "environment": "dev"

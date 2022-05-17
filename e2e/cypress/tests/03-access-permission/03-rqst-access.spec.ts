@@ -40,6 +40,7 @@ describe('Request Access Spec', () => {
       apiDir.createAccessRequest(checkPermission.product, checkPermission.application, accessRequest)
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
+      myAccessPage.saveAPIKeyValue()
     })
   })
 

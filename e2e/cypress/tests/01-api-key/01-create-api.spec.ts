@@ -8,6 +8,8 @@ describe('Create API Spec', () => {
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
+  var nameSpace: string
+  let userSession: string
 
   before(() => {
     cy.visit('/')
@@ -19,6 +21,7 @@ describe('Create API Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('api').as('api')
     cy.visit(login.path)
   })
 
@@ -29,8 +32,14 @@ describe('Create API Spec', () => {
   })
 
   it('creates and activates new namespace', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      home.createNamespace(namespace)
+    cy.getUserSession().then(() => {
+      cy.get('@apiowner').then(({ namespace }: any) => {
+        nameSpace = namespace
+        home.createNamespace(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
+        })
+      })
     })
   })
 
@@ -57,6 +66,23 @@ describe('Create API Spec', () => {
       pd.createNewProduct(product.name, product.environment.name)
     })
   })
+
+  it('Associate Namespace to the organization Unit', () => {
+    cy.get('@api').then(({ organization }: any) => {
+      cy.setHeaders(organization.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
+  })
+  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
+    })
+  })
   it('publish product to directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
@@ -74,16 +100,10 @@ describe('Create API Spec', () => {
       })
     })
   })
-  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ product }: any) => {
-      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
-    })
-  })
   after(() => {
     cy.logout()
-    cy.clearLocalStorage({log:true})
+    cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })
 })

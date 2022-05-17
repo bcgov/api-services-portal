@@ -1,7 +1,7 @@
 entity: CredentialIssuer
 record:
   id: 'Gateway Services Resource Server'
-  namespace: platform
+  namespace: newplatform
   description: 'Authorization Profile for protecting the Gateway Services API'
   flow: client-credentials
   mode: auto
@@ -17,6 +17,7 @@ record:
     - Access.Manage
     - GatewayConfig.Publish
     - Content.Publish
+    - Namespace.Assign
   owner: janis@idir
   environmentDetails:
     - environment: prod

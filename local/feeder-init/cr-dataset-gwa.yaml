@@ -1,8 +1,8 @@
 entity: Dataset
 record:
-  id: "B334567890000000"
-  name: "new-auto-test-product"
-  title: "New-Auto Test Product"
+  id: "B234567890000000"
+  name: "client-credentials-test-product"
+  title: "Client Credentials Test Product"
   notes: "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them."
   tags: [ 'gateway', 'kong', 'openapi' ]
   sector: "Service"
