@@ -6,7 +6,6 @@ class MyProfilePage {
         var obj: any
         let scope : string
         cy.get(this.userProfile).then(($ele) => {
-          debugger
           obj = JSON.parse($ele.get(0).innerText)
           expect(obj.scopes[0]).to.eq(expScope)
         })
