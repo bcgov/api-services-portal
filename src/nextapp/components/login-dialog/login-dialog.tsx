@@ -40,7 +40,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
           </ModalBody>
 
           <ModalFooter justifyContent="center">
-            <LoginButtons />
+            <LoginButtons buttons={['idir', 'bceid', 'github']} />
           </ModalFooter>
         </ModalContent>
       </Modal>
