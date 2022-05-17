@@ -9,11 +9,13 @@ import {
   Grid,
   GridItem,
   Icon,
+  IconButton,
   Center,
   useToast,
   VStack,
   useDisclosure,
 } from '@chakra-ui/react';
+import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
@@ -29,6 +31,7 @@ import {
   FaUserFriends,
   FaUserShield,
 } from 'react-icons/fa';
+import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
@@ -102,6 +105,7 @@ const NamespacesPage: React.FC = () => {
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const bannerDisclosure = useDisclosure();
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -132,6 +136,52 @@ const NamespacesPage: React.FC = () => {
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
+      <Box width="100%" bgColor="#FCBA191A">
+        <Container maxW="6xl" py={3}>
+          <Flex align="center">
+            <Icon
+              as={IoIosInformationCircleOutline}
+              boxSize="6"
+              mr={2}
+              color="bc-blue"
+            />
+            <Text fontSize="sm">
+              Your products will remain in preview mode until you publish them
+              in the API Directory
+            </Text>
+            <IconButton
+              size="sm"
+              icon={
+                <Icon
+                  as={bannerDisclosure.isOpen ? BsChevronUp : BsChevronDown}
+                />
+              }
+              onClick={bannerDisclosure.onToggle}
+              variant="ghost"
+              ml={2}
+            />
+          </Flex>
+          {bannerDisclosure.isOpen && (
+            <Box>
+              <Text fontSize="sm">
+                If this is a new namespace, it must be approved and associated
+                with an organization before you can enable your products in the
+                API Directory to make them visible to the public. You can still
+                configure your products but they will remain in preview mode.{' '}
+                <Text
+                  as="a"
+                  color="bc-blue"
+                  fontWeight="bold"
+                  textDecor="underline"
+                  href="#"
+                >
+                  Find and contact your Organization Administrator for approval
+                </Text>
+              </Text>
+            </Box>
+          )}
+        </Container>
+      </Box>
       <Container maxW="6xl">
         <PageHeader title={user?.namespace} />
         {!hasNamespace && (
