@@ -54,7 +54,7 @@ export const generateCredential = async (
 
     const newApiKey = await registerApiKey(context, clientId, nickname);
 
-    logger.debug('new-api-key %j', newApiKey);
+    logger.debug('new-api-key CREATED FOR %s', clientId);
 
     // Call /feeds to sync the Consumer with KeystoneJS
     await feederApi.forceSync('kong', 'consumer', newApiKey.consumer.id);

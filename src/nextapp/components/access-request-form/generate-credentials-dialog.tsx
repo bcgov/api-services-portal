@@ -18,11 +18,13 @@ import { FaKey } from 'react-icons/fa';
 interface GenerateCredentialsDialogProps {
   id: string;
   open?: boolean;
+  regenerate?: boolean;
 }
 
 const GenerateCredentialsDialog: React.FC<GenerateCredentialsDialogProps> = ({
   id,
   open,
+  regenerate,
 }) => {
   const client = useQueryClient();
   const { isOpen, onOpen, onClose } = useDisclosure();
