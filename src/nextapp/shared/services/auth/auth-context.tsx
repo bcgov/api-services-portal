@@ -55,13 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               <Heading size="md">Unauthorized</Heading>
               <Text>You do not have permission to view this page.</Text>
             </Box>
-            <Button
-              href={`/admin/signin?${querystring.encode({
-                f: router?.asPath,
-              })}`}
-            >
-              Login
-            </Button>
+            <Button href="/login">Login</Button>
           </Box>
         </Center>
       ) : (

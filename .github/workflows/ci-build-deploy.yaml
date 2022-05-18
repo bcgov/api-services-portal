@@ -167,14 +167,17 @@ jobs:
           oauthProxy:
             enabled: true
             image:
-              tag: v7.2.0
+              repository: ${{ env.REGISTRY }}/bcgov-dss/api-serv-infra/oauth2-proxy
+              tag: 7.2.1-8c743f0c
+              pullPolicy: IfNotPresent
+
             config:
               upstream: http://127.0.0.1:3000
               client-id: ${{ secrets.OIDC_CLIENT_ID }}
               client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
               oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
+              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
