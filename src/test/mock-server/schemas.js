@@ -888,6 +888,7 @@ type Blob {
   _label_: String
   id: ID!
   ref: String
+  type: String
   blob: String
 }
 
@@ -916,6 +917,10 @@ input BlobWhereInput {
   ref_not_ends_with_i: String
   ref_in: [String]
   ref_not_in: [String]
+  type: String
+  type_not: String
+  type_in: [String]
+  type_not_in: [String]
   blob: String
   blob_not: String
   blob_contains: String
@@ -945,12 +950,15 @@ enum SortBlobsBy {
   id_DESC
   ref_ASC
   ref_DESC
+  type_ASC
+  type_DESC
   blob_ASC
   blob_DESC
 }
 
 input BlobUpdateInput {
   ref: String
+  type: String
   blob: String
 }
 
@@ -961,6 +969,7 @@ input BlobsUpdateInput {
 
 input BlobCreateInput {
   ref: String
+  type: String
   blob: String
 }
 
@@ -1799,12 +1808,14 @@ type Dataset {
   private: Boolean
   tags: String
   contacts: String
+  resources: String
   organization: Organization
   organizationUnit: OrganizationUnit
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  isDraft: Boolean
   extSource: String
   extForeignKey: String
   extRecordHash: String
@@ -1981,6 +1992,24 @@ input DatasetWhereInput {
   contacts_not_ends_with_i: String
   contacts_in: [String]
   contacts_not_in: [String]
+  resources: String
+  resources_not: String
+  resources_contains: String
+  resources_not_contains: String
+  resources_starts_with: String
+  resources_not_starts_with: String
+  resources_ends_with: String
+  resources_not_ends_with: String
+  resources_i: String
+  resources_not_i: String
+  resources_contains_i: String
+  resources_not_contains_i: String
+  resources_starts_with_i: String
+  resources_not_starts_with_i: String
+  resources_ends_with_i: String
+  resources_not_ends_with_i: String
+  resources_in: [String]
+  resources_not_in: [String]
   organization: OrganizationWhereInput
   organization_is_null: Boolean
   organizationUnit: OrganizationUnitWhereInput
@@ -2041,6 +2070,8 @@ input DatasetWhereInput {
   catalogContent_not_in: [String]
   isInCatalog: Boolean
   isInCatalog_not: Boolean
+  isDraft: Boolean
+  isDraft_not: Boolean
   extSource: String
   extSource_not: String
   extSource_contains: String
@@ -2124,6 +2155,8 @@ enum SortDatasetsBy {
   tags_DESC
   contacts_ASC
   contacts_DESC
+  resources_ASC
+  resources_DESC
   organization_ASC
   organization_DESC
   organizationUnit_ASC
@@ -2136,6 +2169,8 @@ enum SortDatasetsBy {
   catalogContent_DESC
   isInCatalog_ASC
   isInCatalog_DESC
+  isDraft_ASC
+  isDraft_DESC
   extSource_ASC
   extSource_DESC
   extForeignKey_ASC
@@ -2155,12 +2190,14 @@ input DatasetUpdateInput {
   private: Boolean
   tags: String
   contacts: String
+  resources: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  isDraft: Boolean
   extSource: String
   extForeignKey: String
   extRecordHash: String
@@ -2182,12 +2219,14 @@ input DatasetCreateInput {
   private: Boolean
   tags: String
   contacts: String
+  resources: String
   organization: OrganizationRelateToOneInput
   organizationUnit: OrganizationUnitRelateToOneInput
   notes: String
   title: String
   catalogContent: String
   isInCatalog: Boolean
+  isDraft: Boolean
   extSource: String
   extForeignKey: String
   extRecordHash: String
@@ -2373,7 +2412,6 @@ input EnvironmentUpdateInput {
   credentialIssuer: CredentialIssuerRelateToOneInput
   additionalDetailsToRequest: String
   services: GatewayServiceRelateToManyInput
-  product: ProductRelateToOneInput
 }
 
 input EnvironmentsUpdateInput {
@@ -3667,6 +3705,90 @@ input GatewayServicesCreateInput {
   data: GatewayServiceCreateInput
 }
 
+type Label {
+  _label_: String
+  id: ID!
+  name: String
+  value: String
+}
+
+input LabelWhereInput {
+  AND: [LabelWhereInput]
+  OR: [LabelWhereInput]
+  id: ID
+  id_not: ID
+  id_in: [ID]
+  id_not_in: [ID]
+  name: String
+  name_not: String
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_not_starts_with: String
+  name_ends_with: String
+  name_not_ends_with: String
+  name_i: String
+  name_not_i: String
+  name_contains_i: String
+  name_not_contains_i: String
+  name_starts_with_i: String
+  name_not_starts_with_i: String
+  name_ends_with_i: String
+  name_not_ends_with_i: String
+  name_in: [String]
+  name_not_in: [String]
+  value: String
+  value_not: String
+  value_contains: String
+  value_not_contains: String
+  value_starts_with: String
+  value_not_starts_with: String
+  value_ends_with: String
+  value_not_ends_with: String
+  value_i: String
+  value_not_i: String
+  value_contains_i: String
+  value_not_contains_i: String
+  value_starts_with_i: String
+  value_not_starts_with_i: String
+  value_ends_with_i: String
+  value_not_ends_with_i: String
+  value_in: [String]
+  value_not_in: [String]
+}
+
+input LabelWhereUniqueInput {
+  id: ID!
+}
+
+enum SortLabelsBy {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  value_ASC
+  value_DESC
+}
+
+input LabelUpdateInput {
+  name: String
+  value: String
+}
+
+input LabelsUpdateInput {
+  id: ID!
+  data: LabelUpdateInput
+}
+
+input LabelCreateInput {
+  name: String
+  value: String
+}
+
+input LabelsCreateInput {
+  data: LabelCreateInput
+}
+
 type Legal {
   _label_: String
   id: ID!
@@ -4667,7 +4789,6 @@ enum SortProductsBy {
 input ProductUpdateInput {
   appId: String
   name: String
-  namespace: String
   description: String
   dataset: DatasetRelateToOneInput
   organization: OrganizationRelateToOneInput
@@ -4707,6 +4828,13 @@ input GatewayConsumerRelateToOneInput {
   disconnectAll: Boolean
 }
 
+input LabelRelateToManyInput {
+  create: [LabelCreateInput]
+  connect: [LabelWhereUniqueInput]
+  disconnect: [LabelWhereUniqueInput]
+  disconnectAll: Boolean
+}
+
 type ServiceAccess {
   _label_: String
   id: ID!
@@ -4721,6 +4849,22 @@ type ServiceAccess {
   consumer: GatewayConsumer
   application: Application
   productEnvironment: Environment
+  labels(
+    where: LabelWhereInput
+    search: String
+    sortBy: [SortLabelsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Label!]!
+  _labelsMeta(
+    where: LabelWhereInput
+    search: String
+    sortBy: [SortLabelsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -4836,6 +4980,9 @@ input ServiceAccessWhereInput {
   application_is_null: Boolean
   productEnvironment: EnvironmentWhereInput
   productEnvironment_is_null: Boolean
+  labels_every: LabelWhereInput
+  labels_some: LabelWhereInput
+  labels_none: LabelWhereInput
   updatedAt: DateTime
   updatedAt_not: DateTime
   updatedAt_lt: DateTime
@@ -4883,6 +5030,8 @@ enum SortServiceAccessesBy {
   application_DESC
   productEnvironment_ASC
   productEnvironment_DESC
+  labels_ASC
+  labels_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -4901,6 +5050,7 @@ input ServiceAccessUpdateInput {
   consumer: GatewayConsumerRelateToOneInput
   application: ApplicationRelateToOneInput
   productEnvironment: EnvironmentRelateToOneInput
+  labels: LabelRelateToManyInput
 }
 
 input ServiceAccessesUpdateInput {
@@ -4920,6 +5070,7 @@ input ServiceAccessCreateInput {
   consumer: GatewayConsumerRelateToOneInput
   application: ApplicationRelateToOneInput
   productEnvironment: EnvironmentRelateToOneInput
+  labels: LabelRelateToManyInput
 }
 
 input ServiceAccessesCreateInput {
@@ -5501,6 +5652,11 @@ type Namespace {
   name: String!
   scopes: [UMAScope]!
   prodEnvId: String
+  permDomains: [String]
+  permDataPlane: String
+  permProtectedNs: String
+  org: String
+  orgUnit: String
 }
 
 input NamespaceInput {
@@ -5536,6 +5692,7 @@ type UMAPolicy {
   owner: String!
   users: [String]
   clients: [String]
+  groups: [String]
   scopes: [String]!
 }
 
@@ -5843,6 +6000,24 @@ type Query {
     skip: Int
   ): _QueryMeta
   _GatewayServicesMeta: _ListMeta
+  allLabels(
+    where: LabelWhereInput
+    search: String
+    sortBy: [SortLabelsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): [Label]
+  Label(where: LabelWhereUniqueInput!): Label
+  _allLabelsMeta(
+    where: LabelWhereInput
+    search: String
+    sortBy: [SortLabelsBy!]
+    orderBy: String
+    first: Int
+    skip: Int
+  ): _QueryMeta
+  _LabelsMeta: _ListMeta
   allLegals(
     where: LegalWhereInput
     search: String
@@ -6004,6 +6179,18 @@ type Query {
     orderBy: String
     where: GatewayServiceWhereInput
   ): [GatewayService]
+  allGatewayRoutesByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: GatewayRouteWhereInput
+  ): [GatewayRoute]
+  allContentsByNamespace(
+    first: Int
+    skip: Int
+    orderBy: String
+    where: ContentWhereInput
+  ): [Content]
   allProductsByNamespace(
     first: Int
     skip: Int
@@ -6070,7 +6257,9 @@ type Query {
   ): ConsumerScopesAndRoles
   currentNamespace: Namespace
   allNamespaces: [Namespace]
+  namespace(ns: String!): Namespace
   usersByNamespace(namespace: String!, scopeName: String): [UserContact]
+  getOrgPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]
   getUmaPoliciesForResource(prodEnvId: ID!, resourceId: String!): [UMAPolicy]
   allResourceSets(prodEnvId: ID!, type: String): [UMAResourceSet]
   getResourceSet(prodEnvId: ID!, resourceId: String!): UMAResourceSet
@@ -6178,6 +6367,12 @@ type Mutation {
   updateGatewayServices(data: [GatewayServicesUpdateInput]): [GatewayService]
   deleteGatewayService(id: ID!): GatewayService
   deleteGatewayServices(ids: [ID!]): [GatewayService]
+  createLabel(data: LabelCreateInput): Label
+  createLabels(data: [LabelsCreateInput]): [Label]
+  updateLabel(id: ID!, data: LabelUpdateInput): Label
+  updateLabels(data: [LabelsUpdateInput]): [Label]
+  deleteLabel(id: ID!): Label
+  deleteLabels(ids: [ID!]): [Label]
   createLegal(data: LegalCreateInput): Legal
   createLegals(data: [LegalsCreateInput]): [Legal]
   updateLegal(id: ID!, data: LegalUpdateInput): Legal
@@ -6240,6 +6435,7 @@ type Mutation {
   updateUsers(data: [UsersUpdateInput]): [User]
   deleteUser(id: ID!): User
   deleteUsers(ids: [ID!]): [User]
+  forceDeleteEnvironment(id: ID!, force: Boolean!): Boolean
   createGatewayConsumerPlugin(id: ID!, plugin: String!): GatewayConsumer
   updateGatewayConsumerPlugin(
     id: ID!
@@ -6270,8 +6466,10 @@ type Mutation {
     scopeName: String!
     grant: Boolean!
   ): Boolean
+  regenerateCredentials(id: ID!): AccessRequest
   createNamespace(namespace: String!): Namespace
   deleteNamespace(namespace: String!): Boolean
+  forceDeleteNamespace(namespace: String!, force: Boolean!): Boolean
   createServiceAccount(resourceId: String!, scopes: [String]!): ServiceAccount
   createUmaPolicy(
     prodEnvId: ID!

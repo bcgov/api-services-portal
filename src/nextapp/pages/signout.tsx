@@ -1,32 +1,37 @@
 import * as React from 'react';
-import { Center, Box, Heading, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  GridItem,
+  Heading,
+  Text,
+} from '@chakra-ui/react';
+import Head from 'next/head';
+import NextLink from 'next/link';
 
-import Button from '@/components/button';
-
-import { useRouter } from 'next/router';
-
-const HomePage: React.FC = () => {
-  const router = useRouter();
-
+const LoginPage: React.FC = () => {
   return (
     <>
-      <Center width="100vw" height="100vh">
-        <Box
-          minWidth={40}
-          bgColor="white"
-          borderRadius={4}
-          p={4}
-          textAlign="center"
-        >
-          <Box mb={4}>
-            <Heading size="md">Signed Out!</Heading>
-            <Text>You have successfully signed out.</Text>
-          </Box>
-          <Button href="/admin/signin">Login</Button>
+      <Head>
+        <title>API Program Services | Login</title>
+      </Head>
+      <Container maxW="6xl">
+        <Box as="header" mt={12} mb={6}>
+          <Heading>Logged out </Heading>
         </Box>
-      </Center>
+        <Grid as="section" mb={7} templateColumns="1fr 1fr" gap={6}>
+          <GridItem>
+            <Text>You have succesfully logged out.</Text>
+          </GridItem>
+        </Grid>
+        <NextLink passHref href="/login">
+          <Button as="a">Log Back In</Button>
+        </NextLink>
+      </Container>
     </>
   );
 };
 
-export default HomePage;
+export default LoginPage;

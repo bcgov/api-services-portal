@@ -12,6 +12,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   const sa = new ServiceAccountsPage()
   const pd = new Products()
   const authProfile = new AuthorizationProfile()
+  var nameSpace: string
+  let userSession: string
 
   before(() => {
     cy.visit('/')
@@ -22,6 +24,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('api').as('api')
     cy.visit(login.path)
   })
   it('Authenticates api owner', () => {
@@ -30,8 +33,14 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
   })
   it('Activates namespace for client credential flow tests', () => {
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      home.useNamespace(clientCredentials.namespace)
+    cy.getUserSession().then(() => {
+      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+        nameSpace = clientCredentials.namespace
+        home.useNamespace(clientCredentials.namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
+        })
+      })
     })
   })
   it('Creates authorization profile for Client ID/Secret', () => {
@@ -83,6 +92,25 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       )
     })
   })
+
+  it('Associate Namespace to the organization Unit', () => {
+    cy.get('@api').then(({ organization }: any) => {
+      cy.setHeaders(organization.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
+  })
+
+  it('Update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let product = clientCredentials.clientIdSecret.product
+      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
+    })
+  })
+
   it('Adds environment with Client ID/Secret authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
@@ -130,15 +158,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
-  it('Update the Dataset in BC Data Catalogue to appear the API in the Directory', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let product = clientCredentials.clientIdSecret.product
-      pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
-    })
-  })
+
   after(() => {
-    cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })

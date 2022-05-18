@@ -1,0 +1,19 @@
+services:
+- name: service-for-deleteplatform
+  host: httpbin.org
+  tags: [ns.deleteplatform]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: service-for-deleteplatform-route
+    tags: [ns.deleteplatform]
+    hosts:
+      - service-for-deleteplatform.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0

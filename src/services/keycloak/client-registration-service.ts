@@ -168,10 +168,7 @@ export class KeycloakClientRegistrationService {
     desiredSetOfScopes: string[],
     optional: boolean
   ): Promise<any> {
-    const listAllFunction = optional
-      ? this.kcAdminClient.clientScopes.listDefaultOptionalClientScopes
-      : this.kcAdminClient.clientScopes.listDefaultClientScopes;
-    const allScopes = await listAllFunction();
+    const allScopes = await this.kcAdminClient.clientScopes.find();
     const scopeToId = allScopes.reduce(function (map: any, obj: any) {
       map[obj.name] = obj.id;
       return map;

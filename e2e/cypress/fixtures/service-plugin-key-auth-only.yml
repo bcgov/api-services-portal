@@ -1,15 +1,15 @@
 services:
-- name: a-service-for-platform
+- name: a-service-for-newplatform
   host: httpbin.org
-  tags: [ns.platform]
+  tags: [ns.newplatform]
   port: 443
   protocol: https
   retries: 0
   routes:
-  - name: a-service-for-platform-route
-    tags: [ns.platform]
+  - name: a-service-for-newplatform-route
+    tags: [ns.newplatform]
     hosts:
-      - a-service-for-platform.api.gov.bc.ca
+      - a-service-for-newplatform.api.gov.bc.ca
     paths:
       - /
     methods:
@@ -21,7 +21,7 @@ services:
 
   plugins:
   - name: key-auth
-    tags: [ ns.platform ]
+    tags: [ ns.newplatform ]
     protocols: [ http, https ]
     config:
       key_names: ["X-API-KEY"]

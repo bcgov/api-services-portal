@@ -2,6 +2,7 @@ kind: Product
 appId: 2B04C28E08AW
 name: Auto Test Product
 dataset: auto-test-product
+namespace: newplatform
 environments:
   - id: 1F7CA929
     name: dev

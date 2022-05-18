@@ -8,8 +8,12 @@ export OIDC_ISSUER=""
 
 hostip=$(ifconfig en0 | awk '$1 == "inet" {print $2}')
 
+# built image using:
+# git clone -b kc_idp_hint https://github.com/ikethecoder/oauth2-proxy.git
+# (cd oauth2-proxy && docker build --tag oauth2-proxy.local .)
+#
 docker run -ti --rm --name proxy -p 4180:4180 \
-  quay.io/oauth2-proxy/oauth2-proxy:v7.2.0 \
+  oauth2-proxy.local \
     --http-address=0.0.0.0:4180 \
     --cookie-secret=$COOKIE_SECRET \
     --cookie-secure=False \
@@ -18,7 +22,7 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --insecure-oidc-allow-unverified-email=true \
     --insecure-oidc-skip-issuer-verification=true \
     --email-domain=* \
-    --provider=keycloak \
+    --provider=oidc \
     --client-id=${OIDC_CLIENT_ID} \
     --client-secret=${OIDC_CLIENT_SECRET} \
     --scope=openid \
@@ -33,7 +37,7 @@ docker run -ti --rm --name proxy -p 4180:4180 \
     --skip-jwt-bearer-tokens=false \
     --set-authorization-header=false \
     --pass-authorization-header=false \
-    --skip-auth-regex="/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$" \
+    --skip-auth-regex="/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$" \
     --whitelist-domain="${OIDC_ISSUER_HOSTNAME}" \
     --upstream="http://${hostip}:3000"
 ```

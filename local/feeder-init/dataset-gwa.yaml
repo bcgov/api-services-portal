@@ -1,6 +1,6 @@
 entity: Dataset
 record:
-  id: "A123456789000000"
+  id: "A12345678900000175161673"
   name: "auto-test-product"
   title: "Auto Test Product"
   notes: "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them."
@@ -9,3 +9,5 @@ record:
   license_title: "Access Only"
   view_audience: "Government"
   security_class: "LOW-PUBLIC"
+  org: "7a66db63-26f4-4052-9cd5-3272b63910f8"
+  sub_org: "319b3297-846d-4b97-8095-ceb3ec505fb8"

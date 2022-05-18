@@ -185,6 +185,7 @@ for (const _list of [
   'BusinessProfile',
   'ConsumerGroups',
   'ConsumerScopesAndRoles',
+  'CredentialRegenerate',
   'Namespace',
   'OrganizationPolicy',
   'ServiceAccount',

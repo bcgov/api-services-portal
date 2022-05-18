@@ -28,6 +28,7 @@ import AccessRequestForm from './access-request-form';
 import AccessRequestCredentials from './access-request-credentials';
 import AccessRequestFormLoading from './access-request-form-loading';
 import { useAuth } from '@/shared/services/auth';
+import LoginDialog from '../login-dialog/login-dialog';
 
 interface AccessRequestDialogProps {
   defaultTab?: number;
@@ -156,11 +157,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           Request Access
         </Button>
       )}
-      {!auth.user && (
-        <Button as="a" href="/admin/signin">
-          Request Access
-        </Button>
-      )}
+      {!auth.user && <LoginDialog buttonText="Request Access" />}
       <Modal
         isOpen={open || isOpen}
         onClose={onClose}
@@ -232,7 +229,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 </Button>
               </ButtonGroup>
             )}
-            {tab === 1 && <Button onClick={handleDone}>Done</Button>}
+            {tab === 1 && <Button onClick={handleDone} data-testid="doneAcceptRequest">Done</Button>}
           </ModalFooter>
         </ModalContent>
       </Modal>

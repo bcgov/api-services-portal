@@ -101,6 +101,14 @@ export class KeycloakClientService {
     return lkup[0];
   }
 
+  public async regenerateSecret(id: string): Promise<string> {
+    const cred = await this.kcAdminClient.clients.generateNewClientSecret({
+      id,
+    });
+    logger.debug('[regenerateSecret] CID=%s %s', id, cred.type);
+    return cred.value;
+  }
+
   public async login(clientId: string, clientSecret: string): Promise<void> {
     await this.kcAdminClient
       .auth({

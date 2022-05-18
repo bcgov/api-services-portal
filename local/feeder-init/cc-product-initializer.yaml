@@ -2,6 +2,7 @@ kind: Product
 appId: 2B04C28E08AW
 name: Client Credentials Test Product
 dataset: client-credentials-test-product
+namespace: ccplatform
 environments:
   - id: 2G8DB030
     name: dev

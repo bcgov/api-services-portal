@@ -23,5 +23,9 @@
     "JWKS_URL": "http://cypress-jwks-url.localtest.me:3500",
     "KONG_CONFIG_URL": "http://kong.localtest.me:8001",
     "BASE_URL": "http://oauth2proxy.localtest.me:4180"
+  },
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
   }
 }

@@ -6,12 +6,15 @@ import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
 import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
+import _ = require('cypress/types/lodash')
 
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
-let headers : any
+let headers: any
+
+let requestBody: any = {}
 interface formDataRequestOptions {
   method: string
   url: string
@@ -21,18 +24,23 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.log('< Log in with user ' + username)
   const login = new LoginPage()
   const home = new HomePage()
-  cy.get(login.loginButton).click()
 
-  const log = Cypress.log({
-    name: 'Login to Dev',
-    displayName: 'LOGIN_DEV',
-    message: [`🔐 Authenticating | ${username}`],
-    autoEnd: false,
+  cy.get('header').then(($a) => { 
+    if ($a.text().includes('Login')) {
+      debugger
+      cy.get(login.loginButton).click()
+      const log = Cypress.log({
+        name: 'Login to Dev',
+        displayName: 'LOGIN_DEV',
+        message: [`🔐 Authenticating | ${username}`],
+        autoEnd: false,
+      })
+      cy.get(login.usernameInput).click().type(username)
+      cy.get(login.passwordInput).click().type(password)
+      cy.get(login.loginSubmitButton).click()
+    }
   })
-  cy.get(login.usernameInput).click().type(username)
-  cy.get(login.passwordInput).click().type(password)
-  cy.get(login.loginSubmitButton).click()
-
+  debugger
   if (checkElementExists('.alert')) {
     cy.reload()
     cy.get(login.usernameInput).click().type(username)
@@ -40,7 +48,15 @@ Cypress.Commands.add('login', (username: string, password: string) => {
     cy.get(login.loginSubmitButton).click()
   }
 
-  log.end()
+  // log.end()
+  // cy.getLoginCallback().then(() => {
+  //   cy.get('@login1').should((response :any) => {
+  //     debugger
+  //     if (response.status == 403)
+  //       cy.wait(60000);
+  //       cy.log("Trigger the block")
+  //   })
+  // })
   cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
     expect($el).to.exist
     expect($el).to.be.visible
@@ -260,21 +276,55 @@ Cypress.Commands.add('setHeaders', (headerValues: any) => {
   headers = headerValues
 })
 
+Cypress.Commands.add('setRequestBody', (body: any) => {
+  debugger
+  requestBody = JSON.stringify(body)
+})
+
+Cypress.Commands.add('setAuthorizationToken', (token: string) => {
+  headers["Authorization"] = "Bearer " + token
+  headers = headers
+})
+
 Cypress.Commands.add('makeAPIRequest', (endPoint: string, methodType: string) => {
   let body = {}
-  // var serviceEndPoint = endpoint
-  // body = config[requestName]
-  // if (requestName == '') {
-  //   body = {}
-  // }
+
+  if (methodType.toUpperCase() === 'PUT' || methodType.toUpperCase() === 'POST') {
+    body = requestBody
+  }
   return cy.request({
     url: Cypress.env('BASE_URL') + '/' + endPoint,
     method: methodType,
     body: body,
-    form: true,
-    headers:headers,
+    headers: headers,
     failOnStatusCode: false
   })
+})
+
+Cypress.Commands.add('getUserSession', () => {
+  cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
+})
+
+Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
+  let response = actualResponse
+  if (indexFlag) {
+    const index = actualResponse.findIndex((x: { name: string }) => x.name === expectedResponse.name);
+    response = actualResponse[index]
+  }
+  for (var p in expectedResponse) {
+    if (typeof (expectedResponse[p]) === "object") {
+      var objectValue1 = expectedResponse[p],
+        objectValue2 = response[p];
+      for (var value in objectValue1) {
+        cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
+      }
+    } else {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId'].includes(p))) {
+        cy.log("Different Value ->" + expectedResponse[p])
+        assert.fail("JSON value mismatch for " + p)
+      }
+    }
+  }
 })
 
 const formDataRequest = (

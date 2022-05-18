@@ -7456,6 +7456,7 @@ export type Mutation = {
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
+  regenerateCredentials?: Maybe<AccessRequest>;
   createNamespace?: Maybe<Namespace>;
   deleteNamespace?: Maybe<Scalars['Boolean']>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
@@ -8242,6 +8243,11 @@ export type MutationUpdateConsumerScopeAssignmentArgs = {
   consumerUsername: Scalars['String'];
   scopeName: Scalars['String'];
   grant: Scalars['Boolean'];
+};
+
+
+export type MutationRegenerateCredentialsArgs = {
+  id: Scalars['ID'];
 };
 
 

@@ -75,10 +75,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     })
   })
 
-  it('Verify that only "CredentialIssuer.Admin" permission is displayed in the profile', () => {
-    mp.checkScopeOfProfile("CredentialIssuer.Admin")
-  })
-
   it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
     cy.visit(ns.path)
     ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
@@ -92,18 +88,10 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     })
   })
 
-  it('Verify that authorization profile for Kong API key is generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ kongAPI }: any) => {
-      let ap = kongAPI.authProfile
-      authProfile.createAuthProfile(ap)
-    })
-  })
-
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-    cy.resetCredential('Wendy')
+    // cy.resetCredential('Wendy')
   })
 })

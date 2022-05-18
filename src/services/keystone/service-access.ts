@@ -23,6 +23,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                             flow
                             credentialIssuer {
                                 id
+                                clientAuthenticator
                             }
                         }
                         application {
