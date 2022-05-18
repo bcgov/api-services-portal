@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Button,
   Box,
+  Center,
   Container,
   Heading,
   Flex,
@@ -10,7 +11,8 @@ import {
   GridItem,
   Icon,
   IconButton,
-  Center,
+  Link,
+  Tooltip,
   useToast,
   VStack,
   useDisclosure,
@@ -31,7 +33,7 @@ import {
   FaUserFriends,
   FaUserShield,
 } from 'react-icons/fa';
-import { IoIosInformationCircleOutline } from 'react-icons/io';
+import { ImInfo } from 'react-icons/im';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
@@ -139,12 +141,16 @@ const NamespacesPage: React.FC = () => {
       <Box width="100%" bgColor="#FCBA191A">
         <Container maxW="6xl" py={3}>
           <Flex align="center">
-            <Icon
-              as={IoIosInformationCircleOutline}
-              boxSize="6"
-              mr={2}
-              color="bc-blue"
-            />
+            <Tooltip
+              hasArrow
+              bg="black"
+              color="white"
+              label="Preview mode allows you to test and review your request access flow and dataset content before making it publicly available"
+              aria-label="Preview mode tooltip"
+              placement="right"
+            >
+              <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
+            </Tooltip>
             <Text fontSize="sm">
               Your products will remain in preview mode until you publish them
               in the API Directory
@@ -248,6 +254,18 @@ const NamespacesPage: React.FC = () => {
                           <Text fontSize="sm" mb={2}>
                             {a.description}
                           </Text>
+                          {a.title === 'Products' && (
+                            <Text fontSize="sm">
+                              <NextLink
+                                passHref
+                                href="/devportal/api-directory"
+                              >
+                                <Link fontWeight="bold" color="bc-blue">
+                                  Preview in Directory
+                                </Link>
+                              </NextLink>
+                            </Text>
+                          )}
                         </Box>
                       </Flex>
                     </NextLink>
