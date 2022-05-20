@@ -10,14 +10,12 @@ import {
   Grid,
   GridItem,
   Icon,
-  IconButton,
   Link,
-  Tooltip,
   useToast,
   VStack,
   useDisclosure,
 } from '@chakra-ui/react';
-import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
@@ -33,12 +31,11 @@ import {
   FaUserFriends,
   FaUserShield,
 } from 'react-icons/fa';
-import { ImInfo } from 'react-icons/im';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
-import ConfirmationDialog from '@/components/confirmation-dialog';
+import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 
@@ -107,7 +104,6 @@ const NamespacesPage: React.FC = () => {
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const bannerDisclosure = useDisclosure();
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -138,56 +134,8 @@ const NamespacesPage: React.FC = () => {
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
-      <Box width="100%" bgColor="#FCBA191A">
-        <Container maxW="6xl" py={3}>
-          <Flex align="center">
-            <Tooltip
-              hasArrow
-              bg="black"
-              color="white"
-              label="Preview mode allows you to test and review your request access flow and dataset content before making it publicly available"
-              aria-label="Preview mode tooltip"
-              placement="right"
-            >
-              <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
-            </Tooltip>
-            <Text fontSize="sm">
-              Your products will remain in preview mode until you publish them
-              in the API Directory
-            </Text>
-            <IconButton
-              size="sm"
-              icon={
-                <Icon
-                  as={bannerDisclosure.isOpen ? BsChevronUp : BsChevronDown}
-                />
-              }
-              onClick={bannerDisclosure.onToggle}
-              variant="ghost"
-              ml={2}
-            />
-          </Flex>
-          {bannerDisclosure.isOpen && (
-            <Box>
-              <Text fontSize="sm">
-                If this is a new namespace, it must be approved and associated
-                with an organization before you can enable your products in the
-                API Directory to make them visible to the public. You can still
-                configure your products but they will remain in preview mode.{' '}
-                <Text
-                  as="a"
-                  color="bc-blue"
-                  fontWeight="bold"
-                  textDecor="underline"
-                  href="#"
-                >
-                  Find and contact your Organization Administrator for approval
-                </Text>
-              </Text>
-            </Box>
-          )}
-        </Container>
-      </Box>
+
+      <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader title={user?.namespace} />
         {!hasNamespace && (
@@ -258,7 +206,7 @@ const NamespacesPage: React.FC = () => {
                             <Text fontSize="sm">
                               <NextLink
                                 passHref
-                                href="/devportal/api-directory"
+                                href="/devportal/api-directory/your-products"
                               >
                                 <Link fontWeight="bold" color="bc-blue">
                                   Preview in Directory

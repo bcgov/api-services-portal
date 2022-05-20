@@ -19,6 +19,7 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
+import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
@@ -81,6 +82,7 @@ const ApiPage: React.FC<
       <Head>
         <title>API Services Portal | API Directory</title>
       </Head>
+      <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader
           breadcrumb={[

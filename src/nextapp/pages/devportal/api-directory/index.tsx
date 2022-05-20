@@ -1,15 +1,6 @@
 import * as React from 'react';
-import {
-  Box,
-  Container,
-  Flex,
-  Input,
-  Select,
-  Tab,
-  Tabs,
-  TabList,
-  Text,
-} from '@chakra-ui/react';
+import ApiDirectoryNav from '@/components/api-directory-nav';
+import { Box, Container, Flex, Input, Select, Text } from '@chakra-ui/react';
 // import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
@@ -17,6 +8,7 @@ import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
 import { Dataset, Product } from '@/shared/types/query.types';
+import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
 
@@ -53,13 +45,9 @@ const ApiDiscoveryPage: React.FC<
       <Head>
         <title>API Services Portal | API Directory</title>
       </Head>
+      <PreviewBanner />
       <Container maxW="6xl">
-        <Tabs mt={10}>
-          <TabList borderBottom="none">
-            <Tab>Api Directory</Tab>
-            <Tab>Your Products</Tab>
-          </TabList>
-        </Tabs>
+        <ApiDirectoryNav />
         <PageHeader title="API Directory">
           <Text>Find an API and request an API key to get started</Text>
         </PageHeader>

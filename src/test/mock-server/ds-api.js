@@ -148,4 +148,8 @@ router.get('/directory/:id', async (req, res) => {
   res.json(result.data.DiscoverableProduct);
 });
 
+router.get('/namespaces/:namespace/datasets', async (req, res) => {
+  res.json([]);
+});
+
 module.exports = router;
