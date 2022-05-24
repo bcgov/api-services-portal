@@ -15,7 +15,7 @@ const EmptyPane: React.FC<EmptyPaneProps> = ({
   title,
 }) => {
   return (
-    <Center my={12} data-testid="empty-pane">
+    <Center my={6} data-testid="empty-pane">
       <Box
         textAlign="center"
         py="6rem"

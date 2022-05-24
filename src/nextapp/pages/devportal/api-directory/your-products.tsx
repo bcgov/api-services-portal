@@ -1,6 +1,6 @@
 import * as React from 'react';
 import ApiDirectoryNav from '@/components/api-directory-nav';
-import { Box, Container, Text } from '@chakra-ui/react';
+import { Box, Button, Container, Link, Text } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
@@ -12,6 +12,7 @@ import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
 import { useAuth } from '@/shared/services/auth';
+import NextLink from 'next/link';
 
 interface DiscoveryDataset extends Dataset {
   products: Product[];
@@ -44,10 +45,17 @@ const ApiDiscoveryPage: React.FC = () => {
         </PageHeader>
         <Box my={8}>
           {data?.length === 0 && (
-            <EmptyPane
-              title="You have no draft Products"
-              message="Any unpublished product drafts will be visible only here"
-            />
+            <Box bgColor="white">
+              <EmptyPane
+                title="No Products yet"
+                message="Visit the Products page to create your first product"
+                action={
+                  <NextLink passHref href="/manager/products">
+                    <Button>Go to Products</Button>
+                  </NextLink>
+                }
+              />
+            </Box>
           )}
           <DiscoveryList data={data} />
         </Box>
