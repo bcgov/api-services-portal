@@ -34,7 +34,9 @@ const PreviewBanner: React.FC = () => {
             aria-label="Preview mode tooltip"
             placement="right"
           >
-            <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
+            <div>
+              <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
+            </div>
           </Tooltip>
           <Text fontSize="sm">
             Your products will remain in preview mode until you publish them in

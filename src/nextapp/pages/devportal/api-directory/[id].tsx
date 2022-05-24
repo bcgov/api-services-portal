@@ -19,6 +19,7 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
+import NextLink from 'next/link';
 import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import { FaExternalLinkAlt } from 'react-icons/fa';
@@ -62,6 +63,18 @@ const ApiPage: React.FC<
   const { data } = useQuery<ApiDataset>(queryKey, () =>
     restApi<ApiDataset>(`/ds/api/directory/${id}`)
   );
+  const breadcrumb = React.useMemo(() => {
+    // TODO: This is a place holder to test until we know what property signals it's a draft
+    if (true) {
+      return [
+        {
+          text: 'Back to Your Products',
+          href: '/devportal/api-directory/your-products',
+        },
+      ];
+    }
+    return [{ text: 'API Directory', href: '/devportal/api-directory' }];
+  }, []);
 
   function DetailItem({ detail }: { detail: DetailItem }) {
     return (
@@ -85,9 +98,7 @@ const ApiPage: React.FC<
       <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader
-          breadcrumb={[
-            { text: 'API Directory', href: '/devportal/api-directory' },
-          ]}
+          breadcrumb={breadcrumb}
           title={
             data.isInCatalog ? (
               <Link
@@ -105,7 +116,7 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              data?.title
+              data?.title ?? 'Title'
             )
           }
         >
