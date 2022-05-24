@@ -29,7 +29,11 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
       </Button>
     ),
     bceid: (
-      <Button as="a" variant="primary" href={buildUrl('bceid', router?.asPath)}>
+      <Button
+        as="a"
+        variant="primary"
+        href={buildUrl('bceid-business', router?.asPath)}
+      >
         BCeID
       </Button>
     ),
