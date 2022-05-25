@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AppVersion from '@/components/app-version';
 import {
   Box,
   ChakraProvider,
@@ -116,8 +117,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             >
               <Container
                 d="flex"
-                justifyContent="center"
-                flexDirection="column"
+                justifyContent="space-between"
                 textAlign="center"
                 height={{ base: 'auto', md: '46px' }}
                 my={{ base: 4, md: 'none' }}
@@ -127,7 +127,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   display="flex"
                   flexDirection={{ base: 'column', md: 'row' }}
                   flexWrap={{ base: 'nowrap', md: 'wrap' }}
-                  alignItems="center"
                   color="#fff"
                   sx={{ '& li:last-child a': { border: 'none' } }}
                 >
@@ -146,6 +145,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     </ListItem>
                   ))}
                 </List>
+                <AppVersion />
               </Container>
             </Box>
           </AuthProvider>

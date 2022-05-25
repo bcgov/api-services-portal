@@ -559,6 +559,13 @@ app.post('/gql/api', async (req, res) => {
   res.json(response);
 });
 
+app.use('/about', (_, res) => {
+  res.json({
+    version: 'v1.0.68',
+    revision: casual.uuid,
+    cluster: 'gold',
+  });
+});
 app.use('/admin', adminApi);
 app.use('/ds/api', dsApi);
 app.listen(port, () => console.log(`Mock server running on port ${port}`));
