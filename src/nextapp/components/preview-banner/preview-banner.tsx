@@ -10,15 +10,23 @@ import {
   Tooltip,
   useDisclosure,
 } from '@chakra-ui/react';
+import { gql } from 'graphql-request';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { ImInfo } from 'react-icons/im';
 import { useAuth } from '@/shared/services/auth';
+import { useApi } from '@/shared/services/api';
 
 const PreviewBanner: React.FC = () => {
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
 
-  if (!user) {
+  const { data, isSuccess } = useApi(
+    'currentNamespace',
+    { query },
+    { enabled: true }
+  );
+
+  if (!user || !isSuccess || data.currentNamespace.org) {
     return null;
   }
 
@@ -75,3 +83,12 @@ const PreviewBanner: React.FC = () => {
 };
 
 export default PreviewBanner;
+
+const query = gql`
+  query GET {
+    currentNamespace {
+      org
+      orgUnit
+    }
+  }
+`;

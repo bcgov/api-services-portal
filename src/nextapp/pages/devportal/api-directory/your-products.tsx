@@ -22,7 +22,7 @@ const ApiDiscoveryPage: React.FC = () => {
   const { user } = useAuth();
   const { data } = useQuery('yourProducts', () =>
     restApi<DiscoveryDataset[]>(
-      `/ds/api/namespaces/${user?.namespace}/datasets`
+      `/ds/api/v2/namespaces/${user?.namespace}/datasets`
     )
   );
 

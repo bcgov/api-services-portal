@@ -23,6 +23,8 @@ import {
 import { Dataset, DraftDataset } from './types';
 import { transformContacts, transformResources } from './OrgDatasetController';
 import { BatchResult } from '../../batch/types';
+import { transform } from './DirectoryController';
+import { gql } from 'graphql-request';
 
 @injectable()
 @Route('/namespaces/{ns}/datasets')
@@ -99,4 +101,59 @@ export class DatasetController extends Controller {
       .map((o) => transformResources(o))
       .pop();
   }
+
+  /**
+   * Used primarily for "Preview Mode"
+   * List the datasets belonging to a particular namespace
+   *
+   * @param ns
+   * @param name
+   * @param request
+   * @returns
+   */
+  @Get()
+  @OperationId('get-datasets')
+  public async getDatasets(
+    @Path() ns: string,
+    @Request() request: any
+  ): Promise<any> {
+    const context = this.keystone.createContext(request);
+    const result = await this.keystone.executeGraphQL({
+      context,
+      query: list,
+    });
+    return transform(result.data.allProductsByNamespace);
+  }
 }
+
+const list = gql`
+  query DirectoryNamespacePreview {
+    allProductsByNamespace {
+      name
+      environments {
+        name
+        active
+        flow
+      }
+      dataset {
+        id
+        name
+        title
+        notes
+        license_title
+        view_audience
+        security_class
+        record_publish_date
+        tags
+        organization {
+          name
+          title
+        }
+        organizationUnit {
+          name
+          title
+        }
+      }
+    }
+  }
+`;

@@ -823,6 +823,38 @@ paths:
                     required: true
                     schema:
                         type: string
+    /directory:
+        get:
+            operationId: directory-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - 'API Directory'
+            security: []
+            parameters: []
+    '/directory/{id}':
+        get:
+            operationId: directory-item
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            tags:
+                - 'API Directory'
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
     '/namespaces/{ns}/datasets':
         put:
             operationId: put-dataset
@@ -854,6 +886,28 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/DraftDataset'
+        get:
+            operationId: get-datasets
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
     '/namespaces/{ns}/datasets/{name}':
         get:
             operationId: get-dataset
@@ -882,38 +936,6 @@ paths:
                 -
                     in: path
                     name: name
-                    required: true
-                    schema:
-                        type: string
-    /directory:
-        get:
-            operationId: directory-list
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            tags:
-                - 'API Directory'
-            security: []
-            parameters: []
-    '/directory/{id}':
-        get:
-            operationId: directory-item
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            tags:
-                - 'API Directory'
-            security: []
-            parameters:
-                -
-                    in: path
-                    name: id
                     required: true
                     schema:
                         type: string

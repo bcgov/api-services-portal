@@ -74,7 +74,8 @@ function transformSetAnonymous(products: Product[]) {
   });
   return products;
 }
-function transform(products: Product[]) {
+
+export function transform(products: Product[]) {
   const records: Product[] = products.reduce((accumulator: any, prod: any) => {
     if (prod.dataset === null) {
       // drop it
