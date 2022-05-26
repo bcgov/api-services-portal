@@ -1102,7 +1102,14 @@ paths:
             security:
                 -
                     jwt: []
-            parameters: []
+            parameters:
+                -
+                    in: query
+                    name: ids
+                    required: false
+                    schema:
+                        default: '[]'
+                        type: string
     /namespaces:
         get:
             operationId: namespace-list

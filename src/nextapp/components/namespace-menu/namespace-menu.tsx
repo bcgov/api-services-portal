@@ -11,12 +11,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import {
-  FaChevronDown,
-  FaEdit,
-  FaNetworkWired,
-  FaPlusCircle,
-} from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
@@ -81,7 +76,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           {user?.namespace ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
-        <MenuList color="gray.600">
+        <MenuList
+          color="gray.600"
+          sx={{
+            '.chakra-menu__group__title': {
+              fontWeight: 'normal',
+              fontSize: 'md',
+              px: 1,
+            },
+          }}
+        >
           <>
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
             {isError && (
@@ -89,7 +93,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
-                <MenuOptionGroup title="Change Namespaces">
+                <MenuOptionGroup title="Switch Namespace">
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
                     .sort((a, b) => a.name.localeCompare(b.name))
@@ -107,24 +111,21 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
               </>
             )}
           </>
-          <MenuOptionGroup title="Actions">
+          <MenuOptionGroup title="Namespace Actions">
             <MenuItem
-              isDisabled={!data}
-              icon={<Icon as={FaEdit} />}
-              color="bc-blue-alt"
-              onClick={managerDisclosure.onOpen}
-              data-testid="ns-dropdown-manage-btn"
-            >
-              Manage Namespaces
-            </MenuItem>
-            <MenuItem
-              icon={<Icon as={FaPlusCircle} />}
               onClick={newNamespaceDisclosure.onOpen}
-              fontWeight="bold"
               color="bc-blue-alt"
               data-testid="ns-dropdown-create-btn"
             >
               Create New Namespace
+            </MenuItem>
+            <MenuItem
+              isDisabled={!data}
+              color="bc-blue-alt"
+              onClick={managerDisclosure.onOpen}
+              data-testid="ns-dropdown-manage-btn"
+            >
+              Export Namespace Report
             </MenuItem>
           </MenuOptionGroup>
         </MenuList>

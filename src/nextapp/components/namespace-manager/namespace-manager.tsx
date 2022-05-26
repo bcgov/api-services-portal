@@ -1,28 +1,22 @@
 import * as React from 'react';
 import {
-  Button,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalOverlay,
   ModalHeader,
-  ButtonGroup,
-  Icon,
   Box,
   Text,
   Flex,
-  Link,
-  IconButton,
   Divider,
-  Spacer,
   Center,
   Heading,
+  ModalCloseButton,
+  Checkbox,
 } from '@chakra-ui/react';
 import type { NamespaceData } from '@/shared/types/app.types';
-import { FaTrash, FaDownload } from 'react-icons/fa';
 
-import NamespaceDelete from '../namespace-delete';
 import ExportReport from './export-report';
 
 interface NamespaceManagerProps {
@@ -36,91 +30,169 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [namespaceToDelete, setNamespaceToDelete] = React.useState<
-    string | null
-  >(null);
-  const handleDeleteNamespace = React.useCallback(
-    (name: string) => () => {
-      setNamespaceToDelete(name);
+  const [selectAll, setSelectAll] = React.useState(false);
+  const [selected, setSelected] = React.useState<string[]>([]);
+  const [isInvalid, setInvalid] = React.useState(false);
+
+  const handleClose = () => {
+    setSelectAll(false);
+    setSelected([]);
+    onClose();
+  };
+  const handleChecked = React.useCallback(
+    (id: string) => () => {
+      setInvalid(false);
+      setSelected((state) => {
+        if (state.includes(id)) {
+          return state.filter((d) => d !== id);
+        }
+        return [...state, id];
+      });
     },
-    [namespaceToDelete]
+    []
   );
-  const handleCancel = React.useCallback(() => {
-    setNamespaceToDelete(null);
-  }, [namespaceToDelete]);
+  const handleToggleSelectAll = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSelectAll(event.target.checked);
+    setInvalid(false);
+  };
+  const handleClear = () => {
+    setSelectAll(false);
+    setSelected([]);
+  };
+  const handleSubmit = React.useCallback(() => {
+    if (selected.length === 0) {
+      setInvalid(true);
+      return false;
+    }
+    setInvalid(false);
+    return true;
+  }, [selected]);
+
+  React.useEffect(() => {
+    if (selectAll) {
+      setSelected(data.map((n) => n.id));
+    } else {
+      setSelected([]);
+    }
+  }, [data, selectAll]);
 
   return (
     <>
-      {namespaceToDelete && (
-        <NamespaceDelete name={namespaceToDelete} onCancel={handleCancel} />
-      )}
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         scrollBehavior="inside"
-        size="xl"
+        size="2xl"
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Manage Namespaces</ModalHeader>
-          <ModalBody px={0} maxH={300}>
-            <Box px={6} pb={4}>
-              <Text>
-                All namespaces listed below may be removed, but this is
-                permament. Proceed with caution.
+          <ModalCloseButton />
+          <ModalHeader pb={0}>
+            <Heading size="inherit">Export Namespace Report</Heading>
+            <Box fontSize="md" fontWeight="normal" width="100%" mt={3}>
+              <Text color="bc-component" mb={2.5}>
+                Export a detailed report of your namespace metrics and
+                activities
               </Text>
+              <Flex
+                align="center"
+                justify="space-between"
+                height={14}
+                borderBottom="2px solid"
+                borderColor="bc-yellow"
+              >
+                <Checkbox
+                  isChecked={selectAll}
+                  isIndeterminate={
+                    selected.length > 0 && selected.length < data.length
+                  }
+                  isInvalid={isInvalid}
+                  onChange={handleToggleSelectAll}
+                  size="md"
+                  data-testid="export-report-select-all-check"
+                >
+                  {selected.length === data.length
+                    ? 'Select None'
+                    : 'Select All'}
+                </Checkbox>
+                <Box>
+                  {selected.length > 0 && (
+                    <Flex>
+                      <Text color="bc-component">{`${selected.length} selected`}</Text>
+                      <Text
+                        role="button"
+                        color="bc-componet"
+                        textDecor="underline"
+                        size="sm"
+                        ml={2}
+                        onClick={handleClear}
+                      >
+                        Clear
+                      </Text>
+                    </Flex>
+                  )}
+                </Box>
+              </Flex>
             </Box>
-            <Divider />
+          </ModalHeader>
+          <ModalBody px={0} maxH={300}>
             {data.length <= 0 && (
               <Center>
                 <Box my={8}>
-                  <Heading mb={2} size="sm">
+                  <Heading
+                    mb={2}
+                    size="sm"
+                    data-testid="export-report-empty-text"
+                  >
                     You have no namespaces
                   </Heading>
                   <Text fontSize="sm">Create a namespace to manage.</Text>
                 </Box>
               </Center>
             )}
-            {data.map((n) => (
-              <Flex
-                key={n.id}
-                align="center"
-                justify="space-between"
-                py={2}
-                px={6}
-                sx={{
-                  _hover: {
-                    bgColor: 'blue.50',
-                    '& .namespace-manager-delete': {
-                      opacity: 1,
-                    },
-                  },
-                }}
-              >
-                <Text>{n.name}</Text>
-                <IconButton
-                  aria-label="Delete namespace button"
-                  size="xs"
-                  colorScheme="red"
-                  opacity={0}
-                  variant="outline"
-                  className="namespace-manager-delete"
-                  data-testid={`${n.name}-namespace-delete-btn`}
-                  onClick={handleDeleteNamespace(n.name)}
+            {data
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((n) => (
+                <Flex
+                  key={n.id}
+                  as="label"
+                  cursor="pointer"
+                  height={14}
+                  mx={8}
+                  align="center"
+                  borderBottom="1px solid"
+                  borderColor="bc-gray"
                 >
-                  <Icon as={FaTrash} />
-                </IconButton>
-              </Flex>
-            ))}
+                  <Checkbox
+                    isChecked={selected.includes(n.id)}
+                    isInvalid={isInvalid}
+                    value={n.id}
+                    onChange={handleChecked(n.id)}
+                    size="md"
+                    data-testid={`export-report-${n.id}`}
+                  >
+                    {n.name}
+                  </Checkbox>
+                </Flex>
+              ))}
           </ModalBody>
           <Divider />
-          <ModalFooter>
-            <ButtonGroup justifyItems="space-between" alignItems="center">
-              <ExportReport />
-              <Button onClick={onClose} variant="primary">
-                Done
-              </Button>
-            </ButtonGroup>
+          <ModalFooter justifyContent="space-between">
+            <Box>
+              {isInvalid && (
+                <Text color="bc-error" data-testid="export-report-select-error">
+                  *Please select a namespace
+                </Text>
+              )}
+            </Box>
+            <ExportReport
+              isAllSelected={selectAll}
+              onComplete={handleClose}
+              onSubmit={handleSubmit}
+              selected={selected}
+            />
           </ModalFooter>
         </ModalContent>
       </Modal>

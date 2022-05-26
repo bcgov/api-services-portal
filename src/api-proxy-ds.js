@@ -14,7 +14,7 @@ class ApiDSProxyApp {
     const apiProxy = createProxyMiddleware({
       target: this._url,
       changeOrigin: true,
-      pathRewrite: { '^/int/api/': '/ds/api/' },
+      pathRewrite: { '^/int/api/': '/ds/api/v2/' },
       onProxyReq: (proxyReq, req) => {
         proxyReq.removeHeader('cookie');
         proxyReq.setHeader('Accept', 'application/json');

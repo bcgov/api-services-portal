@@ -339,6 +339,7 @@ const theme = extendTheme(
           item: {
             pr: 14,
             pl: 5,
+            color: 'bc-blue',
           },
         },
       },

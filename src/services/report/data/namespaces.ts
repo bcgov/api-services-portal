@@ -1,16 +1,24 @@
+import {
+  transformSingleValueAttributes,
+  camelCaseAttributes,
+} from '../../utils';
 import { KeycloakGroupService } from '../../keycloak';
 import { getMyNamespaces } from '../../workflow';
 import {
   EnvironmentContext,
   NamespaceSummary,
 } from '../../workflow/get-namespaces';
+import { GWAService } from '../../gwaapi';
 
 export interface ReportOfNamespaces {
   resource_id: string;
   name: string;
-  perm_protected_ns: string[];
-  perm_domains: string[];
-  perm_data_plane: string[];
+  permProtectedNs?: string;
+  permDomains?: string[];
+  permDataPlane?: string;
+  org?: string;
+  orgUnit?: string;
+  decommissioned?: string;
 }
 
 /*
@@ -29,16 +37,38 @@ export async function getNamespaces(
     envCtx.issuerEnvConfig.clientSecret
   );
 
+  const client = new GWAService(process.env.GWA_API_URL);
+  const defaultSettings = await client.getDefaultNamespaceSettings();
+
   const dataPromises = nsList.map(
     async (ns): Promise<ReportOfNamespaces> => {
-      const group = await kcGroupService.getGroup('ns', ns.name);
-      return {
+      const detail: ReportOfNamespaces = {
         resource_id: ns.id,
         name: ns.name,
-        perm_protected_ns: group.attributes['perm-protected-fs'],
-        perm_domains: group.attributes['perm-domains'],
-        perm_data_plane: group.attributes['perm-data-plane'],
       };
+      const nsPermissions = await kcGroupService.getGroup('ns', ns.name);
+
+      transformSingleValueAttributes(nsPermissions.attributes, [
+        'perm-data-plane',
+        'perm-protected-ns',
+        'org',
+        'org-unit',
+        'decommissioned',
+      ]);
+      const merged = {
+        ...detail,
+        ...defaultSettings,
+        ...nsPermissions.attributes,
+      };
+      camelCaseAttributes(merged, [
+        'perm-domains',
+        'perm-data-plane',
+        'perm-protected-ns',
+        'org',
+        'org-unit',
+        'decommissioned',
+      ]);
+      return merged;
     }
   );
 

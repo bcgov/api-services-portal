@@ -20,17 +20,27 @@ export const reportStructure: any = {
       },
       {
         header: 'Privileged',
-        key: 'perm_protected_ns',
+        key: 'permProtectedNs',
         width: 25,
       },
       {
         header: 'Permitted Hosts',
-        key: 'perm_domains',
+        key: 'permDomains',
         width: 60,
       },
       {
         header: 'Data Plane',
-        key: 'perm_data_plane',
+        key: 'permDataPlane',
+        width: 25,
+      },
+      {
+        header: 'Org',
+        key: 'org',
+        width: 25,
+      },
+      {
+        header: 'Org Unit',
+        key: 'orgUnit',
         width: 25,
       },
     ],
