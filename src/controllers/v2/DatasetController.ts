@@ -25,6 +25,7 @@ import { transformContacts, transformResources } from './OrgDatasetController';
 import { BatchResult } from '../../batch/types';
 import { transform } from './DirectoryController';
 import { gql } from 'graphql-request';
+import { Product } from '@/services/keystone/types';
 
 @injectable()
 @Route('/namespaces/{ns}/datasets')
@@ -122,6 +123,19 @@ export class DatasetController extends Controller {
       context,
       query: list,
     });
+    // For Preview, put a placeholder Dataset so that it gets returned
+    // result.data.allProductsByNamespace
+    //   .filter((prod: Product) => !prod.dataset)
+    //   .forEach((prod: Product) => {
+    //     prod.dataset = {
+    //       id: '--',
+    //       name: 'Placeholder Dataset',
+    //       title: 'Placeholder Dataset',
+    //       isInCatalog: false,
+    //       isDraft: true,
+    //     };
+    //   });
+
     return transform(result.data.allProductsByNamespace);
   }
 }
