@@ -152,29 +152,31 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                 </Box>
               </Center>
             )}
-            {data.map((n) => (
-              <Flex
-                key={n.id}
-                as="label"
-                cursor="pointer"
-                height={14}
-                mx={8}
-                align="center"
-                borderBottom="1px solid"
-                borderColor="bc-gray"
-              >
-                <Checkbox
-                  isChecked={selected.includes(n.id)}
-                  isInvalid={isInvalid}
-                  value={n.id}
-                  onChange={handleChecked(n.id)}
-                  size="md"
-                  data-testid={`export-report-${n.id}`}
+            {data
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((n) => (
+                <Flex
+                  key={n.id}
+                  as="label"
+                  cursor="pointer"
+                  height={14}
+                  mx={8}
+                  align="center"
+                  borderBottom="1px solid"
+                  borderColor="bc-gray"
                 >
-                  {n.name}
-                </Checkbox>
-              </Flex>
-            ))}
+                  <Checkbox
+                    isChecked={selected.includes(n.id)}
+                    isInvalid={isInvalid}
+                    value={n.id}
+                    onChange={handleChecked(n.id)}
+                    size="md"
+                    data-testid={`export-report-${n.id}`}
+                  >
+                    {n.name}
+                  </Checkbox>
+                </Flex>
+              ))}
           </ModalBody>
           <Divider />
           <ModalFooter justifyContent="space-between">
