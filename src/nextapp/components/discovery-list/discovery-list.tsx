@@ -10,7 +10,7 @@ interface DiscoveryDataset extends Dataset {
 
 interface DiscoveryListProps {
   data: DiscoveryDataset[];
-  preview: boolean;
+  preview?: boolean;
 }
 
 const DiscoveryList: React.FC<DiscoveryListProps> = ({
