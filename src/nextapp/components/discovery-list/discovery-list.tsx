@@ -10,9 +10,13 @@ interface DiscoveryDataset extends Dataset {
 
 interface DiscoveryListProps {
   data: DiscoveryDataset[];
+  preview: boolean;
 }
 
-const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
+const DiscoveryList: React.FC<DiscoveryListProps> = ({
+  data,
+  preview = false,
+}) => {
   return (
     <Grid
       gap={4}
@@ -26,6 +30,7 @@ const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
         <DiscoveryListItem
           key={p.id}
           data={p}
+          preview={preview}
           data-testid={`discovery-item-${index}`}
         />
       ))}

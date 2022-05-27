@@ -48,7 +48,7 @@ export class DirectoryController extends Controller {
   }
 }
 
-function transformSetAnonymous(products: Product[]) {
+export function transformSetAnonymous(products: Product[]) {
   products.forEach((prod) => {
     prod.environments.forEach((env) => {
       env.services.forEach((svc) => {
@@ -101,6 +101,7 @@ export function transform(products: Product[]) {
 const list = gql`
   query Directory {
     allDiscoverableProducts(where: { environments_some: { active: true } }) {
+      id
       name
       environments {
         name
@@ -132,7 +133,10 @@ const list = gql`
 
 const item = gql`
   query GetProduct($id: ID!) {
-    allDiscoverableProducts(where: { dataset: { id: $id } }) {
+    allDiscoverableProducts(
+      where: { environments_some: { active: true }, dataset: { id: $id } }
+    ) {
+      id
       name
       environments {
         name

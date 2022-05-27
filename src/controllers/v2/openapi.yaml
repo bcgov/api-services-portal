@@ -886,28 +886,6 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/DraftDataset'
-        get:
-            operationId: get-datasets
-            responses:
-                '200':
-                    description: Ok
-                    content:
-                        application/json:
-                            schema: {}
-            description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
-            tags:
-                - 'API Directory'
-            security:
-                -
-                    jwt:
-                        - Namespace.Manage
-            parameters:
-                -
-                    in: path
-                    name: ns
-                    required: true
-                    schema:
-                        type: string
     '/namespaces/{ns}/datasets/{name}':
         get:
             operationId: get-dataset
@@ -1243,6 +1221,58 @@ paths:
                         default: 0
                         format: double
                         type: number
+    '/namespaces/{ns}/directory/{id}':
+        get:
+            operationId: get-ns-directory-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Used primarily for \"Preview Mode\"\nGet a particular Dataset"
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/directory':
+        get:
+            operationId: get-ns-directory
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            description: "Used primarily for \"Preview Mode\"\nList the datasets belonging to a particular namespace"
+            tags:
+                - 'API Directory'
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
     /organizations:
         get:
             operationId: organization-list

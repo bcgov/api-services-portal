@@ -34,6 +34,7 @@ interface AccessRequestDialogProps {
   disabled: boolean;
   id: string;
   name: string;
+  preview: boolean;
   open?: boolean;
 }
 
@@ -42,6 +43,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   disabled,
   id,
   name,
+  preview,
   open,
 }) => {
   const client = useQueryClient();
@@ -105,8 +107,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             isClosable: true,
             title: 'Request Failed',
             description:
-              err?.map((e: Error) => e.message).join('\n') ??
-              'Unable to create request',
+              err
+                .map((e: any) =>
+                  e.data?.messages ? e.data.messages.join(',') : e.message
+                )
+                .join('\n') ?? 'Unable to create request',
             status: 'error',
           });
         }
@@ -199,6 +204,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                   <React.Suspense fallback={<AccessRequestFormLoading />}>
                     <AccessRequestForm
                       id={id}
+                      preview={preview}
                       onEnvironmentSelect={handleEnvironmentSelect}
                     />
                   </React.Suspense>
@@ -232,7 +238,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 </Button>
               </ButtonGroup>
             )}
-            {tab === 1 && <Button onClick={handleDone} data-testid="doneAcceptRequest">Done</Button>}
+            {tab === 1 && (
+              <Button onClick={handleDone} data-testid="doneAcceptRequest">
+                Done
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>
