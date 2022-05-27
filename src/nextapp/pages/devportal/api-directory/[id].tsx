@@ -19,7 +19,6 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
-import NextLink from 'next/link';
 import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import { FaExternalLinkAlt } from 'react-icons/fa';
@@ -73,7 +72,6 @@ const ApiPage: React.FC<
     )
   );
   const breadcrumb = React.useMemo(() => {
-    // TODO: This is a place holder to test until we know what property signals it's a draft
     if (preview) {
       return [
         {
@@ -83,7 +81,8 @@ const ApiPage: React.FC<
       ];
     }
     return [{ text: 'API Directory', href: '/devportal/api-directory' }];
-  }, []);
+  }, [preview]);
+  const title = data?.title ?? 'Dataset';
 
   function DetailItem({ detail }: { detail: DetailItem }) {
     return (
@@ -102,7 +101,7 @@ const ApiPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Services Portal | API Directory</title>
+        <title>API Services Portal | API Directory | {title}</title>
       </Head>
       <PreviewBanner />
       <Container maxW="6xl">
@@ -116,7 +115,7 @@ const ApiPage: React.FC<
                 target="_blank"
                 rel="noreferrer"
               >
-                {data?.title}
+                {title}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -125,7 +124,7 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              data?.title ?? 'Title'
+              title
             )
           }
         >

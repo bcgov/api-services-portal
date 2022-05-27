@@ -14,7 +14,7 @@ const ApiDirectoryNav: React.FC = () => {
     return 0;
   }, [router?.pathname]);
 
-  if (!user) {
+  if (!user || !user?.namespace) {
     return null;
   }
 

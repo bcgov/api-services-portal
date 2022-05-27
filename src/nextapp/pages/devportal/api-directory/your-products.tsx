@@ -1,15 +1,13 @@
 import * as React from 'react';
 import ApiDirectoryNav from '@/components/api-directory-nav';
-import { Box, Button, Container, Link, Text } from '@chakra-ui/react';
+import { Box, Button, Container, Text } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { QueryClient, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 import { Dataset, Product } from '@/shared/types/query.types';
 import PreviewBanner from '@/components/preview-banner';
-import { dehydrate } from 'react-query/hydration';
 import DiscoveryList from '@/components/discovery-list';
 import { useAuth } from '@/shared/services/auth';
 import NextLink from 'next/link';
@@ -20,7 +18,7 @@ interface DiscoveryDataset extends Dataset {
 
 const ApiDiscoveryPage: React.FC = () => {
   const { user } = useAuth();
-  const { data } = useQuery('yourProducts', () =>
+  const { data } = useQuery(['yourProducts', user?.namespace], () =>
     restApi<DiscoveryDataset[]>(
       `/ds/api/v2/namespaces/${user?.namespace}/directory`
     )
@@ -57,7 +55,7 @@ const ApiDiscoveryPage: React.FC = () => {
               />
             </Box>
           )}
-          <DiscoveryList data={data} preview={true} />
+          <DiscoveryList preview data={data} />
         </Box>
       </Container>
     </>
