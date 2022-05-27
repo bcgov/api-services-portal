@@ -1,5 +1,4 @@
 import * as React from 'react';
-import AppVersion from '@/components/app-version';
 import {
   Box,
   ChakraProvider,
@@ -7,6 +6,7 @@ import {
   Link,
   List,
   ListItem,
+  Text,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -145,7 +145,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     </ListItem>
                   ))}
                 </List>
-                <AppVersion />
+                <Text fontSize="xs" lineHeight={7}>
+                  Version 1.5.2
+                </Text>
               </Container>
             </Box>
           </AuthProvider>

@@ -22,7 +22,8 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
-import { FaChevronDown, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
+import { BiLinkExternal } from 'react-icons/bi';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -47,30 +48,34 @@ const HelpMenu: React.FC = () => {
               }}
             >
               <ListItem>
-                <Link href="#" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Submit product and service requests using the Data Systems and
                   Services request system
-                  <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </Link>
               </ListItem>
               <ListItem>
                 <Link
-                  href="https://chat.developer.gov.bc.ca/home"
+                  href="https://chat.developer.gov.bc.ca/channel/aps-ops"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Chat with us in Rocket Chat
-                  <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </Link>
               </ListItem>
               <ListItem>
                 <Link
-                  href="https://github.com/bcgov/api-services-portal/issues/new/choose"
+                  href="https://github.com/bcgov/api-services-portal/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Create an issue in Github
-                  <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </Link>
               </ListItem>
             </UnorderedList>
@@ -116,40 +121,40 @@ const HelpMenu: React.FC = () => {
             <MenuGroup title="Documentation">
               <MenuItem
                 as="a"
-                color="text"
-                href="https://bcgov.github.io/aps-infra-platform/"
+                color="bc-blue"
+                href="https://api-gov-bc-ca.test.api.gov.bc.ca/ds/api/v2/console/"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-api-docs"
               >
                 Api Docs
-                <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
               <MenuItem
                 as="a"
-                color="text"
-                href="/documentation"
+                color="bc-blue"
+                href="https://bcgov.github.io/aps-infra-platform/"
                 data-testid="help-menu-aps-support"
               >
                 APS Support
-                <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
               <MenuItem
                 as="a"
-                color="text"
-                href="https://github.com/bcgov/api-services-portal/blob/release-notes/docs/release-1.1.md"
+                color="bc-blue"
+                href="https://bcgov.github.io/aps-infra-platform/releases/2022-may/"
                 rel="noopener noreferrer"
                 data-testid="help-menu-release-notes"
                 target="_blank"
               >
                 Release Notes
-                <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
             </MenuGroup>
             <MenuDivider />
             <MenuGroup title="Contact Us">
               <MenuItem
-                color="text"
+                color="bc-blue"
                 data-testid="help-menu-support"
                 onClick={onOpen}
               >
@@ -160,14 +165,14 @@ const HelpMenu: React.FC = () => {
             <MenuGroup title="About">
               <MenuItem
                 as="a"
-                color="text"
+                color="bc-blue"
                 href="https://uptime.com/s/bcgov-dss"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-status"
               >
                 Status
-                <Icon as={FaExternalLinkAlt} boxSize="3" ml={2} />
+                <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
               <MenuItem
                 isFocusable={false}
