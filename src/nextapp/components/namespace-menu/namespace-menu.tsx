@@ -81,7 +81,16 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
           {user?.namespace ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
-        <MenuList color="gray.600">
+        <MenuList
+          color="bc-component"
+          sx={{
+            'p.chakra-menu__group__title': {
+              fontSize: 'md',
+              fontWeight: 'normal !important',
+              px: 1,
+            },
+          }}
+        >
           <>
             {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
             {isError && (

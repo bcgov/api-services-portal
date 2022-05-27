@@ -16,6 +16,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import Link from 'next/link';
+import HelpMenu from './help-menu';
 
 interface AuthActionProps {
   site: string;
@@ -46,6 +47,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
       spacing={4}
     >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
+      <HelpMenu />
       <Box
         as="span"
         d="flex"
