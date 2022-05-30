@@ -20,6 +20,7 @@ import theme from '@/shared/theme';
 import links from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import { appVersion } from '@/shared/config';
 import type { AppProps } from 'next/app';
 
 import '@bcgov/bc-sans/css/BCSans.css';
@@ -146,7 +147,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   ))}
                 </List>
                 <Text fontSize="xs" lineHeight={7}>
-                  Version 1.5.2
+                  {`Version ${appVersion}`}
                 </Text>
               </Container>
             </Box>

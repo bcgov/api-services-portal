@@ -136,6 +136,8 @@ const HelpMenu: React.FC = () => {
                 color="bc-blue"
                 href="https://bcgov.github.io/aps-infra-platform/"
                 data-testid="help-menu-aps-support"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 APS Support
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
