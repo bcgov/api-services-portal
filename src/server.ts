@@ -352,9 +352,9 @@ const configureExpress = (app: any) => {
 
   app.get('/about', (req: any, res: any) => {
     res.status(200).json({
-      version: process.env.APP_VERSION,
-      revision: process.env.APP_REVISION,
-      cluster: process.env.KUBE_CLUSTER,
+      version: process.env.NEXT_PUBLIC_APP_VERSION,
+      revision: process.env.NEXT_PUBLIC_APP_REVISION,
+      cluster: process.env.NEXT_PUBLIC_KUBE_CLUSTER,
     });
   });
 
