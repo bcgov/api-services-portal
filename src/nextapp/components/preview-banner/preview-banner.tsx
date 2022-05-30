@@ -70,7 +70,9 @@ const PreviewBanner: React.FC = () => {
                 color="bc-blue"
                 fontWeight="bold"
                 textDecor="underline"
-                href="#"
+                href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
+                target="_blank"
+                rel="external noreferrer noopener"
               >
                 Find and contact your Organization Administrator for approval
               </Link>
