@@ -17,7 +17,10 @@ const links: NavLink[] = [
     name: 'API Directory',
     url: '/devportal/api-directory',
     access: [],
-    altUrls: ['/devportal/api-directory/[id]'],
+    altUrls: [
+      '/devportal/api-directory/[id]',
+      '/devportal/api-directory/your-products',
+    ],
     sites: ['devportal'],
   },
   {
