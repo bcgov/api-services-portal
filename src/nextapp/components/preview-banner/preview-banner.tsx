@@ -65,7 +65,8 @@ const PreviewBanner: React.FC = () => {
               If this is a new namespace, it must be approved and associated
               with an organization before you can enable your products in the
               API Directory to make them visible to the public. You can still
-              configure your products but they will remain in preview mode.{' '}
+              configure your products but they will remain in preview mode.
+              Please open a ticket with the{' '}
               <Link
                 color="bc-blue"
                 fontWeight="bold"
@@ -74,8 +75,9 @@ const PreviewBanner: React.FC = () => {
                 target="_blank"
                 rel="external noreferrer noopener"
               >
-                Find and contact your Organization Administrator for approval
-              </Link>
+                Data Systems and Services request system
+              </Link>{' '}
+              for your namespace approval.
             </Text>
           </Box>
         )}
