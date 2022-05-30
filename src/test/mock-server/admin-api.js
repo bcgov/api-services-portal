@@ -5,7 +5,7 @@ const router = express.Router();
 router.put('/switch/:id', (req, res) => {
   const { db } = req.app.locals;
   const namespace = db.get('namespaces').find((n) => n.id === req.params.id)
-    .name;
+    ?.name;
   const user = db.get('user');
 
   db.set('user', { ...user, namespace });

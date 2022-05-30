@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Button,
   Box,
+  Center,
   Container,
   Heading,
   Flex,
@@ -9,11 +10,12 @@ import {
   Grid,
   GridItem,
   Icon,
-  Center,
+  Link,
   useToast,
   VStack,
   useDisclosure,
 } from '@chakra-ui/react';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
@@ -33,7 +35,7 @@ import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
-import ConfirmationDialog from '@/components/confirmation-dialog';
+import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
 
@@ -132,6 +134,8 @@ const NamespacesPage: React.FC = () => {
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
+
+      <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader title={user?.namespace} />
         {!hasNamespace && (
@@ -198,6 +202,18 @@ const NamespacesPage: React.FC = () => {
                           <Text fontSize="sm" mb={2}>
                             {a.description}
                           </Text>
+                          {a.title === 'Products' && (
+                            <Text fontSize="sm">
+                              <NextLink
+                                passHref
+                                href="/devportal/api-directory/your-products"
+                              >
+                                <Link fontWeight="bold" color="bc-blue">
+                                  Preview in Directory
+                                </Link>
+                              </NextLink>
+                            </Text>
+                          )}
                         </Box>
                       </Flex>
                     </NextLink>

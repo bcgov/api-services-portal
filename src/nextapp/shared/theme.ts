@@ -169,9 +169,13 @@ const buttonVariants = {
     },
     _focus: {
       borderColor: 'bc-blue-alt',
-      boxShadow: 'lg',
-      bgColor: '#F2F5F7',
+      boxShadow: 'none',
+      // bgColor: '#F2F5F7',
       outlineColor: 'transparent',
+    },
+    _hover: {
+      bgColor: 'transparent',
+      boxShadow: 'none',
     },
   },
 };

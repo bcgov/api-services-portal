@@ -109,6 +109,10 @@ const server = mockServer(schemaWithMocks, {
     getPermissionTicketsForResource: () =>
       new MockList(6, (_, { id }) => ({ id })),
     getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
+    currentNamespace: () => ({
+      org: null,
+      orgUnit: null,
+    }),
     myApplications: () => new MockList(8, (_, { id }) => ({ id })),
     myServiceAccesses: () => new MockList(4, (_, { id }) => ({ id })),
     mySelf: () => db.get('user'),

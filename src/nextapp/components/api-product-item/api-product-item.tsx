@@ -30,9 +30,14 @@ export interface ApiDataset extends Dataset {
 export interface ApiProductItemProps {
   data: ApiProduct;
   id: string;
+  preview: boolean;
 }
 
-const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
+const ApiProductItem: React.FC<ApiProductItemProps> = ({
+  data,
+  id,
+  preview,
+}) => {
   const isPublic = data.environments.some((e) => e.flow === 'public');
   const isTiered = data.environments.some((e) => e.anonymous);
 
@@ -69,7 +74,12 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               </Button>
             )}
             {!isPublic && (
-              <AccessRequestForm disabled={false} id={id} name={data.name} />
+              <AccessRequestForm
+                disabled={false}
+                id={id}
+                name={data.name}
+                preview={preview}
+              />
             )}
           </>
         )}
@@ -91,7 +101,12 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({ data, id }) => {
               )}
               <Text ml={8} fontSize="sm">
                 For elevated access, please{' '}
-                <AccessRequestForm disabled={false} id={id} name={data.name} />
+                <AccessRequestForm
+                  disabled={false}
+                  id={id}
+                  name={data.name}
+                  preview={preview}
+                />
               </Text>
             </GridItem>
           </Grid>
