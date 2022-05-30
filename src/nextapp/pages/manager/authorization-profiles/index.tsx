@@ -145,19 +145,15 @@ const AuthorizationProfiles: React.FC<
             data={data.allCredentialIssuersByNamespace}
             data-testid="ap-all-profiles-table"
             emptyView={
-              <Tr>
-                <Td align="center" colspan={5}>
-                  <EmptyPane
-                    action={authorizationProfileForm}
-                    title="Create your first Authorization Profile"
-                    message={
-                      user?.namespace
-                        ? 'Manage authentication, authorization and clients access to your API'
-                        : 'Select a namespace first to view its profiles'
-                    }
-                  />
-                </Td>
-              </Tr>
+              <EmptyPane
+                action={authorizationProfileForm}
+                title="Create your first Authorization Profile"
+                message={
+                  user?.namespace
+                    ? 'Manage authentication, authorization and clients access to your API'
+                    : 'Select a namespace first to view its profiles'
+                }
+              />
             }
           >
             {(c: CredentialIssuer) => (
