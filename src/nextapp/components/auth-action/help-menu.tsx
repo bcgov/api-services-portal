@@ -24,6 +24,7 @@ import {
 } from '@chakra-ui/react';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
+import { appCluster, appRevision, appVersion } from '@/shared/config';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -181,8 +182,8 @@ const HelpMenu: React.FC = () => {
                 alignItems="flex-start"
                 data-testid="help-menu-version"
               >
-                <Text fontSize="xs">Version: 1.0.68 revision: be1712</Text>
-                <Text fontSize="xs">Cluster: gold</Text>
+                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision}`}</Text>
+                <Text fontSize="xs">{`Cluster: ${appCluster}`}</Text>
               </MenuItem>
             </MenuGroup>
           </MenuList>
