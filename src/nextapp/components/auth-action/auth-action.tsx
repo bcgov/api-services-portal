@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Flex,
   Icon,
   Menu,
   MenuButton,
@@ -31,11 +32,14 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   if (!user) {
     return (
-      <Link passHref href="/login">
-        <Button as="a" variant="secondary" data-testid="login-btn">
-          Login
-        </Button>
-      </Link>
+      <Flex align="center" gridGap={4}>
+        <HelpMenu />
+        <Link passHref href="/login">
+          <Button as="a" variant="secondary" data-testid="login-btn">
+            Login
+          </Button>
+        </Link>
+      </Flex>
     );
   }
 

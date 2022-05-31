@@ -24,7 +24,18 @@ import {
 } from '@chakra-ui/react';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
-import { appCluster, appRevision, appVersion } from '@/shared/config';
+import {
+  appCluster,
+  appRevision,
+  appVersion,
+  helpDeskUrl,
+  helpChatUrl,
+  helpIssueUrl,
+  helpApiDocsUrl,
+  helpSupportUrl,
+  helpReleaseUrl,
+  helpStatusUrl,
+} from '@/shared/config';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,7 +61,7 @@ const HelpMenu: React.FC = () => {
             >
               <ListItem>
                 <Link
-                  href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2"
+                  href={helpDeskUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -61,7 +72,7 @@ const HelpMenu: React.FC = () => {
               </ListItem>
               <ListItem>
                 <Link
-                  href="https://chat.developer.gov.bc.ca/channel/aps-ops"
+                  href={helpChatUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -71,7 +82,7 @@ const HelpMenu: React.FC = () => {
               </ListItem>
               <ListItem>
                 <Link
-                  href="https://github.com/bcgov/api-services-portal/issues"
+                  href={helpIssueUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -123,7 +134,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href="https://api-gov-bc-ca.test.api.gov.bc.ca/ds/api/v2/console/"
+                href={helpApiDocsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-api-docs"
@@ -134,7 +145,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href="https://bcgov.github.io/aps-infra-platform/"
+                href={helpSupportUrl}
                 data-testid="help-menu-aps-support"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -145,7 +156,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href="https://bcgov.github.io/aps-infra-platform/releases/2022-may/"
+                href={helpReleaseUrl}
                 rel="noopener noreferrer"
                 data-testid="help-menu-release-notes"
                 target="_blank"
@@ -169,7 +180,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href="https://uptime.com/s/bcgov-dss"
+                href={helpStatusUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-status"
@@ -184,7 +195,10 @@ const HelpMenu: React.FC = () => {
                 alignItems="flex-start"
                 data-testid="help-menu-version"
               >
-                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision}`}</Text>
+                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision.slice(
+                  0,
+                  9
+                )}`}</Text>
                 <Text fontSize="xs">{`Cluster: ${appCluster}`}</Text>
               </MenuItem>
             </MenuGroup>
