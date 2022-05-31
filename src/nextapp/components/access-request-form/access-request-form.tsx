@@ -25,11 +25,13 @@ import ApplicationSelect from './application-select';
 
 interface AccessRequestFormProps {
   id: string;
+  preview: boolean;
   onEnvironmentSelect: (value: Environment) => void;
 }
 
 const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
   id,
+  preview,
   onEnvironmentSelect,
 }) => {
   const { data } = useApi('accessRequestForm', {
@@ -37,13 +39,16 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
     variables: { id },
   });
   const [environment, setEnvironment] = React.useState<string>('');
-  const apiTitle = data.allDiscoverableProducts?.reduce((memo: string, d) => {
+  const itemList = preview
+    ? data.allProductsByNamespace
+    : data.allDiscoverableProducts;
+  const apiTitle = itemList?.reduce((memo: string, d) => {
     if (!memo && d.id !== id) {
       return 'API';
     }
     return d.name;
   }, '');
-  const dataset = data?.allDiscoverableProducts[0];
+  const dataset = itemList[0];
   const requestor = data?.allTemporaryIdentities[0];
   const selectedEnvironment: Environment = React.useMemo(() => {
     return dataset.environments.find((e) => e.id === environment);
@@ -92,10 +97,14 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
         >
           <Stack direction="column">
             {dataset?.environments
-              .filter((e) => e.active)
+              .filter((e) => e.active || preview)
               .filter((e) => e.flow !== 'public')
               .map((e) => (
-                <Radio key={uid(e.id)} value={e.id} data-testid={`access-rqst-app-env-${e.name}`} >
+                <Radio
+                  key={uid(e.id)}
+                  value={e.id}
+                  data-testid={`access-rqst-app-env-${e.name}`}
+                >
                   {e.name}
                 </Radio>
               ))}
@@ -131,12 +140,20 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
               </Text>
             )}
           </Box>
-          <Textarea name="additionalDetails" data-testid="access-rqst-add-notes-text"/>
+          <Textarea
+            name="additionalDetails"
+            data-testid="access-rqst-add-notes-text"
+          />
         </Fieldset>
       )}
       {selectedEnvironment?.legal && hasNotAgreedLegal && (
         <Box mt={4} p={4} bgColor="#f2f2f2" borderRadius={4}>
-          <Checkbox isRequired colorScheme="blue" data-testid="acceptLegalTerm" name="acceptLegal">
+          <Checkbox
+            isRequired
+            colorScheme="blue"
+            data-testid="acceptLegalTerm"
+            name="acceptLegal"
+          >
             {selectedEnvironment.legal.title}
           </Checkbox>
           <Box mt={2} ml={7}>
@@ -172,6 +189,27 @@ export default AccessRequestForm;
 
 const query = gql`
   query Get($id: ID!) {
+    allProductsByNamespace(where: { id: $id }) {
+      id
+      name
+      environments {
+        id
+        approval
+        name
+        active
+        flow
+        additionalDetailsToRequest
+        legal {
+          title
+          description
+          link
+          reference
+        }
+        credentialIssuer {
+          clientAuthenticator
+        }
+      }
+    }
     allDiscoverableProducts(where: { id: $id }) {
       id
       name

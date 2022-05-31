@@ -352,9 +352,18 @@ const configureExpress = (app: any) => {
 
   app.get('/about', (req: any, res: any) => {
     res.status(200).json({
-      version: process.env.APP_VERSION,
-      revision: process.env.APP_REVISION,
-      cluster: process.env.KUBE_CLUSTER,
+      version: process.env.NEXT_PUBLIC_APP_VERSION,
+      revision: process.env.NEXT_PUBLIC_APP_REVISION,
+      cluster: process.env.NEXT_PUBLIC_KUBE_CLUSTER,
+      helpLinks: {
+        helpDeskUrl: process.env.NEXT_PUBLIC_HELP_DESK_URL,
+        helpChatUrl: process.env.NEXT_PUBLIC_HELP_CHAT_URL,
+        helpIssueUrl: process.env.NEXT_PUBLIC_HELP_ISSUE_URL,
+        helpApiDocsUrl: process.env.NEXT_PUBLIC_HELP_API_DOCS_URL,
+        helpSupportUrl: process.env.NEXT_PUBLIC_HELP_SUPPORT_URL,
+        helpReleaseUrl: process.env.NEXT_PUBLIC_HELP_RELEASE_URL,
+        helpStatusUrl: process.env.NEXT_PUBLIC_HELP_STATUS_URL,
+      },
     });
   });
 

@@ -81,6 +81,14 @@ export const Validate = async (
         false,
         'Can not mark a new request approved'
       );
+
+      // assert that either the Product is Active or it belongs to the authorized Subject namespace
+      assert.strictEqual(
+        prodEnv.active === true ||
+          prodEnv.product.namespace === context.authedItem.namespace,
+        true,
+        'Product not elligible for requesting access'
+      );
     } else if (isUpdatingToIssued(existingItem, resolvedData)) {
       assert.strictEqual(requestDetails != null, true, errors.WF01);
       assert.strictEqual(

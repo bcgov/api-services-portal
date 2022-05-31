@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Flex,
   Icon,
   Menu,
   MenuButton,
@@ -16,6 +17,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import Link from 'next/link';
+import HelpMenu from './help-menu';
 
 interface AuthActionProps {
   site: string;
@@ -30,11 +32,14 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
 
   if (!user) {
     return (
-      <Link passHref href="/login">
-        <Button as="a" variant="secondary" data-testid="login-btn">
-          Login
-        </Button>
-      </Link>
+      <Flex align="center" gridGap={4}>
+        <HelpMenu />
+        <Link passHref href="/login">
+          <Button as="a" variant="secondary" data-testid="login-btn">
+            Login
+          </Button>
+        </Link>
+      </Flex>
     );
   }
 
@@ -46,6 +51,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
       spacing={4}
     >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
+      <HelpMenu />
       <Box
         as="span"
         d="flex"
