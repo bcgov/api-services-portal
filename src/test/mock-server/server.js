@@ -561,9 +561,18 @@ app.post('/gql/api', async (req, res) => {
 
 app.use('/about', (_, res) => {
   res.json({
-    version: 'v1.0.68',
-    revision: casual.uuid,
-    cluster: 'gold',
+    version: '1.5.5',
+    revision: '12o3i12o3i12vdjoi4jfr9j209rjfair',
+    cluster: 'feature-silver',
+    helpLinks: {
+      helpDeskUrl: 'http://url.com/helpDeskUrl',
+      helpChatUrl: 'http://url.com/helpChatUrl',
+      helpIssueUrl: 'http://url.com/helpIssueUrl',
+      helpApiDocsUrl: 'http://url.com/helpApiDocsUrl',
+      helpSupportUrl: 'http://url.com/helpSupportUrl',
+      helpReleaseUrl: 'http://url.com/helpReleaseUrl',
+      helpStatusUrl: 'http://url.com/helpStatusUrl',
+    },
   });
 });
 app.use('/admin', adminApi);

@@ -22,26 +22,22 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
-import getConfig from 'next/config';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
+import { useRestApi } from '@/shared/services/api';
+
+type HelpLinks = {
+  version: string;
+  revision: string;
+  cluster: string;
+  helpLinks: Record<string, string>;
+};
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    publicRuntimeConfig: {
-      appCluster,
-      appRevision,
-      appVersion,
-      helpDeskUrl,
-      helpChatUrl,
-      helpIssueUrl,
-      helpApiDocsUrl,
-      helpSupportUrl,
-      helpReleaseUrl,
-      helpStatusUrl,
-    },
-  } = getConfig();
+  const { data, isSuccess, isError } = useRestApi<HelpLinks>('help', '/about', {
+    suspense: false,
+  });
 
   return (
     <>
@@ -65,7 +61,7 @@ const HelpMenu: React.FC = () => {
             >
               <ListItem>
                 <Link
-                  href={helpDeskUrl}
+                  href={data?.helpLinks.helpDeskUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -76,7 +72,7 @@ const HelpMenu: React.FC = () => {
               </ListItem>
               <ListItem>
                 <Link
-                  href={helpChatUrl}
+                  href={data?.helpLinks.helpChatUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -86,7 +82,7 @@ const HelpMenu: React.FC = () => {
               </ListItem>
               <ListItem>
                 <Link
-                  href={helpIssueUrl}
+                  href={data?.helpLinks.helpIssueUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -112,6 +108,7 @@ const HelpMenu: React.FC = () => {
       >
         <Menu placement="bottom-end">
           <MenuButton
+            isDisabled={!isSuccess}
             px={2}
             py={1}
             transition="all 0.2s"
@@ -138,7 +135,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href={helpApiDocsUrl}
+                href={data?.helpLinks.helpApiDocsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-api-docs"
@@ -149,7 +146,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href={helpSupportUrl}
+                href={data?.helpLinks.helpSupportUrl}
                 data-testid="help-menu-aps-support"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -160,7 +157,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href={helpReleaseUrl}
+                href={data?.helpLinks.helpReleaseUrl}
                 rel="noopener noreferrer"
                 data-testid="help-menu-release-notes"
                 target="_blank"
@@ -184,7 +181,7 @@ const HelpMenu: React.FC = () => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                href={helpStatusUrl}
+                href={data?.helpLinks.helpStatusUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="help-menu-status"
@@ -199,11 +196,10 @@ const HelpMenu: React.FC = () => {
                 alignItems="flex-start"
                 data-testid="help-menu-version"
               >
-                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision?.slice(
-                  0,
-                  9
-                )}`}</Text>
-                <Text fontSize="xs">{`Cluster: ${appCluster}`}</Text>
+                <Text fontSize="xs">{`Version: ${
+                  data?.version
+                } revision: ${data?.revision?.slice(0, 9)}`}</Text>
+                <Text fontSize="xs">{`Cluster: ${data?.cluster}`}</Text>
               </MenuItem>
             </MenuGroup>
           </MenuList>

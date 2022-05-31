@@ -18,7 +18,6 @@ import NavBar from '@/components/nav-bar';
 import MaintenanceBanner from '@/components/maintenance-banner';
 import theme from '@/shared/theme';
 import links from '@/shared/data/links';
-import { appVersion } from '@/shared/config';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
@@ -146,9 +145,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     </ListItem>
                   ))}
                 </List>
-                <Text fontSize="xs" lineHeight={7}>
-                  {`Version ${appVersion}`}
-                </Text>
               </Container>
             </Box>
           </AuthProvider>
