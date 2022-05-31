@@ -22,34 +22,36 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
-// import {
-//   appCluster,
-//   appRevision,
-//   appVersion,
-//   helpDeskUrl,
-//   helpChatUrl,
-//   helpIssueUrl,
-//   helpApiDocsUrl,
-//   helpSupportUrl,
-//   helpReleaseUrl,
-//   helpStatusUrl,
-// } from '@/shared/config';
 
-const HelpMenu: React.FC = () => {
+export interface HelpMenuProps {
+  appCluster: string;
+  appRevision: string;
+  appVersion: string;
+  helpDeskUrl: string;
+  helpChatUrl: string;
+  helpIssueUrl: string;
+  helpApiDocsUrl: string;
+  helpSupportUrl: string;
+  helpReleaseUrl: string;
+  helpStatusUrl: string;
+}
+
+const HelpMenu: React.FC<HelpMenuProps> = ({
+  appCluster,
+  appRevision,
+  appVersion,
+  helpDeskUrl,
+  helpChatUrl,
+  helpIssueUrl,
+  helpApiDocsUrl,
+  helpSupportUrl,
+  helpReleaseUrl,
+  helpStatusUrl,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '';
-  const appRevision = process.env.NEXT_PUBLIC_APP_REVISION || '';
-  const appCluster = process.env.NEXT_PUBLIC_KUBE_CLUSTER || '';
-  const helpDeskUrl = process.env.NEXT_PUBLIC_HELP_DESK_URL || '';
-  const helpChatUrl = process.env.NEXT_PUBLIC_HELP_CHAT_URL || '';
-  const helpIssueUrl = process.env.NEXT_PUBLIC_HELP_ISSUE_URL || '';
-  const helpApiDocsUrl = process.env.NEXT_PUBLIC_HELP_API_DOCS_URL || '';
-  const helpSupportUrl = process.env.NEXT_PUBLIC_HELP_SUPPORT_URL || '';
-  const helpReleaseUrl = process.env.NEXT_PUBLIC_HELP_RELEASE_URL || '';
-  const helpStatusUrl = process.env.NEXT_PUBLIC_HELP_STATUS_URL || '';
 
   return (
     <>
@@ -207,7 +209,7 @@ const HelpMenu: React.FC = () => {
                 alignItems="flex-start"
                 data-testid="help-menu-version"
               >
-                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision.slice(
+                <Text fontSize="xs">{`Version: ${appVersion} revision: ${appRevision?.slice(
                   0,
                   9
                 )}`}</Text>
