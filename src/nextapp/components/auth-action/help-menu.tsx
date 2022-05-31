@@ -29,16 +29,18 @@ import { BiLinkExternal } from 'react-icons/bi';
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
-    appCluster,
-    appRevision,
-    appVersion,
-    helpDeskUrl,
-    helpChatUrl,
-    helpIssueUrl,
-    helpApiDocsUrl,
-    helpSupportUrl,
-    helpReleaseUrl,
-    helpStatusUrl,
+    publicRuntimeConfig: {
+      appCluster,
+      appRevision,
+      appVersion,
+      helpDeskUrl,
+      helpChatUrl,
+      helpIssueUrl,
+      helpApiDocsUrl,
+      helpSupportUrl,
+      helpReleaseUrl,
+      helpStatusUrl,
+    },
   } = getConfig();
 
   return (
@@ -119,7 +121,7 @@ const HelpMenu: React.FC = () => {
             _focus={{ boxShadow: 'outline' }}
             data-testid="help-dropdown-btn"
           >
-            Help
+            Help {JSON.stringify(getConfig())}
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
           </MenuButton>
           <MenuList
