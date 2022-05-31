@@ -22,9 +22,11 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import getConfig from 'next/config';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
+
+const { publicRuntimeConfig } = getConfig();
 
 export interface HelpMenuProps {
   appCluster: string;
@@ -131,7 +133,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({
             _focus={{ boxShadow: 'outline' }}
             data-testid="help-dropdown-btn"
           >
-            Help
+            Help T={JSON.stringify(publicRuntimeConfig)}
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
           </MenuButton>
           <MenuList
@@ -153,7 +155,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({
                 rel="noopener noreferrer"
                 data-testid="help-menu-api-docs"
               >
-                Api Docs
+                API Docs
                 <Icon as={BiLinkExternal} boxSize="4" ml={2} />
               </MenuItem>
               <MenuItem
