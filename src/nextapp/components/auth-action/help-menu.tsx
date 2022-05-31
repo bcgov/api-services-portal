@@ -24,21 +24,33 @@ import {
 } from '@chakra-ui/react';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
-import {
-  appCluster,
-  appRevision,
-  appVersion,
-  helpDeskUrl,
-  helpChatUrl,
-  helpIssueUrl,
-  helpApiDocsUrl,
-  helpSupportUrl,
-  helpReleaseUrl,
-  helpStatusUrl,
-} from '@/shared/config';
+// import {
+//   appCluster,
+//   appRevision,
+//   appVersion,
+//   helpDeskUrl,
+//   helpChatUrl,
+//   helpIssueUrl,
+//   helpApiDocsUrl,
+//   helpSupportUrl,
+//   helpReleaseUrl,
+//   helpStatusUrl,
+// } from '@/shared/config';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '';
+  const appRevision = process.env.NEXT_PUBLIC_APP_REVISION || '';
+  const appCluster = process.env.NEXT_PUBLIC_KUBE_CLUSTER || '';
+  const helpDeskUrl = process.env.NEXT_PUBLIC_HELP_DESK_URL || '';
+  const helpChatUrl = process.env.NEXT_PUBLIC_HELP_CHAT_URL || '';
+  const helpIssueUrl = process.env.NEXT_PUBLIC_HELP_ISSUE_URL || '';
+  const helpApiDocsUrl = process.env.NEXT_PUBLIC_HELP_API_DOCS_URL || '';
+  const helpSupportUrl = process.env.NEXT_PUBLIC_HELP_SUPPORT_URL || '';
+  const helpReleaseUrl = process.env.NEXT_PUBLIC_HELP_RELEASE_URL || '';
+  const helpStatusUrl = process.env.NEXT_PUBLIC_HELP_STATUS_URL || '';
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
