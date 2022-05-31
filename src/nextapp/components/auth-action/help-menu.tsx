@@ -26,33 +26,20 @@ import getConfig from 'next/config';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
 
-export interface HelpMenuProps {
-  appCluster: string;
-  appRevision: string;
-  appVersion: string;
-  helpDeskUrl: string;
-  helpChatUrl: string;
-  helpIssueUrl: string;
-  helpApiDocsUrl: string;
-  helpSupportUrl: string;
-  helpReleaseUrl: string;
-  helpStatusUrl: string;
-}
-
-const HelpMenu: React.FC<HelpMenuProps> = ({
-  appCluster,
-  appRevision,
-  appVersion,
-  helpDeskUrl,
-  helpChatUrl,
-  helpIssueUrl,
-  helpApiDocsUrl,
-  helpSupportUrl,
-  helpReleaseUrl,
-  helpStatusUrl,
-}) => {
+const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const config = getConfig();
+  const {
+    appCluster,
+    appRevision,
+    appVersion,
+    helpDeskUrl,
+    helpChatUrl,
+    helpIssueUrl,
+    helpApiDocsUrl,
+    helpSupportUrl,
+    helpReleaseUrl,
+    helpStatusUrl,
+  } = getConfig();
 
   return (
     <>
@@ -132,7 +119,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({
             _focus={{ boxShadow: 'outline' }}
             data-testid="help-dropdown-btn"
           >
-            Help T={JSON.stringify(config)}
+            Help
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
           </MenuButton>
           <MenuList

@@ -17,14 +17,13 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import Link from 'next/link';
-import HelpMenu, { HelpMenuProps } from './help-menu';
+import HelpMenu from './help-menu';
 
 interface AuthActionProps {
   site: string;
-  helpMenuProps: HelpMenuProps;
 }
 
-const Signin: React.FC<AuthActionProps> = ({ site, helpMenuProps }) => {
+const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
 
   if (site === 'redirect') {
@@ -34,7 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({ site, helpMenuProps }) => {
   if (!user) {
     return (
       <Flex align="center" gridGap={4}>
-        <HelpMenu {...helpMenuProps} />
+        <HelpMenu />
         <Link passHref href="/login">
           <Button as="a" variant="secondary" data-testid="login-btn">
             Login
@@ -52,7 +51,7 @@ const Signin: React.FC<AuthActionProps> = ({ site, helpMenuProps }) => {
       spacing={4}
     >
       {user.roles.includes('portal-user') && <NamespaceMenu user={user} />}
-      <HelpMenu {...helpMenuProps} />
+      <HelpMenu />
       <Box
         as="span"
         d="flex"

@@ -18,21 +18,10 @@ import NavBar from '@/components/nav-bar';
 import MaintenanceBanner from '@/components/maintenance-banner';
 import theme from '@/shared/theme';
 import links from '@/shared/data/links';
+import { appVersion } from '@/shared/config';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
-import {
-  appCluster,
-  appRevision,
-  appVersion,
-  helpDeskUrl,
-  helpChatUrl,
-  helpIssueUrl,
-  helpApiDocsUrl,
-  helpSupportUrl,
-  helpReleaseUrl,
-  helpStatusUrl,
-} from '@/shared/config';
 
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
@@ -111,21 +100,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             </Head>
             <MaintenanceBanner />
             <Header site={site}>
-              <AuthAction
-                site={site}
-                helpMenuProps={{
-                  appCluster,
-                  appRevision,
-                  appVersion,
-                  helpDeskUrl,
-                  helpChatUrl,
-                  helpIssueUrl,
-                  helpApiDocsUrl,
-                  helpSupportUrl,
-                  helpReleaseUrl,
-                  helpStatusUrl,
-                }}
-              />
+              <AuthAction site={site} />
             </Header>
             <NavBar links={links} site={site} pathname={router?.pathname} />
             <Box as="main" mt={{ base: '65px', sm: '115px' }} flex={1}>
