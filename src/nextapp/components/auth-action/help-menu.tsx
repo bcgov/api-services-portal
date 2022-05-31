@@ -121,7 +121,7 @@ const HelpMenu: React.FC = () => {
             _focus={{ boxShadow: 'outline' }}
             data-testid="help-dropdown-btn"
           >
-            Help {JSON.stringify(getConfig())}
+            Help
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
           </MenuButton>
           <MenuList
