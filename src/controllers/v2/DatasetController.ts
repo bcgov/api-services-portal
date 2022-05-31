@@ -23,6 +23,9 @@ import {
 import { Dataset, DraftDataset } from './types';
 import { transformContacts, transformResources } from './OrgDatasetController';
 import { BatchResult } from '../../batch/types';
+import { transform } from './DirectoryController';
+import { gql } from 'graphql-request';
+import { Product } from '@/services/keystone/types';
 
 @injectable()
 @Route('/namespaces/{ns}/datasets')

@@ -19,11 +19,13 @@ import PageHeader from '@/components/page-header';
 import { restApi } from '@/shared/services/api';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient, useQuery } from 'react-query';
+import PreviewBanner from '@/components/preview-banner';
 import { dehydrate } from 'react-query/hydration';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import gfm from 'remark-gfm';
 import { uid } from 'react-uid';
+import { useAuth } from '@/shared/services/auth';
 
 const renderers = {
   link: InternalLink,
@@ -38,29 +40,49 @@ type DetailItem = {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
+  const { preview } = context.query;
   const queryClient = new QueryClient();
   const queryKey = ['DiscoverableDataset', id];
 
-  await queryClient.prefetchQuery(
-    queryKey,
-    async () => await restApi<ApiDataset>(`/ds/api/directory/${id}`)
-  );
+  !preview &&
+    (await queryClient.prefetchQuery(
+      queryKey,
+      async () => await restApi<ApiDataset>(`/ds/api/v2/directory/${id}`)
+    ));
 
   return {
     props: {
       id,
       dehydratedState: dehydrate(queryClient),
       queryKey,
+      preview: preview ? true : false,
     },
   };
 };
 
 const ApiPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ id, queryKey }) => {
+> = ({ id, queryKey, preview }) => {
+  const { user } = useAuth();
   const { data } = useQuery<ApiDataset>(queryKey, () =>
-    restApi<ApiDataset>(`/ds/api/directory/${id}`)
+    restApi<ApiDataset>(
+      preview
+        ? `/ds/api/v2/namespaces/${user?.namespace}/directory/${id}`
+        : `/ds/api/v2/directory/${id}`
+    )
   );
+  const breadcrumb = React.useMemo(() => {
+    if (preview) {
+      return [
+        {
+          text: 'Back to Your Products',
+          href: '/devportal/api-directory/your-products',
+        },
+      ];
+    }
+    return [{ text: 'API Directory', href: '/devportal/api-directory' }];
+  }, [preview]);
+  const title = data?.title ?? 'Dataset';
 
   function DetailItem({ detail }: { detail: DetailItem }) {
     return (
@@ -79,22 +101,21 @@ const ApiPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Services Portal | API Directory</title>
+        <title>API Services Portal | API Directory | {title}</title>
       </Head>
+      <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader
-          breadcrumb={[
-            { text: 'API Directory', href: '/devportal/api-directory' },
-          ]}
+          breadcrumb={breadcrumb}
           title={
-            data.isInCatalog ? (
+            data?.isInCatalog ? (
               <Link
                 isExternal
                 href={`https://catalogue.data.gov.bc.ca/dataset/${data.name}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                {data?.title}
+                {title}
                 <Icon
                   as={FaExternalLinkAlt}
                   boxSize="5"
@@ -103,7 +124,7 @@ const ApiPage: React.FC<
                 />
               </Link>
             ) : (
-              data?.title
+              title
             )
           }
         >
@@ -124,13 +145,18 @@ const ApiPage: React.FC<
             </Box>
             <Box my={9}>
               <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
-                {data.notes}
+                {data?.notes}
               </ReactMarkdownWithHtml>
             </Box>
             <Card heading="Products">
               <Box bg="gray.100">
                 {data?.products?.map((p) => (
-                  <ApiProductItem key={uid(p)} data={p} id={p.id} />
+                  <ApiProductItem
+                    key={uid(p)}
+                    data={p}
+                    id={p.id}
+                    preview={preview}
+                  />
                 ))}
               </Box>
             </Card>

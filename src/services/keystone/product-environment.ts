@@ -206,9 +206,13 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                     Environment(where: {id: $id}) {
                         id
                         name
+                        active
                         approval
                         legal {
                             reference
+                        }
+                        product {
+                            namespace
                         }
                         credentialIssuer {
                             name

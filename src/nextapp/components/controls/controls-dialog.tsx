@@ -73,10 +73,18 @@ const ControlsDialog: React.FC<ControlDialogProps> = ({
             </form>
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} data-testid="control-dialog-cancel-btn" onClick={onClose}>
+            <Button
+              mr={3}
+              data-testid="control-dialog-cancel-btn"
+              onClick={onClose}
+            >
               Cancel
             </Button>
-            <Button variant="primary" data-testid="control-dialog-apply-btn" onClick={onTriggerSubmit}>
+            <Button
+              variant="primary"
+              data-testid="control-dialog-apply-btn"
+              onClick={onTriggerSubmit}
+            >
               Apply
             </Button>
           </ModalFooter>

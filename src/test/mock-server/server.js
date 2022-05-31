@@ -109,6 +109,10 @@ const server = mockServer(schemaWithMocks, {
     getPermissionTicketsForResource: () =>
       new MockList(6, (_, { id }) => ({ id })),
     getResourceSet: () => new MockList(8, (_, { id }) => ({ id })),
+    currentNamespace: () => ({
+      org: null,
+      orgUnit: null,
+    }),
     myApplications: () => new MockList(8, (_, { id }) => ({ id })),
     myServiceAccesses: () => new MockList(4, (_, { id }) => ({ id })),
     mySelf: () => db.get('user'),
@@ -314,11 +318,7 @@ const server = mockServer(schemaWithMocks, {
     name: casual.random_element(['dev', 'test', 'prod', 'sandbox', 'other']),
     approval: casual.boolean,
     active: casual.boolean,
-    flow: casual.random_element([
-      'kong-api-key-acl',
-      'public',
-      'client-credentials',
-    ]),
+    flow: casual.random_element(['public', 'client-credentials']),
     plugins: () => new MockList(2, (_, { id }) => ({ id })),
     description: casual.short_description,
     services: () => new MockList(random(0, 3), (_, { id }) => ({ id })),
@@ -350,47 +350,26 @@ const server = mockServer(schemaWithMocks, {
     hosts: JSON.stringify(['route']),
     paths: JSON.stringify(['/path']),
   }),
-  CredentialIssuer: () => {
-    const flow = casual.random_element([
-      'kong-api-key-acl',
-      'client-credentials',
-    ]);
-    let credentialValues = {};
-
-    if (flow === 'client-credentials') {
-      credentialValues = {
-        availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),
-        clientRoles: JSON.stringify(['role-a', 'role-b', 'role-c']),
-        resourceScopes: JSON.stringify([]),
-        resourceAccessScope: 'Manager.View',
-        resourceType: 'namespace',
-        apiKeyName: null,
-      };
-    }
-
-    return {
-      name: casual.title,
-      description: casual.description,
-      authMethod: casual.random_element(['jwt', 'public', 'keys']),
-      mode: casual.random_element(['manual', 'auto']),
-      instruction: casual.description,
-      oidcDiscoveryUrl: casual.url,
-      initialAccessToken: casual.card_number,
-      flow,
-      clientAuthenticator: 'client-secret',
-      clientId: casual.uuid,
-      clientSecret: casual.uuid,
-      availableScopes: null,
-      clientRoles: null,
-      resourceScopes: null,
-      resourceAccessScope: null,
-      resourceType: null,
-      apiKeyName: 'keyname',
-      ...credentialValues,
-      environmentDetails:
-        '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
-    };
-  },
+  CredentialIssuer: () => ({
+    name: casual.title,
+    description: casual.description,
+    authMethod: casual.random_element(['jwt', 'public', 'keys']),
+    mode: casual.random_element(['manual', 'auto']),
+    instruction: casual.description,
+    oidcDiscoveryUrl: casual.url,
+    initialAccessToken: casual.card_number,
+    flow: 'client-credentials',
+    clientAuthenticator: 'client-secret',
+    clientId: casual.uuid,
+    clientSecret: casual.uuid,
+    availableScopes: JSON.stringify(['Scope1', 'Scope2', 'Scope3']),
+    clientRoles: JSON.stringify(['role-a', 'role-b', 'role-c']),
+    resourceScopes: JSON.stringify([]),
+    resourceAccessScope: 'Manager.View',
+    resourceType: 'namespace',
+    environmentDetails:
+      '[{"environment":"dev","issuerUrl":"https://authz-dev.apps.silver.devops.gov.bc.ca/auth/realms/aps","clientRegistration":"managed","clientId":"gwa","clientSecret":"93d2b2f2-c2d9-d526-1f29-482d23eeaebf"}]',
+  }),
   GatewayConsumer: () => ({
     username: casual.username,
     customId: () => sample([casual.word, null, null, null]),

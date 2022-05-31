@@ -2,7 +2,6 @@ const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
 const { Markdown } = require('@keystonejs/fields-markdown')
 const { Content } = require('@keystonejs/fields-content');
 const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
-const GrapesJSEditor = require('keystonejs-grapesjs-editor')
 
 const { externallySourced } = require('../components/ExternalSource')
 

@@ -38,6 +38,7 @@ import {
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
 import { NamespaceService } from '../../services/org-groups';
+import { IssuerEnvironmentConfig } from '@/services/workflow/types';
 
 const typeUserContact = `
   type UserContact {
@@ -123,7 +124,11 @@ module.exports = {
                 );
                 return null;
               } else {
-                return matched[0];
+                return await backfillGroupAttributes(
+                  context.req.user.namespace,
+                  matched[0],
+                  envCtx.issuerEnvConfig
+                );
               }
             },
             access: EnforcementPoint,
@@ -209,45 +214,12 @@ module.exports = {
                 }))
                 .pop();
 
-              const kcGroupService = new KeycloakGroupService(
-                envCtx.issuerEnvConfig.issuerUrl
-              );
-              await kcGroupService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
+              const merged = await backfillGroupAttributes(
+                args.ns,
+                detail,
+                envCtx.issuerEnvConfig
               );
 
-              const nsPermissions = await kcGroupService.getGroup(
-                'ns',
-                args.ns
-              );
-
-              transformSingleValueAttributes(nsPermissions.attributes, [
-                'perm-data-plane',
-                'perm-protected-ns',
-                'org',
-                'org-unit',
-              ]);
-
-              logger.debug('[namespace] %j', nsPermissions.attributes);
-
-              const client = new GWAService(process.env.GWA_API_URL);
-              const defaultSettings = await client.getDefaultNamespaceSettings();
-
-              logger.debug('[namespace] Default Settings %j', defaultSettings);
-
-              const merged = {
-                ...detail,
-                ...defaultSettings,
-                ...nsPermissions.attributes,
-              };
-              camelCaseAttributes(merged, [
-                'perm-domains',
-                'perm-data-plane',
-                'perm-protected-ns',
-                'org',
-                'org-unit',
-              ]);
               logger.debug('[namespace] Result %j', merged);
               return merged;
             },
@@ -533,3 +505,45 @@ module.exports = {
     },
   ],
 };
+
+async function backfillGroupAttributes(
+  ns: string,
+  detail: any,
+  issuerEnvConfig: IssuerEnvironmentConfig
+): Promise<any> {
+  const kcGroupService = new KeycloakGroupService(issuerEnvConfig.issuerUrl);
+  await kcGroupService.login(
+    issuerEnvConfig.clientId,
+    issuerEnvConfig.clientSecret
+  );
+
+  const nsPermissions = await kcGroupService.getGroup('ns', ns);
+
+  transformSingleValueAttributes(nsPermissions.attributes, [
+    'perm-data-plane',
+    'perm-protected-ns',
+    'org',
+    'org-unit',
+  ]);
+
+  logger.debug('[namespace] %j', nsPermissions.attributes);
+
+  const client = new GWAService(process.env.GWA_API_URL);
+  const defaultSettings = await client.getDefaultNamespaceSettings();
+
+  logger.debug('[namespace] Default Settings %j', defaultSettings);
+
+  const merged = {
+    ...detail,
+    ...defaultSettings,
+    ...nsPermissions.attributes,
+  };
+  camelCaseAttributes(merged, [
+    'perm-domains',
+    'perm-data-plane',
+    'perm-protected-ns',
+    'org',
+    'org-unit',
+  ]);
+  return merged;
+}

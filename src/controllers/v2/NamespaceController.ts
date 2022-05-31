@@ -60,11 +60,14 @@ export class NamespaceController extends Controller {
 
   @Get('/report')
   @OperationId('report')
-  public async report(@Request() req: any): Promise<any> {
+  public async report(
+    @Request() req: any,
+    @Query() ids: string = '[]'
+  ): Promise<any> {
     const workbookService = new WorkbookService(
       this.keystone.createContext(req, true)
     );
-    const workbook = await workbookService.buildWorkbook();
+    const workbook = await workbookService.buildWorkbook(JSON.parse(ids));
     const buffer = await workbook.xlsx.writeBuffer();
 
     req.res.setHeader(

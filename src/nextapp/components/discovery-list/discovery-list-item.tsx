@@ -23,10 +23,12 @@ interface DiscoveryDataset extends Dataset {
 
 interface DiscoveryListItemProps extends BoxProps {
   data: DiscoveryDataset;
+  preview: boolean;
 }
 
 const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
   data,
+  preview,
   ...props
 }) => {
   return (
@@ -55,14 +57,20 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
             {data ? (
               <>
-                <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
+                <NextLink
+                  passHref
+                  href={`/devportal/api-directory/${data.id}?preview=${preview}`}
+                >
                   <Link data-testid={`api-${kebabCase(data.title)}`}>
                     {data.title}
                   </Link>
                 </NextLink>
               </>
             ) : (
-              <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
+              <NextLink
+                passHref
+                href={`/devportal/api-directory/${data.id}?preview=${preview}`}
+              >
                 <Link data-testid="discovery-list-item-link">{data.name}</Link>
               </NextLink>
             )}
