@@ -6,6 +6,7 @@ import {
   Link,
   List,
   ListItem,
+  Text,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -116,8 +117,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             >
               <Container
                 d="flex"
-                justifyContent="center"
-                flexDirection="column"
+                justifyContent="space-between"
                 textAlign="center"
                 height={{ base: 'auto', md: '46px' }}
                 my={{ base: 4, md: 'none' }}
@@ -127,7 +127,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   display="flex"
                   flexDirection={{ base: 'column', md: 'row' }}
                   flexWrap={{ base: 'nowrap', md: 'wrap' }}
-                  alignItems="center"
                   color="#fff"
                   sx={{ '& li:last-child a': { border: 'none' } }}
                 >

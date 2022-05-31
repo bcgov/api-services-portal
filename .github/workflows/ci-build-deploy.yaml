@@ -223,6 +223,22 @@ jobs:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'    
             NEXT_PUBLIC_GRAFANA_URL:
               value: 'https://grafana-apps-gov-bc-ca.dev.api.gov.bc.ca'
+            NEXT_PUBLIC_KUBE_CLUSTER:
+              value: 'feature-silver'
+            NEXT_PUBLIC_HELP_DESK_URL:
+              value: 'https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2'
+            NEXT_PUBLIC_HELP_CHAT_URL:
+              value: 'https://chat.developer.gov.bc.ca/channel/aps-ops'
+            NEXT_PUBLIC_HELP_ISSUE_URL:
+              value: 'https://github.com/bcgov/api-services-portal/issues'
+            NEXT_PUBLIC_HELP_API_DOCS_URL:
+              value: '/ds/api/v2/console/'
+            NEXT_PUBLIC_HELP_SUPPORT_URL:
+              value: 'https://bcgov.github.io/aps-infra-platform/'
+            NEXT_PUBLIC_HELP_RELEASE_URL:
+              value: 'https://bcgov.github.io/aps-infra-platform/releases/2022-may/'
+            NEXT_PUBLIC_HELP_STATUS_URL:
+              value: 'https://uptime.com/s/bcgov-dss'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_PROD_ENV_SLUG:

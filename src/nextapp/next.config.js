@@ -5,4 +5,5 @@ module.exports = {
   env: {
     USER_HAS_PORTFOLIO: !!process.env.IFRAMELY_API_KEY,
   },
+  publicRuntimeConfig: {},
 };
