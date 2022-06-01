@@ -26,7 +26,12 @@ const PreviewBanner: React.FC = () => {
     { enabled: true }
   );
 
-  if (!user || !isSuccess || data.currentNamespace.org) {
+  if (
+    !user ||
+    !isSuccess ||
+    data.currentNamespace === null ||
+    data.currentNamespace.org
+  ) {
     return null;
   }
 
