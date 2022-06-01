@@ -92,15 +92,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             <MenuItem
               as="a"
               color="text"
-              target="_blank"
-              href="/ds/api/v2/console"
-              data-testid="auth-menu-api-docs"
-            >
-              API Docs
-            </MenuItem>
-            <MenuItem
-              as="a"
-              color="text"
               href="/admin/signout"
               data-testid="auth-menu-signout-btn"
             >

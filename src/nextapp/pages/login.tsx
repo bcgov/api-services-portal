@@ -87,7 +87,7 @@ const LoginPage: React.FC = () => {
                   one of the options available below.
                 </Text>
                 <Box mt={7}>
-                  <LoginButtons buttons={['idir', 'bceid', 'github']} />
+                  <LoginButtons buttons={['idir', 'github']} />
                 </Box>
               </GridItem>
               <GridItem bgColor="white" p={10}>
