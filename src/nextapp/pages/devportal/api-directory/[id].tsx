@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
   const queryKey = ['DiscoverableDataset', id];
 
-  !preview &&
+  preview === 'false' &&
     (await queryClient.prefetchQuery(
       queryKey,
       async () => await restApi<ApiDataset>(`/ds/api/v2/directory/${id}`)
@@ -55,7 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       id,
       dehydratedState: dehydrate(queryClient),
       queryKey,
-      preview: preview ? true : false,
+      preview: preview === 'true' ? true : false,
     },
   };
 };
