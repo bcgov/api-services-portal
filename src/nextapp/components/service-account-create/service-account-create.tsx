@@ -102,7 +102,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                   <CheckboxGroup>
                     <Wrap spacing={4}>
                       {isSuccess &&
-                        data?.currentNamespace.scopes.map((s) => (
+                        data?.currentNamespace?.scopes?.map((s) => (
                           <WrapItem key={s.name}>
                             <Checkbox value={s.name} name="scopes">
                               {s.name}
