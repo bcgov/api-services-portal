@@ -76,7 +76,7 @@ const HelpMenu: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Chat with us in Rocket Chat
+                  Chat with us in Rocket.Chat
                   <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </Link>
               </ListItem>
@@ -86,7 +86,7 @@ const HelpMenu: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Create an issue in Github
+                  Create an issue in GitHub
                   <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </Link>
               </ListItem>
