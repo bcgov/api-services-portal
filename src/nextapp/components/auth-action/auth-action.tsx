@@ -87,7 +87,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
           <MenuList borderRadius={0}>
             <MenuItem
               as="a"
-              color="text"
               href="/profile"
               data-testid="auth-menu-user-profile"
             >
@@ -104,7 +103,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                   sx={{
                     p: {
                       fontSize: 'md',
-                      color: 'bc-component',
+                      color: '#606060CC',
                     },
                   }}
                 >
@@ -126,11 +125,10 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             )}
             <MenuItem
               as="a"
-              color="text"
               href="/admin/signout"
               data-testid="auth-menu-signout-btn"
             >
-              Sign Out
+              Logout
             </MenuItem>
           </MenuList>
         </Menu>
