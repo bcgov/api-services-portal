@@ -5,6 +5,7 @@ import {
   Button,
   Flex,
   Icon,
+  Link,
   Menu,
   MenuButton,
   MenuList,
@@ -12,11 +13,13 @@ import {
   Center,
   HStack,
   StackDivider,
+  Text,
+  MenuDivider,
 } from '@chakra-ui/react';
+import { BiLinkExternal } from 'react-icons/bi';
 import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
-import Link from 'next/link';
 import HelpMenu from './help-menu';
 
 interface AuthActionProps {
@@ -25,6 +28,7 @@ interface AuthActionProps {
 
 const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
+  const isBCeIDUser = user?.roles.includes('bceid-business-user');
 
   if (site === 'redirect') {
     return <></>;
@@ -89,6 +93,37 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             >
               My Profile
             </MenuItem>
+            {isBCeIDUser && (
+              <>
+                <MenuDivider />
+                <MenuItem
+                  as="div"
+                  display="flex"
+                  flexDir="column"
+                  alignItems="flex-start"
+                  sx={{
+                    p: {
+                      fontSize: 'md',
+                      color: 'bc-component',
+                    },
+                  }}
+                >
+                  <Text>{`BCeID User ID: ${user?.username}`}</Text>
+                  <Text>{`Business: ${user?.businessName}`}</Text>
+                  <Text>
+                    <Link
+                      color="bc-blue"
+                      target="_blank"
+                      href="https://www.bceid.ca/logon.aspx"
+                      rel="noreferrer noopener"
+                    >
+                      Manage My BCeID Account <Icon as={BiLinkExternal} />
+                    </Link>
+                  </Text>
+                </MenuItem>
+                <MenuDivider />
+              </>
+            )}
             <MenuItem
               as="a"
               color="text"

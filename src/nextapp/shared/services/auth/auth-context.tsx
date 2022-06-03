@@ -3,7 +3,6 @@ import { Box, Center, Heading, Text } from '@chakra-ui/react';
 import Button from '@/components/button';
 import links from '@/shared/data/links';
 import { useRouter } from 'next/router';
-import querystring from 'querystring';
 
 import { useSession, UserSessionResult } from './use-session';
 
