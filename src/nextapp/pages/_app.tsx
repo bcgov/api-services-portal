@@ -55,6 +55,13 @@ const footerItems = [
     text: 'Contact Us',
   },
 ];
+
+const envS = {
+  ABC: process.env.ABC,
+  ABC: process.env.ABC,
+  DEF: process.env.DEF,
+};
+
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
@@ -123,7 +130,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 my={{ base: 4, md: 'none' }}
                 maxW="6xl"
               >
-                <Box>ENV={JSON.stringify(process.env)}</Box>
+                <Box>
+                  ENV={JSON.stringify(process.env)},{process.env.ABC},
+                  {process.env.GHI}, ENVs={JSON.stringify(envS)}
+                </Box>
                 <List
                   display="flex"
                   flexDirection={{ base: 'column', md: 'row' }}
