@@ -58,7 +58,7 @@ const footerItems = [
 
 const envS = {
   ABC: process.env.ABC,
-  ABC: process.env.ABC,
+  GHI: process.env.GHI,
   DEF: process.env.DEF,
 };
 
