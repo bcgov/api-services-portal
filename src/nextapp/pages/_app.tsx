@@ -22,8 +22,6 @@ import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
 
-import getConfig from 'next/config';
-
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 
@@ -57,14 +55,6 @@ const footerItems = [
     text: 'Contact Us',
   },
 ];
-
-const envS = {
-  ABC: process.env.ABC,
-  GHI: process.env.GHI,
-  DEF: process.env.DEF,
-};
-
-const gConfig = getConfig();
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -134,13 +124,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 my={{ base: 4, md: 'none' }}
                 maxW="6xl"
               >
-                <Box>
-                  ENV={JSON.stringify(process.env)},{process.env.JKL},
-                  {process.env.GHI}, ENVs={JSON.stringify(envS)}, GCONFIG=
-                  {JSON.stringify(gConfig)},PP=
-                  {process.env.NEXT_PUBLIC_KUBE_CLUSTER},,PP=
-                  {process.env.NEXT_PUBLIC_HELP_CHAT_URL}
-                </Box>
                 <List
                   display="flex"
                   flexDirection={{ base: 'column', md: 'row' }}
