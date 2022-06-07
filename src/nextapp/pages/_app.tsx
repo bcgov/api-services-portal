@@ -135,9 +135,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 maxW="6xl"
               >
                 <Box>
-                  ENV={JSON.stringify(process.env)},{process.env.ABC},
+                  ENV={JSON.stringify(process.env)},{process.env.JKL},
                   {process.env.GHI}, ENVs={JSON.stringify(envS)}, GCONFIG=
-                  {JSON.stringify(gConfig)}
+                  {JSON.stringify(gConfig)},PP=
+                  {process.env.NEXT_PUBLIC_KUBE_CLUSTER},,PP=
+                  {process.env.NEXT_PUBLIC_HELP_CHAT_URL}
                 </Box>
                 <List
                   display="flex"
