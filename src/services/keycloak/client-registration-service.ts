@@ -192,10 +192,7 @@ export class KeycloakClientRegistrationService {
       .map((sname) => scopeToId[sname]);
     if (scopesToAdd.filter((s: any) => s == null).length != 0) {
       throw Error(
-        'Missing one of these Realm Defaults - ' +
-          (optional ? 'Optional' : 'Default') +
-          ' Scopes: ' +
-          desiredSetOfScopes
+        'One or more scopes missing from IdP - ' + desiredSetOfScopes
       );
     }
 
