@@ -259,6 +259,10 @@ jobs:
               value: 'API.Services.Portal@gov.bc.ca'
             EMAIL_HOST:
               value: 'apps.smtp.gov.bc.ca'
+            JKL:
+              value: 'jkl_test'
+            DEF:
+              value: 'def_test'
 
           readinessProbe:
             exec:
