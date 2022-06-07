@@ -55,7 +55,6 @@ const footerItems = [
     text: 'Contact Us',
   },
 ];
-
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
   const queryClientRef = React.useRef<QueryClient>();
