@@ -123,6 +123,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 my={{ base: 4, md: 'none' }}
                 maxW="6xl"
               >
+                <Box>ENV={JSON.stringify(process.env)}</Box>
                 <List
                   display="flex"
                   flexDirection={{ base: 'column', md: 'row' }}
