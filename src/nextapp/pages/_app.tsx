@@ -22,6 +22,8 @@ import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
 
+import getConfig from 'next/config';
+
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 
@@ -61,6 +63,8 @@ const envS = {
   GHI: process.env.GHI,
   DEF: process.env.DEF,
 };
+
+const gConfig = getConfig();
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -132,7 +136,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
               >
                 <Box>
                   ENV={JSON.stringify(process.env)},{process.env.ABC},
-                  {process.env.GHI}, ENVs={JSON.stringify(envS)}
+                  {process.env.GHI}, ENVs={JSON.stringify(envS)}, GCONFIG=
+                  {JSON.stringify(gConfig)}
                 </Box>
                 <List
                   display="flex"
