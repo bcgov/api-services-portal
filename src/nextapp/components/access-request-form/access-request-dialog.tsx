@@ -175,10 +175,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             {`Access Request to ${name}`}
             <Tabs defaultIndex={tab} index={tab}>
               <TabList mt={4}>
-                <Tab px={0} cursor="default">
-                  1. Request Access
-                </Tab>
-                <Tab px={0} ml={4} cursor="default">
+                <Tab px={0}>1. Request Access</Tab>
+                <Tab px={0} ml={4}>
                   2. Generate Secrets
                 </Tab>
               </TabList>

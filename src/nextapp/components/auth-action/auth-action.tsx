@@ -29,6 +29,7 @@ interface AuthActionProps {
 const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
+  const isBcscUser = user?.roles.includes('bcsc-user');
 
   if (site === 'redirect') {
     return <></>;
@@ -92,6 +93,23 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             >
               My Profile
             </MenuItem>
+            {isBcscUser && (
+              <>
+                <MenuDivider />
+                <MenuItem
+                  as={Link}
+                  color="bc-blue"
+                  target="_blank"
+                  href="https://id.gov.bc.ca/account/"
+                  rel="noreferrer noopener"
+                >
+                  {/*https://id.gov.bc.ca/login/entry*/}
+                  Manage My BC Services Card Account
+                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+                </MenuItem>
+                <MenuDivider />
+              </>
+            )}
             {isBCeIDUser && (
               <>
                 <MenuDivider />
