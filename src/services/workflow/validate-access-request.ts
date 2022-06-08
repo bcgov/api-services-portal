@@ -5,6 +5,8 @@ import {
   lookupCredentialIssuerById,
   lookupUserLegals,
   LegalAgreed,
+  lookupKongConsumerByCustomId,
+  lookupMyApplicationsById,
 } from '../keystone';
 import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
 import { isUpdatingToIssued, isRequested, isBlank } from './common';
@@ -89,6 +91,26 @@ export const Validate = async (
         true,
         'Product not elligible for requesting access'
       );
+
+      // assert that the Consumer does not already exist
+      const application = await lookupMyApplicationsById(
+        context,
+        resolvedData.application.toString()
+      );
+
+      const clientId = prodEnv.appId + '-' + application.appId;
+
+      const consumer = await lookupKongConsumerByCustomId(
+        context,
+        clientId,
+        false
+      );
+      logger.debug('Does consumer exist? %s : %j', clientId, consumer);
+      assert.strictEqual(
+        typeof consumer === 'undefined',
+        true,
+        'This application already has access.'
+      );
     } else if (isUpdatingToIssued(existingItem, resolvedData)) {
       assert.strictEqual(requestDetails != null, true, errors.WF01);
       assert.strictEqual(
@@ -171,7 +193,7 @@ export const Validate = async (
       }
     }
   } catch (err) {
-    logger.error('Validation caused exception %j', err);
+    logger.error('Validation caused exception %s', err);
     assert(err instanceof assert.AssertionError);
     addValidationError(err.message);
   }
