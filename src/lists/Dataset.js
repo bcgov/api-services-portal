@@ -1,12 +1,10 @@
-const { Text, Checkbox, Relationship } = require('@keystonejs/fields')
-const { Markdown } = require('@keystonejs/fields-markdown')
-const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce')
-const GrapesJSEditor = require('keystonejs-grapesjs-editor')
+const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
+const { Markdown } = require('@keystonejs/fields-markdown');
+const { Wysiwyg } = require('@keystonejs/fields-wysiwyg-tinymce');
 
-const { externallySourced } = require('../components/ExternalSource')
+const { externallySourced } = require('../components/ExternalSource');
 
-const { EnforcementPoint } = require('../authz/enforcement')
-
+const { EnforcementPoint } = require('../authz/enforcement');
 
 /*
 
@@ -28,49 +26,54 @@ Requestor (if not Principal Contact) (Name, Email, Phone, Role (businessExport, 
 module.exports = {
   fields: {
     name: {
-        type: Text,
-        isRequired: true,
+      type: Text,
+      isRequired: true,
+      isUnique: true,
     },
     // bcdc_id: {
     //     type: Text,
     //     isRequired: false,
     // },
     sector: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     license_title: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     view_audience: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     download_audience: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     record_publish_date: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     security_class: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     private: {
-        type: Checkbox,
-        isRequired: false,
-        default: false
+      type: Checkbox,
+      isRequired: false,
+      defaultValue: false,
     },
     tags: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     contacts: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
+    },
+    resources: {
+      type: Text,
+      isRequired: false,
     },
     organization: { type: Relationship, ref: 'Organization' },
     organizationUnit: { type: Relationship, ref: 'OrganizationUnit' },
@@ -79,21 +82,24 @@ module.exports = {
       isRequired: false,
     },
     title: {
-        type: Text,
-        isRequired: false,
+      type: Text,
+      isRequired: false,
     },
     catalogContent: {
       type: Markdown,
       isRequired: false,
     },
     isInCatalog: {
-        type: Checkbox,
-        isRequired: true,
-        default: false
-    }
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: false,
+    },
+    isDraft: {
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: true,
+    },
   },
   access: EnforcementPoint,
-  plugins: [
-    externallySourced({isRequired: false}),
-  ]
-}
+  plugins: [externallySourced({ isRequired: false })],
+};

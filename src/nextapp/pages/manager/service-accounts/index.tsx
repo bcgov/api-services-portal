@@ -103,7 +103,9 @@ const ServiceAccountsPage: React.FC<
                 text file.
               </Text>
             </Box>
-            <ViewSecret credentials={credentials} />
+            <Box p={4}>
+              <ViewSecret credentials={credentials} />
+            </Box>
           </Box>
         )}
         <Box bgColor="white" mb={4}>
@@ -124,7 +126,7 @@ const ServiceAccountsPage: React.FC<
                 <Th textAlign="right">Action</Th>
               </Tr>
             </Thead>
-            <Tbody>
+            <Tbody data-testid="service-account-table">
               {data.allNamespaceServiceAccounts?.length === 0 && (
                 <Tr>
                   <Td colSpan={5}>

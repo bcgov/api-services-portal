@@ -1,0 +1,263 @@
+components:
+    examples: {}
+    headers: {}
+    parameters: {}
+    requestBodies: {}
+    responses: {}
+    schemas:
+        ContentSummary:
+            properties:
+                kind:
+                    type: string
+                externalLink:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                content:
+                    type: string
+                order:
+                    type: number
+                    format: double
+                tags:
+                    items:
+                        type: string
+                    type: array
+                isComplete:
+                    type: boolean
+                isPublic:
+                    type: boolean
+                publishDate:
+                    type: string
+                slug:
+                    type: string
+            required:
+                - externalLink
+            type: object
+            additionalProperties: false
+    securitySchemes:
+        jwt:
+            type: oauth2
+            description: 'Authz IdP Authentication'
+            flows:
+                clientCredentials:
+                    tokenUrl: 'https://authz-apps-gov-bc-ca.dev.api.gov.bc.ca/auth/realms/aps-v2/protocol/openid-connect/token'
+                    scopes: {}
+info:
+    title: bcgov-aps-portal
+    version: 1.1.0
+    description: 'API Services Portal by BC Gov API Programme Services'
+    license:
+        name: MIT
+    contact:
+        name: 'BC Gov APS'
+openapi: 3.0.0
+paths:
+    '/namespaces/{ns}/contents':
+        put:
+            operationId: put-content
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt:
+                        - Content.Publish
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ContentSummary'
+    '/namespaces/{ns}/datasets':
+        put:
+            operationId: put-dataset
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: {}
+    /directory:
+        get:
+            operationId: directory-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters: []
+    '/directory/{id}':
+        get:
+            operationId: directory-item
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    /documentation:
+        get:
+            operationId: document-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters: []
+    '/documentation/{slug}':
+        get:
+            operationId: document-item
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: slug
+                    required: true
+                    schema:
+                        type: string
+    '/identifiers/{type}':
+        get:
+            operationId: GetNewID
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: type
+                    required: true
+                    schema:
+                        type: string
+    '/namespaces/{ns}/issuers':
+        put:
+            operationId: put-issuer
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt:
+                        - CredentialIssuer.Admin
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: {}
+    /namespaces/report:
+        get:
+            operationId: report
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt: []
+            parameters: []
+    /namespaces:
+        get:
+            operationId: namespace-list
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    type: string
+                                type: array
+            security:
+                -
+                    jwt: []
+            parameters: []
+    '/namespaces/{ns}/products':
+        put:
+            operationId: put-product
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema: {}
+            security:
+                -
+                    jwt:
+                        - Namespace.Manage
+            parameters:
+                -
+                    in: path
+                    name: ns
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema: {}
+servers:
+    -
+        url: /ds/api

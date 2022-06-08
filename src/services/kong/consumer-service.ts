@@ -140,6 +140,31 @@ export class KongConsumerService {
     } as KeyAuthResponse;
   }
 
+  public async delKeyAuthFromConsumer(
+    consumerPK: string,
+    keyAuthId: string
+  ): Promise<void> {
+    logger.debug(
+      '[delKeyAuthFromConsumer] CALLING with consumer:%s key-auth:%s',
+      consumerPK,
+      keyAuthId
+    );
+
+    const res = await fetch(
+      `${this.kongUrl}/consumers/${consumerPK}/key-auth/${keyAuthId}`,
+      {
+        method: 'delete',
+      }
+    );
+    if (!res.ok) {
+      logger.error(
+        '[delKeyAuthFromConsumer] Error - %d %s',
+        res.status,
+        res.statusText
+      );
+    }
+  }
+
   public async addPluginToConsumer(
     consumerPK: string,
     plugin: KongPlugin,
@@ -377,11 +402,13 @@ export class KongConsumerService {
   }
 
   public async deleteConsumer(consumerId: string): Promise<void> {
+    logger.debug('[deleteConsumer] Delete %s', consumerId);
     await fetch(`${this.kongUrl}/consumers/${consumerId}`, {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json',
       },
     }).then(checkStatus);
+    logger.debug('[deleteConsumer] DELETED %s', consumerId);
   }
 }

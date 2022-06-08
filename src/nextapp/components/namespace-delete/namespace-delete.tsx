@@ -28,6 +28,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 }) => {
   const cancelRef = React.useRef();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const [force, setForce] = React.useState<boolean>(false);
   const { user } = useAuth();
   const client = useQueryClient();
   const router = useRouter();
@@ -36,7 +37,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 
   const handleDelete = React.useCallback(async () => {
     try {
-      await deleteMutation.mutateAsync({ name });
+      await deleteMutation.mutateAsync({ name, force });
 
       if (user.namespace === name && router) {
         router.push('/manager');
@@ -51,7 +52,12 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       onClose();
     } catch (err) {
       toast({
-        title: 'Delete Namespace Failed',
+        title: 'Namespace Delete Failed',
+        description: err
+          .map((e) =>
+            e.data?.messages ? e.data.messages.join(',') : e.message
+          )
+          .join(', '),
         status: 'error',
       });
     }
@@ -81,7 +87,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
             <Button ref={cancelRef} onClick={handleCancel}>
               Cancel
             </Button>
-            <Button colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button data-testid="confirm-delete-namespace-btn" colorScheme="red" ml={3} onClick={handleDelete}>
               Yes, Delete
             </Button>
           </AlertDialogFooter>
@@ -94,7 +100,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
 export default NamespaceDelete;
 
 const mutation = gql`
-  mutation DeleteNamespace($name: String!) {
-    deleteNamespace(namespace: $name)
+  mutation DeleteNamespace($name: String!, $force: Boolean!) {
+    forceDeleteNamespace(namespace: $name, force: $force)
   }
 `;

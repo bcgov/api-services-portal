@@ -1,5 +1,10 @@
 import { Logger } from '../../logger';
-import { Environment, EnvironmentWhereInput, GatewayService } from './types';
+import {
+  Environment,
+  EnvironmentWhereInput,
+  GatewayService,
+  Product,
+} from './types';
 
 const assert = require('assert').strict;
 const logger = Logger('keystone.prod-env');
@@ -18,6 +23,15 @@ export async function lookupProductEnvironmentServices(
                         approval
                         product {
                             namespace
+                            dataset {
+                              id
+                              organization {
+                                name
+                              }
+                              organizationUnit {
+                                name
+                              }
+                            }
                         }
                         credentialIssuer {
                             id
@@ -192,9 +206,13 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                     Environment(where: {id: $id}) {
                         id
                         name
+                        active
                         approval
                         legal {
                             reference
+                        }
+                        product {
+                            namespace
                         }
                         credentialIssuer {
                             name
@@ -215,4 +233,52 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
     'ProductEnvironmentNotFound ' + id
   );
   return result.data.Environment;
+}
+
+export async function lookupProduct(context: any, ns: string, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($ns: String!, $id: ID!) {
+                    Product(where: {namespace: $ns, id: $id}) {
+                        environments {
+                          id
+                        }
+                    }
+                }`,
+    variables: { ns, id },
+  });
+  logger.debug('[lookupProduct] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
+}
+
+export async function lookupProductDataset(context: any, id: string) {
+  const result = await context.executeGraphQL({
+    query: `query GetProduct($id: ID!) {
+                    Product(where: {id: $id}) {
+                      namespace
+                      dataset {
+                        id
+                        name
+                        organization {
+                          name
+                        }
+                        organizationUnit {
+                          name
+                        }
+                      }
+                    }
+                }`,
+    variables: { id },
+  });
+  logger.debug('[lookupProductDataset] result %j', result);
+  assert.strictEqual(
+    result.data.Product == null,
+    false,
+    'ProductNotFound ' + id
+  );
+  return result.data.Product;
 }

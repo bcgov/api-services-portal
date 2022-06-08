@@ -1,5 +1,6 @@
 import subDays from 'date-fns/subDays';
 import cloneDeep from 'lodash/cloneDeep';
+import casual from 'casual-browserify';
 
 const today = new Date();
 

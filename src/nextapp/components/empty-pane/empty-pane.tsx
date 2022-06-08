@@ -15,10 +15,11 @@ const EmptyPane: React.FC<EmptyPaneProps> = ({
   title,
 }) => {
   return (
-    <Center my={12} data-testid="empty-pane">
+    <Center my={6} data-testid="empty-pane">
       <Box
         textAlign="center"
-        p={8}
+        py="6rem"
+        px={8}
         bg="white"
         borderRadius="4px"
         maxW={{ sm: 500 }}
@@ -29,7 +30,7 @@ const EmptyPane: React.FC<EmptyPaneProps> = ({
         </Heading>
         <Text>{message}</Text>
         {error && <Text color="red.500">{error}</Text>}
-        {action && <Box mt="6">{action}</Box>}
+        {action && <Box mt={6}>{action}</Box>}
       </Box>
     </Center>
   );

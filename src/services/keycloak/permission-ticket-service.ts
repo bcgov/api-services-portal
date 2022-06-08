@@ -168,19 +168,9 @@ export class KeycloakPermissionTicketService {
       returnNames: true,
     });
     if (perms.length == 0) {
-      return await this.createPermission(
-        resourceId,
-        requesterId,
-        granted,
-        scopeName
-      );
+      return this.createPermission(resourceId, requesterId, granted, scopeName);
     } else if (perms.filter((s) => s.scopeName == scopeName).length == 0) {
-      return await this.createPermission(
-        resourceId,
-        requesterId,
-        granted,
-        scopeName
-      );
+      return this.createPermission(resourceId, requesterId, granted, scopeName);
     } else {
       const perm = perms.filter((s) => s.scopeName == scopeName)[0];
       logger.debug('UPDATE.. %s', JSON.stringify(perm));

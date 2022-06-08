@@ -66,14 +66,10 @@ const ServiceAccountsList: React.FC<ServiceAccountsListProps> = ({
         </Thead>
         <Tbody>
           {list
-            ?.filter((p) => p.users == null)
+            ?.filter((p) => p.clients)
             .map((item) => (
               <Tr key={item.id}>
-                <Td>
-                  {item.clients != null
-                    ? item.clients.join(',')
-                    : item.users.join(',')}
-                </Td>
+                <Td>{item.clients.join(',')}</Td>
                 <Td>
                   <InlinePermissionsList
                     enableRevoke={false}

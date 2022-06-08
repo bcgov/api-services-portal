@@ -6,7 +6,7 @@ export {
   updateAccessRequestState,
 } from './access-request';
 
-export { recordActivity } from './activity';
+export { recordActivity, recordActivityWithBlob } from './activity';
 
 export { lookupApplication } from './application';
 
@@ -26,13 +26,15 @@ export {
   lookupKongConsumerByUsername,
 } from './gateway-consumer';
 
-export { lookupServices } from './gateway-service';
+export { lookupServices, lookupServicesByNamespace } from './gateway-service';
 
 export {
   lookupEnvironmentAndIssuerUsingWhereClause,
   lookupEnvironmentAndIssuerById,
   lookupProductEnvironmentServices,
   lookupProductEnvironmentServicesBySlug,
+  lookupProduct,
+  lookupProductDataset,
 } from './product-environment';
 
 export {
@@ -40,6 +42,8 @@ export {
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
   lookupServiceAccessesByNamespace,
+  lookupServiceAccessesByEnvironment,
+  lookupServiceAccessesForNamespace,
   markActiveTheServiceAccess,
 } from './service-access';
 
@@ -58,3 +62,5 @@ export {
   getConsumerMetrics,
   calculateStats,
 } from './metrics';
+
+export { getOrganizations, getOrganizationUnit } from './organization';

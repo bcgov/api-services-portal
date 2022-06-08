@@ -11,11 +11,15 @@ import {
   toString,
 } from './transformations';
 import { handleNameChange } from './hooks';
-import union from 'lodash/union';
-import { metadata } from './data-rules';
+import YAML from 'js-yaml';
 import { BatchResult } from './types';
-import { BatchService } from '../services/keystone/batch-service';
+import {
+  BatchService,
+  BatchWhereClause,
+} from '../services/keystone/batch-service';
 import { Logger } from '../logger';
+
+const { metadata } = require('./data-rules');
 
 export function dot(value: any, _key: string) {
   let returnedValue = value;
@@ -31,7 +35,7 @@ export function dot(value: any, _key: string) {
 const logger = Logger('batch.worker');
 
 const hooks = {
-  'pre-lookup': { handleNameChange: handleNameChange },
+  'pre-lookup': { handleNameChange },
 } as any;
 
 const transformations = {
@@ -46,27 +50,32 @@ const transformations = {
   alwaysFalse: alwaysFalse,
 } as any;
 
-// const importFeedWorker = async (keystone: any, entity: string, json: any) => {
-//     const eid = json['id']
-//     console.log(JSON.stringify(json, null, 4))
-
-//     assert.strictEqual(entity in metadata, true)
-//     assert.strictEqual(eid === null || json === null || typeof json == 'undefined', false, "Either entity or ID are missing " + eid + json)
-
-//     assert.strictEqual(typeof eid == 'string', true, 'Unique ID is not a string! ' + JSON.stringify(json))
-
-//     const result = await syncRecords(keystone, entity, eid, json)
-//     return result
-// }
-
 export const putFeedWorker = async (context: any, req: any, res: any) => {
   const entity = req.params['entity'];
-  const eid = 'id' in req.params ? req.params['id'] : req.body['id'];
+  assert.strictEqual(entity in metadata, true);
+
+  const md = metadata[entity];
+  const refKey = md.refKey;
+
+  // This assumption that "id" must be there is really due to the Feeder
+  // sending payloads from Kong, CKAN, Prometheus
+  // Using V2 of the Discovery API does not require this and the normal 'refKey'
+  // can be used
+  let eid;
+  if ('id' in req.params) {
+    eid = req.params['id'];
+  } else if (refKey in req.body) {
+    eid = req.body[refKey];
+  } else {
+    eid = req.body['id'];
+  }
   const json = req.body;
 
-  assert.strictEqual(entity in metadata, true);
   assert.strictEqual(
-    eid === null || json === null || typeof json == 'undefined',
+    eid === null ||
+      typeof eid == 'undefined' ||
+      json === null ||
+      typeof json == 'undefined',
     false,
     'Either entity or ID are missing ' + eid + json
   );
@@ -74,7 +83,7 @@ export const putFeedWorker = async (context: any, req: any, res: any) => {
   assert.strictEqual(
     typeof eid == 'string',
     true,
-    'Unique ID is not a string! ' +
+    `Unique ID (${eid}) is not a string! ` +
       JSON.stringify(req.params) +
       ' :: ' +
       JSON.stringify(req.body)
@@ -89,8 +98,6 @@ export const deleteFeedWorker = async (context: any, req: any, res: any) => {
   const feedEntity = req.params['entity'];
   const eid = req.params['id'];
   const json = req.body;
-  //const context = keystone.createContext({ skipAccessControl: true });
-  const batchService = new BatchService(context);
 
   assert.strictEqual(feedEntity in metadata, true);
   assert.strictEqual(
@@ -98,9 +105,18 @@ export const deleteFeedWorker = async (context: any, req: any, res: any) => {
     false
   );
 
-  const md = (metadata as any)[feedEntity];
+  res.json(deleteRecord(context, feedEntity, eid));
+};
 
+export const deleteRecord = async function (
+  context: any,
+  feedEntity: string,
+  eid: string
+): Promise<BatchResult> {
+  const md = (metadata as any)[feedEntity];
   const entity = 'entity' in md ? md['entity'] : feedEntity;
+
+  const batchService = new BatchService(context);
 
   const localRecord = await batchService.lookup(
     md.query,
@@ -109,10 +125,13 @@ export const deleteFeedWorker = async (context: any, req: any, res: any) => {
     md.sync
   );
   if (localRecord == null) {
-    res.json({ result: 'not-found' });
+    return { status: 404, result: 'not-found' };
   } else {
-    const nr = await batchService.remove(entity, localRecord.id);
-    res.json({ result: 'deleted' });
+    const result = await batchService.remove(entity, localRecord.id);
+    if (result == null) {
+      return { status: 400, result: 'deletion-failed' };
+    }
+    return { status: 200, result: 'deleted', id: localRecord.id };
   }
 };
 
@@ -142,16 +161,24 @@ export const getFeedWorker = async (context: any, req: any, res: any) => {
 
 const syncListOfRecords = async function (
   keystone: any,
-  entity: string,
+  transformInfo: any,
   records: any
 ): Promise<BatchResult[]> {
   const result: BatchResult[] = [];
   if (records == null || typeof records == 'undefined') {
     return [];
   }
+  const recordKey = 'refKey' in transformInfo ? transformInfo['refKey'] : 'id';
+
   for (const record of records) {
     result.push(
-      await syncRecords(keystone, entity, record['id'], record, true)
+      await syncRecords(
+        keystone,
+        transformInfo.list,
+        record[recordKey],
+        record,
+        true
+      )
     );
   }
   return result;
@@ -170,7 +197,7 @@ const syncListOfRecords = async function (
 //     return result
 // }
 
-function buildQueryResponse(md: any): string[] {
+function buildQueryResponse(md: any, children: string[] = undefined): string[] {
   const relationshipFields = Object.keys(
     md.transformations
   ).filter((tranField: any) =>
@@ -181,13 +208,83 @@ function buildQueryResponse(md: any): string[] {
   const response = md.sync
     .filter((s: string) => !relationshipFields.includes(s))
     .slice();
+  response.push(md.refKey);
+
   logger.debug('[buildQueryResponse] DRAFT (%s) %j', md.query, response);
-  relationshipFields.forEach((field: string) => {
-    response.push(`${field} { id }`);
-  });
+  if (children) {
+    relationshipFields.forEach((field: string) => {
+      // populate the fields as well
+      logger.debug('[buildQueryResponse] %s', md.transformations[field].list);
+      const listToMatch = md.transformations[field].list;
+      const mdRelField = Object.keys(metadata)
+        .filter(
+          (entity: string) =>
+            (metadata as any)[entity].query === listToMatch ||
+            entity === listToMatch
+        )
+        .map((entity) => (metadata as any)[entity])
+        .pop();
+      if (children.includes(field)) {
+        children.splice(children.indexOf(field), 1);
+        response.push(
+          `${field} { id, ${buildQueryResponse(mdRelField, children)} }`
+        );
+      } else {
+        const refKey =
+          'refKey' in md.transformations[field]
+            ? md.transformations[field].refKey
+            : mdRelField.refKey;
+        response.push(`${field} { id, ${refKey} }`);
+      }
+    });
+  } else {
+    relationshipFields.forEach((field: string) => {
+      response.push(`${field} { id }`);
+    });
+  }
+  if ('ownedBy' in md) {
+    response.push(`${md.ownedBy} { id }`);
+  }
+
   logger.debug('[buildQueryResponse] FINAL (%s) %j', md.query, response);
   return response;
 }
+
+export const getRecords = async function (
+  context: any,
+  feedEntity: string,
+  query: string = undefined,
+  children: string[] = undefined,
+  where: BatchWhereClause = undefined
+): Promise<any[]> {
+  const md = (metadata as any)[feedEntity];
+
+  const batchService = new BatchService(context);
+
+  return await batchService.listAll(
+    query ? query : md.query,
+    buildQueryResponse(md, children),
+    where
+  );
+};
+
+export const getRecord = async function (
+  context: any,
+  feedEntity: string,
+  eid: string,
+  children: string[] = undefined
+): Promise<any> {
+  const md = (metadata as any)[feedEntity];
+
+  const batchService = new BatchService(context);
+
+  return await batchService.lookup(
+    md.query,
+    md.refKey,
+    eid,
+    buildQueryResponse(md, children)
+  );
+};
 
 export const syncRecords = async function (
   context: any,
@@ -205,6 +302,12 @@ export const syncRecords = async function (
     'This entity is only part of a child.'
   );
 
+  assert.strictEqual(
+    typeof eid === 'string' && eid.length > 0,
+    true,
+    `Invalid ID for ${feedEntity} ${eid}`
+  );
+
   const batchService = new BatchService(context);
 
   // pre-lookup hook that can be used to handle special cases,
@@ -220,6 +323,8 @@ export const syncRecords = async function (
       await hooks['pre-lookup'][hook](context, entity, md, eid, json);
     }
   }
+
+  let childResults: BatchResult[] = [];
 
   const localRecord = await batchService.lookup(
     md.query,
@@ -242,7 +347,7 @@ export const syncRecords = async function (
           // handle these children independently first - return a list of IDs
           const allIds = await syncListOfRecords(
             context,
-            transformInfo.list,
+            transformInfo,
             json[transformKey]
           );
           logger.debug('CHILDREN [%s] %j', transformKey, allIds);
@@ -251,7 +356,15 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
+          assert.strictEqual(
+            allIds.filter((record) => typeof record.ownedBy != 'undefined')
+              .length,
+            0,
+            'There are some child records that have exclusive ownership already!'
+          );
           json[transformKey + '_ids'] = allIds.map((status) => status.id);
+
+          childResults.push(...allIds);
         }
         const transformMutation = await transformations[transformInfo.name](
           context,
@@ -277,9 +390,9 @@ export const syncRecords = async function (
     const nr = await batchService.create(entity, data);
     if (nr == null) {
       logger.error('CREATE FAILED (%s) %j', nr, data);
-      return { status: 400, result: 'create-failed' };
+      return { status: 400, result: 'create-failed', childResults };
     } else {
-      return { status: 200, result: 'created', id: nr };
+      return { status: 200, result: 'created', id: nr, childResults };
     }
   } else {
     const transformKeys =
@@ -311,7 +424,7 @@ export const syncRecords = async function (
           // handle these children independently first - return a list of IDs
           const allIds = await syncListOfRecords(
             context,
-            transformInfo.list,
+            transformInfo,
             json[transformKey]
           );
           logger.debug('CHILDREN [%s] %j', transformKey, allIds);
@@ -320,7 +433,19 @@ export const syncRecords = async function (
             0,
             'Failed updating children'
           );
+          logger.debug('%j', localRecord);
+          assert.strictEqual(
+            allIds.filter(
+              (record) =>
+                typeof record.ownedBy != 'undefined' &&
+                record.ownedBy != localRecord.id
+            ).length,
+            0,
+            'There are some child records that had ownership already (w/ local record)!'
+          );
+
           json[transformKey + '_ids'] = allIds.map((status) => status.id);
+          childResults.push(...allIds);
         }
 
         const transformMutation = await transformations[transformInfo.name](
@@ -342,15 +467,98 @@ export const syncRecords = async function (
       }
     }
     if (Object.keys(data).length === 0) {
-      return { status: 200, result: 'no-change', id: localRecord['id'] };
+      return {
+        status: 200,
+        result: 'no-change',
+        id: localRecord['id'],
+        childResults,
+        ownedBy:
+          md.ownedBy && localRecord[md.ownedBy]
+            ? localRecord[md.ownedBy].id
+            : undefined,
+      };
     }
     logger.debug('keys triggering update %j', Object.keys(data));
     const nr = await batchService.update(entity, localRecord.id, data);
     if (nr == null) {
       logger.error('UPDATE FAILED (%s) %j', nr, data);
-      return { status: 400, result: 'update-failed' };
+      return { status: 400, result: 'update-failed', childResults };
     } else {
-      return { status: 200, result: 'updated', id: nr };
+      return {
+        status: 200,
+        result: 'updated',
+        id: nr,
+        childResults,
+        ownedBy:
+          md.ownedBy && localRecord[md.ownedBy]
+            ? localRecord[md.ownedBy].id
+            : undefined,
+      };
     }
   }
+};
+
+export const removeEmpty = (obj: object) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val && typeof val === 'object' && removeEmpty(val)) ||
+      ((val === null || val === '') && delete (obj as any)[key])
+  );
+  return obj;
+};
+
+export const removeKeys = (obj: object, keys: string[]) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (keys.includes(key) && delete (obj as any)[key]) ||
+      (val && typeof val === 'object' && removeKeys(val, keys))
+  );
+  return obj;
+};
+
+export const parseJsonString = (obj: any, keys: string[]) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val && typeof val === 'object' && parseJsonString(val, keys)) ||
+      (keys.includes(key) && (obj[key] = JSON.parse(obj[key])))
+  );
+  return obj;
+};
+
+export const parseBlobString = (obj: any, keys: string[] = ['blob']) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      keys.includes(key) &&
+      (obj[key] =
+        obj['type'] === 'json'
+          ? JSON.parse(Object.values(val).pop())
+          : YAML.load(Object.values(val).pop()))
+  );
+  return obj;
+};
+
+export const transformAllRefID = (obj: any, keys: string[]) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val && keys.includes(key) && (obj[key] = Object.values(val).pop())) ||
+      (val && typeof val === 'object' && transformAllRefID(val, keys))
+  );
+  return obj;
+};
+
+export const transformArrayKeyToString = (
+  obj: any,
+  arrayKey: string,
+  childKey: string
+) => {
+  Object.entries(obj).forEach(
+    ([key, val]) =>
+      (val &&
+        arrayKey === key &&
+        (obj[key] = (val as any).map((v: any) => v[childKey]))) ||
+      (val &&
+        typeof val === 'object' &&
+        transformArrayKeyToString(val, arrayKey, childKey))
+  );
+  return obj;
 };

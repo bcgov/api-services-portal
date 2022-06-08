@@ -1,0 +1,6 @@
+
+  mutation genCredential($id: ID!) {
+    regenerateCredentials(id: $id) {
+      credential
+    }
+  }

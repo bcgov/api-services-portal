@@ -91,14 +91,17 @@ export const DeleteAccess = async (context: any, operation: any, keys: any) => {
     );
     svc.consumer != null &&
       svc.consumerType == 'client' &&
+      svc.productEnvironment &&
       deleteRecord(context, 'GatewayConsumer', { id: svc.consumer.id }, [
         'id',
         'extForeignKey',
         'customId',
       ]);
 
+    // Asynchronously do the deletion of the backend IdP and Kong
     svc.consumer != null &&
       svc.consumerType == 'client' &&
+      svc.productEnvironment &&
       kongApi.deleteConsumer(svc.consumer.extForeignKey).then(async () => {
         if (flow == 'client-credentials') {
           const issuer = await lookupCredentialIssuerById(

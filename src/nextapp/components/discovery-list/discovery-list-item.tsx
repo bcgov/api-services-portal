@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Badge,
   Box,
+  BoxProps,
   Divider,
   Flex,
   Heading,
@@ -16,11 +17,20 @@ import { Dataset, Product } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
 import kebabCase from 'lodash/kebabCase';
 
-interface DiscoveryListItemProps {
-  data: Dataset;
+interface DiscoveryDataset extends Dataset {
+  products: Product[];
 }
 
-const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
+interface DiscoveryListItemProps extends BoxProps {
+  data: DiscoveryDataset;
+  preview: boolean;
+}
+
+const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
+  data,
+  preview,
+  ...props
+}) => {
   return (
     <Flex
       bg="white"
@@ -31,6 +41,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       position="relative"
       overflow="hidden"
       height="100%"
+      {...props}
     >
       <Box
         as="header"
@@ -46,15 +57,21 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
             <Icon as={FaBook} mr={2} color="bc-blue-alt" />
             {data ? (
               <>
-                <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
+                <NextLink
+                  passHref
+                  href={`/devportal/api-directory/${data.id}?preview=${preview}`}
+                >
                   <Link data-testid={`api-${kebabCase(data.title)}`}>
                     {data.title}
                   </Link>
                 </NextLink>
               </>
             ) : (
-              <NextLink passHref href={`/devportal/api-directory/${data.id}`}>
-                <Link>{data.name}</Link>
+              <NextLink
+                passHref
+                href={`/devportal/api-directory/${data.id}?preview=${preview}`}
+              >
+                <Link data-testid="discovery-list-item-link">{data.name}</Link>
               </NextLink>
             )}
           </Heading>
@@ -99,7 +116,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({ data }) => {
       <Flex p={4} bgColor="gray.50" justify="space-between">
         <Box>{data && <Badge color="bc-blue-alt">{data.sector}</Badge>}</Box>
         <Wrap spacing={2}>
-          {(data as any).products.map((prod: Product) =>
+          {data.products?.map((prod) =>
             prod.environments.map((e) => (
               <WrapItem key={e.id}>
                 <Badge colorScheme="green">{e.name}</Badge>

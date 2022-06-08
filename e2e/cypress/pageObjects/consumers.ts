@@ -1,4 +1,5 @@
-import { wrap } from 'module'
+import { Assertion } from "chai"
+import { wrap } from "module"
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
@@ -9,6 +10,7 @@ export default class ConsumersPage {
   applyBtn: string = '[data-testid="control-dialog-apply-btn"]'
   allConsumerTable: string = '[data-testid="all-consumer-control-tbl"]'
   aclSwitch: string = '[data-testid="acls-switch"]'
+  pendingRequestTable: string = '[data-testid="pending-request-tbl"]'
 
   clickOnTheFirstConsumerID() {
     cy.get(this.allConsumerTable).find('a').first().click()
@@ -51,15 +53,13 @@ export default class ConsumersPage {
   }
 
   turnOnACLSwitch(flag: Boolean) {
-    cy.get(this.aclSwitch)
-      .find('input')
-      .then(($btn) => {
-        if ($btn.is(':checked') != flag) {
-          cy.wrap($btn).invoke('show')
-          cy.wrap($btn).click({ force: true })
-          cy.wait(3000)
-        }
-      })
+    cy.get(this.aclSwitch).find('input').then(($btn) => {
+      if ($btn.is(':checked') != flag) {
+        cy.wrap($btn).invoke('show')
+        cy.wrap($btn).click({ force: true })
+        cy.wait(3000)
+      }
+    })
   }
 
   deleteControl() {
@@ -69,5 +69,12 @@ export default class ConsumersPage {
         cy.contains('button', 'Yes, Delete').click()
       }
     })
+  }
+
+  isApproveAccessEnabled(expStatus : boolean) {
+    if(expStatus)
+      cy.contains('Review').should('be.visible')
+    else
+      cy.contains('Review').should('not.exist')
   }
 }

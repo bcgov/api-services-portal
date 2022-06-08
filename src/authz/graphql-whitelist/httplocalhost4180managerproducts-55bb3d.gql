@@ -1,0 +1,4 @@
+
+  mutation Remove($id: ID!, $force: Boolean!) {
+    forceDeleteEnvironment(id: $id, force: $force) {}
+  }

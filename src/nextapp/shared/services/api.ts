@@ -11,7 +11,7 @@ import {
 import omit from 'lodash/omit';
 import { Query } from '@/types/query.types';
 
-import { apiHost, apiInternalHost } from '../config';
+import { apiHost, apiInternalHost, env } from '../config';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -125,7 +125,8 @@ export async function restApi(
 ): Promise<string> {
   try {
     const config = {
-      ssr: true,
+      // NOTE: will need to have a better way to handle traffic for ssr in dev
+      ssr: env === 'development' ? false : true,
       method: 'GET',
       headers: {
         Accept: 'application/json',

@@ -13,13 +13,30 @@ export interface PolicyQuery {
   max?: number;
 }
 
-export interface Policy {
+export interface PolicyRole {
   id: string;
+  required: boolean;
+}
+
+// Added for Query, not needed for Create/Update:
+// type?: string;
+// logic?: string;
+// decisionStrategy?: string;
+// owner?: string;
+
+export interface Policy {
+  id?: string;
   name: string;
   description: string;
+  type?: string;
+  logic?: string;
+  decisionStrategy?: string;
+  owner?: string;
   scopes: string[];
   users?: string[];
   clients?: string[];
+  groups?: string[];
+  roles?: any | PolicyRole[];
 }
 
 const logger = Logger('uma2-policy');

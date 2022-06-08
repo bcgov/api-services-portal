@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [dev, main, feature/*]
+    branches: [dev, test, main, feature/*]
 
 env:
   REGISTRY: ghcr.io
@@ -132,7 +132,7 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 10.31.5 -f values.yaml bitnami/mongodb
 
       - name: 'Deploy Backend'
         run: |
@@ -167,14 +167,17 @@ jobs:
           oauthProxy:
             enabled: true
             image:
-              tag: v7.2.0
+              repository: ${{ env.REGISTRY }}/bcgov-dss/api-serv-infra/oauth2-proxy
+              tag: 7.2.1-8c743f0c
+              pullPolicy: IfNotPresent
+
             config:
               upstream: http://127.0.0.1:3000
               client-id: ${{ secrets.OIDC_CLIENT_ID }}
               client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
               oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
+              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
@@ -220,6 +223,22 @@ jobs:
               value: 'https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca'    
             NEXT_PUBLIC_GRAFANA_URL:
               value: 'https://grafana-apps-gov-bc-ca.dev.api.gov.bc.ca'
+            NEXT_PUBLIC_KUBE_CLUSTER:
+              value: 'feature-silver'
+            NEXT_PUBLIC_HELP_DESK_URL:
+              value: 'https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2'
+            NEXT_PUBLIC_HELP_CHAT_URL:
+              value: 'https://chat.developer.gov.bc.ca/channel/aps-ops'
+            NEXT_PUBLIC_HELP_ISSUE_URL:
+              value: 'https://github.com/bcgov/api-services-portal/issues'
+            NEXT_PUBLIC_HELP_API_DOCS_URL:
+              value: '/ds/api/v2/console/'
+            NEXT_PUBLIC_HELP_SUPPORT_URL:
+              value: 'https://bcgov.github.io/aps-infra-platform/'
+            NEXT_PUBLIC_HELP_RELEASE_URL:
+              value: 'https://bcgov.github.io/aps-infra-platform/releases/2022-may/'
+            NEXT_PUBLIC_HELP_STATUS_URL:
+              value: 'https://uptime.com/s/bcgov-dss'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_PROD_ENV_SLUG:
@@ -280,3 +299,42 @@ jobs:
           OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
           ./scripts/init.sh
+
+      - name: 'Restart Portal in OCP Test Namespace'
+        if: github.ref == 'refs/heads/test'
+        run: |
+          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
+
+      - name: 'Create Pull Request for Release'
+        if: github.ref == 'refs/heads/test'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const openPrs = await github.rest.pulls.list({
+              owner,
+              repo,
+              head: '${{ github.ref_name }}',
+              base: 'main',
+              state: 'open'
+            })
+
+            if(openPrs.data.length === 0){
+              await github.rest.pulls.create({
+              title: 'Create Latest Release',
+              owner,
+              repo,
+              head: '${{ github.ref_name }}',
+              base: 'main',
+              body: [
+                'This Pull Request is auto-created by [actions/github-script](https://github.com/actions/github-script).',
+                'Please update this PR with appropriate labels to target specific type of release'
+              ].join('\n\n'),
+              draft: true
+              });
+            } else {
+              console.log("There is already an open Pull Request in place.\n")
+              openPrs.data.forEach((item) => {
+                console.log(item.html_url)
+              })
+            }

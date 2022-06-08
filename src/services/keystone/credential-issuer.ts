@@ -20,11 +20,16 @@ export async function lookupCredentialIssuerById(
                         clientMappers
                         resourceType
                         environmentDetails
+                        environments {
+                          id
+                        }
                     }
                 }`,
     variables: { id: id },
   });
-  logger.debug('Query [lookupCredentialIssuerById] result %j', result);
+  if (result.errors) {
+    logger.error('[lookupCredentialIssuerById] %j', result);
+  }
   return result.data.CredentialIssuer;
 }
 

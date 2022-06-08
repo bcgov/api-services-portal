@@ -35,14 +35,15 @@ import { Logger } from '../../logger';
 const logger = Logger('wf.getns');
 
 export async function getGwaProductEnvironment(
-  context: any
+  context: any,
+  withSubject: boolean
 ): Promise<EnvironmentContext> {
   const prodEnvId = await getProductEnvironmentIdBySlug(
     context,
     process.env.GWA_PROD_ENV_SLUG
   );
 
-  return await getEnvironmentContext(context, prodEnvId, {});
+  return getEnvironmentContext(context, prodEnvId, {}, withSubject);
 }
 
 export async function getMyNamespaces(
@@ -66,7 +67,8 @@ export async function getMyNamespaces(
 export async function getEnvironmentContext(
   context: any,
   prodEnvId: string,
-  access: any
+  access: any,
+  withSubject: boolean
 ): Promise<EnvironmentContext> {
   const noauthContext = context.createContext({ skipAccessControl: true });
   const prodEnv = await lookupEnvironmentAndIssuerUsingWhereClause(
@@ -90,8 +92,8 @@ export async function getEnvironmentContext(
   const uma2 = usesUma2
     ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
     : null;
-  const subjectToken = getSubjectToken(context.req);
-  const subjectUuid = context.req.user.sub;
+  const subjectToken = withSubject ? getSubjectToken(context.req) : null;
+  const subjectUuid = withSubject ? context.req.user.sub : null;
 
   return {
     subjectToken,

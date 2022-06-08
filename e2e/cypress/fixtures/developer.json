@@ -5,7 +5,7 @@
       "password": "local"
     }
   },
-  "namespace": "platform",
+  "namespace": "newplatform",
   "product": {
     "name": "Auto Test Product",
     "environment": "dev"
@@ -48,6 +48,16 @@
         "name": "Client Credentials Test Product",
         "environment": "sandbox"
       }
+    }
+  },
+  "checkPermission":{
+    "application": {
+      "name": "New-Auto Test App",
+      "description": "Test application for auto test"
+    },
+    "product": {
+      "name": "New-Auto Test Product",
+      "environment": "dev"
     }
   }
 }

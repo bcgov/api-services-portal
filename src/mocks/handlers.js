@@ -14,6 +14,9 @@ import {
 } from './resolvers/consumers';
 import { allProductsByNamespaceHandler } from './resolvers/products';
 
+import KongHandlers from './handlers/kong';
+import KeycloakHandlers from './handlers/keycloak';
+
 export function resetAll() {
   consumersStore.reset();
 }

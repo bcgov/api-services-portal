@@ -5,8 +5,14 @@
       "password": "mark"
     }
   },
-  "namespace": "platform",
+  "namespace": "newplatform",
   "clientCredentials": {
     "namespace": "ccplatform"
+  },
+  "checkPermission": {
+    "namespace": "permission"
+  },
+  "serviceAccount": {
+    "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   }
 }

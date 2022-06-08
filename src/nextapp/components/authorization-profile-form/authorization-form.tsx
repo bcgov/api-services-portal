@@ -31,6 +31,14 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const submitButtonText = id ? 'Save' : 'Continue';
+  const parseClientMappers = (value = '') => {
+    try {
+      const config = JSON.parse(value);
+      return config[0]?.defaultValue;
+    } catch {
+      return value;
+    }
+  };
 
   // Events
   const handleSubmit = React.useCallback(
@@ -39,6 +47,11 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 
       if (formRef?.current.checkValidity()) {
         const formData = new FormData(formRef.current);
+        const clientMappers = formData.get('clientMappers');
+        formData.set(
+          'clientMappers',
+          JSON.stringify([{ name: 'audience', defaultValue: clientMappers }])
+        );
         onComplete(formData);
       }
     },
@@ -124,7 +137,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
               </GridItem>
               <GridItem>
                 <Input
-                  defaultValue={data?.clientMappers}
+                  defaultValue={parseClientMappers(data?.clientMappers)}
                   data-testid="ap-authorization-client-mappers"
                   placeholder="Enter the Audience"
                   name="clientMappers"

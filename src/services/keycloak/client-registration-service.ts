@@ -9,7 +9,9 @@ import { strict as assert } from 'assert';
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
 
-import { default as KcAdminClient } from 'keycloak-admin';
+import KeycloakAdminClient, {
+  default as KcAdminClient,
+} from '@keycloak/keycloak-admin-client';
 import { ClientMapper } from '../workflow/types';
 import { AudienceMapper } from './templates/protocol-mappers/audience';
 
@@ -166,10 +168,7 @@ export class KeycloakClientRegistrationService {
     desiredSetOfScopes: string[],
     optional: boolean
   ): Promise<any> {
-    const listAllFunction = optional
-      ? this.kcAdminClient.clientScopes.listDefaultOptionalClientScopes
-      : this.kcAdminClient.clientScopes.listDefaultClientScopes;
-    const allScopes = await listAllFunction();
+    const allScopes = await this.kcAdminClient.clientScopes.find();
     const scopeToId = allScopes.reduce(function (map: any, obj: any) {
       map[obj.name] = obj.id;
       return map;

@@ -5,8 +5,7 @@ import {
   ServiceAccess,
   ServiceAccessCreateInput,
 } from './types';
-
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
 const logger = Logger('keystone.svc-access');
 
 export async function lookupCredentialReferenceByServiceAccess(
@@ -24,6 +23,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                             flow
                             credentialIssuer {
                                 id
+                                clientAuthenticator
                             }
                         }
                         application {
@@ -145,6 +145,105 @@ export async function lookupServiceAccessesByNamespace(
   });
   logger.debug(
     '[lookupServiceAccessesByNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessesByEnvironment(
+  context: any,
+  ns: string,
+  envIds: string[]
+): Promise<ServiceAccess[]> {
+  logger.debug(
+    '[lookupServiceAccessesByEnvironment] lookup ns=%s %j',
+    ns,
+    envIds
+  );
+
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByEnvironment($ns: String!, $envIds: [ID]!) {
+                    allServiceAccesses(where: { productEnvironment: { id_in: $envIds, product: { namespace: $ns } } } ) {
+                        id
+                        active
+                        namespace
+                        consumer {
+                          username
+                          customId
+                        }
+                        application {
+                          name
+                          owner {
+                            name
+                            email
+                          }
+                        }
+                        productEnvironment {
+                          name
+                          flow
+                          product {
+                            name
+                          }
+                        }
+                    }
+                }`,
+    variables: { ns, envIds },
+  });
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  logger.debug(
+    '[lookupServiceAccessesByEnvironment] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessesForNamespace(
+  context: any,
+  ns: string
+): Promise<ServiceAccess[]> {
+  logger.debug('[lookupServiceAccessesForNamespace] lookup ns=%s', ns);
+
+  const result = await context.executeGraphQL({
+    query: `query GetServiceAccessByNamespace($ns: String!) {
+                    allServiceAccesses(where: { namespace: $ns }) {
+                        id
+                        active
+                        namespace
+                        consumer {
+                          username
+                          customId
+                        }
+                        application {
+                          name
+                          owner {
+                            name
+                            email
+                          }
+                        }
+                        productEnvironment {
+                          name
+                          flow
+                          product {
+                            name
+                          }
+                        }
+                    }
+                }`,
+    variables: { ns },
+  });
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  logger.debug(
+    '[lookupServiceAccessesForNamespace] result row count %d',
     result.data.allServiceAccesses.length
   );
   return result.data.allServiceAccesses;

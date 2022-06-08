@@ -24,22 +24,29 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
   const client = useQueryClient();
   const toast = useToast();
   const mutation = useApiMutation<{ id: string }>(REMOVE_ENVIRONMENT);
+  const [force, setForce] = React.useState<boolean>(false);
   const [open, setOpen] = React.useState<boolean>(false);
   const cancelRef = React.useRef<HTMLButtonElement>(null);
   const onClose = () => setOpen(false);
   const onConfirm = () => setOpen(true);
   const onDelete = async () => {
     try {
-      await mutation.mutateAsync({ id });
+      await mutation.mutateAsync({ id, force });
       setOpen(false);
       client.invalidateQueries('products');
       toast({
         title: 'Environment Deleted',
         status: 'success',
       });
-    } catch {
+    } catch (err) {
       toast({
         title: 'Environment Delete Failed',
+        description: err
+          .map((e) =>
+            e.data?.messages ? e.data.messages.join(',') : e.message
+          )
+          .join(', '),
+
         status: 'error',
       });
     }
@@ -77,7 +84,7 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={onDelete} ml={3}>
+              <Button data-testid="delete-env-confirmation-btn" colorScheme="red" onClick={onDelete} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>

@@ -1,0 +1,20 @@
+entity: Organization
+record:
+  id: 7a66db63-26f4-4052-9cd5-3272b63910f8
+  type: organization
+  name: ministry-of-citizens-services
+  sector: ''
+  title: 'Ministry of Citizens Services'
+  tags: []
+  description: ''
+  extSource: ''
+  extRecordHash: ''
+  orgUnits:
+    - id: 319b3297-846d-4b97-8095-ceb3ec505fb8
+      name: databc
+      sector: ''
+      title: 'DataBC'
+      tags: []
+      description: ''
+      extSource: ''
+      extRecordHash: ''

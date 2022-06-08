@@ -48,9 +48,9 @@ CREATE TABLE public."AccessRequest" (
     id integer NOT NULL,
     name text NOT NULL,
     communication text,
-    "isApproved" boolean,
-    "isIssued" boolean,
-    "isComplete" boolean,
+    "isApproved" boolean NOT NULL,
+    "isIssued" boolean NOT NULL,
+    "isComplete" boolean NOT NULL,
     credential text,
     controls text NOT NULL,
     "additionalDetails" text,
@@ -231,6 +231,7 @@ ALTER SEQUENCE public."Application_id_seq" OWNED BY public."Application".id;
 CREATE TABLE public."Blob" (
     id integer NOT NULL,
     ref text NOT NULL,
+    type text NOT NULL,
     blob text NOT NULL
 );
 
@@ -319,6 +320,7 @@ CREATE TABLE public."CredentialIssuer" (
     "clientRegistration" text,
     mode text NOT NULL,
     "clientAuthenticator" text,
+    "clientMappers" text,
     "authPlugin" text,
     instruction text,
     "environmentDetails" text NOT NULL,
@@ -326,7 +328,6 @@ CREATE TABLE public."CredentialIssuer" (
     "initialAccessToken" text,
     "clientId" text,
     "clientSecret" text,
-    "clientMappers" text,
     "availableScopes" text,
     "clientRoles" text,
     "resourceScopes" text,
@@ -380,15 +381,17 @@ CREATE TABLE public."Dataset" (
     download_audience text,
     record_publish_date text,
     security_class text,
-    private boolean,
+    private boolean NOT NULL,
     tags text,
     contacts text,
+    resources text,
     organization integer,
     "organizationUnit" integer,
     notes text,
     title text,
     "catalogContent" text,
     "isInCatalog" boolean NOT NULL,
+    "isDraft" boolean NOT NULL,
     "extSource" text,
     "extForeignKey" text,
     "extRecordHash" text
@@ -723,6 +726,41 @@ CREATE TABLE public."GatewayService_plugins_many" (
 ALTER TABLE public."GatewayService_plugins_many" OWNER TO keystonejsuser;
 
 --
+-- Name: Label; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."Label" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    value text NOT NULL
+);
+
+
+ALTER TABLE public."Label" OWNER TO keystonejsuser;
+
+--
+-- Name: Label_id_seq; Type: SEQUENCE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE SEQUENCE public."Label_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Label_id_seq" OWNER TO keystonejsuser;
+
+--
+-- Name: Label_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: keystonejsuser
+--
+
+ALTER SEQUENCE public."Label_id_seq" OWNED BY public."Label".id;
+
+
+--
 -- Name: Legal; Type: TABLE; Schema: public; Owner: keystonejsuser
 --
 
@@ -995,6 +1033,18 @@ ALTER SEQUENCE public."ServiceAccess_id_seq" OWNED BY public."ServiceAccess".id;
 
 
 --
+-- Name: ServiceAccess_labels_many; Type: TABLE; Schema: public; Owner: keystonejsuser
+--
+
+CREATE TABLE public."ServiceAccess_labels_many" (
+    "ServiceAccess_left_id" integer NOT NULL,
+    "Label_right_id" integer NOT NULL
+);
+
+
+ALTER TABLE public."ServiceAccess_labels_many" OWNER TO keystonejsuser;
+
+--
 -- Name: TemporaryIdentity; Type: TABLE; Schema: public; Owner: keystonejsuser
 --
 
@@ -1180,6 +1230,13 @@ ALTER TABLE ONLY public."GatewayService" ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: Label id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Label" ALTER COLUMN id SET DEFAULT nextval('public."Label_id_seq"'::regclass);
+
+
+--
 -- Name: Legal id; Type: DEFAULT; Schema: public; Owner: keystonejsuser
 --
 
@@ -1348,6 +1405,14 @@ ALTER TABLE ONLY public."GatewayService"
 
 
 --
+-- Name: Label Label_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Label"
+    ADD CONSTRAINT "Label_pkey" PRIMARY KEY (id);
+
+
+--
 -- Name: Legal Legal_pkey; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
 --
 
@@ -1441,6 +1506,14 @@ ALTER TABLE ONLY public."Content"
 
 ALTER TABLE ONLY public."CredentialIssuer"
     ADD CONSTRAINT credentialissuer_name_unique UNIQUE (name);
+
+
+--
+-- Name: Dataset dataset_name_unique; Type: CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Dataset"
+    ADD CONSTRAINT dataset_name_unique UNIQUE (name);
 
 
 --
@@ -1844,6 +1917,20 @@ CREATE INDEX serviceaccess_consumer_index ON public."ServiceAccess" USING btree 
 
 
 --
+-- Name: serviceaccess_labels_many_label_right_id_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX serviceaccess_labels_many_label_right_id_index ON public."ServiceAccess_labels_many" USING btree ("Label_right_id");
+
+
+--
+-- Name: serviceaccess_labels_many_serviceaccess_left_id_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX serviceaccess_labels_many_serviceaccess_left_id_index ON public."ServiceAccess_labels_many" USING btree ("ServiceAccess_left_id");
+
+
+--
 -- Name: serviceaccess_productenvironment_index; Type: INDEX; Schema: public; Owner: keystonejsuser
 --
 
@@ -2171,6 +2258,22 @@ ALTER TABLE ONLY public."ServiceAccess"
 
 
 --
+-- Name: ServiceAccess_labels_many serviceaccess_labels_many_label_right_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ServiceAccess_labels_many"
+    ADD CONSTRAINT serviceaccess_labels_many_label_right_id_foreign FOREIGN KEY ("Label_right_id") REFERENCES public."Label"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: ServiceAccess_labels_many serviceaccess_labels_many_serviceaccess_left_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."ServiceAccess_labels_many"
+    ADD CONSTRAINT serviceaccess_labels_many_serviceaccess_left_id_foreign FOREIGN KEY ("ServiceAccess_left_id") REFERENCES public."ServiceAccess"(id) ON DELETE CASCADE;
+
+
+--
 -- Name: ServiceAccess serviceaccess_productenvironment_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
 --
 
@@ -2191,3 +2294,4 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
+

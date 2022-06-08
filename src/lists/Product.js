@@ -6,6 +6,11 @@ const {
   EnforcementPoint,
 } = require('../authz/enforcement');
 const { logger } = require('../logger');
+const {
+  DeleteProductValidate,
+  DeleteProductEnvironments,
+} = require('../services/workflow/delete-product');
+const { strict: assert } = require('assert');
 
 module.exports = {
   fields: {
@@ -21,7 +26,7 @@ module.exports = {
     namespace: {
       type: Text,
       isRequired: true,
-      access: FieldEnforcementPoint,
+      access: { update: false },
     },
     description: {
       type: Markdown,
@@ -53,5 +58,21 @@ module.exports = {
       logger.debug('[List.Product] Resolved %j', resolvedData);
       return resolvedData;
     },
+
+    validateDelete: async function ({ existingItem, context }) {
+      await DeleteProductValidate(
+        context,
+        context.authedItem['namespace'],
+        existingItem.id
+      );
+    },
+
+    // beforeDelete: async function ({ existingItem, context }) {
+    //   await DeleteProductEnvironments(
+    //     context,
+    //     context.authedItem['namespace'],
+    //     existingItem.id
+    //   );
+    // },
   },
 };

@@ -4,11 +4,19 @@ import { Dataset, Product } from '@/shared/types/query.types';
 
 import DiscoveryListItem from './discovery-list-item';
 
-interface DiscoveryListProps {
-  data: Dataset[];
+interface DiscoveryDataset extends Dataset {
+  products: Product[];
 }
 
-const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
+interface DiscoveryListProps {
+  data: DiscoveryDataset[];
+  preview?: boolean;
+}
+
+const DiscoveryList: React.FC<DiscoveryListProps> = ({
+  data,
+  preview = false,
+}) => {
   return (
     <Grid
       gap={4}
@@ -18,8 +26,13 @@ const DiscoveryList: React.FC<DiscoveryListProps> = ({ data }) => {
         md: 'repeat(3, 1fr)',
       }}
     >
-      {data?.map((p) => (
-        <DiscoveryListItem key={p.id} data={p} />
+      {data?.map((p, index) => (
+        <DiscoveryListItem
+          key={p.id}
+          data={p}
+          preview={preview}
+          data-testid={`discovery-item-${index}`}
+        />
       ))}
     </Grid>
   );

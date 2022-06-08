@@ -15,6 +15,7 @@ import { useAuth } from '@/shared/services/auth';
 import EmptyPane from '@/components/empty-pane';
 import UsersAccessList from '@/components/users-access-list';
 import ServiceAccountsList from '@/components/service-accounts-list';
+import OrgGroupsList from '@/components/org-groups-list';
 
 const Loading = (
   <Box p={0}>
@@ -157,6 +158,23 @@ const AccessRedirectPage: React.FC<
                 queryKey={queryKey}
               />
             </Box>
+            <Box bgColor="white" my={4} mb={4}>
+              <Box
+                p={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Heading size="md">Organization Groups with Access</Heading>
+              </Box>
+              <Divider />
+              <OrgGroupsList
+                prodEnvId={prodEnvId}
+                resourceId={resourceId}
+                data={permissions?.getOrgPoliciesForResource}
+                queryKey={queryKey}
+              />
+            </Box>
           </>
         )}
       </Container>
@@ -207,6 +225,21 @@ const permissionsQuery = gql`
       owner
       clients
       users
+      groups
+      scopes
+    }
+
+    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      description
+      type
+      logic
+      decisionStrategy
+      owner
+      clients
+      users
+      groups
       scopes
     }
 

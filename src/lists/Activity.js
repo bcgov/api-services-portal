@@ -60,7 +60,7 @@ module.exports = {
       fieldPath, // exists only for field hooks
     }) {
       if (
-        updatedItem.action === 'publish' &&
+        (updatedItem.action === 'publish' || updatedItem.action === 'delete') &&
         updatedItem.type === 'GatewayConfig' &&
         updatedItem.result === 'completed'
       ) {

@@ -5,6 +5,8 @@ declare namespace Cypress {
   interface Chainable<Subject> {
     login(username: string, password: string): Chainable<any>
 
+    resetCredential(accessRole: string): Chainable<any>
+
     getSession(): Chainable<Cypress.Response<any>>
 
     loginByAuthAPI(username: string, password: string): Chainable<Cypress.Response<any>>
@@ -39,6 +41,20 @@ declare namespace Cypress {
 
     makeKongGatewayRequest(endpoint: string, requestName:string, methodType: string): Chainable<Cypress.Response<any>>
 
-    generateKeystore() : Chainable<any>
+    // generateKeystore() : Chainable<any>
+
+    generateKeystore() : void
+
+    setHeaders(headerValues : any) : void
+
+    setRequestBody(requestBody : any) : void
+
+    setAuthorizationToken (token : string) : void
+
+    makeAPIRequest(endPoint: string,methodType: string): Chainable<Cypress.Response<any>>
+
+    getUserSession(): Chainable<Cypress.Response<any>>
+
+    compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
   }
 }

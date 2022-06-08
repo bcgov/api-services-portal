@@ -17,6 +17,10 @@ class Products {
   envCfgApplyChangesBtn: string = '[data-testid=prd-env-config-apply-btn]'
   catelogueDropDown: string = '[id=downshift-0-input]'
   catelogueDropDownMenu: string = '[id=downshift-0-menu]'
+  deleteProductEnvBtn: string = '[data-testid="prd-env-delete-btn"]'
+  deleteProductBtn: string = '[data-testid="prd-edit-delete-btn"]'
+  deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
+  deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
 
   getTestIdEnvName(env: string) : string {
     switch (env) {
@@ -67,12 +71,13 @@ class Products {
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
 
-    cy.get(this.envCfgTermsDropdown).select(config.terms)
+    cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
     let authType = config.authorization
     cy.get(this.envCfgAuthzDropdown)
-      .select(authType)
+      .select(authType, { force: true }).invoke('val')
       .then(() => {
+
         if (
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
@@ -86,7 +91,7 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-
+    // cy.get(`[data-testid=${config.serviceName}`).click()
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -119,6 +124,24 @@ class Products {
 
   updateProduct() {
     cy.get(this.updateBtn).click()
+  }
+
+  deleteProductEnvironment(productName: string, envName: string){
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    let env = this.getTestIdEnvName(envName);
+    cy.get(`[data-testid=${pname}-${env}-edit-btn]`).siblings(this.deleteProductEnvBtn).click()
+    cy.get(this.deleteConfirmationBtn).click()
+  }
+
+  deleteProduct(productName: string){
+    this.editProduct(productName)
+    cy.get(this.deleteProductBtn).click()
+    cy.get(this.deleteProductConfirmationBtn).click()
+  }
+
+  verifyProductIsVisible(productName: string)
+  {
+    cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
   }
 }
 

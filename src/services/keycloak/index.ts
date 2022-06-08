@@ -12,6 +12,8 @@ export type {
 
 export { KeycloakGroupService } from './group-service';
 
+export { KeycloakClientPolicyService } from './client-policy-service';
+
 export { KeycloakPermissionTicketService } from './permission-ticket-service';
 
 export type {
