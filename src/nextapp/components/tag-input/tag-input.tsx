@@ -78,7 +78,7 @@ const TagInput: React.FC<TagInputProps> = ({
   const handleFocus = React.useCallback(() => setIsFocused(true), []);
   const handleBlur = React.useCallback(() => {
     if (inputRef.current.value.trim()) {
-      setValues((state) => [...state, inputRef.current.value]);
+      setValues((state) => [...state, inputRef.current.value.trim()]);
       setTimeout(() => {
         inputRef.current.value = '';
       }, 1);
