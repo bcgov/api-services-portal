@@ -7,12 +7,20 @@ type GlobalContent = {
   readonly cluster: string;
   readonly accountLinks: Record<string, string>;
   readonly helpLinks: Record<string, string>;
+  readonly identities: {
+    developer: string[];
+    provider: string[];
+  };
 };
 
 const defaultState = {
   version: '',
   revision: '',
   cluster: '',
+  identities: {
+    developer: ['idir'],
+    provider: ['idir'],
+  },
   accountLinks: {},
   helpLinks: {},
 };

@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 
 import LoginButtons from '../login-buttons';
+import { useGlobal } from '@/shared/services/global';
 
 interface LoginDialogProps {
   buttonText: string;
@@ -20,6 +21,8 @@ interface LoginDialogProps {
 
 const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { identities } = useGlobal();
+
   return (
     <>
       <Button onClick={onOpen}>{buttonText}</Button>
@@ -40,7 +43,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
           </ModalBody>
 
           <ModalFooter justifyContent="center">
-            <LoginButtons buttons={['idir', 'bceid', 'github']} />
+            <LoginButtons buttons={identities.developer} />
           </ModalFooter>
         </ModalContent>
       </Modal>
