@@ -239,6 +239,14 @@ jobs:
               value: 'https://bcgov.github.io/aps-infra-platform/releases/2022-may/'
             NEXT_PUBLIC_HELP_STATUS_URL:
               value: 'https://uptime.com/s/bcgov-dss'
+            NEXT_PUBLIC_DEVELOPER_IDS:
+              value: 'idir,bceid,bcsc,github'
+            NEXT_PUBLIC_PROVIDER_IDS:
+              value: 'idir'
+            NEXT_PUBLIC_ACCOUNT_BCEID_URL:
+              value: 'https://www.test.bceid.ca/logon.aspx?returnUrl=/profile_management'
+            NEXT_PUBLIC_ACCOUNT_BCSC_URL:
+              value: 'https://id.gov.bc.ca/account/'
             GWA_API_URL:
               value: 'https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca'
             GWA_PROD_ENV_SLUG:
