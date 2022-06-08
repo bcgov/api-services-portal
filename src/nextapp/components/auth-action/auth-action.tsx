@@ -21,6 +21,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
+import { useGlobal } from '@/shared/services/global';
 
 interface AuthActionProps {
   site: string;
@@ -30,6 +31,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
   const isBcscUser = user?.roles.includes('bcsc-user');
+  const global = useGlobal();
 
   if (site === 'redirect') {
     return <></>;
@@ -100,10 +102,9 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                   as={Link}
                   color="bc-blue"
                   target="_blank"
-                  href="https://id.gov.bc.ca/account/"
+                  href={global.accountLinks.bcscUrl}
                   rel="noreferrer noopener"
                 >
-                  {/*https://id.gov.bc.ca/login/entry*/}
                   Manage My BC Services Card Account
                   <Icon as={BiLinkExternal} boxSize="4" ml={2} />
                 </MenuItem>
@@ -131,7 +132,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                     <Link
                       color="bc-blue"
                       target="_blank"
-                      href="https://www.bceid.ca/logon.aspx"
+                      href={global.accountLinks.bceidUrl}
                       rel="noreferrer noopener"
                     >
                       Manage My BCeID Account <Icon as={BiLinkExternal} />

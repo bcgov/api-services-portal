@@ -24,20 +24,11 @@ import {
 } from '@chakra-ui/react';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
-import { useRestApi } from '@/shared/services/api';
-
-type HelpLinks = {
-  version: string;
-  revision: string;
-  cluster: string;
-  helpLinks: Record<string, string>;
-};
+import { useGlobal } from '@/shared/services/global';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { data, isSuccess, isError } = useRestApi<HelpLinks>('help', '/about', {
-    suspense: false,
-  });
+  const data = useGlobal();
 
   return (
     <>
@@ -108,7 +99,7 @@ const HelpMenu: React.FC = () => {
       >
         <Menu placement="bottom-end">
           <MenuButton
-            isDisabled={!isSuccess}
+            isDisabled={!data?.helpLinks}
             px={2}
             py={1}
             transition="all 0.2s"

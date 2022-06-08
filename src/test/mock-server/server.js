@@ -555,6 +555,14 @@ app.use('/about', (_, res) => {
       helpReleaseUrl: 'http://url.com/helpReleaseUrl',
       helpStatusUrl: 'http://url.com/helpStatusUrl',
     },
+    identities: {
+      developer: ['idir', 'bceid', 'bcsc', 'github'],
+      provider: ['idir'],
+    },
+    accountLinks: {
+      bceidUrl: 'https://www.bceid.ca/',
+      bcscUrl: 'https://id.gov.bc.ca/',
+    },
   });
 });
 app.use('/admin', adminApi);
