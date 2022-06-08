@@ -1,10 +1,10 @@
 import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
-let userSession: string
+let userSession: any
 var nameSpace: string
 
-describe('API Tests to verify the Organization details in the response (/Organization end point', () => {
-
+describe('API Tests to verify the Organization details in the response', () => {
+    
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('api').as('api')
@@ -62,6 +62,7 @@ describe('Get the user session token', () => {
         cy.visit('/')
         cy.deleteAllCookies()
         cy.reload()
+        // cy.getUserSessionTokenValue()
     })
 
     beforeEach(() => {
@@ -71,15 +72,9 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
-                })
-            })
-        })
+         cy.getUserSessionTokenValue().then((value) => {
+            userSession = value
+         })
     })
 
 })
@@ -140,6 +135,7 @@ describe('Get the Namespace associated with the organization', () => {
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
+                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
                 nameSpace = response[0].name
@@ -188,7 +184,6 @@ describe('Delete the Namespace associated with the organization', () => {
     it('Verify that the deleted Namespace is not displayed in Get Call', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
                 assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace),-1)

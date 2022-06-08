@@ -1,9 +1,9 @@
 import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
-let userSession: string
+let userSession: any
 let nameSpace: string
 
-describe('Get the user session token to check ', () => {
+describe('Get the user session token to pass it as authorization token to make the API call ', () => {
 
     const login = new LoginPage()
     const home = new HomePage()
@@ -21,16 +21,9 @@ describe('Get the user session token to check ', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                nameSpace = apiTest.namespace
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
-                })
-            })
-        })
+        cy.getUserSessionTokenValue().then((value) => {
+            userSession = value
+         })
     })
 })
 
@@ -81,7 +74,6 @@ describe('API Tests for Namespace List', () => {
         cy.get('@api').then(({ namespaces }: any) => {
             cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                debugger
                 response = res.body
             })
         })
@@ -89,5 +81,72 @@ describe('API Tests for Namespace List', () => {
 
     it('Verify that the selected Namespace is displayed in the Response list in the response', () => {
         expect(response).to.be.contain(nameSpace)
+    })
+})
+
+describe('API Tests for Namespace Activities', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+    var response: any
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.setHeaders(namespaces.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Get the resource and verify the success code in the response', () => {
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res) => {
+                expect(res.status).to.be.equal(200)
+            })
+        })
+    })
+})
+
+describe('API Tests for Deleting Namespace', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+    var response: any
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+        cy.fixture('apiowner').as('apiowner')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.setHeaders(namespaces.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Delete the namespace and verify the success code in the response', () => {
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.get('@api').then(({ namespaces }: any) => {
+                cy.makeAPIRequest(namespaces.endPoint + "/" + apiTest.delete_namespace, 'DELETE').then((res) => {
+                    expect(res.status).to.be.equal(200)
+                    response = res.body
+                })
+            })
+        })
+    })
+
+    it('Verify that deleted namespace does not display in Get namespace list', () => {
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.get('@api').then(({ namespaces }: any) => {
+                cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
+                    expect(res.status).to.be.equal(200)
+                })
+            })
+            // expect(response).to.not.contain(apiTest.delete_namespace)
+        })
     })
 })

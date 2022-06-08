@@ -36,6 +36,7 @@
   },
   "documentation": {
     "endPoint": "ds/api/v2/namespaces/apiplatform/contents",
+    "getDocumentation_endPoint": "ds/api/v2/documentation",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -49,6 +50,29 @@
       "isPublic": true,
       "isComplete": true,
       "tags": ["tag1", "tag2"]
+    }
+  },
+  "apiDirectory": {
+    "endPoint": "ds/api/v2/namespaces",
+    "orgEndPoint": "ds/api/v2/organizations",
+    "headers": {
+      "accept": "application/json",
+      "content-type": "application/json"
+    },
+    "body": {
+      "name": "auto-test-product-new",
+      "license_title": "Open Government Licence - British Columbia",
+      "security_class": "PUBLIC",
+      "view_audience": "Government",
+      "download_audience": "Public",
+      "notes": "Some notes",
+      "title": "Dataset for Test API",
+      "tags": [
+        "gateway",
+        "kong"
+      ],
+      "organization": "ministry-of-health",
+      "organizationUnit": "planning-and-innovation-division"
     }
   },
   "authorizationProfiles": {

@@ -15,7 +15,6 @@ class myAccessPage {
 
   saveAPIKeyValue(): void {
     cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
-      debugger
       cy.saveState('apikey', $apiKey)
     })
     cy.get(this.closeRequestAccesss).click()
