@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
 
   React.useEffect(() => {
     if (ok) {
-      router.push('/');
+      router.push('/api-directory');
     }
   }, [ok]);
 
