@@ -106,10 +106,13 @@ export async function recordActivity(
   refId: string,
   message: string,
   result: string = '',
-  activityContext: string = ''
+  activityContext: string = '',
+  productNamespace: string = undefined
 ) {
   const userId = context.authedItem.userId;
-  const namespace = context.authedItem.namespace;
+  const namespace = productNamespace
+    ? productNamespace
+    : context.authedItem.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivity] userid=%s name=%s', userId, name);
 
