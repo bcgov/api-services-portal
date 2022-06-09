@@ -171,6 +171,7 @@ export async function lookupEnvironmentsByNS(
                         appId
                         name
                         flow
+                        additionalDetailsToRequest
                         approval
                         product {
                           name

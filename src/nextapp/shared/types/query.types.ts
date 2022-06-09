@@ -6067,10 +6067,8 @@ export type ConsumerAccess = {
 
 export type ConsumerProdEnvAccess = {
   __typename?: 'ConsumerProdEnvAccess';
-  id?: Maybe<Scalars['String']>;
   productName?: Maybe<Scalars['String']>;
-  environment?: Maybe<Scalars['String']>;
-  flow?: Maybe<Scalars['String']>;
+  environment?: Maybe<Environment>;
   plugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
   revocable?: Maybe<Scalars['Boolean']>;
   authorization?: Maybe<Scalars['String']>;
@@ -6420,6 +6418,7 @@ export type Query = {
   BusinessProfile?: Maybe<BusinessProfile>;
   getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
   getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
+  getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -7158,6 +7157,12 @@ export type QueryBusinessProfileArgs = {
 
 export type QueryGetNamespaceConsumerAccessArgs = {
   serviceAccessId: Scalars['ID'];
+};
+
+
+export type QueryGetConsumerProdEnvAccessArgs = {
+  serviceAccessId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
 };
 
 

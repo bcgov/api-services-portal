@@ -53,6 +53,71 @@ export async function getAccessRequestsByNamespace(
   return result.data.allAccessRequests;
 }
 
+export async function getAccessRequestByNamespaceServiceAccess(
+  context: any,
+  ns: string,
+  serviceAccessId: string
+): Promise<AccessRequest> {
+  const query = gql`
+    query GetNamespaceAccessRequestByServiceAccess(
+      $ns: String!
+      $serviceAccessId: ID!
+    ) {
+      allAccessRequests(
+        where: {
+          serviceAccess: { id: $serviceAccessId }
+          productEnvironment: { product: { namespace: $ns } }
+        }
+      ) {
+        id
+        name
+        isApproved
+        isIssued
+        isComplete
+        additionalDetails
+        requestor {
+          username
+        }
+        application {
+          name
+          appId
+        }
+        requestor {
+          username
+        }
+        productEnvironment {
+          name
+          appId
+          flow
+          product {
+            name
+          }
+        }
+        serviceAccess {
+          id
+          consumer {
+            username
+          }
+        }
+        createdAt
+      }
+    }
+  `;
+
+  const result = await context.executeGraphQL({
+    query,
+    variables: { ns, serviceAccessId },
+  });
+  logger.debug(
+    'Query [getAccessRequestByNamespaceServiceAccess] result %j',
+    result
+  );
+
+  return result.data.allAccessRequests.length == 0
+    ? undefined
+    : result.data.allAccessRequests[0];
+}
+
 export async function lookupEnvironmentAndApplicationByAccessRequest(
   context: any,
   id: string

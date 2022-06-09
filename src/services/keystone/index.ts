@@ -4,6 +4,7 @@ export {
   linkServiceAccessToRequest,
   markAccessRequestAsNotIssued,
   updateAccessRequestState,
+  getAccessRequestByNamespaceServiceAccess,
 } from './access-request';
 
 export { recordActivity, recordActivityWithBlob } from './activity';

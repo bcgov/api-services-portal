@@ -254,10 +254,13 @@ const query = gql`
         values
       }
       prodEnvAccess {
-        id
         productName
-        environment
-        flow
+        environment {
+          flow
+          name
+          id
+          additionalDetailsToRequest
+        }
         plugins {
           name
         }
@@ -265,6 +268,10 @@ const query = gql`
         authorization
         request {
           name
+          isIssued
+          isApproved
+          isComplete
+          additionalDetails
         }
       }
     }

@@ -50,6 +50,7 @@
  */
 
 import {
+  getAccessRequestByNamespaceServiceAccess,
   lookupConsumerPlugins,
   lookupCredentialReferenceByServiceAccess,
   lookupLabeledServiceAccessesForNamespace,
@@ -65,6 +66,7 @@ import {
   ConsumerSummary,
 } from './types';
 import { Logger } from '../../logger';
+import { strict as assert } from 'assert';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -109,10 +111,10 @@ export async function getNamespaceConsumerAccess(
     consumer: serviceAccess.consumer,
     application: serviceAccess.application,
     owner: {
-      id: serviceAccess.application.owner.id,
-      name: serviceAccess.application.owner.name,
-      username: serviceAccess.application.owner.username,
-      email: serviceAccess.application.owner.email,
+      id: serviceAccess.application?.owner.id,
+      name: serviceAccess.application?.owner.name,
+      username: serviceAccess.application?.owner.username,
+      email: serviceAccess.application?.owner.email,
     },
     labels: [],
     prodEnvAccess: [],
@@ -149,10 +151,14 @@ export async function getNamespaceConsumerAccess(
 
   const batch1 = other.map((svc) => {
     return {
-      id: svc.productEnvironment.id,
       productName: svc.productEnvironment.product.name,
-      environment: svc.productEnvironment.name,
-      flow: svc.productEnvironment.flow,
+      environment: {
+        id: svc.productEnvironment.id,
+        name: svc.productEnvironment.name,
+        additionalDetails: svc.productEnvironment.additionalDetailsToRequest,
+        flow: svc.productEnvironment.flow,
+        services: svc.productEnvironment.services,
+      },
       plugins: gwConsumer.plugins.filter(
         (plugin) => plugin.service?.environment.id === svc.productEnvironment.id
       ),
@@ -164,13 +170,19 @@ export async function getNamespaceConsumerAccess(
 
   const batch2 = envs
     .filter((env) => aclGroups.includes(env.appId))
-    .filter((env) => batch1.filter((acc) => acc.id === env.id).length == 0)
+    .filter(
+      (env) => batch1.filter((acc) => acc.environment.id === env.id).length == 0
+    )
     .map((env) => {
       return {
-        id: env.id,
         productName: env.product.name,
-        environment: env.name,
-        flow: env.flow,
+        environment: {
+          id: env.id,
+          name: env.name,
+          additionalDetails: env.additionalDetailsToRequest,
+          flow: env.flow,
+          services: env.services,
+        },
         plugins: gwConsumer.plugins.filter(
           (plugin) => plugin.service?.environment.id === env.id
         ),
@@ -186,13 +198,41 @@ export async function getNamespaceConsumerAccess(
 
 export async function getConsumerProdEnvAccess(
   context: any,
-  consumerId: string,
+  ns: string,
+  serviceAccessId: string,
   prodEnvId: string
 ): Promise<ConsumerProdEnvAccess> {
   // same as getNamespaceConsumerAccess
   // but add 'authorization' and 'request' details (if applicable)
   // and add plugin config
-  return null;
+
+  const consumer = await getNamespaceConsumerAccess(
+    context,
+    ns,
+    serviceAccessId
+  );
+
+  consumer.prodEnvAccess = consumer.prodEnvAccess.filter(
+    (p) => p.environment.id === prodEnvId
+  );
+
+  assert.strictEqual(consumer.prodEnvAccess.length, 1, 'Invalid access data');
+
+  const access = consumer.prodEnvAccess;
+
+  // authorization?: any;
+  // Authorization: Scopes and Roles for flows requiring IdPs
+
+  // request?: AccessRequest;
+  // lookup request based on ServiceAccess record
+  const request = await getAccessRequestByNamespaceServiceAccess(
+    context,
+    ns,
+    serviceAccessId
+  );
+  access[0].request = request;
+
+  return access[0];
 }
 
 export async function grantConsumerProdEnvAccess(

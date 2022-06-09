@@ -1,17 +1,14 @@
-import {
-  lookupEnvironmentAndIssuerUsingWhereClause,
-  lookupKongConsumerId,
-} from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
-import { FeederService } from '../../services/feeder';
-import { KongConsumerService } from '../../services/kong';
-import { EnvironmentWhereInput } from '@/services/keystone/types';
-import { mergeWhereClause } from '@keystonejs/utils';
 import {
+  getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
 } from '../../services/workflow';
-import { ConsumerAccess, ConsumerSummary } from '@/services/workflow/types';
+import {
+  ConsumerAccess,
+  ConsumerProdEnvAccess,
+  ConsumerSummary,
+} from '../../services/workflow/types';
 
 const typeConsumerLabel = `
 type ConsumerLabel {
@@ -42,10 +39,8 @@ type ConsumerAccess {
 
 const typeConsumerProdEnvAccess = `
 type ConsumerProdEnvAccess {
-  id: String,
   productName: String,
-  environment: String,
-  flow: String,
+  environment: Environment,
   plugins: [GatewayPlugin],
   revocable: Boolean,
   authorization: String,
@@ -93,6 +88,26 @@ module.exports = {
                 context,
                 namespace,
                 serviceAccessId
+              );
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'getConsumerProdEnvAccess(serviceAccessId: ID!, prodEnvId: ID!): ConsumerProdEnvAccess',
+            resolver: async (
+              item: any,
+              { serviceAccessId, prodEnvId }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<ConsumerProdEnvAccess> => {
+              const namespace = context.req.user.namespace;
+              return await getConsumerProdEnvAccess(
+                context,
+                namespace,
+                serviceAccessId,
+                prodEnvId
               );
             },
             access: EnforcementPoint,

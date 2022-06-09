@@ -20,6 +20,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                         productEnvironment {
                             id
                             name
+                            additionalDetailsToRequest
                             flow
                             credentialIssuer {
                                 id

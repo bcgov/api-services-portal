@@ -9,6 +9,7 @@ node dist/test/integrated/keystonejs/consumerManagement.js
 import InitKeystone from './init';
 import { o } from '../util';
 import {
+  getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
 } from '../../../services/workflow';
@@ -42,8 +43,17 @@ import {
     .map(async (c) => {
       const consumer = await getNamespaceConsumerAccess(ctx, ns, c.id);
       o(consumer);
+      const envPromises = consumer.prodEnvAccess.map(async (p: any) => {
+        const res = await getConsumerProdEnvAccess(
+          ctx,
+          ns,
+          c.id,
+          p.environment.id
+        );
+        o(res);
+      });
+      await Promise.all(envPromises);
     });
-
   await Promise.all(promises);
 
   await keystone.disconnect();

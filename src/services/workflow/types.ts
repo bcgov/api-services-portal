@@ -2,6 +2,7 @@ import {
   AccessRequest,
   Application,
   CredentialIssuer,
+  Environment,
   GatewayConsumer,
   GatewayPlugin,
   User,
@@ -125,10 +126,8 @@ export interface ConsumerAccess {
 }
 
 export interface ConsumerProdEnvAccess {
-  id: string;
+  environment: Environment;
   productName: string;
-  environment: string;
-  flow: string;
   plugins: GatewayPlugin[];
   revocable: boolean;
   authorization?: any;
