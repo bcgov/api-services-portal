@@ -188,8 +188,7 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              {JSON.stringify(application)}
-              {/* <ProfileCard data={application.owner} overflow="hidden" /> */}
+              <ProfileCard data={application.owner} overflow="hidden" />
             </Detail>
           </Flex>
           <Divider />
