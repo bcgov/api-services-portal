@@ -1,0 +1,95 @@
+
+  query GetConsumer($id: ID!, $serviceAccessId: ID!) {
+    getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
+      application {
+        name
+        owner {
+          name
+          username
+          email
+        }
+      }
+      labels {
+        labelGroup
+        values
+      }
+      prodEnvAccess {
+        id
+        productName
+        environment
+        flow
+        plugins {
+          name
+        }
+        revocable
+        authorization
+        request {
+          name
+        }
+      }
+    }
+
+    getGatewayConsumerPlugins(id: $id) {
+      id
+      username
+      aclGroups
+      customId
+      extForeignKey
+      namespace
+      plugins {
+        id
+        name
+        extForeignKey
+        config
+        service {
+          id
+          name
+          extForeignKey
+        }
+        route {
+          id
+          name
+          extForeignKey
+        }
+      }
+      tags
+      createdAt
+    }
+
+    allServiceAccesses(where: { id: $id }) {
+      name
+      consumerType
+      application {
+        appId
+        name
+        owner {
+          name
+          username
+          email
+        }
+      }
+    }
+
+    allProductsByNamespace {
+      id
+      name
+      environments {
+        id
+        appId
+        name
+        active
+        flow
+        credentialIssuer {
+          id
+          availableScopes
+          clientRoles
+        }
+        services {
+          name
+          routes {
+            name
+          }
+        }
+      }
+    }
+  }

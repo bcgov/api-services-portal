@@ -42,6 +42,7 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 // import ConsumerFilters from '@/components/consumer-filters';
 
 interface ConsumerListItem {
+  id: string;
   application: Application;
   consumer: GatewayConsumer;
 }
@@ -267,10 +268,7 @@ const ConsumersPage: React.FC<
             {(d: ConsumerListItem) => (
               <Tr key={uid(d.consumer.id)}>
                 <Td width="25%">
-                  <NextLink
-                    passHref
-                    href={`/manager/consumers/${d.consumer.id}`}
-                  >
+                  <NextLink passHref href={`/manager/consumers/${d.id}`}>
                     <Link color="bc-link" textDecor="underline">
                       {d.consumer.username}
                     </Link>
@@ -343,6 +341,7 @@ const query = gql`
       orderBy: "updatedAt_DESC"
       where: { consumer: { username_not_starts_with: "sa-" } }
     ) {
+      id
       namespace
       consumer {
         id

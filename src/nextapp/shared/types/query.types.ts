@@ -6057,6 +6057,26 @@ export type ConsumerSummary = {
   lastUpdated: Scalars['String'];
 };
 
+export type ConsumerAccess = {
+  __typename?: 'ConsumerAccess';
+  application?: Maybe<Application>;
+  owner?: Maybe<User>;
+  labels?: Maybe<Array<Maybe<ConsumerLabel>>>;
+  prodEnvAccess?: Maybe<Array<Maybe<ConsumerProdEnvAccess>>>;
+};
+
+export type ConsumerProdEnvAccess = {
+  __typename?: 'ConsumerProdEnvAccess';
+  id?: Maybe<Scalars['String']>;
+  productName?: Maybe<Scalars['String']>;
+  environment?: Maybe<Scalars['String']>;
+  flow?: Maybe<Scalars['String']>;
+  plugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  revocable?: Maybe<Scalars['Boolean']>;
+  authorization?: Maybe<Scalars['String']>;
+  request?: Maybe<AccessRequest>;
+};
+
 export type ConsumerScopesAndRoles = {
   __typename?: 'ConsumerScopesAndRoles';
   id: Scalars['String'];
@@ -6399,6 +6419,7 @@ export type Query = {
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
   getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
+  getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -7131,6 +7152,11 @@ export type QueryAllDiscoverableContentsArgs = {
 
 
 export type QueryBusinessProfileArgs = {
+  serviceAccessId: Scalars['ID'];
+};
+
+
+export type QueryGetNamespaceConsumerAccessArgs = {
   serviceAccessId: Scalars['ID'];
 };
 

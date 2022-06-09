@@ -20,12 +20,16 @@ ACCESS MANAGER,,consumerScopesAndRoles,,,,,,,access-manager,,,allow,filterByPack
 ACCESS MANAGER,,linkConsumerToNamespace,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerRoleAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
 ACCESS MANAGER,,updateConsumerScopeAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
+,,getNamespaceConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayRoute,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayService,read,,,,,access-manager,,,allow,
+,,,Product,read,,,,,access-manager,,,allow,
+,,,Environment,read,,,,,access-manager,,,allow,
 ,,,ServiceAccess,read,,,,,access-manager,,,allow,
 ,,,Application,read,,,,,access-manager,,,allow,
+,,,User,read,,,,,access-manager,,,allow,
 ,,,Label,read,,,,,access-manager,,,allow,
 ,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,

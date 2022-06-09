@@ -98,6 +98,8 @@ export async function getNamespaceConsumerAccess(
   ns: string,
   serviceAccessId: string
 ): Promise<ConsumerAccess> {
+  logger.debug('[getNamespaceConsumerAccess] %s %s', ns, serviceAccessId);
+
   const serviceAccess = await lookupCredentialReferenceByServiceAccess(
     context,
     serviceAccessId
@@ -106,6 +108,12 @@ export async function getNamespaceConsumerAccess(
   const access: ConsumerAccess = {
     consumer: serviceAccess.consumer,
     application: serviceAccess.application,
+    owner: {
+      id: serviceAccess.application.owner.id,
+      name: serviceAccess.application.owner.name,
+      username: serviceAccess.application.owner.username,
+      email: serviceAccess.application.owner.email,
+    },
     labels: [],
     prodEnvAccess: [],
   };

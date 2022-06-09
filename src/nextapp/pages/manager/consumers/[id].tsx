@@ -49,7 +49,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id },
+        { id, serviceAccessId: id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -72,19 +72,27 @@ const ConsumerPage: React.FC<
     queryKey,
     {
       query,
-      variables: { id },
+      variables: { id, serviceAccessId: id },
     },
     { suspense: false }
   );
   const { isOpen, onClose, onToggle } = useDisclosure();
-  const consumer = data?.getGatewayConsumerPlugins;
+  //const consumer = data?.getGatewayConsumerPlugins;
+
+  const consumer = {
+    id: '0',
+    username: 'abc',
+    plugins: [],
+    tags: '[]',
+  };
+
   const application = data?.allServiceAccesses[0]?.application;
 
   function renderRow(product: Product, environment: Environment) {
     const tags = [];
     const plugins = [];
     environment.services.forEach((d) => {
-      data.getGatewayConsumerPlugins.plugins
+      consumer.plugins
         .filter((p) => p.service?.name === d.name || p.route?.name === d.name)
         .forEach((p) => {
           plugins.push(p);
@@ -180,7 +188,8 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              <ProfileCard data={application.owner} overflow="hidden" />
+              {JSON.stringify(application)}
+              {/* <ProfileCard data={application.owner} overflow="hidden" /> */}
             </Detail>
           </Flex>
           <Divider />
@@ -231,7 +240,36 @@ const ConsumerPage: React.FC<
 export default ConsumerPage;
 
 const query = gql`
-  query GetConsumer($id: ID!) {
+  query GetConsumer($id: ID!, $serviceAccessId: ID!) {
+    getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
+      application {
+        name
+      }
+      owner {
+        name
+        username
+        email
+      }
+      labels {
+        labelGroup
+        values
+      }
+      prodEnvAccess {
+        id
+        productName
+        environment
+        flow
+        plugins {
+          name
+        }
+        revocable
+        authorization
+        request {
+          name
+        }
+      }
+    }
+
     getGatewayConsumerPlugins(id: $id) {
       id
       username
@@ -259,7 +297,7 @@ const query = gql`
       createdAt
     }
 
-    allServiceAccesses(where: { consumer: { id: $id } }) {
+    allServiceAccesses(where: { id: $id }) {
       name
       consumerType
       application {

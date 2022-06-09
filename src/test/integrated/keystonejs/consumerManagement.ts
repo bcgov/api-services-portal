@@ -24,7 +24,7 @@ import {
     id: null,
     username: 'sample_username',
     namespace: ns,
-    roles: JSON.stringify(['api-owner']),
+    roles: JSON.stringify(['access-manager']),
     scopes: [],
     userId: '60c9124f3518951bb519084d',
   } as any;
@@ -37,12 +37,14 @@ import {
   const consumers = await getFilteredNamespaceConsumers(ctx, ns);
   o(consumers);
 
-  // const promises = consumers.map(async (c) => {
-  //   const consumer = await getNamespaceConsumerAccess(ctx, ns, c.id);
-  //   o(consumer);
-  // });
+  const promises = consumers
+    .filter((c) => c.id === '62a18b772da3cdea467b10fe')
+    .map(async (c) => {
+      const consumer = await getNamespaceConsumerAccess(ctx, ns, c.id);
+      o(consumer);
+    });
 
-  // await Promise.all(promises);
+  await Promise.all(promises);
 
   await keystone.disconnect();
 })();

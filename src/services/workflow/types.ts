@@ -4,6 +4,7 @@ import {
   CredentialIssuer,
   GatewayConsumer,
   GatewayPlugin,
+  User,
 } from '../keystone/types';
 import { strict as assert } from 'assert';
 export interface KeystoneContext {}
@@ -118,6 +119,7 @@ export interface ConsumerSummary {
 export interface ConsumerAccess {
   consumer: GatewayConsumer;
   application?: Application;
+  owner?: User;
   labels?: ConsumerLabel[];
   prodEnvAccess?: ConsumerProdEnvAccess[];
 }
