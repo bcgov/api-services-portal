@@ -190,6 +190,6 @@
   },
   "apiTest": {
     "namespace": "apiplatform",
-    "delete_namespace": "deleteplatform"
+    "delete_namespace": "deleteplatform1"
   }
 }

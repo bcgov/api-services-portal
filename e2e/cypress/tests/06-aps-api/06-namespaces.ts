@@ -21,9 +21,12 @@ describe('Get the user session token to pass it as authorization token to make t
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSessionTokenValue().then((value) => {
-            userSession = value
-         })
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue().then((value) => {
+                userSession = value
+            })
+            nameSpace = apiTest.namespace
+        })
     })
 })
 
@@ -114,7 +117,7 @@ describe('API Tests for Deleting Namespace', () => {
 
     const login = new LoginPage()
     const home = new HomePage()
-    var response: any
+    
 
     beforeEach(() => {
         cy.fixture('api').as('api')
@@ -133,20 +136,24 @@ describe('API Tests for Deleting Namespace', () => {
             cy.get('@api').then(({ namespaces }: any) => {
                 cy.makeAPIRequest(namespaces.endPoint + "/" + apiTest.delete_namespace, 'DELETE').then((res) => {
                     expect(res.status).to.be.equal(200)
-                    response = res.body
                 })
             })
         })
     })
 
     it('Verify that deleted namespace does not display in Get namespace list', () => {
+        let response : any
+        let namespace : string
         cy.get('@apiowner').then(({ apiTest }: any) => {
+            namespace = apiTest.delete_namespace
             cy.get('@api').then(({ namespaces }: any) => {
                 cy.makeAPIRequest(namespaces.endPoint, 'GET').then((res) => {
+                    debugger
                     expect(res.status).to.be.equal(200)
+                    response = res.body
+                    expect(response).to.not.contain(namespace)
                 })
             })
-            // expect(response).to.not.contain(apiTest.delete_namespace)
         })
     })
 })

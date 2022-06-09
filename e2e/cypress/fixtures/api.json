@@ -11,16 +11,10 @@
     },
     "orgName": "ministry-of-health",
     "expectedScope": ["Dataset.Manage", "GroupAccess.Manage", "Namespace.Assign"],
-    "expectedNamespace": [
-      {
-        "name": "newplatform",
-        "orgUnit": "planning-and-innovation-division"
-      },
-      {
-        "name": "platform",
-        "orgUnit": "planning-and-innovation-division"
-      }
-    ],
+    "expectedNamespace": {
+      "name": "newplatform",
+      "orgUnit": "planning-and-innovation-division"
+    },
     "body": {
       "name": "ministry-of-health",
       "parent": "/ca.bc.gov",
@@ -67,10 +61,7 @@
       "download_audience": "Public",
       "notes": "Some notes",
       "title": "Dataset for Test API",
-      "tags": [
-        "gateway",
-        "kong"
-      ],
+      "tags": ["gateway", "kong"],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
     }

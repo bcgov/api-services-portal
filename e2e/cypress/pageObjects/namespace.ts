@@ -32,6 +32,11 @@ class NameSpacePage {
         cy.get(this.serviceAccountsLink).should('exist')
         cy.get(this.deleteNamespaceLink).should('exist')
     }
+
+    deleteNamespace(name: string) {
+        cy.get(this.deleteNamespaceLink).click()
+        cy.contains('button', 'Yes, Delete').click()
+      }
 }
 
 export default NameSpacePage
