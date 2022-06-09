@@ -6041,6 +6041,22 @@ export type AddressDetails = {
   country?: Maybe<Scalars['String']>;
 };
 
+export type ConsumerLabel = {
+  __typename?: 'ConsumerLabel';
+  labelGroup: Scalars['String'];
+  values: Array<Maybe<Scalars['String']>>;
+};
+
+export type ConsumerSummary = {
+  __typename?: 'ConsumerSummary';
+  id: Scalars['String'];
+  consumerType: Scalars['String'];
+  username?: Maybe<Scalars['String']>;
+  customId?: Maybe<Scalars['String']>;
+  labels: Array<Maybe<ConsumerLabel>>;
+  lastUpdated: Scalars['String'];
+};
+
 export type ConsumerScopesAndRoles = {
   __typename?: 'ConsumerScopesAndRoles';
   id: Scalars['String'];
@@ -6382,6 +6398,7 @@ export type Query = {
   mySelf?: Maybe<User>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
+  getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;

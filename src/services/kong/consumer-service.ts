@@ -280,6 +280,8 @@ export class KongConsumerService {
     consumerPK: string,
     namespace: string
   ): Promise<any> {
+    logger.debug('[getConsumerACLByNamespace] %s', consumerPK);
+
     let response = await fetch(
       `${this.kongUrl}/consumers/${consumerPK}/acls?tags=ns.${namespace}`,
       {

@@ -217,13 +217,11 @@ export default GrantAccessDialog;
 const query = gql`
   query GetConsumerProductsAndEnvironments($namespace: String!) {
     allProductsByNamespace(where: { namespace: $namespace }) {
-      product {
+      id
+      name
+      environments {
         id
         name
-        environments {
-          id
-          name
-        }
       }
     }
   }

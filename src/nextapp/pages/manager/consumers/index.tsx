@@ -327,6 +327,17 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers {
+    getFilteredNamespaceConsumers {
+      id
+      consumerType
+      username
+      labels {
+        labelGroup
+        values
+      }
+      lastUpdated
+    }
+
     allServiceAccessesByNamespace(
       first: 200
       orderBy: "updatedAt_DESC"

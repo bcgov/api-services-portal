@@ -1,4 +1,10 @@
-import { CredentialIssuer } from '../keystone/types';
+import {
+  AccessRequest,
+  Application,
+  CredentialIssuer,
+  GatewayConsumer,
+  GatewayPlugin,
+} from '../keystone/types';
 import { strict as assert } from 'assert';
 export interface KeystoneContext {}
 
@@ -94,4 +100,35 @@ export function getIssuerEnvironmentConfig(
     `EnvironmentMissing ${issuer.name} ${environment}`
   );
   return env;
+}
+
+export interface ConsumerLabel {
+  labelGroup: string;
+  values: string[];
+}
+export interface ConsumerSummary {
+  id: string;
+  consumerType: string;
+  username: string;
+  customId: string;
+  labels: ConsumerLabel[];
+  lastUpdated: string;
+}
+
+export interface ConsumerAccess {
+  consumer: GatewayConsumer;
+  application?: Application;
+  labels?: ConsumerLabel[];
+  prodEnvAccess?: ConsumerProdEnvAccess[];
+}
+
+export interface ConsumerProdEnvAccess {
+  id: string;
+  productName: string;
+  environment: string;
+  flow: string;
+  plugins: GatewayPlugin[];
+  revocable: boolean;
+  authorization?: any;
+  request?: AccessRequest;
 }

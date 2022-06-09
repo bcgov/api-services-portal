@@ -2,6 +2,16 @@ export { Apply } from './apply';
 
 export { CreateServiceAccount } from './create-service-account';
 
+export {
+  getFilteredNamespaceConsumers,
+  getNamespaceConsumerAccess,
+  getConsumerProdEnvAccess,
+  grantConsumerProdEnvAccess,
+  updateConsumerProdEnvAccess,
+  revokeConsumerProdEnvAccess,
+  saveConsumerLabels,
+} from './consumer-management';
+
 export { DeleteAccess } from './delete-access';
 
 export { DeleteIssuerValidate } from './delete-issuer';

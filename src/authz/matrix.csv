@@ -8,6 +8,7 @@ ACCESS MANAGER,,allAccessRequestsByNamespace,,,,,,,access-manager,,,allow,filter
 ACCESS MANAGER,,allServiceAccessesByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentProductNSOrNS
 ACCESS MANAGER,,allProductsByNamespace,,,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,allGatewayServicesByNamespace,,,,,,,access-manager,,,allow,filterByUserNS
+ACCESS MANAGER,,getFilteredNamespaceConsumers,,,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,getGatewayConsumerPlugins,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,deleteGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
@@ -23,6 +24,10 @@ ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayRoute,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayService,read,,,,,access-manager,,,allow,
+,,,ServiceAccess,read,,,,,access-manager,,,allow,
+,,,Application,read,,,,,access-manager,,,allow,
+,,,Label,read,,,,,access-manager,,,allow,
+,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
@@ -94,7 +99,7 @@ Portal User Namespaces,,allNamespaces,,,,,,,portal-user,,,allow,
 API Owner Role Rules,,createNamespace,,,,,,,idir-user,,,allow,
 API Owner Role Rules,,forceDeleteNamespace,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,namespace,,,,,,,api-owner,,,allow,
-API Owner Role Rules,,currentNamespace,,,,,,,,,"api-owner,provider-user",allow,
+API Owner Role Rules,,currentNamespace,,,,,,,,,"api-owner,provider-user,access-manager,credential-admin",allow,
 API Owner Role Rules,,grantPermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,revokePermissions,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,approvePermissions,,,,,,,api-owner,,,allow,
@@ -170,7 +175,7 @@ API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-us
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-,,,,,,,,,,,,,
+,,allProductsByNamespace,,,,,,,,,portal-user,allow,
 ,,,,,,,,,,,,,
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
 Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment

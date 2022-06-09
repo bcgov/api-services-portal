@@ -24,6 +24,9 @@ export async function lookupConsumerPlugins(
                           service {
                             id
                             name
+                            environment {
+                              id
+                            }
                           }
                           route {
                             id
