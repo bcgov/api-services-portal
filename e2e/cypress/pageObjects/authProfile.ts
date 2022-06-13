@@ -107,7 +107,6 @@ class AuthorizationProfile {
       }
     }
     cy.get(this.createBtn).click()
-    cy.wait(2000)
     if (isCreated === true)
       cy.get(this.profileTable).contains(authProfile.name).should('exist')
     else

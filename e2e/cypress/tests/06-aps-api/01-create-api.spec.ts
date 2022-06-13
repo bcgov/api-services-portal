@@ -31,6 +31,7 @@ describe('Create API Spec', () => {
   it('creates and activates new namespace', () => {
     cy.get('@apiowner').then(({ apiTest }: any) => {
       home.createNamespace(apiTest.namespace)
+      home.createNamespace(apiTest.delete_namespace)
     })
   })
 
