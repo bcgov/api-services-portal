@@ -45,7 +45,8 @@ cat > "${CONFIG_PATH:-./config/default.json}" <<EOF
             "redis_password": "${PLUGINS_RATELIMITING_REDIS_PASSWORD}",
             "redis_timeout": 2000
         }
-    }
+    },
+    "defaultDataPlane": "local.dataplane"
 }
 EOF
 
