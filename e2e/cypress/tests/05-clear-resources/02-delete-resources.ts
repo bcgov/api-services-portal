@@ -1,5 +1,6 @@
 import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
+import NameSpacePage from '../../pageObjects/namespace'
 import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
@@ -8,6 +9,7 @@ describe('Delete created resources', () => {
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
   const pd = new Products()
+  const ns = new NameSpacePage
 
   before(() => {
     cy.visit('/')
@@ -54,7 +56,15 @@ describe('Delete created resources', () => {
 
   it('Delete Namespace', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
-      home.deleteNamespace(deleteResources.namespace)
+      cy.visit(ns.path)
+      ns.deleteNamespace(deleteResources.namespace)
     })
   })
+
+  // it('Verify that the deleted namespace does not display in namespace list', () => {
+  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
+  //     const flag = home.useNamespace(deleteResources.namespace)
+  //     assert.equal(flag, false)
+  //   })
+  // })
 })

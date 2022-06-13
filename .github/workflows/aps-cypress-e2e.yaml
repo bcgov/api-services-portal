@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['util/*automation*']
+    branches: ['test']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Build GWA API Image
         run: |
-          git clone https://github.com/bcgov/gwa-api.git -b dev
+          git clone https://github.com/bcgov/gwa-api.git -b master
           cd gwa-api/microservices/gatewayApi
           docker build -t gwa-api:e2e .
       - name: Checkout Portal

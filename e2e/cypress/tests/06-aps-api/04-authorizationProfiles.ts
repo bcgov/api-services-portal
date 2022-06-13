@@ -1,6 +1,6 @@
 import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
-let userSession: string
+let userSession: any
 let testData = require("../../fixtures/test_data/authorizationProfile.json")
 
 describe('Get the user session token', () => {
@@ -21,15 +21,9 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
-                })
-            })
-        })
+        cy.getUserSessionTokenValue().then((value) => {
+            userSession = value
+         })
     })
 
 })

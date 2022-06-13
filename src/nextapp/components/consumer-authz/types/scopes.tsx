@@ -88,7 +88,7 @@ const ScopesComponent: React.FC<ScopesProps> = ({
       } catch (err) {
         toast({
           title: 'Scope update failed',
-          description: err?.message,
+          description: Array.isArray(err) ? err[0].message : err?.message,
           status: 'error',
         });
         setBusy.off();
