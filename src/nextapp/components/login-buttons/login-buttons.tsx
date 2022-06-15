@@ -37,6 +37,15 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
         BCeID
       </Button>
     ),
+    bcsc: (
+      <Button
+        as="a"
+        variant="primary"
+        href={buildUrl('bcsc', router?.asPath)}
+      >
+        BC Services Card
+      </Button>
+    ),
     github: (
       <Button
         as="a"
