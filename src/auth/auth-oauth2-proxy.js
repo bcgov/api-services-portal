@@ -13,7 +13,7 @@ const { maintenance } = require('../services/maintenance');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const jwtDecoder = require('jwt-decode');
-const { deriveRoleFromUsername, scopesToRoles } = require('./scope-role-utils');
+const { deriveRoleFromIdP, scopesToRoles } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
 const authLogoutUrl =
@@ -185,7 +185,7 @@ class Oauth2ProxyAuthStrategy {
         // Switch to "no namespace" - aka "clear namespace"
         try {
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-          const username = req['oauth_user']['preferred_username']; // Username included in token
+          const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
           // The oauth2_proxy is handling the refresh token; so there can be a new jti
           logger.info(
             '[ns-clear] %s -> %s : %s',
@@ -193,7 +193,7 @@ class Oauth2ProxyAuthStrategy {
             jti,
             req.user.jti === jti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
           );
-          await this.assign_namespace(req.user.jti, jti, username, {
+          await this.assign_namespace(req.user.jti, jti, identityProvider, {
             rsname: null,
             scopes: [],
           });
@@ -252,10 +252,10 @@ class Oauth2ProxyAuthStrategy {
     return app;
   }
 
-  async assign_namespace(jti, newJti, username, umaAuthDetails) {
+  async assign_namespace(jti, newJti, identityProvider, umaAuthDetails) {
     const namespace = umaAuthDetails['rsname'];
     const scopes = umaAuthDetails['scopes'];
-    const _roles = scopesToRoles(username, scopes);
+    const _roles = scopesToRoles(identityProvider, scopes);
 
     const roles = JSON.stringify(_roles);
 
@@ -303,6 +303,8 @@ class Oauth2ProxyAuthStrategy {
     const sub = oauthUser['sub']; // Subject ID - Whom the token refers to
 
     const name = oauthUser['name'];
+    const identityProvider = oauthUser['identity_provider'];
+    const providerUsername = oauthUser['provider_username'];
     const email = oauthUser['email'];
     const username = oauthUser['preferred_username'];
     const groups = JSON.stringify(oauthUser['groups']);
@@ -329,7 +331,7 @@ class Oauth2ProxyAuthStrategy {
       }
     }
     _roles.push('portal-user');
-    _roles.push(deriveRoleFromUsername(username));
+    _roles.push(deriveRoleFromIdP(identityProvider));
 
     const roles = JSON.stringify(_roles); // authenticated user gets developer role automatically
 
@@ -356,11 +358,11 @@ class Oauth2ProxyAuthStrategy {
       // auto-create a user record
       const { data, errors } = await this.keystone.executeGraphQL({
         context: this.keystone.createContext({ skipAccessControl: true }),
-        query: `mutation ($name: String, $email: String, $username: String) {
-                        createUser(data: {name: $name, username: $username, email: $email, isAdmin: false }) {
+        query: `mutation ($name: String, $email: String, $username: String, $identityProvider: String, $providerUsername: String) {
+                        createUser(data: {name: $name, username: $username, email: $email, provider: $identityProvider, providerUsername: $providerUsername, isAdmin: false }) {
                             id
                     } }`,
-        variables: { name, email, username },
+        variables: { name, email, username, identityProvider, providerUsername },
       });
       if (errors) {
         logger.error(
@@ -373,20 +375,21 @@ class Oauth2ProxyAuthStrategy {
     } else {
       // update if "name" or "email" has changed
       const saved = _results[0];
-      if (saved.name != name || saved.email != email) {
+      if (saved.name != name || saved.email != email || saved.providerUsername != providerUsername) {
         logger.info(
-          'register_user - updating name (%s) and email (%s) for %s',
+          'register_user - updating name (%s), email (%s) and providerUsername (%s) for %s',
           name,
           email,
+          providerUsername,
           username
         );
         const { data, errors } = await this.keystone.executeGraphQL({
           context: this.keystone.createContext({ skipAccessControl: true }),
-          query: `mutation ($name: String, $email: String, $userId: ID!) {
-                          updateUser(id: $userId, data: {name: $name, email: $email }) {
+          query: `mutation ($name: String, $email: String, $providerUsername: String, $userId: ID!) {
+                          updateUser(id: $userId, data: {name: $name, email: $email, providerUsername: $providerUsername }) {
                               id
                       } }`,
-          variables: { name, email, userId },
+          variables: { name, email, providerUsername, userId },
         });
         if (errors) {
           logger.error(
