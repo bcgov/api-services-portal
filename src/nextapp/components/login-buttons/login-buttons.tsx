@@ -24,13 +24,19 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
 
   const buttonComponents = {
     idir: (
-      <Button as="a" variant="primary" href={buildUrl('idir', router?.asPath)}>
+      <Button
+        as="a"
+        key="idir"
+        variant="primary"
+        href={buildUrl('idir', router?.asPath)}
+      >
         IDIR
       </Button>
     ),
     bceid: (
       <Button
         as="a"
+        key="bceid"
         variant="primary"
         href={buildUrl('bceid-business', router?.asPath)}
       >
@@ -40,6 +46,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
     bcsc: (
       <Button
         as="a"
+        key="bscs"
         variant="primary"
         href={buildUrl('bcsc', router?.asPath)}
       >
@@ -49,6 +56,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
     github: (
       <Button
         as="a"
+        key="github"
         variant="secondary"
         bgColor="#f5f5f5"
         borderColor="#333"
@@ -61,7 +69,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
   };
 
   return (
-    <ButtonGroup spacing={7}>
+    <ButtonGroup spacing={3}>
       {buttons.map((button) => buttonComponents[button])}
     </ButtonGroup>
   );

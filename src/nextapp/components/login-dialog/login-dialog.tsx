@@ -22,11 +22,12 @@ interface LoginDialogProps {
 const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { identities } = useGlobal();
+  const size = identities.developer.length > 2 ? '2xl' : 'lg';
 
   return (
     <>
       <Button onClick={onOpen}>{buttonText}</Button>
-      <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <Modal isOpen={isOpen} onClose={onClose} size={size}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Login to request access</ModalHeader>
@@ -42,7 +43,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
             </Text>
           </ModalBody>
 
-          <ModalFooter justifyContent="center">
+          <ModalFooter justifyContent="flex-start">
             <LoginButtons buttons={identities.developer} />
           </ModalFooter>
         </ModalContent>
