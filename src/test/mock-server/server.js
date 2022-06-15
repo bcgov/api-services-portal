@@ -118,10 +118,13 @@ const server = mockServer(schemaWithMocks, {
     mySelf: () => db.get('user'),
     BusinessProfile: () => ({
       user: {
-        displayName: 'Joe Smith',
-        firstname: 'Joe',
-        surname: 'Smith',
-        email: 'joe_smith@nowhere.com',
+        displayName: 'nmerryweather',
+        firstname: 'Nathaniel',
+        surname: 'Merryweather',
+        email: 'nmerryweather@nowhere.com',
+        guid: casual.uuid,
+        isSuspended: false,
+        isManagerDisabled: false,
       },
       institution: {
         type: 'Other',
@@ -551,6 +554,14 @@ app.use('/about', (_, res) => {
       helpSupportUrl: 'http://url.com/helpSupportUrl',
       helpReleaseUrl: 'http://url.com/helpReleaseUrl',
       helpStatusUrl: 'http://url.com/helpStatusUrl',
+    },
+    identities: {
+      developer: ['idir', 'bceid', 'bcsc', 'github'],
+      provider: ['idir'],
+    },
+    accountLinks: {
+      bceidUrl: 'https://www.bceid.ca/',
+      bcscUrl: 'https://id.gov.bc.ca/',
     },
   });
 });

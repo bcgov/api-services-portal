@@ -5,6 +5,7 @@ import {
   Button,
   Flex,
   Icon,
+  Link,
   Menu,
   MenuButton,
   MenuList,
@@ -12,12 +13,15 @@ import {
   Center,
   HStack,
   StackDivider,
+  Text,
+  MenuDivider,
 } from '@chakra-ui/react';
+import { BiLinkExternal } from 'react-icons/bi';
 import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
-import Link from 'next/link';
 import HelpMenu from './help-menu';
+import { useGlobal } from '@/shared/services/global';
 
 interface AuthActionProps {
   site: string;
@@ -25,6 +29,9 @@ interface AuthActionProps {
 
 const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
+  const isBCeIDUser = user?.roles.includes('bceid-business-user');
+  const isBcscUser = user?.roles.includes('bcsc-user');
+  const global = useGlobal();
 
   if (site === 'redirect') {
     return <></>;
@@ -83,19 +90,64 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
           <MenuList borderRadius={0}>
             <MenuItem
               as="a"
-              color="text"
               href="/profile"
               data-testid="auth-menu-user-profile"
             >
               My Profile
             </MenuItem>
+            {isBcscUser && (
+              <>
+                <MenuDivider />
+                <MenuItem
+                  as={Link}
+                  color="bc-blue"
+                  target="_blank"
+                  href={global.accountLinks.bcscUrl}
+                  rel="noreferrer noopener"
+                >
+                  Manage My BC Services Card Account
+                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
+                </MenuItem>
+                <MenuDivider />
+              </>
+            )}
+            {isBCeIDUser && (
+              <>
+                <MenuDivider />
+                <MenuItem
+                  as="div"
+                  display="flex"
+                  flexDir="column"
+                  alignItems="flex-start"
+                  sx={{
+                    p: {
+                      fontSize: 'md',
+                      color: '#606060CC',
+                    },
+                  }}
+                >
+                  <Text>{`BCeID User ID: ${user?.username}`}</Text>
+                  <Text>{`Business: ${user?.businessName}`}</Text>
+                  <Text>
+                    <Link
+                      color="bc-blue"
+                      target="_blank"
+                      href={global.accountLinks.bceidUrl}
+                      rel="noreferrer noopener"
+                    >
+                      Manage My BCeID Account <Icon as={BiLinkExternal} />
+                    </Link>
+                  </Text>
+                </MenuItem>
+                <MenuDivider />
+              </>
+            )}
             <MenuItem
               as="a"
-              color="text"
               href="/admin/signout"
               data-testid="auth-menu-signout-btn"
             >
-              Sign Out
+              Logout
             </MenuItem>
           </MenuList>
         </Menu>
