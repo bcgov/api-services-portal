@@ -1,11 +1,11 @@
-const { Text, Checkbox, Relationship, Select } = require('@keystonejs/fields')
+const { Text, Checkbox, Relationship, Select } = require('@keystonejs/fields');
 
-const { byTracking, atTracking } = require('@keystonejs/list-plugins')
+const { byTracking, atTracking } = require('@keystonejs/list-plugins');
 
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => {
-    return Boolean(user && user.isAdmin);
-}
+  return Boolean(user && user.isAdmin);
+};
 
 const userOwnsItem = ({ authentication: { item: user } }) => {
   if (!user) {
@@ -17,7 +17,7 @@ const userOwnsItem = ({ authentication: { item: user } }) => {
   return { id: user.id };
 };
 
-const userIsAdminOrOwner = auth => {
+const userIsAdminOrOwner = (auth) => {
   const isAdmin = access.userIsAdmin(auth);
   const isOwner = access.userOwnsItem(auth);
   return isAdmin ? isAdmin : isOwner;
@@ -31,6 +31,10 @@ module.exports = {
     sub: { type: Text, required: true },
     name: { type: Text },
     username: { type: Text, required: false },
+    provider: { type: Text, required: false, isUnique: false },
+    providerUserGuid: { type: Text, required: false, isUnique: false },
+    providerUsername: { type: Text, required: false, isUnique: false },
+    businessName: { type: Text, required: false, isUnique: false },
     email: {
       type: Text,
       isUnique: false,
@@ -44,13 +48,13 @@ module.exports = {
       },
     },
     userId: {
-        type: Text,
-        isUnique: false,
+      type: Text,
+      isUnique: false,
     },
     namespace: { type: Text, required: true },
     groups: { type: Text, required: true },
     roles: { type: Text, required: true },
-    scopes: { type: Text, required: true }
+    scopes: { type: Text, required: true },
   },
   // List-level access controls
   access: {
@@ -60,7 +64,5 @@ module.exports = {
     delete: access.userIsAdmin,
     auth: true,
   },
-  plugins: [
-    atTracking()
-  ]
-}
+  plugins: [atTracking()],
+};

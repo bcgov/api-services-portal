@@ -126,7 +126,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                     },
                   }}
                 >
-                  <Text>{`BCeID User ID: ${user?.username}`}</Text>
+                  <Text>{`BCeID User ID: ${user?.providerUsername}`}</Text>
                   <Text>{`Business: ${user?.businessName}`}</Text>
                   <Text>
                     <Link

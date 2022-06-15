@@ -304,7 +304,9 @@ class Oauth2ProxyAuthStrategy {
 
     const name = oauthUser['name'];
     const identityProvider = oauthUser['identity_provider'];
+    const providerUserGuid = oauthUser['provider_user_guid'];
     const providerUsername = oauthUser['provider_username'];
+    const businessName = oauthUser['business_name'];
     const email = oauthUser['email'];
     const username = oauthUser['preferred_username'];
     const groups = JSON.stringify(oauthUser['groups']);
@@ -362,7 +364,13 @@ class Oauth2ProxyAuthStrategy {
                         createUser(data: {name: $name, username: $username, email: $email, provider: $identityProvider, providerUsername: $providerUsername, isAdmin: false }) {
                             id
                     } }`,
-        variables: { name, email, username, identityProvider, providerUsername },
+        variables: {
+          name,
+          email,
+          username,
+          identityProvider,
+          providerUsername,
+        },
       });
       if (errors) {
         logger.error(
@@ -375,7 +383,12 @@ class Oauth2ProxyAuthStrategy {
     } else {
       // update if "name" or "email" has changed
       const saved = _results[0];
-      if (saved.name != name || saved.email != email || saved.providerUsername != providerUsername) {
+      if (
+        saved.name != name ||
+        saved.email != email ||
+        saved.identityProvider === null ||
+        saved.providerUsername != providerUsername
+      ) {
         logger.info(
           'register_user - updating name (%s), email (%s) and providerUsername (%s) for %s',
           name,
@@ -408,8 +421,8 @@ class Oauth2ProxyAuthStrategy {
       logger.debug('Temporary Credential NOT FOUND - CREATING AUTOMATICALLY');
       const { errors } = await this.keystone.executeGraphQL({
         context: this.keystone.createContext({ skipAccessControl: true }),
-        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
-                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, email: $email, isAdmin: false, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
+        query: `mutation ($jti: String, $sub: String, $name: String, $email: String, $username: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String, $businessName: String, $groups: String, $roles: String, $scopes: String, $userId: String) {
+                        createTemporaryIdentity(data: {jti: $jti, sub: $sub, name: $name, username: $username, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername, businessName: $businessName, email: $email, isAdmin: false, groups: $groups, roles: $roles, scopes: $scopes, userId: $userId }) {
                             id
                     } }`,
         variables: {
@@ -418,6 +431,10 @@ class Oauth2ProxyAuthStrategy {
           name,
           email,
           username,
+          identityProvider,
+          providerUserGuid,
+          providerUsername,
+          businessName,
           groups,
           roles,
           scopes: '[]',

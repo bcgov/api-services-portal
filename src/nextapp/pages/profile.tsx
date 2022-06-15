@@ -16,7 +16,10 @@ import { uid } from 'react-uid';
 const fields = [
   { name: 'Name', key: 'name' },
   { name: 'Email', key: 'email' },
-  { name: 'Username', key: 'username' },
+  { name: 'Username', key: 'providerUsername' },
+  { name: 'Provider', key: 'provider' },
+  { name: 'User ID', key: 'username' },
+  { name: 'Business Name', key: 'businessName' },
 ];
 
 const ProfilePage: React.FC = () => {
