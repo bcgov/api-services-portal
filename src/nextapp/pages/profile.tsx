@@ -18,8 +18,6 @@ const fields = [
   { name: 'Email', key: 'email' },
   { name: 'Username', key: 'providerUsername' },
   { name: 'Provider', key: 'provider' },
-  { name: 'User ID', key: 'username' },
-  { name: 'Business Name', key: 'businessName' },
 ];
 
 const ProfilePage: React.FC = () => {

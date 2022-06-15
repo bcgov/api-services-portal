@@ -42,6 +42,7 @@ module.exports = {
     name: { type: Text },
     username: { type: Text, required: false, isUnique: true },
     provider: { type: Text, required: false, isUnique: false },
+    providerUserGuid: { type: Text, required: false, isUnique: false },
     providerUsername: { type: Text, required: false, isUnique: false },
     email: {
       type: Text,

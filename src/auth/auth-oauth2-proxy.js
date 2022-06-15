@@ -360,8 +360,8 @@ class Oauth2ProxyAuthStrategy {
       // auto-create a user record
       const { data, errors } = await this.keystone.executeGraphQL({
         context: this.keystone.createContext({ skipAccessControl: true }),
-        query: `mutation ($name: String, $email: String, $username: String, $identityProvider: String, $providerUsername: String) {
-                        createUser(data: {name: $name, username: $username, email: $email, provider: $identityProvider, providerUsername: $providerUsername, isAdmin: false }) {
+        query: `mutation ($name: String, $email: String, $username: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String) {
+                        createUser(data: {name: $name, username: $username, email: $email, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername, isAdmin: false }) {
                             id
                     } }`,
         variables: {
@@ -369,6 +369,7 @@ class Oauth2ProxyAuthStrategy {
           email,
           username,
           identityProvider,
+          providerUserGuid,
           providerUsername,
         },
       });
@@ -390,9 +391,10 @@ class Oauth2ProxyAuthStrategy {
         saved.providerUsername != providerUsername
       ) {
         logger.info(
-          'register_user - updating name (%s), email (%s) and providerUsername (%s) for %s',
+          'register_user - updating name (%s), email (%s), providerUserGuid (%s), providerUsername (%s) for %s',
           name,
           email,
+          providerUserGuid,
           providerUsername,
           username
         );

@@ -5050,11 +5050,6 @@ export type MutationCreateNamespaceArgs = {
 };
 
 
-export type MutationDeleteNamespaceArgs = {
-  namespace: Scalars['String'];
-};
-
-
 export type MutationForceDeleteNamespaceArgs = {
   namespace: Scalars['String'];
   force: Scalars['Boolean'];
@@ -7649,6 +7644,8 @@ export enum SortUsersBy {
   UsernameDesc = 'username_DESC',
   ProviderAsc = 'provider_ASC',
   ProviderDesc = 'provider_DESC',
+  ProviderUserGuidAsc = 'providerUserGuid_ASC',
+  ProviderUserGuidDesc = 'providerUserGuid_DESC',
   ProviderUsernameAsc = 'providerUsername_ASC',
   ProviderUsernameDesc = 'providerUsername_DESC',
   EmailAsc = 'email_ASC',
@@ -8094,6 +8091,7 @@ export type User = {
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
   provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
   providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
@@ -8113,6 +8111,7 @@ export type UserCreateInput = {
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
   provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
   providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
@@ -8142,6 +8141,7 @@ export type UserUpdateInput = {
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
   provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
   providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
@@ -8210,6 +8210,24 @@ export type UserWhereInput = {
   provider_not_ends_with_i?: Maybe<Scalars['String']>;
   provider_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   provider_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUserGuid_not?: Maybe<Scalars['String']>;
+  providerUserGuid_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_i?: Maybe<Scalars['String']>;
+  providerUserGuid_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   providerUsername?: Maybe<Scalars['String']>;
   providerUsername_not?: Maybe<Scalars['String']>;
   providerUsername_contains?: Maybe<Scalars['String']>;
