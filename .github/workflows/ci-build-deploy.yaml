@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [dev, main, feature/*]
+    branches: [dev, test, main, feature/*]
 
 env:
   REGISTRY: ghcr.io
@@ -307,3 +307,42 @@ jobs:
           OIDC_CLIENT_ID=${{ secrets.OIDC_CLIENT_ID }} \
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
           ./scripts/init.sh
+
+      - name: 'Restart Portal in OCP Test Namespace'
+        if: github.ref == 'refs/heads/test'
+        run: |
+          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
+
+      - name: 'Create Pull Request for Release'
+        if: github.ref == 'refs/heads/test'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const openPrs = await github.rest.pulls.list({
+              owner,
+              repo,
+              head: '${{ github.ref_name }}',
+              base: 'main',
+              state: 'open'
+            })
+
+            if(openPrs.data.length === 0){
+              await github.rest.pulls.create({
+              title: 'Create Latest Release',
+              owner,
+              repo,
+              head: '${{ github.ref_name }}',
+              base: 'main',
+              body: [
+                'This Pull Request is auto-created by [actions/github-script](https://github.com/actions/github-script).',
+                'Please update this PR with appropriate labels to target specific type of release'
+              ].join('\n\n'),
+              draft: true
+              });
+            } else {
+              console.log("There is already an open Pull Request in place.\n")
+              openPrs.data.forEach((item) => {
+                console.log(item.html_url)
+              })
+            }

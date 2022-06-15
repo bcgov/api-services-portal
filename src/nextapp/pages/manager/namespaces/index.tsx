@@ -312,6 +312,6 @@ export default NamespacesPage;
 
 const mutation = gql`
   mutation DeleteNamespace($name: String!) {
-    deleteNamespace(namespace: $name)
+    forceDeleteNamespace(namespace: $name, force: false)
   }
 `;

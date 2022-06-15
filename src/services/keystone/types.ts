@@ -4253,7 +4253,6 @@ export type Mutation = {
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
   createNamespace?: Maybe<Namespace>;
-  deleteNamespace?: Maybe<Scalars['Boolean']>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
