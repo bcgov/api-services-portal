@@ -42,6 +42,12 @@ const links: NavLink[] = [
     sites: ['devportal'],
   },
   {
+    name: 'Profile',
+    url: '/profile',
+    access: ['portal-user'],
+    sites: ['platform'],
+  },
+  {
     name: 'Namespaces',
     url: '/manager/namespaces',
     altUrls: [

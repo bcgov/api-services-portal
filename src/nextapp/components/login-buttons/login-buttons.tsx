@@ -21,6 +21,8 @@ interface LoginButtonsProps {
 
 const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
   const router = useRouter();
+  const forwardPath: string =
+    'f' in router?.query ? router.query.f.toString() : router?.asPath;
 
   const buttonComponents = {
     idir: (
@@ -28,7 +30,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
         as="a"
         key="idir"
         variant="primary"
-        href={buildUrl('idir', router?.asPath)}
+        href={buildUrl('idir', forwardPath)}
       >
         IDIR
       </Button>
@@ -38,7 +40,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
         as="a"
         key="bceid"
         variant="primary"
-        href={buildUrl('bceid-business', router?.asPath)}
+        href={buildUrl('bceid-business', forwardPath)}
       >
         BCeID
       </Button>
@@ -48,7 +50,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
         as="a"
         key="bscs"
         variant="primary"
-        href={buildUrl('bcsc', router?.asPath)}
+        href={buildUrl('bcsc', forwardPath)}
       >
         BC Services Card
       </Button>
@@ -61,7 +63,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
         bgColor="#f5f5f5"
         borderColor="#333"
         color="#333"
-        href={buildUrl('github', router?.asPath)}
+        href={buildUrl('github', forwardPath)}
       >
         Github
       </Button>
