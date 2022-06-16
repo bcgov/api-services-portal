@@ -25,6 +25,7 @@ import EmptyPane from '@/components/empty-pane';
 // import Filters from '@/components/filters';
 import {
   Application,
+  ConsumerSummary,
   GatewayConsumer,
   Query,
 } from '@/shared/types/query.types';
@@ -74,7 +75,7 @@ const ConsumersPage: React.FC<
   const client = useQueryClient();
   const [search, setSearch] = React.useState('');
   const [grantAccess, setGrantAccess] = React.useState(null);
-  const { data } = useApi(
+  const { data, status } = useApi(
     queryKey,
     {
       query,
@@ -91,33 +92,22 @@ const ConsumersPage: React.FC<
       client.invalidateQueries(queryKey);
     },
   });
-  const accessRequests = React.useMemo(() => {
-    if (!data?.allAccessRequestsByNamespace) {
-      return [];
-    }
-    return data.allAccessRequestsByNamespace;
-  }, [data]);
+  const accessRequests = data?.allAccessRequestsByNamespace ?? [];
   const consumers = React.useMemo(() => {
-    if (!data?.allServiceAccessesByNamespace) {
+    if (!data?.getFilteredNamespaceConsumers) {
       return [];
     }
 
     const searchTerm = new RegExp(search, 'i');
-    const result = data.allServiceAccessesByNamespace
-      ?.filter((d) => !!d.consumer)
-      .map((d) => {
-        return d;
-      });
 
     if (!search) {
-      return result;
+      return data.getFilteredNamespaceConsumers;
     }
 
-    return result.filter((d) => {
+    return data.getFilteredNamespaceConsumers.filter((d) => {
+      const labels = d.labels.map((l) => l.values.join(' ')).join(' ');
       return (
-        d.consumer.username.search(searchTerm) >= 0 ||
-        d.consumer.id.search(searchTerm) >= 0 ||
-        d.consumer.tags.search(searchTerm) >= 0
+        d.username.search(searchTerm) >= 0 || labels.search(searchTerm) >= 0
       );
     });
   }, [data, search]);
@@ -188,7 +178,7 @@ const ConsumersPage: React.FC<
     [grantMutate, toast]
   );
   const handleGrant = React.useCallback(
-    (d: ConsumerListItem) => () => {
+    (d: ConsumerSummary) => () => {
       setGrantAccess(d);
     },
     []
@@ -234,6 +224,7 @@ const ConsumersPage: React.FC<
             <Heading
               size="sm"
               fontWeight="normal"
+              data-testid="consumers-count-text"
             >{`${totalConsumers} Consumer${
               totalConsumers === 1 ? '' : 's'
             }`}</Heading>
@@ -265,21 +256,21 @@ const ConsumersPage: React.FC<
               />
             }
           >
-            {(d: ConsumerListItem) => (
-              <Tr key={uid(d.consumer.id)}>
+            {(d: ConsumerSummary) => (
+              <Tr key={uid(d.id)}>
                 <Td width="25%">
                   <NextLink passHref href={`/manager/consumers/${d.id}`}>
                     <Link color="bc-link" textDecor="underline">
-                      {d.consumer.username}
+                      {d.username}
                     </Link>
                   </NextLink>
                 </Td>
                 <Td width="50%">
                   <Wrap spacing={2.5}>
-                    {JSON.parse(d.consumer.tags).map((t) => (
+                    {d.labels.map((t) => (
                       <WrapItem key={uid(t)}>
                         <Tag bgColor="white" variant="outline">
-                          {t}
+                          {`${t.labelGroup} = ${t.values.join(', ')}`}
                         </Tag>
                       </WrapItem>
                     ))}
@@ -287,8 +278,8 @@ const ConsumersPage: React.FC<
                 </Td>
                 <Td width="25%">
                   <Flex align="center" justify="space-between">
-                    {formatDistanceToNow(new Date(d.consumer.updatedAt))} ago
-                    <ActionsMenu data-testid={`consumer-${d.consumer.id}-menu`}>
+                    {formatDistanceToNow(new Date(d.lastUpdated))} ago
+                    <ActionsMenu data-testid={`consumer-${d.id}-menu`}>
                       <MenuItem
                         color="bc-link"
                         onClick={handleGrant(d)}
@@ -298,7 +289,7 @@ const ConsumersPage: React.FC<
                       </MenuItem>
                       <MenuItem
                         color="red"
-                        onClick={handleDelete(d.consumer.id)}
+                        onClick={handleDelete(d.id)}
                         data-testid="consumer-delete-menuitem"
                       >
                         Delete Consumer

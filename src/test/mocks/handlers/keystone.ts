@@ -1,13 +1,14 @@
-import { Logger } from '../../logger';
+import { Logger } from '../../../logger';
 import YAML from 'js-yaml';
 import fs from 'fs';
+import path from 'path';
 import { strict as assert } from 'assert';
 import { Environment } from '@/services/keystone/types';
 
 const logger = Logger('mocks.ks');
-
+console.log(path.resolve('test/mocks/handlers/data/ns-default.yaml'))
 const nsDefault = YAML.load(
-  fs.readFileSync('./mocks/handlers/data/ns-default.yaml', 'utf8')
+fs.readFileSync(path.resolve('test/mocks/handlers/data/ns-default.yaml'), 'utf8')
 );
 
 const scenarios: {

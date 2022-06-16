@@ -1,15 +1,16 @@
 import { graphql, rest } from 'msw';
 
-import { Logger } from '../../logger';
+import { Logger } from '../../../logger';
 import YAML from 'js-yaml';
 import fs from 'fs';
+import path from 'path';
 import url from 'url';
 import { strict as assert } from 'assert';
 
 const logger = Logger('mocks.kc');
 
 const def = YAML.load(
-  fs.readFileSync('./mocks/handlers/data/keycloak.yaml', 'utf8')
+  fs.readFileSync(path.resolve('test/mocks/handlers/data/keycloak.yaml'), 'utf8')
 );
 
 const calls: any = {

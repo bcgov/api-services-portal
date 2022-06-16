@@ -27,6 +27,61 @@ export const harleyAccessRequest = {
 };
 
 const consumers = {
+  getFilteredNamespaceConsumers: [
+    {
+      id: 'c1',
+      consumerType: '',
+      username: 'sa-moh-proto-ca853245-9d9af1b3c417',
+      labels: [
+        {
+          labelGroup: 'Facility',
+          values: ['London Drugs #5062'],
+        },
+        {
+          labelGroup: 'Phone Number',
+          values: ['204-537-5569'],
+        },
+        {
+          labelGroup: 'Contact',
+          values: ['Antonio Mario Banderas'],
+        },
+      ],
+      lastUpdated: new Date().toISOString(),
+    },
+    {
+      id: 'd1',
+      consumerType: '',
+      username: 'Test Consumer for Shoppers',
+      labels: [
+        {
+          labelGroup: 'Facility',
+          values: ['Shoppers Drug Mart'],
+        },
+        {
+          labelGroup: 'Phone Number',
+          values: ['604-499-4239'],
+        },
+      ],
+      lastUpdated: subDays(new Date(), 20).toISOString(),
+    },
+    {
+      id: 'c2',
+      consumerType: '',
+      username: 'Test Consumer for Pharmasave',
+      labels: [
+        {
+          labelGroup: 'Facility',
+          values: ['Pharmasave #2222'],
+        },
+        {
+          labelGroup: 'Phone Number',
+          values: ['444-444-4444'],
+        },
+      ],
+      lastUpdated: subDays(today, 6).toISOString(),
+    },
+  ],
+
   allServiceAccessesByNamespace: [
     {
       namespace: 'loc',
@@ -244,8 +299,8 @@ export const deleteConsumersHandler = (req, res, ctx) => {
 
   const mutated = {
     ...store.data,
-    allServiceAccessesByNamespace: store.data.allServiceAccessesByNamespace.filter(
-      (c) => c.consumer.id !== id
+    getFilteredNamespaceConsumers: store.data.getFilteredNamespaceConsumers.filter(
+      (c) => c.id !== id
     ),
   };
   store.update(mutated);
