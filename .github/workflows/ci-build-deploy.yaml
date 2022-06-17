@@ -315,12 +315,12 @@ jobs:
           openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
           insecure_skip_tls_verify: true
-          namespace: ${{ env.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
 
       - name: 'Restart Portal in Gold Test Namespace'
         if: github.ref == 'refs/heads/test'
         run: |
-          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
+          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
 
       - name: 'Create Pull Request for Release'
         if: github.ref == 'refs/heads/test'
