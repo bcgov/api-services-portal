@@ -36,7 +36,7 @@ jobs:
         with:
           version: '4.6'
 
-      - name: Authenticate and set context
+      - name: Authenticate to silver and set context
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
@@ -308,7 +308,16 @@ jobs:
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
           ./scripts/init.sh
 
-      - name: 'Restart Portal in OCP Test Namespace'
+      - name: Authenticate to Gold and set context
+        if: github.ref == 'refs/heads/test'
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+
+      - name: 'Restart Portal in Gold Test Namespace'
         if: github.ref == 'refs/heads/test'
         run: |
           oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
