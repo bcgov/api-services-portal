@@ -1,6 +1,8 @@
 export interface UserData {
   sub: string;
   name: string;
+  businessName: string;
+  providerUsername: string;
   username: string;
   roles: string[];
   namespace: string | null;

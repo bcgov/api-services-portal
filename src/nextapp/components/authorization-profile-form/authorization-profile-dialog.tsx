@@ -239,13 +239,11 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
               </Flex>
               <Tabs index={tabIndex} pos="relative" onChange={handleTabChange}>
                 <TabList mt={4} mb={2}>
-                  <Tab px={0} cursor="default">
-                    Authentication
-                  </Tab>
-                  <Tab px={0} ml={4} cursor="default">
+                  <Tab px={0}>Authentication</Tab>
+                  <Tab px={0} ml={4}>
                     Authorization
                   </Tab>
-                  <Tab px={0} ml={4} cursor="default">
+                  <Tab px={0} ml={4}>
                     Client Management
                   </Tab>
                   <Box flex={1} />
