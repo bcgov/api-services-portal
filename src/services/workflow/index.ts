@@ -36,4 +36,7 @@ export {
   getGwaProductEnvironment,
   getMyNamespaces,
   getResourceServerContext,
+  getEnvironmentContext,
 } from './get-namespaces';
+
+export { getConsumerAuthz } from './get-consumer-authz';

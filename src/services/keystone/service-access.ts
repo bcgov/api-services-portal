@@ -37,6 +37,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                         }
                         consumer {
                             id
+                            username
                             customId
                             extForeignKey
                         }
@@ -269,9 +270,11 @@ export async function lookupLabeledServiceAccessesForNamespace(
                           username
                           customId
                         }
-                        labels {
-                          name
-                          value
+                        application {
+                          labels {
+                            name
+                            value
+                          }
                         }
                         updatedAt
                     }
@@ -309,6 +312,7 @@ export async function lookupServiceAccessesByConsumer(
                         productEnvironment {
                             id
                             name
+                            appId
                             flow
                             product {
                               name

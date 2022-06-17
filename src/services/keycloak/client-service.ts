@@ -84,13 +84,6 @@ export class KeycloakClientService {
     return scopes;
   }
 
-  public async listDefaultClientScopes() {
-    logger.debug('[listDefaultClientScopes]');
-    const scopes = await this.kcAdminClient.clientScopes.listDefaultClientScopes();
-    logger.debug('[listDefaultClientScopes] RESULT %j', scopes);
-    return scopes;
-  }
-
   public async findResourceByName(id: string, name: string) {
     const lkup = await (
       await this.kcAdminClient.clients.listResources({ id, name })

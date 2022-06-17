@@ -20,6 +20,7 @@ import {
   WrapItem,
   Button,
   useDisclosure,
+  Code,
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import Card from '@/components/card';
@@ -210,6 +211,22 @@ const ConsumerPage: React.FC<
               </ClientRequest>
             </Detail>
           </Flex>
+        </Box>
+        <Box>
+          {data.getNamespaceConsumerAccess.prodEnvAccess.map((acc) => {
+            return (
+              <Box>
+                {JSON.stringify(acc, null, 3)}
+                <ConsumerEditDialog
+                  consumer={consumer}
+                  environment={acc.environment}
+                  data={acc.plugins}
+                  queryKey={queryKey}
+                  product={{ name: acc.productName } as Product}
+                />
+              </Box>
+            );
+          })}
         </Box>
         <Box as="section">
           <Box as="header" mb={4}>

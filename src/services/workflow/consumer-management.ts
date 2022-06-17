@@ -56,6 +56,7 @@ import {
   lookupLabeledServiceAccessesForNamespace,
   lookupServiceAccessesByConsumer,
   lookupServiceAccessesByNamespace,
+  lookupEnvironmentAndIssuerById,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { KongConsumerService } from '../kong';
@@ -64,9 +65,17 @@ import {
   ConsumerLabel,
   ConsumerProdEnvAccess,
   ConsumerSummary,
+  RequestControls,
 } from './types';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
+import { getEnvironmentContext } from './get-namespaces';
+import { getConsumerAuthz } from '.';
+import { GatewayConsumer } from '../keystone/types';
+import {
+  KeycloakClientRegistrationService,
+  KeycloakClientService,
+} from '../keycloak';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -83,13 +92,15 @@ export async function getFilteredNamespaceConsumers(
         username: acc.consumer.username,
         customId: acc.consumer.customId,
         consumerType: acc.consumerType,
-        labels: acc.labels.map(
-          (l) =>
-            ({
-              labelGroup: l.name,
-              values: JSON.parse(l.value),
-            } as ConsumerLabel)
-        ),
+        labels: acc.labels
+          ? acc.labels?.map(
+              (l) =>
+                ({
+                  labelGroup: l.name,
+                  values: JSON.parse(l.value),
+                } as ConsumerLabel)
+            )
+          : [],
         lastUpdated: acc.updatedAt,
       } as ConsumerSummary;
     });
@@ -120,34 +131,38 @@ export async function getNamespaceConsumerAccess(
     prodEnvAccess: [],
   };
 
+  access.prodEnvAccess = (
+    await getConsumerProdEnvAccessList(context, ns, serviceAccess.consumer.id)
+  ).prodEnvAccess;
+
+  return access;
+}
+
+async function getConsumerProdEnvAccessList(
+  context: any,
+  ns: string,
+  consumerId: string
+): Promise<{
+  consumer: GatewayConsumer;
+  prodEnvAccess: ConsumerProdEnvAccess[];
+}> {
   // ConsumerProdEnvAccess:
   // - get ServiceAccess records that match the consumer ID and namespace
   // - get the ACLs for the Consumer and derive the ProdEnvAccess records
+  const consumer = await lookupConsumerPlugins(context, consumerId);
 
   const kongApi = new KongConsumerService(
     process.env.KONG_URL,
     process.env.GWA_URL
   );
   const aclGroups = (
-    await kongApi.getConsumerACLByNamespace(
-      serviceAccess.consumer.extForeignKey,
-      ns
-    )
+    await kongApi.getConsumerACLByNamespace(consumer.extForeignKey, ns)
   ).map((acl: any) => acl.group);
 
   // find the ProductEnvironments that the ACL 'group' corresponds to
   const envs = await lookupEnvironmentsByNS(context, ns);
 
-  const gwConsumer = await lookupConsumerPlugins(
-    context,
-    serviceAccess.consumer.id
-  );
-
-  const other = await lookupServiceAccessesByConsumer(
-    context,
-    ns,
-    serviceAccess.consumer.id
-  );
+  const other = await lookupServiceAccessesByConsumer(context, ns, consumerId);
 
   const batch1 = other.map((svc) => {
     return {
@@ -155,11 +170,12 @@ export async function getNamespaceConsumerAccess(
       environment: {
         id: svc.productEnvironment.id,
         name: svc.productEnvironment.name,
+        appId: svc.productEnvironment.appId,
         additionalDetails: svc.productEnvironment.additionalDetailsToRequest,
         flow: svc.productEnvironment.flow,
         services: svc.productEnvironment.services,
       },
-      plugins: gwConsumer.plugins.filter(
+      plugins: consumer.plugins.filter(
         (plugin) => plugin.service?.environment.id === svc.productEnvironment.id
       ),
       revocable: false,
@@ -179,11 +195,12 @@ export async function getNamespaceConsumerAccess(
         environment: {
           id: env.id,
           name: env.name,
+          appId: env.appId,
           additionalDetails: env.additionalDetailsToRequest,
           flow: env.flow,
           services: env.services,
         },
-        plugins: gwConsumer.plugins.filter(
+        plugins: consumer.plugins.filter(
           (plugin) => plugin.service?.environment.id === env.id
         ),
         revocable: true,
@@ -192,8 +209,10 @@ export async function getNamespaceConsumerAccess(
       } as ConsumerProdEnvAccess;
     });
 
-  access.prodEnvAccess = batch1.concat(batch2);
-  return access;
+  return {
+    consumer,
+    prodEnvAccess: batch1.concat(batch2),
+  };
 }
 
 export async function getConsumerProdEnvAccess(
@@ -218,10 +237,30 @@ export async function getConsumerProdEnvAccess(
 
   assert.strictEqual(consumer.prodEnvAccess.length, 1, 'Invalid access data');
 
-  const access = consumer.prodEnvAccess;
+  const access = consumer.prodEnvAccess[0];
 
-  // authorization?: any;
-  // Authorization: Scopes and Roles for flows requiring IdPs
+  // If Flow is client-credentials, then lookup the Scopes and Roles for the Consumer from the IdP
+  if (access.environment.flow === 'client-credentials') {
+    logger.debug('[getConsumerProdEnvAccess] Gather authz from IdP..');
+    const envCtx = await getEnvironmentContext(
+      context,
+      prodEnvId,
+      { product: { namespace: ns } },
+      false
+    );
+    if (envCtx) {
+      const authz = await getConsumerAuthz(envCtx, consumer.consumer.username);
+      access.authorization = {
+        credentialIssuer: {
+          ...envCtx.prodEnv.credentialIssuer,
+          ...{ environmentDetails: null },
+        },
+        defaultClientScopes: authz.defaultScopes,
+        defaultOptionalScopes: authz.optionalScopes,
+        roles: authz.clientRoles,
+      };
+    }
+  }
 
   // request?: AccessRequest;
   // lookup request based on ServiceAccess record
@@ -230,29 +269,226 @@ export async function getConsumerProdEnvAccess(
     ns,
     serviceAccessId
   );
-  access[0].request = request;
+  access.request = request;
 
-  return access[0];
+  return access;
 }
 
+/**
+ * Granting is only applicable to ACL
+ * ?? What about plugins?
+ *
+ * @param context
+ * @param ns
+ * @param consumerId
+ * @param prodEnvId
+ */
 export async function grantConsumerProdEnvAccess(
   context: any,
-  consumerId: string,
-  access: ConsumerProdEnvAccess
-): Promise<void> {}
-
-export async function updateConsumerProdEnvAccess(
-  context: any,
-  consumerId: string,
-  access: ConsumerProdEnvAccess
-): Promise<void> {}
-
-export async function revokeConsumerProdEnvAccess(
-  context: any,
+  ns: string,
   consumerId: string,
   prodEnvId: string
-): Promise<void> {}
+): Promise<void> {
+  // make sure the consumer hasn't granted access already
+  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
+    context,
+    ns,
+    consumerId
+  );
 
+  const found =
+    prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
+
+  assert.strictEqual(
+    found,
+    false,
+    'Consumer already granted to this product environment.'
+  );
+
+  const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
+
+  assert.strictEqual(
+    ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow),
+    true,
+    `Flow ${prodEnv.flow} can not be granted to consumer`
+  );
+
+  const kongApi = new KongConsumerService(
+    process.env.KONG_URL,
+    process.env.GWA_API_URL
+  );
+  await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+}
+
+/**
+ * Revoking is only applicable to ACL
+ * ?? What about plugins?
+ *
+ * @param context
+ * @param ns
+ * @param consumerId
+ * @param prodEnvId
+ */
+export async function revokeConsumerProdEnvAccess(
+  context: any,
+  ns: string,
+  consumerId: string,
+  prodEnvId: string
+): Promise<void> {
+  // make sure the consumer has granted access already
+  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
+    context,
+    ns,
+    consumerId
+  );
+
+  const found =
+    prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
+
+  assert.strictEqual(
+    found,
+    true,
+    'Consumer is not granted to this product environment.'
+  );
+
+  const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
+
+  assert.strictEqual(
+    ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow),
+    true,
+    `Flow ${prodEnv.flow} can not be revoked from consumer`
+  );
+
+  const kongApi = new KongConsumerService(
+    process.env.KONG_URL,
+    process.env.GWA_API_URL
+  );
+  await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+}
+
+/**
+ * Updating is about authorization
+ *
+ * @param context
+ * @param ns
+ * @param consumerId
+ * @param prodEnvId
+ * @param controls
+ */
+export async function updateConsumerProdEnvAccess(
+  context: any,
+  ns: string,
+  consumerId: string,
+  prodEnvId: string,
+  controls: RequestControls
+): Promise<void> {
+  // make sure the consumer has granted access already
+  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
+    context,
+    ns,
+    consumerId
+  );
+
+  const selectedProdEnvAccess = prodEnvAccess.filter(
+    (p) => p.environment.id === prodEnvId
+  );
+
+  assert.strictEqual(
+    selectedProdEnvAccess.length,
+    1,
+    'Consumer is not granted to this product environment.'
+  );
+
+  assert.strictEqual(
+    ['client-credentials'].includes(selectedProdEnvAccess[0].environment.flow),
+    true,
+    `Flow ${selectedProdEnvAccess[0].environment.flow} can not be updated for consumer`
+  );
+
+  const envCtx = await getEnvironmentContext(
+    context,
+    prodEnvId,
+    { product: { namespace: ns } },
+    false
+  );
+
+  const kcClientService = new KeycloakClientService(
+    envCtx.issuerEnvConfig.issuerUrl
+  );
+  const kcClientRegService = new KeycloakClientRegistrationService(
+    envCtx.issuerEnvConfig.issuerUrl,
+    envCtx.openid.registration_endpoint
+  );
+  await kcClientService.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  await kcClientRegService.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+
+  const client = await kcClientService.findByClientId(
+    envCtx.issuerEnvConfig.clientId
+  );
+
+  const allScopes = await kcClientService.findRealmClientScopes();
+
+  const selectedScopes = allScopes.filter((r: any) =>
+    controls.defaultClientScopes.includes(r.name)
+  );
+
+  assert.strictEqual(
+    selectedScopes.length,
+    controls.defaultClientScopes.length,
+    'Scope missing from IdP'
+  );
+
+  logger.debug('[updateConsumerProdEnvAccess] selected %j', selectedScopes);
+
+  const consumerUsername = consumer.username;
+
+  const isClient = await kcClientService.isClient(consumerUsername);
+
+  assert.strictEqual(isClient, true, 'Only clients (not users) support scopes');
+
+  await kcClientRegService.syncAndApply(
+    client.id,
+    selectedScopes.map((scope) => scope.id),
+    [] as string[]
+  );
+}
+
+/**
+ * Revoke all Consumer Access will delete the Service Access
+ * record associated with the consumerId and prodEnvId
+ * and cascade handling of the client on the IdP (if applicable)
+ *
+ * @param context
+ * @param ns
+ * @param consumerId
+ * @param prodEnvId
+ */
+export async function revokeAllConsumerAccess(
+  context: any,
+  ns: string,
+  consumerId: string
+): Promise<void> {
+  // Loop through the ProdEnv access
+  // and either delete the ServiceAccess record
+  // or revoke ACL
+}
+
+/**
+ * Is this at the Application or Consumer level?
+ * Application can have 0-N Consumers (Credentials) associated with it
+ * (Separate ServiceAccess records get created)
+ * Could want to assign Labels to Users though
+ *
+ * @param context
+ * @param consumerId
+ * @param labels
+ */
 export async function saveConsumerLabels(
   context: any,
   consumerId: string,

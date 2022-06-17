@@ -39,7 +39,11 @@ import {
   o(consumers);
 
   const promises = consumers
-    .filter((c) => c.id === '62a18b772da3cdea467b10fe')
+    .filter(
+      (c) =>
+        c.id === '62a18b772da3cdea467b10fe' ||
+        c.id === '62a1848991c56de2f62d31a6'
+    )
     .map(async (c) => {
       const consumer = await getNamespaceConsumerAccess(ctx, ns, c.id);
       o(consumer);

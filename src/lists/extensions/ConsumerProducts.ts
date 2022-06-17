@@ -48,6 +48,15 @@ type ConsumerProdEnvAccess {
 }
 `;
 
+const typeConsumerAuthorization = `
+type ConsumerAuthorization {
+  credentialIssuer: CredentialIssuer,
+  defaultClientScopes: [String],
+  defaultOptionalScopes: [String],
+  roles: [String]
+}
+`;
+
 module.exports = {
   extensions: [
     (keystone: any) => {
@@ -57,6 +66,7 @@ module.exports = {
           { type: typeConsumerSummary },
           { type: typeConsumerAccess },
           { type: typeConsumerProdEnvAccess },
+          { type: typeConsumerAuthorization },
         ],
         queries: [
           {
