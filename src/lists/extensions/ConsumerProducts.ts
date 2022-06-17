@@ -43,7 +43,7 @@ type ConsumerProdEnvAccess {
   environment: Environment,
   plugins: [GatewayPlugin],
   revocable: Boolean,
-  authorization: String,
+  authorization: ConsumerAuthorization,
   request: AccessRequest
 }
 `;
