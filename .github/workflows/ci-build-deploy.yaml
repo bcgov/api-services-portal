@@ -320,7 +320,7 @@ jobs:
       - name: 'Restart Portal in Gold Test Namespace'
         if: github.ref == 'refs/heads/test'
         run: |
-          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
+          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
 
       - name: 'Create Pull Request for Release'
         if: github.ref == 'refs/heads/test'
