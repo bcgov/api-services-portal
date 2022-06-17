@@ -10,7 +10,10 @@ import { strict as assert } from 'assert';
 const logger = Logger('mocks.kc');
 
 const def = YAML.load(
-  fs.readFileSync(path.resolve('test/mocks/handlers/data/keycloak.yaml'), 'utf8')
+  fs.readFileSync(
+    path.resolve('test/mocks/handlers/data/keycloak.yaml'),
+    'utf8'
+  )
 );
 
 const calls: any = {
@@ -130,7 +133,7 @@ const calls: any = {
     _: any,
     { name }: any
   ) => {
-    // ?name=group-data-custodian-ministry-citizens-services-databc-policy
+    // ?name=group-organization-admin-ministry-citizens-services-databc-policy
     return def.clientPolicies.filter((p: any) => p.name === name).pop();
   },
 

@@ -68,24 +68,24 @@ groups:
           'org-unit': ['databc']
 
   - id: 5978a996-c215-4c3f-a17e-a76396a9d6a4
-    name: data-custodian
-    path: /data-custodian
+    name: organization-admin
+    path: /organization-admin
     subGroups:
       - id: 9fc7ef68-ee29-4678-9f2e-dff0052fac44
         name: MoH
-        path: /data-custodian/MoH
+        path: /organization-admin/MoH
         subGroups: []
       - id: a60c7342-d61b-4b02-a826-483b544fbe22
         name: ministry-citizens-services
-        path: /data-custodian/ministry-citizens-services
+        path: /organization-admin/ministry-citizens-services
         subGroups:
           - id: b6e23545-dd71-49fd-9bbe-735ae7b8290e
             name: databc
-            path: /data-custodian/ministry-citizens-services/databc
+            path: /organization-admin/ministry-citizens-services/databc
             subGroups: []
           - id: a4a22404-da60-4b41-9626-da4b5c68a7e3
             name: data-innovation
-            path: /data-custodian/ministry-citizens-services/data-innovation
+            path: /organization-admin/ministry-citizens-services/data-innovation
             subGroups: []
 
 clientRoles:
@@ -243,8 +243,8 @@ policyAssociations:
         _id: b444a5a1-8e14-4f92-9005-8b476b977e25
     policies:
       - id: 5f84d050-f50d-4a2b-946c-9a9fa6cb3317
-        name: group-data-custodian-ministry-citizens-services-databc-policy
-        description: Group '/data-custodian/ministry-citizens-services' / 'databc' Policy
+        name: group-organization-admin-ministry-citizens-services-databc-policy
+        description: Group '/organization-admin/ministry-citizens-services' / 'databc' Policy
         type: group
         logic: POSITIVE
         decisionStrategy: UNANIMOUS
@@ -255,7 +255,7 @@ clientPermissions:
       id: b444a5a1-8e14-4f92-9005-8b476b977e25
     permissions:
       - id: 0d793387-6617-4cb4-87a3-76478c368849
-        name: Access to 'orgcontrol' services for role data-custodian
+        name: Access to 'orgcontrol' services for role organization-admin
         type: scope
         logic: POSITIVE
         decisionStrategy: UNANIMOUS
@@ -263,8 +263,8 @@ clientPermissions:
 
 clientPolicies:
   - id: 5f84d050-f50d-4a2b-946c-9a9fa6cb3317
-    name: group-data-custodian-ministry-citizens-services-databc-policy
-    description: Group '/data-custodian/ministry-citizens-services' / 'databc' Policy
+    name: group-organization-admin-ministry-citizens-services-databc-policy
+    description: Group '/organization-admin/ministry-citizens-services' / 'databc' Policy
     type: group
     logic: POSITIVE
     decisionStrategy: UNANIMOUS
