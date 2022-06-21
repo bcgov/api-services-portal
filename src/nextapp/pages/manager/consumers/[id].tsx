@@ -24,6 +24,7 @@ import {
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import Card from '@/components/card';
+import groupBy from 'lodash/groupBy';
 import PageHeader from '@/components/page-header';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
@@ -39,6 +40,7 @@ import ProfileCard from '@/components/profile-card';
 import { uid } from 'react-uid';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
+import { env } from 'process';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -78,16 +80,9 @@ const ConsumerPage: React.FC<
     { suspense: false }
   );
   const { isOpen, onClose, onToggle } = useDisclosure();
-  //const consumer = data?.getGatewayConsumerPlugins;
-
-  const consumer = {
-    id: '0',
-    username: 'abc',
-    plugins: [],
-    tags: '[]',
-  };
-
-  const application = data?.allServiceAccesses[0]?.application;
+  const consumer = data?.getNamespaceConsumerAccess;
+  const application = data?.getNamespaceConsumerAccess?.application;
+  const products = Object.keys(groupBy(consumer?.prodEnvAccess, 'productName'));
 
   function renderRow(product: Product, environment: Environment) {
     const tags = [];
@@ -120,11 +115,9 @@ const ConsumerPage: React.FC<
         </Td>
         <Td textAlign="right">
           <ConsumerEditDialog
-            consumer={consumer}
-            environment={environment}
-            data={plugins}
+            prodEnvId={environment.id}
             queryKey={queryKey}
-            product={product}
+            serviceAccessId={id}
           />
         </Td>
       </Tr>
@@ -153,7 +146,7 @@ const ConsumerPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers | ${consumer.username}`}</title>
+        <title>{`Consumers | ${consumer.owner?.name}`}</title>
       </Head>
       <GrantAccessDialog
         consumer={consumer}
@@ -167,11 +160,10 @@ const ConsumerPage: React.FC<
           breadcrumb={breadcrumbs([
             { href: '/manager/consumers', text: 'Consumers' },
             {
-              href: `/manager/consumers/${consumer.id}`,
-              text: consumer.username,
+              text: consumer.owner?.name,
             },
           ])}
-          title={consumer.username}
+          title={consumer.owner?.name}
         />
         <Box as="section" mb={9}>
           <Box as="header" mb={4}>
@@ -185,21 +177,21 @@ const ConsumerPage: React.FC<
                   icon={<Icon as={IoLayers} color="bc-blue" />}
                   bg="bc-gray"
                 />
-                <Text ml={2}>{application.name}</Text>
+                <Text ml={2}>{application?.name}</Text>
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              <ProfileCard data={application.owner} overflow="hidden" />
+              <ProfileCard data={application?.owner} overflow="hidden" />
             </Detail>
           </Flex>
           <Divider />
           <Flex bgColor="white">
             <Detail title="Labels">
               <Wrap spacing={2.5}>
-                {JSON.parse(consumer.tags).map((t) => (
-                  <WrapItem key={uid(t)}>
+                {consumer.labels.map((label) => (
+                  <WrapItem key={uid(label)}>
                     <Tag bgColor="white" variant="outline">
-                      {t}
+                      {`${label.labelGroup} = ${label.values.join(', ')}`}
                     </Tag>
                   </WrapItem>
                 ))}
@@ -207,35 +199,17 @@ const ConsumerPage: React.FC<
             </Detail>
             <Detail>
               <ClientRequest fallback="loading...">
-                <BusinessProfile serviceAccessId="123" />
+                <BusinessProfile serviceAccessId={id} />
               </ClientRequest>
             </Detail>
           </Flex>
         </Box>
-        <Box>
-          {data.getNamespaceConsumerAccess.prodEnvAccess.map((acc) => {
-            return (
-              <Box>
-                {JSON.stringify(acc, null, 3)}
-                <ConsumerEditDialog
-                  consumer={consumer}
-                  environment={acc.environment}
-                  data={acc.plugins}
-                  queryKey={queryKey}
-                  product={{ name: acc.productName } as Product}
-                />
-              </Box>
-            );
-          })}
-        </Box>
         <Box as="section">
           <Box as="header" mb={4}>
-            <Heading size="md">{`Products (${
-              data?.allProductsByNamespace?.length ?? 0
-            })`}</Heading>
+            <Heading size="md">{`Products (${products.length ?? 0})`}</Heading>
           </Box>
-          {data?.allProductsByNamespace?.map((d) => (
-            <Card key={uid(d.id)} heading={d.name} mb={9}>
+          {products.map((p) => (
+            <Card key={uid(p)} heading={p} mb={9}>
               <Table>
                 <Thead>
                   <Tr>
@@ -243,7 +217,40 @@ const ConsumerPage: React.FC<
                     <Th colSpan={2}>Restrictions</Th>
                   </Tr>
                 </Thead>
-                <Tbody>{d.environments.map(renderRow.bind(null, d))}</Tbody>
+                <Tbody>
+                  {data.getNamespaceConsumerAccess?.prodEnvAccess
+                    .filter((d) => d.productName === p)
+                    .map((d) => (
+                      <Tr key={uid(d)}>
+                        <Td>
+                          <EnvironmentTag name={d.environment?.name} />
+                        </Td>
+                        <Td>
+                          {d.plugins.length > 0 && (
+                            <Wrap spacing={2}>
+                              {d.plugins.map((p) => (
+                                <Tag key={p.name} variant="outline">
+                                  {p.name}
+                                </Tag>
+                              ))}
+                            </Wrap>
+                          )}
+                          {d.plugins.length === 0 && (
+                            <Text as="em" color="bc-component">
+                              No restrictions added
+                            </Text>
+                          )}
+                        </Td>
+                        <Td textAlign="right">
+                          <ConsumerEditDialog
+                            prodEnvId={d.environment.id}
+                            queryKey={queryKey}
+                            serviceAccessId={id}
+                          />
+                        </Td>
+                      </Tr>
+                    ))}
+                </Tbody>
               </Table>
             </Card>
           ))}
@@ -289,70 +296,6 @@ const query = gql`
           isApproved
           isComplete
           additionalDetails
-        }
-      }
-    }
-
-    getGatewayConsumerPlugins(id: $id) {
-      id
-      username
-      aclGroups
-      customId
-      extForeignKey
-      namespace
-      plugins {
-        id
-        name
-        extForeignKey
-        config
-        service {
-          id
-          name
-          extForeignKey
-        }
-        route {
-          id
-          name
-          extForeignKey
-        }
-      }
-      tags
-      createdAt
-    }
-
-    allServiceAccesses(where: { id: $id }) {
-      name
-      consumerType
-      application {
-        appId
-        name
-        owner {
-          name
-          username
-          email
-        }
-      }
-    }
-
-    allProductsByNamespace {
-      id
-      name
-      environments {
-        id
-        appId
-        name
-        active
-        flow
-        credentialIssuer {
-          id
-          availableScopes
-          clientRoles
-        }
-        services {
-          name
-          routes {
-            name
-          }
         }
       }
     }

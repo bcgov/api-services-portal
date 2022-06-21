@@ -8,6 +8,7 @@ import {
   gatewayServicesHandler,
   getConsumersHandler,
   getConsumerHandler,
+  getConsumerProdEnvAccessHandler,
   grantConsumerHandler,
   rejectRequestHandler,
   store as consumersStore,
@@ -47,6 +48,7 @@ export const handlers = [
   }),
   keystone.query('GetConsumers', getConsumersHandler),
   keystone.query('GetConsumer', getConsumerHandler),
+  keystone.query('GetConsumerEditDetails', getConsumerProdEnvAccessHandler),
   keystone.query('GetAccessRequestAuth', accessRequestAuthHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
   keystone.query(

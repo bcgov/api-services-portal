@@ -20,44 +20,54 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import {
-  Environment,
-  GatewayConsumer,
+  CredentialIssuer,
   GatewayPlugin,
   GatewayPluginCreateInput,
-  Product,
 } from '@/shared/types/query.types';
+import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
 import RequestAuthorization from './authorization';
 import { QueryKey, useQueryClient } from 'react-query';
+import { useApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 interface ConsumerEditDialogProps {
-  consumer: GatewayConsumer;
-  data: GatewayPlugin[];
-  environment: Environment;
-  product: Product;
   queryKey: QueryKey;
+  serviceAccessId: string;
+  prodEnvId: string;
 }
 
 const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
-  consumer,
-  environment,
-  data,
-  product,
+  prodEnvId,
   queryKey,
+  serviceAccessId,
 }) => {
   const client = useQueryClient();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { data, isLoading, isSuccess } = useApi(
+    ['consumerEdit', prodEnvId, serviceAccessId],
+    { query },
+    { suspense: false, enabled: isOpen }
+  );
   const [tabIndex, setTabIndex] = React.useState(0);
   const restrictions = React.useState<
     (GatewayPlugin | GatewayPluginCreateInput)[]
   >(() => {
-    return data.filter((p) => p.name === 'ip-restriction');
+    return (
+      data?.getConsumerProdEnvAccess.plugins.filter(
+        (p) => p.name === 'ip-restriction'
+      ) ?? []
+    );
   });
   const rateLimits = React.useState(() => {
-    return data.filter((p) => p.name === 'rate-limiting');
+    return (
+      data?.getConsumerProdEnvAccess.plugins.filter(
+        (p) => p.name === 'rate-limiting'
+      ) ?? []
+    );
   });
   // Events
   const handleTabChange = (index: number) => {
@@ -66,8 +76,16 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const handleClose = () => {
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
-    setRestrictions(data.filter((p) => p.name === 'ip-restriction'));
-    setRateLimits(data.filter((p) => p.name === 'rate-limiting'));
+    setRestrictions(
+      data?.getConsumerProdEnvAccess.plugins.filter(
+        (p) => p.name === 'ip-restriction'
+      )
+    );
+    setRateLimits(
+      data?.getConsumerProdEnvAccess.plugins.filter(
+        (p) => p.name === 'rate-limiting'
+      )
+    );
     onClose();
   };
   const handleSave = () => {
@@ -78,13 +96,13 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     console.log('ip-restriction', restrictsionsData, rateLimitsData);
     try {
       toast({
-        title: `${consumer.username} Saved`,
+        title: 'Request saved',
         status: 'success',
       });
       client.invalidateQueries(queryKey);
     } catch {
       toast({
-        title: `${consumer.username} save failed`,
+        title: 'Request save failed',
         status: 'error',
       });
     }
@@ -97,7 +115,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         variant="ghost"
         size="sm"
         onClick={onOpen}
-        data-testid={`${consumer.id}-edit-btn`}
+        data-testid={`${serviceAccessId}-edit-btn`}
       >
         Edit
       </Button>
@@ -111,7 +129,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         <ModalOverlay />
         <ModalContent data-testid="edit-consumer-dialog">
           <ModalHeader data-testid="ar-modal-header">
-            {product.name}
+            {data?.getConsumerProdEnvAccess?.productName}
             <Tabs
               index={tabIndex}
               mt={4}
@@ -119,65 +137,88 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               onChange={handleTabChange}
             >
               <TabList mb={5} data-testid="ar-tabs">
-                <Tab px={0}>Controls</Tab>
-                <Tab px={0} ml={4}>
+                <Tab px={0} isDisabled={isLoading}>
+                  Controls
+                </Tab>
+                <Tab px={0} ml={4} isDisabled={isLoading}>
                   Authorization
                 </Tab>
-                <Tab px={0} ml={4}>
+                <Tab px={0} ml={4} isDisabled={isLoading}>
                   Request Details
                 </Tab>
               </TabList>
             </Tabs>
           </ModalHeader>
           <ModalCloseButton data-testid="consumer-edit-close-btn" />
-          <ModalBody>
-            <Box
-              hidden={tabIndex !== 0}
-              display={tabIndex === 0 ? 'block' : 'none'}
-              data-testid="ar-controls-tab"
-            >
-              <RequestControls
-                rateLimits={rateLimits}
-                restrictions={restrictions}
-              />
-            </Box>
-            <Box
-              hidden={tabIndex !== 1}
-              display={tabIndex === 1 ? 'block' : 'none'}
-              data-testid="ar-authorization-tab"
-            >
-              <RequestAuthorization
-                credentialIssuer={environment.credentialIssuer}
-                id={environment.id}
-              />
-            </Box>
-            <Box
-              hidden={tabIndex !== 2}
-              display={tabIndex === 2 ? 'block' : 'none'}
-              data-testid="ar-request-details-tab"
-            >
-              <Grid
-                templateColumns="205px 1fr"
-                rowGap={3}
-                columnGap={2}
-                sx={{
-                  '& dt:after': {
-                    content: '":"',
-                  },
-                }}
-                data-testid="ar-request-details"
+          {isSuccess && (
+            <ModalBody>
+              <Box
+                hidden={tabIndex !== 0}
+                display={tabIndex === 0 ? 'block' : 'none'}
+                data-testid="ar-controls-tab"
               >
-                <GridItem as="dt">Request Date</GridItem>
-                <GridItem as="dd">-</GridItem>
-                <GridItem as="dt">Instructions from the API Provider</GridItem>
-                <GridItem as="dd">-</GridItem>
-                <GridItem as="dt">Requester Comments</GridItem>
-                <GridItem as="dd">-</GridItem>
-                <GridItem as="dt">Approver</GridItem>
-                <GridItem as="dd">-</GridItem>
-              </Grid>
-            </Box>
-          </ModalBody>
+                <RequestControls
+                  rateLimits={rateLimits}
+                  restrictions={restrictions}
+                />
+              </Box>
+              <Box
+                hidden={tabIndex !== 1}
+                display={tabIndex === 1 ? 'block' : 'none'}
+                data-testid="ar-authorization-tab"
+              >
+                <RequestAuthorization
+                  credentialIssuer={
+                    data?.getConsumerProdEnvAccess?.authorization
+                  }
+                  id={serviceAccessId}
+                />
+              </Box>
+              <Box
+                hidden={tabIndex !== 2}
+                display={tabIndex === 2 ? 'block' : 'none'}
+                data-testid="ar-request-details-tab"
+              >
+                <Grid
+                  templateColumns="205px 1fr"
+                  rowGap={3}
+                  columnGap={2}
+                  sx={{
+                    '& dt:after': {
+                      content: '":"',
+                    },
+                  }}
+                  data-testid="ar-request-details"
+                >
+                  <GridItem as="dt">Request Date</GridItem>
+                  <GridItem as="dd">
+                    <time>
+                      {format(
+                        new Date(
+                          data?.getConsumerProdEnvAccess.request.createdAt
+                        ),
+                        'MMM do, yyyy'
+                      )}
+                    </time>
+                  </GridItem>
+                  <GridItem as="dt">
+                    Instructions from the API Provider
+                  </GridItem>
+                  <GridItem as="dd">
+                    {data?.getConsumerProdEnvAccess.request.additionalDetails}
+                  </GridItem>
+                  <GridItem as="dt">Requester Comments</GridItem>
+                  <GridItem as="dd">
+                    {data?.getConsumerProdEnvAccess.request.communication}
+                  </GridItem>
+                  <GridItem as="dt">Approver</GridItem>
+                  <GridItem as="dd">
+                    {data?.getConsumerProdEnvAccess.requestApprover?.name}
+                  </GridItem>
+                </Grid>
+              </Box>
+            </ModalBody>
+          )}
           <ModalFooter>
             <ButtonGroup>
               <Button
@@ -199,3 +240,33 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
 };
 
 export default ConsumerEditDialog;
+
+const query = gql`
+  query GetConsumerEditDetails($serviceAccessId: ID!, $prodEnvId: ID!) {
+    getConsumerProdEnvAccess(
+      serviceAccessId: $serviceAccessId
+      prodEnvId: $prodEnvId
+    ) {
+      productName
+      environment {
+        name
+      }
+      plugins {
+        id
+        name
+        namespace
+        config
+        tags
+        service
+        route
+        extSource
+      }
+      revocable
+      authorization
+      request {
+        id
+        name
+      }
+    }
+  }
+`;

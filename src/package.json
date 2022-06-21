@@ -189,10 +189,10 @@
     "prettier": "^2.2.1",
     "shelljs": "^0.8.4",
     "source-map-support": "^0.5.21",
-    "ts-node": "^9.1.1",
+    "ts-node": "9.1.1",
     "ts-node-dev": "^1.1.6",
     "tslint": "^6.1.3",
-    "typescript": "^4.2.4"
+    "typescript": "4.2.4"
   },
   "nyc": {
     "extends": "./nyc-config.js",

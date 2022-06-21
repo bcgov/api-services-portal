@@ -86,7 +86,7 @@ const consumers = {
     {
       namespace: 'loc',
       consumer: {
-        id: '120912301',
+        id: 'c1',
         username: 'sa-moh-proto-ca853245-9d9af1b3c417',
         tags:
           '["Facility - London Drugs #5602", "Phone Number - 555-555-5555"]',
@@ -156,60 +156,67 @@ export const getConsumersHandler = (_, res, ctx) => {
 
 export const getConsumerHandler = (req, res, ctx) => {
   const { id } = req.variables;
-  const { consumer } = store.data.allServiceAccessesByNamespace.find(
-    (d) => d.consumer.id === id
+  const consumer = store.data.getFilteredNamespaceConsumers.find(
+    (d) => d.id === id
   );
+  const owner = {
+    name: harleyAccessRequest.requestor.name,
+    username: 'harley123',
+    email: 'harley@easymart.store',
+  };
   return res(
     ctx.data({
-      getGatewayConsumerPlugins: {
+      getNamespaceConsumerAccess: {
+        application: {
+          id: 'a1',
+          name: harleyAccessRequest.application.name,
+          owner,
+        },
         ...consumer,
-        plugins: [
+        owner: {
+          name: consumer.username,
+        },
+        prodEnvAccess: [
           {
-            name: 'rate-limiting',
-            service: {
-              id: '1231',
-              name: 'service-aps-portal-dev-api',
+            productName: 'Pharmanet Electronic Prescribing',
+            environment: { id: 'e1', name: 'dev' },
+            plugins: [{ name: 'rate-limiting' }],
+            revocable: false,
+            authorization: {
+              id: 'c1',
+              availableScopes: '["System/Patient"]',
+              clientRoles: '["b.role"]',
             },
-            route: null,
-            protocols: ['http', 'https'],
-            config: JSON.stringify({
-              second: '1',
-              minute: '1',
-              hour: '1',
-              day: '1',
-              policy: 'local',
-              service: '1231',
-            }),
+            request: {},
           },
           {
-            name: 'ip-restriction',
-            config: JSON.stringify({
-              allow: JSON.stringify(['1.1.1.1', '2.2.2.2']),
-            }),
-            service: {
-              id: '1231',
-              name: 'service-aps-portal-dev-api',
+            productName: 'Pharmanet Electronic Prescribing',
+            environment: { id: 'e2', name: 'conformance' },
+            plugins: [{ name: 'rate-limiting' }],
+            revocable: false,
+            authorization: {
+              id: 'c1',
+              availableScopes: '["System/Patient"]',
+              clientRoles: '["b.role"]',
             },
-            route: null,
+            request: {},
           },
           {
-            name: 'rate-limiting',
-            service: null,
-            route: {
-              id: '22',
-              name: 'route-aps-portal-dev-api',
+            productName: 'Another Product',
+            environment: { id: 'e3', name: 'prod' },
+            plugins: [{ name: 'ip-restriction' }, { name: 'rate-limiting' }],
+            revocable: false,
+            authorization: {
+              id: 'c1',
+              availableScopes: '["System/Patient"]',
+              clientRoles: '["b.role"]',
             },
-            protocols: ['http', 'https'],
-            config: JSON.stringify({
-              second: '20',
-              minute: '20',
-              hour: '20',
-              day: '20',
-              policy: 'redis',
-              service: '1231',
-            }),
+            request: {},
           },
         ],
+      },
+      getGatewayConsumerPlugins: {
+        ...consumer,
       },
       allServiceAccesses: [
         {
@@ -282,6 +289,73 @@ export const getConsumerHandler = (req, res, ctx) => {
           ],
         },
       ],
+    })
+  );
+};
+
+export const getConsumerProdEnvAccessHandler = (requ, res, ctx) => {
+  return res(
+    ctx.data({
+      getConsumerProdEnvAccess: {
+        productName: 'Product Name',
+        environment: {
+          id: 'e1',
+          name: 'dev',
+        },
+        plugins: [
+          {
+            name: 'rate-limiting',
+            service: {
+              id: '1231',
+              name: 'service-aps-portal-dev-api',
+            },
+            route: null,
+            protocols: ['http', 'https'],
+            config: JSON.stringify({
+              second: '1',
+              minute: '1',
+              hour: '1',
+              day: '1',
+              policy: 'local',
+              service: '1231',
+            }),
+          },
+          {
+            name: 'ip-restriction',
+            config: JSON.stringify({
+              allow: JSON.stringify(['1.1.1.1', '2.2.2.2']),
+            }),
+            service: {
+              id: '1231',
+              name: 'service-aps-portal-dev-api',
+            },
+            route: null,
+          },
+          {
+            name: 'rate-limiting',
+            service: null,
+            route: {
+              id: '22',
+              name: 'route-aps-portal-dev-api',
+            },
+            protocols: ['http', 'https'],
+            config: JSON.stringify({
+              second: '20',
+              minute: '20',
+              hour: '20',
+              day: '20',
+              policy: 'redis',
+              service: '1231',
+            }),
+          },
+        ],
+        revocable: false,
+        authorization: '',
+        request: harleyAccessRequest,
+        requestApprover: {
+          name: 'Mark Simpson',
+        },
+      },
     })
   );
 };
