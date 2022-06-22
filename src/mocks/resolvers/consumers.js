@@ -350,7 +350,21 @@ export const getConsumerProdEnvAccessHandler = (requ, res, ctx) => {
           },
         ],
         revocable: false,
-        authorization: '',
+        authorization: {
+          credentialIssuer: {
+            name: 'refactortime test',
+            flow: 'client-credentials',
+            mode: 'auto',
+            availableScopes: '["System/Patient","System/MedicationRequest"]',
+            clientRoles: '["a.role","b.role","c.role"]',
+            resourceType: '',
+            resourceAccessScope: '',
+            environmentDetails: null,
+            defaultClientScopes: [],
+            defaultOptionalScopes: [],
+            roles: [],
+          },
+        },
         request: harleyAccessRequest,
         requestApprover: {
           name: 'Mark Simpson',

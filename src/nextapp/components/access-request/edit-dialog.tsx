@@ -45,6 +45,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   serviceAccessId,
 }) => {
   const client = useQueryClient();
+  const ref = React.useRef(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, isLoading, isSuccess } = useApi(
@@ -87,13 +88,31 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       )
     );
     onClose();
+    setTabIndex(0);
   };
   const handleSave = () => {
     const [restrictsionsData] = restrictions;
     const [rateLimitsData] = rateLimits;
+    const authorizationForm = ref?.current.querySelector(
+      'form[name="authorizationForm"]'
+    );
+    const authorizationFormData = new FormData(authorizationForm);
+    const defaultClientScopes = authorizationFormData.getAll(
+      'defaultClientScopes'
+    );
+    const roles = authorizationFormData.getAll('roles');
+    const data = {
+      plugins: [...restrictsionsData, ...rateLimitsData],
+      authorization: {
+        defaultClientScopes: JSON.stringify(defaultClientScopes),
+        roles: JSON.stringify(roles),
+      },
+    };
+
     onClose();
-    // TODO: wire this to API
-    console.log('ip-restriction', restrictsionsData, rateLimitsData);
+    setTabIndex(0);
+    // TODO: wire this to API as a mutation
+    console.log('Output', data);
     try {
       toast({
         title: 'Request saved',
@@ -107,6 +126,20 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       });
     }
   };
+  React.useEffect(() => {
+    if (isSuccess) {
+      restrictions[1](
+        data?.getConsumerProdEnvAccess.plugins.filter(
+          (p) => p.name === 'ip-restriction'
+        )
+      );
+      rateLimits[1](
+        data?.getConsumerProdEnvAccess.plugins.filter(
+          (p) => p.name === 'rate-limiting'
+        )
+      );
+    }
+  }, [data, isSuccess]);
 
   return (
     <>
@@ -151,7 +184,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
           </ModalHeader>
           <ModalCloseButton data-testid="consumer-edit-close-btn" />
           {isSuccess && (
-            <ModalBody>
+            <ModalBody ref={ref}>
               <Box
                 hidden={tabIndex !== 0}
                 display={tabIndex === 0 ? 'block' : 'none'}
@@ -170,6 +203,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 <RequestAuthorization
                   credentialIssuer={
                     data?.getConsumerProdEnvAccess?.authorization
+                      .credentialIssuer
                   }
                   id={serviceAccessId}
                 />
