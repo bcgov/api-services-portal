@@ -20,7 +20,6 @@ import {
   WrapItem,
   Button,
   useDisclosure,
-  Code,
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import Card from '@/components/card';
@@ -30,7 +29,7 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import { Environment, Product, Query } from '@/shared/types/query.types';
+import { Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import { IoLayers } from 'react-icons/io5';
 import BusinessProfile from '@/components/business-profile';
@@ -40,7 +39,6 @@ import ProfileCard from '@/components/profile-card';
 import { uid } from 'react-uid';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
-import { env } from 'process';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -106,7 +104,7 @@ const ConsumerPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers | ${consumer.consumer?.username}`}</title>
+        <title>{`Consumers | ${consumer?.username}`}</title>
       </Head>
       <GrantAccessDialog
         consumer={consumer.consumer}
