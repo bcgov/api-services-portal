@@ -178,10 +178,6 @@ const buttonVariants = {
       // bgColor: '#F2F5F7',
       outlineColor: 'transparent',
     },
-    _hover: {
-      bgColor: 'transparent',
-      boxShadow: 'none',
-    },
   },
 };
 
