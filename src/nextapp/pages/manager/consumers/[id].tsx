@@ -104,7 +104,7 @@ const ConsumerPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers | ${consumer?.username}`}</title>
+        <title>{`Consumers | ${consumer.consumer?.username}`}</title>
       </Head>
       <GrantAccessDialog
         consumer={consumer.consumer}
