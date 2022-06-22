@@ -50,7 +50,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, isLoading, isSuccess } = useApi(
     ['consumerEdit', prodEnvId, serviceAccessId],
-    { query },
+    { query, variables: { serviceAccessId, prodEnvId } },
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
@@ -291,15 +291,22 @@ const query = gql`
         namespace
         config
         tags
-        service
-        route
         extSource
+        service {
+          name
+        }
+        route {
+          name
+        }
       }
       revocable
-      authorization
+      authorization {
+        defaultClientScopes
+      }
       request {
         id
         name
+        createdAt
       }
     }
   }

@@ -57,6 +57,7 @@ import {
   lookupServiceAccessesByConsumer,
   lookupServiceAccessesByNamespace,
   lookupEnvironmentAndIssuerById,
+  getConsumerLabels,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { KongConsumerService } from '../kong';
@@ -71,11 +72,22 @@ import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
 import { getConsumerAuthz } from '.';
-import { GatewayConsumer } from '../keystone/types';
+import {
+  Environment,
+  GatewayConsumer,
+  Label,
+  LabelCreateInput,
+  LabelUpdateInput,
+} from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
   KeycloakClientService,
 } from '../keycloak';
+import {
+  addConsumerLabel,
+  delConsumerLabel,
+  updateConsumerLabel,
+} from '../keystone/labels';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -84,7 +96,16 @@ export async function getFilteredNamespaceConsumers(
   ns: string
 ): Promise<ConsumerSummary[]> {
   logger.debug('[getFilteredNamespaceConsumers] %s', ns);
-  return (await lookupLabeledServiceAccessesForNamespace(context, ns))
+
+  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+
+  const labels = await getConsumerLabels(
+    context,
+    ns,
+    accesses.filter((acc) => acc.consumer).map((acc) => acc.consumer.id)
+  );
+
+  return accesses
     .filter((acc) => acc.consumer)
     .map((acc) => {
       return {
@@ -92,15 +113,15 @@ export async function getFilteredNamespaceConsumers(
         username: acc.consumer.username,
         customId: acc.consumer.customId,
         consumerType: acc.consumerType,
-        labels: acc.labels
-          ? acc.labels?.map(
-              (l) =>
-                ({
-                  labelGroup: l.name,
-                  values: JSON.parse(l.value),
-                } as ConsumerLabel)
-            )
-          : [],
+        labels: labels
+          .filter((l: any) => l.consumer?.id === acc.consumer.id)
+          .map(
+            (l: any) =>
+              ({
+                labelGroup: l.name,
+                values: JSON.parse(l.value),
+              } as ConsumerLabel)
+          ),
         lastUpdated: acc.updatedAt,
       } as ConsumerSummary;
     });
@@ -178,7 +199,8 @@ async function getConsumerProdEnvAccessList(
       plugins: consumer.plugins.filter(
         (plugin) => plugin.service?.environment.id === svc.productEnvironment.id
       ),
-      revocable: false,
+      revocable: isRevocable(svc.productEnvironment),
+      serviceAccessId: svc.id,
       authorization: null,
       request: null,
     } as ConsumerProdEnvAccess;
@@ -203,7 +225,8 @@ async function getConsumerProdEnvAccessList(
         plugins: consumer.plugins.filter(
           (plugin) => plugin.service?.environment.id === env.id
         ),
-        revocable: true,
+        revocable: isRevocable(env),
+        serviceAccessId: null,
         authorization: null,
         request: null,
       } as ConsumerProdEnvAccess;
@@ -264,12 +287,11 @@ export async function getConsumerProdEnvAccess(
 
   // request?: AccessRequest;
   // lookup request based on ServiceAccess record
-  const request = await getAccessRequestByNamespaceServiceAccess(
+  access.request = await getAccessRequestByNamespaceServiceAccess(
     context,
     ns,
     serviceAccessId
   );
-  access.request = request;
 
   return access;
 }
@@ -283,7 +305,7 @@ export async function getConsumerProdEnvAccess(
  * @param consumerId
  * @param prodEnvId
  */
-export async function grantConsumerProdEnvAccess(
+export async function grantAccessToConsumer(
   context: any,
   ns: string,
   consumerId: string,
@@ -296,19 +318,21 @@ export async function grantConsumerProdEnvAccess(
     consumerId
   );
 
-  const found =
-    prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
+  logger.debug('[grantConsumerProdEnvAccess] Consumer %j', consumer);
 
-  assert.strictEqual(
-    found,
-    false,
-    'Consumer already granted to this product environment.'
-  );
+  // const found =
+  //   prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
+
+  // assert.strictEqual(
+  //   found,
+  //   false,
+  //   'Consumer already granted to this product environment.'
+  // );
 
   const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
   assert.strictEqual(
-    ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow),
+    isRevocable(prodEnv),
     true,
     `Flow ${prodEnv.flow} can not be granted to consumer`
   );
@@ -329,7 +353,7 @@ export async function grantConsumerProdEnvAccess(
  * @param consumerId
  * @param prodEnvId
  */
-export async function revokeConsumerProdEnvAccess(
+export async function revokeAccessFromConsumer(
   context: any,
   ns: string,
   consumerId: string,
@@ -342,22 +366,31 @@ export async function revokeConsumerProdEnvAccess(
     consumerId
   );
 
-  const found =
-    prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
+  const prodEnvAccessFiltered = prodEnvAccess.filter(
+    (p) => p.environment.id === prodEnvId
+  );
 
   assert.strictEqual(
-    found,
+    prodEnvAccessFiltered.length === 1,
     true,
     'Consumer is not granted to this product environment.'
   );
 
+  const prodEnvAccessItem = prodEnvAccessFiltered[0];
+
+  assert.strictEqual(prodEnvAccessItem.revocable, true, 'Access not revocable');
+
+  const serviceAccessId = prodEnvAccessItem.serviceAccessId;
+
   const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
   assert.strictEqual(
-    ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow),
+    isRevocable(prodEnv),
     true,
     `Flow ${prodEnv.flow} can not be revoked from consumer`
   );
+
+  logger.warn('[revokeAccessFromConsumer] Service Access %s', serviceAccessId);
 
   const kongApi = new KongConsumerService(
     process.env.KONG_URL,
@@ -375,7 +408,7 @@ export async function revokeConsumerProdEnvAccess(
  * @param prodEnvId
  * @param controls
  */
-export async function updateConsumerProdEnvAccess(
+export async function updateConsumerAccess(
   context: any,
   ns: string,
   consumerId: string,
@@ -389,20 +422,22 @@ export async function updateConsumerProdEnvAccess(
     consumerId
   );
 
-  const selectedProdEnvAccess = prodEnvAccess.filter(
+  const prodEnvAccessFilter = prodEnvAccess.filter(
     (p) => p.environment.id === prodEnvId
   );
 
   assert.strictEqual(
-    selectedProdEnvAccess.length,
+    prodEnvAccessFilter.length,
     1,
     'Consumer is not granted to this product environment.'
   );
 
+  const prodEnvAccessItem = prodEnvAccessFilter[0];
+
   assert.strictEqual(
-    ['client-credentials'].includes(selectedProdEnvAccess[0].environment.flow),
+    ['client-credentials'].includes(prodEnvAccessItem.environment.flow),
     true,
-    `Flow ${selectedProdEnvAccess[0].environment.flow} can not be updated for consumer`
+    `Flow ${prodEnvAccessItem.environment.flow} can not be updated for consumer`
   );
 
   const envCtx = await getEnvironmentContext(
@@ -461,13 +496,12 @@ export async function updateConsumerProdEnvAccess(
 
 /**
  * Revoke all Consumer Access will delete the Service Access
- * record associated with the consumerId and prodEnvId
+ * records associated with the consumerId
  * and cascade handling of the client on the IdP (if applicable)
  *
  * @param context
  * @param ns
  * @param consumerId
- * @param prodEnvId
  */
 export async function revokeAllConsumerAccess(
   context: any,
@@ -491,6 +525,81 @@ export async function revokeAllConsumerAccess(
  */
 export async function saveConsumerLabels(
   context: any,
+  ns: string,
   consumerId: string,
   labels: ConsumerLabel[]
-): Promise<void> {}
+): Promise<void> {
+  const changes = { A: 0, D: 0, U: 0 };
+
+  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
+    context,
+    ns,
+    consumerId
+  );
+
+  const currentLabels = await getConsumerLabels(context, ns, [consumerId]);
+
+  logger.debug('[saveConsumerLabels] Current Labels %j', currentLabels);
+
+  // Do all the Additions
+  const addPromises = labels
+    .filter(
+      (l) => currentLabels.filter((c) => c.name === l.labelGroup).length === 0
+    )
+    .map(async (l) => {
+      const label: LabelCreateInput = {
+        name: l.labelGroup,
+        value: JSON.stringify(l.values),
+        namespace: ns,
+        consumer: { connect: { id: consumerId } },
+      };
+
+      await addConsumerLabel(context, label);
+      changes.A++;
+    });
+  await Promise.all(addPromises);
+
+  // Do all the Deletions
+  const delPromises = currentLabels
+    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 0)
+    .map(async (l) => {
+      await delConsumerLabel(context, l.id);
+      changes.D++;
+    });
+  await Promise.all(delPromises);
+
+  // Do any edits
+  const editPromises = currentLabels
+    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 1)
+    .map((l) => {
+      const newLabel = labels.filter((c) => c.labelGroup === l.name).pop();
+      return {
+        id: l.id,
+        name: l.name,
+        oldValue: l.value,
+        newValue: JSON.stringify(newLabel.values),
+      };
+    })
+    .filter((l) => l.newValue != l.oldValue)
+    .map(async (l) => {
+      const label: LabelUpdateInput = {
+        name: l.name,
+        value: l.newValue,
+      };
+
+      await updateConsumerLabel(context, l.id, label);
+      changes.U++;
+    });
+  await Promise.all(editPromises);
+
+  logger.debug('[saveConsumerLabels] Changes %j', changes);
+}
+
+/**
+ *
+ * @param prodEnv
+ * @returns boolean
+ */
+function isRevocable(prodEnv: Environment): boolean {
+  return ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow);
+}

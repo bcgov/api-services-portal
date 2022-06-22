@@ -67,3 +67,5 @@ export {
 } from './metrics';
 
 export { getOrganizations, getOrganizationUnit } from './organization';
+
+export { getConsumerLabels } from './labels';

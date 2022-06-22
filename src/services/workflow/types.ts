@@ -130,6 +130,7 @@ export interface ConsumerProdEnvAccess {
   productName: string;
   plugins: GatewayPlugin[];
   revocable: boolean;
+  serviceAccessId?: string;
   authorization?: ConsumerAuthorization;
   request?: AccessRequest;
 }

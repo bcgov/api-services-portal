@@ -303,27 +303,35 @@ export class KongConsumerService {
     namespace: string,
     aclGroup: string
   ): Promise<DiffResult> {
+    logger.debug('[assignConsumerACL] (%s) ASSIGN %s', consumerPK, aclGroup);
+
     const result: DiffResult = { D: [], C: [] };
     const acls = await this.getConsumerACLByNamespace(consumerPK, namespace);
 
     const acl = acls.filter((acl: any) => acl.group === aclGroup);
-    assert.strictEqual(acl.length, 0, 'Consumer ACL Already Exists');
+    if (acl.length != 0) {
+      logger.warn(
+        '[assignConsumerACL] ACL already assigned for %s',
+        consumerPK
+      );
+      return result;
+    } else {
+      await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls`, {
+        method: 'post',
+        body: JSON.stringify({ group: aclGroup, tags: ['ns.' + namespace] }),
+        headers: { 'Content-Type': 'application/json' },
+      }).then(checkStatus);
+      result.C.push(aclGroup);
 
-    await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls`, {
-      method: 'post',
-      body: JSON.stringify({ group: aclGroup, tags: ['ns.' + namespace] }),
-      headers: { 'Content-Type': 'application/json' },
-    }).then(checkStatus);
-    result.C.push(aclGroup);
+      logger.debug(
+        '[assignConsumerACL] (%s) ASSIGN %s : RESULT %j',
+        consumerPK,
+        aclGroup,
+        result
+      );
 
-    logger.debug(
-      '[assignConsumerACL] (%s) ASSIGN %s : RESULT %j',
-      consumerPK,
-      aclGroup,
-      result
-    );
-
-    return result;
+      return result;
+    }
   }
 
   public async removeConsumerACL(
@@ -336,14 +344,24 @@ export class KongConsumerService {
     const result: DiffResult = { D: [], C: [] };
 
     const acl = acls.filter((acl: any) => acl.group === aclGroup);
-    assert.strictEqual(acl.length, 1, 'Consumer ACL Missing');
+    if (acl.length === 0) {
+      logger.warn('[removeConsumerACL] ACL already deleted for %s', consumerPK);
+      return undefined;
+    } else {
+      await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls/${acl[0].id}`, {
+        method: 'delete',
+      }).then(checkStatus);
+      result.D.push(aclGroup);
 
-    await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls/${acl[0].id}`, {
-      method: 'delete',
-    }).then(checkStatus);
-    result.D.push(aclGroup);
+      logger.debug(
+        '[removeConsumerACL] (%s) REMOVE %s : RESULT %j',
+        consumerPK,
+        aclGroup,
+        result
+      );
 
-    return result;
+      return result;
+    }
   }
 
   public async updateConsumerACLByNamespace(

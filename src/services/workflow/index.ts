@@ -6,9 +6,9 @@ export {
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   getConsumerProdEnvAccess,
-  grantConsumerProdEnvAccess,
-  updateConsumerProdEnvAccess,
-  revokeConsumerProdEnvAccess,
+  grantAccessToConsumer,
+  revokeAccessFromConsumer,
+  updateConsumerAccess,
   saveConsumerLabels,
 } from './consumer-management';
 

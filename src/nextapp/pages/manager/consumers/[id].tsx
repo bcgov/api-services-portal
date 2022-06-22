@@ -52,7 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { id, serviceAccessId: id },
+        { serviceAccessId: id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -75,7 +75,7 @@ const ConsumerPage: React.FC<
     queryKey,
     {
       query,
-      variables: { id, serviceAccessId: id },
+      variables: { serviceAccessId: id },
     },
     { suspense: false }
   );
@@ -83,46 +83,6 @@ const ConsumerPage: React.FC<
   const consumer = data?.getNamespaceConsumerAccess;
   const application = data?.getNamespaceConsumerAccess?.application;
   const products = Object.keys(groupBy(consumer?.prodEnvAccess, 'productName'));
-
-  function renderRow(product: Product, environment: Environment) {
-    const tags = [];
-    const plugins = [];
-    environment.services.forEach((d) => {
-      consumer.plugins
-        .filter((p) => p.service?.name === d.name || p.route?.name === d.name)
-        .forEach((p) => {
-          plugins.push(p);
-          tags.push(
-            <Tag key={d.name} variant="outline">
-              {p.name}
-            </Tag>
-          );
-        });
-    });
-
-    return (
-      <Tr key={uid(environment.id)}>
-        <Td>
-          <EnvironmentTag name={environment.name} />
-        </Td>
-        <Td>
-          {environment.services.length > 0 && <Wrap spacing={2}>{tags}</Wrap>}
-          {environment.services.length === 0 && (
-            <Text as="em" color="bc-component">
-              No restrictions added
-            </Text>
-          )}
-        </Td>
-        <Td textAlign="right">
-          <ConsumerEditDialog
-            prodEnvId={environment.id}
-            queryKey={queryKey}
-            serviceAccessId={id}
-          />
-        </Td>
-      </Tr>
-    );
-  }
 
   function Detail({
     children,
@@ -146,10 +106,10 @@ const ConsumerPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers | ${consumer.owner?.name}`}</title>
+        <title>{`Consumers | ${consumer.consumer?.username}`}</title>
       </Head>
       <GrantAccessDialog
-        consumer={consumer}
+        consumer={consumer.consumer}
         isOpen={isOpen}
         onClose={onClose}
         queryKey={queryKey}
@@ -160,10 +120,10 @@ const ConsumerPage: React.FC<
           breadcrumb={breadcrumbs([
             { href: '/manager/consumers', text: 'Consumers' },
             {
-              text: consumer.owner?.name,
+              text: consumer.consumer?.username,
             },
           ])}
-          title={consumer.owner?.name}
+          title={consumer.consumer?.username}
         />
         <Box as="section" mb={9}>
           <Box as="header" mb={4}>
@@ -181,7 +141,9 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              <ProfileCard data={application?.owner} overflow="hidden" />
+              {application?.owner && (
+                <ProfileCard data={application?.owner} overflow="hidden" />
+              )}
             </Detail>
           </Flex>
           <Divider />
@@ -263,8 +225,11 @@ const ConsumerPage: React.FC<
 export default ConsumerPage;
 
 const query = gql`
-  query GetConsumer($id: ID!, $serviceAccessId: ID!) {
+  query GetConsumer($serviceAccessId: ID!) {
     getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
+      consumer {
+        username
+      }
       application {
         name
       }
@@ -289,7 +254,10 @@ const query = gql`
           name
         }
         revocable
-        authorization
+        serviceAccessId
+        authorization {
+          defaultClientScopes
+        }
         request {
           name
           isIssued
