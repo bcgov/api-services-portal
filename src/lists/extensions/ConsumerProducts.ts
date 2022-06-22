@@ -30,6 +30,7 @@ type ConsumerSummary {
 
 const typeConsumerAccess = `
 type ConsumerAccess {
+  consumer: GatewayConsumer,
   application: Application,
   owner: User,
   labels: [ConsumerLabel],
@@ -43,8 +44,10 @@ type ConsumerProdEnvAccess {
   environment: Environment,
   plugins: [GatewayPlugin],
   revocable: Boolean,
+  serviceAccessId: String,
   authorization: ConsumerAuthorization,
-  request: AccessRequest
+  request: AccessRequest,
+  requestApprover: User
 }
 `;
 

@@ -44,7 +44,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                         credentialReference
                     }
                 }`,
-    variables: { id: id },
+    variables: { id },
   });
   logger.debug(
     'Query [lookupCredentialReferenceByServiceAccess] result %j',
@@ -271,7 +271,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                           customId
                         }
                         application {
-                          labels {
+                          labels(namespace: $ns) {
                             name
                             value
                           }

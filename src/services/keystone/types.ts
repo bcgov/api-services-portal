@@ -753,13 +753,6 @@ export type OrganizationUnitRelateToOneInput = {
   disconnectAll?: Maybe<Scalars['Boolean']>;
 };
 
-export type LabelRelateToManyInput = {
-  create?: Maybe<Array<Maybe<LabelCreateInput>>>;
-  connect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
-  disconnect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
 /**  A keystone list  */
 export type Application = {
   __typename?: 'Application';
@@ -779,32 +772,8 @@ export type Application = {
   organization?: Maybe<Organization>;
   organizationUnit?: Maybe<OrganizationUnit>;
   owner?: Maybe<User>;
-  labels: Array<Label>;
-  _labelsMeta?: Maybe<_QueryMeta>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-/**  A keystone list  */
-export type ApplicationLabelsArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-/**  A keystone list  */
-export type Application_LabelsMetaArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
 };
 
 export type ApplicationWhereInput = {
@@ -892,12 +861,6 @@ export type ApplicationWhereInput = {
   organizationUnit_is_null?: Maybe<Scalars['Boolean']>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
-  /**  condition must be true for all nodes  */
-  labels_every?: Maybe<LabelWhereInput>;
-  /**  condition must be true for at least 1 node  */
-  labels_some?: Maybe<LabelWhereInput>;
-  /**  condition must be false for all nodes  */
-  labels_none?: Maybe<LabelWhereInput>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -937,8 +900,6 @@ export enum SortApplicationsBy {
   OrganizationUnitDesc = 'organizationUnit_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
-  LabelsAsc = 'labels_ASC',
-  LabelsDesc = 'labels_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -952,7 +913,6 @@ export type ApplicationUpdateInput = {
   certificate?: Maybe<Scalars['String']>;
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ApplicationsUpdateInput = {
@@ -968,7 +928,6 @@ export type ApplicationCreateInput = {
   organization?: Maybe<OrganizationRelateToOneInput>;
   organizationUnit?: Maybe<OrganizationUnitRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ApplicationsCreateInput = {
@@ -3952,6 +3911,13 @@ export type GatewayServicesCreateInput = {
   data?: Maybe<GatewayServiceCreateInput>;
 };
 
+export type GatewayConsumerRelateToOneInput = {
+  create?: Maybe<GatewayConsumerCreateInput>;
+  connect?: Maybe<GatewayConsumerWhereUniqueInput>;
+  disconnect?: Maybe<GatewayConsumerWhereUniqueInput>;
+  disconnectAll?: Maybe<Scalars['Boolean']>;
+};
+
 /**  A keystone list  */
 export type Label = {
   __typename?: 'Label';
@@ -3964,8 +3930,10 @@ export type Label = {
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumer>;
 };
 
 export type LabelWhereInput = {
@@ -3975,6 +3943,24 @@ export type LabelWhereInput = {
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
   id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -4011,6 +3997,8 @@ export type LabelWhereInput = {
   value_not_ends_with_i?: Maybe<Scalars['String']>;
   value_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   value_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumer?: Maybe<GatewayConsumerWhereInput>;
+  consumer_is_null?: Maybe<Scalars['Boolean']>;
 };
 
 export type LabelWhereUniqueInput = {
@@ -4020,15 +4008,21 @@ export type LabelWhereUniqueInput = {
 export enum SortLabelsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   ValueAsc = 'value_ASC',
-  ValueDesc = 'value_DESC'
+  ValueDesc = 'value_DESC',
+  ConsumerAsc = 'consumer_ASC',
+  ConsumerDesc = 'consumer_DESC'
 }
 
 export type LabelUpdateInput = {
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
 };
 
 export type LabelsUpdateInput = {
@@ -4037,8 +4031,10 @@ export type LabelsUpdateInput = {
 };
 
 export type LabelCreateInput = {
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
 };
 
 export type LabelsCreateInput = {
@@ -5144,13 +5140,6 @@ export enum ServiceAccessConsumerTypeType {
   User = 'user'
 }
 
-export type GatewayConsumerRelateToOneInput = {
-  create?: Maybe<GatewayConsumerCreateInput>;
-  connect?: Maybe<GatewayConsumerWhereUniqueInput>;
-  disconnect?: Maybe<GatewayConsumerWhereUniqueInput>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
-};
-
 /**  A keystone list  */
 export type ServiceAccess = {
   __typename?: 'ServiceAccess';
@@ -5174,32 +5163,8 @@ export type ServiceAccess = {
   consumer?: Maybe<GatewayConsumer>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
-  labels: Array<Label>;
-  _labelsMeta?: Maybe<_QueryMeta>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-/**  A keystone list  */
-export type ServiceAccessLabelsArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-/**  A keystone list  */
-export type ServiceAccess_LabelsMetaArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
 };
 
 export type ServiceAccessWhereInput = {
@@ -5313,12 +5278,6 @@ export type ServiceAccessWhereInput = {
   application_is_null?: Maybe<Scalars['Boolean']>;
   productEnvironment?: Maybe<EnvironmentWhereInput>;
   productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
-  /**  condition must be true for all nodes  */
-  labels_every?: Maybe<LabelWhereInput>;
-  /**  condition must be true for at least 1 node  */
-  labels_some?: Maybe<LabelWhereInput>;
-  /**  condition must be false for all nodes  */
-  labels_none?: Maybe<LabelWhereInput>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -5366,8 +5325,6 @@ export enum SortServiceAccessesBy {
   ApplicationDesc = 'application_DESC',
   ProductEnvironmentAsc = 'productEnvironment_ASC',
   ProductEnvironmentDesc = 'productEnvironment_DESC',
-  LabelsAsc = 'labels_ASC',
-  LabelsDesc = 'labels_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',
@@ -5386,7 +5343,6 @@ export type ServiceAccessUpdateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessesUpdateInput = {
@@ -5406,7 +5362,6 @@ export type ServiceAccessCreateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessesCreateInput = {
@@ -6093,6 +6048,7 @@ export type ConsumerSummary = {
 
 export type ConsumerAccess = {
   __typename?: 'ConsumerAccess';
+  consumer?: Maybe<GatewayConsumer>;
   application?: Maybe<Application>;
   owner?: Maybe<User>;
   labels?: Maybe<Array<Maybe<ConsumerLabel>>>;
@@ -6105,8 +6061,10 @@ export type ConsumerProdEnvAccess = {
   environment?: Maybe<Environment>;
   plugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
   revocable?: Maybe<Scalars['Boolean']>;
-  authorization?: Maybe<Scalars['String']>;
+  serviceAccessId?: Maybe<Scalars['String']>;
+  authorization?: Maybe<ConsumerAuthorization>;
   request?: Maybe<AccessRequest>;
+  requestApprover?: Maybe<User>;
 };
 
 export type ConsumerAuthorization = {

@@ -1,13 +1,15 @@
 import { Logger } from '../../logger';
 import { GatewayConsumer } from './types';
 
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
+
 const logger = Logger('keystone.gw-consumer');
 
 export async function lookupConsumerPlugins(
   context: any,
   id: string
 ): Promise<GatewayConsumer> {
+  logger.debug('Query [lookupConsumerPlugins] ID %s', id);
   const result = await context.executeGraphQL({
     query: `query GetConsumerPlugins($id: ID!) {
                     allGatewayConsumers(where: {id: $id}) {
@@ -38,9 +40,15 @@ export async function lookupConsumerPlugins(
                   
                     }
                 }`,
-    variables: { id: id },
+    variables: { id },
   });
   logger.debug('Query [lookupConsumerPlugins] result %j', result);
+
+  assert.strictEqual(
+    result.data.allGatewayConsumers.length,
+    1,
+    `Consumer record missing ${id}`
+  );
 
   return result.data.allGatewayConsumers[0];
 }
