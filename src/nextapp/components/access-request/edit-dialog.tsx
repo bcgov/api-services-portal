@@ -28,20 +28,22 @@ import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
-import RequestAuthorization from './authorization';
-import { QueryKey, useQueryClient } from 'react-query';
-import { useApi } from '@/shared/services/api';
+import RequestAuthorization from './authorization-edit';
+import { QueryKey, useMutation, useQueryClient } from 'react-query';
+import api, { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 interface ConsumerEditDialogProps {
   queryKey: QueryKey;
   serviceAccessId: string;
+  consumerId: string;
   prodEnvId: string;
 }
 
 const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   prodEnvId,
   queryKey,
+  consumerId,
   serviceAccessId,
 }) => {
   const client = useQueryClient();
@@ -70,6 +72,16 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       ) ?? []
     );
   });
+  // const authorization = React.useState(() => {
+  //   return data?.getConsumerProdEnvAccess?.authorization;
+  // });
+  const prodEnvAccess = data?.getConsumerProdEnvAccess;
+  const authorization = prodEnvAccess?.authorization;
+
+  const mutation = useMutation(
+    async (changes: unknown) => await api(saveMutation, changes, { ssr: false })
+  );
+
   // Events
   const handleTabChange = (index: number) => {
     setTabIndex(index);
@@ -90,35 +102,41 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     onClose();
     setTabIndex(0);
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     const [restrictsionsData] = restrictions;
     const [rateLimitsData] = rateLimits;
+    const data = {
+      plugins: [...restrictsionsData, ...rateLimitsData],
+    };
+
     const authorizationForm = ref?.current.querySelector(
       'form[name="authorizationForm"]'
     );
-    const authorizationFormData = new FormData(authorizationForm);
-    const defaultClientScopes = authorizationFormData.getAll(
-      'defaultClientScopes'
-    );
-    const roles = authorizationFormData.getAll('roles');
-    const data = {
-      plugins: [...restrictsionsData, ...rateLimitsData],
-      authorization: {
-        defaultClientScopes: JSON.stringify(defaultClientScopes),
-        roles: JSON.stringify(roles),
-      },
-    };
+    if (authorizationForm) {
+      const authorizationFormData = new FormData(authorizationForm);
+      const defaultClientScopes = authorizationFormData.getAll(
+        'defaultClientScopes'
+      );
+      const roles = authorizationFormData.getAll('roles');
 
-    onClose();
-    setTabIndex(0);
-    // TODO: wire this to API as a mutation
-    console.log('Output', data);
+      data['defaultClientScopes'] = defaultClientScopes;
+      data['roles'] = roles;
+    }
+
     try {
+      await mutation.mutateAsync({
+        consumerId: consumerId,
+        prodEnvId: prodEnvAccess.environment.id,
+        controls: data,
+      });
       toast({
         title: 'Request saved',
         status: 'success',
       });
       client.invalidateQueries(queryKey);
+      client.invalidateQueries(['consumerEdit', prodEnvId, serviceAccessId]);
+      onClose();
+      setTabIndex(0);
     } catch {
       toast({
         title: 'Request save failed',
@@ -173,10 +191,22 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 <Tab px={0} isDisabled={isLoading}>
                   Controls
                 </Tab>
-                <Tab px={0} ml={4} isDisabled={isLoading}>
+                <Tab
+                  px={0}
+                  ml={4}
+                  isDisabled={
+                    isLoading || !data?.getConsumerProdEnvAccess?.authorization
+                  }
+                >
                   Authorization
                 </Tab>
-                <Tab px={0} ml={4} isDisabled={isLoading}>
+                <Tab
+                  px={0}
+                  ml={4}
+                  isDisabled={
+                    isLoading || !data?.getConsumerProdEnvAccess?.request
+                  }
+                >
                   Request Details
                 </Tab>
               </TabList>
@@ -200,13 +230,13 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 display={tabIndex === 1 ? 'block' : 'none'}
                 data-testid="ar-authorization-tab"
               >
-                <RequestAuthorization
-                  credentialIssuer={
-                    data?.getConsumerProdEnvAccess?.authorization
-                      .credentialIssuer
-                  }
-                  id={serviceAccessId}
-                />
+                {authorization && (
+                  <RequestAuthorization
+                    credentialIssuer={authorization.credentialIssuer}
+                    defaultClientScopes={authorization.defaultClientScopes}
+                    roles={authorization.roles}
+                  />
+                )}
               </Box>
               <Box
                 hidden={tabIndex !== 2}
@@ -239,11 +269,14 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                     Instructions from the API Provider
                   </GridItem>
                   <GridItem as="dd">
-                    {data?.getConsumerProdEnvAccess.request.additionalDetails}
+                    {
+                      data?.getConsumerProdEnvAccess.environment
+                        .additionalDetailsToRequest
+                    }
                   </GridItem>
                   <GridItem as="dt">Requester Comments</GridItem>
                   <GridItem as="dd">
-                    {data?.getConsumerProdEnvAccess.request.communication}
+                    {data?.getConsumerProdEnvAccess.request.additionalDetails}
                   </GridItem>
                   <GridItem as="dt">Approver</GridItem>
                   <GridItem as="dd">
@@ -275,6 +308,20 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
 
 export default ConsumerEditDialog;
 
+const saveMutation = gql`
+  mutation UpdateConsumerAccess(
+    $consumerId: ID!
+    $prodEnvId: ID!
+    $controls: JSON
+  ) {
+    updateConsumerAccess(
+      consumerId: $consumerId
+      prodEnvId: $prodEnvId
+      controls: $controls
+    )
+  }
+`;
+
 const query = gql`
   query GetConsumerEditDetails($serviceAccessId: ID!, $prodEnvId: ID!) {
     getConsumerProdEnvAccess(
@@ -283,30 +330,34 @@ const query = gql`
     ) {
       productName
       environment {
+        id
         name
+        additionalDetailsToRequest
       }
       plugins {
         id
         name
-        namespace
         config
-        tags
-        extSource
-        service {
-          name
-        }
-        route {
-          name
-        }
+        service
+        route
       }
       revocable
       authorization {
+        credentialIssuer {
+          name
+          availableScopes
+          clientRoles
+        }
         defaultClientScopes
+        roles
       }
       request {
         id
-        name
+        additionalDetails
         createdAt
+      }
+      requestApprover {
+        name
       }
     }
   }

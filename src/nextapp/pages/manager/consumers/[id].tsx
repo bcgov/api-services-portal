@@ -101,6 +101,10 @@ const ConsumerPage: React.FC<
     );
   }
 
+  if (!consumer) {
+    return <></>;
+  }
+
   return (
     <>
       <Head>
@@ -139,8 +143,8 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              {application?.owner && (
-                <ProfileCard data={application?.owner} overflow="hidden" />
+              {consumer?.owner && (
+                <ProfileCard data={consumer?.owner} overflow="hidden" />
               )}
             </Detail>
           </Flex>
@@ -203,8 +207,9 @@ const ConsumerPage: React.FC<
                         </Td>
                         <Td textAlign="right">
                           <ConsumerEditDialog
-                            prodEnvId={d.environment.id}
                             queryKey={queryKey}
+                            consumerId={consumer?.consumer.id}
+                            prodEnvId={d.environment.id}
                             serviceAccessId={id}
                           />
                         </Td>
@@ -226,6 +231,7 @@ const query = gql`
   query GetConsumer($serviceAccessId: ID!) {
     getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
       consumer {
+        id
         username
       }
       application {
@@ -262,6 +268,9 @@ const query = gql`
           isApproved
           isComplete
           additionalDetails
+        }
+        requestApprover {
+          name
         }
       }
     }

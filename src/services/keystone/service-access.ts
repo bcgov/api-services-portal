@@ -313,6 +313,7 @@ export async function lookupServiceAccessesByConsumer(
                             id
                             name
                             appId
+                            additionalDetailsToRequest
                             flow
                             product {
                               name

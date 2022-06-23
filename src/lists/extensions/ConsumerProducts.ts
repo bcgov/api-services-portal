@@ -3,12 +3,17 @@ import {
   getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
+  saveConsumerLabels,
+  updateConsumerAccess,
 } from '../../services/workflow';
 import {
   ConsumerAccess,
   ConsumerProdEnvAccess,
   ConsumerSummary,
 } from '../../services/workflow/types';
+import { Logger } from '../../logger';
+
+const logger = Logger('lists.consumerproducts');
 
 const typeConsumerLabel = `
 type ConsumerLabel {
@@ -42,7 +47,7 @@ const typeConsumerProdEnvAccess = `
 type ConsumerProdEnvAccess {
   productName: String,
   environment: Environment,
-  plugins: [GatewayPlugin],
+  plugins: [ConsumerGatewayPlugin],
   revocable: Boolean,
   serviceAccessId: String,
   authorization: ConsumerAuthorization,
@@ -60,6 +65,16 @@ type ConsumerAuthorization {
 }
 `;
 
+const typeConsumerGatewayPlugin = `
+type ConsumerGatewayPlugin {
+  id: String,
+  name: String,
+  config: String,
+  service: JSON,
+  route: JSON,
+}
+`;
+
 module.exports = {
   extensions: [
     (keystone: any) => {
@@ -70,6 +85,7 @@ module.exports = {
           { type: typeConsumerAccess },
           { type: typeConsumerProdEnvAccess },
           { type: typeConsumerAuthorization },
+          { type: typeConsumerGatewayPlugin },
         ],
         queries: [
           {
@@ -126,7 +142,62 @@ module.exports = {
             access: EnforcementPoint,
           },
         ],
-        mutations: [],
+        mutations: [
+          {
+            schema:
+              'updateConsumerAccess(consumerId: ID!, prodEnvId: ID!, controls: JSON): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId, prodEnvId, controls }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              try {
+                logger.debug(
+                  '[updateConsumerAccess] %s %s %j',
+                  consumerId,
+                  prodEnvId,
+                  controls
+                );
+                await updateConsumerAccess(
+                  context,
+                  namespace,
+                  consumerId,
+                  prodEnvId,
+                  controls
+                );
+              } catch (err) {
+                logger.error(
+                  '[updateConsumerAccess] %s %s %s',
+                  consumerId,
+                  prodEnvId,
+                  err
+                );
+                throw err;
+              }
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'saveConsumerLabels(consumerId: ID!, labels: [JSON]): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId, labels }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              await saveConsumerLabels(context, namespace, consumerId, labels);
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+        ],
       });
     },
   ],

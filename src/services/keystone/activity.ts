@@ -176,6 +176,46 @@ export async function getActivity(
   return activities.data.allActivities;
 }
 
+export async function getActivityByRefId(
+  context: any,
+  refId: string,
+  first: number = 10,
+  skip: number = 0
+): Promise<any[]> {
+  logger.debug('[getActivityByRefId] %d / %d %s', first, skip, refId);
+
+  const activities = await context.executeGraphQL({
+    query: `query RefActivities($refId: String!, $first: Int, $skip: Int) {
+              allActivities(where: { refId: $refId }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+                type
+                name
+                namespace
+                action
+                refId
+                result
+                message
+                context
+                actor {
+                  name
+                }
+                blob {
+                  type
+                  blob
+                }
+                createdAt
+                updatedAt
+              }
+            }
+      `,
+    variables: { refId, first, skip },
+  });
+  logger.debug(
+    '[getActivityByRefId] returned=%d',
+    activities.data.allActivities.length
+  );
+  return activities.data.allActivities;
+}
+
 export function format(
   stringWithPlaceholders: string,
   replacements: { [key: string]: string }

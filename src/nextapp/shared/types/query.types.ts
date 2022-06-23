@@ -6059,7 +6059,7 @@ export type ConsumerProdEnvAccess = {
   __typename?: 'ConsumerProdEnvAccess';
   productName?: Maybe<Scalars['String']>;
   environment?: Maybe<Environment>;
-  plugins?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  plugins?: Maybe<Array<Maybe<ConsumerGatewayPlugin>>>;
   revocable?: Maybe<Scalars['Boolean']>;
   serviceAccessId?: Maybe<Scalars['String']>;
   authorization?: Maybe<ConsumerAuthorization>;
@@ -6073,6 +6073,15 @@ export type ConsumerAuthorization = {
   defaultClientScopes?: Maybe<Array<Maybe<Scalars['String']>>>;
   defaultOptionalScopes?: Maybe<Array<Maybe<Scalars['String']>>>;
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type ConsumerGatewayPlugin = {
+  __typename?: 'ConsumerGatewayPlugin';
+  id?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  config?: Maybe<Scalars['String']>;
+  service?: Maybe<Scalars['JSON']>;
+  route?: Maybe<Scalars['JSON']>;
 };
 
 export type ConsumerScopesAndRoles = {
@@ -7501,6 +7510,8 @@ export type Mutation = {
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
+  updateConsumerAccess?: Maybe<Scalars['Boolean']>;
+  saveConsumerLabels?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
@@ -8270,6 +8281,19 @@ export type MutationUpdateConsumerGroupMembershipArgs = {
   consumerId: Scalars['ID'];
   group: Scalars['String'];
   grant: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateConsumerAccessArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
+  controls?: Maybe<Scalars['JSON']>;
+};
+
+
+export type MutationSaveConsumerLabelsArgs = {
+  consumerId: Scalars['ID'];
+  labels?: Maybe<Array<Maybe<Scalars['JSON']>>>;
 };
 
 

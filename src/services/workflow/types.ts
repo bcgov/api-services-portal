@@ -128,11 +128,12 @@ export interface ConsumerAccess {
 export interface ConsumerProdEnvAccess {
   environment: Environment;
   productName: string;
-  plugins: GatewayPlugin[];
+  plugins: ConsumerGatewayPlugin[];
   revocable: boolean;
   serviceAccessId?: string;
   authorization?: ConsumerAuthorization;
   request?: AccessRequest;
+  requestApprover?: User;
 }
 
 export interface ConsumerAuthorization {
@@ -140,4 +141,14 @@ export interface ConsumerAuthorization {
   defaultClientScopes?: string[];
   defaultOptionalScopes?: string[];
   roles?: string[];
+}
+
+export interface ConsumerGatewayPlugin {
+  id?: string;
+  name?: string;
+  config?: string;
+  serviceId?: string;
+  serviceName?: string;
+  routeId?: string;
+  routeName?: string;
 }

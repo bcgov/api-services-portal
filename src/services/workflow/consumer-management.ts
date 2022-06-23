@@ -88,6 +88,7 @@ import {
   delConsumerLabel,
   updateConsumerLabel,
 } from '../keystone/labels';
+import { getActivityByRefId } from '../keystone/activity';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -139,6 +140,10 @@ export async function getNamespaceConsumerAccess(
     serviceAccessId
   );
 
+  const labels = await getConsumerLabels(context, ns, [
+    serviceAccess.consumer.id,
+  ]);
+
   const access: ConsumerAccess = {
     consumer: serviceAccess.consumer,
     application: serviceAccess.application,
@@ -148,7 +153,13 @@ export async function getNamespaceConsumerAccess(
       username: serviceAccess.application?.owner.username,
       email: serviceAccess.application?.owner.email,
     },
-    labels: [],
+    labels: labels.map(
+      (l: any) =>
+        ({
+          labelGroup: l.name,
+          values: JSON.parse(l.value),
+        } as ConsumerLabel)
+    ),
     prodEnvAccess: [],
   };
 
@@ -192,13 +203,29 @@ async function getConsumerProdEnvAccessList(
         id: svc.productEnvironment.id,
         name: svc.productEnvironment.name,
         appId: svc.productEnvironment.appId,
-        additionalDetails: svc.productEnvironment.additionalDetailsToRequest,
+        additionalDetailsToRequest:
+          svc.productEnvironment.additionalDetailsToRequest,
         flow: svc.productEnvironment.flow,
         services: svc.productEnvironment.services,
       },
-      plugins: consumer.plugins.filter(
-        (plugin) => plugin.service?.environment.id === svc.productEnvironment.id
-      ),
+      plugins: consumer.plugins
+        .filter(
+          (plugin) =>
+            plugin.service?.environment.id === svc.productEnvironment.id
+        )
+        .map((plugin) => ({
+          id: plugin.id,
+          name: plugin.name,
+          config: plugin.config,
+          service: {
+            id: plugin.service?.id,
+            name: plugin.service?.name,
+          },
+          route: {
+            id: plugin.route?.id,
+            name: plugin.route?.name,
+          },
+        })),
       revocable: isRevocable(svc.productEnvironment),
       serviceAccessId: svc.id,
       authorization: null,
@@ -218,13 +245,25 @@ async function getConsumerProdEnvAccessList(
           id: env.id,
           name: env.name,
           appId: env.appId,
-          additionalDetails: env.additionalDetailsToRequest,
+          additionalDetailsToRequest: env.additionalDetailsToRequest,
           flow: env.flow,
           services: env.services,
         },
-        plugins: consumer.plugins.filter(
-          (plugin) => plugin.service?.environment.id === env.id
-        ),
+        plugins: consumer.plugins
+          .filter((plugin) => plugin.service?.environment.id === env.id)
+          .map((plugin) => ({
+            id: plugin.id,
+            name: plugin.name,
+            config: plugin.config,
+            service: {
+              id: plugin.service?.id,
+              name: plugin.service?.name,
+            },
+            route: {
+              id: plugin.route?.id,
+              name: plugin.route?.name,
+            },
+          })),
         revocable: isRevocable(env),
         serviceAccessId: null,
         authorization: null,
@@ -292,6 +331,16 @@ export async function getConsumerProdEnvAccess(
     ns,
     serviceAccessId
   );
+
+  const activity = await getActivityByRefId(context, access.request.id);
+  logger.debug('Activity %j', activity);
+
+  if (activity.length > 0) {
+    access.requestApprover = {
+      id: '',
+      name: activity[0].actor.name,
+    };
+  }
 
   return access;
 }
@@ -413,7 +462,7 @@ export async function updateConsumerAccess(
   ns: string,
   consumerId: string,
   prodEnvId: string,
-  controls: RequestControls
+  { plugins, defaultClientScopes, roles }: RequestControls
 ): Promise<void> {
   // make sure the consumer has granted access already
   const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
@@ -463,19 +512,18 @@ export async function updateConsumerAccess(
     envCtx.issuerEnvConfig.clientSecret
   );
 
-  const client = await kcClientService.findByClientId(
-    envCtx.issuerEnvConfig.clientId
-  );
+  // Will raise error if not found
+  await kcClientService.findByClientId(consumer.username);
 
   const allScopes = await kcClientService.findRealmClientScopes();
 
-  const selectedScopes = allScopes.filter((r: any) =>
-    controls.defaultClientScopes.includes(r.name)
+  const selectedScopes = allScopes.filter((s: any) =>
+    defaultClientScopes.includes(s.name)
   );
 
   assert.strictEqual(
     selectedScopes.length,
-    controls.defaultClientScopes.length,
+    defaultClientScopes.length,
     'Scope missing from IdP'
   );
 
@@ -488,8 +536,8 @@ export async function updateConsumerAccess(
   assert.strictEqual(isClient, true, 'Only clients (not users) support scopes');
 
   await kcClientRegService.syncAndApply(
-    client.id,
-    selectedScopes.map((scope) => scope.id),
+    consumer.username,
+    selectedScopes.map((scope) => scope.name),
     [] as string[]
   );
 }
