@@ -49,9 +49,11 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ data }) => {
         </ErrorBoundary>
       </GridItem>
       <GridItem as="dt">Instructions from the API Provider</GridItem>
-      <GridItem as="dd">{data.additionalDetails}</GridItem>
+      <GridItem as="dd">
+        {data.productEnvironment?.additionalDetailsToRequest}
+      </GridItem>
       <GridItem as="dt">Requester Comments</GridItem>
-      <GridItem as="dd">{data.communication}</GridItem>
+      <GridItem as="dd">{data.additionalDetails}</GridItem>
     </Grid>
   );
 };

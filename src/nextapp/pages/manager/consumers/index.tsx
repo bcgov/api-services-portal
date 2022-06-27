@@ -365,6 +365,7 @@ const query = gql`
       }
       productEnvironment {
         name
+        additionalDetailsToRequest
       }
     }
   }
