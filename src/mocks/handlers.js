@@ -11,6 +11,7 @@ import {
   getConsumerProdEnvAccessHandler,
   grantConsumerHandler,
   rejectRequestHandler,
+  updateConsumerAccessHandler,
   store as consumersStore,
 } from './resolvers/consumers';
 import { allProductsByNamespaceHandler } from './resolvers/products';
@@ -59,6 +60,7 @@ export const handlers = [
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),
   keystone.mutation('RejectAccessRequest', rejectRequestHandler),
+  keystone.mutation('UpdateConsumerAccess', updateConsumerAccessHandler),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     return res(
       ctx.data({

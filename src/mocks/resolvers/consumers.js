@@ -180,7 +180,10 @@ export const getConsumerHandler = (req, res, ctx) => {
         prodEnvAccess: [
           {
             productName: 'Pharmanet Electronic Prescribing',
-            environment: { id: 'e1', name: 'dev' },
+            environment: {
+              id: 'e1',
+              name: 'dev',
+            },
             plugins: [{ name: 'rate-limiting' }],
             revocable: false,
             authorization: {
@@ -192,11 +195,14 @@ export const getConsumerHandler = (req, res, ctx) => {
           },
           {
             productName: 'Pharmanet Electronic Prescribing',
-            environment: { id: 'e2', name: 'conformance' },
+            environment: {
+              id: 'e2',
+              name: 'conformance',
+            },
             plugins: [{ name: 'rate-limiting' }],
             revocable: false,
             authorization: {
-              id: 'c1',
+              id: 'c2',
               availableScopes: '["System/Patient"]',
               clientRoles: '["b.role"]',
             },
@@ -204,11 +210,14 @@ export const getConsumerHandler = (req, res, ctx) => {
           },
           {
             productName: 'Another Product',
-            environment: { id: 'e3', name: 'prod' },
+            environment: {
+              id: 'e3',
+              name: 'prod',
+            },
             plugins: [{ name: 'ip-restriction' }, { name: 'rate-limiting' }],
             revocable: false,
             authorization: {
-              id: 'c1',
+              id: 'c3',
               availableScopes: '["System/Patient"]',
               clientRoles: '["b.role"]',
             },
@@ -294,13 +303,15 @@ export const getConsumerHandler = (req, res, ctx) => {
   );
 };
 
-export const getConsumerProdEnvAccessHandler = (requ, res, ctx) => {
+export const getConsumerProdEnvAccessHandler = (req, res, ctx) => {
+  const { prodEnvId, serviceAccessId } = req.variables;
   return res(
     ctx.data({
       getConsumerProdEnvAccess: {
         productName: 'Product Name',
         environment: {
-          id: 'e1',
+          additionalDetailsToRequest: 'Please add your phone number',
+          id: prodEnvId,
           name: 'dev',
         },
         plugins: [
@@ -352,18 +363,18 @@ export const getConsumerProdEnvAccessHandler = (requ, res, ctx) => {
         ],
         revocable: false,
         authorization: {
+          defaultClientScopes: ['System/Patient', 'System/MedicationRequest'],
+          roles: ['a.role', 'b.role', 'c.role'],
+          defaultOptionalScopes: [],
           credentialIssuer: {
             name: 'refactortime test',
             flow: 'client-credentials',
             mode: 'auto',
-            availableScopes: '["System/Patient","System/MedicationRequest"]',
-            clientRoles: '["a.role","b.role","c.role"]',
             resourceType: '',
             resourceAccessScope: '',
+            availableScopes: '["System/Patient","System/MedicationRequest"]',
+            clientRoles: '["a.role","b.role","c.role"]',
             environmentDetails: null,
-            defaultClientScopes: [],
-            defaultOptionalScopes: [],
-            roles: [],
           },
         },
         request: harleyAccessRequest,
@@ -487,6 +498,10 @@ export const accessRequestAuthHandler = (req, res, ctx) => {
       },
     })
   );
+};
+
+export const updateConsumerAccessHandler = (req, res, ctx) => {
+  return res(ctx.data(true));
 };
 
 export const gatewayServicesHandler = (req, res, ctx) => {

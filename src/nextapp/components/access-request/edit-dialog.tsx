@@ -28,9 +28,9 @@ import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
-import RequestAuthorization from './authorization-edit';
+import AuthorizationEdit from './authorization-edit';
 import { QueryKey, useMutation, useQueryClient } from 'react-query';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 interface ConsumerEditDialogProps {
@@ -78,9 +78,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const prodEnvAccess = data?.getConsumerProdEnvAccess;
   const authorization = prodEnvAccess?.authorization;
 
-  const mutation = useMutation(
-    async (changes: unknown) => await api(saveMutation, changes, { ssr: false })
-  );
+  const mutation = useApiMutation(saveMutation);
 
   // Events
   const handleTabChange = (index: number) => {
@@ -231,7 +229,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 data-testid="ar-authorization-tab"
               >
                 {authorization && (
-                  <RequestAuthorization
+                  <AuthorizationEdit
                     credentialIssuer={authorization.credentialIssuer}
                     defaultClientScopes={authorization.defaultClientScopes}
                     roles={authorization.roles}

@@ -1,17 +1,6 @@
 import * as React from 'react';
-import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  Box,
-  Center,
-  Grid,
-  Heading,
-  VStack,
-} from '@chakra-ui/react';
+import { Box, Grid, Heading, VStack } from '@chakra-ui/react';
 import { Checkbox } from '@chakra-ui/checkbox';
-import { gql } from 'graphql-request';
-import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { CredentialIssuer } from '@/shared/types/query.types';
 
@@ -56,10 +45,10 @@ const Authorization: React.FC<AuthorizationProps> = ({
         borderColor="bc-divider"
       >
         <VStack align="flex-start" spacing={3}>
-          {availableScopes?.map((s, index) => (
+          {availableScopes?.map((s: string, index: number) => (
             <Checkbox
               key={uid(s, index)}
-              defaultChecked={defaultClientScopes.includes(s)}
+              defaultChecked={defaultClientScopes?.includes(s)}
               name="defaultClientScopes"
               value={s}
               data-testid={`client-scope-${s}`}
@@ -69,10 +58,10 @@ const Authorization: React.FC<AuthorizationProps> = ({
           ))}
         </VStack>
         <VStack align="flex-start" spacing={3}>
-          {clientRoles?.map((r, index) => (
+          {clientRoles?.map((r: string, index: number) => (
             <Checkbox
               key={uid(r, index)}
-              defaultChecked={roles.includes(r)}
+              defaultChecked={roles?.includes(r)}
               name="roles"
               value={r}
               data-testid={`client-role-${r}`}
