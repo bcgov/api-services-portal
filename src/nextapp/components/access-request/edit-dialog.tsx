@@ -20,7 +20,6 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import {
-  CredentialIssuer,
   GatewayPlugin,
   GatewayPluginCreateInput,
 } from '@/shared/types/query.types';
@@ -29,8 +28,8 @@ import { FaPen } from 'react-icons/fa';
 
 import RequestControls from './controls';
 import AuthorizationEdit from './authorization-edit';
-import { QueryKey, useMutation, useQueryClient } from 'react-query';
-import api, { useApi, useApiMutation } from '@/shared/services/api';
+import { QueryKey, useQueryClient } from 'react-query';
+import { useApi, useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 interface ConsumerEditDialogProps {
@@ -72,12 +71,8 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       ) ?? []
     );
   });
-  // const authorization = React.useState(() => {
-  //   return data?.getConsumerProdEnvAccess?.authorization;
-  // });
   const prodEnvAccess = data?.getConsumerProdEnvAccess;
   const authorization = prodEnvAccess?.authorization;
-
   const mutation = useApiMutation(saveMutation);
 
   // Events
@@ -177,7 +172,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       >
         <ModalOverlay />
         <ModalContent data-testid="edit-consumer-dialog">
-          <ModalHeader data-testid="ar-modal-header">
+          <ModalHeader data-testid="edit-consumer-dialog-header">
             {data?.getConsumerProdEnvAccess?.productName}
             <Tabs
               index={tabIndex}
@@ -185,7 +180,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               pos="relative"
               onChange={handleTabChange}
             >
-              <TabList mb={5} data-testid="ar-tabs">
+              <TabList mb={5} data-testid="edit-consumer-dialog-tabs">
                 <Tab px={0} isDisabled={isLoading}>
                   Controls
                 </Tab>
@@ -216,7 +211,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               <Box
                 hidden={tabIndex !== 0}
                 display={tabIndex === 0 ? 'block' : 'none'}
-                data-testid="ar-controls-tab"
+                data-testid="edit-consumer-dialog-controls-tab"
               >
                 <RequestControls
                   rateLimits={rateLimits}
@@ -226,7 +221,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               <Box
                 hidden={tabIndex !== 1}
                 display={tabIndex === 1 ? 'block' : 'none'}
-                data-testid="ar-authorization-tab"
+                data-testid="edit-consumer-dialog-authorization-tab"
               >
                 {authorization && (
                   <AuthorizationEdit
@@ -239,7 +234,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               <Box
                 hidden={tabIndex !== 2}
                 display={tabIndex === 2 ? 'block' : 'none'}
-                data-testid="ar-request-details-tab"
+                data-testid="edit-consumer-dialog-request-details-tab"
               >
                 <Grid
                   templateColumns="205px 1fr"
@@ -250,7 +245,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                       content: '":"',
                     },
                   }}
-                  data-testid="ar-request-details"
+                  data-testid="edit-consumer-dialog-request-details"
                 >
                   <GridItem as="dt">Request Date</GridItem>
                   <GridItem as="dd">
@@ -288,12 +283,15 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
             <ButtonGroup>
               <Button
                 variant="secondary"
-                data-testid="ar-edit-cancel-btn"
+                data-testid="edit-consumer-dialog-edit-cancel-btn"
                 onClick={handleClose}
               >
                 Cancel
               </Button>
-              <Button data-testid="ar-edit-save-btn" onClick={handleSave}>
+              <Button
+                data-testid="edit-consumer-dialog-edit-save-btn"
+                onClick={handleSave}
+              >
                 Save
               </Button>
             </ButtonGroup>

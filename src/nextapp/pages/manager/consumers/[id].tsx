@@ -143,8 +143,8 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              {consumer?.owner && (
-                <ProfileCard data={consumer?.owner} overflow="hidden" />
+              {application?.owner && (
+                <ProfileCard data={application?.owner} overflow="hidden" />
               )}
             </Detail>
           </Flex>
@@ -236,6 +236,11 @@ const query = gql`
       }
       application {
         name
+        owner {
+          email
+          name
+          username
+        }
       }
       owner {
         name
