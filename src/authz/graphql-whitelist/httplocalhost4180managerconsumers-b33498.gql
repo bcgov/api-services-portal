@@ -1,4 +1,0 @@
-
-  mutation LinkConsumerToNamespace($username: String!) {
-    linkConsumerToNamespace(username: $username)
-  }
