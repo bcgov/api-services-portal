@@ -1,0 +1,17 @@
+
+  query GetConsumerProductsAndEnvironments($namespace: String!) {
+    allProductsByNamespace(where: { namespace: $namespace }) {
+      id
+      name
+      environments {
+        id
+        name
+        flow
+        credentialIssuer {
+          name
+          availableScopes
+          clientRoles
+        }
+      }
+    }
+  }

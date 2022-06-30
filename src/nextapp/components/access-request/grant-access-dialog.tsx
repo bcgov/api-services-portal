@@ -23,7 +23,7 @@ import {
 import { gql } from 'graphql-request';
 
 import RequestControls from './controls';
-import RequestAuthorization from './authorization';
+import RequestAuthorization from './authorization-edit';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useAuth } from '@/shared/services/auth';
@@ -47,7 +47,10 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const [tabIndex, setTabIndex] = React.useState(0);
   const restrictions = React.useState([]);
   const rateLimits = React.useState([]);
+  const [defaultClientScopes, setDefaultClientScopes] = React.useState([]);
+  const [roles, setRoles] = React.useState([]);
   const [product, setProduct] = React.useState(null);
+  const [environment, setEnvironment] = React.useState(null);
   const environmentRef = React.useRef<HTMLSelectElement>(null);
   const { data, isLoading, isSuccess } = useApi(
     'GetConsumerProductsAndEnvironments',
@@ -71,17 +74,35 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setProduct(event.target.value);
   };
+  const handleEnvironmentChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedEnv = data?.allProductsByNamespace
+      .find((p) => p.id === product)
+      ?.environments.find((e) => e.id === event.target.value);
+    setEnvironment(
+      selectedEnv.flow === 'client-credentials' ? selectedEnv : undefined
+    );
+  };
   const handleGrant = async () => {
     try {
       const prodEnvId = environmentRef.current?.value;
       if (!prodEnvId || !product) {
         throw 'Missing values product and/or environment';
       }
+
+      const [restrictsionsData] = restrictions;
+      const [rateLimitsData] = rateLimits;
+      const data = {
+        plugins: [...restrictsionsData, ...rateLimitsData],
+      };
+      data['defaultClientScopes'] = defaultClientScopes;
+      data['roles'] = roles;
+
       await grantMutate.mutateAsync({
         prodEnvId,
         consumerId: consumer.id,
-        group: product,
-        grant: true,
+        controls: data,
       });
       onClose();
       setProduct(null);
@@ -140,6 +161,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
                 <Select
                   isDisabled={!product}
                   placeholder="Select Environment"
+                  onChange={handleEnvironmentChange}
                   ref={environmentRef}
                   data-testid="ar-environment-select"
                 >
@@ -165,7 +187,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               <Tab px={0} ml={4}>
                 Controls
               </Tab>
-              <Tab px={0} ml={4}>
+              <Tab px={0} ml={4} isDisabled={!environment}>
                 Authorization
               </Tab>
             </TabList>
@@ -189,7 +211,13 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               hidden={tabIndex !== 1}
               display={tabIndex === 1 ? 'block' : 'none'}
             >
-              <RequestAuthorization id={consumer.id} />
+              {environment && (
+                <RequestAuthorization
+                  credentialIssuer={environment.credentialIssuer}
+                  defaultClientScopes={defaultClientScopes}
+                  roles={roles}
+                />
+              )}
             </Box>
           </ModalBody>
         )}
@@ -222,23 +250,27 @@ const query = gql`
       environments {
         id
         name
+        flow
+        credentialIssuer {
+          name
+          availableScopes
+          clientRoles
+        }
       }
     }
   }
 `;
 
 const mutation = gql`
-  mutation ToggleConsumerACLMembership(
+  mutation GrantAccessToConsumer(
     $prodEnvId: ID!
     $consumerId: ID!
-    $group: String!
-    $grant: Boolean!
+    $controls: JSON
   ) {
-    updateConsumerGroupMembership(
+    grantAccessToConsumer(
       prodEnvId: $prodEnvId
       consumerId: $consumerId
-      group: $group
-      grant: $grant
+      controls: $controls
     )
   }
 `;
