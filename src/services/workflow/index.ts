@@ -3,6 +3,7 @@ export { Apply } from './apply';
 export { CreateServiceAccount } from './create-service-account';
 
 export {
+  allConsumerGroupLabels,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   getConsumerProdEnvAccess,

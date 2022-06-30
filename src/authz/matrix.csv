@@ -21,6 +21,7 @@ ACCESS MANAGER,,linkConsumerToNamespace,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerRoleAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
 ACCESS MANAGER,,updateConsumerScopeAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
 ACCESS MANAGER,,getNamespaceConsumerAccess,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,allConsumerGroupLabels,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,getConsumerProdEnvAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS

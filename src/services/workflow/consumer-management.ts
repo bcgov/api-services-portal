@@ -92,6 +92,34 @@ import { getActivityByRefId } from '../keystone/activity';
 
 const logger = Logger('wf.ConsumerMgmt');
 
+export async function allConsumerGroupLabels(
+  context: any,
+  ns: string
+): Promise<string[]> {
+  logger.debug('[allConsumerGroupLabels] %s', ns);
+
+  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+
+  const labels = await getConsumerLabels(
+    context,
+    ns,
+    accesses.filter((acc) => acc.consumer).map((acc) => acc.consumer.id)
+  );
+
+  const result = labels
+    .map((label) => label.name)
+    .reduce((previousValue, label) => {
+      if (!previousValue.includes(label)) {
+        previousValue.push(label);
+      }
+      return previousValue;
+    }, [])
+    .sort();
+
+  logger.debug('[allConsumerGroupLabels] %j', result);
+  return result;
+}
+
 export async function getFilteredNamespaceConsumers(
   context: any,
   ns: string
@@ -358,7 +386,8 @@ export async function grantAccessToConsumer(
   context: any,
   ns: string,
   consumerId: string,
-  prodEnvId: string
+  prodEnvId: string,
+  { plugins, defaultClientScopes, roles }: RequestControls
 ): Promise<void> {
   // make sure the consumer hasn't granted access already
   const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
@@ -367,7 +396,7 @@ export async function grantAccessToConsumer(
     consumerId
   );
 
-  logger.debug('[grantConsumerProdEnvAccess] Consumer %j', consumer);
+  logger.debug('[grantAccessToConsumer] Consumer %j', consumer);
 
   // const found =
   //   prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;

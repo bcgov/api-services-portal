@@ -1,8 +1,10 @@
 import { EnforcementPoint } from '../../authz/enforcement';
 import {
+  allConsumerGroupLabels,
   getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
+  grantAccessToConsumer,
   saveConsumerLabels,
   updateConsumerAccess,
 } from '../../services/workflow';
@@ -19,6 +21,19 @@ const typeConsumerLabel = `
 type ConsumerLabel {
   labelGroup: String!,
   values: [String]!
+}
+`;
+
+const typeConsumerQueryFilter = `
+input ConsumerQueryFilterInput {
+  products: [String],
+  environments: [String],
+  scopes: [String],
+  roles: [String],
+  mostActive: Boolean,
+  leastActive: Boolean,
+  labelGroup: String,
+  labelValue: String
 }
 `;
 
@@ -81,6 +96,7 @@ module.exports = {
       keystone.extendGraphQLSchema({
         types: [
           { type: typeConsumerLabel },
+          { type: typeConsumerQueryFilter },
           { type: typeConsumerSummary },
           { type: typeConsumerAccess },
           { type: typeConsumerProdEnvAccess },
@@ -89,14 +105,31 @@ module.exports = {
         ],
         queries: [
           {
-            schema: 'getFilteredNamespaceConsumers: [ConsumerSummary]',
+            schema: 'allConsumerGroupLabels: [String]',
             resolver: async (
               item: any,
-              args: any,
+              { filter }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<string[]> => {
+              const namespace = context.req.user.namespace;
+              return await allConsumerGroupLabels(context, namespace);
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'getFilteredNamespaceConsumers(filter: ConsumerQueryFilterInput): [ConsumerSummary]',
+            resolver: async (
+              item: any,
+              { filter }: any,
               context: any,
               info: any,
               { query, access }: any
             ): Promise<ConsumerSummary[]> => {
+              logger.debug('[getFilteredNamespaceConsumers] Filter %j', filter);
+
               const namespace = context.req.user.namespace;
               return await getFilteredNamespaceConsumers(context, namespace);
             },
@@ -143,6 +176,44 @@ module.exports = {
           },
         ],
         mutations: [
+          {
+            schema:
+              'grantAccessToConsumer(consumerId: ID!, prodEnvId: ID!, controls: JSON): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId, prodEnvId, controls }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              try {
+                logger.debug(
+                  '[updateConsumerAccess] %s %s %j',
+                  consumerId,
+                  prodEnvId,
+                  controls
+                );
+                await grantAccessToConsumer(
+                  context,
+                  namespace,
+                  consumerId,
+                  prodEnvId,
+                  controls
+                );
+              } catch (err) {
+                logger.error(
+                  '[updateConsumerAccess] %s %s %s',
+                  consumerId,
+                  prodEnvId,
+                  err
+                );
+                throw err;
+              }
+              return true;
+            },
+            access: EnforcementPoint,
+          },
           {
             schema:
               'updateConsumerAccess(consumerId: ID!, prodEnvId: ID!, controls: JSON): Boolean',

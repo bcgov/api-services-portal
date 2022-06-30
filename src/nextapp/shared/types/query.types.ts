@@ -6036,6 +6036,17 @@ export type ConsumerLabel = {
   values: Array<Maybe<Scalars['String']>>;
 };
 
+export type ConsumerQueryFilterInput = {
+  products?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environments?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes?: Maybe<Array<Maybe<Scalars['String']>>>;
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+  mostActive?: Maybe<Scalars['Boolean']>;
+  leastActive?: Maybe<Scalars['Boolean']>;
+  labelGroup?: Maybe<Scalars['String']>;
+  labelValue?: Maybe<Scalars['String']>;
+};
+
 export type ConsumerSummary = {
   __typename?: 'ConsumerSummary';
   id: Scalars['String'];
@@ -6425,6 +6436,7 @@ export type Query = {
   mySelf?: Maybe<User>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
+  allConsumerGroupLabels?: Maybe<Array<Maybe<Scalars['String']>>>;
   getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
   getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
   getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;
@@ -7164,6 +7176,11 @@ export type QueryBusinessProfileArgs = {
 };
 
 
+export type QueryGetFilteredNamespaceConsumersArgs = {
+  filter?: Maybe<ConsumerQueryFilterInput>;
+};
+
+
 export type QueryGetNamespaceConsumerAccessArgs = {
   serviceAccessId: Scalars['ID'];
 };
@@ -7510,6 +7527,7 @@ export type Mutation = {
   deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
+  grantAccessToConsumer?: Maybe<Scalars['Boolean']>;
   updateConsumerAccess?: Maybe<Scalars['Boolean']>;
   saveConsumerLabels?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
@@ -8281,6 +8299,13 @@ export type MutationUpdateConsumerGroupMembershipArgs = {
   consumerId: Scalars['ID'];
   group: Scalars['String'];
   grant: Scalars['Boolean'];
+};
+
+
+export type MutationGrantAccessToConsumerArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
+  controls?: Maybe<Scalars['JSON']>;
 };
 
 

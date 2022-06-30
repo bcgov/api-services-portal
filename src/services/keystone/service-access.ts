@@ -270,12 +270,6 @@ export async function lookupLabeledServiceAccessesForNamespace(
                           username
                           customId
                         }
-                        application {
-                          labels(namespace: $ns) {
-                            name
-                            value
-                          }
-                        }
                         updatedAt
                     }
                 }`,

@@ -229,6 +229,8 @@ export default ConsumerPage;
 
 const query = gql`
   query GetConsumer($serviceAccessId: ID!) {
+    allConsumerGroupLabels
+
     getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
       consumer {
         id
