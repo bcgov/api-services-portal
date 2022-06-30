@@ -308,7 +308,6 @@ jobs:
           OIDC_CLIENT_SECRET=${{ secrets.OIDC_CLIENT_SECRET }} \
           ./scripts/init.sh
 
-<<<<<<< test
       - name: Authenticate to Gold and set context
         if: github.ref == 'refs/heads/test'
         uses: redhat-actions/oc-login@v1
@@ -322,12 +321,6 @@ jobs:
         if: github.ref == 'refs/heads/test'
         run: |
           oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
-=======
-      - name: 'Restart Portal in OCP Test Namespace'
-        if: github.ref == 'refs/heads/test'
-        run: |
-          oc rollout restart deployment/bcgov-aps-portal-generic-api -n ${{ secrets.OPENSHIFT_TEST_NAMESPACE }}
->>>>>>> main
 
       - name: 'Create Pull Request for Release'
         if: github.ref == 'refs/heads/test'
