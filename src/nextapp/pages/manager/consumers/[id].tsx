@@ -163,7 +163,7 @@ const ConsumerPage: React.FC<
                 <WrapItem>
                   <ManageLabels
                     data={consumer.labels}
-                    id={id}
+                    id={consumer.consumer?.id}
                     queryKey={queryKey}
                   />
                 </WrapItem>
