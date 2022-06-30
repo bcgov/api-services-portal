@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Box,
-  FormErrorMessage,
   Input,
   InputProps,
   Tag,
@@ -18,7 +17,7 @@ interface TagInputProps extends InputProps {
   id?: string;
   name?: string;
   placeholder?: string;
-  value?: string;
+  value?: string | string[];
 }
 
 const TagInput: React.FC<TagInputProps> = ({
@@ -39,6 +38,9 @@ const TagInput: React.FC<TagInputProps> = ({
         return [];
       }
 
+      if (Array.isArray(value)) {
+        return value;
+      }
       return JSON.parse(value);
     } catch {
       return [];
@@ -123,7 +125,7 @@ const TagInput: React.FC<TagInputProps> = ({
         height="auto"
         minHeight="40px"
         pos="relative"
-        py={2}
+        py={1}
         onClick={handleContainerClick}
         cursor="text"
         data-testid={props['data-testid']}

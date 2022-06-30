@@ -22,7 +22,7 @@ import { dehydrate } from 'react-query/hydration';
 import { QueryClient, useQueryClient } from 'react-query';
 import EmptyPane from '@/components/empty-pane';
 // TODO:  Once we get API support for filters circle back and add back in
-// import Filters from '@/components/filters';
+import Filters from '@/components/filters';
 import {
   Application,
   ConsumerSummary,
@@ -31,7 +31,7 @@ import {
 } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-// import InlineManageLabels from '@/components/inline-manage-labels';
+import InlineManageLabels from '@/components/inline-manage-labels';
 import LinkConsumer from '@/components/link-consumer';
 import PageHeader from '@/components/page-header';
 import NextLink from 'next/link';
@@ -40,7 +40,7 @@ import Table from '@/components/table';
 import { uid } from 'react-uid';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
-// import ConsumerFilters from '@/components/consumer-filters';
+import ConsumerFilters from '@/components/consumer-filters';
 
 interface ConsumerListItem {
   id: string;
@@ -189,11 +189,6 @@ const ConsumersPage: React.FC<
   const handleCloseGrantDialog = React.useCallback(() => {
     setGrantAccess(null);
   }, []);
-  //const filterEl = (
-  //  <Filters cacheId="consumers" filterTypeOptions={filterTypeOptions} mb={4}>
-  //    <ConsumerFilters />
-  //  </Filters>
-  //);
 
   return (
     <>
@@ -208,10 +203,16 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-
         {accessRequests.map((a) => (
           <AccessRequest key={a.id} data={a} queryKey={queryKey} />
         ))}
+        <Filters
+          cacheId="consumers"
+          filterTypeOptions={filterTypeOptions}
+          mb={4}
+        >
+          <ConsumerFilters />
+        </Filters>
         <Box bgColor="white" mb={4}>
           <Box
             as="header"
@@ -395,14 +396,14 @@ const deleteMutation = gql`
   }
 `;
 
-//const filterTypeOptions = [
-//  {
-//    name: 'Products',
-//    value: 'products',
-//  },
-//  { name: 'Environment', value: 'environment' },
-//
-//  { name: 'Scopes', value: 'scopes' },
-//
-//  { name: 'Roles', value: 'roles' },
-//];
+const filterTypeOptions = [
+  {
+    name: 'Products',
+    value: 'products',
+  },
+  { name: 'Environment', value: 'environment' },
+
+  { name: 'Scopes', value: 'scopes' },
+
+  { name: 'Roles', value: 'roles' },
+];

@@ -10,7 +10,9 @@ import {
   getConsumerHandler,
   getConsumerProdEnvAccessHandler,
   grantConsumerHandler,
+  getConsumersFilterHandler,
   rejectRequestHandler,
+  saveConsumerLabels,
   updateConsumerAccessHandler,
   store as consumersStore,
 } from './resolvers/consumers';
@@ -72,6 +74,7 @@ export const handlers = [
   keystone.query('GetConsumer', getConsumerHandler),
   keystone.query('GetConsumerEditDetails', getConsumerProdEnvAccessHandler),
   keystone.query('GetAccessRequestAuth', accessRequestAuthHandler),
+  keystone.query('GetFilterConsumers', getConsumersFilterHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
   keystone.query(
     'GetConsumerProductsAndEnvironments',
@@ -82,6 +85,7 @@ export const handlers = [
   keystone.mutation('FulfillRequest', fullfillRequestHandler),
   keystone.mutation('RejectAccessRequest', rejectRequestHandler),
   keystone.mutation('UpdateConsumerAccess', updateConsumerAccessHandler),
+  keystone.mutation('SaveConsumerLabels', saveConsumerLabels),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     return res(
       ctx.data({

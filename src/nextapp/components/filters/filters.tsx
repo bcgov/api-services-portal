@@ -32,8 +32,13 @@ const Filters: React.FC<FiltersProps> = ({
   ...props
 }) => {
   const [filters, setFilters] = React.useState<string[]>(() => {
+    const cached = localStorage.getItem(cacheId);
     try {
-      return JSON.parse(localStorage.getItem(cacheId));
+      let result = [];
+      if (cached) {
+        result = JSON.parse(cached);
+      }
+      return result;
     } catch {
       return [];
     }
@@ -129,12 +134,12 @@ const Filters: React.FC<FiltersProps> = ({
         </GridItem>
       </Grid>
       <Box>
-        {filters.length === 0 && (
+        {filters?.length === 0 && (
           <Text fontSize="small" fontStyle="italic" color="bc-component">
             Filtered tags will appear here
           </Text>
         )}
-        {filters.length > 0 && (
+        {filters?.length > 0 && (
           <Grid gap={4} templateColumns="1fr auto">
             <GridItem d="flex" alignItems="center">
               <Wrap>

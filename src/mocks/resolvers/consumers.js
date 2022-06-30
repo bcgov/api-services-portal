@@ -42,7 +42,7 @@ const consumers = {
           values: ['204-537-5569'],
         },
         {
-          labelGroup: 'Contact',
+          labelGroup: 'Contact Person',
           values: ['Antonio Mario Banderas'],
         },
       ],
@@ -303,6 +303,24 @@ export const getConsumerHandler = (req, res, ctx) => {
   );
 };
 
+export const getConsumersFilterHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      // getFilteredNamespaceConsumers: [],
+      allProductsByNamespace: [
+        {
+          id: 'p1',
+          name: 'Pharmanet Electronic Prescribing',
+        },
+        {
+          id: 'p2',
+          name: 'Another Product',
+        },
+      ],
+    })
+  );
+};
+
 export const getConsumerProdEnvAccessHandler = (req, res, ctx) => {
   const { prodEnvId, serviceAccessId } = req.variables;
   return res(
@@ -535,4 +553,8 @@ export const gatewayServicesHandler = (req, res, ctx) => {
       ],
     })
   );
+};
+
+export const saveConsumerLabels = (req, res, ctx) => {
+  return res(ctx.data(true));
 };

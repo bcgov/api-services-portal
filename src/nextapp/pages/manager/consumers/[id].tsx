@@ -39,6 +39,7 @@ import ProfileCard from '@/components/profile-card';
 import { uid } from 'react-uid';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
+import ManageLabels from '@/components/manage-labels';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -159,6 +160,13 @@ const ConsumerPage: React.FC<
                     </Tag>
                   </WrapItem>
                 ))}
+                <WrapItem>
+                  <ManageLabels
+                    data={consumer.labels}
+                    id={id}
+                    queryKey={queryKey}
+                  />
+                </WrapItem>
               </Wrap>
             </Detail>
             <Detail>
