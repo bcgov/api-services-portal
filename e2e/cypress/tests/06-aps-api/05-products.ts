@@ -66,16 +66,16 @@ describe('API Tests for Updating Products', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.makeAPIRequest(products.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                expect(res.body.length).to.be.equal(1)
-                response = res.body
-                productID = res.body[0].appId
-                envID = res.body[0].environments[0].appId
+                let index = res.body.findIndex((x: { name: string }) => x.name === products.body.name)
+                response = res.body[index]
+                productID = res.body[index].appId
+                envID = res.body[index].environments[0].appId
             })
         })
     })
     it('Compare the values in response against the values passed in the request', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.compareJSONObjects(response, products.body, true)
+            cy.compareJSONObjects(response, products.body)
         })
     })
 })
@@ -142,8 +142,8 @@ describe('API Tests for Delete Products', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.makeAPIRequest(products.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                expect(res.body.length).to.be.equal(1)
-                expect(res.body[0].environments).to.be.empty
+                let index = res.body.findIndex((x: { name: string }) => x.name === products.body.name)
+                expect(res.body[index].environments).to.be.empty
             })
         })
     })
@@ -160,9 +160,9 @@ describe('API Tests for Delete Products', () => {
         cy.get('@api').then(({ products }: any) => {
             cy.makeAPIRequest(products.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                expect(res.body.length).to.be.equal(0)
+                response = res.body
+                assert.equal(response.findIndex((x: { name: string }) => x.name === products.body.name),-1)
             })
         })
     })
 })
-

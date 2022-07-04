@@ -36,7 +36,7 @@ Cypress.Commands.add('preserveCookiesDefaults', () => {
   cy.log('> Saving Cookies')
 })
 
-Cypress.Commands.add('saveState', (key: string, value: string) => {
+Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean) => {
   cy.log('< Saving State')
   cy.log(key, value)
   let newState
@@ -56,10 +56,22 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
         cy.writeFile('cypress/fixtures/manage-control/kong-plugin-config.json', currState)
       }
     )
-  } else {
+  } else if (flag) {
+    cy.readFile('cypress/fixtures/state/regen.json').then((currState) => {
+      currState[keyValue] = value
+      cy.writeFile('cypress/fixtures/state/regen.json', currState)
+    })
+  }
+  else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       currState[keyValue] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
+    })
+  }
+  if (key == 'apikey' || key == 'consumernumber') {
+    cy.readFile('cypress/fixtures/state/regen.json').then((currState) => {
+      currState[keyValue] = value
+      cy.writeFile('cypress/fixtures/state/regen.json', currState)
     })
   }
 

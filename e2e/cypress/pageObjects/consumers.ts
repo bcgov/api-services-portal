@@ -12,10 +12,23 @@ export default class ConsumersPage {
   aclSwitch: string = '[data-testid="acls-switch"]'
   pendingRequestTable: string = '[data-testid="pending-request-tbl"]'
 
-  clickOnTheFirstConsumerID() {
+  clickOnTheFirstConsumerID() {  
+    cy.get(this.allConsumerTable).find('a').first().then(($elem) => {
+      cy.saveState('consumernumber', $elem.text())
+    })
     cy.get(this.allConsumerTable).find('a').first().click()
     cy.contains('Add Controls').should('be.visible')
   }
+
+  clickOnTheTheConsumerID(consumerID: string) {  
+    cy.get(this.allConsumerTable).find('tbody').find('tr').each(($el) => {
+      let consumer_id = $el.find('a').text()
+      if (consumer_id === consumerID) {
+        cy.wrap($el).find('a').click()
+      }
+    })
+  }
+
   clickOnRateLimitingOption() {
     cy.contains('p', 'Rate Limiting').click()
   }

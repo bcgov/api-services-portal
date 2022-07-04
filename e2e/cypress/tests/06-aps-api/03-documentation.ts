@@ -74,7 +74,6 @@ describe('API Tests for Fetching documentation', () => {
 
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            debugger
             cy.makeAPIRequest(documentation.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
                 slugValue = res.body[0].slug
@@ -187,7 +186,6 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Verify that document contant is displayed for GET /documentation', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            debugger
             cy.makeAPIRequest(documentation.getDocumentation_endPoint, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body[0].title).to.be.equal(documentation.body.title)
@@ -199,7 +197,6 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Verify that document contant is fetch by slug ID', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            debugger
             cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/'+slugID, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body.slug).to.be.equal(slugID)

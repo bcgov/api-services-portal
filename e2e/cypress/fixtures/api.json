@@ -49,6 +49,7 @@
   "apiDirectory": {
     "endPoint": "ds/api/v2/namespaces",
     "orgEndPoint": "ds/api/v2/organizations",
+    "directoryEndPoint": "ds/api/v2/directory",
     "headers": {
       "accept": "application/json",
       "content-type": "application/json"
@@ -64,6 +65,75 @@
       "tags": ["gateway", "kong"],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
+    },
+    "directory": {
+      "name": "api-auto-test-product",
+      "title": "API Auto Test Product",
+      "notes": "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.",
+      "license_title": "Access Only",
+      "view_audience": "Government",
+      "security_class": "LOW-PUBLIC",
+      "tags": ["gateway", "kong", "openapi"],
+      "organization": {
+        "name": "ministry-of-health",
+        "title": "Ministry of Health"
+      },
+      "organizationUnit": {
+        "name": "planning-and-innovation-division",
+        "title": "Planning and Innovation Division"
+      },
+      "products": [
+        {
+          "name": "API Auto Test Product",
+          "environments": [
+            {
+              "name": "dev",
+              "active": true,
+              "flow": "kong-api-key-acl"
+            }
+          ]
+        }
+      ]
+    },
+    "namespaceDirectory": {
+      "name": "client-credentials-test-product",
+      "title": "Client Credentials Test Product",
+      "notes": "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them.",
+      "license_title": "Access Only",
+      "view_audience": "Government",
+      "security_class": "LOW-PUBLIC",
+      "tags": ["gateway", "kong", "openapi"],
+      "organization": {
+        "name": "ministry-of-health",
+        "title": "Ministry of Health"
+      },
+      "organizationUnit": {
+        "name": "planning-and-innovation-division",
+        "title": "Planning and Innovation Division"
+      },
+      "products": [
+        {
+          "id": "2",
+          "name": "Client Credentials Test Product",
+          "environments": [
+            {
+              "name": "test",
+              "active": true,
+              "flow": "client-credentials"
+            },
+            {
+              "name": "dev",
+              "active": true,
+              "flow": "client-credentials"
+            },
+            {
+              "name": "sandbox",
+              "active": true,
+              "flow": "client-credentials"
+            }
+          ]
+        }
+      ]
     }
   },
   "authorizationProfiles": {
@@ -116,6 +186,34 @@
       "accept": "application/json",
       "content-type": "application/json"
     },
-    "endPoint": "ds/api/v2/namespaces"
+    "endPoint": "ds/api/v2/namespaces",
+    "activity": {
+      "name": "apiplatform",
+      "scopes": [
+        {
+          "name": "GatewayConfig.Publish"
+        },
+        {
+          "name": "Namespace.Manage"
+        },
+        {
+          "name": "Access.Manage"
+        },
+        {
+          "name": "Content.Publish"
+        },
+        {
+          "name": "Namespace.View"
+        },
+        {
+          "name": "CredentialIssuer.Admin"
+        }
+      ],
+      "permDomains": [".api.gov.bc.ca"],
+      "permDataPlane": "local.dataplane",
+      "permProtectedNs": "deny",
+      "org": "ministry-of-health",
+      "orgUnit": "planning-and-innovation-division"
+    }
   }
 }

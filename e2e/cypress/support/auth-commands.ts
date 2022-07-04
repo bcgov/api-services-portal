@@ -7,6 +7,7 @@ import { url } from 'inspector'
 import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
+const njwt = require('njwt')
 
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
@@ -184,9 +185,10 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
       client_secret,
     },
     form: true,
+    failOnStatusCode: false
   }).then((res) => {
     cy.wrap(res).as('accessTokenResponse')
-    expect(res.status).to.eq(200)
+    // expect(res.status).to.eq(200)
   })
   cy.log('> Get Token')
 })
@@ -239,15 +241,20 @@ Cypress.Commands.add('deleteAllCookies', () => {
 })
 
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
-  cy.fixture('state/store').then((creds: any) => {
+  let authorization
+  cy.fixture('state/regen').then((creds: any) => {
     let token = key || creds.apikey
-    cy.log("Token->" + token)
+    debugger
     const service = serviceName
+    cy.log("Token->" + token)
     return cy.request({
       url: Cypress.env('KONG_URL'),
       method: methodType,
       headers: { 'x-api-key': `${token}`, 'Host': `${service}` + '.api.gov.bc.ca' },
-      failOnStatusCode: false
+      failOnStatusCode: false,
+      auth: {
+        bearer: token,
+      }
     })
   })
 })
@@ -343,7 +350,6 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
         cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
       }
     } else {
-      debugger
       if ((expectedResponse[p] == 'true') || (expectedResponse[p] == 'false'))
         Boolean(expectedResponse[p])
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
@@ -355,6 +361,41 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       }
     }
   }
+})
+
+Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey: any) => {
+  let jwkCred = JSON.parse(credential)
+  let clientId = jwkCred.clientId
+  let tokenEndpoint = jwkCred.tokenEndpoint
+
+  let now = Math.floor(new Date().getTime() / 1000)
+  let plus5Minutes = new Date((now + 5 * 60) * 1000)
+  let alg = 'RS256'
+
+  let claims = {
+    aud: Cypress.env('OIDC_ISSUER') + '/auth/realms/master',
+  }
+
+  let jwt = njwt
+    .create(claims, privateKey, alg)
+    .setIssuedAt(now)
+    .setExpiration(plus5Minutes)
+    .setIssuer(clientId)
+    .setSubject(clientId)
+    .compact()
+
+  cy.request({
+    url: tokenEndpoint,
+    method: 'POST',
+    body: {
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      scopes: 'openid',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: jwt,
+    },
+    form: true,
+  })
 })
 
 const formDataRequest = (

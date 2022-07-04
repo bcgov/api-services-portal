@@ -135,7 +135,6 @@ describe('Get the Namespace associated with the organization', () => {
     it('Get the resource and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
                 nameSpace = response[0].name
@@ -215,7 +214,6 @@ describe('Add and Get Organization Access', () => {
     it('Add the access of the organization to the specific user and verify the success code in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/access', 'PUT').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(204)
             })
         })

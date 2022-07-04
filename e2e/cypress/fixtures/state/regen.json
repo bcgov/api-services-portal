@@ -1,0 +1,5 @@
+{
+  "apikey": "yQ3L6J46HTOJpUoKiMEgh7TZIxv8VbqL",
+  "consumernumber": "3CBD4EB1-9E07D3FBF2F",
+  "clientidsecret": "{\"clientId\": \"B297ECBB-F562BDAE027\", \"clientSecret\": \"8473aa8e-5cfd-403c-b4f6-c4ee88fc038d\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}"
+}

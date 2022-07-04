@@ -86,7 +86,7 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
               'kong-api-key-acl',
               'client-credentials',
             ].includes(data.productEnvironment.flow) && (
-              <MenuItem onClick={onOpen}>Regenerate Credentials</MenuItem>
+              <MenuItem data-testid="regenerate-credentials-btn" onClick={onOpen}>Regenerate Credentials</MenuItem>
             )}
             <MenuItem
               color="bc-error"
