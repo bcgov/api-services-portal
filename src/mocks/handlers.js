@@ -2,6 +2,7 @@ import { graphql, rest } from 'msw';
 
 import { harley, mark } from './resolvers/personas';
 import {
+  allConsumerGroupLabelsHandler,
   accessRequestAuthHandler,
   deleteConsumersHandler,
   fullfillRequestHandler,
@@ -80,6 +81,7 @@ export const handlers = [
     'GetConsumerProductsAndEnvironments',
     allProductsByNamespaceHandler
   ),
+  keystone.query('GetAllConsumerGroupLabels', allConsumerGroupLabelsHandler),
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),

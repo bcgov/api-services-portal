@@ -555,6 +555,12 @@ export const gatewayServicesHandler = (req, res, ctx) => {
   );
 };
 
-export const saveConsumerLabels = (req, res, ctx) => {
+export const saveConsumerLabels = (_, res, ctx) => {
   return res(ctx.data(true));
+};
+
+export const allConsumerGroupLabelsHandler = (_, res, ctx) => {
+  return res(
+    ctx.data({ allConsumerGroupLabels: ['Phone Number', 'Facility'] })
+  );
 };

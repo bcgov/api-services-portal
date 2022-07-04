@@ -20,6 +20,8 @@ interface TagInputProps extends InputProps {
   value?: string | string[];
 }
 
+// TODO: Look into custom reportValidity hook, so a input with value `[]` doesn't pass as valid when required
+// (Should have a populated array if required)
 const TagInput: React.FC<TagInputProps> = ({
   id,
   name,

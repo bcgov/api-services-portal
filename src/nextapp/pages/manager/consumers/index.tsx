@@ -242,7 +242,7 @@ const ConsumersPage: React.FC<
             columns={[
               { name: 'Name/ID', key: 'name' },
               {
-                name: 'Labels',
+                name: <InlineManageLabels />,
                 key: 'tags',
                 sortable: false,
               },

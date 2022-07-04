@@ -37,7 +37,7 @@ interface ManageLabelsProps {
 
 const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   const client = useQueryClient();
-  const form = React.useRef<HTMLFormElement>(null);
+  const form = React.useRef(null);
   const saveLabelsMutation = useApiMutation(mutation);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -51,10 +51,10 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   const handleAddLabelSet = () => {
     setLabels((state) => [...state, defaultLabelGroup]);
   };
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(event.target);
       const labelGroups = data.getAll('labelGroup');
       const values = data.getAll('values');
       const combined = zip(labelGroups, values);
@@ -148,6 +148,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
                       placeholder="Select group"
                       defaultValue={l.labelGroup}
                       name="labelGroup"
+                      data-testid={`labels-group-${index}-select`}
                     >
                       <option value="Facility">Facility</option>
                       <option value="Contact Person">Contact Person</option>
@@ -155,7 +156,11 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
                     </Select>
                   </GridItem>
                   <GridItem>
-                    <TagInput value={l.values} name="values" />
+                    <TagInput
+                      value={l.values}
+                      name="values"
+                      data-testid={`labels-values-${index}`}
+                    />
                   </GridItem>
                 </React.Fragment>
               ))}

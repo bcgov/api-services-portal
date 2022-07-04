@@ -26,10 +26,13 @@ const InlineManageLabels: React.FC = () => {
               aria-label="Manage labels button"
               icon={<Icon as={HiOutlineChevronDown} />}
               variant="ghost"
+              data-testid="label-dialog-button"
             />
           </MenuButton>
           <MenuList>
-            <MenuItem onClick={onToggle}>Manage Group Labels</MenuItem>
+            <MenuItem onClick={onToggle} data-testid="label-dialog-menu-item">
+              Manage Group Labels
+            </MenuItem>
           </MenuList>
         </Menu>
       </Box>
