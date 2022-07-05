@@ -6043,8 +6043,12 @@ export type ConsumerQueryFilterInput = {
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
   mostActive?: Maybe<Scalars['Boolean']>;
   leastActive?: Maybe<Scalars['Boolean']>;
+  labels?: Maybe<Array<Maybe<ConsumerLabelFilter>>>;
+};
+
+export type ConsumerLabelFilter = {
   labelGroup?: Maybe<Scalars['String']>;
-  labelValue?: Maybe<Scalars['String']>;
+  value?: Maybe<Scalars['String']>;
 };
 
 export type ConsumerSummary = {

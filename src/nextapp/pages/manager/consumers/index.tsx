@@ -79,6 +79,7 @@ const ConsumersPage: React.FC<
     queryKey,
     {
       query,
+      variables: { filter: {} },
     },
     { suspense: false }
   );
@@ -316,8 +317,8 @@ const ConsumersPage: React.FC<
 export default ConsumersPage;
 
 const query = gql`
-  query GetConsumers {
-    getFilteredNamespaceConsumers {
+  query GetConsumers($filter: ConsumerQueryFilterInput) {
+    getFilteredNamespaceConsumers(filter: $filter) {
       id
       consumerType
       username
