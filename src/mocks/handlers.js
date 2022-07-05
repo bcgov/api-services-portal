@@ -3,6 +3,7 @@ import { graphql, rest } from 'msw';
 import { harley, mark } from './resolvers/personas';
 import {
   allConsumerGroupLabelsHandler,
+  allProductsByNamespaceHandler,
   accessRequestAuthHandler,
   deleteConsumersHandler,
   fullfillRequestHandler,
@@ -11,13 +12,13 @@ import {
   getConsumerHandler,
   getConsumerProdEnvAccessHandler,
   grantConsumerHandler,
+  grantAccessToConsumerHandler,
   getConsumersFilterHandler,
   rejectRequestHandler,
   saveConsumerLabels,
   updateConsumerAccessHandler,
   store as consumersStore,
 } from './resolvers/consumers';
-import { allProductsByNamespaceHandler } from './resolvers/products';
 
 export function resetAll() {
   consumersStore.reset();
@@ -88,6 +89,7 @@ export const handlers = [
   keystone.mutation('RejectAccessRequest', rejectRequestHandler),
   keystone.mutation('UpdateConsumerAccess', updateConsumerAccessHandler),
   keystone.mutation('SaveConsumerLabels', saveConsumerLabels),
+  keystone.mutation('GrantAccessToConsumer', grantAccessToConsumerHandler),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     return res(
       ctx.data({

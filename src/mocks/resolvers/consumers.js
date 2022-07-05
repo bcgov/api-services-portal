@@ -26,6 +26,55 @@ export const harleyAccessRequest = {
   },
 };
 
+export const allProductsByNamespace = [
+  {
+    id: '111',
+    name: 'Pharmanet Electronic Prescribing',
+    environments: [
+      {
+        id: '14',
+        name: 'dev',
+        active: true,
+        flow: 'client-credentials',
+        credentialIssuer: {
+          id: 'c1',
+          availableScopes: '["System/Patient"]',
+          clientRoles: '["b.role"]',
+        },
+        services: [
+          {
+            name: 'route-aps-portal-dev-api',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: '112',
+    name: 'Another App',
+    environments: [
+      {
+        id: '64',
+        name: 'prod',
+        active: true,
+        flow: 'client-credentials',
+        services: [
+          {
+            name: 'service-aps-portal-dev-api',
+          },
+        ],
+      },
+      {
+        id: '100',
+        name: 'sandbox',
+        active: true,
+        flow: 'client-credentials',
+        services: [],
+      },
+    ],
+  },
+];
+
 const consumers = {
   getFilteredNamespaceConsumers: [
     {
@@ -251,54 +300,7 @@ export const getConsumerHandler = (req, res, ctx) => {
           },
         },
       ],
-      allProductsByNamespace: [
-        {
-          id: '111',
-          name: 'Pharmanet Electronic Prescribing',
-          environments: [
-            {
-              id: '14',
-              name: 'dev',
-              active: true,
-              flow: 'client-credentials',
-              credentialIssuer: {
-                id: 'c1',
-                availableScopes: '["System/Patient"]',
-                clientRoles: '["b.role"]',
-              },
-              services: [
-                {
-                  name: 'route-aps-portal-dev-api',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: '112',
-          name: 'Another App',
-          environments: [
-            {
-              id: '64',
-              name: 'prod',
-              active: true,
-              flow: 'client-credentials',
-              services: [
-                {
-                  name: 'service-aps-portal-dev-api',
-                },
-              ],
-            },
-            {
-              id: '100',
-              name: 'sandbox',
-              active: true,
-              flow: 'client-credentials',
-              services: [],
-            },
-          ],
-        },
-      ],
+      allProductsByNamespace,
     })
   );
 };
@@ -307,16 +309,15 @@ export const getConsumersFilterHandler = (req, res, ctx) => {
   return res(
     ctx.data({
       // getFilteredNamespaceConsumers: [],
-      allProductsByNamespace: [
-        {
-          id: 'p1',
-          name: 'Pharmanet Electronic Prescribing',
-        },
-        {
-          id: 'p2',
-          name: 'Another Product',
-        },
-      ],
+      allProductsByNamespace,
+    })
+  );
+};
+
+export const allProductsByNamespaceHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allProductsByNamespace,
     })
   );
 };
@@ -444,6 +445,10 @@ export const grantConsumerHandler = (req, res, ctx) => {
   }
 
   return res(ctx.data({}));
+};
+
+export const grantAccessToConsumerHandler = (req, res, ctx) => {
+  return res(ctx.data(true));
 };
 
 export const fullfillRequestHandler = (req, res, ctx) => {

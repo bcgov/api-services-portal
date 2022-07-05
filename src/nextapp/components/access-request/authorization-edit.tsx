@@ -15,8 +15,8 @@ const Authorization: React.FC<AuthorizationProps> = ({
   defaultClientScopes,
   roles,
 }) => {
-  const availableScopes = JSON.parse(credentialIssuer?.availableScopes);
-  const clientRoles = JSON.parse(credentialIssuer?.clientRoles);
+  const availableScopes = JSON.parse(credentialIssuer?.availableScopes ?? '[]');
+  const clientRoles = JSON.parse(credentialIssuer?.clientRoles ?? '[]');
 
   return (
     <Box>

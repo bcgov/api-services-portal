@@ -23,11 +23,11 @@ import {
 import { gql } from 'graphql-request';
 
 import RequestControls from './controls';
-import RequestAuthorization from './authorization-edit';
+import AuthorizationEdit from './authorization-edit';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useAuth } from '@/shared/services/auth';
-import { GatewayConsumer } from '@/shared/types/query.types';
+import { Environment, GatewayConsumer } from '@/shared/types/query.types';
 
 interface GrantAccessDialogProps {
   consumer: GatewayConsumer;
@@ -44,13 +44,16 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
 }) => {
   const client = useQueryClient();
   const { user } = useAuth();
+  const ref = React.useRef(null);
   const [tabIndex, setTabIndex] = React.useState(0);
   const restrictions = React.useState([]);
   const rateLimits = React.useState([]);
   const [defaultClientScopes, setDefaultClientScopes] = React.useState([]);
   const [roles, setRoles] = React.useState([]);
   const [product, setProduct] = React.useState(null);
-  const [environment, setEnvironment] = React.useState(null);
+  const [environment, setEnvironment] = React.useState<Environment | null>(
+    null
+  );
   const environmentRef = React.useRef<HTMLSelectElement>(null);
   const { data, isLoading, isSuccess } = useApi(
     'GetConsumerProductsAndEnvironments',
@@ -91,13 +94,15 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
         throw 'Missing values product and/or environment';
       }
 
+      const form = ref.current?.querySelector('form[name="authorizationForm"]');
+      const formData = new FormData(form);
       const [restrictsionsData] = restrictions;
       const [rateLimitsData] = rateLimits;
       const data = {
         plugins: [...restrictsionsData, ...rateLimitsData],
       };
-      data['defaultClientScopes'] = defaultClientScopes;
-      data['roles'] = roles;
+      data['defaultClientScopes'] = formData.getAll('defaultClientScopes');
+      data['roles'] = formData.getAll('roles');
 
       await grantMutate.mutateAsync({
         prodEnvId,
@@ -106,6 +111,8 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
       });
       onClose();
       setProduct(null);
+      setTabIndex(0);
+      setEnvironment(null);
       toast({
         title: 'Access granted',
         status: 'success',
@@ -113,7 +120,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
     } catch (err) {
       toast({
         title: 'Access grant failed',
-        description: err,
+        description: err.message,
         status: 'error',
       });
     }
@@ -121,6 +128,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const handleClose = React.useCallback(() => {
     setTabIndex(0);
     setProduct(null);
+    setEnvironment(null);
     onClose();
   }, [onClose]);
 
@@ -157,10 +165,14 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
             </GridItem>
             <GridItem>
               <FormControl>
-                <FormLabel>Environment {product}</FormLabel>
+                <FormLabel>Environment</FormLabel>
                 <Select
                   isDisabled={!product}
-                  placeholder="Select Environment"
+                  placeholder={
+                    !product
+                      ? 'Product selection required'
+                      : 'Select Environment'
+                  }
                   onChange={handleEnvironmentChange}
                   ref={environmentRef}
                   data-testid="ar-environment-select"
@@ -195,7 +207,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
         </ModalHeader>
         <ModalCloseButton data-testid="access-request-close-btn" />
         {consumer && (
-          <ModalBody>
+          <ModalBody ref={ref}>
             <Box
               data-testid="ar-controls-tab"
               hidden={tabIndex !== 0}
@@ -212,7 +224,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               display={tabIndex === 1 ? 'block' : 'none'}
             >
               {environment && (
-                <RequestAuthorization
+                <AuthorizationEdit
                   credentialIssuer={environment.credentialIssuer}
                   defaultClientScopes={defaultClientScopes}
                   roles={roles}
