@@ -5,6 +5,7 @@ import {
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   grantAccessToConsumer,
+  revokeAccessFromConsumer,
   saveConsumerLabels,
   updateConsumerAccess,
 } from '../../services/workflow';
@@ -196,7 +197,7 @@ module.exports = {
               const namespace = context.req.user.namespace;
               try {
                 logger.debug(
-                  '[updateConsumerAccess] %s %s %j',
+                  '[grantAccessToConsumer] %s %s %j',
                   consumerId,
                   prodEnvId,
                   controls
@@ -210,7 +211,44 @@ module.exports = {
                 );
               } catch (err) {
                 logger.error(
-                  '[updateConsumerAccess] %s %s %s',
+                  '[grantAccessToConsumer] %s %s %s',
+                  consumerId,
+                  prodEnvId,
+                  err
+                );
+                throw err;
+              }
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'revokeAccessFromConsumer(consumerId: ID!, prodEnvId: ID!): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId, prodEnvId, controls }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              try {
+                logger.debug(
+                  '[revokeAccessFromConsumer] %s %s %j',
+                  consumerId,
+                  prodEnvId,
+                  controls
+                );
+                await revokeAccessFromConsumer(
+                  context,
+                  namespace,
+                  consumerId,
+                  prodEnvId
+                );
+              } catch (err) {
+                logger.error(
+                  '[revokeAccessFromConsumer] %s %s %s',
                   consumerId,
                   prodEnvId,
                   err

@@ -25,6 +25,7 @@ ACCESS MANAGER,,allConsumerGroupLabels,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,getConsumerProdEnvAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,grantAccessToConsumer,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,revokeAccessFromConsumer,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,saveConsumerLabels,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
