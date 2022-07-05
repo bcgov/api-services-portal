@@ -236,46 +236,48 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 display={tabIndex === 2 ? 'block' : 'none'}
                 data-testid="edit-consumer-dialog-request-details-tab"
               >
-                <Grid
-                  templateColumns="205px 1fr"
-                  rowGap={3}
-                  columnGap={2}
-                  sx={{
-                    '& dt:after': {
-                      content: '":"',
-                    },
-                  }}
-                  data-testid="edit-consumer-dialog-request-details"
-                >
-                  <GridItem as="dt">Request Date</GridItem>
-                  <GridItem as="dd">
-                    <time>
-                      {format(
-                        new Date(
-                          data?.getConsumerProdEnvAccess.request.createdAt
-                        ),
-                        'MMM do, yyyy'
-                      )}
-                    </time>
-                  </GridItem>
-                  <GridItem as="dt">
-                    Instructions from the API Provider
-                  </GridItem>
-                  <GridItem as="dd">
-                    {
-                      data?.getConsumerProdEnvAccess.environment
-                        .additionalDetailsToRequest
-                    }
-                  </GridItem>
-                  <GridItem as="dt">Requester Comments</GridItem>
-                  <GridItem as="dd">
-                    {data?.getConsumerProdEnvAccess.request.additionalDetails}
-                  </GridItem>
-                  <GridItem as="dt">Approver</GridItem>
-                  <GridItem as="dd">
-                    {data?.getConsumerProdEnvAccess.requestApprover?.name}
-                  </GridItem>
-                </Grid>
+                {data?.getConsumerProdEnvAccess?.request && (
+                  <Grid
+                    templateColumns="205px 1fr"
+                    rowGap={3}
+                    columnGap={2}
+                    sx={{
+                      '& dt:after': {
+                        content: '":"',
+                      },
+                    }}
+                    data-testid="edit-consumer-dialog-request-details"
+                  >
+                    <GridItem as="dt">Request Date</GridItem>
+                    <GridItem as="dd">
+                      <time>
+                        {format(
+                          new Date(
+                            data?.getConsumerProdEnvAccess.request.createdAt
+                          ),
+                          'MMM do, yyyy'
+                        )}
+                      </time>
+                    </GridItem>
+                    <GridItem as="dt">
+                      Instructions from the API Provider
+                    </GridItem>
+                    <GridItem as="dd">
+                      {
+                        data?.getConsumerProdEnvAccess.environment
+                          .additionalDetailsToRequest
+                      }
+                    </GridItem>
+                    <GridItem as="dt">Requester Comments</GridItem>
+                    <GridItem as="dd">
+                      {data?.getConsumerProdEnvAccess.request.additionalDetails}
+                    </GridItem>
+                    <GridItem as="dt">Approver</GridItem>
+                    <GridItem as="dd">
+                      {data?.getConsumerProdEnvAccess.requestApprover?.name}
+                    </GridItem>
+                  </Grid>
+                )}
               </Box>
             </ModalBody>
           )}

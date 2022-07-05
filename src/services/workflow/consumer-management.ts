@@ -354,20 +354,22 @@ export async function getConsumerProdEnvAccess(
 
   // request?: AccessRequest;
   // lookup request based on ServiceAccess record
-  access.request = await getAccessRequestByNamespaceServiceAccess(
-    context,
-    ns,
-    serviceAccessId
-  );
+  if (access.serviceAccessId) {
+    access.request = await getAccessRequestByNamespaceServiceAccess(
+      context,
+      ns,
+      access.serviceAccessId
+    );
 
-  const activity = await getActivityByRefId(context, access.request.id);
-  logger.debug('Activity %j', activity);
+    const activity = await getActivityByRefId(context, access.request.id);
+    logger.debug('Activity %j', activity);
 
-  if (activity.length > 0) {
-    access.requestApprover = {
-      id: '',
-      name: activity[0].actor.name,
-    };
+    if (activity.length > 0) {
+      access.requestApprover = {
+        id: '',
+        name: activity[0].actor.name,
+      };
+    }
   }
 
   return access;
