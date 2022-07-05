@@ -7532,6 +7532,7 @@ export type Mutation = {
   acceptLegal?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
   grantAccessToConsumer?: Maybe<Scalars['Boolean']>;
+  revokeAccessFromConsumer?: Maybe<Scalars['Boolean']>;
   updateConsumerAccess?: Maybe<Scalars['Boolean']>;
   saveConsumerLabels?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
@@ -8310,6 +8311,12 @@ export type MutationGrantAccessToConsumerArgs = {
   consumerId: Scalars['ID'];
   prodEnvId: Scalars['ID'];
   controls?: Maybe<Scalars['JSON']>;
+};
+
+
+export type MutationRevokeAccessFromConsumerArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
 };
 
 
