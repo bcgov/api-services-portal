@@ -24,6 +24,13 @@ type ConsumerLabel {
 }
 `;
 
+const typeConsumerLabelFilter = `
+input ConsumerLabelFilter {
+  labelGroup: String,
+  value: String
+}
+`;
+
 const typeConsumerQueryFilter = `
 input ConsumerQueryFilterInput {
   products: [String],
@@ -32,8 +39,7 @@ input ConsumerQueryFilterInput {
   roles: [String],
   mostActive: Boolean,
   leastActive: Boolean,
-  labelGroup: String,
-  labelValue: String
+  labels: [ConsumerLabelFilter]
 }
 `;
 
@@ -97,6 +103,7 @@ module.exports = {
         types: [
           { type: typeConsumerLabel },
           { type: typeConsumerQueryFilter },
+          { type: typeConsumerLabelFilter },
           { type: typeConsumerSummary },
           { type: typeConsumerAccess },
           { type: typeConsumerProdEnvAccess },
