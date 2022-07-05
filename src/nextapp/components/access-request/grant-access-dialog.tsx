@@ -94,15 +94,19 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
         throw 'Missing values product and/or environment';
       }
 
-      const form = ref.current?.querySelector('form[name="authorizationForm"]');
-      const formData = new FormData(form);
       const [restrictsionsData] = restrictions;
       const [rateLimitsData] = rateLimits;
       const data = {
         plugins: [...restrictsionsData, ...rateLimitsData],
       };
-      data['defaultClientScopes'] = formData.getAll('defaultClientScopes');
-      data['roles'] = formData.getAll('roles');
+      if (environment) {
+        const form = ref.current?.querySelector(
+          'form[name="authorizationForm"]'
+        );
+        const formData = new FormData(form);
+        data['defaultClientScopes'] = formData.getAll('defaultClientScopes');
+        data['roles'] = formData.getAll('roles');
+      }
 
       await grantMutate.mutateAsync({
         prodEnvId,
