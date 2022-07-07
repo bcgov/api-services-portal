@@ -134,7 +134,7 @@ describe('API Tests for Deleting Namespace', () => {
     it('Delete the namespace and verify the success code in the response', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.get('@api').then(({ namespaces }: any) => {
-                cy.makeAPIRequest(namespaces.endPoint + "/" + apiTest.delete_namespace, 'DELETE').then((res) => {
+                cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace, 'DELETE').then((res) => {
                     expect(res.status).to.be.equal(200)
                 })
             })
