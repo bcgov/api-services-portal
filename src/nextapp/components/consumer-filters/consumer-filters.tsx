@@ -11,49 +11,51 @@ interface ConsumerFiltersProps {
 
 const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
   const { user } = useAuth();
-  const config = React.useMemo(() => {
-    switch (value) {
-      case 'products':
-        return {
-          query: productsQuery,
-          variables: {
-            namespace: user?.namespace,
-          },
-        };
-      case 'environment':
-        return {
-          query: productsQuery,
-          variables: {
-            namespace: user?.namespace,
-          },
-        };
-      case 'scopes':
-        return {
-          query: productsQuery,
-          variables: {
-            namespace: user?.namespace,
-          },
-        };
-      case 'roles':
-        return {
-          query: productsQuery,
-          variables: {
-            namespace: user?.namespace,
-          },
-        };
-    }
-  }, [user, value]);
   const { data, isLoading, isSuccess } = useApi(
     ['consumersFilter', value],
-    config,
-    { enabled: Boolean(value) }
+    {
+      query: productsQuery,
+      variables: {
+        namespace: user?.namespace,
+      },
+    },
+    { enabled: Boolean(user?.namespace) }
   );
+  const options: { name: string; id: string }[] = React.useMemo(() => {
+    if (isSuccess) {
+      switch (value) {
+        case 'products':
+          return data.allProductsByNamespace.map((f) => ({
+            id: f.id,
+            name: f.name,
+          }));
+
+        case 'environments':
+          return data.allProductsByNamespace.reduce((memo, d) => {
+            if (d.environments?.length > 0) {
+              return [
+                ...memo,
+                ...d.environments.map((e) => ({
+                  id: e.id,
+                  name: e.name,
+                })),
+              ];
+            }
+            return memo;
+          }, []);
+
+        default:
+          return [];
+      }
+    }
+    return [];
+  }, [value, data, isSuccess]);
 
   return (
     <>
-      <Select isDisabled={isLoading} name="value">
+      <Select isDisabled={isLoading || options.length === 0} name="value">
         {isSuccess &&
-          data.allProductsByNamespace.map((f) => (
+          options.map((f) => (
             <option key={uid(f)} value={f.id}>
               {f.name}
             </option>
@@ -70,6 +72,10 @@ const productsQuery = gql`
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id
+      environments {
+        id
+        name
+      }
     }
   }
 `;

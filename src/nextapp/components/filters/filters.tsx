@@ -20,74 +20,69 @@ import { uid } from 'react-uid';
 
 interface FiltersProps extends BoxProps {
   cacheId: string;
+  data: unknown;
   filterTypeOptions: { name: string; value: string }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
+  onAddFilter: (key: string, value: string) => void;
+  onClearFilters: () => void;
+  onRemoveFilter: (key: string, value: string) => void;
 }
 
 const Filters: React.FC<FiltersProps> = ({
   cacheId,
   children,
+  data,
   filterTypeOptions,
   filterValueOptions,
+  onAddFilter,
+  onClearFilters,
+  onRemoveFilter,
   ...props
 }) => {
-  const [filters, setFilters] = React.useState<string[]>(() => {
-    const cached = localStorage.getItem(cacheId);
-    try {
-      let result = [];
-      if (cached) {
-        result = JSON.parse(cached);
+  const filters: string[] = React.useMemo(() => {
+    const keys = Object.keys(data);
+    const result: string[] = [];
+
+    keys.forEach((k) => {
+      const value = data[k];
+      if (Array.isArray(value) && value.length > 0) {
+        value.forEach((v) => {
+          result.push(`${k} = ${v}`);
+        });
       }
-      return result;
-    } catch {
-      return [];
-    }
-  });
+    });
+
+    return result;
+  }, [data]);
   const [filterType, setFilterType] = React.useState<string>(
     filterTypeOptions[0]?.value ?? ''
   );
   const toast = useToast();
 
   // Events
-  const handleFilterTypeSelect = React.useCallback((event) => {
+  const handleFilterTypeSelect = (event) => {
     setFilterType(event.target.value);
-  }, []);
+  };
 
-  const handleSubmit = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      const form = new FormData(event.currentTarget);
-      const filterType = form.get('type');
-      const filterValue = form.get('value');
-      const newFilter = `${filterType}=${filterValue}`;
-      setFilters((state) => {
-        const updatedState = [...state, newFilter];
-        localStorage.setItem(cacheId, JSON.stringify(updatedState));
-        return updatedState;
-      });
-      event.currentTarget.reset();
-      toast({
-        title: 'Filters Added',
-        status: 'success',
-      });
-    },
-    [cacheId, toast]
-  );
-  const handleRemove = React.useCallback(
-    (index: number) => () => {
-      setFilters((state) => {
-        const updatedState = state.filter((_, i) => index !== i);
-        localStorage.setItem(cacheId, JSON.stringify(updatedState));
-        return updatedState;
-      });
-    },
-    [cacheId]
-  );
-  const handleClear = React.useCallback(() => {
-    setFilters([]);
-    localStorage.setItem(cacheId, '[]');
-  }, [cacheId]);
-
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const filterType = form.get('type');
+    const filterValue = form.get('value');
+    onAddFilter(filterType as string, filterValue as string);
+    event.currentTarget.reset();
+    toast({
+      title: 'Filters Added',
+      status: 'success',
+    });
+  };
+  const handleRemove = (filter: string) => () => {
+    const [key, value] = filter.split(' = ');
+    onRemoveFilter(key, value);
+  };
+  const handleClear = () => {
+    onClearFilters();
+  };
   return (
     <Box bgColor="white" {...props} py={5} px={9}>
       <Grid
@@ -143,11 +138,11 @@ const Filters: React.FC<FiltersProps> = ({
           <Grid gap={4} templateColumns="1fr auto">
             <GridItem d="flex" alignItems="center">
               <Wrap>
-                {filters.map((f, index) => (
+                {filters.map((f) => (
                   <WrapItem key={uid(f)}>
                     <Tag variant="outline">
                       {f}
-                      <TagCloseButton onClick={handleRemove(index)} />
+                      <TagCloseButton onClick={handleRemove(f)} />
                     </Tag>
                   </WrapItem>
                 ))}

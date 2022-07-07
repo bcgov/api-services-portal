@@ -48,8 +48,6 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   const [tabIndex, setTabIndex] = React.useState(0);
   const restrictions = React.useState([]);
   const rateLimits = React.useState([]);
-  const [defaultClientScopes, setDefaultClientScopes] = React.useState([]);
-  const [roles, setRoles] = React.useState([]);
   const [product, setProduct] = React.useState(null);
   const [environment, setEnvironment] = React.useState<Environment | null>(
     null
@@ -230,8 +228,8 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               {environment && (
                 <AuthorizationEdit
                   credentialIssuer={environment.credentialIssuer}
-                  defaultClientScopes={defaultClientScopes}
-                  roles={roles}
+                  defaultClientScopes={[]}
+                  roles={[]}
                 />
               )}
             </Box>

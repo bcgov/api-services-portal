@@ -21,8 +21,7 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient, useQueryClient } from 'react-query';
 import EmptyPane from '@/components/empty-pane';
-// TODO:  Once we get API support for filters circle back and add back in
-import Filters from '@/components/filters';
+import Filters, { useFilters } from '@/components/filters';
 import {
   Application,
   ConsumerSummary,
@@ -42,6 +41,17 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
 
+interface FilterState {
+  products: string[];
+  environments: string[];
+  scopes: string[];
+  roles: string[];
+  mostActive: boolean;
+  leastActive: boolean;
+  labelGroup: string;
+  labelValue: string;
+}
+
 interface ConsumerListItem {
   id: string;
   application: Application;
@@ -50,7 +60,7 @@ interface ConsumerListItem {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
-  const queryKey = ['allConsumers'];
+  const queryKey = 'allConsumers';
 
   await queryClient.prefetchQuery(
     queryKey,
@@ -75,19 +85,30 @@ const ConsumersPage: React.FC<
   const client = useQueryClient();
   const [search, setSearch] = React.useState('');
   const [grantAccess, setGrantAccess] = React.useState(null);
-  const { data, status } = useApi(
-    queryKey,
+  const {
+    state,
+    addFilter,
+    clearFilters,
+    removeFilter,
+  } = useFilters<FilterState>({
+    products: [],
+    environments: [],
+    scopes: [],
+    roles: [],
+    mostActive: false,
+    leastActive: false,
+    labelGroup: '',
+    labelValue: '',
+  });
+  const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
+  const { data } = useApi(
+    [queryKey, filterKey],
     {
       query,
-      variables: { filter: {} },
+      variables: { filter: state },
     },
     { suspense: false }
   );
-  const grantMutate = useApiMutation(grantMutation, {
-    onSuccess() {
-      client.invalidateQueries(queryKey);
-    },
-  });
   const deleteMutate = useApiMutation(deleteMutation, {
     onSuccess() {
       client.invalidateQueries(queryKey);
@@ -116,80 +137,41 @@ const ConsumersPage: React.FC<
   const totalConsumers = consumers.length ?? 0;
 
   // Events
-  const handleDelete = React.useCallback(
-    (id: string) => async () => {
-      const successId = 'delete-success';
-      const errorId = 'delete-error';
+  const handleDelete = (id: string) => async () => {
+    const successId = 'delete-success';
+    const errorId = 'delete-error';
 
-      try {
-        await deleteMutate.mutateAsync({ id });
-        if (!toast.isActive(successId)) {
-          toast({
-            id: successId,
-            title: 'Consumer deleted',
-            status: 'success',
-          });
-        }
-      } catch (err) {
-        if (!toast.isActive(errorId)) {
-          toast({
-            id: errorId,
-            title: 'Consumer delete failed',
-            description: Array.isArray(err)
-              ? err.map((e) => e.message).join(', ')
-              : '',
-            status: 'error',
-          });
-        }
-      }
-    },
-    [deleteMutate, toast]
-  );
-  const handleGrantRequest = React.useCallback(
-    (d: ConsumerListItem) => async () => {
-      const successId = 'grant-success';
-      const errorId = 'grant-error';
-      try {
-        await grantMutate.mutateAsync({
-          prodEnvId: d.application.appId,
-          consumerId: d.consumer.id,
-          group: d.consumer.aclGroups,
-          grant: true,
+    try {
+      await deleteMutate.mutateAsync({ id });
+      if (!toast.isActive(successId)) {
+        toast({
+          id: successId,
+          title: 'Consumer deleted',
+          status: 'success',
         });
-        if (!toast.isActive(successId)) {
-          toast({
-            id: successId,
-            title: 'Consumer access granted',
-            status: 'success',
-          });
-        }
-      } catch (err) {
-        if (!toast.isActive(errorId)) {
-          toast({
-            id: errorId,
-            title: 'Consumer access grant failed',
-            description: Array.isArray(err)
-              ? err?.map((e) => e.message).join(', ')
-              : err.message,
-            status: 'error',
-          });
-        }
       }
-    },
-    [grantMutate, toast]
-  );
-  const handleGrant = React.useCallback(
-    (d: ConsumerSummary) => () => {
-      setGrantAccess(d);
-    },
-    []
-  );
-  const handleSearchChange = React.useCallback((value: string) => {
+    } catch (err) {
+      if (!toast.isActive(errorId)) {
+        toast({
+          id: errorId,
+          title: 'Consumer delete failed',
+          description: Array.isArray(err)
+            ? err.map((e) => e.message).join(', ')
+            : '',
+          status: 'error',
+        });
+      }
+    }
+  };
+  const handleGrant = (d: ConsumerSummary) => () => {
+    setGrantAccess(d);
+  };
+  const handleSearchChange = (value: string) => {
     setSearch(value);
-  }, []);
-  const handleCloseGrantDialog = React.useCallback(() => {
+  };
+  const handleCloseGrantDialog = () => {
     setGrantAccess(null);
-  }, []);
+  };
 
   return (
     <>
@@ -209,7 +191,11 @@ const ConsumersPage: React.FC<
         ))}
         <Filters
           cacheId="consumers"
+          data={state as FilterState}
           filterTypeOptions={filterTypeOptions}
+          onAddFilter={addFilter}
+          onClearFilters={clearFilters}
+          onRemoveFilter={removeFilter}
           mb={4}
         >
           <ConsumerFilters />
@@ -402,7 +388,7 @@ const filterTypeOptions = [
     name: 'Products',
     value: 'products',
   },
-  { name: 'Environment', value: 'environment' },
+  { name: 'Environment', value: 'environments' },
 
   { name: 'Scopes', value: 'scopes' },
 
