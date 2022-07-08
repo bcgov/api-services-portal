@@ -42,10 +42,10 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
 
 interface FilterState {
-  products: string[];
-  environments: string[];
-  scopes: string[];
-  roles: string[];
+  products: Record<string, string>[];
+  environments: Record<string, string>[];
+  scopes: Record<string, string>[];
+  roles: Record<string, string>[];
   mostActive: boolean;
   leastActive: boolean;
   labels: { labelGroup: string; value: string }[];
@@ -99,11 +99,22 @@ const ConsumersPage: React.FC<
     labels: [],
   });
   const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
+  const filter = React.useMemo(() => {
+    const result = {};
+    Object.keys(state).forEach((k) => {
+      if (Array.isArray(state[k])) {
+        result[k] = state[k].map((v) => v.value);
+      } else {
+        result[k] = state[k];
+      }
+    });
+    return result;
+  }, [state]);
   const { data } = useApi(
     [queryKey, filterKey],
     {
       query,
-      variables: { filter: state },
+      variables: { filter },
     },
     { suspense: false }
   );

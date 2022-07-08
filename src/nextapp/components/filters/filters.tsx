@@ -11,7 +11,6 @@ import {
   Tag,
   TagCloseButton,
   Text,
-  useToast,
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
@@ -23,7 +22,7 @@ interface FiltersProps extends BoxProps {
   data: unknown;
   filterTypeOptions: { name: string; value: string }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
-  onAddFilter: (key: string, value: string) => void;
+  onAddFilter: (key: string, payload: Record<string, string>) => void;
   onClearFilters: () => void;
   onRemoveFilter: (key: string, value: string) => void;
 }
@@ -47,7 +46,7 @@ const Filters: React.FC<FiltersProps> = ({
       const value = data[k];
       if (Array.isArray(value) && value.length > 0) {
         value.forEach((v) => {
-          result.push(`${k} = ${v}`);
+          result.push(`${k} = ${v.name}`);
         });
       }
     });
@@ -57,7 +56,6 @@ const Filters: React.FC<FiltersProps> = ({
   const [filterType, setFilterType] = React.useState<string>(
     filterTypeOptions[0]?.value ?? ''
   );
-  const toast = useToast();
 
   // Events
   const handleFilterTypeSelect = (event) => {
@@ -66,15 +64,14 @@ const Filters: React.FC<FiltersProps> = ({
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const filterType = form.get('type');
-    const filterValue = form.get('value');
-    onAddFilter(filterType as string, filterValue as string);
+    const form = new FormData(event.target);
+    const filterType = form.get('type') as string;
+    const filterValue = form.get('value') as string;
+    const filterName = event.target.querySelector(
+      `select[name="value"] option[value="${filterValue}"]`
+    )?.textContent;
+    onAddFilter(filterType, { value: filterValue, name: filterName });
     event.currentTarget.reset();
-    toast({
-      title: 'Filters Added',
-      status: 'success',
-    });
   };
   const handleRemove = (filter: string) => () => {
     const [key, value] = filter.split(' = ');

@@ -5,12 +5,12 @@ type FilterActionType = 'addFilter' | 'clearFilters' | 'removeFilter';
 type FilterAction = {
   type: FilterActionType;
   filterType?: string;
-  payload?: string;
+  payload?: string | Record<string, string>;
 };
 
 type FilterReturn<T> = {
   state: T;
-  addFilter: (key: string, value: string) => void;
+  addFilter: (key: string, value: Record<string, string>) => void;
   clearFilters: () => void;
   removeFilter: (key: string, value: string) => void;
 };
@@ -22,6 +22,16 @@ const useFilters = <FilterState>(
     (state: FilterState, action: FilterAction): FilterState => {
       switch (action.type) {
         case 'addFilter':
+          if (
+            state[action.filterType].find((f) => {
+              if (typeof action.payload !== 'string') {
+                return f.value === action.payload?.value;
+              }
+              return false;
+            })
+          ) {
+            return state;
+          }
           return {
             ...state,
             [action.filterType]: [...state[action.filterType], action.payload],
@@ -34,7 +44,7 @@ const useFilters = <FilterState>(
           return {
             ...state,
             [action.filterType]: state[action.filterType].filter(
-              (value) => value !== action.payload
+              (value) => value.name !== action.payload
             ),
           };
 
@@ -47,7 +57,7 @@ const useFilters = <FilterState>(
 
   return {
     state,
-    addFilter: (key: string, value: string): void => {
+    addFilter: (key: string, value: Record<string, string>): void => {
       dispatch({
         type: 'addFilter',
         payload: value,
