@@ -48,8 +48,7 @@ interface FilterState {
   roles: string[];
   mostActive: boolean;
   leastActive: boolean;
-  labelGroup: string;
-  labelValue: string;
+  labels: { labelGroup: string; value: string }[];
 }
 
 interface ConsumerListItem {
@@ -97,8 +96,7 @@ const ConsumersPage: React.FC<
     roles: [],
     mostActive: false,
     leastActive: false,
-    labelGroup: '',
-    labelValue: '',
+    labels: [],
   });
   const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
   const { data } = useApi(
