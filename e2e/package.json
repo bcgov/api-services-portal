@@ -13,7 +13,7 @@
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
     "cy:edge": "npx cypress run --browser edge",
     "moch:html": "marge results/bcgov-aps-e2e-report.json --reportDir results/report -i -t \"API Services Portal E2E Test Report\"",
-    "cy:chrome": "cypress run --env TransferProtocol='http' --browser chrome",
+    "cy:chrome": "cypress run --headed --env TransferProtocol='http' --browser chrome",
     "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html",
     "cy:run:rcd:html": "run-s --continue-on-error cy:run:rcd moch:json moch:html",
     "cy:chrome:headless": "cypress run --env TransferProtocol='http' --browser chrome --headless",

@@ -56,5 +56,8 @@ declare namespace Cypress {
     getUserSession(): Chainable<Cypress.Response<any>>
 
     compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
+
+    getUserSessionTokenValue(): Chainable<Cypress.Response<any>>
+
   }
 }

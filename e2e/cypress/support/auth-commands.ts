@@ -25,10 +25,11 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   const login = new LoginPage()
   const home = new HomePage()
 
-  cy.get('header').then(($a) => { 
+  cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-      debugger
+
       cy.get(login.loginButton).click()
+      cy.contains('Github').click()
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',
@@ -40,7 +41,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
       cy.get(login.loginSubmitButton).click()
     }
   })
-  debugger
+
   if (checkElementExists('.alert')) {
     cy.reload()
     cy.get(login.usernameInput).click().type(username)
@@ -83,6 +84,30 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
     na.clickGrantUserAccessButton()
     na.grantPermission(checkPermission.grantPermission[accessRole])
+  })
+})
+
+Cypress.Commands.add('getUserSessionTokenValue', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  const na = new NamespaceAccessPage()
+  let userSession: string
+  cy.deleteAllCookies()
+  cy.visit('/')
+  cy.reload()
+  cy.fixture('apiowner').as('apiowner')
+  cy.preserveCookies()
+  cy.visit(login.path)
+  cy.getUserSession().then(() => {
+    cy.get('@apiowner').then(({ user, apiTest }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
+      home.useNamespace(apiTest.namespace)
+      cy.get('@login').then(function (xhr: any) {
+        userSession = xhr.response.headers['x-auth-request-access-token']
+        return userSession
+      })
+    })
   })
 })
 
@@ -141,7 +166,7 @@ Cypress.Commands.add('logout', () => {
   cy.getSession().then(() => {
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
-      cy.contains('Sign Out').click()
+      cy.contains('Logout').click()
     })
   })
   cy.log('> Logging out')
@@ -277,7 +302,6 @@ Cypress.Commands.add('setHeaders', (headerValues: any) => {
 })
 
 Cypress.Commands.add('setRequestBody', (body: any) => {
-  debugger
   requestBody = JSON.stringify(body)
 })
 
@@ -319,6 +343,12 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
         cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
       }
     } else {
+      debugger
+      if ((expectedResponse[p] == 'true') || (expectedResponse[p] == 'false'))
+        Boolean(expectedResponse[p])
+      if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
+        response[p] = response[p]['name']
+      }
       if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)

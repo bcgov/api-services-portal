@@ -42,7 +42,7 @@ services:
         aliases:
           - keycloak.localtest.me
   oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
     container_name: oauth2-proxy
     command: --config ./oauth2-proxy.cfg
     depends_on:
@@ -103,30 +103,30 @@ services:
       - ./local/feeder-init:/tmp
     networks:
       - aps-net
-  cypress:
-    image: aps-cypress-e2e:latest
-    container_name: cypress-e2e
-    entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
-    environment:
-      - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
-      - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
-      - RUN_ENV=${CY_EXECUTION_ENV}
-      - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
-      - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
-      - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
-      - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
-      - COMMIT_INFO_REMOTE=${CY_REPO_URL}
-      - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
-    depends_on:
-      - feeder-seeding
-    build:
-      context: ./e2e
-      dockerfile: Dockerfile
-    volumes:
-      - ./e2e/coverage:/e2e/coverage
-      - ./e2e/results:/e2e/results
-    networks:
-      - aps-net
+  # cypress:
+  #   image: aps-cypress-e2e:latest
+  #   container_name: cypress-e2e
+  #   entrypoint: sh -c "chmod +x /tmp/entrypoint.sh && /tmp/entrypoint.sh"
+  #   environment:
+  #     - CYPRESS_RECORD_KEY=${CY_RECORD_KEY}
+  #     - CYPRESS_PROJECT_ID=${CY_PROJECT_ID}
+  #     - RUN_ENV=${CY_EXECUTION_ENV}
+  #     - COMMIT_INFO_BRANCH=${CY_COMMIT_BRANCH}
+  #     - COMMIT_INFO_SHA=${CY_COMMIT_SHA}
+  #     - COMMIT_INFO_AUTHOR=${CY_COMMIT_AUTHOR}
+  #     - COMMIT_INFO_MESSAGE=${CY_COMMIT_MESSAGE}
+  #     - COMMIT_INFO_REMOTE=${CY_REPO_URL}
+  #     - COMMIT_INFO_EMAIL=${CY_COMMIT_AUTHOR_EMAIL}
+  #   depends_on:
+  #     - feeder-seeding
+  #   build:
+  #     context: ./e2e
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./e2e/coverage:/e2e/coverage
+  #     - ./e2e/results:/e2e/results
+  #   networks:
+  #     - aps-net
   kong-db:
     image: postgres:12.8
     container_name: kong-db
