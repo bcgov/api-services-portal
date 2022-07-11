@@ -91,6 +91,8 @@ import {
   updateConsumerLabel,
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
+import { AnyElement } from 'soap/lib/wsdl/elements';
+import { scopes } from 'auth/scope-role-utils';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -123,6 +125,30 @@ export async function allConsumerGroupLabels(
     .sort();
 
   logger.debug('[allConsumerGroupLabels] %j', result);
+  return result;
+}
+
+export async function allScopesAndRoles(
+  context: any,
+  ns: string
+): Promise<{ scopes: string[]; roles: string[] }> {
+  logger.debug('[allScopesAndRoles] %s', ns);
+
+  const envs = await lookupEnvironmentsByNS(context, ns);
+
+  const result: any = {
+    scopes: [] as any[],
+    roles: [] as any[],
+  };
+
+  envs
+    .filter((env) => env.credentialIssuer)
+    .forEach((env) => {
+      logger.debug('[allScopesAndRoles] %j', env.credentialIssuer);
+      result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
+      result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
+    });
+
   return result;
 }
 

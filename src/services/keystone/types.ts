@@ -6441,6 +6441,7 @@ export type Query = {
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
   allConsumerGroupLabels?: Maybe<Array<Maybe<Scalars['String']>>>;
+  allConsumerScopesAndRoles?: Maybe<Scalars['JSON']>;
   getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
   getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
   getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;

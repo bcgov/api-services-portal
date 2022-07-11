@@ -22,6 +22,7 @@ ACCESS MANAGER,,updateConsumerRoleAssignment,,,,,,,access-manager,,,allow,filter
 ACCESS MANAGER,,updateConsumerScopeAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
 ACCESS MANAGER,,getNamespaceConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,allConsumerGroupLabels,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,allConsumerScopesAndRoles,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,getConsumerProdEnvAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,grantAccessToConsumer,,,,,,,access-manager,,,allow,

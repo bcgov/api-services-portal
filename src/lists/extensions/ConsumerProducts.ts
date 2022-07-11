@@ -1,6 +1,7 @@
 import { EnforcementPoint } from '../../authz/enforcement';
 import {
   allConsumerGroupLabels,
+  allScopesAndRoles,
   getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
@@ -123,6 +124,20 @@ module.exports = {
             ): Promise<string[]> => {
               const namespace = context.req.user.namespace;
               return await allConsumerGroupLabels(context, namespace);
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'allConsumerScopesAndRoles: JSON',
+            resolver: async (
+              item: any,
+              { filter }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<{ scopes: string[]; roles: string[] }> => {
+              const namespace = context.req.user.namespace;
+              return await allScopesAndRoles(context, namespace);
             },
             access: EnforcementPoint,
           },

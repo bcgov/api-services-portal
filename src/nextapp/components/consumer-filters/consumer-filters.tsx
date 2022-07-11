@@ -44,6 +44,18 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
             return memo;
           }, []);
 
+        case 'scopes':
+          return data.allConsumerScopesAndRoles.scopes.map((scope) => ({
+            id: scope,
+            name: scope,
+          }));
+
+        case 'roles':
+          return data.allConsumerScopesAndRoles.roles.map((role) => ({
+            id: role,
+            name: role,
+          }));
+
         default:
           return [];
       }
@@ -69,6 +81,8 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetFilterConsumers($namespace: String!) {
+    allConsumerScopesAndRoles
+
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id
