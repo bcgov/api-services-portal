@@ -75,6 +75,28 @@ export async function lookupKongConsumerId(
   return result.data.allGatewayConsumers[0].extForeignKey;
 }
 
+export async function lookupKongConsumerIds(
+  context: any,
+  ids: string[]
+): Promise<GatewayConsumer[]> {
+  const result = await context.executeGraphQL({
+    query: `query FindConsumersByIds($where: GatewayConsumerWhereInput) {
+                    allGatewayConsumers(where: $where) {
+                      id
+                    }
+                }`,
+    variables: { where: { extForeignKey_in: ids } },
+  });
+  logger.debug('Query [lookupKongConsumerIds] result %j', result);
+
+  // assert.strictEqual(
+  //   result.data.allGatewayConsumers.length,
+  //   ids.length,
+  //   `Unexpected data returned for Consumer lookup ${ids.length} ${result.data.allGatewayConsumers.length}`
+  // );
+  return result.data.allGatewayConsumers;
+}
+
 export async function lookupKongConsumerIdByName(
   context: any,
   name: string

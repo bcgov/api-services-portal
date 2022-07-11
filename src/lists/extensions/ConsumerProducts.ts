@@ -139,7 +139,11 @@ module.exports = {
               logger.debug('[getFilteredNamespaceConsumers] Filter %j', filter);
 
               const namespace = context.req.user.namespace;
-              return await getFilteredNamespaceConsumers(context, namespace);
+              return await getFilteredNamespaceConsumers(
+                context,
+                namespace,
+                filter
+              );
             },
             access: EnforcementPoint,
           },

@@ -65,12 +65,14 @@ import {
   ConsumerAccess,
   ConsumerLabel,
   ConsumerProdEnvAccess,
+  ConsumerQueryFilter,
   ConsumerSummary,
   RequestControls,
 } from './types';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
+import { doFiltering } from './consumer-filters';
 import { getConsumerAuthz } from '.';
 import {
   Environment,
@@ -98,7 +100,11 @@ export async function allConsumerGroupLabels(
 ): Promise<string[]> {
   logger.debug('[allConsumerGroupLabels] %s', ns);
 
-  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+  const accesses = await lookupLabeledServiceAccessesForNamespace(
+    context,
+    ns,
+    undefined
+  );
 
   const labels = await getConsumerLabels(
     context,
@@ -122,11 +128,18 @@ export async function allConsumerGroupLabels(
 
 export async function getFilteredNamespaceConsumers(
   context: any,
-  ns: string
+  ns: string,
+  filter: ConsumerQueryFilter
 ): Promise<ConsumerSummary[]> {
-  logger.debug('[getFilteredNamespaceConsumers] %s', ns);
+  logger.debug('[getFilteredNamespaceConsumers] %s %j', ns, filter);
 
-  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+  const consumerIds = await doFiltering(context, ns, filter);
+
+  const accesses = await lookupLabeledServiceAccessesForNamespace(
+    context,
+    ns,
+    consumerIds
+  );
 
   const labels = await getConsumerLabels(
     context,

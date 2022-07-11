@@ -11,6 +11,33 @@ import { strict as assert } from 'assert';
 
 const logger = Logger('keystone.labels');
 
+export async function lookupConsumerIdsByLabels(
+  context: any,
+  ns: string,
+  labelGroup: string,
+  value: string
+): Promise<string[]> {
+  logger.debug('[lookupConsumersByLabels] result %s=%s', labelGroup, value);
+  const result = await context.executeGraphQL({
+    query: `query GetConsumersByLabels($ns: String!, $labelGroup: String, $value: String) {
+                    allLabels(where: { name: $labelGroup, value_contains: $value, namespace: $ns}) {
+                        name
+                        value
+                        consumer {
+                          id
+                        }
+                    }
+                }`,
+    variables: { ns, labelGroup, value },
+  });
+  logger.debug('[lookupConsumersByLabels] result %j', result);
+  return [
+    ...new Set(
+      result.data.allLabels.map((m: Label) => m.consumer?.id) as string[]
+    ),
+  ];
+}
+
 export async function getConsumerLabels(
   context: any,
   ns: string,

@@ -108,6 +108,22 @@ export interface ConsumerLabel {
   labelGroup: string;
   values: string[];
 }
+
+export interface ConsumerLabelFilter {
+  labelGroup: string;
+  value: string;
+}
+
+export interface ConsumerQueryFilter {
+  products: string[];
+  environments: string[];
+  scopes: string[];
+  roles: string[];
+  mostActive: boolean;
+  leastActive: boolean;
+  labels: ConsumerLabelFilter[];
+}
+
 export interface ConsumerSummary {
   id: string;
   consumerType: string;
