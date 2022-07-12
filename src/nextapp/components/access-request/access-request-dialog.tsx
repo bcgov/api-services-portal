@@ -22,13 +22,13 @@ import RequestControls from './controls';
 import RequestAuthorization from './authorization';
 import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 
 interface AccessRequestDialogProps {
   data: AccessRequest;
   isOpen: boolean;
   onClose: () => void;
-  queryKey: string;
+  queryKey: QueryKey;
   title: string;
 }
 

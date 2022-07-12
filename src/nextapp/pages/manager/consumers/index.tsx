@@ -19,15 +19,10 @@ import {
 import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
-import { QueryClient, useQueryClient } from 'react-query';
+import { QueryClient, QueryKey, useQueryClient } from 'react-query';
 import EmptyPane from '@/components/empty-pane';
 import Filters, { useFilters } from '@/components/filters';
-import {
-  Application,
-  ConsumerSummary,
-  GatewayConsumer,
-  Query,
-} from '@/shared/types/query.types';
+import { ConsumerSummary, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import InlineManageLabels from '@/components/inline-manage-labels';
@@ -40,6 +35,7 @@ import { uid } from 'react-uid';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
+import AccessRequestsList from '@/components/access-request/access-requests-list';
 
 interface FilterState {
   products: Record<string, string>[];
@@ -51,15 +47,9 @@ interface FilterState {
   labels: { labelGroup: string; value: string }[];
 }
 
-interface ConsumerListItem {
-  id: string;
-  application: Application;
-  consumer: GatewayConsumer;
-}
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
-  const queryKey = 'allConsumers';
+  const queryKey: QueryKey = 'allConsumers';
 
   await queryClient.prefetchQuery(
     queryKey,
@@ -110,7 +100,7 @@ const ConsumersPage: React.FC<
     });
     return result;
   }, [state]);
-  const { data } = useApi(
+  const { data, isFetching } = useApi(
     [queryKey, filterKey],
     {
       query,
@@ -123,7 +113,6 @@ const ConsumersPage: React.FC<
       client.invalidateQueries(queryKey);
     },
   });
-  const accessRequests = data?.allAccessRequestsByNamespace ?? [];
   const consumers = React.useMemo(() => {
     if (!data?.getFilteredNamespaceConsumers) {
       return [];
@@ -142,7 +131,6 @@ const ConsumersPage: React.FC<
       );
     });
   }, [data, search]);
-  const totalRequests = accessRequests.length ?? 0;
   const totalConsumers = consumers.length ?? 0;
 
   // Events
@@ -185,9 +173,7 @@ const ConsumersPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers ${
-          totalRequests > 0 ? `(${totalRequests})` : ''
-        }`}</title>
+        <title>Consumers</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -195,9 +181,7 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        {accessRequests.map((a) => (
-          <AccessRequest key={a.id} data={a} queryKey={queryKey} />
-        ))}
+        <AccessRequestsList queryKey={queryKey} />
         <Filters
           cacheId="consumers"
           data={state as FilterState}
@@ -235,6 +219,7 @@ const ConsumersPage: React.FC<
           </Box>
           <Table
             sortable
+            isUpdating={isFetching}
             columns={[
               { name: 'Name/ID', key: 'name' },
               {

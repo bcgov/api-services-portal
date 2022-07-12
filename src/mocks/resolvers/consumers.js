@@ -175,7 +175,14 @@ const consumers = {
       },
     },
   ],
-  allAccessRequestsByNamespace: [harleyAccessRequest],
+};
+
+export const getAccessRequestsHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allAccessRequestsByNamespace: [harleyAccessRequest],
+    })
+  );
 };
 
 class Store {
@@ -199,8 +206,8 @@ class Store {
 
 export const store = new Store(consumers);
 
-export const getConsumersHandler = (_, res, ctx) => {
-  return res(ctx.data(store.data));
+export const getConsumersHandler = (req, res, ctx) => {
+  return res(ctx.delay(), ctx.data(store.data));
 };
 
 export const getConsumerHandler = (req, res, ctx) => {
