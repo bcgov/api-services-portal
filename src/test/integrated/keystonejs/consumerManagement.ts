@@ -68,6 +68,13 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
     o(cids);
   }
 
+  if (true) {
+    const cids = await doFiltering(ctx, ns, {
+      scopes: ['read'],
+    } as ConsumerQueryFilter);
+    o(cids);
+  }
+
   // const consumers = await getFilteredNamespaceConsumers(ctx, ns, {
   //   labels: [{ labelGroup: 'Facility', value: 'abc' }],
   // } as ConsumerQueryFilter);

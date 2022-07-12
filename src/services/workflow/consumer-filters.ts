@@ -1,11 +1,17 @@
 import { logger } from '../../logger';
+import { getOpenidFromIssuer, KeycloakClientService } from '../keycloak';
 import { lookupServiceAccessesByEnvironment } from '../keystone';
 import { lookupKongConsumerIds } from '../keystone/gateway-consumer';
 import { lookupConsumerIdsByLabels } from '../keystone/labels';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { Environment } from '../keystone/types';
 import { KongACLService, KongConsumerService } from '../kong';
-import { ConsumerQueryFilter } from './types';
+import { getEnvironmentContext } from './get-namespaces';
+import {
+  checkIssuerEnvironmentConfig,
+  ConsumerQueryFilter,
+  IssuerEnvironmentConfig,
+} from './types';
 
 export async function doFiltering(
   context: any,
@@ -30,6 +36,15 @@ export async function doFiltering(
         ns,
         filter.labels[0].labelGroup,
         filter.labels[0].value
+      )
+    );
+  }
+  if (filter.scopes?.length > 0 || filter.roles?.length > 0) {
+    promises.push(
+      filterByScope(
+        context,
+        ns,
+        filter.scopes?.length > 0 ? filter.scopes[0] : undefined
       )
     );
   }
@@ -147,13 +162,72 @@ async function queryServiceAccessConsumerIds(
  * @param role
  * @returns
  */
-async function filterByScopesAndRoles(
+async function filterByScope(
   context: any,
   ns: string,
-  scope: string,
-  role: string
+  scope: string
 ): Promise<string[]> {
-  return null;
+  logger.debug('[filterByScope] Filter %s %s', ns, scope);
+
+  const envs = await lookupEnvironmentsByNS(context, ns);
+
+  const matchedEnvs = envs
+    .filter((env) => env.flow === 'client-credentials')
+    .filter((env) => env.credentialIssuer)
+    .filter((env) => {
+      const issuer = env.credentialIssuer;
+      const eligibleScopes = JSON.parse(issuer.availableScopes);
+      const eligibleRoles = JSON.parse(issuer.clientRoles);
+      return scope && eligibleScopes.includes(scope);
+    });
+
+  logger.debug('[filterByScope] Matched %j', matchedEnvs);
+
+  // for each environment, search for matching clients
+  // and then cross-reference with "accesses"
+  const promises = matchedEnvs.map(
+    async (env): Promise<string[]> => {
+      const appId = env.appId;
+
+      const issuerEnvConfig: IssuerEnvironmentConfig = checkIssuerEnvironmentConfig(
+        env.credentialIssuer,
+        env.name
+      );
+
+      const kc = new KeycloakClientService(issuerEnvConfig.issuerUrl);
+
+      await kc.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
+      const clients = await kc.list(appId);
+
+      logger.debug(
+        '[filterByScope] Clients Search %s %d',
+        appId,
+        clients.length
+      );
+
+      return clients
+        .filter((client) => client.defaultClientScopes.includes(scope))
+        .map((client) => client.clientId);
+    }
+  );
+
+  const allClients = new Set(
+    [].concat.apply([], await Promise.all(promises)) as string[]
+  );
+
+  const envIds = matchedEnvs.map((env) => env.id);
+  const accesses = await lookupServiceAccessesByEnvironment(
+    context,
+    ns,
+    envIds
+  );
+
+  // go through the "accesses" and any matching clientId then
+  // include the consumer ID
+  return accesses
+    .filter((access) => allClients.has(access.consumer.customId))
+    .map((access) => access.consumer.id);
 }
 
 /**
