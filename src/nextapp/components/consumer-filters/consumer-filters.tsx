@@ -4,12 +4,17 @@ import { Select } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
+import { ConsumerSummary } from '@/shared/types/query.types';
 
 interface ConsumerFiltersProps {
+  consumers: ConsumerSummary[];
   value?: string;
 }
 
-const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
+const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
+  consumers,
+  value,
+}) => {
   const { user } = useAuth();
   const { data, isLoading, isSuccess } = useApi(
     ['consumersFilter', value],
@@ -21,6 +26,22 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
     },
     { enabled: Boolean(user?.namespace) }
   );
+  const labels = React.useMemo(() => {
+    return consumers.reduce((memo, c) => {
+      c.labels.forEach((l) => {
+        l.values.forEach((v) => {
+          const name = `${l.labelGroup}=${v}`;
+          if (!memo.includes(name)) {
+            memo.push({
+              id: name,
+              name,
+            });
+          }
+        });
+      });
+      return memo;
+    }, []);
+  }, [consumers]);
   const options: { name: string; id: string }[] = React.useMemo(() => {
     if (isSuccess) {
       switch (value) {
@@ -33,13 +54,14 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
         case 'environments':
           return data.allProductsByNamespace.reduce((memo, d) => {
             if (d.environments?.length > 0) {
-              return [
-                ...memo,
-                ...d.environments.map((e) => ({
-                  id: e.id,
-                  name: e.name,
-                })),
-              ];
+              d.environments.forEach((e) => {
+                if (!memo.map((e) => e.id).includes(e.name)) {
+                  memo.push({
+                    id: e.name,
+                    name: e.name,
+                  });
+                }
+              });
             }
             return memo;
           }, []);
@@ -56,12 +78,15 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
             name: role,
           }));
 
+        case 'labels':
+          return labels;
+
         default:
           return [];
       }
     }
     return [];
-  }, [value, data, isSuccess]);
+  }, [data, labels, isSuccess, value]);
 
   return (
     <>

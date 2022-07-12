@@ -207,7 +207,7 @@ const ConsumersPage: React.FC<
           onRemoveFilter={removeFilter}
           mb={4}
         >
-          <ConsumerFilters />
+          <ConsumerFilters consumers={consumers} />
         </Filters>
         <Box bgColor="white" mb={4}>
           <Box
@@ -368,22 +368,6 @@ const query = gql`
   }
 `;
 
-const grantMutation = gql`
-  mutation ToggleConsumerACLMembership(
-    $prodEnvId: ID!
-    $consumerId: ID!
-    $group: String!
-    $grant: Boolean!
-  ) {
-    updateConsumerGroupMembership(
-      prodEnvId: $prodEnvId
-      consumerId: $consumerId
-      group: $group
-      grant: $grant
-    )
-  }
-`;
-
 const deleteMutation = gql`
   mutation DeleteConsumer($id: ID!) {
     deleteGatewayConsumer(id: $id) {
@@ -393,13 +377,9 @@ const deleteMutation = gql`
 `;
 
 const filterTypeOptions = [
-  {
-    name: 'Products',
-    value: 'products',
-  },
+  { name: 'Products', value: 'products' },
   { name: 'Environment', value: 'environments' },
-
+  { name: 'Labels', value: 'labels' },
   { name: 'Scopes', value: 'scopes' },
-
   { name: 'Roles', value: 'roles' },
 ];

@@ -14,6 +14,7 @@ import {
   useDisclosure,
   Select,
   useToast,
+  Input,
 } from '@chakra-ui/react';
 import { FaPen } from 'react-icons/fa';
 import TagInput from '../tag-input';

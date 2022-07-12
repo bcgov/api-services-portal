@@ -66,10 +66,17 @@ const Filters: React.FC<FiltersProps> = ({
     event.preventDefault();
     const form = new FormData(event.target);
     const filterType = form.get('type') as string;
-    const filterValue = form.get('value') as string;
+    let filterValue: any = form.get('value') as string;
     const filterName = event.target.querySelector(
       `select[name="value"] option[value="${filterValue}"]`
     )?.textContent;
+    if (filterType === 'labels') {
+      const [labelGroup, value] = filterValue.split('=');
+      filterValue = {
+        labelGroup,
+        value,
+      };
+    }
     onAddFilter(filterType, { value: filterValue, name: filterName });
     event.currentTarget.reset();
   };
