@@ -144,8 +144,8 @@ const ConsumerPage: React.FC<
               </Flex>
             </Detail>
             <Detail title="Application Owner">
-              {application?.owner && (
-                <ProfileCard data={application?.owner} overflow="hidden" />
+              {consumer.owner && (
+                <ProfileCard data={consumer.owner} overflow="hidden" />
               )}
             </Detail>
           </Flex>

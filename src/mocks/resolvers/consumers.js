@@ -3,6 +3,12 @@ import cloneDeep from 'lodash/cloneDeep';
 import casual from 'casual-browserify';
 
 const today = new Date();
+const allConsumerGroupLabels = [
+  'Phone Number',
+  'Facility',
+  'Contact Person',
+  'Location',
+];
 
 export const harleyAccessRequest = {
   id: '123',
@@ -571,8 +577,10 @@ export const saveConsumerLabels = (_, res, ctx) => {
   return res(ctx.data(true));
 };
 
-export const allConsumerGroupLabelsHandler = (_, res, ctx) => {
+export const getAllConsumerGroupLabelsHandler = (_, res, ctx) => {
   return res(
-    ctx.data({ allConsumerGroupLabels: ['Phone Number', 'Facility'] })
+    ctx.data({
+      allConsumerGroupLabels,
+    })
   );
 };

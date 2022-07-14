@@ -15,13 +15,14 @@ import {
   Select,
   useToast,
   Input,
+  Text,
 } from '@chakra-ui/react';
 import { FaPen } from 'react-icons/fa';
 import TagInput from '../tag-input';
 import { uid } from 'react-uid';
 import { ConsumerLabel } from '@/shared/types/query.types';
 import zip from 'lodash/zip';
-import { useApiMutation } from '@/shared/services/api';
+import { useApi, useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { QueryKey, useQueryClient } from 'react-query';
 
@@ -39,7 +40,15 @@ interface ManageLabelsProps {
 const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   const client = useQueryClient();
   const form = React.useRef(null);
+  const newLabelInput = React.useRef(null);
   const saveLabelsMutation = useApiMutation(mutation);
+  const [isAddingNew, setIsAddingNew] = React.useState(false);
+  const [isAddingNewLabel, setIsAddingNewLabel] = React.useState(false);
+  const labelsData = useApi(
+    'GetAllConsumerLabels',
+    { query },
+    { suspense: false }
+  );
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [labels, setLabels] = React.useState<ConsumerLabel[]>(() => {
@@ -50,7 +59,43 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   });
 
   const handleAddLabelSet = () => {
-    setLabels((state) => [...state, defaultLabelGroup]);
+    setIsAddingNew(true);
+  };
+  const handleLabelGroupChange = (event) => {
+    if (event.target.value !== '+') {
+      setLabels((state) => [
+        ...state,
+        {
+          labelGroup: event.target.value,
+          values: [],
+        },
+      ]);
+      setIsAddingNew(false);
+    } else {
+      setIsAddingNewLabel(true);
+      newLabelInput.current?.focus();
+    }
+  };
+  const handleCancelAddLabel = () => {
+    setIsAddingNew(false);
+    setIsAddingNewLabel(false);
+  };
+  const handleAddNewLabelGroup = (event) => {
+    const formData = new FormData(form.current);
+    const labelGroup = formData.get('newLabelGroup') as string;
+    if (!labelGroup.trim()) {
+      newLabelInput.current?.reportValidity();
+      return;
+    }
+    setLabels((state) => [
+      ...state,
+      {
+        labelGroup,
+        values: [],
+      },
+    ]);
+    setIsAddingNew(false);
+    setIsAddingNewLabel(false);
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -144,17 +189,8 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
               <GridItem colSpan={2}>Labels</GridItem>
               {labels.map((l, index) => (
                 <React.Fragment key={uid(l, index)}>
-                  <GridItem>
-                    <Select
-                      placeholder="Select group"
-                      defaultValue={l.labelGroup}
-                      name="labelGroup"
-                      data-testid={`labels-group-${index}-select`}
-                    >
-                      <option value="Facility">Facility</option>
-                      <option value="Contact Person">Contact Person</option>
-                      <option value="Phone Number">Phone Number</option>
-                    </Select>
+                  <GridItem d="flex" alignItems="center">
+                    <Input readOnly name="labelGroup" value={l.labelGroup} />
                   </GridItem>
                   <GridItem>
                     <TagInput
@@ -165,18 +201,67 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
                   </GridItem>
                 </React.Fragment>
               ))}
-              <GridItem>
-                <Button w="100%" onClick={handleAddLabelSet}>
-                  Add more labels
-                </Button>
-              </GridItem>
+              {isAddingNew && (
+                <>
+                  <GridItem
+                    d="flex"
+                    alignItems="center"
+                    gridGap={2}
+                    colSpan={isAddingNewLabel ? 2 : undefined}
+                  >
+                    {!isAddingNewLabel && (
+                      <Select
+                        placeholder="Select group"
+                        name="labelGroup"
+                        isDisabled={labelsData.isLoading}
+                        data-testid="labels-group-select"
+                        onChange={handleLabelGroupChange}
+                      >
+                        {labelsData.data?.allConsumerGroupLabels?.map((l) => (
+                          <option key={uid(l)} value={l}>
+                            {l}
+                          </option>
+                        ))}
+                        <option value="+">Add New Label Group</option>
+                      </Select>
+                    )}
+                    {isAddingNewLabel && (
+                      <>
+                        <Input
+                          isRequired
+                          name="newLabelGroup"
+                          placeholder="Add new Label Group"
+                          ref={newLabelInput}
+                        />
+                        <Button
+                          isRequired
+                          variant="secondary"
+                          onClick={handleCancelAddLabel}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleAddNewLabelGroup}>Add</Button>
+                      </>
+                    )}
+                  </GridItem>
+                </>
+              )}
+              {!isAddingNew && (
+                <GridItem>
+                  <Button w="100%" onClick={handleAddLabelSet}>
+                    Add more labels
+                  </Button>
+                </GridItem>
+              )}
             </Grid>
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button isDisabled={isAddingNew} onClick={handleSave}>
+              Save
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -185,6 +270,12 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
 };
 
 export default ManageLabels;
+
+const query = gql`
+  query GetAllConsumerGroupLabels {
+    allConsumerGroupLabels
+  }
+`;
 
 const mutation = gql`
   mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {
