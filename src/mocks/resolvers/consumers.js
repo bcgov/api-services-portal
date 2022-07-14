@@ -213,7 +213,7 @@ class Store {
 export const store = new Store(consumers);
 
 export const getConsumersHandler = (req, res, ctx) => {
-  return res(ctx.delay(), ctx.data(store.data));
+  return res(ctx.delay(), ctx.data({ ...store.data, allConsumerGroupLabels }));
 };
 
 export const getConsumerHandler = (req, res, ctx) => {

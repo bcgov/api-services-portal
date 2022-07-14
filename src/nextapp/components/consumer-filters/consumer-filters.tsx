@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { gql } from 'graphql-request';
-import { Select } from '@chakra-ui/react';
+import { Grid, Input, Select } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
@@ -8,14 +8,17 @@ import { ConsumerSummary } from '@/shared/types/query.types';
 
 interface ConsumerFiltersProps {
   consumers: ConsumerSummary[];
+  labels: string[];
   value?: string;
 }
 
 const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
   consumers,
+  labels,
   value,
 }) => {
   const { user } = useAuth();
+
   const { data, isLoading, isSuccess } = useApi(
     ['consumersFilter', value],
     {
@@ -26,22 +29,6 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
     },
     { enabled: Boolean(user?.namespace) }
   );
-  const labels = React.useMemo(() => {
-    return consumers.reduce((memo, c) => {
-      c.labels.forEach((l) => {
-        l.values.forEach((v) => {
-          const name = `${l.labelGroup}=${v}`;
-          if (!memo.includes(name)) {
-            memo.push({
-              id: name,
-              name,
-            });
-          }
-        });
-      });
-      return memo;
-    }, []);
-  }, [consumers]);
   const options: { name: string; id: string }[] = React.useMemo(() => {
     if (isSuccess) {
       switch (value) {
@@ -79,7 +66,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
           }));
 
         case 'labels':
-          return labels;
+          return (
+            labels?.map((l) => ({
+              id: l,
+              name: l,
+            })) ?? []
+          );
 
         default:
           return [];
@@ -89,7 +81,7 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
   }, [data, labels, isSuccess, value]);
 
   return (
-    <>
+    <Grid templateColumns={value === 'labels' ? '1fr 1fr' : '1fr'} gap={4}>
       <Select isDisabled={isLoading || options.length === 0} name="value">
         {isSuccess &&
           options.map((f) => (
@@ -98,7 +90,10 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
             </option>
           ))}
       </Select>
-    </>
+      {value === 'labels' && (
+        <Input isRequired placeholder="Label Value" name="labelValue" />
+      )}
+    </Grid>
   );
 };
 

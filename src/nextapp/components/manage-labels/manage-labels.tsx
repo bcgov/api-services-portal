@@ -42,7 +42,6 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   const form = React.useRef(null);
   const newLabelInput = React.useRef(null);
   const saveLabelsMutation = useApiMutation(mutation);
-  const [isAddingNew, setIsAddingNew] = React.useState(false);
   const [isAddingNewLabel, setIsAddingNewLabel] = React.useState(false);
   const labelsData = useApi(
     'GetAllConsumerLabels',
@@ -55,12 +54,9 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
     if (data.length > 0) {
       return data;
     }
-    return [defaultLabelGroup];
+    return [];
   });
 
-  const handleAddLabelSet = () => {
-    setIsAddingNew(true);
-  };
   const handleLabelGroupChange = (event) => {
     if (event.target.value !== '+') {
       setLabels((state) => [
@@ -70,14 +66,12 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
           values: [],
         },
       ]);
-      setIsAddingNew(false);
     } else {
       setIsAddingNewLabel(true);
       newLabelInput.current?.focus();
     }
   };
   const handleCancelAddLabel = () => {
-    setIsAddingNew(false);
     setIsAddingNewLabel(false);
   };
   const handleAddNewLabelGroup = (event) => {
@@ -94,7 +88,6 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
         values: [],
       },
     ]);
-    setIsAddingNew(false);
     setIsAddingNewLabel(false);
   };
   const handleSubmit = async (event) => {
@@ -187,6 +180,12 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
               data-testid="ar-request-details"
             >
               <GridItem colSpan={2}>Labels</GridItem>
+              {labels.length === 0 && (
+                <GridItem d="grid" placeItems="center" colSpan={2} pb={7}>
+                  <Text>You have no labels assigned to this consumer yet.</Text>
+                  <Text>Select one below or create a new one.</Text>
+                </GridItem>
+              )}
               {labels.map((l, index) => (
                 <React.Fragment key={uid(l, index)}>
                   <GridItem d="flex" alignItems="center">
@@ -201,65 +200,62 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
                   </GridItem>
                 </React.Fragment>
               ))}
-              {isAddingNew && (
-                <>
-                  <GridItem
-                    d="flex"
-                    alignItems="center"
-                    gridGap={2}
-                    colSpan={isAddingNewLabel ? 2 : undefined}
+              <GridItem
+                d="flex"
+                alignItems="center"
+                gridGap={2}
+                colSpan={isAddingNewLabel ? 2 : undefined}
+              >
+                {!isAddingNewLabel && (
+                  <Select
+                    placeholder="Select group"
+                    name="labelGroup"
+                    isDisabled={labelsData.isLoading}
+                    data-testid="labels-group-select"
+                    onChange={handleLabelGroupChange}
                   >
-                    {!isAddingNewLabel && (
-                      <Select
-                        placeholder="Select group"
-                        name="labelGroup"
-                        isDisabled={labelsData.isLoading}
-                        data-testid="labels-group-select"
-                        onChange={handleLabelGroupChange}
-                      >
-                        {labelsData.data?.allConsumerGroupLabels?.map((l) => (
+                    <optgroup label="Available Labels">
+                      {labelsData.data?.allConsumerGroupLabels
+                        ?.filter(
+                          (l) => !labels.map((l) => l.labelGroup).includes(l)
+                        )
+                        .map((l) => (
                           <option key={uid(l)} value={l}>
                             {l}
                           </option>
                         ))}
-                        <option value="+">Add New Label Group</option>
-                      </Select>
-                    )}
-                    {isAddingNewLabel && (
-                      <>
-                        <Input
-                          isRequired
-                          name="newLabelGroup"
-                          placeholder="Add new Label Group"
-                          ref={newLabelInput}
-                        />
-                        <Button
-                          isRequired
-                          variant="secondary"
-                          onClick={handleCancelAddLabel}
-                        >
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddNewLabelGroup}>Add</Button>
-                      </>
-                    )}
-                  </GridItem>
-                </>
-              )}
-              {!isAddingNew && (
-                <GridItem>
-                  <Button w="100%" onClick={handleAddLabelSet}>
-                    Add more labels
-                  </Button>
-                </GridItem>
-              )}
+                    </optgroup>
+                    <optgroup label="-----------">
+                      <option value="+">[+] Add New Label Group...</option>
+                    </optgroup>
+                  </Select>
+                )}
+                {isAddingNewLabel && (
+                  <>
+                    <Input
+                      isRequired
+                      name="newLabelGroup"
+                      placeholder="Add new Label Group"
+                      ref={newLabelInput}
+                    />
+                    <Button
+                      isRequired
+                      variant="secondary"
+                      onClick={handleCancelAddLabel}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddNewLabelGroup}>Add</Button>
+                  </>
+                )}
+              </GridItem>
             </Grid>
           </ModalBody>
           <ModalFooter>
             <Button mr={3} onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button isDisabled={isAddingNew} onClick={handleSave}>
+            <Button isDisabled={isAddingNewLabel} onClick={handleSave}>
               Save
             </Button>
           </ModalFooter>

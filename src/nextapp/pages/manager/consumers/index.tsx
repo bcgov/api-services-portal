@@ -191,7 +191,10 @@ const ConsumersPage: React.FC<
           onRemoveFilter={removeFilter}
           mb={4}
         >
-          <ConsumerFilters consumers={consumers} />
+          <ConsumerFilters
+            consumers={consumers}
+            labels={data?.allConsumerGroupLabels}
+          />
         </Filters>
         <Box bgColor="white" mb={4}>
           <Box
@@ -298,6 +301,7 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers($filter: ConsumerQueryFilterInput) {
+    allConsumerGroupLabels
     getFilteredNamespaceConsumers(filter: $filter) {
       id
       consumerType

@@ -1,12 +1,23 @@
 import { useReducer } from 'react';
+import { uid } from 'react-uid';
 
-type FilterActionType = 'addFilter' | 'clearFilters' | 'removeFilter';
-
-type FilterAction = {
-  type: FilterActionType;
-  filterType?: string;
-  payload?: string | Record<string, string>;
+type AddFilterAction = {
+  type: 'addFilter';
+  filterType: string;
+  payload: Record<string, string>;
 };
+
+type RemoveFilterAction = {
+  type: 'removeFilter';
+  filterType: string;
+  payload: string;
+};
+
+type ClearFilterAction = {
+  type: 'clearFilters';
+};
+
+type FilterAction = AddFilterAction | RemoveFilterAction | ClearFilterAction;
 
 type FilterReturn<T> = {
   state: T;
@@ -34,7 +45,10 @@ const useFilters = <FilterState>(
           }
           return {
             ...state,
-            [action.filterType]: [...state[action.filterType], action.payload],
+            [action.filterType]: [
+              ...state[action.filterType],
+              { ...action.payload, id: uid(action.payload) },
+            ],
           };
 
         case 'clearFilters':
@@ -44,7 +58,7 @@ const useFilters = <FilterState>(
           return {
             ...state,
             [action.filterType]: state[action.filterType].filter(
-              (value) => value.name !== action.payload
+              (f) => f.id !== action.payload
             ),
           };
 
