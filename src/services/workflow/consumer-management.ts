@@ -661,6 +661,7 @@ export async function saveConsumerLabels(
 
   // Do all the Additions
   const addPromises = labels
+    .filter((l) => l.values.length != 0)
     .filter(
       (l) => currentLabels.filter((c) => c.name === l.labelGroup).length === 0
     )
@@ -679,7 +680,12 @@ export async function saveConsumerLabels(
 
   // Do all the Deletions
   const delPromises = currentLabels
-    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 0)
+    .filter(
+      (l) =>
+        labels
+          .filter((c) => c.values.length != 0)
+          .filter((c) => c.labelGroup === l.name).length === 0
+    )
     .map(async (l) => {
       await delConsumerLabel(context, l.id);
       changes.D++;
@@ -688,7 +694,12 @@ export async function saveConsumerLabels(
 
   // Do any edits
   const editPromises = currentLabels
-    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 1)
+    .filter(
+      (l) =>
+        labels
+          .filter((c) => c.values.length != 0)
+          .filter((c) => c.labelGroup === l.name).length === 1
+    )
     .map((l) => {
       const newLabel = labels.filter((c) => c.labelGroup === l.name).pop();
       return {
