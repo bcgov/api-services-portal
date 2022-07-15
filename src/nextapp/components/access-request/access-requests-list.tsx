@@ -11,8 +11,9 @@ interface AccessRequestsListProps {
 const AccessRequestsList: React.FC<AccessRequestsListProps> = ({
   queryKey,
 }) => {
+  const accessRequestsQueryKey = 'allAccessRequestsByNamespace';
   const { data } = useApi(
-    'allAccessRequestsByNamespace',
+    accessRequestsQueryKey,
     {
       query,
     },
@@ -21,7 +22,12 @@ const AccessRequestsList: React.FC<AccessRequestsListProps> = ({
   return (
     <>
       {data?.allAccessRequestsByNamespace.map((a) => (
-        <AccessRequest key={a.id} data={a} queryKey={queryKey} />
+        <AccessRequest
+          key={a.id}
+          data={a}
+          accessRequestsQueryKey={accessRequestsQueryKey}
+          allConsumersQueryKey={queryKey}
+        />
       ))}
     </>
   );
@@ -46,6 +52,9 @@ const query = gql`
       productEnvironment {
         name
         additionalDetailsToRequest
+        product {
+          name
+        }
       }
     }
   }

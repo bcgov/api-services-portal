@@ -8,11 +8,16 @@ import type { QueryKey } from 'react-query';
 import AccessRequestDialog from './access-request-dialog';
 
 interface AccessRequestProps {
+  accessRequestsQueryKey: QueryKey;
+  allConsumersQueryKey: QueryKey;
   data: AccessRequestData;
-  queryKey: QueryKey;
 }
 
-const AccessRequest: React.FC<AccessRequestProps> = ({ data, queryKey }) => {
+const AccessRequest: React.FC<AccessRequestProps> = ({
+  accessRequestsQueryKey,
+  allConsumersQueryKey,
+  data,
+}) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   return (
     <>
@@ -20,8 +25,9 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data, queryKey }) => {
         data={data}
         isOpen={isOpen}
         onClose={onClose}
-        queryKey={queryKey}
-        title={data.application?.name}
+        accessRequestsQueryKey={accessRequestsQueryKey}
+        allConsumersQueryKey={allConsumersQueryKey}
+        title={data.productEnvironment?.product?.name ?? 'Access Request'}
       />
       <Flex
         align="center"

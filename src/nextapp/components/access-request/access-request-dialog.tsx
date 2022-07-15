@@ -23,20 +23,23 @@ import RequestAuthorization from './authorization';
 import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 import { QueryKey, useQueryClient } from 'react-query';
+import UserProfile from '../user-profile';
 
 interface AccessRequestDialogProps {
+  accessRequestsQueryKey: QueryKey;
+  allConsumersQueryKey: QueryKey;
   data: AccessRequest;
   isOpen: boolean;
   onClose: () => void;
-  queryKey: QueryKey;
   title: string;
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
+  accessRequestsQueryKey,
+  allConsumersQueryKey,
   data,
   isOpen,
   onClose,
-  queryKey,
   title,
 }) => {
   const client = useQueryClient();
@@ -45,14 +48,15 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const rateLimits = React.useState([]);
   const approveMutate = useApiMutation(approveMutation, {
     onSuccess() {
-      client.invalidateQueries(queryKey);
+      client.invalidateQueries(accessRequestsQueryKey);
+      client.invalidateQueries(allConsumersQueryKey);
     },
   });
   const rejectMutate = useApiMutation(rejectMutation, {
     onMutate: async () => {
       await client.cancelQueries('todos');
-      const prevAccessRequests = client.getQueryData(queryKey);
-      client.setQueryData(queryKey, (cached: Query = {}) => ({
+      const prevAccessRequests = client.getQueryData(accessRequestsQueryKey);
+      client.setQueryData(accessRequestsQueryKey, (cached: Query = {}) => ({
         ...cached,
         allAccessRequestsByNamespace:
           cached.allAccessRequestsByNamespace?.filter(
@@ -62,10 +66,10 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       return { prevAccessRequests };
     },
     onError: (err: Error, context) => {
-      client.setQueryData(queryKey, context.prevAccessRequests);
+      client.setQueryData(accessRequestsQueryKey, context.prevAccessRequests);
     },
     onSettled: () => {
-      client.invalidateQueries(queryKey);
+      client.invalidateQueries(accessRequestsQueryKey);
     },
   });
   const toast = useToast();
@@ -138,8 +142,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader data-testid="ar-modal-header">
+        <ModalHeader data-testid="ar-modal-header" pos="relative">
           {title}
+          <Box pos="absolute" top="20px" right={12}>
+            <UserProfile data={data.requestor} heading="Requestor" />
+          </Box>
           <Tabs
             index={tabIndex}
             mt={4}

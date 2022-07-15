@@ -1,6 +1,5 @@
 import * as React from 'react';
 import ActionsMenu from '@/components/actions-menu';
-import AccessRequest from '@/components/access-request';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,

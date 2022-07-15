@@ -20,6 +20,8 @@ export const harleyAccessRequest = {
   requestor: {
     id: 'u1',
     name: 'Harley Jones',
+    username: 'harley123',
+    email: 'harley@easymart.store',
   },
   application: {
     id: 'app1',
@@ -29,6 +31,9 @@ export const harleyAccessRequest = {
     id: 'pe1',
     name: 'dev',
     services: [],
+    product: {
+      name: 'MoH PharmaNet Electronic Prescribing',
+    },
   },
 };
 
@@ -82,6 +87,7 @@ export const allProductsByNamespace = [
 ];
 
 const consumers = {
+  allAccessRequestsByNamespace: [harleyAccessRequest],
   getFilteredNamespaceConsumers: [
     {
       id: 'c1',
@@ -181,14 +187,6 @@ const consumers = {
       },
     },
   ],
-};
-
-export const getAccessRequestsHandler = (req, res, ctx) => {
-  return res(
-    ctx.data({
-      allAccessRequestsByNamespace: [harleyAccessRequest],
-    })
-  );
 };
 
 class Store {
@@ -314,6 +312,14 @@ export const getConsumerHandler = (req, res, ctx) => {
         },
       ],
       allProductsByNamespace,
+    })
+  );
+};
+
+export const getAccessRequestsHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allAccessRequestsByNamespace: store.data.allAccessRequestsByNamespace,
     })
   );
 };
@@ -467,24 +473,22 @@ export const grantAccessToConsumerHandler = (req, res, ctx) => {
 export const fullfillRequestHandler = (req, res, ctx) => {
   store.update({
     ...store.data,
-    allServiceAccessesByNamespace: [
-      ...store.data.allServiceAccessesByNamespace,
+    allAccessRequestsByNamespace: [],
+    getFilteredNamespaceConsumers: [
+      ...store.data.getFilteredNamespaceConsumers,
       {
-        namespace: 'loc',
-        consumer: {
-          id: '919191919',
-          username: 'new-consumer',
-          tags:
-            '["Facility - London Drugs #5602", "Phone Number - 555-555-5555"]',
-          updatedAt: subDays(today, 3).toISOString(),
-          aclGroups: JSON.stringify([]),
-        },
-        application: {
-          id: 'a1',
-        },
+        id: '919191919',
+        consumerType: '',
+        username: 'MoH PharmaNet Electronic Prescribing',
+        labels: [
+          {
+            labelGroup: 'Facility',
+            values: ['London Drugs #5602'],
+          },
+        ],
+        lastUpdated: new Date().toISOString(),
       },
     ],
-    allAccessRequestsByNamespace: [],
   });
 
   return res(ctx.data({ id: req.variables.id }));
