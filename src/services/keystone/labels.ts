@@ -45,7 +45,7 @@ export async function getConsumerLabels(
 ): Promise<Label[]> {
   const result = await context.executeGraphQL({
     query: `query GetConsumerLabels($ns: String!, $consumerIds: [ID]!) {
-                    allLabels(where: { consumer: { id_in: $consumerIds } }, namespace: $ns) {
+                    allLabels(where: { namespace: $ns, consumer: { id_in: $consumerIds } }) {
                         id
                         name
                         value
