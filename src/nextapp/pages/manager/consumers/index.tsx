@@ -54,9 +54,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        {},
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
