@@ -23,7 +23,6 @@ interface FilterTag {
 }
 
 interface FiltersProps extends BoxProps {
-  cacheId: string;
   data: unknown;
   filterTypeOptions: { name: string; value: string }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
@@ -33,7 +32,6 @@ interface FiltersProps extends BoxProps {
 }
 
 const Filters: React.FC<FiltersProps> = ({
-  cacheId,
   children,
   data,
   filterTypeOptions,

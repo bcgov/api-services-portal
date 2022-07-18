@@ -12,12 +12,20 @@ import {
 import { HiOutlineChevronDown } from 'react-icons/hi';
 import LabelDialog from './label-dialog';
 
-const InlineManageLabels: React.FC = () => {
+interface InlineManageLabelsProps {
+  data: string[];
+  isReady: boolean;
+}
+
+const InlineManageLabels: React.FC<InlineManageLabelsProps> = ({
+  data,
+  isReady,
+}) => {
   const { isOpen, onClose, onToggle } = useDisclosure();
 
   return (
     <>
-      <LabelDialog isOpen={isOpen} onClose={onClose} />
+      <LabelDialog data={data} isOpen={isOpen} onClose={onClose} />
       <Box as="span" pos="relative">
         Labels
         <Menu>
@@ -30,7 +38,11 @@ const InlineManageLabels: React.FC = () => {
             />
           </MenuButton>
           <MenuList>
-            <MenuItem onClick={onToggle} data-testid="label-dialog-menu-item">
+            <MenuItem
+              isDisabled={!isReady}
+              onClick={onToggle}
+              data-testid="label-dialog-menu-item"
+            >
               Manage Group Labels
             </MenuItem>
           </MenuList>

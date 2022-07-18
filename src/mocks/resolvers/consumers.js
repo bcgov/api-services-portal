@@ -187,6 +187,10 @@ const consumers = {
       },
     },
   ],
+  allConsumerScopesAndRoles: {
+    roles: ['admin', 'user'],
+    scopes: ['Sample.*'],
+  },
 };
 
 class Store {
@@ -234,9 +238,7 @@ export const getConsumerHandler = (req, res, ctx) => {
         },
         ...consumer,
         consumer,
-        owner: {
-          name: consumer.username,
-        },
+        owner,
         prodEnvAccess: [
           {
             productName: 'Pharmanet Electronic Prescribing',
@@ -329,6 +331,7 @@ export const getConsumersFilterHandler = (req, res, ctx) => {
     ctx.data({
       // getFilteredNamespaceConsumers: [],
       allProductsByNamespace,
+      allConsumerScopesAndRoles: store.data.allConsumerScopesAndRoles,
     })
   );
 };

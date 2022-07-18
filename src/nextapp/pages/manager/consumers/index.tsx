@@ -82,15 +82,18 @@ const ConsumersPage: React.FC<
     addFilter,
     clearFilters,
     removeFilter,
-  } = useFilters<FilterState>({
-    products: [],
-    environments: [],
-    scopes: [],
-    roles: [],
-    mostActive: false,
-    leastActive: false,
-    labels: [],
-  });
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      scopes: [],
+      roles: [],
+      mostActive: false,
+      leastActive: false,
+      labels: [],
+    },
+    'consumers'
+  );
   const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
   const filter = React.useMemo(() => {
     const result = {};
@@ -103,7 +106,7 @@ const ConsumersPage: React.FC<
     });
     return result;
   }, [state]);
-  const { data, isFetching } = useApi(
+  const { data, isFetching, isSuccess } = useApi(
     [queryKey, filterKey],
     {
       query,
@@ -186,7 +189,6 @@ const ConsumersPage: React.FC<
         />
         <AccessRequestsList queryKey={queryKey} />
         <Filters
-          cacheId="consumers"
           data={state as FilterState}
           filterTypeOptions={filterTypeOptions}
           onAddFilter={addFilter}
@@ -229,7 +231,7 @@ const ConsumersPage: React.FC<
             columns={[
               { name: 'Name/ID', key: 'name' },
               {
-                name: <InlineManageLabels />,
+                name: 'Labels',
                 key: 'tags',
                 sortable: false,
               },

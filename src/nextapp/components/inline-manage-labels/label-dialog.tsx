@@ -12,32 +12,33 @@ import {
   FormControl,
 } from '@chakra-ui/react';
 import TagInput from '../tag-input';
-import { useApi } from '@/shared/services/api';
+// import { useApi, useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
 interface LabelDialogProps {
+  data: string[];
   isOpen: boolean;
   onClose: () => void;
 }
 
-const LabelDialog: React.FC<LabelDialogProps> = ({ isOpen, onClose }) => {
-  const { data } = useApi(
-    'GetAllConsumerGroupLabels',
-    { query },
-    {
-      enabled: isOpen,
-    }
-  );
+const LabelDialog: React.FC<LabelDialogProps> = ({ data, isOpen, onClose }) => {
   const formRef = React.useRef<HTMLFormElement>();
+  // const saveLabelsMutation = useApiMutation(mutation);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (event.currentTarget?.checkValidity()) {
-      const formData = new FormData(event.currentTarget);
-      const payload = { labels: JSON.parse(formData.get('labels') as string) };
-      console.log(payload);
-      // TODO: Mutation code here
-      onClose();
+      try {
+        const formData = new FormData(event.currentTarget);
+        const payload = {
+          labels: JSON.parse(formData.get('labels') as string),
+        };
+        console.log(payload);
+        // TODO: Mutation code here
+        onClose();
+      } catch {
+        console.log('boo');
+      }
     }
   };
   const handleSubmitClick = () => {
@@ -56,7 +57,7 @@ const LabelDialog: React.FC<LabelDialogProps> = ({ isOpen, onClose }) => {
               <FormLabel>Group labels</FormLabel>
               <TagInput
                 name="labels"
-                value={data?.allConsumerGroupLabels}
+                value={data}
                 data-testid="label-dialog-input"
               />
             </FormControl>
@@ -85,8 +86,8 @@ const LabelDialog: React.FC<LabelDialogProps> = ({ isOpen, onClose }) => {
 
 export default LabelDialog;
 
-const query = gql`
-  query GetAllConsumerGroupLabels {
-    allConsumerGroupLabels
+const mutation = gql`
+  mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {
+    saveConsumerLabels(consumerId: $consumerId, labels: $labels)
   }
 `;
