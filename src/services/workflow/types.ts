@@ -49,13 +49,16 @@ export interface ClientMapper {
   defaultValue: string;
 }
 
-export interface Name {
-  name: string;
+export interface KeystoneItemID {
+  id: string;
+  name?: string;
 }
 export interface ConsumerPlugin {
+  id?: string; // KeystoneJS GatewayConsumer ID
   name: string;
-  service: Name;
   config: PluginConfig;
+  service?: KeystoneItemID;
+  route?: KeystoneItemID;
 }
 export interface PluginConfig {
   second?: number;
@@ -144,7 +147,7 @@ export interface ConsumerAccess {
 export interface ConsumerProdEnvAccess {
   environment: Environment;
   productName: string;
-  plugins: ConsumerGatewayPlugin[];
+  plugins: ConsumerFullPluginDetails[];
   revocable: boolean;
   serviceAccessId?: string;
   authorization?: ConsumerAuthorization;
@@ -159,12 +162,10 @@ export interface ConsumerAuthorization {
   roles?: string[];
 }
 
-export interface ConsumerGatewayPlugin {
-  id?: string;
-  name?: string;
-  config?: string;
-  serviceId?: string;
-  serviceName?: string;
-  routeId?: string;
-  routeName?: string;
+export interface ConsumerFullPluginDetails {
+  id?: string; // KeystoneJS GatewayConsumer ID
+  name: string;
+  config: string;
+  service?: KeystoneItemID;
+  route?: KeystoneItemID;
 }

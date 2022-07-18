@@ -42,10 +42,7 @@ module.exports = {
               );
 
               const namespace = context.req.user.namespace;
-              const kongApi = new KongConsumerService(
-                process.env.KONG_URL,
-                process.env.GWA_API_URL
-              );
+              const kongApi = new KongConsumerService(process.env.KONG_URL);
 
               args.grant
                 ? await kongApi.assignConsumerACL(

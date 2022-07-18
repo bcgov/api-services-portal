@@ -1,17 +1,18 @@
-import { logger } from '../../logger';
-import { getOpenidFromIssuer, KeycloakClientService } from '../keycloak';
+import { Logger } from '../../logger';
+import { KeycloakClientService } from '../keycloak';
 import { lookupServiceAccessesByEnvironment } from '../keystone';
 import { lookupKongConsumerIds } from '../keystone/gateway-consumer';
 import { lookupConsumerIdsByLabels } from '../keystone/labels';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { Environment } from '../keystone/types';
-import { KongACLService, KongConsumerService } from '../kong';
-import { getEnvironmentContext } from './get-namespaces';
+import { KongACLService } from '../kong';
 import {
   checkIssuerEnvironmentConfig,
   ConsumerQueryFilter,
   IssuerEnvironmentConfig,
 } from './types';
+
+const logger = Logger('wf.ConsumerFilters');
 
 export async function doFiltering(
   context: any,

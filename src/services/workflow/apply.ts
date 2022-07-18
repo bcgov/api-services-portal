@@ -5,6 +5,7 @@ import {
   markActiveTheServiceAccess,
   markAccessRequestAsNotIssued,
   recordActivity,
+  lookupConsumerPlugins,
 } from '../keystone';
 import { strict as assert } from 'assert';
 import {
@@ -25,11 +26,13 @@ import {
 import { Logger } from '../../logger';
 import { AccessRequest, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
+import { syncPlugins } from './consumer-plugins';
 
 const logger = Logger('wf.Apply');
 
 /* Is called After the AccessRequest is updated */
 export const Apply = async (
+  subjectContext: any,
   context: any,
   operation: any,
   existingItem: any,
@@ -79,7 +82,7 @@ export const Apply = async (
           consumer: requestDetails.serviceAccess.consumer,
         };
 
-        await setupAuthorizationAndEnable(context, setup);
+        await setupAuthorizationAndEnable(subjectContext, context, setup);
 
         await updateAccessRequestState(context, requestDetails.id, {
           isApproved: true,
@@ -148,7 +151,7 @@ export const Apply = async (
         consumer: requestDetails.serviceAccess.consumer,
       };
 
-      await setupAuthorizationAndEnable(context, setup);
+      await setupAuthorizationAndEnable(subjectContext, context, setup);
 
       message.text = 'approved access';
     } else if (isUpdatingToRejected(existingItem, updatedItem)) {
@@ -215,13 +218,11 @@ interface SetupAuthorizationInput {
 }
 
 async function setupAuthorizationAndEnable(
+  subjectContext: any,
   context: any,
   setup: SetupAuthorizationInput
 ) {
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
   const feederApi = new FeederService(process.env.FEEDER_URL);
 
   const flow = setup.flow;
@@ -334,16 +335,10 @@ async function setupAuthorizationAndEnable(
             ]
         }
     */
-  // Convert the service or route name to a extForeignKey
+
   if ('plugins' in controls) {
-    for (const plugin of controls.plugins) {
-      // assume the service and route IDs are Kong's unique IDs for them
-      await kongApi.addPluginToConsumer(
-        kongConsumerPK,
-        plugin,
-        context.req.user.namespace
-      );
-    }
+    const consumer = await lookupConsumerPlugins(context, setup.consumer.id);
+    await syncPlugins(subjectContext, ns, consumer, controls.plugins);
   }
 
   // Call /feeds to sync the Consumer with KeystoneJS

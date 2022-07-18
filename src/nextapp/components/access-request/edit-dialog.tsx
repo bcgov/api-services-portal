@@ -20,6 +20,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import {
+  ConsumerGatewayPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
 } from '@/shared/types/query.types';
@@ -55,9 +56,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
-  const restrictions = React.useState<
-    (GatewayPlugin | GatewayPluginCreateInput)[]
-  >(() => {
+  const restrictions = React.useState<ConsumerGatewayPlugin[]>(() => {
     return (
       data?.getConsumerProdEnvAccess.plugins.filter(
         (p) => p.name === 'ip-restriction'

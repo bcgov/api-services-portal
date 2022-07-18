@@ -118,6 +118,7 @@ module.exports = {
       const noauthContext = context.createContext({ skipAccessControl: true });
 
       await Apply(
+        context,
         noauthContext,
         operation,
         existingItem,

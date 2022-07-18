@@ -27,7 +27,12 @@ export {
   lookupKongConsumerByUsername,
 } from './gateway-consumer';
 
-export { lookupServices, lookupServicesByNamespace } from './gateway-service';
+export {
+  lookupKongServiceIds,
+  lookupKongRouteIds,
+  lookupServices,
+  lookupServicesByNamespace,
+} from './gateway-service';
 
 export {
   lookupEnvironmentAndIssuerUsingWhereClause,

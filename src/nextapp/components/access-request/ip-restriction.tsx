@@ -22,6 +22,7 @@ import { ExpandableCard } from '@/components/card';
 import { FaDoorClosed, FaTrash } from 'react-icons/fa';
 import { uid } from 'react-uid';
 import {
+  ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
   GatewayRoute,
@@ -37,10 +38,8 @@ interface IpRestrictionsProps {
   routeOptions: GatewayRoute[];
   serviceOptions: GatewayService[];
   state: [
-    (GatewayPlugin | GatewayPluginCreateInput)[],
-    React.Dispatch<
-      React.SetStateAction<(GatewayPlugin | GatewayPluginCreateInput)[]>
-    >
+    ConsumerPlugin[],
+    React.Dispatch<React.SetStateAction<ConsumerPlugin[]>>
   ];
 }
 
@@ -68,24 +67,19 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
 
     if (event.currentTarget.checkValidity() && formData.get('allow') !== '[]') {
       const entries = Object.fromEntries(formData);
-      const payload: GatewayPluginCreateInput = {
+      const payload: ConsumerPlugin = {
         name: 'ip-restriction',
-        config: JSON.stringify({
-          allow: entries.allow,
-        }),
-        tags: '["consumer"]',
+        config: {
+          allow: JSON.parse(entries.allow as string),
+        },
       };
       if (entries.scope === 'route') {
         payload.route = {
-          connect: {
-            id: entries.route as string,
-          },
+          id: entries.route as string,
         };
       } else {
         payload.service = {
-          connect: {
-            id: entries.service as string,
-          },
+          id: entries.service as string,
         };
       }
       setRestrictions([...restrictions, payload]);
@@ -103,7 +97,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
         if (i === index) {
           return {
             ...r,
-            config: JSON.stringify({ allow }),
+            config: { allow: JSON.parse(allow as string) },
           };
         }
         return r;
@@ -164,7 +158,7 @@ const IpRestrictions: React.FC<IpRestrictionsProps> = ({
             {restrictions
               .map((r) => ({
                 ...r,
-                config: JSON.parse(r.config) as IpRestrictionConfig,
+                config: r.config as IpRestrictionConfig,
               }))
               .map((r: IpRestrictionItem, index: number) => (
                 <AccordionItem key={uid(r, index)} border="none" p2={3}>
