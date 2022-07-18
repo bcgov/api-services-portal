@@ -24,8 +24,8 @@ export class KeycloakClientService {
     return this;
   }
 
-  public async list() {
-    return this.kcAdminClient.clients.find();
+  public async list(search: string = undefined) {
+    return this.kcAdminClient.clients.find({ search: true, clientId: search });
   }
 
   public async searchForClientId(clientId: string) {

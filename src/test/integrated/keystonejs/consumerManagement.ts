@@ -12,7 +12,19 @@ import {
   getConsumerProdEnvAccess,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
+  grantAccessToConsumer,
+  revokeAccessFromConsumer,
+  updateConsumerAccess,
+  saveConsumerLabels,
+  allConsumerGroupLabels,
+  allScopesAndRoles,
 } from '../../../services/workflow';
+import {
+  RequestControls,
+  ConsumerLabel,
+  ConsumerQueryFilter,
+} from '../../../services/workflow/types';
+import { doFiltering } from '../../../services/workflow/consumer-filters';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -35,30 +47,104 @@ import {
     authentication: { item: identity },
   });
 
-  const consumers = await getFilteredNamespaceConsumers(ctx, ns);
-  o(consumers);
+  const labels = await allConsumerGroupLabels(ctx, ns);
+  o(labels);
 
-  const promises = consumers
-    .filter(
-      (c) =>
-        c.id === '62a18b772da3cdea467b10fe' ||
-        c.id === '62a1848991c56de2f62d31a6'
-    )
-    .map(async (c) => {
-      const consumer = await getNamespaceConsumerAccess(ctx, ns, c.id);
-      o(consumer);
-      const envPromises = consumer.prodEnvAccess.map(async (p: any) => {
-        const res = await getConsumerProdEnvAccess(
-          ctx,
-          ns,
-          c.id,
-          p.environment.id
-        );
-        o(res);
+  const scopesRoles = await allScopesAndRoles(ctx, ns);
+  o(scopesRoles);
+
+  if (false) {
+    const cids = await doFiltering(ctx, ns, {
+      products: ['6180d1328a98e36cae8d0621'],
+      environments: ['dev'],
+    } as ConsumerQueryFilter);
+    o(cids);
+  }
+
+  if (false) {
+    const cids = await doFiltering(ctx, ns, {
+      labels: [{ labelGroup: 'Facility', value: 'abc' }],
+    } as ConsumerQueryFilter);
+    o(cids);
+  }
+
+  if (true) {
+    const cids = await doFiltering(ctx, ns, {
+      scopes: ['read'],
+    } as ConsumerQueryFilter);
+    o(cids);
+  }
+
+  // const consumers = await getFilteredNamespaceConsumers(ctx, ns, {
+  //   labels: [{ labelGroup: 'Facility', value: 'abc' }],
+  // } as ConsumerQueryFilter);
+  // o(consumers);
+
+  if (false) {
+    const consumers = await getFilteredNamespaceConsumers(
+      ctx,
+      ns,
+      {} as ConsumerQueryFilter
+    );
+    o(consumers);
+
+    const promises = consumers
+      .filter(
+        (c) =>
+          c.id === '62a18b772da3cdea467b10fe' ||
+          c.id === '62a1848991c56de2f62d31a6'
+      )
+      .map(async (c) => {
+        const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, c.id);
+        o(consumerAccess);
+
+        if (true) {
+          const envPromises = consumerAccess.prodEnvAccess.map(
+            async (p: any) => {
+              const res = await getConsumerProdEnvAccess(
+                ctx,
+                ns,
+                c.id,
+                p.environment.id
+              );
+              o(res);
+
+              if (c.id === '62a18b772da3cdea467b10fe') {
+                await revokeAccessFromConsumer(
+                  ctx,
+                  ns,
+                  consumerAccess.consumer.id,
+                  p.environment.id
+                );
+
+                await grantAccessToConsumer(
+                  ctx,
+                  ns,
+                  consumerAccess.consumer.id,
+                  p.environment.id,
+                  {}
+                );
+
+                //const controls : RequestControls = {}
+                //await updateConsumerProdEnvAccess(ctx, ns, c.id, p.environment.id, controls);
+                const labels: ConsumerLabel[] = [
+                  { labelGroup: 'Fullname', values: ['Joe Smith'] },
+                ];
+                await saveConsumerLabels(
+                  ctx,
+                  ns,
+                  consumerAccess.consumer.id,
+                  labels
+                );
+              }
+            }
+          );
+
+          await Promise.all(envPromises);
+        }
       });
-      await Promise.all(envPromises);
-    });
-  await Promise.all(promises);
+    await Promise.all(promises);
+  }
 
   await keystone.disconnect();
 })();

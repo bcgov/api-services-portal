@@ -4,6 +4,7 @@ import {
   Environment,
   ServiceAccess,
   ServiceAccessCreateInput,
+  ServiceAccessWhereInput,
 } from './types';
 import { strict as assert } from 'assert';
 const logger = Logger('keystone.svc-access');
@@ -173,6 +174,7 @@ export async function lookupServiceAccessesByEnvironment(
                         active
                         namespace
                         consumer {
+                          id
                           username
                           customId
                         }
@@ -256,13 +258,33 @@ export async function lookupServiceAccessesForNamespace(
 
 export async function lookupLabeledServiceAccessesForNamespace(
   context: any,
-  ns: string
+  ns: string,
+  consumerIds: string[]
 ): Promise<ServiceAccess[]> {
   logger.debug('[lookupLabeledServiceAccessesForNamespace] lookup ns=%s', ns);
 
+  const where: ServiceAccessWhereInput = {};
+
+  if (consumerIds) {
+    where['AND'] = [
+      { consumer: { id_in: consumerIds } },
+      {
+        OR: [
+          { namespace: ns },
+          { productEnvironment: { product: { namespace: ns } } },
+        ],
+      },
+    ];
+  } else {
+    where['OR'] = [
+      { namespace: ns },
+      { productEnvironment: { product: { namespace: ns } } },
+    ];
+  }
+
   const result = await context.executeGraphQL({
-    query: `query GetLabeledServiceAccessByNamespace($ns: String!) {
-                    allServiceAccesses(where: { OR: [{ namespace: $ns}, { productEnvironment: { product: { namespace: $ns }}}]}) {
+    query: `query GetLabeledServiceAccessByNamespace($where: ServiceAccessWhereInput!) {
+                    allServiceAccesses(where: $where) {
                         id
                         consumerType
                         consumer {
@@ -273,7 +295,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                         updatedAt
                     }
                 }`,
-    variables: { ns },
+    variables: { where },
   });
 
   assert.strictEqual(

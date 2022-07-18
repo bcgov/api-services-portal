@@ -4,6 +4,7 @@ export { CreateServiceAccount } from './create-service-account';
 
 export {
   allConsumerGroupLabels,
+  allScopesAndRoles,
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   getConsumerProdEnvAccess,

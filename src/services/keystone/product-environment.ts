@@ -174,6 +174,7 @@ export async function lookupEnvironmentsByNS(
                         additionalDetailsToRequest
                         approval
                         product {
+                          id
                           name
                         }
                         legal {

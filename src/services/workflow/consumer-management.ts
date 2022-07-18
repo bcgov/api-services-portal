@@ -65,12 +65,14 @@ import {
   ConsumerAccess,
   ConsumerLabel,
   ConsumerProdEnvAccess,
+  ConsumerQueryFilter,
   ConsumerSummary,
   RequestControls,
 } from './types';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
+import { doFiltering } from './consumer-filters';
 import { getConsumerAuthz } from '.';
 import {
   Environment,
@@ -89,6 +91,8 @@ import {
   updateConsumerLabel,
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
+import { AnyElement } from 'soap/lib/wsdl/elements';
+import { scopes } from 'auth/scope-role-utils';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -98,7 +102,11 @@ export async function allConsumerGroupLabels(
 ): Promise<string[]> {
   logger.debug('[allConsumerGroupLabels] %s', ns);
 
-  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+  const accesses = await lookupLabeledServiceAccessesForNamespace(
+    context,
+    ns,
+    undefined
+  );
 
   const labels = await getConsumerLabels(
     context,
@@ -120,13 +128,44 @@ export async function allConsumerGroupLabels(
   return result;
 }
 
-export async function getFilteredNamespaceConsumers(
+export async function allScopesAndRoles(
   context: any,
   ns: string
-): Promise<ConsumerSummary[]> {
-  logger.debug('[getFilteredNamespaceConsumers] %s', ns);
+): Promise<{ scopes: string[]; roles: string[] }> {
+  logger.debug('[allScopesAndRoles] %s', ns);
 
-  const accesses = await lookupLabeledServiceAccessesForNamespace(context, ns);
+  const envs = await lookupEnvironmentsByNS(context, ns);
+
+  const result: any = {
+    scopes: [] as any[],
+    roles: [] as any[],
+  };
+
+  envs
+    .filter((env) => env.credentialIssuer)
+    .forEach((env) => {
+      logger.debug('[allScopesAndRoles] %j', env.credentialIssuer);
+      result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
+      result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
+    });
+
+  return result;
+}
+
+export async function getFilteredNamespaceConsumers(
+  context: any,
+  ns: string,
+  filter: ConsumerQueryFilter
+): Promise<ConsumerSummary[]> {
+  logger.debug('[getFilteredNamespaceConsumers] %s %j', ns, filter);
+
+  const consumerIds = await doFiltering(context, ns, filter);
+
+  const accesses = await lookupLabeledServiceAccessesForNamespace(
+    context,
+    ns,
+    consumerIds
+  );
 
   const labels = await getConsumerLabels(
     context,
@@ -622,6 +661,7 @@ export async function saveConsumerLabels(
 
   // Do all the Additions
   const addPromises = labels
+    .filter((l) => l.values.length != 0)
     .filter(
       (l) => currentLabels.filter((c) => c.name === l.labelGroup).length === 0
     )
@@ -640,7 +680,12 @@ export async function saveConsumerLabels(
 
   // Do all the Deletions
   const delPromises = currentLabels
-    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 0)
+    .filter(
+      (l) =>
+        labels
+          .filter((c) => c.values.length != 0)
+          .filter((c) => c.labelGroup === l.name).length === 0
+    )
     .map(async (l) => {
       await delConsumerLabel(context, l.id);
       changes.D++;
@@ -649,7 +694,12 @@ export async function saveConsumerLabels(
 
   // Do any edits
   const editPromises = currentLabels
-    .filter((l) => labels.filter((c) => c.labelGroup === l.name).length === 1)
+    .filter(
+      (l) =>
+        labels
+          .filter((c) => c.values.length != 0)
+          .filter((c) => c.labelGroup === l.name).length === 1
+    )
     .map((l) => {
       const newLabel = labels.filter((c) => c.labelGroup === l.name).pop();
       return {

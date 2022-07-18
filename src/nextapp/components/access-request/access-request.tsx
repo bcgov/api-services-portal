@@ -3,15 +3,21 @@ import { Box, Button, Flex, Icon, Text, useDisclosure } from '@chakra-ui/react';
 import { FaExclamationCircle } from 'react-icons/fa';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { AccessRequest as AccessRequestData } from '@/shared/types/query.types';
+import type { QueryKey } from 'react-query';
 
 import AccessRequestDialog from './access-request-dialog';
 
 interface AccessRequestProps {
+  accessRequestsQueryKey: QueryKey;
+  allConsumersQueryKey: QueryKey;
   data: AccessRequestData;
-  queryKey: string;
 }
 
-const AccessRequest: React.FC<AccessRequestProps> = ({ data, queryKey }) => {
+const AccessRequest: React.FC<AccessRequestProps> = ({
+  accessRequestsQueryKey,
+  allConsumersQueryKey,
+  data,
+}) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   return (
     <>
@@ -19,8 +25,9 @@ const AccessRequest: React.FC<AccessRequestProps> = ({ data, queryKey }) => {
         data={data}
         isOpen={isOpen}
         onClose={onClose}
-        queryKey={queryKey}
-        title={data.application?.name}
+        accessRequestsQueryKey={accessRequestsQueryKey}
+        allConsumersQueryKey={allConsumersQueryKey}
+        title={data.productEnvironment?.product?.name ?? 'Access Request'}
       />
       <Flex
         align="center"

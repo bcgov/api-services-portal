@@ -58,6 +58,11 @@ export async function getAccessRequestByNamespaceServiceAccess(
   ns: string,
   serviceAccessId: string
 ): Promise<AccessRequest> {
+  logger.debug(
+    '[getAccessRequestByNamespaceServiceAccess] %s %s',
+    ns,
+    serviceAccessId
+  );
   const query = gql`
     query GetNamespaceAccessRequestByServiceAccess(
       $ns: String!
@@ -108,10 +113,7 @@ export async function getAccessRequestByNamespaceServiceAccess(
     query,
     variables: { ns, serviceAccessId },
   });
-  logger.debug(
-    'Query [getAccessRequestByNamespaceServiceAccess] result %j',
-    result
-  );
+  logger.debug('[getAccessRequestByNamespaceServiceAccess] result %j', result);
 
   return result.data.allAccessRequests.length == 0
     ? undefined

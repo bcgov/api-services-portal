@@ -17,6 +17,11 @@ import {
 import { FaTimes } from 'react-icons/fa';
 import { uid } from 'react-uid';
 
+interface FilterTag {
+  id: string;
+  value: string;
+}
+
 interface FiltersProps extends BoxProps {
   cacheId: string;
   data: unknown;
@@ -38,15 +43,16 @@ const Filters: React.FC<FiltersProps> = ({
   onRemoveFilter,
   ...props
 }) => {
-  const filters: string[] = React.useMemo(() => {
+  const filters: FilterTag[] = React.useMemo(() => {
     const keys = Object.keys(data);
-    const result: string[] = [];
+    const result: FilterTag[] = [];
 
     keys.forEach((k) => {
       const value = data[k];
       if (Array.isArray(value) && value.length > 0) {
         value.forEach((v) => {
-          result.push(`${k} = ${v.name}`);
+          const name = k === 'labels' ? `${v.name}:${v.value.value}` : v.name;
+          result.push({ id: v.id, value: `${k} = ${name}` });
         });
       }
     });
@@ -66,16 +72,24 @@ const Filters: React.FC<FiltersProps> = ({
     event.preventDefault();
     const form = new FormData(event.target);
     const filterType = form.get('type') as string;
-    const filterValue = form.get('value') as string;
+    let filterValue: any = form.get('value') as string;
     const filterName = event.target.querySelector(
       `select[name="value"] option[value="${filterValue}"]`
     )?.textContent;
+    if (filterType === 'labels') {
+      const value = form.get('labelValue') as string;
+      filterValue = {
+        labelGroup: filterValue,
+        value,
+      };
+    }
     onAddFilter(filterType, { value: filterValue, name: filterName });
     event.currentTarget.reset();
   };
-  const handleRemove = (filter: string) => () => {
-    const [key, value] = filter.split(' = ');
-    onRemoveFilter(key, value);
+  const handleRemove = (filter: FilterTag) => () => {
+    const [key] = filter.value.split(' = ');
+    console.log(key, filter.id);
+    onRemoveFilter(key, filter.id);
   };
   const handleClear = () => {
     onClearFilters();
@@ -136,9 +150,9 @@ const Filters: React.FC<FiltersProps> = ({
             <GridItem d="flex" alignItems="center">
               <Wrap>
                 {filters.map((f) => (
-                  <WrapItem key={uid(f)}>
+                  <WrapItem key={uid(f.id)}>
                     <Tag variant="outline">
-                      {f}
+                      {f.value}
                       <TagCloseButton onClick={handleRemove(f)} />
                     </Tag>
                   </WrapItem>

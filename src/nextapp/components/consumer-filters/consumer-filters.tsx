@@ -1,16 +1,24 @@
 import * as React from 'react';
 import { gql } from 'graphql-request';
-import { Select } from '@chakra-ui/react';
+import { Grid, Input, Select } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
+import { ConsumerSummary } from '@/shared/types/query.types';
 
 interface ConsumerFiltersProps {
+  consumers: ConsumerSummary[];
+  labels: string[];
   value?: string;
 }
 
-const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
+const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
+  consumers,
+  labels,
+  value,
+}) => {
   const { user } = useAuth();
+
   const { data, isLoading, isSuccess } = useApi(
     ['consumersFilter', value],
     {
@@ -33,26 +41,47 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
         case 'environments':
           return data.allProductsByNamespace.reduce((memo, d) => {
             if (d.environments?.length > 0) {
-              return [
-                ...memo,
-                ...d.environments.map((e) => ({
-                  id: e.id,
-                  name: e.name,
-                })),
-              ];
+              d.environments.forEach((e) => {
+                if (!memo.map((e) => e.id).includes(e.name)) {
+                  memo.push({
+                    id: e.name,
+                    name: e.name,
+                  });
+                }
+              });
             }
             return memo;
           }, []);
+
+        case 'scopes':
+          return data.allConsumerScopesAndRoles.scopes.map((scope) => ({
+            id: scope,
+            name: scope,
+          }));
+
+        case 'roles':
+          return data.allConsumerScopesAndRoles.roles.map((role) => ({
+            id: role,
+            name: role,
+          }));
+
+        case 'labels':
+          return (
+            labels?.map((l) => ({
+              id: l,
+              name: l,
+            })) ?? []
+          );
 
         default:
           return [];
       }
     }
     return [];
-  }, [value, data, isSuccess]);
+  }, [data, labels, isSuccess, value]);
 
   return (
-    <>
+    <Grid templateColumns={value === 'labels' ? '1fr 1fr' : '1fr'} gap={4}>
       <Select isDisabled={isLoading || options.length === 0} name="value">
         {isSuccess &&
           options.map((f) => (
@@ -61,7 +90,10 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
             </option>
           ))}
       </Select>
-    </>
+      {value === 'labels' && (
+        <Input isRequired placeholder="Label Value" name="labelValue" />
+      )}
+    </Grid>
   );
 };
 
@@ -69,6 +101,8 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetFilterConsumers($namespace: String!) {
+    allConsumerScopesAndRoles
+
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id

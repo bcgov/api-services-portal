@@ -1,6 +1,5 @@
 import * as React from 'react';
 import ActionsMenu from '@/components/actions-menu';
-import AccessRequest from '@/components/access-request';
 import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
@@ -19,15 +18,10 @@ import {
 import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
-import { QueryClient, useQueryClient } from 'react-query';
+import { QueryClient, QueryKey, useQueryClient } from 'react-query';
 import EmptyPane from '@/components/empty-pane';
 import Filters, { useFilters } from '@/components/filters';
-import {
-  Application,
-  ConsumerSummary,
-  GatewayConsumer,
-  Query,
-} from '@/shared/types/query.types';
+import { ConsumerSummary, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import InlineManageLabels from '@/components/inline-manage-labels';
@@ -40,6 +34,7 @@ import { uid } from 'react-uid';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
+import AccessRequestsList from '@/components/access-request/access-requests-list';
 
 interface FilterState {
   products: Record<string, string>[];
@@ -51,22 +46,20 @@ interface FilterState {
   labels: { labelGroup: string; value: string }[];
 }
 
-interface ConsumerListItem {
-  id: string;
-  application: Application;
-  consumer: GatewayConsumer;
-}
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
-  const queryKey = 'allConsumers';
+  const queryKey: QueryKey = 'allConsumers';
 
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        {},
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
@@ -110,7 +103,7 @@ const ConsumersPage: React.FC<
     });
     return result;
   }, [state]);
-  const { data } = useApi(
+  const { data, isFetching } = useApi(
     [queryKey, filterKey],
     {
       query,
@@ -123,7 +116,6 @@ const ConsumersPage: React.FC<
       client.invalidateQueries(queryKey);
     },
   });
-  const accessRequests = data?.allAccessRequestsByNamespace ?? [];
   const consumers = React.useMemo(() => {
     if (!data?.getFilteredNamespaceConsumers) {
       return [];
@@ -142,7 +134,6 @@ const ConsumersPage: React.FC<
       );
     });
   }, [data, search]);
-  const totalRequests = accessRequests.length ?? 0;
   const totalConsumers = consumers.length ?? 0;
 
   // Events
@@ -185,9 +176,7 @@ const ConsumersPage: React.FC<
   return (
     <>
       <Head>
-        <title>{`Consumers ${
-          totalRequests > 0 ? `(${totalRequests})` : ''
-        }`}</title>
+        <title>Consumers</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -195,9 +184,7 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        {accessRequests.map((a) => (
-          <AccessRequest key={a.id} data={a} queryKey={queryKey} />
-        ))}
+        <AccessRequestsList queryKey={queryKey} />
         <Filters
           cacheId="consumers"
           data={state as FilterState}
@@ -207,7 +194,10 @@ const ConsumersPage: React.FC<
           onRemoveFilter={removeFilter}
           mb={4}
         >
-          <ConsumerFilters />
+          <ConsumerFilters
+            consumers={consumers}
+            labels={data?.allConsumerGroupLabels}
+          />
         </Filters>
         <Box bgColor="white" mb={4}>
           <Box
@@ -235,6 +225,7 @@ const ConsumersPage: React.FC<
           </Box>
           <Table
             sortable
+            isUpdating={isFetching}
             columns={[
               { name: 'Name/ID', key: 'name' },
               {
@@ -313,6 +304,7 @@ export default ConsumersPage;
 
 const query = gql`
   query GetConsumers($filter: ConsumerQueryFilterInput) {
+    allConsumerGroupLabels
     getFilteredNamespaceConsumers(filter: $filter) {
       id
       consumerType
@@ -368,22 +360,6 @@ const query = gql`
   }
 `;
 
-const grantMutation = gql`
-  mutation ToggleConsumerACLMembership(
-    $prodEnvId: ID!
-    $consumerId: ID!
-    $group: String!
-    $grant: Boolean!
-  ) {
-    updateConsumerGroupMembership(
-      prodEnvId: $prodEnvId
-      consumerId: $consumerId
-      group: $group
-      grant: $grant
-    )
-  }
-`;
-
 const deleteMutation = gql`
   mutation DeleteConsumer($id: ID!) {
     deleteGatewayConsumer(id: $id) {
@@ -393,13 +369,9 @@ const deleteMutation = gql`
 `;
 
 const filterTypeOptions = [
-  {
-    name: 'Products',
-    value: 'products',
-  },
+  { name: 'Products', value: 'products' },
   { name: 'Environment', value: 'environments' },
-
+  { name: 'Labels', value: 'labels' },
   { name: 'Scopes', value: 'scopes' },
-
   { name: 'Roles', value: 'roles' },
 ];

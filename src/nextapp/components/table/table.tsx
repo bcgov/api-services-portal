@@ -10,10 +10,12 @@ import {
   TableColumnHeaderProps,
   Box,
   TableProps,
+  Skeleton,
 } from '@chakra-ui/react';
 import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
 import sortBy from 'lodash/sortBy';
 import { uid } from 'react-uid';
+import { times } from 'lodash';
 
 interface Column extends TableColumnHeaderProps {
   name: React.ReactNode;
@@ -26,6 +28,7 @@ interface ApsTableProps extends TableProps {
   columns: Column[];
   data: unknown[];
   emptyView?: React.ReactNode;
+  isUpdating?: boolean;
   sortable?: boolean;
 }
 
@@ -34,6 +37,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
   columns,
   data,
   emptyView,
+  isUpdating,
   sortable,
   ...props
 }) => {
@@ -131,18 +135,41 @@ const ApsTable: React.FC<ApsTableProps> = ({
         </Tr>
       </Thead>
       <Tbody>
-        {!data.length && (
+        {isUpdating &&
+          (() => {
+            const elements = [];
+            times(5, (n) => {
+              elements.push(
+                <Tr key={`tr-${n}`}>
+                  {(() => {
+                    const elements = [];
+                    times(columns.length, (col) => {
+                      elements.push(
+                        <Td key={`td-${col}`} textAlign="center">
+                          <Skeleton height="20px" width="100%" />
+                        </Td>
+                      );
+                    });
+                    return elements;
+                  })()}
+                </Tr>
+              );
+            });
+            return elements;
+          })()}
+        {!data.length && !isUpdating && (
           <Tr>
             <Td colSpan={columns.length} textAlign="center">
               {emptyView}
             </Td>
           </Tr>
         )}
-        {sorted.map((d, index) =>
-          React.cloneElement(children(d, index), {
-            key: uid(d),
-          })
-        )}
+        {!isUpdating &&
+          sorted.map((d, index) =>
+            React.cloneElement(children(d, index), {
+              key: uid(d),
+            })
+          )}
       </Tbody>
     </Table>
   );
