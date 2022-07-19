@@ -63,11 +63,36 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   o(scopesRoles);
 
   if (true) {
-    const id = '62a18b772da3cdea467b10fe';
+    const id = '62a1848991c56de2f62d31a6';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
-    o(consumerAccess);
+    //o(consumerAccess);
+
+    const res = await getConsumerProdEnvAccess(
+      ctx,
+      ns,
+      id,
+      consumerAccess.prodEnvAccess[0].environment.id
+    );
+    o(res);
+
+    const controls: RequestControls = {
+      roles: ['r1', ' r2'],
+    };
+    await updateConsumerAccess(
+      ctx,
+      ns,
+      consumerAccess.consumer.id,
+      consumerAccess.prodEnvAccess[0].environment.id,
+      controls
+    );
   }
-  if (true) {
+  if (false) {
+    const id = '62a1848991c56de2f62d31a5';
+    const consumer = await lookupConsumerPlugins(ctx, id);
+    o(consumer);
+  }
+
+  if (false) {
     const id = '62a18b772da3cdea467b10fd';
     const consumer = await lookupConsumerPlugins(ctx, id);
 

@@ -84,6 +84,7 @@ import {
 import {
   KeycloakClientRegistrationService,
   KeycloakClientService,
+  KeycloakUserService,
 } from '../keycloak';
 import {
   addConsumerLabel,
@@ -577,38 +578,128 @@ export async function updateConsumerAccess(
     // Will raise error if not found
     await kcClientService.findByClientId(consumer.username);
 
-    const allScopes = await kcClientService.findRealmClientScopes();
+    if (defaultClientScopes) {
+      const allScopes = await kcClientService.findRealmClientScopes();
 
-    const selectedScopes = allScopes.filter((s: any) =>
-      defaultClientScopes.includes(s.name)
-    );
+      const selectedScopes = allScopes.filter((s: any) =>
+        defaultClientScopes.includes(s.name)
+      );
 
-    assert.strictEqual(
-      selectedScopes.length,
-      defaultClientScopes.length,
-      'Scope missing from IdP'
-    );
+      assert.strictEqual(
+        selectedScopes.length,
+        defaultClientScopes.length,
+        'Scope missing from IdP'
+      );
 
-    logger.debug('[updateConsumerProdEnvAccess] selected %j', selectedScopes);
+      logger.debug('[updateConsumerProdEnvAccess] selected %j', selectedScopes);
 
-    const consumerUsername = consumer.username;
+      const consumerUsername = consumer.username;
 
-    const isClient = await kcClientService.isClient(consumerUsername);
+      const isClient = await kcClientService.isClient(consumerUsername);
 
-    assert.strictEqual(
-      isClient,
-      true,
-      'Only clients (not users) support scopes'
-    );
+      assert.strictEqual(
+        isClient,
+        true,
+        'Only clients (not users) support scopes'
+      );
 
-    await kcClientRegService.syncAndApply(
-      consumer.username,
-      selectedScopes.map((scope) => scope.name),
-      [] as string[]
-    );
+      await kcClientRegService.syncAndApply(
+        consumer.username,
+        selectedScopes.map((scope) => scope.name),
+        [] as string[]
+      );
+    }
+
+    if (roles) {
+      logger.error('Doing roles! %s', roles);
+
+      const kcUserService = new KeycloakUserService(
+        envCtx.issuerEnvConfig.issuerUrl
+      );
+      await kcUserService.login(
+        envCtx.issuerEnvConfig.clientId,
+        envCtx.issuerEnvConfig.clientSecret
+      );
+
+      const client = await kcClientService.findByClientId(
+        envCtx.issuerEnvConfig.clientId
+      );
+
+      const availableRoles = await kcClientService.listRoles(client.id);
+      logger.error('Available %j', availableRoles);
+
+      const selectedRoles = availableRoles
+        .filter((r: any) => roles.includes(r.name))
+        .map((r: any) => ({ id: r.id, name: r.name }));
+
+      assert.strictEqual(
+        selectedRoles.length,
+        roles.length,
+        'Role not found for client'
+      );
+
+      logger.debug('[] selected %j', selectedRoles);
+
+      const isClient = await kcClientService.isClient(consumer.username);
+
+      if (isClient) {
+        const consumerClient = await kcClientService.findByClientId(
+          consumer.username
+        );
+        const userId = await kcClientService.lookupServiceAccountUserId(
+          consumerClient.id
+        );
+
+        const userRoles = await kcUserService.listUserClientRoles(
+          userId,
+          client.id
+        );
+
+        await kcUserService.syncUserClientRoles(
+          userId,
+          client.id,
+          selectedRoles
+            .filter(
+              (role) =>
+                userRoles.filter((urole: any) => urole.name === role.name)
+                  .length == 0
+            )
+            .map((role) => ({ id: role.id, name: role.name })),
+          userRoles
+            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+            .map((role: any) => ({ id: role.id, name: role.name }))
+        );
+      } else {
+        const userId = await kcUserService.lookupUserByUsername(
+          consumer.username
+        );
+
+        const userRoles = await kcUserService.listUserClientRoles(
+          userId,
+          client.id
+        );
+
+        await kcUserService.syncUserClientRoles(
+          userId,
+          client.id,
+          selectedRoles
+            .filter(
+              (role) =>
+                userRoles.filter((urole: any) => urole.name === role.name)
+                  .length == 0
+            )
+            .map((role) => ({ id: role.id, name: role.name })),
+          userRoles
+            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+            .map((role: any) => ({ id: role.id, name: role.name }))
+        );
+      }
+    }
   }
 
-  await syncPlugins(context, ns, consumer, plugins);
+  if (plugins) {
+    await syncPlugins(context, ns, consumer, plugins);
+  }
 }
 
 /**
