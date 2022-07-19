@@ -276,7 +276,7 @@ async function getConsumerProdEnvAccessList(
       plugins: consumer.plugins
         .filter(
           (plugin) =>
-            plugin.service?.environment.id === svc.productEnvironment.id
+            plugin.service?.environment?.id === svc.productEnvironment.id
         )
         .map((plugin) => ({
           id: plugin.id,
@@ -315,7 +315,7 @@ async function getConsumerProdEnvAccessList(
           services: env.services,
         },
         plugins: consumer.plugins
-          .filter((plugin) => plugin.service?.environment.id === env.id)
+          .filter((plugin) => plugin.service?.environment?.id === env.id)
           .map((plugin) => ({
             id: plugin.id,
             name: plugin.name,
