@@ -179,6 +179,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             data-testid="ar-controls-tab"
           >
             <RequestControls
+              prodEnvId={data.productEnvironment.id}
               rateLimits={rateLimits}
               restrictions={restrictions}
             />

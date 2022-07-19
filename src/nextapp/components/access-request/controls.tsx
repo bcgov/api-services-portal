@@ -15,6 +15,7 @@ import IpRestrictions from './ip-restriction';
 import RateLimiting from './rate-limiting';
 
 interface ControlsProps {
+  prodEnvId: string;
   rateLimits: [
     ConsumerPlugin[],
     React.Dispatch<React.SetStateAction<ConsumerPlugin[]>>
@@ -25,10 +26,14 @@ interface ControlsProps {
   ];
 }
 
-const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
+const Controls: React.FC<ControlsProps> = ({
+  prodEnvId,
+  rateLimits,
+  restrictions,
+}) => {
   const { data, isLoading } = useApi(
-    'consumerControls',
-    { query },
+    ['nsProductServices', prodEnvId],
+    { query, variables: { prodEnvId } },
     { suspense: false }
   );
 
@@ -66,6 +71,14 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
     return serviceNameDict[id];
   };
 
+  if (!isLoading && serviceOptions.length == 0) {
+    return (
+      <Box data-testid="controls">
+        This environment has no gateway services assigned to it.
+      </Box>
+    );
+  }
+
   return (
     <Box data-testid="controls">
       {isLoading && <Text data-testid="controls-loading">Loading...</Text>}
@@ -90,8 +103,8 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
 export default Controls;
 
 const query = gql`
-  query GetControlContent {
-    allGatewayServicesByNamespace {
+  query GetControlContent($prodEnvId: ID!) {
+    allGatewayServicesByNamespace(where: { environment: { id: $prodEnvId } }) {
       id
       name
       extForeignKey

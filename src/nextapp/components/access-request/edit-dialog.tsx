@@ -249,6 +249,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 data-testid="edit-consumer-dialog-controls-tab"
               >
                 <RequestControls
+                  prodEnvId={data?.getConsumerProdEnvAccess?.environment.id}
                   rateLimits={rateLimits}
                   restrictions={restrictions}
                 />
