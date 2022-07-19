@@ -20,7 +20,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import {
-  ConsumerGatewayPlugin,
+  ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
 } from '@/shared/types/query.types';
@@ -56,18 +56,30 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
-  const restrictions = React.useState<ConsumerGatewayPlugin[]>(() => {
+  const restrictions = React.useState<ConsumerPlugin[]>(() => {
     return (
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'ip-restriction'
-      ) ?? []
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'ip-restriction')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        })) ?? []
     );
   });
   const rateLimits = React.useState(() => {
     return (
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'rate-limiting'
-      ) ?? []
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'rate-limiting')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        })) ?? []
     );
   });
   const prodEnvAccess = data?.getConsumerProdEnvAccess;
@@ -82,14 +94,26 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
     setRestrictions(
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'ip-restriction'
-      )
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'ip-restriction')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        }))
     );
     setRateLimits(
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'rate-limiting'
-      )
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'rate-limiting')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        }))
     );
     onClose();
     setTabIndex(0);
@@ -139,14 +163,26 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   React.useEffect(() => {
     if (isSuccess) {
       restrictions[1](
-        data?.getConsumerProdEnvAccess.plugins.filter(
-          (p) => p.name === 'ip-restriction'
-        )
+        data?.getConsumerProdEnvAccess.plugins
+          .filter((p) => p.name === 'ip-restriction')
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            config: JSON.parse(p.config),
+            service: p.service,
+            route: p.route,
+          }))
       );
       rateLimits[1](
-        data?.getConsumerProdEnvAccess.plugins.filter(
-          (p) => p.name === 'rate-limiting'
-        )
+        data?.getConsumerProdEnvAccess.plugins
+          .filter((p) => p.name === 'rate-limiting')
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            config: JSON.parse(p.config),
+            service: p.service,
+            route: p.route,
+          }))
       );
     }
   }, [data, isSuccess]);
