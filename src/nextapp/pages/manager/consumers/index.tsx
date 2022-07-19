@@ -77,35 +77,23 @@ const ConsumersPage: React.FC<
   const client = useQueryClient();
   const [search, setSearch] = React.useState('');
   const [grantAccess, setGrantAccess] = React.useState(null);
-  const addFilter = () => false;
-  const clearFilters = () => false;
-  const removeFilter = () => false;
-  // const {
-  //   state,
-  //   addFilter,
-  //   clearFilters,
-  //   removeFilter,
-  // } = useFilters<FilterState>(
-  //   {
-  //     products: [],
-  //     environments: [],
-  //     scopes: [],
-  //     roles: [],
-  //     mostActive: false,
-  //     leastActive: false,
-  //     labels: [],
-  //   },
-  //   'consumers'
-  // );
-  const state = {
-    products: [],
-    environments: [],
-    scopes: [],
-    roles: [],
-    mostActive: false,
-    leastActive: false,
-    labels: [],
-  };
+  const {
+    state,
+    addFilter,
+    clearFilters,
+    removeFilter,
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      scopes: [],
+      roles: [],
+      mostActive: false,
+      leastActive: false,
+      labels: [],
+    },
+    'consumers'
+  );
 
   const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
   const filter = React.useMemo(() => {
