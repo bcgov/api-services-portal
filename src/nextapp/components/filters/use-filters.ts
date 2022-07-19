@@ -81,9 +81,9 @@ const useFilters = <FilterState>(
     (s) => {
       try {
         const cached = sessionStorage.getItem(cacheId);
-        return JSON.parse(cached);
+        return JSON.parse(cached) ?? s;
       } catch {
-        return initialState;
+        return s;
       }
     }
   );
