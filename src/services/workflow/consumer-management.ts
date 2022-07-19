@@ -276,17 +276,18 @@ async function getConsumerProdEnvAccessList(
       plugins: consumer.plugins
         .filter(
           (plugin) =>
-            plugin.service?.environment?.id === svc.productEnvironment.id
+            plugin.service?.environment?.id === svc.productEnvironment.id ||
+            plugin.route?.service?.environment?.id === svc.productEnvironment.id
         )
         .map((plugin) => ({
           id: plugin.id,
           name: plugin.name,
           config: plugin.config,
-          service: {
+          service: plugin.service && {
             id: plugin.service?.id,
             name: plugin.service?.name,
           },
-          route: {
+          route: plugin.route && {
             id: plugin.route?.id,
             name: plugin.route?.name,
           },
@@ -315,16 +316,20 @@ async function getConsumerProdEnvAccessList(
           services: env.services,
         },
         plugins: consumer.plugins
-          .filter((plugin) => plugin.service?.environment?.id === env.id)
+          .filter(
+            (plugin) =>
+              plugin.service?.environment?.id === env.id ||
+              plugin.route?.service?.environment?.id === env.id
+          )
           .map((plugin) => ({
             id: plugin.id,
             name: plugin.name,
             config: plugin.config,
-            service: {
+            service: plugin.service && {
               id: plugin.service?.id,
               name: plugin.service?.name,
             },
-            route: {
+            route: plugin.route && {
               id: plugin.route?.id,
               name: plugin.route?.name,
             },

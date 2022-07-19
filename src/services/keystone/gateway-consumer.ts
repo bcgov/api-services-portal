@@ -36,6 +36,11 @@ export async function lookupConsumerPlugins(
                             id
                             name
                             extForeignKey
+                            service {
+                              environment {
+                                id
+                              }
+                            }
                           }
                         }
                         tags
