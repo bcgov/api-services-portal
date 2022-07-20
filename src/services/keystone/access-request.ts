@@ -128,6 +128,7 @@ export async function lookupEnvironmentAndApplicationByAccessRequest(
     query: `query GetSpecificAccessRequest($id: ID!) {
                   AccessRequest(where: {id: $id}) {
                       id
+                      labels
                       controls
                       productEnvironment {
                           appId

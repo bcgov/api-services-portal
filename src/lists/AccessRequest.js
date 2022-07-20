@@ -52,6 +52,10 @@ module.exports = {
       type: Text,
       isRequired: false,
     },
+    labels: {
+      type: Text,
+      isRequired: false,
+    },
     controls: {
       type: Text,
       isRequired: true,

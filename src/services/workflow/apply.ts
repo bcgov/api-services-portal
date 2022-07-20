@@ -27,6 +27,7 @@ import { Logger } from '../../logger';
 import { AccessRequest, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
 import { syncPlugins } from './consumer-plugins';
+import { saveConsumerLabels } from './consumer-management';
 
 const logger = Logger('wf.Apply');
 
@@ -151,6 +152,15 @@ export const Apply = async (
         consumer: requestDetails.serviceAccess.consumer,
       };
 
+      if ('labels' in requestDetails) {
+        const labels = JSON.parse(requestDetails.labels);
+        await saveConsumerLabels(
+          context,
+          setup.namespace,
+          setup.consumer.id,
+          labels
+        );
+      }
       await setupAuthorizationAndEnable(subjectContext, context, setup);
 
       message.text = 'approved access';

@@ -53,6 +53,7 @@ const query = gql`
         name
       }
       productEnvironment {
+        id
         name
         additionalDetailsToRequest
         product {
