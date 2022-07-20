@@ -18,12 +18,14 @@ import {
   GridItem,
   Grid,
   useToast,
+  Flex,
 } from '@chakra-ui/react';
 import {
   ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
 } from '@/shared/types/query.types';
+import EnvironmentTag from '@/components/environment-tag';
 import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
 
@@ -208,7 +210,12 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         <ModalOverlay />
         <ModalContent data-testid="edit-consumer-dialog">
           <ModalHeader data-testid="edit-consumer-dialog-header">
-            {data?.getConsumerProdEnvAccess?.productName}
+            <Flex align="center" gridGap={4}>
+              {data?.getConsumerProdEnvAccess?.productName}
+              <EnvironmentTag
+                name={data?.getConsumerProdEnvAccess?.environment.name}
+              />
+            </Flex>
             <Tabs
               index={tabIndex}
               mt={4}

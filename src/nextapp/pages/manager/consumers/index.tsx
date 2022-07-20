@@ -24,7 +24,7 @@ import Filters, { useFilters } from '@/components/filters';
 import { ConsumerSummary, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-import InlineManageLabels from '@/components/inline-manage-labels';
+// import InlineManageLabels from '@/components/inline-manage-labels';
 import LinkConsumer from '@/components/link-consumer';
 import PageHeader from '@/components/page-header';
 import NextLink from 'next/link';
@@ -188,7 +188,10 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <AccessRequestsList queryKey={queryKey} />
+        <AccessRequestsList
+          labels={data?.allConsumerGroupLabels}
+          queryKey={queryKey}
+        />
         <Filters
           data={state as FilterState}
           filterTypeOptions={filterTypeOptions}
