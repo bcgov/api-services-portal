@@ -110,6 +110,7 @@ const Filters: React.FC<FiltersProps> = ({
           name="type"
           onChange={handleFilterTypeSelect}
           value={filterType}
+          data-testid="filter-type-select"
         >
           {filterTypeOptions.map((f) => (
             <option key={uid(f)} value={f.value}>
@@ -125,7 +126,7 @@ const Filters: React.FC<FiltersProps> = ({
             })
           )}
         {filterValueOptions && (
-          <Select name="value">
+          <Select name="value" data-testid="filters-value-select">
             {filterValueOptions[filterType]?.map((f) => (
               <option key={uid(f)} value={f.value}>
                 {f.name}

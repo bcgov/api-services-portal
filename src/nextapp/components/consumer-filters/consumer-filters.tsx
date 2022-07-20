@@ -86,6 +86,7 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
         isRequired
         isDisabled={isLoading || options.length === 0}
         name="value"
+        data-testid="consumer-filters-select"
       >
         {isSuccess &&
           options.map((f) => (
