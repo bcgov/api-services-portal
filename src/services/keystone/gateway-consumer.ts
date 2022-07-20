@@ -23,9 +23,11 @@ export async function lookupConsumerPlugins(
                           id
                           name
                           config
+                          extForeignKey
                           service {
                             id
                             name
+                            extForeignKey
                             environment {
                               id
                             }
@@ -33,6 +35,12 @@ export async function lookupConsumerPlugins(
                           route {
                             id
                             name
+                            extForeignKey
+                            service {
+                              environment {
+                                id
+                              }
+                            }
                           }
                         }
                         tags

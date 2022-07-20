@@ -93,10 +93,12 @@ export const handlers = [
   keystone.mutation('SaveConsumerLabels', saveConsumerLabels),
   keystone.mutation('GrantAccessToConsumer', grantAccessToConsumerHandler),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
+    const { serviceAccessId } = req.variables;
+    const institution = serviceAccessId === 'd1' ? null : harley.business;
     return res(
       ctx.data({
         BusinessProfile: {
-          institution: harley.business,
+          institution,
         },
       })
     );

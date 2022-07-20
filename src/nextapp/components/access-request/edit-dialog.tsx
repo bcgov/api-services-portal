@@ -18,11 +18,14 @@ import {
   GridItem,
   Grid,
   useToast,
+  Flex,
 } from '@chakra-ui/react';
 import {
+  ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
 } from '@/shared/types/query.types';
+import EnvironmentTag from '@/components/environment-tag';
 import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
 
@@ -55,20 +58,30 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
-  const restrictions = React.useState<
-    (GatewayPlugin | GatewayPluginCreateInput)[]
-  >(() => {
+  const restrictions = React.useState<ConsumerPlugin[]>(() => {
     return (
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'ip-restriction'
-      ) ?? []
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'ip-restriction')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        })) ?? []
     );
   });
   const rateLimits = React.useState(() => {
     return (
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'rate-limiting'
-      ) ?? []
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'rate-limiting')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        })) ?? []
     );
   });
   const prodEnvAccess = data?.getConsumerProdEnvAccess;
@@ -83,14 +96,26 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
     setRestrictions(
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'ip-restriction'
-      )
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'ip-restriction')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        }))
     );
     setRateLimits(
-      data?.getConsumerProdEnvAccess.plugins.filter(
-        (p) => p.name === 'rate-limiting'
-      )
+      data?.getConsumerProdEnvAccess.plugins
+        .filter((p) => p.name === 'rate-limiting')
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          config: JSON.parse(p.config),
+          service: p.service,
+          route: p.route,
+        }))
     );
     onClose();
     setTabIndex(0);
@@ -140,14 +165,26 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   React.useEffect(() => {
     if (isSuccess) {
       restrictions[1](
-        data?.getConsumerProdEnvAccess.plugins.filter(
-          (p) => p.name === 'ip-restriction'
-        )
+        data?.getConsumerProdEnvAccess.plugins
+          .filter((p) => p.name === 'ip-restriction')
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            config: JSON.parse(p.config),
+            service: p.service,
+            route: p.route,
+          }))
       );
       rateLimits[1](
-        data?.getConsumerProdEnvAccess.plugins.filter(
-          (p) => p.name === 'rate-limiting'
-        )
+        data?.getConsumerProdEnvAccess.plugins
+          .filter((p) => p.name === 'rate-limiting')
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            config: JSON.parse(p.config),
+            service: p.service,
+            route: p.route,
+          }))
       );
     }
   }, [data, isSuccess]);
@@ -173,7 +210,12 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         <ModalOverlay />
         <ModalContent data-testid="edit-consumer-dialog">
           <ModalHeader data-testid="edit-consumer-dialog-header">
-            {data?.getConsumerProdEnvAccess?.productName}
+            <Flex align="center" gridGap={4}>
+              {data?.getConsumerProdEnvAccess?.productName}
+              <EnvironmentTag
+                name={data?.getConsumerProdEnvAccess?.environment.name}
+              />
+            </Flex>
             <Tabs
               index={tabIndex}
               mt={4}
@@ -214,6 +256,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
                 data-testid="edit-consumer-dialog-controls-tab"
               >
                 <RequestControls
+                  prodEnvId={data?.getConsumerProdEnvAccess?.environment.id}
                   rateLimits={rateLimits}
                   restrictions={restrictions}
                 />

@@ -84,6 +84,7 @@ import {
 import {
   KeycloakClientRegistrationService,
   KeycloakClientService,
+  KeycloakUserService,
 } from '../keycloak';
 import {
   addConsumerLabel,
@@ -93,6 +94,7 @@ import {
 import { getActivityByRefId } from '../keystone/activity';
 import { AnyElement } from 'soap/lib/wsdl/elements';
 import { scopes } from 'auth/scope-role-utils';
+import { syncPlugins } from './consumer-plugins';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -250,10 +252,7 @@ async function getConsumerProdEnvAccessList(
   // - get the ACLs for the Consumer and derive the ProdEnvAccess records
   const consumer = await lookupConsumerPlugins(context, consumerId);
 
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
   const aclGroups = (
     await kongApi.getConsumerACLByNamespace(consumer.extForeignKey, ns)
   ).map((acl: any) => acl.group);
@@ -278,17 +277,18 @@ async function getConsumerProdEnvAccessList(
       plugins: consumer.plugins
         .filter(
           (plugin) =>
-            plugin.service?.environment.id === svc.productEnvironment.id
+            plugin.service?.environment?.id === svc.productEnvironment.id ||
+            plugin.route?.service?.environment?.id === svc.productEnvironment.id
         )
         .map((plugin) => ({
           id: plugin.id,
           name: plugin.name,
           config: plugin.config,
-          service: {
+          service: plugin.service && {
             id: plugin.service?.id,
             name: plugin.service?.name,
           },
-          route: {
+          route: plugin.route && {
             id: plugin.route?.id,
             name: plugin.route?.name,
           },
@@ -317,16 +317,20 @@ async function getConsumerProdEnvAccessList(
           services: env.services,
         },
         plugins: consumer.plugins
-          .filter((plugin) => plugin.service?.environment.id === env.id)
+          .filter(
+            (plugin) =>
+              plugin.service?.environment?.id === env.id ||
+              plugin.route?.service?.environment?.id === env.id
+          )
           .map((plugin) => ({
             id: plugin.id,
             name: plugin.name,
             config: plugin.config,
-            service: {
+            service: plugin.service && {
               id: plugin.service?.id,
               name: plugin.service?.name,
             },
-            route: {
+            route: plugin.route && {
               id: plugin.route?.id,
               name: plugin.route?.name,
             },
@@ -456,10 +460,7 @@ export async function grantAccessToConsumer(
     `Flow ${prodEnv.flow} can not be granted to consumer`
   );
 
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 }
 
@@ -511,10 +512,7 @@ export async function revokeAccessFromConsumer(
 
   logger.warn('[revokeAccessFromConsumer] Service Access %s', serviceAccessId);
 
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 }
 
@@ -553,63 +551,155 @@ export async function updateConsumerAccess(
 
   const prodEnvAccessItem = prodEnvAccessFilter[0];
 
-  assert.strictEqual(
-    ['client-credentials'].includes(prodEnvAccessItem.environment.flow),
-    true,
-    `Flow ${prodEnvAccessItem.environment.flow} can not be updated for consumer`
-  );
+  if (prodEnvAccessItem.environment.flow === 'client-credentials') {
+    const envCtx = await getEnvironmentContext(
+      context,
+      prodEnvId,
+      { product: { namespace: ns } },
+      false
+    );
 
-  const envCtx = await getEnvironmentContext(
-    context,
-    prodEnvId,
-    { product: { namespace: ns } },
-    false
-  );
+    const kcClientService = new KeycloakClientService(
+      envCtx.issuerEnvConfig.issuerUrl
+    );
+    const kcClientRegService = new KeycloakClientRegistrationService(
+      envCtx.issuerEnvConfig.issuerUrl,
+      envCtx.openid.registration_endpoint
+    );
+    await kcClientService.login(
+      envCtx.issuerEnvConfig.clientId,
+      envCtx.issuerEnvConfig.clientSecret
+    );
+    await kcClientRegService.login(
+      envCtx.issuerEnvConfig.clientId,
+      envCtx.issuerEnvConfig.clientSecret
+    );
 
-  const kcClientService = new KeycloakClientService(
-    envCtx.issuerEnvConfig.issuerUrl
-  );
-  const kcClientRegService = new KeycloakClientRegistrationService(
-    envCtx.issuerEnvConfig.issuerUrl,
-    envCtx.openid.registration_endpoint
-  );
-  await kcClientService.login(
-    envCtx.issuerEnvConfig.clientId,
-    envCtx.issuerEnvConfig.clientSecret
-  );
-  await kcClientRegService.login(
-    envCtx.issuerEnvConfig.clientId,
-    envCtx.issuerEnvConfig.clientSecret
-  );
+    // Will raise error if not found
+    await kcClientService.findByClientId(consumer.username);
 
-  // Will raise error if not found
-  await kcClientService.findByClientId(consumer.username);
+    if (defaultClientScopes) {
+      const allScopes = await kcClientService.findRealmClientScopes();
 
-  const allScopes = await kcClientService.findRealmClientScopes();
+      const selectedScopes = allScopes.filter((s: any) =>
+        defaultClientScopes.includes(s.name)
+      );
 
-  const selectedScopes = allScopes.filter((s: any) =>
-    defaultClientScopes.includes(s.name)
-  );
+      assert.strictEqual(
+        selectedScopes.length,
+        defaultClientScopes.length,
+        'Scope missing from IdP'
+      );
 
-  assert.strictEqual(
-    selectedScopes.length,
-    defaultClientScopes.length,
-    'Scope missing from IdP'
-  );
+      logger.debug('[updateConsumerProdEnvAccess] selected %j', selectedScopes);
 
-  logger.debug('[updateConsumerProdEnvAccess] selected %j', selectedScopes);
+      const consumerUsername = consumer.username;
 
-  const consumerUsername = consumer.username;
+      const isClient = await kcClientService.isClient(consumerUsername);
 
-  const isClient = await kcClientService.isClient(consumerUsername);
+      assert.strictEqual(
+        isClient,
+        true,
+        'Only clients (not users) support scopes'
+      );
 
-  assert.strictEqual(isClient, true, 'Only clients (not users) support scopes');
+      await kcClientRegService.syncAndApply(
+        consumer.username,
+        selectedScopes.map((scope) => scope.name),
+        [] as string[]
+      );
+    }
 
-  await kcClientRegService.syncAndApply(
-    consumer.username,
-    selectedScopes.map((scope) => scope.name),
-    [] as string[]
-  );
+    if (roles) {
+      logger.error('Doing roles! %s', roles);
+
+      const kcUserService = new KeycloakUserService(
+        envCtx.issuerEnvConfig.issuerUrl
+      );
+      await kcUserService.login(
+        envCtx.issuerEnvConfig.clientId,
+        envCtx.issuerEnvConfig.clientSecret
+      );
+
+      const client = await kcClientService.findByClientId(
+        envCtx.issuerEnvConfig.clientId
+      );
+
+      const availableRoles = await kcClientService.listRoles(client.id);
+      logger.error('Available %j', availableRoles);
+
+      const selectedRoles = availableRoles
+        .filter((r: any) => roles.includes(r.name))
+        .map((r: any) => ({ id: r.id, name: r.name }));
+
+      assert.strictEqual(
+        selectedRoles.length,
+        roles.length,
+        'Role not found for client'
+      );
+
+      logger.debug('[] selected %j', selectedRoles);
+
+      const isClient = await kcClientService.isClient(consumer.username);
+
+      if (isClient) {
+        const consumerClient = await kcClientService.findByClientId(
+          consumer.username
+        );
+        const userId = await kcClientService.lookupServiceAccountUserId(
+          consumerClient.id
+        );
+
+        const userRoles = await kcUserService.listUserClientRoles(
+          userId,
+          client.id
+        );
+
+        await kcUserService.syncUserClientRoles(
+          userId,
+          client.id,
+          selectedRoles
+            .filter(
+              (role) =>
+                userRoles.filter((urole: any) => urole.name === role.name)
+                  .length == 0
+            )
+            .map((role) => ({ id: role.id, name: role.name })),
+          userRoles
+            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+            .map((role: any) => ({ id: role.id, name: role.name }))
+        );
+      } else {
+        const userId = await kcUserService.lookupUserByUsername(
+          consumer.username
+        );
+
+        const userRoles = await kcUserService.listUserClientRoles(
+          userId,
+          client.id
+        );
+
+        await kcUserService.syncUserClientRoles(
+          userId,
+          client.id,
+          selectedRoles
+            .filter(
+              (role) =>
+                userRoles.filter((urole: any) => urole.name === role.name)
+                  .length == 0
+            )
+            .map((role) => ({ id: role.id, name: role.name })),
+          userRoles
+            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+            .map((role: any) => ({ id: role.id, name: role.name }))
+        );
+      }
+    }
+  }
+
+  if (plugins) {
+    await syncPlugins(context, ns, consumer, plugins);
+  }
 }
 
 /**
@@ -649,11 +739,8 @@ export async function saveConsumerLabels(
 ): Promise<void> {
   const changes = { A: 0, D: 0, U: 0 };
 
-  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
-    context,
-    ns,
-    consumerId
-  );
+  // make sure consumer is valid
+  await lookupConsumerPlugins(context, consumerId);
 
   const currentLabels = await getConsumerLabels(context, ns, [consumerId]);
 

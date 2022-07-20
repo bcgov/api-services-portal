@@ -23,7 +23,6 @@ interface FilterTag {
 }
 
 interface FiltersProps extends BoxProps {
-  cacheId: string;
   data: unknown;
   filterTypeOptions: { name: string; value: string }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
@@ -33,7 +32,6 @@ interface FiltersProps extends BoxProps {
 }
 
 const Filters: React.FC<FiltersProps> = ({
-  cacheId,
   children,
   data,
   filterTypeOptions,
@@ -112,6 +110,7 @@ const Filters: React.FC<FiltersProps> = ({
           name="type"
           onChange={handleFilterTypeSelect}
           value={filterType}
+          data-testid="filter-type-select"
         >
           {filterTypeOptions.map((f) => (
             <option key={uid(f)} value={f.value}>
@@ -127,7 +126,7 @@ const Filters: React.FC<FiltersProps> = ({
             })
           )}
         {filterValueOptions && (
-          <Select name="value">
+          <Select name="value" data-testid="filters-value-select">
             {filterValueOptions[filterType]?.map((f) => (
               <option key={uid(f)} value={f.value}>
                 {f.name}

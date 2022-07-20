@@ -74,6 +74,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
   }, []);
   const handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setProduct(event.target.value);
+    setEnvironment(undefined);
   };
   const handleEnvironmentChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -81,9 +82,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
     const selectedEnv = data?.allProductsByNamespace
       .find((p) => p.id === product)
       ?.environments.find((e) => e.id === event.target.value);
-    setEnvironment(
-      selectedEnv.flow === 'client-credentials' ? selectedEnv : undefined
-    );
+    setEnvironment(selectedEnv);
   };
   const handleGrant = async () => {
     try {
@@ -201,7 +200,13 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               <Tab px={0} ml={4}>
                 Controls
               </Tab>
-              <Tab px={0} ml={4} isDisabled={!environment}>
+              <Tab
+                px={0}
+                ml={4}
+                isDisabled={
+                  !environment || environment.flow != 'client-credentials'
+                }
+              >
                 Authorization
               </Tab>
             </TabList>
@@ -215,10 +220,13 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
               hidden={tabIndex !== 0}
               display={tabIndex === 0 ? 'block' : 'none'}
             >
-              <RequestControls
-                rateLimits={rateLimits}
-                restrictions={restrictions}
-              />
+              {environment && (
+                <RequestControls
+                  prodEnvId={environment.id}
+                  rateLimits={rateLimits}
+                  restrictions={restrictions}
+                />
+              )}
             </Box>
             <Box
               data-testid="ar-authorization-tab"

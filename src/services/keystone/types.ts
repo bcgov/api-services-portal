@@ -6074,7 +6074,7 @@ export type ConsumerProdEnvAccess = {
   __typename?: 'ConsumerProdEnvAccess';
   productName?: Maybe<Scalars['String']>;
   environment?: Maybe<Environment>;
-  plugins?: Maybe<Array<Maybe<ConsumerGatewayPlugin>>>;
+  plugins?: Maybe<Array<Maybe<ConsumerFullPluginDetails>>>;
   revocable?: Maybe<Scalars['Boolean']>;
   serviceAccessId?: Maybe<Scalars['String']>;
   authorization?: Maybe<ConsumerAuthorization>;
@@ -6090,11 +6090,20 @@ export type ConsumerAuthorization = {
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
-export type ConsumerGatewayPlugin = {
-  __typename?: 'ConsumerGatewayPlugin';
+export type ConsumerFullPluginDetails = {
+  __typename?: 'ConsumerFullPluginDetails';
   id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   config?: Maybe<Scalars['String']>;
+  service?: Maybe<Scalars['JSON']>;
+  route?: Maybe<Scalars['JSON']>;
+};
+
+export type ConsumerPlugin = {
+  __typename?: 'ConsumerPlugin';
+  id?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  config: Scalars['JSON'];
   service?: Maybe<Scalars['JSON']>;
   route?: Maybe<Scalars['JSON']>;
 };

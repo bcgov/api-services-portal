@@ -70,7 +70,7 @@ const typeConsumerProdEnvAccess = `
 type ConsumerProdEnvAccess {
   productName: String,
   environment: Environment,
-  plugins: [ConsumerGatewayPlugin],
+  plugins: [ConsumerFullPluginDetails],
   revocable: Boolean,
   serviceAccessId: String,
   authorization: ConsumerAuthorization,
@@ -88,11 +88,22 @@ type ConsumerAuthorization {
 }
 `;
 
-const typeConsumerGatewayPlugin = `
-type ConsumerGatewayPlugin {
+const typeConsumerFullPluginDetails = `
+type ConsumerFullPluginDetails {
   id: String,
   name: String,
   config: String,
+  service: JSON,
+  route: JSON,
+}
+`;
+
+// part of the RequestControls for updateConsumerAccess
+const typeConsumerPlugin = `
+type ConsumerPlugin {
+  id: String,
+  name: String!,
+  config: JSON!,
   service: JSON,
   route: JSON,
 }
@@ -110,7 +121,8 @@ module.exports = {
           { type: typeConsumerAccess },
           { type: typeConsumerProdEnvAccess },
           { type: typeConsumerAuthorization },
-          { type: typeConsumerGatewayPlugin },
+          { type: typeConsumerFullPluginDetails },
+          { type: typeConsumerPlugin },
         ],
         queries: [
           {

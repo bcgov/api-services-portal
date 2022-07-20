@@ -4,6 +4,7 @@ import { ExpandableCards } from '@/components/card';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import {
+  ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
   GatewayRoute,
@@ -14,24 +15,25 @@ import IpRestrictions from './ip-restriction';
 import RateLimiting from './rate-limiting';
 
 interface ControlsProps {
+  prodEnvId: string;
   rateLimits: [
-    (GatewayPlugin | GatewayPluginCreateInput)[],
-    React.Dispatch<
-      React.SetStateAction<(GatewayPlugin | GatewayPluginCreateInput)[]>
-    >
+    ConsumerPlugin[],
+    React.Dispatch<React.SetStateAction<ConsumerPlugin[]>>
   ];
   restrictions: [
-    (GatewayPlugin | GatewayPluginCreateInput)[],
-    React.Dispatch<
-      React.SetStateAction<(GatewayPlugin | GatewayPluginCreateInput)[]>
-    >
+    ConsumerPlugin[],
+    React.Dispatch<React.SetStateAction<ConsumerPlugin[]>>
   ];
 }
 
-const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
+const Controls: React.FC<ControlsProps> = ({
+  prodEnvId,
+  rateLimits,
+  restrictions,
+}) => {
   const { data, isLoading } = useApi(
-    'consumerControls',
-    { query },
+    ['nsProductServices', prodEnvId],
+    { query, variables: { prodEnvId } },
     { suspense: false }
   );
 
@@ -50,19 +52,17 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
   }, [data]);
   const serviceNameDict: Record<string, string> = React.useMemo(() => {
     const result = {};
-    routeOptions.forEach((r) => (result[r.extForeignKey] = r.name));
-    serviceOptions.forEach((s) => (result[s.extForeignKey] = s.name));
+    routeOptions.forEach((r) => (result[r.id] = r.name));
+    serviceOptions.forEach((s) => (result[s.id] = s.name));
     return result;
   }, [routeOptions, serviceOptions]);
   // New records won't have a name embedded in them, so this will look them up on
   // above option lists
-  const getControlName = (
-    plugin: unknown & GatewayPlugin & GatewayPluginCreateInput
-  ): string => {
+  const getControlName = (plugin: unknown & ConsumerPlugin): string => {
     if (plugin.service?.name || plugin.route?.name) {
       return plugin.service?.name ?? plugin.route?.name;
     }
-    const id = plugin.service?.connect?.id ?? plugin.route?.connect?.id;
+    const id = plugin.service?.id ?? plugin.route?.id;
 
     if (!id) {
       return 'N/A';
@@ -70,6 +70,14 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
 
     return serviceNameDict[id];
   };
+
+  if (!isLoading && serviceOptions.length == 0) {
+    return (
+      <Box data-testid="controls">
+        This environment has no gateway services assigned to it.
+      </Box>
+    );
+  }
 
   return (
     <Box data-testid="controls">
@@ -95,8 +103,8 @@ const Controls: React.FC<ControlsProps> = ({ rateLimits, restrictions }) => {
 export default Controls;
 
 const query = gql`
-  query GetControlContent {
-    allGatewayServicesByNamespace {
+  query GetControlContent($prodEnvId: ID!) {
+    allGatewayServicesByNamespace(where: { environment: { id: $prodEnvId } }) {
       id
       name
       extForeignKey

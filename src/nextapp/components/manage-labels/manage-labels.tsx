@@ -149,23 +149,6 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
           <ModalCloseButton />
           <ModalBody>
             <Grid
-              templateColumns="215px 1fr"
-              rowGap={3}
-              columnGap={2}
-              mb={7}
-              sx={{
-                '& dt:after': {
-                  content: '":"',
-                },
-              }}
-              data-testid="ar-request-details"
-            >
-              <GridItem as="dt">Instructions from the API Provider</GridItem>
-              <GridItem as="dd">-</GridItem>
-              <GridItem as="dt">Requester Comments</GridItem>
-              <GridItem as="dd">-</GridItem>
-            </Grid>
-            <Grid
               as="form"
               ref={form}
               templateColumns="215px 1fr"

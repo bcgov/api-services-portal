@@ -1,5 +1,6 @@
 /*
 Wire up directly with Keycloak and use the Services
+export TOK="<token from portal>"
 To run:
 npm run ts-build
 npm run ts-watch
@@ -23,8 +24,11 @@ import {
   RequestControls,
   ConsumerLabel,
   ConsumerQueryFilter,
+  ConsumerPlugin,
 } from '../../../services/workflow/types';
 import { doFiltering } from '../../../services/workflow/consumer-filters';
+import { syncPlugins } from '../../../services/workflow/consumer-plugins';
+import { lookupConsumerPlugins } from '../../../services/keystone';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -46,6 +50,11 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
     skipAccessControl,
     authentication: { item: identity },
   });
+  ctx.req = {
+    headers: {
+      'x-forwarded-access-token': process.env.TOK,
+    },
+  };
 
   const labels = await allConsumerGroupLabels(ctx, ns);
   o(labels);
@@ -53,6 +62,53 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
   const scopesRoles = await allScopesAndRoles(ctx, ns);
   o(scopesRoles);
 
+  if (true) {
+    const id = '62a1848991c56de2f62d31a6';
+    const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
+    //o(consumerAccess);
+
+    const res = await getConsumerProdEnvAccess(
+      ctx,
+      ns,
+      id,
+      consumerAccess.prodEnvAccess[0].environment.id
+    );
+    o(res);
+
+    const controls: RequestControls = {
+      roles: ['r1', ' r2'],
+    };
+    await updateConsumerAccess(
+      ctx,
+      ns,
+      consumerAccess.consumer.id,
+      consumerAccess.prodEnvAccess[0].environment.id,
+      controls
+    );
+  }
+  if (false) {
+    const id = '62a1848991c56de2f62d31a5';
+    const consumer = await lookupConsumerPlugins(ctx, id);
+    o(consumer);
+  }
+
+  if (false) {
+    const id = '62a18b772da3cdea467b10fd';
+    const consumer = await lookupConsumerPlugins(ctx, id);
+
+    const plugins: ConsumerPlugin[] = [
+      {
+        id: '62d5b2238feb3dcd137db3b7',
+        name: 'rate-limiting',
+        config: { minute: 10 },
+        service: {
+          id: '61816208655ef5aad5968c5c',
+        },
+      },
+    ];
+
+    await syncPlugins(ctx, ns, consumer, plugins);
+  }
   if (false) {
     const cids = await doFiltering(ctx, ns, {
       products: ['6180d1328a98e36cae8d0621'],
@@ -68,7 +124,7 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
     o(cids);
   }
 
-  if (true) {
+  if (false) {
     const cids = await doFiltering(ctx, ns, {
       scopes: ['read'],
     } as ConsumerQueryFilter);
@@ -88,19 +144,20 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
     );
     o(consumers);
 
-    const promises = consumers
-      .filter(
-        (c) =>
-          c.id === '62a18b772da3cdea467b10fe' ||
-          c.id === '62a1848991c56de2f62d31a6'
-      )
-      .map(async (c) => {
-        const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, c.id);
-        o(consumerAccess);
+    // testing plugins
+    if (true) {
+      const promises = consumers
+        .filter((c) => c.id === '62a18b772da3cdea467b10fe')
+        .map(async (c) => {
+          const consumerAccess = await getNamespaceConsumerAccess(
+            ctx,
+            ns,
+            c.id
+          );
 
-        if (true) {
-          const envPromises = consumerAccess.prodEnvAccess.map(
-            async (p: any) => {
+          const envPromises = consumerAccess.prodEnvAccess
+            .filter((a) => a.plugins.length > 0)
+            .map(async (p: any) => {
               const res = await getConsumerProdEnvAccess(
                 ctx,
                 ns,
@@ -109,41 +166,119 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
               );
               o(res);
 
-              if (c.id === '62a18b772da3cdea467b10fe') {
-                await revokeAccessFromConsumer(
+              // const controls: RequestControls = {
+              //   plugins: [
+              //     {
+              //       id: '62a18c362da3cdea467b1103',
+              //       name: 'ip-restriction',
+              //       config:
+              //         '{"status":null,"allow":["2.2.2.2"],"message":null,"deny":null}',
+              //       service: {
+              //         id: '61816208655ef5aad5968c5c',
+              //         name: 'a-service-for-refactortime-2',
+              //       },
+              //       route: {},
+              //     },
+              //     {
+              //       name: 'ip-restriction',
+              //       config: '{"allow":"[\\"1.1.1.1\\"]"}',
+              //       tags: '["consumer"]',
+              //       route: {
+              //         connect: {
+              //           id: '84733df3-cf00-4a00-9c21-d8db460f5d5b',
+              //         },
+              //       },
+              //     },
+              //     {
+              //       id: '62a18c3a2da3cdea467b1105',
+              //       name: 'rate-limiting',
+              //       config:
+              //         '{"redis_timeout":2000,"limit_by":"consumer","redis_ssl":false,"redis_ssl_verify":false,"redis_server_name":null,"second":null,"minute":4,"hour":null,"day":null,"month":null,"policy":"local","fault_tolerant":true,"hide_client_headers":false,"header_name":null,"path":null,"redis_port":6379,"redis_password":"****","redis_host":"****","year":null,"redis_database":0}',
+              //       service: {
+              //         id: '61816208655ef5aad5968c5c',
+              //         name: 'a-service-for-refactortime-2',
+              //       },
+              //       route: {},
+              //     },
+              //   ],
+              // };
+              // await updateConsumerAccess(
+              //   ctx,
+              //   ns,
+              //   consumerAccess.consumer.id,
+              //   p.environment.id,
+              //   controls
+              // );
+            });
+          await Promise.all(envPromises);
+        });
+      await Promise.all(promises);
+    }
+
+    if (false) {
+      const promises = consumers
+        .filter(
+          (c) =>
+            c.id === '62a18b772da3cdea467b10fe' ||
+            c.id === '62a1848991c56de2f62d31a6'
+        )
+        .map(async (c) => {
+          const consumerAccess = await getNamespaceConsumerAccess(
+            ctx,
+            ns,
+            c.id
+          );
+          o(consumerAccess);
+
+          o(consumerAccess.prodEnvAccess.filter((a) => a.plugins.length > 0));
+
+          if (false) {
+            const envPromises = consumerAccess.prodEnvAccess.map(
+              async (p: any) => {
+                const res = await getConsumerProdEnvAccess(
                   ctx,
                   ns,
-                  consumerAccess.consumer.id,
+                  c.id,
                   p.environment.id
                 );
+                o(res);
 
-                await grantAccessToConsumer(
-                  ctx,
-                  ns,
-                  consumerAccess.consumer.id,
-                  p.environment.id,
-                  {}
-                );
+                if (c.id === '62a18b772da3cdea467b10fe') {
+                  await revokeAccessFromConsumer(
+                    ctx,
+                    ns,
+                    consumerAccess.consumer.id,
+                    p.environment.id
+                  );
 
-                //const controls : RequestControls = {}
-                //await updateConsumerProdEnvAccess(ctx, ns, c.id, p.environment.id, controls);
-                const labels: ConsumerLabel[] = [
-                  { labelGroup: 'Fullname', values: ['Joe Smith'] },
-                ];
-                await saveConsumerLabels(
-                  ctx,
-                  ns,
-                  consumerAccess.consumer.id,
-                  labels
-                );
+                  await grantAccessToConsumer(
+                    ctx,
+                    ns,
+                    consumerAccess.consumer.id,
+                    p.environment.id,
+                    {}
+                  );
+
+                  //const controls : RequestControls = {}
+                  //await updateConsumerProdEnvAccess(ctx, ns, c.id, p.environment.id, controls);
+                  const labels: ConsumerLabel[] = [
+                    { labelGroup: 'Fullname', values: ['Joe Smith'] },
+                  ];
+                  await saveConsumerLabels(
+                    ctx,
+                    ns,
+                    consumerAccess.consumer.id,
+                    labels
+                  );
+                }
               }
-            }
-          );
+            );
 
-          await Promise.all(envPromises);
-        }
-      });
-    await Promise.all(promises);
+            await Promise.all(envPromises);
+          }
+        });
+      await Promise.all(promises);
+    }
   }
 
   await keystone.disconnect();

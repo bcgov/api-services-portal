@@ -1,0 +1,16 @@
+
+  query GetControlContent {
+    allGatewayServicesByNamespace {
+      id
+      name
+      extForeignKey
+      environment {
+        id
+      }
+      routes {
+        id
+        name
+        extForeignKey
+      }
+    }
+  }

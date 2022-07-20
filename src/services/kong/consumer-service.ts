@@ -4,46 +4,20 @@ import { Logger } from '../../logger';
 
 import { v4 as uuidv4 } from 'uuid';
 import { strict as assert } from 'assert';
-
-export interface CreateOrGetConsumerResult {
-  created: boolean;
-  consumer: KongConsumer;
-}
-export interface KongConsumer {
-  id?: string;
-  username?: string;
-  custom_id?: string;
-  tags?: string[];
-}
-
-export interface KeyAuthResponse {
-  keyAuthPK: string;
-  apiKey: string;
-}
-
-export interface KongPlugin {
-  name: string;
-  config: any;
-}
-
-export interface KongObjectID {
-  id: string;
-}
-
-export interface DiffResult {
-  D: string[];
-  C: string[];
-}
+import {
+  CreateOrGetConsumerResult,
+  DiffResult,
+  KeyAuthResponse,
+  KongConsumer,
+} from './types';
 
 const logger = Logger('kong.consumer');
 
 export class KongConsumerService {
   private kongUrl: string;
-  private gwaUrl: string;
 
-  constructor(kongUrl: string, gwaUrl: string) {
+  constructor(kongUrl: string) {
     this.kongUrl = kongUrl;
-    this.gwaUrl = gwaUrl;
   }
 
   public async getConsumerByUsername(username: string) {
@@ -163,73 +137,6 @@ export class KongConsumerService {
         res.statusText
       );
     }
-  }
-
-  public async addPluginToConsumer(
-    consumerPK: string,
-    plugin: KongPlugin,
-    namespace: string
-  ): Promise<KongObjectID> {
-    const body = { ...plugin, tags: ['ns.' + namespace] };
-    logger.debug('[addPluginToConsumer] CALLING with ' + consumerPK);
-
-    const response = await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins`,
-      {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then(checkStatus)
-      .then((res) => res.json());
-
-    logger.debug('[addPluginToConsumer] RESULT %j', response);
-    return {
-      id: response['id'],
-    } as KongObjectID;
-  }
-
-  public async updateConsumerPlugin(
-    consumerPK: string,
-    pluginPK: string,
-    plugin: KongPlugin,
-    namespace: string
-  ): Promise<void> {
-    logger.debug('[updateConsumerPlugin] C=%s P=%s', consumerPK, pluginPK);
-    const body = { ...plugin, tags: ['ns.' + namespace] };
-    const response = await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
-      {
-        method: 'put',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then(checkStatus)
-      .then((res) => res.json());
-
-    logger.debug('[updateConsumerPlugin] RESULT %j', response);
-  }
-
-  public async deleteConsumerPlugin(
-    consumerPK: string,
-    pluginPK: string,
-    namespace: string
-  ): Promise<void> {
-    await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
-      {
-        method: 'delete',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then(checkStatus);
   }
 
   public async genKeyForConsumerKeyAuth(consumerPK: string, keyAuthPK: string) {

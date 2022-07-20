@@ -14,6 +14,7 @@ import {
   TabList,
   Tab,
   useToast,
+  Flex,
 } from '@chakra-ui/react';
 import { AccessRequest, Query } from '@/shared/types/query.types';
 
@@ -29,6 +30,7 @@ interface AccessRequestDialogProps {
   accessRequestsQueryKey: QueryKey;
   allConsumersQueryKey: QueryKey;
   data: AccessRequest;
+  labels: string[];
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -38,6 +40,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   accessRequestsQueryKey,
   allConsumersQueryKey,
   data,
+  labels,
   isOpen,
   onClose,
   title,
@@ -104,9 +107,21 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     setTabIndex(0);
     try {
       const formEl = document.forms['authorizationForm'];
+      const labelsForm = document.forms['labelsForm'];
       const formData = new FormData(formEl);
+      const labelsFormData = new FormData(labelsForm);
       const defaultClientScopes = formData.getAll('defaultClientScopes');
       const roles = formData.getAll('roles');
+      // labels
+      const labelGroups = labelsFormData.getAll('labelGroup') as string[];
+      const labelValues = labelsFormData.getAll('values') as string[];
+      const labels = labelGroups.map((labelGroup, index) => {
+        return {
+          labelGroup,
+          values: JSON.parse(labelValues[index]),
+        };
+      });
+
       await approveMutate.mutateAsync({
         id: data.id,
         controls: JSON.stringify({
@@ -114,6 +129,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           defaultClientScopes,
           roles,
         }),
+        labels,
       });
       client.invalidateQueries(['allConsumers']);
       toast({
@@ -171,7 +187,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             display={tabIndex === 0 ? 'block' : 'none'}
             data-testid="ar-request-details-tab"
           >
-            <RequestDetails data={data} />
+            <RequestDetails data={data} labels={labels} />
           </Box>
           <Box
             hidden={tabIndex !== 1}
@@ -179,6 +195,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
             data-testid="ar-controls-tab"
           >
             <RequestControls
+              prodEnvId={data.productEnvironment.id}
               rateLimits={rateLimits}
               restrictions={restrictions}
             />

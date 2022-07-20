@@ -27,46 +27,65 @@ type FilterReturn<T> = {
 };
 
 const useFilters = <FilterState>(
-  initialState: FilterState
+  initialState: FilterState,
+  cacheId: string
 ): FilterReturn<FilterState> => {
   const [state, dispatch] = useReducer(
     (state: FilterState, action: FilterAction): FilterState => {
+      function update(fn) {
+        const result = fn();
+        sessionStorage.setItem(cacheId, JSON.stringify(result));
+        return result;
+      }
+
       switch (action.type) {
         case 'addFilter':
-          if (
-            state[action.filterType].find((f) => {
-              if (typeof action.payload !== 'string') {
-                return f.value === action.payload?.value;
-              }
-              return false;
-            })
-          ) {
-            return state;
-          }
-          return {
-            ...state,
-            [action.filterType]: [
-              ...state[action.filterType],
-              { ...action.payload, id: uid(action.payload) },
-            ],
-          };
+          return update(() => {
+            if (
+              state[action.filterType].find((f) => {
+                if (typeof action.payload !== 'string') {
+                  return f.value === action.payload?.value;
+                }
+                return false;
+              })
+            ) {
+              return state;
+            }
+            return {
+              ...state,
+              [action.filterType]: [
+                ...state[action.filterType],
+                { ...action.payload, id: uid(action.payload) },
+              ],
+            };
+          });
 
         case 'clearFilters':
-          return initialState;
+          return update(() => initialState);
 
         case 'removeFilter':
-          return {
-            ...state,
-            [action.filterType]: state[action.filterType].filter(
-              (f) => f.id !== action.payload
-            ),
-          };
+          return update(() => {
+            return {
+              ...state,
+              [action.filterType]: state[action.filterType].filter(
+                (f) => f.id !== action.payload
+              ),
+            };
+          });
 
         default:
           throw new Error();
       }
     },
-    initialState
+    initialState,
+    (s) => {
+      try {
+        const cached = sessionStorage.getItem(cacheId);
+        return JSON.parse(cached) ?? s;
+      } catch {
+        return s;
+      }
+    }
   );
 
   return {

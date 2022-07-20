@@ -5,10 +5,12 @@ import { gql } from 'graphql-request';
 import { QueryKey } from 'react-query';
 
 interface AccessRequestsListProps {
+  labels: string[];
   queryKey: QueryKey;
 }
 
 const AccessRequestsList: React.FC<AccessRequestsListProps> = ({
+  labels,
   queryKey,
 }) => {
   const accessRequestsQueryKey = 'allAccessRequestsByNamespace';
@@ -27,6 +29,7 @@ const AccessRequestsList: React.FC<AccessRequestsListProps> = ({
           data={a}
           accessRequestsQueryKey={accessRequestsQueryKey}
           allConsumersQueryKey={queryKey}
+          labels={labels}
         />
       ))}
     </>

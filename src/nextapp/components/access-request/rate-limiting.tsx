@@ -25,6 +25,7 @@ import { HiChartBar } from 'react-icons/hi';
 import startCase from 'lodash/startCase';
 import { uid } from 'react-uid';
 import {
+  ConsumerPlugin,
   GatewayPlugin,
   GatewayPluginCreateInput,
   GatewayRoute,
@@ -39,10 +40,8 @@ interface RateLimitingProps {
   routeOptions: GatewayRoute[];
   serviceOptions: GatewayService[];
   state: [
-    (GatewayPlugin | GatewayPluginCreateInput)[],
-    React.Dispatch<
-      React.SetStateAction<(GatewayPlugin | GatewayPluginCreateInput)[]>
-    >
+    ConsumerPlugin[],
+    React.Dispatch<React.SetStateAction<ConsumerPlugin[]>>
   ];
 }
 
@@ -61,22 +60,20 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
       const { route, service, scope, ...entries } = Object.fromEntries(
         formData
       );
-      const payload: GatewayPluginCreateInput = {
+      ['second', 'minute', 'hour', 'day'].forEach((k) => {
+        entries[k] = entries[k] === '' ? null : (Number(entries[k]) as any);
+      });
+      const payload: ConsumerPlugin = {
         name: 'rate-limiting',
-        config: JSON.stringify(entries),
-        tags: '["consumer"]',
+        config: entries,
       };
       if (scope === 'route') {
         payload.route = {
-          connect: {
-            id: route as string,
-          },
+          id: route as string,
         };
       } else {
         payload.service = {
-          connect: {
-            id: service as string,
-          },
+          id: service as string,
         };
       }
       setRateLimits([...rateLimits, payload]);
@@ -91,13 +88,17 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
   const handleUpdate = (index: number) => (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const config = Object.fromEntries(form);
+    const config: any = Object.fromEntries(form);
+    ['second', 'minute', 'hour', 'day'].forEach((k) => {
+      config[k] = Number(config[k]);
+    });
+
     setRateLimits(
       rateLimits.map((r, i) => {
         if (i === index) {
           return {
             ...r,
-            config: JSON.stringify(config),
+            config,
           };
         }
         return r;
@@ -165,7 +166,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
             {rateLimits
               .map((r) => ({
                 ...r,
-                config: JSON.parse(r.config) as RateLimitingConfig,
+                config: r.config as RateLimitingConfig,
               }))
               .map((r: RateLimitingItem, index) => (
                 <AccordionItem key={uid(r, index)} border="none" p2={3}>

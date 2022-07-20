@@ -54,7 +54,7 @@ const ScopeControl: React.FC<ScopeControlProps> = ({
           data-testid={`${testId}-${target}-dropdown`}
         >
           {options.map((s) => (
-            <option key={uid(s.id)} value={s.extForeignKey}>
+            <option key={uid(s.id)} value={s.id}>
               {s.name}
             </option>
           ))}

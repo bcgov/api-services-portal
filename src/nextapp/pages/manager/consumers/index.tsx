@@ -24,7 +24,7 @@ import Filters, { useFilters } from '@/components/filters';
 import { ConsumerSummary, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
-import InlineManageLabels from '@/components/inline-manage-labels';
+// import InlineManageLabels from '@/components/inline-manage-labels';
 import LinkConsumer from '@/components/link-consumer';
 import PageHeader from '@/components/page-header';
 import NextLink from 'next/link';
@@ -55,7 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        {},
+        { filter: {} },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -82,15 +82,19 @@ const ConsumersPage: React.FC<
     addFilter,
     clearFilters,
     removeFilter,
-  } = useFilters<FilterState>({
-    products: [],
-    environments: [],
-    scopes: [],
-    roles: [],
-    mostActive: false,
-    leastActive: false,
-    labels: [],
-  });
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      scopes: [],
+      roles: [],
+      mostActive: false,
+      leastActive: false,
+      labels: [],
+    },
+    'consumers'
+  );
+
   const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
   const filter = React.useMemo(() => {
     const result = {};
@@ -103,7 +107,7 @@ const ConsumersPage: React.FC<
     });
     return result;
   }, [state]);
-  const { data, isFetching } = useApi(
+  const { data, isFetching, isSuccess } = useApi(
     [queryKey, filterKey],
     {
       query,
@@ -184,9 +188,11 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs([])}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <AccessRequestsList queryKey={queryKey} />
+        <AccessRequestsList
+          labels={data?.allConsumerGroupLabels}
+          queryKey={queryKey}
+        />
         <Filters
-          cacheId="consumers"
           data={state as FilterState}
           filterTypeOptions={filterTypeOptions}
           onAddFilter={addFilter}
@@ -229,7 +235,7 @@ const ConsumersPage: React.FC<
             columns={[
               { name: 'Name/ID', key: 'name' },
               {
-                name: <InlineManageLabels />,
+                name: 'Labels',
                 key: 'tags',
                 sortable: false,
               },

@@ -82,7 +82,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
 
   return (
     <Grid templateColumns={value === 'labels' ? '1fr 1fr' : '1fr'} gap={4}>
-      <Select isDisabled={isLoading || options.length === 0} name="value">
+      <Select
+        isRequired
+        isDisabled={isLoading || options.length === 0}
+        name="value"
+        data-testid="consumer-filters-select"
+      >
         {isSuccess &&
           options.map((f) => (
             <option key={uid(f)} value={f.id}>
@@ -111,5 +116,6 @@ const productsQuery = gql`
         name
       }
     }
+    allConsumerScopesAndRoles
   }
 `;

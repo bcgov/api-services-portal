@@ -307,10 +307,10 @@ export async function lookupLabeledServiceAccessesForNamespace(
     '[lookupLabeledServiceAccessesForNamespace] result row count %d',
     result.data.allServiceAccesses.length
   );
-  logger.debug(
-    '[lookupLabeledServiceAccessesForNamespace] result %j',
-    result.data.allServiceAccesses
-  );
+  // logger.debug(
+  //   '[lookupLabeledServiceAccessesForNamespace] result %j',
+  //   result.data.allServiceAccesses
+  // );
   return result.data.allServiceAccesses;
 }
 

@@ -74,7 +74,7 @@ export class KeycloakUserService {
     delRoles: RoleMappingPayload[]
   ) {
     logger.debug(
-      '[syncUserClientRoles] (%s) %s : %j %j',
+      '[syncUserClientRoles] (%s) %s : ADD:%j DEL:%j',
       id,
       clientUniqueId,
       addRoles,
