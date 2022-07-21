@@ -331,6 +331,6 @@ const query = gql`
 
 const mutation = gql`
   mutation RevokeAccessFromConsumer($consumerId: ID!, $prodEnvId: ID!) {
-    revokeAccessFromConsumer(consumerId: $consumerId, prodEnvId: $prodId)
+    revokeAccessFromConsumer(consumerId: $consumerId, prodEnvId: $prodEnvId)
   }
 `;
