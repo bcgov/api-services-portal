@@ -231,11 +231,14 @@ export const getConsumerHandler = (req, res, ctx) => {
   return res(
     ctx.data({
       getNamespaceConsumerAccess: {
-        application: {
-          id: 'a1',
-          name: harleyAccessRequest.application.name,
-          owner,
-        },
+        application:
+          serviceAccessId === 'd1'
+            ? null
+            : {
+                id: 'a1',
+                name: harleyAccessRequest.application.name,
+                owner,
+              },
         ...consumer,
         consumer,
         owner,
@@ -544,6 +547,13 @@ export const accessRequestAuthHandler = (req, res, ctx) => {
 };
 
 export const updateConsumerAccessHandler = (req, res, ctx) => {
+  return res(ctx.data(true));
+};
+
+export const revokeAccessFromConsumer = (req, res, ctx) => {
+  if (req.variables.consumerId === 'd1') {
+    return res(ctx.data(false));
+  }
   return res(ctx.data(true));
 };
 

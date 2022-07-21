@@ -1,5 +1,5 @@
 import * as React from 'react';
-import api, { useApi } from '@/shared/services/api';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Avatar,
   Box,
@@ -20,13 +20,15 @@ import {
   WrapItem,
   Button,
   useDisclosure,
+  MenuItem,
+  useToast,
 } from '@chakra-ui/react';
 import breadcrumbs from '@/components/ns-breadcrumb';
 import Card from '@/components/card';
 import groupBy from 'lodash/groupBy';
 import PageHeader from '@/components/page-header';
 import { dehydrate } from 'react-query/hydration';
-import { QueryClient } from 'react-query';
+import { QueryClient, useQueryClient } from 'react-query';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
 import { Query } from '@/shared/types/query.types';
@@ -40,6 +42,8 @@ import { uid } from 'react-uid';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
+import ActionsMenu from '@/components/actions-menu';
+import { reverse } from 'dns';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -70,6 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ConsumerPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ id, queryKey }) => {
+  const client = useQueryClient();
   const { data } = useApi(
     queryKey,
     {
@@ -79,9 +84,30 @@ const ConsumerPage: React.FC<
     { suspense: false }
   );
   const { isOpen, onClose, onToggle } = useDisclosure();
+  const toast = useToast();
   const consumer = data?.getNamespaceConsumerAccess;
   const application = data?.getNamespaceConsumerAccess?.application;
   const products = Object.keys(groupBy(consumer?.prodEnvAccess, 'productName'));
+
+  const revokeMutation = useApiMutation(mutation);
+  const handleRevoke = (consumerId: string, prodEnvId: string) => async () => {
+    try {
+      await revokeMutation.mutateAsync({ consumerId, prodEnvId });
+      client.invalidateQueries(queryKey);
+      toast({
+        title: 'Product Revoked',
+        status: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: 'Product Revoke Failed',
+        status: 'error',
+        description: Array.isArray(err)
+          ? err.map((e) => e.message).join(', ')
+          : undefined,
+      });
+    }
+  };
 
   function Detail({
     children,
@@ -132,24 +158,28 @@ const ConsumerPage: React.FC<
           <Box as="header" mb={4}>
             <Heading size="md">Consumer Details</Heading>
           </Box>
-          <Flex bgColor="white">
-            <Detail title="Application">
-              <Flex align="center">
-                <Avatar
-                  bgColor="bc-gray"
-                  icon={<Icon as={IoLayers} color="bc-blue" />}
-                  bg="bc-gray"
-                />
-                <Text ml={2}>{application?.name}</Text>
+          {application && (
+            <>
+              <Flex bgColor="white">
+                <Detail title="Application">
+                  <Flex align="center">
+                    <Avatar
+                      bgColor="bc-gray"
+                      icon={<Icon as={IoLayers} color="bc-blue" />}
+                      bg="bc-gray"
+                    />
+                    <Text ml={2}>{application?.name}</Text>
+                  </Flex>
+                </Detail>
+                <Detail title="Application Owner">
+                  {consumer.owner && (
+                    <ProfileCard data={consumer.owner} overflow="hidden" />
+                  )}
+                </Detail>
               </Flex>
-            </Detail>
-            <Detail title="Application Owner">
-              {consumer.owner && (
-                <ProfileCard data={consumer.owner} overflow="hidden" />
-              )}
-            </Detail>
-          </Flex>
-          <Divider />
+              <Divider />
+            </>
+          )}
           <Flex bgColor="white">
             <Detail title="Labels">
               <Wrap spacing={2.5}>
@@ -220,6 +250,18 @@ const ConsumerPage: React.FC<
                             prodEnvId={d.environment.id}
                             serviceAccessId={id}
                           />
+                          <ActionsMenu
+                            data-testid={`consumer-prod-${d.productName}-menu`}
+                          >
+                            <MenuItem
+                              onClick={handleRevoke(
+                                consumer?.consumer.id,
+                                d.environment.id
+                              )}
+                            >
+                              Revoke Access
+                            </MenuItem>
+                          </ActionsMenu>
                         </Td>
                       </Tr>
                     ))}
@@ -284,5 +326,11 @@ const query = gql`
         }
       }
     }
+  }
+`;
+
+const mutation = gql`
+  mutation RevokeAccessFromConsumer($consumerId: ID!, $prodEnvId: ID!) {
+    revokeAccessFromConsumer(consumerId: $consumerId, prodEnvId: $prodId)
   }
 `;

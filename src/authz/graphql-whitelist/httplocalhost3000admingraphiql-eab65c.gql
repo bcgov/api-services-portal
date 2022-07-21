@@ -1,0 +1,4 @@
+
+  mutation RevokeAccessFromConsumer($consumerId: ID!, $prodEnvId: ID!) {
+    revokeAccessFromConsumer(consumerId: $consumerId, prodEnvId: $prodId)
+  }
