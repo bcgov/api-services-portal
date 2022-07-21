@@ -16,6 +16,7 @@ import {
   grantAccessToConsumerHandler,
   getConsumersFilterHandler,
   rejectRequestHandler,
+  revokeAccessFromConsumer,
   saveConsumerLabels,
   updateConsumerAccessHandler,
   store as consumersStore,
@@ -92,6 +93,7 @@ export const handlers = [
   keystone.mutation('UpdateConsumerAccess', updateConsumerAccessHandler),
   keystone.mutation('SaveConsumerLabels', saveConsumerLabels),
   keystone.mutation('GrantAccessToConsumer', grantAccessToConsumerHandler),
+  keystone.mutation('RevokeAccessFromConsumer', revokeAccessFromConsumer),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     const { serviceAccessId } = req.variables;
     const institution = serviceAccessId === 'd1' ? null : harley.business;

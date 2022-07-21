@@ -65,6 +65,7 @@ export type AccessRequest = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
@@ -144,6 +145,24 @@ export type AccessRequestWhereInput = {
   credential_not_ends_with_i?: Maybe<Scalars['String']>;
   credential_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   credential_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  labels?: Maybe<Scalars['String']>;
+  labels_not?: Maybe<Scalars['String']>;
+  labels_contains?: Maybe<Scalars['String']>;
+  labels_not_contains?: Maybe<Scalars['String']>;
+  labels_starts_with?: Maybe<Scalars['String']>;
+  labels_not_starts_with?: Maybe<Scalars['String']>;
+  labels_ends_with?: Maybe<Scalars['String']>;
+  labels_not_ends_with?: Maybe<Scalars['String']>;
+  labels_i?: Maybe<Scalars['String']>;
+  labels_not_i?: Maybe<Scalars['String']>;
+  labels_contains_i?: Maybe<Scalars['String']>;
+  labels_not_contains_i?: Maybe<Scalars['String']>;
+  labels_starts_with_i?: Maybe<Scalars['String']>;
+  labels_not_starts_with_i?: Maybe<Scalars['String']>;
+  labels_ends_with_i?: Maybe<Scalars['String']>;
+  labels_not_ends_with_i?: Maybe<Scalars['String']>;
+  labels_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  labels_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   controls?: Maybe<Scalars['String']>;
   controls_not?: Maybe<Scalars['String']>;
   controls_contains?: Maybe<Scalars['String']>;
@@ -229,6 +248,8 @@ export enum SortAccessRequestsBy {
   IsCompleteDesc = 'isComplete_DESC',
   CredentialAsc = 'credential_ASC',
   CredentialDesc = 'credential_DESC',
+  LabelsAsc = 'labels_ASC',
+  LabelsDesc = 'labels_DESC',
   ControlsAsc = 'controls_ASC',
   ControlsDesc = 'controls_DESC',
   AdditionalDetailsAsc = 'additionalDetails_ASC',
@@ -258,6 +279,7 @@ export type AccessRequestUpdateInput = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
@@ -278,6 +300,7 @@ export type AccessRequestCreateInput = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;

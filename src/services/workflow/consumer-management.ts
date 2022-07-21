@@ -744,7 +744,7 @@ export async function saveConsumerLabels(
 
   const currentLabels = await getConsumerLabels(context, ns, [consumerId]);
 
-  logger.debug('[saveConsumerLabels] Current Labels %j', currentLabels);
+  logger.debug('[saveConsumerLabels] New=%j Cur=%j', labels, currentLabels);
 
   // Do all the Additions
   const addPromises = labels

@@ -129,7 +129,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           defaultClientScopes,
           roles,
         }),
-        labels,
+        labels: JSON.stringify(labels),
       });
       client.invalidateQueries(['allConsumers']);
       toast({
@@ -236,7 +236,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
 export default AccessRequestDialog;
 
 const approveMutation = gql`
-  mutation FulfillRequest($id: ID!, $controls: String!) {
+  mutation FulfillRequest($id: ID!, $controls: String!, $labels: String!) {
     updateAccessRequest(
       id: $id
       data: {
@@ -244,6 +244,7 @@ const approveMutation = gql`
         isIssued: true
         isComplete: true
         controls: $controls
+        labels: $labels
       }
     ) {
       id
