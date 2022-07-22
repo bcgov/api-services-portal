@@ -65,11 +65,9 @@ const links: NavLink[] = [
       '/manager/service-accounts',
       '/manager/poc/activity',
     ],
+    // TODO: find out if these need to change?
+    // Also, our mock user has api-owner role... why can't they access?
     access: [
-      'api-owner',
-      'provider-user',
-      'credential-admin',
-      'access-manager',
     ],
     sites: ['devportal'],
   },
