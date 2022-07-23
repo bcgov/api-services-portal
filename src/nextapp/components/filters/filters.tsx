@@ -135,7 +135,7 @@ const Filters: React.FC<FiltersProps> = ({
           </Select>
         )}
         <GridItem>
-          <Button type="submit">Apply</Button>
+          <Button type="submit" data-testid="btn-filter-apply">Apply</Button>
         </GridItem>
       </Grid>
       <Box>

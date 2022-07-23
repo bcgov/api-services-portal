@@ -21,6 +21,7 @@ class Products {
   deleteProductBtn: string = '[data-testid="prd-edit-delete-btn"]'
   deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
   deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
+  aclSwitch: string = '[data-testid="acls-switch"]'
 
   getTestIdEnvName(env: string) : string {
     switch (env) {
@@ -91,8 +92,11 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+    cy.wait(3000)
     // cy.get(`[data-testid=${config.serviceName}`).click()
+    // cy.wait(3000)
     cy.get(this.envCfgApplyChangesBtn).click()
+    cy.wait(3000)
   }
 
   generateKongPluginConfig(filename: string) {
@@ -143,6 +147,22 @@ class Products {
   {
     cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
   }
+
+  turnOnACLSwitch(flag: Boolean) {
+    cy.get(this.aclSwitch).find('input').then(($btn) => {
+      if ($btn.is(':checked') != flag) {
+        cy.wrap($btn).invoke('show')
+        cy.wrap($btn).click({ force: true })
+        cy.wait(3000)
+      }
+    })
+  }
+
+  activateService(config: any)
+  {
+    cy.get(`[data-testid=${config.serviceName}`).click()
+  }
+
 }
 
 export default Products

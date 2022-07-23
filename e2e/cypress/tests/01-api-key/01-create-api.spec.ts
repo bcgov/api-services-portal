@@ -22,7 +22,7 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
@@ -76,13 +76,14 @@ describe('Create API Spec', () => {
       })
     })
   })
-  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
 
+  it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
       pd.updateDatasetNameToCatelogue(product.name, product.environment.name)
     })
   })
+
   it('publish product to directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
@@ -91,6 +92,7 @@ describe('Create API Spec', () => {
     })
     pd.generateKongPluginConfig('service.yml')
   })
+
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
       cy.publishApi('service-plugin.yml', namespace).then(() => {
@@ -98,6 +100,12 @@ describe('Create API Spec', () => {
           cy.log(JSON.stringify(res.body))
         })
       })
+    })
+  })
+
+  it('activate the service', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.activateService(product.environment.config)
     })
   })
 
