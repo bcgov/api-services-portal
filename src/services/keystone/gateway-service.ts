@@ -1,5 +1,5 @@
 import { Logger } from '../../logger';
-import { GatewayService } from './types';
+import { GatewayRoute, GatewayService } from './types';
 
 const logger = Logger('keystone.gw-service');
 
@@ -34,6 +34,44 @@ export async function lookupServices(
     svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)))
   );
   return result.data.allGatewayServices;
+}
+
+export async function lookupKongServiceIds(
+  context: any,
+  serviceIds: string[]
+): Promise<GatewayService[]> {
+  if (serviceIds.length == 0) {
+    return [];
+  }
+  const result = await context.executeGraphQL({
+    query: `query MapKongServices($serviceIds: [ID]) {
+                    allGatewayServices(where: {id_in: $serviceIds}) {
+                      id
+                      extForeignKey
+                    }
+                }`,
+    variables: { serviceIds },
+  });
+  return result.data.allGatewayServices;
+}
+
+export async function lookupKongRouteIds(
+  context: any,
+  routeIds: string[]
+): Promise<GatewayRoute[]> {
+  if (routeIds.length == 0) {
+    return [];
+  }
+  const result = await context.executeGraphQL({
+    query: `query MapKongRoutes($routeIds: [ID]) {
+                    allGatewayRoutes(where: {id_in: $routeIds}) {
+                      id
+                      extForeignKey
+                    }
+                }`,
+    variables: { routeIds },
+  });
+  return result.data.allGatewayRoutes;
 }
 
 export async function lookupServicesByNamespace(

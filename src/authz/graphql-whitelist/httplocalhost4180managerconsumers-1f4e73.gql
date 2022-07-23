@@ -1,0 +1,12 @@
+
+  mutation UpdateConsumerAccess(
+    $consumerId: ID!
+    $prodEnvId: ID!
+    $controls: JSON
+  ) {
+    updateConsumerAccess(
+      consumerId: $consumerId
+      prodEnvId: $prodEnvId
+      controls: $controls
+    )
+  }

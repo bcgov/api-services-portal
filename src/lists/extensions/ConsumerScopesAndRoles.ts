@@ -1,23 +1,14 @@
-import {
-  lookupEnvironmentAndIssuerUsingWhereClause,
-  lookupKongConsumerId,
-} from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
-import { FeederService } from '../../services/feeder';
-import { KongConsumerService } from '../../services/kong';
 import {
   KeycloakUserService,
   KeycloakClientService,
   KeycloakClientRegistrationService,
 } from '../../services/keycloak';
-import { EnvironmentWhereInput } from '@/services/keystone/types';
-import { mergeWhereClause } from '@keystonejs/utils';
 import {
-  IssuerEnvironmentConfig,
-  getIssuerEnvironmentConfig,
-} from '../../services/workflow/types';
-import { LinkConsumerToNamespace } from '../../services/workflow';
-import { getEnvironmentContext } from './Common';
+  getConsumerAuthz,
+  LinkConsumerToNamespace,
+  getEnvironmentContext,
+} from '../../services/workflow';
 import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 
@@ -71,7 +62,8 @@ module.exports = {
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
-                access
+                access,
+                true
               );
               if (envCtx == null) {
                 logger.warn(
@@ -86,76 +78,8 @@ module.exports = {
                   clientRoles: [],
                 } as any;
               }
-              try {
-                const kcClientService = new KeycloakClientService(
-                  envCtx.issuerEnvConfig.issuerUrl
-                );
-                const kcUserService = new KeycloakUserService(
-                  envCtx.issuerEnvConfig.issuerUrl
-                );
-                await kcClientService.login(
-                  envCtx.issuerEnvConfig.clientId,
-                  envCtx.issuerEnvConfig.clientSecret
-                );
-                await kcUserService.login(
-                  envCtx.issuerEnvConfig.clientId,
-                  envCtx.issuerEnvConfig.clientSecret
-                );
 
-                const client = await kcClientService.findByClientId(
-                  envCtx.issuerEnvConfig.clientId
-                );
-
-                const isClient = await kcClientService.isClient(
-                  args.consumerUsername
-                );
-
-                if (isClient) {
-                  const consumerClient = await kcClientService.findByClientId(
-                    args.consumerUsername
-                  );
-                  const userId = await kcClientService.lookupServiceAccountUserId(
-                    consumerClient.id
-                  );
-                  const userRoles = await kcUserService.listUserClientRoles(
-                    userId,
-                    client.id
-                  );
-                  const defaultScopes = await kcClientService.listDefaultScopes(
-                    consumerClient.id
-                  );
-
-                  return {
-                    id: userId,
-                    consumerType: 'client',
-                    defaultScopes: defaultScopes.map((v: any) => v.name),
-                    optionalScopes: [],
-                    clientRoles: userRoles.map((r: any) => r.name),
-                  } as any;
-                } else {
-                  const userId = await kcUserService.lookupUserByUsername(
-                    args.consumerUsername
-                  );
-                  const userRoles = await kcUserService.listUserClientRoles(
-                    userId,
-                    client.id
-                  );
-                  return {
-                    id: userId,
-                    consumerType: 'user',
-                    defaultScopes: [],
-                    optionalScopes: [],
-                    clientRoles: userRoles.map((r: any) => r.name),
-                  } as any;
-                }
-              } catch (err: any) {
-                logger.error(
-                  '[consumerScopesAndRoles] (%j) Error %s',
-                  args,
-                  err
-                );
-                throw err;
-              }
+              return await getConsumerAuthz(envCtx, args.consumerUsername);
             },
             access: EnforcementPoint,
           },
@@ -197,7 +121,8 @@ module.exports = {
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
-                access
+                access,
+                true
               );
               try {
                 const kcClientService = new KeycloakClientService(
@@ -290,7 +215,8 @@ module.exports = {
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
-                access
+                access,
+                true
               );
               try {
                 const kcClientService = new KeycloakClientService(
@@ -314,9 +240,9 @@ module.exports = {
                   envCtx.issuerEnvConfig.clientId
                 );
 
-                const availableScopes = await kcClientService.listDefaultClientScopes();
+                const allScopes = await kcClientService.findRealmClientScopes();
 
-                const selectedScope = availableScopes
+                const selectedScope = allScopes
                   .filter((r: any) => r.name === args.scopeName)
                   .map((r: any) => r.id);
 

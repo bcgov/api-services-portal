@@ -1,0 +1,12 @@
+
+  mutation GrantAccessToConsumer(
+    $prodEnvId: ID!
+    $consumerId: ID!
+    $controls: JSON
+  ) {
+    grantAccessToConsumer(
+      prodEnvId: $prodEnvId
+      consumerId: $consumerId
+      controls: $controls
+    )
+  }

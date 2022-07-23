@@ -4,6 +4,7 @@ import {
   Environment,
   ServiceAccess,
   ServiceAccessCreateInput,
+  ServiceAccessWhereInput,
 } from './types';
 import { strict as assert } from 'assert';
 const logger = Logger('keystone.svc-access');
@@ -20,6 +21,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                         productEnvironment {
                             id
                             name
+                            additionalDetailsToRequest
                             flow
                             credentialIssuer {
                                 id
@@ -27,19 +29,23 @@ export async function lookupCredentialReferenceByServiceAccess(
                             }
                         }
                         application {
+                          name
                           owner {
+                            name
                             username
+                            email
                           }
                         }
                         consumer {
                             id
+                            username
                             customId
                             extForeignKey
                         }
                         credentialReference
                     }
                 }`,
-    variables: { id: id },
+    variables: { id },
   });
   logger.debug(
     'Query [lookupCredentialReferenceByServiceAccess] result %j',
@@ -168,6 +174,7 @@ export async function lookupServiceAccessesByEnvironment(
                         active
                         namespace
                         consumer {
+                          id
                           username
                           customId
                         }
@@ -246,6 +253,98 @@ export async function lookupServiceAccessesForNamespace(
     '[lookupServiceAccessesForNamespace] result row count %d',
     result.data.allServiceAccesses.length
   );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupLabeledServiceAccessesForNamespace(
+  context: any,
+  ns: string,
+  consumerIds: string[]
+): Promise<ServiceAccess[]> {
+  logger.debug('[lookupLabeledServiceAccessesForNamespace] lookup ns=%s', ns);
+
+  const where: ServiceAccessWhereInput = {};
+
+  if (consumerIds) {
+    where['AND'] = [
+      { consumer: { id_in: consumerIds } },
+      {
+        OR: [
+          { namespace: ns },
+          { productEnvironment: { product: { namespace: ns } } },
+        ],
+      },
+    ];
+  } else {
+    where['OR'] = [
+      { namespace: ns },
+      { productEnvironment: { product: { namespace: ns } } },
+    ];
+  }
+
+  const result = await context.executeGraphQL({
+    query: `query GetLabeledServiceAccessByNamespace($where: ServiceAccessWhereInput!) {
+                    allServiceAccesses(where: $where) {
+                        id
+                        consumerType
+                        consumer {
+                          id
+                          username
+                          customId
+                        }
+                        updatedAt
+                    }
+                }`,
+    variables: { where },
+  });
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  logger.debug(
+    '[lookupLabeledServiceAccessesForNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  // logger.debug(
+  //   '[lookupLabeledServiceAccessesForNamespace] result %j',
+  //   result.data.allServiceAccesses
+  // );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessesByConsumer(
+  context: any,
+  ns: string,
+  consumerId: string
+): Promise<ServiceAccess[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetSpecificServiceAccessByConsumer($ns: String!, $consumerId: ID!) {
+                    allServiceAccesses(where: { consumer: { id: $consumerId }, productEnvironment: { product: { namespace: $ns } } } ) {
+                        id
+                        namespace
+                        consumerType
+                        productEnvironment {
+                            id
+                            name
+                            appId
+                            additionalDetailsToRequest
+                            flow
+                            product {
+                              name
+                            }
+                            credentialIssuer {
+                                id
+                                clientAuthenticator
+                            }
+                        }
+                    }
+                }`,
+    variables: { ns, consumerId },
+  });
+  logger.debug('Query [lookupServiceAccessesByConsumer] result %j', result);
+
   return result.data.allServiceAccesses;
 }
 

@@ -131,6 +131,7 @@ const server = mockServer(schemaWithMocks, {
         legalName: 'Smith Associates',
         address: {
           addressLine1: '2233 Broadway South',
+          addressLine2: null,
           city: 'Mincetown',
           postal: 'V1B4A3',
           province: 'BC',
@@ -485,6 +486,8 @@ const server = mockServer(schemaWithMocks, {
         },
       ],
     }),
+    additionalDetails: casual.sentences(4),
+    communication: casual.sentence,
   }),
   UMAResourceSet: () => {
     const ns = sample(data.namespaces);
@@ -497,6 +500,17 @@ const server = mockServer(schemaWithMocks, {
       type: casual.word,
     };
   },
+  ConsumerScopesAndRoles: () => ({
+    id: casual.uuid,
+    consumerType: casual.word,
+    defaultScopes: [
+      'System/Patient',
+      'System/MedicationRequest',
+      'System/CheeseSlicesChalkCheesy',
+    ],
+    optionalScopes: [],
+    clientRoles: ['a.role', 'b.role', 'c.role'],
+  }),
   UMAPermissionTicket: () => {
     const { requester, requesterName } = sample(data.requesters);
     const ns = sample(data.namespaces);

@@ -22,7 +22,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'org-level',
-      parent: '/data-custodian',
+      parent: '/organization-admin',
     };
 
     await kc.createGroupIfMissing(orgGroup);
@@ -37,7 +37,7 @@ describe('Org Group Access Service', function () {
     await kc.backfillGroups();
 
     const orgGroup: OrganizationGroup = {
-      name: 'data-custodian',
+      name: 'organization-admin',
     };
 
     await kc.createGroupIfMissing(orgGroup);
@@ -53,7 +53,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     const result = kc.listGroups(orgGroup);

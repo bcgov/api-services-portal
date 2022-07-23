@@ -8,6 +8,7 @@ ACCESS MANAGER,,allAccessRequestsByNamespace,,,,,,,access-manager,,,allow,filter
 ACCESS MANAGER,,allServiceAccessesByNamespace,,,,,,,access-manager,,,allow,filterByEnvironmentProductNSOrNS
 ACCESS MANAGER,,allProductsByNamespace,,,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,allGatewayServicesByNamespace,,,,,,,access-manager,,,allow,filterByUserNS
+ACCESS MANAGER,,getFilteredNamespaceConsumers,,,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,getGatewayConsumerPlugins,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,deleteGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateGatewayConsumerPlugin,,,,,,,access-manager,,,allow,
@@ -19,12 +20,27 @@ ACCESS MANAGER,,consumerScopesAndRoles,,,,,,,access-manager,,,allow,filterByPack
 ACCESS MANAGER,,linkConsumerToNamespace,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerRoleAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
 ACCESS MANAGER,,updateConsumerScopeAssignment,,,,,,,access-manager,,,allow,filterByPackageNS
-ACCESS MANAGER,,,User,read,,,,,access-manager,,,allow,
-ACCESS MANAGER,,,ServiceAccess,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,getNamespaceConsumerAccess,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,allConsumerGroupLabels,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,allConsumerScopesAndRoles,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,getConsumerProdEnvAccess,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,updateConsumerAccess,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,grantAccessToConsumer,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,revokeAccessFromConsumer,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,saveConsumerLabels,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayRoute,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayService,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Product,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Environment,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Environment,read,,active,,,access-manager,,,allow,
+ACCESS MANAGER,,,CredentialIssuer,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Legal,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,ServiceAccess,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Application,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,User,read,,,,,access-manager,,,allow,
+ACCESS MANAGER,,,Label,,"read,create,update,delete",,,,access-manager,,,allow,
 ACCESS MANAGER,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
@@ -45,9 +61,15 @@ NS MANAGER,,allAccessRequestsByNamespace,,,,,,,api-owner,,,allow,filterByEnviron
 NS MANAGER,,allServiceAccessesByNamespace,,,,,,,api-owner,,,allow,filterByEnvironmentProductNSOrNS
 NS MANAGER,,getGatewayConsumerPlugins,,,,,,,api-owner,,,allow,
 NS MANAGER,,consumerScopesAndRoles,,,,,,,api-owner,,,allow,filterByPackageNS
-NS MANAGER,,,AccessRequest,read,,,,,api-owner,,,allow,
 NS MANAGER,,BusinessProfile,,,,,,,api-owner,,,allow,
-,,,,,,,,,,,,,
+NS MANAGER,,getNamespaceConsumerAccess,,,,,,,api-owner,,,allow,
+NS MANAGER,,allConsumerGroupLabels,,,,,,,api-owner,,,allow,
+NS MANAGER,,allConsumerScopesAndRoles,,,,,,,api-owner,,,allow,
+NS MANAGER,,getConsumerProdEnvAccess,,,,,,,api-owner,,,allow,
+NS MANAGER,,allProductsByNamespace,,,,,,,api-owner,,,allow,
+NS MANAGER,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,
+NS MANAGER,,getFilteredNamespaceConsumers,,,,,,,api-owner,,,allow,
+API Owner Role Rules,,,AccessRequest,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Alert,,"create,update,delete",,,,api-owner,,,allow,
@@ -65,7 +87,7 @@ API Owner Role Rules,,,Environment,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,update,,,,,api-owner,,,allow,
 ,,,,,,,,,,,,,
-,,,,,,,,,,,,,
+API Owner Role Rules,,,Label,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,,"read,update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayGroup,read,,,,,api-owner,,,allow,

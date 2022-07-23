@@ -16,10 +16,7 @@ export async function registerApiKey(
   newClientId: string,
   nickname: string
 ) {
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
 
   const consumer = await kongApi.createKongConsumer(nickname, newClientId);
 

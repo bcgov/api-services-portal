@@ -10,14 +10,17 @@ import {
   TableColumnHeaderProps,
   Box,
   TableProps,
+  Skeleton,
 } from '@chakra-ui/react';
 import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
 import sortBy from 'lodash/sortBy';
 import { uid } from 'react-uid';
+import { times } from 'lodash';
 
 interface Column extends TableColumnHeaderProps {
-  name: string;
+  name: React.ReactNode;
   key?: string;
+  sortable?: boolean;
 }
 
 interface ApsTableProps extends TableProps {
@@ -25,6 +28,7 @@ interface ApsTableProps extends TableProps {
   columns: Column[];
   data: unknown[];
   emptyView?: React.ReactNode;
+  isUpdating?: boolean;
   sortable?: boolean;
 }
 
@@ -33,6 +37,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
   columns,
   data,
   emptyView,
+  isUpdating,
   sortable,
   ...props
 }) => {
@@ -76,17 +81,25 @@ const ApsTable: React.FC<ApsTableProps> = ({
               aria-label={
                 name ? `${name} column header` : 'none sortable table header'
               }
-              onClick={key ? handleSort(key) : undefined}
+              onClick={
+                rest.sortable !== false && key ? handleSort(key) : undefined
+              }
               _hover={{
                 color: 'black',
-                cursor: sortable && name ? 'pointer' : undefined,
+                cursor:
+                  rest.sortable !== false && sortable && name
+                    ? 'pointer'
+                    : undefined,
                 userSelect: 'none',
-                bgColor: sortable && name ? 'gray.50' : undefined,
+                bgColor:
+                  rest.sortable !== false && sortable && name
+                    ? 'gray.50'
+                    : undefined,
               }}
             >
               <Box pos="relative" d="inline">
                 {name}
-                {sortable && name && (
+                {rest.sortable !== false && sortable && name && (
                   <Box h="20px" pos="absolute" right={0} top="2px">
                     <Icon
                       as={TiArrowSortedUp}
@@ -122,18 +135,41 @@ const ApsTable: React.FC<ApsTableProps> = ({
         </Tr>
       </Thead>
       <Tbody>
-        {!data.length && (
+        {isUpdating &&
+          (() => {
+            const elements = [];
+            times(5, (n) => {
+              elements.push(
+                <Tr key={`tr-${n}`}>
+                  {(() => {
+                    const elements = [];
+                    times(columns.length, (col) => {
+                      elements.push(
+                        <Td key={`td-${col}`} textAlign="center">
+                          <Skeleton height="20px" width="100%" />
+                        </Td>
+                      );
+                    });
+                    return elements;
+                  })()}
+                </Tr>
+              );
+            });
+            return elements;
+          })()}
+        {!data.length && !isUpdating && (
           <Tr>
             <Td colSpan={columns.length} textAlign="center">
               {emptyView}
             </Td>
           </Tr>
         )}
-        {sorted.map((d, index) =>
-          React.cloneElement(children(d, index), {
-            key: uid(d),
-          })
-        )}
+        {!isUpdating &&
+          sorted.map((d, index) =>
+            React.cloneElement(children(d, index), {
+              key: uid(d),
+            })
+          )}
       </Tbody>
     </Table>
   );

@@ -4,6 +4,7 @@ export {
   linkServiceAccessToRequest,
   markAccessRequestAsNotIssued,
   updateAccessRequestState,
+  getAccessRequestByNamespaceServiceAccess,
 } from './access-request';
 
 export { recordActivity, recordActivityWithBlob } from './activity';
@@ -26,7 +27,12 @@ export {
   lookupKongConsumerByUsername,
 } from './gateway-consumer';
 
-export { lookupServices, lookupServicesByNamespace } from './gateway-service';
+export {
+  lookupKongServiceIds,
+  lookupKongRouteIds,
+  lookupServices,
+  lookupServicesByNamespace,
+} from './gateway-service';
 
 export {
   lookupEnvironmentAndIssuerUsingWhereClause,
@@ -41,9 +47,11 @@ export {
   addServiceAccess,
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
+  lookupServiceAccessesByConsumer,
   lookupServiceAccessesByNamespace,
   lookupServiceAccessesByEnvironment,
   lookupServiceAccessesForNamespace,
+  lookupLabeledServiceAccessesForNamespace,
   markActiveTheServiceAccess,
 } from './service-access';
 
@@ -64,3 +72,5 @@ export {
 } from './metrics';
 
 export { getOrganizations, getOrganizationUnit } from './organization';
+
+export { getConsumerLabels } from './labels';

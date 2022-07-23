@@ -62,7 +62,7 @@ const AccessRequests: React.FC = () => {
   const color = total === 0 ? 'blue' : 'yellow';
   const handleShowMore = React.useCallback(
     () => setSliceIndex((s) => (s === initialSlice ? total : initialSlice)),
-    [data, setSliceIndex]
+    [setSliceIndex, total]
   );
 
   return (

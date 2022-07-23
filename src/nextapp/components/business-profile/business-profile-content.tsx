@@ -49,46 +49,53 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
       <Heading size="sm" mb={3.5}>
         Business Profile:
       </Heading>
-      <Flex>
-        <Avatar
-          bgColor="bc-gray"
-          icon={
-            <Icon
-              as={FaBuilding}
-              color={data.institution?.isSuspended ? 'bc-component' : 'bc-blue'}
-            />
-          }
-        />
-        <Flex
-          ml={2.5}
-          flex={1}
-          direction="column"
-          justify="space-between"
-          color="bc-component"
-        >
-          {isLoading && (
-            <>
-              <Flex align="center">
-                <Skeleton width="170px" height="20px" />
-              </Flex>
-              <Skeleton width="235px" height="20px" />
-            </>
-          )}
-          {!isLoading && (
-            <>
-              <Text lineHeight="1" data-testid={`${testId}-name`}>
-                {legalName}
-                {data.institution?.isSuspended && (
-                  <Text as="em" ml={2} color="bc-divider">
-                    (Suspended)
-                  </Text>
-                )}
-              </Text>
-              <Text data-testid={`${testId}-address`}>{addressItems}</Text>
-            </>
-          )}
+      {!data.institution && (
+        <Text color="bc-component">A business profile has not been added</Text>
+      )}
+      {data.institution && (
+        <Flex>
+          <Avatar
+            bgColor="bc-gray"
+            icon={
+              <Icon
+                as={FaBuilding}
+                color={
+                  data.institution?.isSuspended ? 'bc-component' : 'bc-blue'
+                }
+              />
+            }
+          />
+          <Flex
+            ml={2.5}
+            flex={1}
+            direction="column"
+            justify="space-between"
+            color="bc-component"
+          >
+            {isLoading && (
+              <>
+                <Flex align="center">
+                  <Skeleton width="170px" height="20px" />
+                </Flex>
+                <Skeleton width="235px" height="20px" />
+              </>
+            )}
+            {!isLoading && (
+              <>
+                <Text lineHeight="1" data-testid={`${testId}-name`}>
+                  {legalName}
+                  {data.institution?.isSuspended && (
+                    <Text as="em" ml={2} color="bc-divider">
+                      (Suspended)
+                    </Text>
+                  )}
+                </Text>
+                <Text data-testid={`${testId}-address`}>{addressItems}</Text>
+              </>
+            )}
+          </Flex>
         </Flex>
-      </Flex>
+      )}
     </Box>
   );
 };

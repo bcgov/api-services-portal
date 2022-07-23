@@ -40,9 +40,11 @@
     "start": "cross-env NODE_ENV=development keystone start --entry=dist/server.js",
     "build": "npm-run-all copy-assets tsoa-build-v1 tsoa-build-v2 ts-build ks-build copy-keystone-admin-assets",
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
-    "lint": "eslint .",
-    "lint:ts": "eslint ./nextapp --ext .ts,.tsx --quiet & tsc -p ./nextapp/tsconfig.json --noEmit",
+    "lint": "eslint ./nextapp --ext .ts,.tsx --quiet",
+    "lint:ts": "tsc -p ./nextapp/tsconfig.json --noEmit",
     "test": "cross-env NODE_ENV=test jest --config ./jest.config.js --coverage --detectOpenHandles",
+    "test:next": "jest --config ./nextapp/jest.config.js --coverage",
+    "test:next-watch": "jest --watch --config ./nextapp/jest.config.js",
     "test:watch": "jest -w --coverage",
     "test:node": "node_modules/.bin/mocha",
     "generate": "graphql-codegen",
@@ -162,6 +164,7 @@
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
+    "babel-jest": "^27.5.1",
     "babel-loader": "^8.2.2",
     "babel-plugin-istanbul": "^6.1.1",
     "casual-browserify": "^1.5.19-2",
@@ -174,6 +177,7 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "identity-obj-proxy": "^3.0.0",
     "istanbul-lib-coverage": "^3.2.0",
     "jest": "^27.5.1",
     "mocha": "^5.2.0",
@@ -185,10 +189,10 @@
     "prettier": "^2.2.1",
     "shelljs": "^0.8.4",
     "source-map-support": "^0.5.21",
-    "ts-node": "^9.1.1",
+    "ts-node": "9.1.1",
     "ts-node-dev": "^1.1.6",
     "tslint": "^6.1.3",
-    "typescript": "^4.2.4"
+    "typescript": "4.2.4"
   },
   "nyc": {
     "extends": "./nyc-config.js",
@@ -223,5 +227,8 @@
       "objectRestSpread",
       "optionalCatchBinding"
     ]
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

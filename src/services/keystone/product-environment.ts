@@ -171,8 +171,10 @@ export async function lookupEnvironmentsByNS(
                         appId
                         name
                         flow
+                        additionalDetailsToRequest
                         approval
                         product {
+                          id
                           name
                         }
                         legal {
@@ -207,6 +209,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                         id
                         appId
                         name
+                        flow
                         active
                         approval
                         legal {

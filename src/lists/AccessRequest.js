@@ -52,6 +52,10 @@ module.exports = {
       type: Text,
       isRequired: false,
     },
+    labels: {
+      type: Text,
+      isRequired: false,
+    },
     controls: {
       type: Text,
       isRequired: true,
@@ -118,6 +122,7 @@ module.exports = {
       const noauthContext = context.createContext({ skipAccessControl: true });
 
       await Apply(
+        context,
         noauthContext,
         operation,
         existingItem,

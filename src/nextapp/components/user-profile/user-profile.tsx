@@ -10,14 +10,17 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { UserData } from '@/shared/types/app.types';
+import { User } from '@/shared/types/query.types';
 
 interface UserProfileProps extends BoxProps {
-  data?: UserData;
+  data?: UserData | User;
+  heading?: string;
   isLoading?: boolean;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({
   data = {},
+  heading = 'Administrator',
   isLoading = false,
   ...props
 }) => {
@@ -25,7 +28,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
   return (
     <Box {...props}>
       <Heading size="sm" mb={3.5}>
-        Administrator:
+        {heading}:
       </Heading>
       <Flex>
         <Avatar name={data.name} />

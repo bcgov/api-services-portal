@@ -13,12 +13,15 @@ import {
 import { uid } from 'react-uid';
 
 interface TagInputProps extends InputProps {
+  error?: string;
   id?: string;
   name?: string;
   placeholder?: string;
-  value?: string;
+  value?: string | string[];
 }
 
+// TODO: Look into custom reportValidity hook, so a input with value `[]` doesn't pass as valid when required
+// (Should have a populated array if required)
 const TagInput: React.FC<TagInputProps> = ({
   id,
   name,
@@ -27,7 +30,9 @@ const TagInput: React.FC<TagInputProps> = ({
   ...props
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const styles = useMultiStyleConfig('Input', { variant: 'bc-input' });
+  const styles = useMultiStyleConfig('Input', {
+    variant: 'bc-input',
+  });
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
   const [values, setValues] = React.useState<string[]>(() => {
     try {
@@ -35,6 +40,9 @@ const TagInput: React.FC<TagInputProps> = ({
         return [];
       }
 
+      if (Array.isArray(value)) {
+        return value;
+      }
       return JSON.parse(value);
     } catch {
       return [];
@@ -51,7 +59,9 @@ const TagInput: React.FC<TagInputProps> = ({
 
           setValues((state) => [...state, inputRef.current.value]);
           setTimeout(() => {
-            inputRef.current.value = ' ';
+            if (inputRef.current) {
+              inputRef.current.value = ' ';
+            }
           }, 10);
         } else if (event.key === 'Escape') {
           inputRef.current.value = '';
@@ -80,7 +90,9 @@ const TagInput: React.FC<TagInputProps> = ({
     if (inputRef.current.value.trim()) {
       setValues((state) => [...state, inputRef.current.value.trim()]);
       setTimeout(() => {
-        inputRef.current.value = '';
+        if (inputRef.current) {
+          inputRef.current.value = '';
+        }
       }, 1);
     }
     setIsFocused(false);
@@ -96,6 +108,16 @@ const TagInput: React.FC<TagInputProps> = ({
     return styles.field;
   }, [isFocused, styles.field]);
 
+  React.useEffect(() => {
+    const handleReset = () => setValues([]);
+    const ref = inputRef?.current;
+    ref.form?.addEventListener('reset', handleReset);
+
+    return () => {
+      ref.form?.removeEventListener('reset', handleReset);
+    };
+  }, []);
+
   return (
     <>
       <Box
@@ -105,10 +127,11 @@ const TagInput: React.FC<TagInputProps> = ({
         height="auto"
         minHeight="40px"
         pos="relative"
-        py={2}
+        py={1}
         onClick={handleContainerClick}
         cursor="text"
         data-testid={props['data-testid']}
+        borderColor={props.isInvalid ? 'bc-error' : 'bc-component'}
       >
         <Wrap spacing={2}>
           {values.map((v, index) => (

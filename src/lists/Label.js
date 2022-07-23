@@ -1,7 +1,11 @@
-const { Text } = require('@keystonejs/fields');
+const { Text, Relationship } = require('@keystonejs/fields');
 
 module.exports = {
   fields: {
+    namespace: {
+      type: Text,
+      isRequired: true,
+    },
     name: {
       type: Text,
       isRequired: true,
@@ -10,5 +14,6 @@ module.exports = {
       type: Text,
       isRequired: true,
     },
+    consumer: { type: Relationship, isRequired: true, ref: 'GatewayConsumer' },
   },
 };

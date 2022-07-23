@@ -8,7 +8,7 @@ describe('Org Role to Group Access', function () {
 name: databc
 parent: /ministry-of-citizens-services
 roles:
-  - name: data-custodian
+  - name: organization-admin
     permissions:
       - resource: platform
         scopes:
@@ -28,7 +28,7 @@ roles:
     const match = `
 name: databc
 roles:
-  - name: data-custodian
+  - name: organization-admin
     permissions:
       - resource: org/databc
         scopes:
