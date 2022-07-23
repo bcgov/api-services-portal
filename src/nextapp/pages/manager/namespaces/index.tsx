@@ -137,26 +137,24 @@ const NamespacesPage: React.FC = () => {
 
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={user?.namespace} />
+        <PageHeader title={hasNamespace ? user.namespace : "For API Providers" } />
         {!hasNamespace && (
           <>
-            <Center minHeight={300}>
-              <Box p={4} bgColor="white" textAlign="center" maxW={350}>
-                <Box mb={4}>
-                  <Heading size="sm" mb={2}>
-                    No Active Namespace
-                  </Heading>
-                  <Text fontSize="sm">
-                    Select a namespace in the toolbar above{' '}
-                    <Icon as={FaArrowUp} /> or create a new namspace here.
-                  </Text>
-                </Box>
-                <Button onClick={onOpen} variant="primary">
-                  Create New Namespace
-                </Button>
+            <Box p={4} width="100%" height="300px" bgColor="white">
+              <Box mb={4}>
+                <Heading size="sm" mb={2}>
+                  No namespace selected yet
+                </Heading>
+                <Text fontSize="sm">
+                  To get started select namespace from the dropdown below{' '}
+                  or create a new namespace
+                </Text>
               </Box>
-            </Center>
-            <NewNamespace isOpen={isOpen} onClose={onClose} />
+              <Button onClick={onOpen} variant="primary">
+                Create New Namespace
+              </Button>
+            </Box>
+          <NewNamespace isOpen={isOpen} onClose={onClose} />
           </>
         )}
         {hasNamespace && (
