@@ -9,7 +9,7 @@ export {
 
 export { recordActivity, recordActivityWithBlob } from './activity';
 
-export { lookupApplication } from './application';
+export { lookupApplication, lookupMyApplicationsById } from './application';
 
 export { deleteRecord, deleteRecords } from './common-delete-record';
 

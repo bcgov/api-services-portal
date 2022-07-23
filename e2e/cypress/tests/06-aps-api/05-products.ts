@@ -1,7 +1,7 @@
 import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
 import Products from "../../pageObjects/products"
-let userSession: string
+let userSession: any
 let productID: string
 let envID: string
 
@@ -100,15 +100,9 @@ describe('Verify that created Product is displayed in UI', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
-                })
-            })
-        })
+        cy.getUserSessionTokenValue().then((value) => {
+            userSession = value
+         })
     })
 
     it('Verify that the product is visible in Manage Product Page', () => {

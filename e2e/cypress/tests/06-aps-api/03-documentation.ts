@@ -1,6 +1,6 @@
 import HomePage from "../../pageObjects/home"
 import LoginPage from "../../pageObjects/login"
-let userSession: string
+let userSession: any
 let slugValue: string
 
 describe('Get the user session token', () => {
@@ -21,15 +21,9 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSession().then(() => {
-            cy.get('@apiowner').then(({ user, apiTest }: any) => {
-                cy.login(user.credentials.username, user.credentials.password)
-                home.useNamespace(apiTest.namespace)
-                cy.get('@login').then(function (xhr: any) {
-                    userSession = xhr.response.headers['x-auth-request-access-token']
-                })
-            })
-        })
+        cy.getUserSessionTokenValue().then((value) => {
+            userSession = value
+         })
     })
 
 })
@@ -82,7 +76,6 @@ describe('API Tests for Fetching documentation', () => {
         cy.get('@api').then(({ documentation }: any) => {
             debugger
             cy.makeAPIRequest(documentation.endPoint, 'GET').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(200)
                 slugValue = res.body[0].slug
                 response = res.body[0]
@@ -124,7 +117,7 @@ describe('API Tests for Deleting documentation', () => {
     })
 })
 
-describe('API Tests for to verify no value in Get call after deleting document content', () => {
+describe('API Tests to verify no value in Get call after deleting document content', () => {
 
     const login = new LoginPage()
     const home = new HomePage()
@@ -146,6 +139,71 @@ describe('API Tests for to verify no value in Get call after deleting document c
             cy.makeAPIRequest(documentation.endPoint, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body).to.be.empty
+            })
+        })
+    })
+})
+
+describe('API Tests to verify Get documentation content', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+    let slugID: string
+
+    beforeEach(() => {
+        cy.fixture('api').as('api')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.setHeaders(documentation.headers)
+            cy.setAuthorizationToken(userSession)
+            cy.setRequestBody(documentation.body)
+        })
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.setHeaders(documentation.headers)
+            cy.setAuthorizationToken(userSession)
+            cy.setRequestBody(documentation.body)
+        })
+    })
+
+    it('Put the resource and verify the success code in the response', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.makeAPIRequest(documentation.endPoint, 'PUT').then((response) => {
+                expect(response.status).to.be.equal(200)
+            })
+        })
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.setHeaders(documentation.headers)
+            cy.setRequestBody(documentation.body)
+        })
+    })
+
+    it('Verify that document contant is displayed for GET /documentation', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            debugger
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint, 'GET').then((response) => {
+                expect(response.status).to.be.equal(200)
+                expect(response.body[0].title).to.be.equal(documentation.body.title)
+                expect(response.body[0].description).to.be.equal(documentation.body.description)
+                slugID = response.body[0].slug
+            })
+        })
+    })
+
+    it('Verify that document contant is fetch by slug ID', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            debugger
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/'+slugID, 'GET').then((response) => {
+                expect(response.status).to.be.equal(200)
+                expect(response.body.slug).to.be.equal(slugID)
+                expect(response.body.title).to.be.equal(documentation.body.title)
             })
         })
     })

@@ -161,6 +161,9 @@ export const ValidateActiveEnvironment = async (
               '] missing or incomplete acl plugin.'
           );
         }
+        addValidationError(
+          'The kong-acl-only flow can not be enabled on the API Directory'
+        );
       } else if (flow == 'client-credentials') {
         assert.strictEqual(
           issuer != null,

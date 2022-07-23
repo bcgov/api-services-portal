@@ -72,7 +72,7 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
           isOpen={isOpen}
           onClose={onClose}
         />
-        <Menu>
+        <Menu placement="bottom-end">
           <MenuButton
             as={IconButton}
             aria-label="product actions"

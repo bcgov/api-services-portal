@@ -134,7 +134,8 @@ export async function lookupKongConsumerIdByName(
 
 export async function lookupKongConsumerByCustomId(
   context: any,
-  name: string
+  name: string,
+  expected: boolean = true
 ): Promise<GatewayConsumer> {
   assert.strictEqual(
     name != null && typeof name != 'undefined' && name != '',
@@ -153,11 +154,13 @@ export async function lookupKongConsumerByCustomId(
   logger.debug('Query [lookupKongConsumerByCustomId] result %j', result);
 
   assert.strictEqual(
-    result.data.allGatewayConsumers.length,
-    1,
+    expected === false || result.data.allGatewayConsumers.length === 1,
+    true,
     'Unexpected data returned for Consumer lookup'
   );
-  return result.data.allGatewayConsumers[0];
+  return result.data.allGatewayConsumers.length === 0
+    ? undefined
+    : result.data.allGatewayConsumers[0];
 }
 
 export async function lookupKongConsumerByUsername(

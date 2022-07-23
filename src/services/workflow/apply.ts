@@ -43,12 +43,14 @@ export const Apply = async (
   const message = { text: '' };
 
   if (originalInput['credential'] == 'NEW') {
-    try {
-      const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
-        context,
-        existingItem.id
-      );
+    const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
+      context,
+      existingItem.id
+    );
+    const productNamespace =
+      requestDetails.productEnvironment.product.namespace;
 
+    try {
       const newCredential = await generateCredential(context, requestDetails);
       if (newCredential != null) {
         updatedItem['credential'] = JSON.stringify(newCredential);
@@ -101,7 +103,8 @@ export const Apply = async (
         updatedItem.id,
         message.text,
         'success',
-        JSON.stringify(originalInput)
+        JSON.stringify(originalInput),
+        productNamespace
       );
     } catch (err) {
       logger.error('Workflow Error %s', err);
@@ -116,7 +119,9 @@ export const Apply = async (
         'AccessRequest',
         updatedItem.id,
         'Failed to Apply Workflow - ' + err,
-        'failed'
+        'failed',
+        '',
+        productNamespace
       );
       throw err;
     }

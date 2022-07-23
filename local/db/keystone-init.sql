@@ -20,6 +20,7 @@ SET row_security = off;
 -- Name: public; Type: SCHEMA; Schema: -; Owner: keystonejsuser
 --
 
+-- extra line added to make it compitible for local docker run
 \c keystonejs;
 
 DROP SCHEMA IF EXISTS public;
@@ -1054,6 +1055,10 @@ CREATE TABLE public."TemporaryIdentity" (
     sub text,
     name text,
     username text,
+    provider text,
+    "providerUserGuid" text,
+    "providerUsername" text,
+    "businessName" text,
     email text,
     "isAdmin" boolean,
     "userId" text,
@@ -1100,6 +1105,9 @@ CREATE TABLE public."User" (
     id integer NOT NULL,
     name text,
     username text,
+    provider text,
+    "providerUserGuid" text,
+    "providerUsername" text,
     email text,
     "isAdmin" boolean,
     password character varying(60),
@@ -2294,4 +2302,3 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
-

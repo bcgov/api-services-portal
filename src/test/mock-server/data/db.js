@@ -18,6 +18,7 @@ class MockDatabase {
       userId: casual.uuid,
       name: 'Nathaniel Merriweather',
       username: 'nmerriweather',
+      businessName: 'SmithCorp Inc.',
       email: 'nmerriweather@hbms.com',
       roles: [role, 'portal-user'],
       isAdmin: false,

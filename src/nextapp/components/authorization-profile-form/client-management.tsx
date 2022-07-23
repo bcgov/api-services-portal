@@ -100,8 +100,8 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
               </Td>
               <Td width="20%">{d.clientId}</Td>
               <Td>
-                <ActionsMenu placement="bottom-start">
-                  <MenuItem onClick={handleDelete(index)}>Delete</MenuItem>
+                <ActionsMenu placement="bottom-end">
+                  <MenuItem onClick={handleDelete(index)} color="bc-error">Delete</MenuItem>
                 </ActionsMenu>
               </Td>
             </Tr>

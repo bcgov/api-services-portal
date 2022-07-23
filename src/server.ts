@@ -356,6 +356,14 @@ const configureExpress = (app: any) => {
       version: process.env.NEXT_PUBLIC_APP_VERSION,
       revision: process.env.NEXT_PUBLIC_APP_REVISION,
       cluster: process.env.NEXT_PUBLIC_KUBE_CLUSTER,
+      identities: {
+        developer: (process.env.NEXT_PUBLIC_DEVELOPER_IDS || '').split(','),
+        provider: (process.env.NEXT_PUBLIC_PROVIDER_IDS || '').split(','),
+      },
+      accountLinks: {
+        bceidUrl: process.env.NEXT_PUBLIC_ACCOUNT_BCEID_URL,
+        bcscUrl: process.env.NEXT_PUBLIC_ACCOUNT_BCSC_URL,
+      },
       helpLinks: {
         helpDeskUrl: process.env.NEXT_PUBLIC_HELP_DESK_URL,
         helpChatUrl: process.env.NEXT_PUBLIC_HELP_CHAT_URL,
