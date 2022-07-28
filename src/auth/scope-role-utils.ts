@@ -2,7 +2,7 @@ export function scopes(scopeString: string) {
   return scopeString.split(' ');
 }
 
-export function scopesToRoles(username: string, scopes: string[]): string[] {
+export function scopesToRoles(identityProvider: string, scopes: string[]): string[] {
   const _roles = [];
   if (scopes.includes('Namespace.Manage')) {
     _roles.push('api-owner');
@@ -18,13 +18,10 @@ export function scopesToRoles(username: string, scopes: string[]): string[] {
   }
 
   _roles.push('portal-user');
-  if (username != null) {
-    _roles.push(deriveRoleFromUsername(username));
-  }
+  _roles.push(deriveRoleFromIdP(identityProvider));
   return _roles;
 }
 
-export function deriveRoleFromUsername(username: string) {
-  const parts = username.split('@');
-  return parts.length == 1 ? 'developer' : `${parts[1]}-user`;
+export function deriveRoleFromIdP(identityProvider: string) {
+  return identityProvider ? `${identityProvider}-user`: 'developer';
 }

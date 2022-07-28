@@ -1,10 +1,8 @@
 import * as React from 'react';
 import {
   Alert,
-  AlertDescription,
   AlertTitle,
   Box,
-  Button,
   Center,
   Container,
   Grid,
@@ -22,13 +20,15 @@ import NextLink from 'next/link';
 import LoginButtons from '@/components/login-buttons';
 import { useAuth } from '@/shared/services/auth';
 import router from 'next/router';
+import { useGlobal } from '@/shared/services/global';
 
 const LoginPage: React.FC = () => {
   const { ok, isLoading } = useAuth();
+  const { identities } = useGlobal();
 
   React.useEffect(() => {
     if (ok) {
-      router.push('/');
+      router.push('/devportal/api-directory');
     }
   }, [ok]);
 
@@ -87,7 +87,7 @@ const LoginPage: React.FC = () => {
                   one of the options available below.
                 </Text>
                 <Box mt={7}>
-                  <LoginButtons buttons={['idir', 'github']} />
+                  <LoginButtons buttons={identities.developer} />
                 </Box>
               </GridItem>
               <GridItem bgColor="white" p={10}>
@@ -100,7 +100,7 @@ const LoginPage: React.FC = () => {
                   IDIR to login to the APS Portal.
                 </Text>
                 <Box mt={7}>
-                  <LoginButtons buttons={['idir']} />
+                  <LoginButtons buttons={identities.provider} />
                 </Box>
               </GridItem>
             </Grid>

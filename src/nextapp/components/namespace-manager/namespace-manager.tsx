@@ -113,9 +113,7 @@ const NamespaceManager: React.FC<NamespaceManagerProps> = ({
                   size="md"
                   data-testid="export-report-select-all-check"
                 >
-                  {selected.length === data.length
-                    ? 'Select None'
-                    : 'Select All'}
+                  Select All
                 </Checkbox>
                 <Box>
                   {selected.length > 0 && (

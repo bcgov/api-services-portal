@@ -216,8 +216,8 @@ const AuthorizationProfiles: React.FC<
                       Edit
                     </Button>
                   </AuthorizationProfileForm>
-                  <ActionsMenu>
-                    <MenuItem onClick={handleDelete(c.id)}>Delete</MenuItem>
+                  <ActionsMenu placement="bottom-end">
+                    <MenuItem onClick={handleDelete(c.id)} color="bc-error">Delete</MenuItem>
                   </ActionsMenu>
                 </Td>
               </Tr>
