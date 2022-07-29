@@ -721,6 +721,10 @@ export async function revokeAllConsumerAccess(
     consumerId
   );
 
+  logger.warn(
+    '[revokeAllConsumerAccess] %s',
+    JSON.stringify(prodEnvAccess, null, 3)
+  );
   assert.strictEqual(
     prodEnvAccess.length == 1 && prodEnvAccess[0].serviceAccessId != null,
     true,

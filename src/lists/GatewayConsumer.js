@@ -1,19 +1,7 @@
-const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
-const { Markdown } = require('@keystonejs/fields-markdown');
-
+const { Text, Relationship } = require('@keystonejs/fields');
+const { atTracking } = require('@keystonejs/list-plugins');
 const { externallySourced } = require('../components/ExternalSource');
-
-const { byTracking, atTracking } = require('@keystonejs/list-plugins');
-
 const { EnforcementPoint } = require('../authz/enforcement');
-
-const {
-  lookupConsumerPlugins,
-  lookupKongConsumerId,
-} = require('../services/keystone');
-
-const { KongConsumerService } = require('../services/kong');
-const { FeederService } = require('../services/feeder');
 const { delAllConsumerLabels } = require('../services/keystone/labels');
 
 module.exports = {
@@ -73,9 +61,10 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
-      const namespace = context.req.user.namespace;
-
-      await delAllConsumerLabels(context, namespace, existingItem.id);
+      const namespace = context.authedItem['namespace'];
+      if (namespace) {
+        await delAllConsumerLabels(context, namespace, existingItem.id);
+      }
     },
   },
 };
