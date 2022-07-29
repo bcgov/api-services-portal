@@ -14,6 +14,7 @@ const {
 
 const { KongConsumerService } = require('../services/kong');
 const { FeederService } = require('../services/feeder');
+const { delAllConsumerLabels } = require('../services/keystone/labels');
 
 module.exports = {
   fields: {
@@ -64,4 +65,17 @@ module.exports = {
   },
   access: EnforcementPoint,
   plugins: [externallySourced(), atTracking()],
+  hooks: {
+    beforeDelete: async function ({
+      operation,
+      existingItem,
+      context,
+      listKey,
+      fieldPath, // exists only for field hooks
+    }) {
+      const namespace = context.req.user.namespace;
+
+      await delAllConsumerLabels(context, namespace, existingItem.id);
+    },
+  },
 };

@@ -343,10 +343,8 @@ const query = gql`
 `;
 
 const deleteMutation = gql`
-  mutation DeleteConsumer($id: ID!) {
-    deleteGatewayConsumer(id: $id) {
-      id
-    }
+  mutation RevokeAllConsumerAccess($id: ID!) {
+    revokeAllConsumerAccess(consumerId: $id)
   }
 `;
 

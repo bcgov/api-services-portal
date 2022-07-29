@@ -102,3 +102,24 @@ export async function updateConsumerLabel(
   logger.debug('[updateConsumerLabel] result %j', result);
   assert.strictEqual('errors' in result, false, `Failed to update labels`);
 }
+
+export async function delAllConsumerLabels(
+  context: any,
+  ns: string,
+  id: string
+) {
+  const labels = await getConsumerLabels(context, ns, [id]);
+
+  const ids = labels.map((label) => label.id);
+
+  const result = await context.executeGraphQL({
+    query: `mutation DeleteAllConsumerLabels($ids: [ID]!) {
+        deleteLabels(ids: $ids) {
+            id
+        }
+    }`,
+    variables: { ids },
+  });
+  logger.debug('[delAllConsumerLabels] result %j', result);
+  assert.strictEqual('errors' in result, false, `Failed to delete label`);
+}

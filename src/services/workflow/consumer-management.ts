@@ -57,6 +57,7 @@ import {
   lookupServiceAccessesByConsumer,
   lookupEnvironmentAndIssuerById,
   getConsumerLabels,
+  deleteServiceAccess,
 } from '../keystone';
 import { lookupEnvironmentsByNS } from '../keystone/product-environment';
 import { KongConsumerService } from '../kong';
@@ -712,9 +713,22 @@ export async function revokeAllConsumerAccess(
   ns: string,
   consumerId: string
 ): Promise<void> {
-  // Loop through the ProdEnv access
-  // and either delete the ServiceAccess record
-  // or revoke ACL
+  logger.info('[revokeAllConsumerAccess] Delete %s : %s', ns, consumerId);
+
+  const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
+    context,
+    ns,
+    consumerId
+  );
+
+  assert.strictEqual(
+    prodEnvAccess.length == 1 && prodEnvAccess[0].serviceAccessId != null,
+    true,
+    'Not eligible for deletion'
+  );
+
+  const serviceAccessId = prodEnvAccess[0].serviceAccessId;
+  await deleteServiceAccess(context, serviceAccessId);
 }
 
 /**

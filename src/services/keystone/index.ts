@@ -45,6 +45,7 @@ export {
 
 export {
   addServiceAccess,
+  deleteServiceAccess,
   linkCredRefsToServiceAccess,
   lookupCredentialReferenceByServiceAccess,
   lookupServiceAccessesByConsumer,
