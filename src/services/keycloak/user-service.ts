@@ -87,11 +87,13 @@ export class KeycloakUserService {
         roles: addRoles,
       });
     }
-    await this.kcAdminClient.users.delClientRoleMappings({
-      id,
-      clientUniqueId,
-      roles: delRoles,
-    });
+    if (delRoles.length > 0) {
+      await this.kcAdminClient.users.delClientRoleMappings({
+        id,
+        clientUniqueId,
+        roles: delRoles,
+      });
+    }
     logger.debug('[syncUserClientRoles] %s OK', id);
   }
 }

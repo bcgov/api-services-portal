@@ -90,7 +90,7 @@ import {
   updateConsumerLabel,
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
-import { syncPlugins } from './consumer-plugins';
+import { syncPlugins, trimPlugin } from './consumer-plugins';
 import { removeAllButKeys } from '../../batch/feed-worker';
 
 const logger = Logger('wf.ConsumerMgmt');
@@ -613,8 +613,6 @@ export async function updateConsumerAccess(
     }
 
     if (roles) {
-      logger.error('Doing roles! %s', roles);
-
       const kcUserService = new KeycloakUserService(
         envCtx.issuerEnvConfig.issuerUrl
       );
@@ -819,20 +817,4 @@ export async function saveConsumerLabels(
  */
 function isRevocable(prodEnv: Environment): boolean {
   return ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow);
-}
-
-function trimPlugin(_plugin: string) {
-  const plugin = JSON.parse(_plugin);
-  removeAllButKeys(plugin, [
-    'deny',
-    'allow',
-    'second',
-    'minute',
-    'hour',
-    'day',
-    'month',
-    'year',
-    'policy',
-  ]);
-  return JSON.stringify(plugin);
 }

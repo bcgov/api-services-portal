@@ -153,9 +153,10 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       client.invalidateQueries(['consumerEdit', prodEnvId, consumerId]);
       onClose();
       setTabIndex(0);
-    } catch {
+    } catch (err) {
       toast({
         title: 'Request save failed',
+        description: Array.isArray(err) ? err[0].message : err?.message,
         status: 'error',
       });
     }

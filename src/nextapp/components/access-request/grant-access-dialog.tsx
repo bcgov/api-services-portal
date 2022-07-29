@@ -121,7 +121,7 @@ const GrantAccessDialog: React.FC<GrantAccessDialogProps> = ({
     } catch (err) {
       toast({
         title: 'Access grant failed',
-        description: err.message,
+        description: Array.isArray(err) ? err[0].message : err?.message,
         status: 'error',
       });
     }
