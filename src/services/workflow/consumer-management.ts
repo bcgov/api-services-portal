@@ -176,7 +176,7 @@ export async function getFilteredNamespaceConsumers(
     .filter((acc) => acc.consumer)
     .map((acc) => {
       return {
-        id: acc.id,
+        id: acc.consumer.id,
         username: acc.consumer.username,
         customId: acc.consumer.customId,
         consumerType: acc.consumerType,
@@ -197,14 +197,23 @@ export async function getFilteredNamespaceConsumers(
 export async function getNamespaceConsumerAccess(
   context: any,
   ns: string,
-  serviceAccessId: string
+  consumerId: string
 ): Promise<ConsumerAccess> {
-  logger.debug('[getNamespaceConsumerAccess] %s %s', ns, serviceAccessId);
+  logger.debug('[getNamespaceConsumerAccess] %s %s', ns, consumerId);
 
-  const serviceAccess = await lookupCredentialReferenceByServiceAccess(
+  const serviceAccesses = await lookupLabeledServiceAccessesForNamespace(
     context,
-    serviceAccessId
+    ns,
+    [consumerId],
+    true
   );
+  assert.strictEqual(
+    serviceAccesses.length > 0,
+    true,
+    'Consumer not found for namespace'
+  );
+
+  const serviceAccess = serviceAccesses[0];
 
   const labels = await getConsumerLabels(context, ns, [
     serviceAccess.consumer.id,
@@ -348,18 +357,14 @@ async function getConsumerProdEnvAccessList(
 export async function getConsumerProdEnvAccess(
   context: any,
   ns: string,
-  serviceAccessId: string,
+  consumerId: string,
   prodEnvId: string
 ): Promise<ConsumerProdEnvAccess> {
   // same as getNamespaceConsumerAccess
   // but add 'authorization' and 'request' details (if applicable)
   // and add plugin config
 
-  const consumer = await getNamespaceConsumerAccess(
-    context,
-    ns,
-    serviceAccessId
-  );
+  const consumer = await getNamespaceConsumerAccess(context, ns, consumerId);
 
   consumer.prodEnvAccess = consumer.prodEnvAccess.filter(
     (p) => p.environment.id === prodEnvId

@@ -259,7 +259,8 @@ export async function lookupServiceAccessesForNamespace(
 export async function lookupLabeledServiceAccessesForNamespace(
   context: any,
   ns: string,
-  consumerIds: string[]
+  consumerIds: string[],
+  incDetail: boolean = false
 ): Promise<ServiceAccess[]> {
   logger.debug('[lookupLabeledServiceAccessesForNamespace] lookup ns=%s', ns);
 
@@ -284,6 +285,27 @@ export async function lookupLabeledServiceAccessesForNamespace(
     ];
   }
 
+  const detail = `
+                    productEnvironment {
+                      id
+                      name
+                      additionalDetailsToRequest
+                      flow
+                      credentialIssuer {
+                          id
+                          clientAuthenticator
+                      }
+                    }
+                    application {
+                      name
+                      owner {
+                        name
+                        username
+                        email
+                      }
+                    }
+`;
+
   const result = await context.executeGraphQL({
     query: `query GetLabeledServiceAccessByNamespace($where: ServiceAccessWhereInput!) {
                     allServiceAccesses(where: $where) {
@@ -295,6 +317,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                           customId
                         }
                         updatedAt
+                        ${incDetail && detail}
                     }
                 }`,
     variables: { where },

@@ -54,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { serviceAccessId: id },
+        { consumerId: id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -78,7 +78,7 @@ const ConsumerPage: React.FC<
     queryKey,
     {
       query,
-      variables: { serviceAccessId: id },
+      variables: { consumerId: id },
     },
     { suspense: false }
   );
@@ -277,10 +277,10 @@ const ConsumerPage: React.FC<
 export default ConsumerPage;
 
 const query = gql`
-  query GetConsumer($serviceAccessId: ID!) {
+  query GetConsumer($consumerId: ID!) {
     allConsumerGroupLabels
 
-    getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
+    getNamespaceConsumerAccess(consumerId: $consumerId) {
       consumer {
         id
         username

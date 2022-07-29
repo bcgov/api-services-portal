@@ -7380,12 +7380,12 @@ export type QueryGetFilteredNamespaceConsumersArgs = {
 
 
 export type QueryGetNamespaceConsumerAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
 };
 
 
 export type QueryGetConsumerProdEnvAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
   prodEnvId: Scalars['ID'];
 };
 

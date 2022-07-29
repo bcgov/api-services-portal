@@ -93,7 +93,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   }
 
   if (true) {
-    const id = '62a18b772da3cdea467b10fe';
+    const id = '62a18b772da3cdea467b10fd';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
 
@@ -175,7 +175,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumers);
   }
 
-  if (false) {
+  if (true) {
     const consumers = await getFilteredNamespaceConsumers(
       ctx,
       ns,
@@ -186,7 +186,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     // testing plugins
     if (true) {
       const promises = consumers
-        .filter((c) => c.id === '62a18b772da3cdea467b10fe')
+        .filter((c) => c.id === '62a18b772da3cdea467b10fd')
         .map(async (c) => {
           const consumerAccess = await getNamespaceConsumerAccess(
             ctx,
