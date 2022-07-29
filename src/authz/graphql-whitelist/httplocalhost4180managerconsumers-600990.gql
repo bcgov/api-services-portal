@@ -1,0 +1,32 @@
+
+  query GetConsumers($filter: ConsumerQueryFilterInput) {
+    allConsumerGroupLabels
+    getFilteredNamespaceConsumers(filter: $filter) {
+      id
+      consumerType
+      username
+      labels {
+        labelGroup
+        values
+      }
+      lastUpdated
+    }
+
+    allAccessRequestsByNamespace(where: { isComplete_not: true }) {
+      id
+      name
+      additionalDetails
+      communication
+      createdAt
+      requestor {
+        name
+      }
+      application {
+        name
+      }
+      productEnvironment {
+        name
+        additionalDetailsToRequest
+      }
+    }
+  }

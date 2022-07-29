@@ -5407,6 +5407,10 @@ export type TemporaryIdentity = {
   sub?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
+  businessName?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   userId?: Maybe<Scalars['String']>;
@@ -5497,6 +5501,78 @@ export type TemporaryIdentityWhereInput = {
   username_not_ends_with_i?: Maybe<Scalars['String']>;
   username_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   username_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provider?: Maybe<Scalars['String']>;
+  provider_not?: Maybe<Scalars['String']>;
+  provider_contains?: Maybe<Scalars['String']>;
+  provider_not_contains?: Maybe<Scalars['String']>;
+  provider_starts_with?: Maybe<Scalars['String']>;
+  provider_not_starts_with?: Maybe<Scalars['String']>;
+  provider_ends_with?: Maybe<Scalars['String']>;
+  provider_not_ends_with?: Maybe<Scalars['String']>;
+  provider_i?: Maybe<Scalars['String']>;
+  provider_not_i?: Maybe<Scalars['String']>;
+  provider_contains_i?: Maybe<Scalars['String']>;
+  provider_not_contains_i?: Maybe<Scalars['String']>;
+  provider_starts_with_i?: Maybe<Scalars['String']>;
+  provider_not_starts_with_i?: Maybe<Scalars['String']>;
+  provider_ends_with_i?: Maybe<Scalars['String']>;
+  provider_not_ends_with_i?: Maybe<Scalars['String']>;
+  provider_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provider_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUserGuid_not?: Maybe<Scalars['String']>;
+  providerUserGuid_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_i?: Maybe<Scalars['String']>;
+  providerUserGuid_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUsername?: Maybe<Scalars['String']>;
+  providerUsername_not?: Maybe<Scalars['String']>;
+  providerUsername_contains?: Maybe<Scalars['String']>;
+  providerUsername_not_contains?: Maybe<Scalars['String']>;
+  providerUsername_starts_with?: Maybe<Scalars['String']>;
+  providerUsername_not_starts_with?: Maybe<Scalars['String']>;
+  providerUsername_ends_with?: Maybe<Scalars['String']>;
+  providerUsername_not_ends_with?: Maybe<Scalars['String']>;
+  providerUsername_i?: Maybe<Scalars['String']>;
+  providerUsername_not_i?: Maybe<Scalars['String']>;
+  providerUsername_contains_i?: Maybe<Scalars['String']>;
+  providerUsername_not_contains_i?: Maybe<Scalars['String']>;
+  providerUsername_starts_with_i?: Maybe<Scalars['String']>;
+  providerUsername_not_starts_with_i?: Maybe<Scalars['String']>;
+  providerUsername_ends_with_i?: Maybe<Scalars['String']>;
+  providerUsername_not_ends_with_i?: Maybe<Scalars['String']>;
+  providerUsername_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUsername_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  businessName?: Maybe<Scalars['String']>;
+  businessName_not?: Maybe<Scalars['String']>;
+  businessName_contains?: Maybe<Scalars['String']>;
+  businessName_not_contains?: Maybe<Scalars['String']>;
+  businessName_starts_with?: Maybe<Scalars['String']>;
+  businessName_not_starts_with?: Maybe<Scalars['String']>;
+  businessName_ends_with?: Maybe<Scalars['String']>;
+  businessName_not_ends_with?: Maybe<Scalars['String']>;
+  businessName_i?: Maybe<Scalars['String']>;
+  businessName_not_i?: Maybe<Scalars['String']>;
+  businessName_contains_i?: Maybe<Scalars['String']>;
+  businessName_not_contains_i?: Maybe<Scalars['String']>;
+  businessName_starts_with_i?: Maybe<Scalars['String']>;
+  businessName_not_starts_with_i?: Maybe<Scalars['String']>;
+  businessName_ends_with_i?: Maybe<Scalars['String']>;
+  businessName_not_ends_with_i?: Maybe<Scalars['String']>;
+  businessName_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  businessName_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   email?: Maybe<Scalars['String']>;
   email_not?: Maybe<Scalars['String']>;
   email_contains?: Maybe<Scalars['String']>;
@@ -5640,6 +5716,14 @@ export enum SortTemporaryIdentitiesBy {
   NameDesc = 'name_DESC',
   UsernameAsc = 'username_ASC',
   UsernameDesc = 'username_DESC',
+  ProviderAsc = 'provider_ASC',
+  ProviderDesc = 'provider_DESC',
+  ProviderUserGuidAsc = 'providerUserGuid_ASC',
+  ProviderUserGuidDesc = 'providerUserGuid_DESC',
+  ProviderUsernameAsc = 'providerUsername_ASC',
+  ProviderUsernameDesc = 'providerUsername_DESC',
+  BusinessNameAsc = 'businessName_ASC',
+  BusinessNameDesc = 'businessName_DESC',
   EmailAsc = 'email_ASC',
   EmailDesc = 'email_DESC',
   IsAdminAsc = 'isAdmin_ASC',
@@ -5665,6 +5749,10 @@ export type TemporaryIdentityUpdateInput = {
   sub?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
+  businessName?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   userId?: Maybe<Scalars['String']>;
@@ -5684,6 +5772,10 @@ export type TemporaryIdentityCreateInput = {
   sub?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
+  businessName?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   userId?: Maybe<Scalars['String']>;
@@ -5711,6 +5803,9 @@ export type User = {
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   password_is_set?: Maybe<Scalars['Boolean']>;
@@ -5760,6 +5855,60 @@ export type UserWhereInput = {
   username_not_ends_with_i?: Maybe<Scalars['String']>;
   username_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   username_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provider?: Maybe<Scalars['String']>;
+  provider_not?: Maybe<Scalars['String']>;
+  provider_contains?: Maybe<Scalars['String']>;
+  provider_not_contains?: Maybe<Scalars['String']>;
+  provider_starts_with?: Maybe<Scalars['String']>;
+  provider_not_starts_with?: Maybe<Scalars['String']>;
+  provider_ends_with?: Maybe<Scalars['String']>;
+  provider_not_ends_with?: Maybe<Scalars['String']>;
+  provider_i?: Maybe<Scalars['String']>;
+  provider_not_i?: Maybe<Scalars['String']>;
+  provider_contains_i?: Maybe<Scalars['String']>;
+  provider_not_contains_i?: Maybe<Scalars['String']>;
+  provider_starts_with_i?: Maybe<Scalars['String']>;
+  provider_not_starts_with_i?: Maybe<Scalars['String']>;
+  provider_ends_with_i?: Maybe<Scalars['String']>;
+  provider_not_ends_with_i?: Maybe<Scalars['String']>;
+  provider_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  provider_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUserGuid_not?: Maybe<Scalars['String']>;
+  providerUserGuid_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with?: Maybe<Scalars['String']>;
+  providerUserGuid_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_i?: Maybe<Scalars['String']>;
+  providerUserGuid_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_contains_i?: Maybe<Scalars['String']>;
+  providerUserGuid_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_starts_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_not_ends_with_i?: Maybe<Scalars['String']>;
+  providerUserGuid_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUserGuid_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUsername?: Maybe<Scalars['String']>;
+  providerUsername_not?: Maybe<Scalars['String']>;
+  providerUsername_contains?: Maybe<Scalars['String']>;
+  providerUsername_not_contains?: Maybe<Scalars['String']>;
+  providerUsername_starts_with?: Maybe<Scalars['String']>;
+  providerUsername_not_starts_with?: Maybe<Scalars['String']>;
+  providerUsername_ends_with?: Maybe<Scalars['String']>;
+  providerUsername_not_ends_with?: Maybe<Scalars['String']>;
+  providerUsername_i?: Maybe<Scalars['String']>;
+  providerUsername_not_i?: Maybe<Scalars['String']>;
+  providerUsername_contains_i?: Maybe<Scalars['String']>;
+  providerUsername_not_contains_i?: Maybe<Scalars['String']>;
+  providerUsername_starts_with_i?: Maybe<Scalars['String']>;
+  providerUsername_not_starts_with_i?: Maybe<Scalars['String']>;
+  providerUsername_ends_with_i?: Maybe<Scalars['String']>;
+  providerUsername_not_ends_with_i?: Maybe<Scalars['String']>;
+  providerUsername_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  providerUsername_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   email?: Maybe<Scalars['String']>;
   email_not?: Maybe<Scalars['String']>;
   email_contains?: Maybe<Scalars['String']>;
@@ -5812,6 +5961,12 @@ export enum SortUsersBy {
   NameDesc = 'name_DESC',
   UsernameAsc = 'username_ASC',
   UsernameDesc = 'username_DESC',
+  ProviderAsc = 'provider_ASC',
+  ProviderDesc = 'provider_DESC',
+  ProviderUserGuidAsc = 'providerUserGuid_ASC',
+  ProviderUserGuidDesc = 'providerUserGuid_DESC',
+  ProviderUsernameAsc = 'providerUsername_ASC',
+  ProviderUsernameDesc = 'providerUsername_DESC',
   EmailAsc = 'email_ASC',
   EmailDesc = 'email_DESC',
   IsAdminAsc = 'isAdmin_ASC',
@@ -5823,6 +5978,9 @@ export enum SortUsersBy {
 export type UserUpdateInput = {
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   password?: Maybe<Scalars['String']>;
@@ -5837,6 +5995,9 @@ export type UsersUpdateInput = {
 export type UserCreateInput = {
   name?: Maybe<Scalars['String']>;
   username?: Maybe<Scalars['String']>;
+  provider?: Maybe<Scalars['String']>;
+  providerUserGuid?: Maybe<Scalars['String']>;
+  providerUsername?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   isAdmin?: Maybe<Scalars['Boolean']>;
   password?: Maybe<Scalars['String']>;
@@ -7219,12 +7380,12 @@ export type QueryGetFilteredNamespaceConsumersArgs = {
 
 
 export type QueryGetNamespaceConsumerAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
 };
 
 
 export type QueryGetConsumerProdEnvAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
   prodEnvId: Scalars['ID'];
 };
 

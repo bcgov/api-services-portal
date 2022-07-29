@@ -55,7 +55,6 @@ import {
   lookupCredentialReferenceByServiceAccess,
   lookupLabeledServiceAccessesForNamespace,
   lookupServiceAccessesByConsumer,
-  lookupServiceAccessesByNamespace,
   lookupEnvironmentAndIssuerById,
   getConsumerLabels,
 } from '../keystone';
@@ -77,7 +76,6 @@ import { getConsumerAuthz } from '.';
 import {
   Environment,
   GatewayConsumer,
-  Label,
   LabelCreateInput,
   LabelUpdateInput,
 } from '../keystone/types';
@@ -92,9 +90,8 @@ import {
   updateConsumerLabel,
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
-import { AnyElement } from 'soap/lib/wsdl/elements';
-import { scopes } from 'auth/scope-role-utils';
-import { syncPlugins } from './consumer-plugins';
+import { syncPlugins, trimPlugin } from './consumer-plugins';
+import { removeAllButKeys } from '../../batch/feed-worker';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -179,7 +176,7 @@ export async function getFilteredNamespaceConsumers(
     .filter((acc) => acc.consumer)
     .map((acc) => {
       return {
-        id: acc.id,
+        id: acc.consumer.id,
         username: acc.consumer.username,
         customId: acc.consumer.customId,
         consumerType: acc.consumerType,
@@ -200,14 +197,23 @@ export async function getFilteredNamespaceConsumers(
 export async function getNamespaceConsumerAccess(
   context: any,
   ns: string,
-  serviceAccessId: string
+  consumerId: string
 ): Promise<ConsumerAccess> {
-  logger.debug('[getNamespaceConsumerAccess] %s %s', ns, serviceAccessId);
+  logger.debug('[getNamespaceConsumerAccess] %s %s', ns, consumerId);
 
-  const serviceAccess = await lookupCredentialReferenceByServiceAccess(
+  const serviceAccesses = await lookupLabeledServiceAccessesForNamespace(
     context,
-    serviceAccessId
+    ns,
+    [consumerId],
+    true
   );
+  assert.strictEqual(
+    serviceAccesses.length > 0,
+    true,
+    'Consumer not found for namespace'
+  );
+
+  const serviceAccess = serviceAccesses[0];
 
   const labels = await getConsumerLabels(context, ns, [
     serviceAccess.consumer.id,
@@ -283,7 +289,7 @@ async function getConsumerProdEnvAccessList(
         .map((plugin) => ({
           id: plugin.id,
           name: plugin.name,
-          config: plugin.config,
+          config: trimPlugin(plugin.config),
           service: plugin.service && {
             id: plugin.service?.id,
             name: plugin.service?.name,
@@ -325,7 +331,7 @@ async function getConsumerProdEnvAccessList(
           .map((plugin) => ({
             id: plugin.id,
             name: plugin.name,
-            config: plugin.config,
+            config: trimPlugin(plugin.config),
             service: plugin.service && {
               id: plugin.service?.id,
               name: plugin.service?.name,
@@ -351,18 +357,14 @@ async function getConsumerProdEnvAccessList(
 export async function getConsumerProdEnvAccess(
   context: any,
   ns: string,
-  serviceAccessId: string,
+  consumerId: string,
   prodEnvId: string
 ): Promise<ConsumerProdEnvAccess> {
   // same as getNamespaceConsumerAccess
   // but add 'authorization' and 'request' details (if applicable)
   // and add plugin config
 
-  const consumer = await getNamespaceConsumerAccess(
-    context,
-    ns,
-    serviceAccessId
-  );
+  const consumer = await getNamespaceConsumerAccess(context, ns, consumerId);
 
   consumer.prodEnvAccess = consumer.prodEnvAccess.filter(
     (p) => p.environment.id === prodEnvId
@@ -432,7 +434,7 @@ export async function grantAccessToConsumer(
   ns: string,
   consumerId: string,
   prodEnvId: string,
-  { plugins, defaultClientScopes, roles }: RequestControls
+  { plugins }: RequestControls
 ): Promise<void> {
   // make sure the consumer hasn't granted access already
   const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
@@ -442,15 +444,6 @@ export async function grantAccessToConsumer(
   );
 
   logger.debug('[grantAccessToConsumer] Consumer %j', consumer);
-
-  // const found =
-  //   prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
-
-  // assert.strictEqual(
-  //   found,
-  //   false,
-  //   'Consumer already granted to this product environment.'
-  // );
 
   const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
@@ -462,6 +455,10 @@ export async function grantAccessToConsumer(
 
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+
+  if (plugins) {
+    await syncPlugins(context, ns, consumer, plugins);
+  }
 }
 
 /**
@@ -514,6 +511,8 @@ export async function revokeAccessFromConsumer(
 
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+
+  await syncPlugins(context, ns, consumer, []);
 }
 
 /**
@@ -611,8 +610,6 @@ export async function updateConsumerAccess(
     }
 
     if (roles) {
-      logger.error('Doing roles! %s', roles);
-
       const kcUserService = new KeycloakUserService(
         envCtx.issuerEnvConfig.issuerUrl
       );
@@ -626,7 +623,6 @@ export async function updateConsumerAccess(
       );
 
       const availableRoles = await kcClientService.listRoles(client.id);
-      logger.error('Available %j', availableRoles);
 
       const selectedRoles = availableRoles
         .filter((r: any) => roles.includes(r.name))

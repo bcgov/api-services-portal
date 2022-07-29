@@ -176,10 +176,10 @@ module.exports = {
           },
           {
             schema:
-              'getNamespaceConsumerAccess(serviceAccessId: ID!): ConsumerAccess',
+              'getNamespaceConsumerAccess(consumerId: ID!): ConsumerAccess',
             resolver: async (
               item: any,
-              { serviceAccessId }: any,
+              { consumerId }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -188,17 +188,17 @@ module.exports = {
               return await getNamespaceConsumerAccess(
                 context,
                 namespace,
-                serviceAccessId
+                consumerId
               );
             },
             access: EnforcementPoint,
           },
           {
             schema:
-              'getConsumerProdEnvAccess(serviceAccessId: ID!, prodEnvId: ID!): ConsumerProdEnvAccess',
+              'getConsumerProdEnvAccess(consumerId: ID!, prodEnvId: ID!): ConsumerProdEnvAccess',
             resolver: async (
               item: any,
-              { serviceAccessId, prodEnvId }: any,
+              { consumerId, prodEnvId }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -207,7 +207,7 @@ module.exports = {
               return await getConsumerProdEnvAccess(
                 context,
                 namespace,
-                serviceAccessId,
+                consumerId,
                 prodEnvId
               );
             },

@@ -69,6 +69,7 @@ export interface PluginConfig {
   year?: number;
   allow?: string[];
   deny?: string[];
+  policy?: string;
 }
 
 export interface IssuerEnvironmentConfig {

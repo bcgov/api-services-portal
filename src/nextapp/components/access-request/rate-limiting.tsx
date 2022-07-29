@@ -90,7 +90,7 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
     const form = new FormData(event.currentTarget);
     const config: any = Object.fromEntries(form);
     ['second', 'minute', 'hour', 'day'].forEach((k) => {
-      config[k] = Number(config[k]);
+      config[k] = Number(config[k]) === 0 ? null : Number(config[k]);
     });
 
     setRateLimits(

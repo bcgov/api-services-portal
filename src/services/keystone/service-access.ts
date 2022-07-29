@@ -259,28 +259,52 @@ export async function lookupServiceAccessesForNamespace(
 export async function lookupLabeledServiceAccessesForNamespace(
   context: any,
   ns: string,
-  consumerIds: string[]
+  consumerIds: string[],
+  incDetail: boolean = false
 ): Promise<ServiceAccess[]> {
   logger.debug('[lookupLabeledServiceAccessesForNamespace] lookup ns=%s', ns);
 
   const where: ServiceAccessWhereInput = {};
 
+  // NOTE: Where namespace and product environment exists, it is a
+  // Namespace Service Account - which we want to exclude
   if (consumerIds) {
     where['AND'] = [
       { consumer: { id_in: consumerIds } },
       {
         OR: [
-          { namespace: ns },
+          { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
           { productEnvironment: { product: { namespace: ns } } },
         ],
       },
     ];
   } else {
     where['OR'] = [
-      { namespace: ns },
+      { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
       { productEnvironment: { product: { namespace: ns } } },
     ];
   }
+
+  const detail = `
+                    productEnvironment {
+                      id
+                      name
+                      additionalDetailsToRequest
+                      flow
+                      credentialIssuer {
+                          id
+                          clientAuthenticator
+                      }
+                    }
+                    application {
+                      name
+                      owner {
+                        name
+                        username
+                        email
+                      }
+                    }
+`;
 
   const result = await context.executeGraphQL({
     query: `query GetLabeledServiceAccessByNamespace($where: ServiceAccessWhereInput!) {
@@ -293,6 +317,7 @@ export async function lookupLabeledServiceAccessesForNamespace(
                           customId
                         }
                         updatedAt
+                        ${incDetail && detail}
                     }
                 }`,
     variables: { where },
