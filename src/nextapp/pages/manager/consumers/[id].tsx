@@ -247,7 +247,6 @@ const ConsumerPage: React.FC<
                             queryKey={queryKey}
                             consumerId={consumer?.consumer.id}
                             prodEnvId={d.environment.id}
-                            serviceAccessId={id}
                           />
                           <ActionsMenu
                             data-testid={`consumer-prod-${d.productName}-menu`}

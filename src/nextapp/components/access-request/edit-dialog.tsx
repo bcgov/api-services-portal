@@ -37,7 +37,6 @@ import { gql } from 'graphql-request';
 
 interface ConsumerEditDialogProps {
   queryKey: QueryKey;
-  serviceAccessId: string;
   consumerId: string;
   prodEnvId: string;
 }
@@ -46,15 +45,14 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   prodEnvId,
   queryKey,
   consumerId,
-  serviceAccessId,
 }) => {
   const client = useQueryClient();
   const ref = React.useRef(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, isLoading, isSuccess } = useApi(
-    ['consumerEdit', prodEnvId, serviceAccessId],
-    { query, variables: { serviceAccessId, prodEnvId } },
+    ['consumerEdit', prodEnvId, consumerId],
+    { query, variables: { consumerId, prodEnvId } },
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
@@ -152,7 +150,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         status: 'success',
       });
       client.invalidateQueries(queryKey);
-      client.invalidateQueries(['consumerEdit', prodEnvId, serviceAccessId]);
+      client.invalidateQueries(['consumerEdit', prodEnvId, consumerId]);
       onClose();
       setTabIndex(0);
     } catch {
@@ -196,7 +194,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
         variant="ghost"
         size="sm"
         onClick={onOpen}
-        data-testid={`${serviceAccessId}-edit-btn`}
+        data-testid={`${consumerId}-edit-btn`}
       >
         Edit
       </Button>
@@ -364,11 +362,8 @@ const saveMutation = gql`
 `;
 
 const query = gql`
-  query GetConsumerEditDetails($serviceAccessId: ID!, $prodEnvId: ID!) {
-    getConsumerProdEnvAccess(
-      serviceAccessId: $serviceAccessId
-      prodEnvId: $prodEnvId
-    ) {
+  query GetConsumerEditDetails($consumerId: ID!, $prodEnvId: ID!) {
+    getConsumerProdEnvAccess(consumerId: $consumerId, prodEnvId: $prodEnvId) {
       productName
       environment {
         id
