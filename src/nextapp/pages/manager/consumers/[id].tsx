@@ -43,7 +43,6 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
 import ActionsMenu from '@/components/actions-menu';
-import { reverse } from 'dns';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;

@@ -55,7 +55,6 @@ import {
   lookupCredentialReferenceByServiceAccess,
   lookupLabeledServiceAccessesForNamespace,
   lookupServiceAccessesByConsumer,
-  lookupServiceAccessesByNamespace,
   lookupEnvironmentAndIssuerById,
   getConsumerLabels,
 } from '../keystone';
@@ -77,7 +76,6 @@ import { getConsumerAuthz } from '.';
 import {
   Environment,
   GatewayConsumer,
-  Label,
   LabelCreateInput,
   LabelUpdateInput,
 } from '../keystone/types';
@@ -92,9 +90,8 @@ import {
   updateConsumerLabel,
 } from '../keystone/labels';
 import { getActivityByRefId } from '../keystone/activity';
-import { AnyElement } from 'soap/lib/wsdl/elements';
-import { scopes } from 'auth/scope-role-utils';
 import { syncPlugins } from './consumer-plugins';
+import { removeAllButKeys } from '../../batch/feed-worker';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -283,7 +280,7 @@ async function getConsumerProdEnvAccessList(
         .map((plugin) => ({
           id: plugin.id,
           name: plugin.name,
-          config: plugin.config,
+          config: trimPlugin(plugin.config),
           service: plugin.service && {
             id: plugin.service?.id,
             name: plugin.service?.name,
@@ -325,7 +322,7 @@ async function getConsumerProdEnvAccessList(
           .map((plugin) => ({
             id: plugin.id,
             name: plugin.name,
-            config: plugin.config,
+            config: trimPlugin(plugin.config),
             service: plugin.service && {
               id: plugin.service?.id,
               name: plugin.service?.name,
@@ -626,7 +623,6 @@ export async function updateConsumerAccess(
       );
 
       const availableRoles = await kcClientService.listRoles(client.id);
-      logger.error('Available %j', availableRoles);
 
       const selectedRoles = availableRoles
         .filter((r: any) => roles.includes(r.name))
@@ -818,4 +814,20 @@ export async function saveConsumerLabels(
  */
 function isRevocable(prodEnv: Environment): boolean {
   return ['kong-api-key-acl', 'kong-acl-only'].includes(prodEnv.flow);
+}
+
+function trimPlugin(_plugin: string) {
+  const plugin = JSON.parse(_plugin);
+  removeAllButKeys(plugin, [
+    'deny',
+    'allow',
+    'second',
+    'minute',
+    'hour',
+    'day',
+    'month',
+    'year',
+    'policy',
+  ]);
+  return JSON.stringify(plugin);
 }

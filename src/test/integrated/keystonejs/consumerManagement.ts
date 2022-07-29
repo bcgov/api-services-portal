@@ -62,7 +62,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   const scopesRoles = await allScopesAndRoles(ctx, ns);
   o(scopesRoles);
 
-  if (true) {
+  if (false) {
     const id = '62a1848991c56de2f62d31a6';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     //o(consumerAccess);
@@ -92,17 +92,47 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumer);
   }
 
+  if (true) {
+    const id = '62a18b772da3cdea467b10fe';
+    const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
+    o(consumerAccess);
+
+    // only enriches with Authorization and Access Request details
+    // const envPromises = consumerAccess.prodEnvAccess
+    //   .filter((a) => a.plugins.length > 0)
+    //   .map(async (p: any) => {
+    //     const res = await getConsumerProdEnvAccess(
+    //       ctx,
+    //       ns,
+    //       consumerAccess.consumer.id,
+    //       p.environment.id
+    //     );
+    //     o(res);
+    //   });
+    // await Promise.all(envPromises);
+  }
   if (false) {
     const id = '62a18b772da3cdea467b10fd';
     const consumer = await lookupConsumerPlugins(ctx, id);
 
     const plugins: ConsumerPlugin[] = [
       {
-        id: '62d5b2238feb3dcd137db3b7',
-        name: 'rate-limiting',
-        config: { minute: 10 },
+        id: '62e30200b16aa6aa9e87ea56',
+        name: 'ip-restriction',
+        config: { deny: null, allow: ['1.1.1.1'] },
         service: {
           id: '61816208655ef5aad5968c5c',
+          name: 'a-service-for-refactortime-2',
+        },
+      },
+      {
+        id: '62e30200b16aa6aa9e87ea57',
+        name: 'rate-limiting',
+        config: { second: 10, minute: null, policy: 'redis' },
+        route: null,
+        service: {
+          id: '61816208655ef5aad5968c5c',
+          name: 'a-service-for-refactortime-2',
         },
       },
     ];
@@ -135,6 +165,15 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   //   labels: [{ labelGroup: 'Facility', value: 'abc' }],
   // } as ConsumerQueryFilter);
   // o(consumers);
+
+  if (true) {
+    const consumers = await getFilteredNamespaceConsumers(
+      ctx,
+      ns,
+      {} as ConsumerQueryFilter
+    );
+    o(consumers);
+  }
 
   if (false) {
     const consumers = await getFilteredNamespaceConsumers(

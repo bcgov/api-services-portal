@@ -265,19 +265,21 @@ export async function lookupLabeledServiceAccessesForNamespace(
 
   const where: ServiceAccessWhereInput = {};
 
+  // NOTE: Where namespace and product environment exists, it is a
+  // Namespace Service Account - which we want to exclude
   if (consumerIds) {
     where['AND'] = [
       { consumer: { id_in: consumerIds } },
       {
         OR: [
-          { namespace: ns },
+          { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
           { productEnvironment: { product: { namespace: ns } } },
         ],
       },
     ];
   } else {
     where['OR'] = [
-      { namespace: ns },
+      { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
       { productEnvironment: { product: { namespace: ns } } },
     ];
   }
