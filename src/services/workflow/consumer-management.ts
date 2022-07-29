@@ -434,7 +434,7 @@ export async function grantAccessToConsumer(
   ns: string,
   consumerId: string,
   prodEnvId: string,
-  { plugins, defaultClientScopes, roles }: RequestControls
+  { plugins }: RequestControls
 ): Promise<void> {
   // make sure the consumer hasn't granted access already
   const { consumer, prodEnvAccess } = await getConsumerProdEnvAccessList(
@@ -444,15 +444,6 @@ export async function grantAccessToConsumer(
   );
 
   logger.debug('[grantAccessToConsumer] Consumer %j', consumer);
-
-  // const found =
-  //   prodEnvAccess.filter((p) => p.environment.id === prodEnvId).length == 1;
-
-  // assert.strictEqual(
-  //   found,
-  //   false,
-  //   'Consumer already granted to this product environment.'
-  // );
 
   const prodEnv = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
@@ -464,6 +455,10 @@ export async function grantAccessToConsumer(
 
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+
+  if (plugins) {
+    await syncPlugins(context, ns, consumer, plugins);
+  }
 }
 
 /**
@@ -516,6 +511,8 @@ export async function revokeAccessFromConsumer(
 
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+
+  await syncPlugins(context, ns, consumer, []);
 }
 
 /**
