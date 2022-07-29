@@ -20,8 +20,9 @@ describe('Approve Pending Request Spec', () => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('Verify that API is not accessible with the generated API Key when the request is not approved', () => {
@@ -40,8 +41,23 @@ describe('Approve Pending Request Spec', () => {
     })
   })
 
+  it('verify the request details', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.get('@developer').then(({ accessRequest, application }: any) => {
+        cy.visit(consumers.path);
+        consumers.reviewThePendingRequest()
+        consumers.verifyRequestDetails(product, accessRequest, application)
+      })
+    })
+  })
+
+  it('Add group labels in request details window', () => {
+    cy.get('@access-manager').then(({ labels_consumer2 }: any) => {
+      consumers.addGroupLabels(labels_consumer2)
+    })
+  })
+
   it('approves an access request', () => {
-    cy.visit(consumers.path);
     consumers.approvePendingRequest()
   })
 

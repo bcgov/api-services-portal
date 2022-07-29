@@ -34,18 +34,18 @@ describe('Grant appropriate permissions to team members for client credential fl
   })
 
   it('Grant namespace access to access manager(Mark)', () => {
-    cy.get('@apiowner').then(({ permission }: any) => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission(permission.Mark)
+      na.grantPermission(clientCredentials.Mark)
     })
   })
 
-  it('Grant CredentialIssuer.Admin permission to API Owner', () => {
-    cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
+  it('Grant CredentialIssuer.Admin permission to credential issuer(Wendy)', () => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission({ userName: user.credentials.username, accessRole: namespaceAccessPermissions })
+      na.grantPermission(clientCredentials.Wendy)
     })
   })
 

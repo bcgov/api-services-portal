@@ -134,6 +134,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
         size="sm"
         variant="link"
         color="bc-blue"
+        data-testid="manage-labels-btn"
       >
         Manage Labels
       </Button>
@@ -172,7 +173,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
               {labels.map((l, index) => (
                 <React.Fragment key={uid(l, index)}>
                   <GridItem d="flex" alignItems="center">
-                    <Input readOnly name="labelGroup" value={l.labelGroup} />
+                    <Input readOnly name="labelGroup"  data-testid={`labels-groups-${index}`} value={l.labelGroup} />
                   </GridItem>
                   <GridItem>
                     <TagInput
@@ -238,7 +239,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
             <Button mr={3} onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button isDisabled={isAddingNewLabel} onClick={handleSave}>
+            <Button data-testid="groups-labels-save-btn" isDisabled={isAddingNewLabel} onClick={handleSave}>
               Save
             </Button>
           </ModalFooter>

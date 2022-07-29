@@ -1,5 +1,6 @@
 import { Assertion } from "chai"
 import { wrap } from "module"
+import dateformat from 'dateformat'
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
@@ -12,20 +13,30 @@ export default class ConsumersPage {
   reviewBtn: string = '[data-testid="ar-review-btn"]'
   approveBtn: string = '[data-testid="ar-approve-btn"]'
   filterType: string = '[data-testid="filter-type-select"]'
-  filterValur: string = '[data-testid="consumer-filters-select"]'
+  filterValue: string = '[data-testid="consumer-filters-select"]'
   filterApplyBtn: string = '[data-testid="btn-filter-apply"]'
   allConsumerTable: string = '[data-testid="all-consumer-control-tbl"]'
   editProductBtn: string = '[data-testid="2-edit-btn"]'
   ipRestrictionOption: string = '[data-testid="ip-restrictions-card"]'
   rateLimitingOption: string = '[data-testid="ratelimit-card"]'
-  consumerDialogSaveBtn: string= '[data-testid="edit-consumer-dialog-edit-save-btn"]'
+  consumerDialogSaveBtn: string = '[data-testid="edit-consumer-dialog-edit-save-btn"]'
+  requesterProfileName: string = '[data-testid="user-profile-name"]'
+  requestDetailsTbl: string = '[data-testid="ar-request-details"]'
+  labelsGroupSelection: string = '[data-testid="labels-group-select"]'
+  labelsGroupValueInput: string = '[data-testid="labels-values-0-input"]'
+  labelName: string = '[name="newLabelGroup"]'
+  clearAllFilterBtn: string = '[data-testid="btn-filter-clear-all"]'
+  labelValueInput: string = '[data-testid="consumer-filters-label-input"]'
+  manageLabelsBtn: string = '[data-testid="manage-labels-btn"]'
+  manageLabelsSaveBtn: string = '[data-testid="groups-labels-save-btn"]'
+
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption).click()
   }
 
   clickOnIPRestrictionOption() {
-    cy.get(this.ipRestrictionOption,{ timeout: 2000 }).click()
+    cy.get(this.ipRestrictionOption, { timeout: 2000 }).click()
   }
 
 
@@ -67,46 +78,157 @@ export default class ConsumersPage {
   }
 
   deleteControl() {
-    // cy.get(this.removeIPRestrictionButton).then($button => {
-    //   if ($button.is(':enabled')){
-    //     cy.get(this.removeIPRestrictionButton,{ timeout: 2000 }).click()
-    //     cy.wait(2000)
-    //   }
-    // })
-
     cy.get("body").then($body => {
-      if ($body.find(this.removeIPRestrictionButton).length > 0) {   
-        cy.get(this.removeIPRestrictionButton,{ timeout: 2000 }).click()
+      if ($body.find(this.removeIPRestrictionButton).length > 0) {
+        cy.get(this.removeIPRestrictionButton, { timeout: 2000 }).click()
       }
-  });
+    });
   }
 
-  approvePendingRequest(){
-    cy.wait(3000)
-    cy.get(this.reviewBtn).click({ force: true })
+  approvePendingRequest() {
     cy.get(this.approveBtn).click({ force: true })
   }
 
-  isApproveAccessEnabled(expStatus : boolean) {
-    if(expStatus)
+  reviewThePendingRequest() {
+    cy.wait(3000)
+    cy.get(this.reviewBtn).click({ force: true })
+  }
+
+  isApproveAccessEnabled(expStatus: boolean) {
+    if (expStatus)
       cy.contains('Review').should('be.visible')
     else
       cy.contains('Review').should('not.exist')
   }
 
-  filterConsumerByTypeAndValue(type: string, value: string)
-  {
+  filterConsumerByTypeAndValue(type: string, value: string, labelValue?: string) {
+    labelValue = labelValue || ""
+    cy.get("body").then($body => {
+      if ($body.find(this.clearAllFilterBtn).length > 0) {
+        cy.get(this.clearAllFilterBtn, { timeout: 2000 }).click()
+      }
+    });
     cy.get(this.filterType).select(type).invoke('val')
-    cy.get(this.filterValur).select(value).invoke('val')
+    cy.get(this.filterValue).select(value).invoke('val')
+    debugger
+    if (type == 'Labels') {
+      cy.get(this.labelValueInput).type(labelValue)
+    }
     cy.get(this.filterApplyBtn).click()
   }
 
-  editConsumerDialog()
-  {
+  editConsumerDialog() {
     cy.get(this.editProductBtn).then($button => {
-      if ($button.is(':visible')){
+      if ($button.is(':visible')) {
         cy.get(this.editProductBtn).contains("Edit").click()
       }
+    })
+  }
+
+  verifyRequestDetails(productDetails: any, accessRequestDetails: any, applicationDetails: any) {
+    let fieldName
+    cy.get(this.requesterProfileName).then(($el) => {
+      expect($el.text().trim()).to.eq('Harley Jones')
+    })
+    cy.get(this.requestDetailsTbl).find('dt').each(($e1, index, $list) => {
+      if ($e1.text() === 'Environment') {
+        expect($e1.next().text().trim()).to.eq('Dev')
+      }
+      if ($e1.text() === 'Application') {
+        debugger
+        expect($e1.next().text().trim()).to.eq(applicationDetails.name)
+      }
+      if ($e1.text() === 'Instructions from the API Provider') {
+        expect($e1.next().text().trim()).to.eq(productDetails.environment.config.optionalInstructions)
+      }
+      if ($e1.text() === 'Requester Comments') {
+        expect($e1.next().text().trim()).to.eq(accessRequestDetails.notes)
+      }
+    })
+  }
+
+  addGroupLabels(groupLabels: any) {
+    Object.entries(groupLabels.labels).forEach((entry, index) => {
+      debugger
+      cy.get(this.labelsGroupSelection).select('[+] Add New Label Group...').invoke('val')
+      cy.get(this.labelName).type(entry[0])
+      cy.contains('Add').click()
+      cy.get('[data-testid="labels-values-' + index + '-input"]').type(entry[1])
+      cy.contains('Add more labels').click()
+    })
+    cy.wait(1000)
+  }
+
+  verifyFilterResults(filterType: string, filterValue: string, expectedResult: string, labelValue?: any) {
+    cy.wait(2000)
+    this.filterConsumerByTypeAndValue(filterType, filterValue, labelValue)
+    cy.wait(2000)
+    cy.get(this.allConsumerTable).find("tbody").find("tr").then((row) => {
+      expect(row.length.toString()).eq(expectedResult)
+    })
+  }
+
+  openManageLabelsWindow() {
+    cy.wait(1000)
+    cy.get(this.manageLabelsBtn).then($el => {
+      cy.wrap($el).click() 
+    })
+  }
+
+  deleteManageLabels() {
+    var labelType: any
+    let labelValue: any
+    this.openManageLabelsWindow()
+    cy.get('[data-testid="labels-groups-0"]').invoke('val').then(($type) => {
+      cy.get('[data-testid="labels-values-0"]').find('span').first().then(($value) => {
+        labelValue = $value.text()
+        labelType = $type
+        cy.get('[data-testid="labels-values-0"]').find('button').first().then(($button) => {
+          cy.wrap($button).focus()
+          cy.wrap($button).click()
+          cy.get(this.manageLabelsSaveBtn).click({force:true})
+          cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
+          cy.contains(labelType + ' = ' + labelValue).should('not.exist')
+        })
+      })
+    })
+  }
+
+  updateManageLabels() {
+    var labelType: any
+    let labelValue: any
+    this.openManageLabelsWindow()
+    cy.get('[data-testid="labels-groups-0"]').invoke('val').then(($type) => {
+      cy.get('[data-testid="labels-values-0"]').find('span').first().then(($value) => {
+        cy.get('[data-testid="labels-values-0"]').find('button').first().then(($button) => {
+          cy.wrap($button).focus()
+          cy.wrap($button).click()
+          labelValue = $value.text()
+          labelType = $type
+          labelValue = labelValue+'123'
+          cy.get('[data-testid="labels-values-0"]').type(labelValue)
+          cy.get(this.manageLabelsSaveBtn).click({force:true})
+          cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
+          cy.contains(labelType + ' = ' + labelValue).should('exist')
+        })
+      })
+    })
+  }
+
+  addManageLabels() {
+    cy.wait(2000)
+    debugger
+    cy.get(this.manageLabelsBtn).parents('ul').find('li').then(($ele) => {
+      debugger
+      const index = $ele.length -1
+      this.openManageLabelsWindow()
+      cy.get(this.labelsGroupSelection).select('[+] Add New Label Group...').invoke('val')
+      cy.get(this.labelName).type("Entity")
+      cy.contains('Add').click()
+      cy.get('[data-testid="labels-values-' +index+ '-input"]').type("Drug Store")
+      cy.get(this.manageLabelsSaveBtn).click({force:true})
+      cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
+      cy.contains('Entity = Drug Store').should('exist')
     })
   }
 }

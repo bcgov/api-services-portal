@@ -165,6 +165,7 @@ const Filters: React.FC<FiltersProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleClear}
+                data-testid="btn-filter-clear-all"
               >
                 Clear All
               </Button>

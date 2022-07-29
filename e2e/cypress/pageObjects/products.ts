@@ -145,7 +145,7 @@ class Products {
 
   verifyProductIsVisible(productName: string)
   {
-    cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
+    cy.get(`[data-testid=${productName}-edit-btn]`).should('exist')
   }
 
   turnOnACLSwitch(flag: Boolean) {
