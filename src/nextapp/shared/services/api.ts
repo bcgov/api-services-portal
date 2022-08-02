@@ -62,7 +62,12 @@ const api = async <T extends ApiResponse>(
     const data = await apiClient.request<T>(query, variables);
 
     if (data.errors) {
-      throw data.errors;
+      let errorMessage = data.errors[0]?.message;
+      if (data.errors[0]?.data.messages) {
+        errorMessage = data.errors[0]?.data.messages.join('\n');
+      }
+      console.log(errorMessage);
+      throw errorMessage;
     }
 
     return data;
@@ -70,7 +75,14 @@ const api = async <T extends ApiResponse>(
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
     } else {
-      throw err.response.errors;
+      const hasErrors = Boolean(err.response?.errors);
+      if (hasErrors) {
+        if (Boolean(err.response.errors[0]?.data?.messages)) {
+          throw err.response.errors[0]?.data?.messages.join('\n');
+        }
+        throw err.response.errors?.map((e) => e.message).join('\n');
+      }
+      throw err;
     }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
