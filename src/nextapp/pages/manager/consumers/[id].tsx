@@ -43,7 +43,6 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
 import ActionsMenu from '@/components/actions-menu';
-import { reverse } from 'dns';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -55,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     async () =>
       await api<Query>(
         query,
-        { serviceAccessId: id },
+        { consumerId: id },
         {
           headers: context.req.headers as HeadersInit,
         }
@@ -79,7 +78,7 @@ const ConsumerPage: React.FC<
     queryKey,
     {
       query,
-      variables: { serviceAccessId: id },
+      variables: { consumerId: id },
     },
     { suspense: false }
   );
@@ -248,7 +247,6 @@ const ConsumerPage: React.FC<
                             queryKey={queryKey}
                             consumerId={consumer?.consumer.id}
                             prodEnvId={d.environment.id}
-                            serviceAccessId={id}
                           />
                           <ActionsMenu
                             data-testid={`consumer-prod-${d.productName}-menu`}
@@ -278,10 +276,10 @@ const ConsumerPage: React.FC<
 export default ConsumerPage;
 
 const query = gql`
-  query GetConsumer($serviceAccessId: ID!) {
+  query GetConsumer($consumerId: ID!) {
     allConsumerGroupLabels
 
-    getNamespaceConsumerAccess(serviceAccessId: $serviceAccessId) {
+    getNamespaceConsumerAccess(consumerId: $consumerId) {
       consumer {
         id
         username

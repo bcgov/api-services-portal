@@ -7,6 +7,7 @@ import { ConsumerPlugin } from './types';
 import { strict as assert } from 'assert';
 import { ConsumerPluginsService } from '../gwaapi';
 import getSubjectToken from '../../auth/auth-token';
+import { removeAllButKeys } from '../../batch/feed-worker';
 
 const logger = Logger('wf.ConsumerPlugins');
 
@@ -24,13 +25,15 @@ export async function syncPlugins(
     'Plugins must be defined in consumer.'
   );
 
-  const kongIdMapper: any = {};
-
   assert.strictEqual(
     plugins.filter((plugin) => !plugin.route && !plugin.service).length == 0,
     true,
     'All plugins must have a service or route'
   );
+
+  // quick mapping of KeystoneJS ID to Kong ID
+  // for Service and Route
+  const kongIdMapper: any = {};
 
   const routeIds: any = plugins
     .filter((plugin) => plugin.route)
@@ -83,13 +86,19 @@ export async function syncPlugins(
             (p) =>
               p.id === plugin.id &&
               p.name === plugin.name &&
-              JSON.stringify(p.config) != JSON.stringify(plugin.config)
+              keyDiffs(p.config, JSON.parse(plugin.config))
           ).length == 1
       )
       .map(async (oldPlugin) => {
         const plugin: ConsumerPlugin = plugins
           .filter((p) => p.id === oldPlugin.id)
           .pop();
+
+        logger.debug(
+          '[update] %s %s',
+          trimPlugin(oldPlugin.config),
+          JSON.stringify(plugin.config)
+        );
 
         const newPlugin: KongPlugin = {
           name: plugin.name,
@@ -127,9 +136,10 @@ export async function syncPlugins(
   );
 
   const allResults = await Promise.all(promises);
-  logger.debug('[syncPlugins] Result = %j', allResults);
-
-  if (allResults.length > 0) {
+  if (allResults.length == 0) {
+    logger.debug('[syncPlugins] No Change');
+  } else {
+    logger.debug('[syncPlugins] Result = %j', allResults);
     const feederApi = new FeederService(process.env.FEEDER_URL);
     await feederApi.forceSync('kong', 'consumer', consumer.extForeignKey);
   }
@@ -175,5 +185,34 @@ async function DeletePluginFromConsumer(
     kongConsumerPK,
     kongPluginId,
     ns
+  );
+}
+
+export function trimPlugin(_plugin: string) {
+  return JSON.stringify(trimPluginObject(JSON.parse(_plugin)));
+}
+
+function trimPluginObject(plugin: any) {
+  removeAllButKeys(plugin, [
+    'deny',
+    'allow',
+    'second',
+    'minute',
+    'hour',
+    'day',
+    'month',
+    'year',
+    'policy',
+  ]);
+  return plugin;
+}
+
+function keyDiffs(source: any, target: any) {
+  return (
+    Object.keys(source).filter(
+      (key) =>
+        !(key in target) ||
+        JSON.stringify(source[key]) != JSON.stringify(target[key])
+    ).length > 0
   );
 }

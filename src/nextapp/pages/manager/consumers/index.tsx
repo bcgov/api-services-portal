@@ -322,30 +322,6 @@ const query = gql`
       lastUpdated
     }
 
-    allServiceAccessesByNamespace(
-      first: 200
-      orderBy: "updatedAt_DESC"
-      where: { consumer: { username_not_starts_with: "sa-" } }
-    ) {
-      id
-      namespace
-      consumer {
-        id
-        username
-        aclGroups
-        customId
-        plugins {
-          name
-        }
-        tags
-        updatedAt
-      }
-      application {
-        name
-        appId
-      }
-    }
-
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {
       id
       name
@@ -367,10 +343,8 @@ const query = gql`
 `;
 
 const deleteMutation = gql`
-  mutation DeleteConsumer($id: ID!) {
-    deleteGatewayConsumer(id: $id) {
-      id
-    }
+  mutation RevokeAllConsumerAccess($id: ID!) {
+    revokeAllConsumerAccess(consumerId: $id)
   }
 `;
 

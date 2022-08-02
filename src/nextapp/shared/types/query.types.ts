@@ -6613,7 +6613,6 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   allApplicationNames?: Maybe<Array<Maybe<ApplicationSummary>>>;
-  getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
@@ -7235,11 +7234,6 @@ export type Query_KsListsMetaArgs = {
 };
 
 
-export type QueryGetGatewayConsumerPluginsArgs = {
-  id: Scalars['ID'];
-};
-
-
 export type QueryAllDiscoverableProductsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -7380,12 +7374,12 @@ export type QueryGetFilteredNamespaceConsumersArgs = {
 
 
 export type QueryGetNamespaceConsumerAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
 };
 
 
 export type QueryGetConsumerProdEnvAccessArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
   prodEnvId: Scalars['ID'];
 };
 
@@ -7720,13 +7714,11 @@ export type Mutation = {
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
   forceDeleteEnvironment?: Maybe<Scalars['Boolean']>;
-  createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
-  updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
-  deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
   grantAccessToConsumer?: Maybe<Scalars['Boolean']>;
   revokeAccessFromConsumer?: Maybe<Scalars['Boolean']>;
+  revokeAllConsumerAccess?: Maybe<Scalars['Boolean']>;
   updateConsumerAccess?: Maybe<Scalars['Boolean']>;
   saveConsumerLabels?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
@@ -8467,25 +8459,6 @@ export type MutationForceDeleteEnvironmentArgs = {
 };
 
 
-export type MutationCreateGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  plugin: Scalars['String'];
-};
-
-
-export type MutationUpdateGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  pluginExtForeignKey: Scalars['String'];
-  plugin: Scalars['String'];
-};
-
-
-export type MutationDeleteGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  pluginExtForeignKey: Scalars['String'];
-};
-
-
 export type MutationAcceptLegalArgs = {
   productEnvironmentId: Scalars['ID'];
   acceptLegal: Scalars['Boolean'];
@@ -8510,6 +8483,11 @@ export type MutationGrantAccessToConsumerArgs = {
 export type MutationRevokeAccessFromConsumerArgs = {
   consumerId: Scalars['ID'];
   prodEnvId: Scalars['ID'];
+};
+
+
+export type MutationRevokeAllConsumerAccessArgs = {
+  consumerId: Scalars['ID'];
 };
 
 

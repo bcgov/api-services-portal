@@ -6,6 +6,7 @@ import {
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   grantAccessToConsumer,
+  revokeAllConsumerAccess,
   revokeAccessFromConsumer,
   saveConsumerLabels,
   updateConsumerAccess,
@@ -176,10 +177,10 @@ module.exports = {
           },
           {
             schema:
-              'getNamespaceConsumerAccess(serviceAccessId: ID!): ConsumerAccess',
+              'getNamespaceConsumerAccess(consumerId: ID!): ConsumerAccess',
             resolver: async (
               item: any,
-              { serviceAccessId }: any,
+              { consumerId }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -188,17 +189,17 @@ module.exports = {
               return await getNamespaceConsumerAccess(
                 context,
                 namespace,
-                serviceAccessId
+                consumerId
               );
             },
             access: EnforcementPoint,
           },
           {
             schema:
-              'getConsumerProdEnvAccess(serviceAccessId: ID!, prodEnvId: ID!): ConsumerProdEnvAccess',
+              'getConsumerProdEnvAccess(consumerId: ID!, prodEnvId: ID!): ConsumerProdEnvAccess',
             resolver: async (
               item: any,
-              { serviceAccessId, prodEnvId }: any,
+              { consumerId, prodEnvId }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -207,7 +208,7 @@ module.exports = {
               return await getConsumerProdEnvAccess(
                 context,
                 namespace,
-                serviceAccessId,
+                consumerId,
                 prodEnvId
               );
             },
@@ -282,6 +283,31 @@ module.exports = {
                   '[revokeAccessFromConsumer] %s %s %s',
                   consumerId,
                   prodEnvId,
+                  err
+                );
+                throw err;
+              }
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'revokeAllConsumerAccess(consumerId: ID!): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              try {
+                logger.debug('[revokeAllConsumerAccess] %s', consumerId);
+                await revokeAllConsumerAccess(context, namespace, consumerId);
+              } catch (err) {
+                logger.error(
+                  '[revokeAllConsumerAccess] %s %s',
+                  consumerId,
                   err
                 );
                 throw err;

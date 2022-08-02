@@ -98,7 +98,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       toast({
         status: 'error',
         title: 'Access Rejection Failed',
-        description: err.message,
+        description: Array.isArray(err) ? err[0].message : err?.message,
       });
     }
   };
@@ -142,8 +142,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     } catch (err) {
       toast({
         status: 'error',
-        title: 'Access Rejection Failed',
-        description: err.message,
+        title: 'Access Approval Failed',
+        description: Array.isArray(err) ? err[0].message : err?.message,
       });
     }
   };
