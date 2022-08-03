@@ -17,6 +17,9 @@ env:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    container:
+      image: owasp/zap2docker-stable:2.11.1
+      options: -u root -v ${{ github.workspace }}/zap/scan_results:/zap/wrk/:rw
     steps:
       - name: Build GWA API Image
         run: |
@@ -37,15 +40,7 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
-
-  zap-scan:
-    name: ZAP Scan
-    runs-on: ubuntu-latest
-    needs: cypress-run
-    container:
-      image: owasp/zap2docker-stable:2.11.1
-      options: -u root -v ${{ github.workspace }}/zap/scan_results:/zap/wrk/:rw
-    steps:
+          
       - id: gwa-api-scan
         name: GWA API Scan
         run: |
@@ -67,11 +62,6 @@ jobs:
           name: ZAP Scan Results
           path: ${{ github.workspace }}/zap/scan_results
           
-  report:
-    name: Scanning Reports
-    runs-on: ubuntu-latest
-    needs: cypress-run
-    steps:          
       - name: Execute Tests & Clean Up
         run: |
           while true; do
