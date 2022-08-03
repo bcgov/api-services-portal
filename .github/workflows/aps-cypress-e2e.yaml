@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['test']
+    branches: ['test','owaspzap']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -37,6 +37,40 @@ jobs:
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
           docker-compose up -d
+
+  zap-scan:
+    runs-on: ubuntu-latest
+    needs: cypress-run
+    container:
+      image: owasp/zap2docker-stable:2.11.1
+      options: -u root -v ${{ github.workspace }}/zap/scan_results:/zap/wrk/:rw
+    name: ZAP Scan Dev
+    steps:
+      - id: gwa-api-scan
+        name: GWA API Scan
+        run: |
+          cd /zap
+          zap-api-scan.py -I -t https://gwa-api-gov-bc-ca.dev.api.gov.bc.ca/docs/v2/openapi.yaml -f openapi -w gwa-api-scan-result.md
+      - id: aps-api-scan
+        name: APS API Scan
+        run: |
+          cd /zap
+          zap-api-scan.py -I -t https://api-gov-bc-ca.dev.api.gov.bc.ca/ds/api/v2/openapi.yaml -f openapi -w aps-api-scan-result.md
+      - id: aps-web-app-scan
+        name: APS WEB App Scan
+        run: |
+          cd /zap
+          zap-baseline.py -I -t https://api-gov-bc-ca.dev.api.gov.bc.ca -w aps-web-app-scan-result.md
+      - name: Upload Scanned Results as Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ZAP Scan Results
+          path: ${{ github.workspace }}/zap/scan_results
+          
+  report:
+    runs-on: ubuntu-latest
+    needs: cypress-run
+    steps:          
       - name: Execute Tests & Clean Up
         run: |
           while true; do
