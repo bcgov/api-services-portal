@@ -51,12 +51,7 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
     } catch (err) {
       toast({
         title: 'Action Failed',
-        description: err
-          .map((e) =>
-            e.data?.messages ? e.data.messages.join(',') : e.message
-          )
-          .join(', '),
-
+        description: err,
         status: 'error',
       });
     }

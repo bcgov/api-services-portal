@@ -93,7 +93,7 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
     } catch (err) {
       toast({
         title: 'Control Update Failed',
-        description: err?.message,
+        description: err,
         status: 'error',
       });
     }

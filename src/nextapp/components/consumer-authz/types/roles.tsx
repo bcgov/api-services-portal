@@ -88,7 +88,7 @@ const RolesComponent: React.FC<RolesProps> = ({
       } catch (err) {
         toast({
           title: 'Role update failed',
-          description: Array.isArray(err) ? err[0].message : err?.message,
+          description: err,
           status: 'error',
         });
         setBusy.off();

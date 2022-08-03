@@ -37,11 +37,11 @@ const AuthorizationProfile: React.FC = () => {
           status: 'success',
         });
         router?.push('/manager/authorization-profiles');
-      } catch (e) {
+      } catch (err) {
         toast({
           title: 'Profile creation failed',
           status: 'error',
-          description: Array.isArray(e) ? e[0].message : '',
+          description: err,
         });
       }
     },

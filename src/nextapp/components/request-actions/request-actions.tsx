@@ -36,7 +36,7 @@ const RequestActions: React.FC<RequestActionsProps> = ({
       toast({
         title: 'Reject failed',
         status: 'error',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        description: err,
       });
     }
   };
@@ -53,7 +53,7 @@ const RequestActions: React.FC<RequestActionsProps> = ({
       toast({
         title: 'Approval failed',
         status: 'error',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        description: err,
       });
     }
   };

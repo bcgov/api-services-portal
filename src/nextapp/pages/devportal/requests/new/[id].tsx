@@ -168,7 +168,7 @@ const NewRequestsPage: React.FC<
     } catch (err) {
       toast({
         title: 'Unable to make request',
-        description: err.message,
+        description: err,
         status: 'error',
       });
     }

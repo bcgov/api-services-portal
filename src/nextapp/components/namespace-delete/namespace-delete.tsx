@@ -53,11 +53,7 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
     } catch (err) {
       toast({
         title: 'Namespace Delete Failed',
-        description: err
-          .map((e) =>
-            e.data?.messages ? e.data.messages.join(',') : e.message
-          )
-          .join(', '),
+        description: err,
         status: 'error',
       });
     }

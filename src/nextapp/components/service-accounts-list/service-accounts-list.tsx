@@ -47,7 +47,7 @@ const ServiceAccountsList: React.FC<ServiceAccountsListProps> = ({
     } catch (err) {
       toast({
         title: 'Revoke Access Scope Failed',
-        description: err?.message,
+        description: err,
         status: 'error',
       });
     }

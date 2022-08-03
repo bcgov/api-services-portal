@@ -61,7 +61,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
       } catch (err) {
         toast({
           title: 'Revoke failed',
-          description: err?.message,
+          description: err,
           status: 'error',
         });
       }

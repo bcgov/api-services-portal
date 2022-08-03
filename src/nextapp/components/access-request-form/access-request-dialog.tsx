@@ -107,12 +107,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           toast({
             isClosable: true,
             title: 'Request Failed',
-            description:
-              err
-                .map((e: any) =>
-                  e.data?.messages ? e.data.messages.join(',') : e.message
-                )
-                .join('\n') ?? 'Unable to create request',
+            description: err,
             status: 'error',
           });
         }

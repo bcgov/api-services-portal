@@ -121,7 +121,7 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
     } catch (err) {
       toast({
         title: 'Revoke Access Scope Failed',
-        description: err?.message,
+        description: err,
         status: 'error',
       });
     }

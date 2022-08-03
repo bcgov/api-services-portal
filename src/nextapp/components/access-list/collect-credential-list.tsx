@@ -54,7 +54,7 @@ const CollectCredentialList: React.FC<CollectCredentialListProps> = ({
       } catch (err) {
         toast({
           title: 'Failed to Cancel Request',
-          description: err?.message,
+          description: err,
           status: 'error',
         });
       }

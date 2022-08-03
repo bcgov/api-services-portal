@@ -45,7 +45,7 @@ const ConsumerACL: React.FC<ConsumerACLProps> = ({
       } catch (err) {
         toast({
           title: 'ACL update failed',
-          description: Array.isArray(err) ? err[0].message : err?.message,
+          description: err,
           status: 'error',
         });
       }
