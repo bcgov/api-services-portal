@@ -5,7 +5,10 @@ import {
 } from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
 import { KeycloakClientService } from '../../services/keycloak';
-import { NewCredential } from '../../services/workflow/types';
+import {
+  CredentialReference,
+  NewCredential,
+} from '../../services/workflow/types';
 import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
 
@@ -40,11 +43,12 @@ module.exports = {
 
                 const newApiKey = await replaceApiKey(
                   clientId,
-                  (serviceAccess.credentialReference as any).id
+                  (serviceAccess.credentialReference as CredentialReference)
+                    .keyAuthPK
                 );
 
-                const credentialReference = {
-                  id: newApiKey.apiKey.keyAuthPK,
+                const credentialReference: CredentialReference = {
+                  keyAuthPK: newApiKey.apiKey.keyAuthPK,
                   clientId,
                 };
                 const noauthContext = keystone.createContext({

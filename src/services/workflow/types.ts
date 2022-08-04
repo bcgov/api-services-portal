@@ -21,6 +21,11 @@ export interface NewCredential {
   clientPrivateKey?: string;
 }
 
+export interface CredentialReference {
+  keyAuthPK?: string;
+  clientId?: string;
+}
+
 // Subject Identity when a Product is requested using the Authentication Code Flow
 // this is collected during a "Confirm Identity" step during Request
 
