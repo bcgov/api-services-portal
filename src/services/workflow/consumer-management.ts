@@ -149,6 +149,8 @@ export async function allScopesAndRoles(
       result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
     });
 
+  result.scopes = [...new Set(result.scopes)];
+  result.roles = [...new Set(result.roles)];
   return result;
 }
 
