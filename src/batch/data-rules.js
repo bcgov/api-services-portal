@@ -113,7 +113,7 @@ const metadata = {
       },
       isInCatalog: { name: 'alwaysFalse' },
     },
-    validation: {
+    validations: {
       /* Ref: https://github.com/bcgov/ckanext-bcgov/blob/main/ckanext/bcgov/scripts/data/edc-vocabs.json */
       /* db.datasets.aggregate({ $group : { _id: "$view_audience", count: { $sum: 1 } } }) */
       security_class: {
