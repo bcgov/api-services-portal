@@ -103,14 +103,16 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
       await mutation.mutateAsync(payload);
       client.invalidateQueries(queryKey);
       toast({
-        title: 'Control Updated',
+        title: 'Control updated',
         status: 'success',
+        isClosable: true,
       });
     } catch (err) {
       toast({
-        title: 'Control Update Failed',
+        title: 'Control update failed',
         description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -172,7 +174,12 @@ const RateLimiting: React.FC<RateLimitingProps> = ({
       </HStack>
       <FormControl id="policy">
         <FormLabel>Policy</FormLabel>
-        <Select name="policy" variant="bc-input" data-testid="ratelimit-policy-dropdown" defaultValue={config.policy}>
+        <Select
+          name="policy"
+          variant="bc-input"
+          data-testid="ratelimit-policy-dropdown"
+          defaultValue={config.policy}
+        >
           <option value="local">Local</option>
           <option value="redis">Redis</option>
         </Select>

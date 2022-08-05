@@ -72,6 +72,7 @@ const AuthorizationProfile: React.FC<
         toast({
           title: 'Profile updated',
           status: 'success',
+          isClosable: true,
         });
         router?.push('/manager/authorization-profiles');
       } catch (err) {
@@ -79,6 +80,7 @@ const AuthorizationProfile: React.FC<
           title: 'Profile update failed',
           description: err,
           status: 'error',
+          isClosable: true,
         });
       }
     },

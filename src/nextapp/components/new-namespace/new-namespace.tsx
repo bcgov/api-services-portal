@@ -45,21 +45,24 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           toast({
             title: `Namespace ${json.createNamespace.name} created!`,
             status: 'success',
+            isClosable: true,
           });
           await restApi(`/admin/switch/${json.createNamespace.id}`, {
             method: 'PUT',
           });
           queryClient.invalidateQueries();
           toast({
-            title: `Switched to  ${json.createNamespace.name} namespace`,
+            title: `Switched to ${json.createNamespace.name} namespace`,
             status: 'success',
+            isClosable: true,
           });
           onClose();
         } catch (err) {
           toast({
-            title: 'Namespace Create Failed',
+            title: 'Namespace create failed',
             description: err,
             status: 'error',
+            isClosable: true,
           });
         }
       }

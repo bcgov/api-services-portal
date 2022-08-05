@@ -106,7 +106,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         } catch (err) {
           toast({
             isClosable: true,
-            title: 'Request Failed',
+            title: 'Request failed',
             description: err,
             status: 'error',
           });
@@ -124,7 +124,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       toast({
         isClosable: true,
         status: 'warning',
-        title: 'Pending Approval',
+        title: 'Pending approval',
         description:
           'Your request for access has been submitted. If approved, your credentials will be authorized to access the API',
       });

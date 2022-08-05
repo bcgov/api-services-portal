@@ -45,12 +45,14 @@ const DeleteControl: React.FC<DeleteControlProps> = ({
       toast({
         title: 'Control removed',
         status: 'success',
+        isClosable: true,
       });
       onClose();
     } catch {
       toast({
         title: 'Control could not be removed',
         status: 'error',
+        isClosable: true,
       });
     }
   };

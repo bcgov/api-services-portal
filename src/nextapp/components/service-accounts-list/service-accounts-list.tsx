@@ -40,15 +40,17 @@ const ServiceAccountsList: React.FC<ServiceAccountsListProps> = ({
     try {
       await revoke.mutateAsync({ prodEnvId, resourceId, policyId });
       toast({
-        title: 'Access Revoked',
+        title: 'Access revoked',
         status: 'success',
+        isClosable: true,
       });
       client.invalidateQueries(queryKey);
     } catch (err) {
       toast({
-        title: 'Revoke Access Scope Failed',
+        title: 'Revoke access scope failed',
         description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };

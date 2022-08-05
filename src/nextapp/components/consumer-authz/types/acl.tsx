@@ -39,14 +39,16 @@ const ConsumerACL: React.FC<ConsumerACLProps> = ({
         });
         client.invalidateQueries(queryKey);
         toast({
-          title: 'ACL Updated',
+          title: 'ACL updated',
           status: 'success',
+          isClosable: true,
         });
       } catch (err) {
         toast({
           title: 'ACL update failed',
           description: err,
           status: 'error',
+          isClosable: true,
         });
       }
     },

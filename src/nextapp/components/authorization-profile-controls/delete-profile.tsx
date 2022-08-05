@@ -37,6 +37,7 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
       toast({
         title: 'Profile deleted',
         status: 'success',
+        isClosable: true,
       });
       onClose();
       router.push('/manager/authorization-profiles');
@@ -45,6 +46,7 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
         title: 'Profile deletion failed',
         status: 'error',
         description: err,
+        isClosable: true,
       });
     }
   };

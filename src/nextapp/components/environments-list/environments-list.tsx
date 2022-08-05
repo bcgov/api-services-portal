@@ -44,15 +44,17 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
       client.invalidateQueries('products');
       toast({
         title: res.updateEnvironment.active
-          ? 'Environment Enabled'
-          : 'Environment Disabled',
+          ? 'Environment enabled'
+          : 'Environment disabled',
         status: res.updateEnvironment.active ? 'success' : 'warning',
+        isClosable: true,
       });
     } catch (err) {
       toast({
-        title: 'Action Failed',
+        title: 'Action failed',
         description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };

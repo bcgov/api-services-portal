@@ -45,16 +45,18 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
       }
 
       toast({
-        title: ' Namespace Deleted',
+        title: ' Namespace deleted',
         status: 'success',
+        isClosable: true,
       });
       client.invalidateQueries();
       onClose();
     } catch (err) {
       toast({
-        title: 'Namespace Delete Failed',
+        title: 'Namespace delete failed',
         description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   }, [client, deleteMutation, name, onClose, router, toast, user.namespace]);
@@ -83,7 +85,12 @@ const NamespaceDelete: React.FC<NamespaceDeleteProps> = ({
             <Button ref={cancelRef} onClick={handleCancel}>
               Cancel
             </Button>
-            <Button data-testid="confirm-delete-namespace-btn" colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button
+              data-testid="confirm-delete-namespace-btn"
+              colorScheme="red"
+              ml={3}
+              onClick={handleDelete}
+            >
               Yes, Delete
             </Button>
           </AlertDialogFooter>

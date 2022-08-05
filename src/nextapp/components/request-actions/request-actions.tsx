@@ -28,8 +28,9 @@ const RequestActions: React.FC<RequestActionsProps> = ({
     try {
       await reject.mutateAsync({ id });
       toast({
-        title: 'Request Rejected',
+        title: 'Request rejected',
         status: 'success',
+        isClosable: true,
       });
       client.invalidateQueries(queryKey);
     } catch (err) {
@@ -37,6 +38,7 @@ const RequestActions: React.FC<RequestActionsProps> = ({
         title: 'Reject failed',
         status: 'error',
         description: err,
+        isClosable: true,
       });
     }
   };
@@ -45,8 +47,9 @@ const RequestActions: React.FC<RequestActionsProps> = ({
     try {
       await approve.mutateAsync({ id, controls: JSON.stringify(controls) });
       toast({
-        title: 'Request Approved',
+        title: 'Request approved',
         status: 'success',
+        isClosable: true,
       });
       client.invalidateQueries(queryKey);
     } catch (err) {
@@ -54,6 +57,7 @@ const RequestActions: React.FC<RequestActionsProps> = ({
         title: 'Approval failed',
         status: 'error',
         description: err,
+        isClosable: true,
       });
     }
   };

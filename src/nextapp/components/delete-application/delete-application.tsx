@@ -36,12 +36,14 @@ const DeleteApplication: React.FC<DeleteApplicationProps> = ({ id }) => {
       toast({
         title: 'Application deleted',
         status: 'success',
+        isClosable: true,
       });
       onClose();
     } catch {
       toast({
         title: 'Application delete failed',
         status: 'error',
+        isClosable: true,
       });
     }
   };

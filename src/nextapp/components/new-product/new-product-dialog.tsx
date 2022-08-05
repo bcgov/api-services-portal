@@ -67,12 +67,14 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             title: `Product ${productName} created!`,
             description: 'You can now add more environments',
             status: 'success',
+            isClosable: true,
           });
           onClose();
         } catch {
           toast({
-            title: 'Create Failed',
+            title: 'Create failed',
             status: 'error',
+            isClosable: true,
           });
         }
       }

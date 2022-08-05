@@ -82,6 +82,7 @@ const RolesComponent: React.FC<RolesProps> = ({
         toast({
           title: `Role ${roleName} ${grant ? 'assigned' : 'removed'}`,
           status: 'success',
+          isClosable: true,
         });
         setBusy.off();
         client.invalidateQueries(queryKey);
@@ -90,6 +91,7 @@ const RolesComponent: React.FC<RolesProps> = ({
           title: 'Role update failed',
           description: err,
           status: 'error',
+          isClosable: true,
         });
         setBusy.off();
       }

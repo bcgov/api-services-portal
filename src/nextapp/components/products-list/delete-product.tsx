@@ -32,16 +32,18 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
     try {
       await mutation.mutateAsync({ id });
       toast({
-        title: 'Product Deleted',
+        title: 'Product deleted',
         status: 'success',
+        isClosable: true,
       });
       onDeleted();
       setIsOpen(false);
       client.invalidateQueries('products');
     } catch {
       toast({
-        title: 'Product Delete Failed',
+        title: 'Product delete failed',
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -74,7 +76,12 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button data-testid="confirm-delete-product-btn" colorScheme="red" onClick={onDelete} ml={3}>
+              <Button
+                data-testid="confirm-delete-product-btn"
+                colorScheme="red"
+                onClick={onDelete}
+                ml={3}
+              >
                 Delete
               </Button>
             </AlertDialogFooter>

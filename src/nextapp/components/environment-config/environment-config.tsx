@@ -92,13 +92,14 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
       });
       client.invalidateQueries(['environment', data.id]);
       toast({
-        title: 'Environment Updated',
+        title: 'Environment updated',
         status: 'success',
+        isClosable: true,
       });
       setEditing(false);
     } catch (err) {
       toast({
-        title: 'Environment Update Failed',
+        title: 'Environment update failed',
         description: err,
         isClosable: true,
         status: 'error',
