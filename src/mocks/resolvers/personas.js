@@ -30,7 +30,7 @@ export const mark = {
   userId: 'uid-mark1',
   name: 'Mark Smith',
   username: 'markadmin',
-  email: 'mark.smith@gov.ca',
+  email: 'mark@vendor.com',
   roles: ['api-owner', 'portal-user'],
   isAdmin: false,
   namespace: 'aps-portal',
