@@ -6,7 +6,6 @@ import {
   Container,
   Editable,
   EditableInput,
-  EditableTextarea,
   EditablePreview,
   Flex,
   Grid,
