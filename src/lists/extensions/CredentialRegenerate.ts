@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import {
   linkCredRefsToServiceAccess,
   lookupApplication,
@@ -90,9 +91,6 @@ module.exports = {
                 const client = await kcClientService.findByClientId(
                   serviceAccess.consumer.customId
                 );
-                const newSecret = await kcClientService.regenerateSecret(
-                  client.id
-                );
 
                 const newCredential = {
                   flow: serviceAccess.productEnvironment.flow,
@@ -102,7 +100,32 @@ module.exports = {
                 } as NewCredential;
 
                 if (clientAuthenticator === 'client-secret') {
+                  const newSecret = await kcClientService.regenerateSecret(
+                    client.id
+                  );
                   newCredential['clientSecret'] = newSecret;
+                } else if (clientAuthenticator === 'client-jwt') {
+                  // regenerate private/public keys
+
+                  const { publicKey, privateKey } = crypto.generateKeyPairSync(
+                    'rsa',
+                    {
+                      modulusLength: 4096,
+                      publicKeyEncoding: {
+                        type: 'spki',
+                        format: 'pem',
+                      },
+                      privateKeyEncoding: {
+                        type: 'pkcs8',
+                        format: 'pem',
+                      },
+                    }
+                  );
+
+                  await kcClientService.uploadCertificate(client.id, publicKey);
+
+                  newCredential['clientPrivateKey'] = privateKey;
+                  newCredential['clientPublicKey'] = publicKey;
                 }
 
                 return {

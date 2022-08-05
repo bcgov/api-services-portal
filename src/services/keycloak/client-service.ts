@@ -1,9 +1,12 @@
+import 'crypto';
+import FormData from 'form-data';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import KeycloakAdminClient, {
   default as KcAdminClient,
 } from '@keycloak/keycloak-admin-client';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
+import CertificateRepresentation from '@keycloak/keycloak-admin-client/lib/defs/certificateRepresentation';
 
 const logger = Logger('kc.client');
 
@@ -100,6 +103,40 @@ export class KeycloakClientService {
     });
     logger.debug('[regenerateSecret] CID=%s %s', id, cred.type);
     return cred.value;
+  }
+
+  public async uploadCertificate(
+    id: string,
+    publicKey: string
+  ): Promise<CertificateRepresentation> {
+    const formData = new FormData();
+    formData.append('keystoreFormat', 'Public Key PEM');
+    formData.append('file', publicKey);
+
+    const uploadCertificate = this.kcAdminClient.clients.makeUpdateRequest<
+      { id: string; attr: string },
+      any
+    >({
+      method: 'POST',
+      path: '/{id}/certificates/{attr}/upload-certificate',
+      urlParamKeys: ['id', 'attr'],
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${
+          (formData as any)._boundary
+        }`,
+      },
+    });
+
+    const cred = await uploadCertificate(
+      {
+        id,
+        attr: 'jwt.credential',
+      },
+      formData
+    );
+    logger.debug('[uploadCertificate] CID=%s %j', id, cred);
+
+    return cred;
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {
