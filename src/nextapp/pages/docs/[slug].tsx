@@ -80,22 +80,22 @@ const DocsContentPage: React.FC<
   return (
     <>
       <Head>
-        <title>API Program Services | Documentation | {data.title}</title>
+        <title>API Program Services | Documentation | {data?.title}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
           breadcrumb={[{ text: 'Documentation Home', href: '/docs' }]}
-          title={data.title}
+          title={data?.title}
         >
           {data?.publishDate && (
             <Text className="text-sm text-gray-500" d="inline">
               {`Published ${formatDistanceToNow(
-                new Date(data.publishDate)
+                new Date(data?.publishDate)
               )} ago`}
             </Text>
           )}
           <Wrap spacing={2} d="inline-flex" ml={4}>
-            {data.tags?.map((tag: string) => (
+            {data?.tags?.map((tag: string) => (
               <WrapItem key={tag}>
                 <Badge colorScheme="green">{tag}</Badge>
               </WrapItem>
