@@ -45,8 +45,8 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
     <Tr>
       <Td>
         <AccessStatus
-          isIssued={data.isIssued ?? data.active === false}
-          isComplete={data.isComplete ?? data.active === false}
+          isIssued={data.isIssued ?? data.active}
+          isComplete={data.isComplete ?? data.active}
           isApproved={data.isApproved ?? data.active}
         />
       </Td>

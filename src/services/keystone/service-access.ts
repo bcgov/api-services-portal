@@ -450,3 +450,18 @@ export async function linkCredRefsToServiceAccess(
   logger.debug('[linkCredRefsToServiceAccess] RESULT %j', result);
   return result.data.updateServiceAccess;
 }
+
+export async function deleteServiceAccess(
+  context: any,
+  serviceAccessId: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation DeleteServiceAccess($serviceAccessId: ID!) {
+                    deleteServiceAccess(id: $serviceAccessId) {
+                        id
+                    }
+                }`,
+    variables: { serviceAccessId },
+  });
+  logger.debug('[deleteServiceAccess] RESULT %j', result);
+}

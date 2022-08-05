@@ -29,60 +29,101 @@ export default class ConsumersPage {
   labelValueInput: string = '[data-testid="consumer-filters-label-input"]'
   manageLabelsBtn: string = '[data-testid="manage-labels-btn"]'
   manageLabelsSaveBtn: string = '[data-testid="groups-labels-save-btn"]'
-
+  grantAccessProduct: string = '[data-testid="ar-product-select"]'
+  grantAccessEnvironment: string = '[data-testid="ar-environment-select"]'
+  grantAccessBtn: string = '[data-testid="ar-grant-btn"]'
+  consumerGrantAccessBtn: string = '[data-testid="consumer-grant-btn"]'
+  rateLimitingApplyBtn: string = '[data-testid="ratelimit-submit-btn"]'
+  removeRateLimitControlButton: string = '[data-testid="ratelimit-item-delete-btn-0"]'
+  rateLimitRouteRadioBtn: string = '[data-testid="ratelimit-route-radio"]'
 
   clickOnRateLimitingOption() {
-    cy.get(this.rateLimitingOption).click()
+    cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
+    this.deleteRateLimitControl()
   }
 
   clickOnIPRestrictionOption() {
     cy.get(this.ipRestrictionOption, { timeout: 2000 }).click()
+    this.deleteIPRestrictionControl()
   }
 
 
   clickOnTheFirstConsumerID() {
-    cy.get(this.allConsumerTable).find('a').first().click()
+    cy.get(this.allConsumerTable).find('a').last().click()
     // cy.contains('Add Controls').should('be.visible')
   }
 
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
-    this.deleteControl()
+    this.editConsumerDialog()
+    cy.wait(1000)
     this.clickOnRateLimitingOption()
-    cy.get(this.rateLimitHourInput).type(requestCount + '{enter}')
+    cy.wait(1000)
+    cy.get(this.rateLimitHourInput, { timeout: 2000 }).click()
+    cy.get(this.rateLimitHourInput, { timeout: 2000 }).type(requestCount)
     if (scope.toLocaleLowerCase() !== 'service') {
-      cy.contains('span', 'Route').click()
+      cy.get(this.rateLimitRouteRadioBtn).click()
     }
     if (policy.toLocaleLowerCase() !== 'local') {
       cy.get(this.policyDropDown).select(policy, { force: true }).invoke('val')
     }
-    cy.get(this.applyBtn).click()
+    cy.get(this.rateLimitingApplyBtn).click()
+    cy.wait(500)
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.wait(1000)
+
   }
 
   setAllowedIPAddress(allowIP: string, scope = 'Service') {
     this.editConsumerDialog()
+    cy.wait(1000)
     this.clickOnIPRestrictionOption()
-    this.deleteControl()
-    cy.get(this.ipRestrictionAllowInput).type(allowIP)
+    cy.get(this.ipRestrictionAllowInput, { timeout: 2000 }).type(allowIP + '{enter}')
     if (scope === 'Route') {
-      cy.contains('span', 'Route').click()
+      cy.contains('span', 'Route').click({ force: true })
     }
     cy.get(this.applyBtn).click()
-    cy.get(this.applyBtn).click()
     // cy.contains('h2', 'ip-restriction').should('be.visible')
+    cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
-    cy.wait(2000)
+    cy.wait(1000)
+
   }
 
   verifyVisibilityOfTheRateLimiting() {
     cy.contains('h4', 'rate-limiting').should('be.visible')
   }
 
-  deleteControl() {
+  deleteIPRestrictionControl() {
+    // cy.wait(2000)
     cy.get("body").then($body => {
       if ($body.find(this.removeIPRestrictionButton).length > 0) {
         cy.get(this.removeIPRestrictionButton, { timeout: 2000 }).click()
       }
     });
+   
+  }
+  
+  deleteRateLimitControl() {
+    cy.get("body").then($body => {
+      if ($body.find(this.removeRateLimitControlButton).length > 0) {
+        cy.get(this.removeRateLimitControlButton, { timeout: 2000 }).click()
+      }
+    });
+  }
+  clearIPRestrictionControl() {
+    this.editConsumerDialog()
+    cy.wait(1000)
+    this.clickOnIPRestrictionOption()
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.wait(1000)
+  }
+
+  clearRateLimitControl() {
+    this.editConsumerDialog()
+    cy.wait(1000)
+    this.clickOnRateLimitingOption()
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.wait(1000)
   }
 
   approvePendingRequest() {
@@ -171,7 +212,7 @@ export default class ConsumersPage {
   openManageLabelsWindow() {
     cy.wait(1000)
     cy.get(this.manageLabelsBtn).then($el => {
-      cy.wrap($el).click() 
+      cy.wrap($el).click()
     })
   }
 
@@ -186,7 +227,7 @@ export default class ConsumersPage {
         cy.get('[data-testid="labels-values-0"]').find('button').first().then(($button) => {
           cy.wrap($button).focus()
           cy.wrap($button).click()
-          cy.get(this.manageLabelsSaveBtn).click({force:true})
+          cy.get(this.manageLabelsSaveBtn).click({ force: true })
           cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
           cy.contains(labelType + ' = ' + labelValue).should('not.exist')
         })
@@ -205,9 +246,9 @@ export default class ConsumersPage {
           cy.wrap($button).click()
           labelValue = $value.text()
           labelType = $type
-          labelValue = labelValue+'123'
+          labelValue = labelValue + '123'
           cy.get('[data-testid="labels-values-0"]').type(labelValue)
-          cy.get(this.manageLabelsSaveBtn).click({force:true})
+          cy.get(this.manageLabelsSaveBtn).click({ force: true })
           cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
           cy.contains(labelType + ' = ' + labelValue).should('exist')
         })
@@ -220,15 +261,26 @@ export default class ConsumersPage {
     debugger
     cy.get(this.manageLabelsBtn).parents('ul').find('li').then(($ele) => {
       debugger
-      const index = $ele.length -1
+      const index = $ele.length - 1
       this.openManageLabelsWindow()
       cy.get(this.labelsGroupSelection).select('[+] Add New Label Group...').invoke('val')
       cy.get(this.labelName).type("Entity")
       cy.contains('Add').click()
-      cy.get('[data-testid="labels-values-' +index+ '-input"]').type("Drug Store")
-      cy.get(this.manageLabelsSaveBtn).click({force:true})
+      cy.get('[data-testid="labels-values-' + index + '-input"]').type("Drug Store")
+      cy.get(this.manageLabelsSaveBtn).click({ force: true })
       cy.get(this.manageLabelsBtn, { timeout: 10000 }).should('be.visible');
       cy.contains('Entity = Drug Store').should('exist')
     })
+  }
+
+  clickOnGrantAccessBtn() {
+    cy.get(this.consumerGrantAccessBtn).click()
+  }
+
+  grantAccessToGivenProductEnvironment(product: string, environment: string) {
+    cy.get(this.grantAccessProduct).select(product).invoke('val')
+    cy.get(this.grantAccessEnvironment).select(environment).invoke('val')
+    cy.get(this.grantAccessBtn).click()
+    cy.wait(1000)
   }
 }

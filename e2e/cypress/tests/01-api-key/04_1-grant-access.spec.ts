@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Approve Pending Request Spec', () => {
+describe('Grant Access Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -25,15 +25,6 @@ describe('Approve Pending Request Spec', () => {
     // cy.visit(login.path)
   })
 
-  it('Verify that API is not accessible with the generated API Key when the request is not approved', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-        expect(response.status).to.be.equal(403)
-        expect(response.body.message).to.be.contain('You cannot consume this service')
-      })
-    })
-  })
-
   it('authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
@@ -41,34 +32,37 @@ describe('Approve Pending Request Spec', () => {
     })
   })
 
-  it('verify the request details', () => {
+  it('Navigate to Consumer page and filter the product', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.get('@developer').then(({ accessRequest, applicationLabels }: any) => {
-        cy.visit(consumers.path);
-        consumers.reviewThePendingRequest()
-        consumers.verifyRequestDetails(product, accessRequest, applicationLabels)
-      })
+      cy.visit(consumers.path);
+      consumers.filterConsumerByTypeAndValue('Products', product.name)
     })
   })
 
-  it('Add group labels in request details window', () => {
-    cy.get('@access-manager').then(({ labels_consumer2 }: any) => {
-      consumers.addGroupLabels(labels_consumer2)
+  it('Click on the first consumer', () => {
+    consumers.clickOnTheFirstConsumerID()
+  })
+
+  it('Click on Grant Access button', () => {
+    cy.wait(1000)
+    consumers.clickOnGrantAccessBtn()
+  })
+
+  it('Grant Access to Test environment', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      consumers.grantAccessToGivenProductEnvironment(product.name, product.test_environment.name)
     })
   })
 
-  it('approves an access request', () => {
-    consumers.approvePendingRequest()
-  })
-
-  it('Verify that API is accessible with the generated API Key', () => {
+  it('Verify that API is accessible with the generated API Key for Test environment', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
+      cy.makeKongRequest(product.test_environment.config.serviceName, 'GET').then((response) => {
         cy.log(response)
         expect(response.status).to.be.equal(200)
       })
     })
   })
+
 })
 
 // describe('Turn off the Authentication', () => {

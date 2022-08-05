@@ -37,6 +37,15 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-newplatform"
       }
+    },
+    "test_environment": {
+      "name": "test",
+      "config": {
+        "terms": "Terms of Use for API Gateway",
+        "authorization": "Kong API Key with ACL Flow",
+        "optionalInstructions": "This is a automation test",
+        "serviceName": "a-service-for-newplatform-test"
+      }
     }
   },
   "clientCredentials": {

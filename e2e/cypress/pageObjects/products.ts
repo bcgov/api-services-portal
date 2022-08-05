@@ -22,6 +22,7 @@ class Products {
   deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
   deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
   aclSwitch: string = '[data-testid="acls-switch"]'
+  config: string | undefined
 
   getTestIdEnvName(env: string) : string {
     switch (env) {
@@ -102,9 +103,13 @@ class Products {
   generateKongPluginConfig(filename: string) {
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
-      cy.readFile('cypress/fixtures/' + filename).then((content) => {
+      cy.readFile('cypress/fixtures/' + filename).then((content:any) => {
         let pluginFilename = filename.replace('.', '-plugin.')
-        cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
+        // cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
+        // debugger
+        let subString = content.split('v0')
+        // debugger
+        cy.writeFile('cypress/fixtures/' + pluginFilename,subString[0]+ 'v0' + '\n' + this.config+'\n'+subString[1]+ 'v0' + '\n' + $el.text())
       })
     })
   }
@@ -163,6 +168,12 @@ class Products {
     cy.get(`[data-testid=${config.serviceName}`).click()
   }
 
+  getKongPluginConfig()
+  {
+    cy.get('.language-yaml').then(($el) => {
+      this.config = $el.text()
+    })
+  }
 }
 
 export default Products

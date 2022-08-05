@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Approve Pending Request Spec', () => {
+describe('Filter Manage labels Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -37,10 +37,8 @@ describe('Approve Pending Request Spec', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.get('@access-manager').then(({ labels_consumer1 }: any) => {
         cy.visit(consumers.path);
-        // consumers.verifyFilterResults('Products',product.name,'2')
-        // consumers.verifyFilterResults('Environment',product.environment.name,'2')
-        // consumers.verifyFilterResults('Environment',product.environment.name,'2')
-        debugger
+        consumers.verifyFilterResults('Products',product.name,'2')
+        consumers.verifyFilterResults('Environment',product.environment.name,'2')
         consumers.verifyFilterResults('Labels',Object.keys(labels_consumer1.labels)[0],'1',Object.values(labels_consumer1.labels)[0])
         consumers.verifyFilterResults('Labels',Object.keys(labels_consumer1.labels)[1],'1',Object.values(labels_consumer1.labels)[1])
         consumers.verifyFilterResults('Labels',Object.keys(labels_consumer1.labels)[2],'2',Object.values(labels_consumer1.labels)[2])

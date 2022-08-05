@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Approve Pending Request Spec', () => {
+describe('Manage/Edit labels spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -36,14 +36,14 @@ describe('Approve Pending Request Spec', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.visit(consumers.path);
       consumers.filterConsumerByTypeAndValue('Products', product.name)
-  })
+    })
   })
 
   it('Click on the first consumer', () => {
     consumers.clickOnTheFirstConsumerID()
   })
 
-  it('Verify that labels can be deletd', () => {
+  it('Verify that labels can be deleted', () => {
     // cy.wait(1000)
     consumers.deleteManageLabels()
   })

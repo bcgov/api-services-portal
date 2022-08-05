@@ -6,6 +6,7 @@ import {
   getFilteredNamespaceConsumers,
   getNamespaceConsumerAccess,
   grantAccessToConsumer,
+  revokeAllConsumerAccess,
   revokeAccessFromConsumer,
   saveConsumerLabels,
   updateConsumerAccess,
@@ -282,6 +283,31 @@ module.exports = {
                   '[revokeAccessFromConsumer] %s %s %s',
                   consumerId,
                   prodEnvId,
+                  err
+                );
+                throw err;
+              }
+              return true;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'revokeAllConsumerAccess(consumerId: ID!): Boolean',
+            resolver: async (
+              item: any,
+              { consumerId }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const namespace = context.req.user.namespace;
+              try {
+                logger.debug('[revokeAllConsumerAccess] %s', consumerId);
+                await revokeAllConsumerAccess(context, namespace, consumerId);
+              } catch (err) {
+                logger.error(
+                  '[revokeAllConsumerAccess] %s %s',
+                  consumerId,
                   err
                 );
                 throw err;

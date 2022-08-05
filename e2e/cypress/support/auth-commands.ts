@@ -7,6 +7,7 @@ import { url } from 'inspector'
 import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
+// import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
@@ -200,7 +201,12 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
   }).then((res) => {
     expect(res.status).to.eq(200)
-    cy.saveState(config + 'ID', res.body.data[0].id)
+    if(config === 'routes'){
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["hosts",["a-service-for-newplatform.api.gov.bc.ca"]]))[0],'id'))
+    }
+    else{
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["name","a-service-for-newplatform"]))[0],'id'))
+    }
   })
 })
 
@@ -243,6 +249,7 @@ Cypress.Commands.add('deleteAllCookies', () => {
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   let authorization
   cy.fixture('state/regen').then((creds: any) => {
+    cy.wait(1000)
     let token = key || creds.apikey
     debugger
     const service = serviceName

@@ -27,6 +27,8 @@ ACCESS MANAGER,,getConsumerProdEnvAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,updateConsumerAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,grantAccessToConsumer,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,revokeAccessFromConsumer,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,revokeAllConsumerAccess,,,,,,,access-manager,,,allow,
+ACCESS MANAGER,,deleteServiceAccess,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,saveConsumerLabels,,,,,,,access-manager,,,allow,
 ACCESS MANAGER,,,Activity,read,,,,,access-manager,,,allow,filterByUserNS
 ACCESS MANAGER,,,GatewayPlugin,read,,,,,access-manager,,,allow,
@@ -197,6 +199,8 @@ API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-us
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+,,allProductsByNamespace,,,,,,,,,portal-user,allow,
+,,,,,,,,,,,,,
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
 Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment
 Portal User or Guest,,allProducts,,,,,,,,,"portal-user,guest",allow,

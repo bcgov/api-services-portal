@@ -31,7 +31,7 @@ describe('Apply Rate Limiting for Client Credential Authorization Profile', () =
         cy.login(user.credentials.username, user.credentials.password).then(() => {
           home.useNamespace(clientCredentials.namespace);
           cy.visit(consumers.path);
-          consumers.clickOnTheTheConsumerID(cc.clientId)
+          consumers.clickOnTheFirstConsumerID(cc.clientId)
           consumers.setRateLimiting('3')
         })
       })

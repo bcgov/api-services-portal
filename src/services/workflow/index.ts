@@ -9,6 +9,7 @@ export {
   getNamespaceConsumerAccess,
   getConsumerProdEnvAccess,
   grantAccessToConsumer,
+  revokeAllConsumerAccess,
   revokeAccessFromConsumer,
   updateConsumerAccess,
   saveConsumerLabels,

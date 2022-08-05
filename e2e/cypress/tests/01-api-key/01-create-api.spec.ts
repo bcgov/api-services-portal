@@ -51,7 +51,7 @@ describe('Create API Spec', () => {
     sa.saveServiceAcctCreds()
   })
 
-  it('publishes a new API to Kong Gateway', () => {
+  it('publishes a new API for Dev environment to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespace }: any) => {
       cy.publishApi('service.yml', namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
@@ -60,6 +60,7 @@ describe('Create API Spec', () => {
       })
     })
   })
+
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
@@ -90,6 +91,17 @@ describe('Create API Spec', () => {
       pd.editProductEnvironment(product.name, product.environment.name)
       pd.editProductEnvironmentConfig(product.environment.config)
     })
+    pd.getKongPluginConfig()
+  })
+
+
+  it('Create a Test environment', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.addEnvToProduct(product.name, product.test_environment.name)
+      pd.editProductEnvironment(product.name, product.test_environment.name)
+      pd.editProductEnvironmentConfig(product.test_environment.config)
+    })
     pd.generateKongPluginConfig('service.yml')
   })
 
@@ -103,9 +115,19 @@ describe('Create API Spec', () => {
     })
   })
 
-  it('activate the service', () => {
+  it('activate the service for Test environment', () => {
     cy.get('@apiowner').then(({ product }: any) => {
+      pd.activateService(product.test_environment.config)
+      cy.wait(3000)
+    })
+  })
+
+  it('activate the service for Dev environment', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.editProductEnvironment(product.name, product.environment.name)
       pd.activateService(product.environment.config)
+      cy.wait(3000)
     })
   })
 
