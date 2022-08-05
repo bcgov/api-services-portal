@@ -19,6 +19,7 @@ import {
   saveConsumerLabels,
   allConsumerGroupLabels,
   allScopesAndRoles,
+  revokeAllConsumerAccess,
 } from '../../../services/workflow';
 import {
   RequestControls,
@@ -92,7 +93,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumer);
   }
 
-  if (true) {
+  if (false) {
     const id = '62a18b772da3cdea467b10fd';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
@@ -128,7 +129,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
       {
         id: '62e30200b16aa6aa9e87ea57',
         name: 'rate-limiting',
-        config: { second: 10, minute: null, policy: 'redis' },
+        config: { second: 20, minute: null, policy: 'redis' },
         route: null,
         service: {
           id: '61816208655ef5aad5968c5c',
@@ -166,7 +167,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   // } as ConsumerQueryFilter);
   // o(consumers);
 
-  if (true) {
+  if (false) {
     const consumers = await getFilteredNamespaceConsumers(
       ctx,
       ns,
@@ -175,7 +176,41 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumers);
   }
 
-  if (true) {
+  if (false) {
+    const id = '62b40afce12d4941e6f4088b';
+
+    await revokeAllConsumerAccess(ctx, ns, id);
+  }
+  if (false) {
+    const id = '62a18b772da3cdea467b10fd';
+    const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
+    o(consumerAccess);
+    const envId = '6180d1078a98e36cae8d061f';
+
+    const controls: RequestControls = {
+      plugins: [
+        {
+          name: 'rate-limiting',
+          config: { second: 20, policy: 'local' },
+          route: null,
+          service: {
+            id: '61816208655ef5aad5968c5c',
+            name: 'a-service-for-refactortime-2',
+          },
+        },
+      ],
+    };
+    await revokeAccessFromConsumer(ctx, ns, consumerAccess.consumer.id, envId);
+    await grantAccessToConsumer(
+      ctx,
+      ns,
+      consumerAccess.consumer.id,
+      envId,
+      controls
+    );
+  }
+
+  if (false) {
     const consumers = await getFilteredNamespaceConsumers(
       ctx,
       ns,

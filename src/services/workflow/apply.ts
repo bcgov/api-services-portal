@@ -157,7 +157,7 @@ export const Apply = async (
         consumer: requestDetails.serviceAccess.consumer,
       };
 
-      if ('labels' in requestDetails) {
+      if ('labels' in requestDetails && requestDetails.labels != null) {
         const labels = JSON.parse(requestDetails.labels);
         await saveConsumerLabels(
           context,
