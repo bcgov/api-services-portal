@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Button,
   Box,
-  Center,
   Container,
   Heading,
   Flex,
@@ -12,8 +11,15 @@ import {
   Icon,
   Link,
   useToast,
+  HStack,
   VStack,
   useDisclosure,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  MenuOptionGroup
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -30,14 +36,18 @@ import {
   FaUserAlt,
   FaUserFriends,
   FaUserShield,
+  FaChevronDown
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation } from '@/shared/services/api';
+import { restApi, useApiMutation, useApi } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import NewNamespace from '@/components/new-namespace';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
+import Card from '@/components/card';
+import EmptyPane from '@/components/empty-pane';
+import type { NamespaceData } from '@/shared/types/app.types';
 
 const actions = [
   {
@@ -96,6 +106,20 @@ const secondaryActions = [
   },
 ];
 
+
+/*
+TODO Discussion items with Josh:
+
+To jump to item, search for item number
+
+1. In file: `src/nextapp/shared/data/links.ts` for the `name: 'Namespaces'` block: set access list to: `access: []`... before it was `access: ['api-owner']`. Is this an appropriate change? Also, even though we are logged in as someone who is an api-owner, they were not able to access this page. Why would that be the case?
+
+2. (Multiple Instances) Copied these from namespace-menu... is this a reasonable approach?
+
+3. This query is also used namespace-menu... should this be a shared query? Ie: place it in: `src/nextapp/shared/queries`... or is there a more appropriate way of getting shared data?
+*/
+
+
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
   const hasNamespace = !!user?.namespace;
@@ -104,6 +128,13 @@ const NamespacesPage: React.FC = () => {
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
+
+  // 2.
+  const { data, isLoading, isSuccess, isError } = useApi(
+    'allNamespaces',
+    { query },
+    { suspense: false }
+  );
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -126,6 +157,32 @@ const NamespacesPage: React.FC = () => {
     }
   }, [client, mutate, router, toast, user]);
 
+  // 2.
+  const handleNamespaceChange = React.useCallback(
+    (namespace: NamespaceData) => async () => {
+      toast({
+        title: `Switching to  ${namespace.name} namespace`,
+        status: 'info',
+      });
+      try {
+        await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
+        toast.closeAll();
+        client.invalidateQueries();
+        toast({
+          title: `Switched to  ${namespace.name} namespace`,
+          status: 'success',
+        });
+      } catch (err) {
+        toast.closeAll();
+        toast({
+          title: 'Unable to switch namespaces',
+          status: 'error',
+        });
+      }
+    },
+    [client, toast]
+  );
+
   return (
     <>
       <Head>
@@ -139,23 +196,74 @@ const NamespacesPage: React.FC = () => {
       <Container maxW="6xl">
         <PageHeader title={hasNamespace ? user.namespace : "For API Providers" } />
         {!hasNamespace && (
-          <>
-            <Box p={4} width="100%" height="300px" bgColor="white">
-              <Box mb={4}>
-                <Heading size="sm" mb={2}>
-                  No namespace selected yet
-                </Heading>
-                <Text fontSize="sm">
-                  To get started select namespace from the dropdown below{' '}
-                  or create a new namespace
-                </Text>
-              </Box>
-              <Button onClick={onOpen} variant="primary">
-                Create New Namespace
-              </Button>
-            </Box>
-          <NewNamespace isOpen={isOpen} onClose={onClose} />
-          </>
+          <Card data-testid="access-empty-pane">
+            <EmptyPane
+              action={
+                <HStack spacing={4}>
+                  {/* 2. */}
+                  <Menu placement="bottom-end">
+                    <MenuButton
+                      px={2}
+                      py={2}
+                      width={350}
+                      transition="all 0.2s"
+                      borderRadius={4}
+                      border="2px solid"
+                      borderColor="bc-component"
+                      _hover={{ bg: 'bc-link' }}
+                      _expanded={{ bg: 'blue.400' }}
+                      _focus={{ boxShadow: 'outline' }}
+                      data-testid="ns-dropdown-btn"
+                    >
+                      {user?.namespace ?? 'Select a Namespace'}{' '}
+                      <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
+                    </MenuButton>
+                    <MenuList
+                      color="gray.600"
+                      sx={{
+                        '.chakra-menu__group__title': {
+                          fontWeight: 'normal',
+                          fontSize: 'md',
+                          px: 1,
+                        },
+                      }}
+                    >
+                      <>
+                        {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
+                        {isError && (
+                          <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
+                        )}
+                        {isSuccess && data.allNamespaces.length > 0 && (
+                          <>
+                            <MenuOptionGroup title="Switch Namespace">
+                              {data.allNamespaces
+                                .filter((n) => n.name !== user.namespace)
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((n) => (
+                                  <MenuItem
+                                    key={n.id}
+                                    onClick={handleNamespaceChange(n)}
+                                    data-testid={`ns-dropdown-item-${n.name}`}
+                                  >
+                                    {n.name}
+                                  </MenuItem>
+                                ))}
+                            </MenuOptionGroup>
+                          </>
+                        )}
+                      </>
+                    </MenuList>
+                  </Menu>
+
+                  <Text>or</Text>
+                  <Button as="a">Create New Namespace</Button>
+                </HStack>
+              }
+              message="To get started select a namespace from the dropdown below or create a new namespace"
+              title="No namespace selected yet"
+            />
+            
+          </Card>
         )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
@@ -311,5 +419,15 @@ export default NamespacesPage;
 const mutation = gql`
   mutation DeleteNamespace($name: String!) {
     forceDeleteNamespace(namespace: $name, force: false)
+  }
+`;
+
+// 3.
+const query = gql`
+  query GetNamespaces {
+    allNamespaces {
+      id
+      name
+    }
   }
 `;
