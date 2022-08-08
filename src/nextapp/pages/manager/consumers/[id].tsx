@@ -144,7 +144,7 @@ const ConsumerPage: React.FC<
       />
       <Container maxW="6xl">
         <PageHeader
-          actions={<Button onClick={onToggle}>Grant Access</Button>}
+          actions={<Button data-testid="consumer-grant-btn" onClick={onToggle}>Grant Access</Button>}
           breadcrumb={breadcrumbs([
             { href: '/manager/consumers', text: 'Consumers' },
             {

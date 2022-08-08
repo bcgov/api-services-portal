@@ -25,15 +25,6 @@ describe('Approve Pending Request Spec', () => {
     // cy.visit(login.path)
   })
 
-  it('Verify that API is not accessible with the generated API Key when the request is not approved', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-        expect(response.status).to.be.equal(403)
-        expect(response.body.message).to.be.contain('You cannot consume this service')
-      })
-    })
-  })
-
   it('authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user, namespace }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
@@ -43,17 +34,17 @@ describe('Approve Pending Request Spec', () => {
 
   it('verify the request details', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.get('@developer').then(({ accessRequest, application }: any) => {
+      cy.get('@developer').then(({ accessRequest, applicationLabels }: any) => {
         cy.visit(consumers.path);
         consumers.reviewThePendingRequest()
-        consumers.verifyRequestDetails(product, accessRequest, application)
+        consumers.verifyRequestDetails(product, accessRequest, applicationLabels)
       })
     })
   })
 
   it('Add group labels in request details window', () => {
-    cy.get('@access-manager').then(({ labels_consumer1 }: any) => {
-      consumers.addGroupLabels(labels_consumer1)
+    cy.get('@access-manager').then(({ labels_consumer2 }: any) => {
+      consumers.addGroupLabels(labels_consumer2)
     })
   })
 

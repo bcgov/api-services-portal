@@ -43,30 +43,6 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
-  it('Creates authorization profile for Client ID/Secret', () => {
-    cy.visit(authProfile.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.clientIdSecret.authProfile
-      authProfile.createAuthProfile(ap)
-      cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
-    })
-  })
-  it('Creates authorization profile for JWT - Generated Key Pair', () => {
-    cy.visit(authProfile.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.jwtKeyPair.authProfile
-      authProfile.createAuthProfile(ap)
-      cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
-    })
-  })
-  it('Creates authorization profile for JWKS URL', () => {
-    cy.visit(authProfile.path)
-    cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.jwksUrl.authProfile
-      authProfile.createAuthProfile(ap)
-      cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
-    })
-  })
   it('Creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {

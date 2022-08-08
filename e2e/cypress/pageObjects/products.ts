@@ -21,6 +21,8 @@ class Products {
   deleteProductBtn: string = '[data-testid="prd-edit-delete-btn"]'
   deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
   deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
+  aclSwitch: string = '[data-testid="acls-switch"]'
+  config: string | undefined
 
   getTestIdEnvName(env: string) : string {
     switch (env) {
@@ -91,16 +93,23 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+    cy.wait(3000)
     // cy.get(`[data-testid=${config.serviceName}`).click()
+    // cy.wait(3000)
     cy.get(this.envCfgApplyChangesBtn).click()
+    cy.wait(3000)
   }
 
   generateKongPluginConfig(filename: string) {
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
-      cy.readFile('cypress/fixtures/' + filename).then((content) => {
+      cy.readFile('cypress/fixtures/' + filename).then((content:any) => {
         let pluginFilename = filename.replace('.', '-plugin.')
-        cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
+        // cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
+        // debugger
+        let subString = content.split('v0')
+        // debugger
+        cy.writeFile('cypress/fixtures/' + pluginFilename,subString[0]+ 'v0' + '\n' + this.config+'\n'+subString[1]+ 'v0' + '\n' + $el.text())
       })
     })
   }
@@ -141,7 +150,29 @@ class Products {
 
   verifyProductIsVisible(productName: string)
   {
-    cy.get(`[data-testid=${productName}-edit-btn]`).should('be.visible')
+    cy.get(`[data-testid=${productName}-edit-btn]`).should('exist')
+  }
+
+  turnOnACLSwitch(flag: Boolean) {
+    cy.get(this.aclSwitch).find('input').then(($btn) => {
+      if ($btn.is(':checked') != flag) {
+        cy.wrap($btn).invoke('show')
+        cy.wrap($btn).click({ force: true })
+        cy.wait(3000)
+      }
+    })
+  }
+
+  activateService(config: any)
+  {
+    cy.get(`[data-testid=${config.serviceName}`).click()
+  }
+
+  getKongPluginConfig()
+  {
+    cy.get('.language-yaml').then(($el) => {
+      this.config = $el.text()
+    })
   }
 }
 

@@ -16,7 +16,7 @@ describe('Access manager approves developer access request for Client ID/Secret 
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('Access Manager logs in', () => {
@@ -29,9 +29,12 @@ describe('Access manager approves developer access request for Client ID/Secret 
   it('Access Manager approves developer access request', () => {
     cy.get('@access-manager').then(() => {
       cy.visit(consumers.path)
-      cy.contains('Review').click()
-      cy.contains('Approve').click()
+      consumers.reviewThePendingRequest()
     })
+  })
+
+  it('approves an access request', () => {
+    consumers.approvePendingRequest()
   })
 
   after(() => {
