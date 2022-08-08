@@ -19,7 +19,8 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
-  MenuOptionGroup
+  MenuOptionGroup,
+  Center,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -36,7 +37,7 @@ import {
   FaUserAlt,
   FaUserFriends,
   FaUserShield,
-  FaChevronDown
+  FaChevronDown,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation, useApi } from '@/shared/services/api';
@@ -106,7 +107,6 @@ const secondaryActions = [
   },
 ];
 
-
 /*
 TODO Discussion items with Josh:
 
@@ -117,8 +117,21 @@ To jump to item, search for item number
 2. (Multiple Instances) Copied these from namespace-menu... is this a reasonable approach?
 
 3. This query is also used namespace-menu... should this be a shared query? Ie: place it in: `src/nextapp/shared/queries`... or is there a more appropriate way of getting shared data?
+
+4. Originally had EmptyPane component here but didn't think there was a way to override the maxW prop... should this be an EmptyPane instead? If so, how to override props like maxW?
+
+5. What should _hover be? Change color? Underline text?
+
+6. Tried using MenuButton.justifyContent="space-between" but did not work, so ended up using HStack to add this property. Why did justifyContent not work in this situation.
 */
 
+/*
+TODO: 
+
+- Looks like the text is in a more narrow Box while the buttons are in a wider box.
+- Add fuctionality for clicking on Create New Namespace button
+- Buttons should have greater height
+*/
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
@@ -194,75 +207,107 @@ const NamespacesPage: React.FC = () => {
 
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={hasNamespace ? user.namespace : "For API Providers" } />
+        <PageHeader
+          title={hasNamespace ? user.namespace : 'For API Providers'}
+        />
         {!hasNamespace && (
-          <Card data-testid="access-empty-pane">
-            <EmptyPane
-              action={
-                <HStack spacing={4}>
-                  {/* 2. */}
-                  <Menu placement="bottom-end">
-                    <MenuButton
-                      px={2}
-                      py={2}
-                      width={350}
-                      transition="all 0.2s"
-                      borderRadius={4}
-                      border="2px solid"
-                      borderColor="bc-component"
-                      _hover={{ bg: 'bc-link' }}
-                      _expanded={{ bg: 'blue.400' }}
-                      _focus={{ boxShadow: 'outline' }}
-                      data-testid="ns-dropdown-btn"
-                    >
-                      {user?.namespace ?? 'Select a Namespace'}{' '}
-                      <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
-                    </MenuButton>
-                    <MenuList
-                      color="gray.600"
-                      sx={{
-                        '.chakra-menu__group__title': {
-                          fontWeight: 'normal',
-                          fontSize: 'md',
-                          px: 1,
-                        },
-                      }}
-                    >
-                      <>
-                        {isLoading && <MenuItem isDisabled>Loading namespaces...</MenuItem>}
-                        {isError && (
-                          <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
-                        )}
-                        {isSuccess && data.allNamespaces.length > 0 && (
-                          <>
-                            <MenuOptionGroup title="Switch Namespace">
-                              {data.allNamespaces
-                                .filter((n) => n.name !== user.namespace)
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((n) => (
-                                  <MenuItem
-                                    key={n.id}
-                                    onClick={handleNamespaceChange(n)}
-                                    data-testid={`ns-dropdown-item-${n.name}`}
-                                  >
-                                    {n.name}
-                                  </MenuItem>
-                                ))}
-                            </MenuOptionGroup>
-                          </>
-                        )}
-                      </>
-                    </MenuList>
-                  </Menu>
+          <Card>
+            {/* 4. */}
+            <Center my={6}>
+              <Box
+                textAlign="center"
+                py="6rem"
+                px={8}
+                bg="white"
+                borderRadius="4px"
+                maxW={{ sm: 650 }}
+                mx={{ base: 4 }}
+              >
+                <Heading as="h3" size="md" mb={2}>
+                  No namespace selected yet.
+                </Heading>
+                <Text>
+                  To get started, select a namespace from the dropdown below or
+                  create a new namespace
+                </Text>
+                <Box mt={6}>
+                  <HStack spacing={4}>
+                    {/* 2. */}
+                    <Menu placement="bottom-end">
+                      <MenuButton
+                        px={5}
+                        py={2}
+                        width={250}
+                        transition="all 0.2s"
+                        borderRadius={4}
+                        border="2px solid"
+                        borderColor="bc-component"
+                        // 5.
+                        _hover={{ bg: 'bc-link' }}
+                        _expanded={{ bg: 'blue.400' }}
+                        _focus={{ boxShadow: 'outline' }}
+                        alignItems="center"
+                        // justifyContent="space-between"
+                      >
+                        {/* 6. */}
+                        <HStack justify="space-between">
+                          <Text>{user?.namespace ?? 'Select a Namespace'}</Text>
+                          <Icon
+                            as={FaChevronDown}
+                            ml={2}
+                            aria-label="chevron down icon"
+                          />
+                        </HStack>
+                      </MenuButton>
+                      <MenuList
+                        color="gray.600"
+                        sx={{
+                          '.chakra-menu__group__title': {
+                            fontWeight: 'normal',
+                            fontSize: 'md',
+                            px: 1,
+                          },
+                        }}
+                      >
+                        <>
+                          {isLoading && (
+                            <MenuItem isDisabled>
+                              Loading namespaces...
+                            </MenuItem>
+                          )}
+                          {isError && (
+                            <MenuItem isDisabled>
+                              Namespaces Failed to Load
+                            </MenuItem>
+                          )}
+                          {isSuccess && data.allNamespaces.length > 0 && (
+                            <>
+                              <MenuOptionGroup title="Switch Namespace">
+                                {data.allNamespaces
+                                  .filter((n) => n.name !== user.namespace)
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((n) => (
+                                    <MenuItem
+                                      key={n.id}
+                                      onClick={handleNamespaceChange(n)}
+                                      data-testid={`ns-dropdown-item-${n.name}`}
+                                    >
+                                      {n.name}
+                                    </MenuItem>
+                                  ))}
+                              </MenuOptionGroup>
+                            </>
+                          )}
+                        </>
+                      </MenuList>
+                    </Menu>
 
-                  <Text>or</Text>
-                  <Button as="a">Create New Namespace</Button>
-                </HStack>
-              }
-              message="To get started select a namespace from the dropdown below or create a new namespace"
-              title="No namespace selected yet"
-            />
-            
+                    <Text>or</Text>
+                    <Button as="a">Create New Namespace</Button>
+                  </HStack>
+                </Box>
+              </Box>
+            </Center>
           </Card>
         )}
         {hasNamespace && (
