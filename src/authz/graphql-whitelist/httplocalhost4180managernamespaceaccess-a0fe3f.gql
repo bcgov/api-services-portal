@@ -1,0 +1,12 @@
+
+  mutation RevokeAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $tickets: [String]!
+  ) {
+    revokePermissions(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      ids: $tickets
+    )
+  }
