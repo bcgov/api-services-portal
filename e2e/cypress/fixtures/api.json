@@ -62,6 +62,8 @@
       "download_audience": "Public",
       "notes": "Some notes",
       "title": "Dataset for Test API",
+      "isInCatalog": "false",
+      "isDraft": "false",
       "tags": ["gateway", "kong"],
       "organization": "ministry-of-health",
       "organizationUnit": "planning-and-innovation-division"
@@ -188,7 +190,7 @@
     },
     "endPoint": "ds/api/v2/namespaces",
     "activity": {
-      "name": "apiplatform",
+      "name": "newplatform",
       "scopes": [
         {
           "name": "GatewayConfig.Publish"

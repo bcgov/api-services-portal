@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Grant Access Spec', () => {
+describe('Approve Pending Request Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -32,37 +32,34 @@ describe('Grant Access Spec', () => {
     })
   })
 
-  it('Navigate to Consumer page and filter the product', () => {
+  it('verify the request details', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.visit(consumers.path);
-      consumers.filterConsumerByTypeAndValue('Products', product.name)
+      cy.get('@developer').then(({ accessRequest, applicationLabels }: any) => {
+        cy.visit(consumers.path);
+        consumers.reviewThePendingRequest()
+        consumers.verifyRequestDetails(product, accessRequest, applicationLabels)
+      })
     })
   })
 
-  it('Click on the first consumer', () => {
-    consumers.clickOnTheFirstConsumerID()
-  })
-
-  it('Click on Grant Access button', () => {
-    cy.wait(1000)
-    consumers.clickOnGrantAccessBtn()
-  })
-
-  it('Grant Access to Test environment', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      consumers.grantAccessToGivenProductEnvironment(product.name, product.test_environment.name)
+  it('Add group labels in request details window', () => {
+    cy.get('@access-manager').then(({ labels_consumer2 }: any) => {
+      consumers.addGroupLabels(labels_consumer2)
     })
   })
 
-  it('Verify that API is accessible with the generated API Key for Test environment', () => {
+  it('approves an access request', () => {
+    consumers.approvePendingRequest()
+  })
+
+  it('Verify that API is accessible with the generated API Key', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.test_environment.config.serviceName, 'GET').then((response) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
         cy.log(response)
         expect(response.status).to.be.equal(200)
       })
     })
   })
-
 })
 
 // describe('Turn off the Authentication', () => {

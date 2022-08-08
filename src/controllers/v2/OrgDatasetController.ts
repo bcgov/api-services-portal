@@ -24,7 +24,7 @@ import {
   deleteRecord,
 } from '../../batch/feed-worker';
 import { BatchResult } from '../../batch/types';
-import { Dataset } from './types';
+import { Dataset, DraftDataset } from './types';
 
 @injectable()
 @Route('/organizations')
@@ -91,12 +91,12 @@ export class OrgDatasetController extends Controller {
   @Security('jwt', ['Dataset.Manage'])
   public async putDataset(
     @Path() org: string,
-    @Body() body: Dataset,
+    @Body() body: DraftDataset,
     @Request() request: any
   ): Promise<BatchResult> {
-    assert.strictEqual(org, body['organization'], 'Organization Unit Mismatch');
+    assert.strictEqual(org, body['organization'], 'Organization Mismatch');
     return await syncRecords(
-      this.keystone.createContext(request),
+      this.keystone.createContext(request, true),
       'DraftDataset',
       body['name'],
       body
@@ -121,7 +121,7 @@ export class OrgDatasetController extends Controller {
     @Path() name: string,
     @Request() request: any
   ): Promise<BatchResult> {
-    const context = this.keystone.createContext(request);
+    const context = this.keystone.createContext(request, true);
 
     const records = await getRecords(
       context,
@@ -137,7 +137,7 @@ export class OrgDatasetController extends Controller {
 
     assert.strictEqual(records.length == 0, false, 'Dataset not found');
 
-    return await deleteRecord(context, 'Dataset', records.pop().name);
+    return await deleteRecord(context, 'DraftDataset', records.pop().name);
   }
 
   /**

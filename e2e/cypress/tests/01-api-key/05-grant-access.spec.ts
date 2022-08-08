@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import ProductPage from '../../pageObjects/products'
 
-describe('Manage/Edit labels spec', () => {
+describe('Grant Access Spec', () => {
   const login = new LoginPage()
   const consumers = new ConsumersPage()
   const home = new HomePage()
@@ -22,7 +22,6 @@ describe('Manage/Edit labels spec', () => {
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('developer').as('developer')
     cy.fixture('state/store').as('store')
-    // cy.visit(login.path)
   })
 
   it('authenticates Mark (Access-Manager)', () => {
@@ -43,18 +42,24 @@ describe('Manage/Edit labels spec', () => {
     consumers.clickOnTheFirstConsumerID()
   })
 
-  it('Verify that labels can be deleted', () => {
-    // cy.wait(1000)
-    consumers.deleteManageLabels()
+  it('Click on Grant Access button', () => {
+    cy.wait(1000)
+    consumers.clickOnGrantAccessBtn()
   })
 
-  it('Verify that labels can be updated', () => {
-    // cy.wait(1000)
-    consumers.updateManageLabels()
+  it('Grant Access to Test environment', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      consumers.grantAccessToGivenProductEnvironment(product.name, product.test_environment.name)
+    })
   })
 
-  it('Verify that labels can be added', () => {
-    // cy.wait(1000)
-    consumers.addManageLabels()
+  it('Verify that API is accessible with the generated API Key for Test environment', () => {
+    cy.get('@apiowner').then(({ product }: any) => {
+      cy.makeKongRequest(product.test_environment.config.serviceName, 'GET').then((response) => {
+        cy.log(response)
+        expect(response.status).to.be.equal(200)
+      })
+    })
   })
+
 })

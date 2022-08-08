@@ -111,14 +111,14 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string"},
             "license_title": {"dataType":"string"},
-            "security_class": {"dataType":"string"},
-            "view_audience": {"dataType":"string"},
-            "download_audience": {"dataType":"string"},
+            "security_class": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HIGH-CABINET"]},{"dataType":"enum","enums":["HIGH-CONFIDENTIAL"]},{"dataType":"enum","enums":["HIGH-SENSITIVITY"]},{"dataType":"enum","enums":["MEDIUM-SENSITIVITY"]},{"dataType":"enum","enums":["MEDIUM-PERSONAL"]},{"dataType":"enum","enums":["LOW-SENSITIVITY"]},{"dataType":"enum","enums":["LOW-PUBLIC"]},{"dataType":"enum","enums":["PUBLIC"]},{"dataType":"enum","enums":["PROTECTED A"]},{"dataType":"enum","enums":["PROTECTED B"]},{"dataType":"enum","enums":["PROTECTED C"]}]},
+            "view_audience": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["Public"]},{"dataType":"enum","enums":["Government"]},{"dataType":"enum","enums":["Named users"]},{"dataType":"enum","enums":["Government and Business BCeID"]}]},
+            "download_audience": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["Public"]},{"dataType":"enum","enums":["Government"]},{"dataType":"enum","enums":["Named users"]},{"dataType":"enum","enums":["Government and Business BCeID"]}]},
             "record_publish_date": {"dataType":"string"},
             "notes": {"dataType":"string"},
             "title": {"dataType":"string"},
-            "isInCatalog": {"dataType":"string"},
-            "isDraft": {"dataType":"string"},
+            "isInCatalog": {"dataType":"boolean"},
+            "isDraft": {"dataType":"boolean"},
             "contacts": {"dataType":"string"},
             "resources": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
@@ -510,7 +510,7 @@ export function RegisterRoutes(app: express.Router) {
             async function OrgDatasetController_putDataset(request: any, response: any, next: any) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"Dataset"},
+                    body: {"in":"body","name":"body","required":true,"ref":"DraftDataset"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

@@ -362,7 +362,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
         response[p] = response[p]['name']
       }
-      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId'].includes(p))) {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId','isInCatalog','isDraft'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

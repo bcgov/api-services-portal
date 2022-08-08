@@ -8,7 +8,9 @@ describe('Regenerate Credential for API Key', () => {
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
   const myAccessPage = new MyAccessPage()
-  let consumerid : string
+  let consumerid: string
+  let consumerNumber: string
+  let existingAPIKey: string
 
   before(() => {
     cy.visit('/')
@@ -27,6 +29,27 @@ describe('Regenerate Credential for API Key', () => {
   it('authenticates Harley (developer)', () => {
     cy.get('@developer').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
+    })
+  })
+
+  it('Get the consumer id based on consumer number', () => {
+    cy.get('@regen').then((creds: any) => {
+      const consumerNumber = creds.consumernumber
+      cy.makeKongGatewayRequest('consumers', '', 'GET').then((response) => {
+        expect(response.status).to.be.equal(200)
+        consumerid = Cypress._.get((Cypress._.filter(response.body.data, ["custom_id", consumerNumber]))[0], 'id')
+      })
+    })
+  })
+
+  it('Get current API Key', () => {
+    cy.get('@regen').then((creds: any) => {
+      cy.get('@developer').then(({ user }: any) => {
+        cy.makeKongGatewayRequest('consumers/' + consumerid + '/key-auth', '', 'GET').then((response: any) => {
+          expect(response.status).to.be.equal(200)
+          existingAPIKey = response.body.data[0].key
+        })
+      })
     })
   })
 
@@ -50,20 +73,9 @@ describe('Regenerate Credential for API Key', () => {
     })
   })
 
-  it('Get the consumer id based on consumer number', () => {
-    cy.get('@regen').then((creds: any) => {
-      const consumerNumber = creds.consumernumber
-      cy.makeKongGatewayRequest('consumers', '', 'GET').then((response) => {
-        expect(response.status).to.be.equal(200)
-        consumerid = Cypress._.get((Cypress._.filter(response.body.data,["custom_id",consumerNumber]))[0],'id')
-      })
-    })
-  })
-
   it('Verify that only one API key(new key) is set to the consumer in Kong gateway', () => {
     cy.get('@regen').then((creds: any) => {
-      const consumerNumber = creds.consumersid
-      cy.makeKongGatewayRequest('consumers/' +consumerid+ '/key-auth', '', 'GET').then((response:any) => {
+      cy.makeKongGatewayRequest('consumers/' + consumerid + '/key-auth', '', 'GET').then((response: any) => {
         expect(response.status).to.be.equal(200)
         expect(response.body.data.length).to.be.equal(1)
       })
@@ -72,10 +84,9 @@ describe('Regenerate Credential for API Key', () => {
 
   it('Verify that API is not accessible with the old API Key', () => {
     cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET', existingAPIKey).then((response) => {
         debugger
-        expect(response.status).to.be.equal(403)
-        expect(response.body.message).to.be.contain('You cannot consume this service')
+        expect(response.status).to.be.equal(500)
       })
     })
   })

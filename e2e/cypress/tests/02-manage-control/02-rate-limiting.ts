@@ -37,6 +37,7 @@ describe('Manage Control-Rate Limiting Spec for Service as Scope and Local Polic
     })
 
     it('Select the consumer from the list ', () => {
+        consumers.saveConsumerNumber()
         consumers.clickOnTheFirstConsumerID()
     })
 

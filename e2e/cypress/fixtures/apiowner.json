@@ -208,7 +208,7 @@
   },
   "apiTest": {
     "namespace": "apiplatform",
-    "delete_namespace": "deleteplatform1",
+    "delete_namespace": "testplatform",
     "product": {
       "name": "API Auto Test Product",
       "environment": {

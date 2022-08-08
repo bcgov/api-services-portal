@@ -43,6 +43,7 @@ export default class ConsumersPage {
   }
 
   clickOnIPRestrictionOption() {
+    cy.get(this.ipRestrictionOption, { timeout: 3000 }).should('be.visible');
     cy.get(this.ipRestrictionOption, { timeout: 2000 }).click()
     this.deleteIPRestrictionControl()
   }
@@ -53,9 +54,15 @@ export default class ConsumersPage {
     // cy.contains('Add Controls').should('be.visible')
   }
 
+  saveConsumerNumber(){
+    cy.get(this.allConsumerTable).find('a').last().then(($consumer: any) => {
+      cy.saveState('consumernumber', $consumer.text())
+    })
+  }
+
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
     this.editConsumerDialog()
-    cy.wait(1000)
+    // cy.wait(1000)
     this.clickOnRateLimitingOption()
     cy.wait(1000)
     cy.get(this.rateLimitHourInput, { timeout: 2000 }).click()
@@ -67,15 +74,15 @@ export default class ConsumersPage {
       cy.get(this.policyDropDown).select(policy, { force: true }).invoke('val')
     }
     cy.get(this.rateLimitingApplyBtn).click()
-    cy.wait(500)
+    // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
-    cy.wait(1000)
+    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
 
   }
 
   setAllowedIPAddress(allowIP: string, scope = 'Service') {
     this.editConsumerDialog()
-    cy.wait(1000)
+    // cy.wait(1000)
     this.clickOnIPRestrictionOption()
     cy.get(this.ipRestrictionAllowInput, { timeout: 2000 }).type(allowIP + '{enter}')
     if (scope === 'Route') {
@@ -83,9 +90,9 @@ export default class ConsumersPage {
     }
     cy.get(this.applyBtn).click()
     // cy.contains('h2', 'ip-restriction').should('be.visible')
-    cy.wait(500)
+    // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
-    cy.wait(1000)
+    // cy.wait(1000)
 
   }
 
@@ -97,7 +104,8 @@ export default class ConsumersPage {
     // cy.wait(2000)
     cy.get("body").then($body => {
       if ($body.find(this.removeIPRestrictionButton).length > 0) {
-        cy.get(this.removeIPRestrictionButton, { timeout: 2000 }).click()
+        cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).should('be.visible');
+        cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).click()
       }
     });
    
@@ -106,13 +114,14 @@ export default class ConsumersPage {
   deleteRateLimitControl() {
     cy.get("body").then($body => {
       if ($body.find(this.removeRateLimitControlButton).length > 0) {
+        cy.get(this.removeRateLimitControlButton, { timeout: 3000 }).should('be.visible');
         cy.get(this.removeRateLimitControlButton, { timeout: 2000 }).click()
       }
     });
   }
   clearIPRestrictionControl() {
     this.editConsumerDialog()
-    cy.wait(1000)
+    // cy.wait(1000)
     this.clickOnIPRestrictionOption()
     cy.get(this.consumerDialogSaveBtn).click()
     cy.wait(1000)
@@ -120,10 +129,11 @@ export default class ConsumersPage {
 
   clearRateLimitControl() {
     this.editConsumerDialog()
-    cy.wait(1000)
+    // cy.wait(1000)
     this.clickOnRateLimitingOption()
     cy.get(this.consumerDialogSaveBtn).click()
-    cy.wait(1000)
+    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
+    // cy.wait(1000)
   }
 
   approvePendingRequest() {

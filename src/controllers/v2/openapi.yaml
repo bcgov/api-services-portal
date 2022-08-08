@@ -124,10 +124,32 @@ components:
                     type: string
                 security_class:
                     type: string
+                    enum:
+                        - HIGH-CABINET
+                        - HIGH-CONFIDENTIAL
+                        - HIGH-SENSITIVITY
+                        - MEDIUM-SENSITIVITY
+                        - MEDIUM-PERSONAL
+                        - LOW-SENSITIVITY
+                        - LOW-PUBLIC
+                        - PUBLIC
+                        - 'PROTECTED A'
+                        - 'PROTECTED B'
+                        - 'PROTECTED C'
                 view_audience:
                     type: string
+                    enum:
+                        - Public
+                        - Government
+                        - 'Named users'
+                        - 'Government and Business BCeID'
                 download_audience:
                     type: string
+                    enum:
+                        - Public
+                        - Government
+                        - 'Named users'
+                        - 'Government and Business BCeID'
                 record_publish_date:
                     type: string
                 notes:
@@ -135,9 +157,9 @@ components:
                 title:
                     type: string
                 isInCatalog:
-                    type: string
+                    type: boolean
                 isDraft:
-                    type: string
+                    type: boolean
                 contacts:
                     type: string
                 resources:
@@ -761,7 +783,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Dataset'
+                            $ref: '#/components/schemas/DraftDataset'
     '/organizations/{org}/datasets/{name}':
         delete:
             operationId: delete-dataset
