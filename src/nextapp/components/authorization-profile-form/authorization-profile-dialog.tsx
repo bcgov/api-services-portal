@@ -101,6 +101,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile created',
           status: 'success',
+          isClosable: true,
         });
         client.invalidateQueries('authorizationProfiles');
         handleClose();
@@ -108,6 +109,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile create failed',
           status: 'error',
+          isClosable: true,
         });
       }
     },
@@ -138,6 +140,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile updated',
           status: 'success',
+          isClosable: true,
         });
         client.invalidateQueries();
         handleClose();
@@ -145,6 +148,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile save failed',
           status: 'error',
+          isClosable: true,
         });
       }
     },

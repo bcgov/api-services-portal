@@ -48,14 +48,16 @@ const CollectCredentialList: React.FC<CollectCredentialListProps> = ({
         await revoke.mutateAsync({ id });
         client.invalidateQueries(queryKey);
         toast({
-          title: 'Request Canceled',
+          title: 'Request canceled',
           status: 'success',
+          isClosable: true,
         });
       } catch (err) {
         toast({
-          title: 'Failed to Cancel Request',
-          description: err?.message,
+          title: 'Failed to cancel request',
+          description: err,
           status: 'error',
+          isClosable: true,
         });
       }
     },

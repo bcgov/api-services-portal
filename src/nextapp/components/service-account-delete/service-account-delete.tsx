@@ -36,12 +36,14 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
       toast({
         title: 'Service Account deleted',
         status: 'success',
+        isClosable: true,
       });
       onClose();
     } catch {
       toast({
         title: 'Service Account delete failed',
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -76,7 +78,12 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button data-testid="confirm-delete-service-acct-btn" colorScheme="red" ml={3} onClick={handleDelete}>
+            <Button
+              data-testid="confirm-delete-service-acct-btn"
+              colorScheme="red"
+              ml={3}
+              onClick={handleDelete}
+            >
               Yes, Delete
             </Button>
           </AlertDialogFooter>

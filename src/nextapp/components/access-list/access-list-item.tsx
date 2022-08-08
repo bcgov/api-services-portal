@@ -55,14 +55,16 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
         }
         client.invalidateQueries(queryKey);
         toast({
-          title: 'Access Revoked',
+          title: 'Access revoked',
           status: 'success',
+          isClosable: true,
         });
       } catch (err) {
         toast({
           title: 'Revoke failed',
-          description: err?.message,
+          description: err,
           status: 'error',
+          isClosable: true,
         });
       }
     },

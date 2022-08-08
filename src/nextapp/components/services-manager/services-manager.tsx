@@ -73,12 +73,8 @@ const ServicesManager: React.FC<ServicesManagerProps> = ({
         client.invalidateQueries(['environment', environmentId]);
       } catch (err) {
         toast({
-          title: 'Services Update Failed',
-          description: err
-            .map((e) =>
-              e.data?.messages ? e.data.messages.join(',') : e.message
-            )
-            .join(', '),
+          title: 'Services update failed',
+          description: err,
           isClosable: true,
           status: 'error',
         });

@@ -184,9 +184,9 @@ const server = mockServer(schemaWithMocks, {
       return res;
     },
     updateEnvironment: ({ id, data }) => {
-      // throw new Error({
-      //   errors: [{ message: 'something broke', name: 'ValidationError' }],
-      // });
+      throw new Error(
+        '[dataset] Namespace and Dataset must belong to the same Organization Unit (ns:databc, dataset:undefined)'
+      );
       db.get('products').forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
 
@@ -253,6 +253,35 @@ const server = mockServer(schemaWithMocks, {
         regenerateCredentials: {
           credential: casual.uuid,
         },
+      };
+    },
+    createGatewayConsumerPlugin: () => {
+      return {
+        errors: [
+          {
+            message: 'Nested errors occurred',
+            name: 'NestedError',
+            time_thrown: '2022-07-19T22:57:57.476Z',
+            data: { errors: [{ status: '400 BAD REQUEST' }] },
+            uid: 'cl5ss0t0k000s0o56b9qt2jen',
+          },
+        ],
+        data: { createGatewayConsumerPlugin: null },
+      };
+    },
+    updateConsumerGroupMembership: () => {
+      return {
+        errors: [
+          {
+            message: 'You do not have access to this resource',
+            name: 'AccessDeniedError',
+            time_thrown: '2022-07-19T23:00:13.786Z',
+            data: { type: 'mutation', target: 'updateConsumerGroupMembership' },
+            path: ['updateConsumerGroupMembership'],
+            uid: 'cl5ss3q6y000v0o56h61z8gf8',
+          },
+        ],
+        data: { updateConsumerGroupMembership: null },
       };
     },
   }),

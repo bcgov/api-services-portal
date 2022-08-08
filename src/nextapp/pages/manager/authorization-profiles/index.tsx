@@ -88,12 +88,14 @@ const AuthorizationProfiles: React.FC<
         toast({
           title: `${res.deleteCredentialIssuer?.name} deleted`,
           status: 'success',
+          isClosable: true,
         });
         client.invalidateQueries(queryKey);
       } catch (err) {
         toast({
           title: 'Unable to delete Credential Issuer',
           status: 'error',
+          isClosable: true,
         });
       }
     },
@@ -217,7 +219,9 @@ const AuthorizationProfiles: React.FC<
                     </Button>
                   </AuthorizationProfileForm>
                   <ActionsMenu placement="bottom-end">
-                    <MenuItem onClick={handleDelete(c.id)} color="bc-error">Delete</MenuItem>
+                    <MenuItem onClick={handleDelete(c.id)} color="bc-error">
+                      Delete
+                    </MenuItem>
                   </ActionsMenu>
                 </Td>
               </Tr>
