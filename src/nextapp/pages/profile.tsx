@@ -16,12 +16,16 @@ import {
   Button,
   useEditableControls,
   Icon,
+  Input,
+  FormHelperText,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { FaPen } from 'react-icons/fa';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const inputRef = React.useRef(null);
+  const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
 
   function Figure({
     children,
@@ -68,6 +72,15 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  function handleSubmit(value: string) {
+    const email = value.trim();
+    if (email && inputRef.current?.checkValidity()) {
+      setIsInvalid(false);
+      return false;
+    }
+    setIsInvalid(true);
+  }
+
   return (
     <>
       <Head>
@@ -87,11 +100,23 @@ const ProfilePage: React.FC = () => {
           >
             <Figure label="Name">{user.name}</Figure>
             <Figure label="Email">
-              <Editable defaultValue={user.email}>
+              <Editable
+                isRequired
+                submitOnBlur={false}
+                defaultValue={user?.email}
+                onSubmit={handleSubmit}
+              >
                 <EditablePreview />
-                <EditableInput width="auto" />
+                <Input
+                  isRequired
+                  ref={inputRef}
+                  as={EditableInput}
+                  width="auto"
+                  type="email"
+                />
                 <EditableControls />
               </Editable>
+              {isInvalid && <Text color="bc-error">Invalid Email</Text>}
             </Figure>
             <Figure label="Username">{user.username}</Figure>
             <Figure label="Authentication">BC Services Card</Figure>
