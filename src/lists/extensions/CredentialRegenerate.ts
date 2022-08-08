@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import {
   linkCredRefsToServiceAccess,
   lookupApplication,
@@ -5,7 +6,10 @@ import {
 } from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
 import { KeycloakClientService } from '../../services/keycloak';
-import { NewCredential } from '../../services/workflow/types';
+import {
+  CredentialReference,
+  NewCredential,
+} from '../../services/workflow/types';
 import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
 
@@ -40,11 +44,12 @@ module.exports = {
 
                 const newApiKey = await replaceApiKey(
                   clientId,
-                  (serviceAccess.credentialReference as any).id
+                  (serviceAccess.credentialReference as CredentialReference)
+                    .keyAuthPK
                 );
 
-                const credentialReference = {
-                  id: newApiKey.apiKey.keyAuthPK,
+                const credentialReference: CredentialReference = {
+                  keyAuthPK: newApiKey.apiKey.keyAuthPK,
                   clientId,
                 };
                 const noauthContext = keystone.createContext({
@@ -86,9 +91,6 @@ module.exports = {
                 const client = await kcClientService.findByClientId(
                   serviceAccess.consumer.customId
                 );
-                const newSecret = await kcClientService.regenerateSecret(
-                  client.id
-                );
 
                 const newCredential = {
                   flow: serviceAccess.productEnvironment.flow,
@@ -98,7 +100,32 @@ module.exports = {
                 } as NewCredential;
 
                 if (clientAuthenticator === 'client-secret') {
+                  const newSecret = await kcClientService.regenerateSecret(
+                    client.id
+                  );
                   newCredential['clientSecret'] = newSecret;
+                } else if (clientAuthenticator === 'client-jwt') {
+                  // regenerate private/public keys
+
+                  const { publicKey, privateKey } = crypto.generateKeyPairSync(
+                    'rsa',
+                    {
+                      modulusLength: 4096,
+                      publicKeyEncoding: {
+                        type: 'spki',
+                        format: 'pem',
+                      },
+                      privateKeyEncoding: {
+                        type: 'pkcs8',
+                        format: 'pem',
+                      },
+                    }
+                  );
+
+                  await kcClientService.uploadCertificate(client.id, publicKey);
+
+                  newCredential['clientPrivateKey'] = privateKey;
+                  newCredential['clientPublicKey'] = publicKey;
                 }
 
                 return {

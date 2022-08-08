@@ -16,11 +16,11 @@ describe('Org Group Access Service', function () {
     const kc = new OrgGroupService('');
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
     const name = kc.getGroupPolicyName(orgGroup);
     expect(name).toBe(
-      'group-data-custodian-ministry-citizens-services-databc-policy'
+      'group-organization-admin-ministry-citizens-services-databc-policy'
     );
   });
 
@@ -28,10 +28,12 @@ describe('Org Group Access Service', function () {
     const kc = new OrgGroupService('');
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
     const name = kc.getGroupPermissionName(orgGroup, 'res123');
-    expect(name).toBe("Access to 'res123' services for role data-custodian");
+    expect(name).toBe(
+      "Access to 'res123' services for role organization-admin"
+    );
   });
 
   it('it should getValidRoles', async function () {
@@ -43,7 +45,7 @@ describe('Org Group Access Service', function () {
 
     const roles = await kc.getValidRoles();
     expect(roles.length).toBe(1);
-    expect(roles[0]).toBe('data-custodian');
+    expect(roles[0]).toBe('organization-admin');
   });
 
   it('it should findGroup', async function () {
@@ -55,7 +57,9 @@ describe('Org Group Access Service', function () {
     await kc.backfillGroups();
 
     const result = kc.findGroup('b6e23545-dd71-49fd-9bbe-735ae7b8290e');
-    expect(result).toBe('/data-custodian/ministry-citizens-services/databc');
+    expect(result).toBe(
+      '/organization-admin/ministry-citizens-services/databc'
+    );
   });
 
   it('it should deleteGroup', async function () {
@@ -68,7 +72,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
     await kc.deleteGroup(orgGroup);
   });
@@ -83,7 +87,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createGroupIfMissing(orgGroup);
@@ -99,7 +103,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc_2',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createGroupIfMissing(orgGroup);
@@ -130,7 +134,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createOrUpdateGroupPermission(orgGroup, 'ns2', ['Namespace.View']);
@@ -146,7 +150,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createOrUpdateGroupPermission(orgGroup, 'orgcontrol', [
@@ -164,7 +168,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createOrUpdateGroupPolicy(orgGroup);
@@ -180,7 +184,7 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'data-innovation',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     await kc.createOrUpdateGroupPolicy(orgGroup);
@@ -196,7 +200,9 @@ describe('Org Group Access Service', function () {
 
     const result = await kc.getGroupPathsByGroupName('databc');
     expect(result.length).toBe(1);
-    expect(result[0]).toBe('/data-custodian/ministry-citizens-services/databc');
+    expect(result[0]).toBe(
+      '/organization-admin/ministry-citizens-services/databc'
+    );
   });
 
   it('it should getPermissionsForGroupPolicy', async function () {
@@ -209,12 +215,12 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     const result = await kc.getPermissionsForGroupPolicy(
       orgGroup,
-      'data-custodian'
+      'organization-admin'
     );
     expect(result.length).toBe(1);
     expect(result[0].resource).toBe('orgcontrol');
@@ -231,17 +237,17 @@ describe('Org Group Access Service', function () {
 
     const orgGroup: OrganizationGroup = {
       name: 'databc',
-      parent: '/data-custodian/ministry-citizens-services',
+      parent: '/organization-admin/ministry-citizens-services',
     };
 
     const result = await kc.getGroupPermissions(orgGroup, ['orgcontrol']);
     o(result);
     expect(result.length).toBe(1);
     expect(result[0].name).toBe(
-      "Access to 'orgcontrol' services for role data-custodian"
+      "Access to 'orgcontrol' services for role organization-admin"
     );
     expect(result[0].config.policies[0].name).toBe(
-      'group-data-custodian-ministry-citizens-services-databc-policy'
+      'group-organization-admin-ministry-citizens-services-databc-policy'
     );
   });
 });

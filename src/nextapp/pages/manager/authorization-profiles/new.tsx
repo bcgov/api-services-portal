@@ -35,13 +35,15 @@ const AuthorizationProfile: React.FC = () => {
         toast({
           title: 'Profile created',
           status: 'success',
+          isClosable: true,
         });
         router?.push('/manager/authorization-profiles');
-      } catch (e) {
+      } catch (err) {
         toast({
           title: 'Profile creation failed',
           status: 'error',
-          description: Array.isArray(e) ? e[0].message : '',
+          description: err,
+          isClosable: true,
         });
       }
     },

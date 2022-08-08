@@ -60,8 +60,9 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
       },
     });
     toast({
-      title: 'Access Granted',
+      title: 'Access granted',
       status: 'success',
+      isClosable: true,
     });
     client.invalidateQueries(queryKey);
     onClose();
@@ -131,8 +132,13 @@ const ShareResourceDialog: React.FC<ShareResourceDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button variant="secondary" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSubmitClick} data-testid="nsa-gua-share-btn">
+              <Button variant="secondary" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitClick}
+                data-testid="nsa-gua-share-btn"
+              >
                 Share
               </Button>
             </ButtonGroup>

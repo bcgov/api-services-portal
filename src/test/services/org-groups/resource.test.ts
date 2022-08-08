@@ -28,12 +28,12 @@ describe('Org Group Resource Service', function () {
 
     const match = `
 - id: 5f84d050-f50d-4a2b-946c-9a9fa6cb3317
-  name: group-data-custodian-ministry-citizens-services-databc-policy
+  name: group-organization-admin-ministry-citizens-services-databc-policy
   type: group
   logic: POSITIVE
   decisionStrategy: UNANIMOUS
   owner: acd2e29a-6e1f-4895-a0d2-d9bb42d0ba81
-  description: Group '/data-custodian/ministry-citizens-services' / 'databc' Policy
+  description: Group '/organization-admin/ministry-citizens-services' / 'databc' Policy
   scopes:
     - Namespace.View
   users:
@@ -41,9 +41,9 @@ describe('Org Group Resource Service', function () {
     - user2
     - user3
   groups:
-    - /data-custodian
-    - /data-custodian/ministry-citizens-services
-    - /data-custodian/ministry-citizens-services/databc
+    - /organization-admin
+    - /organization-admin/ministry-citizens-services
+    - /organization-admin/ministry-citizens-services/databc
 `;
     expect(YAML.dump(perms, { indent: 2 }).trim()).toBe(match.trim());
   });

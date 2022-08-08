@@ -43,15 +43,17 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
       await mutation.mutateAsync({ product: productId, name: value });
       client.invalidateQueries('products');
       toast({
-        title: 'Environment Added',
+        title: 'Environment added',
         description: 'You may now configure it. By default it is not enabled.',
         status: 'success',
+        isClosable: true,
       });
     } catch {
       toast({
-        title: 'Action Failed',
+        title: 'Action failed',
         description: 'Environment could not be added',
         status: 'error',
+        isClosable: true,
       });
     }
   };

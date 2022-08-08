@@ -113,14 +113,16 @@ const NamespacesPage: React.FC = () => {
         router?.push('/manager');
 
         toast({
-          title: ' Namespace Deleted',
+          title: ' Namespace deleted',
           status: 'success',
+          isClosable: true,
         });
         client.invalidateQueries();
       } catch (err) {
         toast({
-          title: 'Delete Namespace Failed',
+          title: 'Delete namespace failed',
           status: 'error',
+          isClosable: true,
         });
       }
     }

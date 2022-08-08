@@ -87,11 +87,13 @@ const ApplicationsPage: React.FC<
         toast({
           title: 'Application deleted',
           status: 'success',
+          isClosable: true,
         });
       } catch {
         toast({
           title: 'Application delete failed',
           status: 'error',
+          isClosable: true,
         });
       }
     },

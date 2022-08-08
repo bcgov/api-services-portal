@@ -44,7 +44,11 @@ export class KeycloakClientRegistrationService {
   private kcAdminClient: any;
   private session: boolean = false;
 
-  constructor(issuerUrl: string, registrationUrl: string, accessToken: string) {
+  constructor(
+    issuerUrl: string,
+    registrationUrl: string,
+    accessToken: string = undefined
+  ) {
     this.registrationUrl =
       registrationUrl == null
         ? null

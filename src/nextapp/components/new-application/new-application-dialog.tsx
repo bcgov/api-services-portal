@@ -66,6 +66,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
             title: `${name} created!`,
             description: 'You can now request access to an API',
             status: 'success',
+            isClosable: true,
           });
           queryClient.invalidateQueries(refreshQueryKey);
           onClose();
@@ -75,8 +76,9 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
         }
       } catch {
         toast({
-          title: 'Create Application Failed',
+          title: 'Create application failed',
           status: 'error',
+          isClosable: true,
         });
       }
     }

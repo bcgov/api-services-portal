@@ -1,4 +1,12 @@
-import { CredentialIssuer } from '../keystone/types';
+import {
+  AccessRequest,
+  Application,
+  CredentialIssuer,
+  Environment,
+  GatewayConsumer,
+  GatewayPlugin,
+  User,
+} from '../keystone/types';
 import { strict as assert } from 'assert';
 export interface KeystoneContext {}
 
@@ -11,6 +19,11 @@ export interface NewCredential {
   apiKey?: string;
   clientPublicKey?: string;
   clientPrivateKey?: string;
+}
+
+export interface CredentialReference {
+  keyAuthPK?: string;
+  clientId?: string;
 }
 
 // Subject Identity when a Product is requested using the Authentication Code Flow
@@ -41,13 +54,16 @@ export interface ClientMapper {
   defaultValue: string;
 }
 
-export interface Name {
-  name: string;
+export interface KeystoneItemID {
+  id: string;
+  name?: string;
 }
 export interface ConsumerPlugin {
+  id?: string; // KeystoneJS GatewayConsumer ID
   name: string;
-  service: Name;
   config: PluginConfig;
+  service?: KeystoneItemID;
+  route?: KeystoneItemID;
 }
 export interface PluginConfig {
   second?: number;
@@ -58,6 +74,7 @@ export interface PluginConfig {
   year?: number;
   allow?: string[];
   deny?: string[];
+  policy?: string;
 }
 
 export interface IssuerEnvironmentConfig {
@@ -94,4 +111,67 @@ export function getIssuerEnvironmentConfig(
     `EnvironmentMissing ${issuer.name} ${environment}`
   );
   return env;
+}
+
+export interface ConsumerLabel {
+  labelGroup: string;
+  values: string[];
+}
+
+export interface ConsumerLabelFilter {
+  labelGroup: string;
+  value: string;
+}
+
+export interface ConsumerQueryFilter {
+  products: string[];
+  environments: string[];
+  scopes: string[];
+  roles: string[];
+  mostActive: boolean;
+  leastActive: boolean;
+  labels: ConsumerLabelFilter[];
+}
+
+export interface ConsumerSummary {
+  id: string;
+  consumerType: string;
+  username: string;
+  customId: string;
+  labels: ConsumerLabel[];
+  lastUpdated: string;
+}
+
+export interface ConsumerAccess {
+  consumer: GatewayConsumer;
+  application?: Application;
+  owner?: User;
+  labels?: ConsumerLabel[];
+  prodEnvAccess?: ConsumerProdEnvAccess[];
+}
+
+export interface ConsumerProdEnvAccess {
+  environment: Environment;
+  productName: string;
+  plugins: ConsumerFullPluginDetails[];
+  revocable: boolean;
+  serviceAccessId?: string;
+  authorization?: ConsumerAuthorization;
+  request?: AccessRequest;
+  requestApprover?: User;
+}
+
+export interface ConsumerAuthorization {
+  credentialIssuer?: CredentialIssuer;
+  defaultClientScopes?: string[];
+  defaultOptionalScopes?: string[];
+  roles?: string[];
+}
+
+export interface ConsumerFullPluginDetails {
+  id?: string; // KeystoneJS GatewayConsumer ID
+  name: string;
+  config: string;
+  service?: KeystoneItemID;
+  route?: KeystoneItemID;
 }

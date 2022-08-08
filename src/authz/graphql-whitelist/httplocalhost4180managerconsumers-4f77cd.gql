@@ -1,0 +1,39 @@
+
+  query GetConsumerEditDetails($serviceAccessId: ID!, $prodEnvId: ID!) {
+    getConsumerProdEnvAccess(
+      serviceAccessId: $serviceAccessId
+      prodEnvId: $prodEnvId
+    ) {
+      productName
+      environment {
+        id
+        name
+        additionalDetailsToRequest
+      }
+      plugins {
+        id
+        name
+        config
+        service
+        route
+      }
+      revocable
+      authorization {
+        credentialIssuer {
+          name
+          availableScopes
+          clientRoles
+        }
+        defaultClientScopes
+        roles
+      }
+      request {
+        id
+        additionalDetails
+        createdAt
+      }
+      requestApprover {
+        name
+      }
+    }
+  }

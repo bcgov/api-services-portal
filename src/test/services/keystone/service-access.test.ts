@@ -1,5 +1,5 @@
 import { lookupServiceAccessesByNamespace } from '../../../services/keystone';
-import Context from '../../../mocks/handlers/keystone';
+import Context from '../../mocks/handlers/keystone';
 
 const context = Context('default');
 

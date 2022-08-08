@@ -20,7 +20,7 @@ export function headers(accessToken: string): HeadersInit {
     Accept: 'application/json',
     'Content-Type': 'application/json',
   };
-  accessToken != null && (headers['Authorization'] = 'bearer ' + accessToken);
+  accessToken && (headers['Authorization'] = 'bearer ' + accessToken);
   return headers;
 }
 

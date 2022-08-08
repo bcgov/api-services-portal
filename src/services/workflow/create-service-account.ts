@@ -77,10 +77,7 @@ export const CreateServiceAccount = async (
   const clientId = client.client.clientId;
   const nickname = client.client.clientId;
 
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
   const consumer = await kongApi.createKongConsumer(nickname, clientId);
   const consumerPK = await AddClientConsumer(
     context,

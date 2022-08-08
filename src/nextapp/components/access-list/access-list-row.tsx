@@ -45,8 +45,8 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
     <Tr>
       <Td>
         <AccessStatus
-          isIssued={data.isIssued ?? data.active === false}
-          isComplete={data.isComplete ?? data.active === false}
+          isIssued={data.isIssued ?? data.active}
+          isComplete={data.isComplete ?? data.active}
           isApproved={data.isApproved ?? data.active}
         />
       </Td>
@@ -86,7 +86,7 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
               'kong-api-key-acl',
               'client-credentials',
             ].includes(data.productEnvironment.flow) && (
-              <MenuItem onClick={onOpen}>Regenerate Credentials</MenuItem>
+              <MenuItem data-testid="regenerate-credentials-btn" onClick={onOpen}>Regenerate Credentials</MenuItem>
             )}
             <MenuItem
               color="bc-error"

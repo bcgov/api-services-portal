@@ -5,8 +5,8 @@ import '@testing-library/jest-dom/extend-expect';
 
 //import { queryClient } from './test/wrapper';
 import { resetAll } from './mocks/handlers';
-import { server } from './mocks/server';
-import { context } from './mocks/handlers/keystone';
+import { server } from './test/mocks/server';
+import { context } from './test/mocks/handlers/keystone';
 
 const originalError = console.error;
 
@@ -25,7 +25,7 @@ afterEach(() => {
   // queryClient.clear();
   server.resetHandlers();
   server.restoreHandlers();
-  resetAll();
+  // resetAll();
 });
 
 afterAll(() => {

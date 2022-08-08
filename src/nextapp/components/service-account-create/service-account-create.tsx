@@ -57,14 +57,16 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
       }
 
       toast({
-        title: 'Service Account Created',
+        title: 'Service account created',
         status: 'success',
+        isClosable: true,
       });
       onClose();
     } catch (err) {
       toast({
         title: 'Could not create Service Account',
         status: 'error',
+        isClosable: true,
       });
     }
   }, [credentialGenerator, onClose, onCreate, toast]);

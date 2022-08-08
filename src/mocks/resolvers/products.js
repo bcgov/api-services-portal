@@ -4,7 +4,7 @@ export const allProductsByNamespaceHandler = (req, res, ctx) => {
       allProductsByNamespace: [
         {
           id: 'p1',
-          name: 'Product 1',
+          name: 'PharmaNet Electronic Prescribing',
           environments: [
             {
               id: 'e1',
@@ -13,6 +13,20 @@ export const allProductsByNamespaceHandler = (req, res, ctx) => {
             {
               id: 'e2',
               name: 'dev',
+            },
+          ],
+        },
+        {
+          id: 'p2',
+          name: 'PharmaNet API',
+          environments: [
+            {
+              id: 'e11',
+              name: 'test',
+            },
+            {
+              id: 'e21',
+              name: 'other',
             },
           ],
         },

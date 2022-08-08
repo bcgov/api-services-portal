@@ -184,6 +184,7 @@ for (const _list of [
   'AliasedQueries',
   'BusinessProfile',
   'ConsumerGroups',
+  'ConsumerProducts',
   'ConsumerScopesAndRoles',
   'CredentialRegenerate',
   'Namespace',
