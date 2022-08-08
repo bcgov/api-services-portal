@@ -164,12 +164,21 @@ jobs:
 
           containerPort: 3000
 
+          resources:
+            requests:
+              cpu: 20m
+              memory: 400M
+            limits:
+              cpu: 100m
+              memory: 800M
+
           oauthProxy:
             enabled: true
             image:
               repository: ${{ env.REGISTRY }}/bcgov-dss/api-serv-infra/oauth2-proxy
               tag: 7.2.1-8c743f0c
               pullPolicy: IfNotPresent
+
             config:
               upstream: http://127.0.0.1:3000
               client-id: ${{ secrets.OIDC_CLIENT_ID }}
