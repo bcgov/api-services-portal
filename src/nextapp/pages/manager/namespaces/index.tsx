@@ -214,7 +214,7 @@ const NamespacesPage: React.FC = () => {
           <Card>
             {/* 4. */}
             <Center my={6}>
-              <Box
+              <VStack
                 textAlign="center"
                 py="6rem"
                 px={8}
@@ -222,14 +222,17 @@ const NamespacesPage: React.FC = () => {
                 borderRadius="4px"
                 maxW={{ sm: 650 }}
                 mx={{ base: 4 }}
+                spacing={5}
               >
-                <Heading as="h3" size="md" mb={2}>
-                  No namespace selected yet.
-                </Heading>
-                <Text>
-                  To get started, select a namespace from the dropdown below or
-                  create a new namespace
-                </Text>
+                <Box width={475}>
+                  <Heading as="h3" size="md" mb={2}>
+                    No namespace selected yet.
+                  </Heading>
+                  <Text>
+                    To get started, select a namespace from the dropdown below or
+                    create a new namespace
+                  </Text>
+                </Box>
                 <Box mt={6}>
                   <HStack spacing={4}>
                     {/* 2. */}
@@ -306,7 +309,7 @@ const NamespacesPage: React.FC = () => {
                     <Button as="a">Create New Namespace</Button>
                   </HStack>
                 </Box>
-              </Box>
+              </VStack>
             </Center>
           </Card>
         )}
