@@ -1,0 +1,4 @@
+
+  mutation RevokeAllConsumerAccess($id: ID!) {
+    revokeAllConsumerAccess(consumerId: $id)
+  }

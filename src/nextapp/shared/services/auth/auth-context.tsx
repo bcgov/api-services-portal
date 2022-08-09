@@ -6,7 +6,12 @@ import { useRouter } from 'next/router';
 
 import { useSession, UserSessionResult } from './use-session';
 
-const authContext = React.createContext<UserSessionResult>(null);
+const authContext = React.createContext<UserSessionResult>({
+  isLoading: false,
+  ok: false,
+  maintenance: false,
+  status: 'idle',
+});
 
 interface AuthProviderProps {
   children: React.ReactNode;

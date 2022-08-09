@@ -22,15 +22,14 @@ import links from '@/shared/data/links';
 import AuthAction from '@/components/auth-action';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import type { AppProps } from 'next/app';
-
 import '@bcgov/bc-sans/css/BCSans.css';
 import '@/shared/styles/global.css';
 
 // import { createContext, useContext } from 'react';
 
 // const SiteContext = createContext({site: 'devportal'});
-
 import { AppWrapper } from './context';
+import '../../mocks';
 
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },

@@ -161,7 +161,12 @@ const buttonVariants = {
     },
   },
   ghost: {
+    color: 'bc-blue',
     borderColor: 'transparent',
+    _hover: {
+      bgColor: 'transparent',
+      textDecor: 'none',
+    },
     _active: {
       bgColor: '#F2F5F7',
       boxShadow: 'none',
@@ -172,10 +177,6 @@ const buttonVariants = {
       boxShadow: 'none',
       // bgColor: '#F2F5F7',
       outlineColor: 'transparent',
-    },
-    _hover: {
-      bgColor: 'transparent',
-      boxShadow: 'none',
     },
   },
 };
@@ -250,7 +251,7 @@ const theme = extendTheme(
           },
         },
         defaultProps: {
-          size: 'lg',
+          // size: 'lg',
           colorScheme: 'primary',
         },
       },

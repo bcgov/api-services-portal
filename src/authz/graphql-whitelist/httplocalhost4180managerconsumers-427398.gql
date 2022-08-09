@@ -1,0 +1,15 @@
+
+  mutation FulfillRequest($id: ID!, $controls: String!, $labels: String!) {
+    updateAccessRequest(
+      id: $id
+      data: {
+        isApproved: true
+        isIssued: true
+        isComplete: true
+        controls: $controls
+        labels: $labels
+      }
+    ) {
+      id
+    }
+  }

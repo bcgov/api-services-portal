@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Badge, BadgeProps, Wrap, WrapItem } from '@chakra-ui/react';
+import { BadgeProps, Tag, Wrap, WrapItem } from '@chakra-ui/react';
 
 interface TagsListProps {
   colorScheme?: string & Pick<BadgeProps, 'colorScheme'>;
@@ -17,12 +17,12 @@ const TagsList: React.FC<TagsListProps> = ({
   const tags = data == null || data == '' ? [] : (JSON.parse(data) as string[]);
 
   return (
-    <Wrap spacing={2}>
+    <Wrap spacing={2.5}>
       {tags.map((t) => (
         <WrapItem key={t}>
-          <Badge colorScheme={colorScheme} fontSize={size} variant={variant}>
+          <Tag colorScheme={colorScheme} fontSize={size} variant={variant}>
             {t}
-          </Badge>
+          </Tag>
         </WrapItem>
       ))}
     </Wrap>

@@ -48,8 +48,9 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
       username: formData.get('username') as string,
     });
     toast({
-      title: 'Consumer Linked',
+      title: 'Consumer linked',
       status: 'success',
+      isClosable: true,
     });
     client.invalidateQueries(queryKey);
     onClose();
@@ -103,10 +104,10 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button variant="secondary" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSubmitClick}>
-                Link
+              <Button variant="secondary" onClick={onClose}>
+                Cancel
               </Button>
+              <Button onClick={handleSubmitClick}>Link</Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

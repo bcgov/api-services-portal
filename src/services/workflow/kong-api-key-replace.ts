@@ -12,10 +12,7 @@ import { KongConsumerService } from '../kong';
  * @param {*} oldKeyAuthId
  */
 export async function replaceApiKey(clientId: string, oldKeyAuthId: string) {
-  const kongApi = new KongConsumerService(
-    process.env.KONG_URL,
-    process.env.GWA_API_URL
-  );
+  const kongApi = new KongConsumerService(process.env.KONG_URL);
 
   const consumer = await kongApi.getConsumerByUsername(clientId);
 

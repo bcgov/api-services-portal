@@ -1,202 +1,307 @@
 import * as React from 'react';
-import AccessRequests from '@/components/access-requests';
-import api, { useApi } from '@/shared/services/api';
+import ActionsMenu from '@/components/actions-menu';
+import api, { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
-  Button,
-  ButtonGroup,
-  Center,
   Container,
-  Divider,
   Heading,
   Link,
-  Table,
-  Tbody,
   Td,
-  Th,
-  Thead,
   Tr,
-  Text,
-  Alert,
-  AlertIcon,
-  IconButton,
-  Icon,
-  Badge,
   Wrap,
   WrapItem,
+  Tag,
+  MenuItem,
+  Flex,
+  useToast,
 } from '@chakra-ui/react';
-import PageHeader from '@/components/page-header';
+import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
-import { QueryClient } from 'react-query';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import Head from 'next/head';
-import { Query } from '@/shared/types/query.types';
+import { QueryClient, QueryKey, useQueryClient } from 'react-query';
+import EmptyPane from '@/components/empty-pane';
+import Filters, { useFilters } from '@/components/filters';
+import { ConsumerSummary, Query } from '@/shared/types/query.types';
 import { gql } from 'graphql-request';
-import NextLink from 'next/link';
-import { FaPen, FaPlusCircle, FaStop } from 'react-icons/fa';
-import TagsList from '@/components/tags-list';
+import Head from 'next/head';
+// import InlineManageLabels from '@/components/inline-manage-labels';
 import LinkConsumer from '@/components/link-consumer';
+import PageHeader from '@/components/page-header';
+import NextLink from 'next/link';
+import SearchInput from '@/components/search-input';
+import Table from '@/components/table';
+import { uid } from 'react-uid';
+import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
+import ConsumerFilters from '@/components/consumer-filters';
+import AccessRequestsList from '@/components/access-request/access-requests-list';
 
-import breadcrumbs from '@/components/ns-breadcrumb';
+interface FilterState {
+  products: Record<string, string>[];
+  environments: Record<string, string>[];
+  scopes: Record<string, string>[];
+  roles: Record<string, string>[];
+  mostActive: boolean;
+  leastActive: boolean;
+  labels: { labelGroup: string; value: string }[];
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryClient = new QueryClient();
+  const queryKey: QueryKey = 'allConsumers';
 
   await queryClient.prefetchQuery(
-    ['allConsumers'],
+    queryKey,
     async () =>
-      await api<Query>(query, null, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        { filter: {} },
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
+      queryKey,
     },
   };
 };
 
 const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = () => {
-  const queryKey = ['allConsumers'];
-  const { data } = useApi(
-    queryKey,
+> = ({ queryKey }) => {
+  const toast = useToast();
+  const client = useQueryClient();
+  const [search, setSearch] = React.useState('');
+  const [grantAccess, setGrantAccess] = React.useState(null);
+  const {
+    state,
+    addFilter,
+    clearFilters,
+    removeFilter,
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      scopes: [],
+      roles: [],
+      mostActive: false,
+      leastActive: false,
+      labels: [],
+    },
+    'consumers'
+  );
+
+  const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
+  const filter = React.useMemo(() => {
+    const result = {};
+    Object.keys(state).forEach((k) => {
+      if (Array.isArray(state[k])) {
+        result[k] = state[k].map((v) => v.value);
+      } else {
+        result[k] = state[k];
+      }
+    });
+    return result;
+  }, [state]);
+  const { data, isFetching, isSuccess } = useApi(
+    [queryKey, filterKey],
     {
       query,
+      variables: { filter },
     },
     { suspense: false }
   );
-  const totalRequests = data?.allAccessRequestsByNamespace?.length ?? 0;
-  const totalConsumers = data?.allServiceAccessesByNamespace?.length ?? 0;
+  const deleteMutate = useApiMutation(deleteMutation, {
+    onSuccess() {
+      client.invalidateQueries(queryKey);
+    },
+  });
+  const consumers = React.useMemo(() => {
+    if (!data?.getFilteredNamespaceConsumers) {
+      return [];
+    }
 
-  const actions = [<LinkConsumer queryKey={queryKey} />];
+    const searchTerm = new RegExp(search, 'i');
+
+    if (!search) {
+      return data.getFilteredNamespaceConsumers;
+    }
+
+    return data.getFilteredNamespaceConsumers.filter((d) => {
+      const labels = d.labels.map((l) => l.values.join(' ')).join(' ');
+      return (
+        d.username.search(searchTerm) >= 0 || labels.search(searchTerm) >= 0
+      );
+    });
+  }, [data, search]);
+  const totalConsumers = consumers.length ?? 0;
+
+  // Events
+  const handleDelete = (id: string) => async () => {
+    const successId = 'delete-success';
+    const errorId = 'delete-error';
+
+    try {
+      await deleteMutate.mutateAsync({ id });
+      if (!toast.isActive(successId)) {
+        toast({
+          id: successId,
+          title: 'Consumer deleted',
+          status: 'success',
+        });
+      }
+    } catch (err) {
+      if (!toast.isActive(errorId)) {
+        toast({
+          id: errorId,
+          title: 'Consumer delete failed',
+          description: Array.isArray(err)
+            ? err.map((e) => e.message).join(', ')
+            : '',
+          status: 'error',
+        });
+      }
+    }
+  };
+  const handleGrant = (d: ConsumerSummary) => () => {
+    setGrantAccess(d);
+  };
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  const handleCloseGrantDialog = () => {
+    setGrantAccess(null);
+  };
 
   return (
     <>
       <Head>
-        <title>{`Consumers ${
-          totalRequests > 0 ? `(${totalRequests})` : ''
-        }`}</title>
+        <title>Consumers</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
           title="Consumers"
           breadcrumb={breadcrumbs([])}
-          actions={actions}
+          actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <Box mb={4}>
-          {totalRequests === 0 && (
-            <Alert status="info">
-              <AlertIcon />
-              Once you add consumers to your API, access requests will be listed
-              here.
-            </Alert>
-          )}
-          {totalRequests > 0 && <AccessRequests />}
-        </Box>
+        <AccessRequestsList
+          labels={data?.allConsumerGroupLabels}
+          queryKey={queryKey}
+        />
+        <Filters
+          data={state as FilterState}
+          filterTypeOptions={filterTypeOptions}
+          onAddFilter={addFilter}
+          onClearFilters={clearFilters}
+          onRemoveFilter={removeFilter}
+          mb={4}
+        >
+          <ConsumerFilters
+            consumers={consumers}
+            labels={data?.allConsumerGroupLabels}
+          />
+        </Filters>
         <Box bgColor="white" mb={4}>
           <Box
+            as="header"
             p={4}
+            pl={9}
             display="flex"
             alignItems="center"
             justifyContent="space-between"
           >
-            <Heading size="md">All Consumers</Heading>
+            <Heading
+              size="sm"
+              fontWeight="normal"
+              data-testid="consumers-count-text"
+            >{`${totalConsumers} Consumer${
+              totalConsumers === 1 ? '' : 's'
+            }`}</Heading>
+            <Box minW="400px">
+              <SearchInput
+                onChange={handleSearchChange}
+                value={search}
+                data-testid="consumer-search-input"
+              />
+            </Box>
           </Box>
-          <Divider />
-          <Table data-testid="all-consumer-control-tbl" variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Name/Id</Th>
-                <Th>Controls</Th>
-                <Th>Tags</Th>
-                <Th colSpan={2}>Last Updated</Th>
+          <Table
+            sortable
+            isUpdating={isFetching}
+            columns={[
+              { name: 'Name/ID', key: 'name' },
+              {
+                name: 'Labels',
+                key: 'tags',
+                sortable: false,
+              },
+              { name: 'Updated', key: 'updatedAt' },
+            ]}
+            data={consumers}
+            data-testid="all-consumer-control-tbl"
+            emptyView={
+              <EmptyPane
+                title="Create your first consumer"
+                message="Consumers access your API under restrictions you set"
+              />
+            }
+          >
+            {(d: ConsumerSummary) => (
+              <Tr key={uid(d.id)}>
+                <Td width="25%">
+                  <NextLink passHref href={`/manager/consumers/${d.id}`}>
+                    <Link color="bc-link" textDecor="underline">
+                      {d.username}
+                    </Link>
+                  </NextLink>
+                </Td>
+                <Td width="50%">
+                  <Wrap spacing={2.5}>
+                    {d.labels.map((t) => (
+                      <WrapItem key={uid(t)}>
+                        <Tag bgColor="white" variant="outline">
+                          {`${t.labelGroup} = ${t.values.join(', ')}`}
+                        </Tag>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </Td>
+                <Td width="25%">
+                  <Flex align="center" justify="space-between">
+                    {formatDistanceToNow(new Date(d.lastUpdated))} ago
+                    <ActionsMenu data-testid={`consumer-${d.id}-menu`}>
+                      <MenuItem
+                        color="bc-link"
+                        onClick={handleGrant(d)}
+                        data-testid="consumer-grant-menuitem"
+                      >
+                        Grant Access
+                      </MenuItem>
+                      <MenuItem
+                        color="red"
+                        onClick={handleDelete(d.id)}
+                        data-testid="consumer-delete-menuitem"
+                      >
+                        Delete Consumer
+                      </MenuItem>
+                    </ActionsMenu>
+                  </Flex>
+                </Td>
               </Tr>
-            </Thead>
-            <Tbody>
-              {totalConsumers === 0 && (
-                <Tr>
-                  <Td colSpan={5}>
-                    <Center>
-                      <Box m={8} textAlign="center">
-                        <Heading mb={2} size="md">
-                          Create your first consumer
-                        </Heading>
-                        <Text color="gray.600">
-                          Consumers access your API under restrictions you set
-                        </Text>
-                      </Box>
-                    </Center>
-                  </Td>
-                </Tr>
-              )}
-              {data.allServiceAccessesByNamespace
-                ?.filter((d) => !!d.consumer)
-                .map((d) => d.consumer)
-                .map((d) => (
-                  <Tr key={d.id}>
-                    <Td>
-                      <NextLink passHref href={`/manager/consumers/${d.id}`}>
-                        <Link>{d.customId ?? d.username}</Link>
-                      </NextLink>
-                    </Td>
-                    <Td>
-                      <Wrap>
-                        {d.plugins?.length === 0 ? (
-                          <NextLink href={`/manager/consumers/${d.id}`}>
-                            <Button
-                              leftIcon={<Icon as={FaPlusCircle} />}
-                              size="xs"
-                              variant="ghost"
-                              color="gray"
-                            >
-                              Add Controls
-                            </Button>
-                          </NextLink>
-                        ) : (
-                          d.plugins.map((d) => (
-                            <WrapItem key={d.id}>
-                              <Badge variant="outline">{d.name}</Badge>
-                            </WrapItem>
-                          ))
-                        )}
-                      </Wrap>
-                    </Td>
-                    <Td>
-                      <TagsList data={d.tags} size="xs" />
-                    </Td>
-                    <Td>{`${formatDistanceToNow(
-                      new Date(d.updatedAt)
-                    )} ago`}</Td>
-                    <Td textAlign="right">
-                      <ButtonGroup size="sm">
-                        <NextLink href={`/manager/consumers/${d.id}`}>
-                          <Button
-                            variant="outline"
-                            color="bc-blue-alt"
-                            leftIcon={<Icon as={FaPen} />}
-                          >
-                            Edit
-                          </Button>
-                        </NextLink>
-                        <IconButton
-                          aria-label="disable consumer button"
-                          icon={<Icon as={FaStop} />}
-                          variant="outline"
-                          colorScheme="red"
-                          disabled={true}
-                        />
-                      </ButtonGroup>
-                    </Td>
-                  </Tr>
-                ))}
-            </Tbody>
+            )}
           </Table>
         </Box>
       </Container>
+      <GrantAccessDialog
+        consumer={grantAccess}
+        isOpen={Boolean(grantAccess)}
+        onClose={handleCloseGrantDialog}
+        queryKey={queryKey}
+      />
     </>
   );
 };
@@ -204,32 +309,49 @@ const ConsumersPage: React.FC<
 export default ConsumersPage;
 
 const query = gql`
-  query GetConsumers {
-    allServiceAccessesByNamespace(
-      first: 200
-      orderBy: "updatedAt_DESC"
-      where: { consumer: { username_not_starts_with: "sa-" } }
-    ) {
-      namespace
-      consumer {
-        id
-        username
-        aclGroups
-        customId
-        plugins {
-          name
-        }
-        tags
-        updatedAt
+  query GetConsumers($filter: ConsumerQueryFilterInput) {
+    allConsumerGroupLabels
+    getFilteredNamespaceConsumers(filter: $filter) {
+      id
+      consumerType
+      username
+      labels {
+        labelGroup
+        values
       }
-      application {
-        name
-        appId
-      }
+      lastUpdated
     }
 
     allAccessRequestsByNamespace(where: { isComplete_not: true }) {
       id
+      name
+      additionalDetails
+      communication
+      createdAt
+      requestor {
+        name
+      }
+      application {
+        name
+      }
+      productEnvironment {
+        name
+        additionalDetailsToRequest
+      }
     }
   }
 `;
+
+const deleteMutation = gql`
+  mutation RevokeAllConsumerAccess($id: ID!) {
+    revokeAllConsumerAccess(consumerId: $id)
+  }
+`;
+
+const filterTypeOptions = [
+  { name: 'Products', value: 'products' },
+  { name: 'Environment', value: 'environments' },
+  { name: 'Labels', value: 'labels' },
+  { name: 'Scopes', value: 'scopes' },
+  { name: 'Roles', value: 'roles' },
+];

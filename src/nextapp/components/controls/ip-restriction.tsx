@@ -87,14 +87,16 @@ const IpRestriction: React.FC<IpRestrictionProps> = ({
       await mutation.mutateAsync(payload);
       client.invalidateQueries(queryKey);
       toast({
-        title: 'Control Updated',
+        title: 'Control updated',
         status: 'success',
+        isClosable: true,
       });
     } catch (err) {
       toast({
-        title: 'Control Update Failed',
-        description: err?.message,
+        title: 'Control update failed',
+        description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };

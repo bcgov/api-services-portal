@@ -4,6 +4,7 @@ import {
   Environment,
   ServiceAccess,
   ServiceAccessCreateInput,
+  ServiceAccessWhereInput,
 } from './types';
 import { strict as assert } from 'assert';
 const logger = Logger('keystone.svc-access');
@@ -20,6 +21,7 @@ export async function lookupCredentialReferenceByServiceAccess(
                         productEnvironment {
                             id
                             name
+                            additionalDetailsToRequest
                             flow
                             credentialIssuer {
                                 id
@@ -27,19 +29,23 @@ export async function lookupCredentialReferenceByServiceAccess(
                             }
                         }
                         application {
+                          name
                           owner {
+                            name
                             username
+                            email
                           }
                         }
                         consumer {
                             id
+                            username
                             customId
                             extForeignKey
                         }
                         credentialReference
                     }
                 }`,
-    variables: { id: id },
+    variables: { id },
   });
   logger.debug(
     'Query [lookupCredentialReferenceByServiceAccess] result %j',
@@ -168,6 +174,7 @@ export async function lookupServiceAccessesByEnvironment(
                         active
                         namespace
                         consumer {
+                          id
                           username
                           customId
                         }
@@ -249,6 +256,123 @@ export async function lookupServiceAccessesForNamespace(
   return result.data.allServiceAccesses;
 }
 
+export async function lookupLabeledServiceAccessesForNamespace(
+  context: any,
+  ns: string,
+  consumerIds: string[],
+  incDetail: boolean = false
+): Promise<ServiceAccess[]> {
+  logger.debug('[lookupLabeledServiceAccessesForNamespace] lookup ns=%s', ns);
+
+  const where: ServiceAccessWhereInput = {};
+
+  // NOTE: Where namespace and product environment exists, it is a
+  // Namespace Service Account - which we want to exclude
+  if (consumerIds) {
+    where['AND'] = [
+      { consumer: { id_in: consumerIds } },
+      {
+        OR: [
+          { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
+          { productEnvironment: { product: { namespace: ns } } },
+        ],
+      },
+    ];
+  } else {
+    where['OR'] = [
+      { AND: [{ namespace: ns }, { productEnvironment_is_null: true }] },
+      { productEnvironment: { product: { namespace: ns } } },
+    ];
+  }
+
+  const detail = `
+                    productEnvironment {
+                      id
+                      name
+                      additionalDetailsToRequest
+                      flow
+                      credentialIssuer {
+                          id
+                          clientAuthenticator
+                      }
+                    }
+                    application {
+                      name
+                      owner {
+                        name
+                        username
+                        email
+                      }
+                    }
+`;
+
+  const result = await context.executeGraphQL({
+    query: `query GetLabeledServiceAccessByNamespace($where: ServiceAccessWhereInput!) {
+                    allServiceAccesses(where: $where) {
+                        id
+                        consumerType
+                        consumer {
+                          id
+                          username
+                          customId
+                        }
+                        updatedAt
+                        ${incDetail && detail}
+                    }
+                }`,
+    variables: { where },
+  });
+
+  assert.strictEqual(
+    'errors' in result,
+    false,
+    `Unexpected errors ${JSON.stringify(result.errors)}`
+  );
+  logger.debug(
+    '[lookupLabeledServiceAccessesForNamespace] result row count %d',
+    result.data.allServiceAccesses.length
+  );
+  // logger.debug(
+  //   '[lookupLabeledServiceAccessesForNamespace] result %j',
+  //   result.data.allServiceAccesses
+  // );
+  return result.data.allServiceAccesses;
+}
+
+export async function lookupServiceAccessesByConsumer(
+  context: any,
+  ns: string,
+  consumerId: string
+): Promise<ServiceAccess[]> {
+  const result = await context.executeGraphQL({
+    query: `query GetSpecificServiceAccessByConsumer($ns: String!, $consumerId: ID!) {
+                    allServiceAccesses(where: { consumer: { id: $consumerId }, productEnvironment: { product: { namespace: $ns } } } ) {
+                        id
+                        namespace
+                        consumerType
+                        productEnvironment {
+                            id
+                            name
+                            appId
+                            additionalDetailsToRequest
+                            flow
+                            product {
+                              name
+                            }
+                            credentialIssuer {
+                                id
+                                clientAuthenticator
+                            }
+                        }
+                    }
+                }`,
+    variables: { ns, consumerId },
+  });
+  logger.debug('Query [lookupServiceAccessesByConsumer] result %j', result);
+
+  return result.data.allServiceAccesses;
+}
+
 export async function addServiceAccess(
   context: any,
   name: string,
@@ -325,4 +449,19 @@ export async function linkCredRefsToServiceAccess(
   });
   logger.debug('[linkCredRefsToServiceAccess] RESULT %j', result);
   return result.data.updateServiceAccess;
+}
+
+export async function deleteServiceAccess(
+  context: any,
+  serviceAccessId: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation DeleteServiceAccess($serviceAccessId: ID!) {
+                    deleteServiceAccess(id: $serviceAccessId) {
+                        id
+                    }
+                }`,
+    variables: { serviceAccessId },
+  });
+  logger.debug('[deleteServiceAccess] RESULT %j', result);
 }

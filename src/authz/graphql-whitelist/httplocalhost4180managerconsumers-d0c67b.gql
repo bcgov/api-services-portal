@@ -1,0 +1,11 @@
+
+  query GetAccessRequestAuth($id: ID!) {
+    AccessRequest(where: { id: $id }) {
+      productEnvironment {
+        credentialIssuer {
+          availableScopes
+          clientRoles
+        }
+      }
+    }
+  }

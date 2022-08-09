@@ -4,46 +4,20 @@ import { Logger } from '../../logger';
 
 import { v4 as uuidv4 } from 'uuid';
 import { strict as assert } from 'assert';
-
-export interface CreateOrGetConsumerResult {
-  created: boolean;
-  consumer: KongConsumer;
-}
-export interface KongConsumer {
-  id?: string;
-  username?: string;
-  custom_id?: string;
-  tags?: string[];
-}
-
-export interface KeyAuthResponse {
-  keyAuthPK: string;
-  apiKey: string;
-}
-
-export interface KongPlugin {
-  name: string;
-  config: any;
-}
-
-export interface KongObjectID {
-  id: string;
-}
-
-export interface DiffResult {
-  D: string[];
-  C: string[];
-}
+import {
+  CreateOrGetConsumerResult,
+  DiffResult,
+  KeyAuthResponse,
+  KongConsumer,
+} from './types';
 
 const logger = Logger('kong.consumer');
 
 export class KongConsumerService {
   private kongUrl: string;
-  private gwaUrl: string;
 
-  constructor(kongUrl: string, gwaUrl: string) {
+  constructor(kongUrl: string) {
     this.kongUrl = kongUrl;
-    this.gwaUrl = gwaUrl;
   }
 
   public async getConsumerByUsername(username: string) {
@@ -165,73 +139,6 @@ export class KongConsumerService {
     }
   }
 
-  public async addPluginToConsumer(
-    consumerPK: string,
-    plugin: KongPlugin,
-    namespace: string
-  ): Promise<KongObjectID> {
-    const body = { ...plugin, tags: ['ns.' + namespace] };
-    logger.debug('[addPluginToConsumer] CALLING with ' + consumerPK);
-
-    const response = await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins`,
-      {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then(checkStatus)
-      .then((res) => res.json());
-
-    logger.debug('[addPluginToConsumer] RESULT %j', response);
-    return {
-      id: response['id'],
-    } as KongObjectID;
-  }
-
-  public async updateConsumerPlugin(
-    consumerPK: string,
-    pluginPK: string,
-    plugin: KongPlugin,
-    namespace: string
-  ): Promise<void> {
-    logger.debug('[updateConsumerPlugin] C=%s P=%s', consumerPK, pluginPK);
-    const body = { ...plugin, tags: ['ns.' + namespace] };
-    const response = await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
-      {
-        method: 'put',
-        body: JSON.stringify(body),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then(checkStatus)
-      .then((res) => res.json());
-
-    logger.debug('[updateConsumerPlugin] RESULT %j', response);
-  }
-
-  public async deleteConsumerPlugin(
-    consumerPK: string,
-    pluginPK: string,
-    namespace: string
-  ): Promise<void> {
-    await fetch(
-      `${this.gwaUrl}/v2/namespaces/${namespace}/consumers/${consumerPK}/plugins/${pluginPK}`,
-      {
-        method: 'delete',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then(checkStatus);
-  }
-
   public async genKeyForConsumerKeyAuth(consumerPK: string, keyAuthPK: string) {
     const body = {
       key: uuidv4().replace(/-/g, ''),
@@ -280,6 +187,8 @@ export class KongConsumerService {
     consumerPK: string,
     namespace: string
   ): Promise<any> {
+    logger.debug('[getConsumerACLByNamespace] %s', consumerPK);
+
     let response = await fetch(
       `${this.kongUrl}/consumers/${consumerPK}/acls?tags=ns.${namespace}`,
       {
@@ -301,27 +210,35 @@ export class KongConsumerService {
     namespace: string,
     aclGroup: string
   ): Promise<DiffResult> {
+    logger.debug('[assignConsumerACL] (%s) ASSIGN %s', consumerPK, aclGroup);
+
     const result: DiffResult = { D: [], C: [] };
     const acls = await this.getConsumerACLByNamespace(consumerPK, namespace);
 
     const acl = acls.filter((acl: any) => acl.group === aclGroup);
-    assert.strictEqual(acl.length, 0, 'Consumer ACL Already Exists');
+    if (acl.length != 0) {
+      logger.warn(
+        '[assignConsumerACL] ACL already assigned for %s',
+        consumerPK
+      );
+      return result;
+    } else {
+      await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls`, {
+        method: 'post',
+        body: JSON.stringify({ group: aclGroup, tags: ['ns.' + namespace] }),
+        headers: { 'Content-Type': 'application/json' },
+      }).then(checkStatus);
+      result.C.push(aclGroup);
 
-    await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls`, {
-      method: 'post',
-      body: JSON.stringify({ group: aclGroup, tags: ['ns.' + namespace] }),
-      headers: { 'Content-Type': 'application/json' },
-    }).then(checkStatus);
-    result.C.push(aclGroup);
+      logger.debug(
+        '[assignConsumerACL] (%s) ASSIGN %s : RESULT %j',
+        consumerPK,
+        aclGroup,
+        result
+      );
 
-    logger.debug(
-      '[assignConsumerACL] (%s) ASSIGN %s : RESULT %j',
-      consumerPK,
-      aclGroup,
-      result
-    );
-
-    return result;
+      return result;
+    }
   }
 
   public async removeConsumerACL(
@@ -334,14 +251,24 @@ export class KongConsumerService {
     const result: DiffResult = { D: [], C: [] };
 
     const acl = acls.filter((acl: any) => acl.group === aclGroup);
-    assert.strictEqual(acl.length, 1, 'Consumer ACL Missing');
+    if (acl.length === 0) {
+      logger.warn('[removeConsumerACL] ACL already deleted for %s', consumerPK);
+      return undefined;
+    } else {
+      await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls/${acl[0].id}`, {
+        method: 'delete',
+      }).then(checkStatus);
+      result.D.push(aclGroup);
 
-    await fetch(`${this.kongUrl}/consumers/${consumerPK}/acls/${acl[0].id}`, {
-      method: 'delete',
-    }).then(checkStatus);
-    result.D.push(aclGroup);
+      logger.debug(
+        '[removeConsumerACL] (%s) REMOVE %s : RESULT %j',
+        consumerPK,
+        aclGroup,
+        result
+      );
 
-    return result;
+      return result;
+    }
   }
 
   public async updateConsumerACLByNamespace(
