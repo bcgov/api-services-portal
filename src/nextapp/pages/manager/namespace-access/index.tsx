@@ -5,7 +5,19 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { QueryClient } from 'react-query';
 import { Query } from '@/shared/types/query.types';
 import { dehydrate } from 'react-query/hydration';
-import { Box, Container, Divider, Heading, Skeleton } from '@chakra-ui/react';
+import {
+  Box,
+  Container,
+  Divider,
+  Heading,
+  Skeleton,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+} from '@chakra-ui/react';
 import GrantAccessDialog from '@/components/grant-access-dialog';
 import GrantServiceAccountDialog from '@/components/grant-service-account-dialog';
 import PageHeader from '@/components/page-header';
@@ -25,13 +37,12 @@ const Loading = (
 );
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const keystoneReq = context.req as any;
-  const nsQueryKey = ['namespaceAccess', keystoneReq.user.namespace];
+  // const keystoneReq = context.req as any;
+  // console.log(context.req);
+  // const nsQueryKey = ['namespaceAccess', keystoneReq?.user?.namespace];
 
   return {
-    props: {
-      nsQueryKey,
-    },
+    props: {},
   };
 };
 
@@ -39,17 +50,19 @@ const AccessRedirectPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ nsQueryKey, headers }) => {
   const { user } = useAuth();
-  const breadcrumbs = user
-    ? [
-        { href: '/manager/namespaces', text: 'Namespaces' },
-        { href: '/manager/namespaces', text: user.namespace },
-      ]
-    : [];
+  const breadcrumbs = [
+    {
+      href: '/manager/namespaces',
+      text: `Namespaces (${user?.namespace})`,
+    },
+    { href: '/manager/namespace-access', text: 'Namespace Access' },
+  ];
 
   const { data, isSuccess, isLoading } = useApi(
-    nsQueryKey,
+    user?.namespace,
     { query },
     {
+      enabled: Boolean(user?.namespace),
       suspense: false,
     }
   );
@@ -101,82 +114,19 @@ const AccessRedirectPage: React.FC<
           }
           breadcrumb={breadcrumbs}
           title="Namespace Access"
-        />
-
-        {isLoading || isPermissionsLoading ? (
-          Loading
-        ) : (
-          <>
-            <Box bgColor="white" my={4} mb={4}>
-              <Box
-                p={4}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Heading size="md">Users with Access</Heading>
-                <GrantAccessDialog
-                  prodEnvId={prodEnvId}
-                  resource={permissions?.getResourceSet}
-                  resourceId={resourceId}
-                  queryKey={queryKey}
-                />
-              </Box>
-              <Divider />
-
-              <UsersAccessList
-                enableRevoke
-                data={permissions?.getPermissionTicketsForResource.filter(
-                  (p) => p.granted
-                )}
-                resourceId={resourceId}
-                prodEnvId={prodEnvId}
-                queryKey={queryKey}
-              />
-            </Box>
-
-            <Box bgColor="white" my={4} mb={4}>
-              <Box
-                p={4}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Heading size="md">Service Accounts with Access</Heading>
-                <GrantServiceAccountDialog
-                  prodEnvId={prodEnvId}
-                  resource={permissions?.getResourceSet}
-                  resourceId={resourceId}
-                  queryKey={queryKey}
-                />
-              </Box>
-              <Divider />
-              <ServiceAccountsList
-                prodEnvId={prodEnvId}
-                resourceId={resourceId}
-                data={permissions?.getUmaPoliciesForResource}
-                queryKey={queryKey}
-              />
-            </Box>
-            <Box bgColor="white" my={4} mb={4}>
-              <Box
-                p={4}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Heading size="md">Organization Groups with Access</Heading>
-              </Box>
-              <Divider />
-              <OrgGroupsList
-                prodEnvId={prodEnvId}
-                resourceId={resourceId}
-                data={permissions?.getOrgPoliciesForResource}
-                queryKey={queryKey}
-              />
-            </Box>
-          </>
-        )}
+        >
+          <Text>Namespace access allows you to grant access to others.</Text>
+        </PageHeader>
+        <Tabs>
+          <TabList>
+            <Tab>Users with access</Tab>
+            <Tab>Service accounts with access</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel bgColor="white">2 users</TabPanel>
+            <TabPanel bgColor="white">2 service accounts</TabPanel>
+          </TabPanels>
+        </Tabs>
       </Container>
     </>
   );
@@ -185,7 +135,7 @@ const AccessRedirectPage: React.FC<
 export default AccessRedirectPage;
 
 const query = gql`
-  query GET {
+  query GetCurrentNamespace {
     currentNamespace {
       id
       name
