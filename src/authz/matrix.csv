@@ -67,7 +67,7 @@ NS MANAGER,,getNamespaceConsumerAccess,,,,,,,api-owner,,,allow,
 NS MANAGER,,allConsumerGroupLabels,,,,,,,api-owner,,,allow,
 NS MANAGER,,allConsumerScopesAndRoles,,,,,,,api-owner,,,allow,
 NS MANAGER,,getConsumerProdEnvAccess,,,,,,,api-owner,,,allow,
-NS MANAGER,,allProductsByNamespace,,,,,,,api-owner,,,allow,
+NS MANAGER,,allProductsByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
 NS MANAGER,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,
 NS MANAGER,,getFilteredNamespaceConsumers,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,,AccessRequest,read,,,,,,,"api-owner,provider-user",allow,
@@ -199,8 +199,6 @@ API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-us
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-,,allProductsByNamespace,,,,,,,,,portal-user,allow,
-,,,,,,,,,,,,,
 Portal User or Guest,,allDiscoverableContents,,,,,,,,,"portal-user,guest",allow,filterByNamespaceOrPublic
 Portal User or Guest,,allDiscoverableProducts,,,,,,,,,"portal-user,guest",allow,filterByActiveEnvironment
 Portal User or Guest,,allProducts,,,,,,,,,"portal-user,guest",allow,
