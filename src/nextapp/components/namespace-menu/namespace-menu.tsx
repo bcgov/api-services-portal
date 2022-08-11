@@ -62,8 +62,6 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg
   );
 
   const isNSSelector = variant === 'ns-selector';
-  
-  // Q: While testing, selecting namespace from dropdown did not update NS in header dropdown.
 
   // Q: Is this an ok way of handling styling for different variants?
   const default_styling = {
