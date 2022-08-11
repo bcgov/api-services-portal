@@ -160,10 +160,21 @@ describe('API Tests for Updating dataset', () => {
         })
     })
 
-    it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code in the response', () => {
+    it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code and empty response for the namespace with no directory', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory', 'GET').then((res) => {
+                    expect(res.status).to.be.equal(200)
+                    expect(res.body).to.be.empty
+                })
+            })
+        })
+    })
+
+    it('Get the namespace directory details (/namespaces/{ns}/directory) and verify the success code in the response', () => {
+        cy.get('@apiowner').then(({ namespace }: any) => {
+            cy.get('@api').then(({ apiDirectory }: any) => {
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory', 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
                     response = res.body[0]
                     directoryID = res.body[0].id
@@ -180,9 +191,9 @@ describe('API Tests for Updating dataset', () => {
     // })
 
     it('Get the namespace directory details by its ID (/namespaces/{ns}/directory/{id}) and verify the success code in the response', () => {
-        cy.get('@apiowner').then(({ apiTest }: any) => {
+        cy.get('@apiowner').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + apiTest.namespace + '/directory' + '/' + directoryID, 'GET').then((res) => {
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/' + directoryID, 'GET').then((res) => {
                     expect(res.status).to.be.equal(200)
                     expect(res.body.name).to.be.equal(directoryName)
                 })
