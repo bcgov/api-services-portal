@@ -22,10 +22,14 @@ import NewNamespace from '../new-namespace';
 interface NamespaceMenuProps {
   user: UserData;
   variant?: string;
-  menuBtnMsg?: string;
+  buttonMessage?: string;
 }
 
-const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg }) => {
+const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
+  user,
+  variant,
+  buttonMessage,
+}) => {
   const client = useQueryClient();
   const toast = useToast();
   const newNamespaceDisclosure = useDisclosure();
@@ -61,39 +65,24 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg
     [client, toast]
   );
 
-  const isNSSelector = variant === 'ns-selector';
-
-  // Q: Is this an ok way of handling styling for different variants?
-  const default_styling = {
-    px: 2,
-    py: 1,
-    transition: 'all 0.2s',
-    borderRadius: 4,
-    _hover: { bg: 'bc-link' },
-    _expanded: { bg: 'blue.400' },
-    _focus: { boxShadow: 'outline' },
-  };
-
-  const variant_styling = {
-    'ns-selector': {
-      px: 5,
-      py: 2,
-      border: '2px solid',
-      borderColor: 'bc-component',
-      _hover: { boxShadow: 'md' },
-      _expanded: { bg: 'white' },
-    },
-  };
-
-  const styling = { ...default_styling, ...variant_styling[variant] };
+  const isNamespaceSelector = variant === 'ns-selector';
 
   return (
     <>
       <Menu placement="bottom-end">
-        {/* Q: Figma has a bigger gap between the text and chevron... should a larger gap be added? */}
-        {/* Q: Follow up: how precise does styling need to be? Does it need to match up perfectly to figma? */}
-        <MenuButton data-testid="ns-dropdown-btn" {...styling}>
-          {user?.namespace ?? menuBtnMsg ?? 'No Active Namespace'}{' '}
+        <MenuButton
+          data-testid="ns-dropdown-btn"
+          px={isNamespaceSelector ? 5 : 2}
+          py={isNamespaceSelector ? 2 : 1}
+          transition="all 0.2s"
+          borderRadius={4}
+          border={isNamespaceSelector ? '2px solid black' : ''}
+          borderColor={isNamespaceSelector ? 'bc-component' : ''}
+          _hover={isNamespaceSelector ? { boxShadow: 'md' } : { bg: 'bc-link' }}
+          _expanded={isNamespaceSelector ? {} : { bg: 'blue.400' }}
+          _focus={{ boxShadow: 'outline' }}
+        >
+          {user?.namespace ?? buttonMessage ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList
@@ -113,7 +102,9 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
-                <MenuOptionGroup title={isNSSelector ? '' : 'Switch Namespace'}>
+                <MenuOptionGroup
+                  title={isNamespaceSelector ? '' : 'Switch Namespace'}
+                >
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
                     .sort((a, b) => a.name.localeCompare(b.name))
@@ -130,7 +121,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg
               </>
             )}
           </>
-          {!isNSSelector && (
+          {!isNamespaceSelector && (
             <>
               <MenuDivider />
               <MenuOptionGroup title="Namespace Actions">

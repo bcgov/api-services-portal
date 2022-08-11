@@ -147,10 +147,10 @@ const NamespacesPage: React.FC = () => {
             message="To get started select a namespace from the dropdown below or create a new namespace"
             title="No namespace selected yet"
           >
-            <Flex justifyContent="center" alignItems="center" gridGap={5}>
-              <NamespaceMenu user={user} variant="ns-selector" menuBtnMsg='Select a namespace' />
+            <Flex justifyContent="center" alignItems="center" gridGap={4}>
+              <NamespaceMenu user={user} variant="ns-selector" buttonMessage='Select a namespace' />
               <Text>or</Text>
-              <Button onClick={newNamespaceDisclosure.onOpen}>
+              <Button variant="primary" onClick={newNamespaceDisclosure.onOpen}>
                 Create New Namespace
               </Button>
             </Flex>
