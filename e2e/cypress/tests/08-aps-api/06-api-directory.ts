@@ -201,6 +201,16 @@ describe('API Tests for Updating dataset', () => {
         })
     })
 
+    it('Get the namespace directory details (/namespaces/{ns}/directory/{id}) for non exist directory ID and verify the response code', () => {
+        cy.get('@apiowner').then(({ namespace }: any) => {
+            cy.get('@api').then(({ apiDirectory }: any) => {
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99' , 'GET').then((res) => {
+                    expect(res.status).to.be.equal(204)
+                })
+            })
+        })
+    })
+
     it('Delete the dataset (/organizations/{org}/datasets/{name}) and verify the success code in the response', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
             cy.get('@api').then(({ apiDirectory, organization }: any) => {
