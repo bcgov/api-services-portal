@@ -11,16 +11,8 @@ import {
   Icon,
   Link,
   useToast,
-  HStack,
   VStack,
   useDisclosure,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
-  MenuOptionGroup,
-  Center,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -37,18 +29,16 @@ import {
   FaUserAlt,
   FaUserFriends,
   FaUserShield,
-  FaChevronDown,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation, useApi } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
-import NewNamespace from '@/components/new-namespace';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
-import Card from '@/components/card';
 import EmptyPane from '@/components/empty-pane';
-import type { NamespaceData } from '@/shared/types/app.types';
+import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
+import NewNamespace from '@/components/new-namespace';
 
 const actions = [
   {
@@ -107,31 +97,6 @@ const secondaryActions = [
   },
 ];
 
-/*
-TODO Discussion items with Josh:
-
-To jump to item, search for item number
-
-1. In file: `src/nextapp/shared/data/links.ts` for the `name: 'Namespaces'` block: set access list to: `access: []`... before it was `access: ['api-owner']`. Is this an appropriate change? Also, even though we are logged in as someone who is an api-owner, they were not able to access this page. Why would that be the case?
-
-2. (Multiple Instances) Copied these from namespace-menu... is this a reasonable approach?
-
-3. This query is also used namespace-menu... should this be a shared query? Ie: place it in: `src/nextapp/shared/queries`... or is there a more appropriate way of getting shared data?
-
-4. Originally had EmptyPane component here but didn't think there was a way to override the maxW prop... should this be an EmptyPane instead? If so, how to override props like maxW?
-
-5. What should _hover be? Change color? Underline text?
-
-6. Tried using MenuButton.justifyContent="space-between" but did not work, so ended up using HStack to add this property. Why did justifyContent not work in this situation.
-*/
-
-/*
-TODO: 
-
-- Looks like the text is in a more narrow Box while the buttons are in a wider box.
-- Add fuctionality for clicking on Create New Namespace button
-- Buttons should have greater height
-*/
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
@@ -140,14 +105,7 @@ const NamespacesPage: React.FC = () => {
   const toast = useToast();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
-  const { isOpen, onClose, onOpen } = useDisclosure();
-
-  // 2.
-  const { data, isLoading, isSuccess, isError } = useApi(
-    'allNamespaces',
-    { query },
-    { suspense: false }
-  );
+  const newNamespaceDisclosure = useDisclosure();
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -170,32 +128,6 @@ const NamespacesPage: React.FC = () => {
     }
   }, [client, mutate, router, toast, user]);
 
-  // 2.
-  const handleNamespaceChange = React.useCallback(
-    (namespace: NamespaceData) => async () => {
-      toast({
-        title: `Switching to  ${namespace.name} namespace`,
-        status: 'info',
-      });
-      try {
-        await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
-        toast.closeAll();
-        client.invalidateQueries();
-        toast({
-          title: `Switched to  ${namespace.name} namespace`,
-          status: 'success',
-        });
-      } catch (err) {
-        toast.closeAll();
-        toast({
-          title: 'Unable to switch namespaces',
-          status: 'error',
-        });
-      }
-    },
-    [client, toast]
-  );
-
   return (
     <>
       <Head>
@@ -211,107 +143,22 @@ const NamespacesPage: React.FC = () => {
           title={hasNamespace ? user.namespace : 'For API Providers'}
         />
         {!hasNamespace && (
-          <Card>
-            {/* 4. */}
-            <Center my={6}>
-              <VStack
-                textAlign="center"
-                py="6rem"
-                px={8}
-                bg="white"
-                borderRadius="4px"
-                maxW={{ sm: 650 }}
-                mx={{ base: 4 }}
-                spacing={5}
-              >
-                <Box width={475}>
-                  <Heading as="h3" size="md" mb={2}>
-                    No namespace selected yet.
-                  </Heading>
-                  <Text>
-                    To get started, select a namespace from the dropdown below or
-                    create a new namespace
-                  </Text>
-                </Box>
-                <Box mt={6}>
-                  <HStack spacing={4}>
-                    {/* 2. */}
-                    <Menu placement="bottom-end">
-                      <MenuButton
-                        px={5}
-                        py={2}
-                        width={250}
-                        transition="all 0.2s"
-                        borderRadius={4}
-                        border="2px solid"
-                        borderColor="bc-component"
-                        // 5.
-                        _hover={{ bg: 'bc-link' }}
-                        _expanded={{ bg: 'blue.400' }}
-                        _focus={{ boxShadow: 'outline' }}
-                        alignItems="center"
-                        // justifyContent="space-between"
-                      >
-                        {/* 6. */}
-                        <HStack justify="space-between">
-                          <Text>{user?.namespace ?? 'Select a Namespace'}</Text>
-                          <Icon
-                            as={FaChevronDown}
-                            ml={2}
-                            aria-label="chevron down icon"
-                          />
-                        </HStack>
-                      </MenuButton>
-                      <MenuList
-                        color="gray.600"
-                        sx={{
-                          '.chakra-menu__group__title': {
-                            fontWeight: 'normal',
-                            fontSize: 'md',
-                            px: 1,
-                          },
-                        }}
-                      >
-                        <>
-                          {isLoading && (
-                            <MenuItem isDisabled>
-                              Loading namespaces...
-                            </MenuItem>
-                          )}
-                          {isError && (
-                            <MenuItem isDisabled>
-                              Namespaces Failed to Load
-                            </MenuItem>
-                          )}
-                          {isSuccess && data.allNamespaces.length > 0 && (
-                            <>
-                              <MenuOptionGroup title="Switch Namespace">
-                                {data.allNamespaces
-                                  .filter((n) => n.name !== user.namespace)
-                                  .sort((a, b) => a.name.localeCompare(b.name))
-                                  .map((n) => (
-                                    <MenuItem
-                                      key={n.id}
-                                      onClick={handleNamespaceChange(n)}
-                                      data-testid={`ns-dropdown-item-${n.name}`}
-                                    >
-                                      {n.name}
-                                    </MenuItem>
-                                  ))}
-                              </MenuOptionGroup>
-                            </>
-                          )}
-                        </>
-                      </MenuList>
-                    </Menu>
-
-                    <Text>or</Text>
-                    <Button as="a">Create New Namespace</Button>
-                  </HStack>
-                </Box>
-              </VStack>
-            </Center>
-          </Card>
+          <EmptyPane
+            message="To get started select a namespace from the dropdown below or create a new namespace"
+            title="No namespace selected yet"
+          >
+            <Flex justifyContent="center" alignItems="center" gridGap={5}>
+              <NamespaceMenu user={user} variant="ns-selector" menuBtnMsg='Select a namespace' />
+              <Text>or</Text>
+              <Button onClick={newNamespaceDisclosure.onOpen}>
+                Create New Namespace
+              </Button>
+            </Flex>
+            <NewNamespace
+              isOpen={newNamespaceDisclosure.isOpen}
+              onClose={newNamespaceDisclosure.onClose}
+            />
+          </EmptyPane>
         )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
@@ -467,15 +314,5 @@ export default NamespacesPage;
 const mutation = gql`
   mutation DeleteNamespace($name: String!) {
     forceDeleteNamespace(namespace: $name, force: false)
-  }
-`;
-
-// 3.
-const query = gql`
-  query GetNamespaces {
-    allNamespaces {
-      id
-      name
-    }
   }
 `;

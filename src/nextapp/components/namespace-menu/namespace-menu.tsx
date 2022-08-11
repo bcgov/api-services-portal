@@ -16,15 +16,16 @@ import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
 import type { NamespaceData } from '@/shared/types/app.types';
-
 import NamespaceManager from '../namespace-manager';
 import NewNamespace from '../new-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
+  variant?: string;
+  menuBtnMsg?: string;
 }
 
-const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
+const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user, variant, menuBtnMsg }) => {
   const client = useQueryClient();
   const toast = useToast();
   const newNamespaceDisclosure = useDisclosure();
@@ -60,20 +61,41 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
     [client, toast]
   );
 
+  const isNSSelector = variant === 'ns-selector';
+  
+  // Q: While testing, selecting namespace from dropdown did not update NS in header dropdown.
+
+  // Q: Is this an ok way of handling styling for different variants?
+  const default_styling = {
+    px: 2,
+    py: 1,
+    transition: 'all 0.2s',
+    borderRadius: 4,
+    _hover: { bg: 'bc-link' },
+    _expanded: { bg: 'blue.400' },
+    _focus: { boxShadow: 'outline' },
+  };
+
+  const variant_styling = {
+    'ns-selector': {
+      px: 5,
+      py: 2,
+      border: '2px solid',
+      borderColor: 'bc-component',
+      _hover: { boxShadow: 'md' },
+      _expanded: { bg: 'white' },
+    },
+  };
+
+  const styling = { ...default_styling, ...variant_styling[variant] };
+
   return (
     <>
       <Menu placement="bottom-end">
-        <MenuButton
-          px={2}
-          py={1}
-          transition="all 0.2s"
-          borderRadius={4}
-          _hover={{ bg: 'bc-link' }}
-          _expanded={{ bg: 'blue.400' }}
-          _focus={{ boxShadow: 'outline' }}
-          data-testid="ns-dropdown-btn"
-        >
-          {user?.namespace ?? 'No Active Namespace'}{' '}
+        {/* Q: Figma has a bigger gap between the text and chevron... should a larger gap be added? */}
+        {/* Q: Follow up: how precise does styling need to be? Does it need to match up perfectly to figma? */}
+        <MenuButton data-testid="ns-dropdown-btn" {...styling}>
+          {user?.namespace ?? menuBtnMsg ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList
@@ -93,7 +115,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
               <>
-                <MenuOptionGroup title="Switch Namespace">
+                <MenuOptionGroup title={isNSSelector ? '' : 'Switch Namespace'}>
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
                     .sort((a, b) => a.name.localeCompare(b.name))
@@ -107,27 +129,31 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>
-                <MenuDivider />
               </>
             )}
           </>
-          <MenuOptionGroup title="Namespace Actions">
-            <MenuItem
-              onClick={newNamespaceDisclosure.onOpen}
-              color="bc-blue-alt"
-              data-testid="ns-dropdown-create-btn"
-            >
-              Create New Namespace
-            </MenuItem>
-            <MenuItem
-              isDisabled={!data}
-              color="bc-blue-alt"
-              onClick={managerDisclosure.onOpen}
-              data-testid="ns-dropdown-manage-btn"
-            >
-              Export Namespace Report
-            </MenuItem>
-          </MenuOptionGroup>
+          {!isNSSelector && (
+            <>
+              <MenuDivider />
+              <MenuOptionGroup title="Namespace Actions">
+                <MenuItem
+                  onClick={newNamespaceDisclosure.onOpen}
+                  color="bc-blue-alt"
+                  data-testid="ns-dropdown-create-btn"
+                >
+                  Create New Namespace
+                </MenuItem>
+                <MenuItem
+                  isDisabled={!data}
+                  color="bc-blue-alt"
+                  onClick={managerDisclosure.onOpen}
+                  data-testid="ns-dropdown-manage-btn"
+                >
+                  Export Namespace Report
+                </MenuItem>
+              </MenuOptionGroup>
+            </>
+          )}
         </MenuList>
       </Menu>
       <NewNamespace
