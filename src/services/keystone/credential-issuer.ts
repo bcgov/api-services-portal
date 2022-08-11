@@ -28,7 +28,7 @@ export async function lookupCredentialIssuerById(
     variables: { id: id },
   });
   if (result.errors) {
-    logger.error('[lookupCredentialIssuerById] %j', result);
+    logger.error('[lookupCredentialIssuerById] %j', result.errors);
   }
   return result.data.CredentialIssuer;
 }
@@ -51,11 +51,11 @@ export function updateEnvironmentDetails(
       const existingIndex = existing.findIndex((env) => {
         return env.environment === upd.environment;
       });
-      if (existingIndex === -1) {
-        logger.debug('Adding %s', upd.environment);
-      } else {
-        logger.debug('Replacing %s', upd.environment);
-      }
+      // if (existingIndex === -1) {
+      //   logger.debug('Adding %s', upd.environment);
+      // } else {
+      //   logger.debug('Replacing %s', upd.environment);
+      // }
       newList.push(upd);
     }
   });

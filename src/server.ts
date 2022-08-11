@@ -1,6 +1,7 @@
 /// <reference types="node" />
 /// <reference types="express" />
 import 'reflect-metadata';
+const { formatError } = require('./services/keystone_overrides/formatError');
 const { Keystone } = require('@keystonejs/keystone');
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
@@ -238,6 +239,22 @@ const apps = [
   new MaintenanceApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
+    apollo: {
+      formatError: (err: any) => {
+        logger.error('GraphQL Error: %s', err);
+        const error = formatError(err);
+
+        const data = error.extensions?.exception?.response?.data;
+        if (error.extensions?.exception) {
+          logger.warn('Removing exception details from error response');
+          delete error.extensions['exception'];
+        }
+        if (data) {
+          logger.error('  %s', data);
+        }
+        return error;
+      },
+    },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
