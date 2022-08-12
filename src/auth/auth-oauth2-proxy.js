@@ -228,7 +228,7 @@ class Oauth2ProxyAuthStrategy {
         try {
           const rpt = jwtDecoder(accessToken);
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-          const username = req['oauth_user']['preferred_username']; // Username included in token
+          const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
           // The oauth2_proxy is handling the refresh token; so there can be a new jti
           logger.info(
             '[ns-switch] %s -> %s : %s',
@@ -239,7 +239,7 @@ class Oauth2ProxyAuthStrategy {
           await this.assign_namespace(
             req.user.jti,
             jti,
-            username,
+            identityProvider,
             rpt['authorization']['permissions'][0]
           );
           res.json({ switch: true });
