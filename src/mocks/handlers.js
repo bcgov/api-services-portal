@@ -23,7 +23,11 @@ import {
 } from './resolvers/consumers';
 import {
   getCurrentNamesSpaceHandler,
-  getPermissionsHandler,
+  getResourceSetHandler,
+  getServiceAccessPermissionsHandler,
+  getUserPermissionsHandler,
+  grantAccessHandler,
+  grantSAAccessHandler,
 } from './resolvers/namespace-access';
 
 export function resetAll() {
@@ -91,8 +95,15 @@ export const handlers = [
     allProductsByNamespaceHandler
   ),
   // Namespace Access
-  keystone.query('GetPermissions', getPermissionsHandler),
+  keystone.query('GetUserPermissions', getUserPermissionsHandler),
+  keystone.query(
+    'GetServiceAccessPermissions',
+    getServiceAccessPermissionsHandler
+  ),
+  keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.mutation('GrantUserAccess', grantAccessHandler),
+  keystone.mutation('GrantSAAccess', grantSAAccessHandler),
   // MUTATIONS
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),

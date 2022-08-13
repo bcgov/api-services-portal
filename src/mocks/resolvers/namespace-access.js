@@ -16,7 +16,7 @@ export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   );
 };
 
-export const getPermissionsHandler = (_, res, ctx) => {
+export const getUserPermissionsHandler = (_, res, ctx) => {
   return res(
     ctx.data({
       getPermissionTicketsForResource: [
@@ -25,26 +25,89 @@ export const getPermissionsHandler = (_, res, ctx) => {
           owner: 'o1',
           ownerName: 'aps',
           requester: '123',
-          requesterName: 'harley123',
+          requesterName: 'wolfeschlegelsteinhausen@idir',
           resource: 'r1',
           resourceName: 'aps-portal',
           scope: 's1',
           scopeName: 'Namespace.Manage',
-          granted: true,
+          granted: false,
+        },
+        {
+          id: 'perm1-a',
+          owner: 'o1',
+          ownerName: 'aps',
+          requester: '123',
+          requesterName: 'wolfeschlegelsteinhausen@idir',
+          resource: 'r1',
+          resourceName: 'aps-portal',
+          scope: 's1',
+          scopeName: 'Content.Publish',
+          granted: false,
+        },
+        {
+          id: 'perm1-b',
+          owner: 'o1',
+          ownerName: 'aps',
+          requester: '123',
+          requesterName: 'wolfeschlegelsteinhausen@idir',
+          resource: 'r1',
+          resourceName: 'aps-portal',
+          scope: 's1',
+          scopeName: 'GatewayConfig.Publish',
+          granted: false,
+        },
+        {
+          id: 'perm1-c',
+          owner: 'o1',
+          ownerName: 'aps',
+          requester: '123',
+          requesterName: 'wolfeschlegelsteinhausen@idir',
+          resource: 'r1',
+          resourceName: 'aps-portal',
+          scope: 's1',
+          scopeName: 'Namespace.Manage',
+          granted: false,
+        },
+        {
+          id: 'perm1-d',
+          owner: 'o1',
+          ownerName: 'aps',
+          requester: '123',
+          requesterName: 'wolfeschlegelsteinhausen@idir',
+          resource: 'r1',
+          resourceName: 'aps-portal',
+          scope: 's1',
+          scopeName: 'Namespace.View',
+          granted: false,
         },
         {
           id: 'perm2',
           owner: 'o1',
           ownerName: 'aps',
           requester: '123',
-          requesterName: 'harley123',
-          resource: 'r1',
+          requesterName: 'elischen@idir',
+          resource: 'r2',
           resourceName: 'aps-portal',
           scope: 's1',
-          scopeName: 'Namespace.Manage',
-          granted: true,
+          scopeName: 'Namespace.Access',
+          granted: false,
         },
       ],
+      getOrgPoliciesForResource: [],
+      Environment: { name: 'dev', product: { id: 'e1', name: 'GWA API' } },
+    })
+  );
+};
+
+export const getServiceAccessPermissionsHandler = (_, res, ctx) => {
+  // Keep around to test an empty view.
+  // return res(
+  //   ctx.data({
+  //     getUmaPoliciesForResource: [],
+  //   })
+  // );
+  return res(
+    ctx.data({
       getUmaPoliciesForResource: [
         {
           id: 'uma1',
@@ -57,7 +120,13 @@ export const getPermissionsHandler = (_, res, ctx) => {
           clients: null,
           users: ['r1'],
           groups: null,
-          scopes: ['Namespace.Manage'],
+          scopes: [
+            'Namespace.Manage',
+            'Content.Publish',
+            'GatewayConfig.Publish',
+            'Namespace.Manage',
+            'Namespace.View',
+          ],
         },
         {
           id: 'uma1',
@@ -86,7 +155,13 @@ export const getPermissionsHandler = (_, res, ctx) => {
           scopes: ['GatewayConfig.Publish'],
         },
       ],
-      getOrgPoliciesForResource: [],
+    })
+  );
+};
+
+export const getResourceSetHandler = (_, res, ctx) => {
+  return res(
+    ctx.data({
       getResourceSet: {
         id: 'r1',
         name: 'aps-portal',
@@ -98,7 +173,22 @@ export const getPermissionsHandler = (_, res, ctx) => {
           { name: 'Namespace.View' },
         ],
       },
-      Environment: { name: 'dev', product: { id: 'e1', name: 'GWA API' } },
+    })
+  );
+};
+
+export const grantAccessHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      id: 'a4',
+    })
+  );
+};
+
+export const grantSAAccessHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      id: 'a4',
     })
   );
 };
