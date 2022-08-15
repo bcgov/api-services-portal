@@ -16,8 +16,6 @@ import {
   Icon,
   useDisclosure,
   VStack,
-  Box,
-  Text,
   WrapItem,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
@@ -74,7 +72,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
           <ModalHeader>{startCase(title)}</ModalHeader>
           <ModalBody>
             <form ref={formRef} onSubmit={handleSubmit}>
-              <VStack spacing={6} overflow="hidden">
+              <VStack spacing={6}>
                 <FormControl isRequired>
                   <FormLabel>
                     {variant === 'user' ? 'Username' : 'Service Account'}

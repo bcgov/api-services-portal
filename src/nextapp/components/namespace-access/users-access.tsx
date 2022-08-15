@@ -40,7 +40,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
   const toast = useToast();
-  const { data, isSuccess } = useApi(
+  const { data, isLoading, isSuccess } = useApi(
     queryKey,
     {
       query,
@@ -81,8 +81,8 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     await grant.mutateAsync({
       prodEnvId,
       data: {
-        username,
         resourceId,
+        username,
         scopes,
       },
     });
@@ -117,6 +117,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       </Flex>
       <Table
         sortable
+        isUpdating={isLoading}
         emptyView={
           <EmptyPane
             title={search ? 'No users found' : 'No users have access'}

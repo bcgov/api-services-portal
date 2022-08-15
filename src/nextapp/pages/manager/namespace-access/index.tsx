@@ -38,7 +38,6 @@ const AccessRedirectPage: React.FC = () => {
     { query },
     { enabled: namespaceDetails.isSuccess, suspense: false }
   );
-  console.log(namespaceDetails.data, data);
 
   return (
     <>
@@ -51,8 +50,8 @@ const AccessRedirectPage: React.FC = () => {
         </PageHeader>
         <Tabs>
           <TabList>
-            <Tab>Users with access</Tab>
-            <Tab>Service accounts with access</Tab>
+            <Tab isDisabled={isLoading}>Users with access</Tab>
+            <Tab isDisabled={isLoading}>Service accounts with access</Tab>
           </TabList>
           <TabPanels>
             <TabPanel bgColor="white" px={0} pb={0}>

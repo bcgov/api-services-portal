@@ -2,9 +2,9 @@ import * as React from 'react';
 import {
   Box,
   Heading,
+  Tag,
   Td,
   Tr,
-  Tag,
   Flex,
   Wrap,
   WrapItem,
@@ -60,14 +60,14 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     return [];
   }, [data, isSuccess, search]);
   const handleGrantAccess = async (form: FormData) => {
-    const username = form.get('username') as string;
+    const name = form.get('username') as string;
     const scopes = form.getAll('scopes') as string[];
 
     await grant.mutateAsync({
       prodEnvId,
+      resourceId,
       data: {
-        username,
-        resourceId,
+        name,
         scopes,
       },
     });
@@ -93,7 +93,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         <Heading size="sm" fontWeight="normal">
           {requests?.length ?? '0'} service accounts
         </Heading>
-        <Box>
+        <Box minW="280px">
           <SearchInput
             placeholder="Search for Service Account"
             value={search}
@@ -103,6 +103,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
       </Flex>
       <Table
         sortable
+        isUpdating={isLoading}
         emptyView={
           <EmptyPane
             title={
@@ -142,7 +143,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
                 ))}
               </Wrap>
             </Td>
-            <Td textAlign="right">Menu</Td>
+            <Td textAlign="right"></Td>
           </Tr>
         )}
       </Table>
