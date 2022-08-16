@@ -1,0 +1,5 @@
+mutation GrantSAAccess($prodEnvId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
+  createUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {
+    id
+  }
+}

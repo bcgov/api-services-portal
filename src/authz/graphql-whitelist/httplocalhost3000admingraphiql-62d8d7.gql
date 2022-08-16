@@ -1,0 +1,10 @@
+query GetResourceSet($prodEnvId: ID!, $resourceId: ID!) {
+  getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+    id
+    name
+    type
+    resource_scopes {
+      name
+    }
+  }
+}

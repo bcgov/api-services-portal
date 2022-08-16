@@ -50,8 +50,12 @@ const AccessRedirectPage: React.FC = () => {
         </PageHeader>
         <Tabs>
           <TabList>
-            <Tab isDisabled={isLoading}>Users with access</Tab>
-            <Tab isDisabled={isLoading}>Service accounts with access</Tab>
+            <Tab isDisabled={isLoading} data-testid="nsa-tab-users">
+              Users with access
+            </Tab>
+            <Tab isDisabled={isLoading} data-testid="nsa-tab-sa">
+              Service accounts with access
+            </Tab>
           </TabList>
           <TabPanels>
             <TabPanel bgColor="white" px={0} pb={0}>

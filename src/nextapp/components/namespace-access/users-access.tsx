@@ -104,7 +104,11 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   return (
     <>
       <Flex as="header" justify="space-between" px={8} align="center">
-        <Heading size="sm" fontWeight="normal">
+        <Heading
+          size="sm"
+          fontWeight="normal"
+          data-testid="nsa-users-count-text"
+        >
           {requests?.length ?? '0'} users
         </Heading>
         <Box>
@@ -112,6 +116,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
             placeholder="Search for User"
             value={search}
             onChange={setSearch}
+            data-testid="nsa-users-search"
           />
         </Box>
       </Flex>
@@ -142,7 +147,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         data={requests}
       >
         {(d: AccessItem, index) => (
-          <Tr key={index}>
+          <Tr key={index} data-testid={`nsa-users-table-row-${index}`}>
             <Td>{d.requesterName}</Td>
             <Td>
               <Wrap>

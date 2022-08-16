@@ -90,7 +90,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
   return (
     <>
       <Flex as="header" justify="space-between" px={8} align="center">
-        <Heading size="sm" fontWeight="normal">
+        <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
           {requests?.length ?? '0'} service accounts
         </Heading>
         <Box minW="280px">
@@ -98,6 +98,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
             placeholder="Search for Service Account"
             value={search}
             onChange={setSearch}
+            data-testid="nsa-sa-search"
           />
         </Box>
       </Flex>
@@ -132,7 +133,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         data={requests}
       >
         {(d: UmaPolicy, index) => (
-          <Tr key={index}>
+          <Tr key={index} data-testid={`nsa-users-table-row-${index}`}>
             <Td>{d.name}</Td>
             <Td>
               <Wrap>

@@ -102,7 +102,11 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button variant="secondary" onClick={onClose}>
+              <Button
+                variant="secondary"
+                onClick={onClose}
+                data-testid="nsa-gua-cancel-btn"
+              >
                 Cancel
               </Button>
               <Button
