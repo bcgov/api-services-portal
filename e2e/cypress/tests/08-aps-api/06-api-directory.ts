@@ -205,7 +205,7 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@apiowner').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
                 cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99' , 'GET').then((res) => {
-                    expect(res.status).to.be.equal(204)
+                    expect(res.status).to.be.oneOf([404,422])
                 })
             })
         })
