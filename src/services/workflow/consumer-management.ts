@@ -228,7 +228,8 @@ export async function getNamespaceConsumerAccess(
     owner: {
       id: serviceAccess.application?.owner.id,
       name: serviceAccess.application?.owner.name,
-      username: serviceAccess.application?.owner.username,
+      provider: serviceAccess.application?.owner.provider,
+      providerUsername: serviceAccess.application?.owner.providerUsername,
       email: serviceAccess.application?.owner.email,
     },
     labels: labels.map(

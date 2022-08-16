@@ -30,6 +30,9 @@ import {
 import { doFiltering } from '../../../services/workflow/consumer-filters';
 import { syncPlugins } from '../../../services/workflow/consumer-plugins';
 import { lookupConsumerPlugins } from '../../../services/keystone';
+import { Logger } from '../../../logger';
+
+const logger = Logger('test.intg');
 
 (async () => {
   const keystone = await InitKeystone();
@@ -93,24 +96,32 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumer);
   }
 
+  if (true) {
+    const cid = '62f55c9cc56563de1c514e1b';
+    const id = '629fccaf76e9e65444ca6a43';
+    const res = await getConsumerProdEnvAccess(ctx, ns, cid, id).catch((e) => {
+      logger.error('Caught error: %s', e.message);
+    });
+    o(res);
+  }
   if (false) {
     const id = '62a18b772da3cdea467b10fd';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
 
     // only enriches with Authorization and Access Request details
-    // const envPromises = consumerAccess.prodEnvAccess
-    //   .filter((a) => a.plugins.length > 0)
-    //   .map(async (p: any) => {
-    //     const res = await getConsumerProdEnvAccess(
-    //       ctx,
-    //       ns,
-    //       consumerAccess.consumer.id,
-    //       p.environment.id
-    //     );
-    //     o(res);
-    //   });
-    // await Promise.all(envPromises);
+    const envPromises = consumerAccess.prodEnvAccess
+      .filter((a) => a.plugins.length > 0)
+      .map(async (p: any) => {
+        const res = await getConsumerProdEnvAccess(
+          ctx,
+          ns,
+          consumerAccess.consumer.id,
+          p.environment.id
+        );
+        o(res);
+      });
+    await Promise.all(envPromises);
   }
   if (false) {
     const id = '62a18b772da3cdea467b10fd';

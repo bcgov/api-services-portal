@@ -300,6 +300,8 @@ export async function lookupLabeledServiceAccessesForNamespace(
                       name
                       owner {
                         name
+                        provider
+                        providerUsername
                         username
                         email
                       }

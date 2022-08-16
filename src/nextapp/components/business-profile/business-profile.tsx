@@ -6,18 +6,18 @@ import { BoxProps } from '@chakra-ui/layout';
 import BusinessProfileContent from './business-profile-content';
 
 interface BusinessProfileProps extends BoxProps {
-  serviceAccessId: string;
+  consumerId: string;
 }
 
 const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
-  serviceAccessId,
+  consumerId,
   ...props
 }) => {
   const { data, isLoading } = useApi(
-    ['BusinessProfile', serviceAccessId],
+    ['BusinessProfile', consumerId],
     {
       query,
-      variables: { serviceAccessId },
+      variables: { consumerId },
     },
     { suspense: false }
   );
@@ -34,8 +34,8 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
 export default BusinessProfileComponent;
 
 const query = gql`
-  query GetBusinessProfile($serviceAccessId: ID!) {
-    BusinessProfile(serviceAccessId: $serviceAccessId) {
+  query GetBusinessProfile($consumerId: ID!) {
+    BusinessProfile(consumerId: $consumerId) {
       institution {
         legalName
         address {
