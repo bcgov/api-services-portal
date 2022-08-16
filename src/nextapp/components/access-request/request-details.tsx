@@ -105,7 +105,7 @@ const RequestDetails: React.FC<RequestDetailsProps> = ({ data, labels }) => {
             }
           >
             <React.Suspense fallback="Loading...">
-              <BusinessDetails id={data.id} />
+              <BusinessDetails id={data.serviceAccess?.consumer?.id} />
             </React.Suspense>
           </ErrorBoundary>
         </GridItem>

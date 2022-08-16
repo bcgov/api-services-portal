@@ -11,7 +11,7 @@ interface BusinessDetailsProps {
 const BusinessDetails: React.FC<BusinessDetailsProps> = ({ id }) => {
   const { data } = useApi(['businessAddress', id], {
     query,
-    variables: { serviceAccessId: id },
+    variables: { consumerId: id },
   });
   const { institution } = data?.BusinessProfile;
   let legalName = 'N/A';
@@ -37,8 +37,8 @@ const BusinessDetails: React.FC<BusinessDetailsProps> = ({ id }) => {
 export default BusinessDetails;
 
 const query = gql`
-  query RequestDetailsBusinessProfile($serviceAccessId: ID!) {
-    BusinessProfile(serviceAccessId: $serviceAccessId) {
+  query RequestDetailsBusinessProfile($consumerId: ID!) {
+    BusinessProfile(consumerId: $consumerId) {
       institution {
         legalName
         address {

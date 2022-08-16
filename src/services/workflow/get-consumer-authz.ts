@@ -69,7 +69,11 @@ export async function getConsumerAuthz(
       } as any;
     }
   } catch (err: any) {
-    logger.error('[getConsumerAuthz] (%j) Error %s', consumerUsername, err);
+    logger.error(
+      '[getConsumerAuthz] (%j) Error %s',
+      consumerUsername,
+      err.message
+    );
     throw err;
   }
 }

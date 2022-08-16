@@ -7364,7 +7364,7 @@ export type QueryAllDiscoverableContentsArgs = {
 
 
 export type QueryBusinessProfileArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
 };
 
 
@@ -7726,7 +7726,6 @@ export type Mutation = {
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
   createNamespace?: Maybe<Namespace>;
-  deleteNamespace?: Maybe<Scalars['Boolean']>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
@@ -8532,11 +8531,6 @@ export type MutationRegenerateCredentialsArgs = {
 
 
 export type MutationCreateNamespaceArgs = {
-  namespace: Scalars['String'];
-};
-
-
-export type MutationDeleteNamespaceArgs = {
   namespace: Scalars['String'];
 };
 

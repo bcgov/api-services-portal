@@ -1,0 +1,18 @@
+
+  query GetBusinessProfile($consumerId: ID!) {
+    BusinessProfile(consumerId: $consumerId) {
+      institution {
+        legalName
+        address {
+          addressLine1
+          addressLine2
+          city
+          postal
+          province
+          country
+        }
+        isSuspended
+        businessTypeOther
+      }
+    }
+  }
