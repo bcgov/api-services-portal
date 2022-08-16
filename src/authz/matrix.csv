@@ -68,8 +68,8 @@ NS MANAGER,,allConsumerGroupLabels,,,,,,,api-owner,,,allow,
 NS MANAGER,,allConsumerScopesAndRoles,,,,,,,api-owner,,,allow,
 NS MANAGER,,getConsumerProdEnvAccess,,,,,,,api-owner,,,allow,
 NS MANAGER,,allProductsByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
-NS MANAGER,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,
-NS MANAGER,,getFilteredNamespaceConsumers,,,,,,,api-owner,,,allow,
+NS MANAGER,,allGatewayServicesByNamespace,,,,,,,api-owner,,,allow,filterByUserNS
+NS MANAGER,,getFilteredNamespaceConsumers,,,,,,,api-owner,,,allow,filterByUserNS
 API Owner Role Rules,,,AccessRequest,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Activity,read,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,,Alert,,read,,,,,,"api-owner,provider-user",allow,
@@ -87,7 +87,6 @@ API Owner Role Rules,,forceDeleteEnvironment,,,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,read,,,,,,,"api-owner,provider-user",allow,
 API Owner Role Rules,,,Environment,create,,,,,api-owner,,,allow,
 API Owner Role Rules,,,Environment,update,,,,,api-owner,,,allow,
-,,,,,,,,,,,,,
 API Owner Role Rules,,,Label,read,,,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,,"read,update,delete",,,,api-owner,,,allow,
 API Owner Role Rules,,,GatewayConsumer,create,,,,,api-owner,,,allow,

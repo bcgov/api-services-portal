@@ -60,6 +60,11 @@ const query = gql`
           name
         }
       }
+      serviceAccess {
+        consumer {
+          id
+        }
+      }
     }
   }
 `;
