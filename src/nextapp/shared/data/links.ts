@@ -57,7 +57,6 @@ const links: NavLink[] = [
   },
   {
     name: 'Namespaces',
-    url: '/manager/namespaces',
     altUrls: [
       '/manager/services',
       '/manager/services/[id]',
