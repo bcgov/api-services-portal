@@ -37,7 +37,7 @@
     "dev2": "cross-env NODE_ENV=development DISABLE_LOGGING=true keystone --entry=dist/index.js",
     "mock-server": "nodemon ./test/mock-server/server.js",
     "ks-build": "cross-env NODE_ENV=production keystone build --entry=dist/server.js --out=dist2",
-    "start": "cross-env NODE_ENV=development keystone start --entry=dist/server.js",
+    "start": "cross-env NODE_ENV=production keystone start --entry=dist/server.js",
     "build": "npm-run-all copy-assets tsoa-build-v1 tsoa-build-v2 ts-build ks-build copy-keystone-admin-assets",
     "create-tables": "cross-env CREATE_TABLES=true keystone create-tables --entry=dist/server.js",
     "lint": "eslint ./nextapp --ext .ts,.tsx --quiet",

@@ -131,6 +131,7 @@ const ConsumerPage: React.FC<
     return <></>;
   }
 
+
   return (
     <>
       <Head>
@@ -144,7 +145,11 @@ const ConsumerPage: React.FC<
       />
       <Container maxW="6xl">
         <PageHeader
-          actions={<Button data-testid="consumer-grant-btn" onClick={onToggle}>Grant Access</Button>}
+          actions={
+            <Button data-testid="consumer-grant-btn" onClick={onToggle}>
+              Grant Access
+            </Button>
+          }
           breadcrumb={breadcrumbs([
             { href: '/manager/consumers', text: 'Consumers' },
             {
@@ -200,7 +205,7 @@ const ConsumerPage: React.FC<
             </Detail>
             <Detail>
               <ClientRequest fallback="loading...">
-                <BusinessProfile serviceAccessId={id} />
+                <BusinessProfile consumerId={consumer.consumer?.id} />
               </ClientRequest>
             </Detail>
           </Flex>
