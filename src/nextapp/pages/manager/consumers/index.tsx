@@ -15,7 +15,6 @@ import {
   Flex,
   useToast,
 } from '@chakra-ui/react';
-import breadcrumbs from '@/components/ns-breadcrumb';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import { dehydrate } from 'react-query/hydration';
 import { QueryClient, QueryKey, useQueryClient } from 'react-query';
@@ -35,6 +34,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import ConsumerFilters from '@/components/consumer-filters';
 import AccessRequestsList from '@/components/access-request/access-requests-list';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
 interface FilterState {
   products: Record<string, string>[];
@@ -74,6 +74,7 @@ const ConsumersPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
   const toast = useToast();
+  const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Consumers' }]);
   const client = useQueryClient();
   const [search, setSearch] = React.useState('');
   const [grantAccess, setGrantAccess] = React.useState(null);
@@ -185,7 +186,7 @@ const ConsumersPage: React.FC<
       <Container maxW="6xl">
         <PageHeader
           title="Consumers"
-          breadcrumb={breadcrumbs([])}
+          breadcrumb={breadcrumbs}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
         <AccessRequestsList
@@ -273,7 +274,10 @@ const ConsumersPage: React.FC<
                 <Td width="25%">
                   <Flex align="center" justify="space-between">
                     {formatDistanceToNow(new Date(d.lastUpdated))} ago
-                    <ActionsMenu data-testid={`consumer-${d.id}-menu`}>
+                    <ActionsMenu
+                      data-testid={`consumer-${d.id}-menu`}
+                      placement="left-start"
+                    >
                       <MenuItem
                         color="bc-link"
                         onClick={handleGrant(d)}

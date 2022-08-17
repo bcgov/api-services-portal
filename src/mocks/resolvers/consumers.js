@@ -219,9 +219,9 @@ export const getConsumersHandler = (req, res, ctx) => {
 };
 
 export const getConsumerHandler = (req, res, ctx) => {
-  const { serviceAccessId } = req.variables;
+  const { consumerId } = req.variables;
   const consumer = store.data.getFilteredNamespaceConsumers.find(
-    (d) => d.id === serviceAccessId
+    (d) => d.id === consumerId
   );
   const owner = {
     name: harleyAccessRequest.requestor.name,
@@ -232,7 +232,7 @@ export const getConsumerHandler = (req, res, ctx) => {
     ctx.data({
       getNamespaceConsumerAccess: {
         application:
-          serviceAccessId === 'd1'
+          consumerId === 'd1'
             ? null
             : {
                 id: 'a1',
