@@ -50,7 +50,9 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
         Business Profile:
       </Heading>
       {!data.institution && (
-        <Text color="bc-component">A business profile has not been added</Text>
+        <Text color="bc-component" fontStyle="italic" opacity={0.6}>
+          A business profile has not been added
+        </Text>
       )}
       {data.institution && (
         <Flex>
@@ -82,7 +84,7 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
             )}
             {!isLoading && (
               <>
-                <Text lineHeight="1" data-testid={`${testId}-name`}>
+                <Text lineHeight="5" data-testid={`${testId}-name`}>
                   {legalName}
                   {data.institution?.isSuspended && (
                     <Text as="em" ml={2} color="bc-divider">

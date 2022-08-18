@@ -173,7 +173,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
       <input
         type="hidden"
         name="name"
-        value={`${dataset.name} FOR ${requestor.name ?? requestor.username}`}
+        value={`${dataset.name} FOR ${
+          requestor.name ?? requestor.providerUsername
+        }`}
       />
       <input
         type="hidden"
@@ -246,7 +248,7 @@ const query = gql`
       id
       userId
       name
-      username
+      providerUsername
       email
     }
   }

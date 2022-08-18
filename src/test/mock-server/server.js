@@ -609,5 +609,5 @@ app.use('/about', (_, res) => {
   });
 });
 app.use('/admin', adminApi);
-app.use('/ds/api', dsApi);
+app.use('/ds/api/v2', dsApi);
 app.listen(port, () => console.log(`Mock server running on port ${port}`));

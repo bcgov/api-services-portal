@@ -7,7 +7,7 @@
       mode
       owner {
         name
-        providerUsername
+        username
         email
       }
       environmentDetails
