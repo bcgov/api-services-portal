@@ -35,7 +35,13 @@ const AccessRedirectPage: React.FC = () => {
   );
   const { data, isLoading } = useApi(
     'resourcesSet',
-    { query },
+    {
+      query,
+      variables: {
+        prodEnvId: namespaceDetails.data?.currentNamespace?.prodEnvId,
+        resourceId: namespaceDetails.data?.currentNamespace?.id,
+      },
+    },
     { enabled: namespaceDetails.isSuccess, suspense: false }
   );
 
