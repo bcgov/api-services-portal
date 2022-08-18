@@ -125,7 +125,7 @@ const query = gql`
       owner {
         id
         name
-        username
+        providerUsername
         email
       }
       environments {

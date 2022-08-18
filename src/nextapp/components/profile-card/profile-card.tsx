@@ -34,9 +34,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       >
         <Text isTruncated fontWeight="bold" lineHeight={5}>
           {data.name}
-          {data.username && (
+          {data.providerUsername && (
             <Text isTruncated as="span" fontWeight="normal" color="gray.400">
-              {` • ${data.username}`}
+              {` • ${data.providerUsername}`}
             </Text>
           )}
         </Text>

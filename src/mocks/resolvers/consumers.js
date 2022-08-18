@@ -20,7 +20,7 @@ export const harleyAccessRequest = {
   requestor: {
     id: 'u1',
     name: 'Harley Jones',
-    username: 'harley123',
+    providerUsername: 'harley123',
     email: 'harley@easymart.store',
   },
   application: {
@@ -225,7 +225,7 @@ export const getConsumerHandler = (req, res, ctx) => {
   );
   const owner = {
     name: harleyAccessRequest.requestor.name,
-    username: 'harley123',
+    providerUsername: 'harley123',
     email: 'harley@easymart.store',
   };
   return res(
