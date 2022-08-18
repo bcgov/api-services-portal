@@ -294,7 +294,7 @@ const query = gql`
       }
       owner {
         name
-        username
+        providerUsername
         email
       }
       labels {

@@ -334,6 +334,8 @@ const query = gql`
       createdAt
       requestor {
         name
+        providerUsername
+        email
       }
       application {
         name
