@@ -1,40 +1,46 @@
-query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
-  getPermissionTicketsForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-    id
-    owner
-    ownerName
-    requester
-    requesterName
-    resource
-    resourceName
-    scope
-    scopeName
-    granted
+
+  query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
+    getPermissionTicketsForResource(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+    ) {
+      id
+      owner
+      ownerName
+      requester
+      requesterName
+      resource
+      resourceName
+      scope
+      scopeName
+      granted
+    }
+
+    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      description
+      type
+      logic
+      decisionStrategy
+      owner
+      clients
+      users
+      groups
+      scopes
+    }
+
+    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      description
+      type
+      logic
+      decisionStrategy
+      owner
+      clients
+      users
+      groups
+      scopes
+    }
   }
-  getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-    id
-    name
-    description
-    type
-    logic
-    decisionStrategy
-    owner
-    clients
-    users
-    groups
-    scopes
-  }
-  getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-    id
-    name
-    description
-    type
-    logic
-    decisionStrategy
-    owner
-    clients
-    users
-    groups
-    scopes
-  }
-}
