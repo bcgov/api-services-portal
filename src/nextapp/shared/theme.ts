@@ -136,6 +136,26 @@ const buttonVariants = {
       },
     },
   },
+  success: {
+    bg: 'bc-success',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-success',
+      },
+    },
+  },
+  danger: {
+    bg: 'bc-error',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-error',
+      },
+    },
+  },
   header: {
     bg: 'bc-yellow',
     color: 'white',

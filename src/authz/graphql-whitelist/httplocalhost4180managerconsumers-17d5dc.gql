@@ -1,0 +1,50 @@
+
+  query GetConsumer($consumerId: ID!) {
+    allConsumerGroupLabels
+
+    getNamespaceConsumerAccess(consumerId: $consumerId) {
+      consumer {
+        id
+        username
+      }
+      application {
+        name
+      }
+      owner {
+        name
+        providerUsername
+        email
+      }
+      labels {
+        labelGroup
+        values
+      }
+      prodEnvAccess {
+        productName
+        environment {
+          flow
+          name
+          id
+          additionalDetailsToRequest
+        }
+        plugins {
+          name
+        }
+        revocable
+        serviceAccessId
+        authorization {
+          defaultClientScopes
+        }
+        request {
+          name
+          isIssued
+          isApproved
+          isComplete
+          additionalDetails
+        }
+        requestApprover {
+          name
+        }
+      }
+    }
+  }
