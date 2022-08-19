@@ -140,12 +140,12 @@ const NamespacesPage: React.FC = () => {
       <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader
-          title={hasNamespace ? user.namespace : 'For API Providers'}
+          title={hasNamespace ? user.namespace : ''}
         />
         {!hasNamespace && (
           <EmptyPane
             message="To get started select a namespace from the dropdown below or create a new namespace"
-            title="No namespace selected yet"
+            title="No Namespace selected yet"
             boxProps={{borderRadius:0, mx:0}}
             my={0}
           >
