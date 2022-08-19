@@ -144,13 +144,13 @@ const NamespacesPage: React.FC = () => {
         />
         {!hasNamespace && (
           <EmptyPane
-            message="To get started select a namespace from the dropdown below or create a new namespace"
+            message="To get started select a Namespace from the dropdown below or create a new Namespace"
             title="No Namespace selected yet"
             boxProps={{borderRadius:0, mx:0}}
             my={0}
           >
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              <NamespaceMenu user={user} variant="ns-selector" buttonMessage='Select a namespace' />
+              <NamespaceMenu user={user} variant="ns-selector" buttonMessage='Select a Namespace' />
               <Text>or</Text>
               <Button variant="primary" onClick={newNamespaceDisclosure.onOpen}>
                 Create New Namespace
