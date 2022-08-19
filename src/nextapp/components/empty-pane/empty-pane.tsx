@@ -4,7 +4,7 @@ import { Box, Center, Heading, Text } from '@chakra-ui/react';
 interface EmptyPaneProps {
   action?: React.ReactNode;
   error?: string;
-  message: string;
+  message: React.ReactNode;
   title: string;
 }
 

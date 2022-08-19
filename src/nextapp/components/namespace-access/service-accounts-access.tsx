@@ -4,6 +4,7 @@ import {
   Heading,
   Tag,
   Td,
+  Text,
   Tr,
   Flex,
   Wrap,
@@ -88,13 +89,11 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     client.invalidateQueries(queryKey);
   };
 
-  const accessDialog = (
-    <NamespaceAccessDialog
-      data={resourceScopes}
-      onSubmit={handleGrantAccess}
-      variant="service"
-    />
-  );
+  const accessRequestDialogProps = {
+    data: resourceScopes,
+    onSubmit: handleGrantAccess,
+    variant: 'service',
+  } as const;
 
   return (
     <>
@@ -116,24 +115,31 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         isUpdating={isLoading}
         emptyView={
           <EmptyPane
-            title={
-              search
-                ? 'No service accounts found'
-                : 'No service accounts have access yet'
-            }
+            title={search ? '' : 'No service accounts have access yet'}
             message={
-              search
-                ? 'Try editing your search term'
-                : 'Grant service account access and assign specific permissions'
+              search ? (
+                <Text as="em" color="bc-component">
+                  No service accounts found
+                </Text>
+              ) : (
+                'Grant service account access and assign specific permissions'
+              )
             }
-            action={accessDialog}
+            action={
+              !search && (
+                <NamespaceAccessDialog
+                  {...accessRequestDialogProps}
+                  buttonVariant="primary"
+                />
+              )
+            }
           />
         }
         columns={[
           { name: 'Subject', key: 'name' },
           { name: 'Permission', key: 'scopeName', sortable: false },
           {
-            name: accessDialog,
+            name: <NamespaceAccessDialog {...accessRequestDialogProps} />,
             key: 'id',
             textAlign: 'right',
             sortable: false,

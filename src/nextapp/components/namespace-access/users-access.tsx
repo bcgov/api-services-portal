@@ -3,6 +3,7 @@ import {
   Box,
   Heading,
   Td,
+  Text,
   Tr,
   Tag,
   Flex,
@@ -132,17 +133,23 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         isUpdating={isLoading}
         emptyView={
           <EmptyPane
-            title={search ? 'No users found' : 'No users have access yet'}
+            title={search ? '' : 'No users have access yet'}
             message={
-              search
-                ? 'Try editing your search term'
-                : 'Grant user access and assign specific permissions'
+              search ? (
+                <Text as="em" color="bc-component">
+                  No users found
+                </Text>
+              ) : (
+                'Grant user access and assign specific permissions'
+              )
             }
             action={
-              <NamespaceAccessDialog
-                {...accessRequestDialogProps}
-                buttonVariant="primary"
-              />
+              !search && (
+                <NamespaceAccessDialog
+                  {...accessRequestDialogProps}
+                  buttonVariant="primary"
+                />
+              )
             }
           />
         }

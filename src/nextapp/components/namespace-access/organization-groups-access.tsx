@@ -5,6 +5,7 @@ import {
   ListItem,
   Tag,
   Td,
+  Text,
   Tr,
   Flex,
   Wrap,
@@ -84,7 +85,7 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
         <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
           {requests?.length ?? '0'} organization groups
         </Heading>
-        <Box minW="280px">
+        <Box minW="320px">
           <SearchInput
             placeholder="Search for Organization Group"
             value={search}
@@ -98,12 +99,16 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
         isUpdating={isLoading}
         emptyView={
           <EmptyPane
-            title={
-              search
-                ? 'No organization group found'
-                : 'No organization groups have access yet'
+            title={search ? '' : 'No organization groups have access yet'}
+            message={
+              search ? (
+                <Text as="em" color="bc-component">
+                  No organization group found
+                </Text>
+              ) : (
+                ''
+              )
             }
-            message={search ? 'Try editing your search term' : ''}
           />
         }
         columns={[
