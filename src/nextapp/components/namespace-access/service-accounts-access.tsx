@@ -156,7 +156,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 export default ServiceAccountsAccess;
 
 const query = gql`
-  query GetServiceAccessPermissions($resourceId: String!, $prodEnvId: ID!) {
+  query GetServiceAccessPermissions($resourceId: ID!, $prodEnvId: ID!) {
     getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
@@ -176,7 +176,7 @@ const query = gql`
 const mutation = gql`
   mutation GrantSAAccess(
     $prodEnvId: ID!
-    $resourceId: String!
+    $resourceId: ID!
     $data: UMAPolicyInput!
   ) {
     createUmaPolicy(

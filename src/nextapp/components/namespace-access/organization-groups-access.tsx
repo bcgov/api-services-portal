@@ -176,10 +176,7 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
 export default OrganizationGroupsAccess;
 
 const query = gql`
-  query GetOrganizationGroupsPermissions(
-    $resourceId: String!
-    $prodEnvId: ID!
-  ) {
+  query GetOrganizationGroupsPermissions($resourceId: ID!, $prodEnvId: ID!) {
     getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
@@ -199,7 +196,7 @@ const query = gql`
 const mutation = gql`
   mutation GrantSAAccess(
     $prodEnvId: ID!
-    $resourceId: String!
+    $resourceId: ID!
     $data: UMAPolicyInput!
   ) {
     createUmaPolicy(

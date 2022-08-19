@@ -179,7 +179,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
 export default UsersAccess;
 
 const query = gql`
-  query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
+  query GetUserPermissions($resourceId: ID!, $prodEnvId: ID!) {
     getPermissionTicketsForResource(
       prodEnvId: $prodEnvId
       resourceId: $resourceId
