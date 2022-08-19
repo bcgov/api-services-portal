@@ -17,18 +17,21 @@ import {
   useDisclosure,
   VStack,
   WrapItem,
+  ButtonProps,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
 import startCase from 'lodash/startCase';
 import { UmaScope } from '@/shared/types/query.types';
 
 interface NamespaceAccessDialogProps {
+  buttonVariant?: ButtonProps['variant'];
   data: UmaScope[];
   onSubmit: (formData: FormData) => void;
   variant: 'user' | 'service';
 }
 
 const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
+  buttonVariant = 'ghost',
   data = [],
   onSubmit,
   variant = 'user',
@@ -53,10 +56,9 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
   return (
     <>
       <Button
-        px={1}
         leftIcon={<Icon as={FaPlusCircle} />}
         onClick={onOpen}
-        variant="ghost"
+        variant={buttonVariant}
         data-testid="nsa-grant-access-btn"
       >
         {title}

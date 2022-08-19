@@ -1,0 +1,16 @@
+
+  query GetOrganizationGroupsPermissions($resourceId: String!, $prodEnvId: ID!) {
+    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      description
+      type
+      logic
+      decisionStrategy
+      owner
+      clients
+      users
+      groups
+      scopes
+    }
+  }

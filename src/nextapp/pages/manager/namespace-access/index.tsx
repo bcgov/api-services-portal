@@ -13,8 +13,9 @@ import {
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import {
-  UsersAccess,
+  OrganizationGroupsAccess,
   ServiceAccountsAccess,
+  UsersAccess,
 } from '@/components/namespace-access';
 import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
@@ -62,6 +63,9 @@ const AccessRedirectPage: React.FC = () => {
             <Tab isDisabled={isLoading} data-testid="nsa-tab-sa">
               Service accounts with access
             </Tab>
+            <Tab isDisabled={isLoading} data-testid="nsa-tab-og">
+              Organization groups with access
+            </Tab>
           </TabList>
           <TabPanels>
             <TabPanel bgColor="white" px={0} pb={0}>
@@ -73,6 +77,13 @@ const AccessRedirectPage: React.FC = () => {
             </TabPanel>
             <TabPanel bgColor="white" px={0} pb={0}>
               <ServiceAccountsAccess
+                resourceScopes={data?.getResourceSet.resource_scopes}
+                resourceId={namespaceDetails.data?.currentNamespace?.id}
+                prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}
+              />
+            </TabPanel>
+            <TabPanel bgColor="white" px={0} pb={0}>
+              <OrganizationGroupsAccess
                 resourceScopes={data?.getResourceSet.resource_scopes}
                 resourceId={namespaceDetails.data?.currentNamespace?.id}
                 prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}

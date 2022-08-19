@@ -23,6 +23,7 @@ import {
 } from './resolvers/consumers';
 import {
   getCurrentNamesSpaceHandler,
+  getOrganizationGroupsPermissionsHandler,
   getResourceSetHandler,
   getServiceAccessPermissionsHandler,
   getUserPermissionsHandler,
@@ -99,6 +100,10 @@ export const handlers = [
   keystone.query(
     'GetServiceAccessPermissions',
     getServiceAccessPermissionsHandler
+  ),
+  keystone.query(
+    'GetOrganizationGroupsPermissions',
+    getOrganizationGroupsPermissionsHandler
   ),
   keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),

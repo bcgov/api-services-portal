@@ -138,6 +138,12 @@ export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
 };
 
 export const getUserPermissionsHandler = (_, res, ctx) => {
+  // Test errors here
+  // return res(
+  //   ctx.data({
+  //     errors: [{ message: 'You do not have accesss for this resource' }],
+  //   })
+  // );
   return res(
     ctx.data({
       getPermissionTicketsForResource: permissions,
@@ -157,6 +163,61 @@ export const getServiceAccessPermissionsHandler = (_, res, ctx) => {
   return res(
     ctx.data({
       getUmaPoliciesForResource: umaPolicies,
+    })
+  );
+};
+
+export const getOrganizationGroupsPermissionsHandler = (_, res, ctx) => {
+  return res(
+    ctx.data({
+      getOrgPoliciesForResource: [
+        {
+          id: 'og1',
+          name:
+            'group-organization-admin-ca.bc.gov-ministry-of-health-pharmaceutical-services-division-policy',
+          description:
+            "Group '/organization-admin/ca.bc.gov/ministry-of-health' / 'pharmaceutical-services-division' Policy",
+          type: 'group',
+          logic: 'POSITIVE',
+          decisionStrategy: 'UNANIMOUS',
+          owner: 'o1',
+          clients: null,
+          users: ['acope@idir', 'jbrammal@idir', 'becumberbatch@idir'],
+          groups: [
+            '/organization-admin',
+            '/organization-admin/ca.bc.gov',
+            '/organization-admin/ca.bc.gov/ministry-of-health',
+            '/organization-admin/ca.bc.gov/ministry-of-health/pharmaceutical-services-division',
+          ],
+          scopes: ['Namespace.View'],
+        },
+        {
+          id: 'og2',
+          name:
+            'group-organization-admin-ca.bc.gov-ministry-of-health-this-is-another-division',
+          description:
+            "Group '/organization-admin/ca.bc.gov/ministry-of-health' / 'this-is-another-division' Policy",
+          type: 'group',
+          logic: 'POSITIVE',
+          decisionStrategy: 'UNANIMOUS',
+          owner: 'o1',
+          clients: null,
+          users: ['acope@idir'],
+          groups: [
+            '/organization-admin',
+            '/organization-admin/ca.bc.gov',
+            '/organization-admin/ca.bc.gov/ministry-of-health',
+            '/organization-admin/ca.bc.gov/ministry-of-health/this-is-another-division',
+          ],
+          scopes: [
+            'Access.Manage',
+            'Content.Publish',
+            'GatewayConfig.Publish',
+            'Namespace.Manage',
+            'Namespace.View',
+          ],
+        },
+      ],
     })
   );
 };

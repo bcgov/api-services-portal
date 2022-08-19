@@ -13,18 +13,4 @@
       groups
       scopes
     }
-
-    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-      id
-      name
-      description
-      type
-      logic
-      decisionStrategy
-      owner
-      clients
-      users
-      groups
-      scopes
-    }
   }

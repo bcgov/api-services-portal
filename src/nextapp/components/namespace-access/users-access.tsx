@@ -50,7 +50,16 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       },
     },
     {
+      enabled: Boolean(resourceId),
       suspense: false,
+      onError(err) {
+        toast({
+          status: 'error',
+          title: 'Unable to load users',
+          description: err,
+          isClosable: true,
+        });
+      },
     }
   );
 
@@ -93,13 +102,11 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     });
     client.invalidateQueries(queryKey);
   };
-  const accessRequestDialog = (
-    <NamespaceAccessDialog
-      data={resourceScopes}
-      onSubmit={handleGrantAccess}
-      variant="user"
-    />
-  );
+  const accessRequestDialogProps = {
+    data: resourceScopes,
+    onSubmit: handleGrantAccess,
+    variant: 'user',
+  } as const;
 
   return (
     <>
@@ -125,20 +132,23 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         isUpdating={isLoading}
         emptyView={
           <EmptyPane
-            title={search ? 'No users found' : 'No users have access'}
+            title={search ? 'No users found' : 'No users have access yet'}
             message={
-              search
-                ? 'Try a different search criteria'
-                : 'There are currently no active User access requests.'
+              search ? 'Try editing your search term' : 'Grant a user access'
             }
-            action={accessRequestDialog}
+            action={
+              <NamespaceAccessDialog
+                {...accessRequestDialogProps}
+                buttonVariant="primary"
+              />
+            }
           />
         }
         columns={[
           { name: 'User', key: 'requesterName' },
           { name: 'Permission', key: 'scopeName', sortable: false },
           {
-            name: accessRequestDialog,
+            name: <NamespaceAccessDialog {...accessRequestDialogProps} />,
             key: 'id',
             textAlign: 'right',
             sortable: false,

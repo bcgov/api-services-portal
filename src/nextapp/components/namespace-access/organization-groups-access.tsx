@@ -2,14 +2,17 @@ import * as React from 'react';
 import {
   Box,
   Heading,
+  ListItem,
   Tag,
   Td,
   Tr,
   Flex,
   Wrap,
   WrapItem,
+  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
+import startCase from 'lodash/startCase';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
 import NamespaceAccessDialog from './namespace-access-dialog';
@@ -19,18 +22,18 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 
-interface ServiceAccountsAccessProps {
+interface OrganizationGroupsAccessProps {
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
-const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
+const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
   resourceId,
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = 'namespaceAccessServiceAccounts';
+  const queryKey = 'namespaceAccessOrganizationGroups';
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
   const toast = useToast();
@@ -52,7 +55,19 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 
   const requests = React.useMemo(() => {
     if (isSuccess) {
-      const result = data?.getUmaPoliciesForResource;
+      const result = data?.getOrgPoliciesForResource.map((d) => {
+        const name = d.groups
+          .reduce((memo: string[], group) => {
+            const segment = group.split('/').pop();
+            memo.push(startCase(segment));
+            return memo;
+          }, [])
+          .join(' > ');
+        return {
+          ...d,
+          name,
+        };
+      });
       if (search) {
         return result.filter((d) => d.name.search(search) >= 0);
       }
@@ -92,11 +107,11 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     <>
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
-          {requests?.length ?? '0'} service accounts
+          {requests?.length ?? '0'} organization groups
         </Heading>
         <Box minW="280px">
           <SearchInput
-            placeholder="Search for Service Account"
+            placeholder="Search for Organization Group"
             value={search}
             onChange={setSearch}
             data-testid="nsa-sa-search"
@@ -110,24 +125,23 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
           <EmptyPane
             title={
               search
-                ? 'No service accounts found'
-                : 'No service accounts have access yet'
+                ? 'No organization group found'
+                : 'No organization groups have access yet'
             }
             message={
               search
                 ? 'Try editing your search term'
-                : 'Grant a service account access'
+                : 'Grant an organization group access'
             }
             action={accessDialog}
           />
         }
         columns={[
-          { name: 'Subject', key: 'name' },
-          { name: 'Permission', key: 'scopeName', sortable: false },
+          { name: 'Group', key: 'name' },
+          { name: 'Members', key: 'users', sortable: false },
           {
-            name: accessDialog,
-            key: 'id',
-            textAlign: 'right',
+            name: 'Permission',
+            key: 'scopes',
             sortable: false,
           },
         ]}
@@ -137,6 +151,13 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
           <Tr key={index} data-testid={`nsa-users-table-row-${index}`}>
             <Td>{d.name}</Td>
             <Td>
+              <UnorderedList>
+                {d.users.map((u) => (
+                  <ListItem key={u}>{u}</ListItem>
+                ))}
+              </UnorderedList>
+            </Td>
+            <Td>
               <Wrap>
                 {d.scopes.map((t) => (
                   <WrapItem key={t}>
@@ -145,7 +166,6 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
                 ))}
               </Wrap>
             </Td>
-            <Td textAlign="right"></Td>
           </Tr>
         )}
       </Table>
@@ -153,11 +173,14 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
   );
 };
 
-export default ServiceAccountsAccess;
+export default OrganizationGroupsAccess;
 
 const query = gql`
-  query GetServiceAccessPermissions($resourceId: String!, $prodEnvId: ID!) {
-    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+  query GetOrganizationGroupsPermissions(
+    $resourceId: String!
+    $prodEnvId: ID!
+  ) {
+    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
       description
