@@ -142,6 +142,9 @@
   },
   "checkPermission": {
     "namespace": "permission",
+    "serviceAccount": {
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
+    },
     "product": {
       "name": "New-Auto Test Product",
       "environment": {
@@ -157,7 +160,7 @@
     "grantPermission": {
       "Mark": {
         "userName": "mark",
-        "accessRole": ["Access.Manage", "Namespace.View"]
+        "accessRole": ["Access.Manage"]
       },
       "Wendy": {
         "userName": "wendy",
