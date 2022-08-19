@@ -111,7 +111,7 @@ const namespaceQuery = gql`
 `;
 
 const query = gql`
-  query GetResourceSet($prodEnvId: ID!, $resourceId: ID!) {
+  query GetResourceSet($prodEnvId: ID!, $resourceId: String!) {
     getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
