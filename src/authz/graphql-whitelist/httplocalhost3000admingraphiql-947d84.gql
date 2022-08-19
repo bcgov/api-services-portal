@@ -1,5 +1,5 @@
 
-  query GetUserPermissions($resourceId: ID!, $prodEnvId: ID!) {
+  query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
     getPermissionTicketsForResource(
       prodEnvId: $prodEnvId
       resourceId: $resourceId

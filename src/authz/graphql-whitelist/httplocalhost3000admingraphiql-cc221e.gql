@@ -1,5 +1,5 @@
 
-  query GetServiceAccessPermissions($resourceId: ID!, $prodEnvId: ID!) {
+  query GetServiceAccessPermissions($resourceId: String!, $prodEnvId: ID!) {
     getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name

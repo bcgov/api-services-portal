@@ -47,6 +47,14 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     {
       enabled: Boolean(resourceId),
       suspense: false,
+      onError(err) {
+        toast({
+          status: 'error',
+          title: 'Unable to load users',
+          description: err,
+          isClosable: true,
+        });
+      },
     }
   );
 
@@ -116,7 +124,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
             message={
               search
                 ? 'Try editing your search term'
-                : 'Grant a service account access'
+                : 'Grant service account access and assign specific permissions'
             }
             action={accessDialog}
           />
@@ -156,7 +164,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 export default ServiceAccountsAccess;
 
 const query = gql`
-  query GetServiceAccessPermissions($resourceId: ID!, $prodEnvId: ID!) {
+  query GetServiceAccessPermissions($resourceId: String!, $prodEnvId: ID!) {
     getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name

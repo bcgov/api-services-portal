@@ -134,7 +134,9 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
           <EmptyPane
             title={search ? 'No users found' : 'No users have access yet'}
             message={
-              search ? 'Try editing your search term' : 'Grant a user access'
+              search
+                ? 'Try editing your search term'
+                : 'Grant user access and assign specific permissions'
             }
             action={
               <NamespaceAccessDialog
@@ -179,7 +181,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
 export default UsersAccess;
 
 const query = gql`
-  query GetUserPermissions($resourceId: ID!, $prodEnvId: ID!) {
+  query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
     getPermissionTicketsForResource(
       prodEnvId: $prodEnvId
       resourceId: $resourceId

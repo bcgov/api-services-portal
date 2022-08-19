@@ -84,7 +84,6 @@ const AccessRedirectPage: React.FC = () => {
             </TabPanel>
             <TabPanel bgColor="white" px={0} pb={0}>
               <OrganizationGroupsAccess
-                resourceScopes={data?.getResourceSet.resource_scopes}
                 resourceId={namespaceDetails.data?.currentNamespace?.id}
                 prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}
               />

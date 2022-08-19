@@ -15,27 +15,21 @@ import {
 import startCase from 'lodash/startCase';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
-import NamespaceAccessDialog from './namespace-access-dialog';
 import SearchInput from '@/components/search-input';
 import Table from '@/components/table';
-import { useApi, useApiMutation } from '@/shared/services/api';
-import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
-import { useQueryClient } from 'react-query';
+import { useApi } from '@/shared/services/api';
+import { UmaPolicy } from '@/shared/types/query.types';
 
 interface OrganizationGroupsAccessProps {
-  resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
 const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
   resourceId,
-  resourceScopes,
   prodEnvId,
 }) => {
   const queryKey = 'namespaceAccessOrganizationGroups';
-  const client = useQueryClient();
-  const grant = useApiMutation(mutation);
   const toast = useToast();
   const [search, setSearch] = React.useState('');
   const { data, isSuccess, isLoading } = useApi(
@@ -50,6 +44,14 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
     {
       enabled: Boolean(resourceId),
       suspense: false,
+      onError(err) {
+        toast({
+          status: 'error',
+          title: 'Unable to load users',
+          description: err,
+          isClosable: true,
+        });
+      },
     }
   );
 
@@ -75,33 +77,6 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
     }
     return [];
   }, [data, isSuccess, search]);
-  const handleGrantAccess = async (form: FormData) => {
-    const name = form.get('username') as string;
-    const scopes = form.getAll('scopes') as string[];
-
-    await grant.mutateAsync({
-      prodEnvId,
-      resourceId,
-      data: {
-        name,
-        scopes,
-      },
-    });
-    toast({
-      title: 'Access granted',
-      status: 'success',
-      isClosable: true,
-    });
-    client.invalidateQueries(queryKey);
-  };
-
-  const accessDialog = (
-    <NamespaceAccessDialog
-      data={resourceScopes}
-      onSubmit={handleGrantAccess}
-      variant="service"
-    />
-  );
 
   return (
     <>
@@ -128,12 +103,7 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
                 ? 'No organization group found'
                 : 'No organization groups have access yet'
             }
-            message={
-              search
-                ? 'Try editing your search term'
-                : 'Grant an organization group access'
-            }
-            action={accessDialog}
+            message={search ? 'Try editing your search term' : ''}
           />
         }
         columns={[
@@ -176,7 +146,10 @@ const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
 export default OrganizationGroupsAccess;
 
 const query = gql`
-  query GetOrganizationGroupsPermissions($resourceId: ID!, $prodEnvId: ID!) {
+  query GetOrganizationGroupsPermissions(
+    $resourceId: String!
+    $prodEnvId: ID!
+  ) {
     getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
       id
       name
@@ -189,22 +162,6 @@ const query = gql`
       users
       groups
       scopes
-    }
-  }
-`;
-
-const mutation = gql`
-  mutation GrantSAAccess(
-    $prodEnvId: ID!
-    $resourceId: ID!
-    $data: UMAPolicyInput!
-  ) {
-    createUmaPolicy(
-      prodEnvId: $prodEnvId
-      resourceId: $resourceId
-      data: $data
-    ) {
-      id
     }
   }
 `;
