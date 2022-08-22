@@ -21,7 +21,7 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
-    saveState(key: string, value: string): Chainable<any>
+    saveState(key: string, value: string, flag?: boolean): Chainable<any>
 
     getState(key: string): Chainable<any>
 
@@ -59,5 +59,6 @@ declare namespace Cypress {
 
     getUserSessionTokenValue(): Chainable<Cypress.Response<any>>
 
+    getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
   }
 }

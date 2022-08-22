@@ -45,6 +45,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
       toast({
         title: `Switching to  ${namespace.name} namespace`,
         status: 'info',
+        isClosable: true,
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
@@ -53,12 +54,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         toast({
           title: `Switched to  ${namespace.name} namespace`,
           status: 'success',
+          isClosable: true,
         });
       } catch (err) {
         toast.closeAll();
         toast({
           title: 'Unable to switch namespaces',
           status: 'error',
+          isClosable: true,
         });
       }
     },

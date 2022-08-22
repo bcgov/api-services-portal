@@ -136,6 +136,26 @@ const buttonVariants = {
       },
     },
   },
+  success: {
+    bg: 'bc-success',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-success',
+      },
+    },
+  },
+  danger: {
+    bg: 'bc-error',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-error',
+      },
+    },
+  },
   header: {
     bg: 'bc-yellow',
     color: 'white',
@@ -161,7 +181,12 @@ const buttonVariants = {
     },
   },
   ghost: {
+    color: 'bc-blue',
     borderColor: 'transparent',
+    _hover: {
+      bgColor: 'transparent',
+      textDecor: 'none',
+    },
     _active: {
       bgColor: '#F2F5F7',
       boxShadow: 'none',
@@ -172,10 +197,6 @@ const buttonVariants = {
       boxShadow: 'none',
       // bgColor: '#F2F5F7',
       outlineColor: 'transparent',
-    },
-    _hover: {
-      bgColor: 'transparent',
-      boxShadow: 'none',
     },
   },
 };
@@ -250,7 +271,7 @@ const theme = extendTheme(
           },
         },
         defaultProps: {
-          size: 'lg',
+          // size: 'lg',
           colorScheme: 'primary',
         },
       },

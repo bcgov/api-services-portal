@@ -1,11 +1,5 @@
 export { KongConsumerService } from './consumer-service';
-export type {
-  KongConsumer,
-  KongPlugin,
-  KeyAuthResponse,
-  KongObjectID,
-  DiffResult,
-} from './consumer-service';
+export type { KongConsumer, KeyAuthResponse, DiffResult } from './types';
 
 export { KongACLService } from './acl';
 

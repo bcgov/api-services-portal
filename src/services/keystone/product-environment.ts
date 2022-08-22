@@ -147,10 +147,10 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
                 }`,
     variables: { where },
   });
-  logger.debug(
-    '[lookupEnvironmentAndIssuerUsingWhereClause] result %j',
-    result
-  );
+  // logger.debug(
+  //   '[lookupEnvironmentAndIssuerUsingWhereClause] result %j',
+  //   result
+  // );
   assert.strictEqual(
     result.data.allEnvironments.length,
     1,
@@ -171,8 +171,10 @@ export async function lookupEnvironmentsByNS(
                         appId
                         name
                         flow
+                        additionalDetailsToRequest
                         approval
                         product {
+                          id
                           name
                         }
                         legal {
@@ -207,6 +209,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                         id
                         appId
                         name
+                        flow
                         active
                         approval
                         legal {
@@ -227,7 +230,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                 }`,
     variables: { id: id },
   });
-  logger.debug('[lookupEnvironmentAndIssuerById] result %j', result);
+  // logger.debug('[lookupEnvironmentAndIssuerById] result %j', result);
   assert.strictEqual(
     result.data.Environment == null,
     false,

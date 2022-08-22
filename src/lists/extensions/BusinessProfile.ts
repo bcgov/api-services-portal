@@ -1,9 +1,10 @@
 import { EnforcementPoint } from '../../authz/enforcement';
-
-import { lookupCredentialReferenceByServiceAccess } from '../../services/keystone';
-
 import { ConfigService } from '../../services/config.service';
 import { BCeIDService } from '../../services/bceid/bceid.service';
+import { getNamespaceConsumerAccess } from '../../services/workflow';
+import { Logger } from '../../logger';
+
+const logger = Logger('List.Ext.BusProfile');
 
 const typeBusinessProfile = `
 type BusinessProfile {
@@ -58,29 +59,24 @@ module.exports = {
         ],
         queries: [
           {
-            schema: 'BusinessProfile(serviceAccessId: ID!): BusinessProfile',
+            schema: 'BusinessProfile(consumerId: ID!): BusinessProfile',
             resolver: async (
               item: any,
-              args: any,
+              { consumerId }: any,
               context: any,
               info: any,
               { query, access }: any
             ) => {
-              const serviceAccess = await lookupCredentialReferenceByServiceAccess(
+              const namespace = context.req.user.namespace;
+              const consumer = await getNamespaceConsumerAccess(
                 context,
-                args.serviceAccessId
+                namespace,
+                consumerId
               );
+              logger.debug('%s -> %j', consumerId, consumer.owner);
 
-              const fullUsername = serviceAccess.application?.owner.username;
-
-              if (
-                fullUsername != null &&
-                fullUsername.endsWith('@bceid-business')
-              ) {
-                const username = fullUsername.substring(
-                  0,
-                  fullUsername.lastIndexOf('@')
-                );
+              if (consumer.owner?.provider === 'bceid-business') {
+                const username = consumer.owner?.providerUsername;
 
                 const bc = new BCeIDService(new ConfigService());
                 return await bc.getAccountDetails(username);

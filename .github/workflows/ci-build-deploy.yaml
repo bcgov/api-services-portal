@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [dev, test, main, feature/*]
+    branches: [feature/*, test]
 
 env:
   REGISTRY: ghcr.io
@@ -116,12 +116,12 @@ jobs:
               size: 2Gi
 
           resources:
+            requests:
+              cpu: 85m
+              memory: 480M
             limits:
               cpu: 300m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi    
+              memory: 720M
 
           podSecurityContext:
               enabled: true
@@ -164,6 +164,14 @@ jobs:
 
           containerPort: 3000
 
+          resources:
+            requests:
+              cpu: 20m
+              memory: 400M
+            limits:
+              cpu: 100m
+              memory: 800M
+
           oauthProxy:
             enabled: true
             image:
@@ -189,7 +197,6 @@ jobs:
               skip-jwt-bearer-tokens: 'false'
               set-authorization-header: 'false'
               pass-authorization-header: 'false'
-
           env:
             SESSION_SECRET:
               value: '234873290483290'

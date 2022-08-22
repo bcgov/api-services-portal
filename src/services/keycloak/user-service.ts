@@ -74,7 +74,7 @@ export class KeycloakUserService {
     delRoles: RoleMappingPayload[]
   ) {
     logger.debug(
-      '[syncUserClientRoles] (%s) %s : %j %j',
+      '[syncUserClientRoles] (%s) %s : ADD:%j DEL:%j',
       id,
       clientUniqueId,
       addRoles,
@@ -87,11 +87,13 @@ export class KeycloakUserService {
         roles: addRoles,
       });
     }
-    await this.kcAdminClient.users.delClientRoleMappings({
-      id,
-      clientUniqueId,
-      roles: delRoles,
-    });
+    if (delRoles.length > 0) {
+      await this.kcAdminClient.users.delClientRoleMappings({
+        id,
+        clientUniqueId,
+        roles: delRoles,
+      });
+    }
     logger.debug('[syncUserClientRoles] %s OK', id);
   }
 }

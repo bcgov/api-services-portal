@@ -82,14 +82,16 @@ const ScopesComponent: React.FC<ScopesProps> = ({
         toast({
           title: `Scope ${scopeName} ${grant ? 'assigned' : 'removed'}`,
           status: 'success',
+          isClosable: true,
         });
         setBusy.off();
         client.invalidateQueries(queryKey);
       } catch (err) {
         toast({
           title: 'Scope update failed',
-          description: Array.isArray(err) ? err[0].message : err?.message,
+          description: err,
           status: 'error',
+          isClosable: true,
         });
         setBusy.off();
       }

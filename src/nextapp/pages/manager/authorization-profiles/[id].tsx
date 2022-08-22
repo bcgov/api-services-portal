@@ -72,13 +72,15 @@ const AuthorizationProfile: React.FC<
         toast({
           title: 'Profile updated',
           status: 'success',
+          isClosable: true,
         });
         router?.push('/manager/authorization-profiles');
-      } catch (e) {
+      } catch (err) {
         toast({
           title: 'Profile update failed',
-          description: Array.isArray(e) ? e[0].message : '',
+          description: err,
           status: 'error',
+          isClosable: true,
         });
       }
     },
@@ -123,7 +125,7 @@ const query = gql`
       owner {
         id
         name
-        username
+        providerUsername
         email
       }
       environments {

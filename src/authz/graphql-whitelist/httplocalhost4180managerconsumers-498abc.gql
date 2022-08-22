@@ -1,0 +1,13 @@
+
+  query GetControlContent($prodEnvId: ID!) {
+    allGatewayServicesByNamespace(where: { environment: { id: $prodEnvId } }) {
+      id
+      name
+      extForeignKey
+      routes {
+        id
+        name
+        extForeignKey
+      }
+    }
+  }

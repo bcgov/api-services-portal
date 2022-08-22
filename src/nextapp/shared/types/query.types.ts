@@ -36,6 +36,7 @@ export type AccessRequest = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<User>;
@@ -55,6 +56,7 @@ export type AccessRequestCreateInput = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
@@ -70,6 +72,7 @@ export type AccessRequestUpdateInput = {
   isIssued?: Maybe<Scalars['Boolean']>;
   isComplete?: Maybe<Scalars['Boolean']>;
   credential?: Maybe<Scalars['String']>;
+  labels?: Maybe<Scalars['String']>;
   controls?: Maybe<Scalars['String']>;
   additionalDetails?: Maybe<Scalars['String']>;
   requestor?: Maybe<UserRelateToOneInput>;
@@ -145,6 +148,24 @@ export type AccessRequestWhereInput = {
   credential_not_ends_with_i?: Maybe<Scalars['String']>;
   credential_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   credential_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  labels?: Maybe<Scalars['String']>;
+  labels_not?: Maybe<Scalars['String']>;
+  labels_contains?: Maybe<Scalars['String']>;
+  labels_not_contains?: Maybe<Scalars['String']>;
+  labels_starts_with?: Maybe<Scalars['String']>;
+  labels_not_starts_with?: Maybe<Scalars['String']>;
+  labels_ends_with?: Maybe<Scalars['String']>;
+  labels_not_ends_with?: Maybe<Scalars['String']>;
+  labels_i?: Maybe<Scalars['String']>;
+  labels_not_i?: Maybe<Scalars['String']>;
+  labels_contains_i?: Maybe<Scalars['String']>;
+  labels_not_contains_i?: Maybe<Scalars['String']>;
+  labels_starts_with_i?: Maybe<Scalars['String']>;
+  labels_not_starts_with_i?: Maybe<Scalars['String']>;
+  labels_ends_with_i?: Maybe<Scalars['String']>;
+  labels_not_ends_with_i?: Maybe<Scalars['String']>;
+  labels_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  labels_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   controls?: Maybe<Scalars['String']>;
   controls_not?: Maybe<Scalars['String']>;
   controls_contains?: Maybe<Scalars['String']>;
@@ -901,6 +922,74 @@ export enum CacheControlScope {
   Private = 'PRIVATE'
 }
 
+export type ConsumerAccess = {
+  __typename?: 'ConsumerAccess';
+  consumer?: Maybe<GatewayConsumer>;
+  application?: Maybe<Application>;
+  owner?: Maybe<User>;
+  labels?: Maybe<Array<Maybe<ConsumerLabel>>>;
+  prodEnvAccess?: Maybe<Array<Maybe<ConsumerProdEnvAccess>>>;
+};
+
+export type ConsumerAuthorization = {
+  __typename?: 'ConsumerAuthorization';
+  credentialIssuer?: Maybe<CredentialIssuer>;
+  defaultClientScopes?: Maybe<Array<Maybe<Scalars['String']>>>;
+  defaultOptionalScopes?: Maybe<Array<Maybe<Scalars['String']>>>;
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type ConsumerFullPluginDetails = {
+  __typename?: 'ConsumerFullPluginDetails';
+  id?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  config?: Maybe<Scalars['String']>;
+  service?: Maybe<Scalars['JSON']>;
+  route?: Maybe<Scalars['JSON']>;
+};
+
+export type ConsumerLabel = {
+  __typename?: 'ConsumerLabel';
+  labelGroup: Scalars['String'];
+  values: Array<Maybe<Scalars['String']>>;
+};
+
+export type ConsumerLabelFilter = {
+  labelGroup?: Maybe<Scalars['String']>;
+  value?: Maybe<Scalars['String']>;
+};
+
+export type ConsumerPlugin = {
+  __typename?: 'ConsumerPlugin';
+  id?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  config: Scalars['JSON'];
+  service?: Maybe<Scalars['JSON']>;
+  route?: Maybe<Scalars['JSON']>;
+};
+
+export type ConsumerProdEnvAccess = {
+  __typename?: 'ConsumerProdEnvAccess';
+  productName?: Maybe<Scalars['String']>;
+  environment?: Maybe<Environment>;
+  plugins?: Maybe<Array<Maybe<ConsumerFullPluginDetails>>>;
+  revocable?: Maybe<Scalars['Boolean']>;
+  serviceAccessId?: Maybe<Scalars['String']>;
+  authorization?: Maybe<ConsumerAuthorization>;
+  request?: Maybe<AccessRequest>;
+  requestApprover?: Maybe<User>;
+};
+
+export type ConsumerQueryFilterInput = {
+  products?: Maybe<Array<Maybe<Scalars['String']>>>;
+  environments?: Maybe<Array<Maybe<Scalars['String']>>>;
+  scopes?: Maybe<Array<Maybe<Scalars['String']>>>;
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+  mostActive?: Maybe<Scalars['Boolean']>;
+  leastActive?: Maybe<Scalars['Boolean']>;
+  labels?: Maybe<Array<Maybe<ConsumerLabelFilter>>>;
+};
+
 export type ConsumerScopesAndRoles = {
   __typename?: 'ConsumerScopesAndRoles';
   id: Scalars['String'];
@@ -915,6 +1004,16 @@ export type ConsumerScopesAndRolesInput = {
   defaultScopes: Array<Maybe<Scalars['String']>>;
   optionalScopes: Array<Maybe<Scalars['String']>>;
   clientRoles: Array<Maybe<Scalars['String']>>;
+};
+
+export type ConsumerSummary = {
+  __typename?: 'ConsumerSummary';
+  id: Scalars['String'];
+  consumerType: Scalars['String'];
+  username?: Maybe<Scalars['String']>;
+  customId?: Maybe<Scalars['String']>;
+  labels: Array<Maybe<ConsumerLabel>>;
+  lastUpdated: Scalars['String'];
 };
 
 /**  A keystone list  */
@@ -3535,25 +3634,24 @@ export type Label = {
    */
   _label_?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumer>;
 };
 
 export type LabelCreateInput = {
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
-};
-
-export type LabelRelateToManyInput = {
-  create?: Maybe<Array<Maybe<LabelCreateInput>>>;
-  connect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
-  disconnect?: Maybe<Array<Maybe<LabelWhereUniqueInput>>>;
-  disconnectAll?: Maybe<Scalars['Boolean']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
 };
 
 export type LabelUpdateInput = {
+  namespace?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   value?: Maybe<Scalars['String']>;
+  consumer?: Maybe<GatewayConsumerRelateToOneInput>;
 };
 
 export type LabelWhereInput = {
@@ -3563,6 +3661,24 @@ export type LabelWhereInput = {
   id_not?: Maybe<Scalars['ID']>;
   id_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
   id_not_in?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   name?: Maybe<Scalars['String']>;
   name_not?: Maybe<Scalars['String']>;
   name_contains?: Maybe<Scalars['String']>;
@@ -3599,6 +3715,8 @@ export type LabelWhereInput = {
   value_not_ends_with_i?: Maybe<Scalars['String']>;
   value_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   value_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumer?: Maybe<GatewayConsumerWhereInput>;
+  consumer_is_null?: Maybe<Scalars['Boolean']>;
 };
 
 export type LabelWhereUniqueInput = {
@@ -4243,11 +4361,13 @@ export type Mutation = {
   /**  Delete multiple User items by ID.  */
   deleteUsers?: Maybe<Array<Maybe<User>>>;
   forceDeleteEnvironment?: Maybe<Scalars['Boolean']>;
-  createGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
-  updateGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
-  deleteGatewayConsumerPlugin?: Maybe<GatewayConsumer>;
   acceptLegal?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
+  grantAccessToConsumer?: Maybe<Scalars['Boolean']>;
+  revokeAccessFromConsumer?: Maybe<Scalars['Boolean']>;
+  revokeAllConsumerAccess?: Maybe<Scalars['Boolean']>;
+  updateConsumerAccess?: Maybe<Scalars['Boolean']>;
+  saveConsumerLabels?: Maybe<Scalars['Boolean']>;
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
@@ -4986,25 +5106,6 @@ export type MutationForceDeleteEnvironmentArgs = {
 };
 
 
-export type MutationCreateGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  plugin: Scalars['String'];
-};
-
-
-export type MutationUpdateGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  pluginExtForeignKey: Scalars['String'];
-  plugin: Scalars['String'];
-};
-
-
-export type MutationDeleteGatewayConsumerPluginArgs = {
-  id: Scalars['ID'];
-  pluginExtForeignKey: Scalars['String'];
-};
-
-
 export type MutationAcceptLegalArgs = {
   productEnvironmentId: Scalars['ID'];
   acceptLegal: Scalars['Boolean'];
@@ -5016,6 +5117,37 @@ export type MutationUpdateConsumerGroupMembershipArgs = {
   consumerId: Scalars['ID'];
   group: Scalars['String'];
   grant: Scalars['Boolean'];
+};
+
+
+export type MutationGrantAccessToConsumerArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
+  controls?: Maybe<Scalars['JSON']>;
+};
+
+
+export type MutationRevokeAccessFromConsumerArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
+};
+
+
+export type MutationRevokeAllConsumerAccessArgs = {
+  consumerId: Scalars['ID'];
+};
+
+
+export type MutationUpdateConsumerAccessArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
+  controls?: Maybe<Scalars['JSON']>;
+};
+
+
+export type MutationSaveConsumerLabelsArgs = {
+  consumerId: Scalars['ID'];
+  labels?: Maybe<Array<Maybe<Scalars['JSON']>>>;
 };
 
 
@@ -5965,7 +6097,6 @@ export type Query = {
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
   allApplicationNames?: Maybe<Array<Maybe<ApplicationSummary>>>;
-  getGatewayConsumerPlugins?: Maybe<GatewayConsumer>;
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
@@ -5985,6 +6116,11 @@ export type Query = {
   mySelf?: Maybe<User>;
   allDiscoverableContents?: Maybe<Array<Maybe<Content>>>;
   BusinessProfile?: Maybe<BusinessProfile>;
+  allConsumerGroupLabels?: Maybe<Array<Maybe<Scalars['String']>>>;
+  allConsumerScopesAndRoles?: Maybe<Scalars['JSON']>;
+  getFilteredNamespaceConsumers?: Maybe<Array<Maybe<ConsumerSummary>>>;
+  getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
+  getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -6582,11 +6718,6 @@ export type Query_KsListsMetaArgs = {
 };
 
 
-export type QueryGetGatewayConsumerPluginsArgs = {
-  id: Scalars['ID'];
-};
-
-
 export type QueryAllDiscoverableProductsArgs = {
   first?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
@@ -6717,7 +6848,23 @@ export type QueryAllDiscoverableContentsArgs = {
 
 
 export type QueryBusinessProfileArgs = {
-  serviceAccessId: Scalars['ID'];
+  consumerId: Scalars['ID'];
+};
+
+
+export type QueryGetFilteredNamespaceConsumersArgs = {
+  filter?: Maybe<ConsumerQueryFilterInput>;
+};
+
+
+export type QueryGetNamespaceConsumerAccessArgs = {
+  consumerId: Scalars['ID'];
+};
+
+
+export type QueryGetConsumerProdEnvAccessArgs = {
+  consumerId: Scalars['ID'];
+  prodEnvId: Scalars['ID'];
 };
 
 
@@ -6795,32 +6942,8 @@ export type ServiceAccess = {
   consumer?: Maybe<GatewayConsumer>;
   application?: Maybe<Application>;
   productEnvironment?: Maybe<Environment>;
-  labels: Array<Label>;
-  _labelsMeta?: Maybe<_QueryMeta>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-/**  A keystone list  */
-export type ServiceAccessLabelsArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
-};
-
-
-/**  A keystone list  */
-export type ServiceAccess_LabelsMetaArgs = {
-  where?: Maybe<LabelWhereInput>;
-  search?: Maybe<Scalars['String']>;
-  sortBy?: Maybe<Array<SortLabelsBy>>;
-  orderBy?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
 };
 
 export enum ServiceAccessConsumerTypeType {
@@ -6840,7 +6963,6 @@ export type ServiceAccessCreateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessRelateToOneInput = {
@@ -6862,7 +6984,6 @@ export type ServiceAccessUpdateInput = {
   consumer?: Maybe<GatewayConsumerRelateToOneInput>;
   application?: Maybe<ApplicationRelateToOneInput>;
   productEnvironment?: Maybe<EnvironmentRelateToOneInput>;
-  labels?: Maybe<LabelRelateToManyInput>;
 };
 
 export type ServiceAccessWhereInput = {
@@ -6976,12 +7097,6 @@ export type ServiceAccessWhereInput = {
   application_is_null?: Maybe<Scalars['Boolean']>;
   productEnvironment?: Maybe<EnvironmentWhereInput>;
   productEnvironment_is_null?: Maybe<Scalars['Boolean']>;
-  /**  condition must be true for all nodes  */
-  labels_every?: Maybe<LabelWhereInput>;
-  /**  condition must be true for at least 1 node  */
-  labels_some?: Maybe<LabelWhereInput>;
-  /**  condition must be false for all nodes  */
-  labels_none?: Maybe<LabelWhereInput>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   updatedAt_not?: Maybe<Scalars['DateTime']>;
   updatedAt_lt?: Maybe<Scalars['DateTime']>;
@@ -7042,6 +7157,8 @@ export enum SortAccessRequestsBy {
   IsCompleteDesc = 'isComplete_DESC',
   CredentialAsc = 'credential_ASC',
   CredentialDesc = 'credential_DESC',
+  LabelsAsc = 'labels_ASC',
+  LabelsDesc = 'labels_DESC',
   ControlsAsc = 'controls_ASC',
   ControlsDesc = 'controls_DESC',
   AdditionalDetailsAsc = 'additionalDetails_ASC',
@@ -7444,10 +7561,14 @@ export enum SortGatewayServicesBy {
 export enum SortLabelsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   NameAsc = 'name_ASC',
   NameDesc = 'name_DESC',
   ValueAsc = 'value_ASC',
-  ValueDesc = 'value_DESC'
+  ValueDesc = 'value_DESC',
+  ConsumerAsc = 'consumer_ASC',
+  ConsumerDesc = 'consumer_DESC'
 }
 
 export enum SortLegalsBy {
@@ -7588,8 +7709,6 @@ export enum SortServiceAccessesBy {
   ApplicationDesc = 'application_DESC',
   ProductEnvironmentAsc = 'productEnvironment_ASC',
   ProductEnvironmentDesc = 'productEnvironment_DESC',
-  LabelsAsc = 'labels_ASC',
-  LabelsDesc = 'labels_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',
   UpdatedAtDesc = 'updatedAt_DESC',
   CreatedAtAsc = 'createdAt_ASC',

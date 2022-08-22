@@ -1,0 +1,9 @@
+
+  mutation RejectAccessRequest($id: ID!) {
+    updateAccessRequest(
+      id: $id
+      data: { isApproved: false, isComplete: true }
+    ) {
+      id
+    }
+  }

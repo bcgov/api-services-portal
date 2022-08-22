@@ -131,6 +131,7 @@ const server = mockServer(schemaWithMocks, {
         legalName: 'Smith Associates',
         address: {
           addressLine1: '2233 Broadway South',
+          addressLine2: null,
           city: 'Mincetown',
           postal: 'V1B4A3',
           province: 'BC',
@@ -183,9 +184,9 @@ const server = mockServer(schemaWithMocks, {
       return res;
     },
     updateEnvironment: ({ id, data }) => {
-      // throw new Error({
-      //   errors: [{ message: 'something broke', name: 'ValidationError' }],
-      // });
+      throw new Error(
+        '[dataset] Namespace and Dataset must belong to the same Organization Unit (ns:databc, dataset:undefined)'
+      );
       db.get('products').forEach((p) => {
         const environmentIds = p.environments.map((e) => e.id);
 
@@ -252,6 +253,35 @@ const server = mockServer(schemaWithMocks, {
         regenerateCredentials: {
           credential: casual.uuid,
         },
+      };
+    },
+    createGatewayConsumerPlugin: () => {
+      return {
+        errors: [
+          {
+            message: 'Nested errors occurred',
+            name: 'NestedError',
+            time_thrown: '2022-07-19T22:57:57.476Z',
+            data: { errors: [{ status: '400 BAD REQUEST' }] },
+            uid: 'cl5ss0t0k000s0o56b9qt2jen',
+          },
+        ],
+        data: { createGatewayConsumerPlugin: null },
+      };
+    },
+    updateConsumerGroupMembership: () => {
+      return {
+        errors: [
+          {
+            message: 'You do not have access to this resource',
+            name: 'AccessDeniedError',
+            time_thrown: '2022-07-19T23:00:13.786Z',
+            data: { type: 'mutation', target: 'updateConsumerGroupMembership' },
+            path: ['updateConsumerGroupMembership'],
+            uid: 'cl5ss3q6y000v0o56h61z8gf8',
+          },
+        ],
+        data: { updateConsumerGroupMembership: null },
       };
     },
   }),
@@ -485,6 +515,8 @@ const server = mockServer(schemaWithMocks, {
         },
       ],
     }),
+    additionalDetails: casual.sentences(4),
+    communication: casual.sentence,
   }),
   UMAResourceSet: () => {
     const ns = sample(data.namespaces);
@@ -497,6 +529,17 @@ const server = mockServer(schemaWithMocks, {
       type: casual.word,
     };
   },
+  ConsumerScopesAndRoles: () => ({
+    id: casual.uuid,
+    consumerType: casual.word,
+    defaultScopes: [
+      'System/Patient',
+      'System/MedicationRequest',
+      'System/CheeseSlicesChalkCheesy',
+    ],
+    optionalScopes: [],
+    clientRoles: ['a.role', 'b.role', 'c.role'],
+  }),
   UMAPermissionTicket: () => {
     const { requester, requesterName } = sample(data.requesters);
     const ns = sample(data.namespaces);
@@ -566,5 +609,5 @@ app.use('/about', (_, res) => {
   });
 });
 app.use('/admin', adminApi);
-app.use('/ds/api', dsApi);
+app.use('/ds/api/v2', dsApi);
 app.listen(port, () => console.log(`Mock server running on port ${port}`));

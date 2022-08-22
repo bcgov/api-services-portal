@@ -64,14 +64,16 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
       client.invalidateQueries(['products']);
       onClose();
       toast({
-        title: `${data.name} Updated`,
+        title: `${data.name} updated`,
         status: 'success',
+        isClosable: true,
       });
     } catch (err) {
       console.error(err.message);
       toast({
-        title: 'Update Product Failed',
+        title: 'Update product failed',
         status: 'error',
+        isClosable: true,
       });
     }
   }, [client, data, mutation, onClose, toast]);

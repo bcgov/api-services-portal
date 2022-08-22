@@ -2,6 +2,19 @@ export { Apply } from './apply';
 
 export { CreateServiceAccount } from './create-service-account';
 
+export {
+  allConsumerGroupLabels,
+  allScopesAndRoles,
+  getFilteredNamespaceConsumers,
+  getNamespaceConsumerAccess,
+  getConsumerProdEnvAccess,
+  grantAccessToConsumer,
+  revokeAllConsumerAccess,
+  revokeAccessFromConsumer,
+  updateConsumerAccess,
+  saveConsumerLabels,
+} from './consumer-management';
+
 export { DeleteAccess } from './delete-access';
 
 export { DeleteIssuerValidate } from './delete-issuer';
@@ -26,4 +39,7 @@ export {
   getGwaProductEnvironment,
   getMyNamespaces,
   getResourceServerContext,
+  getEnvironmentContext,
 } from './get-namespaces';
+
+export { getConsumerAuthz } from './get-consumer-authz';

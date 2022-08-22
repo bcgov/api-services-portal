@@ -1,7 +1,7 @@
 import { getServiceMetrics, calculateStats } from '../../../services/keystone';
 import numeral from 'numeral';
 
-import Context from '../../../mocks/handlers/keystone';
+import Context from '../../mocks/handlers/keystone';
 
 const context = Context('default');
 

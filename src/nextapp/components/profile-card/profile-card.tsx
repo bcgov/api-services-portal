@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Avatar, Box, BoxProps, Flex, Text } from '@chakra-ui/react';
+import { Avatar, Flex, FlexProps, Text } from '@chakra-ui/react';
 import { User } from '@/shared/types/query.types';
 import { UserData } from '@/shared/types/app.types';
 
-interface ProfileCardProps extends BoxProps {
+interface ProfileCardProps extends FlexProps {
   data: User | UserData;
   variant?: 'flat' | 'raised';
 }
@@ -17,24 +17,33 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <Flex
-      align="center"
+      align="stretch"
       boxShadow={isRaised ? 'md' : 'none'}
       p={isRaised ? 4 : 0}
       borderRadius={4}
       {...rest}
     >
-      <Avatar name={data.name} size="sm" />
-      <Box ml={2} lineHeight="4">
-        <Text fontSize="sm" fontWeight="bold">
+      <Avatar name={data.name} />
+      <Flex
+        flex={1}
+        ml={2}
+        lineHeight="4"
+        direction="column"
+        justify="space-between"
+        py={1}
+      >
+        <Text isTruncated fontWeight="bold" lineHeight={5}>
           {data.name}
-          <Text as="span" fontWeight="normal" color="gray.400">
-            {` • ${data.username}`}
-          </Text>
+          {data.providerUsername && (
+            <Text isTruncated as="span" fontWeight="normal" color="gray.400">
+              {` • ${data.providerUsername}`}
+            </Text>
+          )}
         </Text>
-        <Text fontWeight="normal" fontSize="xs" color="bc-component">
+        <Text fontWeight="normal" color="bc-component">
           {data.email}
         </Text>
-      </Box>
+      </Flex>
     </Flex>
   );
 };

@@ -10,7 +10,7 @@ import { strict as assert } from 'assert';
 import { AddClientConsumer } from './add-client-consumer';
 import { FeederService } from '../feeder';
 import { KongConsumerService } from '../kong';
-import { NewCredential, RequestControls } from './types';
+import { CredentialReference, NewCredential, RequestControls } from './types';
 import { registerClient } from './client-credentials';
 import { registerApiKey } from './kong-api-key';
 import { Logger } from '../../logger';
@@ -59,8 +59,9 @@ export const generateCredential = async (
     // Call /feeds to sync the Consumer with KeystoneJS
     await feederApi.forceSync('kong', 'consumer', newApiKey.consumer.id);
 
-    const credentialReference = {
+    const credentialReference: CredentialReference = {
       keyAuthPK: newApiKey.apiKey.keyAuthPK,
+      clientId,
     };
     // Create a ServiceAccess record
     const consumerType = 'client';
@@ -135,10 +136,7 @@ export const generateCredential = async (
 
     logger.debug('new-client %j', newClient);
 
-    const kongApi = new KongConsumerService(
-      process.env.KONG_URL,
-      process.env.GWA_API_URL
-    );
+    const kongApi = new KongConsumerService(process.env.KONG_URL);
     const consumer = await kongApi.createKongConsumer(nickname, clientId);
     const consumerPK = await AddClientConsumer(
       context,

@@ -1,17 +1,12 @@
 /// <reference types="node" />
 /// <reference types="express" />
 import 'reflect-metadata';
-import express from 'express';
-import request from 'graphql-request';
+const { formatError } = require('./services/keystone_overrides/formatError');
 const { Keystone } = require('@keystonejs/keystone');
-const { Checkbox, Password, Select } = require('@keystonejs/fields');
-//import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
 const { generate } = require('@graphql-codegen/cli');
-//const { AdminUIApp } = require('@keystone-next/admin-ui');
-const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
@@ -20,19 +15,11 @@ const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
 
-var Keycloak = require('keycloak-connect');
-
 const initialiseData = require('./initial-data');
-const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
 
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
-
-const { Strategy, Issuer, Client } = require('openid-client');
-
-const { staticRoute, staticPath, distDir } = require('./config');
 
 const {
   putFeedWorker,
@@ -41,10 +28,7 @@ const {
 } = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked');
 
-const {
-  FieldEnforcementPoint,
-  EnforcementPoint,
-} = require('./authz/enforcement');
+const { EnforcementPoint } = require('./authz/enforcement');
 
 const { loadRulesAndWatch } = require('./authz/enforcement');
 
@@ -184,6 +168,7 @@ for (const _list of [
   'AliasedQueries',
   'BusinessProfile',
   'ConsumerGroups',
+  'ConsumerProducts',
   'ConsumerScopesAndRoles',
   'CredentialRegenerate',
   'Namespace',
@@ -247,13 +232,6 @@ const authStrategy =
       });
 
 const { pages } = require('./admin-hooks.js');
-//const tasked = require('./services/tasked');
-
-const {
-  checkWhitelist,
-  loadWhitelistAndWatch,
-  addToWhitelist,
-} = require('./authz/whitelist');
 
 const apps = [
   new ApiHealthApp(state),
@@ -261,6 +239,22 @@ const apps = [
   new MaintenanceApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
+    apollo: {
+      formatError: (err: any) => {
+        logger.error('GraphQL Error: %s', err);
+        const error = formatError(err);
+
+        const data = error.extensions?.exception?.response?.data;
+        if (error.extensions?.exception) {
+          logger.warn('Removing exception details from error response');
+          delete error.extensions['exception'];
+        }
+        if (data) {
+          logger.error('  %s', data);
+        }
+        return error;
+      },
+    },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
@@ -270,11 +264,6 @@ const apps = [
     authStrategy,
     pages: pages,
     enableDefaultRoute: false,
-    isAccessAllowed: (user: any) => {
-      // console.log('isAllowed?');
-      // console.log(JSON.stringify(user));
-      return true;
-    },
   }),
   new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),

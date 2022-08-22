@@ -161,6 +161,7 @@ const NewRequestsPage: React.FC<
       toast({
         title: 'Request submitted',
         status: 'success',
+        isClosable: true,
       });
       router?.push(
         `/devportal/requests/new/tokens?requestId=${result.data.createAccessRequest.id}`
@@ -168,8 +169,9 @@ const NewRequestsPage: React.FC<
     } catch (err) {
       toast({
         title: 'Unable to make request',
-        description: err.message,
+        description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };

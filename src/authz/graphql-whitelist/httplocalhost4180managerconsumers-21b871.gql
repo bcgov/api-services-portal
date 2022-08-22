@@ -1,0 +1,4 @@
+
+  mutation SaveConsumerLabels($consumerId: ID!, $labels: [JSON]) {
+    saveConsumerLabels(consumerId: $consumerId, labels: $labels)
+  }

@@ -1,7 +1,7 @@
 import { useAuth } from '@/shared/services/auth';
 
 type Breadcrumb = {
-  href: string;
+  href?: string;
   text: string;
 };
 

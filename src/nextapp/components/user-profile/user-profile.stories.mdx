@@ -11,7 +11,7 @@ The user profile component decorates a `UserData` object.
   <Story name="Default">
     <UserProfile data={{ 
       name: 'Margaret Kilgallen', 
-      username: 'mkilgallen@idir',
+      providerUsername: 'mkilgallen@idir',
       email: 'mkilgallen@boc.gov.ca'
     }} data-testid="user-profile"/>
   </Story>
@@ -34,7 +34,7 @@ The container extends a Chakra `Box`, so any layout props are accepted, though o
   <Story name="Customizations">
     <UserProfile data={{ 
         name: 'Margaret Kilgallen', 
-        username: 'mkilgallen@idir',
+        providerUsername: 'mkilgallen@idir',
         email: 'mkilgallen@boc.gov.ca'
       }} 
       bgColor="bc-blue" 

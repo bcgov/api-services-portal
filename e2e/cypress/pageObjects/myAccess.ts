@@ -8,6 +8,11 @@ class myAccessPage {
   publicKey: string = '[data-testid=sa-new-creds-signing-public-certificate]'
   issuer: string = '[data-testid=sa-new-creds-issuer]'
   closeRequestAccesss: string = '[data-testid=doneAcceptRequest]'
+  accessListTbl: string = '[data-testid=access-list-item-table]'
+  regenerateCredentialBtn: string = '[data-testid=regenerate-credentials-btn]'
+  regenerateCredentialCloseBtn: string = '[data-testid=regenerate-credentials-done-button]'
+  path: string = '/devportal/access'
+
 
   clickOnGenerateSecretButton() {
     cy.get(this.generateSecretsBtn).click()
@@ -20,52 +25,69 @@ class myAccessPage {
     cy.get(this.closeRequestAccesss).click()
   }
 
-  saveClientCredentials(): void {
+  saveReGenAPIKeyValue(): void {
+    cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
+      cy.saveState('newApiKey', $apiKey)
+    })
+    cy.get(this.regenerateCredentialCloseBtn).click()
+  }
+
+  saveClientCredentials(flag?: boolean): void {
     cy.get(this.clientId).invoke('val').then(($clientId: any) => {
       cy.get(this.clientSecret).invoke('val').then(($clientSecret: any) => {
         cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {
           cy.saveState(
             'clientidsecret',
             '{"clientId": "' +
-              $clientId +
-              '", "clientSecret": "' +
-              $clientSecret +
-              '", "tokenEndpoint": "' +
-              $tokenEndpoint +
-              '"}'
+            $clientId +
+            '", "clientSecret": "' +
+            $clientSecret +
+            '", "tokenEndpoint": "' +
+            $tokenEndpoint +
+            '"}', flag
           )
         })
       })
     })
-    cy.get(this.closeRequestAccesss).click()
+    if(flag)
+      cy.get(this.regenerateCredentialCloseBtn).click()
+    else
+      cy.get(this.closeRequestAccesss).click()
   }
 
-  saveJwtKeyPairCredentials(): void {
-    cy.get(this.clientId).invoke('val').then(($clientId:any) => {
-      cy.get(this.privateKey).invoke('val').then(($privateKey:any) => {
-        cy.get(this.publicKey).invoke('val').then(($publicKey:any) => {
-          cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint:any) => {
+  saveJwtKeyPairCredentials(flag?: boolean): void {
+    cy.get(this.clientId).invoke('val').then(($clientId: any) => {
+      cy.get(this.privateKey).invoke('val').then(($privateKey: any) => {
+        cy.get(this.publicKey).invoke('val').then(($publicKey: any) => {
+          cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {
             cy.saveState(
               'jwtkeypaircredentials',
               '{"clientId": "' +
-                $clientId +
-                '", "tokenEndpoint": "' +
-                $tokenEndpoint +
-                '"}'
+              $clientId +
+              '", "tokenEndpoint": "' +
+              $tokenEndpoint +
+              '"}',flag
             )
-            cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey)
-            cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey)
+            if(flag){
+              cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey.pem', $privateKey)
+              cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey.pub', $publicKey)
+              cy.get(this.regenerateCredentialCloseBtn).click()
+            }
+            else{
+              cy.writeFile('cypress/fixtures/state/jwtGenPrivateKey.pem', $privateKey)
+              cy.writeFile('cypress/fixtures/state/jwtGenPublicKey.pub', $publicKey)
+              cy.get(this.closeRequestAccesss).click()
+            }
           })
         })
       })
     })
-    cy.get(this.closeRequestAccesss).click()
   }
 
   saveJwksUrlCredentials(): void {
-    cy.get(this.clientId).invoke('val').then(($clientId:any) => {
-      cy.get(this.issuer).invoke('val').then(($issuer:any) => {
-        cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint:any) => {
+    cy.get(this.clientId).invoke('val').then(($clientId: any) => {
+      cy.get(this.issuer).invoke('val').then(($issuer: any) => {
+        cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {
           cy.saveState(
             'jwksurlcredentials',
             '{"clientId": "' +
@@ -80,6 +102,17 @@ class myAccessPage {
       })
     })
     cy.get(this.closeRequestAccesss).click()
+  }
+
+  regenerateCredential(env: string, appName: string): void {
+    cy.get(this.accessListTbl).find('tr').each(($e1, index, $list) => {
+      let applicationName = $e1.find('td:nth-child(3)').text()
+      let environment = $e1.find('td:nth-child(2)').find('span').text()
+      if (applicationName.toLowerCase() === appName.toLowerCase() && environment.toLowerCase() === env.toLowerCase()) {
+        cy.wrap($e1).find('button').first().click()
+        cy.get(this.regenerateCredentialBtn).filter(':visible').first().click()
+      }
+    })
   }
 }
 
