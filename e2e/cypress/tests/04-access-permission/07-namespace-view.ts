@@ -35,7 +35,7 @@ describe('Grant Namespace View Role to Mark', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Mark)
+      na.grantPermission(checkPermission.grantPermission.Mark_NV)
       na.revokePermission(checkPermission.revokePermission.Mark_AM)
     })
   })
