@@ -22,7 +22,7 @@ class MockDatabase {
       email: 'nmerriweather@hbms.com',
       roles: [role, 'portal-user'],
       isAdmin: false,
-      namespace: null,
+      namespace,
       groups: null,
       legalsAgreed: '[]',
       sub: 'sub',
