@@ -20,7 +20,7 @@ export const harleyAccessRequest = {
   requestor: {
     id: 'u1',
     name: 'Harley Jones',
-    username: 'harley123',
+    providerUsername: 'harley123',
     email: 'harley@easymart.store',
   },
   application: {
@@ -219,20 +219,20 @@ export const getConsumersHandler = (req, res, ctx) => {
 };
 
 export const getConsumerHandler = (req, res, ctx) => {
-  const { serviceAccessId } = req.variables;
+  const { consumerId } = req.variables;
   const consumer = store.data.getFilteredNamespaceConsumers.find(
-    (d) => d.id === serviceAccessId
+    (d) => d.id === consumerId
   );
   const owner = {
     name: harleyAccessRequest.requestor.name,
-    username: 'harley123',
+    providerUsername: 'harley123',
     email: 'harley@easymart.store',
   };
   return res(
     ctx.data({
       getNamespaceConsumerAccess: {
         application:
-          serviceAccessId === 'd1'
+          consumerId === 'd1'
             ? null
             : {
                 id: 'a1',

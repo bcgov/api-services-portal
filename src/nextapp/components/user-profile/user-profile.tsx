@@ -54,17 +54,19 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 >
                   {data.name}
                 </Text>
-                <Text
-                  as="span"
-                  color="bc-component"
-                  fontSize="md"
-                  data-testid={`${testId}-username`}
-                >
-                  <Text as="span" mx={1}>
-                    &bull;
+                {data.providerUsername && (
+                  <Text
+                    as="span"
+                    color="bc-component"
+                    fontSize="md"
+                    data-testid={`${testId}-username`}
+                  >
+                    <Text as="span" mx={1}>
+                      &bull;
+                    </Text>
+                    {data.providerUsername}
                   </Text>
-                  {data.username}
-                </Text>
+                )}
               </Text>
               <Text
                 color="bc-component"
