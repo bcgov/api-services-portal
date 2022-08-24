@@ -315,6 +315,7 @@ export default ConsumersPage;
 const query = gql`
   query GetConsumers($filter: ConsumerQueryFilterInput) {
     allConsumerGroupLabels
+
     getFilteredNamespaceConsumers(filter: $filter) {
       id
       consumerType
@@ -324,26 +325,6 @@ const query = gql`
         values
       }
       lastUpdated
-    }
-
-    allAccessRequestsByNamespace(where: { isComplete_not: true }) {
-      id
-      name
-      additionalDetails
-      communication
-      createdAt
-      requestor {
-        name
-        providerUsername
-        email
-      }
-      application {
-        name
-      }
-      productEnvironment {
-        name
-        additionalDetailsToRequest
-      }
     }
   }
 `;

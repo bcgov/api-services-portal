@@ -156,7 +156,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     } catch (err) {
       toast({
         title: 'Request save failed',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        description: err,
         status: 'error',
       });
     }

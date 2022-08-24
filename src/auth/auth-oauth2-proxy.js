@@ -391,20 +391,28 @@ class Oauth2ProxyAuthStrategy {
         saved.providerUsername != providerUsername
       ) {
         logger.info(
-          'register_user - updating name (%s), email (%s), providerUserGuid (%s), providerUsername (%s) for %s',
+          'register_user - updating name (%s), email (%s), provider (%s), providerUserGuid (%s), providerUsername (%s) for %s',
           name,
           email,
+          identityProvider,
           providerUserGuid,
           providerUsername,
           username
         );
         const { data, errors } = await this.keystone.executeGraphQL({
           context: this.keystone.createContext({ skipAccessControl: true }),
-          query: `mutation ($name: String, $email: String, $providerUsername: String, $userId: ID!) {
-                          updateUser(id: $userId, data: {name: $name, email: $email, providerUsername: $providerUsername }) {
+          query: `mutation ($name: String, $email: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String, $userId: ID!) {
+                          updateUser(id: $userId, data: {name: $name, email: $email, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername }) {
                               id
                       } }`,
-          variables: { name, email, providerUsername, userId },
+          variables: {
+            name,
+            email,
+            identityProvider,
+            providerUserGuid,
+            providerUsername,
+            userId,
+          },
         });
         if (errors) {
           logger.error(
