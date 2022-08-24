@@ -217,7 +217,7 @@ const ConsumerPage: React.FC<
           </Box>
           {products.map((p) => (
             <Card key={uid(p)} heading={p} mb={9}>
-              <Table>
+              <Table data-testid="product-list-table">
                 <Thead>
                   <Tr>
                     <Th width="25%">Environment</Th>
