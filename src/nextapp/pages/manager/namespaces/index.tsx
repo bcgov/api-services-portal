@@ -20,7 +20,6 @@ import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { useAuth } from '@/shared/services/auth';
 import {
-  FaArrowUp,
   FaChartBar,
   FaChevronRight,
   FaClock,
@@ -105,7 +104,7 @@ const NamespacesPage: React.FC = () => {
   const toast = useToast();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
-  const newNamespaceDisclosure = useDisclosure();
+  const { isOpen, onClose, onOpen } = useDisclosure();
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -154,13 +153,13 @@ const NamespacesPage: React.FC = () => {
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
               <NamespaceMenu user={user} variant="ns-selector" buttonMessage='Select a Namespace' />
               <Text>or</Text>
-              <Button variant="primary" onClick={newNamespaceDisclosure.onOpen}>
+              <Button variant="primary" onClick={onOpen}>
                 Create New Namespace
               </Button>
             </Flex>
             <NewNamespace
-              isOpen={newNamespaceDisclosure.isOpen}
-              onClose={newNamespaceDisclosure.onClose}
+              isOpen={isOpen}
+              onClose={onClose}
             />
           </EmptyPane>
         )}

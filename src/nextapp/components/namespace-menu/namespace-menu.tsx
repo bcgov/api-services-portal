@@ -32,8 +32,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
 }) => {
   const client = useQueryClient();
   const toast = useToast();
-  const newNamespaceDisclosure = useDisclosure();
-  const managerDisclosure = useDisclosure();
+  const { isOpen, onClose, onOpen } = useDisclosure();
   const { data, isLoading, isSuccess, isError } = useApi(
     'allNamespaces',
     { query },
@@ -129,7 +128,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
               <MenuDivider />
               <MenuOptionGroup title="Namespace Actions">
                 <MenuItem
-                  onClick={newNamespaceDisclosure.onOpen}
+                  onClick={onOpen}
                   color="bc-blue-alt"
                   data-testid="ns-dropdown-create-btn"
                 >
@@ -138,7 +137,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                 <MenuItem
                   isDisabled={!data}
                   color="bc-blue-alt"
-                  onClick={managerDisclosure.onOpen}
+                  onClick={onOpen}
                   data-testid="ns-dropdown-manage-btn"
                 >
                   Export Namespace Report
@@ -149,14 +148,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
         </MenuList>
       </Menu>
       <NewNamespace
-        isOpen={newNamespaceDisclosure.isOpen}
-        onClose={newNamespaceDisclosure.onClose}
+        isOpen={isOpen}
+        onClose={onClose}
       />
       {data && (
         <NamespaceManager
           data={data.allNamespaces}
-          isOpen={managerDisclosure.isOpen}
-          onClose={managerDisclosure.onClose}
+          isOpen={isOpen}
+          onClose={onClose}
         />
       )}
     </>
