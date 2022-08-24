@@ -21,17 +21,19 @@ import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 
 interface ServiceAccountsAccessProps {
+  namespace: string;
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
 const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
+  namespace,
   resourceId,
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = 'namespaceAccessServiceAccounts';
+  const queryKey = ['namespaceAccessServiceAccounts', namespace];
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
   const toast = useToast();

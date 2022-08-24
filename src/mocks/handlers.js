@@ -31,6 +31,19 @@ import {
   grantSAAccessHandler,
 } from './resolvers/namespace-access';
 
+// Namespaces
+const allNamespaces = [
+  {
+    id: 'n1',
+    name: 'aps-portal',
+  },
+  {
+    id: 'n2',
+    name: 'loc',
+  },
+];
+let namespace = mark.namespace;
+
 export function resetAll() {
   consumersStore.reset();
 }
@@ -63,23 +76,23 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: mark,
+        user: { ...mark, namespace },
+      })
+    );
+  }),
+  rest.put('*/admin/switch/:ns', (req, res, ctx) => {
+    namespace = allNamespaces.find((n) => n.id === req.params.ns).name;
+    return res(
+      ctx.status(200),
+      ctx.json({
+        switch: true,
       })
     );
   }),
   keystone.query('GetNamespaces', (_, res, ctx) => {
     return res(
       ctx.data({
-        allNamespaces: [
-          {
-            id: 'n1',
-            name: 'aps-portal',
-          },
-          {
-            id: 'n2',
-            name: 'loc',
-          },
-        ],
+        allNamespaces,
       })
     );
   }),

@@ -100,6 +100,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                   </CheckboxGroup>
                 </FormControl>
               </VStack>
+              <button hidden type="submit" />
             </form>
           </ModalBody>
           <ModalFooter>

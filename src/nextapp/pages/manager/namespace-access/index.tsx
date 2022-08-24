@@ -27,7 +27,7 @@ const AccessRedirectPage: React.FC = () => {
   ]);
 
   const namespaceDetails = useApi(
-    'accessNamespaceDetails',
+    ['accessNamespaceDetails', user?.namespace],
     { query: namespaceQuery },
     {
       suspense: false,
@@ -45,6 +45,12 @@ const AccessRedirectPage: React.FC = () => {
     },
     { enabled: namespaceDetails.isSuccess, suspense: false }
   );
+  const namespaceProps = {
+    namespace: user?.namespace,
+    resourceId: namespaceDetails.data?.currentNamespace?.id,
+    prodEnvId: namespaceDetails.data?.currentNamespace?.prodEnvId,
+  } as const;
+  const resourceScopes = data?.getResourceSet.resource_scopes;
 
   return (
     <>
@@ -70,23 +76,18 @@ const AccessRedirectPage: React.FC = () => {
           <TabPanels>
             <TabPanel bgColor="white" px={0} pb={0}>
               <UsersAccess
-                resourceScopes={data?.getResourceSet.resource_scopes}
-                resourceId={namespaceDetails.data?.currentNamespace?.id}
-                prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}
+                {...namespaceProps}
+                resourceScopes={resourceScopes}
               />
             </TabPanel>
             <TabPanel bgColor="white" px={0} pb={0}>
               <ServiceAccountsAccess
-                resourceScopes={data?.getResourceSet.resource_scopes}
-                resourceId={namespaceDetails.data?.currentNamespace?.id}
-                prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}
+                {...namespaceProps}
+                resourceScopes={resourceScopes}
               />
             </TabPanel>
             <TabPanel bgColor="white" px={0} pb={0}>
-              <OrganizationGroupsAccess
-                resourceId={namespaceDetails.data?.currentNamespace?.id}
-                prodEnvId={namespaceDetails.data?.currentNamespace?.prodEnvId}
-              />
+              <OrganizationGroupsAccess {...namespaceProps} />
             </TabPanel>
           </TabPanels>
         </Tabs>

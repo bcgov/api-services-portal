@@ -26,17 +26,19 @@ type AccessItem = {
   scopes: string[];
 };
 interface UsersAccessProps {
+  namespace: string;
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
 const UsersAccess: React.FC<UsersAccessProps> = ({
+  namespace,
   resourceId,
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = 'namespaceAccessUsers';
+  const queryKey = ['namespaceAccessUsers', namespace];
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
