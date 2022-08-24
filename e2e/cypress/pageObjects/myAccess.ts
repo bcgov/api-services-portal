@@ -11,6 +11,7 @@ class myAccessPage {
   accessListTbl: string = '[data-testid=access-list-item-table]'
   regenerateCredentialBtn: string = '[data-testid=regenerate-credentials-btn]'
   regenerateCredentialCloseBtn: string = '[data-testid=regenerate-credentials-done-button]'
+  collectCredentialsBtn: string = '[data-testid="generate-credentials-button"]'
   path: string = '/devportal/access'
 
 
@@ -18,10 +19,19 @@ class myAccessPage {
     cy.get(this.generateSecretsBtn).click()
   }
 
+  clickOnCollectCredentialButton() {
+    cy.get(this.collectCredentialsBtn).click()
+  }
+
   saveAPIKeyValue(): void {
     cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
       cy.saveState('apikey', $apiKey)
+      cy.contains('Done').click()
     })
+  }
+
+  closeRequestAccessPopUp()
+  {
     cy.get(this.closeRequestAccesss).click()
   }
 
@@ -111,6 +121,16 @@ class myAccessPage {
       if (applicationName.toLowerCase() === appName.toLowerCase() && environment.toLowerCase() === env.toLowerCase()) {
         cy.wrap($e1).find('button').first().click()
         cy.get(this.regenerateCredentialBtn).filter(':visible').first().click()
+      }
+    })
+  }
+
+  checkRequestStatus(env: string, appName: string, requestStatus: string): void {
+    cy.get(this.accessListTbl).find('tr').each(($e1, index, $list) => {
+      let applicationName = $e1.find('td:nth-child(3)').text()
+      let environment = $e1.find('td:nth-child(2)').find('span').text()
+      if (applicationName.toLowerCase() === appName.toLowerCase() && environment.toLowerCase() === env.toLowerCase()) {
+        assert.equal($e1.find('td:nth-child(1)').find('p').text(),requestStatus)
       }
     })
   }
