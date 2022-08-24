@@ -24,7 +24,7 @@ class Products {
   aclSwitch: string = '[data-testid="acls-switch"]'
   config: string | undefined
 
-  getTestIdEnvName(env: string) : string {
+  getTestIdEnvName(env: string): string {
     switch (env) {
       case "Development":
         return "dev"
@@ -68,7 +68,7 @@ class Products {
   }
 
   editProductEnvironmentConfig(config: any) {
-    
+
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
     cy.get(this.envCfgApprovalCheckbox).click()
@@ -89,7 +89,7 @@ class Products {
             `${config.authIssuer} (${env})`
           )
         }
-          
+
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
@@ -100,16 +100,18 @@ class Products {
     cy.wait(3000)
   }
 
-  generateKongPluginConfig(filename: string) {
+  generateKongPluginConfig(filename: string, flag?: boolean) {
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
-      cy.readFile('cypress/fixtures/' + filename).then((content:any) => {
+      cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
         let pluginFilename = filename.replace('.', '-plugin.')
-        // cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
-        // debugger
-        let subString = content.split('v0')
-        // debugger
-        cy.writeFile('cypress/fixtures/' + pluginFilename,subString[0]+ 'v0' + '\n' + this.config+'\n'+subString[1]+ 'v0' + '\n' + $el.text())
+        if (flag) {
+          let subString = content.split('v0')
+          cy.writeFile('cypress/fixtures/' + pluginFilename, subString[0] + 'v0' + '\n' + this.config + '\n' + subString[1] + 'v0' + '\n' + $el.text())
+        }
+        else {
+          cy.writeFile('cypress/fixtures/' + pluginFilename, content + '\n' + $el.text())
+        }
       })
     })
   }
@@ -135,21 +137,20 @@ class Products {
     cy.get(this.updateBtn).click()
   }
 
-  deleteProductEnvironment(productName: string, envName: string){
+  deleteProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).siblings(this.deleteProductEnvBtn).click()
     cy.get(this.deleteConfirmationBtn).click()
   }
 
-  deleteProduct(productName: string){
+  deleteProduct(productName: string) {
     this.editProduct(productName)
     cy.get(this.deleteProductBtn).click()
     cy.get(this.deleteProductConfirmationBtn).click()
   }
 
-  verifyProductIsVisible(productName: string)
-  {
+  verifyProductIsVisible(productName: string) {
     cy.get(`[data-testid=${productName}-edit-btn]`).should('exist')
   }
 
@@ -163,13 +164,11 @@ class Products {
     })
   }
 
-  activateService(config: any)
-  {
+  activateService(config: any) {
     cy.get(`[data-testid=${config.serviceName}`).click()
   }
 
-  getKongPluginConfig()
-  {
+  getKongPluginConfig() {
     cy.get('.language-yaml').then(($el) => {
       this.config = $el.text()
     })

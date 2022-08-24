@@ -69,8 +69,8 @@ class myAccessPage {
               '"}',flag
             )
             if(flag){
-              cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey.pem', $privateKey)
-              cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey.pub', $publicKey)
+              cy.writeFile('cypress/fixtures/state/jwtReGenPrivateKey_new.pem', $privateKey)
+              cy.writeFile('cypress/fixtures/state/jwtReGenPublicKey_new.pub', $publicKey)
               cy.get(this.regenerateCredentialCloseBtn).click()
             }
             else{

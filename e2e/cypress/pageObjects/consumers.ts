@@ -169,9 +169,9 @@ export default class ConsumersPage {
   }
 
   editConsumerDialog() {
-    cy.get(this.editProductBtn).then($button => {
+    cy.get('[data-testid="product-list-table"]').then($button => {
       if ($button.is(':visible')) {
-        cy.get(this.editProductBtn).contains("Edit").click()
+        cy.contains('Edit').first().click()
       }
     })
   }

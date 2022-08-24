@@ -102,7 +102,7 @@ describe('Create API Spec', () => {
       pd.editProductEnvironment(product.name, product.test_environment.name)
       pd.editProductEnvironmentConfig(product.test_environment.config)
     })
-    pd.generateKongPluginConfig('service.yml')
+    pd.generateKongPluginConfig('service.yml', true)
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {

@@ -45,8 +45,8 @@ describe('Create API Spec', () => {
 
   it('creates a new service account', () => {
     cy.visit(sa.path)
-    cy.get('@apiowner').then(({ serviceAccount }: any) => {
-      sa.createServiceAccount(serviceAccount.scopes)
+    cy.get('@apiowner').then(({ checkPermission }: any) => {
+      sa.createServiceAccount(checkPermission.serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
   })
@@ -97,9 +97,8 @@ describe('Create API Spec', () => {
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-plugin.yml', checkPermission.namespace).then(() => {
+      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
         })
       })
     })
