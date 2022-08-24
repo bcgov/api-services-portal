@@ -225,7 +225,6 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                debugger
                 response = res.body
                 expect(response).to.not.contain(apiDirectory.body.name)
             })
