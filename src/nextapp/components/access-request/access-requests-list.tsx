@@ -41,7 +41,7 @@ export default AccessRequestsList;
 const query = gql`
   query GetAccessRequests {
     allAccessRequestsByNamespace(
-      where: { isIssued: true, isComplete_not: true }
+      where: { serviceAccess_is_null: false, isComplete_not: true }
     ) {
       id
       name

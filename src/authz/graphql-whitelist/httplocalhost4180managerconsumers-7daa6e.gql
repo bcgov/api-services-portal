@@ -1,0 +1,34 @@
+
+  query GetAccessRequests {
+    allAccessRequestsByNamespace(where: { isComplete_not: true }) {
+      id
+      name
+      additionalDetails
+      communication
+      createdAt
+      isApproved
+      isIssued
+      isComplete
+      requestor {
+        name
+        providerUsername
+        email
+      }
+      application {
+        name
+      }
+      productEnvironment {
+        id
+        name
+        additionalDetailsToRequest
+        product {
+          name
+        }
+      }
+      serviceAccess {
+        consumer {
+          id
+        }
+      }
+    }
+  }
