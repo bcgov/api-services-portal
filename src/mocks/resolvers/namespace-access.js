@@ -241,10 +241,29 @@ export const getResourceSetHandler = (_, res, ctx) => {
 };
 
 export const grantAccessHandler = (req, res, ctx) => {
-  if (req.variables.data.name === 'fail') {
+  if (req.variables.data.username === 'fail') {
     return res(
       ctx.data({
-        errors: [{ data: { message: 'Invalid access grant' } }],
+        errors: [
+          {
+            message: 'User not found fail',
+            locations: [
+              {
+                line: 3,
+                column: 5,
+              },
+            ],
+            path: ['grantPermissions'],
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+            },
+            uid: '123123lkj123123lkj',
+            name: 'GraphQLError',
+          },
+        ],
+        data: {
+          grantPermissions: null,
+        },
       })
     );
   }
@@ -273,7 +292,26 @@ export const grantSAAccessHandler = (req, res, ctx) => {
   if (req.variables.data.name === 'fail') {
     return res(
       ctx.data({
-        errors: [{ data: { message: 'Invalid access grant' } }],
+        errors: [
+          {
+            message: 'Service account not found fail',
+            locations: [
+              {
+                line: 3,
+                column: 5,
+              },
+            ],
+            path: ['grantPermissions'],
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+            },
+            uid: '123123lkj123123lkj',
+            name: 'GraphQLError',
+          },
+        ],
+        data: {
+          grantPermissions: null,
+        },
       })
     );
   }

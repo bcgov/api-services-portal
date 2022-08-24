@@ -46,7 +46,6 @@ const AccessRedirectPage: React.FC = () => {
     { enabled: namespaceDetails.isSuccess, suspense: false }
   );
   const namespaceProps = {
-    namespace: user?.namespace,
     resourceId: namespaceDetails.data?.currentNamespace?.id,
     prodEnvId: namespaceDetails.data?.currentNamespace?.prodEnvId,
   } as const;

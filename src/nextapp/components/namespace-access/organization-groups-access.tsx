@@ -22,17 +22,15 @@ import { useApi } from '@/shared/services/api';
 import { UmaPolicy } from '@/shared/types/query.types';
 
 interface OrganizationGroupsAccessProps {
-  namespace: string;
   resourceId: string;
   prodEnvId: string;
 }
 
 const OrganizationGroupsAccess: React.FC<OrganizationGroupsAccessProps> = ({
-  namespace,
   resourceId,
   prodEnvId,
 }) => {
-  const queryKey = ['namespaceAccessOrganizationGroups', namespace];
+  const queryKey = 'namespaceAccessOrganizationGroups';
   const toast = useToast();
   const [search, setSearch] = React.useState('');
   const { data, isSuccess, isLoading } = useApi(

@@ -26,19 +26,17 @@ type AccessItem = {
   scopes: string[];
 };
 interface UsersAccessProps {
-  namespace: string;
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
 const UsersAccess: React.FC<UsersAccessProps> = ({
-  namespace,
   resourceId,
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = ['namespaceAccessUsers', namespace];
+  const queryKey = 'namespaceAccessUsers';
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
@@ -90,20 +88,29 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     const username = form.get('username') as string;
     const scopes = form.getAll('scopes') as string[];
 
-    await grant.mutateAsync({
-      prodEnvId,
-      data: {
-        resourceId,
-        username,
-        scopes,
-      },
-    });
-    toast({
-      title: 'Access granted',
-      status: 'success',
-      isClosable: true,
-    });
-    client.invalidateQueries(queryKey);
+    try {
+      await grant.mutateAsync({
+        prodEnvId,
+        data: {
+          resourceId,
+          username,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access granted',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Unable to grant user access',
+        description: err,
+        isClosable: true,
+      });
+    }
   };
   const accessRequestDialogProps = {
     data: resourceScopes,

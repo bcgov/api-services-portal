@@ -21,19 +21,17 @@ import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 
 interface ServiceAccountsAccessProps {
-  namespace: string;
   resourceScopes: UmaScope[];
   resourceId: string;
   prodEnvId: string;
 }
 
 const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
-  namespace,
   resourceId,
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = ['namespaceAccessServiceAccounts', namespace];
+  const queryKey = 'namespaceAccessServiceAccounts';
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
   const toast = useToast();
@@ -75,20 +73,29 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     const name = form.get('username') as string;
     const scopes = form.getAll('scopes') as string[];
 
-    await grant.mutateAsync({
-      prodEnvId,
-      resourceId,
-      data: {
-        name,
-        scopes,
-      },
-    });
-    toast({
-      title: 'Access granted',
-      status: 'success',
-      isClosable: true,
-    });
-    client.invalidateQueries(queryKey);
+    try {
+      await grant.mutateAsync({
+        prodEnvId,
+        resourceId,
+        data: {
+          name,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access granted',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        isClosable: true,
+        status: 'error',
+        title: 'Unable to grant access',
+        description: err,
+      });
+    }
   };
 
   const accessRequestDialogProps = {
@@ -192,7 +199,7 @@ const query = gql`
 const mutation = gql`
   mutation GrantSAAccess(
     $prodEnvId: ID!
-    $resourceId: ID!
+    $resourceId: String!
     $data: UMAPolicyInput!
   ) {
     createUmaPolicy(
