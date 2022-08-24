@@ -8432,6 +8432,7 @@ export type MutationCreateUsersArgs = {
 };
 
 
+
 export type MutationUpdateUserArgs = {
   id: Scalars['ID'];
   data?: Maybe<UserUpdateInput>;
@@ -8513,6 +8514,7 @@ export type MutationUpdateConsumerRoleAssignmentArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['String'];
   roleName: Scalars['String'];
+
   grant: Scalars['Boolean'];
 };
 
