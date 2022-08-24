@@ -54,7 +54,7 @@ export default class ConsumersPage {
     // cy.contains('Add Controls').should('be.visible')
   }
 
-  saveConsumerNumber(){
+  saveConsumerNumber() {
     cy.get(this.allConsumerTable).find('a').last().then(($consumer: any) => {
       cy.saveState('consumernumber', $consumer.text())
     })
@@ -108,9 +108,9 @@ export default class ConsumersPage {
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).click()
       }
     });
-   
+
   }
-  
+
   deleteRateLimitControl() {
     cy.get("body").then($body => {
       if ($body.find(this.removeRateLimitControlButton).length > 0) {
@@ -119,6 +119,7 @@ export default class ConsumersPage {
       }
     });
   }
+
   clearIPRestrictionControl() {
     this.editConsumerDialog()
     // cy.wait(1000)
@@ -129,20 +130,25 @@ export default class ConsumersPage {
 
   clearRateLimitControl() {
     this.editConsumerDialog()
-    // cy.wait(1000)
     this.clickOnRateLimitingOption()
     cy.get(this.consumerDialogSaveBtn).click()
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-    // cy.wait(1000)
   }
 
   approvePendingRequest() {
     cy.get(this.approveBtn).click({ force: true })
   }
 
-  reviewThePendingRequest() {
+  reviewThePendingRequest() : Boolean{
     cy.wait(3000)
-    cy.get(this.reviewBtn).click({ force: true })
+    var flag = false;
+    cy.get("body").then($body => {
+      if ($body.find(this.reviewBtn).length > 0) {
+        cy.get(this.reviewBtn).click({ force: true })
+        flag = true
+      }
+    })
+    return flag
   }
 
   isApproveAccessEnabled(expStatus: boolean) {
