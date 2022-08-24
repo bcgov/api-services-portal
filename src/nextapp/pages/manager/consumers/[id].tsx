@@ -137,6 +137,7 @@ const ConsumerPage: React.FC<
     return <></>;
   }
 
+
   return (
     <>
       <Head>
