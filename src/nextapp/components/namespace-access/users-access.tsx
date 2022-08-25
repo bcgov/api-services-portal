@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Box,
   Heading,
+  MenuItem,
   Td,
   Text,
   Tr,
@@ -20,10 +21,12 @@ import Table from '@/components/table';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
+import { uid } from 'react-uid';
+import ActionsMenu from '../actions-menu';
 
 type AccessItem = {
   requesterName: string;
-  scopes: string[];
+  scopes: { id: string; name: string }[];
 };
 interface UsersAccessProps {
   resourceScopes: UmaScope[];
@@ -40,6 +43,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
+  const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
   const { data, isLoading, isSuccess } = useApi(
     queryKey,
@@ -73,7 +77,10 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       const result = Object.keys(groupedByRequester).map((r) => {
         return {
           requesterName: r,
-          scopes: groupedByRequester[r].map((d) => d.scopeName),
+          scopes: groupedByRequester[r].map((d) => ({
+            id: d.scope,
+            name: d.scopeName,
+          })),
         };
       });
       if (search) {
@@ -109,6 +116,28 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         title: 'Unable to grant user access',
         description: err,
         isClosable: true,
+      });
+    }
+  };
+  const handleRevokeAccess = (d: AccessItem) => async () => {
+    try {
+      await revoke.mutateAsync({
+        prodEnvId,
+        resourceId,
+        tickets: d.scopes.map((s) => s.id),
+      });
+      toast({
+        title: 'Access revoked',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        isClosable: true,
+        status: 'error',
+        title: 'Unable to revoke access',
+        description: err,
       });
     }
   };
@@ -175,18 +204,31 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         data={requests}
       >
         {(d: AccessItem, index) => (
-          <Tr key={index} data-testid={`nsa-users-table-row-${index}`}>
+          <Tr key={uid(d)} data-testid={`nsa-users-table-row-${index}`}>
             <Td>{d.requesterName}</Td>
             <Td>
               <Wrap>
-                {d.scopes.map((t) => (
-                  <WrapItem key={t}>
-                    <Tag variant="outline">{t}</Tag>
+                {d.scopes.map((s) => (
+                  <WrapItem key={uid(s)}>
+                    <Tag variant="outline">{s.name}</Tag>
                   </WrapItem>
                 ))}
               </Wrap>
             </Td>
-            <Td textAlign="right"></Td>
+            <Td textAlign="right">
+              <ActionsMenu
+                placement="bottom-end"
+                data-testid={`nsa-users-table-row-${index}-menu`}
+              >
+                <MenuItem
+                  color="bc-error"
+                  onClick={handleRevokeAccess(d)}
+                  data-testid={`nsa-users-table-row-${index}-revoke-btn`}
+                >
+                  Revoke Access
+                </MenuItem>
+              </ActionsMenu>
+            </Td>
           </Tr>
         )}
       </Table>
@@ -249,5 +291,19 @@ const mutation = gql`
     grantPermissions(prodEnvId: $prodEnvId, data: $data) {
       id
     }
+  }
+`;
+
+const revokeMutation = gql`
+  mutation RevokeAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $tickets: [String]!
+  ) {
+    revokePermissions(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      ids: $tickets
+    )
   }
 `;

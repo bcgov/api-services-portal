@@ -29,6 +29,8 @@ import {
   getUserPermissionsHandler,
   grantAccessHandler,
   grantSAAccessHandler,
+  revokeAccessHandler,
+  revokeSAAccessHandler,
 } from './resolvers/namespace-access';
 
 // Namespaces
@@ -122,6 +124,8 @@ export const handlers = [
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
   keystone.mutation('GrantUserAccess', grantAccessHandler),
   keystone.mutation('GrantSAAccess', grantSAAccessHandler),
+  keystone.mutation('RevokeAccess', revokeAccessHandler),
+  keystone.mutation('RevokeSAAccess', revokeSAAccessHandler),
   // MUTATIONS
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),

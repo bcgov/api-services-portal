@@ -1,4 +1,4 @@
-const permissions = [
+let permissions = [
   {
     id: 'perm1',
     owner: 'o1',
@@ -19,7 +19,7 @@ const permissions = [
     requesterName: 'wolfeschlegelsteinhausen@idir',
     resource: 'r1',
     resourceName: 'aps-portal',
-    scope: 's1',
+    scope: 's2',
     scopeName: 'Content.Publish',
     granted: false,
   },
@@ -31,7 +31,7 @@ const permissions = [
     requesterName: 'wolfeschlegelsteinhausen@idir',
     resource: 'r1',
     resourceName: 'aps-portal',
-    scope: 's1',
+    scope: 's3',
     scopeName: 'GatewayConfig.Publish',
     granted: false,
   },
@@ -43,8 +43,8 @@ const permissions = [
     requesterName: 'wolfeschlegelsteinhausen@idir',
     resource: 'r1',
     resourceName: 'aps-portal',
-    scope: 's1',
-    scopeName: 'Namespace.Manage',
+    scope: 's5',
+    scopeName: 'Namespace.Rename',
     granted: false,
   },
   {
@@ -67,12 +67,12 @@ const permissions = [
     requesterName: 'elischen@idir',
     resource: 'r2',
     resourceName: 'aps-portal',
-    scope: 's1',
+    scope: 's4',
     scopeName: 'Namespace.Access',
     granted: false,
   },
 ];
-const umaPolicies = [
+let umaPolicies = [
   {
     id: 'uma1',
     name: 'sa-moh-proto-3io4u124u21oiu341',
@@ -92,7 +92,7 @@ const umaPolicies = [
     ],
   },
   {
-    id: 'uma1',
+    id: 'uma2',
     name: 'sa-moh-proto-ca153245-e53d468ec6a6',
     description: null,
     type: 'uma',
@@ -105,7 +105,7 @@ const umaPolicies = [
     scopes: ['Namespace.Manage'],
   },
   {
-    id: 'uma2',
+    id: 'uma3',
     name: 'sa-aps-portal',
     description: 'Service Acct asdf',
     type: 'uma',
@@ -333,4 +333,14 @@ export const grantSAAccessHandler = (req, res, ctx) => {
       id: 'a4',
     })
   );
+};
+
+export const revokeAccessHandler = (req, res, ctx) => {
+  const { tickets } = req.variables;
+  permissions = permissions.filter((p) => !tickets.includes(p.scope));
+  return res(ctx.data(true));
+};
+export const revokeSAAccessHandler = (req, res, ctx) => {
+  umaPolicies = umaPolicies.filter((u) => u.id !== req.variables.policyId);
+  return res(ctx.data(true));
 };

@@ -10,6 +10,7 @@ import {
   Wrap,
   WrapItem,
   useToast,
+  MenuItem,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
@@ -19,6 +20,7 @@ import Table from '@/components/table';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
+import ActionsMenu from '../actions-menu';
 
 interface ServiceAccountsAccessProps {
   resourceScopes: UmaScope[];
@@ -34,6 +36,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
   const queryKey = 'namespaceAccessServiceAccounts';
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
+  const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
   const [search, setSearch] = React.useState('');
   const { data, isSuccess, isLoading } = useApi(
@@ -93,6 +96,28 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         isClosable: true,
         status: 'error',
         title: 'Unable to grant access',
+        description: err,
+      });
+    }
+  };
+  const handleRevokeAccess = (policyId: string) => async () => {
+    try {
+      await revoke.mutateAsync({
+        prodEnvId,
+        resourceId,
+        policyId,
+      });
+      toast({
+        title: 'Access revoked',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        isClosable: true,
+        status: 'error',
+        title: 'Unable to revoke access',
         description: err,
       });
     }
@@ -157,7 +182,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         data={requests}
       >
         {(d: UmaPolicy, index) => (
-          <Tr key={index} data-testid={`nsa-users-table-row-${index}`}>
+          <Tr key={index} data-testid={`nsa-sa-table-row-${index}`}>
             <Td>{d.name}</Td>
             <Td>
               <Wrap>
@@ -168,7 +193,20 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
                 ))}
               </Wrap>
             </Td>
-            <Td textAlign="right"></Td>
+            <Td textAlign="right">
+              <ActionsMenu
+                placement="bottom-end"
+                data-testid={`nsa-sa-table-row-${index}-menu`}
+              >
+                <MenuItem
+                  color="bc-error"
+                  onClick={handleRevokeAccess(d.id)}
+                  data-testid={`nsa-sa-table-row-${index}-revoke-btn`}
+                >
+                  Revoke Access
+                </MenuItem>
+              </ActionsMenu>
+            </Td>
           </Tr>
         )}
       </Table>
@@ -209,5 +247,19 @@ const mutation = gql`
     ) {
       id
     }
+  }
+`;
+
+const revokeMutation = gql`
+  mutation RevokeSAAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $policyId: String!
+  ) {
+    deleteUmaPolicy(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      policyId: $policyId
+    )
   }
 `;
