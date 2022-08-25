@@ -171,6 +171,7 @@ class Products {
   getKongPluginConfig() {
     cy.get('.language-yaml').then(($el) => {
       this.config = $el.text()
+      cy.wait(1000)
     })
   }
 }
