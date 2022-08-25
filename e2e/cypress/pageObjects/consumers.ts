@@ -64,8 +64,8 @@ export default class ConsumersPage {
     this.editConsumerDialog()
     // cy.wait(1000)
     this.clickOnRateLimitingOption()
-    cy.wait(1000)
-    cy.get(this.rateLimitHourInput, { timeout: 2000 }).click()
+    cy.wait(3000)
+    cy.get(this.rateLimitHourInput, { timeout: 5000 }).click()
     cy.get(this.rateLimitHourInput, { timeout: 2000 }).type(requestCount)
     if (scope.toLocaleLowerCase() !== 'service') {
       cy.get(this.rateLimitRouteRadioBtn).click()
