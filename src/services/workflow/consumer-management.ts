@@ -73,7 +73,7 @@ import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
 import { doFiltering } from './consumer-filters';
-import { getConsumerAuthz } from '.';
+import { getConsumerAuthz, StructuredActivityService } from '.';
 import {
   Environment,
   GatewayConsumer,
@@ -460,6 +460,12 @@ export async function grantAccessToConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
+  new StructuredActivityService(
+    context,
+    ns,
+    context.authedItem
+  ).grantRevokeConsumerAccess(true, true, prodEnv, consumer);
+
   if (plugins) {
     await syncPlugins(context, ns, consumer, plugins);
   }
@@ -515,6 +521,12 @@ export async function revokeAccessFromConsumer(
 
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
+
+  new StructuredActivityService(
+    context,
+    ns,
+    context.authedItem
+  ).grantRevokeConsumerAccess(false, true, prodEnv, consumer);
 
   await syncPlugins(context, ns, consumer, []);
 }
@@ -736,6 +748,12 @@ export async function revokeAllConsumerAccess(
 
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
   await deleteServiceAccess(context, serviceAccessId);
+
+  new StructuredActivityService(
+    context,
+    ns,
+    context.authedItem
+  ).revokeAllConsumerAccess(true, consumer);
 }
 
 /**

@@ -216,6 +216,7 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
                             reference
                         }
                         product {
+                            name
                             namespace
                         }
                         credentialIssuer {

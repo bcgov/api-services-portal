@@ -43,3 +43,8 @@ export {
 } from './get-namespaces';
 
 export { getConsumerAuthz } from './get-consumer-authz';
+
+export {
+  getFilteredNamespaceActivity,
+  StructuredActivityService,
+} from './namespace-activity';

@@ -5,6 +5,7 @@ import {
   Environment,
   GatewayConsumer,
   GatewayPlugin,
+  Scalars,
   User,
 } from '../keystone/types';
 import { strict as assert } from 'assert';
@@ -174,4 +175,18 @@ export interface ConsumerFullPluginDetails {
   config: string;
   service?: KeystoneItemID;
   route?: KeystoneItemID;
+}
+
+export interface ActivityQueryFilter {
+  users: string[];
+  serviceAccounts: string[];
+  activityDate?: string;
+}
+
+export interface ActivitySummary {
+  id: string;
+  message: string;
+  params: { [key: string]: string };
+  activityAt: Scalars['DateTime'];
+  blob?: any;
 }

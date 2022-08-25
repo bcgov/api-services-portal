@@ -6333,6 +6333,21 @@ export type UserContact = {
   email: Scalars['String'];
 };
 
+export type ActivityQueryFilterInput = {
+  users?: Maybe<Array<Maybe<Scalars['String']>>>;
+  serviceAccounts?: Maybe<Array<Maybe<Scalars['String']>>>;
+  activityDate?: Maybe<Scalars['String']>;
+};
+
+export type ActivitySummary = {
+  __typename?: 'ActivitySummary';
+  id: Scalars['String'];
+  message: Scalars['String'];
+  params: Scalars['JSON'];
+  activityAt: Scalars['String'];
+  blob?: Maybe<Blob>;
+};
+
 export type ServiceAccount = {
   __typename?: 'ServiceAccount';
   id: Scalars['String'];
@@ -6642,6 +6657,7 @@ export type Query = {
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   namespace?: Maybe<Namespace>;
   usersByNamespace?: Maybe<Array<Maybe<UserContact>>>;
+  getFilteredNamespaceActivity?: Maybe<Array<Maybe<ActivitySummary>>>;
   getOrgPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   getUmaPoliciesForResource?: Maybe<Array<Maybe<UmaPolicy>>>;
   allResourceSets?: Maybe<Array<Maybe<UmaResourceSet>>>;
@@ -7398,6 +7414,13 @@ export type QueryNamespaceArgs = {
 export type QueryUsersByNamespaceArgs = {
   namespace: Scalars['String'];
   scopeName?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetFilteredNamespaceActivityArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  filter?: Maybe<ActivityQueryFilterInput>;
 };
 
 
@@ -8432,7 +8455,6 @@ export type MutationCreateUsersArgs = {
 };
 
 
-
 export type MutationUpdateUserArgs = {
   id: Scalars['ID'];
   data?: Maybe<UserUpdateInput>;
@@ -8514,7 +8536,6 @@ export type MutationUpdateConsumerRoleAssignmentArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['String'];
   roleName: Scalars['String'];
-
   grant: Scalars['Boolean'];
 };
 

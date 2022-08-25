@@ -5,6 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 const logger = Logger('keystone.activity');
 
+export interface TokenizedActivity {
+  message: string;
+  params: { [key: string]: string };
+}
+
 export async function recordActivityWithBlob(
   context: any,
   action: string,
@@ -144,12 +149,13 @@ export async function getActivity(
   namespaces: string[],
   first: number = 10,
   skip: number = 0
-): Promise<any[]> {
+): Promise<Activity[]> {
   logger.debug('[getActivity] %d / %d', first, skip);
 
   const activities = await context.executeGraphQL({
     query: `query NamespaceActivities($namespaces: [String]!, $first: Int, $skip: Int) {
               allActivities(where: { namespace_in: $namespaces }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+                id
                 type
                 name
                 namespace
