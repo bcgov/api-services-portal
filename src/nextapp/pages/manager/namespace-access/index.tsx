@@ -2,7 +2,9 @@ import * as React from 'react';
 import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import {
+  Center,
   Container,
+  Spinner,
   Tab,
   TabList,
   TabPanel,
@@ -34,7 +36,7 @@ const AccessRedirectPage: React.FC = () => {
       enabled: Boolean(user?.namespace),
     }
   );
-  const { data, isLoading } = useApi(
+  const { data, isLoading, isSuccess } = useApi(
     'resourcesSet',
     {
       query,
@@ -50,6 +52,7 @@ const AccessRedirectPage: React.FC = () => {
     prodEnvId: namespaceDetails.data?.currentNamespace?.prodEnvId,
   } as const;
   const resourceScopes = data?.getResourceSet.resource_scopes;
+  const isLoadingDetails = isLoading || namespaceDetails.isLoading;
 
   return (
     <>
@@ -62,34 +65,41 @@ const AccessRedirectPage: React.FC = () => {
         </PageHeader>
         <Tabs>
           <TabList>
-            <Tab isDisabled={isLoading} data-testid="nsa-tab-users">
+            <Tab isDisabled={isLoadingDetails} data-testid="nsa-tab-users">
               Users with access
             </Tab>
-            <Tab isDisabled={isLoading} data-testid="nsa-tab-sa">
+            <Tab isDisabled={isLoadingDetails} data-testid="nsa-tab-sa">
               Service accounts with access
             </Tab>
-            <Tab isDisabled={isLoading} data-testid="nsa-tab-og">
+            <Tab isDisabled={isLoadingDetails} data-testid="nsa-tab-og">
               Organization groups with access
             </Tab>
           </TabList>
-          <TabPanels>
-            <TabPanel bgColor="white" px={0} pb={0}>
-              <UsersAccess
-                {...namespaceProps}
-                resourceScopes={resourceScopes}
-              />
-            </TabPanel>
-            <TabPanel bgColor="white" px={0} pb={0}>
-              <ServiceAccountsAccess
-                {...namespaceProps}
-                resourceScopes={resourceScopes}
-              />
-            </TabPanel>
-            <TabPanel bgColor="white" px={0} pb={0}>
-              <OrganizationGroupsAccess {...namespaceProps} />
-            </TabPanel>
-          </TabPanels>
+          {namespaceDetails.isSuccess && isSuccess && (
+            <TabPanels>
+              <TabPanel bgColor="white" px={0} pb={0}>
+                <UsersAccess
+                  {...namespaceProps}
+                  resourceScopes={resourceScopes}
+                />
+              </TabPanel>
+              <TabPanel bgColor="white" px={0} pb={0}>
+                <ServiceAccountsAccess
+                  {...namespaceProps}
+                  resourceScopes={resourceScopes}
+                />
+              </TabPanel>
+              <TabPanel bgColor="white" px={0} pb={0}>
+                <OrganizationGroupsAccess {...namespaceProps} />
+              </TabPanel>
+            </TabPanels>
+          )}
         </Tabs>
+        {isLoadingDetails && (
+          <Center bgColor="white" minH="200px">
+            <Spinner />
+          </Center>
+        )}
       </Container>
     </>
   );

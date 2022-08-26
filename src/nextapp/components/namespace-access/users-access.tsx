@@ -70,10 +70,10 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
 
   const requests: AccessItem[] = React.useMemo(() => {
     if (isSuccess) {
-      const notGrantedItems = data?.getPermissionTicketsForResource.filter(
-        (d) => !d.granted
+      const groupedByRequester = groupBy(
+        data?.getPermissionTicketsForResource,
+        'requesterName'
       );
-      const groupedByRequester = groupBy(notGrantedItems, 'requesterName');
       const result = Object.keys(groupedByRequester).map((r) => {
         return {
           requesterName: r,

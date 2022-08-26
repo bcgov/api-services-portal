@@ -9,7 +9,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's1',
     scopeName: 'Namespace.Manage',
-    granted: false,
+    granted: true,
   },
   {
     id: 'perm1-a',
@@ -21,7 +21,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's2',
     scopeName: 'Content.Publish',
-    granted: false,
+    granted: true,
   },
   {
     id: 'perm1-b',
@@ -33,7 +33,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's3',
     scopeName: 'GatewayConfig.Publish',
-    granted: false,
+    granted: true,
   },
   {
     id: 'perm1-c',
@@ -45,7 +45,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's5',
     scopeName: 'Namespace.Rename',
-    granted: false,
+    granted: true,
   },
   {
     id: 'perm1-d',
@@ -57,7 +57,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's1',
     scopeName: 'Namespace.View',
-    granted: false,
+    granted: true,
   },
   {
     id: 'perm2',
@@ -69,7 +69,7 @@ let permissions = [
     resourceName: 'aps-portal',
     scope: 's4',
     scopeName: 'Namespace.Access',
-    granted: false,
+    granted: true,
   },
 ];
 let umaPolicies = [
@@ -121,6 +121,7 @@ let umaPolicies = [
 
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   return res(
+    ctx.delay(4500),
     ctx.data({
       currentNamespace: {
         id: 'ns1',
@@ -224,6 +225,7 @@ export const getOrganizationGroupsPermissionsHandler = (_, res, ctx) => {
 
 export const getResourceSetHandler = (_, res, ctx) => {
   return res(
+    ctx.delay(4000),
     ctx.data({
       getResourceSet: {
         id: 'r1',
