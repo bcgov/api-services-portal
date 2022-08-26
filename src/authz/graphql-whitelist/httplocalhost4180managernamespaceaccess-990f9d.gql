@@ -1,7 +1,7 @@
 
   mutation RevokeSAAccess(
     $prodEnvId: ID!
-    $resourceId: ID!
+    $resourceId: String!
     $policyId: String!
   ) {
     deleteUmaPolicy(
