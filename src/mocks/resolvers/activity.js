@@ -2,6 +2,7 @@ export const getActivityHandler = (req, res, ctx) => {
   const { first, skip } = req.variables;
 
   return res(
+    ctx.delay(3000),
     ctx.data({
       getFilteredNamespaceActivity: [
         {
@@ -45,14 +46,14 @@ export const getActivityHandler = (req, res, ctx) => {
           id: 'a4',
           message: '',
           params: {},
-          activityAt: '2022-08-25T06:04:15.498Z',
+          activityAt: '2022-08-24T06:04:15.498Z',
           blob: null,
         },
         {
           id: 'a5',
           message: 'requested access',
           params: {},
-          activityAt: '2022-08-25T06:04:09.896Z',
+          activityAt: '2022-08-23T06:04:09.896Z',
           blob: null,
         },
       ],
