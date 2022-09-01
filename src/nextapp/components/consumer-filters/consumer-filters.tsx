@@ -96,7 +96,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
           ))}
       </Select>
       {value === 'labels' && (
-        <Input isRequired placeholder="Label Value" name="labelValue" data-testid="consumer-filters-label-input"/>
+        <Input
+          isRequired
+          placeholder="Label Value"
+          name="labelValue"
+          data-testid="consumer-filters-label-input"
+        />
       )}
     </Grid>
   );

@@ -5,16 +5,15 @@ import {
   Container,
   Flex,
   Heading,
-  Select,
   Skeleton,
   SkeletonCircle,
-  SkeletonText,
   Text,
   VStack,
 } from '@chakra-ui/react';
 import format from 'date-fns/format';
 import groupBy from 'lodash/groupBy';
 import Head from 'next/head';
+import last from 'lodash/last';
 import PageHeader from '@/components/page-header';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { gql } from 'graphql-request';
@@ -23,6 +22,7 @@ import { uid } from 'react-uid';
 import template from 'lodash/template';
 import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
+import ActivityFilters from '@/components/activity-filters';
 
 interface ActivitySortDate extends ActivitySummary {
   sortDate: string;
@@ -53,9 +53,28 @@ const ActivityPage: React.FC = () => {
     },
     'activity'
   );
+  const filterKey = React.useMemo(() => JSON.stringify(state), [state]);
+  const filter = React.useMemo(() => {
+    const result = {};
+    Object.keys(state).forEach((k) => {
+      if (k === 'activityDate') {
+        const lastActivity = last(state.activityDate);
+        if (lastActivity) {
+          result[k] = lastActivity.value;
+        }
+      } else {
+        if (Array.isArray(state[k])) {
+          result[k] = state[k].map((v: { value: string }) => v.value);
+        } else {
+          result[k] = state[k];
+        }
+      }
+    });
+    return result;
+  }, [state]);
   const { data, isLoading, isSuccess } = useApi(
-    'activityFeed',
-    { query, variables: { first: 50, skip: 0 } },
+    ['activityFeed', filterKey],
+    { query, variables: { filter, first: 50, skip: 0 } },
     {
       suspense: false,
     }
@@ -87,9 +106,7 @@ const ActivityPage: React.FC = () => {
             onClearFilters={clearFilters}
             onRemoveFilter={removeFilter}
           >
-            <Box>
-              <Select isDisabled placeholder="TBD"></Select>
-            </Box>
+            <ActivityFilters />
           </Filters>
         </PageHeader>
         <Box bgColor="white" mb={4} p={7} pb={2}>
@@ -148,9 +165,9 @@ const ActivityPage: React.FC = () => {
 export default ActivityPage;
 
 const filterTypeOptions = [
-  { name: 'User', value: 'products' },
-  { name: 'Service Account', value: 'environments' },
-  { name: 'Date', value: 'labels' },
+  { name: 'User', value: 'users' },
+  { name: 'Service Account', value: 'serviceAccounts' },
+  { name: 'Date', value: 'activityDate' },
 ];
 
 const query = gql`

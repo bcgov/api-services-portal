@@ -42,6 +42,7 @@ const useFilters = <FilterState>(
         case 'addFilter':
           return update(() => {
             if (
+              Array.isArray(state[action.filterType]) &&
               state[action.filterType].find((f) => {
                 if (typeof action.payload !== 'string') {
                   return f.value === action.payload?.value;
