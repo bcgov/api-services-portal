@@ -3,9 +3,11 @@ import {
   Avatar,
   Box,
   Button,
+  Center,
   Container,
   Flex,
   Heading,
+  Icon,
   Skeleton,
   SkeletonCircle,
   Text,
@@ -24,6 +26,7 @@ import template from 'lodash/template';
 import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
+import { FaTimesCircle } from 'react-icons/fa';
 
 interface PageState {
   first: number;
@@ -83,7 +86,7 @@ const ActivityPage: React.FC = () => {
     first: 0,
     skip: PER_PAGE,
   });
-  const { data, isLoading, isSuccess } = useApi(
+  const { data, isError, isLoading, isSuccess } = useApi(
     ['activityFeed', filterKey, first, skip],
     { query, variables: { filter, first, skip } },
     {
@@ -146,6 +149,25 @@ const ActivityPage: React.FC = () => {
                 </VStack>
               </Flex>
             ))}
+          {isError && (
+            <Center>
+              <Flex
+                my={7}
+                border="1px solid"
+                borderColor="bc-error"
+                borderRadius={4}
+                backgroundColor="#D8292F1A"
+                py={2}
+                px={4}
+                align="center"
+              >
+                <Icon as={FaTimesCircle} color="bc-error" mr={2} />
+                <Text>
+                  There was an error loading your namespace&apos;s activity
+                </Text>
+              </Flex>
+            </Center>
+          )}
           {Object.keys(feed).map((date) => {
             return (
               <Box key={uid(date)}>
