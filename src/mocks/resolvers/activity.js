@@ -1,62 +1,54 @@
+import subDays from 'date-fns/subDays';
+import sample from 'lodash/sample';
+import times from 'lodash/times';
+
+const actors = ['Aidan Cope', 'Justin Tendeck', 'Niraj Patel', 'Joshua Jones'];
+const actions = ['approved access', 'failed', 'edited', 'revoked', 'granted'];
+const consumers = ['7AFFF375-E0ECE4972BC'];
+const envs = ['conformance', 'dev', 'staging', 'production', 'sandbox', 'test'];
+const products = ['PharmaNet Electronic Prescribing', 'eRX Demo API'];
+
+const today = new Date();
+let dateOffset = 0;
+
 export const getActivityHandler = (req, res, ctx) => {
   const { first, skip } = req.variables;
+  const result = [];
+  const count = skip || 50;
+
+  times(count, (n) => {
+    const actor = sample(actors);
+    const action = sample(actions);
+    const consumer = sample(consumers);
+    const env = sample(envs);
+    const product = sample(products);
+    const activityAt = subDays(today, dateOffset).toLocaleDateString();
+
+    if (n % 4 === 0) {
+      dateOffset = dateOffset + n;
+    }
+
+    result.push({
+      id: `a${n * count}`,
+      message:
+        '{actor} <strong>{action}</strong> {entity} to {product} {env} from {consumer}',
+      params: {
+        actor,
+        action,
+        entity: 'access',
+        product,
+        env,
+        consumer,
+      },
+      activityAt,
+      blob: null,
+    });
+  });
 
   return res(
     ctx.delay(3000),
     ctx.data({
-      getFilteredNamespaceActivity: [
-        {
-          id: 'a1',
-          message:
-            '{actor} <strong>{action}</strong> {entity} to {product} {env} from {consumer}',
-          params: {
-            actor: 'Aidan Cope',
-            action: 'revoked',
-            entity: 'access',
-            product: 'refactortime API',
-            env: 'test',
-            consumer: '7AFFF375-E0ECE4972BC',
-          },
-          activityAt: '2022-08-25T06:05:05.596Z',
-          blob: null,
-        },
-        {
-          id: 'a2',
-          message:
-            '{actor} <strong>{action}</strong> {consumer} {entity} to {product} {env}',
-          params: {
-            actor: 'Aidan Cope',
-            action: 'granted',
-            entity: 'access',
-            product: 'refactortime API',
-            env: 'test',
-            consumer: '7AFFF375-E0ECE4972BC',
-          },
-          activityAt: '2022-08-25T06:05:00.299Z',
-          blob: null,
-        },
-        {
-          id: 'a3',
-          message: 'received credentials',
-          params: {},
-          activityAt: '2022-08-25T06:04:16.903Z',
-          blob: null,
-        },
-        {
-          id: 'a4',
-          message: '',
-          params: {},
-          activityAt: '2022-08-24T06:04:15.498Z',
-          blob: null,
-        },
-        {
-          id: 'a5',
-          message: 'requested access',
-          params: {},
-          activityAt: '2022-08-23T06:04:09.896Z',
-          blob: null,
-        },
-      ],
+      getFilteredNamespaceActivity: result,
     })
   );
 };

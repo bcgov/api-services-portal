@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Avatar,
   Box,
+  Button,
   Container,
   Flex,
   Heading,
@@ -24,6 +25,10 @@ import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 
+interface PageState {
+  first: number;
+  skip: number;
+}
 interface ActivitySortDate extends ActivitySummary {
   sortDate: string;
 }
@@ -33,6 +38,8 @@ interface FilterState {
   serviceAccounts: Record<string, string>[];
   activityDate: Record<string, string>[];
 }
+
+const PER_PAGE = 50;
 
 const ActivityPage: React.FC = () => {
   const breadcrumbs = useNamespaceBreadcrumbs([
@@ -72,9 +79,13 @@ const ActivityPage: React.FC = () => {
     });
     return result;
   }, [state]);
+  const [{ first, skip }, setPage] = React.useState<PageState>({
+    first: 0,
+    skip: PER_PAGE,
+  });
   const { data, isLoading, isSuccess } = useApi(
-    ['activityFeed', filterKey],
-    { query, variables: { filter, first: 50, skip: 0 } },
+    ['activityFeed', filterKey, first, skip],
+    { query, variables: { filter, first, skip } },
     {
       suspense: false,
     }
@@ -91,6 +102,21 @@ const ActivityPage: React.FC = () => {
     }
     return result;
   }, [data, isSuccess]);
+
+  const handlePreviousPageClick = () => {
+    setPage((state) => ({
+      ...state,
+      first: Math.max(0, state.first - PER_PAGE),
+      skip: Math.max(0, state.skip - PER_PAGE),
+    }));
+  };
+  const handleNextPageClick = () => {
+    setPage((state) => ({
+      ...state,
+      first: state.first + PER_PAGE,
+      skip: state.skip + PER_PAGE,
+    }));
+  };
 
   return (
     <>
@@ -157,6 +183,24 @@ const ActivityPage: React.FC = () => {
             );
           })}
         </Box>
+        <Flex mt={4} justify="space-between" data-testid="activity-pagination">
+          <Button
+            isDisabled={first === 0 || isLoading}
+            variant="secondary"
+            onClick={handlePreviousPageClick}
+          >
+            Previous Page
+          </Button>
+          <Button
+            disabled={
+              data?.getFilteredNamespaceActivity.length < PER_PAGE || isLoading
+            }
+            variant="secondary"
+            onClick={handleNextPageClick}
+          >
+            Next Page
+          </Button>
+        </Flex>
       </Container>
     </>
   );

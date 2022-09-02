@@ -1,6 +1,9 @@
 import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   useMutation,
   UseMutationOptions,
   UseMutationResult,
@@ -103,6 +106,18 @@ export const useApi = (
   queryOptions: UseQueryOptions = { suspense: true }
 ): UseQueryResult<Query> => {
   return useQuery<Query>(
+    key,
+    async () => await api<Query>(query.query, query.variables, { ssr: false }),
+    queryOptions
+  );
+};
+
+export const useInfiniteApi = (
+  key: QueryKey,
+  query: UseApiOptions,
+  queryOptions: UseInfiniteQueryOptions = { suspense: true }
+): UseInfiniteQueryResult<Query> => {
+  return useInfiniteQuery<Query>(
     key,
     async () => await api<Query>(query.query, query.variables, { ssr: false }),
     queryOptions
