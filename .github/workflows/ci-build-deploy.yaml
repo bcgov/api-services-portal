@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [feature/*, test]
+    branches: [feature/*, dev, test]
 
 env:
   REGISTRY: ghcr.io
@@ -83,11 +83,13 @@ jobs:
         run: docker push ${{ steps.docker_meta.outputs.tags }}
 
       - name: 'Get Helm'
+        if: github.ref != 'refs/heads/dev'
         run: |
           curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
           tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
       - name: 'Deploy Database'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -135,6 +137,7 @@ jobs:
           helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 10.31.5 -f values.yaml bitnami/mongodb
 
       - name: 'Deploy Backend'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -288,6 +291,7 @@ jobs:
           helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
 
       - name: 'Deploy Routes'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -304,6 +308,7 @@ jobs:
           helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
 
       - name: 'Seed Data'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
