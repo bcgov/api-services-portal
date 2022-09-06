@@ -45,7 +45,7 @@ const typeUserContact = `
     id: ID!
     name: String!
     username: String!
-    email: String!
+    email: String
   }`;
 
 const typeNamespace = `
