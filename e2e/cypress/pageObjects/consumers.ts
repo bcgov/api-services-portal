@@ -1,6 +1,7 @@
 import { Assertion } from "chai"
 import { wrap } from "module"
 import dateformat from 'dateformat'
+import { checkElementExists } from "../support"
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
@@ -36,6 +37,7 @@ export default class ConsumersPage {
   rateLimitingApplyBtn: string = '[data-testid="ratelimit-submit-btn"]'
   removeRateLimitControlButton: string = '[data-testid="ratelimit-item-delete-btn-0"]'
   rateLimitRouteRadioBtn: string = '[data-testid="ratelimit-route-radio"]'
+  consumerDialogCancelBtn: string = '[data-testid="edit-consumer-dialog-edit-cancel-btn"]'
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
@@ -54,7 +56,7 @@ export default class ConsumersPage {
     // cy.contains('Add Controls').should('be.visible')
   }
 
-  saveConsumerNumber(){
+  saveConsumerNumber() {
     cy.get(this.allConsumerTable).find('a').last().then(($consumer: any) => {
       cy.saveState('consumernumber', $consumer.text())
     })
@@ -62,10 +64,17 @@ export default class ConsumersPage {
 
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
     this.editConsumerDialog()
+    cy.wait(2000)
+    if (!checkElementExists(this.rateLimitingOption)){
+      cy.get(this.consumerDialogCancelBtn).click()
+      this.editConsumerDialog()
+    }
     // cy.wait(1000)
     this.clickOnRateLimitingOption()
-    cy.wait(1000)
-    cy.get(this.rateLimitHourInput, { timeout: 2000 }).click()
+    cy.wait(3000)
+   
+
+    cy.get(this.rateLimitHourInput, { timeout: 5000 }).click()
     cy.get(this.rateLimitHourInput, { timeout: 2000 }).type(requestCount)
     if (scope.toLocaleLowerCase() !== 'service') {
       cy.get(this.rateLimitRouteRadioBtn).click()
@@ -108,9 +117,9 @@ export default class ConsumersPage {
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).click()
       }
     });
-   
+
   }
-  
+
   deleteRateLimitControl() {
     cy.get("body").then($body => {
       if ($body.find(this.removeRateLimitControlButton).length > 0) {
@@ -119,6 +128,7 @@ export default class ConsumersPage {
       }
     });
   }
+
   clearIPRestrictionControl() {
     this.editConsumerDialog()
     // cy.wait(1000)
@@ -129,20 +139,25 @@ export default class ConsumersPage {
 
   clearRateLimitControl() {
     this.editConsumerDialog()
-    // cy.wait(1000)
     this.clickOnRateLimitingOption()
     cy.get(this.consumerDialogSaveBtn).click()
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-    // cy.wait(1000)
   }
 
   approvePendingRequest() {
     cy.get(this.approveBtn).click({ force: true })
   }
 
-  reviewThePendingRequest() {
+  reviewThePendingRequest() : Boolean{
     cy.wait(3000)
-    cy.get(this.reviewBtn).click({ force: true })
+    var flag = false;
+    cy.get("body").then($body => {
+      if ($body.find(this.reviewBtn).length > 0) {
+        cy.get(this.reviewBtn).click({ force: true })
+        flag = true
+      }
+    })
+    return flag
   }
 
   isApproveAccessEnabled(expStatus: boolean) {
@@ -169,9 +184,9 @@ export default class ConsumersPage {
   }
 
   editConsumerDialog() {
-    cy.get(this.editProductBtn).then($button => {
+    cy.get('[data-testid="product-list-table"]').then($button => {
       if ($button.is(':visible')) {
-        cy.get(this.editProductBtn).contains("Edit").click()
+        cy.contains('Edit').first().click()
       }
     })
   }

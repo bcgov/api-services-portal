@@ -3,7 +3,7 @@ import ApplicationPage from '../../pageObjects/applications'
 import LoginPage from '../../pageObjects/login'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-describe('Request Access Spec', () => {
+describe('Collect credential Spec', () => {
   const login = new LoginPage()
   const apiDir = new ApiDirectoryPage()
   const app = new ApplicationPage()
@@ -18,7 +18,6 @@ describe('Request Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
-    cy.visit(login.path)
   })
 
   it('authenticates Harley (developer)', () => {
@@ -27,21 +26,21 @@ describe('Request Access Spec', () => {
     })
   })
 
-  it('creates an application', () => {
-    cy.visit(app.path)
-    cy.get('@developer').then(({ application }: any) => {
-      app.createApplication(application)
+  it('Navigate to my Access Page', () => {
+    cy.visit(myAccessPage.path)
+  })
+
+  it('Verify that the request status is Pending Approval', () => {
+    cy.get('@developer').then(({ product, application }: any) => {
+      myAccessPage.checkRequestStatus(product.environment, application.name, 'Pending Approval')
     })
   })
 
-  it('creates an access request', () => {
-    cy.visit(apiDir.path)
-    cy.get('@developer').then(({ product, application,accessRequest }: any) => {
-      apiDir.createAccessRequest(product, application, accessRequest)
+  it('Collect the credentials', () => {
+      myAccessPage.clickOnCollectCredentialButton()
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
       myAccessPage.saveAPIKeyValue()
-    })
   })
 
   after(() => {

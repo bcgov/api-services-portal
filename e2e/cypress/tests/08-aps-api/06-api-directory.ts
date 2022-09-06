@@ -204,8 +204,8 @@ describe('API Tests for Updating dataset', () => {
     it('Get the namespace directory details (/namespaces/{ns}/directory/{id}) for non exist directory ID and verify the response code', () => {
         cy.get('@apiowner').then(({ namespace }: any) => {
             cy.get('@api').then(({ apiDirectory }: any) => {
-                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99' , 'GET').then((res) => {
-                    expect(res.status).to.be.oneOf([404,422])
+                cy.makeAPIRequest(apiDirectory.endPoint + '/' + namespace + '/directory' + '/99', 'GET').then((res) => {
+                    expect(res.status).to.be.oneOf([404, 422])
                 })
             })
         })
@@ -225,7 +225,6 @@ describe('API Tests for Updating dataset', () => {
         cy.get('@api').then(({ apiDirectory, organization }: any) => {
             cy.makeAPIRequest(apiDirectory.orgEndPoint + '/' + organization.orgName + '/datasets/', 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
-                debugger
                 response = res.body
                 expect(response).to.not.contain(apiDirectory.body.name)
             })

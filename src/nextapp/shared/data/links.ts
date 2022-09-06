@@ -4,7 +4,7 @@ import AccessRequestsBadge from '@/components/access-requests-badge';
 export interface NavLink {
   BadgeElement?: React.FC;
   name: string;
-  url: string;
+  url?: string;
   altUrls?: string[];
   sites: string[];
   access: string[];
@@ -50,6 +50,13 @@ const links: NavLink[] = [
   {
     name: 'Namespaces',
     url: '/manager/namespaces',
+    access: [
+      'portal-user'
+    ],
+    sites: ['devportal'],
+  },
+  {
+    name: 'Namespaces',
     altUrls: [
       '/manager/services',
       '/manager/services/[id]',

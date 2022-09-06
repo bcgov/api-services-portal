@@ -99,6 +99,17 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
+
+  it('applies authorization plugin to service published to Kong Gateway', () => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
+      })
+    })
+  })
+
   it('Adds environment with JWT - Generated Key Pair authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
@@ -112,6 +123,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
+
   it('Adds environment with JWT - JWKS URL authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
@@ -125,6 +137,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     pd.generateKongPluginConfig('cc-service.yml')
   })
+  
   it('Applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace).then(() => {
@@ -132,6 +145,15 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
           cy.log(JSON.stringify(res.body))
         })
       })
+    })
+  })
+
+  it('activate the service for Test environment', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let product = clientCredentials.clientIdSecret.product
+      pd.editProductEnvironment(product.name, product.environment.name)
+      pd.activateService(clientCredentials)
     })
   })
 
