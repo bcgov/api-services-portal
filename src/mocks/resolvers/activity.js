@@ -14,7 +14,7 @@ let dateOffset = 0;
 export const getActivityHandler = (req, res, ctx) => {
   const { first, skip } = req.variables;
   const result = [];
-  const count = skip || 50;
+  const count = skip === 75 ? 5 : first;
 
   times(count, (n) => {
     const actor = sample(actors);

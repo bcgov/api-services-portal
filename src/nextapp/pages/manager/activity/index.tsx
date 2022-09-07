@@ -20,7 +20,7 @@ import last from 'lodash/last';
 import PageHeader from '@/components/page-header';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { gql } from 'graphql-request';
-import { useApi } from '@/shared/services/api';
+import { useInfiniteApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import template from 'lodash/template';
 import Filters, { useFilters } from '@/components/filters';
@@ -28,10 +28,6 @@ import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
 
-interface PageState {
-  first: number;
-  skip: number;
-}
 interface ActivitySortDate extends ActivitySummary {
   sortDate: string;
 }
@@ -41,8 +37,6 @@ interface FilterState {
   serviceAccounts: Record<string, string>[];
   activityDate: Record<string, string>[];
 }
-
-const PER_PAGE = 50;
 
 const ActivityPage: React.FC = () => {
   const breadcrumbs = useNamespaceBreadcrumbs([
@@ -82,13 +76,17 @@ const ActivityPage: React.FC = () => {
     });
     return result;
   }, [state]);
-  const [{ first, skip }, setPage] = React.useState<PageState>({
-    first: 0,
-    skip: PER_PAGE,
-  });
-  const { data, isError, isLoading, isSuccess } = useApi(
-    ['activityFeed', filterKey, first, skip],
-    { query, variables: { filter, first, skip } },
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isLoading,
+    isSuccess,
+    isFetchingNextPage,
+  } = useInfiniteApi(
+    ['activityFeed', filterKey],
+    { query, variables: { filter } },
     {
       suspense: false,
     }
@@ -97,29 +95,18 @@ const ActivityPage: React.FC = () => {
   const feed: Record<string, ActivitySortDate[]> = React.useMemo(() => {
     let result = {};
     if (isSuccess) {
-      result = data.getFilteredNamespaceActivity.map((a) => ({
-        ...a,
-        sortDate: format(new Date(a.activityAt), 'LL-d-yy'),
-      }));
+      result = data.pages
+        .reduce((memo, page) => {
+          return memo.concat(page.getFilteredNamespaceActivity);
+        }, [])
+        .map((a) => ({
+          ...a,
+          sortDate: format(new Date(a.activityAt), 'LL-d-yy'),
+        }));
       return groupBy(result, 'sortDate');
     }
     return result;
   }, [data, isSuccess]);
-
-  const handlePreviousPageClick = () => {
-    setPage((state) => ({
-      ...state,
-      first: Math.max(0, state.first - PER_PAGE),
-      skip: Math.max(0, state.skip - PER_PAGE),
-    }));
-  };
-  const handleNextPageClick = () => {
-    setPage((state) => ({
-      ...state,
-      first: state.first + PER_PAGE,
-      skip: state.skip + PER_PAGE,
-    }));
-  };
 
   return (
     <>
@@ -204,25 +191,23 @@ const ActivityPage: React.FC = () => {
               </Box>
             );
           })}
+          {hasNextPage && (
+            <Center
+              my={4}
+              justify="space-between"
+              data-testid="activity-pagination"
+            >
+              <Button
+                isLoading={isFetchingNextPage}
+                isDisabled={isLoading || isFetchingNextPage}
+                variant="secondary"
+                onClick={() => fetchNextPage()}
+              >
+                Load More
+              </Button>
+            </Center>
+          )}
         </Box>
-        <Flex mt={4} justify="space-between" data-testid="activity-pagination">
-          <Button
-            isDisabled={first === 0 || isLoading}
-            variant="secondary"
-            onClick={handlePreviousPageClick}
-          >
-            Previous Page
-          </Button>
-          <Button
-            disabled={
-              data?.getFilteredNamespaceActivity.length < PER_PAGE || isLoading
-            }
-            variant="secondary"
-            onClick={handleNextPageClick}
-          >
-            Next Page
-          </Button>
-        </Flex>
       </Container>
     </>
   );

@@ -5,7 +5,6 @@ import {
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
   useMutation,
-  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -15,6 +14,7 @@ import omit from 'lodash/omit';
 import { Query } from '@/types/query.types';
 
 import { apiHost, apiInternalHost, env } from '../config';
+import { last } from 'lodash';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -80,7 +80,7 @@ const api = async <T extends ApiResponse>(
     } else {
       const hasErrors = Boolean(err.response?.errors);
       if (hasErrors) {
-        if (Boolean(err.response.errors[0]?.data?.messages)) {
+        if (err.response.errors[0]?.data?.messages) {
           throw err.response.errors[0]?.data?.messages.join('\n');
         }
         throw err.response.errors?.map((e) => e.message).join('\n');
@@ -112,6 +112,7 @@ export const useApi = (
   );
 };
 
+const PER_PAGE = 25;
 export const useInfiniteApi = (
   key: QueryKey,
   query: UseApiOptions,
@@ -119,8 +120,25 @@ export const useInfiniteApi = (
 ): UseInfiniteQueryResult<Query> => {
   return useInfiniteQuery<Query>(
     key,
-    async () => await api<Query>(query.query, query.variables, { ssr: false }),
-    queryOptions
+    async ({ pageParam }) => {
+      const skip = pageParam ? pageParam * PER_PAGE : 0;
+      const variables = (query.variables as Record<string, string>) ?? {};
+      return api<Query>(
+        query.query,
+        { ...variables, skip, first: PER_PAGE },
+        { ssr: false }
+      );
+    },
+    {
+      ...queryOptions,
+      getNextPageParam: (lastPage, pages) => {
+        const lastArray = Object.values(lastPage)[0];
+        if (Array.isArray(lastArray) && lastArray.length !== PER_PAGE) {
+          return undefined;
+        }
+        return pages.length;
+      },
+    }
   );
 };
 
