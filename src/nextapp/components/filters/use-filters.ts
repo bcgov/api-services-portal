@@ -52,6 +52,16 @@ const useFilters = <FilterState>(
             ) {
               return state;
             }
+
+            if (!action.payload.multiple) {
+              return {
+                ...state,
+                [action.filterType]: [
+                  { ...action.payload, id: uid(action.payload) },
+                ],
+              };
+            }
+
             return {
               ...state,
               [action.filterType]: [

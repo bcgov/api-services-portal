@@ -20,6 +20,7 @@ import { uid } from 'react-uid';
 interface LabelValue {
   labelGroup: string;
   value: string;
+  multiple?: boolean;
 }
 
 interface FilterTag {
@@ -29,11 +30,11 @@ interface FilterTag {
 
 interface FiltersProps extends BoxProps {
   data: unknown;
-  filterTypeOptions: { name: string; value: string }[];
+  filterTypeOptions: { name: string; value: string; multiple?: boolean }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
   onAddFilter: (
     key: string,
-    payload: Record<string, string | LabelValue>
+    payload: Record<string, string | LabelValue | boolean>
   ) => void;
   onClearFilters: () => void;
   onRemoveFilter: (key: string, value: string) => void;
@@ -90,7 +91,13 @@ const Filters: React.FC<FiltersProps> = ({
         value,
       };
     }
-    onAddFilter(filterType, { value: filterValue, name: filterName });
+    const multiple =
+      filterTypeOptions.find((f) => f.value === filterType)?.multiple ?? true;
+    onAddFilter(filterType, {
+      value: filterValue,
+      name: filterName,
+      multiple,
+    });
     event.currentTarget.reset();
   };
   const handleRemove = (filter: FilterTag) => () => {

@@ -13,7 +13,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import format from 'date-fns/format';
+import DOMPurify from 'dompurify';
 import groupBy from 'lodash/groupBy';
 import Head from 'next/head';
 import last from 'lodash/last';
@@ -27,6 +27,16 @@ import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
+
+const sortFormat = new Intl.DateTimeFormat('en-CA', {
+  dateStyle: 'short',
+});
+const headerFormat = new Intl.DateTimeFormat('en-CA', {
+  dateStyle: 'long',
+});
+const timeFormat = new Intl.DateTimeFormat('en-CA', {
+  timeStyle: 'short',
+});
 
 interface ActivitySortDate extends ActivitySummary {
   sortDate: string;
@@ -101,7 +111,7 @@ const ActivityPage: React.FC = () => {
         }, [])
         .map((a) => ({
           ...a,
-          sortDate: format(new Date(a.activityAt), 'LL-d-yy'),
+          sortDate: sortFormat.format(new Date(a.activityAt)),
         }));
       return groupBy(result, 'sortDate');
     }
@@ -159,12 +169,13 @@ const ActivityPage: React.FC = () => {
             return (
               <Box key={uid(date)}>
                 <Heading size="sm" mb={5}>
-                  {format(new Date(date), 'MMMM do, yyyy')}
+                  {headerFormat.format(new Date(date))}
                 </Heading>
                 {feed[date].map((a) => {
                   const compiled = template(a.message, {
                     interpolate: /{([\s\S]+?)}/g,
                   });
+                  const text = DOMPurify.sanitize(compiled(a.params));
                   return (
                     <Flex key={uid(a.id)} pb={5} align="center">
                       <Avatar name={a.params?.actor} size="sm" mr={5} />
@@ -172,7 +183,7 @@ const ActivityPage: React.FC = () => {
                         <Text>
                           <span
                             dangerouslySetInnerHTML={{
-                              __html: compiled(a.params),
+                              __html: text,
                             }}
                           />
                         </Text>
@@ -182,7 +193,7 @@ const ActivityPage: React.FC = () => {
                           fontSize="sm"
                           dateTime={a.activityAt}
                         >
-                          {format(new Date(a.activityAt), 'h:mmaaa')}
+                          {timeFormat.format(new Date(a.activityAt))}
                         </Text>
                       </Box>
                     </Flex>
@@ -218,7 +229,7 @@ export default ActivityPage;
 const filterTypeOptions = [
   { name: 'User', value: 'users' },
   { name: 'Service Account', value: 'serviceAccounts' },
-  { name: 'Date', value: 'activityDate' },
+  { name: 'Date', value: 'activityDate', multiple: false },
 ];
 
 const query = gql`
