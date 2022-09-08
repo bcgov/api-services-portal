@@ -10,6 +10,7 @@ import {
   ModalCloseButton,
   Text,
   useDisclosure,
+  ButtonProps,
 } from '@chakra-ui/react';
 
 import LoginButtons from '../login-buttons';
@@ -17,16 +18,31 @@ import { useGlobal } from '@/shared/services/global';
 
 interface LoginDialogProps {
   buttonText: string;
+  buttonVariant?: ButtonProps['variant'];
 }
 
-const LoginDialog: React.FC<LoginDialogProps> = ({ buttonText = 'Login' }) => {
+const LoginDialog: React.FC<LoginDialogProps> = ({
+  buttonText = 'Login',
+  buttonVariant,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { identities } = useGlobal();
   const size = identities.developer.length > 2 ? '2xl' : 'lg';
+  const isInline = buttonVariant === 'link';
+  const buttonProps = !isInline
+    ? {}
+    : {
+        fontWeight: 'normal',
+        fontSize: 'inherit',
+        color: 'bc-link',
+        textDecor: 'underline',
+      };
 
   return (
     <>
-      <Button onClick={onOpen}>{buttonText}</Button>
+      <Button onClick={onOpen} variant={buttonVariant} {...buttonProps}>
+        {buttonText}
+      </Button>
       <Modal isOpen={isOpen} onClose={onClose} size={size}>
         <ModalOverlay />
         <ModalContent>
