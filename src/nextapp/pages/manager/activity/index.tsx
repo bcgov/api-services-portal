@@ -27,6 +27,7 @@ import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
+import EmptyPane from '@/components/empty-pane';
 
 const sortFormat = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'short',
@@ -146,6 +147,13 @@ const ActivityPage: React.FC = () => {
                 </VStack>
               </Flex>
             ))}
+          {isSuccess &&
+            data.pages[0]?.getFilteredNamespaceActivity.length === 0 && (
+              <EmptyPane
+                title="No activity to show"
+                message="Events will show up here as you manage your namespace"
+              />
+            )}
           {isError && (
             <Center>
               <Flex
@@ -233,8 +241,12 @@ const filterTypeOptions = [
 ];
 
 const query = gql`
-  query GetActivity($first: Int, $skip: Int) {
-    getFilteredNamespaceActivity(first: $first, skip: $skip) {
+  query GetActivity(
+    $first: Int
+    $skip: Int
+    $filter: ActivityQueryFilterInput
+  ) {
+    getFilteredNamespaceActivity(first: $first, skip: $skip, filter: $filter) {
       id
       message
       params

@@ -1,6 +1,6 @@
 
-  query GetActivity($first: Int, $skip: Int) {
-    getFilteredNamespaceActivity(first: $first, skip: $skip) {
+  query GetActivity($first: Int, $skip: Int, $filter: ActivityQueryFilterInput) {
+    getFilteredNamespaceActivity(first: $first, skip: $skip, filter: $filter) {
       id
       message
       params
