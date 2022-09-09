@@ -220,11 +220,11 @@ export const CreateServiceAccount = async (
 
   await markActiveTheServiceAccess(context, serviceAccessId);
 
-  new StructuredActivityService(
-    context,
-    namespace,
-    context.authedItem
-  ).logCreateServiceAccount(true, scopes, backToUser.clientId);
+  new StructuredActivityService(context, namespace).logCreateServiceAccount(
+    true,
+    scopes,
+    backToUser.clientId
+  );
 
   return backToUser;
 };
