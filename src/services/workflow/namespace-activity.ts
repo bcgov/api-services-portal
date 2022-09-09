@@ -75,7 +75,6 @@ export class StructuredActivityService {
       `accessRequest:${accessRequest.id}`,
       `application:${app.id}`,
       `environment:${env.id}`,
-      `requester:${actor.id}`,
     ]);
   }
 
@@ -103,7 +102,6 @@ export class StructuredActivityService {
       `accessRequest:${accessRequest.id}`,
       `application:${app.id}`,
       `environment:${env.id}`,
-      `requester:${actor.id}`,
     ]);
   }
 
