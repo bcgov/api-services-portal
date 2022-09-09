@@ -183,16 +183,19 @@ export const Apply = async (
 
       message.text = 'approved access';
 
-      await new StructuredActivityService(
-        context,
-        productNamespace
-      ).logApproveAccess(
-        true,
-        requestDetails,
-        requestDetails.productEnvironment,
-        requestDetails.application,
-        requestDetails.serviceAccess.consumer.customId
-      );
+      // only log another activity record if this is part of approval
+      if (requestDetails.productEnvironment.approval == true) {
+        await new StructuredActivityService(
+          context,
+          productNamespace
+        ).logApproveAccess(
+          true,
+          requestDetails,
+          requestDetails.productEnvironment,
+          requestDetails.application,
+          requestDetails.serviceAccess.consumer.customId
+        );
+      }
     } else if (isUpdatingToRejected(existingItem, updatedItem)) {
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
         context,
@@ -226,22 +229,8 @@ export const Apply = async (
         requestDetails.application,
         requestDetails.serviceAccess.consumer.customId
       );
-    } else if (isRequested(existingItem, updatedItem)) {
-      message.text = 'requested access';
+      // } else if (isRequested(existingItem, updatedItem)) {
     }
-
-    const refId = updatedItem.id;
-    const action = operation;
-
-    // await recordActivity(
-    //   context,
-    //   action,
-    //   'AccessRequest',
-    //   refId,
-    //   message.text,
-    //   'success',
-    //   JSON.stringify(originalInput)
-    // );
   } catch (err) {
     logger.error('Workflow Error %s', err);
     await markAccessRequestAsNotIssued(context, updatedItem.id).catch(

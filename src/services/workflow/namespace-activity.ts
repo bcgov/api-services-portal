@@ -71,7 +71,7 @@ export class StructuredActivityService {
       environment: env.name,
       consumer: consumerUsername,
     };
-    this.recordActivity(success, message, params, [
+    return this.recordActivity(success, message, params, [
       `accessRequest:${accessRequest.id}`,
       `application:${app.id}`,
       `environment:${env.id}`,
@@ -98,7 +98,7 @@ export class StructuredActivityService {
       environment: env.name,
       consumer: consumerUsername,
     };
-    this.recordActivity(success, message, params, [
+    return this.recordActivity(success, message, params, [
       `accessRequest:${accessRequest.id}`,
       `application:${app.id}`,
       `environment:${env.id}`,
@@ -124,7 +124,7 @@ export class StructuredActivityService {
       consumer: consumerUsername,
       note: pendingApproval ? 'access pending approval' : 'auto approved',
     };
-    this.recordActivity(true, message, params, [
+    return this.recordActivity(true, message, params, [
       `application:${app.id}`,
       `user:${actor.id}`,
     ]);
@@ -137,7 +137,7 @@ export class StructuredActivityService {
     consumer: GatewayConsumer
   ) {
     const { actor } = this;
-    this.recordActivity(
+    return this.recordActivity(
       success,
       grant
         ? '{actor} {action} {consumer} {entity} to {product} {env}'
@@ -159,7 +159,7 @@ export class StructuredActivityService {
     consumer: GatewayConsumer
   ) {
     const { actor } = this;
-    this.recordActivity(
+    return this.recordActivity(
       success,
       '{actor} {action} {entity} from {consumer}',
       {
@@ -212,7 +212,7 @@ export class StructuredActivityService {
       permissions: permissions.join(', '),
       consumer: consumerUsername,
     };
-    this.recordActivity(true, message, params, [
+    return this.recordActivity(true, message, params, [
       `consumerUsername: ${consumerUsername}`,
     ]);
   }
