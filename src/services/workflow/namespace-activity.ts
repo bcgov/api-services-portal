@@ -25,19 +25,26 @@ export async function getFilteredNamespaceActivity(
 
   const activities = await getActivity(context, [ns], first, skip);
 
-  return activities.map((a) => {
-    const struct = a.filterKey1
-      ? JSON.parse(a.context)
-      : { message: a.message, params: {} };
+  return activities
+    .map((a) => {
+      const struct = a.filterKey1
+        ? JSON.parse(a.context)
+        : { message: a.message, params: {} };
 
-    return {
-      id: a.id,
-      message: struct.message,
-      params: struct.params,
-      activityAt: a.createdAt,
-      blob: a.blob,
-    } as ActivitySummary;
-  });
+      return {
+        id: a.id,
+        message: struct.message,
+        params: struct.params,
+        activityAt: a.createdAt,
+        blob: a.blob,
+      } as ActivitySummary;
+    })
+    .map((a) => {
+      if (!('actor' in a.params)) {
+        a.params['actor'] = 'Unknown Actor';
+      }
+      return a;
+    });
 }
 
 export class StructuredActivityService {
@@ -210,6 +217,23 @@ export class StructuredActivityService {
       action: 'created',
       entity: 'namespace service account',
       permissions: permissions.join(', '),
+      consumer: consumerUsername,
+    };
+    return this.recordActivity(true, message, params, [
+      `consumerUsername: ${consumerUsername}`,
+    ]);
+  }
+
+  public async logDeleteAccess(
+    environment: Environment,
+    consumerUsername: string
+  ) {
+    const { actor } = this;
+    const message = '{actor} {action} {entity} ({consumer})';
+    const params = {
+      actor: actor.name,
+      action: 'deleted',
+      entity: 'namespace service account',
       consumer: consumerUsername,
     };
     return this.recordActivity(true, message, params, [

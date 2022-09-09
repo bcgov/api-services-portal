@@ -15,7 +15,7 @@ export {
   saveConsumerLabels,
 } from './consumer-management';
 
-export { DeleteAccess } from './delete-access';
+export { DeleteAccess, AfterDeleteAccess } from './delete-access';
 
 export { DeleteIssuerValidate } from './delete-issuer';
 
