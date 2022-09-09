@@ -20,9 +20,13 @@ import { useQueryClient } from 'react-query';
 
 interface ServiceAccountDeleteProps {
   id: string;
+  onDelete: () => void;
 }
 
-const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
+const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({
+  id,
+  onDelete,
+}) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { isOpen, onClose, onOpen } = useDisclosure();
@@ -39,6 +43,7 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({ id }) => {
         isClosable: true,
       });
       onClose();
+      onDelete();
     } catch {
       toast({
         title: 'Service Account delete failed',

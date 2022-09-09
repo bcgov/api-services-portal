@@ -66,11 +66,19 @@ const ServiceAccountsPage: React.FC<
       query,
       variables: { ns: 'abc' },
     },
-    { suspense: false }
+    {
+      suspense: false,
+      onSettled() {
+        setCredentials(null);
+      },
+    }
   );
   const handleCreate = (credentials: Record<string, string>) => {
     setCredentials(credentials);
     client.invalidateQueries(queryKey);
+  };
+  const handleDelete = () => {
+    setCredentials(null);
   };
 
   return (
@@ -153,7 +161,7 @@ const ServiceAccountsPage: React.FC<
                   <Td>{d.name}</Td>
                   <Td>{format(new Date(d.createdAt), 'MMM do, yyyy')}</Td>
                   <Td textAlign="right">
-                    <ServiceAccountDelete id={d.id} />
+                    <ServiceAccountDelete id={d.id} onDelete={handleDelete} />
                   </Td>
                 </Tr>
               ))}
