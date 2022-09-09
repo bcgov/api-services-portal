@@ -460,7 +460,7 @@ export async function grantAccessToConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
     true,
     true,
     prodEnv,
@@ -523,7 +523,7 @@ export async function revokeAccessFromConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
     false,
     true,
     prodEnv,
@@ -763,7 +763,7 @@ export async function revokeAllConsumerAccess(
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
   await deleteServiceAccess(context, serviceAccessId);
 
-  new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
+  await new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
     true,
     consumer
   );

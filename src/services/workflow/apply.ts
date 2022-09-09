@@ -96,7 +96,7 @@ export const Apply = async (
         message.text = 'received credentials (immediate approval)';
       }
 
-      new StructuredActivityService(
+      await new StructuredActivityService(
         context,
         productNamespace
       ).logCollectedCredentials(
@@ -183,7 +183,10 @@ export const Apply = async (
 
       message.text = 'approved access';
 
-      new StructuredActivityService(context, productNamespace).logApproveAccess(
+      await new StructuredActivityService(
+        context,
+        productNamespace
+      ).logApproveAccess(
         true,
         requestDetails,
         requestDetails.productEnvironment,
@@ -213,7 +216,10 @@ export const Apply = async (
       );
       message.text = 'rejected access request';
 
-      new StructuredActivityService(context, productNamespace).logRejectAccess(
+      await new StructuredActivityService(
+        context,
+        productNamespace
+      ).logRejectAccess(
         true,
         requestDetails,
         requestDetails.productEnvironment,
