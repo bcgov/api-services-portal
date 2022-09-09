@@ -44,6 +44,18 @@ module.exports = {
       type: Text,
       isRequired: false,
     },
+    filterKey1: {
+      type: Text,
+      isRequired: false,
+    },
+    filterKey2: {
+      type: Text,
+      isRequired: false,
+    },
+    filterKey3: {
+      type: Text,
+      isRequired: false,
+    },
     actor: { type: Relationship, ref: 'User' },
     blob: { type: Relationship, ref: 'Blob' },
   },

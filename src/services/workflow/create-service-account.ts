@@ -18,6 +18,7 @@ import {
 } from '../keycloak';
 import { Logger } from '../../logger';
 import { Policy, UMAPolicyService } from '../uma2';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.CreateSvcAcct');
 
@@ -218,6 +219,12 @@ export const CreateServiceAccount = async (
   }
 
   await markActiveTheServiceAccess(context, serviceAccessId);
+
+  new StructuredActivityService(
+    context,
+    namespace,
+    context.authedItem
+  ).logCreateServiceAccount(true, scopes, backToUser.clientId);
 
   return backToUser;
 };

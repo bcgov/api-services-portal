@@ -112,7 +112,8 @@ export async function recordActivity(
   message: string,
   result: string = '',
   activityContext: string = '',
-  productNamespace: string = undefined
+  productNamespace: string = undefined,
+  ids: string[] = []
 ) {
   const userId = context.authedItem.userId;
   const namespace = productNamespace
@@ -121,27 +122,38 @@ export async function recordActivity(
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivity] userid=%s name=%s', userId, name);
 
-  const activity = context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: String) {
-                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, actor: { connect: { id : $userId }} }) {
-                    id
-            } }`,
-    variables: {
-      name,
-      namespace,
-      type,
-      action,
-      refId,
-      message,
-      result,
-      activityContext,
-      userId,
-    },
+  const variables: { [key: string]: any } = {
+    name,
+    namespace,
+    type,
+    action,
+    refId,
+    message,
+    result,
+    activityContext,
+    userId,
+    filterKey1: undefined,
+    filterKey2: undefined,
+    filterKey3: undefined,
+  };
+  ids.forEach((id: string, index: number) => {
+    variables[`filterKey${index + 1}`] = id;
   });
 
-  return activity.catch((e: any) => {
-    logger.error('Activity Recording Error %s', e);
+  logger.warn('%j', variables);
+  const activity = await context.executeGraphQL({
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: ID, $filterKey1: String, $filterKey2: String, $filterKey3: String) {
+                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, filterKey1: $filterKey1, filterKey2: $filterKey2, filterKey3: $filterKey3, actor: { connect: { id : $userId }} }) {
+                    id
+            } }`,
+    variables,
   });
+  return activity;
+  //
+
+  // return activity.catch((e: any) => {
+  //   logger.error('Activity Recording Error %s', e);
+  // });
 }
 
 export async function getActivity(
@@ -171,6 +183,7 @@ export async function getActivity(
                   type
                   blob
                 }
+                filterKey1
                 createdAt
                 updatedAt
               }

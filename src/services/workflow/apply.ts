@@ -28,6 +28,7 @@ import { AccessRequest, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
 import { syncPlugins } from './consumer-plugins';
 import { saveConsumerLabels } from './consumer-management';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.Apply');
 
@@ -52,10 +53,9 @@ export const Apply = async (
 
     try {
       const newCredential = await generateCredential(context, requestDetails);
-      if (newCredential != null) {
-        updatedItem['credential'] = JSON.stringify(newCredential);
-        message.text = 'received credentials';
-      }
+
+      updatedItem['credential'] = JSON.stringify(newCredential);
+      message.text = 'received credentials';
 
       if (requestDetails.productEnvironment.approval == false) {
         const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
@@ -96,16 +96,26 @@ export const Apply = async (
         message.text = 'received credentials (immediate approval)';
       }
 
-      await recordActivity(
+      new StructuredActivityService(
         context,
-        operation,
-        'AccessRequest',
-        updatedItem.id,
-        message.text,
-        'success',
-        JSON.stringify(originalInput),
         productNamespace
+      ).logCollectedCredentials(
+        requestDetails.productEnvironment,
+        requestDetails.application,
+        newCredential.clientId,
+        requestDetails.productEnvironment.approval == true
       );
+
+      // await recordActivity(
+      //   context,
+      //   operation,
+      //   'AccessRequest',
+      //   updatedItem.id,
+      //   message.text,
+      //   'success',
+      //   JSON.stringify(originalInput),
+      //   productNamespace
+      // );
     } catch (err) {
       logger.error('Workflow Error %s', err);
       await markAccessRequestAsNotIssued(context, updatedItem.id).catch(
@@ -142,9 +152,12 @@ export const Apply = async (
 
       logger.debug('[UpdatingToIssued] ExistingItem = %j', existingItem);
 
+      const productNamespace =
+        requestDetails.productEnvironment.product.namespace;
+
       const setup = <SetupAuthorizationInput>{
         flow: requestDetails.productEnvironment.flow,
-        namespace: requestDetails.productEnvironment.product.namespace,
+        namespace: productNamespace,
         controls:
           'controls' in requestDetails
             ? JSON.parse(requestDetails.controls)
@@ -169,16 +182,29 @@ export const Apply = async (
       await setupAuthorizationAndEnable(subjectContext, context, setup);
 
       message.text = 'approved access';
+
+      new StructuredActivityService(context, productNamespace).logApproveAccess(
+        true,
+        requestDetails,
+        requestDetails.productEnvironment,
+        requestDetails.application,
+        requestDetails.serviceAccess.consumer.customId
+      );
     } else if (isUpdatingToRejected(existingItem, updatedItem)) {
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
         context,
         existingItem.id
       );
+
       assert.strictEqual(
         requestDetails.serviceAccess == null,
         false,
         'Service Access is Missing!'
       );
+
+      const productNamespace =
+        requestDetails.productEnvironment.product.namespace;
+
       await deleteRecord(
         context,
         'ServiceAccess',
@@ -186,6 +212,14 @@ export const Apply = async (
         ['id']
       );
       message.text = 'rejected access request';
+
+      new StructuredActivityService(context, productNamespace).logRejectAccess(
+        true,
+        requestDetails,
+        requestDetails.productEnvironment,
+        requestDetails.application,
+        requestDetails.serviceAccess.consumer.customId
+      );
     } else if (isRequested(existingItem, updatedItem)) {
       message.text = 'requested access';
     }
@@ -193,15 +227,15 @@ export const Apply = async (
     const refId = updatedItem.id;
     const action = operation;
 
-    await recordActivity(
-      context,
-      action,
-      'AccessRequest',
-      refId,
-      message.text,
-      'success',
-      JSON.stringify(originalInput)
-    );
+    // await recordActivity(
+    //   context,
+    //   action,
+    //   'AccessRequest',
+    //   refId,
+    //   message.text,
+    //   'success',
+    //   JSON.stringify(originalInput)
+    // );
   } catch (err) {
     logger.error('Workflow Error %s', err);
     await markAccessRequestAsNotIssued(context, updatedItem.id).catch(

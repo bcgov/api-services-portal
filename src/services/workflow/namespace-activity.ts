@@ -2,7 +2,15 @@ import { strict as assert } from 'assert';
 import { ActivityQueryFilter, ActivitySummary } from './types';
 import { Logger } from '../../logger';
 import { format, getActivity, recordActivity } from '../keystone/activity';
-import { Environment, GatewayConsumer, User } from '../keystone/types';
+import {
+  AccessRequest,
+  Application,
+  ConsumerProdEnvAccess,
+  Environment,
+  GatewayConsumer,
+  GatewayService,
+  User,
+} from '../keystone/types';
 
 const logger = Logger('wf.Activity');
 
@@ -18,10 +26,9 @@ export async function getFilteredNamespaceActivity(
   const activities = await getActivity(context, [ns], first, skip);
 
   return activities.map((a) => {
-    const struct =
-      a.type === 'structured'
-        ? JSON.parse(a.context)
-        : { message: a.message, params: {} };
+    const struct = a.filterKey1
+      ? JSON.parse(a.context)
+      : { message: a.message, params: {} };
 
     return {
       id: a.id,
@@ -38,13 +45,94 @@ export class StructuredActivityService {
   namespace: string;
   actor: User;
 
-  constructor(context: any, namespace: string, actor: User) {
+  constructor(context: any, namespace: string) {
     this.context = context;
     this.namespace = namespace;
-    this.actor = actor;
+    this.actor = this.context.authedItem;
   }
 
-  public async grantRevokeConsumerAccess(
+  public async logApproveAccess(
+    success: boolean,
+    accessRequest: AccessRequest,
+    env: Environment,
+    app: Application,
+    consumerUsername: string
+  ) {
+    const { actor } = this;
+    const message = success
+      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
+      : 'Failed to {action} {entity} for {application} ({consumer}) to access {product} {environment} (user: {actor})';
+    const params = {
+      actor: actor.name,
+      action: success ? 'approved' : 'approve',
+      entity: 'access request',
+      application: app.name,
+      product: env.product.name,
+      environment: env.name,
+      consumer: consumerUsername,
+    };
+    this.recordActivity(success, message, params, [
+      `accessRequest:${accessRequest.id}`,
+      `application:${app.id}`,
+      `environment:${env.id}`,
+      `requester:${actor.id}`,
+    ]);
+  }
+
+  public async logRejectAccess(
+    success: boolean,
+    accessRequest: AccessRequest,
+    env: Environment,
+    app: Application,
+    consumerUsername: string
+  ) {
+    const { actor } = this;
+    const message = success
+      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
+      : 'Failed to {action} {entity} for {application} ({consumer}) to access {product} {environment} (user: {actor})';
+    const params = {
+      actor: actor.name,
+      action: success ? 'rejected' : 'reject',
+      entity: 'access request',
+      application: app.name,
+      product: env.product.name,
+      environment: env.name,
+      consumer: consumerUsername,
+    };
+    this.recordActivity(success, message, params, [
+      `accessRequest:${accessRequest.id}`,
+      `application:${app.id}`,
+      `environment:${env.id}`,
+      `requester:${actor.id}`,
+    ]);
+  }
+
+  public async logCollectedCredentials(
+    env: Environment,
+    app: Application,
+    consumerUsername: string,
+    pendingApproval: boolean
+  ) {
+    const { actor } = this;
+    const message =
+      '{actor} {action} for {application} ({consumer}) to access {product} {environment} ({note})';
+    const params = {
+      actor: actor.name,
+      action: 'received credentials',
+      entity: 'access',
+      application: app.name,
+      product: env.product.name,
+      environment: env.name,
+      consumer: consumerUsername,
+      note: pendingApproval ? 'access pending approval' : 'auto approved',
+    };
+    this.recordActivity(true, message, params, [
+      `application:${app.id}`,
+      `user:${actor.id}`,
+    ]);
+  }
+
+  public async logGrantRevokeConsumerAccess(
     grant: boolean,
     success: boolean,
     env: Environment,
@@ -68,7 +156,7 @@ export class StructuredActivityService {
     );
   }
 
-  public async revokeAllConsumerAccess(
+  public async logRevokeAllConsumerAccess(
     success: boolean,
     consumer: GatewayConsumer
   ) {
@@ -86,6 +174,51 @@ export class StructuredActivityService {
     );
   }
 
+  public async logUpdateConsumerAccess(
+    prodEnvAccessItem: ConsumerProdEnvAccess,
+    consumer: GatewayConsumer,
+    accessUpdate: string
+  ) {
+    const { actor } = this;
+
+    const message =
+      '{actor} {action} {entity} (Product:{product} {environment}, Consumer: {consumer}) to: {accessUpdate}';
+    const params = {
+      actor: actor.name,
+      action: 'updated',
+      entity: 'ConsumerProductAccess',
+      product: prodEnvAccessItem.productName,
+      environment: prodEnvAccessItem.environment.name,
+      accessUpdate,
+      consumer: consumer.username,
+    };
+    return this.recordActivity(true, message, params, [
+      `ConsumerProdEnvAccess=${consumer.id}.${prodEnvAccessItem.environment.id}`,
+      `Consumer.username=${consumer.username}`,
+      `Product=${prodEnvAccessItem.productName}`,
+    ]);
+  }
+
+  public async logCreateServiceAccount(
+    success: boolean,
+    permissions: string[],
+    consumerUsername: string
+  ) {
+    const { actor } = this;
+    const message =
+      '{actor} {action} {entity} ({consumer}) with permissions: {permissions}';
+    const params = {
+      actor: actor.name,
+      action: 'created',
+      entity: 'namespace service account',
+      permissions: permissions.join(', '),
+      consumer: consumerUsername,
+    };
+    this.recordActivity(true, message, params, [
+      `consumerUsername: ${consumerUsername}`,
+    ]);
+  }
+
   async recordActivity(
     success: boolean,
     message: string,
@@ -94,24 +227,32 @@ export class StructuredActivityService {
   ) {
     const { context, namespace } = this;
 
+    assert.strictEqual(
+      ids.length > 0 && ids.length < 4,
+      true,
+      'Must be atleast one id and no more than 3'
+    );
+
     const activityContext = JSON.stringify({
       message,
       params,
     });
-    logger.info('[recordActivity] %s %j', message, params);
+    logger.info('[recordActivity] %s %j %j', message, params, ids);
 
     const result = await recordActivity(
       context,
       params.action,
-      'structured',
+      params.entity,
       ids[0],
       format(message, params),
       success ? 'success' : 'failed',
       activityContext,
-      namespace
+      namespace,
+      ids
     );
     if (result.errors) {
       logger.error('[recordActivity] %s %j %j', message, params, result);
     }
+    return result;
   }
 }

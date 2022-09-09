@@ -460,11 +460,12 @@ export async function grantAccessToConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  new StructuredActivityService(
-    context,
-    ns,
-    context.authedItem
-  ).grantRevokeConsumerAccess(true, true, prodEnv, consumer);
+  new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    true,
+    true,
+    prodEnv,
+    consumer
+  );
 
   if (plugins) {
     await syncPlugins(context, ns, consumer, plugins);
@@ -522,11 +523,12 @@ export async function revokeAccessFromConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  new StructuredActivityService(
-    context,
-    ns,
-    context.authedItem
-  ).grantRevokeConsumerAccess(false, true, prodEnv, consumer);
+  new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    false,
+    true,
+    prodEnv,
+    consumer
+  );
 
   await syncPlugins(context, ns, consumer, []);
 }
@@ -707,6 +709,18 @@ export async function updateConsumerAccess(
         );
       }
     }
+
+    const accessUpdates = [];
+    defaultClientScopes &&
+      accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
+    roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);
+    const accessUpdate = accessUpdates.join(', ');
+
+    await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
+      prodEnvAccessItem,
+      consumer,
+      accessUpdate
+    );
   }
 
   if (plugins) {
@@ -749,11 +763,10 @@ export async function revokeAllConsumerAccess(
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
   await deleteServiceAccess(context, serviceAccessId);
 
-  new StructuredActivityService(
-    context,
-    ns,
-    context.authedItem
-  ).revokeAllConsumerAccess(true, consumer);
+  new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
+    true,
+    consumer
+  );
 }
 
 /**

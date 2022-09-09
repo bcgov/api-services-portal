@@ -140,12 +140,14 @@ export async function lookupEnvironmentAndApplicationByAccessRequest(
                               id
                           }
                           product {
+                              name
                               namespace
                           }
                       }
                       application {
                           id
                           appId
+                          name
                       }
                       serviceAccess {
                           id

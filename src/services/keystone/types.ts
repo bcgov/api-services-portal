@@ -341,6 +341,9 @@ export type Activity = {
   context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  filterKey1?: Maybe<Scalars['String']>;
+  filterKey2?: Maybe<Scalars['String']>;
+  filterKey3?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
   blob?: Maybe<Blob>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -516,6 +519,60 @@ export type ActivityWhereInput = {
   namespace_not_ends_with_i?: Maybe<Scalars['String']>;
   namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey1?: Maybe<Scalars['String']>;
+  filterKey1_not?: Maybe<Scalars['String']>;
+  filterKey1_contains?: Maybe<Scalars['String']>;
+  filterKey1_not_contains?: Maybe<Scalars['String']>;
+  filterKey1_starts_with?: Maybe<Scalars['String']>;
+  filterKey1_not_starts_with?: Maybe<Scalars['String']>;
+  filterKey1_ends_with?: Maybe<Scalars['String']>;
+  filterKey1_not_ends_with?: Maybe<Scalars['String']>;
+  filterKey1_i?: Maybe<Scalars['String']>;
+  filterKey1_not_i?: Maybe<Scalars['String']>;
+  filterKey1_contains_i?: Maybe<Scalars['String']>;
+  filterKey1_not_contains_i?: Maybe<Scalars['String']>;
+  filterKey1_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey1_not_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey1_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey1_not_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey1_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey1_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey2?: Maybe<Scalars['String']>;
+  filterKey2_not?: Maybe<Scalars['String']>;
+  filterKey2_contains?: Maybe<Scalars['String']>;
+  filterKey2_not_contains?: Maybe<Scalars['String']>;
+  filterKey2_starts_with?: Maybe<Scalars['String']>;
+  filterKey2_not_starts_with?: Maybe<Scalars['String']>;
+  filterKey2_ends_with?: Maybe<Scalars['String']>;
+  filterKey2_not_ends_with?: Maybe<Scalars['String']>;
+  filterKey2_i?: Maybe<Scalars['String']>;
+  filterKey2_not_i?: Maybe<Scalars['String']>;
+  filterKey2_contains_i?: Maybe<Scalars['String']>;
+  filterKey2_not_contains_i?: Maybe<Scalars['String']>;
+  filterKey2_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey2_not_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey2_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey2_not_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey2_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey2_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey3?: Maybe<Scalars['String']>;
+  filterKey3_not?: Maybe<Scalars['String']>;
+  filterKey3_contains?: Maybe<Scalars['String']>;
+  filterKey3_not_contains?: Maybe<Scalars['String']>;
+  filterKey3_starts_with?: Maybe<Scalars['String']>;
+  filterKey3_not_starts_with?: Maybe<Scalars['String']>;
+  filterKey3_ends_with?: Maybe<Scalars['String']>;
+  filterKey3_not_ends_with?: Maybe<Scalars['String']>;
+  filterKey3_i?: Maybe<Scalars['String']>;
+  filterKey3_not_i?: Maybe<Scalars['String']>;
+  filterKey3_contains_i?: Maybe<Scalars['String']>;
+  filterKey3_not_contains_i?: Maybe<Scalars['String']>;
+  filterKey3_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey3_not_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey3_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey3_not_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey3_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey3_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   actor?: Maybe<UserWhereInput>;
   actor_is_null?: Maybe<Scalars['Boolean']>;
   blob?: Maybe<BlobWhereInput>;
@@ -563,6 +620,12 @@ export enum SortActivitiesBy {
   RefIdDesc = 'refId_DESC',
   NamespaceAsc = 'namespace_ASC',
   NamespaceDesc = 'namespace_DESC',
+  FilterKey1Asc = 'filterKey1_ASC',
+  FilterKey1Desc = 'filterKey1_DESC',
+  FilterKey2Asc = 'filterKey2_ASC',
+  FilterKey2Desc = 'filterKey2_DESC',
+  FilterKey3Asc = 'filterKey3_ASC',
+  FilterKey3Desc = 'filterKey3_DESC',
   ActorAsc = 'actor_ASC',
   ActorDesc = 'actor_DESC',
   BlobAsc = 'blob_ASC',
@@ -583,6 +646,9 @@ export type ActivityUpdateInput = {
   context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  filterKey1?: Maybe<Scalars['String']>;
+  filterKey2?: Maybe<Scalars['String']>;
+  filterKey3?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
   blob?: Maybe<BlobRelateToOneInput>;
 };
@@ -602,6 +668,9 @@ export type ActivityCreateInput = {
   context?: Maybe<Scalars['String']>;
   refId?: Maybe<Scalars['String']>;
   namespace?: Maybe<Scalars['String']>;
+  filterKey1?: Maybe<Scalars['String']>;
+  filterKey2?: Maybe<Scalars['String']>;
+  filterKey3?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
   blob?: Maybe<BlobRelateToOneInput>;
 };
@@ -6330,7 +6399,7 @@ export type UserContact = {
   id: Scalars['ID'];
   name: Scalars['String'];
   username: Scalars['String'];
-  email: Scalars['String'];
+  email?: Maybe<Scalars['String']>;
 };
 
 export type ActivityQueryFilterInput = {
