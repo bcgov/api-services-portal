@@ -144,7 +144,6 @@ export async function allScopesAndRoles(
   envs
     .filter((env) => env.credentialIssuer)
     .forEach((env) => {
-      logger.debug('[allScopesAndRoles] %j', env.credentialIssuer);
       result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
       result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
     });

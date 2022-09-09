@@ -235,14 +235,16 @@ export class StructuredActivityService {
       message,
       params,
     });
-    logger.info('[recordActivity] %s %j %j', message, params, ids);
+
+    const formattedMessage = format(message, params);
+    logger.info('%s', formattedMessage);
 
     const result = await recordActivity(
       context,
       params.action,
       params.entity,
       ids[0],
-      format(message, params),
+      formattedMessage,
       success ? 'success' : 'failed',
       activityContext,
       namespace,
