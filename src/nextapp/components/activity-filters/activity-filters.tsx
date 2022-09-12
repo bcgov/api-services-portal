@@ -10,6 +10,8 @@ const ActivityFilters: React.FC<ActivityFiltersProps> = ({ value }) => {
     switch (value) {
       case 'serviceAccounts':
         return 'Enter a service account ID';
+      case 'consumers':
+        return 'Enter a consumer name';
       case 'users':
         return 'Enter a user name';
       default:

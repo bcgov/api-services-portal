@@ -45,6 +45,7 @@ interface ActivitySortDate extends ActivitySummary {
 
 interface FilterState {
   users: Record<string, string>[];
+  consumers: Record<string, string>[];
   serviceAccounts: Record<string, string>[];
   activityDate: Record<string, string>[];
 }
@@ -63,6 +64,7 @@ const ActivityPage: React.FC = () => {
   } = useFilters<FilterState>(
     {
       users: [],
+      consumers: [],
       serviceAccounts: [],
       activityDate: [],
     },
@@ -87,6 +89,7 @@ const ActivityPage: React.FC = () => {
     });
     return result;
   }, [state]);
+  console.log(state, filter);
   const {
     data,
     fetchNextPage,
@@ -236,6 +239,7 @@ export default ActivityPage;
 
 const filterTypeOptions = [
   { name: 'User', value: 'users' },
+  { name: 'Consumer', value: 'consumers' },
   { name: 'Service Account', value: 'serviceAccounts' },
   { name: 'Date', value: 'activityDate', multiple: false },
 ];
