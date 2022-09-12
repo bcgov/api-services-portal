@@ -462,8 +462,11 @@ export async function grantAccessToConsumer(
   await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
     true,
     true,
-    prodEnv,
-    consumer
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer: consumer,
+    }
   );
 
   if (plugins) {
@@ -523,10 +526,13 @@ export async function revokeAccessFromConsumer(
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
   await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
-    false,
     true,
-    prodEnv,
-    consumer
+    false,
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer,
+    }
   );
 
   await syncPlugins(context, ns, consumer, []);
@@ -716,8 +722,13 @@ export async function updateConsumerAccess(
     const accessUpdate = accessUpdates.join(', ');
 
     await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
-      prodEnvAccessItem,
-      consumer,
+      true,
+      {
+        prodEnvAccessItem,
+        environment: prodEnvAccessItem.environment,
+        product: prodEnvAccessItem.environment.product,
+        consumer,
+      },
       accessUpdate
     );
   }
@@ -764,7 +775,9 @@ export async function revokeAllConsumerAccess(
 
   await new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
     true,
-    consumer
+    {
+      consumer,
+    }
   );
 }
 

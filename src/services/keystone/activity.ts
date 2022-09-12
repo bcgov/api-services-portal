@@ -18,17 +18,37 @@ export async function recordActivityWithBlob(
   message: string,
   result: string = '',
   activityContext: string = '',
-  blob: any = {}
+  blob: any = {},
+  ids: string[] = []
 ) {
   const userId = context.authedItem.userId;
   const namespace = context.authedItem.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivityWithBlob] userid=%s name=%s', userId, name);
 
-  const actor = userId ? 'actor: { connect: { id : $userId }} }' : '';
+  //const actor = userId ? 'actor: { connect: { id : $userId }} }' : '';
+
+  const variables: { [key: string]: any } = {
+    name,
+    namespace,
+    type,
+    action,
+    refId,
+    message,
+    result,
+    activityContext,
+    blob: JSON.stringify(blob),
+    blobRef: `${name} ${uuidv4()}`,
+    filterKey1: undefined,
+    filterKey2: undefined,
+    filterKey3: undefined,
+  };
+  ids.forEach((id: string, index: number) => {
+    variables[`filterKey${index + 1}`] = id;
+  });
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $blob: String, $blobRef: String) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $blob: String, $blobRef: String) {
                 createActivity(data: {
                   type: $type, 
                   name: $name, 
@@ -38,6 +58,9 @@ export async function recordActivityWithBlob(
                   message: $message, 
                   result: $result, 
                   context: $activityContext, 
+                  filterKey1: $filterKey1,
+                  filterKey2: $filterKey2,
+                  filterKey3: $filterKey3,
                   blob: {
                     create: {
                       ref: $blobRef,
@@ -49,18 +72,7 @@ export async function recordActivityWithBlob(
             ) {
                     id
             } }`,
-    variables: {
-      name,
-      namespace,
-      type,
-      action,
-      refId,
-      message,
-      result,
-      activityContext,
-      blob: JSON.stringify(blob),
-      blobRef: `${name} ${uuidv4()}`,
-    },
+    variables,
   });
   logger.debug('[recordActivity] result %j', activity);
   if ('errors' in activity) {
@@ -148,12 +160,11 @@ export async function recordActivity(
             } }`,
     variables,
   });
-  return activity;
-  //
+  if (activity.errors) {
+    logger.error('[recordActivity] %j', activity.errors);
+  }
 
-  // return activity.catch((e: any) => {
-  //   logger.error('Activity Recording Error %s', e);
-  // });
+  return activity;
 }
 
 export async function getActivity(

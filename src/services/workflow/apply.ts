@@ -100,9 +100,14 @@ export const Apply = async (
         context,
         productNamespace
       ).logCollectedCredentials(
-        requestDetails.productEnvironment,
-        requestDetails.application,
-        newCredential.clientId,
+        true,
+        {
+          accessRequest: requestDetails,
+          environment: requestDetails.productEnvironment,
+          product: requestDetails.productEnvironment.product,
+          application: requestDetails.application,
+          consumerUsername: newCredential.clientId,
+        },
         requestDetails.productEnvironment.approval == true
       );
 
@@ -188,13 +193,13 @@ export const Apply = async (
         await new StructuredActivityService(
           context,
           productNamespace
-        ).logApproveAccess(
-          true,
-          requestDetails,
-          requestDetails.productEnvironment,
-          requestDetails.application,
-          requestDetails.serviceAccess.consumer.customId
-        );
+        ).logApproveAccess(true, {
+          accessRequest: requestDetails,
+          environment: requestDetails.productEnvironment,
+          product: requestDetails.productEnvironment.product,
+          application: requestDetails.application,
+          consumerUsername: requestDetails.serviceAccess.consumer.customId,
+        });
       }
     } else if (isUpdatingToRejected(existingItem, updatedItem)) {
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
@@ -222,13 +227,13 @@ export const Apply = async (
       await new StructuredActivityService(
         context,
         productNamespace
-      ).logRejectAccess(
-        true,
-        requestDetails,
-        requestDetails.productEnvironment,
-        requestDetails.application,
-        requestDetails.serviceAccess.consumer.customId
-      );
+      ).logRejectAccess(true, {
+        accessRequest: requestDetails,
+        environment: requestDetails.productEnvironment,
+        product: requestDetails.productEnvironment.product,
+        application: requestDetails.application,
+        consumerUsername: requestDetails.serviceAccess.consumer.customId,
+      });
       // } else if (isRequested(existingItem, updatedItem)) {
     }
   } catch (err) {

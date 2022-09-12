@@ -90,11 +90,9 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
-      await DeleteAccess(
-        context.createContext({ skipAccessControl: true }),
-        operation,
-        { serviceAccess: existingItem.id }
-      );
+      await DeleteAccess(context.sudo(), {
+        serviceAccess: existingItem.id,
+      });
     },
     afterDelete: async function ({
       operation,
@@ -103,10 +101,7 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
-      await AfterDeleteAccess(
-        context.createContext({ skipAccessControl: true }),
-        existingItem
-      );
+      await AfterDeleteAccess(context.sudo(), existingItem);
     },
   },
 };

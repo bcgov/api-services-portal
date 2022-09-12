@@ -84,7 +84,7 @@ module.exports = {
               context.skipAccessControl = true;
 
               const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG;
-              const result = await CreateServiceAccount(
+              const { newCredentials } = await CreateServiceAccount(
                 context,
                 productEnvironmentSlug,
                 context.req.user.namespace,
@@ -96,9 +96,9 @@ module.exports = {
                 throw err;
               });
               return {
-                id: result.clientId,
-                name: result.clientId,
-                credentials: JSON.stringify(result),
+                id: newCredentials.clientId,
+                name: newCredentials.clientId,
+                credentials: JSON.stringify(newCredentials),
               };
             },
             access: EnforcementPoint,

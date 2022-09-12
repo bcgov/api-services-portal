@@ -4,49 +4,28 @@ import { Logger } from '../../logger';
 import { format, getActivity, recordActivity } from '../keystone/activity';
 import {
   AccessRequest,
+  Activity,
   Application,
   ConsumerProdEnvAccess,
   Environment,
   GatewayConsumer,
   GatewayService,
+  Product,
+  ServiceAccess,
   User,
 } from '../keystone/types';
 
 const logger = Logger('wf.Activity');
-
-export async function getFilteredNamespaceActivity(
-  context: any,
-  ns: string,
-  first: number,
-  skip: number,
-  filter: ActivityQueryFilter
-): Promise<ActivitySummary[]> {
-  logger.debug('[getFilteredNamespaceActivity] %s %j', ns, filter);
-
-  const activities = await getActivity(context, [ns], first, skip);
-
-  return activities
-    .map((a) => {
-      const struct = a.filterKey1
-        ? JSON.parse(a.context)
-        : { message: a.message, params: {} };
-
-      return {
-        id: a.id,
-        message: struct.message,
-        params: struct.params,
-        activityAt: a.createdAt,
-        blob: a.blob,
-      } as ActivitySummary;
-    })
-    .map((a) => {
-      if (!('actor' in a.params)) {
-        a.params['actor'] = 'Unknown Actor';
-      }
-      return a;
-    });
+export interface ActivityDataInput {
+  accessRequest?: AccessRequest;
+  application?: Application;
+  environment?: Environment;
+  product?: Product;
+  serviceAccess?: ServiceAccess;
+  prodEnvAccessItem?: ConsumerProdEnvAccess;
+  consumer?: GatewayConsumer;
+  consumerUsername?: string;
 }
-
 export class StructuredActivityService {
   context: any;
   namespace: string;
@@ -58,64 +37,88 @@ export class StructuredActivityService {
     this.actor = this.context.authedItem;
   }
 
-  public async logApproveAccess(
-    success: boolean,
-    accessRequest: AccessRequest,
-    env: Environment,
-    app: Application,
-    consumerUsername: string
+  mapDataInputToParams(
+    dataInput: ActivityDataInput,
+    params: { [key: string]: string }
   ) {
-    const { actor } = this;
-    const message = success
-      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
-      : 'Failed to {action} {entity} for {application} ({consumer}) to access {product} {environment} (user: {actor})';
-    const params = {
-      actor: actor.name,
-      action: success ? 'approved' : 'approve',
-      entity: 'access request',
-      application: app.name,
-      product: env.product.name,
-      environment: env.name,
-      consumer: consumerUsername,
-    };
-    return this.recordActivity(success, message, params, [
-      `accessRequest:${accessRequest.id}`,
-      `application:${app.id}`,
-      `environment:${env.id}`,
-    ]);
+    Object.keys(dataInput).forEach((key) => {
+      switch (key) {
+        case 'application':
+          params[key] = dataInput.application.name;
+          break;
+        case 'product':
+          params[key] = dataInput.product.name;
+          break;
+        case 'environment':
+          params[key] = dataInput.environment.name;
+          break;
+        case 'consumer':
+          params[key] = dataInput.consumer.username;
+          break;
+        case 'consumerUsername':
+          params['consumer'] = dataInput.consumerUsername;
+          break;
+        case 'prodEnvAccessItem':
+          params[key] = dataInput.prodEnvAccessItem.productName;
+          break;
+      }
+    });
   }
 
-  public async logRejectAccess(
+  mapDataInputToIDs(idKeys: string[], dataInput: ActivityDataInput): string[] {
+    return idKeys.map((key) => (dataInput as any)[key].id);
+  }
+
+  public async logApproveAccess(
     success: boolean,
-    accessRequest: AccessRequest,
-    env: Environment,
-    app: Application,
-    consumerUsername: string
+    dataInput: ActivityDataInput
   ) {
     const { actor } = this;
-    const message = success
-      ? '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}'
-      : 'Failed to {action} {entity} for {application} ({consumer}) to access {product} {environment} (user: {actor})';
+    const message =
+      '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}';
     const params = {
       actor: actor.name,
-      action: success ? 'rejected' : 'reject',
+      action: 'approved',
       entity: 'access request',
-      application: app.name,
-      product: env.product.name,
-      environment: env.name,
-      consumer: consumerUsername,
     };
-    return this.recordActivity(success, message, params, [
-      `accessRequest:${accessRequest.id}`,
-      `application:${app.id}`,
-      `environment:${env.id}`,
-    ]);
+    this.mapDataInputToParams(dataInput, params);
+
+    return this.recordActivity(
+      success,
+      message,
+      params,
+      this.mapDataInputToIDs(
+        ['accessRequest', 'application', 'environment'],
+        dataInput
+      )
+    );
+  }
+
+  public async logRejectAccess(success: boolean, dataInput: ActivityDataInput) {
+    const { actor } = this;
+    const message =
+      '{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}';
+    const params = {
+      actor: actor.name,
+      action: 'rejected',
+      entity: 'access request',
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    return this.recordActivity(
+      success,
+      message,
+      params,
+      this.mapDataInputToIDs(
+        ['accessRequest', 'application', 'environment'],
+        dataInput
+      )
+    );
   }
 
   public async logCollectedCredentials(
-    env: Environment,
-    app: Application,
-    consumerUsername: string,
+    success: boolean,
+    dataInput: ActivityDataInput,
     pendingApproval: boolean
   ) {
     const { actor } = this;
@@ -125,63 +128,72 @@ export class StructuredActivityService {
       actor: actor.name,
       action: 'received credentials',
       entity: 'access',
-      application: app.name,
-      product: env.product.name,
-      environment: env.name,
-      consumer: consumerUsername,
       note: pendingApproval ? 'access pending approval' : 'auto approved',
     };
-    return this.recordActivity(true, message, params, [
-      `application:${app.id}`,
-      `user:${actor.id}`,
-    ]);
+    this.mapDataInputToParams(dataInput, params);
+
+    return this.recordActivity(
+      success,
+      message,
+      params,
+      this.mapDataInputToIDs(
+        ['accessRequest', 'application', 'environment'],
+        dataInput
+      )
+    );
   }
 
   public async logGrantRevokeConsumerAccess(
-    grant: boolean,
     success: boolean,
-    env: Environment,
-    consumer: GatewayConsumer
+    grant: boolean,
+    dataInput: ActivityDataInput
   ) {
     const { actor } = this;
+    const params = {
+      actor: actor.name,
+      action: grant ? 'granted' : 'revoked',
+      entity: 'access',
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    const ids = this.mapDataInputToIDs(['consumer'], dataInput);
+
     return this.recordActivity(
       success,
       grant
-        ? '{actor} {action} {consumer} {entity} to {product} {env}'
-        : '{actor} {action} {entity} to {product} {env} from {consumer}',
-      {
-        actor: actor.name,
-        action: grant ? 'granted' : 'revoked',
-        entity: 'access',
-        product: env.product.name,
-        env: env.name,
-        consumer: consumer.username,
-      },
-      [`consumer:${consumer.id}`]
+        ? '{actor} {action} {consumer} {entity} to {product} {environment}'
+        : '{actor} {action} {entity} to {product} {environment} from {consumer}',
+      params,
+      ids
     );
   }
 
   public async logRevokeAllConsumerAccess(
     success: boolean,
-    consumer: GatewayConsumer
+    dataInput: ActivityDataInput
   ) {
     const { actor } = this;
+
+    const params = {
+      actor: actor.name,
+      action: 'revoked all',
+      entity: 'access',
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    const ids = this.mapDataInputToIDs(['consumer'], dataInput);
+
     return this.recordActivity(
       success,
       '{actor} {action} {entity} from {consumer}',
-      {
-        actor: actor.name,
-        action: 'revoked all',
-        entity: 'access',
-        consumer: consumer.username,
-      },
-      [`consumer:${consumer.id}`]
+      params,
+      ids
     );
   }
 
   public async logUpdateConsumerAccess(
-    prodEnvAccessItem: ConsumerProdEnvAccess,
-    consumer: GatewayConsumer,
+    success: boolean,
+    dataInput: ActivityDataInput,
     accessUpdate: string
   ) {
     const { actor } = this;
@@ -192,15 +204,17 @@ export class StructuredActivityService {
       actor: actor.name,
       action: 'updated',
       entity: 'ConsumerProductAccess',
-      product: prodEnvAccessItem.productName,
-      environment: prodEnvAccessItem.environment.name,
       accessUpdate,
-      consumer: consumer.username,
     };
-    return this.recordActivity(true, message, params, [
-      `ConsumerProdEnvAccess=${consumer.id}.${prodEnvAccessItem.environment.id}`,
-      `Consumer.username=${consumer.username}`,
-      `Product=${prodEnvAccessItem.productName}`,
+
+    this.mapDataInputToParams(dataInput, params);
+
+    //const ids = this.mapDataInputToIDs(['consumer'], dataInput);
+
+    return this.recordActivity(success, message, params, [
+      `ConsumerProdEnvAccess=${dataInput.consumer.id}.${dataInput.prodEnvAccessItem.environment.id}`,
+      `Consumer.username=${dataInput.consumer.username}`,
+      `Product=${dataInput.prodEnvAccessItem.productName}`,
     ]);
   }
 
@@ -219,26 +233,43 @@ export class StructuredActivityService {
       permissions: permissions.join(', '),
       consumer: consumerUsername,
     };
-    return this.recordActivity(true, message, params, [
+    return this.recordActivity(success, message, params, [
       `consumerUsername: ${consumerUsername}`,
     ]);
   }
 
-  public async logDeleteAccess(
-    environment: Environment,
-    consumerUsername: string
-  ) {
+  public async logDeleteAccess(success: boolean, dataInput: ActivityDataInput) {
+    const nsServiceAccount =
+      dataInput.environment.appId === process.env.GWA_PROD_ENV_SLUG;
+
     const { actor } = this;
-    const message = '{actor} {action} {entity} ({consumer})';
-    const params = {
-      actor: actor.name,
-      action: 'deleted',
-      entity: 'namespace service account',
-      consumer: consumerUsername,
-    };
-    return this.recordActivity(true, message, params, [
-      `consumerUsername: ${consumerUsername}`,
-    ]);
+
+    if (nsServiceAccount) {
+      const message = '{actor} {action} {entity} ({consumer})';
+      const params = {
+        actor: actor.name,
+        action: 'deleted',
+        entity: 'namespace service account',
+      };
+      this.mapDataInputToParams(dataInput, params);
+
+      return this.recordActivity(success, message, params, [
+        `consumerUsername: ${dataInput.consumerUsername}`,
+      ]);
+    } else {
+      const message =
+        '{actor} {action} {entity} to {product} {environment} from {consumer}';
+      const params = {
+        actor: actor.name,
+        action: 'revoked',
+        entity: 'access',
+      };
+      this.mapDataInputToParams(dataInput, params);
+
+      return this.recordActivity(success, message, params, [
+        `consumerUsername: ${dataInput.consumerUsername}`,
+      ]);
+    }
   }
 
   async recordActivity(
@@ -279,4 +310,37 @@ export class StructuredActivityService {
     }
     return result;
   }
+}
+
+export async function getFilteredNamespaceActivity(
+  context: any,
+  ns: string,
+  first: number,
+  skip: number,
+  filter: ActivityQueryFilter
+): Promise<ActivitySummary[]> {
+  logger.debug('[getFilteredNamespaceActivity] %s %j', ns, filter);
+
+  const activities = await getActivity(context, [ns], first, skip);
+
+  return activities
+    .map((a) => {
+      const struct = a.filterKey1
+        ? JSON.parse(a.context)
+        : { message: a.message, params: {} };
+
+      return {
+        id: a.id,
+        message: struct.message,
+        params: struct.params,
+        activityAt: a.createdAt,
+        blob: a.blob,
+      } as ActivitySummary;
+    })
+    .map((a) => {
+      if (!('actor' in a.params)) {
+        a.params['actor'] = 'Unknown Actor';
+      }
+      return a;
+    });
 }

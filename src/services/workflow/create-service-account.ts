@@ -29,7 +29,7 @@ export const CreateServiceAccount = async (
   nsResourceId: string,
   scopes: string[],
   existingClientId?: string
-): Promise<NewCredential> => {
+): Promise<{ serviceAccessId: string; newCredentials: NewCredential }> => {
   const productEnvironment = await lookupProductEnvironmentServicesBySlug(
     context,
     productEnvironmentSlug
@@ -225,5 +225,5 @@ export const CreateServiceAccount = async (
     namespace
   ).logCreateServiceAccount(true, scopes, backToUser.clientId);
 
-  return backToUser;
+  return { serviceAccessId, newCredentials: backToUser };
 };

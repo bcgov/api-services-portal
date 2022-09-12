@@ -232,6 +232,9 @@ export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
     variables: { id: id },
   });
   // logger.debug('[lookupEnvironmentAndIssuerById] result %j', result);
+  if (result.errors) {
+    logger.error('[lookupEnvironmentAndIssuerById] %j', result.errors);
+  }
   assert.strictEqual(
     result.data.Environment == null,
     false,
