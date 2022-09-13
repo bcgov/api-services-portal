@@ -9,6 +9,7 @@ const typeActivityQueryFilter = `
 input ActivityQueryFilterInput {
   users: [String],
   serviceAccounts: [String],
+  consumers: [String],
   activityDate: String
 }
 `;

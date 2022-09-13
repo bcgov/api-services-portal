@@ -178,8 +178,9 @@ export interface ConsumerFullPluginDetails {
 }
 
 export interface ActivityQueryFilter {
-  users: string[];
-  serviceAccounts: string[];
+  users?: string[];
+  serviceAccounts?: string[];
+  consumers?: string[];
   activityDate?: string;
 }
 

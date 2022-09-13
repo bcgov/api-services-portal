@@ -29,7 +29,7 @@ import {
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'orgcontrol';
+  const ns = 'refactortime';
   const skipAccessControl = true;
 
   const identity = {
@@ -59,7 +59,7 @@ import {
     );
   }
 
-  const records = await getActivity(ctx, ['simple'], 20);
+  const records = await getActivity(ctx, ['refactortime'], undefined, 20);
 
   o(
     records

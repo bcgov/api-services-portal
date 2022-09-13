@@ -43,11 +43,13 @@ const logger = Logger('test.intg');
 
   const identity = {
     id: null,
+    name: 'Sample User',
     username: 'sample_username',
     namespace: ns,
     roles: JSON.stringify(['access-manager']),
     scopes: [],
-    userId: '60c9124f3518951bb519084d',
+    //userId: '60c9124f3518951bb519084d',
+    userId: '60c9124f3518951bb519084d', // acope@idir
   } as any;
 
   const ctx = keystone.createContext({
@@ -96,7 +98,7 @@ const logger = Logger('test.intg');
     o(consumer);
   }
 
-  if (true) {
+  if (false) {
     const cid = '62f55c9cc56563de1c514e1b';
     const id = '629fccaf76e9e65444ca6a43';
     const res = await getConsumerProdEnvAccess(ctx, ns, cid, id).catch((e) => {
@@ -192,33 +194,43 @@ const logger = Logger('test.intg');
 
     await revokeAllConsumerAccess(ctx, ns, id);
   }
-  if (false) {
-    const id = '62a18b772da3cdea467b10fd';
+  if (true) {
+    const id = '62a184cc91c56de2f62d31b1';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
-    const envId = '6180d1078a98e36cae8d061f';
+    const envId = '629fccaf76e9e65444ca6a43';
 
     const controls: RequestControls = {
-      plugins: [
-        {
-          name: 'rate-limiting',
-          config: { second: 20, policy: 'local' },
-          route: null,
-          service: {
-            id: '61816208655ef5aad5968c5c',
-            name: 'a-service-for-refactortime-2',
-          },
-        },
-      ],
+      //plugins: [
+      // {
+      //   name: 'rate-limiting',
+      //   config: { second: 20, policy: 'local' },
+      //   route: null,
+      //   service: {
+      //     id: '61816208655ef5aad5968c5c',
+      //     name: 'a-service-for-refactortime-2',
+      //   },
+      // },
+      //],
+      defaultClientScopes: ['read'],
     };
-    await revokeAccessFromConsumer(ctx, ns, consumerAccess.consumer.id, envId);
-    await grantAccessToConsumer(
+
+    await updateConsumerAccess(
       ctx,
       ns,
       consumerAccess.consumer.id,
       envId,
       controls
     );
+
+    //await revokeAccessFromConsumer(ctx, ns, consumerAccess.consumer.id, envId);
+    // await grantAccessToConsumer(
+    //   ctx,
+    //   ns,
+    //   consumerAccess.consumer.id,
+    //   envId,
+    //   controls
+    // );
   }
 
   if (false) {

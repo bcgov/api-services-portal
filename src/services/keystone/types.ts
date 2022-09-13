@@ -278,6 +278,7 @@ export type Activity = {
   filterKey1?: Maybe<Scalars['String']>;
   filterKey2?: Maybe<Scalars['String']>;
   filterKey3?: Maybe<Scalars['String']>;
+  filterKey4?: Maybe<Scalars['String']>;
   actor?: Maybe<User>;
   blob?: Maybe<Blob>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -297,6 +298,7 @@ export type ActivityCreateInput = {
   filterKey1?: Maybe<Scalars['String']>;
   filterKey2?: Maybe<Scalars['String']>;
   filterKey3?: Maybe<Scalars['String']>;
+  filterKey4?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
   blob?: Maybe<BlobRelateToOneInput>;
 };
@@ -304,6 +306,7 @@ export type ActivityCreateInput = {
 export type ActivityQueryFilterInput = {
   users?: Maybe<Array<Maybe<Scalars['String']>>>;
   serviceAccounts?: Maybe<Array<Maybe<Scalars['String']>>>;
+  consumers?: Maybe<Array<Maybe<Scalars['String']>>>;
   activityDate?: Maybe<Scalars['String']>;
 };
 
@@ -329,6 +332,7 @@ export type ActivityUpdateInput = {
   filterKey1?: Maybe<Scalars['String']>;
   filterKey2?: Maybe<Scalars['String']>;
   filterKey3?: Maybe<Scalars['String']>;
+  filterKey4?: Maybe<Scalars['String']>;
   actor?: Maybe<UserRelateToOneInput>;
   blob?: Maybe<BlobRelateToOneInput>;
 };
@@ -556,6 +560,24 @@ export type ActivityWhereInput = {
   filterKey3_not_ends_with_i?: Maybe<Scalars['String']>;
   filterKey3_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   filterKey3_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey4?: Maybe<Scalars['String']>;
+  filterKey4_not?: Maybe<Scalars['String']>;
+  filterKey4_contains?: Maybe<Scalars['String']>;
+  filterKey4_not_contains?: Maybe<Scalars['String']>;
+  filterKey4_starts_with?: Maybe<Scalars['String']>;
+  filterKey4_not_starts_with?: Maybe<Scalars['String']>;
+  filterKey4_ends_with?: Maybe<Scalars['String']>;
+  filterKey4_not_ends_with?: Maybe<Scalars['String']>;
+  filterKey4_i?: Maybe<Scalars['String']>;
+  filterKey4_not_i?: Maybe<Scalars['String']>;
+  filterKey4_contains_i?: Maybe<Scalars['String']>;
+  filterKey4_not_contains_i?: Maybe<Scalars['String']>;
+  filterKey4_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey4_not_starts_with_i?: Maybe<Scalars['String']>;
+  filterKey4_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey4_not_ends_with_i?: Maybe<Scalars['String']>;
+  filterKey4_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  filterKey4_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   actor?: Maybe<UserWhereInput>;
   actor_is_null?: Maybe<Scalars['Boolean']>;
   blob?: Maybe<BlobWhereInput>;
@@ -7294,6 +7316,8 @@ export enum SortActivitiesBy {
   FilterKey2Desc = 'filterKey2_DESC',
   FilterKey3Asc = 'filterKey3_ASC',
   FilterKey3Desc = 'filterKey3_DESC',
+  FilterKey4Asc = 'filterKey4_ASC',
+  FilterKey4Desc = 'filterKey4_DESC',
   ActorAsc = 'actor_ASC',
   ActorDesc = 'actor_DESC',
   BlobAsc = 'blob_ASC',

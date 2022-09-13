@@ -247,6 +247,7 @@ export class OrganizationController extends Controller {
     const records = await getActivity(
       ctx,
       assignedNamespaces.map((n) => n.name),
+      undefined,
       first > 50 ? 50 : first,
       skip
     );

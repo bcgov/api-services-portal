@@ -184,7 +184,13 @@ export class NamespaceController extends Controller {
     @Query() skip: number = 0
   ): Promise<Activity[]> {
     const ctx = this.keystone.sudo();
-    const records = await getActivity(ctx, [ns], first > 50 ? 50 : first, skip);
+    const records = await getActivity(
+      ctx,
+      [ns],
+      undefined,
+      first > 50 ? 50 : first,
+      skip
+    );
     return records
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))

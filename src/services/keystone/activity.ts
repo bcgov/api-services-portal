@@ -1,5 +1,5 @@
 import { Logger } from '../../logger';
-import { Activity } from './types';
+import { Activity, ActivityWhereInput } from './types';
 import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,13 +42,14 @@ export async function recordActivityWithBlob(
     filterKey1: undefined,
     filterKey2: undefined,
     filterKey3: undefined,
+    filterKey4: undefined,
   };
   ids.forEach((id: string, index: number) => {
     variables[`filterKey${index + 1}`] = id;
   });
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $blob: String, $blobRef: String) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String, $blob: String, $blobRef: String) {
                 createActivity(data: {
                   type: $type, 
                   name: $name, 
@@ -61,6 +62,7 @@ export async function recordActivityWithBlob(
                   filterKey1: $filterKey1,
                   filterKey2: $filterKey2,
                   filterKey3: $filterKey3,
+                  filterKey4: $filterKey4,
                   blob: {
                     create: {
                       ref: $blobRef,
@@ -147,6 +149,7 @@ export async function recordActivity(
     filterKey1: undefined,
     filterKey2: undefined,
     filterKey3: undefined,
+    filterKey4: undefined,
   };
   ids.forEach((id: string, index: number) => {
     variables[`filterKey${index + 1}`] = id;
@@ -154,8 +157,8 @@ export async function recordActivity(
 
   logger.warn('%j', variables);
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: ID, $filterKey1: String, $filterKey2: String, $filterKey3: String) {
-                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, filterKey1: $filterKey1, filterKey2: $filterKey2, filterKey3: $filterKey3, actor: { connect: { id : $userId }} }) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: ID, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String) {
+                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, filterKey1: $filterKey1, filterKey2: $filterKey2, filterKey3: $filterKey3, filterKey4: $filterKey4, actor: { connect: { id : $userId }} }) {
                     id
             } }`,
     variables,
@@ -170,14 +173,29 @@ export async function recordActivity(
 export async function getActivity(
   context: any,
   namespaces: string[],
+  activityQuery: ActivityWhereInput,
   first: number = 10,
   skip: number = 0
 ): Promise<Activity[]> {
   logger.debug('[getActivity] %d / %d', first, skip);
 
+  const where: ActivityWhereInput = {};
+  if (activityQuery) {
+    where['AND'] = [
+      activityQuery,
+      {
+        namespace_in: namespaces,
+      },
+    ];
+  } else {
+    where.namespace_in = namespaces;
+  }
+
+  logger.debug('[getActivity] where: %j', where);
+
   const activities = await context.executeGraphQL({
-    query: `query NamespaceActivities($namespaces: [String]!, $first: Int, $skip: Int) {
-              allActivities(where: { namespace_in: $namespaces }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+    query: `query NamespaceActivities($where: ActivityWhereInput!, $first: Int, $skip: Int) {
+              allActivities(where: $where, first:$first, skip: $skip, sortBy: createdAt_DESC) {
                 id
                 type
                 name
@@ -200,7 +218,7 @@ export async function getActivity(
               }
             }
       `,
-    variables: { namespaces, first, skip },
+    variables: { where, first, skip },
   });
   logger.debug(
     '[getActivity] returned=%d',

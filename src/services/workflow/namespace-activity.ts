@@ -5,6 +5,7 @@ import { format, getActivity, recordActivity } from '../keystone/activity';
 import {
   AccessRequest,
   Activity,
+  ActivityWhereInput,
   Application,
   ConsumerProdEnvAccess,
   Environment,
@@ -66,7 +67,10 @@ export class StructuredActivityService {
   }
 
   mapDataInputToIDs(idKeys: string[], dataInput: ActivityDataInput): string[] {
-    return idKeys.map((key) => (dataInput as any)[key].id);
+    const params: { [key: string]: string } = {};
+    this.mapDataInputToParams(dataInput, params);
+
+    return idKeys.map((key) => `${key}:${params[key]}`);
   }
 
   public async logApproveAccess(
@@ -212,9 +216,9 @@ export class StructuredActivityService {
     //const ids = this.mapDataInputToIDs(['consumer'], dataInput);
 
     return this.recordActivity(success, message, params, [
-      `ConsumerProdEnvAccess=${dataInput.consumer.id}.${dataInput.prodEnvAccessItem.environment.id}`,
-      `Consumer.username=${dataInput.consumer.username}`,
-      `Product=${dataInput.prodEnvAccessItem.productName}`,
+      `ConsumerProdEnvAccess:${dataInput.consumer.id}.${dataInput.prodEnvAccessItem.environment.id}`,
+      `consumer:${dataInput.consumer.username}`,
+      `product:${dataInput.prodEnvAccessItem.productName}`,
     ]);
   }
 
@@ -234,7 +238,7 @@ export class StructuredActivityService {
       consumer: consumerUsername,
     };
     return this.recordActivity(success, message, params, [
-      `consumerUsername: ${consumerUsername}`,
+      `consumer:${consumerUsername}`,
     ]);
   }
 
@@ -254,7 +258,7 @@ export class StructuredActivityService {
       this.mapDataInputToParams(dataInput, params);
 
       return this.recordActivity(success, message, params, [
-        `consumerUsername: ${dataInput.consumerUsername}`,
+        `consumer:${dataInput.consumerUsername}`,
       ]);
     } else {
       const message =
@@ -267,7 +271,7 @@ export class StructuredActivityService {
       this.mapDataInputToParams(dataInput, params);
 
       return this.recordActivity(success, message, params, [
-        `consumerUsername: ${dataInput.consumerUsername}`,
+        `consumer:${dataInput.consumerUsername}`,
       ]);
     }
   }
@@ -281,9 +285,9 @@ export class StructuredActivityService {
     const { context, namespace } = this;
 
     assert.strictEqual(
-      ids.length > 0 && ids.length < 4,
+      ids.length > 0 && ids.length < 5,
       true,
-      'Must be atleast one id and no more than 3'
+      'Must be atleast one id and no more than 4'
     );
 
     const activityContext = JSON.stringify({
@@ -303,7 +307,7 @@ export class StructuredActivityService {
       success ? 'success' : 'failed',
       activityContext,
       namespace,
-      ids
+      ids.concat(`actor:${params.actor}`)
     );
     if (result.errors) {
       logger.error('[recordActivity] %s %j %j', message, params, result);
@@ -321,7 +325,15 @@ export async function getFilteredNamespaceActivity(
 ): Promise<ActivitySummary[]> {
   logger.debug('[getFilteredNamespaceActivity] %s %j', ns, filter);
 
-  const activities = await getActivity(context, [ns], first, skip);
+  const activityQuery = doFiltering(filter);
+
+  const activities = await getActivity(
+    context,
+    [ns],
+    activityQuery,
+    first,
+    skip
+  );
 
   return activities
     .map((a) => {
@@ -343,4 +355,38 @@ export async function getFilteredNamespaceActivity(
       }
       return a;
     });
+}
+
+export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
+  const where: ActivityWhereInput[] = [];
+  if (filter.consumers && filter.consumers.length > 0) {
+    const match = `consumer:${filter.consumers[0]}`;
+    where.push(getFilterKeyWhere(match));
+  }
+  if (filter.serviceAccounts && filter.serviceAccounts.length > 0) {
+    const match = `actor:${filter.serviceAccounts[0]}`;
+    where.push(getFilterKeyWhere(match));
+  }
+  if (filter.users && filter.users.length > 0) {
+    const match = `actor:${filter.users[0]}`;
+    where.push(getFilterKeyWhere(match));
+  }
+  if (filter.activityDate) {
+    where.push(
+      { createdAt_gte: `${filter.activityDate}T00:00:00` },
+      { createdAt_lte: `${filter.activityDate}T23:59:59` }
+    );
+  }
+  return where.length == 1 ? where[0] : { AND: where };
+}
+
+function getFilterKeyWhere(match: string): ActivityWhereInput {
+  return {
+    OR: [
+      { filterKey1: match },
+      { filterKey2: match },
+      { filterKey3: match },
+      { filterKey4: match },
+    ],
+  } as ActivityWhereInput;
 }
