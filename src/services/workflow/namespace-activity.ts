@@ -302,6 +302,23 @@ export class StructuredActivityService {
     return this.recordActivity(success, message, params, ids);
   }
 
+  public async logConsumerPluginUpdate(
+    success: boolean,
+    dataInput: ActivityDataInput
+  ) {
+    const { actor } = this;
+    const params = {
+      actor: actor.name,
+      action: 'update',
+      entity: 'consumer control',
+    };
+    const message = '{actor} {action} {entity} for {consumer}';
+
+    const ids = this.mapDataInputToIDs(['consumer'], dataInput);
+
+    return this.recordActivity(success, message, params, ids);
+  }
+
   public async logDeleteAccess(success: boolean, dataInput: ActivityDataInput) {
     const nsServiceAccount =
       dataInput.environment.appId === process.env.GWA_PROD_ENV_SLUG;
