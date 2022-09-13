@@ -112,10 +112,12 @@ const ActivityPage: React.FC = () => {
         .reduce((memo, page) => {
           return memo.concat(page.getFilteredNamespaceActivity);
         }, [])
-        .map((a) => ({
-          ...a,
-          sortDate: sortFormat.format(new Date(a.activityAt)),
-        }));
+        .filter((a) => a.activityAt)
+        .map((a) => {
+          const [sortDateNoTimezone] = a.activityAt.split('.');
+          const sortDate = new Date(sortDateNoTimezone);
+          return { ...a, sortDate: sortFormat.format(sortDate) };
+        });
       return groupBy(result, 'sortDate');
     }
     return result;
@@ -179,7 +181,7 @@ const ActivityPage: React.FC = () => {
             return (
               <Box key={uid(date)}>
                 <Heading size="sm" mb={5}>
-                  {headerFormat.format(new Date(date.replace('-', '/')))}
+                  {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
                   const compiled = template(a.message, {
