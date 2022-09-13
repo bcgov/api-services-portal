@@ -33,6 +33,12 @@ export const AfterDeleteAccess = async (context: any, existingItem: any) => {
   // ACope deleted service account sa-refactortime-xxx
   logger.debug('[AfterDeleteAccess] %j', existingItem);
 
+  // Rejecting a request will delete the Service Access record, and so we don't need to
+  // record activity twice
+  if (existingItem.active === false) {
+    return;
+  }
+
   // existingItem.consumer : PK
   // existingItem.productEnvironment : PK
 
