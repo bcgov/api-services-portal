@@ -46,6 +46,9 @@ export class StructuredActivityService {
   ) {
     Object.keys(dataInput).forEach((key) => {
       switch (key) {
+        case 'accessRequest':
+          params[key] = dataInput.accessRequest.id;
+          break;
         case 'application':
           params[key] = dataInput.application.name;
           break;
@@ -97,7 +100,7 @@ export class StructuredActivityService {
       message,
       params,
       this.mapDataInputToIDs(
-        ['accessRequest', 'application', 'environment'],
+        ['accessRequest', 'consumer', 'environment'],
         dataInput
       )
     );
@@ -119,7 +122,7 @@ export class StructuredActivityService {
       message,
       params,
       this.mapDataInputToIDs(
-        ['accessRequest', 'application', 'environment'],
+        ['accessRequest', 'consumer', 'environment'],
         dataInput
       )
     );
@@ -146,7 +149,7 @@ export class StructuredActivityService {
       message,
       params,
       this.mapDataInputToIDs(
-        ['accessRequest', 'application', 'environment'],
+        ['accessRequest', 'consumer', 'environment'],
         dataInput
       )
     );
