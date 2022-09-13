@@ -89,7 +89,6 @@ const ActivityPage: React.FC = () => {
     });
     return result;
   }, [state]);
-  console.log(state, filter);
   const {
     data,
     fetchNextPage,
@@ -180,7 +179,7 @@ const ActivityPage: React.FC = () => {
             return (
               <Box key={uid(date)}>
                 <Heading size="sm" mb={5}>
-                  {headerFormat.format(new Date(date))}
+                  {headerFormat.format(new Date(date.replace('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
                   const compiled = template(a.message, {
