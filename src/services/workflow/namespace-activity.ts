@@ -8,6 +8,7 @@ import {
   ActivityWhereInput,
   Application,
   ConsumerProdEnvAccess,
+  CredentialIssuer,
   Environment,
   GatewayConsumer,
   GatewayService,
@@ -22,6 +23,7 @@ export interface ActivityDataInput {
   application?: Application;
   environment?: Environment;
   product?: Product;
+  credentialIssuer?: CredentialIssuer;
   serviceAccess?: ServiceAccess;
   prodEnvAccessItem?: ConsumerProdEnvAccess;
   consumer?: GatewayConsumer;
@@ -53,6 +55,9 @@ export class StructuredActivityService {
         case 'environment':
           params[key] = dataInput.environment.name;
           break;
+        case 'credentialIssuer':
+          params[key] = dataInput.credentialIssuer.name;
+          break;
         case 'consumer':
           params[key] = dataInput.consumer.username;
           break;
@@ -60,7 +65,7 @@ export class StructuredActivityService {
           params['consumer'] = dataInput.consumerUsername;
           break;
         case 'prodEnvAccessItem':
-          params[key] = dataInput.prodEnvAccessItem.productName;
+          params['product'] = dataInput.prodEnvAccessItem.productName;
           break;
       }
     });
@@ -242,6 +247,32 @@ export class StructuredActivityService {
     ]);
   }
 
+  public async logListActivity(
+    success: boolean,
+    operation: string,
+    entity: string,
+    dataInput: ActivityDataInput,
+    message: string
+  ) {
+    const operationActionMap: { [key: string]: string } = {
+      delete: 'deleted',
+      create: 'created',
+      update: 'updated',
+    };
+
+    const { actor } = this;
+    const params = {
+      actor: actor.name,
+      action: operationActionMap[operation],
+      entity,
+    };
+    this.mapDataInputToParams(dataInput, params);
+
+    const ids = this.mapDataInputToIDs([entity], dataInput);
+
+    return this.recordActivity(success, message, params, ids);
+  }
+
   public async logDeleteAccess(success: boolean, dataInput: ActivityDataInput) {
     const nsServiceAccount =
       dataInput.environment.appId === process.env.GWA_PROD_ENV_SLUG;
@@ -376,6 +407,9 @@ export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
       { createdAt_gte: `${filter.activityDate}T00:00:00` },
       { createdAt_lte: `${filter.activityDate}T23:59:59` }
     );
+  }
+  if (where.length == 0) {
+    return undefined;
   }
   return where.length == 1 ? where[0] : { AND: where };
 }
