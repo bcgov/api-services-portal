@@ -8,6 +8,7 @@ import { strict as assert } from 'assert';
 import { ConsumerPluginsService } from '../gwaapi';
 import getSubjectToken from '../../auth/auth-token';
 import { removeAllButKeys } from '../../batch/feed-worker';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.ConsumerPlugins');
 
@@ -139,9 +140,15 @@ export async function syncPlugins(
   if (allResults.length == 0) {
     logger.debug('[syncPlugins] No Change');
   } else {
-    logger.debug('[syncPlugins] Result = %j', allResults);
     const feederApi = new FeederService(process.env.FEEDER_URL);
     await feederApi.forceSync('kong', 'consumer', consumer.extForeignKey);
+
+    await new StructuredActivityService(
+      context.sudo(),
+      ns
+    ).logConsumerPluginUpdate(true, { consumer });
+
+    logger.debug('[syncPlugins] Result = %j', allResults);
   }
 }
 
