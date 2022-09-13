@@ -273,6 +273,32 @@ export class StructuredActivityService {
     return this.recordActivity(success, message, params, ids);
   }
 
+  public async logNamespaceAccess(
+    success: boolean,
+    grantRevoke: 'grant' | 'revoke',
+    entity: string,
+    subjectType: 'user' | 'client',
+    subject: string,
+    scopes: string[]
+  ) {
+    const { actor } = this;
+    const params = {
+      actor: actor.name,
+      action: grantRevoke,
+      entity,
+      subject,
+      permissions: scopes.join(', '),
+      subjectType,
+    };
+    const message = '{actor} {action} {subject} permissions: {permissions}';
+
+    const ids = [
+      subjectType == 'client' ? `serviceAccount:${subject}` : `user:${subject}`,
+    ];
+
+    return this.recordActivity(success, message, params, ids);
+  }
+
   public async logDeleteAccess(success: boolean, dataInput: ActivityDataInput) {
     const nsServiceAccount =
       dataInput.environment.appId === process.env.GWA_PROD_ENV_SLUG;
