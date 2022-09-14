@@ -74,7 +74,7 @@ const ActivityPage: React.FC = () => {
       if (k === 'activityDate') {
         const lastActivity = last(state.activityDate);
         if (lastActivity) {
-          result[k] = lastActivity.value.replaceAll('-', '/');
+          result[k] = lastActivity.value;
         }
       } else {
         if (Array.isArray(state[k])) {
