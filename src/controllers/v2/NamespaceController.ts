@@ -22,6 +22,7 @@ import {
   parseBlobString,
   parseJsonString,
   removeEmpty,
+  removeKeys,
   transformAllRefID,
 } from '../../batch/feed-worker';
 
@@ -194,6 +195,7 @@ export class NamespaceController extends Controller {
       skip
     );
     return transformActivity(records)
+      .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
