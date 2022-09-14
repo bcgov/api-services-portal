@@ -46,5 +46,6 @@ export { getConsumerAuthz } from './get-consumer-authz';
 
 export {
   getFilteredNamespaceActivity,
+  transformActivity,
   StructuredActivityService,
 } from './namespace-activity';

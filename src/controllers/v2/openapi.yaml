@@ -544,6 +544,26 @@ components:
                 - orgUnit
             type: object
             additionalProperties: false
+        ActivityDetail:
+            properties:
+                id:
+                    type: string
+                message:
+                    type: string
+                params:
+                    properties: {}
+                    additionalProperties:
+                        type: string
+                    type: object
+                activityAt: {}
+                blob: {}
+            required:
+                - id
+                - message
+                - params
+                - activityAt
+            type: object
+            additionalProperties: false
         DraftDatasetRefID:
             type: string
         LegalRefID:
@@ -1524,7 +1544,7 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    $ref: '#/components/schemas/Activity'
+                                    $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.Assign'
             summary: 'Get Namespace Activity for namespaces associated with this Organization Unit'

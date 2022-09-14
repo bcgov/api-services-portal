@@ -411,27 +411,7 @@ export async function getFilteredNamespaceActivity(
     first,
     skip
   );
-
-  return activities
-    .map((a) => {
-      const struct = a.filterKey1
-        ? JSON.parse(a.context)
-        : { message: a.message, params: {} };
-
-      return {
-        id: a.id,
-        message: struct.message,
-        params: struct.params,
-        activityAt: a.createdAt,
-        blob: a.blob,
-      } as ActivitySummary;
-    })
-    .map((a) => {
-      if (!('actor' in a.params)) {
-        a.params['actor'] = 'Unknown Actor';
-      }
-      return a;
-    });
+  return transformActivity(activities);
 }
 
 export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
@@ -481,4 +461,27 @@ function toISOString(pstDate: string) {
   return new Date(
     dt.getTime() + (dt.getTime() - pstTS.getTime())
   ).toISOString();
+}
+
+export function transformActivity(activities: Activity[]): ActivitySummary[] {
+  return activities
+    .map((a) => {
+      const struct = a.filterKey1
+        ? JSON.parse(a.context)
+        : { message: a.message, params: {} };
+
+      return {
+        id: a.id,
+        message: struct.message,
+        params: struct.params,
+        activityAt: a.createdAt,
+        blob: a.blob,
+      } as ActivitySummary;
+    })
+    .map((a) => {
+      if (!('actor' in a.params)) {
+        a.params['actor'] = 'Unknown Actor';
+      }
+      return a;
+    });
 }

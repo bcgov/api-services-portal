@@ -30,6 +30,7 @@ import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
+import { transformActivity } from '../../services/workflow';
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -191,7 +192,7 @@ export class NamespaceController extends Controller {
       first > 50 ? 50 : first,
       skip
     );
-    return records
+    return transformActivity(records)
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));
