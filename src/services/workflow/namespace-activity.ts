@@ -411,7 +411,7 @@ export async function getFilteredNamespaceActivity(
     first,
     skip
   );
-  return transformActivity(activities, filter.timeZone);
+  return transformActivity(activities);
 }
 
 export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
@@ -474,20 +474,7 @@ function toISOString(pstDate: string, _timeZone: string) {
   ).toISOString();
 }
 
-function toLocaleString(pstDate: string, _timeZone: string) {
-  const timeZone = _timeZone ? _timeZone : 'America/Los_Angeles';
-  const dt = new Date(pstDate);
-  return new Date(
-    dt.toLocaleString('en-us', {
-      timeZone,
-    })
-  ).toISOString();
-}
-
-export function transformActivity(
-  activities: Activity[],
-  timeZone: string
-): ActivitySummary[] {
+export function transformActivity(activities: Activity[]): ActivitySummary[] {
   return activities
     .map((a) => {
       const struct = a.filterKey1
@@ -498,7 +485,7 @@ export function transformActivity(
         id: a.id,
         message: struct.message,
         params: struct.params,
-        activityAt: toLocaleString(a.createdAt, timeZone),
+        activityAt: a.createdAt,
         blob: a.blob,
       } as ActivitySummary;
     })

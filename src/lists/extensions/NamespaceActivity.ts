@@ -7,6 +7,7 @@ const logger = Logger('lists.activity');
 
 const typeActivityQueryFilter = `
 input ActivityQueryFilterInput {
+  timeZone: String,
   users: [String],
   serviceAccounts: [String],
   consumers: [String],

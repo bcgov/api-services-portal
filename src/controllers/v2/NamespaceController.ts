@@ -194,7 +194,7 @@ export class NamespaceController extends Controller {
       first > 50 ? 50 : first,
       skip
     );
-    return transformActivity(records, undefined)
+    return transformActivity(records)
       .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
