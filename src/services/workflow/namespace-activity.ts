@@ -450,8 +450,8 @@ export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
   }
   if (filter.activityDate) {
     where.push(
-      { createdAt_gte: `${filter.activityDate}T00:00:00` },
-      { createdAt_lte: `${filter.activityDate}T23:59:59` }
+      { createdAt_gte: toISOString(`${filter.activityDate}T00:00:00`) },
+      { createdAt_lt: toISOString(`${filter.activityDate}T24:00:00`) }
     );
   }
   if (where.length == 0) {
@@ -469,4 +469,16 @@ function getFilterKeyWhere(match: string): ActivityWhereInput {
       { filterKey4: match },
     ],
   } as ActivityWhereInput;
+}
+
+function toISOString(pstDate: string) {
+  const dt = new Date(pstDate);
+  const pstTS = new Date(
+    dt.toLocaleString('en-us', {
+      timeZone: 'America/Los_Angeles',
+    })
+  );
+  return new Date(
+    dt.getTime() + (dt.getTime() - pstTS.getTime())
+  ).toISOString();
 }
