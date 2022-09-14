@@ -35,9 +35,6 @@ const sortFormat = new Intl.DateTimeFormat('en-CA', {
 const headerFormat = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'long',
 });
-const timeFormat = new Intl.DateTimeFormat('en-CA', {
-  timeStyle: 'short',
-});
 
 interface ActivitySortDate extends ActivitySummary {
   sortDate: string;
@@ -77,7 +74,7 @@ const ActivityPage: React.FC = () => {
       if (k === 'activityDate') {
         const lastActivity = last(state.activityDate);
         if (lastActivity) {
-          result[k] = lastActivity.value;
+          result[k] = lastActivity.value.replaceAll('-', '/');
         }
       } else {
         if (Array.isArray(state[k])) {
@@ -205,7 +202,9 @@ const ActivityPage: React.FC = () => {
                           fontSize="sm"
                           dateTime={a.activityAt}
                         >
-                          {timeFormat.format(new Date(a.activityAt))}
+                          {new Date(a.activityAt).toLocaleTimeString('en-CA', {
+                            timeStyle: 'short',
+                          })}
                         </Text>
                       </Box>
                     </Flex>
