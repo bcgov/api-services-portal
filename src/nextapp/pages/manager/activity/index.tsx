@@ -29,11 +29,15 @@ import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
 
+const timeZone = 'America/Vancouver';
+
 const sortFormat = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'short',
+  timeZone,
 });
 const headerFormat = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'long',
+  timeZone,
 });
 
 interface ActivitySortDate extends ActivitySummary {
@@ -111,8 +115,8 @@ const ActivityPage: React.FC = () => {
         }, [])
         .filter((a) => a.activityAt)
         .map((a) => {
-          const [sortDateNoTimezone] = a.activityAt.split('.');
-          const sortDate = new Date(sortDateNoTimezone);
+          const sortDate = new Date(a.activityAt);
+          console.log(a.activityAt, sortDate, sortFormat.format(sortDate));
           return { ...a, sortDate: sortFormat.format(sortDate) };
         });
       return groupBy(result, 'sortDate');
@@ -166,6 +170,8 @@ const ActivityPage: React.FC = () => {
                 py={2}
                 px={4}
                 align="center"
+                data-testid="activity-feed-error"
+                role="alert"
               >
                 <Icon as={FaTimesCircle} color="bc-error" mr={2} />
                 <Text>
@@ -177,7 +183,11 @@ const ActivityPage: React.FC = () => {
           {Object.keys(feed).map((date) => {
             return (
               <Box key={uid(date)}>
-                <Heading size="sm" mb={5}>
+                <Heading
+                  size="sm"
+                  mb={5}
+                  data-testid={`activity-feed-heading-${date}`}
+                >
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
@@ -186,7 +196,12 @@ const ActivityPage: React.FC = () => {
                   });
                   const text = DOMPurify.sanitize(compiled(a.params));
                   return (
-                    <Flex key={uid(a.id)} pb={5} align="center">
+                    <Flex
+                      key={uid(a.id)}
+                      pb={5}
+                      align="center"
+                      data-content-id={a.id}
+                    >
                       <Avatar name={a.params?.actor} size="sm" mr={5} />
                       <Box>
                         <Text>
@@ -224,6 +239,7 @@ const ActivityPage: React.FC = () => {
                 isDisabled={isLoading || isFetchingNextPage}
                 variant="secondary"
                 onClick={() => fetchNextPage()}
+                data-testid="activity-feed-load-more-btn"
               >
                 Load More
               </Button>

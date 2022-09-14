@@ -23,7 +23,13 @@ const ActivityFilters: React.FC<ActivityFiltersProps> = ({ value }) => {
   return (
     <Grid templateColumns="1fr" gap={4}>
       {value === 'activityDate' && (
-        <Input isRequired type="date" name="value" max={max} />
+        <Input
+          isRequired
+          type="date"
+          name="value"
+          max={max}
+          data-testid="activity-feed-filters-date"
+        />
       )}
       {value !== 'activityDate' && (
         <Input
