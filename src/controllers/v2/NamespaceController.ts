@@ -31,6 +31,7 @@ import { Logger } from '../../logger';
 import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
 import { transformActivity } from '../../services/workflow';
+import { ActivityDetail } from './types-extra';
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -183,7 +184,7 @@ export class NamespaceController extends Controller {
     @Path() ns: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
-  ): Promise<Activity[]> {
+  ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     const records = await getActivity(
       ctx,
