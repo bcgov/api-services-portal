@@ -411,7 +411,7 @@ export async function getFilteredNamespaceActivity(
     first,
     skip
   );
-  return transformActivity(activities);
+  return transformActivity(activities, filter.timeZone);
 }
 
 export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
@@ -430,8 +430,18 @@ export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {
   }
   if (filter.activityDate) {
     where.push(
-      { createdAt_gte: toISOString(`${filter.activityDate}T00:00:00`) },
-      { createdAt_lt: toISOString(`${filter.activityDate}T24:00:00`) }
+      {
+        createdAt_gte: toISOString(
+          `${filter.activityDate}T00:00:00`,
+          filter.timeZone
+        ),
+      },
+      {
+        createdAt_lt: toISOString(
+          `${filter.activityDate}T24:00:00`,
+          filter.timeZone
+        ),
+      }
     );
   }
   if (where.length == 0) {
@@ -451,11 +461,12 @@ function getFilterKeyWhere(match: string): ActivityWhereInput {
   } as ActivityWhereInput;
 }
 
-function toISOString(pstDate: string) {
+function toISOString(pstDate: string, _timeZone: string) {
+  const timeZone = _timeZone ? _timeZone : 'America/Los_Angeles';
   const dt = new Date(pstDate);
   const pstTS = new Date(
     dt.toLocaleString('en-us', {
-      timeZone: 'America/Los_Angeles',
+      timeZone,
     })
   );
   return new Date(
@@ -463,7 +474,20 @@ function toISOString(pstDate: string) {
   ).toISOString();
 }
 
-export function transformActivity(activities: Activity[]): ActivitySummary[] {
+function toLocaleString(pstDate: string, _timeZone: string) {
+  const timeZone = _timeZone ? _timeZone : 'America/Los_Angeles';
+  const dt = new Date(pstDate);
+  return new Date(
+    dt.toLocaleString('en-us', {
+      timeZone,
+    })
+  ).toISOString();
+}
+
+export function transformActivity(
+  activities: Activity[],
+  timeZone: string
+): ActivitySummary[] {
   return activities
     .map((a) => {
       const struct = a.filterKey1
@@ -474,7 +498,7 @@ export function transformActivity(activities: Activity[]): ActivitySummary[] {
         id: a.id,
         message: struct.message,
         params: struct.params,
-        activityAt: a.createdAt,
+        activityAt: toLocaleString(a.createdAt, timeZone),
         blob: a.blob,
       } as ActivitySummary;
     })

@@ -178,6 +178,7 @@ export interface ConsumerFullPluginDetails {
 }
 
 export interface ActivityQueryFilter {
+  timeZone?: string;
   users?: string[];
   serviceAccounts?: string[];
   consumers?: string[];

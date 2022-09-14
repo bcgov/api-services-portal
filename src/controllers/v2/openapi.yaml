@@ -402,61 +402,25 @@ components:
                 - name
                 - id
             type: object
-        DateTime:
-            description: '*****************************************'
-        Activity:
+        ActivityDetail:
             properties:
-                extRefId:
+                id:
                     type: string
-                type:
-                    type: string
-                name:
-                    type: string
-                action:
-                    type: string
-                    enum:
-                        - add
-                        - update
-                        - create
-                        - delete
-                        - validate
-                        - publish
-                result:
-                    type: string
-                    enum:
-                        - ""
-                        - received
-                        - failed
-                        - completed
-                        - success
                 message:
                     type: string
-                refId:
-                    type: string
-                namespace:
-                    type: string
-                blob:
-                    type: string
-                updatedAt:
-                    $ref: '#/components/schemas/DateTime'
-                createdAt:
-                    $ref: '#/components/schemas/DateTime'
-                actor:
-                    $ref: '#/components/schemas/UserRefID'
+                params:
+                    properties: {}
+                    additionalProperties:
+                        type: string
+                    type: object
+                activityAt: {}
+                blob: {}
+            required:
+                - message
+                - params
+                - activityAt
             type: object
             additionalProperties: false
-            example:
-                type: Namespace
-                name: 'delete Namespace[ns_x]'
-                action: delete
-                refId: ns_x
-                result: success
-                message: 'Deleted ns_x namespace'
-                actor:
-                    name: 'XT:Blink, James CITZ:IN'
-                blob: {}
-                createdAt: '2022-03-11T00:47:42.947Z'
-                updatedAt: '2022-03-11T00:47:42.947Z'
         GroupPermission:
             properties:
                 resource:
@@ -542,26 +506,6 @@ components:
             required:
                 - name
                 - orgUnit
-            type: object
-            additionalProperties: false
-        ActivityDetail:
-            properties:
-                id:
-                    type: string
-                message:
-                    type: string
-                params:
-                    properties: {}
-                    additionalProperties:
-                        type: string
-                    type: object
-                activityAt: {}
-                blob: {}
-            required:
-                - id
-                - message
-                - params
-                - activityAt
             type: object
             additionalProperties: false
         DraftDatasetRefID:
@@ -1237,7 +1181,7 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    $ref: '#/components/schemas/Activity'
+                                    $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.View'
             summary: 'Get Namespace Activity for this namespace'

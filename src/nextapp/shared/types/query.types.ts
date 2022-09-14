@@ -304,6 +304,7 @@ export type ActivityCreateInput = {
 };
 
 export type ActivityQueryFilterInput = {
+  timeZone?: Maybe<Scalars['String']>;
   users?: Maybe<Array<Maybe<Scalars['String']>>>;
   serviceAccounts?: Maybe<Array<Maybe<Scalars['String']>>>;
   consumers?: Maybe<Array<Maybe<Scalars['String']>>>;

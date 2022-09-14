@@ -257,7 +257,7 @@ export class OrganizationController extends Controller {
       skip
     );
 
-    return transformActivity(records)
+    return transformActivity(records, undefined)
       .map((o) => removeEmpty(o))
       .map((o) => transformAllRefID(o, ['blob']))
       .map((o) => parseJsonString(o, ['blob']));
