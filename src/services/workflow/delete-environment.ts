@@ -1,11 +1,12 @@
 import { strict as assert } from 'assert';
 import {
   deleteRecords,
+  lookupEnvironmentAndIssuerById,
   lookupServiceAccessesByEnvironment,
   recordActivityWithBlob,
 } from '../keystone';
 import { Logger } from '../../logger';
-import { ServiceAccess } from '../keystone/types';
+import { Environment, ServiceAccess } from '../keystone/types';
 import { updateActivity } from '../keystone/activity';
 import { Keystone } from '@keystonejs/keystone';
 
@@ -37,6 +38,7 @@ export const DeleteEnvironmentValidate = async (
 export const DeleteEnvironmentRecordActivity = async (
   context: any,
   ns: string,
+  env: Environment,
   accessList: ServiceAccess[]
 ): Promise<{ id: string }> => {
   logger.debug('Record Activity for Deleting Environment ns=%s', ns);
@@ -45,11 +47,12 @@ export const DeleteEnvironmentRecordActivity = async (
     context.sudo(),
     'delete',
     'Environment',
-    ns,
+    env.id,
     `Deleted Environment in ${ns}`,
     'pending',
     undefined,
-    { access: accessList }
+    { access: accessList },
+    [`environment:${env.id}`, `actor:${context.authedItem.name}`]
   );
 };
 
@@ -64,6 +67,8 @@ export const DeleteEnvironment = async (
     ns,
     prodEnvId
   );
+
+  const envDetail = await lookupEnvironmentAndIssuerById(context, prodEnvId);
 
   const accessList = await lookupServiceAccessesByEnvironment(context, ns, [
     prodEnvId,
@@ -80,6 +85,7 @@ export const DeleteEnvironment = async (
   const activity = await DeleteEnvironmentRecordActivity(
     context,
     ns,
+    envDetail,
     accessList
   );
 

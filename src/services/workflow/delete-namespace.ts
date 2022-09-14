@@ -110,7 +110,7 @@ export const DeleteNamespaceRecordActivity = async (
       params: { actor: context.authedItem.name, ns },
     }),
     { access: accessList, serviceAccounts: serviceAccountAccessList },
-    [`Namespace:${ns}`]
+    [`Namespace:${ns}`, `actor:${context.authedItem.name}`]
   );
 
   return r;

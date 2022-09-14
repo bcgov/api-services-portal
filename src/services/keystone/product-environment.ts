@@ -202,7 +202,10 @@ export async function lookupEnvironmentsByNS(
   return result.data.allEnvironments;
 }
 
-export async function lookupEnvironmentAndIssuerById(context: any, id: string) {
+export async function lookupEnvironmentAndIssuerById(
+  context: any,
+  id: string
+): Promise<Environment> {
   const result = await context.executeGraphQL({
     query: `query GetCredentialIssuerByEnvironmentId($id: ID!) {
                     Environment(where: {id: $id}) {

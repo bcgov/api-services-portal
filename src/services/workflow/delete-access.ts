@@ -52,11 +52,14 @@ export const AfterDeleteAccess = async (context: any, existingItem: any) => {
   // then assume it is a Namespace Service Account
   // otherwise assume it is Consumer Access
   const namespace: string = undefined;
-  await new StructuredActivityService(context, namespace).logDeleteAccess(env, {
-    product: env.product,
-    environment: env,
-    consumerUsername: existingItem.name,
-  });
+  await new StructuredActivityService(context, namespace).logDeleteAccess(
+    true,
+    {
+      product: env.product,
+      environment: env,
+      consumerUsername: existingItem.name,
+    }
+  );
 };
 
 export const DeleteAccess = async (context: any, keys: any) => {
