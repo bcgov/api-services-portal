@@ -171,7 +171,7 @@ module.exports = {
                 context.authedItem['namespace']
               ).logNamespaceAccess(
                 true,
-                'grant',
+                'granted',
                 'namespace access',
                 'user',
                 args.data.username,
@@ -230,7 +230,7 @@ module.exports = {
                 context.authedItem['namespace']
               ).logNamespaceAccess(
                 true,
-                'revoke',
+                'revoked',
                 'namespace access',
                 'user',
                 requesterName.pop(),
