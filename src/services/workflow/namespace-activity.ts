@@ -482,6 +482,12 @@ export function transformActivity(activities: Activity[]): ActivitySummary[] {
         ? JSON.parse(a.context)
         : { message: a.message, params: {} };
 
+      if (
+        a.message === '' &&
+        (a.type === 'GatewayConsumerPlugin' || a.type === 'GatewayConfig')
+      ) {
+        struct.message = `${a.type} Update`;
+      }
       return {
         id: a.id,
         message: struct.message,

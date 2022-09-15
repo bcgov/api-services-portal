@@ -271,9 +271,7 @@ const query = gql`
       message
       params
       activityAt
-      blob {
-        id
-      }
+      blob
     }
   }
 `;
