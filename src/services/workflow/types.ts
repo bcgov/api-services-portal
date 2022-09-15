@@ -187,6 +187,7 @@ export interface ActivityQueryFilter {
 
 export interface ActivitySummary {
   id: string;
+  result: string;
   message: string;
   params: { [key: string]: string };
   activityAt: Scalars['DateTime'];

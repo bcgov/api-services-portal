@@ -494,6 +494,7 @@ export function transformActivity(activities: Activity[]): ActivitySummary[] {
       }
       return {
         id: a.id,
+        result: a.result,
         message: struct.message,
         params: struct.params,
         activityAt: a.createdAt,

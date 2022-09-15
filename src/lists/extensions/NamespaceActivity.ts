@@ -18,6 +18,7 @@ input ActivityQueryFilterInput {
 const typeActivitySummary = `
 type ActivitySummary {
   id: String!,
+  result: String,
   message: String!,
   params: JSON!,
   activityAt: String!,

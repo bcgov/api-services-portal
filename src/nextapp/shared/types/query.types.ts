@@ -314,10 +314,11 @@ export type ActivityQueryFilterInput = {
 export type ActivitySummary = {
   __typename?: 'ActivitySummary';
   id: Scalars['String'];
+  result?: Maybe<Scalars['String']>;
   message: Scalars['String'];
   params: Scalars['JSON'];
   activityAt: Scalars['String'];
-  blob?: Maybe<Blob>;
+  blob?: Maybe<Scalars['JSON']>;
 };
 
 export type ActivityUpdateInput = {
