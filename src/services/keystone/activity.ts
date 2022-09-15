@@ -100,16 +100,14 @@ export async function updateActivity(
   logger.debug('[updateActivity] id=%s %s', id, result);
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($id: ID!, $activityContext: String!, $result: String!) {
+    query: `mutation ($id: ID!, $result: String!) {
                 updateActivity(id: $id, data: {
-                  context: $activityContext, 
                   result: $result
                 })
             }`,
     variables: {
       id,
       result,
-      activityContext,
     },
   });
   if ('errors' in activity) {
