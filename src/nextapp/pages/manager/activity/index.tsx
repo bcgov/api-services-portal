@@ -13,7 +13,6 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import DOMPurify from 'dompurify';
 import groupBy from 'lodash/groupBy';
 import Head from 'next/head';
 import last from 'lodash/last';
@@ -22,11 +21,11 @@ import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { gql } from 'graphql-request';
 import { useInfiniteApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
-import template from 'lodash/template';
 import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
-import { FaTimesCircle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
+import { GrDocumentUpdate } from 'react-icons/gr';
 import EmptyPane from '@/components/empty-pane';
 import ActivitySummaryText from '@/components/activity-summary';
 
@@ -117,7 +116,6 @@ const ActivityPage: React.FC = () => {
         .filter((a) => a.activityAt)
         .map((a) => {
           const sortDate = new Date(a.activityAt);
-          console.log(a.activityAt, sortDate, sortFormat.format(sortDate));
           return { ...a, sortDate: sortFormat.format(sortDate) };
         });
       return groupBy(result, 'sortDate');
@@ -201,10 +199,32 @@ const ActivityPage: React.FC = () => {
                     >
                       <Avatar name={a.params?.actor} size="sm" mr={5} />
                       <Box>
-                        <ActivitySummaryText
-                          data={a.params}
-                          message={a.message}
-                        />
+                        <Flex align="center">
+                          {a.result === 'failed' && (
+                            <>
+                              <Icon
+                                as={FaExclamationTriangle}
+                                color="bc-error"
+                                mr={2}
+                              />
+                              <Text color="bc-error" mr={2}>
+                                FAILED
+                              </Text>
+                            </>
+                          )}
+                          {a.blob && <Icon as={GrDocumentUpdate} mr={2} />}
+                          <ActivitySummaryText
+                            data={a.params}
+                            message={a.message}
+                          />
+                          {a.blob && (
+                            <Box ml={2}>
+                              <Button color="bc-blue" variant="link">
+                                View Config
+                              </Button>
+                            </Box>
+                          )}
+                        </Flex>
                         <Text
                           as="time"
                           color="bc-component"
