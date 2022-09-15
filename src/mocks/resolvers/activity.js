@@ -30,8 +30,7 @@ export const getActivityHandler = (req, res, ctx) => {
 
     result.push({
       id: `a${n * count}`,
-      message:
-        '{actor} <strong>{action}</strong> {entity} to {product} {env} from {consumer}',
+      message: '{actor} {action} {entity} to {product} {env} from {consumer}',
       params: {
         actor,
         action,

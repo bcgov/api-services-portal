@@ -28,6 +28,7 @@ import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
+import ActivitySummaryText from '@/components/activity-summary';
 
 const timeZone = 'America/Vancouver';
 
@@ -191,10 +192,6 @@ const ActivityPage: React.FC = () => {
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
-                  const compiled = template(a.message, {
-                    interpolate: /{([\s\S]+?)}/g,
-                  });
-                  const text = DOMPurify.sanitize(compiled(a.params));
                   return (
                     <Flex
                       key={uid(a.id)}
@@ -204,13 +201,10 @@ const ActivityPage: React.FC = () => {
                     >
                       <Avatar name={a.params?.actor} size="sm" mr={5} />
                       <Box>
-                        <Text>
-                          <span
-                            dangerouslySetInnerHTML={{
-                              __html: text,
-                            }}
-                          />
-                        </Text>
+                        <ActivitySummaryText
+                          data={a.params}
+                          message={a.message}
+                        />
                         <Text
                           as="time"
                           color="bc-component"
