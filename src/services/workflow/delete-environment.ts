@@ -50,7 +50,10 @@ export const DeleteEnvironmentRecordActivity = async (
     env.id,
     `Deleted Environment in ${ns}`,
     'pending',
-    JSON.stringify({ actor: context.authedItem.name }),
+    JSON.stringify({
+      message: '{actor} deleted {environment} environment',
+      params: { actor: context.authedItem.name, environment: env.name },
+    }),
     { access: accessList },
     [`environment:${env.id}`, `actor:${context.authedItem.name}`]
   );
