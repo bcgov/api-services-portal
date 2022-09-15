@@ -726,7 +726,7 @@ export async function updateConsumerAccess(
       {
         prodEnvAccessItem,
         environment: prodEnvAccessItem.environment,
-        product: prodEnvAccessItem.environment.product,
+        productName: prodEnvAccessItem.productName,
         consumer,
       },
       accessUpdate

@@ -24,6 +24,7 @@ export interface ActivityDataInput {
   application?: Application;
   environment?: Environment;
   product?: Product;
+  productName?: string;
   credentialIssuer?: CredentialIssuer;
   serviceAccess?: ServiceAccess;
   prodEnvAccessItem?: ConsumerProdEnvAccess;
@@ -55,6 +56,9 @@ export class StructuredActivityService {
           break;
         case 'product':
           params[key] = dataInput.product.name;
+          break;
+        case 'productName':
+          params['product'] = dataInput.productName;
           break;
         case 'environment':
           params[key] = dataInput.environment.name;
