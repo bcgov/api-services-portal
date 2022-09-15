@@ -37,8 +37,9 @@ export async function recordActivityWithBlob(
     message,
     result,
     activityContext,
-    blob: JSON.stringify(blob),
+    blob: typeof blob === 'string' ? blob : JSON.stringify(blob),
     blobRef: `${name} ${uuidv4()}`,
+    blobType: typeof blob === 'string' ? 'yaml' : 'json',
     filterKey1: undefined,
     filterKey2: undefined,
     filterKey3: undefined,
@@ -49,7 +50,7 @@ export async function recordActivityWithBlob(
   });
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String, $blob: String, $blobRef: String) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String, $blob: String, $blobType: String, $blobRef: String) {
                 createActivity(data: {
                   type: $type, 
                   name: $name, 
@@ -66,7 +67,7 @@ export async function recordActivityWithBlob(
                   blob: {
                     create: {
                       ref: $blobRef,
-                      type: "json",
+                      type: $blobType,
                       blob: $blob
                     }
                   }

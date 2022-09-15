@@ -16,6 +16,7 @@ import {
   ServiceAccess,
   User,
 } from '../keystone/types';
+import { parseBlobString } from '../../batch/feed-worker';
 
 const logger = Logger('wf.Activity');
 export interface ActivityDataInput {
@@ -411,7 +412,7 @@ export async function getFilteredNamespaceActivity(
     first,
     skip
   );
-  return transformActivity(activities);
+  return transformActivity(activities).map((o) => parseBlobString(o));
 }
 
 export function doFiltering(filter: ActivityQueryFilter): ActivityWhereInput {

@@ -21,7 +21,7 @@ type ActivitySummary {
   message: String!,
   params: JSON!,
   activityAt: String!,
-  blob: Blob
+  blob: JSON
 }
 `;
 
