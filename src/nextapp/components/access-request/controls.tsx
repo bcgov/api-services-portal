@@ -13,6 +13,7 @@ import {
 
 import IpRestrictions from './ip-restriction';
 import RateLimiting from './rate-limiting';
+import EmptyPane from '../empty-pane';
 
 interface ControlsProps {
   prodEnvId: string;
@@ -82,6 +83,12 @@ const Controls: React.FC<ControlsProps> = ({
   return (
     <Box data-testid="controls">
       {isLoading && <Text data-testid="controls-loading">Loading...</Text>}
+      {!data?.allGatewayServicesByNamespace.length && (
+        <EmptyPane
+          title="No gateway services assigned yet"
+          message="You can set IP restrictions and rate limiting controls to this environment once it has gateway services assigned to it"
+        />
+      )}
       <ExpandableCards>
         <IpRestrictions
           getControlName={getControlName}
