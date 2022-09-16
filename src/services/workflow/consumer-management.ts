@@ -75,6 +75,7 @@ import { getEnvironmentContext } from './get-namespaces';
 import { doFiltering } from './consumer-filters';
 import { getConsumerAuthz, StructuredActivityService } from '.';
 import {
+  Activity,
   Environment,
   GatewayConsumer,
   LabelCreateInput,
@@ -409,13 +410,20 @@ export async function getConsumerProdEnvAccess(
       access.serviceAccessId
     );
 
-    const activity = await getActivityByRefId(context, access.request.id);
+    const activity = await getActivityByRefId(
+      context,
+      `accessRequest:${access.request.id}`
+    );
     logger.debug('Activity %j', activity);
 
-    if (activity.length > 0) {
+    const match: Activity[] = activity.filter(
+      (a: Activity) => a.action === 'rejected' || a.action === 'approved'
+    );
+    if (match.length > 0) {
+      const context = JSON.parse(match[0].context);
       access.requestApprover = {
         id: '',
-        name: activity[0].actor.name,
+        name: context.params.actor,
       };
     }
   }

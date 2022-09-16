@@ -246,9 +246,6 @@ export async function getActivityByRefId(
                 result
                 message
                 context
-                actor {
-                  name
-                }
                 blob {
                   type
                   blob
