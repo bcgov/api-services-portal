@@ -24,10 +24,9 @@ import { uid } from 'react-uid';
 import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
-import { FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
-import { GrDocumentUpdate } from 'react-icons/gr';
+import { FaTimesCircle } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
-import ActivitySummaryText from '@/components/activity-summary';
+import ActivityItem from '@/components/activity-item';
 
 const timeZone = 'America/Vancouver';
 
@@ -190,54 +189,7 @@ const ActivityPage: React.FC = () => {
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
-                  return (
-                    <Flex
-                      key={uid(a.id)}
-                      pb={5}
-                      align="center"
-                      data-content-id={a.id}
-                    >
-                      <Avatar name={a.params?.actor} size="sm" mr={5} />
-                      <Box>
-                        <Flex align="center">
-                          {a.result === 'failed' && (
-                            <>
-                              <Icon
-                                as={FaExclamationTriangle}
-                                color="bc-error"
-                                mr={2}
-                              />
-                              <Text color="bc-error" mr={2}>
-                                FAILED
-                              </Text>
-                            </>
-                          )}
-                          {a.blob && <Icon as={GrDocumentUpdate} mr={2} />}
-                          <ActivitySummaryText
-                            data={a.params}
-                            message={a.message}
-                          />
-                          {a.blob && (
-                            <Box ml={2}>
-                              <Button color="bc-blue" variant="link">
-                                View Config
-                              </Button>
-                            </Box>
-                          )}
-                        </Flex>
-                        <Text
-                          as="time"
-                          color="bc-component"
-                          fontSize="sm"
-                          dateTime={a.activityAt}
-                        >
-                          {new Date(a.activityAt).toLocaleTimeString('en-CA', {
-                            timeStyle: 'short',
-                          })}
-                        </Text>
-                      </Box>
-                    </Flex>
-                  );
+                  return <ActivityItem key={uid(a.id)} data={a} />;
                 })}
               </Box>
             );
