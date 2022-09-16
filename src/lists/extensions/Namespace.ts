@@ -405,7 +405,10 @@ module.exports = {
                   },
                 }),
                 args.namespace,
-                [`Namespace:${args.namespace}`]
+                [
+                  `Namespace:${args.namespace}`,
+                  `actor:${context.authedItem.name}`,
+                ]
               );
 
               return rset;
