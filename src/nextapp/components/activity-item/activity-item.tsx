@@ -79,7 +79,12 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
               >
                 More details
               </Button>
-              <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+              <Modal
+                isOpen={isOpen}
+                onClose={onClose}
+                scrollBehavior="inside"
+                size="2xl"
+              >
                 <ModalOverlay />
                 <ModalContent>
                   <ModalCloseButton />
