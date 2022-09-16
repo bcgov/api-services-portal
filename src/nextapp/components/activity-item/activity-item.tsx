@@ -40,7 +40,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
 
   clean.forEach((str, index, arr) => {
     if (!regex.test(str)) {
-      if (arr[index - 1] === '(') {
+      if (arr[index - 1] === '<') {
         text.push(
           <Text key={uid(str)} as="mark" bg="none">
             {str}
@@ -66,16 +66,17 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
           {data.result === 'failed' && (
             <>
               <Icon as={FaExclamationTriangle} color="bc-error" mr={2} />
-              <Text color="bc-error" mr={2}>
-                FAILED
-              </Text>
             </>
           )}
-          {data.blob && <Icon as={GrDocumentUpdate} mr={2} />}
           <Text>{text}</Text>
           {data.blob && (
             <Box ml={2}>
-              <Button color="bc-blue" onClick={onOpen} variant="link">
+              <Button
+                leftIcon={<Icon as={GrDocumentUpdate} />}
+                color="bc-blue"
+                onClick={onOpen}
+                variant="link"
+              >
                 More details
               </Button>
               <Modal isOpen={isOpen} onClose={onClose} size="2xl">
