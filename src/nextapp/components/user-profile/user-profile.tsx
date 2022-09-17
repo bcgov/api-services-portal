@@ -52,30 +52,32 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   fontSize="md"
                   data-testid={`${testId}-name`}
                 >
-                  {data.name}
+                  {data.provider === 'github'
+                    ? data.providerUsername
+                    : data.name}
                 </Text>
-                {data.providerUsername && (
-                  <Text
-                    as="span"
-                    color="bc-component"
-                    fontSize="md"
-                    data-testid={`${testId}-username`}
-                  >
-                    <Text as="span" mx={1}>
-                      &bull;
-                    </Text>
-                    {data.providerUsername}
+                <Text
+                  as="span"
+                  color="bc-component"
+                  fontSize="md"
+                  data-testid={`${testId}-username`}
+                >
+                  <Text as="span" mx={1}>
+                    &bull;
                   </Text>
-                )}
+                  {getProviderText(d.provider)}
+                </Text>
               </Text>
-              <Text
-                color="bc-component"
-                data-testid={`${testId}-email`}
-                fontSize="md"
-                fontWeight="normal"
-              >
-                {data.email}
-              </Text>
+              {data.provider !== 'bscs' && (
+                <Text
+                  color="bc-component"
+                  data-testid={`${testId}-email`}
+                  fontSize="md"
+                  fontWeight="normal"
+                >
+                  {data.email}
+                </Text>
+              )}
             </>
           )}
         </Flex>
@@ -85,3 +87,18 @@ const UserProfile: React.FC<UserProfileProps> = ({
 };
 
 export default UserProfile;
+
+function getProviderText(provider: string): string {
+  switch (provider) {
+    case 'bscs':
+      return 'BC Services Card';
+    case 'idir':
+      return 'IDIR';
+    case 'bceid':
+      return 'Business BCeID';
+    case 'github':
+      return 'Github';
+    default:
+      return '';
+  }
+}
