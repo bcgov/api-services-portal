@@ -398,7 +398,7 @@ export class StructuredActivityService {
     });
 
     const formattedMessage = format(message, params);
-    logger.info('%s', formattedMessage);
+    logger.info('%s (%j)', formattedMessage, ids);
 
     const result = await recordActivity(
       context,
