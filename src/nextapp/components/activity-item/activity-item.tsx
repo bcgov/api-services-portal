@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { dump } from 'js-yaml';
 import { FaExclamationTriangle } from 'react-icons/fa';
-import { GrDocumentUpdate } from 'react-icons/gr';
+import { HiOutlineDocumentSearch } from 'react-icons/hi';
 import { uid } from 'react-uid';
 import YamlViewer from '@/components/yaml-viewer';
 import { ActivitySummary } from '@/shared/types/query.types';
@@ -72,7 +72,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
           {data.blob && (
             <Box ml={2}>
               <Button
-                leftIcon={<Icon as={GrDocumentUpdate} />}
+                leftIcon={<Icon as={HiOutlineDocumentSearch} />}
                 color="bc-blue"
                 onClick={onOpen}
                 variant="link"

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Avatar,
   Box,
   Button,
   Center,
@@ -188,9 +187,9 @@ const ActivityPage: React.FC = () => {
                 >
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
-                {feed[date].map((a) => {
-                  return <ActivityItem key={uid(a.id)} data={a} />;
-                })}
+                {feed[date].map((a) => (
+                  <ActivityItem key={uid(a.id)} data={a} />
+                ))}
               </Box>
             );
           })}
