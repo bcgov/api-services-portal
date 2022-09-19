@@ -65,7 +65,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   <Text as="span" mx={1}>
                     &bull;
                   </Text>
-                  {getProviderText(d.provider)}
+                  {getProviderText(data.provider)}
                 </Text>
               </Text>
               {data.provider !== 'bscs' && (
