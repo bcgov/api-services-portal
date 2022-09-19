@@ -21,9 +21,11 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSessionTokenValue().then((value) => {
-            userSession = value
-         })
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+                userSession = value
+            })
+        })
     })
 
 })
@@ -84,9 +86,9 @@ describe('API Tests for Fetching documentation', () => {
 
 
     it('Compare the values in response against the values passed in the request', () => {
-        cy.get('@api').then(({documentation}:any) => {
+        cy.get('@api').then(({ documentation }: any) => {
             cy.compareJSONObjects(response, documentation.body)
-        }) 
+        })
     })
 })
 
@@ -197,7 +199,7 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Verify that document contant is fetch by slug ID', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/'+slugID, 'GET').then((response) => {
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/' + slugID, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body.slug).to.be.equal(slugID)
                 expect(response.body.title).to.be.equal(documentation.body.title)

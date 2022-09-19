@@ -57,7 +57,7 @@ declare namespace Cypress {
 
     compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
 
-    getUserSessionTokenValue(): Chainable<Cypress.Response<any>>
+    getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
 
     getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
   }

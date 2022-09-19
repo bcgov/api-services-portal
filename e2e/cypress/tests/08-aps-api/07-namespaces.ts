@@ -22,7 +22,7 @@ describe('Get the user session token to pass it as authorization token to make t
 
     it('authenticates Janis (api owner) to get the user session token', () => {
         cy.get('@apiowner').then(({ apiTest }: any) => {
-            cy.getUserSessionTokenValue().then((value) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
                 userSession = value
             })
             nameSpace = apiTest.namespace
