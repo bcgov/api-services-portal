@@ -24,7 +24,7 @@ import {
   isRequested,
 } from './common';
 import { Logger } from '../../logger';
-import { AccessRequest, GatewayConsumer } from '../keystone/types';
+import { AccessRequest, Environment, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
 import { syncPlugins } from './consumer-plugins';
 import { saveConsumerLabels } from './consumer-management';
@@ -85,7 +85,12 @@ export const Apply = async (
           consumer: requestDetails.serviceAccess.consumer,
         };
 
-        await setupAuthorizationAndEnable(subjectContext, context, setup);
+        await setupAuthorizationAndEnable(
+          subjectContext,
+          context,
+          requestDetails.productEnvironment,
+          setup
+        );
 
         await updateAccessRequestState(context, requestDetails.id, {
           isApproved: true,
@@ -184,7 +189,12 @@ export const Apply = async (
           labels
         );
       }
-      await setupAuthorizationAndEnable(subjectContext, context, setup);
+      await setupAuthorizationAndEnable(
+        subjectContext,
+        context,
+        requestDetails.productEnvironment,
+        setup
+      );
 
       message.text = 'approved access';
 
@@ -269,6 +279,7 @@ interface SetupAuthorizationInput {
 async function setupAuthorizationAndEnable(
   subjectContext: any,
   context: any,
+  prodEnv: Environment,
   setup: SetupAuthorizationInput
 ) {
   const kongApi = new KongConsumerService(process.env.KONG_URL);
@@ -387,7 +398,7 @@ async function setupAuthorizationAndEnable(
 
   if ('plugins' in controls) {
     const consumer = await lookupConsumerPlugins(context, setup.consumer.id);
-    await syncPlugins(subjectContext, ns, consumer, controls.plugins);
+    await syncPlugins(subjectContext, ns, consumer, prodEnv, controls.plugins);
   }
 
   // Call /feeds to sync the Consumer with KeystoneJS

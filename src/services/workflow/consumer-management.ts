@@ -80,6 +80,7 @@ import {
   GatewayConsumer,
   LabelCreateInput,
   LabelUpdateInput,
+  Product,
 } from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
@@ -478,7 +479,7 @@ export async function grantAccessToConsumer(
   );
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(context, ns, consumer, prodEnv, plugins);
   }
 }
 
@@ -543,7 +544,7 @@ export async function revokeAccessFromConsumer(
     }
   );
 
-  await syncPlugins(context, ns, consumer, []);
+  await syncPlugins(context, ns, consumer, prodEnv, []);
 }
 
 /**
@@ -742,7 +743,16 @@ export async function updateConsumerAccess(
   }
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(
+      context,
+      ns,
+      consumer,
+      {
+        name: prodEnvAccessItem.environment.name,
+        product: { name: prodEnvAccessItem.productName },
+      } as Environment,
+      plugins
+    );
   }
 }
 
