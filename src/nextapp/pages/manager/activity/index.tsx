@@ -13,7 +13,6 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import DOMPurify from 'dompurify';
 import groupBy from 'lodash/groupBy';
 import Head from 'next/head';
 import last from 'lodash/last';
@@ -22,13 +21,12 @@ import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { gql } from 'graphql-request';
 import { useInfiniteApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
-import template from 'lodash/template';
 import Filters, { useFilters } from '@/components/filters';
 import { ActivitySummary } from '@/shared/types/query.types';
 import ActivityFilters from '@/components/activity-filters';
 import { FaTimesCircle } from 'react-icons/fa';
 import EmptyPane from '@/components/empty-pane';
-import ActivitySummaryText from '@/components/activity-summary';
+import ActivityItem from '@/components/activity-item';
 
 const timeZone = 'America/Vancouver';
 
@@ -117,7 +115,6 @@ const ActivityPage: React.FC = () => {
         .filter((a) => a.activityAt)
         .map((a) => {
           const sortDate = new Date(a.activityAt);
-          console.log(a.activityAt, sortDate, sortFormat.format(sortDate));
           return { ...a, sortDate: sortFormat.format(sortDate) };
         });
       return groupBy(result, 'sortDate');
@@ -192,32 +189,7 @@ const ActivityPage: React.FC = () => {
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => {
-                  return (
-                    <Flex
-                      key={uid(a.id)}
-                      pb={5}
-                      align="center"
-                      data-content-id={a.id}
-                    >
-                      <Avatar name={a.params?.actor} size="sm" mr={5} />
-                      <Box>
-                        <ActivitySummaryText
-                          data={a.params}
-                          message={a.message}
-                        />
-                        <Text
-                          as="time"
-                          color="bc-component"
-                          fontSize="sm"
-                          dateTime={a.activityAt}
-                        >
-                          {new Date(a.activityAt).toLocaleTimeString('en-CA', {
-                            timeStyle: 'short',
-                          })}
-                        </Text>
-                      </Box>
-                    </Flex>
-                  );
+                  return <ActivityItem key={uid(a.id)} data={a} />;
                 })}
               </Box>
             );
