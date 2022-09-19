@@ -191,7 +191,7 @@ export class NamespaceController extends Controller {
       ctx,
       [ns],
       undefined,
-      first > 50 ? 50 : first,
+      first > 100 ? 100 : first,
       skip
     );
     return transformActivity(records)
