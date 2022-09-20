@@ -121,6 +121,10 @@ const ActivityPage: React.FC = () => {
     return result;
   }, [data, isSuccess]);
 
+  const handleParamSelect = (key: string, value: string) => {
+    addFilter(key, { value: value, name: value, multiple: true });
+  };
+
   return (
     <>
       <Head>
@@ -188,7 +192,11 @@ const ActivityPage: React.FC = () => {
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
                 {feed[date].map((a) => (
-                  <ActivityItem key={uid(a.id)} data={a} />
+                  <ActivityItem
+                    key={uid(a.id)}
+                    data={a}
+                    onSelect={handleParamSelect}
+                  />
                 ))}
               </Box>
             );

@@ -15,6 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  Link,
 } from '@chakra-ui/react';
 import { dump } from 'js-yaml';
 import { FaExclamationTriangle } from 'react-icons/fa';
@@ -29,9 +30,10 @@ interface ActivitySortDate extends ActivitySummary {
 
 interface ActivityItemProps {
   data: ActivitySortDate;
+  onSelect: (key: string, value: string) => void;
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
+const ActivityItem: React.FC<ActivityItemProps> = ({ data, onSelect }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const compiled = template(data.message, data.params as TemplateMap);
   const regex = /(<|\[|\]|>)/g;
@@ -42,9 +44,13 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
     if (!regex.test(str)) {
       if (arr[index - 1] === '<') {
         text.push(
-          <Text key={uid(str)} as="mark" bg="none">
+          <Link
+            key={uid(str)}
+            textDecoration="underline"
+            onClick={() => onSelect('users', str)}
+          >
             {str}
-          </Text>
+          </Link>
         );
       } else if (arr[index - 1] === '[') {
         text.push(
