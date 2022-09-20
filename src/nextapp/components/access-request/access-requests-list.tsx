@@ -40,7 +40,9 @@ export default AccessRequestsList;
 
 const query = gql`
   query GetAccessRequests {
-    allAccessRequestsByNamespace(where: { isComplete_not: true }) {
+    allAccessRequestsByNamespace(
+      where: { serviceAccess_is_null: false, isComplete_not: true }
+    ) {
       id
       name
       additionalDetails
@@ -48,6 +50,8 @@ const query = gql`
       createdAt
       requestor {
         name
+        providerUsername
+        email
       }
       application {
         name

@@ -105,9 +105,14 @@ export const DeleteNamespaceRecordActivity = async (
     ns,
     `Deleted ${ns} namespace`,
     'pending',
-    undefined,
-    { access: accessList, serviceAccounts: serviceAccountAccessList }
+    JSON.stringify({
+      message: '{actor} deleted {ns} namespace',
+      params: { actor: context.authedItem.name, ns },
+    }),
+    { access: accessList, serviceAccounts: serviceAccountAccessList },
+    [`Namespace:${ns}`, `actor:${context.authedItem.name}`]
   );
+
   return r;
 };
 

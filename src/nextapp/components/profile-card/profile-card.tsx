@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Avatar, Box, BoxProps, Flex, Text } from '@chakra-ui/react';
+import { Avatar, Flex, FlexProps, Text } from '@chakra-ui/react';
 import { User } from '@/shared/types/query.types';
 import { UserData } from '@/shared/types/app.types';
 
-interface ProfileCardProps extends BoxProps {
+interface ProfileCardProps extends FlexProps {
   data: User | UserData;
   variant?: 'flat' | 'raised';
 }
@@ -32,11 +32,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         justify="space-between"
         py={1}
       >
-        <Text isTruncated fontWeight="bold">
+        <Text isTruncated fontWeight="bold" lineHeight={5}>
           {data.name}
-          <Text isTruncated as="span" fontWeight="normal" color="gray.400">
-            {` • ${data.username}`}
-          </Text>
+          {data.providerUsername && (
+            <Text isTruncated as="span" fontWeight="normal" color="gray.400">
+              {` • ${data.providerUsername}`}
+            </Text>
+          )}
         </Text>
         <Text fontWeight="normal" color="bc-component">
           {data.email}

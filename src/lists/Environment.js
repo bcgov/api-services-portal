@@ -9,6 +9,7 @@ const {
   ValidateActiveEnvironment,
   DeleteEnvironment,
   DeleteEnvironmentValidate,
+  StructuredActivityService,
 } = require('../services/workflow');
 
 const {
@@ -136,6 +137,37 @@ module.exports = {
         existingItem.id
       );
     },
+
+    afterDelete: async function ({ existingItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        'delete',
+        'environment',
+        {
+          environment: existingItem,
+        },
+        '{actor} {action} {entity} {environment}'
+      );
+    },
+
+    afterChange: async function ({ operation, updatedItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        operation,
+        'environment',
+        {
+          environment: updatedItem,
+        },
+        '{actor} {action} {entity} {environment}'
+      );
+    },
+
     // beforeDelete: async function ({
     //   operation,
     //   existingItem,

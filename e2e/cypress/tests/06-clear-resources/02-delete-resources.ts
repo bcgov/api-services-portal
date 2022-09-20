@@ -15,7 +15,7 @@ describe('Delete created resources', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.resetState()
+    // cy.resetState()
   })
 
   beforeEach(() => {

@@ -29,7 +29,7 @@ describe('Grant Access Manager Role', () => {
     })
   })
 
-  it('Grant "Access.Manager" and "Namespace.View" access to Mark (access manager)', () => {
+  it('Grant "Access.Manager" access to Mark (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
       na.clickGrantUserAccessButton()

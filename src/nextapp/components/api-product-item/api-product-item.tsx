@@ -106,6 +106,7 @@ const ApiProductItem: React.FC<ApiProductItemProps> = ({
                   id={id}
                   name={data.name}
                   preview={preview}
+                  variant="inline"
                 />
               </Text>
             </GridItem>

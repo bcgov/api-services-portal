@@ -49,22 +49,24 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
       <Heading size="sm" mb={3.5}>
         Business Profile:
       </Heading>
-      {!data.institution && (
-        <Text color="bc-component">A business profile has not been added</Text>
-      )}
-      {data.institution && (
-        <Flex>
-          <Avatar
-            bgColor="bc-gray"
-            icon={
-              <Icon
-                as={FaBuilding}
-                color={
-                  data.institution?.isSuspended ? 'bc-component' : 'bc-blue'
-                }
-              />
-            }
-          />
+      <Flex>
+        <Avatar
+          bgColor="bc-gray"
+          icon={
+            <Icon
+              as={FaBuilding}
+              color={data.institution?.isSuspended ? 'bc-component' : 'bc-blue'}
+            />
+          }
+        />
+        {!data.institution && (
+          <Flex ml={2.5} align="center">
+            <Text color="bc-component" fontStyle="italic" opacity={0.6}>
+              A Business Profile has not been added
+            </Text>
+          </Flex>
+        )}
+        {data.institution && (
           <Flex
             ml={2.5}
             flex={1}
@@ -82,7 +84,7 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
             )}
             {!isLoading && (
               <>
-                <Text lineHeight="1" data-testid={`${testId}-name`}>
+                <Text lineHeight="5" data-testid={`${testId}-name`}>
                   {legalName}
                   {data.institution?.isSuspended && (
                     <Text as="em" ml={2} color="bc-divider">
@@ -94,8 +96,8 @@ const BusinessProfileContent: React.FC<BusinessProfileContentProps> = ({
               </>
             )}
           </Flex>
-        </Flex>
-      )}
+        )}
+      </Flex>
     </Box>
   );
 };

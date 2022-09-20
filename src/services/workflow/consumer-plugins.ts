@@ -1,13 +1,19 @@
 import { Logger } from '../../logger';
 import { FeederService } from '../feeder';
 import { lookupKongRouteIds, lookupKongServiceIds } from '../keystone';
-import { GatewayConsumer } from '../keystone/types';
+import {
+  Environment,
+  GatewayConsumer,
+  GatewayRoute,
+  GatewayService,
+} from '../keystone/types';
 import { KongObjectID, KongPlugin } from '../gwaapi';
-import { ConsumerPlugin } from './types';
+import { ConsumerPlugin, ConsumerPluginInput } from './types';
 import { strict as assert } from 'assert';
 import { ConsumerPluginsService } from '../gwaapi';
 import getSubjectToken from '../../auth/auth-token';
 import { removeAllButKeys } from '../../batch/feed-worker';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.ConsumerPlugins');
 
@@ -15,6 +21,7 @@ export async function syncPlugins(
   context: any,
   ns: string,
   consumer: GatewayConsumer,
+  prodEnv: Environment,
   plugins: ConsumerPlugin[]
 ) {
   logger.debug('[syncPlugins] %j', plugins);
@@ -33,25 +40,25 @@ export async function syncPlugins(
 
   // quick mapping of KeystoneJS ID to Kong ID
   // for Service and Route
-  const kongIdMapper: any = {};
+  const kongIdMapper: { [key: string]: GatewayRoute | GatewayService } = {};
 
   const routeIds: any = plugins
     .filter((plugin) => plugin.route)
     .map((plugin) => plugin.route.id);
   (await lookupKongRouteIds(context, routeIds)).map((r) => {
-    kongIdMapper[`r:${r.id}`] = r.extForeignKey;
+    kongIdMapper[`r:${r.id}`] = r;
   });
 
   const serviceIds: any = plugins
     .filter((plugin) => plugin.service)
     .map((plugin) => plugin.service.id);
   (await lookupKongServiceIds(context, serviceIds)).map((s) => {
-    kongIdMapper[`s:${s.id}`] = s.extForeignKey;
+    kongIdMapper[`s:${s.id}`] = s;
   });
 
   const subjectToken = getSubjectToken(context.req);
 
-  const promises: Promise<KongObjectID | void>[] = [];
+  const promises: Promise<ConsumerPluginInput>[] = [];
 
   // add new
   promises.push(
@@ -63,17 +70,29 @@ export async function syncPlugins(
           config: plugin.config,
         };
         if (plugin.service) {
-          newPlugin.service = { id: kongIdMapper[`s:${plugin.service.id}`] };
+          newPlugin.service = {
+            id: kongIdMapper[`s:${plugin.service.id}`].extForeignKey,
+          };
         }
         if (plugin.route) {
-          newPlugin.route = { id: kongIdMapper[`r:${plugin.route.id}`] };
+          newPlugin.route = {
+            id: kongIdMapper[`r:${plugin.route.id}`].extForeignKey,
+          };
         }
-        return AddPluginToConsumer(
+        await AddPluginToConsumer(
           subjectToken,
           ns,
           consumer.extForeignKey,
           newPlugin
         );
+        return {
+          operation: 'added',
+          name: plugin.name,
+          serviceOrRouteName:
+            kongIdMapper[`s:${plugin.service?.id}`]?.name ||
+            kongIdMapper[`r:${plugin.route?.id}`]?.name,
+          config: plugin.config,
+        } as ConsumerPluginInput;
       })
   );
 
@@ -105,10 +124,14 @@ export async function syncPlugins(
           config: plugin.config,
         };
         if (plugin.service) {
-          newPlugin.service = { id: kongIdMapper[`s:${plugin.service.id}`] };
+          newPlugin.service = {
+            id: kongIdMapper[`s:${plugin.service.id}`].extForeignKey,
+          };
         }
         if (plugin.route) {
-          newPlugin.route = { id: kongIdMapper[`r:${plugin.route.id}`] };
+          newPlugin.route = {
+            id: kongIdMapper[`r:${plugin.route.id}`].extForeignKey,
+          };
         }
 
         await UpdatePluginForConsumer(
@@ -118,6 +141,14 @@ export async function syncPlugins(
           oldPlugin.extForeignKey,
           newPlugin
         );
+        return {
+          operation: 'updated',
+          name: plugin.name,
+          serviceOrRouteName:
+            kongIdMapper[`s:${plugin.service?.id}`]?.name ||
+            kongIdMapper[`r:${plugin.route?.id}`]?.name,
+          config: plugin.config,
+        } as ConsumerPluginInput;
       })
   );
 
@@ -125,23 +156,46 @@ export async function syncPlugins(
   promises.push(
     ...consumer.plugins
       .filter((plugin) => plugins.filter((p) => p.id === plugin.id).length == 0)
-      .map(async (plugin) => {
-        await DeletePluginFromConsumer(
-          subjectToken,
-          ns,
-          consumer.extForeignKey,
-          plugin.extForeignKey
-        );
-      })
+      .map(
+        async (plugin): Promise<ConsumerPluginInput> => {
+          await DeletePluginFromConsumer(
+            subjectToken,
+            ns,
+            consumer.extForeignKey,
+            plugin.extForeignKey
+          );
+          return {
+            operation: 'removed',
+            name: plugin.name,
+            serviceOrRouteName: plugin.service?.name || plugin.route?.name,
+            config: plugin.config,
+          } as ConsumerPluginInput;
+        }
+      )
   );
 
   const allResults = await Promise.all(promises);
   if (allResults.length == 0) {
     logger.debug('[syncPlugins] No Change');
   } else {
-    logger.debug('[syncPlugins] Result = %j', allResults);
     const feederApi = new FeederService(process.env.FEEDER_URL);
     await feederApi.forceSync('kong', 'consumer', consumer.extForeignKey);
+
+    const activityPromises = allResults.map(
+      async (pluginSummary: ConsumerPluginInput): Promise<void> => {
+        await new StructuredActivityService(
+          context.sudo(),
+          ns
+        ).logConsumerPluginUpdate(
+          true,
+          { consumer, environment: prodEnv, product: prodEnv.product },
+          pluginSummary
+        );
+      }
+    );
+    await Promise.all(activityPromises);
+
+    logger.debug('[syncPlugins] Result = %j', allResults);
   }
 }
 

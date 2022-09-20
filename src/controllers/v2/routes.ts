@@ -239,26 +239,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgUnit":{"ref":"Maybe_Scalars-at-String_"},"org":{"ref":"Maybe_Scalars-at-String_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "DateTime": {
-        "dataType": "refAlias",
-        "type": {"dataType":"any","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Activity": {
+    "ActivityDetail": {
         "dataType": "refObject",
         "properties": {
-            "extRefId": {"dataType":"string"},
-            "type": {"dataType":"string"},
-            "name": {"dataType":"string"},
-            "action": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["add"]},{"dataType":"enum","enums":["update"]},{"dataType":"enum","enums":["create"]},{"dataType":"enum","enums":["delete"]},{"dataType":"enum","enums":["validate"]},{"dataType":"enum","enums":["publish"]}]},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":[""]},{"dataType":"enum","enums":["received"]},{"dataType":"enum","enums":["failed"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["success"]}]},
-            "message": {"dataType":"string"},
-            "refId": {"dataType":"string"},
-            "namespace": {"dataType":"string"},
-            "blob": {"dataType":"string"},
-            "updatedAt": {"ref":"DateTime"},
-            "createdAt": {"ref":"DateTime"},
-            "actor": {"ref":"UserRefID"},
+            "id": {"dataType":"string"},
+            "message": {"dataType":"string","required":true},
+            "params": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true},
+            "activityAt": {"dataType":"any","required":true},
+            "blob": {"dataType":"any"},
         },
         "additionalProperties": false,
     },

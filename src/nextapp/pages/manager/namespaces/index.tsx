@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Button,
   Box,
-  Center,
   Container,
   Heading,
   Flex,
@@ -21,7 +20,6 @@ import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { useAuth } from '@/shared/services/auth';
 import {
-  FaArrowUp,
   FaChartBar,
   FaChevronRight,
   FaClock,
@@ -32,12 +30,14 @@ import {
   FaUserShield,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation } from '@/shared/services/api';
+import { restApi, useApiMutation, useApi } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
-import NewNamespace from '@/components/new-namespace';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
+import EmptyPane from '@/components/empty-pane';
+import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
+import NewNamespace from '@/components/new-namespace';
 
 const actions = [
   {
@@ -67,7 +67,7 @@ const actions = [
 const secondaryActions = [
   {
     title: 'Activity',
-    url: '/manager/poc/activity',
+    url: '/manager/activity',
     icon: FaClock,
     roles: ['api-owner', 'provider-user', 'access-manager'],
     description: 'View all the activity within your namepace.',
@@ -139,27 +139,27 @@ const NamespacesPage: React.FC = () => {
 
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={user?.namespace} />
+        <PageHeader title={hasNamespace ? user.namespace : ''} />
         {!hasNamespace && (
-          <>
-            <Center minHeight={300}>
-              <Box p={4} bgColor="white" textAlign="center" maxW={350}>
-                <Box mb={4}>
-                  <Heading size="sm" mb={2}>
-                    No Active Namespace
-                  </Heading>
-                  <Text fontSize="sm">
-                    Select a namespace in the toolbar above{' '}
-                    <Icon as={FaArrowUp} /> or create a new namspace here.
-                  </Text>
-                </Box>
-                <Button onClick={onOpen} variant="primary">
-                  Create New Namespace
-                </Button>
-              </Box>
-            </Center>
+          <EmptyPane
+            message="To get started select a Namespace from the dropdown below or create a new Namespace"
+            title="No Namespace selected yet"
+            boxProps={{ borderRadius: 0, mx: 0 }}
+            my={0}
+          >
+            <Flex justifyContent="center" alignItems="center" gridGap={4}>
+              <NamespaceMenu
+                user={user}
+                variant="ns-selector"
+                buttonMessage="Select a Namespace"
+              />
+              <Text>or</Text>
+              <Button variant="primary" onClick={onOpen}>
+                Create New Namespace
+              </Button>
+            </Flex>
             <NewNamespace isOpen={isOpen} onClose={onClose} />
-          </>
+          </EmptyPane>
         )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>

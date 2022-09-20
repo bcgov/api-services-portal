@@ -37,6 +37,7 @@ interface AccessRequestDialogProps {
   name: string;
   preview: boolean;
   open?: boolean;
+  variant?: 'inline' | 'button';
 }
 
 const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
@@ -46,6 +47,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   name,
   preview,
   open,
+  variant = 'button',
 }) => {
   const client = useQueryClient();
   const auth = useAuth();
@@ -65,6 +67,15 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     ? 'Request Access & Continue'
     : 'Request Access';
   const [accessRequestId, setAccessRequestId] = React.useState<string>('');
+  const isInline = variant === 'inline';
+  const buttonProps = !isInline
+    ? {}
+    : {
+        fontWeight: 'normal',
+        fontSize: 'inherit',
+        color: 'bc-link',
+        textDecor: 'underline',
+      };
 
   // Events
   const handleAccessSubmit = React.useCallback(
@@ -148,16 +159,20 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     <>
       {auth.user && (
         <Button
-          colorScheme="green"
           disabled={disabled}
-          variant="solid"
           onClick={onOpen}
           data-testid="request-access-button"
+          variant={isInline ? 'link' : 'primary'}
+          fontWeight="600"
+          color="white"
+          {...buttonProps}
         >
           Request Access
         </Button>
       )}
-      {!auth.user && <LoginDialog buttonText="Request Access" />}
+      {!auth.user && (
+        <LoginDialog buttonText="Request Access" buttonVariant="link" />
+      )}
       <Modal
         isOpen={open || isOpen}
         onClose={onClose}

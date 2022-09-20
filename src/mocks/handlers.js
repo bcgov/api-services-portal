@@ -32,6 +32,7 @@ import {
   revokeAccessHandler,
   revokeSAAccessHandler,
 } from './resolvers/namespace-access';
+import { getActivityHandler } from './resolvers/activity';
 
 // Namespaces
 const allNamespaces = [
@@ -98,6 +99,7 @@ export const handlers = [
       })
     );
   }),
+  keystone.query('GetActivity', getActivityHandler),
   keystone.query('GetConsumers', getConsumersHandler),
   keystone.query('GetConsumer', getConsumerHandler),
   keystone.query('GetAccessRequests', getAccessRequestsHandler),

@@ -18,6 +18,7 @@ import {
 } from '../keycloak';
 import { Logger } from '../../logger';
 import { Policy, UMAPolicyService } from '../uma2';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.CreateSvcAcct');
 
@@ -28,7 +29,7 @@ export const CreateServiceAccount = async (
   nsResourceId: string,
   scopes: string[],
   existingClientId?: string
-): Promise<NewCredential> => {
+): Promise<{ serviceAccessId: string; newCredentials: NewCredential }> => {
   const productEnvironment = await lookupProductEnvironmentServicesBySlug(
     context,
     productEnvironmentSlug
@@ -219,5 +220,10 @@ export const CreateServiceAccount = async (
 
   await markActiveTheServiceAccess(context, serviceAccessId);
 
-  return backToUser;
+  await new StructuredActivityService(
+    context,
+    namespace
+  ).logCreateServiceAccount(true, scopes, backToUser.clientId);
+
+  return { serviceAccessId, newCredentials: backToUser };
 };

@@ -5,6 +5,15 @@ import { Logger } from '../../logger';
 
 const logger = Logger('controller');
 
+const resolveName = function (user: any) {
+  for (const nm of ['name', 'clientId']) {
+    if (nm in user) {
+      return user[nm];
+    }
+  }
+  return null;
+};
+
 const resolveUsername = function (user: any) {
   for (const nm of ['preferred_username', 'clientId']) {
     if (nm in user) {
@@ -13,6 +22,7 @@ const resolveUsername = function (user: any) {
   }
   return null;
 };
+
 @injectable()
 export class KeystoneService {
   private keystone: any;
@@ -30,8 +40,10 @@ export class KeystoneService {
 
   public createContext(request: any, skipAccessControl: boolean = false): any {
     const _scopes = scopes(request.user.scope);
+
     const identity = {
       id: null,
+      name: resolveName(request.user),
       username: resolveUsername(request.user),
       namespace: request.params.ns,
       roles: JSON.stringify(scopesToRoles(null, _scopes)),

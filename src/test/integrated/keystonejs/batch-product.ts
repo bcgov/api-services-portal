@@ -29,6 +29,7 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
 
   const identity = {
     id: null,
+    name: 'Sample User',
     username: 'sample_username',
     namespace: ns,
     roles: JSON.stringify(['api-owner']),
@@ -66,16 +67,16 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
     o(result);
   }
 
-  if (false) {
+  if (true) {
     const product2 = {
-      name: 'my-new-product-2',
-      appId: '100000000002',
+      name: 'refactortime prod tes2',
+      appId: '122000000002',
       environments: [
         {
           name: 'dev',
           approval: false,
           flow: 'public',
-          appId: '10000000',
+          appId: '12200000',
         },
       ],
     };

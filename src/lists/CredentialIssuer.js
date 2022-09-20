@@ -18,7 +18,10 @@ const {
   FieldEnforcementPoint,
 } = require('../authz/enforcement');
 const { updateEnvironmentDetails } = require('../services/keystone');
-const { DeleteIssuerValidate } = require('../services/workflow');
+const {
+  DeleteIssuerValidate,
+  StructuredActivityService,
+} = require('../services/workflow');
 
 const { Logger } = require('../logger');
 const logger = Logger('lists.credentialissuer');
@@ -189,6 +192,36 @@ module.exports = {
         context,
         context.authedItem['namespace'],
         existingItem.id
+      );
+    },
+
+    afterDelete: async function ({ existingItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        'delete',
+        'authorization profile',
+        {
+          credentialIssuer: existingItem,
+        },
+        '{actor} {action} {entity} {credentialIssuer}'
+      );
+    },
+
+    afterChange: async function ({ operation, updatedItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        operation,
+        'authorization profile',
+        {
+          credentialIssuer: updatedItem,
+        },
+        '{actor} {action} {entity} {credentialIssuer}'
       );
     },
   },
