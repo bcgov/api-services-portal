@@ -70,7 +70,7 @@ export async function syncPlugins(
         if (plugin.route) {
           newPlugin.route = { id: kongIdMapper[`r:${plugin.route.id}`] };
         }
-        AddPluginToConsumer(
+        await AddPluginToConsumer(
           subjectToken,
           ns,
           consumer.extForeignKey,
