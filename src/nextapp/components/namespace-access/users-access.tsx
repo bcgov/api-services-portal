@@ -26,6 +26,7 @@ import ActionsMenu from '../actions-menu';
 
 type AccessItem = {
   requesterName: string;
+  tickets: string[];
   scopes: { id: string; name: string }[];
 };
 interface UsersAccessProps {
@@ -81,6 +82,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
             id: d.scope,
             name: d.scopeName,
           })),
+          tickets: groupedByRequester[r].map((d) => d.id),
         };
       });
       if (search) {
@@ -124,7 +126,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       await revoke.mutateAsync({
         prodEnvId,
         resourceId,
-        tickets: d.scopes.map((s) => s.id),
+        tickets: d.tickets,
       });
       toast({
         title: 'Access revoked',
