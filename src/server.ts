@@ -172,6 +172,7 @@ for (const _list of [
   'ConsumerScopesAndRoles',
   'CredentialRegenerate',
   'Namespace',
+  'NamespaceActivity',
   'OrganizationPolicy',
   'ServiceAccount',
   'UMAPolicy',

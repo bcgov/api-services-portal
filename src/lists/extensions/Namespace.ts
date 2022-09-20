@@ -9,6 +9,8 @@ import {
 import {
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
+  recordActivity,
+  recordActivityWithBlob,
 } from '../../services/keystone';
 import {
   getEnvironmentContext,
@@ -87,6 +89,13 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
@@ -388,6 +397,27 @@ module.exports = {
 
               await kcGroupService.createIfMissing('ns', args.namespace);
 
+              await recordActivity(
+                context.sudo(),
+                'create',
+                'Namespace',
+                args.namespace,
+                `Created ${args.namespace} namespace`,
+                'success',
+                JSON.stringify({
+                  message: '{actor} created {ns} namespace',
+                  params: {
+                    actor: context.authedItem.name,
+                    ns: args.namespace,
+                  },
+                }),
+                args.namespace,
+                [
+                  `Namespace:${args.namespace}`,
+                  `actor:${context.authedItem.name}`,
+                ]
+              );
+
               return rset;
             },
             access: EnforcementPoint,
@@ -437,7 +467,7 @@ module.exports = {
                 );
               }
               await DeleteNamespace(
-                context.createContext({ skipAccessControl: true }),
+                context.sudo(),
                 getSubjectToken(context.req),
                 args.namespace
               );

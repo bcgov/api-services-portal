@@ -90,6 +90,7 @@ export const generateCredential = async (
     return {
       flow,
       apiKey: newApiKey.apiKey.apiKey,
+      clientId,
     } as NewCredential;
   } else if (flow == 'client-credentials') {
     const productEnvironment = await lookupProductEnvironmentServices(

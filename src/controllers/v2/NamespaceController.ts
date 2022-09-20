@@ -22,6 +22,7 @@ import {
   parseBlobString,
   parseJsonString,
   removeEmpty,
+  removeKeys,
   transformAllRefID,
 } from '../../batch/feed-worker';
 
@@ -30,6 +31,8 @@ import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { Activity } from './types';
 import { getActivity } from '../../services/keystone/activity';
+import { transformActivity } from '../../services/workflow';
+import { ActivityDetail } from './types-extra';
 const logger = Logger('controllers.Namespace');
 
 /**
@@ -182,10 +185,17 @@ export class NamespaceController extends Controller {
     @Path() ns: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
-  ): Promise<Activity[]> {
+  ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
-    const records = await getActivity(ctx, [ns], first > 50 ? 50 : first, skip);
-    return records
+    const records = await getActivity(
+      ctx,
+      [ns],
+      undefined,
+      first > 100 ? 100 : first,
+      skip
+    );
+    return transformActivity(records)
+      .map((o) => removeKeys(o, ['id']))
       .map((o) => removeEmpty(o))
       .map((o) => parseJsonString(o, ['context']))
       .map((o) => parseBlobString(o));

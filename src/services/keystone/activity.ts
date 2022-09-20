@@ -1,9 +1,14 @@
 import { Logger } from '../../logger';
-import { Activity } from './types';
+import { Activity, ActivityWhereInput } from './types';
 import { strict as assert } from 'assert';
 import { v4 as uuidv4 } from 'uuid';
 
 const logger = Logger('keystone.activity');
+
+export interface TokenizedActivity {
+  message: string;
+  params: { [key: string]: string };
+}
 
 export async function recordActivityWithBlob(
   context: any,
@@ -13,17 +18,39 @@ export async function recordActivityWithBlob(
   message: string,
   result: string = '',
   activityContext: string = '',
-  blob: any = {}
+  blob: any = {},
+  ids: string[] = []
 ) {
   const userId = context.authedItem.userId;
   const namespace = context.authedItem.namespace;
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivityWithBlob] userid=%s name=%s', userId, name);
 
-  const actor = userId ? 'actor: { connect: { id : $userId }} }' : '';
+  //const actor = userId ? 'actor: { connect: { id : $userId }} }' : '';
+
+  const variables: { [key: string]: any } = {
+    name,
+    namespace,
+    type,
+    action,
+    refId,
+    message,
+    result,
+    activityContext,
+    blob: typeof blob === 'string' ? blob : JSON.stringify(blob),
+    blobRef: `${name} ${uuidv4()}`,
+    blobType: typeof blob === 'string' ? 'yaml' : 'json',
+    filterKey1: undefined,
+    filterKey2: undefined,
+    filterKey3: undefined,
+    filterKey4: undefined,
+  };
+  ids.forEach((id: string, index: number) => {
+    variables[`filterKey${index + 1}`] = id;
+  });
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $blob: String, $blobRef: String) {
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String, $blob: String, $blobType: String, $blobRef: String) {
                 createActivity(data: {
                   type: $type, 
                   name: $name, 
@@ -33,10 +60,14 @@ export async function recordActivityWithBlob(
                   message: $message, 
                   result: $result, 
                   context: $activityContext, 
+                  filterKey1: $filterKey1,
+                  filterKey2: $filterKey2,
+                  filterKey3: $filterKey3,
+                  filterKey4: $filterKey4,
                   blob: {
                     create: {
                       ref: $blobRef,
-                      type: "json",
+                      type: $blobType,
                       blob: $blob
                     }
                   }
@@ -44,18 +75,7 @@ export async function recordActivityWithBlob(
             ) {
                     id
             } }`,
-    variables: {
-      name,
-      namespace,
-      type,
-      action,
-      refId,
-      message,
-      result,
-      activityContext,
-      blob: JSON.stringify(blob),
-      blobRef: `${name} ${uuidv4()}`,
-    },
+    variables,
   });
   logger.debug('[recordActivity] result %j', activity);
   if ('errors' in activity) {
@@ -80,16 +100,14 @@ export async function updateActivity(
   logger.debug('[updateActivity] id=%s %s', id, result);
 
   const activity = await context.executeGraphQL({
-    query: `mutation ($id: ID!, $activityContext: String!, $result: String!) {
+    query: `mutation ($id: ID!, $result: String!) {
                 updateActivity(id: $id, data: {
-                  context: $activityContext, 
                   result: $result
                 })
             }`,
     variables: {
       id,
       result,
-      activityContext,
     },
   });
   if ('errors' in activity) {
@@ -107,7 +125,8 @@ export async function recordActivity(
   message: string,
   result: string = '',
   activityContext: string = '',
-  productNamespace: string = undefined
+  productNamespace: string = undefined,
+  ids: string[] = []
 ) {
   const userId = context.authedItem.userId;
   const namespace = productNamespace
@@ -116,40 +135,66 @@ export async function recordActivity(
   const name = `${action} ${type}[${refId}]`;
   logger.debug('[recordActivity] userid=%s name=%s', userId, name);
 
-  const activity = context.executeGraphQL({
-    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: String) {
-                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, actor: { connect: { id : $userId }} }) {
-                    id
-            } }`,
-    variables: {
-      name,
-      namespace,
-      type,
-      action,
-      refId,
-      message,
-      result,
-      activityContext,
-      userId,
-    },
+  const variables: { [key: string]: any } = {
+    name,
+    namespace,
+    type,
+    action,
+    refId,
+    message,
+    result,
+    activityContext,
+    // userId,
+    filterKey1: undefined,
+    filterKey2: undefined,
+    filterKey3: undefined,
+    filterKey4: undefined,
+  };
+  ids.forEach((id: string, index: number) => {
+    variables[`filterKey${index + 1}`] = id;
   });
 
-  return activity.catch((e: any) => {
-    logger.error('Activity Recording Error %s', e);
+  const activity = await context.executeGraphQL({
+    query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: ID, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String) {
+                createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, filterKey1: $filterKey1, filterKey2: $filterKey2, filterKey3: $filterKey3, filterKey4: $filterKey4 }) {
+                    id
+            } }`,
+    variables,
   });
+  if (activity.errors) {
+    logger.error('[recordActivity] %j', activity.errors);
+  }
+
+  return activity;
 }
 
 export async function getActivity(
   context: any,
   namespaces: string[],
+  activityQuery: ActivityWhereInput,
   first: number = 10,
   skip: number = 0
-): Promise<any[]> {
+): Promise<Activity[]> {
   logger.debug('[getActivity] %d / %d', first, skip);
 
+  const where: ActivityWhereInput = {};
+  if (activityQuery) {
+    where['AND'] = [
+      activityQuery,
+      {
+        namespace_in: namespaces,
+      },
+    ];
+  } else {
+    where.namespace_in = namespaces;
+  }
+
+  logger.debug('[getActivity] where: %j', where);
+
   const activities = await context.executeGraphQL({
-    query: `query NamespaceActivities($namespaces: [String]!, $first: Int, $skip: Int) {
-              allActivities(where: { namespace_in: $namespaces }, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+    query: `query NamespaceActivities($where: ActivityWhereInput!, $first: Int, $skip: Int) {
+              allActivities(where: $where, first:$first, skip: $skip, sortBy: createdAt_DESC) {
+                id
                 type
                 name
                 namespace
@@ -165,12 +210,13 @@ export async function getActivity(
                   type
                   blob
                 }
+                filterKey1
                 createdAt
                 updatedAt
               }
             }
       `,
-    variables: { namespaces, first, skip },
+    variables: { where, first, skip },
   });
   logger.debug(
     '[getActivity] returned=%d',
@@ -198,9 +244,6 @@ export async function getActivityByRefId(
                 result
                 message
                 context
-                actor {
-                  name
-                }
                 blob {
                   type
                   blob

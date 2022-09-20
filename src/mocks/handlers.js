@@ -21,6 +21,7 @@ import {
   updateConsumerAccessHandler,
   store as consumersStore,
 } from './resolvers/consumers';
+import { getActivityHandler } from './resolvers/activity';
 
 export function resetAll() {
   consumersStore.reset();
@@ -74,6 +75,7 @@ export const handlers = [
       })
     );
   }),
+  keystone.query('GetActivity', getActivityHandler),
   keystone.query('GetConsumers', getConsumersHandler),
   keystone.query('GetConsumer', getConsumerHandler),
   keystone.query('GetAccessRequests', getAccessRequestsHandler),
