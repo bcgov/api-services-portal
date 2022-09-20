@@ -36,30 +36,47 @@ interface ActivityItemProps {
 const ActivityItem: React.FC<ActivityItemProps> = ({ data, onSelect }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const compiled = template(data.message, data.params as TemplateMap);
-  const regex = /(<|\[|\]|>)/g;
+  const regex = /(\{|<|\[|\]|>|\})/g;
   const clean = compact(compiled.split(regex));
   const text = [];
 
   clean.forEach((str, index, arr) => {
     if (!regex.test(str)) {
-      if (arr[index - 1] === '<') {
-        text.push(
-          <Link
-            key={uid(str)}
-            textDecoration="underline"
-            onClick={() => onSelect('users', str)}
-          >
-            {str}
-          </Link>
-        );
-      } else if (arr[index - 1] === '[') {
-        text.push(
-          <Text key={uid(str)} as="strong">
-            {str}
-          </Text>
-        );
-      } else {
-        text.push(str);
+      switch (arr[index - 1]) {
+        case '<':
+          text.push(
+            <Link
+              key={uid(str)}
+              textDecoration="underline"
+              data-filter-type="users"
+              onClick={() => onSelect('users', str)}
+            >
+              {str}
+            </Link>
+          );
+          break;
+        case '{':
+          text.push(
+            <Link
+              key={uid(str)}
+              textDecoration="underline"
+              data-filter-type="consumers"
+              onClick={() => onSelect('consumers', str)}
+            >
+              {str}
+            </Link>
+          );
+          break;
+        case '[':
+          text.push(
+            <Text key={uid(str)} as="strong">
+              {str}
+            </Text>
+          );
+          break;
+        default:
+          text.push(str);
+          break;
       }
     }
   });
@@ -142,6 +159,9 @@ function template(string: string, data: TemplateMap): string {
       switch (keyParts[i]) {
         case 'actor':
           result += `<${data[keyParts[i]]}>`;
+          break;
+        case 'consumer':
+          result += `{${data[keyParts[i]]}}`;
           break;
         case 'action':
           result += `[${data[keyParts[i]]}]`;
