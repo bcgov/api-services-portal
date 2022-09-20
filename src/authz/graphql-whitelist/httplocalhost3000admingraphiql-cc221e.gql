@@ -1,0 +1,16 @@
+
+  query GetServiceAccessPermissions($resourceId: String!, $prodEnvId: ID!) {
+    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      description
+      type
+      logic
+      decisionStrategy
+      owner
+      clients
+      users
+      groups
+      scopes
+    }
+  }
