@@ -47,6 +47,7 @@ export async function lookupKongServiceIds(
     query: `query MapKongServices($serviceIds: [ID]) {
                     allGatewayServices(where: {id_in: $serviceIds}) {
                       id
+                      name
                       extForeignKey
                     }
                 }`,
@@ -66,6 +67,7 @@ export async function lookupKongRouteIds(
     query: `query MapKongRoutes($routeIds: [ID]) {
                     allGatewayRoutes(where: {id_in: $routeIds}) {
                       id
+                      name
                       extForeignKey
                     }
                 }`,

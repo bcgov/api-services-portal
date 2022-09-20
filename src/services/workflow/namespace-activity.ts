@@ -334,7 +334,9 @@ export class StructuredActivityService {
     this.mapDataInputToParams(dataInput, params);
 
     const message =
-      '{actor} {action} {entity} {plugin} to {serviceOrRoute} ({pluginDetails}) for {consumer}';
+      pluginSummary.operation === 'removed'
+        ? '{actor} {action} {entity} {plugin} to {serviceOrRoute} for {consumer}'
+        : '{actor} {action} {entity} {plugin} to {serviceOrRoute} ({pluginDetails}) for {consumer}';
 
     const ids = this.mapDataInputToIDs(
       ['consumer', 'environment', 'product'],

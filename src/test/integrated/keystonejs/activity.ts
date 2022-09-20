@@ -46,7 +46,7 @@ import {
     authentication: { item: identity },
   });
 
-  if (false) {
+  if (true) {
     const r = await recordActivityWithBlob(
       ctx,
       'delete',
@@ -55,10 +55,49 @@ import {
       'Deleted orgcontrol namespace',
       'success',
       undefined,
-      { name: 'Joe' }
+      { access: [] }
+    );
+  }
+  if (false) {
+    const yamlExample = `
+    package:
+      label:
+        enabled: true`;
+
+    const r = await recordActivityWithBlob(
+      ctx,
+      'delete',
+      'Namespace',
+      'orgcontrol',
+      'Deleted orgcontrol namespace',
+      'success',
+      undefined,
+      yamlExample
     );
   }
 
+  if (false) {
+    // multi-yaml document
+    const yamlExample = `package:
+  label:
+    enabled: true
+---
+package2:
+  label2:
+    enabled: true
+    `;
+
+    const r = await recordActivityWithBlob(
+      ctx,
+      'delete',
+      'Namespace',
+      'orgcontrol',
+      'Deleted orgcontrol namespace',
+      'success',
+      undefined,
+      yamlExample
+    );
+  }
   const records = await getActivity(ctx, ['refactortime'], undefined, 20);
 
   o(

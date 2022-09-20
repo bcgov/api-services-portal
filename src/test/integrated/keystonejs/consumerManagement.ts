@@ -132,12 +132,11 @@ const logger = Logger('test.intg');
 
     const plugins: ConsumerPlugin[] = [
       {
-        // id: '6328bc1806c62b1bcf848d63',
+        //id: '6329575b31550937833b1a23',
         name: 'ip-restriction',
-        config: { deny: null, allow: ['3.1.1.1'] },
+        config: { deny: null, allow: ['7.1.1.1'] },
         service: {
           id: '61816208655ef5aad5968c5c',
-          name: 'a-service-for-refactortime-2',
         },
       },
       // {
@@ -156,7 +155,7 @@ const logger = Logger('test.intg');
       name: 'dev',
       product: { name: 'abc' },
     } as Environment;
-    await syncPlugins(ctx, ns, consumer, prodEnv, plugins);
+    await syncPlugins(ctx, ns, consumer, prodEnv, []);
   }
   if (false) {
     const cids = await doFiltering(ctx, ns, {
@@ -200,7 +199,7 @@ const logger = Logger('test.intg');
     await revokeAllConsumerAccess(ctx, ns, id);
   }
   if (false) {
-    const id = '62a184cc91c56de2f62d31b1';
+    const id = '63293b8f31550937833b1333';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
     const envId = '629fccaf76e9e65444ca6a43';
@@ -217,7 +216,7 @@ const logger = Logger('test.intg');
       //   },
       // },
       //],
-      defaultClientScopes: ['read'],
+      defaultClientScopes: ['write'],
     };
 
     await updateConsumerAccess(

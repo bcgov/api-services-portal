@@ -1,7 +1,12 @@
 import { Logger } from '../../logger';
 import { FeederService } from '../feeder';
 import { lookupKongRouteIds, lookupKongServiceIds } from '../keystone';
-import { Environment, GatewayConsumer } from '../keystone/types';
+import {
+  Environment,
+  GatewayConsumer,
+  GatewayRoute,
+  GatewayService,
+} from '../keystone/types';
 import { KongObjectID, KongPlugin } from '../gwaapi';
 import { ConsumerPlugin, ConsumerPluginInput } from './types';
 import { strict as assert } from 'assert';
@@ -35,20 +40,20 @@ export async function syncPlugins(
 
   // quick mapping of KeystoneJS ID to Kong ID
   // for Service and Route
-  const kongIdMapper: any = {};
+  const kongIdMapper: { [key: string]: GatewayRoute | GatewayService } = {};
 
   const routeIds: any = plugins
     .filter((plugin) => plugin.route)
     .map((plugin) => plugin.route.id);
   (await lookupKongRouteIds(context, routeIds)).map((r) => {
-    kongIdMapper[`r:${r.id}`] = r.extForeignKey;
+    kongIdMapper[`r:${r.id}`] = r;
   });
 
   const serviceIds: any = plugins
     .filter((plugin) => plugin.service)
     .map((plugin) => plugin.service.id);
   (await lookupKongServiceIds(context, serviceIds)).map((s) => {
-    kongIdMapper[`s:${s.id}`] = s.extForeignKey;
+    kongIdMapper[`s:${s.id}`] = s;
   });
 
   const subjectToken = getSubjectToken(context.req);
@@ -65,10 +70,14 @@ export async function syncPlugins(
           config: plugin.config,
         };
         if (plugin.service) {
-          newPlugin.service = { id: kongIdMapper[`s:${plugin.service.id}`] };
+          newPlugin.service = {
+            id: kongIdMapper[`s:${plugin.service.id}`].extForeignKey,
+          };
         }
         if (plugin.route) {
-          newPlugin.route = { id: kongIdMapper[`r:${plugin.route.id}`] };
+          newPlugin.route = {
+            id: kongIdMapper[`r:${plugin.route.id}`].extForeignKey,
+          };
         }
         await AddPluginToConsumer(
           subjectToken,
@@ -79,7 +88,9 @@ export async function syncPlugins(
         return {
           operation: 'added',
           name: plugin.name,
-          serviceOrRouteName: plugin.service?.name || plugin.route?.name,
+          serviceOrRouteName:
+            kongIdMapper[`s:${plugin.service?.id}`]?.name ||
+            kongIdMapper[`r:${plugin.route?.id}`]?.name,
           config: plugin.config,
         } as ConsumerPluginInput;
       })
@@ -113,10 +124,14 @@ export async function syncPlugins(
           config: plugin.config,
         };
         if (plugin.service) {
-          newPlugin.service = { id: kongIdMapper[`s:${plugin.service.id}`] };
+          newPlugin.service = {
+            id: kongIdMapper[`s:${plugin.service.id}`].extForeignKey,
+          };
         }
         if (plugin.route) {
-          newPlugin.route = { id: kongIdMapper[`r:${plugin.route.id}`] };
+          newPlugin.route = {
+            id: kongIdMapper[`r:${plugin.route.id}`].extForeignKey,
+          };
         }
 
         await UpdatePluginForConsumer(
@@ -129,7 +144,9 @@ export async function syncPlugins(
         return {
           operation: 'updated',
           name: plugin.name,
-          serviceOrRouteName: plugin.service?.name || plugin.route?.name,
+          serviceOrRouteName:
+            kongIdMapper[`s:${plugin.service?.id}`]?.name ||
+            kongIdMapper[`r:${plugin.route?.id}`]?.name,
           config: plugin.config,
         } as ConsumerPluginInput;
       })
