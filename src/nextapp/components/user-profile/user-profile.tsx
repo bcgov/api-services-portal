@@ -9,6 +9,7 @@ import {
   SkeletonCircle,
   Text,
 } from '@chakra-ui/react';
+import { getProviderText } from '@/shared/services/utils';
 import { UserData } from '@/shared/types/app.types';
 import { User } from '@/shared/types/query.types';
 
@@ -89,18 +90,3 @@ const UserProfile: React.FC<UserProfileProps> = ({
 };
 
 export default UserProfile;
-
-function getProviderText(provider: string): string {
-  switch (provider) {
-    case 'bscs':
-      return 'BC Services Card';
-    case 'idir':
-      return 'IDIR';
-    case 'bceid':
-      return 'Business BCeID';
-    case 'github':
-      return 'Github';
-    default:
-      return '';
-  }
-}
