@@ -201,11 +201,11 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
   }).then((res) => {
     expect(res.status).to.eq(200)
-    if(config === 'routes'){
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["hosts",["a-service-for-newplatform.api.gov.bc.ca"]]))[0],'id'))
+    if (config === 'routes') {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", ["a-service-for-newplatform.api.gov.bc.ca"]]))[0], 'id'))
     }
-    else{
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["name","a-service-for-newplatform"]))[0],'id'))
+    else {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", "a-service-for-newplatform"]))[0], 'id'))
     }
   })
 })
@@ -343,7 +343,16 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('verifyToastMessage', (msg: string) => {
+  cy.get('[role="alert"]',{timeout:2000}).closest('div').invoke('text')
+    .then((text) => {
+      const toastText = text;
+      expect(toastText).to.contain(msg);
+    })
+})
+
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
+  debugger
   let response = actualResponse
   if (indexFlag) {
     const index = actualResponse.findIndex((x: { name: string }) => x.name === expectedResponse.name);
@@ -362,7 +371,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
         response[p] = response[p]['name']
       }
-      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId','isInCatalog','isDraft'].includes(p))) {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

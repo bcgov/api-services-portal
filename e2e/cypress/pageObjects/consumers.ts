@@ -299,4 +299,12 @@ export default class ConsumersPage {
     cy.get(this.grantAccessBtn).click()
     cy.wait(1000)
   }
+
+  selectAuthorizationScope(scopes: any) {
+    cy.contains("Authorization").click()
+    scopes.forEach(function (scope: string) {
+      cy.get('[data-testid="client-scope-'+scope+'"]').click()
+      cy.wait(1000)
+    })
+  }
 }

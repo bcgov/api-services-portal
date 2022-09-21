@@ -51,6 +51,15 @@ describe('Verify /Organization/{Org} end point', () => {
             })
         })
     })
+
+    it('Verify the status code and response message for invalid organization name', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/health' , 'GET').then((response) => {        
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.equal("Organization not found.")
+            })
+        })
+    })
 })
 
 describe('Get the user session token', () => {

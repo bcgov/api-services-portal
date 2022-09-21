@@ -14,6 +14,7 @@ class NamespaceAccessPage {
       })
     })
     cy.contains("Share").click()
+    cy.verifyToastMessage("Access granted1")
   }
 
   revokePermission(revokePermission: any) {
@@ -29,11 +30,10 @@ class NamespaceAccessPage {
     })
   }
 
-  revokeAllPermission(user :string)
-  {
+  revokeAllPermission(user: string) {
     cy.contains(user).parents('tr').find('td:nth-child(3)').find('button').click()
   }
-  
+
   path: string = '/manager/namespace-access'
 
   clickGrantUserAccessButton() {
