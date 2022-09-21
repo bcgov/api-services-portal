@@ -36,13 +36,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(
-        query,
-        { ns: 'abc' },
-        {
-          headers: context.req.headers as HeadersInit,
-        }
-      )
+      await api<Query>(query, {
+        headers: context.req.headers as HeadersInit,
+      })
   );
 
   return {
@@ -64,7 +60,6 @@ const ServiceAccountsPage: React.FC<
     queryKey,
     {
       query,
-      variables: { ns: 'abc' },
     },
     {
       suspense: false,
@@ -73,9 +68,9 @@ const ServiceAccountsPage: React.FC<
       },
     }
   );
-  const handleCreate = (credentials: Record<string, string>) => {
+  const handleCreate = async (credentials: Record<string, string>) => {
+    await client.invalidateQueries(queryKey);
     setCredentials(credentials);
-    client.invalidateQueries(queryKey);
   };
   const handleDelete = () => {
     setCredentials(null);
@@ -176,7 +171,7 @@ const ServiceAccountsPage: React.FC<
 export default ServiceAccountsPage;
 
 const query = gql`
-  query GET {
+  query GetAllServiceAccounts {
     allNamespaceServiceAccounts(
       orderBy: "createdAt_DESC"
       where: {
