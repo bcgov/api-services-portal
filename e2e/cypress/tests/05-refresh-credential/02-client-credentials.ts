@@ -5,62 +5,62 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import MyAccessPage from '../../pageObjects/myAccess'
 
-describe('Apply Rate Limiting for Client Credential Authorization Profile', () => {
-  const login = new LoginPage()
-  const home = new HomePage()
-  const consumers = new ConsumersPage()
+// describe('Apply Rate Limiting for Client Credential Authorization Profile', () => {
+//   const login = new LoginPage()
+//   const home = new HomePage()
+//   const consumers = new ConsumersPage()
 
-  before(() => {
-    cy.visit('/')
-    cy.deleteAllCookies()
-    cy.reload()
-  })
+//   before(() => {
+//     cy.visit('/')
+//     cy.deleteAllCookies()
+//     cy.reload()
+//   })
 
-  beforeEach(() => {
-    cy.preserveCookies()
-    cy.fixture('access-manager').as('access-manager')
-    cy.fixture('apiowner').as('apiowner')
-    cy.fixture('developer').as('developer')
-    cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
-    cy.visit(login.path)
-  })
+//   beforeEach(() => {
+//     cy.preserveCookies()
+//     cy.fixture('access-manager').as('access-manager')
+//     cy.fixture('apiowner').as('apiowner')
+//     cy.fixture('developer').as('developer')
+//     cy.fixture('manage-control-config-setting').as('manage-control-config-setting')
+//     cy.visit(login.path)
+//   })
 
-  it('set api rate limit as per the test config, Local Policy and Scope as Service', () => {
-    cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
-      let cc = JSON.parse(store_res.clientidsecret)
-      cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
-        cy.get('@developer').then(({ clientCredentials }: any) => {
-          cy.login(user.credentials.username, user.credentials.password).then(() => {
-            home.useNamespace(clientCredentials.namespace);
-            cy.visit(consumers.path);
-            consumers.filterConsumerByTypeAndValue('Environment', clientCredentials.clientIdSecret.product.environment)
-            consumers.clickOnTheFirstConsumerID()
-            consumers.setRateLimiting('3')
-          })
-        })
-      })
-    })
-  })
+//   it('set api rate limit as per the test config, Local Policy and Scope as Service', () => {
+//     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
+//       let cc = JSON.parse(store_res.clientidsecret)
+//       cy.get('@access-manager').then(({ user, clientCredentials }: any) => {
+//         cy.get('@developer').then(({ clientCredentials }: any) => {
+//           cy.login(user.credentials.username, user.credentials.password).then(() => {
+//             home.useNamespace(clientCredentials.namespace);
+//             cy.visit(consumers.path);
+//             consumers.filterConsumerByTypeAndValue('Environment', clientCredentials.clientIdSecret.product.environment)
+//             consumers.clickOnTheFirstConsumerID()
+//             consumers.setRateLimiting('3')
+//           })
+//         })
+//       })
+//     })
+//   })
 
 
-  it('Verify that rate limiting is applied correctly to the consument', () => {
-    cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
-      let cc = JSON.parse(store_res.clientidsecret)
-      debugger
-      cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
-        cy.get('@accessTokenResponse').then((token_res: any) => {
-          let token = token_res.body.access_token
-          cy.get('@apiowner').then(({ clientCredentials }: any) => {
-            cy.makeKongRequest(clientCredentials.serviceName, 'GET', token).then((response) => {
-              expect(response.status).to.be.equal(200)
-              expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(2)
-            })
-          })
-        })
-      })
-    })
-  })
-})
+//   it('Verify that rate limiting is applied correctly to the consument', () => {
+//     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
+//       let cc = JSON.parse(store_res.clientidsecret)
+//       debugger
+//       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
+//         cy.get('@accessTokenResponse').then((token_res: any) => {
+//           let token = token_res.body.access_token
+//           cy.get('@apiowner').then(({ clientCredentials }: any) => {
+//             cy.makeKongRequest(clientCredentials.serviceName, 'GET', token).then((response) => {
+//               expect(response.status).to.be.equal(200)
+//               expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(2)
+//             })
+//           })
+//         })
+//       })
+//     })
+//   })
+// })
 
 describe('Regenerate Credential for Client Credentials- Client ID/Secret', () => {
   const login = new LoginPage()
@@ -118,7 +118,7 @@ describe('Regenerate Credential for Client Credentials- Client ID/Secret', () =>
           cy.get('@apiowner').then(({ clientCredentials }: any) => {
             cy.makeKongRequest(clientCredentials.serviceName, 'GET', token).then((response) => {
               expect(response.status).to.be.equal(200)
-              expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(1)
+              // expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(1)
             })
           })
         })

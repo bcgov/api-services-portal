@@ -66,6 +66,14 @@ export interface ConsumerPlugin {
   service?: KeystoneItemID;
   route?: KeystoneItemID;
 }
+
+export interface ConsumerPluginInput {
+  operation: 'added' | 'removed' | 'updated';
+  name: string;
+  serviceOrRouteName: string;
+  config: PluginConfig;
+}
+
 export interface PluginConfig {
   second?: number;
   minute?: number;

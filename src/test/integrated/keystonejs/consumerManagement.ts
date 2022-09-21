@@ -31,6 +31,7 @@ import { doFiltering } from '../../../services/workflow/consumer-filters';
 import { syncPlugins } from '../../../services/workflow/consumer-plugins';
 import { lookupConsumerPlugins } from '../../../services/keystone';
 import { Logger } from '../../../logger';
+import { Environment } from '../../../services/keystone/types';
 
 const logger = Logger('test.intg');
 
@@ -125,33 +126,36 @@ const logger = Logger('test.intg');
       });
     await Promise.all(envPromises);
   }
-  if (false) {
+  if (true) {
     const id = '62a18b772da3cdea467b10fd';
     const consumer = await lookupConsumerPlugins(ctx, id);
 
     const plugins: ConsumerPlugin[] = [
       {
-        id: '62e30200b16aa6aa9e87ea56',
+        //id: '6329575b31550937833b1a23',
         name: 'ip-restriction',
-        config: { deny: null, allow: ['1.1.1.1'] },
+        config: { deny: null, allow: ['7.1.1.1'] },
         service: {
           id: '61816208655ef5aad5968c5c',
-          name: 'a-service-for-refactortime-2',
         },
       },
-      {
-        id: '62e30200b16aa6aa9e87ea57',
-        name: 'rate-limiting',
-        config: { second: 20, minute: null, policy: 'redis' },
-        route: null,
-        service: {
-          id: '61816208655ef5aad5968c5c',
-          name: 'a-service-for-refactortime-2',
-        },
-      },
+      // {
+      //   // id: '62e30200b16aa6aa9e87ea57',
+      //   name: 'rate-limiting',
+      //   config: { second: 20, minute: null, policy: 'redis' },
+      //   route: null,
+      //   service: {
+      //     id: '61816208655ef5aad5968c5c',
+      //     name: 'a-service-for-refactortime-2',
+      //   },
+      // },
     ];
 
-    await syncPlugins(ctx, ns, consumer, plugins);
+    const prodEnv = {
+      name: 'dev',
+      product: { name: 'abc' },
+    } as Environment;
+    await syncPlugins(ctx, ns, consumer, prodEnv, []);
   }
   if (false) {
     const cids = await doFiltering(ctx, ns, {
@@ -194,8 +198,8 @@ const logger = Logger('test.intg');
 
     await revokeAllConsumerAccess(ctx, ns, id);
   }
-  if (true) {
-    const id = '62a184cc91c56de2f62d31b1';
+  if (false) {
+    const id = '63293b8f31550937833b1333';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
     const envId = '629fccaf76e9e65444ca6a43';
@@ -212,7 +216,7 @@ const logger = Logger('test.intg');
       //   },
       // },
       //],
-      defaultClientScopes: ['read'],
+      defaultClientScopes: ['write'],
     };
 
     await updateConsumerAccess(

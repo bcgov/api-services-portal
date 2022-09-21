@@ -89,6 +89,13 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });

@@ -80,6 +80,7 @@ import {
   GatewayConsumer,
   LabelCreateInput,
   LabelUpdateInput,
+  Product,
 } from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
@@ -478,7 +479,7 @@ export async function grantAccessToConsumer(
   );
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(context, ns, consumer, prodEnv, plugins);
   }
 }
 
@@ -543,7 +544,7 @@ export async function revokeAccessFromConsumer(
     }
   );
 
-  await syncPlugins(context, ns, consumer, []);
+  await syncPlugins(context, ns, consumer, prodEnv, []);
 }
 
 /**
@@ -580,6 +581,8 @@ export async function updateConsumerAccess(
   );
 
   const prodEnvAccessItem = prodEnvAccessFilter[0];
+
+  const changeList: string[] = [];
 
   if (prodEnvAccessItem.environment.flow === 'client-credentials') {
     const envCtx = await getEnvironmentContext(
@@ -633,11 +636,12 @@ export async function updateConsumerAccess(
         'Only clients (not users) support scopes'
       );
 
-      await kcClientRegService.syncAndApply(
+      const changes = await kcClientRegService.syncAndApply(
         consumer.username,
         selectedScopes.map((scope) => scope.name),
         [] as string[]
       );
+      changeList.push(...changes);
     }
 
     if (roles) {
@@ -682,19 +686,26 @@ export async function updateConsumerAccess(
           client.id
         );
 
+        const addRoles = selectedRoles
+          .filter(
+            (role) =>
+              userRoles.filter((urole: any) => urole.name === role.name)
+                .length == 0
+          )
+          .map((role) => ({ id: role.id, name: role.name }));
+
+        const delRoles = userRoles
+          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+          .map((role: any) => ({ id: role.id, name: role.name }));
+
+        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
+        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
+
         await kcUserService.syncUserClientRoles(
           userId,
           client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
+          addRoles,
+          delRoles
         );
       } else {
         const userId = await kcUserService.lookupUserByUsername(
@@ -706,43 +717,63 @@ export async function updateConsumerAccess(
           client.id
         );
 
+        const addRoles = selectedRoles
+          .filter(
+            (role) =>
+              userRoles.filter((urole: any) => urole.name === role.name)
+                .length == 0
+          )
+          .map((role) => ({ id: role.id, name: role.name }));
+
+        const delRoles = userRoles
+          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+          .map((role: any) => ({ id: role.id, name: role.name }));
+
+        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
+        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
+
         await kcUserService.syncUserClientRoles(
           userId,
           client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
+          addRoles,
+          delRoles
         );
       }
     }
 
-    const accessUpdates = [];
-    defaultClientScopes &&
-      accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
-    roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);
-    const accessUpdate = accessUpdates.join(', ');
+    if (changeList.length > 0) {
+      logger.info('[%s] %j', consumer.username, changeList);
 
-    await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
-      true,
-      {
-        prodEnvAccessItem,
-        environment: prodEnvAccessItem.environment,
-        productName: prodEnvAccessItem.productName,
-        consumer,
-      },
-      accessUpdate
-    );
+      const accessUpdates = [];
+      defaultClientScopes &&
+        accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
+      roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);
+      const accessUpdate = accessUpdates.join(', ');
+
+      await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
+        true,
+        {
+          prodEnvAccessItem,
+          environment: prodEnvAccessItem.environment,
+          productName: prodEnvAccessItem.productName,
+          consumer,
+        },
+        accessUpdate
+      );
+    }
   }
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(
+      context,
+      ns,
+      consumer,
+      {
+        name: prodEnvAccessItem.environment.name,
+        product: { name: prodEnvAccessItem.productName },
+      } as Environment,
+      plugins
+    );
   }
 }
 

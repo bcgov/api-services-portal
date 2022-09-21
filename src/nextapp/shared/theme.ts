@@ -6,6 +6,7 @@ const colors = {
   'bc-yellow': '#FCBA19',
   text: '#313132',
   'bc-component': '#606060',
+  'bc-empty': '#60606080',
   'bc-link': '#1A5A96',
   'bc-blue-alt': '#38598A',
   'bc-light-blue': '#77ACF1',

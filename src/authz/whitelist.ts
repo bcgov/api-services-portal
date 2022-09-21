@@ -55,10 +55,10 @@ export function loadWhitelistAndWatch(watch: boolean) {
 export function checkWhitelist(query: string) {
   var hash = crypto.createHash('md5').update(query).digest('hex');
   if (hash in whitelist.list) {
-    logger.info('HIT : [%s] %j', hash, query);
+    logger.debug('HIT : [%s] %j', hash, query);
     return true;
   } else {
-    logger.info('MISS: [%s] %j', hash, query);
+    logger.warn('MISS: [%s] %j', hash, query);
     return false;
   }
 }

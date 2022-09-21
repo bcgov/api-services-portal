@@ -154,8 +154,6 @@ export async function recordActivity(
     variables[`filterKey${index + 1}`] = id;
   });
 
-  // , actor: { connect: { id : $userId }}
-  logger.warn('%j', variables);
   const activity = await context.executeGraphQL({
     query: `mutation ($name: String, $namespace: String, $type: String, $action: String, $refId: String, $message: String, $result: String, $activityContext: String, $userId: ID, $filterKey1: String, $filterKey2: String, $filterKey3: String, $filterKey4: String) {
                 createActivity(data: { type: $type, name: $name, namespace: $namespace, action: $action, refId: $refId, message: $message, result: $result, context: $activityContext, filterKey1: $filterKey1, filterKey2: $filterKey2, filterKey3: $filterKey3, filterKey4: $filterKey4 }) {

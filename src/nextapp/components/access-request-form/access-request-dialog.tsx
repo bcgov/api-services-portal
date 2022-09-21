@@ -170,7 +170,9 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
           Request Access
         </Button>
       )}
-      {!auth.user && <LoginDialog buttonText="Request Access" />}
+      {!auth.user && (
+        <LoginDialog buttonText="Request Access" buttonVariant="link" />
+      )}
       <Modal
         isOpen={open || isOpen}
         onClose={onClose}

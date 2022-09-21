@@ -1,6 +1,7 @@
 import { Assertion } from "chai"
 import { wrap } from "module"
 import dateformat from 'dateformat'
+import { checkElementExists } from "../support"
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'
@@ -36,6 +37,7 @@ export default class ConsumersPage {
   rateLimitingApplyBtn: string = '[data-testid="ratelimit-submit-btn"]'
   removeRateLimitControlButton: string = '[data-testid="ratelimit-item-delete-btn-0"]'
   rateLimitRouteRadioBtn: string = '[data-testid="ratelimit-route-radio"]'
+  consumerDialogCancelBtn: string = '[data-testid="edit-consumer-dialog-edit-cancel-btn"]'
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
@@ -62,9 +64,16 @@ export default class ConsumersPage {
 
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
     this.editConsumerDialog()
+    cy.wait(2000)
+    if (!checkElementExists(this.rateLimitingOption)){
+      cy.get(this.consumerDialogCancelBtn).click()
+      this.editConsumerDialog()
+    }
     // cy.wait(1000)
     this.clickOnRateLimitingOption()
     cy.wait(3000)
+   
+
     cy.get(this.rateLimitHourInput, { timeout: 5000 }).click()
     cy.get(this.rateLimitHourInput, { timeout: 2000 }).type(requestCount)
     if (scope.toLocaleLowerCase() !== 'service') {

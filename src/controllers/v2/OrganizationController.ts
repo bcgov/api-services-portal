@@ -253,7 +253,7 @@ export class OrganizationController extends Controller {
       ctx,
       assignedNamespaces.map((n) => n.name),
       undefined,
-      first > 50 ? 50 : first,
+      first > 100 ? 100 : first,
       skip
     );
 

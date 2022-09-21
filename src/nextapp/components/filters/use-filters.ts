@@ -21,7 +21,7 @@ type FilterAction = AddFilterAction | RemoveFilterAction | ClearFilterAction;
 
 type FilterReturn<T> = {
   state: T;
-  addFilter: (key: string, value: Record<string, string>) => void;
+  addFilter: (key: string, value: Record<string, string | boolean>) => void;
   clearFilters: () => void;
   removeFilter: (key: string, value: string) => void;
 };

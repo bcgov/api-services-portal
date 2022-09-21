@@ -34,10 +34,11 @@ import { ActivityQueryFilter } from '@/services/workflow/types';
   });
 
   const filter: ActivityQueryFilter = {
-    consumers: ['A94884A1-974424B14EB84CC4'],
+    activityDate: '2022-09-14',
   };
   const a = await getFilteredNamespaceActivity(ctx, ns, 20, 0, filter);
   o(a);
 
+  // 2022-09-13T16:47:09.367Z
   await keystone.disconnect();
 })();

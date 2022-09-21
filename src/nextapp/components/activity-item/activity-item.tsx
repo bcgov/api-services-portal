@@ -15,10 +15,11 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  Link,
 } from '@chakra-ui/react';
 import { dump } from 'js-yaml';
 import { FaExclamationTriangle } from 'react-icons/fa';
-import { GrDocumentUpdate } from 'react-icons/gr';
+import { HiOutlineDocumentSearch } from 'react-icons/hi';
 import { uid } from 'react-uid';
 import YamlViewer from '@/components/yaml-viewer';
 import { ActivitySummary } from '@/shared/types/query.types';
@@ -29,31 +30,53 @@ interface ActivitySortDate extends ActivitySummary {
 
 interface ActivityItemProps {
   data: ActivitySortDate;
+  onSelect: (key: string, value: string) => void;
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
+const ActivityItem: React.FC<ActivityItemProps> = ({ data, onSelect }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const compiled = template(data.message, data.params as TemplateMap);
-  const regex = /(<|\[|\]|>)/g;
+  const regex = /(\{|<|\[|\]|>|\})/g;
   const clean = compact(compiled.split(regex));
   const text = [];
 
   clean.forEach((str, index, arr) => {
     if (!regex.test(str)) {
-      if (arr[index - 1] === '<') {
-        text.push(
-          <Text key={uid(str)} as="mark" bg="none">
-            {str}
-          </Text>
-        );
-      } else if (arr[index - 1] === '[') {
-        text.push(
-          <Text key={uid(str)} as="strong">
-            {str}
-          </Text>
-        );
-      } else {
-        text.push(str);
+      switch (arr[index - 1]) {
+        case '<':
+          text.push(
+            <Link
+              key={uid(str)}
+              textDecoration="underline"
+              data-filter-type="users"
+              onClick={() => onSelect('users', str)}
+            >
+              {str}
+            </Link>
+          );
+          break;
+        case '{':
+          text.push(
+            <Link
+              key={uid(str)}
+              textDecoration="underline"
+              data-filter-type="consumers"
+              onClick={() => onSelect('consumers', str)}
+            >
+              {str}
+            </Link>
+          );
+          break;
+        case '[':
+          text.push(
+            <Text key={uid(str)} as="strong">
+              {str}
+            </Text>
+          );
+          break;
+        default:
+          text.push(str);
+          break;
       }
     }
   });
@@ -72,7 +95,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ data }) => {
           {data.blob && (
             <Box ml={2}>
               <Button
-                leftIcon={<Icon as={GrDocumentUpdate} />}
+                leftIcon={<Icon as={HiOutlineDocumentSearch} />}
                 color="bc-blue"
                 onClick={onOpen}
                 variant="link"
@@ -136,6 +159,9 @@ function template(string: string, data: TemplateMap): string {
       switch (keyParts[i]) {
         case 'actor':
           result += `<${data[keyParts[i]]}>`;
+          break;
+        case 'consumer':
+          result += `{${data[keyParts[i]]}}`;
           break;
         case 'action':
           result += `[${data[keyParts[i]]}]`;

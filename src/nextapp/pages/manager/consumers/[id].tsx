@@ -43,6 +43,7 @@ import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
 import ActionsMenu from '@/components/actions-menu';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -137,7 +138,6 @@ const ConsumerPage: React.FC<
     return <></>;
   }
 
-
   return (
     <>
       <Head>
@@ -187,7 +187,12 @@ const ConsumerPage: React.FC<
           )}
           <Flex bgColor="white">
             <Detail title="Labels">
-              <Wrap spacing={2.5}>
+              <Wrap spacing={2.5} align="center">
+                {!consumer.labels?.length && (
+                  <Text as="em" color="bc-empty">
+                    Labels will appear here
+                  </Text>
+                )}
                 {consumer.labels.map((label) => (
                   <WrapItem key={uid(label)}>
                     <Tag bgColor="white" variant="outline">
@@ -195,6 +200,7 @@ const ConsumerPage: React.FC<
                     </Tag>
                   </WrapItem>
                 ))}
+
                 <WrapItem>
                   <ManageLabels
                     data={consumer.labels}
@@ -215,6 +221,14 @@ const ConsumerPage: React.FC<
           <Box as="header" mb={4}>
             <Heading size="md">{`Products (${products.length ?? 0})`}</Heading>
           </Box>
+          {!products.length && (
+            <Card>
+              <EmptyPane
+                title="Consumer has no product yet"
+                message="Products that have their access will appear here"
+              />
+            </Card>
+          )}
           {products.map((p) => (
             <Card key={uid(p)} heading={p} mb={9}>
               <Table data-testid="product-list-table">

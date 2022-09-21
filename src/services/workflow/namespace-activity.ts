@@ -1,5 +1,9 @@
 import { strict as assert } from 'assert';
-import { ActivityQueryFilter, ActivitySummary } from './types';
+import {
+  ActivityQueryFilter,
+  ActivitySummary,
+  ConsumerPluginInput,
+} from './types';
 import { Logger } from '../../logger';
 import { format, getActivity, recordActivity } from '../keystone/activity';
 import {
@@ -309,17 +313,35 @@ export class StructuredActivityService {
 
   public async logConsumerPluginUpdate(
     success: boolean,
-    dataInput: ActivityDataInput
+    dataInput: ActivityDataInput,
+    pluginSummary: ConsumerPluginInput
   ) {
     const { actor } = this;
     const params = {
       actor: actor.name,
-      action: 'update',
+      action: pluginSummary.operation,
       entity: 'consumer control',
+      plugin: pluginSummary.name,
+      serviceOrRoute: pluginSummary.serviceOrRouteName,
+      pluginDetails:
+        pluginSummary.operation === 'removed'
+          ? '-'
+          : Object.keys(pluginSummary.config)
+              .filter((k) => (pluginSummary.config as any)[k])
+              .map((k) => `${k}=${(pluginSummary.config as any)[k]}`)
+              .join(', '),
     };
-    const message = '{actor} {action} {entity} for {consumer}';
+    this.mapDataInputToParams(dataInput, params);
 
-    const ids = this.mapDataInputToIDs(['consumer'], dataInput);
+    const message =
+      pluginSummary.operation === 'removed'
+        ? '{actor} {action} {entity} {plugin} to {serviceOrRoute} for {consumer}'
+        : '{actor} {action} {entity} {plugin} to {serviceOrRoute} ({pluginDetails}) for {consumer}';
+
+    const ids = this.mapDataInputToIDs(
+      ['consumer', 'environment', 'product'],
+      dataInput
+    );
 
     return this.recordActivity(success, message, params, ids);
   }
@@ -378,7 +400,7 @@ export class StructuredActivityService {
     });
 
     const formattedMessage = format(message, params);
-    logger.info('%s', formattedMessage);
+    logger.info('%s (%j)', formattedMessage, ids);
 
     const result = await recordActivity(
       context,
