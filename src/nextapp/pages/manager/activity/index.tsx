@@ -242,6 +242,7 @@ const query = gql`
     getFilteredNamespaceActivity(first: $first, skip: $skip, filter: $filter) {
       id
       message
+      result
       params
       activityAt
       blob
