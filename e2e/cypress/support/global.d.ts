@@ -60,5 +60,7 @@ declare namespace Cypress {
     getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
 
     getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
+
+    verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
   }
 }

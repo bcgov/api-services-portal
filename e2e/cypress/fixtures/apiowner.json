@@ -6,6 +6,7 @@
     }
   },
   "namespace": "newplatform",
+  "invalid_namespace": ["test_1234", "New_napespace", "Government"],
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
@@ -129,6 +130,7 @@
         "name": "cy-client-id-secret-auth",
         "flow": "Client Credential Flow",
         "element": "cc-id-secret",
+        "scopes":["System.Write"],
         "clientAuthenticator": "Client ID and Secret",
         "environmentConfig": {
           "environment": "Test",
@@ -136,6 +138,24 @@
           "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
           "clientId": "cypress-auth-profile",
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      }
+    }
+  },
+  "namespacePreview": {
+    "namespace": "previewmode",
+    "serviceAccount": {
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
+    },
+    "product": {
+      "name": "Namespace Preview Test Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-previewmode"
         }
       }
     }

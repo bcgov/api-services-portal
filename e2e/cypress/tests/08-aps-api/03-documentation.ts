@@ -109,7 +109,17 @@ describe('API Tests for Deleting documentation', () => {
         })
     })
 
+    it('Verify the status code and response message for invalid slugvalue', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.makeAPIRequest(documentation.endPoint + '/platform_test' , 'DELETE').then((response) => {      
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.equal("Content not found")
+            })
+        })
+    })
+
     it('Delete the documentation', () => {
+        debugger
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.endPoint + '/' + slugValue, 'DELETE').then((response) => {
                 expect(response.status).to.be.equal(200)
@@ -193,6 +203,15 @@ describe('API Tests to verify Get documentation content', () => {
                 expect(response.body[0].title).to.be.equal(documentation.body.title)
                 expect(response.body[0].description).to.be.equal(documentation.body.description)
                 slugID = response.body[0].slug
+            })
+        })
+    })
+
+    it('Verify the status code and response message for invalid slug id', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/998898', 'GET').then((response) => {     
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.contains("Not Found")
             })
         })
     })

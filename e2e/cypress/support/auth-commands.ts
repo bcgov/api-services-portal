@@ -344,6 +344,14 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('verifyToastMessage', (msg: string) => {
+  cy.get('[role="alert"]',{timeout:2000}).closest('div').invoke('text')
+    .then((text) => {
+      const toastText = text;
+      expect(toastText).to.contain(msg);
+    })
+})
+
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
   debugger
   let response = actualResponse
@@ -367,7 +375,6 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
         response[p] = response[p]['name']
       }
       if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer'].includes(p))) {
-        debugger
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

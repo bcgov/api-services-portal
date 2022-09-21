@@ -40,7 +40,36 @@ class ApiDirectoryPage {
     // })
     cy.get(this.additionalNotes).type(accessRqst.notes)
     cy.get(this.submitBtn).click()
-  };
+  }
+
+  isProductDisplay(productName: string): Boolean {
+    var flag = false;
+    cy.get('body', {timeout: 6000}).then(($body) => {
+      debugger
+      const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+      var ele : string = `[data-testid=api-${pname}]`
+      debugger
+      cy.log('Body -> '+ $body)
+      if ($body.find(ele).length > 0) {
+        flag = true
+      }
+      else{
+        flag = false
+      }
+    })
+    return flag
+  }
+
+  navigateToYourProduct() {
+    cy.contains("Your Products").click()
+    cy.wait(3000)
+  }
+
+  selectProduct(productName: string){
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    var ele : string = `[data-testid=api-${pname}]`
+    cy.get(ele).click()
+  }
 }
 
 export default ApiDirectoryPage

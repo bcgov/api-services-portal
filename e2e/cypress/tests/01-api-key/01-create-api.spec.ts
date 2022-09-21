@@ -2,6 +2,8 @@ import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
+import { slowCypressDown } from 'cypress-slow-down'
+
 
 describe('Create API Spec', () => {
   const login = new LoginPage()
@@ -40,6 +42,12 @@ describe('Create API Spec', () => {
           userSession = xhr.response.headers['x-auth-request-access-token']
         })
       })
+    })
+  })
+
+  it('Verify for invalid namespace name', () => {
+    cy.get('@apiowner').then(({ invalid_namespace }: any) => {
+      home.validateNamespaceName(invalid_namespace)
     })
   })
 
@@ -110,6 +118,7 @@ describe('Create API Spec', () => {
       cy.publishApi('service-plugin.yml', namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
+          expect(res.body.message).to.contains("Sync successful")
         })
       })
     })
