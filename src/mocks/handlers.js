@@ -33,6 +33,10 @@ import {
   revokeSAAccessHandler,
 } from './resolvers/namespace-access';
 import { getActivityHandler } from './resolvers/activity';
+import {
+  createServiceAccountHandler,
+  getAllServiceAccountsHandler,
+} from './resolvers/service-accounts';
 
 // Namespaces
 const allNamespaces = [
@@ -112,6 +116,9 @@ export const handlers = [
     'GetConsumerProductsAndEnvironments',
     allProductsByNamespaceHandler
   ),
+  // Service accounts
+  keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
+  keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
   // Namespace Access
   keystone.query('GetUserPermissions', getUserPermissionsHandler),
   keystone.query(

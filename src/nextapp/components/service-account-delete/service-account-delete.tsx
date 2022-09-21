@@ -10,6 +10,7 @@ import {
   Button,
   Icon,
   IconButton,
+  MenuItem,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -17,6 +18,7 @@ import { gql } from 'graphql-request';
 import * as React from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
+import ActionsMenu from '../actions-menu';
 
 interface ServiceAccountDeleteProps {
   id: string;
@@ -55,15 +57,15 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({
 
   return (
     <>
-      <IconButton
-        aria-label="delete application button"
-        colorScheme="red"
-        icon={<Icon as={FaTrash} />}
-        onClick={onOpen}
-        variant="outline"
-        size="sm"
-        data-testid="service-account-delete-btn"
-      />
+      <ActionsMenu>
+        <MenuItem
+          color="bc-error"
+          onClick={onOpen}
+          data-testid="service-account-delete-btn"
+        >
+          Delete Service Account
+        </MenuItem>
+      </ActionsMenu>
       <AlertDialog
         isCentered
         motionPreset="slideInBottom"
@@ -80,14 +82,14 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({
             undone.
           </AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button ref={cancelRef} onClick={onClose} variant="secondary">
               Cancel
             </Button>
             <Button
               data-testid="confirm-delete-service-acct-btn"
-              colorScheme="red"
               ml={3}
               onClick={handleDelete}
+              variant="danger"
             >
               Yes, Delete
             </Button>

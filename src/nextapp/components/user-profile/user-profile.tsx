@@ -56,17 +56,19 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     ? data.providerUsername
                     : data.name}
                 </Text>
-                <Text
-                  as="span"
-                  color="bc-component"
-                  fontSize="md"
-                  data-testid={`${testId}-username`}
-                >
-                  <Text as="span" mx={1}>
-                    &bull;
+                {data.provider && (
+                  <Text
+                    as="span"
+                    color="bc-component"
+                    fontSize="md"
+                    data-testid={`${testId}-username`}
+                  >
+                    <Text as="span" mx={1}>
+                      &bull;
+                    </Text>
+                    {getProviderText(data.provider)}
                   </Text>
-                  {getProviderText(data.provider)}
-                </Text>
+                )}
               </Text>
               {data.provider !== 'bscs' && (
                 <Text

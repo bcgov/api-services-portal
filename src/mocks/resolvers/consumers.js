@@ -21,6 +21,7 @@ export const harleyAccessRequest = {
     id: 'u1',
     name: 'Harley Jones',
     providerUsername: 'harley123',
+    provider: 'github',
     email: 'harley@easymart.store',
   },
   application: {
@@ -226,6 +227,7 @@ export const getConsumerHandler = (req, res, ctx) => {
   const owner = {
     name: harleyAccessRequest.requestor.name,
     providerUsername: 'harley123',
+    provider: 'github',
     email: 'harley@easymart.store',
   };
   return res(
