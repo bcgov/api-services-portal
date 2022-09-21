@@ -228,5 +228,198 @@
         }
       }
     }
-  }
+  },
+  "expectedActivitiesResponse":[
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "approved",
+            "entity": "access request",
+            "accessRequest": "2",
+            "environment": "dev",
+            "product": "Auto Test Product",
+            "application": "Auto Test App to check labels",
+            "consumer": "9C3EFC92-8F3DE9D3B74"
+        },
+        "activityAt": "2022-09-20T20:39:05.318Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} for {application} ({consumer}) to access {product} {environment} ({note})",
+        "params": {
+            "actor": "Harley Jones",
+            "action": "received credentials",
+            "entity": "access",
+            "note": "access pending approval",
+            "accessRequest": "2",
+            "environment": "dev",
+            "product": "Auto Test Product",
+            "application": "Auto Test App to check labels",
+            "consumer": "9C3EFC92-8F3DE9D3B73"
+        },
+        "activityAt": "2022-09-20T20:38:40.857Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:19.732Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:19.678Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:14.706Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:12.664Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:08.054Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:07.996Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:00.947Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:00.899Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:56.316Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:56.252Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:56.192Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:47.630Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:47.574Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:47.516Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:38.815Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:38.763Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:38.696Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:30.570Z"
+    }
+]
 }
