@@ -251,7 +251,31 @@ export class KeycloakClientRegistrationService {
     desiredSetOfDefaultScopes: string[],
     desiredSetOfOptionalScopes: string[]
   ): Promise<string[]> {
-    logger.debug(
+    return await this.doSyncAndApply(
+      clientId,
+      desiredSetOfDefaultScopes,
+      desiredSetOfOptionalScopes
+    ).catch((e) => {
+      logger.error(
+        '[syncAndApply] Failed %s %s',
+        e.request?.method,
+        e.request?.path
+      );
+      logger.error(
+        '[syncAndApply]   %s %s',
+        e.response?.status,
+        e.response?.statusText
+      );
+      throw e;
+    });
+  }
+
+  async doSyncAndApply(
+    clientId: string,
+    desiredSetOfDefaultScopes: string[],
+    desiredSetOfOptionalScopes: string[]
+  ): Promise<string[]> {
+    logger.info(
       '[syncAndApply] %s %j %j',
       clientId,
       desiredSetOfDefaultScopes,
