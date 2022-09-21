@@ -54,7 +54,7 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
   return (
     <>
       <Button colorScheme="red" onClick={onOpen} size="sm">
-        Delete Profile
+        Delete Profile...
       </Button>
       <AlertDialog
         isCentered
