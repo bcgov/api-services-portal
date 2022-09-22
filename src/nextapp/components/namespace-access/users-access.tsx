@@ -40,7 +40,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   resourceScopes,
   prodEnvId,
 }) => {
-  const queryKey = 'namespaceAccessUsers';
+  const queryKey = ['namespaceAccessUsers', resourceId];
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
