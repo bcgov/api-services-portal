@@ -363,7 +363,7 @@ class Oauth2ProxyAuthStrategy {
         '[migration] %s not found.  Migrating %s@%s',
         username,
         providerUsername,
-        provider
+        identityProvider
       );
       try {
         _results = await _users.adapter.find({
