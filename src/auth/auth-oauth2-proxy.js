@@ -25,6 +25,7 @@ const { Logger } = require('../logger');
 
 const { UMA2TokenService } = require('../services/uma2');
 const { getUma2FromIssuer, Uma2WellKnown } = require('../services/keycloak');
+const { MigrateAuthzUser, MigratePortalUser } = require('../services/workflow');
 
 const toJson = (val) => (val ? JSON.parse(val) : null);
 
@@ -353,6 +354,38 @@ class Oauth2ProxyAuthStrategy {
         */
 
     let _results = await _users.adapter.find({ username: username });
+
+    if (_results.length == 0 && username != `${providerUsername}@${provider}`) {
+      logger.info(
+        '[migration] %s not found.  Migrating %s@%s',
+        username,
+        providerUsername,
+        provider
+      );
+      try {
+        _results = await _users.adapter.find({
+          username: `${providerUsername}@${provider}`,
+        });
+        if (_results.length == 1) {
+          const oldUser = _results[0];
+          // check to see if we need to migrate
+          await MigrateAuthzUser(
+            this.keystone,
+            oldUser.username,
+            username,
+            true
+          );
+          await MigratePortalUser(this.keystone, oldUser.username, username);
+        }
+      } catch (err) {
+        logger.error(
+          '[migration] Error during migration (%s) %s',
+          username,
+          err
+        );
+        throw new Error('User migration error');
+      }
+    }
 
     let userId = _results.length == 0 ? null : _results[0].id;
 

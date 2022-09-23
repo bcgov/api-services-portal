@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { checkKeystoneStatus } from '../checkKeystoneStatus';
 import { User } from './types';
 
 const assert = require('assert').strict;
@@ -144,4 +145,25 @@ export async function lookupUsersByNamespace(
   });
   logger.debug('Query [lookupUsersByNamespace] result %j', result);
   return result.data.usersByNamespace;
+}
+
+export async function changeUsername(
+  context: any,
+  userId: string,
+  newUsername: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation ChangeUsername($userId: ID!, $newUsername: String!) {
+                      updateUser(id: $userId, data: { username: $newUsername } ) {
+                          id
+                      }
+                  }`,
+    variables: { userId, newUsername },
+  });
+  if ('errors' in result) {
+    logger.error('[changeUsername] %s : %s', newUsername, userId);
+    throw new Error('Failed to change username');
+  }
+
+  logger.debug('[changeUsername] RESULT %j', result);
 }

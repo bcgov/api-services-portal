@@ -5,6 +5,7 @@ import KeycloakAdminClient, {
   default as KcAdminClient,
 } from '@keycloak/keycloak-admin-client';
 import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
+import { checkKeystoneStatus } from '../checkKeystoneStatus';
 
 const logger = Logger('kc.user');
 
@@ -95,5 +96,15 @@ export class KeycloakUserService {
       });
     }
     logger.debug('[syncUserClientRoles] %s OK', id);
+  }
+
+  public async disableUser(id: string): Promise<void> {
+    logger.debug('[disableUser] %s', id);
+    await this.kcAdminClient.users.update(
+      { id },
+      {
+        enabled: false,
+      }
+    );
   }
 }
