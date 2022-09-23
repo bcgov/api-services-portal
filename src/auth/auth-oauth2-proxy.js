@@ -355,7 +355,10 @@ class Oauth2ProxyAuthStrategy {
 
     let _results = await _users.adapter.find({ username: username });
 
-    if (_results.length == 0 && username != `${providerUsername}@${provider}`) {
+    if (
+      _results.length == 0 &&
+      username != `${providerUsername}@${identityProvider}`
+    ) {
       logger.info(
         '[migration] %s not found.  Migrating %s@%s',
         username,
@@ -364,7 +367,7 @@ class Oauth2ProxyAuthStrategy {
       );
       try {
         _results = await _users.adapter.find({
-          username: `${providerUsername}@${provider}`,
+          username: `${providerUsername}@${identityProvider}`,
         });
         if (_results.length == 1) {
           const oldUser = _results[0];
