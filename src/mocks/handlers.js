@@ -22,6 +22,7 @@ import {
   store as consumersStore,
 } from './resolvers/consumers';
 import { getActivityHandler } from './resolvers/activity';
+import { allProductsHandler } from './resolvers/products';
 
 export function resetAll() {
   consumersStore.reset();
@@ -84,6 +85,7 @@ export const handlers = [
   keystone.query('GetFilterConsumers', getConsumersFilterHandler),
   keystone.query('GetAllConsumerGroupLabels', getAllConsumerGroupLabelsHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
+  keystone.query('GetAllProducts', allProductsHandler),
   keystone.query(
     'GetConsumerProductsAndEnvironments',
     allProductsByNamespaceHandler

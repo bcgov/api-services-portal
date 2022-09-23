@@ -6,31 +6,36 @@ import {
   Container,
   VStack,
   Skeleton,
+  Text,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ProductsList from '@/components/products-list';
 import NewProduct from '@/components/new-product';
-
-import breadcrumbs from '@/components/ns-breadcrumb'
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
 const PackagingPage: React.FC = () => {
-  const actionElements = <NewProduct />;
-
+  const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
   return (
     <>
       <Head>
         <title>API Program Services | Products</title>
       </Head>
       <Container maxW="6xl">
-
-        <PageHeader title="Products" actions={actionElements} breadcrumb={breadcrumbs()}>
-          <p>
-            <strong>Products</strong> are groups of APIs that are protected in
-            the same way, and are discoverable by Citizens through the BC Data
-            Catalog, or by invitation from an API Manager.
-          </p>
+        <PageHeader
+          title="Products"
+          actions={<NewProduct />}
+          breadcrumb={breadcrumbs}
+        >
+          <Box maxW="65%">
+            <Text>
+              <Text as="strong">Products</Text> are groups of APIs that are
+              protected in the same way, and are discoverable by Citizens
+              through the BC Data Catalogue, or by invitation from an API
+              Manager.
+            </Text>
+          </Box>
         </PageHeader>
 
         <Box mt={5}>

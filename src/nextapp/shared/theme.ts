@@ -54,7 +54,7 @@ const _focus = {
   // outlineColor: 'bc-border-focus',
   outline: 'none',
   borderColor: 'bc-blue-alt',
-  boxShadow: 'lg',
+  boxShadow: 'sm',
 };
 const _disabled = {
   opacity: 0.3,
@@ -184,6 +184,8 @@ const buttonVariants = {
   ghost: {
     color: 'bc-blue',
     borderColor: 'transparent',
+    boxShadow: 'none',
+    px: 3,
     _hover: {
       bgColor: 'transparent',
       textDecor: 'none',

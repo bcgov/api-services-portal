@@ -1,4 +1,4 @@
-export const allProductsByNamespaceHandler = (req, res, ctx) => {
+export const allProductsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
       allProductsByNamespace: [
@@ -9,10 +9,25 @@ export const allProductsByNamespaceHandler = (req, res, ctx) => {
             {
               id: 'e1',
               name: 'prod',
+              flow: 'client-credentials',
+              credentialIssuer: {
+                name: 'MoH IdP',
+              },
+              services: [],
             },
             {
               id: 'e2',
               name: 'dev',
+              flow: 'client-credentials',
+              credentialIssuer: {
+                name: 'MoH IdP',
+              },
+              services: [
+                {
+                  id: 's1',
+                  name: 'a-service-for-moh-proto',
+                },
+              ],
             },
           ],
         },
@@ -23,10 +38,42 @@ export const allProductsByNamespaceHandler = (req, res, ctx) => {
             {
               id: 'e11',
               name: 'test',
+              flow: 'client-credentials',
+              credentialIssuer: {
+                name: 'MoH IdP',
+              },
+              services: [
+                {
+                  id: 's2',
+                  name: 'Sample_API',
+                },
+                {
+                  id: 's5',
+                  name: 'api-for-example',
+                },
+                {
+                  id: 's6',
+                  name: 'api-for-test',
+                },
+                {
+                  id: 's7',
+                  name: 'api-for-new-stores',
+                },
+              ],
             },
             {
               id: 'e21',
               name: 'other',
+              flow: 'kong-api-key-acl',
+              credentialIssuer: {
+                name: 'MoH IdP',
+              },
+              services: [
+                {
+                  id: 's3',
+                  name: 'My New API',
+                },
+              ],
             },
           ],
         },

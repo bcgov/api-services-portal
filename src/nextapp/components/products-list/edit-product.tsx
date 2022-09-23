@@ -16,6 +16,7 @@ import {
   useDisclosure,
   useToast,
   VStack,
+  MenuItem,
 } from '@chakra-ui/react';
 import { FaPenSquare } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
@@ -25,7 +26,7 @@ import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
 import kebabCase from 'lodash/kebabCase';
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
-import OrganizationSelect from './organization-select';
+import ActionsMenu from '../actions-menu';
 
 interface EditProductProps {
   data: Product;
@@ -36,6 +37,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const deleteDisclosure = useDisclosure();
   const mutation = useApiMutation<ProductUpdateInput>(UPDATE_PRODUCT);
   const updateProduct = React.useCallback(async () => {
     try {
@@ -69,10 +71,10 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         isClosable: true,
       });
     } catch (err) {
-      console.error(err.message);
       toast({
         title: 'Update product failed',
         status: 'error',
+        description: err,
         isClosable: true,
       });
     }
@@ -92,14 +94,27 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
 
   return (
     <>
-      <Button
-        variant="tertiary"
-        leftIcon={<Icon as={FaPenSquare} />}
-        onClick={onOpen}
-        data-testid={`${kebabCase(data.name)}-edit-btn`}
-      >
-        Edit
-      </Button>
+      <ActionsMenu>
+        <MenuItem
+          onClick={onOpen}
+          data-testid={`${kebabCase(data.name)}-edit-btn`}
+        >
+          Edit Product
+        </MenuItem>
+        <MenuItem
+          color="bc-error"
+          data-testid={`${kebabCase(data.name)}-delete-btn`}
+          onClick={deleteDisclosure.onOpen}
+        >
+          Delete Product...
+        </MenuItem>
+      </ActionsMenu>
+      <DeleteProduct
+        isOpen={deleteDisclosure.isOpen}
+        onClose={deleteDisclosure.onClose}
+        id={data.id}
+        onDeleted={deleteDisclosure.onClose}
+      />
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -124,9 +139,12 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
           </ModalBody>
 
           <ModalFooter>
-            <DeleteProduct id={data.id} onDeleted={onClose} />
-            <Box flex={1} />
-            <Button mr={3} onClick={onClose} data-testid="prd-edit-cancel-btn">
+            <Button
+              mr={3}
+              onClick={onClose}
+              data-testid="prd-edit-cancel-btn"
+              variant="secondary"
+            >
               Cancel
             </Button>
             <Button
