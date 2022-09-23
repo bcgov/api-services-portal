@@ -84,6 +84,7 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     home.useNamespace(checkPermission.namespace)
     cy.visit(na.path)
     na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
+    cy.wait(2000)
     na.clickGrantUserAccessButton()
     na.grantPermission(checkPermission.grantPermission[accessRole])
   })

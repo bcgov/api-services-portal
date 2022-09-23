@@ -4,7 +4,7 @@ import login from "../../pageObjects/login"
 import LoginPage from "../../pageObjects/login"
 let userSession: any
 let nameSpace: string
-let response : any
+let response: any
 
 describe('Get the user session token to pass it as authorization token to make the API call ', () => {
 
@@ -53,7 +53,36 @@ describe('API Tests for Activity report', () => {
     it('Get the resource and verify the success code in the response', () => {
         debugger
         cy.get('@api').then(({ namespaces }: any) => {
-            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity", 'GET').then((res) => {
+            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res) => {
+                debugger
+                expect(res.status).to.be.equal(200)
+                response = res.body
+            })
+        })
+    })
+})
+
+describe('Generate activity response from APS V2 API', () => {
+
+    const login = new LoginPage()
+    const home = new HomePage()
+
+    beforeEach(() => {
+        cy.preserveCookies()
+        cy.fixture('api').as('api')
+    })
+
+    it('Prepare the Request Specification for the API', () => {
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.setHeaders(namespaces.headers)
+            cy.setAuthorizationToken(userSession)
+        })
+    })
+
+    it('Get the resource and verify the success code in the response', () => {
+        debugger
+        cy.get('@api').then(({ namespaces }: any) => {
+            cy.makeAPIRequest(namespaces.endPoint + "/" + nameSpace + "/activity?first=100", 'GET').then((res) => {
                 debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
@@ -86,12 +115,21 @@ describe('Verify the Activity filter for users', () => {
     })
 
     it('Verify Activity filter for "Janis Smith" user', () => {
-        activity.checkActivityFilterForUser("Janis Smith",response)
+        activity.checkActivityFilter("User","Janis Smith", response)
     })
 
     it('Verify Activity filter for "Harley Jones" user', () => {
-
-        activity.checkActivityFilterForUser("Harley Jones",response)
+        activity.checkActivityFilter("User","Harley Jones", response)
     })
 
+    it('Verify Activity filter for "Mark F Mark L" user', () => {
+        activity.checkActivityFilter("User","Mark F Mark L", response)
+    })
+
+    it('Verify Activities filter for consumer', () => {
+        cy.readFile('cypress/fixtures/state/regen.json').then((store) => {
+            let consumerID = store.consumernumber
+            activity.checkActivityFilter("Consumer",consumerID, response)
+        })
+    })
 })

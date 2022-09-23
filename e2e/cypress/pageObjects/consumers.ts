@@ -123,6 +123,7 @@ export default class ConsumersPage {
   deleteRateLimitControl() {
     cy.get("body").then($body => {
       if ($body.find(this.removeRateLimitControlButton).length > 0) {
+        cy.wait(2000)
         cy.get(this.removeRateLimitControlButton, { timeout: 3000 }).should('be.visible');
         cy.get(this.removeRateLimitControlButton, { timeout: 2000 }).click()
       }

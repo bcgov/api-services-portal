@@ -1,12 +1,12 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import NameSpacePage from '../../pageObjects/namespace'
 import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
-import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 
-describe('Grant Namespace Manage Role', () => {
+describe('Grant Credential Issuer Role', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -31,12 +31,13 @@ describe('Grant Namespace Manage Role', () => {
     })
   })
 
-  it('Grant only "Namespace.Manage" permission to Wendy', () => {
+  it('Grant only "CredentialIssuer.Admin" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
+      na.revokeAllPermission(checkPermission.grantPermission.Wendy.userName)
       na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Wendy)
-      na.revokePermission(checkPermission.revokePermission.Wendy_ci)
+      na.grantPermission(checkPermission.grantPermission.Wendy_CA)
+      // na.revokePermission(checkPermission.revokePermission.Wendy)
     })
   })
 
@@ -47,7 +48,7 @@ describe('Grant Namespace Manage Role', () => {
   })
 })
 
-describe('Verify that Wendy is able to see all the options for the Namespace', () => {
+describe('Verify that Wendy is able to generate authorization profile', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
@@ -65,7 +66,6 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
-    cy.fixture('apiowner').as('apiowner')
   })
 
   it('Authenticates Wendy (Credential-Issuer)', () => {
@@ -78,15 +78,23 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
     })
   })
 
-  it('Verify that all the namespace options and activities are displayed', () => {
+  it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
     cy.visit(ns.path)
-    ns.verifyThatAllOptionsAreDisplayed()
+    ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
+  })
+
+  it('Verify that authorization profile for Client ID/Secret is generated', () => {
+    cy.visit(authProfile.path)
+    cy.get('@credential-issuer').then(({ clientCredentials }: any) => {
+      let ap = clientCredentials.authProfile
+      authProfile.createAuthProfile(ap)
+    })
   })
 
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-    cy.resetCredential('Wendy')
+    // cy.resetCredential('Wendy')
   })
 })

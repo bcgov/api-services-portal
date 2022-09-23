@@ -1,9 +1,5 @@
 import * as React from 'react';
 import {
-<<<<<<< HEAD
-  Avatar,
-=======
->>>>>>> api-services-portal/dev
   Box,
   Button,
   Center,
@@ -125,13 +121,10 @@ const ActivityPage: React.FC = () => {
     return result;
   }, [data, isSuccess]);
 
-<<<<<<< HEAD
-=======
   const handleParamSelect = (key: string, value: string) => {
     addFilter(key, { value: value, name: value, multiple: true });
   };
 
->>>>>>> api-services-portal/dev
   return (
     <>
       <Head>
@@ -198,11 +191,6 @@ const ActivityPage: React.FC = () => {
                 >
                   {headerFormat.format(new Date(date.replaceAll('-', '/')))}
                 </Heading>
-<<<<<<< HEAD
-                {feed[date].map((a) => {
-                  return <ActivityItem key={uid(a.id)} data={a} />;
-                })}
-=======
                 {feed[date].map((a) => (
                   <ActivityItem
                     key={uid(a.id)}
@@ -210,7 +198,6 @@ const ActivityPage: React.FC = () => {
                     onSelect={handleParamSelect}
                   />
                 ))}
->>>>>>> api-services-portal/dev
               </Box>
             );
           })}

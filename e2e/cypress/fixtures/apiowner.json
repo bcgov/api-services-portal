@@ -112,6 +112,34 @@
         }
       }
     },
+    "invalidClientIdSecret": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "other",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      },
+      "authProfile": {
+        "name": "invalid-auth-profile",
+        "flow": "Client Credential Flow",
+        "element": "cc-id-secret",
+        "clientAuthenticator": "Client ID and Secret",
+        "environmentConfig": {
+          "environment": "Other",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "invalid-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-1234"
+        }
+      }
+    },
     "clientIdSecret": {
       "product": {
         "name": "Client Credentials Test Product",
@@ -189,6 +217,10 @@
       "Wendy": {
         "userName": "wendy",
         "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
+      },
+      "Wendy_CA": {
+        "userName": "wendy",
+        "accessRole": ["CredentialIssuer.Admin"]
       },
       "Wendy_GC": {
         "userName": "wendy",

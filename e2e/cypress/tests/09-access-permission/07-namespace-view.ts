@@ -2,17 +2,14 @@ import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
 import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import ConsumersPage from '../../pageObjects/consumers'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
-import AuthorizationProfile from '../../pageObjects/authProfile'
-import ToolBar from '../../pageObjects/toolbar'
-import NameSpacePage from '../../pageObjects/namespace'
 
 
-describe('Grant Gateway Config Role to Wendy', () => {
+describe('Grant Namespace View Role to Mark', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
-  const sa = new ServiceAccountsPage()
 
   before(() => {
     cy.visit('/')
@@ -26,19 +23,20 @@ describe('Grant Gateway Config Role to Wendy', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
+  it('Authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
       home.useNamespace(checkPermission.namespace)
     })
   })
 
-  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
+  it('Grant only "Namespace.View" permission to Mark', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokePermission(checkPermission.grantPermission.Wendy)
+      na.revokeAllPermission(checkPermission.grantPermission.Mark.userName)
       na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Wendy_GC)
+      na.grantPermission(checkPermission.grantPermission.Mark_NV)
     })
   })
 
@@ -49,14 +47,13 @@ describe('Grant Gateway Config Role to Wendy', () => {
   })
 })
 
-describe('Verify that Wendy is able to generate authorization profile', () => {
+describe('Verify that Mark is unable to create service account', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const ns = new NameSpacePage()
   const mp = new MyProfilePage()
-  const tb = new ToolBar()
-  const authProfile = new AuthorizationProfile()
+  const consumers = new ConsumersPage()
+  const sa = new ServiceAccountsPage()
 
   before(() => {
     cy.visit('/')
@@ -67,10 +64,11 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('credential-issuer').as('credential-issuer')
+    cy.fixture('access-manager').as('access-manager')
   })
 
-  it('Authenticates Wendy (Credential-Issuer)', () => {
-    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
+  it('authenticates Mark', () => {
+    cy.get('@access-manager').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -79,14 +77,24 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     })
   })
 
-  it('Verify that GWA API allows user to publish the API to Kong gateway', () => {
-    cy.get('@credential-issuer').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          expect(JSON.stringify(res.body.message)).to.be.contain('Sync successful.')
-          expect(res.statusCode).to.be.equal(200)
-        })
-      })
+  it('Navigate to Consumer Page to see the Approve Request option', () => {
+    cy.visit(consumers.path)
+  })
+
+  it('Verify that the option to approve request is not displayed', () => {
+    consumers.isApproveAccessEnabled(false)
+  })
+
+  it('Navigate to Consumer Page to see the Approve Request option', () => {
+    cy.visit(consumers.path)
+  })
+
+  it('Verify that service accounts are not created', () => {
+    cy.visit(sa.path)
+    cy.get('@access-manager').then(({ serviceAccount }: any) => {
+      sa.createServiceAccount(serviceAccount.scopes)
+      sa.isShareButtonVisible(true)
+      cy.visit(consumers.path)
     })
   })
 
@@ -94,6 +102,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-    cy.resetCredential('Wendy')
+    cy.resetCredential('Mark')
   })
 })

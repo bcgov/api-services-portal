@@ -2,55 +2,66 @@ class ActivityPage {
   path: string = '/manager/activity'
   userProfile: string = '[data-testid=my_profile_json]'
   clearAllBtn: string = '[data-testid="btn-filter-clear-all"]'
+  loadButton: string = '[data-testid="activity-feed-load-more-btn"]'
 
-  checkActivityFilterForUser(user: string, response: any): void {
+  checkActivityFilter(filterCondition: string, value: string, response: any): void {
     let responseText: any
     let activityText: string
-    this.setFilterCondition("User",user)
+    var flag = false
+    this.setFilterCondition(filterCondition, value)
     var filteredResponse: any
-    var activityCount: any
-    const para = document.querySelector('p');
+    let result: any
     debugger
-    filteredResponse = Cypress._.filter(response, ["params.actor", user])
-    // expect(cy.get('[data-testid^="activity-feed-heading-"]').nextAll('div').should('have.length', filteredResponse.length))
-    // filteredResponse.forEach(function (accessResponse: any) {
-    //   responseText = accessResponse.params.actor + " " + accessResponse.params.action
-      cy.get('[data-testid^="activity-feed-heading-"]').nextAll('div').each(($e1, index, $list) => {
-        cy.wrap($e1).find('mark').invoke('text').then((actor) => {
-          cy.wrap($e1).find('strong').invoke('text').then((action) => {
-            debugger
-            activityText = actor + " " + action
-            responseText = filteredResponse[index].message
-            // responseText = responseText.replaceAll("{","`${filteredResponse[index].params.")
-            // responseText = responseText.replaceAll("}","}`")
-            responseText = responseText.replaceAll("{","${filteredResponse[index].params.")
-            // responseText = responseText.replaceAll("}","}`")
-            // responseText = `${responseText}`
-            const regexp = /\${([^{]+)}/g;
-            let result = responseText.replace(regexp, function(ignore:any, key:any){
-              return eval(key);
+    if (filterCondition.toLowerCase() === 'user') {
+      filteredResponse = Cypress._.filter(response, ["params.actor", value])
+    }
+    else {
+      filteredResponse = Cypress._.filter(response, ["params." + filterCondition.toLowerCase(), value])
+    }
+    cy.get('[data-testid^="activity-feed-heading-"]').nextAll('div').then($elements => {
+      assert.equal($elements.length, filteredResponse.length)
+    })
+    cy.get('[data-testid^="activity-feed-heading-"]').nextAll('div').each(($e1, index, $list) => {
+      cy.wrap($e1).find('p').invoke('text').then((text) => {
+        activityText = text
+        filteredResponse.forEach((record: { message: any }) => {
+          debugger
+          responseText = record.message
+          responseText = responseText.replaceAll("{", "${filteredResponse[index].params.")
+          const regexp = /\${([^{]+)}/g;
+          result = responseText.replace(regexp, function (ignore: any, key: any) {
+            return eval(key);
           });
-            cy.log("Result -> "+result)  
-            responseText = "`"+responseText +"`"
-            responseText = `${filteredResponse[index].params.actor}-${filteredResponse[index].params.action}`
-            responseText = filteredResponse[index].params.actor + " " + filteredResponse[index].params.action
-            assert.equal(activityText,responseText)
-          })
-        })
+          if(result === activityText)
+          {
+            flag = true
+          }
+        });
+        assert.isTrue(flag, "Record mismatch for "+activityText)
       })
-    // })
+    })
   }
 
-  setFilterCondition(filterBy: string, filterValue: string)
-  {
+  setFilterCondition(filterBy: string, filterValue: string) {
     cy.get("body").then($body => {
       if ($body.find(this.clearAllBtn).length > 0) {
         cy.get(this.clearAllBtn, { timeout: 2000 }).click()
       }
     })
     cy.get('[data-testid="filter-type-select"]').select(filterBy, { force: true }).invoke('val')
-    cy.get('[data-testid="activity-filters-users-input"]', { timeout: 2000 }).type(filterValue + '{enter}')
+    cy.get('[data-testid="activity-filters-'+filterBy.toLowerCase()+'s-input"]', { timeout: 2000 }).type(filterValue + '{enter}')
     cy.wait(3000)
+    this.loadMoreRecords()
+  }
+
+  loadMoreRecords()
+  {
+    cy.get("body").then($body => {
+      if ($body.find(this.loadButton).length > 0) {
+        cy.get(this.loadButton).click({force:true})
+        cy.wait(2000)
+      }
+    })
   }
 }
 export default ActivityPage

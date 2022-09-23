@@ -74,15 +74,6 @@ describe('Create API Spec', () => {
       pd.updateDatasetNameToCatelogue(namespacePreview.product.name, namespacePreview.product.environment.name)
     })
   })
-  
-  it('publish product to directory', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ namespacePreview }: any) => {
-      pd.editProductEnvironment(namespacePreview.product.name, namespacePreview.product.environment.name)
-      pd.editProductEnvironmentConfig(namespacePreview.product.environment.config, true)
-    })
-    pd.generateKongPluginConfig('service-permission.yml')
-  })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ namespacePreview }: any) => {
