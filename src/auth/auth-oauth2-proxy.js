@@ -360,10 +360,11 @@ class Oauth2ProxyAuthStrategy {
       username != `${providerUsername}@${identityProvider}`
     ) {
       logger.info(
-        '[migration] %s not found.  Migrating %s@%s',
+        '[migration] %s not found.  Migrate %s@%s access to %s',
         username,
         providerUsername,
-        identityProvider
+        identityProvider,
+        username
       );
       try {
         _results = await _users.adapter.find({
@@ -371,14 +372,12 @@ class Oauth2ProxyAuthStrategy {
         });
         if (_results.length == 1) {
           const oldUser = _results[0];
+          const suctx = this.keystone.createContext({
+            skipAccessControl: true,
+          });
           // check to see if we need to migrate
-          await MigrateAuthzUser(
-            this.keystone,
-            oldUser.username,
-            username,
-            true
-          );
-          await MigratePortalUser(this.keystone, oldUser.username, username);
+          await MigrateAuthzUser(suctx, oldUser.username, username, true);
+          await MigratePortalUser(suctx, oldUser.username, username);
         }
       } catch (err) {
         logger.error(
