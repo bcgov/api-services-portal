@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {
-  Box,
   Button,
   FormControl,
   FormLabel,
   FormHelperText,
-  Icon,
   Input,
   Modal,
   ModalOverlay,
@@ -18,7 +16,6 @@ import {
   VStack,
   MenuItem,
 } from '@chakra-ui/react';
-import { FaPenSquare } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
@@ -124,6 +121,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
               <VStack spacing={4}>
                 <FormControl isRequired id="product-name">
                   <FormLabel>Product Name</FormLabel>
+                  <FormHelperText>Must be unique</FormHelperText>
                   <Input
                     type="text"
                     name="name"
@@ -131,7 +129,6 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
                     variant="bc-input"
                     data-testid="prd-edit-name-input"
                   />
-                  <FormHelperText>Must be unique</FormHelperText>
                 </FormControl>
                 <DatasetInput dataset={data.dataset} />
               </VStack>

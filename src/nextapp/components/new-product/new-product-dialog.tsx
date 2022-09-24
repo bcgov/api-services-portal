@@ -103,6 +103,9 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             </FormControl>
             <FormControl as="fieldset" isRequired>
               <FormLabel as="legend">Environment</FormLabel>
+              <FormHelperText>
+                Select the first environment for this product
+              </FormHelperText>
               <RadioGroup defaultValue="dev">
                 <Stack>
                   <Radio
@@ -142,9 +145,6 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                 </Stack>
               </RadioGroup>
-              <FormHelperText>
-                Select the first environment for this product
-              </FormHelperText>
             </FormControl>
           </form>
         </ModalBody>

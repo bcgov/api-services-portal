@@ -15,7 +15,7 @@ import {
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
 import NewProduct from '@/components/new-product';
-import { FaPlusCircle } from 'react-icons/fa';
+import { FaPen, FaPlusCircle } from 'react-icons/fa';
 import { Tr, Td } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { getFlowText } from '@/shared/services/utils';
@@ -145,7 +145,14 @@ const ProductsList: React.FC = () => {
                     </Wrap>
                   )}
                 </Td>
-                <Td textAlign="right">
+                <Td textAlign="right" w="17%">
+                  <Button
+                    leftIcon={<Icon as={FaPen} />}
+                    variant="ghost"
+                    size="xs"
+                  >
+                    Edit
+                  </Button>
                   <ActionsMenu>
                     <MenuItem color="bc-error">Delete Environment...</MenuItem>
                   </ActionsMenu>

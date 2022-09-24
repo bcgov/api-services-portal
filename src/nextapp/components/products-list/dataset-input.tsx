@@ -76,6 +76,11 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
               <FormLabel {...getLabelProps()}>
                 Link to BC Data Catalogue
               </FormLabel>
+              <FormHelperText mb={2}>
+                This value is the slug value of a corresponding BC Data
+                Catalogue entry: https://catalogue.data.gov.bc.ca/dataset/
+                <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
+              </FormHelperText>
               <Input
                 {...getRootProps(
                   { refKey: 'innerRef' },
@@ -142,16 +147,6 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
             </>
           )}
         </Downshift>
-        <FormHelperText>
-          <Text as="em">
-            https://catalogue.data.gov.bc.ca/dataset/
-            <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
-          </Text>
-        </FormHelperText>
-        <FormHelperText>
-          This value is the slug value of a corresponding BC Data Catalogue
-          entry
-        </FormHelperText>
       </FormControl>
     </>
   );
