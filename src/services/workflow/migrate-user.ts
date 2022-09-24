@@ -44,11 +44,11 @@ export const MigrateAuthzUser = async (
   );
 
   const permissionApi = new KeycloakPermissionTicketService(
-    process.env.ISSUER,
+    envCtx.openid.issuer,
     token
   );
 
-  const userApi = new KeycloakUserService(process.env.ISSUER);
+  const userApi = new KeycloakUserService(envCtx.openid.issuer);
   await userApi.login(
     envCtx.issuerEnvConfig.clientId,
     envCtx.issuerEnvConfig.clientSecret
