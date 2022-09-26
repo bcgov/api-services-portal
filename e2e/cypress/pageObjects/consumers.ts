@@ -86,7 +86,8 @@ export default class ConsumersPage {
     // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-
+    debugger
+    cy.wait(3000)
   }
 
   setAllowedIPAddress(allowIP: string, scope = 'Service') {
@@ -101,8 +102,7 @@ export default class ConsumersPage {
     // cy.contains('h2', 'ip-restriction').should('be.visible')
     // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
-    // cy.wait(1000)
-
+    cy.wait(1000)
   }
 
   verifyVisibilityOfTheRateLimiting() {
@@ -113,6 +113,7 @@ export default class ConsumersPage {
     // cy.wait(2000)
     cy.get("body").then($body => {
       if ($body.find(this.removeIPRestrictionButton).length > 0) {
+        cy.wait(2000)
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).should('be.visible');
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).click()
       }

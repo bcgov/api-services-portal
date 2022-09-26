@@ -251,7 +251,7 @@ Cypress.Commands.add('deleteAllCookies', () => {
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   let authorization
   cy.fixture('state/regen').then((creds: any) => {
-    cy.wait(1000)
+    cy.wait(2000)
     let token = key || creds.apikey
     debugger
     const service = serviceName

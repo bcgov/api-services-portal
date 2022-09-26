@@ -12,7 +12,10 @@ class ActivityPage {
     var filteredResponse: any
     let result: any
     debugger
-    if (filterCondition.toLowerCase() === 'user') {
+    if (value == "") {
+      filteredResponse = response
+    }
+    else if (filterCondition.toLowerCase() === 'user') {
       filteredResponse = Cypress._.filter(response, ["params.actor", value])
     }
     else {
@@ -24,20 +27,25 @@ class ActivityPage {
     cy.get('[data-testid^="activity-feed-heading-"]').nextAll('div').each(($e1, index, $list) => {
       cy.wrap($e1).find('p').invoke('text').then((text) => {
         activityText = text
-        filteredResponse.forEach((record: { message: any }) => {
+        filteredResponse.forEach((record: any) => {
           debugger
           responseText = record.message
           responseText = responseText.replaceAll("{", "${filteredResponse[index].params.")
           const regexp = /\${([^{]+)}/g;
-          result = responseText.replace(regexp, function (ignore: any, key: any) {
-            return eval(key);
-          });
-          if(result === activityText)
+          if (!(record.result === 'failed')) {
+              result = responseText.replace(regexp, function (ignore: any, key: any) {
+              return eval(key);
+            });
+          }
+          else if(responseText.includes("Failed to Apply Workflow - IssuerMisconfigError"))
           {
+            result = 'Failed to Apply Workflow - IssuerMisconfigError: undefined'
+          }
+          if (result === activityText) {
             flag = true
           }
         });
-        assert.isTrue(flag, "Record mismatch for "+activityText)
+        assert.isTrue(flag, "Record mismatch for " + activityText)
       })
     })
   }
@@ -49,16 +57,15 @@ class ActivityPage {
       }
     })
     cy.get('[data-testid="filter-type-select"]').select(filterBy, { force: true }).invoke('val')
-    cy.get('[data-testid="activity-filters-'+filterBy.toLowerCase()+'s-input"]', { timeout: 2000 }).type(filterValue + '{enter}')
+    cy.get('[data-testid="activity-filters-' + filterBy.toLowerCase() + 's-input"]', { timeout: 2000 }).type(filterValue + '{enter}')
     cy.wait(3000)
     this.loadMoreRecords()
   }
 
-  loadMoreRecords()
-  {
+  loadMoreRecords() {
     cy.get("body").then($body => {
       if ($body.find(this.loadButton).length > 0) {
-        cy.get(this.loadButton).click({force:true})
+        cy.get(this.loadButton).click({ force: true })
         cy.wait(2000)
       }
     })
