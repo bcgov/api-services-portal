@@ -21,9 +21,11 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSessionTokenValue().then((value) => {
-            userSession = value
-         })
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+                userSession = value
+            })
+        })
     })
 
 })
@@ -84,9 +86,9 @@ describe('API Tests for Fetching documentation', () => {
 
 
     it('Compare the values in response against the values passed in the request', () => {
-        cy.get('@api').then(({documentation}:any) => {
+        cy.get('@api').then(({ documentation }: any) => {
             cy.compareJSONObjects(response, documentation.body)
-        }) 
+        })
     })
 })
 
@@ -107,7 +109,17 @@ describe('API Tests for Deleting documentation', () => {
         })
     })
 
+    it('Verify the status code and response message for invalid slugvalue', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.makeAPIRequest(documentation.endPoint + '/platform_test' , 'DELETE').then((response) => {      
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.equal("Content not found")
+            })
+        })
+    })
+
     it('Delete the documentation', () => {
+        debugger
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.endPoint + '/' + slugValue, 'DELETE').then((response) => {
                 expect(response.status).to.be.equal(200)
@@ -195,9 +207,18 @@ describe('API Tests to verify Get documentation content', () => {
         })
     })
 
+    it('Verify the status code and response message for invalid slug id', () => {
+        cy.get('@api').then(({ documentation }: any) => {
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/998898', 'GET').then((response) => {     
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.contains("Not Found")
+            })
+        })
+    })
+
     it('Verify that document contant is fetch by slug ID', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/'+slugID, 'GET').then((response) => {
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/' + slugID, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 expect(response.body.slug).to.be.equal(slugID)
                 expect(response.body.title).to.be.equal(documentation.body.title)

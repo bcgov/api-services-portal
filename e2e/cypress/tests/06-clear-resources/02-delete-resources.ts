@@ -49,10 +49,10 @@ describe('Delete created resources', () => {
     })
   })
 
-  it('Delete Service Accounts', () => {
-    cy.visit(sa.path)
-    sa.deleteAllServiceAccounts()
-  })
+  // it('Delete Service Accounts', () => {
+  //   cy.visit(sa.path)
+  //   sa.deleteAllServiceAccounts()
+  // })
 
   it('Delete Namespace', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {

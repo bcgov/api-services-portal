@@ -25,6 +25,8 @@ while true; do
         curl http://feeder.localtest.me:6000/push -F yaml=@permission-dataset-gwa.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@api-dataset-gwa.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@product-initializer-api.yaml
+        curl http://feeder.localtest.me:6000/push -F yaml=@preview-dataset-gwa.yaml
+        curl http://feeder.localtest.me:6000/push -F yaml=@preview-product-initializer.yaml
         break
 
     else

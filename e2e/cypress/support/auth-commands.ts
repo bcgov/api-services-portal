@@ -84,12 +84,13 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     home.useNamespace(checkPermission.namespace)
     cy.visit(na.path)
     na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
+    cy.wait(2000)
     na.clickGrantUserAccessButton()
     na.grantPermission(checkPermission.grantPermission[accessRole])
   })
 })
 
-Cypress.Commands.add('getUserSessionTokenValue', () => {
+Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -101,10 +102,11 @@ Cypress.Commands.add('getUserSessionTokenValue', () => {
   cy.preserveCookies()
   cy.visit(login.path)
   cy.getUserSession().then(() => {
-    cy.get('@apiowner').then(({ user, apiTest }: any) => {
+    cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
-      home.useNamespace(apiTest.namespace)
+      // home.useNamespace(apiTest.namespace)
+      home.useNamespace(namespace)
       cy.get('@login').then(function (xhr: any) {
         userSession = xhr.response.headers['x-auth-request-access-token']
         return userSession
@@ -201,11 +203,11 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
   }).then((res) => {
     expect(res.status).to.eq(200)
-    if(config === 'routes'){
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["hosts",["a-service-for-newplatform.api.gov.bc.ca"]]))[0],'id'))
+    if (config === 'routes') {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", ["a-service-for-newplatform.api.gov.bc.ca"]]))[0], 'id'))
     }
-    else{
-      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data,["name","a-service-for-newplatform"]))[0],'id'))
+    else {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", "a-service-for-newplatform"]))[0], 'id'))
     }
   })
 })
@@ -249,7 +251,7 @@ Cypress.Commands.add('deleteAllCookies', () => {
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
   let authorization
   cy.fixture('state/regen').then((creds: any) => {
-    cy.wait(1000)
+    cy.wait(2000)
     let token = key || creds.apikey
     debugger
     const service = serviceName
@@ -343,7 +345,16 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('verifyToastMessage', (msg: string) => {
+  cy.get('[role="alert"]',{timeout:2000}).closest('div').invoke('text')
+    .then((text) => {
+      const toastText = text;
+      expect(toastText).to.contain(msg);
+    })
+})
+
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
+  debugger
   let response = actualResponse
   if (indexFlag) {
     const index = actualResponse.findIndex((x: { name: string }) => x.name === expectedResponse.name);
@@ -354,7 +365,9 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       var objectValue1 = expectedResponse[p],
         objectValue2 = response[p];
       for (var value in objectValue1) {
-        cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
+        if (!(['activityAt'].includes(value))) {
+          cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
+        }
       }
     } else {
       if ((expectedResponse[p] == 'true') || (expectedResponse[p] == 'false'))
@@ -362,7 +375,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
         response[p] = response[p]['name']
       }
-      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId','isInCatalog','isDraft'].includes(p))) {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

@@ -59,6 +59,14 @@ describe('Generate Authorization Profiles', () => {
       cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
     })
   })
+  it('Creates invalid authorization profile', () => {
+    cy.visit(authProfile.path)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let ap = clientCredentials.invalidClientIdSecret.authProfile
+      authProfile.createAuthProfile(ap)
+      cy.get(authProfile.profileTable).contains(ap.name).should('be.visible')
+    })
+  })
 
   after(() => {
     cy.logout()
