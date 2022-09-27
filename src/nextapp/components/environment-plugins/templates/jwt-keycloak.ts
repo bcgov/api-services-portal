@@ -1,4 +1,4 @@
-export default function JwtKeycloak(namespace, envName, issuer) {
+export default function JwtKeycloak(namespace, envName, issuer): string {
   if (issuer == null || issuer.environmentDetails == null) {
     return '';
   }

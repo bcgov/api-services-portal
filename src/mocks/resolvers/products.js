@@ -9,6 +9,7 @@ export const allProductsHandler = (req, res, ctx) => {
             {
               id: 'e1',
               name: 'prod',
+              active: true,
               flow: 'client-credentials',
               credentialIssuer: {
                 name: 'MoH IdP',
@@ -18,6 +19,7 @@ export const allProductsHandler = (req, res, ctx) => {
             {
               id: 'e2',
               name: 'dev',
+              active: false,
               flow: 'client-credentials',
               credentialIssuer: {
                 name: 'MoH IdP',
@@ -39,6 +41,7 @@ export const allProductsHandler = (req, res, ctx) => {
               id: 'e11',
               name: 'test',
               flow: 'client-credentials',
+              active: true,
               credentialIssuer: {
                 name: 'MoH IdP',
               },
@@ -64,6 +67,7 @@ export const allProductsHandler = (req, res, ctx) => {
             {
               id: 'e21',
               name: 'other',
+              active: true,
               flow: 'kong-api-key-acl',
               credentialIssuer: {
                 name: 'MoH IdP',
@@ -76,6 +80,78 @@ export const allProductsHandler = (req, res, ctx) => {
               ],
             },
           ],
+        },
+      ],
+    })
+  );
+};
+
+export const getEnvironmentHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      OwnedEnvironment: {
+        id: req.params.id,
+        name: 'prod',
+        active: true,
+        flow: 'client-credentials',
+        appId: 'e02ei220',
+        legal: null,
+        credentialIssuer: {
+          id: '8',
+        },
+        approval: true,
+        additionalDetailsToRequest:
+          'To gain access to production, you must be certified.  Please provide your certification number below.',
+        product: {
+          name: 'PharmaNet Electronic Prescribing',
+          namespace: 'moh-proto',
+          organization: null,
+          environments: [
+            {
+              name: 'prod',
+              id: '30',
+            },
+            {
+              name: 'conformance',
+              id: '29',
+            },
+          ],
+        },
+        services: [],
+      },
+    })
+  );
+};
+
+export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allCredentialIssuersByNamespace: [
+        {
+          id: 1,
+          name: 'Resource Server',
+          environmentDetails:
+            '[{"environment":"conformance","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true},{"environment":"prod","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true}]',
+        },
+        {
+          id: 8,
+          name: 'Resource Server (Signed)',
+          environmentDetails:
+            '[{"environment":"conformance","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true},{"environment":"prod","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true}]',
+        },
+      ],
+    })
+  );
+};
+
+export const allLegalsHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allLegals: [
+        {
+          id: '1',
+          title: 'Terms of Use for API Gateway',
+          reference: 'terms-of-use-for-api-gateway-1',
         },
       ],
     })

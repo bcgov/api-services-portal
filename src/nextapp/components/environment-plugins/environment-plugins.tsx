@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { Box, Heading, Text, Icon, Flex, Divider } from '@chakra-ui/react';
-import { FaCircle, FaCode } from 'react-icons/fa';
+import {
+  Box,
+  Heading,
+  Text,
+  Icon,
+  Flex,
+  Divider,
+  Center,
+  CircularProgress,
+} from '@chakra-ui/react';
+import { FaCode } from 'react-icons/fa';
 import { Environment } from '@/shared/types/query.types';
 import YamlViewer from '../yaml-viewer';
 import JwtKeycloak from './templates/jwt-keycloak';
@@ -11,71 +20,72 @@ import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 
 interface EnvironmentPluginsProps {
-  data: Environment;
+  environment: Environment;
 }
 
+const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
+  environment,
+}) => {
+  const id = environment?.credentialIssuer?.id;
+  const { data, isLoading, isSuccess } = useApi(
+    ['environment-credential', environment?.credentialIssuer?.id],
+    {
+      query,
+      variables: { id },
+    },
+    {
+      enabled: Boolean(id),
+      suspense: false,
+    }
+  );
+
+  const issuer = data?.allCredentialIssuersByNamespace[0];
+  const pluginConfigs = {
+    'kong-api-key-acl': KongApiKeyAcl(
+      environment?.product.namespace,
+      environment?.appId
+    ),
+    'kong-api-key-only': KongApiKeyOnly(
+      environment?.product.namespace,
+      environment?.appId
+    ),
+    'kong-acl-only': KongAclOnly(
+      environment?.product.namespace,
+      environment?.appId
+    ),
+    'client-credentials': JwtKeycloak(
+      environment?.product.namespace,
+      environment?.name,
+      issuer
+    ),
+  };
+
+  return (
+    <>
+      <Box mb={4}>
+        <Text>
+          Ensure that services associated with this environment have the
+          following plugins configured:
+        </Text>
+      </Box>
+      <Box>
+        {isLoading && (
+          <Center minH="200px">
+            <CircularProgress />
+          </Center>
+        )}
+        {isSuccess && <YamlViewer doc={pluginConfigs[environment.flow]} />}
+      </Box>
+    </>
+  );
+};
+
+export default EnvironmentPlugins;
+
 const query = gql`
-  query GET($id: ID!) {
+  query GetAllCredentialIssuersByNamespace($id: ID!) {
     allCredentialIssuersByNamespace(where: { id: $id }) {
       environmentDetails
     }
   }
 `;
-
-const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({ data }) => {
-  const flow = data.flow;
-
-  const issuerDetails = { issuer: null };
-
-  if (data?.credentialIssuer?.id) {
-    const variables = { id: data?.credentialIssuer?.id };
-    const { data: _data, isLoading, isSuccess } = useApi(
-      ['environment-credential', data?.credentialIssuer?.id],
-      {
-        query,
-        variables,
-      },
-      {
-        suspense: false,
-      }
-    );
-
-    if (isLoading) {
-      return <></>;
-    }
-    issuerDetails.issuer = _data.allCredentialIssuersByNamespace[0];
-  }
-
-  const pluginConfigs = {
-    'kong-api-key-acl': KongApiKeyAcl(data.product.namespace, data.appId),
-    'kong-api-key-only': KongApiKeyOnly(data.product.namespace, data.appId),
-    'kong-acl-only': KongAclOnly(data.product.namespace, data.appId),
-    'client-credentials': JwtKeycloak(
-      data.product.namespace,
-      data.name,
-      issuerDetails.issuer
-    ),
-  };
-  return (
-    flow in pluginConfigs && (
-      <Box my={4} bgColor="white">
-        <Flex as="header" p={4} align="center">
-          <Icon as={FaCode} color="bc-link" mr={2} boxSize={6} />
-          <Heading size="md">Plugin Template</Heading>
-        </Flex>
-        <Divider />
-        <Box p={4}>
-          <Text fontSize="sm">
-            Ensure that services associated with this environment have the
-            following plugins configured:
-          </Text>
-        </Box>
-        <Box p={4} bg="white">
-          <YamlViewer doc={pluginConfigs[flow]} />
-        </Box>
-      </Box>
-    )
-  );
-};
-
-export default EnvironmentPlugins;

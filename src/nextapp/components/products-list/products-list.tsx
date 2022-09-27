@@ -15,7 +15,7 @@ import {
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
 import NewProduct from '@/components/new-product';
-import { FaPen, FaPlusCircle } from 'react-icons/fa';
+import { FaPlusCircle } from 'react-icons/fa';
 import { Tr, Td } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { getFlowText } from '@/shared/services/utils';
@@ -25,6 +25,7 @@ import EditProduct from './edit-product';
 import Card from '../card';
 import { Environment } from '@/shared/types/query.types';
 import ActionsMenu from '../actions-menu';
+import EnvironmentEdit from '../environment-edit';
 
 const ProductsList: React.FC = () => {
   const { data } = useApi('allProducts', { query });
@@ -146,13 +147,7 @@ const ProductsList: React.FC = () => {
                   )}
                 </Td>
                 <Td textAlign="right" w="17%">
-                  <Button
-                    leftIcon={<Icon as={FaPen} />}
-                    variant="ghost"
-                    size="xs"
-                  >
-                    Edit
-                  </Button>
+                  <EnvironmentEdit data={item} product={d} />
                   <ActionsMenu>
                     <MenuItem color="bc-error">Delete Environment...</MenuItem>
                   </ActionsMenu>
