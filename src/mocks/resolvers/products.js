@@ -1,3 +1,5 @@
+import times from 'lodash/times';
+
 export const allProductsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
@@ -117,7 +119,13 @@ export const getEnvironmentHandler = (req, res, ctx) => {
             },
           ],
         },
-        services: [],
+        services: [
+          {
+            id: '1',
+            name: 'a-service-for-moh-proto',
+            environment: null,
+          },
+        ],
       },
     })
   );
@@ -130,14 +138,46 @@ export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
         {
           id: 1,
           name: 'Resource Server',
-          environmentDetails:
-            '[{"environment":"conformance","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true},{"environment":"prod","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true}]',
+          environmentDetails: JSON.stringify([
+            {
+              environment: 'conformance',
+              clientSecret: '****',
+              clientRegistration: 'managed',
+              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+              clientId: 'moh-proto',
+              exists: true,
+            },
+            {
+              environment: 'prod',
+              clientSecret: '****',
+              clientRegistration: 'managed',
+              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+              clientId: 'moh-proto',
+              exists: true,
+            },
+          ]),
         },
         {
           id: 8,
           name: 'Resource Server (Signed)',
-          environmentDetails:
-            '[{"environment":"conformance","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true},{"environment":"prod","clientSecret":"****","clientRegistration":"managed","issuerUrl":"https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky","clientId":"moh-proto","exists":true}]',
+          environmentDetails: JSON.stringify([
+            {
+              environment: 'conformance',
+              clientSecret: '****',
+              clientRegistration: 'managed',
+              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+              clientId: 'moh-proto',
+              exists: true,
+            },
+            {
+              environment: 'prod',
+              clientSecret: '****',
+              clientRegistration: 'managed',
+              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+              clientId: 'moh-proto',
+              exists: true,
+            },
+          ]),
         },
       ],
     })
@@ -154,6 +194,24 @@ export const allLegalsHandler = (req, res, ctx) => {
           reference: 'terms-of-use-for-api-gateway-1',
         },
       ],
+    })
+  );
+};
+
+export const allGatewayServicesHandler = (req, res, ctx) => {
+  const allGatewayServices = [];
+
+  times(10, (n) => {
+    allGatewayServices.push({
+      id: `s${n}`,
+      name: `a-service-for-moh-proto-${n}`,
+      environment: null,
+    });
+  });
+
+  return res(
+    ctx.data({
+      allGatewayServices,
     })
   );
 };

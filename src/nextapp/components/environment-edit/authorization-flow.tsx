@@ -56,6 +56,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
         <FormControl>
           <FormLabel>Instructions for Requester (Optional)</FormLabel>
           <Textarea
+            name="additionalDetailsToRequest"
             defaultValue={environment.additionalDetailsToRequest}
           ></Textarea>
         </FormControl>
@@ -68,10 +69,12 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
       </GridItem>
       <GridItem>
         <Flex align="center" justify="space-between" pt={10}>
-          <Checkbox defaultChecked={environment.approval}>
+          <Checkbox defaultChecked={environment.approval} name="approval">
             Require Approval
           </Checkbox>
-          <Checkbox defaultChecked>Enable Environment</Checkbox>
+          <Checkbox defaultChecked={environment.active} name="active">
+            Enable Environment
+          </Checkbox>
         </Flex>
       </GridItem>
     </Grid>

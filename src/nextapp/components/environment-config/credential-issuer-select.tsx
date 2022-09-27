@@ -12,6 +12,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
   flow,
   value,
 }) => {
+  const [credentialIssuer, setCredentialIssuer] = React.useState(value);
   const { data, isLoading, isError } = useApi(
     ['environment-credential-users', flow],
     {
@@ -23,15 +24,19 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
     }
   );
 
-  console.log(flow, value);
+  const handleCredentialIssuerChange = (event) => {
+    setCredentialIssuer(event.target.value);
+  };
+
   return (
     <Select
       name="credentialIssuer"
       isLoading={isLoading}
       isDisabled={
-        !isError || !/(client\-credentials|authorization\-code)/.test(flow)
+        isError || !/(client-credentials|authorization-code)/.test(flow)
       }
-      defaultValue={value}
+      onChange={handleCredentialIssuerChange}
+      value={credentialIssuer}
     >
       <option value="">Select</option>
       {data?.allCredentialIssuersByNamespace.map((d) => (

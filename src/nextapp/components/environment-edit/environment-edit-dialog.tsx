@@ -22,6 +22,7 @@ import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import { FaCode, FaLock } from 'react-icons/fa';
 import AuthorizationFlow from './authorization-flow';
+import ConfigureEnvironment from './configure-environment';
 
 interface EnvironmentEditDialogProps {
   environment: Environment;
@@ -35,7 +36,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   onClose,
   product,
 }) => {
-  const [tab, setTab] = React.useState(0);
+  const [tab, setTab] = React.useState(1);
   const { data, isLoading, isError, isSuccess } = useApi(
     ['environment', environment.id],
     { query, variables: { id: environment.id } },
@@ -44,6 +45,9 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       suspense: false,
     }
   );
+
+  const handleSetNextTab = () => setTab(1);
+  const handleSave = () => console.log('submit!');
 
   return (
     <Modal isOpen={open} onClose={onClose} scrollBehavior="inside" size="xl">
@@ -58,8 +62,10 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
           </Flex>
           <Tabs defaultIndex={tab} index={tab}>
             <TabList mt={4}>
-              <Tab px={0}>Configure Environment</Tab>
-              <Tab px={0} ml={4}>
+              <Tab px={0} onClick={() => setTab(0)}>
+                Configure Environment
+              </Tab>
+              <Tab px={0} ml={4} onClick={() => setTab(1)}>
                 Configure Environment Services
               </Tab>
             </TabList>
@@ -68,22 +74,29 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
         <ModalBody>
           {isLoading && 'Loading...'}
           {isSuccess && (
-            <ExpandableCards>
-              <ExpandableCard
-                heading="Authorization Flow"
-                icon={FaLock}
-                data-testid="auth-flow-card"
-              >
-                <AuthorizationFlow environment={data.OwnedEnvironment} />
-              </ExpandableCard>
-              <ExpandableCard
-                heading="Plugin Template"
-                icon={FaCode}
-                data-testid="plugin-template-card"
-              >
-                <EnvironmentPlugins environment={data?.OwnedEnvironment} />
-              </ExpandableCard>
-            </ExpandableCards>
+            <>
+              {tab === 0 && (
+                <ExpandableCards>
+                  <ExpandableCard
+                    heading="Authorization Flow"
+                    icon={FaLock}
+                    data-testid="auth-flow-card"
+                  >
+                    <AuthorizationFlow environment={data.OwnedEnvironment} />
+                  </ExpandableCard>
+                  <ExpandableCard
+                    heading="Plugin Template"
+                    icon={FaCode}
+                    data-testid="plugin-template-card"
+                  >
+                    <EnvironmentPlugins environment={data?.OwnedEnvironment} />
+                  </ExpandableCard>
+                </ExpandableCards>
+              )}
+              {tab === 1 && (
+                <ConfigureEnvironment environment={data?.OwnedEnvironment} />
+              )}
+            </>
           )}
         </ModalBody>
         <ModalFooter>
@@ -91,11 +104,23 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
             <Button
               variant="secondary"
               onClick={onClose}
-              data-testid="access-request-cancel-button"
+              data-testid="edit-env-cancel-button"
             >
               Cancel
             </Button>
-            <Button data-testid="access-request-submit-button">Continue</Button>
+            {tab === 0 && (
+              <Button
+                data-testid="edit-env-continue-button"
+                onClick={handleSetNextTab}
+              >
+                Continue
+              </Button>
+            )}
+            {tab === 1 && (
+              <Button data-testid="edit-env-submit-button" onClick={handleSave}>
+                Save
+              </Button>
+            )}
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>
