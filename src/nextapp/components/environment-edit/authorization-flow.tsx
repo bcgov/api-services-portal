@@ -13,19 +13,20 @@ import { uid } from 'react-uid';
 import CredentialIssuerSelect from '../environment-config/credential-issuer-select';
 import { Environment } from '@/shared/types/query.types';
 import LegalSelect from '../environment-config/legal-select';
-import { env } from 'process';
 
 interface AuthorizationFlowProps {
   environment: Environment;
+  flow: string;
+  onFlowChange: (flow: string) => void;
 }
 
 const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
   environment,
+  flow,
+  onFlowChange,
 }) => {
-  const [flow, setFlow] = React.useState(environment.flow ?? 'public');
-
-  const handleFlowChange = (event) => {
-    setFlow(event.target.value);
+  const handleFlowChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    onFlowChange(event.target.value);
   };
 
   return (
@@ -33,7 +34,12 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
       <GridItem>
         <FormControl isRequired>
           <FormLabel>Authorization</FormLabel>
-          <Select name="flow" value={flow} onChange={handleFlowChange}>
+          <Select
+            name="flow"
+            value={flow}
+            onChange={handleFlowChange}
+            data-testid="edit-env-auth-flow-select"
+          >
             {flowTypes.map((f) => (
               <option key={uid(f)} value={f.value}>
                 {f.label}
@@ -43,7 +49,9 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
         </FormControl>
       </GridItem>
       <GridItem>
-        <FormControl>
+        <FormControl
+          isRequired={/(client-credentials|authorization-code)/.test(flow)}
+        >
           <FormLabel>Issuer</FormLabel>
           <CredentialIssuerSelect
             flow={flow}
@@ -58,6 +66,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
           <Textarea
             name="additionalDetailsToRequest"
             defaultValue={environment.additionalDetailsToRequest}
+            data-testid="edit-env-additional-details-textarea"
           ></Textarea>
         </FormControl>
       </GridItem>

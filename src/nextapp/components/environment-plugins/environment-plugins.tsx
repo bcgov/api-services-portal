@@ -1,15 +1,13 @@
 import * as React from 'react';
 import {
   Box,
-  Heading,
   Text,
-  Icon,
-  Flex,
-  Divider,
   Center,
   CircularProgress,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from '@chakra-ui/react';
-import { FaCode } from 'react-icons/fa';
 import { Environment } from '@/shared/types/query.types';
 import YamlViewer from '../yaml-viewer';
 import JwtKeycloak from './templates/jwt-keycloak';
@@ -21,10 +19,12 @@ import { useApi } from '@/shared/services/api';
 
 interface EnvironmentPluginsProps {
   environment: Environment;
+  flow: string;
 }
 
 const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
   environment,
+  flow,
 }) => {
   const id = environment?.credentialIssuer?.id;
   const { data, isLoading, isSuccess } = useApi(
@@ -59,6 +59,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
       issuer
     ),
   };
+  const doc = pluginConfigs[flow];
 
   return (
     <>
@@ -74,7 +75,21 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             <CircularProgress />
           </Center>
         )}
-        {isSuccess && <YamlViewer doc={pluginConfigs[environment.flow]} />}
+        {isSuccess && (
+          <>
+            {doc && <YamlViewer doc={doc} />}{' '}
+            {!doc && (
+              <Alert
+                status="info"
+                variant="subtle"
+                data-testid="edit-env-missing-doc-alert"
+              >
+                <AlertIcon />
+                <AlertDescription>No configuration available</AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
       </Box>
     </>
   );

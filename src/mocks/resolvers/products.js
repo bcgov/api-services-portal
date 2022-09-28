@@ -204,7 +204,7 @@ export const allGatewayServicesHandler = (req, res, ctx) => {
   times(10, (n) => {
     allGatewayServices.push({
       id: `s${n}`,
-      name: `a-service-for-moh-proto-${n}`,
+      name: `${n % 3 === 0 ? 'a' : 'b'}-service-for-moh-proto-${n}`,
       environment: null,
     });
   });

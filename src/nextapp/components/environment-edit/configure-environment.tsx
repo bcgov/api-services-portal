@@ -2,7 +2,9 @@ import * as React from 'react';
 import {
   Box,
   Center,
+  Flex,
   Heading,
+  Select,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -16,6 +18,7 @@ import { gql } from 'graphql-request';
 import { useAuth } from '@/shared/services/auth';
 import { FaGripVertical } from 'react-icons/fa';
 import { Environment, GatewayService } from '@/shared/types/query.types';
+import SearchInput from '../search-input';
 
 const dataTransferType = 'application/service';
 
@@ -35,8 +38,10 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
       return [];
     }
   });
+  const [search, setSearch] = React.useState('');
+  const [sort, setSort] = React.useState('name');
   const auth = useAuth();
-  const { data, isSuccess, isLoading } = useApi(
+  const { data, isSuccess } = useApi(
     ['allGatewayServices'],
     {
       query,
@@ -69,10 +74,16 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   const handleRemoveService = (id: string) => () => {
     setActiveServices((state) => state.filter((s) => s.id !== id));
   };
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSort(event.target.value);
+  };
 
   return (
     <div>
-      <Heading size="sm" mb={8}>
+      <Heading size="sm" mb={8} data-testid="edit-env-active-services-heading">
         {`Active Services (${activeServices.length ?? 0})`}
       </Heading>
       <Box
@@ -85,6 +96,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
         minHeight="130px"
         onDragOver={handleDragOver}
         onDragExit={handleDragExit}
+        data-testid="edit-env-active-services"
       >
         {activeServices.length <= 0 && (
           <Center height="calc(130px - 60px)">
@@ -109,13 +121,47 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
       </Box>
       {isSuccess && (
         <>
-          <Heading size="sm" mb={8}>
-            {`Available Services (${data.allGatewayServices.length ?? 0})`}
-          </Heading>
+          <Flex align="center" justify="space-between" mb={8}>
+            <Heading
+              size="sm"
+              data-testid="edit-env-available-services-heading"
+            >
+              {`Available Services (${data.allGatewayServices.length ?? 0})`}
+            </Heading>
+            <Flex gridGap={4}>
+              <SearchInput
+                onChange={handleSearchChange}
+                value={search}
+                data-testid="edit-env-services-search-input"
+              />
+              <Select
+                onChange={handleSortChange}
+                value={sort}
+                data-testid="edit-env-services-sort-select"
+              >
+                <option value="name">Sort By: Name</option>
+                <option value="date">Sort By: Date Modified</option>
+              </Select>
+            </Flex>
+          </Flex>
           <Box>
-            <Wrap>
+            <Wrap data-testid="edit-env-available-services">
               {data.allGatewayServices
                 .filter((s) => !activeServices.map((a) => a.id).includes(s.id))
+                .filter((s) => {
+                  if (s.name.search(search) >= 0) {
+                    return true;
+                  }
+                  return false;
+                })
+                .sort((a, b) => {
+                  if (sort === 'name') {
+                    return a.name > b.name ? 1 : -1;
+                  }
+                  if (sort === 'date') {
+                    return a.updatedAt > b.updatedAt ? 1 : -1;
+                  }
+                })
                 .map((s) => (
                   <WrapItem key={s.id}>
                     <Tag

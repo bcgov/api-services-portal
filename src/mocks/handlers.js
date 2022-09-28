@@ -27,6 +27,8 @@ import {
   allLegalsHandler,
   getEnvironmentHandler,
   getAllCredentialIssuersByNamespace,
+  allGatewayServicesHandler,
+  updateEnvironmentHandler,
 } from './resolvers/products';
 
 export function resetAll() {
@@ -96,11 +98,13 @@ export const handlers = [
     'GetAllCredentialIssuersByNamespace',
     getAllCredentialIssuersByNamespace
   ),
+  keystone.query('GetAllGatewayServices', allGatewayServicesHandler),
   keystone.query('GetAllLegals', allLegalsHandler),
   keystone.query(
     'GetConsumerProductsAndEnvironments',
     allProductsByNamespaceHandler
   ),
+  keystone.mutation('UpdateEnvironment', updateEnvironmentHandler),
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),

@@ -20,6 +20,7 @@ const EnvironmentEdit: React.FC<EnvironmentEditProps> = ({ data, product }) => {
         variant="ghost"
         size="sm"
         onClick={onOpen}
+        data-testid={`edit-env-btn-${data.id}`}
       >
         Edit
       </Button>

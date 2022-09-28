@@ -1,11 +1,8 @@
-/**
- * TODO: Wire up mutation
- * TODO: Persist tabs so user state doesn't get lost
- * TODO: Sort/Filter for services tags
- * TODO: Fix TS errors
- */
 import * as React from 'react';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Box,
   Button,
   ButtonGroup,
@@ -45,6 +42,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   product,
 }) => {
   const [tab, setTab] = React.useState(0);
+  const [flow, setFlow] = React.useState(environment.flow ?? 'public');
   const formRef = React.useRef<HTMLFormElement>(null);
   const client = useQueryClient();
   const toast = useToast();
@@ -60,18 +58,23 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   const mutate = useApiMutation(mutation);
 
   const handleSetNextTab = () => setTab(1);
+  const handleClose = () => {
+    setTab(0);
+    onClose();
+  };
   const handleSubmit = (event) => event.preventDefault();
   const handleSave = async () => {
     try {
       const formData = new FormData(formRef.current);
-      console.log(Object.fromEntries(formData));
-      await mutate.mutateAsync({ id: environment.id });
+      const data = Object.fromEntries(formData);
+      await mutate.mutateAsync({ id: environment.id, data });
       client.invalidateQueries(queryKey);
       toast({
         title: 'Success',
         description: `Your ${environment.name} environment for ${product.name} has been updated successfully`,
         status: 'success',
       });
+      handleClose();
     } catch (err) {
       toast({
         title: `${environment.name} update failed`,
@@ -82,11 +85,16 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   };
 
   return (
-    <Modal isOpen={open} onClose={onClose} scrollBehavior="inside" size="xl">
+    <Modal
+      isOpen={open}
+      onClose={handleClose}
+      scrollBehavior="inside"
+      size="xl"
+    >
       <ModalOverlay />
       <ModalContent minW="75%">
         <ModalHeader>
-          <Flex align="center" gridGap={4}>
+          <Flex align="center" gridGap={4} data-testid="edit-env-modal-title">
             {product.name}
             <Tag colorScheme={environment.name} variant="outline">
               {environment.name}
@@ -94,16 +102,39 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
           </Flex>
           <Tabs defaultIndex={tab} index={tab}>
             <TabList mt={4}>
-              <Tab px={0} onClick={() => setTab(0)}>
+              <Tab
+                px={0}
+                onClick={() => setTab(0)}
+                data-testid="edit-env-configure-env-tab"
+              >
                 Configure Environment
               </Tab>
-              <Tab px={0} ml={4} onClick={() => setTab(1)}>
+              <Tab
+                px={0}
+                ml={4}
+                onClick={() => setTab(1)}
+                data-testid="edit-env-configure-services-tab"
+              >
                 Configure Environment Services
               </Tab>
             </TabList>
           </Tabs>
         </ModalHeader>
         <ModalBody>
+          {(isError || mutate.isError) && (
+            <Alert
+              status="error"
+              variant="solid"
+              data-testid="edit-env-error-alert"
+            >
+              <AlertIcon />
+              <AlertDescription>
+                {isError && 'Unable to load environment details'}
+                {mutate.isError &&
+                  'Services update failed. Missing or incomplete acl or key-auth plugin'}
+              </AlertDescription>
+            </Alert>
+          )}
           {isLoading && 'Loading...'}
           {isSuccess && (
             <form
@@ -116,16 +147,23 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                   <ExpandableCard
                     heading="Authorization Flow"
                     icon={FaLock}
-                    data-testid="auth-flow-card"
+                    data-testid="edit-env-auth-card"
                   >
-                    <AuthorizationFlow environment={data.OwnedEnvironment} />
+                    <AuthorizationFlow
+                      environment={data.OwnedEnvironment}
+                      flow={flow}
+                      onFlowChange={setFlow}
+                    />
                   </ExpandableCard>
                   <ExpandableCard
                     heading="Plugin Template"
                     icon={FaCode}
-                    data-testid="plugin-template-card"
+                    data-testid="edit-env-plugin-card"
                   >
-                    <EnvironmentPlugins environment={data?.OwnedEnvironment} />
+                    <EnvironmentPlugins
+                      environment={data?.OwnedEnvironment}
+                      flow={flow}
+                    />
                   </ExpandableCard>
                 </ExpandableCards>
               </Box>
@@ -139,7 +177,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
           <ButtonGroup>
             <Button
               variant="secondary"
-              onClick={onClose}
+              onClick={handleClose}
               data-testid="edit-env-cancel-button"
             >
               Cancel
@@ -153,7 +191,11 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               </Button>
             )}
             {tab === 1 && (
-              <Button data-testid="edit-env-submit-button" onClick={handleSave}>
+              <Button
+                isLoading={mutate.isLoading}
+                data-testid="edit-env-submit-button"
+                onClick={handleSave}
+              >
                 Save
               </Button>
             )}
@@ -198,6 +240,7 @@ const query = gql`
       services {
         name
         id
+        updatedAt
       }
     }
   }

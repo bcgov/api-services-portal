@@ -1,13 +1,5 @@
 import * as React from 'react';
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Container,
-  VStack,
-  Skeleton,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Container, Skeleton, Text } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';

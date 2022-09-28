@@ -24,7 +24,9 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
     }
   );
 
-  const handleCredentialIssuerChange = (event) => {
+  const handleCredentialIssuerChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setCredentialIssuer(event.target.value);
   };
 
@@ -37,6 +39,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
       }
       onChange={handleCredentialIssuerChange}
       value={credentialIssuer}
+      data-testid="edit-env-cred-issuer-select"
     >
       <option value="">Select</option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
