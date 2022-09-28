@@ -1,5 +1,12 @@
+/**
+ * TODO: Wire up mutation
+ * TODO: Persist tabs so user state doesn't get lost
+ * TODO: Sort/Filter for services tags
+ * TODO: Fix TS errors
+ */
 import * as React from 'react';
 import {
+  Box,
   Button,
   ButtonGroup,
   Flex,
@@ -19,10 +26,11 @@ import { Environment, Product } from '@/shared/types/query.types';
 import { ExpandableCards, ExpandableCard } from '@/components/card';
 import EnvironmentPlugins from '@/components/environment-plugins';
 import { gql } from 'graphql-request';
-import { useApi } from '@/shared/services/api';
+import { useApi, useApiMutation } from '@/shared/services/api';
 import { FaCode, FaLock } from 'react-icons/fa';
 import AuthorizationFlow from './authorization-flow';
 import ConfigureEnvironment from './configure-environment';
+import { useQueryClient } from 'react-query';
 
 interface EnvironmentEditDialogProps {
   environment: Environment;
@@ -36,18 +44,42 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   onClose,
   product,
 }) => {
-  const [tab, setTab] = React.useState(1);
+  const [tab, setTab] = React.useState(0);
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const client = useQueryClient();
+  const toast = useToast();
+  const queryKey = ['environment', environment.id];
   const { data, isLoading, isError, isSuccess } = useApi(
-    ['environment', environment.id],
+    queryKey,
     { query, variables: { id: environment.id } },
     {
       enabled: open,
       suspense: false,
     }
   );
+  const mutate = useApiMutation(mutation);
 
   const handleSetNextTab = () => setTab(1);
-  const handleSave = () => console.log('submit!');
+  const handleSubmit = (event) => event.preventDefault();
+  const handleSave = async () => {
+    try {
+      const formData = new FormData(formRef.current);
+      console.log(Object.fromEntries(formData));
+      await mutate.mutateAsync({ id: environment.id });
+      client.invalidateQueries(queryKey);
+      toast({
+        title: 'Success',
+        description: `Your ${environment.name} environment for ${product.name} has been updated successfully`,
+        status: 'success',
+      });
+    } catch (err) {
+      toast({
+        title: `${environment.name} update failed`,
+        description: err,
+        status: 'error',
+      });
+    }
+  };
 
   return (
     <Modal isOpen={open} onClose={onClose} scrollBehavior="inside" size="xl">
@@ -74,8 +106,12 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
         <ModalBody>
           {isLoading && 'Loading...'}
           {isSuccess && (
-            <>
-              {tab === 0 && (
+            <form
+              onSubmit={handleSubmit}
+              name="updateEnvironmentForm"
+              ref={formRef}
+            >
+              <Box hidden={tab !== 0} display={tab === 0 ? 'block' : 'none'}>
                 <ExpandableCards>
                   <ExpandableCard
                     heading="Authorization Flow"
@@ -92,11 +128,11 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                     <EnvironmentPlugins environment={data?.OwnedEnvironment} />
                   </ExpandableCard>
                 </ExpandableCards>
-              )}
-              {tab === 1 && (
+              </Box>
+              <Box hidden={tab !== 1} display={tab === 1 ? 'block' : 'none'}>
                 <ConfigureEnvironment environment={data?.OwnedEnvironment} />
-              )}
-            </>
+              </Box>
+            </form>
           )}
         </ModalBody>
         <ModalFooter>
@@ -163,6 +199,15 @@ const query = gql`
         name
         id
       }
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation UpdateEnvironment($id: ID!, $data: EnvironmentUpdateInput) {
+    updateEnvironment(id: $id, data: $data) {
+      name
+      id
     }
   }
 `;

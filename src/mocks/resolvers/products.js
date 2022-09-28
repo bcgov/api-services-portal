@@ -215,3 +215,7 @@ export const allGatewayServicesHandler = (req, res, ctx) => {
     })
   );
 };
+
+export const updateEnvironmentHandler = (req, res, ctx) => {
+  return res(ctx.data({}));
+};

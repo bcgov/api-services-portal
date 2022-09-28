@@ -26,7 +26,7 @@ const LegalSelect: React.FC<LegalSelectProps> = ({ value }) => {
       defaultValue={value}
       data-testid="legal-terms-dd"
     >
-      <option>Select</option>
+      <option value="">Select</option>
       {data?.allLegals.map((d) => (
         <option key={d.id} value={d.id}>
           {d.title}

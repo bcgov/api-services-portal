@@ -33,7 +33,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
       <GridItem>
         <FormControl isRequired>
           <FormLabel>Authorization</FormLabel>
-          <Select value={flow} onChange={handleFlowChange}>
+          <Select name="flow" value={flow} onChange={handleFlowChange}>
             {flowTypes.map((f) => (
               <option key={uid(f)} value={f.value}>
                 {f.label}
@@ -69,10 +69,18 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
       </GridItem>
       <GridItem>
         <Flex align="center" justify="space-between" pt={10}>
-          <Checkbox defaultChecked={environment.approval} name="approval">
+          <Checkbox
+            defaultChecked={environment.approval}
+            name="approval"
+            value="true"
+          >
             Require Approval
           </Checkbox>
-          <Checkbox defaultChecked={environment.active} name="active">
+          <Checkbox
+            defaultChecked={environment.active}
+            name="active"
+            value="true"
+          >
             Enable Environment
           </Checkbox>
         </Flex>
