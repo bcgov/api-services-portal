@@ -1,9 +1,10 @@
-query GetAllGatewayServices($ns: String!) {
-  allGatewayServices(where: {namespace: $ns}) {
-    id
-    name
-    environment {
+
+  query GetAllGatewayServices($ns: String!) {
+    allGatewayServices(where: {namespace: $ns}) {
       id
+      name
+      environment {
+        id
+      }
     }
   }
-}
