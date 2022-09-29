@@ -1,6 +1,6 @@
 
   query GetOwnedEnvironment($id: ID!) {
-    OwnedEnvironment(where: {id: $id}) {
+    OwnedEnvironment(where: { id: $id }) {
       id
       name
       active
