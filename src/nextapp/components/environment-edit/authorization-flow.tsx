@@ -82,6 +82,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
             defaultChecked={environment.approval}
             name="approval"
             value="true"
+            data-testid="edit-env-approval-checkbox"
           >
             Require Approval
           </Checkbox>
@@ -89,6 +90,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
             defaultChecked={environment.active}
             name="active"
             value="true"
+            data-testid="edit-env-active-checkbox"
           >
             Enable Environment
           </Checkbox>
