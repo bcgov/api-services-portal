@@ -13,12 +13,14 @@ import { FaRegCircle } from 'react-icons/fa';
 interface ExpandableCardProps extends AccordionItemProps {
   icon?: React.FC;
   heading: React.ReactNode;
+  onButtonClick: () => void;
 }
 
 const ExpandableCard: React.FC<ExpandableCardProps> = ({
   children,
   icon = FaRegCircle,
   heading,
+  onButtonClick,
   ...props
 }) => {
   return (
@@ -51,6 +53,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
             borderBottomRadius: 0,
             pb: 7,
           }}
+          onClick={onButtonClick}
         >
           <Box flex="1" textAlign="left">
             <Icon as={icon} boxSize="5" color="bc-blue" mr={2.5} />

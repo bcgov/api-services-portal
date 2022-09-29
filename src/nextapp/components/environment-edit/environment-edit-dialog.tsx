@@ -43,6 +43,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
 }) => {
   const [tab, setTab] = React.useState(0);
   const [flow, setFlow] = React.useState(environment.flow ?? 'public');
+  const [expandedIndexes, setExpandedIndexes] = React.useState<number[]>([0]);
   const formRef = React.useRef<HTMLFormElement>(null);
   const client = useQueryClient();
   const toast = useToast();
@@ -57,13 +58,35 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   );
   const mutate = useApiMutation(mutation);
 
-  const handleSetNextTab = () => setTab(1);
+  const handleSetNextTab = () => {
+    if (formRef.current?.checkValidity()) {
+      setTab(1);
+    } else {
+      const isSettingsCardClosed = !expandedIndexes.includes(0);
+      if (isSettingsCardClosed) {
+        setExpandedIndexes([...expandedIndexes, 0]);
+        setTimeout(() => {
+          formRef.current?.reportValidity();
+        }, 100);
+      } else {
+        formRef.current?.reportValidity();
+      }
+    }
+  };
   const handleClose = () => {
     setTab(0);
     onClose();
   };
-  const handleSubmit = (event) => event.preventDefault();
-  const handleSave = async () => {
+  const handleExpandCard = (index: number) => () => {
+    setExpandedIndexes((state) => {
+      if (state.includes(index)) {
+        return state.filter((i) => i !== index);
+      }
+      return [...state, index];
+    });
+  };
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     try {
       const formData = new FormData(formRef.current);
       const data = Object.fromEntries(formData);
@@ -81,6 +104,11 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
         description: err,
         status: 'error',
       });
+    }
+  };
+  const handleSave = () => {
+    if (formRef.current?.checkValidity()) {
+      formRef.current?.requestSubmit();
     }
   };
 
@@ -143,10 +171,11 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               ref={formRef}
             >
               <Box hidden={tab !== 0} display={tab === 0 ? 'block' : 'none'}>
-                <ExpandableCards>
+                <ExpandableCards index={expandedIndexes}>
                   <ExpandableCard
                     heading="Authorization Flow"
                     icon={FaLock}
+                    onButtonClick={handleExpandCard(0)}
                     data-testid="edit-env-auth-card"
                   >
                     <AuthorizationFlow
@@ -155,16 +184,19 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                       onFlowChange={setFlow}
                     />
                   </ExpandableCard>
-                  <ExpandableCard
-                    heading="Plugin Template"
-                    icon={FaCode}
-                    data-testid="edit-env-plugin-card"
-                  >
-                    <EnvironmentPlugins
-                      environment={data?.OwnedEnvironment}
-                      flow={flow}
-                    />
-                  </ExpandableCard>
+                  {flow !== 'public' && (
+                    <ExpandableCard
+                      heading="Plugin Template"
+                      icon={FaCode}
+                      onButtonClick={handleExpandCard(1)}
+                      data-testid="edit-env-plugin-card"
+                    >
+                      <EnvironmentPlugins
+                        environment={data?.OwnedEnvironment}
+                        flow={flow}
+                      />
+                    </ExpandableCard>
+                  )}
                 </ExpandableCards>
               </Box>
               <Box hidden={tab !== 1} display={tab === 1 ? 'block' : 'none'}>
