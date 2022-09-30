@@ -7,6 +7,7 @@ import {
   KeycloakClientPolicyService,
   KeycloakClientService,
   KeycloakGroupService,
+  KeycloakUserService,
 } from '../keycloak';
 import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
@@ -61,11 +62,17 @@ function throwError(msg: string) {
 export class OrgGroupService {
   private clientId: string;
   private keycloakService;
+  private userKeycloakService;
   private groups: GroupRepresentation[];
 
   constructor(issuerUrl: string) {
     logger.debug('[OrgGroupService] %s', issuerUrl);
     this.keycloakService = new KeycloakGroupService(issuerUrl);
+
+    this.userKeycloakService = new KeycloakUserService(issuerUrl);
+    this.userKeycloakService.useAdminClient(
+      this.keycloakService.getAdminClient()
+    );
   }
 
   public async login(
@@ -534,7 +541,6 @@ export class OrgGroupService {
     }
     return allGroupMembers.map((user) => ({
       id: user.id,
-      username: user.username,
       email: user.email,
     }));
   }
@@ -554,7 +560,8 @@ export class OrgGroupService {
 
   public async syncMembers(
     orgGroup: OrganizationGroup,
-    memberUsernames: UserReference[]
+    memberEmails: UserReference[],
+    validIdentityProviders: string[]
   ) {
     const groupIds = this.getGroupBranchToLeaf(orgGroup);
     const group = groupIds[groupIds.length - 1];
@@ -563,7 +570,7 @@ export class OrgGroupService {
       '[syncMembers] %s (%s) %j',
       orgGroup.name,
       group.id,
-      memberUsernames
+      memberEmails
     );
 
     const currentMembers = (await this.listMembersForLeafOnly(orgGroup)).map(
@@ -571,8 +578,12 @@ export class OrgGroupService {
     );
     const desiredMembers = (
       await Promise.all(
-        memberUsernames.map((u) =>
-          this.keycloakService.lookupMemberByUsername(u.username)
+        memberEmails.map((u) =>
+          this.userKeycloakService.lookupUserIdByEmail(
+            u.email,
+            false,
+            validIdentityProviders
+          )
         )
       )
     ).filter((s) => s);

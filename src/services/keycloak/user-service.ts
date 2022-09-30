@@ -20,6 +20,10 @@ export class KeycloakUserService {
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
   }
 
+  public useAdminClient(client: KcAdminClient) {
+    this.kcAdminClient = client;
+  }
+
   // public async findOne(id: string) {
   //   logger.debug('[findOne] %s', id);
   //   const user = await this.kcAdminClient.users.findOne({
@@ -47,6 +51,23 @@ export class KeycloakUserService {
     });
     logger.debug('[lookupUserById] : %j', user);
     return user;
+  }
+
+  public async lookupUserIdByEmail(
+    email: string,
+    verified: boolean,
+    identityProviders: string[]
+  ): Promise<string> {
+    const user = (await this.lookupUsersByEmail(email, verified))
+      .filter(async (user) => {
+        const userWithAttributes = await this.lookupUserById(user.id);
+        return identityProviders.includes(
+          userWithAttributes.attributes.identity_provider
+        );
+      })
+      .pop();
+    assert.strictEqual(Boolean(user), true, `No suitable match for ${email}`);
+    return user.id;
   }
 
   public async lookupUsersByEmail(

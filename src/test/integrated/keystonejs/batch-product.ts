@@ -73,9 +73,10 @@ import { lookupServiceAccessesByEnvironment } from '../../../services/keystone';
       appId: '122000000002',
       environments: [
         {
+          active: false,
           name: 'dev',
-          approval: false,
-          flow: 'public',
+          approval: true,
+          flow: 'client-credentials',
           appId: '12200000',
         },
       ],
