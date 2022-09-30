@@ -3,7 +3,6 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
   Button,
-  Center,
   Flex,
   Icon,
   MenuItem,
@@ -228,7 +227,7 @@ const query = gql`
 `;
 
 const deleteMutation = gql`
-  mutation DeleteEnvironment($id: ID!) {
-    deleteEnvironment(id: $id)
+  mutation DeleteEnvironment($id: ID!, $force: Boolean!) {
+    forceDeleteEnvironment(id: $id, force: $force)
   }
 `;

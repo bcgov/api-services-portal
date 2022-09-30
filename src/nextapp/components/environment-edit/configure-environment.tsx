@@ -49,6 +49,10 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
     },
     { suspense: false, enabled: Boolean(auth?.user.namespace) }
   );
+  const value = React.useMemo(() => {
+    const result = activeServices.map((s) => s.id);
+    return JSON.stringify(result);
+  }, [activeServices]);
 
   const handleDragStart = (d: GatewayService) => (
     event: React.DragEvent<HTMLDivElement>
@@ -106,6 +110,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
             </Box>
           </Center>
         )}
+        <input type="hidden" name="services" value={value} />
         {activeServices.length > 0 && (
           <Wrap>
             {activeServices.map((s) => (

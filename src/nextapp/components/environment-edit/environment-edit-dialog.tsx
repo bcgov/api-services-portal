@@ -89,7 +89,28 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
     event.preventDefault();
     try {
       const formData = new FormData(formRef.current);
-      const data = Object.fromEntries(formData);
+      const activeValue = formData.get('active');
+      const approvalValue = formData.get('approval');
+      const entries = Object.fromEntries(formData);
+      const legalValue = formData.get('legal');
+      const legal = legalValue
+        ? {
+            connect: {
+              id: legalValue,
+            },
+          }
+        : undefined;
+      const servicesValue = formData.get('services');
+      const services = JSON.parse(servicesValue as string) ?? [];
+      const data = {
+        ...entries,
+        active: Boolean(activeValue),
+        approval: Boolean(approvalValue),
+        legal,
+        services: {
+          connect: services,
+        },
+      };
       await mutate.mutateAsync({ id: environment.id, data });
       client.invalidateQueries(queryKey);
       toast({
