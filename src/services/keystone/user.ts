@@ -156,6 +156,7 @@ export async function changeUsername(
     query: `mutation ChangeUsername($userId: ID!, $newUsername: String!) {
                       updateUser(id: $userId, data: { username: $newUsername } ) {
                           id
+                          username
                       }
                   }`,
     variables: { userId, newUsername },
@@ -165,5 +166,5 @@ export async function changeUsername(
     throw new Error('Failed to change username');
   }
 
-  logger.debug('[changeUsername] RESULT %j', result);
+  logger.info('[changeUsername] RESULT %j', result);
 }
