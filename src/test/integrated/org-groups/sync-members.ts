@@ -27,11 +27,15 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     parent: '/data-custodian/ca.bc.gov/ministry-of-citizens-services',
   };
 
-  await kc.syncMembers(org, [
-    { username: 'acope@idir' },
-    { username: 'someone_doesnt_exist' },
-    { username: 'platform' },
-  ]);
+  await kc.syncMembers(
+    org,
+    [
+      { email: 'acope@idir' },
+      { email: 'someone_doesnt_exist' },
+      { email: 'platform' },
+    ],
+    ['idir']
+  );
 
   // await kc.syncMembers(org, [{ username: 'acope@idir' }]);
 
