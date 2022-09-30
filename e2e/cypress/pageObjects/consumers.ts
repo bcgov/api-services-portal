@@ -148,6 +148,8 @@ export default class ConsumersPage {
 
   approvePendingRequest() {
     cy.get(this.approveBtn).click({ force: true })
+    cy.wait(1000)
+    cy.verifyToastMessage("Access request approved")
   }
 
   reviewThePendingRequest() : Boolean{
