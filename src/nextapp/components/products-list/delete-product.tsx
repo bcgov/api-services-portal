@@ -55,7 +55,7 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({ id, onDeleted }) => {
         colorScheme="red"
         data-testid="prd-edit-delete-btn"
       >
-        Delete Product
+        Delete Product...
       </Button>
       <AlertDialog
         isOpen={isOpen}

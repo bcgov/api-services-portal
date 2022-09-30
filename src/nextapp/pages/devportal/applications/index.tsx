@@ -151,7 +151,7 @@ const ApplicationsPage: React.FC<
                       aria-label={`${d.name} actions menu button`}
                       placement="bottom-end"
                     >
-                      <MenuItem color="red.500" onClick={handleDelete(d.id)}>
+                      <MenuItem color="red.500" data-testid="delete-application-btn" onClick={handleDelete(d.id)}>
                         Delete Application
                       </MenuItem>
                     </ActionsMenu>
