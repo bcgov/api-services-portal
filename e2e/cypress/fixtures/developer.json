@@ -73,5 +73,19 @@
       "name": "New-Auto Test Product",
       "environment": "dev"
     }
+  },
+  "deleteApplication":{
+    "application": {
+      "name": "delete-application-without-access",
+      "description": "Test application for auto test"
+    },
+    "pendingRequest": {
+      "name": "delete-application-with-pending-request",
+      "description": "Test application for auto test"
+    },
+    "approvedRequest": {
+      "name": "delete-application-with-approved-request",
+      "description": "Test application for auto test"
+    }
   }
 }
