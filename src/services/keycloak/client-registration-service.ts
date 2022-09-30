@@ -250,28 +250,68 @@ export class KeycloakClientRegistrationService {
     clientId: string,
     desiredSetOfDefaultScopes: string[],
     desiredSetOfOptionalScopes: string[]
-  ) {
-    logger.debug(
+  ): Promise<string[]> {
+    return await this.doSyncAndApply(
+      clientId,
+      desiredSetOfDefaultScopes,
+      desiredSetOfOptionalScopes
+    ).catch((e) => {
+      logger.error(
+        '[syncAndApply] Failed %s %s',
+        e.request?.method,
+        e.request?.path
+      );
+      logger.error(
+        '[syncAndApply]   %s %s',
+        e.response?.status,
+        e.response?.statusText
+      );
+      throw e;
+    });
+  }
+
+  async doSyncAndApply(
+    clientId: string,
+    desiredSetOfDefaultScopes: string[],
+    desiredSetOfOptionalScopes: string[]
+  ): Promise<string[]> {
+    logger.info(
       '[syncAndApply] %s %j %j',
       clientId,
       desiredSetOfDefaultScopes,
       desiredSetOfOptionalScopes
     );
+    const changeList: string[] = [];
     const lkup = await this.kcAdminClient.clients.find({ clientId: clientId });
     assert.strictEqual(lkup.length, 1, 'Client ID not found ' + clientId);
     const clientPK = lkup[0].id;
-    const changes = await this.syncScopes(
+    const changes: string[][] = await this.syncScopes(
       clientPK,
       desiredSetOfDefaultScopes,
       false
     );
+    changes[0].forEach((scope) => changeList.push(`DefaultScope Add ${scope}`));
+    changes[1].forEach((scope) =>
+      changeList.push(`DefaultScope Remove ${scope}`)
+    );
+
     await this.applyChanges(clientPK, changes, false);
-    const changesOptional = await this.syncScopes(
+
+    const changesOptional: string[][] = await this.syncScopes(
       clientPK,
       desiredSetOfOptionalScopes,
       true
     );
+    changesOptional[0].forEach((scope) =>
+      changeList.push(`OptionalScope Add ${scope}`)
+    );
+    changesOptional[1].forEach((scope) =>
+      changeList.push(`OptionalScope Remove ${scope}`)
+    );
+
     await this.applyChanges(clientPK, changesOptional, true);
+
+    return changeList;
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {

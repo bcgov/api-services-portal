@@ -1,0 +1,14 @@
+kind: Product
+appId: 2B04C28E08AW
+name: Namespace Preview Test Product
+dataset: namespace-preview-test-product
+namespace: previewmode
+environments:
+  - id: 2G8DB062
+    name: dev
+    active: true
+    approval: true
+    legal: terms-of-use-for-api-gateway-1
+    flow: kong-api-key-acl
+    additionalDetailsToRequest: Please provide a bit more of this
+    services: []

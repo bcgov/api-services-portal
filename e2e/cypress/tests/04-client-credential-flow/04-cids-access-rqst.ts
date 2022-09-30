@@ -18,7 +18,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('Developer logs in', () => {

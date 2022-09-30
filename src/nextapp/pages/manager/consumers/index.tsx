@@ -36,6 +36,8 @@ import ConsumerFilters from '@/components/consumer-filters';
 import AccessRequestsList from '@/components/access-request/access-requests-list';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
+const sortDate = new Intl.DateTimeFormat('en-ca', { dateStyle: 'short' });
+
 interface FilterState {
   products: Record<string, string>[];
   environments: Record<string, string>[];
@@ -127,12 +129,16 @@ const ConsumersPage: React.FC<
     }
 
     const searchTerm = new RegExp(search, 'i');
+    const result = data.getFilteredNamespaceConsumers.map((c) => ({
+      ...c,
+      sortDate: sortDate.format(new Date(c.lastUpdated)),
+    }));
 
     if (!search) {
-      return data.getFilteredNamespaceConsumers;
+      return result;
     }
 
-    return data.getFilteredNamespaceConsumers.filter((d) => {
+    return result.filter((d) => {
       const labels = d.labels.map((l) => l.values.join(' ')).join(' ');
       return (
         d.username.search(searchTerm) >= 0 || labels.search(searchTerm) >= 0
@@ -240,7 +246,7 @@ const ConsumersPage: React.FC<
                 key: 'tags',
                 sortable: false,
               },
-              { name: 'Updated', key: 'updatedAt' },
+              { name: 'Updated', key: 'sortDate' },
             ]}
             data={consumers}
             data-testid="all-consumer-control-tbl"

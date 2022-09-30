@@ -27,6 +27,7 @@ class AuthorizationProfile {
   authorizationContinueBtn: string = '[data-testid="ap-authorization-form-continue-btn"]'
   kongAPIKeyFlow: string = '[data-testid="kong-api-key-chkBox"]'
   clientCredentialFlow: string = '[data-testid="cc-id-secret-chkBox"]'
+  clientScopeInput: string = '[data-testid="ap-authorization-scopes-input"]'
 
 
   createAuthProfile(authProfile: any, isCreated=true) {
@@ -43,16 +44,16 @@ class AuthorizationProfile {
     } else if (flow === 'Client Credential Flow') {
       cy.get('[data-testid='+ authProfile.element + '-chkBox]').click()
       cy.get(this.authenticationContinueBtn).click()
+      // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID
+      if (authProfile.scopes) {
+        authProfile.scopes.forEach((scope: string) => {
+          cy.get(this.clientScopeInput).click().type(`${scope}{enter}`)
+        })
+      }
       cy.get(this.authorizationContinueBtn).click()
       // cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
       if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
 
-      // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID
-      if (authProfile.scopes) {
-        authProfile.scopes.forEach((scope: string) => {
-          cy.get(this.scopes).click().type(`${scope}{enter}`)
-        })
-      }
 
       // TODO test this. May not work, and have similar issue as "Scopes"
       if (authProfile.clientRoles) {

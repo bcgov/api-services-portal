@@ -9,6 +9,7 @@ import {
   SkeletonCircle,
   Text,
 } from '@chakra-ui/react';
+import { getProviderText } from '@/shared/services/utils';
 import { UserData } from '@/shared/types/app.types';
 import { User } from '@/shared/types/query.types';
 
@@ -52,9 +53,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   fontSize="md"
                   data-testid={`${testId}-name`}
                 >
-                  {data.name}
+                  {data.provider === 'github'
+                    ? data.providerUsername
+                    : data.name}
                 </Text>
-                {data.providerUsername && (
+                {data.provider && (
                   <Text
                     as="span"
                     color="bc-component"
@@ -64,18 +67,20 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     <Text as="span" mx={1}>
                       &bull;
                     </Text>
-                    {data.providerUsername}
+                    {getProviderText(data.provider)}
                   </Text>
                 )}
               </Text>
-              <Text
-                color="bc-component"
-                data-testid={`${testId}-email`}
-                fontSize="md"
-                fontWeight="normal"
-              >
-                {data.email}
-              </Text>
+              {data.provider !== 'bscs' && (
+                <Text
+                  color="bc-component"
+                  data-testid={`${testId}-email`}
+                  fontSize="md"
+                  fontWeight="normal"
+                >
+                  {data.email}
+                </Text>
+              )}
             </>
           )}
         </Flex>

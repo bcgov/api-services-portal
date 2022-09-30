@@ -1,4 +1,4 @@
-module.exports = {
+  module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/src/mocks/',

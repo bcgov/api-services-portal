@@ -73,12 +73,14 @@ import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
 import { doFiltering } from './consumer-filters';
-import { getConsumerAuthz } from '.';
+import { getConsumerAuthz, StructuredActivityService } from '.';
 import {
+  Activity,
   Environment,
   GatewayConsumer,
   LabelCreateInput,
   LabelUpdateInput,
+  Product,
 } from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
@@ -144,7 +146,6 @@ export async function allScopesAndRoles(
   envs
     .filter((env) => env.credentialIssuer)
     .forEach((env) => {
-      logger.debug('[allScopesAndRoles] %j', env.credentialIssuer);
       result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
       result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
     });
@@ -410,13 +411,20 @@ export async function getConsumerProdEnvAccess(
       access.serviceAccessId
     );
 
-    const activity = await getActivityByRefId(context, access.request.id);
+    const activity = await getActivityByRefId(
+      context,
+      `accessRequest:${access.request.id}`
+    );
     logger.debug('Activity %j', activity);
 
-    if (activity.length > 0) {
+    const match: Activity[] = activity.filter(
+      (a: Activity) => a.action === 'rejected' || a.action === 'approved'
+    );
+    if (match.length > 0) {
+      const context = JSON.parse(match[0].context);
       access.requestApprover = {
         id: '',
-        name: activity[0].actor.name,
+        name: context.params.actor,
       };
     }
   }
@@ -460,8 +468,18 @@ export async function grantAccessToConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    true,
+    true,
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer: consumer,
+    }
+  );
+
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(context, ns, consumer, prodEnv, plugins);
   }
 }
 
@@ -516,7 +534,17 @@ export async function revokeAccessFromConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  await syncPlugins(context, ns, consumer, []);
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    true,
+    false,
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer,
+    }
+  );
+
+  await syncPlugins(context, ns, consumer, prodEnv, []);
 }
 
 /**
@@ -553,6 +581,8 @@ export async function updateConsumerAccess(
   );
 
   const prodEnvAccessItem = prodEnvAccessFilter[0];
+
+  const changeList: string[] = [];
 
   if (prodEnvAccessItem.environment.flow === 'client-credentials') {
     const envCtx = await getEnvironmentContext(
@@ -606,11 +636,12 @@ export async function updateConsumerAccess(
         'Only clients (not users) support scopes'
       );
 
-      await kcClientRegService.syncAndApply(
+      const changes = await kcClientRegService.syncAndApply(
         consumer.username,
         selectedScopes.map((scope) => scope.name),
         [] as string[]
       );
+      changeList.push(...changes);
     }
 
     if (roles) {
@@ -655,19 +686,26 @@ export async function updateConsumerAccess(
           client.id
         );
 
+        const addRoles = selectedRoles
+          .filter(
+            (role) =>
+              userRoles.filter((urole: any) => urole.name === role.name)
+                .length == 0
+          )
+          .map((role) => ({ id: role.id, name: role.name }));
+
+        const delRoles = userRoles
+          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+          .map((role: any) => ({ id: role.id, name: role.name }));
+
+        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
+        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
+
         await kcUserService.syncUserClientRoles(
           userId,
           client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
+          addRoles,
+          delRoles
         );
       } else {
         const userId = await kcUserService.lookupUserByUsername(
@@ -679,26 +717,63 @@ export async function updateConsumerAccess(
           client.id
         );
 
+        const addRoles = selectedRoles
+          .filter(
+            (role) =>
+              userRoles.filter((urole: any) => urole.name === role.name)
+                .length == 0
+          )
+          .map((role) => ({ id: role.id, name: role.name }));
+
+        const delRoles = userRoles
+          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
+          .map((role: any) => ({ id: role.id, name: role.name }));
+
+        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
+        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
+
         await kcUserService.syncUserClientRoles(
           userId,
           client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
+          addRoles,
+          delRoles
         );
       }
+    }
+
+    if (changeList.length > 0) {
+      logger.info('[%s] %j', consumer.username, changeList);
+
+      const accessUpdates = [];
+      defaultClientScopes &&
+        accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
+      roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);
+      const accessUpdate = accessUpdates.join(', ');
+
+      await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
+        true,
+        {
+          prodEnvAccessItem,
+          environment: prodEnvAccessItem.environment,
+          productName: prodEnvAccessItem.productName,
+          consumer,
+        },
+        accessUpdate
+      );
     }
   }
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(
+      context,
+      ns,
+      consumer,
+      {
+        name: prodEnvAccessItem.environment.name,
+        product: { name: prodEnvAccessItem.productName },
+      } as Environment,
+      plugins
+    );
   }
 }
 
@@ -736,6 +811,13 @@ export async function revokeAllConsumerAccess(
 
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
   await deleteServiceAccess(context, serviceAccessId);
+
+  await new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
+    true,
+    {
+      consumer,
+    }
+  );
 }
 
 /**

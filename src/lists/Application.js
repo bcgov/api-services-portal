@@ -68,7 +68,7 @@ module.exports = {
       }) {
         console.log("BEFORE DELETE APP " + operation + " " + JSON.stringify(existingItem, null, 3));
 
-        await DeleteAccess(context.createContext({skipAccessControl:true}), operation, {application: existingItem.id})
+        await DeleteAccess(context.sudo(), {application: existingItem.id})
     })
 
   },

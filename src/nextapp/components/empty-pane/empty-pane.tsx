@@ -13,7 +13,7 @@ interface EmptyPaneProps extends CenterProps {
   boxProps?: BoxProps;
   children?: React.ReactNode;
   error?: string;
-  message: string;
+  message: React.ReactNode;
   title: string;
 }
 

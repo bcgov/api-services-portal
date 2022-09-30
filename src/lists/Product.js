@@ -11,6 +11,7 @@ const {
   DeleteProductEnvironments,
 } = require('../services/workflow/delete-product');
 const { strict: assert } = require('assert');
+const { StructuredActivityService } = require('../services/workflow');
 
 module.exports = {
   fields: {
@@ -64,6 +65,36 @@ module.exports = {
         context,
         context.authedItem['namespace'],
         existingItem.id
+      );
+    },
+
+    afterDelete: async function ({ existingItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        'delete',
+        'product',
+        {
+          product: existingItem,
+        },
+        '{actor} {action} {entity} {product}'
+      );
+    },
+
+    afterChange: async function ({ operation, updatedItem, context }) {
+      await new StructuredActivityService(
+        context,
+        context.authedItem['namespace']
+      ).logListActivity(
+        true,
+        operation,
+        'product',
+        {
+          product: updatedItem,
+        },
+        '{actor} {action} {entity} {product}'
       );
     },
 

@@ -24,10 +24,11 @@ import {
   isRequested,
 } from './common';
 import { Logger } from '../../logger';
-import { AccessRequest, GatewayConsumer } from '../keystone/types';
+import { AccessRequest, Environment, GatewayConsumer } from '../keystone/types';
 import { updateAccessRequestState } from '../keystone';
 import { syncPlugins } from './consumer-plugins';
 import { saveConsumerLabels } from './consumer-management';
+import { StructuredActivityService } from './namespace-activity';
 
 const logger = Logger('wf.Apply');
 
@@ -52,10 +53,9 @@ export const Apply = async (
 
     try {
       const newCredential = await generateCredential(context, requestDetails);
-      if (newCredential != null) {
-        updatedItem['credential'] = JSON.stringify(newCredential);
-        message.text = 'received credentials';
-      }
+
+      updatedItem['credential'] = JSON.stringify(newCredential);
+      message.text = 'received credentials';
 
       if (requestDetails.productEnvironment.approval == false) {
         const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
@@ -85,7 +85,12 @@ export const Apply = async (
           consumer: requestDetails.serviceAccess.consumer,
         };
 
-        await setupAuthorizationAndEnable(subjectContext, context, setup);
+        await setupAuthorizationAndEnable(
+          subjectContext,
+          context,
+          requestDetails.productEnvironment,
+          setup
+        );
 
         await updateAccessRequestState(context, requestDetails.id, {
           isApproved: true,
@@ -96,16 +101,31 @@ export const Apply = async (
         message.text = 'received credentials (immediate approval)';
       }
 
-      await recordActivity(
+      await new StructuredActivityService(
         context,
-        operation,
-        'AccessRequest',
-        updatedItem.id,
-        message.text,
-        'success',
-        JSON.stringify(originalInput),
         productNamespace
+      ).logCollectedCredentials(
+        true,
+        {
+          accessRequest: requestDetails,
+          environment: requestDetails.productEnvironment,
+          product: requestDetails.productEnvironment.product,
+          application: requestDetails.application,
+          consumerUsername: newCredential.clientId,
+        },
+        requestDetails.productEnvironment.approval == true
       );
+
+      // await recordActivity(
+      //   context,
+      //   operation,
+      //   'AccessRequest',
+      //   updatedItem.id,
+      //   message.text,
+      //   'success',
+      //   JSON.stringify(originalInput),
+      //   productNamespace
+      // );
     } catch (err) {
       logger.error('Workflow Error %s', err);
       await markAccessRequestAsNotIssued(context, updatedItem.id).catch(
@@ -142,9 +162,12 @@ export const Apply = async (
 
       logger.debug('[UpdatingToIssued] ExistingItem = %j', existingItem);
 
+      const productNamespace =
+        requestDetails.productEnvironment.product.namespace;
+
       const setup = <SetupAuthorizationInput>{
         flow: requestDetails.productEnvironment.flow,
-        namespace: requestDetails.productEnvironment.product.namespace,
+        namespace: productNamespace,
         controls:
           'controls' in requestDetails
             ? JSON.parse(requestDetails.controls)
@@ -166,19 +189,43 @@ export const Apply = async (
           labels
         );
       }
-      await setupAuthorizationAndEnable(subjectContext, context, setup);
+      await setupAuthorizationAndEnable(
+        subjectContext,
+        context,
+        requestDetails.productEnvironment,
+        setup
+      );
 
       message.text = 'approved access';
+
+      // only log another activity record if this is part of approval
+      if (requestDetails.productEnvironment.approval == true) {
+        await new StructuredActivityService(
+          context,
+          productNamespace
+        ).logApproveAccess(true, {
+          accessRequest: requestDetails,
+          environment: requestDetails.productEnvironment,
+          product: requestDetails.productEnvironment.product,
+          application: requestDetails.application,
+          consumerUsername: requestDetails.serviceAccess.consumer.customId,
+        });
+      }
     } else if (isUpdatingToRejected(existingItem, updatedItem)) {
       const requestDetails = await lookupEnvironmentAndApplicationByAccessRequest(
         context,
         existingItem.id
       );
+
       assert.strictEqual(
         requestDetails.serviceAccess == null,
         false,
         'Service Access is Missing!'
       );
+
+      const productNamespace =
+        requestDetails.productEnvironment.product.namespace;
+
       await deleteRecord(
         context,
         'ServiceAccess',
@@ -186,22 +233,19 @@ export const Apply = async (
         ['id']
       );
       message.text = 'rejected access request';
-    } else if (isRequested(existingItem, updatedItem)) {
-      message.text = 'requested access';
+
+      await new StructuredActivityService(
+        context,
+        productNamespace
+      ).logRejectAccess(true, {
+        accessRequest: requestDetails,
+        environment: requestDetails.productEnvironment,
+        product: requestDetails.productEnvironment.product,
+        application: requestDetails.application,
+        consumerUsername: requestDetails.serviceAccess.consumer.customId,
+      });
+      // } else if (isRequested(existingItem, updatedItem)) {
     }
-
-    const refId = updatedItem.id;
-    const action = operation;
-
-    await recordActivity(
-      context,
-      action,
-      'AccessRequest',
-      refId,
-      message.text,
-      'success',
-      JSON.stringify(originalInput)
-    );
   } catch (err) {
     logger.error('Workflow Error %s', err);
     await markAccessRequestAsNotIssued(context, updatedItem.id).catch(
@@ -235,6 +279,7 @@ interface SetupAuthorizationInput {
 async function setupAuthorizationAndEnable(
   subjectContext: any,
   context: any,
+  prodEnv: Environment,
   setup: SetupAuthorizationInput
 ) {
   const kongApi = new KongConsumerService(process.env.KONG_URL);
@@ -353,7 +398,7 @@ async function setupAuthorizationAndEnable(
 
   if ('plugins' in controls) {
     const consumer = await lookupConsumerPlugins(context, setup.consumer.id);
-    await syncPlugins(subjectContext, ns, consumer, controls.plugins);
+    await syncPlugins(subjectContext, ns, consumer, prodEnv, controls.plugins);
   }
 
   // Call /feeds to sync the Consumer with KeystoneJS

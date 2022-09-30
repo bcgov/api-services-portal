@@ -538,10 +538,11 @@ export const parseBlobString = (obj: any, keys: string[] = ['blob']) => {
   Object.entries(obj).forEach(
     ([key, val]) =>
       keys.includes(key) &&
+      obj[key] &&
       (obj[key] =
         obj['type'] === 'json'
           ? JSON.parse(Object.values(val).pop())
-          : YAML.load(Object.values(val).pop()))
+          : YAML.loadAll(Object.values(val).pop()))
   );
   return obj;
 };

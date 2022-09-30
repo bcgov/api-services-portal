@@ -19,7 +19,7 @@ const BusinessProfileComponent: React.FC<BusinessProfileProps> = ({
       query,
       variables: { consumerId },
     },
-    { suspense: false }
+    { enabled: Boolean(consumerId), suspense: false }
   );
 
   return (

@@ -16,6 +16,7 @@ describe('Access manager approves developer access request for Client ID/Secret 
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('access-manager').as('access-manager')
+    cy.fixture('apiowner').as('apiowner')
     // cy.visit(login.path)
   })
 
@@ -30,6 +31,12 @@ describe('Access manager approves developer access request for Client ID/Secret 
     cy.get('@access-manager').then(() => {
       cy.visit(consumers.path)
       consumers.reviewThePendingRequest()
+    })
+  })
+
+  it('Select scopes in Authorization Tab', () => {
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      consumers.selectAuthorizationScope(clientCredentials.clientIdSecret.authProfile.scopes)
     })
   })
 

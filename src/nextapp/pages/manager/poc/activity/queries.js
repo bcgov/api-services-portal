@@ -1,24 +1,16 @@
 export const GET_LIST = `
     query GET($first: Int, $skip: Int) {
-        allActivities( first:$first, skip: $skip, sortBy: createdAt_DESC) {
+      getFilteredNamespaceActivity( first:$first, skip: $skip) {
           id
-          type
-          name
-          action
-          result
           message
-          context
-          refId
-          namespace
-          extRefId
-          createdAt
-          actor {
-              name
-              username
+          params
+          activityAt
+          blob {
+            id
           }
         }
     }
-`
+`;
 
-const empty = () => false
-export default empty
+const empty = () => false;
+export default empty;

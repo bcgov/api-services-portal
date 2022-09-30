@@ -157,6 +157,19 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
   })
 
+  it('Adds environment for invalid authorization profile to other', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      let prod = clientCredentials.invalidClientIdSecret.product
+      let ap = clientCredentials.invalidClientIdSecret.authProfile
+      pd.addEnvToProduct(prod.name, prod.environment.name)
+      pd.editProductEnvironment(prod.name, prod.environment.name)
+      prod.environment.config.authIssuer = ap.name
+      prod.environment.config.authIssuerEnv = ap.environmentConfig.environment
+      pd.editProductEnvironmentConfig(prod.environment.config)
+    })
+  })
+
   after(() => {
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()

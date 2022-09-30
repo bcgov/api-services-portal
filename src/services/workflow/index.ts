@@ -15,7 +15,7 @@ export {
   saveConsumerLabels,
 } from './consumer-management';
 
-export { DeleteAccess } from './delete-access';
+export { DeleteAccess, AfterDeleteAccess } from './delete-access';
 
 export { DeleteIssuerValidate } from './delete-issuer';
 
@@ -43,3 +43,9 @@ export {
 } from './get-namespaces';
 
 export { getConsumerAuthz } from './get-consumer-authz';
+
+export {
+  getFilteredNamespaceActivity,
+  transformActivity,
+  StructuredActivityService,
+} from './namespace-activity';

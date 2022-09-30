@@ -67,7 +67,7 @@ const actions = [
 const secondaryActions = [
   {
     title: 'Activity',
-    url: '/manager/poc/activity',
+    url: '/manager/activity',
     icon: FaClock,
     roles: ['api-owner', 'provider-user', 'access-manager'],
     description: 'View all the activity within your namepace.',
@@ -95,7 +95,6 @@ const secondaryActions = [
       'Manage service accounts for performing functions on the namespace',
   },
 ];
-
 
 const NamespacesPage: React.FC = () => {
   const { user } = useAuth();
@@ -140,27 +139,26 @@ const NamespacesPage: React.FC = () => {
 
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader
-          title={hasNamespace ? user.namespace : ''}
-        />
+        <PageHeader title={hasNamespace ? user.namespace : ''} />
         {!hasNamespace && (
           <EmptyPane
             message="To get started select a Namespace from the dropdown below or create a new Namespace"
             title="No Namespace selected yet"
-            boxProps={{borderRadius:0, mx:0}}
+            boxProps={{ borderRadius: 0, mx: 0 }}
             my={0}
           >
             <Flex justifyContent="center" alignItems="center" gridGap={4}>
-              <NamespaceMenu user={user} variant="ns-selector" buttonMessage='Select a Namespace' />
+              <NamespaceMenu
+                user={user}
+                variant="ns-selector"
+                buttonMessage="Select a Namespace"
+              />
               <Text>or</Text>
               <Button variant="primary" onClick={onOpen}>
                 Create New Namespace
               </Button>
             </Flex>
-            <NewNamespace
-              isOpen={isOpen}
-              onClose={onClose}
-            />
+            <NewNamespace isOpen={isOpen} onClose={onClose} />
           </EmptyPane>
         )}
         {hasNamespace && (
