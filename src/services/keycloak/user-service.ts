@@ -6,6 +6,7 @@ import KeycloakAdminClient, {
 } from '@keycloak/keycloak-admin-client';
 import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
 import { checkKeystoneStatus } from '../checkKeystoneStatus';
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 
 const logger = Logger('kc.user');
 
@@ -32,11 +33,44 @@ export class KeycloakUserService {
     logger.debug('[lookupUserByUsername] %s', username);
     const users = await this.kcAdminClient.users.find({
       exact: true,
-      username: username,
+      username,
     });
     logger.debug('[lookupUserByUsername] : %j', users);
     assert.strictEqual(users.length, 1, 'User not found ' + username);
     return users[0].id;
+  }
+
+  public async lookupUserById(id: string): Promise<UserRepresentation> {
+    logger.debug('[lookupUserById] %s', id);
+    const user = await this.kcAdminClient.users.findOne({
+      id,
+    });
+    logger.debug('[lookupUserById] : %j', user);
+    return user;
+  }
+
+  public async lookupUsersByEmail(
+    email: string,
+    verified: boolean
+  ): Promise<UserRepresentation[]> {
+    logger.debug('[lookupUserByEmail] %s', email);
+    const users = (
+      await this.kcAdminClient.users.find({
+        exact: true,
+        email,
+      })
+    )
+      .filter((user: UserRepresentation) => user.enabled)
+      .filter(
+        (user: UserRepresentation) => verified == false || user.emailVerified
+      );
+    logger.debug('[lookupUserByEmail] : %j', users);
+    assert.strictEqual(
+      users.length > 0,
+      true,
+      'No suitable match for ' + email
+    );
+    return users;
   }
 
   public async login(
