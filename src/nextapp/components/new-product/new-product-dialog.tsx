@@ -17,7 +17,7 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import {
   ADD_ENVIRONMENT,
   ADD_PRODUCT,
@@ -28,11 +28,13 @@ import type { Mutation } from '@/types/query.types';
 interface NewProductDialogProps {
   open: boolean;
   onClose: () => void;
+  queryKey: QueryKey;
 }
 
 const NewProductDialog: React.FC<NewProductDialogProps> = ({
   open,
   onClose,
+  queryKey,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -62,7 +64,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             name: environment,
           });
 
-          queryClient.invalidateQueries('products');
+          queryClient.invalidateQueries(queryKey);
           toast({
             title: `Product ${productName} created!`,
             description: 'You can now add more environments',

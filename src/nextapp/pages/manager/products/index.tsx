@@ -6,9 +6,11 @@ import PageHeader from '@/components/page-header';
 import ProductsList from '@/components/products-list';
 import NewProduct from '@/components/new-product';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import { QueryKey } from 'react-query';
 
 const PackagingPage: React.FC = () => {
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
+  const queryKey: QueryKey = ['allProducts'];
   return (
     <>
       <Head>
@@ -17,7 +19,7 @@ const PackagingPage: React.FC = () => {
       <Container maxW="6xl">
         <PageHeader
           title="Products"
-          actions={<NewProduct />}
+          actions={<NewProduct queryKey={queryKey} />}
           breadcrumb={breadcrumbs}
         >
           <Box maxW="65%">
@@ -32,11 +34,17 @@ const PackagingPage: React.FC = () => {
 
         <Box mt={5}>
           <ClientRequest
-            fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-              <Skeleton key={d} width="100%" height="160px" mb={2} />
+            fallback={[1, 2, 3].map((d) => (
+              <Skeleton
+                key={d}
+                width="100%"
+                height="160px"
+                mb={2}
+                bgColor="white"
+              />
             ))}
           >
-            <ProductsList />
+            <ProductsList queryKey={queryKey} />
           </ClientRequest>
         </Box>
       </Container>

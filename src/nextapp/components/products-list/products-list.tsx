@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useApi } from '@/shared/services/api';
+import { useApi, useApiMutation } from '@/shared/services/api';
 import {
   Box,
   Button,
@@ -9,6 +9,7 @@ import {
   MenuItem,
   Tag,
   Text,
+  useToast,
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
@@ -26,16 +27,42 @@ import Card from '../card';
 import { Environment } from '@/shared/types/query.types';
 import ActionsMenu from '../actions-menu';
 import EnvironmentEdit from '../environment-edit';
+import { QueryKey, useQueryClient } from 'react-query';
 
-const ProductsList: React.FC = () => {
-  const { data } = useApi('allProducts', { query });
+interface ProductsListProps {
+  queryKey: QueryKey;
+}
+const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
+  const { data } = useApi(queryKey, { query });
+  const toast = useToast();
+  const client = useQueryClient();
+  const deleteEnvironment = useApiMutation(deleteMutation);
+
+  const handleDeleteEnvironment = (environment: Environment) => async () => {
+    try {
+      await deleteEnvironment.mutateAsync({ id: environment.id });
+      client.invalidateQueries(queryKey);
+      toast({
+        status: 'success',
+        title: `${environment.name} environment deleted`,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Environment deletion failed',
+        description: err,
+        isClosable: true,
+      });
+    }
+  };
 
   if (data.allProductsByNamespace.length === 0) {
     return (
       <EmptyPane
         title="Make your first Product"
         message="You can create additional environments once a product has been made."
-        action={<NewProduct />}
+        action={<NewProduct queryKey={queryKey} />}
       />
     );
   }
@@ -52,6 +79,7 @@ const ProductsList: React.FC = () => {
                 productId={d.id}
                 environments={d.environments.map((d) => d.name)}
                 productName={d.name}
+                productQueryKey={queryKey}
               >
                 <Button
                   leftIcon={<Icon as={FaPlusCircle} mr={2} />}
@@ -74,87 +102,83 @@ const ProductsList: React.FC = () => {
           heading={d.name}
         >
           {d.environments.length === 0 && (
-            <Box
-              py={4}
-              bgColor="gray.100"
-              boxShadow="inset 0 3px 5px rgba(0, 0, 0, 0.1)"
-            >
-              <Center>
-                <AddEnvironment
-                  productId={d.id}
-                  environments={d.environments.map((d) => d.name)}
-                  productName={d.name}
-                >
-                  Add Environment
-                </AddEnvironment>
-              </Center>
-            </Box>
+            <EmptyPane
+              title="No environments"
+              message="Click Add Environment to add one"
+            />
           )}
-          <Table
-            sortable
-            data={d.environments}
-            columns={[
-              { name: 'State', key: 'active', sortable: true },
-              { name: 'Environment', key: 'name', sortable: true },
-              { name: 'Authentication', key: 'flow', sortable: true },
-              { name: 'Active Services', key: 'credentialIssuer.name' },
-              { name: '', key: 'id' },
-            ]}
-          >
-            {(item: Environment, index) => (
-              <Tr key={index}>
-                <Td>
-                  <Flex align="center">
-                    {item.active ? (
-                      <>
-                        <Box
-                          bgColor="bc-success"
-                          w="12px"
-                          h="12px"
-                          borderRadius="full"
-                          mr={2}
-                        />{' '}
-                        Active
-                      </>
-                    ) : (
-                      <>
-                        <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
-                        Inactive
-                      </>
+          {d.environments.length > 0 && (
+            <Table
+              sortable
+              data={d.environments}
+              columns={[
+                { name: 'State', key: 'active', sortable: true },
+                { name: 'Environment', key: 'name', sortable: true },
+                { name: 'Authentication', key: 'flow', sortable: true },
+                { name: 'Active Services', key: 'credentialIssuer.name' },
+                { name: '', key: 'id' },
+              ]}
+            >
+              {(item: Environment, index) => (
+                <Tr key={index}>
+                  <Td>
+                    <Flex align="center">
+                      {item.active ? (
+                        <>
+                          <Box
+                            bgColor="bc-success"
+                            w="12px"
+                            h="12px"
+                            borderRadius="full"
+                            mr={2}
+                          />{' '}
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
+                          Inactive
+                        </>
+                      )}
+                    </Flex>
+                  </Td>
+                  <Td>
+                    <Tag colorScheme={item.name} variant="outline">
+                      {item.name}
+                    </Tag>
+                  </Td>
+                  <Td>{getFlowText(item.flow)}</Td>
+                  <Td>
+                    {!item.services.length && (
+                      <Text as="em" color="bc-empty">
+                        No active services yet
+                      </Text>
                     )}
-                  </Flex>
-                </Td>
-                <Td>
-                  <Tag colorScheme={item.name} variant="outline">
-                    {item.name}
-                  </Tag>
-                </Td>
-                <Td>{getFlowText(item.flow)}</Td>
-                <Td>
-                  {!item.services.length && (
-                    <Text as="em" color="bc-empty">
-                      No active services yet
-                    </Text>
-                  )}
-                  {item.services?.length > 0 && (
-                    <Wrap>
-                      {item.services?.map((s) => (
-                        <WrapItem key={s.id}>
-                          <Tag variant="outline">{s.name}</Tag>
-                        </WrapItem>
-                      ))}
-                    </Wrap>
-                  )}
-                </Td>
-                <Td textAlign="right" w="17%">
-                  <EnvironmentEdit data={item} product={d} />
-                  <ActionsMenu>
-                    <MenuItem color="bc-error">Delete Environment...</MenuItem>
-                  </ActionsMenu>
-                </Td>
-              </Tr>
-            )}
-          </Table>
+                    {item.services?.length > 0 && (
+                      <Wrap>
+                        {item.services?.map((s) => (
+                          <WrapItem key={s.id}>
+                            <Tag variant="outline">{s.name}</Tag>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
+                    )}
+                  </Td>
+                  <Td textAlign="right" w="17%">
+                    <EnvironmentEdit data={item} product={d} />
+                    <ActionsMenu>
+                      <MenuItem
+                        color="bc-error"
+                        onClick={handleDeleteEnvironment(item)}
+                      >
+                        Delete Environment...
+                      </MenuItem>
+                    </ActionsMenu>
+                  </Td>
+                </Tr>
+              )}
+            </Table>
+          )}
         </Card>
       ))}
     </>
@@ -200,5 +224,11 @@ const query = gql`
         }
       }
     }
+  }
+`;
+
+const deleteMutation = gql`
+  mutation DeleteEnvironment($id: ID!) {
+    deleteEnvironment(id: $id)
   }
 `;

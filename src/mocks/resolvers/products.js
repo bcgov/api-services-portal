@@ -1,89 +1,91 @@
 import times from 'lodash/times';
 
+let allProductsByNamespace = [
+  {
+    id: 'p1',
+    name: 'PharmaNet Electronic Prescribing',
+    environments: [
+      {
+        id: 'e1',
+        name: 'prod',
+        active: true,
+        flow: 'client-credentials',
+        credentialIssuer: {
+          name: 'MoH IdP',
+        },
+        services: [],
+      },
+      {
+        id: 'e2',
+        name: 'dev',
+        active: false,
+        flow: 'client-credentials',
+        credentialIssuer: {
+          name: 'MoH IdP',
+        },
+        services: [
+          {
+            id: 's1',
+            name: 'a-service-for-moh-proto',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'p2',
+    name: 'PharmaNet API',
+    environments: [
+      {
+        id: 'e11',
+        name: 'test',
+        flow: 'client-credentials',
+        active: true,
+        credentialIssuer: {
+          name: 'MoH IdP',
+        },
+        services: [
+          {
+            id: 's2',
+            name: 'Sample_API',
+          },
+          {
+            id: 's5',
+            name: 'api-for-example',
+          },
+          {
+            id: 's6',
+            name: 'api-for-test',
+          },
+          {
+            id: 's7',
+            name: 'api-for-new-stores',
+          },
+        ],
+      },
+      {
+        id: 'e21',
+        name: 'other',
+        active: true,
+        flow: 'kong-api-key-acl',
+        credentialIssuer: {
+          name: 'MoH IdP',
+        },
+        services: [
+          {
+            id: 's3',
+            name: 'My New API',
+          },
+        ],
+      },
+    ],
+  },
+];
+
 export const allProductsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allProductsByNamespace: [
-        {
-          id: 'p1',
-          name: 'PharmaNet Electronic Prescribing',
-          environments: [
-            {
-              id: 'e1',
-              name: 'prod',
-              active: true,
-              flow: 'client-credentials',
-              credentialIssuer: {
-                name: 'MoH IdP',
-              },
-              services: [],
-            },
-            {
-              id: 'e2',
-              name: 'dev',
-              active: false,
-              flow: 'client-credentials',
-              credentialIssuer: {
-                name: 'MoH IdP',
-              },
-              services: [
-                {
-                  id: 's1',
-                  name: 'a-service-for-moh-proto',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 'p2',
-          name: 'PharmaNet API',
-          environments: [
-            {
-              id: 'e11',
-              name: 'test',
-              flow: 'client-credentials',
-              active: true,
-              credentialIssuer: {
-                name: 'MoH IdP',
-              },
-              services: [
-                {
-                  id: 's2',
-                  name: 'Sample_API',
-                },
-                {
-                  id: 's5',
-                  name: 'api-for-example',
-                },
-                {
-                  id: 's6',
-                  name: 'api-for-test',
-                },
-                {
-                  id: 's7',
-                  name: 'api-for-new-stores',
-                },
-              ],
-            },
-            {
-              id: 'e21',
-              name: 'other',
-              active: true,
-              flow: 'kong-api-key-acl',
-              credentialIssuer: {
-                name: 'MoH IdP',
-              },
-              services: [
-                {
-                  id: 's3',
-                  name: 'My New API',
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      allProductsByNamespace,
     })
   );
 };
@@ -217,5 +219,14 @@ export const allGatewayServicesHandler = (req, res, ctx) => {
 };
 
 export const updateEnvironmentHandler = (req, res, ctx) => {
+  return res(ctx.data({}));
+};
+
+export const deleteEnvironmentHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+  allProductsByNamespace = allProductsByNamespace.map((p) => ({
+    ...p,
+    environments: p.environments.filter((e) => e.id !== id),
+  }));
   return res(ctx.data({}));
 };

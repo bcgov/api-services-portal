@@ -29,6 +29,7 @@ import {
   getAllCredentialIssuersByNamespace,
   allGatewayServicesHandler,
   updateEnvironmentHandler,
+  deleteEnvironmentHandler,
 } from './resolvers/products';
 
 export function resetAll() {
@@ -93,6 +94,7 @@ export const handlers = [
   keystone.query('GetAllConsumerGroupLabels', getAllConsumerGroupLabelsHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
   keystone.query('GetAllProducts', allProductsHandler),
+  keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
   keystone.query(
     'GetAllCredentialIssuersByNamespace',

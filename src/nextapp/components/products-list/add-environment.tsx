@@ -7,7 +7,7 @@ import {
   MenuItem,
   useToast,
 } from '@chakra-ui/react';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { ADD_ENVIRONMENT } from '@/shared/queries/products-queries';
 import { useApiMutation } from '@/shared/services/api';
 import kebabCase from 'lodash/kebabCase';
@@ -25,6 +25,7 @@ interface AddEnvironmentProps {
   environments: string[];
   productId: string;
   productName: string;
+  productQueryKey: QueryKey;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
@@ -32,6 +33,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   environments,
   productId,
   productName,
+  productQueryKey,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
@@ -41,7 +43,7 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   const onSelect = (value: string) => async () => {
     try {
       await mutation.mutateAsync({ product: productId, name: value });
-      client.invalidateQueries('products');
+      client.invalidateQueries(productQueryKey);
       toast({
         title: 'Environment added',
         description: 'You may now configure it. By default it is not enabled.',

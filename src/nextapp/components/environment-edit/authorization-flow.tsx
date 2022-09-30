@@ -55,7 +55,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
           <FormLabel>Issuer</FormLabel>
           <CredentialIssuerSelect
             flow={flow}
-            value={environment.credentialIssuer.id}
+            value={environment.credentialIssuer?.id}
             data-testid="prd-env-auth-issuer-select"
           />
         </FormControl>
