@@ -27,19 +27,21 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { FaCode, FaLock } from 'react-icons/fa';
 import AuthorizationFlow from './authorization-flow';
 import ConfigureEnvironment from './configure-environment';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 
 interface EnvironmentEditDialogProps {
   environment: Environment;
   open: boolean;
   onClose: () => void;
   product: Product;
+  productQueryKey: QueryKey;
 }
 const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   environment,
   open,
   onClose,
   product,
+  productQueryKey,
 }) => {
   const [tab, setTab] = React.useState(0);
   const [flow, setFlow] = React.useState(environment.flow ?? 'public');
@@ -89,15 +91,19 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
     event.preventDefault();
     try {
       const formData = new FormData(formRef.current);
+      const entries = Object.fromEntries(formData);
       const activeValue = formData.get('active');
       const approvalValue = formData.get('approval');
-      const entries = Object.fromEntries(formData);
+      const credentialIssuerValue = formData.get('credentialIssuer');
+      const credentialIssuer = credentialIssuerValue
+        ? {
+            id: credentialIssuerValue,
+          }
+        : undefined;
       const legalValue = formData.get('legal');
       const legal = legalValue
         ? {
-            connect: {
-              id: legalValue,
-            },
+            id: legalValue,
           }
         : undefined;
       const servicesValue = formData.get('services');
@@ -106,24 +112,32 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
         ...entries,
         active: Boolean(activeValue),
         approval: Boolean(approvalValue),
-        legal,
+        legal: {
+          connect: legal,
+        },
         services: {
           connect: services,
         },
+        credentialIssuer: {
+          connect: credentialIssuer,
+        },
       };
       await mutate.mutateAsync({ id: environment.id, data });
-      client.invalidateQueries(queryKey);
+      await client.invalidateQueries(queryKey);
+      await client.invalidateQueries(productQueryKey);
       toast({
         title: 'Success',
         description: `Your ${environment.name} environment for ${product.name} has been updated successfully`,
         status: 'success',
+        isClosable: true,
       });
       handleClose();
     } catch (err) {
       toast({
-        title: `${environment.name} update failed`,
+        title: 'Services update failed',
         description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };

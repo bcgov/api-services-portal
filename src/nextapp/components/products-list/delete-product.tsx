@@ -9,15 +9,16 @@ import {
   AlertDialogFooter,
   useToast,
 } from '@chakra-ui/react';
-import { DELETE_PRODUCT } from '@/shared/queries/products-queries';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 interface DeleteProductProps {
   id: string;
   isOpen: boolean;
   onClose: () => void;
   onDeleted: () => void;
+  queryKey: QueryKey;
 }
 
 const DeleteProduct: React.FC<DeleteProductProps> = ({
@@ -25,21 +26,22 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({
   isOpen,
   onClose,
   onDeleted,
+  queryKey,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
   const cancelRef = React.useRef();
-  const mutation = useApiMutation<{ id: string }>(DELETE_PRODUCT);
+  const mutate = useApiMutation<{ id: string }>(mutation);
   const onDelete = async () => {
     try {
-      await mutation.mutateAsync({ id });
+      await mutate.mutateAsync({ id });
       toast({
         title: 'Product deleted',
         status: 'success',
         isClosable: true,
       });
       onDeleted();
-      client.invalidateQueries('products');
+      client.invalidateQueries(queryKey);
     } catch {
       toast({
         title: 'Product delete failed',
@@ -85,3 +87,11 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({
 };
 
 export default DeleteProduct;
+
+const mutation = gql`
+  mutation RemoveProduct($id: ID!) {
+    deleteProduct(id: $id) {
+      id
+    }
+  }
+`;

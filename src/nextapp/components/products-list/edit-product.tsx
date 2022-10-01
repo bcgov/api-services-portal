@@ -16,26 +16,27 @@ import {
   VStack,
   MenuItem,
 } from '@chakra-ui/react';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
-import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
 import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
 import kebabCase from 'lodash/kebabCase';
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
 import ActionsMenu from '../actions-menu';
+import { gql } from 'graphql-request';
 
 interface EditProductProps {
   data: Product;
+  queryKey: QueryKey;
 }
 
-const EditProduct: React.FC<EditProductProps> = ({ data }) => {
+const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
   const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const deleteDisclosure = useDisclosure();
-  const mutation = useApiMutation<ProductUpdateInput>(UPDATE_PRODUCT);
+  const mutate = useApiMutation<ProductUpdateInput>(mutation);
   const updateProduct = React.useCallback(async () => {
     try {
       const formData = new FormData(formRef.current);
@@ -59,8 +60,8 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         }
       }
 
-      await mutation.mutateAsync({ id: data.id, data: payload });
-      client.invalidateQueries(['products']);
+      await mutate.mutateAsync({ id: data.id, data: payload });
+      client.invalidateQueries(queryKey);
       onClose();
       toast({
         title: `${data.name} updated`,
@@ -75,7 +76,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         isClosable: true,
       });
     }
-  }, [client, data, mutation, onClose, toast]);
+  }, [client, data, mutate, onClose, toast]);
   const onUpdate = React.useCallback(() => {
     if (formRef.current.checkValidity()) {
       updateProduct();
@@ -111,6 +112,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         onClose={deleteDisclosure.onClose}
         id={data.id}
         onDeleted={deleteDisclosure.onClose}
+        queryKey={queryKey}
       />
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -145,8 +147,8 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
               Cancel
             </Button>
             <Button
-              isDisabled={mutation.isLoading}
-              isLoading={mutation.isLoading}
+              isDisabled={mutate.isLoading}
+              isLoading={mutate.isLoading}
               variant="primary"
               onClick={onUpdate}
               data-testid="prd-edit-update-btn"
@@ -161,3 +163,11 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
 };
 
 export default EditProduct;
+
+const mutation = gql`
+  mutation UpdateProduct($id: ID!, $data: ProductUpdateInput) {
+    updateProduct(id: $id, data: $data) {
+      id
+    }
+  }
+`;

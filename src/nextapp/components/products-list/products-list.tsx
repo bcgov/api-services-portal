@@ -39,7 +39,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
 
   const handleDeleteEnvironment = (environment: Environment) => async () => {
     try {
-      await deleteEnvironment.mutateAsync({ id: environment.id });
+      await deleteEnvironment.mutateAsync({ id: environment.id, force: false });
       client.invalidateQueries(queryKey);
       toast({
         status: 'success',
@@ -95,7 +95,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                   Add Env
                 </Button>
               </AddEnvironment>
-              <EditProduct data={d} />
+              <EditProduct data={d} queryKey={queryKey} />
             </>
           }
           heading={d.name}
@@ -164,7 +164,11 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                     )}
                   </Td>
                   <Td textAlign="right" w="17%">
-                    <EnvironmentEdit data={item} product={d} />
+                    <EnvironmentEdit
+                      data={item}
+                      product={d}
+                      productQueryKey={queryKey}
+                    />
                     <ActionsMenu>
                       <MenuItem
                         color="bc-error"

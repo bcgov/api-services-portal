@@ -18,12 +18,9 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { QueryKey, useQueryClient } from 'react-query';
-import {
-  ADD_ENVIRONMENT,
-  ADD_PRODUCT,
-} from '@/shared/queries/products-queries';
 import { useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/types/query.types';
+import { gql } from 'graphql-request';
 
 interface NewProductDialogProps {
   open: boolean;
@@ -38,11 +35,11 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const productMutation = useApiMutation<{ name: string }>(ADD_PRODUCT);
+  const productMutation = useApiMutation<{ name: string }>(addProductMutation);
   const environmentMutation = useApiMutation<{
     product: string;
     name: string;
-  }>(ADD_ENVIRONMENT);
+  }>(addEnvironmentMutation);
   const form = React.useRef<HTMLFormElement>();
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -174,3 +171,23 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
 };
 
 export default NewProductDialog;
+
+const addProductMutation = gql`
+  mutation AddProduct($name: String!) {
+    createProduct(data: { name: $name }) {
+      id
+      name
+    }
+  }
+`;
+
+const addEnvironmentMutation = gql`
+  mutation AddEnvironment($name: String!, $product: ID!) {
+    createEnvironment(
+      data: { name: $name, product: { connect: { id: $product } } }
+    ) {
+      id
+      name
+    }
+  }
+`;

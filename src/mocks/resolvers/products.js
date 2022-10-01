@@ -1,5 +1,13 @@
 import times from 'lodash/times';
 
+const allLegals = [
+  {
+    id: '1',
+    title: 'Terms of Use for API Gateway',
+    reference: 'terms-of-use-for-api-gateway-1',
+  },
+];
+
 let allProductsByNamespace = [
   {
     id: 'p1',
@@ -13,6 +21,7 @@ let allProductsByNamespace = [
         credentialIssuer: {
           name: 'MoH IdP',
         },
+        legal: allLegals[0],
         services: [],
       },
       {
@@ -189,13 +198,7 @@ export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
 export const allLegalsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allLegals: [
-        {
-          id: '1',
-          title: 'Terms of Use for API Gateway',
-          reference: 'terms-of-use-for-api-gateway-1',
-        },
-      ],
+      allLegals,
     })
   );
 };
@@ -218,6 +221,57 @@ export const allGatewayServicesHandler = (req, res, ctx) => {
   );
 };
 
+export const addProductHandler = (req, res, ctx) => {
+  const record = {
+    id: `p${allProductsByNamespace.length + 1}`,
+    name: req.variables.name,
+    environments: [],
+  };
+  allProductsByNamespace.push(record);
+  return res(
+    ctx.data({
+      createProduct: record,
+    })
+  );
+};
+
+export const updateProductHandler = (req, res, ctx) => {
+  const { id, data } = req.variables;
+  allProductsByNamespace = allProductsByNamespace.map((p) => {
+    if (p.id === id) {
+      return {
+        ...p,
+        ...data,
+      };
+    }
+    return p;
+  });
+  return res(ctx.data({ id }));
+};
+
+export const addEnvironmentHandler = (req, res, ctx) => {
+  const record = {
+    id: 'e',
+    name: req.variables.name,
+    services: [],
+  };
+  allProductsByNamespace = allProductsByNamespace.map((p) => {
+    const environments =
+      p.id === req.variables.product
+        ? [...p.environments, record]
+        : p.environments;
+    return {
+      ...p,
+      environments,
+    };
+  });
+  return res(
+    ctx.data({
+      createEnvironment: record,
+    })
+  );
+};
+
 export const updateEnvironmentHandler = (req, res, ctx) => {
   return res(ctx.data({}));
 };
@@ -228,5 +282,11 @@ export const deleteEnvironmentHandler = (req, res, ctx) => {
     ...p,
     environments: p.environments.filter((e) => e.id !== id),
   }));
+  return res(ctx.data({}));
+};
+
+export const deleteProductHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+  allProductsByNamespace = allProductsByNamespace.filter((p) => p.id !== id);
   return res(ctx.data({}));
 };
