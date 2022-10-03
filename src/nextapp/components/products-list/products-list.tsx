@@ -31,6 +31,7 @@ import { QueryKey, useQueryClient } from 'react-query';
 interface ProductsListProps {
   queryKey: QueryKey;
 }
+
 const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
   const { data } = useApi(queryKey, { query });
   const toast = useToast();

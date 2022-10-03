@@ -15,18 +15,20 @@ import {
 } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
-import { useAuth } from '@/shared/services/auth';
 import { FaGripVertical } from 'react-icons/fa';
 import { Environment, GatewayService } from '@/shared/types/query.types';
 import SearchInput from '../search-input';
+import EmptyPane from '../empty-pane';
 
 const dataTransferType = 'application/service';
 
 interface ConfigureEnvironmentProps {
+  data: GatewayService[];
   environment: Environment;
 }
 
 const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
+  data,
   environment,
 }) => {
   const dragRef = React.useRef<string>(null);
@@ -40,15 +42,6 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   });
   const [search, setSearch] = React.useState('');
   const [sort, setSort] = React.useState('name');
-  const auth = useAuth();
-  const { data, isSuccess } = useApi(
-    ['allGatewayServices'],
-    {
-      query,
-      variables: { ns: auth.user.namespace },
-    },
-    { suspense: false, enabled: Boolean(auth?.user.namespace) }
-  );
   const value = React.useMemo(() => {
     const result = activeServices.map((s) => s.id);
     return JSON.stringify(result);
@@ -124,81 +117,74 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
           </Wrap>
         )}
       </Box>
-      {isSuccess && (
-        <>
-          <Flex align="center" justify="space-between" mb={8}>
-            <Heading
-              size="sm"
-              data-testid="edit-env-available-services-heading"
-            >
-              {`Available Services (${data.allGatewayServices.length ?? 0})`}
-            </Heading>
-            <Flex gridGap={4}>
-              <SearchInput
-                onChange={handleSearchChange}
-                value={search}
-                data-testid="edit-env-services-search-input"
-              />
-              <Select
-                onChange={handleSortChange}
-                value={sort}
-                data-testid="edit-env-services-sort-select"
-              >
-                <option value="name">Sort By: Name</option>
-                <option value="date">Sort By: Date Modified</option>
-              </Select>
-            </Flex>
-          </Flex>
-          <Box>
-            <Wrap data-testid="edit-env-available-services">
-              {data.allGatewayServices
-                .filter((s) => !activeServices.map((a) => a.id).includes(s.id))
-                .filter((s) => {
-                  if (s.name.search(search) >= 0) {
-                    return true;
-                  }
-                  return false;
-                })
-                .sort((a, b) => {
-                  if (sort === 'name') {
-                    return a.name > b.name ? 1 : -1;
-                  }
-                  if (sort === 'date') {
-                    return a.updatedAt > b.updatedAt ? 1 : -1;
-                  }
-                })
-                .map((s) => (
-                  <WrapItem key={s.id}>
-                    <Tag
-                      draggable
-                      cursor="move"
-                      onDragEnd={handleDragEnd}
-                      onDragStart={handleDragStart(s)}
-                      variant="drag"
-                    >
-                      <TagLabel>{s.name}</TagLabel>
-                      <TagRightIcon as={FaGripVertical} />
-                    </Tag>
-                  </WrapItem>
-                ))}
-            </Wrap>
-          </Box>
-        </>
-      )}
+      <Flex align="center" justify="space-between" mb={8}>
+        <Heading size="sm" data-testid="edit-env-available-services-heading">
+          {`Available Services (${data.length ?? 0})`}
+        </Heading>
+        <Flex gridGap={4}>
+          <SearchInput
+            onChange={handleSearchChange}
+            value={search}
+            data-testid="edit-env-services-search-input"
+          />
+          <Select
+            onChange={handleSortChange}
+            value={sort}
+            data-testid="edit-env-services-sort-select"
+          >
+            <option value="name">Sort By: Name</option>
+            <option value="date">Sort By: Date Modified</option>
+          </Select>
+        </Flex>
+      </Flex>
+      <Box>
+        {data.length === 0 && (
+          <EmptyPane
+            minH="120px"
+            sx={{
+              '& > div': {
+                py: 2,
+              },
+            }}
+            title="No available services"
+            message="All services assigned to Environments"
+          />
+        )}
+        <Wrap data-testid="edit-env-available-services">
+          {data
+            .filter((s) => !activeServices.map((a) => a.id).includes(s.id))
+            .filter((s) => {
+              if (s.name.search(search) >= 0) {
+                return true;
+              }
+              return false;
+            })
+            .sort((a, b) => {
+              if (sort === 'name') {
+                return a.name > b.name ? 1 : -1;
+              }
+              if (sort === 'date') {
+                return a.updatedAt > b.updatedAt ? 1 : -1;
+              }
+            })
+            .map((s) => (
+              <WrapItem key={s.id}>
+                <Tag
+                  draggable
+                  cursor="move"
+                  onDragEnd={handleDragEnd}
+                  onDragStart={handleDragStart(s)}
+                  variant="drag"
+                >
+                  <TagLabel>{s.name}</TagLabel>
+                  <TagRightIcon as={FaGripVertical} />
+                </Tag>
+              </WrapItem>
+            ))}
+        </Wrap>
+      </Box>
     </div>
   );
 };
 
 export default ConfigureEnvironment;
-
-const query = gql`
-  query GetAllGatewayServices($ns: String!) {
-    allGatewayServices(where: { namespace: $ns }) {
-      id
-      name
-      environment {
-        id
-      }
-    }
-  }
-`;

@@ -206,7 +206,7 @@ export const allLegalsHandler = (req, res, ctx) => {
 export const allGatewayServicesHandler = (req, res, ctx) => {
   const allGatewayServices = [];
 
-  times(10, (n) => {
+  times(0, (n) => {
     allGatewayServices.push({
       id: `s${n}`,
       name: `${n % 3 === 0 ? 'a' : 'b'}-service-for-moh-proto-${n}`,

@@ -17,6 +17,7 @@ import {
   TabList,
   Tabs,
   Tag,
+  Tooltip,
   useToast,
 } from '@chakra-ui/react';
 import { Environment, Product } from '@/shared/types/query.types';
@@ -25,9 +26,11 @@ import EnvironmentPlugins from '@/components/environment-plugins';
 import { gql } from 'graphql-request';
 import { useApi, useApiMutation } from '@/shared/services/api';
 import { FaCode, FaLock } from 'react-icons/fa';
+import { QueryKey, useQueryClient } from 'react-query';
+import { useAuth } from '@/shared/services/auth';
+
 import AuthorizationFlow from './authorization-flow';
 import ConfigureEnvironment from './configure-environment';
-import { QueryKey, useQueryClient } from 'react-query';
 
 interface EnvironmentEditDialogProps {
   environment: Environment;
@@ -46,6 +49,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
   const [tab, setTab] = React.useState(0);
   const [flow, setFlow] = React.useState(environment.flow ?? 'public');
   const [expandedIndexes, setExpandedIndexes] = React.useState<number[]>([]);
+  const auth = useAuth();
   const formRef = React.useRef<HTMLFormElement>(null);
   const client = useQueryClient();
   const toast = useToast();
@@ -58,8 +62,25 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       suspense: false,
     }
   );
+  const servicesRequest = useApi(
+    ['allGatewayServices'],
+    {
+      query: servicesQuery,
+      variables: { ns: auth.user.namespace },
+    },
+    { suspense: false, enabled: Boolean(auth?.user.namespace) }
+  );
   const mutate = useApiMutation(mutation);
-
+  const isConfigureServicesTabEnabled = React.useMemo(() => {
+    if (isSuccess && data.OwnedEnvironment?.services.length > 0) {
+      return true;
+    }
+    if (servicesRequest.isSuccess) {
+      return servicesRequest.data?.allGatewayServices?.length > 0;
+    }
+    return false;
+  }, [data, isSuccess, servicesRequest.data, servicesRequest.isSuccess]);
+  // Events
   const handleSetNextTab = () => {
     if (formRef.current?.checkValidity()) {
       setTab(1);
@@ -175,10 +196,16 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               <Tab
                 px={0}
                 ml={4}
-                onClick={() => setTab(1)}
+                isDisabled={!isConfigureServicesTabEnabled}
+                onClick={handleSetNextTab}
                 data-testid="edit-env-configure-services-tab"
               >
-                Configure Environment Services
+                <Tooltip
+                  isDisabled={isConfigureServicesTabEnabled}
+                  label="No available services"
+                >
+                  Configure Environment Services
+                </Tooltip>
               </Tab>
             </TabList>
           </Tabs>
@@ -235,7 +262,10 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                 </ExpandableCards>
               </Box>
               <Box hidden={tab !== 1} display={tab === 1 ? 'block' : 'none'}>
-                <ConfigureEnvironment environment={data?.OwnedEnvironment} />
+                <ConfigureEnvironment
+                  data={servicesRequest.data?.allGatewayServices}
+                  environment={data?.OwnedEnvironment}
+                />
               </Box>
             </form>
           )}
@@ -249,15 +279,16 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
             >
               Cancel
             </Button>
-            {tab === 0 && (
+            {tab === 0 && isConfigureServicesTabEnabled && (
               <Button
                 data-testid="edit-env-continue-button"
+                isDisabled={!servicesRequest.isSuccess}
                 onClick={handleSetNextTab}
               >
                 Continue
               </Button>
             )}
-            {tab === 1 && (
+            {(tab === 1 || !isConfigureServicesTabEnabled) && (
               <Button
                 isLoading={mutate.isLoading}
                 data-testid="edit-env-submit-button"
@@ -308,6 +339,17 @@ const query = gql`
         name
         id
         updatedAt
+      }
+    }
+  }
+`;
+const servicesQuery = gql`
+  query GetAllGatewayServices($ns: String!) {
+    allGatewayServices(where: { namespace: $ns }) {
+      id
+      name
+      environment {
+        id
       }
     }
   }
