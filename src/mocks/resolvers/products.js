@@ -1,4 +1,5 @@
 import times from 'lodash/times';
+import compact from 'lodash/compact';
 
 const allLegals = [
   {
@@ -7,111 +8,168 @@ const allLegals = [
     reference: 'terms-of-use-for-api-gateway-1',
   },
 ];
+const services = new Map([
+  [
+    's1',
+    {
+      id: 's1',
+      name: 'a-service-for-moh-proto',
+    },
+  ],
+  [
+    's2',
+    {
+      id: 's2',
+      name: 'Sample_API',
+    },
+  ],
+  [
+    's3',
+    {
+      id: 's3',
+      name: 'My New API',
+    },
+  ],
+  [
+    's4',
+    {
+      id: 's4',
+      name: 'a-service-for-moh-proto',
+    },
+  ],
+  [
+    's5',
+    {
+      id: 's5',
+      name: 'api-for-example',
+    },
+  ],
+  [
+    's6',
+    {
+      id: 's6',
+      name: 'api-for-test',
+    },
+  ],
+  [
+    's7',
+    {
+      id: 's7',
+      name: 'api-for-new-stores',
+    },
+  ],
+]);
+const environments = new Map([
+  [
+    'e1',
+    {
+      id: 'e1',
+      name: 'prod',
+      active: true,
+      flow: 'client-credentials',
+      credentialIssuer: {
+        id: '8',
+        name: 'MoH IdP',
+      },
+      legal: allLegals[0],
+      services: ['s1'],
+    },
+  ],
+  [
+    'e2',
+    {
+      id: 'e2',
+      name: 'dev',
+      active: false,
+      flow: 'client-credentials',
+      credentialIssuer: {
+        name: 'MoH IdP',
+      },
+      services: [],
+    },
+  ],
+  [
+    'e3',
+    {
+      id: 'e1',
+      name: 'prod',
+      active: true,
+      flow: 'client-credentials',
+      credentialIssuer: {
+        name: 'MoH IdP',
+      },
+      legal: allLegals[0],
+      services: [],
+    },
+  ],
+  [
+    'e11',
+    {
+      id: 'e11',
+      name: 'test',
+      flow: 'client-credentials',
+      active: true,
+      credentialIssuer: {
+        name: 'MoH IdP',
+      },
+      services: ['s2', 's4', 's5', 's7'],
+    },
+  ],
+  [
+    'e21',
+    {
+      id: 'e21',
+      name: 'other',
+      active: true,
+      flow: 'kong-api-key-acl',
+      credentialIssuer: {
+        name: 'MoH IdP',
+      },
+      services: ['s3'],
+    },
+  ],
+]);
 
 let allProductsByNamespace = [
   {
     id: 'p1',
     name: 'PharmaNet Electronic Prescribing',
-    environments: [
-      {
-        id: 'e1',
-        name: 'prod',
-        active: true,
-        flow: 'client-credentials',
-        credentialIssuer: {
-          name: 'MoH IdP',
-        },
-        legal: allLegals[0],
-        services: [],
-      },
-      {
-        id: 'e2',
-        name: 'dev',
-        active: false,
-        flow: 'client-credentials',
-        credentialIssuer: {
-          name: 'MoH IdP',
-        },
-        services: [
-          {
-            id: 's1',
-            name: 'a-service-for-moh-proto',
-          },
-        ],
-      },
-    ],
+    environments: ['e1', 'e2', 'e3'],
   },
   {
     id: 'p2',
     name: 'PharmaNet API',
-    environments: [
-      {
-        id: 'e11',
-        name: 'test',
-        flow: 'client-credentials',
-        active: true,
-        credentialIssuer: {
-          name: 'MoH IdP',
-        },
-        services: [
-          {
-            id: 's2',
-            name: 'Sample_API',
-          },
-          {
-            id: 's5',
-            name: 'api-for-example',
-          },
-          {
-            id: 's6',
-            name: 'api-for-test',
-          },
-          {
-            id: 's7',
-            name: 'api-for-new-stores',
-          },
-        ],
-      },
-      {
-        id: 'e21',
-        name: 'other',
-        active: true,
-        flow: 'kong-api-key-acl',
-        credentialIssuer: {
-          name: 'MoH IdP',
-        },
-        services: [
-          {
-            id: 's3',
-            name: 'My New API',
-          },
-        ],
-      },
-    ],
+    environments: ['e11', 'e21'],
   },
 ];
 
 export const allProductsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allProductsByNamespace,
+      allProductsByNamespace: allProductsByNamespace.map((p) => ({
+        ...p,
+        environments: compact(
+          p.environments
+            .map((e) => environments.get(e))
+            .map((e) => ({
+              ...e,
+              services: compact(e.services.map((s) => services.get(s))),
+            }))
+        ),
+      })),
     })
   );
 };
 
 export const getEnvironmentHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+  const environment = environments.get(id);
   return res(
     ctx.data({
       OwnedEnvironment: {
-        id: req.params.id,
-        name: 'prod',
-        active: true,
-        flow: 'client-credentials',
+        ...environment,
+        services: environment.services.map((s) => services.get(s)),
         appId: 'e02ei220',
-        legal: null,
-        credentialIssuer: {
-          id: '8',
-        },
         approval: true,
         additionalDetailsToRequest:
           'To gain access to production, you must be certified.  Please provide your certification number below.',
@@ -130,13 +188,6 @@ export const getEnvironmentHandler = (req, res, ctx) => {
             },
           ],
         },
-        services: [
-          {
-            id: '1',
-            name: 'a-service-for-moh-proto',
-            environment: null,
-          },
-        ],
       },
     })
   );
@@ -204,19 +255,9 @@ export const allLegalsHandler = (req, res, ctx) => {
 };
 
 export const allGatewayServicesHandler = (req, res, ctx) => {
-  const allGatewayServices = [];
-
-  times(0, (n) => {
-    allGatewayServices.push({
-      id: `s${n}`,
-      name: `${n % 3 === 0 ? 'a' : 'b'}-service-for-moh-proto-${n}`,
-      environment: null,
-    });
-  });
-
   return res(
     ctx.data({
-      allGatewayServices,
+      allGatewayServices: Array.from(services.values()),
     })
   );
 };
