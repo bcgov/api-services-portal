@@ -83,6 +83,7 @@ const environments = new Map([
       active: false,
       flow: 'client-credentials',
       credentialIssuer: {
+        id: '8',
         name: 'MoH IdP',
       },
       services: [],
@@ -96,6 +97,7 @@ const environments = new Map([
       active: true,
       flow: 'client-credentials',
       credentialIssuer: {
+        id: '8',
         name: 'MoH IdP',
       },
       legal: allLegals[0],
@@ -110,6 +112,7 @@ const environments = new Map([
       flow: 'client-credentials',
       active: true,
       credentialIssuer: {
+        id: '1',
         name: 'MoH IdP',
       },
       services: ['s2', 's4', 's5', 's7'],
@@ -123,6 +126,7 @@ const environments = new Map([
       active: true,
       flow: 'kong-api-key-acl',
       credentialIssuer: {
+        id: '8',
         name: 'MoH IdP',
       },
       services: ['s3'],
@@ -198,7 +202,7 @@ export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
     ctx.data({
       allCredentialIssuersByNamespace: [
         {
-          id: 1,
+          id: '1',
           name: 'Resource Server',
           environmentDetails: JSON.stringify([
             {
@@ -220,7 +224,7 @@ export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
           ]),
         },
         {
-          id: 8,
+          id: '8',
           name: 'Resource Server (Signed)',
           environmentDetails: JSON.stringify([
             {
@@ -314,7 +318,13 @@ export const addEnvironmentHandler = (req, res, ctx) => {
 };
 
 export const updateEnvironmentHandler = (req, res, ctx) => {
-  return res(ctx.data({}));
+  let response = {};
+  if (req.variables.id === 'e2') {
+    response = {
+      errors: [{ message: 'Nesting error' }],
+    };
+  }
+  return res(ctx.data(response));
 };
 
 export const deleteEnvironmentHandler = (req, res, ctx) => {

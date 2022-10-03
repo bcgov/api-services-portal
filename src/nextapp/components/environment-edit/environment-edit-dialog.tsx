@@ -97,7 +97,9 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
     }
   };
   const handleClose = () => {
+    mutate.reset();
     setTab(0);
+    setExpandedIndexes([]);
     onClose();
   };
   const handleExpandCard = (index: number) => () => {
@@ -118,30 +120,33 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       const credentialIssuerValue = formData.get('credentialIssuer');
       const credentialIssuer = credentialIssuerValue
         ? {
-            id: credentialIssuerValue,
+            connect: {
+              id: credentialIssuerValue,
+            },
           }
         : undefined;
       const legalValue = formData.get('legal');
       const legal = legalValue
         ? {
-            id: legalValue,
+            connect: {
+              id: legalValue,
+            },
           }
         : undefined;
       const servicesValue = formData.get('services');
-      const services = JSON.parse(servicesValue as string) ?? [];
+      const selectedServices = JSON.parse(servicesValue as string) ?? [];
+      const services = {
+        connect: {
+          services: selectedServices,
+        },
+      };
       const data = {
         ...entries,
         active: Boolean(activeValue),
         approval: Boolean(approvalValue),
-        legal: {
-          connect: legal,
-        },
-        services: {
-          connect: services,
-        },
-        credentialIssuer: {
-          connect: credentialIssuer,
-        },
+        legal,
+        services,
+        credentialIssuer,
       };
       await mutate.mutateAsync({ id: environment.id, data });
       await client.invalidateQueries(queryKey);
@@ -216,12 +221,12 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               status="error"
               variant="solid"
               data-testid="edit-env-error-alert"
+              mb={7}
             >
               <AlertIcon />
               <AlertDescription>
                 {isError && 'Unable to load environment details'}
-                {mutate.isError &&
-                  'Services update failed. Missing or incomplete acl or key-auth plugin'}
+                {mutate.isError && mutate.error}
               </AlertDescription>
             </Alert>
           )}

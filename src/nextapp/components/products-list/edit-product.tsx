@@ -61,7 +61,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
       }
 
       await mutate.mutateAsync({ id: data.id, data: payload });
-      client.invalidateQueries(queryKey);
+      await client.invalidateQueries(queryKey);
       onClose();
       toast({
         title: `${data.name} updated`,
@@ -76,7 +76,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
         isClosable: true,
       });
     }
-  }, [client, data, mutate, onClose, toast]);
+  }, [client, data, mutate, onClose, queryKey, toast]);
   const onUpdate = React.useCallback(() => {
     if (formRef.current.checkValidity()) {
       updateProduct();
@@ -89,19 +89,17 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
     },
     [updateProduct]
   );
+  const dataTestIdName = kebabCase(data.name);
 
   return (
     <>
-      <ActionsMenu>
-        <MenuItem
-          onClick={onOpen}
-          data-testid={`${kebabCase(data.name)}-edit-btn`}
-        >
+      <ActionsMenu data-testid={`${dataTestIdName}-more-options-btn`}>
+        <MenuItem onClick={onOpen} data-testid={`${dataTestIdName}-edit-btn`}>
           Edit Product
         </MenuItem>
         <MenuItem
           color="bc-error"
-          data-testid={`${kebabCase(data.name)}-delete-btn`}
+          data-testid={`${dataTestIdName}-delete-btn`}
           onClick={deleteDisclosure.onOpen}
         >
           Delete Product...
