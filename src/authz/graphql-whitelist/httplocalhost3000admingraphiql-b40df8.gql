@@ -1,6 +1,6 @@
 
   mutation AddProduct($name: String!) {
-    createProduct(data: {name: $name}) {
+    createProduct(data: { name: $name }) {
       id
       name
     }
