@@ -136,9 +136,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       const servicesValue = formData.get('services');
       const selectedServices = JSON.parse(servicesValue as string) ?? [];
       const services = {
-        connect: {
-          services: selectedServices,
-        },
+        connect: selectedServices.map((id) => ({ id })),
       };
       const data = {
         ...entries,
