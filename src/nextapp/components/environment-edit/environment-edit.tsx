@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Button, Icon, useDisclosure } from '@chakra-ui/react';
+import kebabCase from 'lodash/kebabCase';
 
 import { FaPen } from 'react-icons/fa';
 import EnvironmentEditDialog from './environment-edit-dialog';
@@ -26,7 +27,9 @@ const EnvironmentEdit: React.FC<EnvironmentEditProps> = ({
         variant="ghost"
         size="sm"
         onClick={onOpen}
-        data-testid={`edit-env-btn-${data.id}`}
+        data-testid={`${kebabCase(product.name)}-${kebabCase(
+          data.name
+        )}-edit-btn`}
       >
         Edit
       </Button>
