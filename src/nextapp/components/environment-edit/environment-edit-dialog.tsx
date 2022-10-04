@@ -31,6 +31,7 @@ import { useAuth } from '@/shared/services/auth';
 
 import AuthorizationFlow from './authorization-flow';
 import ConfigureEnvironment from './configure-environment';
+import { difference } from 'lodash';
 
 interface EnvironmentEditDialogProps {
   environment: Environment;
@@ -124,7 +125,9 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               id: credentialIssuerValue,
             },
           }
-        : undefined;
+        : {
+            disconnectAll: true,
+          };
       const legalValue = formData.get('legal');
       const legal = legalValue
         ? {
@@ -132,13 +135,20 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               id: legalValue,
             },
           }
-        : undefined;
+        : {
+            disconnectAll: true,
+          };
       const servicesValue = formData.get('services');
       const selectedServices = JSON.parse(servicesValue as string) ?? [];
+      const disconnectServices = difference(
+        data.services.map((s) => s.id),
+        selectedServices
+      );
       const services = {
         connect: selectedServices.map((id) => ({ id })),
+        disconnect: disconnectServices.map((id) => ({ id })),
       };
-      const data = {
+      const payload = {
         ...entries,
         active: Boolean(activeValue),
         approval: Boolean(approvalValue),
@@ -146,7 +156,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
         services,
         credentialIssuer,
       };
-      await mutate.mutateAsync({ id: environment.id, data });
+      await mutate.mutateAsync({ id: environment.id, data: payload });
       await client.invalidateQueries(queryKey);
       await client.invalidateQueries(productQueryKey);
       toast({

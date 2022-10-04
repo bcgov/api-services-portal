@@ -1,13 +1,15 @@
-import times from 'lodash/times';
 import compact from 'lodash/compact';
 
-const allLegals = [
-  {
-    id: '1',
-    title: 'Terms of Use for API Gateway',
-    reference: 'terms-of-use-for-api-gateway-1',
-  },
-];
+const allLegals = new Map([
+  [
+    'legal1',
+    {
+      id: 'legal1',
+      title: 'Terms of Use for API Gateway',
+      reference: 'terms-of-use-for-api-gateway-1',
+    },
+  ],
+]);
 const services = new Map([
   [
     's1',
@@ -34,7 +36,7 @@ const services = new Map([
     's4',
     {
       id: 's4',
-      name: 'a-service-for-moh-proto',
+      name: 'b-service-for-transport',
     },
   ],
   [
@@ -71,8 +73,11 @@ const environments = new Map([
         id: '8',
         name: 'MoH IdP',
       },
-      legal: allLegals[0],
+      legal: allLegals.get('legal1'),
       services: ['s1'],
+      approval: true,
+      additionalDetailsToRequest:
+        'To gain access to production, you must be certified.  Please provide your certification number below.',
     },
   ],
   [
@@ -87,21 +92,27 @@ const environments = new Map([
         name: 'MoH IdP',
       },
       services: [],
+      approval: true,
+      additionalDetailsToRequest:
+        'To gain access to production, you must be certified.  Please provide your certification number below.',
     },
   ],
   [
     'e3',
     {
-      id: 'e1',
-      name: 'prod',
+      id: 'e3',
+      name: 'other',
       active: true,
       flow: 'client-credentials',
       credentialIssuer: {
         id: '8',
         name: 'MoH IdP',
       },
-      legal: allLegals[0],
+      legal: allLegals.get('legal1'),
       services: [],
+      approval: true,
+      additionalDetailsToRequest:
+        'To gain access to production, you must be certified.  Please provide your certification number below.',
     },
   ],
   [
@@ -116,6 +127,8 @@ const environments = new Map([
         name: 'MoH IdP',
       },
       services: ['s2', 's4', 's5', 's7'],
+      approval: false,
+      additionalDetailsToRequest: '',
     },
   ],
   [
@@ -130,6 +143,8 @@ const environments = new Map([
         name: 'MoH IdP',
       },
       services: ['s3'],
+      approval: false,
+      additionalDetailsToRequest: '',
     },
   ],
 ]);
@@ -157,7 +172,7 @@ export const allProductsHandler = (req, res, ctx) => {
             .map((e) => environments.get(e))
             .map((e) => ({
               ...e,
-              services: compact(e.services.map((s) => services.get(s))),
+              services: e.services.map((s) => services.get(s)),
             }))
         ),
       })),
@@ -168,15 +183,13 @@ export const allProductsHandler = (req, res, ctx) => {
 export const getEnvironmentHandler = (req, res, ctx) => {
   const { id } = req.variables;
   const environment = environments.get(id);
+
   return res(
     ctx.data({
       OwnedEnvironment: {
         ...environment,
         services: environment.services.map((s) => services.get(s)),
         appId: 'e02ei220',
-        approval: true,
-        additionalDetailsToRequest:
-          'To gain access to production, you must be certified.  Please provide your certification number below.',
         product: {
           name: 'PharmaNet Electronic Prescribing',
           namespace: 'moh-proto',
@@ -253,7 +266,7 @@ export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
 export const allLegalsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allLegals,
+      allLegals: Array.from(allLegals.values()),
     })
   );
 };
@@ -286,7 +299,7 @@ export const updateProductHandler = (req, res, ctx) => {
     if (p.id === id) {
       return {
         ...p,
-        ...data,
+        name: data.name,
       };
     }
     return p;
@@ -295,16 +308,17 @@ export const updateProductHandler = (req, res, ctx) => {
 };
 
 export const addEnvironmentHandler = (req, res, ctx) => {
+  const { product } = req.variables;
+
   const record = {
-    id: 'e',
+    id: `e${environments.size}`,
     name: req.variables.name,
     services: [],
   };
+  environments.set(record.id, record);
   allProductsByNamespace = allProductsByNamespace.map((p) => {
     const environments =
-      p.id === req.variables.product
-        ? [...p.environments, record]
-        : p.environments;
+      p.id === product ? [...p.environments, record.id] : p.environments;
     return {
       ...p,
       environments,
@@ -318,13 +332,27 @@ export const addEnvironmentHandler = (req, res, ctx) => {
 };
 
 export const updateEnvironmentHandler = (req, res, ctx) => {
-  let response = {};
-  if (req.variables.id === 'e2') {
-    response = {
-      errors: [{ message: 'Nesting error' }],
-    };
+  const { id, data } = req.variables;
+  if (id === 'e2') {
+    return res(
+      ctx.data({
+        errors: [{ message: 'Nesting error' }],
+      })
+    );
   }
-  return res(ctx.data(response));
+  const environment = environments.get(id);
+  const result = environments.set(id, {
+    ...environment,
+    ...data,
+    services: data.services.connect.map((s) => s.id),
+    credentialIssuer: {
+      ...environment.credentialIssuer,
+      id: data.credentialIssuer.connect.id,
+    },
+    legal: data.legal.connect ? allLegals.get(data.legal.connect.id) : null,
+  });
+
+  return res(ctx.data(result.get(id)));
 };
 
 export const deleteEnvironmentHandler = (req, res, ctx) => {
