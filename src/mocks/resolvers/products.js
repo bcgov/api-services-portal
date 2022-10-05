@@ -126,6 +126,9 @@ const environments = new Map([
       legal: allLegals.get('legal1'),
       services: ['s1'],
       approval: true,
+      product: {
+        id: 'p1',
+      },
       additionalDetailsToRequest:
         'To gain access to production, you must be certified.  Please provide your certification number below.',
     },
@@ -142,6 +145,9 @@ const environments = new Map([
       approval: true,
       additionalDetailsToRequest:
         'To gain access to production, you must be certified.  Please provide your certification number below.',
+      product: {
+        id: 'p1',
+      },
     },
   ],
   [
@@ -157,6 +163,9 @@ const environments = new Map([
       approval: true,
       additionalDetailsToRequest:
         'To gain access to production, you must be certified.  Please provide your certification number below.',
+      product: {
+        id: 'p1',
+      },
     },
   ],
   [
@@ -170,6 +179,9 @@ const environments = new Map([
       services: ['s2', 's4', 's5', 's7'],
       approval: false,
       additionalDetailsToRequest: '',
+      product: {
+        id: 'p2',
+      },
     },
   ],
   [
@@ -183,26 +195,35 @@ const environments = new Map([
       services: ['s3'],
       approval: false,
       additionalDetailsToRequest: '',
+      product: {
+        id: 'p2',
+      },
     },
   ],
 ]);
-let allProductsByNamespace = [
-  {
-    id: 'p1',
-    name: 'PharmaNet Electronic Prescribing',
-    environments: ['e1', 'e2', 'e3'],
-  },
-  {
-    id: 'p2',
-    name: 'PharmaNet API',
-    environments: ['e11', 'e21'],
-  },
-];
+let products = new Map([
+  [
+    'p1',
+    {
+      id: 'p1',
+      name: 'PharmaNet Electronic Prescribing',
+      environments: ['e1', 'e2', 'e3'],
+    },
+  ],
+  [
+    'p2',
+    {
+      id: 'p2',
+      name: 'PharmaNet API',
+      environments: ['e11', 'e21'],
+    },
+  ],
+]);
 
 export const allProductsHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allProductsByNamespace: allProductsByNamespace.map((p) => ({
+      allProductsByNamespace: Array.from(products.values()).map((p) => ({
         ...p,
         environments: compact(
           p.environments
@@ -273,11 +294,11 @@ export const allGatewayServicesHandler = (req, res, ctx) => {
 
 export const addProductHandler = (req, res, ctx) => {
   const record = {
-    id: `p${allProductsByNamespace.length + 1}`,
+    id: `p${products.size + 1}`,
     name: req.variables.name,
     environments: [],
   };
-  allProductsByNamespace.push(record);
+  products.set(record.id, record);
   return res(
     ctx.data({
       createProduct: record,
@@ -287,35 +308,30 @@ export const addProductHandler = (req, res, ctx) => {
 
 export const updateProductHandler = (req, res, ctx) => {
   const { id, data } = req.variables;
-  allProductsByNamespace = allProductsByNamespace.map((p) => {
-    if (p.id === id) {
-      return {
-        ...p,
-        name: data.name,
-      };
-    }
-    return p;
+  const product = products.get(id);
+  products.set(id, {
+    ...product,
+    name: data.name,
   });
   return res(ctx.data({ id }));
 };
 
 export const addEnvironmentHandler = (req, res, ctx) => {
   const { product } = req.variables;
-
   const record = {
     id: `e${environments.size}`,
     name: req.variables.name,
     services: [],
+    flow: 'public',
   };
+  const environmentProduct = products.get(product);
+
   environments.set(record.id, record);
-  allProductsByNamespace = allProductsByNamespace.map((p) => {
-    const environments =
-      p.id === product ? [...p.environments, record.id] : p.environments;
-    return {
-      ...p,
-      environments,
-    };
+  products.set(product, {
+    ...environmentProduct,
+    environments: [...environmentProduct.environments, record.id],
   });
+
   return res(
     ctx.data({
       createEnvironment: record,
@@ -355,15 +371,18 @@ export const updateEnvironmentHandler = (req, res, ctx) => {
 
 export const deleteEnvironmentHandler = (req, res, ctx) => {
   const { id } = req.variables;
-  allProductsByNamespace = allProductsByNamespace.map((p) => ({
-    ...p,
-    environments: p.environments.filter((e) => e.id !== id),
-  }));
-  return res(ctx.data({}));
+  const environment = environments.get(id);
+  const product = products.get(environment.product.id);
+  products.set(environment.product.id, {
+    ...product,
+    environments: product.environments.filter((e) => e !== id),
+  });
+  environments.delete(id);
+  return res(ctx.data(environment));
 };
 
 export const deleteProductHandler = (req, res, ctx) => {
   const { id } = req.variables;
-  allProductsByNamespace = allProductsByNamespace.filter((p) => p.id !== id);
+  products.delete(id);
   return res(ctx.data({}));
 };

@@ -64,6 +64,9 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   }, [activeServices, data, search, sort]);
 
   // Events
+  const handleServiceSelect = (service: GatewayService) => () => {
+    setActiveServices((state) => [...state, service]);
+  };
   const handleDragStart = (d: GatewayService) => (
     event: React.DragEvent<HTMLDivElement>
   ) => {
@@ -72,7 +75,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
     event.dataTransfer.setData(dataTransferType, data);
     event.dataTransfer.effectAllowed = 'move';
   };
-  const handleDragEnd = () => {
+  const handleDrop = () => {
     setActiveServices((state) => [...state, JSON.parse(dragRef.current)]);
     setDragTarget(true);
   };
@@ -108,6 +111,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
         p={8}
         mb={8}
         minHeight="130px"
+        onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragExit={handleDragExit}
         data-testid="edit-env-active-services"
@@ -178,14 +182,18 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
             <WrapItem key={s.id}>
               <Tag
                 draggable
-                cursor="move"
                 userSelect="none"
-                onDragEnd={handleDragEnd}
                 onDragStart={handleDragStart(s)}
+                onClick={handleServiceSelect(s)}
                 variant="drag"
               >
-                <TagLabel>{s.name}</TagLabel>
-                <TagRightIcon as={FaGripVertical} />
+                <TagLabel
+                  cursor="pointer"
+                  sx={{ _hover: { textDecor: 'underline' } }}
+                >
+                  {s.name}
+                </TagLabel>
+                <TagRightIcon as={FaGripVertical} cursor="move" />
               </Tag>
             </WrapItem>
           ))}

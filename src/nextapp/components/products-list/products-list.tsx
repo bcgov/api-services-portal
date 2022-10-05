@@ -115,7 +115,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                 { name: 'State', key: 'active', sortable: true },
                 { name: 'Environment', key: 'name', sortable: true },
                 { name: 'Authentication', key: 'flow', sortable: true },
-                { name: 'Active Services', key: 'credentialIssuer.name' },
+                { name: 'Services', key: 'credentialIssuer.name' },
                 { name: '', key: 'id' },
               ]}
             >
@@ -151,7 +151,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                   <Td>
                     {!item.services.length && (
                       <Text as="em" color="bc-empty">
-                        No active services yet
+                        No services yet
                       </Text>
                     )}
                     {item.services?.length > 0 && (
