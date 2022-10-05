@@ -45,10 +45,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
       environment?.product.namespace,
       environment?.appId
     ),
-    'kong-api-key-only': KongApiKeyOnly(
-      environment?.product.namespace,
-      environment?.appId
-    ),
+    'kong-api-key-only': KongApiKeyOnly(environment?.product.namespace),
     'kong-acl-only': KongAclOnly(
       environment?.product.namespace,
       environment?.appId
@@ -59,6 +56,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
       issuer
     ),
   };
+  console.log(flow, environment);
   const doc = pluginConfigs[flow];
 
   return (

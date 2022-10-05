@@ -13,8 +13,6 @@ import {
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
-import { useApi } from '@/shared/services/api';
-import { gql } from 'graphql-request';
 import { FaGripVertical } from 'react-icons/fa';
 import { Environment, GatewayService } from '@/shared/types/query.types';
 import SearchInput from '../search-input';
@@ -46,7 +44,26 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
     const result = activeServices.map((s) => s.id);
     return JSON.stringify(result);
   }, [activeServices]);
+  const availableServices = React.useMemo(() => {
+    return data
+      .filter((s) => !activeServices.map((a) => a.id).includes(s.id))
+      .filter((s) => {
+        if (s.name.search(search) >= 0) {
+          return true;
+        }
+        return false;
+      })
+      .sort((a, b) => {
+        if (sort === 'name') {
+          return a.name > b.name ? 1 : -1;
+        }
+        if (sort === 'date') {
+          return a.updatedAt > b.updatedAt ? 1 : -1;
+        }
+      });
+  }, [activeServices, data, search, sort]);
 
+  // Events
   const handleDragStart = (d: GatewayService) => (
     event: React.DragEvent<HTMLDivElement>
   ) => {
@@ -108,7 +125,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
           <Wrap>
             {activeServices.map((s) => (
               <WrapItem key={s.id}>
-                <Tag variant="solid" colorScheme="green">
+                <Tag variant="solid" colorScheme="green" userSelect="none">
                   <TagLabel>{s.name}</TagLabel>
                   <TagCloseButton onClick={handleRemoveService(s.id)} />
                 </Tag>
@@ -119,7 +136,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
       </Box>
       <Flex align="center" justify="space-between" mb={8}>
         <Heading size="sm" data-testid="edit-env-available-services-heading">
-          {`Available Services (${data.length ?? 0})`}
+          {`Available Services (${availableServices.length ?? 0})`}
         </Heading>
         <Flex gridGap={4}>
           <SearchInput
@@ -138,7 +155,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
         </Flex>
       </Flex>
       <Box>
-        {data.length === 0 && (
+        {availableServices.length === 0 && (
           <EmptyPane
             minH="120px"
             sx={{
@@ -146,41 +163,32 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
                 py: 2,
               },
             }}
-            title="No available services"
-            message="All services assigned to Environments"
+            title={
+              search ? `No services match ${search}` : 'No available services'
+            }
+            message={
+              search
+                ? 'Try changing your search term'
+                : 'All services assigned to Environments'
+            }
           />
         )}
         <Wrap data-testid="edit-env-available-services">
-          {data
-            .filter((s) => !activeServices.map((a) => a.id).includes(s.id))
-            .filter((s) => {
-              if (s.name.search(search) >= 0) {
-                return true;
-              }
-              return false;
-            })
-            .sort((a, b) => {
-              if (sort === 'name') {
-                return a.name > b.name ? 1 : -1;
-              }
-              if (sort === 'date') {
-                return a.updatedAt > b.updatedAt ? 1 : -1;
-              }
-            })
-            .map((s) => (
-              <WrapItem key={s.id}>
-                <Tag
-                  draggable
-                  cursor="move"
-                  onDragEnd={handleDragEnd}
-                  onDragStart={handleDragStart(s)}
-                  variant="drag"
-                >
-                  <TagLabel>{s.name}</TagLabel>
-                  <TagRightIcon as={FaGripVertical} />
-                </Tag>
-              </WrapItem>
-            ))}
+          {availableServices.map((s) => (
+            <WrapItem key={s.id}>
+              <Tag
+                draggable
+                cursor="move"
+                userSelect="none"
+                onDragEnd={handleDragEnd}
+                onDragStart={handleDragStart(s)}
+                variant="drag"
+              >
+                <TagLabel>{s.name}</TagLabel>
+                <TagRightIcon as={FaGripVertical} />
+              </Tag>
+            </WrapItem>
+          ))}
         </Wrap>
       </Box>
     </div>

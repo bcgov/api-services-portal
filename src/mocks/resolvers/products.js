@@ -10,6 +10,59 @@ const allLegals = new Map([
     },
   ],
 ]);
+const credentialIssuers = new Map([
+  [
+    'ci1',
+    {
+      id: 'ci1',
+      name: 'Resource Server',
+      environmentDetails: JSON.stringify([
+        {
+          environment: 'conformance',
+          clientSecret: '****',
+          clientRegistration: 'managed',
+          issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+          clientId: 'moh-proto',
+          exists: true,
+        },
+        {
+          environment: 'prod',
+          clientSecret: '****',
+          clientRegistration: 'managed',
+          issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+          clientId: 'moh-proto',
+          exists: true,
+        },
+      ]),
+    },
+  ],
+  [
+    'ci8',
+    {
+      id: 'ci8',
+      name: 'Resource Server (Signed)',
+      environmentDetails: JSON.stringify([
+        {
+          environment: 'conformance',
+          clientSecret: '****',
+          clientRegistration: 'managed',
+          issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+          clientId: 'moh-proto',
+          exists: true,
+        },
+        {
+          environment: 'prod',
+          clientSecret: '****',
+          clientRegistration: 'managed',
+          issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
+          clientId: 'moh-proto',
+          exists: true,
+        },
+      ]),
+    },
+  ],
+]);
+
 const services = new Map([
   [
     's1',
@@ -69,10 +122,7 @@ const environments = new Map([
       name: 'prod',
       active: true,
       flow: 'client-credentials',
-      credentialIssuer: {
-        id: '8',
-        name: 'MoH IdP',
-      },
+      credentialIssuer: credentialIssuers.get('ci8'),
       legal: allLegals.get('legal1'),
       services: ['s1'],
       approval: true,
@@ -87,10 +137,7 @@ const environments = new Map([
       name: 'dev',
       active: false,
       flow: 'client-credentials',
-      credentialIssuer: {
-        id: '8',
-        name: 'MoH IdP',
-      },
+      credentialIssuer: credentialIssuers.get('ci8'),
       services: [],
       approval: true,
       additionalDetailsToRequest:
@@ -104,10 +151,7 @@ const environments = new Map([
       name: 'other',
       active: true,
       flow: 'client-credentials',
-      credentialIssuer: {
-        id: '8',
-        name: 'MoH IdP',
-      },
+      credentialIssuer: credentialIssuers.get('ci8'),
       legal: allLegals.get('legal1'),
       services: [],
       approval: true,
@@ -122,10 +166,7 @@ const environments = new Map([
       name: 'test',
       flow: 'client-credentials',
       active: true,
-      credentialIssuer: {
-        id: '1',
-        name: 'MoH IdP',
-      },
+      credentialIssuer: credentialIssuers.get('ci8'),
       services: ['s2', 's4', 's5', 's7'],
       approval: false,
       additionalDetailsToRequest: '',
@@ -138,17 +179,13 @@ const environments = new Map([
       name: 'other',
       active: true,
       flow: 'kong-api-key-acl',
-      credentialIssuer: {
-        id: '8',
-        name: 'MoH IdP',
-      },
+      credentialIssuer: credentialIssuers.get('ci8'),
       services: ['s3'],
       approval: false,
       additionalDetailsToRequest: '',
     },
   ],
 ]);
-
 let allProductsByNamespace = [
   {
     id: 'p1',
@@ -213,52 +250,7 @@ export const getEnvironmentHandler = (req, res, ctx) => {
 export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
   return res(
     ctx.data({
-      allCredentialIssuersByNamespace: [
-        {
-          id: '1',
-          name: 'Resource Server',
-          environmentDetails: JSON.stringify([
-            {
-              environment: 'conformance',
-              clientSecret: '****',
-              clientRegistration: 'managed',
-              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
-              clientId: 'moh-proto',
-              exists: true,
-            },
-            {
-              environment: 'prod',
-              clientSecret: '****',
-              clientRegistration: 'managed',
-              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
-              clientId: 'moh-proto',
-              exists: true,
-            },
-          ]),
-        },
-        {
-          id: '8',
-          name: 'Resource Server (Signed)',
-          environmentDetails: JSON.stringify([
-            {
-              environment: 'conformance',
-              clientSecret: '****',
-              clientRegistration: 'managed',
-              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
-              clientId: 'moh-proto',
-              exists: true,
-            },
-            {
-              environment: 'prod',
-              clientSecret: '****',
-              clientRegistration: 'managed',
-              issuerUrl: 'https://oidc.site/auth/realms/asdfasdf',
-              clientId: 'moh-proto',
-              exists: true,
-            },
-          ]),
-        },
-      ],
+      allCredentialIssuersByNamespace: Array.from(credentialIssuers.values()),
     })
   );
 };
@@ -344,11 +336,17 @@ export const updateEnvironmentHandler = (req, res, ctx) => {
   const result = environments.set(id, {
     ...environment,
     ...data,
-    services: data.services.connect.map((s) => s.id),
-    credentialIssuer: {
-      ...environment.credentialIssuer,
-      id: data.credentialIssuer.connect.id,
-    },
+    services: [
+      ...new Set([
+        ...data.services.connect.map((s) => s.id),
+        ...environment.services.filter(
+          (s) => !data.services.disconnect.map((s) => s.id).includes(s)
+        ),
+      ]),
+    ],
+    credentialIssuer: data.credentialIssuer.connect
+      ? credentialIssuers.get(data.credentialIssuer.connect.id)
+      : null,
     legal: data.legal.connect ? allLegals.get(data.legal.connect.id) : null,
   });
 

@@ -139,9 +139,10 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
             disconnectAll: true,
           };
       const servicesValue = formData.get('services');
-      const selectedServices = JSON.parse(servicesValue as string) ?? [];
-      const disconnectServices = difference(
-        data.services.map((s) => s.id),
+      const selectedServices: string[] =
+        JSON.parse(servicesValue as string) ?? [];
+      const disconnectServices: string[] = difference(
+        data.OwnedEnvironment.services.map((s) => s.id),
         selectedServices
       );
       const services = {

@@ -1,4 +1,4 @@
-export default function KongAclOnly(namespace, appId) {
+export default function KongAclOnly(namespace: string, appId: string): string {
   return `
   plugins:
   - name: acl
