@@ -106,9 +106,9 @@ export async function getEnvironmentContext(
   };
 }
 
-async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
-  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
-
+export async function injectResSvrAccessTokenToContext(
+  envCtx: EnvironmentContext
+) {
   assert.strictEqual(
     isUserBasedResourceOwners(envCtx),
     false,
@@ -116,15 +116,20 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   );
 
   const issuerEnvConfig = envCtx.issuerEnvConfig;
-  //const resourceAccessScope =
-  //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
+
   const resSvrAccessToken = await new KeycloakTokenService(
     envCtx.openid.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
   envCtx.accessToken = resSvrAccessToken;
+}
+
+async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
+  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
+
   const permApi = new UMAPermissionService(
     envCtx.uma2.permission_endpoint,
-    resSvrAccessToken
+    envCtx.accessToken
   );
   const permTicket = await permApi.requestTicket([
     {
