@@ -35,6 +35,7 @@ import {
   deleteEnvironmentHandler,
   deleteProductHandler,
 } from './resolvers/products';
+import { handleAllDatasets } from './resolvers/datasets';
 
 export function resetAll() {
   consumersStore.reset();
@@ -97,6 +98,7 @@ export const handlers = [
   keystone.query('GetFilterConsumers', getConsumersFilterHandler),
   keystone.query('GetAllConsumerGroupLabels', getAllConsumerGroupLabelsHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
+  keystone.query('GetAllDatasets', handleAllDatasets),
   keystone.query('GetAllProducts', allProductsHandler),
   keystone.mutation('AddProduct', addProductHandler),
   keystone.mutation('UpdateProduct', updateProductHandler),

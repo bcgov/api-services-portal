@@ -5,6 +5,7 @@ import {
   Button,
   Flex,
   Icon,
+  Link,
   MenuItem,
   Tag,
   Text,
@@ -27,6 +28,7 @@ import { Environment } from '@/shared/types/query.types';
 import ActionsMenu from '../actions-menu';
 import EnvironmentEdit from '../environment-edit';
 import { QueryKey, useQueryClient } from 'react-query';
+import NextLink from 'next/link';
 
 interface ProductsListProps {
   queryKey: QueryKey;
@@ -99,7 +101,21 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
               <EditProduct data={d} queryKey={queryKey} />
             </>
           }
-          heading={d.name}
+          heading={
+            <>
+              {d.name}
+              {d.dataset && (
+                <NextLink
+                  passHref
+                  href={`/devportal/api-directory/${d.dataset.id}`}
+                >
+                  <Link fontSize="sm" color="bc-blue" ml={4}>
+                    View Dataset
+                  </Link>
+                </NextLink>
+              )}
+            </>
+          }
         >
           {d.environments.length === 0 && (
             <EmptyPane

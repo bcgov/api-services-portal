@@ -41,43 +41,41 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
     name: string;
   }>(addEnvironmentMutation);
   const form = React.useRef<HTMLFormElement>();
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createProduct();
-  };
-  const createProduct = async () => {
-    if (form.current) {
-      const data = new FormData(form.current);
+    const data = new FormData(form.current);
 
-      if (form.current.checkValidity()) {
-        try {
-          const productName = data.get('name') as string;
-          const environment = data.get('environment') as string;
-          const res: Mutation = await productMutation.mutateAsync({
-            name: productName,
-          });
-          await environmentMutation.mutateAsync({
-            product: res.createProduct.id,
-            name: environment,
-          });
+    if (form.current.checkValidity()) {
+      try {
+        const productName = data.get('name') as string;
+        const environment = data.get('environment') as string;
+        const res: Mutation = await productMutation.mutateAsync({
+          name: productName,
+        });
+        await environmentMutation.mutateAsync({
+          product: res.createProduct.id,
+          name: environment,
+        });
 
-          queryClient.invalidateQueries(queryKey);
-          toast({
-            title: `Product ${productName} created!`,
-            description: 'You can now add more environments',
-            status: 'success',
-            isClosable: true,
-          });
-          onClose();
-        } catch {
-          toast({
-            title: 'Create failed',
-            status: 'error',
-            isClosable: true,
-          });
-        }
+        queryClient.invalidateQueries(queryKey);
+        toast({
+          title: `Product ${productName} created!`,
+          description: 'You can now add more environments',
+          status: 'success',
+          isClosable: true,
+        });
+        onClose();
+      } catch {
+        toast({
+          title: 'Create failed',
+          status: 'error',
+          isClosable: true,
+        });
       }
     }
+  };
+  const handleCreateClick = () => {
+    form.current?.requestSubmit();
   };
 
   return (
@@ -86,7 +84,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
       <ModalContent borderRadius="4px">
         <ModalHeader>Create Product</ModalHeader>
         <ModalBody>
-          <form ref={form} onSubmit={onSubmit}>
+          <form ref={form} onSubmit={handleSubmit}>
             <FormControl
               isRequired
               mb={4}
@@ -158,7 +156,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             </Button>
             <Button
               isLoading={productMutation.isLoading}
-              onClick={createProduct}
+              onClick={handleCreateClick}
               data-testid="prd-create-btn"
             >
               Create

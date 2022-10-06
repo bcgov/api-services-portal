@@ -10,9 +10,9 @@ import {
 } from '@chakra-ui/react';
 import Downshift, { StateChangeOptions } from 'downshift';
 
-import { SEARCH_DATASETS } from '@/shared/queries/dataset-queries';
 import { useApi } from '@/shared/services/api';
 import { Dataset } from '@/shared/types/query.types';
+import { gql } from 'graphql-request';
 
 interface DatasetInputProps {
   dataset?: Dataset;
@@ -22,10 +22,10 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
   const theme = useTheme();
   const [search, setSearch] = React.useState<string>('');
   const [selected, setSelected] = React.useState<Dataset | null>(dataset);
-  const { data, isLoading, isSuccess } = useApi(
+  const { data, isSuccess } = useApi(
     ['dataset-search', search],
     {
-      query: SEARCH_DATASETS,
+      query,
       variables: { search, first: 25 },
     },
     {
@@ -153,3 +153,13 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
 };
 
 export default DatasetInput;
+
+const query = gql`
+  query GetAllDatasets($search: String!, $first: Int) {
+    allDatasets(search: $search, first: $first) {
+      id
+      name
+      title
+    }
+  }
+`;

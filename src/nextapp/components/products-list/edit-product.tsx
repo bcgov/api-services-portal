@@ -37,7 +37,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const mutate = useApiMutation<ProductUpdateInput>(mutation);
-  const updateProduct = React.useCallback(async () => {
+  const updateProduct = async () => {
     try {
       const formData = new FormData(formRef.current);
       const payload: ProductUpdateInput = {
@@ -76,19 +76,14 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
         isClosable: true,
       });
     }
-  }, [client, data, mutate, onClose, queryKey, toast]);
-  const onUpdate = React.useCallback(() => {
-    if (formRef.current.checkValidity()) {
-      updateProduct();
-    }
-  }, [updateProduct]);
-  const onSubmit = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      updateProduct;
-    },
-    [updateProduct]
-  );
+  };
+  const handleSaveClick = () => {
+    formRef.current?.requestSubmit();
+  };
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    updateProduct();
+  };
   const dataTestIdName = kebabCase(data.name);
 
   return (
@@ -117,7 +112,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
         <ModalContent>
           <ModalHeader>{`Edit ${data.name}`}</ModalHeader>
           <ModalBody>
-            <form ref={formRef} onSubmit={onSubmit}>
+            <form ref={formRef} onSubmit={handleSubmit}>
               <VStack spacing={4}>
                 <FormControl isRequired id="product-name">
                   <FormLabel>Product Name</FormLabel>
@@ -148,7 +143,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
               isDisabled={mutate.isLoading}
               isLoading={mutate.isLoading}
               variant="primary"
-              onClick={onUpdate}
+              onClick={handleSaveClick}
               data-testid="prd-edit-update-btn"
             >
               Update

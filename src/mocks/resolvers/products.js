@@ -208,6 +208,7 @@ let products = new Map([
       id: 'p1',
       name: 'PharmaNet Electronic Prescribing',
       environments: ['e1', 'e2', 'e3'],
+      dataset: null,
     },
   ],
   [
@@ -216,6 +217,7 @@ let products = new Map([
       id: 'p2',
       name: 'PharmaNet API',
       environments: ['e11', 'e21'],
+      dataset: null,
     },
   ],
 ]);
@@ -309,10 +311,26 @@ export const addProductHandler = (req, res, ctx) => {
 export const updateProductHandler = (req, res, ctx) => {
   const { id, data } = req.variables;
   const product = products.get(id);
+  let dataset = product.dataset;
+
+  if (data.dataset.connect) {
+    dataset = {
+      id: data.dataset.connect.id,
+      name: 'My API',
+      title: 'My API Title',
+    };
+  }
+
+  if (data.dataset.disconnect || data.dataset.disconnectAll) {
+    dataset = undefined;
+  }
+
   products.set(id, {
     ...product,
     name: data.name,
+    dataset,
   });
+
   return res(ctx.data({ id }));
 };
 

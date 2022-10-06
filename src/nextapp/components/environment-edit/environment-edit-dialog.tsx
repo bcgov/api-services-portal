@@ -49,7 +49,6 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
 }) => {
   const [tab, setTab] = React.useState(0);
   const [flow, setFlow] = React.useState(environment.flow ?? 'public');
-  const [expandedIndexes, setExpandedIndexes] = React.useState<number[]>([]);
   const auth = useAuth();
   const formRef = React.useRef<HTMLFormElement>(null);
   const client = useQueryClient();
@@ -86,30 +85,13 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
     if (formRef.current?.checkValidity()) {
       setTab(1);
     } else {
-      const isSettingsCardClosed = !expandedIndexes.includes(0);
-      if (isSettingsCardClosed) {
-        setExpandedIndexes([...expandedIndexes, 0]);
-        setTimeout(() => {
-          formRef.current?.reportValidity();
-        }, 100);
-      } else {
-        formRef.current?.reportValidity();
-      }
+      formRef.current?.reportValidity();
     }
   };
   const handleClose = () => {
     mutate.reset();
     setTab(0);
-    setExpandedIndexes([]);
     onClose();
-  };
-  const handleExpandCard = (index: number) => () => {
-    setExpandedIndexes((state) => {
-      if (state.includes(index)) {
-        return state.filter((i) => i !== index);
-      }
-      return [...state, index];
-    });
   };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -247,11 +229,10 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
               ref={formRef}
             >
               <Box hidden={tab !== 0} display={tab === 0 ? 'block' : 'none'}>
-                <ExpandableCards index={expandedIndexes}>
+                <ExpandableCards>
                   <ExpandableCard
                     heading="Authorization Flow"
                     icon={FaLock}
-                    onButtonClick={handleExpandCard(0)}
                     data-testid="edit-env-auth-card"
                   >
                     <AuthorizationFlow
@@ -260,19 +241,6 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                       onFlowChange={setFlow}
                     />
                   </ExpandableCard>
-                  {flow !== 'public' && (
-                    <ExpandableCard
-                      heading="Plugin Template"
-                      icon={FaCode}
-                      onButtonClick={handleExpandCard(1)}
-                      data-testid="edit-env-plugin-card"
-                    >
-                      <EnvironmentPlugins
-                        environment={data?.OwnedEnvironment}
-                        flow={flow}
-                      />
-                    </ExpandableCard>
-                  )}
                 </ExpandableCards>
               </Box>
               <Box hidden={tab !== 1} display={tab === 1 ? 'block' : 'none'}>
