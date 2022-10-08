@@ -18,24 +18,9 @@ export class KeycloakUserService {
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
   }
 
-  // public async findOne(id: string) {
-  //   logger.debug('[findOne] %s', id);
-  //   const user = await this.kcAdminClient.users.findOne({
-  //     id,
-  //   });
-  //   logger.debug('[findOne] : %j', user);
-  //   return user;
-  // }
-
-  public async lookupUserByUsername(username: string) {
-    logger.debug('[lookupUserByUsername] %s', username);
-    const users = await this.kcAdminClient.users.find({
-      exact: true,
-      username: username,
-    });
-    logger.debug('[lookupUserByUsername] : %j', users);
-    assert.strictEqual(users.length, 1, 'User not found ' + username);
-    return users[0].id;
+  public useAdminClient(_kcAdminClient: KeycloakAdminClient) {
+    this.kcAdminClient = _kcAdminClient;
+    return this;
   }
 
   public async login(
@@ -55,6 +40,17 @@ export class KeycloakUserService {
         throw err;
       });
     return this;
+  }
+
+  public async lookupUserByUsername(username: string) {
+    logger.debug('[lookupUserByUsername] %s', username);
+    const users = await this.kcAdminClient.users.find({
+      exact: true,
+      username: username,
+    });
+    logger.debug('[lookupUserByUsername] : %j', users);
+    assert.strictEqual(users.length, 1, 'User not found ' + username);
+    return users[0].id;
   }
 
   public async listUserClientRoles(id: string, clientUniqueId: string) {
