@@ -1,3 +1,5 @@
+import casual from 'casual-browserify';
+
 const applications = new Map([
   [
     'app1',
@@ -47,6 +49,28 @@ export const allApplicationsHandler = (req, res, ctx) => {
           userId: '1',
         },
       ],
+    })
+  );
+};
+
+export const createApplicationHandler = (req, res, ctx) => {
+  if (req.variables.name === 'error') {
+    return res(
+      ctx.data({
+        errors: [{ message: 'You do not have permission' }],
+      })
+    );
+  }
+
+  const record = {
+    id: `app1${applications.size + 1}`,
+    appId: casual.uuid,
+    ...req.variables,
+  };
+  applications.set(record.id, record);
+  return res(
+    ctx.data({
+      createApplication: record,
     })
   );
 };

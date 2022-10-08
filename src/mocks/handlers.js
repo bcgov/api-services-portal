@@ -3,6 +3,7 @@ import { graphql, rest } from 'msw';
 import { harley, mark } from './resolvers/personas';
 import {
   allApplicationsHandler,
+  createApplicationHandler,
   removeApplicationHandler,
 } from './resolvers/applications';
 import {
@@ -122,7 +123,8 @@ export const handlers = [
   ),
   // Applications
   keystone.query('MyApplications', allApplicationsHandler),
-  keystone.mutation('Remove', removeApplicationHandler),
+  keystone.mutation('AddApplication', createApplicationHandler),
+  keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),

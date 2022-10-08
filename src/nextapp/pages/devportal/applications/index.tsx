@@ -255,7 +255,7 @@ const query = gql`
 `;
 
 const mutation = gql`
-  mutation Remove($id: ID!) {
+  mutation RemoveApplication($id: ID!) {
     deleteApplication(id: $id) {
       name
       id
