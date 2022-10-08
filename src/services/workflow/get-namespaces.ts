@@ -174,6 +174,10 @@ export async function getResourceServerContext(
 
   const usesUma2 = isAuthzUsingUma2(prodEnv);
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  if (openid == null) {
+    logger.error('[getResourceServerContext] Failed to reach IdP', prodEnv);
+    return null;
+  }
   const uma2 = usesUma2
     ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
     : null;

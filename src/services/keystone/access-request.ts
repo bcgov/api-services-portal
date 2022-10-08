@@ -20,6 +20,7 @@ export async function getAccessRequestsByNamespace(
         isIssued
         isComplete
         requestor {
+          name
           username
         }
         application {
