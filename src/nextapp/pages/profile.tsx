@@ -10,6 +10,7 @@ import {
   Heading,
   Text,
 } from '@chakra-ui/react';
+import { getProviderText } from '@/shared/services/utils';
 import Head from 'next/head';
 import { uid } from 'react-uid';
 
@@ -45,7 +46,11 @@ const ProfilePage: React.FC = () => {
                 <Text color="bc-component" opacity={0.6}>
                   {f.name}
                 </Text>
-                <Text>{user[f.key] ?? '-'}</Text>
+                <Text>
+                  {f.key === 'provider'
+                    ? getProviderText(user[f.key])
+                    : user[f.key] ?? '-'}
+                </Text>
               </GridItem>
             ))}
           </Grid>

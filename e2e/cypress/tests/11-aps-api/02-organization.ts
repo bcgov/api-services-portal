@@ -4,7 +4,7 @@ let userSession: any
 var nameSpace: string
 
 describe('API Tests to verify the Organization details in the response', () => {
-    
+
     beforeEach(() => {
         cy.preserveCookies()
         cy.fixture('api').as('api')
@@ -45,9 +45,18 @@ describe('Verify /Organization/{Org} end point', () => {
 
     it('Get the resource and verify the org Names in the response', () => {
         cy.get('@api').then(({ organization }: any) => {
-            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response) => {        
+            cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName, 'GET').then((response) => {
                 expect(response.status).to.be.equal(200)
                 assert.isTrue(Cypress._.isEqual(response.body.orgUnits[0], organization.orgExpectedList))
+            })
+        })
+    })
+
+    it('Verify the status code and response message for invalid organization name', () => {
+        cy.get('@api').then(({ organization }: any) => {
+            cy.makeAPIRequest(organization.endPoint + '/health' , 'GET').then((response) => {        
+                expect(response.status).to.be.oneOf([404, 422])
+                expect(response.body.message).to.be.equal("Organization not found.")
             })
         })
     })
@@ -72,9 +81,11 @@ describe('Get the user session token', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-         cy.getUserSessionTokenValue().then((value) => {
-            userSession = value
-         })
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+                userSession = value
+            })
+        })
     })
 
 })
@@ -106,7 +117,7 @@ describe('Get the Organization Role', () => {
     })
 
     it('Compare the scope values in response against the expected values', () => {
-        cy.get('@api').then(({ organization }: any) => {          
+        cy.get('@api').then(({ organization }: any) => {
             actualResponse = response.roles[0].permissions[0].scopes
             expectedResponse = organization.expectedScope
             assert.isTrue(Cypress._.isEqual(actualResponse, expectedResponse))
@@ -186,7 +197,7 @@ describe('Delete the Namespace associated with the organization', () => {
             cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/namespaces', 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
                 response = res.body
-                assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace),-1)
+                assert.equal(response.findIndex((x: { name: string }) => x.name === nameSpace), -1)
             })
         })
     })

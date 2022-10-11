@@ -1,15 +1,18 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
-import NameSpacePage from '../../pageObjects/namespace'
 import MyProfilePage from '../../pageObjects/myProfile'
-import ToolBar from '../../pageObjects/toolbar'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import AuthorizationProfile from '../../pageObjects/authProfile'
+import ToolBar from '../../pageObjects/toolbar'
+import NameSpacePage from '../../pageObjects/namespace'
 
-describe('Grant Credential Issuer Role', () => {
+
+describe('Grant Gateway Config Role to Wendy', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
+  const sa = new ServiceAccountsPage()
 
   before(() => {
     cy.visit('/')
@@ -23,18 +26,20 @@ describe('Grant Credential Issuer Role', () => {
     cy.visit(login.path)
   })
 
-  it('Authenticates Janis (api owner)', () => {
+  it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
-      cy.log('Logged in!')
       home.useNamespace(checkPermission.namespace)
     })
   })
 
-  it('Grant only "CredentialIssuer.Admin" access to Wendy (access manager)', () => {
+  it('Grant "GatewayConfig.Publish" and "Namespace.View" access to Wendy (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokePermission(checkPermission.revokePermission.Wendy)
+      // na.revokePermission(checkPermission.grantPermission.Wendy)
+      na.revokeAllPermission(checkPermission.grantPermission.Wendy.userName)
+      na.clickGrantUserAccessButton()
+      na.grantPermission(checkPermission.grantPermission.Wendy_GC)
     })
   })
 
@@ -75,16 +80,14 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     })
   })
 
-  it('Verify that only Authorization Profile option is displayed in Namespace page', () => {
-    cy.visit(ns.path)
-    ns.verifyThatOnlyAuthorizationProfileLinkIsExist()
-  })
-
-  it('Verify that authorization profile for Client ID/Secret is generated', () => {
-    cy.visit(authProfile.path)
-    cy.get('@credential-issuer').then(({ clientCredentials }: any) => {
-      let ap = clientCredentials.authProfile
-      authProfile.createAuthProfile(ap)
+  it('Verify that GWA API allows user to publish the API to Kong gateway', () => {
+    cy.get('@credential-issuer').then(({ checkPermission }: any) => {
+      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          expect(JSON.stringify(res.body.message)).to.be.contain('Sync successful.')
+          expect(res.statusCode).to.be.equal(200)
+        })
+      })
     })
   })
 
@@ -92,6 +95,6 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-    // cy.resetCredential('Wendy')
+    cy.resetCredential('Wendy')
   })
 })

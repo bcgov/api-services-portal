@@ -16,7 +16,7 @@ describe('Team Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
@@ -27,9 +27,13 @@ describe('Team Access Spec', () => {
     })
   })
 
-  it('grant namespace access to Mark (access manager)', () => {
+  it('Navigate to Namespace Access Page', () => {
+    cy.visit(na.path)
+    cy.wait(2000)
+  })
+
+  it('Grant namespace access to Mark (access manager)', () => {
     cy.get('@apiowner').then(({ grantPermission }: any) => {
-      cy.visit(na.path)
       na.clickGrantUserAccessButton()
       na.grantPermission(grantPermission.Mark)
     })
@@ -37,7 +41,6 @@ describe('Team Access Spec', () => {
 
   it('Grant CredentialIssuer.Admin permission to Janis (API Owner)', () => {
     cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
-      cy.visit(na.path)
       na.clickGrantUserAccessButton()
       na.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
     })

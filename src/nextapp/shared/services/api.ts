@@ -69,7 +69,6 @@ const api = async <T extends ApiResponse>(
       if (data.errors[0]?.data?.messages) {
         errorMessage = data.errors[0]?.data.messages.join('\n');
       }
-      console.log(errorMessage);
       throw errorMessage;
     }
 
@@ -78,7 +77,7 @@ const api = async <T extends ApiResponse>(
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
     } else {
-      const hasErrors = Boolean(err.response?.errors);
+      const hasErrors = Boolean(err?.response?.errors);
       if (hasErrors) {
         if (err.response.errors[0]?.data?.messages) {
           throw err.response.errors[0]?.data?.messages.join('\n');

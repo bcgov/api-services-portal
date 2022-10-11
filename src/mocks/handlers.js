@@ -21,6 +21,17 @@ import {
   updateConsumerAccessHandler,
   store as consumersStore,
 } from './resolvers/consumers';
+import {
+  getCurrentNamesSpaceHandler,
+  getOrganizationGroupsPermissionsHandler,
+  getResourceSetHandler,
+  getServiceAccessPermissionsHandler,
+  getUserPermissionsHandler,
+  grantAccessHandler,
+  grantSAAccessHandler,
+  revokeAccessHandler,
+  revokeSAAccessHandler,
+} from './resolvers/namespace-access';
 import { getActivityHandler } from './resolvers/activity';
 import {
   addEnvironmentHandler,
@@ -36,6 +47,23 @@ import {
   deleteProductHandler,
 } from './resolvers/products';
 import { handleAllDatasets } from './resolvers/datasets';
+
+  createServiceAccountHandler,
+  getAllServiceAccountsHandler,
+} from './resolvers/service-accounts';
+
+// Namespaces
+const allNamespaces = [
+  {
+    id: 'n1',
+    name: 'aps-portal',
+  },
+  {
+    id: 'n2',
+    name: 'loc',
+  },
+];
+let namespace = mark.namespace;
 
 export function resetAll() {
   consumersStore.reset();
@@ -69,23 +97,23 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: mark,
+        user: { ...mark, namespace },
+      })
+    );
+  }),
+  rest.put('*/admin/switch/:ns', (req, res, ctx) => {
+    namespace = allNamespaces.find((n) => n.id === req.params.ns).name;
+    return res(
+      ctx.status(200),
+      ctx.json({
+        switch: true,
       })
     );
   }),
   keystone.query('GetNamespaces', (_, res, ctx) => {
     return res(
       ctx.data({
-        allNamespaces: [
-          {
-            id: 'n1',
-            name: 'aps-portal',
-          },
-          {
-            id: 'n2',
-            name: 'loc',
-          },
-        ],
+        allNamespaces,
       })
     );
   }),
@@ -117,6 +145,26 @@ export const handlers = [
     allProductsByNamespaceHandler
   ),
   keystone.mutation('UpdateEnvironment', updateEnvironmentHandler),
+  // Service accounts
+  keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
+  keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
+  // Namespace Access
+  keystone.query('GetUserPermissions', getUserPermissionsHandler),
+  keystone.query(
+    'GetServiceAccessPermissions',
+    getServiceAccessPermissionsHandler
+  ),
+  keystone.query(
+    'GetOrganizationGroupsPermissions',
+    getOrganizationGroupsPermissionsHandler
+  ),
+  keystone.query('GetResourceSet', getResourceSetHandler),
+  keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.mutation('GrantUserAccess', grantAccessHandler),
+  keystone.mutation('GrantSAAccess', grantSAAccessHandler),
+  keystone.mutation('RevokeAccess', revokeAccessHandler),
+  keystone.mutation('RevokeSAAccess', revokeSAAccessHandler),
+  // MUTATIONS
   keystone.mutation('DeleteConsumer', deleteConsumersHandler),
   keystone.mutation('ToggleConsumerACLMembership', grantConsumerHandler),
   keystone.mutation('FulfillRequest', fullfillRequestHandler),

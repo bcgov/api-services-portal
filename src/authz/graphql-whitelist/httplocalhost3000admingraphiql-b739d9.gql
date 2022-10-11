@@ -1,0 +1,11 @@
+
+  query GetCurrentNamespace {
+    currentNamespace {
+      id
+      name
+      scopes {
+        name
+      }
+      prodEnvId
+    }
+  }

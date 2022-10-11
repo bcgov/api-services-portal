@@ -1,0 +1,11 @@
+
+  query GetResourceSet($prodEnvId: ID!, $resourceId: String!) {
+    getResourceSet(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+      id
+      name
+      type
+      resource_scopes {
+        name
+      }
+    }
+  }

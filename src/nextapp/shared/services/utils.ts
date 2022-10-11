@@ -48,6 +48,21 @@ export const getFlowText = (key: string): string => {
   return dict[key] ?? 'Unknown';
 };
 
+export const getProviderText = (provider: string): string => {
+  switch (provider) {
+    case 'bscs':
+      return 'BC Services Card';
+    case 'idir':
+      return 'IDIR';
+    case 'bceid':
+      return 'Business BCeID';
+    case 'github':
+      return 'Github';
+    default:
+      return '';
+  }
+};
+
 export const delay = async (timeout = 100): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(resolve, timeout);

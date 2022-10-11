@@ -62,7 +62,6 @@ const DeleteProduct: React.FC<DeleteProductProps> = ({
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
             Delete Product
           </AlertDialogHeader>
-
           <AlertDialogBody>
             Are you sure? You can not undo this action afterwards.
           </AlertDialogBody>

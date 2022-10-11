@@ -51,6 +51,7 @@ const query = gql`
       requestor {
         name
         providerUsername
+        provider
         email
       }
       application {
