@@ -78,7 +78,7 @@ export async function assignNamespace(
   let results = await idList.adapter.find({ jti: jti });
   let tempId = results[0]['id'];
 
-  const { errors } = await this.keystone.executeGraphQL({
+  const { errors } = await context.executeGraphQL({
     context: context.sudo(),
     query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String, $scopes: String) {
                   updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles, scopes: $scopes }) {
