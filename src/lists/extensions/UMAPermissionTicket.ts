@@ -9,7 +9,11 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
-import { lookupUsersByUsernames } from '../../services/keystone';
+import {
+  clearNamespace,
+  lookupUsersByUsernames,
+  switchTo,
+} from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -143,7 +147,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const scopes = args.data.scopes;
+              const { email, scopes, resourceId } = args.data;
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
@@ -152,8 +156,7 @@ module.exports = {
 
               const resourceIds = await getResourceSets(envCtx);
               assert.strictEqual(
-                resourceIds.filter((rid) => rid === args.data.resourceId)
-                  .length,
+                resourceIds.filter((rid) => rid === resourceId).length,
                 1,
                 'Invalid Resource'
               );
@@ -163,10 +166,7 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const users = await userApi.lookupUsersByEmail(
-                args.data.email,
-                false
-              );
+              const users = await userApi.lookupUsersByEmail(email, false);
               assert.strictEqual(users.length, 1, 'Unable to match email');
               const user = users.pop();
               const displayName = user.attributes.display_name || user.email;
@@ -180,7 +180,7 @@ module.exports = {
               );
               for (const scope of scopes) {
                 const permission = await permissionApi.createOrUpdatePermission(
-                  args.data.resourceId,
+                  resourceId,
                   user.id,
                   granted,
                   scope
@@ -199,6 +199,22 @@ module.exports = {
                 displayName,
                 scopes
               );
+
+              // refresh the permissions for this user in TemporaryIdentity
+              try {
+                logger.info(
+                  'User matching %s with %j',
+                  user.id,
+                  context.req.user
+                );
+                if (user.id === context.req.user.userId) {
+                  await switchTo(
+                    context,
+                    context.req,
+                    context.authedItem['namespace']
+                  );
+                }
+              } catch (err) {}
 
               return result;
             },
