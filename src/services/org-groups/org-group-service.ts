@@ -166,7 +166,7 @@ export class OrgGroupService {
         owner: cid,
         description: policy.description,
         scopes: permission.scopes.map((s) => s.name),
-        users: members.map((u) => u.username),
+        users: members.map((u) => u.email),
         groups: groups.sort(),
       };
 
