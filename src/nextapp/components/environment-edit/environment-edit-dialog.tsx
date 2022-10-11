@@ -22,10 +22,9 @@ import {
 } from '@chakra-ui/react';
 import { Environment, Product } from '@/shared/types/query.types';
 import { ExpandableCards, ExpandableCard } from '@/components/card';
-import EnvironmentPlugins from '@/components/environment-plugins';
 import { gql } from 'graphql-request';
 import { useApi, useApiMutation } from '@/shared/services/api';
-import { FaCode, FaLock } from 'react-icons/fa';
+import { FaLock } from 'react-icons/fa';
 import { QueryKey, useQueryClient } from 'react-query';
 import { useAuth } from '@/shared/services/auth';
 
@@ -103,23 +102,23 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       const credentialIssuerValue = formData.get('credentialIssuer');
       const credentialIssuer = credentialIssuerValue
         ? {
-            connect: {
-              id: credentialIssuerValue,
-            },
-          }
+          connect: {
+            id: credentialIssuerValue,
+          },
+        }
         : {
-            disconnectAll: true,
-          };
+          disconnectAll: true,
+        };
       const legalValue = formData.get('legal');
       const legal = legalValue
         ? {
-            connect: {
-              id: legalValue,
-            },
-          }
+          connect: {
+            id: legalValue,
+          },
+        }
         : {
-            disconnectAll: true,
-          };
+          disconnectAll: true,
+        };
       const servicesValue = formData.get('services');
       const selectedServices: string[] =
         JSON.parse(servicesValue as string) ?? [];
@@ -210,7 +209,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
           {(isError || mutate.isError) && (
             <Alert
               status="error"
-              variant="solid"
+              variant="outline"
               data-testid="edit-env-error-alert"
               mb={7}
             >
@@ -247,6 +246,7 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
                 <ConfigureEnvironment
                   data={servicesRequest.data?.allGatewayServices}
                   environment={data?.OwnedEnvironment}
+                  hasError={mutate.isError}
                 />
               </Box>
             </form>

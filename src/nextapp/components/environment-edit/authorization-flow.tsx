@@ -77,7 +77,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
         </FormControl>
       </GridItem>
       <GridItem>
-        <Flex align="center" justify="space-between" pt={10}>
+        <Flex align="center" gridGap={10} pt={10}>
           <Checkbox
             defaultChecked={environment.approval}
             name="approval"

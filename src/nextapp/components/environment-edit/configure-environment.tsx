@@ -23,11 +23,13 @@ const dataTransferType = 'application/service';
 interface ConfigureEnvironmentProps {
   data: GatewayService[];
   environment: Environment;
+  hasError?: boolean;
 }
 
 const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   data,
   environment,
+  hasError
 }) => {
   const dragRef = React.useRef<string>(null);
   const [hasDragTarget, setDragTarget] = React.useState<boolean>(false);
@@ -129,7 +131,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
           <Wrap>
             {activeServices.map((s) => (
               <WrapItem key={s.id}>
-                <Tag variant="solid" colorScheme="green" userSelect="none">
+                <Tag variant={hasError ? "outline" : "solid"} colorScheme={hasError ? "red" : "green"} userSelect="none">
                   <TagLabel>{s.name}</TagLabel>
                   <TagCloseButton onClick={handleRemoveService(s.id)} />
                 </Tag>

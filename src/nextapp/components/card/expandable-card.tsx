@@ -45,7 +45,8 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
           borderColor="#e1e1e5"
           _hover={{
             bgColor: 'none',
-            color: 'bc-link',
+            color: isSingle ? 'inherit' : 'bc-link',
+            cursor: isSingle ? 'default' : undefined
           }}
           _focus={{
             outline: 'none',
