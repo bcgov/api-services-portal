@@ -78,8 +78,12 @@ export async function assignNamespace(
   let results = await idList.adapter.find({ jti: jti });
   let tempId = results[0]['id'];
 
+  const noauthContext = context.createContext({
+    skipAccessControl: true,
+  });
+
   const { errors } = await context.executeGraphQL({
-    context: context.sudo(),
+    context: noauthContext,
     query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String, $scopes: String) {
                   updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles, scopes: $scopes }) {
                       id
