@@ -9,6 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
+import { lookupUsersByUsernames } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -29,7 +30,7 @@ type UMAPermissionTicket {
 const typeUMAPermissionTicketInput = `
 input UMAPermissionTicketInput {
     resourceId: String!,
-    username: String!,
+    email: String!,
     granted: Boolean,
     scopes: [String]!
 }
@@ -109,7 +110,24 @@ module.exports = {
                 resourceId: args.resourceId,
                 returnNames: true,
               };
-              return await permissionApi.listPermissions(params);
+              const permissions = await permissionApi.listPermissions(params);
+
+              const usernameList: string[] = permissions.map(
+                (p) => p.requesterName
+              );
+
+              const users = await lookupUsersByUsernames(
+                context.sudo(),
+                usernameList
+              );
+
+              permissions.forEach((perm) => {
+                const user = users
+                  .filter((u) => u.username == perm.requesterName)
+                  .pop();
+                perm.requesterName = user?.name || perm.requesterName;
+              });
+              return permissions;
             },
             access: EnforcementPoint,
           },
@@ -145,9 +163,13 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const userId = await userApi.lookupUserByUsername(
-                args.data.username
+              const users = await userApi.lookupUsersByEmail(
+                args.data.email,
+                false
               );
+              assert.strictEqual(users.length, 1, 'Unable to match email');
+              const user = users.pop();
+              const displayName = user.attributes.display_name || user.email;
 
               const result = [];
               const granted =
@@ -159,7 +181,7 @@ module.exports = {
               for (const scope of scopes) {
                 const permission = await permissionApi.createOrUpdatePermission(
                   args.data.resourceId,
-                  userId,
+                  user.id,
                   granted,
                   scope
                 );
@@ -174,7 +196,7 @@ module.exports = {
                 'granted',
                 'namespace access',
                 'user',
-                args.data.username,
+                displayName,
                 scopes
               );
 
@@ -215,15 +237,23 @@ module.exports = {
                 returnNames: true,
               });
 
-              const requesterName = [];
+              const requesterIds = [];
               const deletedScopes = [];
               for (const permId of args.ids) {
                 const foundPerms = perms.filter((perm) => perm.id === permId);
                 assert.strictEqual(foundPerms.length, 1, 'Invalid Permission');
                 deletedScopes.push(foundPerms[0].scopeName);
-                requesterName.push(foundPerms[0].requesterName);
+                requesterIds.push(foundPerms[0].requester);
                 await permissionApi.deletePermission(permId);
               }
+
+              const userApi = new KeycloakUserService(envCtx.openid.issuer);
+              await userApi.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              const user = await userApi.lookupUserById(requesterIds.pop());
+              const displayName = user.attributes.display_name || user.email;
 
               await new StructuredActivityService(
                 context.sudo(),
@@ -233,7 +263,7 @@ module.exports = {
                 'revoked',
                 'namespace access',
                 'user',
-                requesterName.pop(),
+                displayName,
                 deletedScopes
               );
 

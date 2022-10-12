@@ -73,11 +73,12 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
     if (isSuccess) {
       const groupedByRequester = groupBy(
         data?.getPermissionTicketsForResource,
-        'requesterName'
+        (a) => a.requester + '|' + a.requesterName
       );
       const result = Object.keys(groupedByRequester).map((r) => {
+        const requesterName = r.split('|')[1];
         return {
-          requesterName: r,
+          requesterName,
           scopes: groupedByRequester[r].map((d) => ({
             id: d.scope,
             name: d.scopeName,
@@ -94,7 +95,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   }, [data, isSuccess, search]);
 
   const handleGrantAccess = async (form: FormData) => {
-    const username = form.get('username') as string;
+    const email = form.get('email') as string;
     const scopes = form.getAll('scopes') as string[];
 
     try {
@@ -102,7 +103,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
         prodEnvId,
         data: {
           resourceId,
-          username,
+          email,
           scopes,
         },
       });

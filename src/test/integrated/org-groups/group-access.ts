@@ -46,13 +46,17 @@ import { GroupMembership } from '@/services/org-groups/types';
       parent: '/ca.bc.gov/ministry-of-citizens-services',
       members: [
         {
-          member: { username: 'acope@idir' },
-          roles: ['data-custodian'],
+          member: { email: 'aidan.cope@gmail.com' },
+          roles: ['organization-admin'],
+        },
+        {
+          member: { email: 'apsowner@nowhere' },
+          roles: ['organization-admin'],
         },
       ],
     };
 
-    await kc.createOrUpdateGroupAccess(access);
+    await kc.createOrUpdateGroupAccess(access, ['idir']);
   }
 
   if (false) {
@@ -79,7 +83,7 @@ import { GroupMembership } from '@/services/org-groups/types';
       ],
     };
 
-    await kc.createOrUpdateGroupAccess(access);
+    await kc.createOrUpdateGroupAccess(access, ['idir']);
   }
 
   if (false) {
@@ -114,15 +118,15 @@ import { GroupMembership } from '@/services/org-groups/types';
       'namespace',
       'erx-demo'
     );
-    await kc.createOrUpdateGroupAccess(access);
+    await kc.createOrUpdateGroupAccess(access, ['idir']);
   }
-  if (false) {
+  if (true) {
     o(await kc.getGroupMembership('databc'));
-    await kc.assignNamespace(
-      'ministry-of-citizens-services',
-      'databc',
-      'erx-demo'
-    );
+    // await kc.assignNamespace(
+    //   'ministry-of-citizens-services',
+    //   'databc',
+    //   'erx-demo'
+    // );
   }
 
   if (false) {

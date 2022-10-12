@@ -36,7 +36,7 @@ export const reportStructure: any = {
       {
         header: 'Org',
         key: 'org',
-        width: 25,
+        width: 40,
       },
       {
         header: 'Org Unit',
@@ -56,6 +56,11 @@ export const reportStructure: any = {
       {
         header: 'Subject',
         key: 'subject',
+        width: 40,
+      },
+      {
+        header: 'Subject Name',
+        key: 'subjectName',
         width: 40,
       },
       {
