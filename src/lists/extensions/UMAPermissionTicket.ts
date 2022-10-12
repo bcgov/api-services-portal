@@ -207,7 +207,7 @@ module.exports = {
                   user.id,
                   context.req.user
                 );
-                if (user.id === context.req.user.id) {
+                if (user.id === context.req.user.sub) {
                   await switchTo(
                     context,
                     context.req,
