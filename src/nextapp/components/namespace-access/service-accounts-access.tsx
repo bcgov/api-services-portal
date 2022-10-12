@@ -64,7 +64,9 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 
   const requests = React.useMemo(() => {
     if (isSuccess) {
-      const result = data?.getUmaPoliciesForResource;
+      const result = data?.getUmaPoliciesForResource.filter((policy) =>
+        Boolean(policy.clients)
+      );
       if (search) {
         return result.filter((d) => d.name.search(search) >= 0);
       }

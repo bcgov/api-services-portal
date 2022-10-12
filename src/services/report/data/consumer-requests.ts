@@ -42,7 +42,7 @@ export async function getConsumerRequests(
           prod_env_flow: req.productEnvironment?.flow,
           app_name: req.application.name,
           app_id: req.application.appId,
-          requestor: req.requestor.username,
+          requestor: req.requestor.name,
           req_created: req.createdAt,
           req_reviewer: '',
           req_result: req.isComplete

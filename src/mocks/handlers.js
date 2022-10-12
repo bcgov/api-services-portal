@@ -2,6 +2,11 @@ import { graphql, rest } from 'msw';
 
 import { harley, mark } from './resolvers/personas';
 import {
+  allApplicationsHandler,
+  createApplicationHandler,
+  removeApplicationHandler,
+} from './resolvers/applications';
+import {
   allProductsByNamespaceHandler,
   accessRequestAuthHandler,
   deleteConsumersHandler,
@@ -48,7 +53,7 @@ import {
 } from './resolvers/products';
 import { handleAllDatasets } from './resolvers/datasets';
 
-  createServiceAccountHandler,
+createServiceAccountHandler,
   getAllServiceAccountsHandler,
 } from './resolvers/service-accounts';
 
@@ -145,6 +150,10 @@ export const handlers = [
     allProductsByNamespaceHandler
   ),
   keystone.mutation('UpdateEnvironment', updateEnvironmentHandler),
+  // Applications
+  keystone.query('MyApplications', allApplicationsHandler),
+  keystone.mutation('AddApplication', createApplicationHandler),
+  keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
