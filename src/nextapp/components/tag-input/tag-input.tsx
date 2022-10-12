@@ -57,7 +57,7 @@ const TagInput: React.FC<TagInputProps> = ({
           event.stopPropagation();
           event.preventDefault();
 
-          setValues((state) => [...state, inputRef.current.value]);
+          setValues((state) => [...state, inputRef.current.value.trim()]);
           setTimeout(() => {
             if (inputRef.current) {
               inputRef.current.value = ' ';
