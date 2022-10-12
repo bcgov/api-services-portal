@@ -220,7 +220,19 @@ class Oauth2ProxyAuthStrategy {
         // Switch namespace
         // - Get a Requestor Party Token for the particular Resource
         try {
-          const result = await switchTo(this.keystone, req, req.params['ns']);
+          const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
+          const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
+
+          const subjectToken = context.req.headers['x-forwarded-access-token'];
+
+          const result = await switchTo(
+            this.keystone,
+            req.params['ns'],
+            subjectToken,
+            req.user.jti,
+            jti,
+            identityProvider
+          );
           res.status(200).json({ switch: result });
         } catch (err) {
           res.status(400).json({ switch: false, error: 'ns_assign_fail' });

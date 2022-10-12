@@ -208,10 +208,16 @@ module.exports = {
                   context.req.user
                 );
                 if (user.id === context.req.user.sub) {
+                  const subjectToken =
+                    context.req.headers['x-forwarded-access-token'];
+
                   await switchTo(
                     context,
-                    context.req,
-                    context.authedItem['namespace']
+                    context.authedItem['namespace'],
+                    subjectToken,
+                    context.req.user.jti,
+                    context.req.user.sub,
+                    context.req.user.provider
                   );
                 }
               } catch (err) {}

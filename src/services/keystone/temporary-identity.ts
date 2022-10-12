@@ -8,10 +8,12 @@ const logger = Logger('keystone.tempid');
 
 export async function switchTo(
   context: any,
-  req: any,
-  namespace: string
+  namespace: string,
+  subjectToken: string,
+  curJti: string,
+  newJti: string,
+  newIdentityProvider: string
 ): Promise<boolean> {
-  const subjectToken = req.headers['x-forwarded-access-token'];
   const uma2 = await getUma2FromIssuer(process.env.OIDC_ISSUER);
   const accessToken = await new UMA2TokenService(uma2.token_endpoint)
     .getRequestingPartyToken(
@@ -26,20 +28,17 @@ export async function switchTo(
     });
   try {
     const rpt: any = jwtDecoder(accessToken);
-    const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-    const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
-    // The oauth2_proxy is handling the refresh token; so there can be a new jti
     logger.info(
       '[ns-switch] %s -> %s : %s',
-      req.user.jti,
-      jti,
-      req.user.jti === jti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
+      curJti,
+      newJti,
+      curJti === newJti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
     );
     return await assignNamespace(
       context,
-      req.user.jti,
-      jti,
-      identityProvider,
+      curJti,
+      newJti,
+      newIdentityProvider,
       rpt['authorization']['permissions'][0]
     );
   } catch (err) {
