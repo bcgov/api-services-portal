@@ -9,12 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
-import {
-  clearNamespace,
-  lookupUsersByUsernames,
-  switchTo,
-} from '../../services/keystone';
-import { lookupUsersByUsernames } from '../../services/keystone';
+import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
