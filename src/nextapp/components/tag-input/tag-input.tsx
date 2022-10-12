@@ -60,7 +60,7 @@ const TagInput: React.FC<TagInputProps> = ({
           setValues((state) => [...state, inputRef.current.value.trim()]);
           setTimeout(() => {
             if (inputRef.current) {
-              inputRef.current.value = ' ';
+              inputRef.current.value = '';
             }
           }, 10);
         } else if (event.key === 'Escape') {
