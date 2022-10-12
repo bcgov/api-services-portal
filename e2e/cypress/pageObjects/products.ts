@@ -40,6 +40,7 @@ class Products {
     cy.get(this.productNameInput).type(productName)
     cy.get(`[data-testid=prd-env-${env}-radio]`).click()
     cy.get(this.createBtn).click()
+    cy.verifyToastMessage("Product " + productName + " created")
   }
 
   editProduct(productName: string) {
@@ -67,7 +68,7 @@ class Products {
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
   }
 
-  editProductEnvironmentConfig(config: any) {
+  editProductEnvironmentConfig(config: any, invalid = false) {
 
     cy.get(this.editPrdEnvConfigBtn).click()
     cy.get(this.envCfgActivateRadio).click()
@@ -98,6 +99,12 @@ class Products {
     // cy.wait(3000)
     cy.get(this.envCfgApplyChangesBtn).click()
     cy.wait(3000)
+    if (invalid) {
+      // cy.verifyToastMessage("Environment updated")
+    }
+    else {
+      cy.verifyToastMessage("Environment updated")
+    }
   }
 
   generateKongPluginConfig(filename: string, flag?: boolean) {

@@ -29,6 +29,7 @@ const {
   assignNamespace,
   switchTo,
 } = require('../services/keystone');
+
 const { MigrateAuthzUser, MigratePortalUser } = require('../services/workflow');
 
 const toJson = (val) => (val ? JSON.parse(val) : null);

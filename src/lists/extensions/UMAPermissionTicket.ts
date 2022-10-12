@@ -14,6 +14,7 @@ import {
   lookupUsersByUsernames,
   switchTo,
 } from '../../services/keystone';
+import { lookupUsersByUsernames } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 

@@ -100,9 +100,11 @@ describe('Verify that created Product is displayed in UI', () => {
     })
 
     it('authenticates Janis (api owner) to get the user session token', () => {
-        cy.getUserSessionTokenValue().then((value) => {
-            userSession = value
-         })
+        cy.get('@apiowner').then(({ apiTest }: any) => {
+            cy.getUserSessionTokenValue(apiTest.namespace).then((value) => {
+                userSession = value
+            })
+        })
     })
 
     it('Verify that the product is visible in Manage Product Page', () => {
@@ -132,7 +134,7 @@ describe('API Tests for Delete Products', () => {
 
     it('Delete the product environment and verify the success code in the response', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.makeAPIRequest(products.deleteEnvironmentEndPoint+'/'+envID, 'Delete').then((response) => {
+            cy.makeAPIRequest(products.deleteEnvironmentEndPoint + '/' + envID, 'Delete').then((response) => {
                 expect(response.status).to.be.equal(200)
             })
         })
@@ -150,7 +152,7 @@ describe('API Tests for Delete Products', () => {
 
     it('Delete the product and verify the success code in the response', () => {
         cy.get('@api').then(({ products }: any) => {
-            cy.makeAPIRequest(products.endPoint+'/'+productID, 'Delete').then((response) => {
+            cy.makeAPIRequest(products.endPoint + '/' + productID, 'Delete').then((response) => {
                 expect(response.status).to.be.equal(200)
             })
         })
@@ -161,7 +163,7 @@ describe('API Tests for Delete Products', () => {
             cy.makeAPIRequest(products.endPoint, 'GET').then((res) => {
                 expect(res.status).to.be.equal(200)
                 response = res.body
-                assert.equal(response.findIndex((x: { name: string }) => x.name === products.body.name),-1)
+                assert.equal(response.findIndex((x: { name: string }) => x.name === products.body.name), -1)
             })
         })
     })

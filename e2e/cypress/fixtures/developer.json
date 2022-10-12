@@ -33,6 +33,16 @@
         "description": "Application for testing client credential flow."
       }
     },
+    "clientIdSecret_invalid": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "other"
+      },
+      "application": {
+        "name": "Client ID and Secret App for invalid auth",
+        "description": "Application for testing client credential flow."
+      }
+    },
     "jwtKeyPair": {
       "application": {
         "name": "JWT Key Pair App",
@@ -62,6 +72,20 @@
     "product": {
       "name": "New-Auto Test Product",
       "environment": "dev"
+    }
+  },
+  "deleteApplication":{
+    "application": {
+      "name": "delete-application-without-access",
+      "description": "Test application for auto test"
+    },
+    "pendingRequest": {
+      "name": "delete-application-with-pending-request",
+      "description": "Test application for auto test"
+    },
+    "approvedRequest": {
+      "name": "delete-application-with-approved-request",
+      "description": "Test application for auto test"
     }
   }
 }

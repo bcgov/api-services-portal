@@ -71,11 +71,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const buttonProps = !isInline
     ? {}
     : {
-        fontWeight: 'normal',
-        fontSize: 'inherit',
-        color: 'bc-link',
-        textDecor: 'underline',
-      };
+      fontWeight: 'normal',
+      fontSize: 'inherit',
+      color: 'bc-link',
+      textDecor: 'underline',
+    };
 
   // Events
   const handleAccessSubmit = React.useCallback(

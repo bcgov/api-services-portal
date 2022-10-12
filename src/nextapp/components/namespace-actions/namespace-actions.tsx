@@ -39,7 +39,7 @@ const NamespaceActions: React.FC<NamespaceActionsProps> = ({ name }) => {
         />
         <MenuList>
           <MenuItem icon={<Icon as={FaTrash} />} onClick={handleDelete}>
-            Delete Namespace
+            Delete Namespace...
           </MenuItem>
         </MenuList>
       </Menu>
