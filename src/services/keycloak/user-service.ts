@@ -118,17 +118,6 @@ export class KeycloakUserService {
     return this;
   }
 
-  public async lookupUserByUsername(username: string) {
-    logger.debug('[lookupUserByUsername] %s', username);
-    const users = await this.kcAdminClient.users.find({
-      exact: true,
-      username: username,
-    });
-    logger.debug('[lookupUserByUsername] : %j', users);
-    assert.strictEqual(users.length, 1, 'User not found ' + username);
-    return users[0].id;
-  }
-
   public async listUserClientRoles(id: string, clientUniqueId: string) {
     logger.debug('[listUserClientRoles] (%s) Client %s', id, clientUniqueId);
     const userRoles = await this.kcAdminClient.users.listClientRoleMappings({
