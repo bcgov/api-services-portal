@@ -32,7 +32,10 @@ import { KeycloakUserService } from '../../../services/keycloak';
   o(user);
 
   if (false) {
-    const users = await kc.lookupUsersByEmail('aidan.cope@gmail.com', false);
+    const users = await kc.lookupActiveUsersByEmail(
+      'aidan.cope@gmail.com',
+      false
+    );
     o(users);
     const userId = users.pop().id;
     o(userId);

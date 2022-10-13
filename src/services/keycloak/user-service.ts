@@ -25,6 +25,12 @@ export class KeycloakUserService {
     return this;
   }
 
+  public getOneAttributeValue(user: UserRepresentation, name: string): string {
+    return user.attributes && name in user.attributes
+      ? user.attributes[name]
+      : undefined;
+  }
+
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
     const users = await this.kcAdminClient.users.find({
@@ -59,11 +65,11 @@ export class KeycloakUserService {
     verified: boolean,
     identityProviders: string[]
   ): Promise<UserRepresentation> {
-    const user = (await this.lookupUsersByEmail(email, verified))
+    const user = (await this.lookupActiveUsersByEmail(email, verified))
       .filter(async (user) => {
         const userWithAttributes = await this.lookupUserById(user.id);
         return identityProviders.includes(
-          userWithAttributes.attributes.identity_provider
+          this.getOneAttributeValue(userWithAttributes, 'identity_provider')
         );
       })
       .pop();
@@ -75,11 +81,11 @@ export class KeycloakUserService {
     return user;
   }
 
-  public async lookupUsersByEmail(
+  public async lookupActiveUsersByEmail(
     email: string,
     verified: boolean
   ): Promise<UserRepresentation[]> {
-    logger.debug('[lookupUserByEmail] %s', email);
+    logger.debug('[lookupActiveUsersByEmail] %s', email);
     const users = (
       await this.kcAdminClient.users.find({
         exact: true,
@@ -90,7 +96,7 @@ export class KeycloakUserService {
       .filter(
         (user: UserRepresentation) => verified == false || user.emailVerified
       );
-    logger.debug('[lookupUserByEmail] : %j', users);
+    logger.debug('[lookupActiveUsersByEmail] : %j', users);
     assert.strictEqual(
       users.length > 0,
       true,

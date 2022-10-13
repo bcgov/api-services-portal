@@ -167,7 +167,9 @@ module.exports = {
                 false,
                 ['idir']
               );
-              const displayName = user.attributes.display_name || user.email;
+              const displayName =
+                userApi.getOneAttributeValue(user, 'display_name') ||
+                user.email;
 
               const result = [];
               const granted =
