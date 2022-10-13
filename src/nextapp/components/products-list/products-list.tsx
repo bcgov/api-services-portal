@@ -84,7 +84,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
               {d.dataset && (
                 <NextLink
                   passHref
-                  href={`/devportal/api-directory/${d.dataset.id}`}
+                  href={`/devportal/api-directory/${d.dataset.id}?preview=true`}
                 >
                   <Link fontSize="sm" color="bc-blue" ml={4}>
                     View Dataset
