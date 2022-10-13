@@ -61,8 +61,11 @@ export class KeycloakUserService {
     const user = (await this.lookupUsersByEmail(email, verified))
       .filter(async (user) => {
         const userWithAttributes = await this.lookupUserById(user.id);
-        return identityProviders.includes(
-          userWithAttributes.attributes.identity_provider
+        return (
+          userWithAttributes.attributes?.identity_provider?.length > 0 &&
+          identityProviders.includes(
+            userWithAttributes.attributes.identity_provider[0]
+          )
         );
       })
       .pop();
