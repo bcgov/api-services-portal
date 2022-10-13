@@ -65,7 +65,6 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               alt
               days={range}
               id={data.name}
-              service={data}
               totalRequests={totalRequests}
             />
           </ClientRequest>

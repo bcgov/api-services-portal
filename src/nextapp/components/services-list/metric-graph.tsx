@@ -49,7 +49,6 @@ interface MetricGraphProps {
   days: string[];
   height?: number;
   id: string;
-  service: GatewayService;
   totalRequests: number;
 }
 
@@ -58,7 +57,6 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   days,
   height = 100,
   id,
-  service,
   totalRequests,
 }) => {
   const { data } = useApi(['metric', id], {

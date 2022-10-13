@@ -1,17 +1,5 @@
 import * as React from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  SimpleGrid,
-  Skeleton,
-  Text,
-} from '@chakra-ui/react';
+import { Button, Container, Icon, Skeleton, Text } from '@chakra-ui/react';
 import Card from '@/components/card';
 import ClientRequest from '@/components/client-request';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
@@ -19,7 +7,7 @@ import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
 import { useAuth } from '@/shared/services/auth';
 import SearchInput from '@/components/search-input';
-import ServicesFilters from '@/components/services-list/services-filters';
+// import ServicesFilters from '@/components/services-list/services-filters';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import Head from 'next/head';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -38,6 +26,11 @@ const ServicesPage: React.FC<
   const title = 'Gateway Services';
   const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);
   const { user } = useAuth();
+  const [search, setSearch] = React.useState('');
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
 
   return (
     <>
@@ -54,21 +47,31 @@ const ServicesPage: React.FC<
               rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
             >
               View metrics in real-time
-             </Button>
+            </Button>
           }
           title={title}
           breadcrumb={breadcrumb}
         >
           <Text maxW="65%">
-            Gateway Services allow you to access summarized metrics for the services that you configure on the Gateway. This pulls in details from Prometheus and gwa-api Status.
+            Gateway Services allow you to access summarized metrics for the
+            services that you configure on the Gateway. This pulls in details
+            from Prometheus and gwa-api Status.
           </Text>
         </PageHeader>
-        <Divider my={4} />
-        <Card heading="7 Day Metrics" actions={<SearchInput placeholder="Search for Service" />}>
+        <Card
+          heading="7 Day Metrics"
+          actions={
+            <SearchInput
+              placeholder="Search for Service"
+              value={search}
+              onChange={setSearch}
+            />
+          }
+        >
           {user && (
             <ClientRequest
               fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
-                <Skeleton key={d} height="200px" />
+                <Skeleton key={d} height="72px" mb={2} />
               ))}
             >
               <ServicesList />

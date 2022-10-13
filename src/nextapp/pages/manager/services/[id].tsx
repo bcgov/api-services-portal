@@ -113,7 +113,6 @@ const ServicePage: React.FC<
                   days={range}
                   height={100}
                   id={data?.GatewayService?.name}
-                  service={data?.GatewayService}
                   totalRequests={totalNamespaceRequests}
                 />
               </ClientRequest>
@@ -146,7 +145,6 @@ const ServicePage: React.FC<
                     days={range}
                     height={100}
                     id={data?.GatewayService.name}
-                    service={data?.GatewayService}
                     totalRequests={totalNamespaceRequests}
                   />
                 </ClientRequest>

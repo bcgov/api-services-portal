@@ -18,25 +18,22 @@ const ServiceRoutes: React.FC<ServiceRoutesProps> = ({ routes }) => {
   return (
     <>
       {routes.map((route) => {
-        const _methods = JSON.parse(route['methods']);
+        const _methods = JSON.parse(route.methods);
         const methods =
           Array.isArray(_methods) && _methods.length > 0 ? _methods : ['ALL'];
-        const hosts = Array.isArray(JSON.parse(route['hosts']))
-          ? JSON.parse(route['hosts'])
-          : [];
-        const paths = Array.isArray(JSON.parse(route['paths']))
-          ? JSON.parse(route['paths'])
-          : ['/'];
+        const hosts = JSON.parse(route.hosts);
+        const paths = JSON.parse(route.paths) ?? ['/'];
         const hostPaths = hosts
           .map((h) => paths.map((p) => `https://${h}${p}`))
           .flat();
         return (
           <VStack
+            key={route.id}
             align="left"
             divider={<StackDivider borderColor="gray.200" />}
           >
             {hostPaths.map((hp) => (
-              <SimpleGrid columns={1}>
+              <SimpleGrid key={hp} columns={1}>
                 <Stack
                   direction="row"
                   wrap="nowrap"
