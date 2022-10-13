@@ -9,7 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
-import { lookupUsersByUsernames } from '../../services/keystone';
+import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -163,12 +163,11 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const users = await userApi.lookupUsersByEmail(
+              const user = await userApi.lookupUserByEmail(
                 args.data.email,
-                false
+                false,
+                ['idir']
               );
-              assert.strictEqual(users.length, 1, 'Unable to match email');
-              const user = users.pop();
               const displayName = user.attributes.display_name || user.email;
 
               const result = [];
@@ -199,6 +198,28 @@ module.exports = {
                 displayName,
                 scopes
               );
+
+              // refresh the permissions for this user in TemporaryIdentity
+              try {
+                logger.info(
+                  'User matching %s with %j',
+                  user.id,
+                  context.req.user
+                );
+                if (user.id === context.req.user.sub) {
+                  const subjectToken =
+                    context.req.headers['x-forwarded-access-token'];
+
+                  await switchTo(
+                    context,
+                    context.authedItem['namespace'],
+                    subjectToken,
+                    context.req.user.jti,
+                    context.req.user.sub,
+                    context.req.user.provider
+                  );
+                }
+              } catch (err) {}
 
               return result;
             },
