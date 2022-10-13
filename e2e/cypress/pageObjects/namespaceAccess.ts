@@ -1,11 +1,12 @@
 class NamespaceAccessPage {
 
-  userNameInput: string = '[data-testid="nsa-gua-username-field"]'
+  userNameInput: string = '[data-testid="nsa-gua-email-field"]'
   grantUserAccessBtn: string = '[data-testid="nsa-grant-access-btn"]'
 
   grantPermission(accessRqst: any) {
     cy.get(this.userNameInput,{ timeout: 2000 }).should('be.visible');
-    cy.get(this.userNameInput).type(accessRqst.userName);
+    debugger
+    cy.get(this.userNameInput).type(accessRqst.email);
     let accessRole: Array<string> = accessRqst.accessRole
     accessRole.forEach(function (accessName) {
       cy.contains("Permissions").next().find('li').each(($el, index, $list) => {
