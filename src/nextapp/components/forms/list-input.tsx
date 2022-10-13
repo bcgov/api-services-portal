@@ -71,9 +71,9 @@ const ListInput: React.FC<ListInputProps> = ({
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        const valueToAdd = inputRef.current?.value;
+        const valueToAdd = inputRef.current?.value?.trim();
 
-        if (valueToAdd.trim()) {
+        if (valueToAdd) {
           setValues((state) => [...state, valueToAdd]);
         }
 
