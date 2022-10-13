@@ -56,7 +56,6 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
       issuer
     ),
   };
-  console.log(flow, environment);
   const doc = pluginConfigs[flow];
 
   return (

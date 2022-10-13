@@ -29,7 +29,7 @@ interface ConfigureEnvironmentProps {
 const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   data,
   environment,
-  hasError
+  hasError,
 }) => {
   const dragRef = React.useRef<string>(null);
   const [hasDragTarget, setDragTarget] = React.useState<boolean>(false);
@@ -69,14 +69,13 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   const handleServiceSelect = (service: GatewayService) => () => {
     setActiveServices((state) => [...state, service]);
   };
-  const handleDragStart = (d: GatewayService) => (
-    event: React.DragEvent<HTMLDivElement>
-  ) => {
-    const data = JSON.stringify(d);
-    dragRef.current = data;
-    event.dataTransfer.setData(dataTransferType, data);
-    event.dataTransfer.effectAllowed = 'move';
-  };
+  const handleDragStart =
+    (d: GatewayService) => (event: React.DragEvent<HTMLDivElement>) => {
+      const data = JSON.stringify(d);
+      dragRef.current = data;
+      event.dataTransfer.setData(dataTransferType, data);
+      event.dataTransfer.effectAllowed = 'move';
+    };
   const handleDrop = () => {
     setActiveServices((state) => [...state, JSON.parse(dragRef.current)]);
     setDragTarget(true);
@@ -131,7 +130,11 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
           <Wrap>
             {activeServices.map((s) => (
               <WrapItem key={s.id}>
-                <Tag variant={hasError ? "outline" : "solid"} colorScheme={hasError ? "red" : "green"} userSelect="none">
+                <Tag
+                  variant={hasError ? 'outline' : 'solid'}
+                  colorScheme={hasError ? 'red' : 'green'}
+                  userSelect="none"
+                >
                   <TagLabel>{s.name}</TagLabel>
                   <TagCloseButton onClick={handleRemoveService(s.id)} />
                 </Tag>

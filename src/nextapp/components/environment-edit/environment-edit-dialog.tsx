@@ -102,23 +102,23 @@ const EnvironmentEditDialog: React.FC<EnvironmentEditDialogProps> = ({
       const credentialIssuerValue = formData.get('credentialIssuer');
       const credentialIssuer = credentialIssuerValue
         ? {
-          connect: {
-            id: credentialIssuerValue,
-          },
-        }
+            connect: {
+              id: credentialIssuerValue,
+            },
+          }
         : {
-          disconnectAll: true,
-        };
+            disconnectAll: true,
+          };
       const legalValue = formData.get('legal');
       const legal = legalValue
         ? {
-          connect: {
-            id: legalValue,
-          },
-        }
+            connect: {
+              id: legalValue,
+            },
+          }
         : {
-          disconnectAll: true,
-        };
+            disconnectAll: true,
+          };
       const servicesValue = formData.get('services');
       const selectedServices: string[] =
         JSON.parse(servicesValue as string) ?? [];
