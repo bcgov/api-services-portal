@@ -22,16 +22,8 @@ export class KeycloakUserService {
 
   public useAdminClient(client: KcAdminClient) {
     this.kcAdminClient = client;
+    return this;
   }
-
-  // public async findOne(id: string) {
-  //   logger.debug('[findOne] %s', id);
-  //   const user = await this.kcAdminClient.users.findOne({
-  //     id,
-  //   });
-  //   logger.debug('[findOne] : %j', user);
-  //   return user;
-  // }
 
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
@@ -58,6 +50,15 @@ export class KeycloakUserService {
     verified: boolean,
     identityProviders: string[]
   ): Promise<string> {
+    return (await this.lookupUserByEmail(email, verified, identityProviders))
+      .id;
+  }
+
+  public async lookupUserByEmail(
+    email: string,
+    verified: boolean,
+    identityProviders: string[]
+  ): Promise<UserRepresentation> {
     const user = (await this.lookupUsersByEmail(email, verified))
       .filter(async (user) => {
         const userWithAttributes = await this.lookupUserById(user.id);
@@ -66,8 +67,12 @@ export class KeycloakUserService {
         );
       })
       .pop();
-    assert.strictEqual(Boolean(user), true, `No suitable match for ${email}`);
-    return user.id;
+    assert.strictEqual(
+      Boolean(user),
+      true,
+      `No suitable match for ${identityProviders.join(',')} : ${email}`
+    );
+    return user;
   }
 
   public async lookupUsersByEmail(
@@ -111,6 +116,17 @@ export class KeycloakUserService {
         throw err;
       });
     return this;
+  }
+
+  public async lookupUserByUsername(username: string) {
+    logger.debug('[lookupUserByUsername] %s', username);
+    const users = await this.kcAdminClient.users.find({
+      exact: true,
+      username: username,
+    });
+    logger.debug('[lookupUserByUsername] : %j', users);
+    assert.strictEqual(users.length, 1, 'User not found ' + username);
+    return users[0].id;
   }
 
   public async listUserClientRoles(id: string, clientUniqueId: string) {

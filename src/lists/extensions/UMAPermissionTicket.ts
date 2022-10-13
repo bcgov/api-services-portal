@@ -162,9 +162,11 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const users = await userApi.lookupUsersByEmail(email, false);
-              assert.strictEqual(users.length, 1, 'Unable to match email');
-              const user = users.pop();
+              const user = await userApi.lookupUserByEmail(
+                args.data.email,
+                false,
+                ['idir']
+              );
               const displayName = user.attributes.display_name || user.email;
 
               const result = [];
