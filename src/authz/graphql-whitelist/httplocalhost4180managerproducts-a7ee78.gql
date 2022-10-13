@@ -1,5 +1,5 @@
 
-  query GetAllDatasets($search: String!, $first: int) {
+  query GetAllDatasets($search: String!, $first: Int) {
     allDatasets(search: $search, first: $first) {
       id
       name

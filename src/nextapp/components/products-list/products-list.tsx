@@ -6,10 +6,8 @@ import {
   Flex,
   Icon,
   Link,
-  MenuItem,
   Tag,
   Text,
-  useToast,
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
@@ -25,10 +23,10 @@ import AddEnvironment from './add-environment';
 import EditProduct from './edit-product';
 import Card from '../card';
 import { Environment } from '@/shared/types/query.types';
-import ActionsMenu from '../actions-menu';
 import EnvironmentEdit from '../environment-edit';
-import { QueryKey, useQueryClient } from 'react-query';
+import { QueryKey } from 'react-query';
 import NextLink from 'next/link';
+import DeleteEnvironment from './delete-environment';
 
 interface ProductsListProps {
   queryKey: QueryKey;
@@ -36,28 +34,7 @@ interface ProductsListProps {
 
 const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
   const { data } = useApi(queryKey, { query });
-  const toast = useToast();
-  const client = useQueryClient();
-  const deleteEnvironment = useApiMutation(deleteMutation);
 
-  const handleDeleteEnvironment = (environment: Environment) => async () => {
-    try {
-      await deleteEnvironment.mutateAsync({ id: environment.id, force: false });
-      client.invalidateQueries(queryKey);
-      toast({
-        status: 'success',
-        title: `${environment.name} environment deleted`,
-        isClosable: true,
-      });
-    } catch (err) {
-      toast({
-        status: 'error',
-        title: 'Environment deletion failed',
-        description: err,
-        isClosable: true,
-      });
-    }
-  };
 
   if (data.allProductsByNamespace.length === 0) {
     return (
@@ -151,11 +128,11 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                           Active
                         </>
                       ) : (
-                        <>
-                          <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
+                          <>
+                            <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
                           Inactive
                         </>
-                      )}
+                        )}
                     </Flex>
                   </Td>
                   <Td>
@@ -186,14 +163,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                       product={d}
                       productQueryKey={queryKey}
                     />
-                    <ActionsMenu>
-                      <MenuItem
-                        color="bc-error"
-                        onClick={handleDeleteEnvironment(item)}
-                      >
-                        Delete Environment...
-                      </MenuItem>
-                    </ActionsMenu>
+                    <DeleteEnvironment data={item} queryKey={queryKey} />
                   </Td>
                 </Tr>
               )}
@@ -247,8 +217,3 @@ const query = gql`
   }
 `;
 
-const deleteMutation = gql`
-  mutation DeleteEnvironment($id: ID!, $force: Boolean!) {
-    forceDeleteEnvironment(id: $id, force: $force)
-  }
-`;

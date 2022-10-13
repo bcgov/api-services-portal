@@ -53,7 +53,8 @@ import {
 } from './resolvers/products';
 import { handleAllDatasets } from './resolvers/datasets';
 
-createServiceAccountHandler,
+import {
+  createServiceAccountHandler,
   getAllServiceAccountsHandler,
 } from './resolvers/service-accounts';
 
