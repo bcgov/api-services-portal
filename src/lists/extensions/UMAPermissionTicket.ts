@@ -9,7 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
-import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
+import { lookupUsersByUsernames } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -198,28 +198,6 @@ module.exports = {
                 displayName,
                 scopes
               );
-
-              // refresh the permissions for this user in TemporaryIdentity
-              try {
-                logger.info(
-                  'User matching %s with %j',
-                  user.id,
-                  context.req.user
-                );
-                if (user.id === context.req.user.sub) {
-                  const subjectToken =
-                    context.req.headers['x-forwarded-access-token'];
-
-                  await switchTo(
-                    context,
-                    context.authedItem['namespace'],
-                    subjectToken,
-                    context.req.user.jti,
-                    context.req.user.sub,
-                    context.req.user.provider
-                  );
-                }
-              } catch (err) {}
 
               return result;
             },
