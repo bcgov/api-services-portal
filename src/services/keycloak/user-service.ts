@@ -26,8 +26,10 @@ export class KeycloakUserService {
   }
 
   public getOneAttributeValue(user: UserRepresentation, name: string): string {
-    return user.attributes && name in user.attributes
-      ? user.attributes[name]
+    return user.attributes &&
+      name in user.attributes &&
+      user.attributes[name].length > 0
+      ? user.attributes[name][0]
       : undefined;
   }
 
@@ -65,13 +67,13 @@ export class KeycloakUserService {
     verified: boolean,
     identityProviders: string[]
   ): Promise<UserRepresentation> {
-    const user = (await this.lookupActiveUsersByEmail(email, verified))
-      .filter(async (user) => {
-        const userWithAttributes = await this.lookupUserById(user.id);
-        return identityProviders.includes(
-          this.getOneAttributeValue(userWithAttributes, 'identity_provider')
-        );
-      })
+    const matchingUsers = await this.lookupActiveUsersByEmail(email, verified);
+    const user = matchingUsers
+      .filter((user) =>
+        identityProviders.includes(
+          this.getOneAttributeValue(user, 'identity_provider')
+        )
+      )
       .pop();
     assert.strictEqual(
       Boolean(user),
