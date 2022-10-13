@@ -17,7 +17,6 @@ import {
   Select,
   Textarea,
   useDisclosure,
-  Text,
 } from '@chakra-ui/react';
 import { uid } from 'react-uid';
 import CredentialIssuerSelect from '../environment-config/credential-issuer-select';
