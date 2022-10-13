@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, Tr, Td } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
-import NewProduct from '@/components/new-product';
+import { gql } from 'graphql-request';
+import Table from '@/components/table';
 import { useApi } from '@/shared/services/api';
-import { LIST_GATEWAY_SERVICES } from '@/shared/queries/gateway-service-queries';
 
 import { dateRange, useTotalRequests } from './utils';
-import ServiceItem from './service-item';
+import { GatewayService } from '@/shared/types/query.types';
 
 interface ServicesListProps {
-  search: string;
+  search?: string;
 }
 
 const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
@@ -17,7 +17,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
   const { data } = useApi(
     'gateway-services',
     {
-      query: LIST_GATEWAY_SERVICES,
+      query,
       variables: {
         days: range,
       },
@@ -44,16 +44,70 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
           />
         </Box>
       )}
-      {data.allGatewayServicesByNamespace.filter(filterServices).map((d) => (
-        <ServiceItem
-          key={d.id}
-          data={d}
-          range={range}
-          totalRequests={totalNamespaceRequests}
-        />
-      ))}
+      <Table
+        sortable
+        columns={columns}
+        data={data.allGatewayServicesByNamespace.filter(filterServices)}
+      >
+        {(d: GatewayService) => (
+          <Tr key={d.id}>
+            <Td>{d.name}</Td>
+            <Td>{d.environment?.name ?? '-'}</Td>
+            <Td>79%</Td>
+            <Td>10</Td>
+          </Tr>
+        )}
+      </Table>
     </>
   );
 };
 
 export default ServicesList;
+
+const columns = [
+  { name: 'Service Name', key: 'name' },
+  { name: 'Environment', key: 'environment' },
+  { name: 'Traffic', key: 'id' },
+  { name: 'Total Requests', key: 'id' },
+];
+const query = gql`
+  query GetServices($days: [String!]) {
+    allGatewayServicesByNamespace(first: 200) {
+      id
+      name
+      updatedAt
+      environment {
+        id
+        name
+        active
+        flow
+        product {
+          name
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+      }
+      routes {
+        id
+        name
+      }
+      plugins {
+        id
+        name
+      }
+    }
+    allMetrics(
+      sortBy: day_ASC
+      where: { query: "kong_http_requests_hourly_namespace", day_in: $days }
+    ) {
+      query
+      day
+      metric
+      values
+    }
+  }
+`;

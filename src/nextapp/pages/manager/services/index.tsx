@@ -10,14 +10,15 @@ import {
   IconButton,
   SimpleGrid,
   Skeleton,
+  Text,
 } from '@chakra-ui/react';
+import Card from '@/components/card';
 import ClientRequest from '@/components/client-request';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
-import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
+import { useAuth } from '@/shared/services/auth';
 import SearchInput from '@/components/search-input';
-import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import Head from 'next/head';
@@ -34,18 +35,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const ServicesPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ metricsUrl }) => {
-  const breadcrumb = useNamespaceBreadcrumbs();
+  const title = 'Gateway Services';
+  const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);
   const { user } = useAuth();
-  const [search, setSearch] = React.useState<string>('');
-  const [showFilters, setShowFilters] = React.useState<boolean>(false);
-  const onFilterClick = () => {
-    setShowFilters((state) => !state);
-  };
 
   return (
     <>
       <Head>
-        <title>API Program Services | Services</title>
+        <title>{`API Program Services | ${title}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -56,56 +53,28 @@ const ServicesPage: React.FC<
               href={metricsUrl}
               rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
             >
-              View Full Metrics
-            </Button>
+              View metrics in real-time
+             </Button>
           }
-          title="Services"
+          title={title}
           breadcrumb={breadcrumb}
         >
-          <p>
-            List of services from the API Owner perspective. This should pull in
-            details from Prometheus and gwa-api Status.
-          </p>
+          <Text maxW="65%">
+            Gateway Services allow you to access summarized metrics for the services that you configure on the Gateway. This pulls in details from Prometheus and gwa-api Status.
+          </Text>
         </PageHeader>
         <Divider my={4} />
-        <Box d="flex" flexDir="column">
-          <Box
-            as="header"
-            my={4}
-            d="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Heading as="h3" size="md">
-              7 Day Metrics
-            </Heading>
-            <HStack>
-              <SearchInput
-                onChange={setSearch}
-                placeholder="Search Gateway Services"
-                value={search}
-              />
-              <IconButton
-                aria-label="Show Filters"
-                icon={<Icon as={showFilters ? FaCaretSquareUp : FaFilter} />}
-                variant="primary"
-                onClick={onFilterClick}
-              />
-            </HStack>
-          </Box>
-          {showFilters && <ServicesFilters />}
+        <Card heading="7 Day Metrics" actions={<SearchInput placeholder="Search for Service" />}>
           {user && (
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4} mb={8}>
-              <ClientRequest
-                fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
-                  <Skeleton key={d} height="200px" />
-                ))}
-              >
-                <ServicesList search={search} />
-              </ClientRequest>
-            </SimpleGrid>
+            <ClientRequest
+              fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
+                <Skeleton key={d} height="200px" />
+              ))}
+            >
+              <ServicesList />
+            </ClientRequest>
           )}
-        </Box>
+        </Card>
       </Container>
     </>
   );
