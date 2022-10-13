@@ -75,3 +75,9 @@ export {
 export { getOrganizations, getOrganizationUnit } from './organization';
 
 export { getConsumerLabels } from './labels';
+
+export {
+  assignNamespace,
+  clearNamespace,
+  switchTo,
+} from './temporary-identity';

@@ -296,7 +296,7 @@ const NamespacesPage: React.FC = () => {
                     >
                       <Flex align="center">
                         <Icon as={FaTrash} boxSize={5} mr={3} />
-                        <Text>Delete Namespace</Text>
+                        <Text>Delete Namespace...</Text>
                       </Flex>
                     </Flex>
                   </ConfirmationDialog>

@@ -2318,3 +2318,11 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
+
+
+
+ALTER TABLE public."Activity"
+ ADD COLUMN "filterKey1" text,
+ ADD COLUMN "filterKey2" text,
+ ADD COLUMN "filterKey3" text,
+ ADD COLUMN "filterKey4" text;

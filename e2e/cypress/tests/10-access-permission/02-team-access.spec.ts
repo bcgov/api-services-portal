@@ -16,7 +16,7 @@ describe('Team Access Spec', () => {
   beforeEach(() => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {

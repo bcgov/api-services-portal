@@ -7,6 +7,8 @@ import KeycloakAdminClient, {
 } from '@keycloak/keycloak-admin-client';
 import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
 import CertificateRepresentation from '@keycloak/keycloak-admin-client/lib/defs/certificateRepresentation';
+import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
+import ClientRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientRepresentation';
 
 const logger = Logger('kc.client');
 
@@ -155,5 +157,23 @@ export class KeycloakClientService {
 
   public async findRealmClientScopes(): Promise<ClientScopeRepresentation[]> {
     return this.kcAdminClient.clientScopes.find();
+  }
+
+  public async addClientScopeMappings(
+    consumerClientId: string,
+    rolesClient: ClientRepresentation,
+    roles: RoleRepresentation[]
+  ) {
+    const consumerClient = await this.findByClientId(consumerClientId);
+
+    logger.debug(
+      '[addClientScopeMappings] %s %j',
+      consumerClientId,
+      roles.map((r) => r.name)
+    );
+    await this.kcAdminClient.clients.addClientScopeMappings(
+      { id: consumerClient.id, client: rolesClient.id },
+      roles
+    );
   }
 }
