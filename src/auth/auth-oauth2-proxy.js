@@ -224,7 +224,7 @@ class Oauth2ProxyAuthStrategy {
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
           const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
 
-          const subjectToken = context.req.headers['x-forwarded-access-token'];
+          const subjectToken = req.headers['x-forwarded-access-token'];
 
           const result = await switchTo(
             this.keystone,
@@ -236,6 +236,7 @@ class Oauth2ProxyAuthStrategy {
           );
           res.status(200).json({ switch: result });
         } catch (err) {
+          logger.error(err);
           res.status(400).json({ switch: false, error: 'ns_assign_fail' });
         }
       }
