@@ -77,12 +77,12 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
               <VStack spacing={6}>
                 <FormControl isRequired>
                   <FormLabel>
-                    {variant === 'user' ? 'Username' : 'Service Account'}
+                    {variant === 'user' ? 'Email' : 'Service Account'}
                   </FormLabel>
                   <Input
-                    name="username"
+                    name="email"
                     type="text"
-                    data-testid="nsa-gua-username-field"
+                    data-testid="nsa-gua-email-field"
                   />
                 </FormControl>
                 <FormControl>

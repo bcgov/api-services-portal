@@ -1,6 +1,9 @@
 import { Keystone } from '@keystonejs/keystone';
 import ExcelJS from 'exceljs';
-import { getGwaProductEnvironment } from '../workflow/get-namespaces';
+import {
+  getGwaProductEnvironment,
+  injectResSvrAccessTokenToContext,
+} from '../workflow/get-namespaces';
 import { generateExcelWorkbook } from './output/xls-generator';
 import {
   getConsumerControls,
@@ -25,10 +28,16 @@ export class WorkbookService {
   public async buildWorkbook(ids: string[] = []): Promise<ExcelJS.Workbook> {
     const envCtx = await getGwaProductEnvironment(this.keystone, true);
 
+    await injectResSvrAccessTokenToContext(envCtx);
+
     const namespaces = (await getNamespaces(envCtx)).filter(
       (ns) => ids.length === 0 || ids.includes(ns.resource_id)
     );
-    const ns_access = await getNamespaceAccess(envCtx, namespaces);
+    const ns_access = await getNamespaceAccess(
+      this.keystone,
+      envCtx,
+      namespaces
+    );
     const gateway_metrics = await getGatewayMetrics(this.keystone, namespaces);
     const serviceLookup: Map<string, ReportOfGatewayMetrics> = gatewayToMap(
       gateway_metrics

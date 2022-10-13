@@ -5,6 +5,8 @@ import KeycloakAdminClient, {
   default as KcAdminClient,
 } from '@keycloak/keycloak-admin-client';
 import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation';
+import { checkKeystoneStatus } from '../checkKeystoneStatus';
+import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
 
 const logger = Logger('kc.user');
 
@@ -18,9 +20,83 @@ export class KeycloakUserService {
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
   }
 
-  public useAdminClient(_kcAdminClient: KeycloakAdminClient) {
-    this.kcAdminClient = _kcAdminClient;
+  public useAdminClient(client: KcAdminClient) {
+    this.kcAdminClient = client;
     return this;
+  }
+
+  public async lookupUserByUsername(username: string) {
+    logger.debug('[lookupUserByUsername] %s', username);
+    const users = await this.kcAdminClient.users.find({
+      exact: true,
+      username,
+    });
+    logger.debug('[lookupUserByUsername] : %j', users);
+    assert.strictEqual(users.length, 1, 'User not found ' + username);
+    return users[0].id;
+  }
+
+  public async lookupUserById(id: string): Promise<UserRepresentation> {
+    logger.debug('[lookupUserById] %s', id);
+    const user = await this.kcAdminClient.users.findOne({
+      id,
+    });
+    logger.debug('[lookupUserById] : %j', user);
+    return user;
+  }
+
+  public async lookupUserIdByEmail(
+    email: string,
+    verified: boolean,
+    identityProviders: string[]
+  ): Promise<string> {
+    return (await this.lookupUserByEmail(email, verified, identityProviders))
+      .id;
+  }
+
+  public async lookupUserByEmail(
+    email: string,
+    verified: boolean,
+    identityProviders: string[]
+  ): Promise<UserRepresentation> {
+    const user = (await this.lookupUsersByEmail(email, verified))
+      .filter(async (user) => {
+        const userWithAttributes = await this.lookupUserById(user.id);
+        return identityProviders.includes(
+          userWithAttributes.attributes.identity_provider
+        );
+      })
+      .pop();
+    assert.strictEqual(
+      Boolean(user),
+      true,
+      `No suitable match for ${identityProviders.join(',')} : ${email}`
+    );
+    return user;
+  }
+
+  public async lookupUsersByEmail(
+    email: string,
+    verified: boolean
+  ): Promise<UserRepresentation[]> {
+    logger.debug('[lookupUserByEmail] %s', email);
+    const users = (
+      await this.kcAdminClient.users.find({
+        exact: true,
+        email,
+      })
+    )
+      .filter((user: UserRepresentation) => user.enabled)
+      .filter(
+        (user: UserRepresentation) => verified == false || user.emailVerified
+      );
+    logger.debug('[lookupUserByEmail] : %j', users);
+    assert.strictEqual(
+      users.length > 0,
+      true,
+      'No suitable match for ' + email
+    );
+    return users;
   }
 
   public async login(
@@ -91,5 +167,15 @@ export class KeycloakUserService {
       });
     }
     logger.debug('[syncUserClientRoles] %s OK', id);
+  }
+
+  public async disableUser(id: string): Promise<void> {
+    logger.debug('[disableUser] %s', id);
+    await this.kcAdminClient.users.update(
+      { id },
+      {
+        enabled: false,
+      }
+    );
   }
 }

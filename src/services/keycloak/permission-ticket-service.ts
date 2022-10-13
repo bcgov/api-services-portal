@@ -143,6 +143,7 @@ export class KeycloakPermissionTicketService {
       method: 'delete',
       headers: headers(this.accessToken) as any,
     }).then(checkStatus);
+    logger.debug('[deletePermission] DELETED %s', id);
   }
 
   public async getPermission(id: string): Promise<PermissionTicket> {

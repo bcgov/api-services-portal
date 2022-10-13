@@ -34,7 +34,7 @@ describe('Batch Utilities', function () {
     };
     const output = {
       name: 'sample name',
-      blob: ['tag1', 'tag2'],
+      blob: [['tag1', 'tag2']],
     };
 
     const result = parseBlobString(input, ['blob']);
@@ -52,7 +52,7 @@ describe('Batch Utilities', function () {
     };
     const output = {
       name: 'sample name',
-      blob: ['tag1', 'tag2'],
+      blob: [['tag1', 'tag2']],
     };
 
     const result = parseBlobString(input);
