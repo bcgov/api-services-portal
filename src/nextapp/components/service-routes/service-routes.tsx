@@ -38,7 +38,6 @@ const ServiceRoutes: React.FC<ServiceRoutesProps> = ({ routes }) => {
                   direction="row"
                   wrap="nowrap"
                   spacing={1}
-                  m={1}
                   shouldWrapChildren={true}
                 >
                   {methods.map((p) => (

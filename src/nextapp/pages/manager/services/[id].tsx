@@ -106,18 +106,6 @@ const ServicePage: React.FC<
             <Heading size="md">Metrics</Heading>
           </Box>
           <Divider />
-          <Box minHeight="100px" p={4}>
-            {id && data && (
-              <ClientRequest fallback={<Skeleton width="100%" height="100%" />}>
-                <MetricGraph
-                  days={range}
-                  height={100}
-                  id={data?.GatewayService?.name}
-                  totalRequests={totalNamespaceRequests}
-                />
-              </ClientRequest>
-            )}
-          </Box>
         </Box>
         <Box display="grid" gridGap={4} gridTemplateColumns="repeat(12, 1fr)">
           <Box
@@ -135,21 +123,6 @@ const ServicePage: React.FC<
               <Heading size="md">Stats</Heading>
             </Box>
             <Divider />
-            <Box p={4} display="flex" alignItems="center" flex={1}>
-              {id && data && (
-                <ClientRequest
-                  fallback={<Skeleton width="100%" height="100%" />}
-                >
-                  <MetricGraph
-                    alt
-                    days={range}
-                    height={100}
-                    id={data?.GatewayService.name}
-                    totalRequests={totalNamespaceRequests}
-                  />
-                </ClientRequest>
-              )}
-            </Box>
           </Box>
           <Box bgColor="white" gridColumn="span 5">
             <Box

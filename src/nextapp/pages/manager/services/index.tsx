@@ -3,13 +3,13 @@ import { Button, Container, Icon, Skeleton, Text } from '@chakra-ui/react';
 import Card from '@/components/card';
 import ClientRequest from '@/components/client-request';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
+import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
-import { useAuth } from '@/shared/services/auth';
 import SearchInput from '@/components/search-input';
 // import ServicesFilters from '@/components/services-list/services-filters';
+import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
-import Head from 'next/head';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async () => {

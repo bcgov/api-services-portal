@@ -59,16 +59,6 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
       <Divider />
       <Box p={4} display="flex" minHeight="154px">
         {!inView && <Skeleton flex={1} m={4} />}
-        {inView && (
-          <ClientRequest fallback={<Skeleton flex={1} />}>
-            <MetricGraph
-              alt
-              days={range}
-              id={data.name}
-              totalRequests={totalRequests}
-            />
-          </ClientRequest>
-        )}
       </Box>
     </Box>
   );

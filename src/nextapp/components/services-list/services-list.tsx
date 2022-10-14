@@ -22,12 +22,13 @@ import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
 import ServiceRoutes from '@/components/service-routes';
 import ApsTable from '@/components/table';
+import { GatewayService } from '@/shared/types/query.types';
+import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
 import { useApi } from '@/shared/services/api';
 
 import { dateRange, useTotalRequests } from './utils';
-import { GatewayService } from '@/shared/types/query.types';
-import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
 import MetricGraph from './metric-graph';
+import ServiceDetail from './service-details';
 
 interface ServicesListProps {
   search?: string;
@@ -55,24 +56,6 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
     },
     [search]
   );
-  function StatCard({ children, title }) {
-    return (
-      <GridItem
-        bgColor="white"
-        border="1px solid"
-        borderColor="bc-background"
-        borderRadius={4}
-        overflowY="auto"
-      >
-        <Box as="header" px={4} pt={4}>
-          <Heading size="sm">{title}</Heading>
-        </Box>
-
-        <Box p={4}>{children}</Box>
-      </GridItem>
-    );
-  }
-
   const handleDetailsDisclosure = (id: string) => () => {
     setOpenId((state) => (state !== id ? id : null));
   };
@@ -129,69 +112,11 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
                       </Center>
                     }
                   >
-                    <Box
-                      width="100%"
-                      bgColor="white"
-                      p={4}
-                      color="bc-background"
-                      border="1px solid"
-                      borderRadius={4}
-                    >
-                      <MetricGraph
-                        id={d.name}
-                        days={range}
-                        totalRequests={totalNamespaceRequests}
-                      />
-                    </Box>
-                    <Grid templateColumns="repeat(3, 1fr)" gap={8} mt={8}>
-                      <StatCard title="Stats">
-                        <MetricGraph
-                          alt
-                          id={d.name}
-                          days={range}
-                          totalRequests={totalNamespaceRequests}
-                        />
-                      </StatCard>
-                      <StatCard title="Routes">
-                        <Table variant="simple">
-                          <Tbody>
-                            <Tr>
-                              <Td>
-                                <ServiceRoutes routes={d.routes} />
-                              </Td>
-                            </Tr>
-                          </Tbody>
-                        </Table>
-                      </StatCard>
-                      <StatCard title="Details">
-                        <Box
-                          as="dl"
-                          display="grid"
-                          fontSize="sm"
-                          flexWrap="wrap"
-                          gridColumnGap={4}
-                          gridRowGap={2}
-                          gridTemplateColumns="1fr 2fr"
-                        >
-                          <Text as="dt" fontWeight="bold">
-                            Host
-                          </Text>
-                          <Text as="dd">{d.host}</Text>
-                          <Text as="dt" fontWeight="bold">
-                            Tags
-                          </Text>
-                          <Text as="dd">
-                            <Wrap>
-                              {[].map((t) => (
-                                <WrapItem key={t}>
-                                  <Badge>{t}</Badge>
-                                </WrapItem>
-                              ))}
-                            </Wrap>
-                          </Text>
-                        </Box>
-                      </StatCard>
-                    </Grid>
+                    <ServiceDetail
+                      id={d.id}
+                      days={range}
+                      totalNamespaceRequests={totalNamespaceRequests}
+                    />
                   </React.Suspense>
                 </Td>
               </Tr>

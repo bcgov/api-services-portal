@@ -32,7 +32,7 @@ import { useApi } from '@/shared/services/api';
 // 3. Update frequency
 
 import { GET_METRICS } from '@/shared/queries/gateway-service-queries';
-import { GatewayService } from '@/shared/types/query.types';
+import { GatewayService, Metric } from '@/shared/types/query.types';
 
 interface DailyDatum {
   day: string;
@@ -46,33 +46,24 @@ interface DailyDatum {
 
 interface MetricGraphProps {
   alt?: boolean;
-  days: string[];
+  data: Metric[];
   height?: number;
-  id: string;
   totalRequests: number;
 }
 
 const MetricGraph: React.FC<MetricGraphProps> = ({
   alt,
-  days,
+  data,
   height = 100,
-  id,
   totalRequests,
 }) => {
-  const { data } = useApi(['metric', id], {
-    query: GET_METRICS,
-    variables: {
-      service: id,
-      days,
-    },
-  });
   const labelProps: StatLabelProps | TextProps = {
     textTransform: 'uppercase',
     fontSize: 'xs',
     fontWeight: 'bold',
     color: 'gray.400',
   };
-  const values: number[][] = data.allMetrics.map((metric) => {
+  const values: number[][] = data.slice(0, 5).map((metric) => {
     return JSON.parse(metric.values);
   });
   const dailies: DailyDatum[] = values.map((value: number[]) => {
@@ -144,7 +135,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   const color = usage ? interpolateRdYlGn(usage) : '#eee';
   const y = scaleLinear().range([0, height]).domain([0, 1]);
 
-  if (data.allMetrics) {
+  if (data) {
     const max = dailies.reduce((memo: number, d) => {
       if (Number(d.peak[1]) > memo) {
         return Number(d.peak[1]);

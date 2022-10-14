@@ -42,7 +42,11 @@ import {
   createServiceAccountHandler,
   getAllServiceAccountsHandler,
 } from './resolvers/service-accounts';
-import { allServicesHandler, getMetricsHandler } from './resolvers/services';
+import {
+  allServicesHandler,
+  getMetricsHandler,
+  getGatewayServiceHandler,
+} from './resolvers/services';
 
 // Namespaces
 const allNamespaces = [
@@ -131,6 +135,7 @@ export const handlers = [
   keystone.query('GetMetrics', allServicesHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
+  keystone.query('GetGatewayService', getGatewayServiceHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
   // Namespace Access
   keystone.query('GetUserPermissions', getUserPermissionsHandler),
