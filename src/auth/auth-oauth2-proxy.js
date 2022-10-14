@@ -315,20 +315,19 @@ class Oauth2ProxyAuthStrategy {
 
     let _results = await _users.adapter.find({ username: username });
 
-    if (
-      _results.length == 0 &&
-      username != `${providerUsername}@${identityProvider}`
-    ) {
+    const oldUsername = `${providerUsername}@${identityProvider}`.toLowerCase();
+
+    logger.info('[migration] ? %s != %s : %j', username, oldUsername, _results);
+    if (_results.length == 0 && username != oldUsername) {
       logger.info(
-        '[migration] %s not found.  Migrate %s@%s access to %s',
+        '[migration] %s not found.  Migrate %s access to %s',
         username,
-        providerUsername,
-        identityProvider,
+        oldUsername,
         username
       );
       try {
         _results = await _users.adapter.find({
-          username: `${providerUsername}@${identityProvider}`,
+          username: oldUsername,
         });
         if (_results.length == 1) {
           const oldUser = _results[0];
@@ -338,6 +337,11 @@ class Oauth2ProxyAuthStrategy {
           // check to see if we need to migrate
           await MigrateAuthzUser(suctx, oldUser.username, username, true);
           await MigratePortalUser(suctx, oldUser.username, username);
+        } else {
+          logger.warn(
+            '[migration] Username %s not found - so assume nothing to migrate.',
+            oldUsername
+          );
         }
       } catch (err) {
         logger.error(
