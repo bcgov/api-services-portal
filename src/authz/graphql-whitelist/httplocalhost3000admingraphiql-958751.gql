@@ -1,0 +1,8 @@
+
+  query GetAllCredentialIssuersByNamespace($flow: String) {
+    allCredentialIssuersByNamespace(where: {flow: $flow}) {
+      id
+      name
+      environmentDetails
+    }
+  }
