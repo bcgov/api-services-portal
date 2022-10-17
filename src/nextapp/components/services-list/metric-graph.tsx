@@ -22,19 +22,18 @@ import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
 import format from 'date-fns/format';
+import differnceInDays from 'date-fns/differenceInDays';
 import numeral from 'numeral';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import times from 'lodash/times';
-import { useApi } from '@/shared/services/api';
+import { GatewayService, Metric } from '@/shared/types/query.types';
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
 
-import { GET_METRICS } from '@/shared/queries/gateway-service-queries';
-import { GatewayService, Metric } from '@/shared/types/query.types';
-
 interface DailyDatum {
+  date: Date;
   day: string;
   dayFormatted: string;
   dayFormattedShort: string;
@@ -48,6 +47,7 @@ interface MetricGraphProps {
   alt?: boolean;
   data: Metric[];
   height?: number;
+  service: GatewayService;
   totalRequests: number;
 }
 
@@ -55,13 +55,13 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   alt,
   data,
   height = 100,
+  service,
   totalRequests,
 }) => {
   const labelProps: StatLabelProps | TextProps = {
-    textTransform: 'uppercase',
     fontSize: 'xs',
-    fontWeight: 'bold',
     color: 'gray.400',
+    textTransform: 'none',
   };
   const values: number[][] = data.slice(0, 5).map((metric) => {
     return JSON.parse(metric.values);
@@ -101,6 +101,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     return {
       day,
+      date: firstDateValue,
       dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
       dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
@@ -129,7 +130,9 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     }
     return memo;
   }, null);
-  const peakDayText = peakDay ? peakDay.dayFormattedShort : 'n/a';
+  const peakDayText = peakDay
+    ? differnceInDays(new Date(), new Date(peakDay.date))
+    : 'n/a';
   const usage = totalRequests > 0 ? totalDailyRequests / totalRequests : 0;
   const usagePercent = usage ? usage * 100 : 0;
   const color = usage ? interpolateRdYlGn(usage) : '#eee';
@@ -161,25 +164,31 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
             </CircularProgressLabel>
           </CircularProgress>
         </Box>
-        <StatGroup spacing={8} flexWrap="wrap">
+        <StatGroup
+          spacing={6}
+          flexWrap="wrap"
+          sx={{ '& > *': { overflow: 'hidden' } }}
+        >
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Hourly</StatLabel>
-            <StatNumber>{peakRequests}</StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Daily</StatLabel>
-            <StatNumber>
-              {numeral(peakDay?.total ?? 0).format('0.0a')}
+            <StatLabel {...labelProps}>Avg</StatLabel>
+            <StatNumber fontSize="21px">
+              {numeral(peakRequests).format('0.0a')}
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Day</StatLabel>
-            <StatNumber>{peakDayText}</StatNumber>
+            <StatLabel {...labelProps}>Total Rq</StatLabel>
+            <StatNumber fontSize="21px">
+              {numeral(totalDailyRequests).format('0.0a')}
+            </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Total Req</StatLabel>
-            <StatNumber overflow="hidden">
-              {numeral(totalDailyRequests).format('0.0a')}
+            <StatLabel {...labelProps}>Days since</StatLabel>
+            <StatNumber fontSize="21px">{peakDayText}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Plugins</StatLabel>
+            <StatNumber fontSize="21px" overflow="hidden">
+              {service.plugins.length}
             </StatNumber>
           </Stat>
         </StatGroup>

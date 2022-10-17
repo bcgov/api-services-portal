@@ -50,7 +50,10 @@ const Metric = ({ service }) => {
     timeStyle: 'full',
     hour12: true,
   };
-  const dt = new Intl.DateTimeFormat('en', options as Intl.DateTimeFormatOptions);
+  const dt = new Intl.DateTimeFormat(
+    'en',
+    options as Intl.DateTimeFormatOptions
+  );
 
   const color = (v) => ranges.filter((r) => v <= r.max)[0].color;
 

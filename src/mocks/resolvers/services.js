@@ -85,7 +85,12 @@ export const getGatewayServiceHandler = (req, res, ctx) => {
         tags: '["ns.regresmay22"]',
         host: 'httpbin.org',
         environment: null,
-        plugins: [],
+        plugins: [
+          {
+            id: '159',
+            name: 'jwt-keycloak',
+          },
+        ],
         routes: [
           {
             id: '1081',

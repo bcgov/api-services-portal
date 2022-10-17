@@ -1,14 +1,10 @@
 import * as React from 'react';
 import {
   Box,
-  Table,
-  Tr,
-  Td,
   Text,
   Wrap,
   WrapItem,
   Badge,
-  Tbody,
   Grid,
   GridItem,
   Heading,
@@ -16,7 +12,6 @@ import {
 import { gql } from 'graphql-request';
 import ServiceRoutes from '@/components/service-routes';
 import { useApi } from '@/shared/services/api';
-import { GatewayService } from '@/shared/types/query.types';
 
 import MetricGraph from './metric-graph';
 
@@ -78,6 +73,7 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
         <StatCard title="Stats">
           <MetricGraph
             alt
+            service={data.GatewayService}
             data={data.allMetrics}
             totalRequests={totalNamespaceRequests}
           />

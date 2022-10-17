@@ -17,6 +17,7 @@ import {
   Tbody,
   Grid,
   GridItem,
+  CircularProgressLabel,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
@@ -82,7 +83,19 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
               <Td>
                 <Tag variant="outline">{d.environment?.name ?? '-'}</Tag>
               </Td>
-              <Td>79%</Td>
+              <Td>
+                <CircularProgress
+                  capIsRound
+                  size="56px"
+                  value={79}
+                  color="bc-success"
+                  thickness="10px"
+                >
+                  <CircularProgressLabel>
+                    <Text fontWeight="bold">{`${Math.floor(79)}%`}</Text>
+                  </CircularProgressLabel>
+                </CircularProgress>
+              </Td>
               <Td>10</Td>
               <Td textAlign="right">
                 <IconButton
@@ -108,7 +121,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
                   <React.Suspense
                     fallback={
                       <Center>
-                        <CircularProgress />
+                        <CircularProgress isIndeterminate />
                       </Center>
                     }
                   >
