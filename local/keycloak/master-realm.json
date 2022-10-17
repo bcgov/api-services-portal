@@ -1347,6 +1347,48 @@
           }
         },
         {
+          "id": "8df082aa-710d-4be7-b396-11123a710e84",
+          "name": "provider_username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "provider_username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "provider_username",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "id": "8df082aa-710d-4be7-b396-22223a710e84",
+          "name": "display_name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "display_name",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "display_name",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "id": "8df082aa-710d-4be7-b396-00023a710e84",
+          "name": "provider_user_guid",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "provider_user_guid",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "provider_user_guid",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
           "id": "8df082aa-710d-4be7-b396-87323a710e84",
           "name": "identity_provider",
           "protocol": "openid-connect",
