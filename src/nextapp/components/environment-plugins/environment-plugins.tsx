@@ -7,6 +7,7 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  Tag,
 } from '@chakra-ui/react';
 import { Environment } from '@/shared/types/query.types';
 import YamlViewer from '../yaml-viewer';
@@ -75,14 +76,17 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
         {isSuccess && (
           <>
             {doc && <YamlViewer doc={doc} />}{' '}
-            {!doc && (
+            {(!doc || data.allCredentialIssuersByNamespace.length === 0) && (
               <Alert
                 status="info"
                 variant="subtle"
                 data-testid="edit-env-missing-doc-alert"
               >
                 <AlertIcon />
-                <AlertDescription>No configuration available</AlertDescription>
+                <AlertDescription>
+                  Authorization Profile missing setup for{' '}
+                  <Tag variant="outline">{environment.name}</Tag> environment
+                </AlertDescription>
               </Alert>
             )}
           </>
