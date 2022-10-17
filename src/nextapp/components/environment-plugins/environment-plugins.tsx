@@ -73,6 +73,19 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             <CircularProgress />
           </Center>
         )}
+        {!id && (
+          <Alert
+            status="info"
+            variant="subtle"
+            data-testid="edit-env-missing-doc-alert"
+          >
+            <AlertIcon />
+            <AlertDescription>
+              Credential Issuer missing setup for{' '}
+              <Tag variant="outline">{environment.name}</Tag> environment
+            </AlertDescription>
+          </Alert>
+        )}
         {isSuccess && (
           <>
             {doc && <YamlViewer doc={doc} />}{' '}
