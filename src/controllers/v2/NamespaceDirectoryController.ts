@@ -14,6 +14,9 @@ import { transform, transformSetAnonymous } from './DirectoryController';
 import { gql } from 'graphql-request';
 import { strict as assert } from 'assert';
 
+import { Logger } from '../../logger';
+const logger = Logger('controllers.Directory');
+
 @injectable()
 @Route('/namespaces/{ns}/directory')
 @Security('jwt', ['Namespace.Manage'])
@@ -47,6 +50,8 @@ export class NamespaceDirectoryController extends Controller {
       query: item,
       variables: { id },
     });
+
+    logger.debug('[get-ns-directory-dataset] %j', result);
 
     assert.strictEqual(
       result.data.allProductsByNamespace?.length === 1,
