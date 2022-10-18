@@ -2,6 +2,7 @@
   "user": {
     "credentials": {
       "username": "janis@idir",
+      "email":"janis@testmail.com",
       "password": "awsummer"
     }
   },
@@ -54,10 +55,12 @@
     "serviceName": "cc-service-for-platform",
     "Mark": {
       "userName": "mark",
+      "email":"mark@gmail.com",
       "accessRole": ["Access.Manage"]
     },
     "Wendy": {
       "userName": "wendy",
+      "email":"wendy@test.com",
       "accessRole": ["CredentialIssuer.Admin"]
     },
     "jwtKeyPair": {
@@ -207,27 +210,33 @@
     },
     "grantPermission": {
       "Mark": {
-        "userName": "mark",
+        "userName": "Mark F Mark L",
+        "email":"mark@gmail.com",
         "accessRole": ["Access.Manage"]
       },
       "Mark_NV": {
-        "userName": "mark",
+        "userName": "Mark F Mark L",
+        "email":"mark@gmail.com",
         "accessRole": ["Namespace.View"]
       },
       "Wendy": {
-        "userName": "wendy",
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
         "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       },
       "Wendy_CA": {
-        "userName": "wendy",
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
         "accessRole": ["CredentialIssuer.Admin"]
       },
       "Wendy_GC": {
-        "userName": "wendy",
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
         "accessRole": ["GatewayConfig.Publish", "Namespace.View"]
       },
       "Janis": {
-        "userName": "janis@idir",
+        "userName": "Janis Smith",
+        "email":"janis@testmail.com",
         "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       }
     },
@@ -256,7 +265,18 @@
   "grantPermission": {
     "Mark": {
       "userName": "mark",
+      "email": "mark@gmail.com",
       "accessRole": ["Access.Manage", "Namespace.View"]
+    },
+    "Janis": {
+      "userName": "janis@idir",
+      "email": "janis@testmail.com",
+      "accessRole": ["CredentialIssuer.Admin"]
+    },
+    "OldUser": {
+      "userName": "olduser@idir",
+      "email": "olduser@testmail.com",
+      "accessRole": ["Access.Manage", "Namespace.View","Namespace.Manage"]
     }
   },
   "permission": {
