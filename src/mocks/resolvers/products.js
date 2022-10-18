@@ -140,7 +140,7 @@ const environments = new Map([
       name: 'dev',
       active: false,
       flow: 'client-credentials',
-      credentialIssuer: credentialIssuers.get('ci8'),
+      credentialIssuer: credentialIssuers.get('ci1'),
       services: [],
       approval: true,
       additionalDetailsToRequest:
@@ -191,7 +191,7 @@ const environments = new Map([
       name: 'other',
       active: true,
       flow: 'kong-api-key-acl',
-      credentialIssuer: credentialIssuers.get('ci8'),
+      credentialIssuer: null,
       services: ['s3'],
       approval: false,
       additionalDetailsToRequest: '',
@@ -271,9 +271,11 @@ export const getEnvironmentHandler = (req, res, ctx) => {
 };
 
 export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
+  const { id } = req.variables;
   return res(
     ctx.data({
-      allCredentialIssuersByNamespace: Array.from(credentialIssuers.values()),
+      allCredentialIssuersByNamespace:
+        id === 'ci1' ? [] : Array.from(credentialIssuers.values()),
     })
   );
 };

@@ -39,7 +39,6 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
       suspense: false,
     }
   );
-
   const issuer = data?.allCredentialIssuersByNamespace[0];
   const pluginConfigs = {
     'kong-api-key-acl': KongApiKeyAcl(
@@ -73,7 +72,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             <CircularProgress />
           </Center>
         )}
-        {!id && (
+        {flow === 'client-credentials' && !id && (
           <Alert
             status="info"
             variant="subtle"
@@ -86,23 +85,19 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             </AlertDescription>
           </Alert>
         )}
-        {isSuccess && (
-          <>
-            {doc && <YamlViewer doc={doc} />}{' '}
-            {(!doc || data.allCredentialIssuersByNamespace.length === 0) && (
-              <Alert
-                status="info"
-                variant="subtle"
-                data-testid="edit-env-missing-doc-alert"
-              >
-                <AlertIcon />
-                <AlertDescription>
-                  Authorization Profile missing setup for{' '}
-                  <Tag variant="outline">{environment.name}</Tag> environment
-                </AlertDescription>
-              </Alert>
-            )}
-          </>
+        {doc && <YamlViewer doc={doc} />}{' '}
+        {(!doc || data?.allCredentialIssuersByNamespace.length === 0) && (
+          <Alert
+            status="info"
+            variant="subtle"
+            data-testid="edit-env-missing-doc-alert"
+          >
+            <AlertIcon />
+            <AlertDescription>
+              Authorization Profile missing setup for{' '}
+              <Tag variant="outline">{environment.name}</Tag> environment
+            </AlertDescription>
+          </Alert>
         )}
       </Box>
     </>
