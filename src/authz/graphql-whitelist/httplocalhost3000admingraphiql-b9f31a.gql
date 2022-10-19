@@ -1,0 +1,38 @@
+
+  query GetAllProducts {
+    allProductsByNamespace {
+      id
+      name
+      description
+      organization {
+        id
+        title
+      }
+      organizationUnit {
+        id
+        title
+      }
+      dataset {
+        id
+        name
+        title
+        notes
+        sector
+        license_title
+      }
+      environments {
+        id
+        name
+        active
+        flow
+        services {
+          id
+          name
+          host
+        }
+        credentialIssuer {
+          name
+        }
+      }
+    }
+  }

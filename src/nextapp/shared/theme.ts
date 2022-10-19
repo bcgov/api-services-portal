@@ -54,7 +54,7 @@ const _focus = {
   // outlineColor: 'bc-border-focus',
   outline: 'none',
   borderColor: 'bc-blue-alt',
-  boxShadow: 'lg',
+  boxShadow: 'sm',
 };
 const _disabled = {
   opacity: 0.3,
@@ -184,6 +184,8 @@ const buttonVariants = {
   ghost: {
     color: 'bc-blue',
     borderColor: 'transparent',
+    boxShadow: 'none',
+    px: 3,
     _hover: {
       bgColor: 'transparent',
       textDecor: 'none',
@@ -466,6 +468,8 @@ const theme = extendTheme(
                   return '#f59b7c40';
                 case 'other':
                   return '#f1f48730';
+                case 'red':
+                  return transparentize('bc-error', 0.1)(theme);
                 default:
                   return '#e9f0f8';
               }
@@ -475,7 +479,8 @@ const theme = extendTheme(
               container: {
                 borderRadius: 4,
                 backgroundColor: getLabelBgColor(props.colorScheme),
-                border: '1px solid #8e8e8e30',
+                border: '1px solid',
+                borderColor: props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
                 color: 'text',
                 boxShadow: 'none',
               },
