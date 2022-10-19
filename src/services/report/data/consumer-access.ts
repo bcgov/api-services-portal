@@ -66,10 +66,10 @@ export async function getConsumerAccess(
       const accesses = await lookupDetailedServiceAccessesByNS(ksCtx, ns.name);
       const consumerLookup: any = {};
       accesses.forEach((access: ServiceAccess) => {
-        if (access.consumer === null) {
-          logger.warn('Service Access with Missing Consumer! %j', access);
-        } else {
+        if (access.consumer) {
           consumerLookup[access.consumer.username] = access;
+        } else {
+          logger.warn('Service Access with Missing Consumer! %j', access);
         }
       });
 
@@ -143,6 +143,7 @@ export async function getConsumerAccess(
       await Promise.all(subPromises);
 
       accesses
+        .filter((access) => access.consumer)
         .filter((access) => !(access.consumer.username in repeatChecker))
         .forEach((access) => {
           data.push({

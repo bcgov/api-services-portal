@@ -12,6 +12,7 @@ import {
   KeycloakClientRegistrationService,
   KeycloakTokenService,
   getOpenidFromIssuer,
+  KeycloakClientService,
 } from '../keycloak';
 import { KongConsumerService } from '../kong';
 import { FeederService } from '../feeder';
@@ -29,6 +30,7 @@ import { updateAccessRequestState } from '../keystone';
 import { syncPlugins } from './consumer-plugins';
 import { saveConsumerLabels } from './consumer-management';
 import { StructuredActivityService } from './namespace-activity';
+import { KeycloakClientRolesService } from '../keycloak/client-roles';
 
 const logger = Logger('wf.Apply');
 
@@ -345,11 +347,31 @@ async function setupAuthorizationAndEnable(
       issuerEnvConfig.clientId,
       issuerEnvConfig.clientSecret
     );
-    await kcClientService.syncAndApply(
-      clientId,
-      controls.defaultClientScopes,
-      []
-    );
+    const clientScopes = controls.defaultClientScopes;
+    if (controls.roles) {
+      clientScopes.push('roles');
+    }
+    await kcClientService.syncAndApply(clientId, clientScopes, []);
+
+    if (controls.roles) {
+      const clientRolesService = new KeycloakClientRolesService(
+        issuerEnvConfig.issuerUrl
+      );
+      await clientRolesService.login(
+        issuerEnvConfig.clientId,
+        issuerEnvConfig.clientSecret
+      );
+
+      const rolesClientId = issuerEnvConfig.clientId;
+      await clientRolesService.syncRoles(
+        rolesClientId,
+        controls.roles,
+        clientId
+      );
+
+      // add the ClientScopeMappings
+      await clientRolesService.addClientScopeMappings(clientId, rolesClientId);
+    }
 
     await kcClientService.updateClientRegistration(clientId, {
       clientId,

@@ -19,12 +19,11 @@ import {
   Grid,
   useToast,
   Flex,
+  Alert,
+  AlertDescription,
+  AlertIcon,
 } from '@chakra-ui/react';
-import {
-  ConsumerPlugin,
-  GatewayPlugin,
-  GatewayPluginCreateInput,
-} from '@/shared/types/query.types';
+import { ConsumerPlugin } from '@/shared/types/query.types';
 import EnvironmentTag from '@/components/environment-tag';
 import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
@@ -56,6 +55,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const restrictions = React.useState<ConsumerPlugin[]>(() => {
     return (
       data?.getConsumerProdEnvAccess.plugins
@@ -93,6 +93,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const handleClose = () => {
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
+    setHasUnsavedChanges(false);
     setRestrictions(
       data?.getConsumerProdEnvAccess.plugins
         .filter((p) => p.name === 'ip-restriction')
@@ -124,10 +125,21 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const data = {
       plugins: [...restrictsionsData, ...rateLimitsData],
     };
-
     const authorizationForm = ref?.current.querySelector(
       'form[name="authorizationForm"]'
     );
+    const ipRestrictionForm = new FormData(
+      ref?.current.querySelector('form[name="ipRestrictionsForm"]') || undefined
+    );
+
+    if (
+      Boolean(ipRestrictionForm.get('allow')) &&
+      ipRestrictionForm.get('allow') !== '[]'
+    ) {
+      setHasUnsavedChanges(true);
+      return false;
+    }
+
     if (authorizationForm) {
       const authorizationFormData = new FormData(authorizationForm);
       const defaultClientScopes = authorizationFormData.getAll(
@@ -153,6 +165,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       client.invalidateQueries(['consumerEdit', prodEnvId, consumerId]);
       onClose();
       setTabIndex(0);
+      setHasUnsavedChanges(false);
     } catch (err) {
       toast({
         title: 'Request save failed',
@@ -249,6 +262,14 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
           <ModalCloseButton data-testid="consumer-edit-close-btn" />
           {isSuccess && (
             <ModalBody ref={ref}>
+              {hasUnsavedChanges && (
+                <Alert status="error" variant="solid" mb={8}>
+                  <AlertIcon />
+                  <AlertDescription>
+                    You have an unapplied IP Restrictions control.
+                  </AlertDescription>
+                </Alert>
+              )}
               <Box
                 hidden={tabIndex !== 0}
                 display={tabIndex === 0 ? 'block' : 'none'}

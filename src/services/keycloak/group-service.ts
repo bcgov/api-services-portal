@@ -197,13 +197,13 @@ export class KeycloakGroupService {
     return this.kcAdminClient.users.delFromGroup({ id, groupId });
   }
 
-  public async lookupMemberByUsername(username: string): Promise<string> {
+  public async lookupMemberByEmail(email: string): Promise<string> {
     const foundUsers = await this.kcAdminClient.users.find({
-      username,
+      email,
       exact: true,
     });
     if (foundUsers.length == 0) {
-      logger.warn('[lookupMemberByUsername] User not found %s', username);
+      logger.warn('[lookupMemberByEmail] User not found %s', email);
     }
     return foundUsers.length == 0 ? null : foundUsers[0].id;
   }

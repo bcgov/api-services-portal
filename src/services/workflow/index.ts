@@ -38,6 +38,7 @@ export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 export {
   getGwaProductEnvironment,
   getMyNamespaces,
+  injectResSvrAccessTokenToContext,
   getResourceServerContext,
   getEnvironmentContext,
 } from './get-namespaces';
@@ -49,3 +50,5 @@ export {
   transformActivity,
   StructuredActivityService,
 } from './namespace-activity';
+
+export { MigrateAuthzUser, MigratePortalUser } from './migrate-user';

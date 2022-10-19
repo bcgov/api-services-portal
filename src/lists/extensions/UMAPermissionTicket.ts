@@ -9,6 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
+import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -29,7 +30,7 @@ type UMAPermissionTicket {
 const typeUMAPermissionTicketInput = `
 input UMAPermissionTicketInput {
     resourceId: String!,
-    username: String!,
+    email: String!,
     granted: Boolean,
     scopes: [String]!
 }
@@ -109,7 +110,24 @@ module.exports = {
                 resourceId: args.resourceId,
                 returnNames: true,
               };
-              return await permissionApi.listPermissions(params);
+              const permissions = await permissionApi.listPermissions(params);
+
+              const usernameList: string[] = permissions.map(
+                (p) => p.requesterName
+              );
+
+              const users = await lookupUsersByUsernames(
+                context.sudo(),
+                usernameList
+              );
+
+              permissions.forEach((perm) => {
+                const user = users
+                  .filter((u) => u.username == perm.requesterName)
+                  .pop();
+                perm.requesterName = user?.name || perm.requesterName;
+              });
+              return permissions;
             },
             access: EnforcementPoint,
           },
@@ -125,7 +143,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const scopes = args.data.scopes;
+              const { email, scopes, resourceId } = args.data;
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
@@ -134,8 +152,7 @@ module.exports = {
 
               const resourceIds = await getResourceSets(envCtx);
               assert.strictEqual(
-                resourceIds.filter((rid) => rid === args.data.resourceId)
-                  .length,
+                resourceIds.filter((rid) => rid === resourceId).length,
                 1,
                 'Invalid Resource'
               );
@@ -145,9 +162,14 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const userId = await userApi.lookupUserByUsername(
-                args.data.username
+              const user = await userApi.lookupUserByEmail(
+                args.data.email,
+                false,
+                ['idir']
               );
+              const displayName =
+                userApi.getOneAttributeValue(user, 'display_name') ||
+                user.email;
 
               const result = [];
               const granted =
@@ -158,8 +180,8 @@ module.exports = {
               );
               for (const scope of scopes) {
                 const permission = await permissionApi.createOrUpdatePermission(
-                  args.data.resourceId,
-                  userId,
+                  resourceId,
+                  user.id,
                   granted,
                   scope
                 );
@@ -174,9 +196,31 @@ module.exports = {
                 'granted',
                 'namespace access',
                 'user',
-                args.data.username,
+                displayName,
                 scopes
               );
+
+              // refresh the permissions for this user in TemporaryIdentity
+              try {
+                logger.info(
+                  'User matching %s with %j',
+                  user.id,
+                  context.req.user
+                );
+                if (user.id === context.req.user.sub) {
+                  const subjectToken =
+                    context.req.headers['x-forwarded-access-token'];
+
+                  await switchTo(
+                    context,
+                    context.authedItem['namespace'],
+                    subjectToken,
+                    context.req.user.jti,
+                    context.req.user.sub,
+                    context.req.user.provider
+                  );
+                }
+              } catch (err) {}
 
               return result;
             },
@@ -215,15 +259,23 @@ module.exports = {
                 returnNames: true,
               });
 
-              const requesterName = [];
+              const requesterIds = [];
               const deletedScopes = [];
               for (const permId of args.ids) {
                 const foundPerms = perms.filter((perm) => perm.id === permId);
                 assert.strictEqual(foundPerms.length, 1, 'Invalid Permission');
                 deletedScopes.push(foundPerms[0].scopeName);
-                requesterName.push(foundPerms[0].requesterName);
+                requesterIds.push(foundPerms[0].requester);
                 await permissionApi.deletePermission(permId);
               }
+
+              const userApi = new KeycloakUserService(envCtx.openid.issuer);
+              await userApi.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+              const user = await userApi.lookupUserById(requesterIds.pop());
+              const displayName = user.attributes.display_name || user.email;
 
               await new StructuredActivityService(
                 context.sudo(),
@@ -233,7 +285,7 @@ module.exports = {
                 'revoked',
                 'namespace access',
                 'user',
-                requesterName.pop(),
+                displayName,
                 deletedScopes
               );
 

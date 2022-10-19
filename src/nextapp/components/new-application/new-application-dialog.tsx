@@ -74,9 +74,10 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
             handleAfterCreate(newApplication?.createApplication);
           }
         }
-      } catch {
+      } catch (err) {
         toast({
           title: 'Create application failed',
+          description: err,
           status: 'error',
           isClosable: true,
         });
@@ -133,7 +134,7 @@ const NewApplicationDialog: React.FC<NewApplicationDialog> = ({
 export default NewApplicationDialog;
 
 const mutation = gql`
-  mutation Add($name: String!, $description: String) {
+  mutation AddApplication($name: String!, $description: String) {
     createApplication(data: { name: $name, description: $description }) {
       id
       appId
