@@ -272,7 +272,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
             <Alert status="error" variant="solid" mb={8}>
               <AlertIcon />
               <AlertDescription>
-                You have an unapplied control settings. Reset or apply your
+                You have unapplied control settings. Reset or apply your
                 settings before saving.
               </AlertDescription>
             </Alert>
