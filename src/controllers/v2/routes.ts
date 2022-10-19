@@ -283,7 +283,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string"},
-            "username": {"dataType":"string","required":true},
             "email": {"dataType":"string"},
         },
         "additionalProperties": false,

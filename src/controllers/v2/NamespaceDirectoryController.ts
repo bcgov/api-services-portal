@@ -49,9 +49,9 @@ export class NamespaceDirectoryController extends Controller {
     });
 
     assert.strictEqual(
-      result.data.allProductsByNamespace?.length === 1,
-      true,
-      'Dataset not found'
+      result.data.allProductsByNamespace?.length == 0,
+      false,
+      'No products for dataset found'
     );
 
     return transform(

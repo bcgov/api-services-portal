@@ -23,9 +23,7 @@ import {
   AlertDescription,
   AlertIcon,
 } from '@chakra-ui/react';
-import {
-  ConsumerPlugin,
-} from '@/shared/types/query.types';
+import { ConsumerPlugin } from '@/shared/types/query.types';
 import EnvironmentTag from '@/components/environment-tag';
 import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
@@ -130,9 +128,14 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const authorizationForm = ref?.current.querySelector(
       'form[name="authorizationForm"]'
     );
-    const ipRestrictionForm = new FormData(ref?.current.querySelector('form[name="ipRestrictionsForm"]'));
+    const ipRestrictionForm = new FormData(
+      ref?.current.querySelector('form[name="ipRestrictionsForm"]') || undefined
+    );
 
-    if (ipRestrictionForm.get('allow') !== '[]') {
+    if (
+      Boolean(ipRestrictionForm.get('allow')) &&
+      ipRestrictionForm.get('allow') !== '[]'
+    ) {
       setHasUnsavedChanges(true);
       return false;
     }
@@ -262,7 +265,9 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
               {hasUnsavedChanges && (
                 <Alert status="error" variant="solid" mb={8}>
                   <AlertIcon />
-                  <AlertDescription>You have an unapplied IP Restrictions control.</AlertDescription>
+                  <AlertDescription>
+                    You have an unapplied IP Restrictions control.
+                  </AlertDescription>
                 </Alert>
               )}
               <Box

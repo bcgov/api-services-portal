@@ -44,7 +44,8 @@ export class GroupAccessService {
   }
 
   async createOrUpdateGroupAccess(
-    groupMembership: GroupMembership
+    groupMembership: GroupMembership,
+    validIdentityProviders: string[]
   ): Promise<void> {
     const access = buildGroupAccess(
       groupMembership.name,
@@ -88,7 +89,8 @@ export class GroupAccessService {
 
       await this.orgGroupService.syncMembers(
         orgGroup,
-        buildUserReference(groupRole.name, groupMembership.members)
+        buildUserReference(groupRole.name, groupMembership.members),
+        validIdentityProviders
       );
 
       // TODO: Delete any Permissions that are no longer specified for the Policy
@@ -235,7 +237,7 @@ export class GroupAccessService {
       members: [],
     };
 
-    const members: { [username: string]: GroupMember } = {};
+    const members: { [email: string]: GroupMember } = {};
 
     for (const groupPath of fullGroupPaths) {
       logger.debug('[getGroupAccess] Evaluate %s', groupPath);
@@ -254,10 +256,10 @@ export class GroupAccessService {
       );
 
       roleMembers.forEach((userRef) => {
-        if (userRef.username in members) {
-          members[userRef.username].roles.push(root(fullGroupPaths[0]));
+        if (userRef.email in members) {
+          members[userRef.email].roles.push(root(fullGroupPaths[0]));
         } else {
-          members[userRef.username] = {
+          members[userRef.email] = {
             member: userRef,
             roles: [root(fullGroupPaths[0])],
           };

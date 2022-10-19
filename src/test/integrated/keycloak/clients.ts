@@ -22,17 +22,16 @@ import {
 } from '../../../services/keycloak';
 
 (async () => {
-  const kc = new KeycloakClientService(process.env.ISSUER);
+  // const kc = new KeycloakClientService(process.env.ISSUER);
+  // await kc.login(process.env.CID, process.env.CSC);
 
-  await kc.login(process.env.CID, process.env.CSC);
+  const kcr = new KeycloakClientRegistrationService(
+    process.env.ISSUER,
+    process.env.ISSUER + '/clients-registrations/openid-connect',
+    undefined
+  );
 
-  // const kcr = new KeycloakClientRegistrationService(
-  //   process.env.ISSUER,
-  //   'https://dev.oidc.gov.bc.ca/auth/realms/xtmke7ky/clients-registrations/openid-connect',
-  //   undefined
-  // );
-
-  // await kcr.login(process.env.CID, process.env.CSC);
+  await kcr.login(process.env.CID, process.env.CSC);
 
   // const group = await kc.getGroup('ns', 'platform');
   // console.log(JSON.stringify(group, null, 4));
@@ -42,23 +41,25 @@ import {
   // const c = await kc.findByClientId('5D0C6941-19444960DC7');
   // o(c);
 
-  // await kcr.syncAndApply('5D0C6941-19444960DC7', ['other'], []);
+  await kcr.syncAndApply('5D0C6941-19444960DC7', ['other'], []);
 
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 4096,
-    publicKeyEncoding: {
-      type: 'spki',
-      format: 'pem',
-    },
-    privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'pem',
-    },
-  });
+  if (false) {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 4096,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem',
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem',
+      },
+    });
 
-  o(privateKey);
-  const fs = require('fs');
-  fs.writeFileSync('p.key', privateKey);
+    o(privateKey);
+    const fs = require('fs');
+    fs.writeFileSync('p.key', privateKey);
+  }
 
   //const cid = '76d86d09-dc75-4c25-97ae-c75a169fe9a7';
   const cid = '998b9ad1-2ef0-461e-8de0-9b2a943d2a71';
