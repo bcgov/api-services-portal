@@ -36,8 +36,23 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
   onFlowChange,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const [credentialIssuer, setCredentialIssuer] = React.useState(
+    environment.credentialIssuer?.id ?? ''
+  );
   const handleFlowChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onFlowChange(event.target.value);
+  };
+  const isPluginButtonDisabled = React.useMemo(() => {
+    if (flow === 'client-credentials') {
+      return !credentialIssuer;
+    }
+    return flow === 'public';
+  }, [flow, credentialIssuer]);
+
+  const handleCredentialIssuerChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setCredentialIssuer(event.target.value);
   };
 
   return (
@@ -85,7 +100,8 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
             <FormLabel>Issuer</FormLabel>
             <CredentialIssuerSelect
               flow={flow}
-              value={environment.credentialIssuer?.id}
+              onChange={handleCredentialIssuerChange}
+              value={credentialIssuer}
               data-testid="prd-env-auth-issuer-select"
             />
           </FormControl>
@@ -128,7 +144,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
         </GridItem>
         <GridItem>
           <Button
-            isDisabled={flow === 'public'}
+            isDisabled={isPluginButtonDisabled}
             color="bc-blue"
             variant="link"
             onClick={onOpen}
