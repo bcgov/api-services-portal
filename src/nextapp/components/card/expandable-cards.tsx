@@ -9,10 +9,12 @@ const ExpandableCards: React.FC<ExpandableCardsProps> = ({
   children,
   ...props
 }) => {
+  const totalCards = React.Children.count(children);
   return (
     <Accordion
-      allowToggle
       allowMultiple
+      allowToggle={totalCards > 1}
+      defaultIndex={totalCards === 1 ? 0 : undefined}
       sx={{
         '& > div': {
           mb: 4,
@@ -20,7 +22,11 @@ const ExpandableCards: React.FC<ExpandableCardsProps> = ({
       }}
       {...props}
     >
-      {children}
+      {React.Children.map(children, (child) =>
+        React.cloneElement(child as React.ReactElement, {
+          isSingle: totalCards === 1,
+        })
+      )}
     </Accordion>
   );
 };

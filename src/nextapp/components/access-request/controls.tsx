@@ -5,8 +5,6 @@ import { gql } from 'graphql-request';
 import { useApi } from '@/shared/services/api';
 import {
   ConsumerPlugin,
-  GatewayPlugin,
-  GatewayPluginCreateInput,
   GatewayRoute,
   GatewayService,
 } from '@/shared/types/query.types';

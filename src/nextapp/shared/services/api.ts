@@ -67,7 +67,7 @@ const api = async <T extends ApiResponse>(
     if (data.errors) {
       let errorMessage = data.errors[0]?.message;
       if (data.errors[0]?.data?.messages) {
-        errorMessage = data.errors[0].data.messages.join('\n');
+        errorMessage = data.errors[0]?.data.messages.join('\n');
       }
       throw errorMessage;
     }
