@@ -43,7 +43,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
     onFlowChange(event.target.value);
   };
   const isPluginButtonDisabled = React.useMemo(() => {
-    if (flow === 'client-credentials') {
+    if (flow === 'client-credentials' || flow === 'authorization-code') {
       return !credentialIssuer;
     }
     return flow === 'public';
