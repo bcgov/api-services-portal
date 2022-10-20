@@ -21,7 +21,8 @@
       "members": [
         {
           "member": {
-            "username": "janis@idir"
+            "id": "janis@idir",
+            "email":"janis@testmail.com"
           },
           "roles": ["organization-admin"]
         }

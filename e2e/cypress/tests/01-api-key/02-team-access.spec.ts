@@ -40,9 +40,16 @@ describe('Team Access Spec', () => {
   })
 
   it('Grant CredentialIssuer.Admin permission to Janis (API Owner)', () => {
-    cy.get('@apiowner').then(({ user, namespaceAccessPermissions }: any) => {
+    cy.get('@apiowner').then(({ grantPermission }: any) => {
       na.clickGrantUserAccessButton()
-      na.grantPermission({userName: user.credentials.username, accessRole: namespaceAccessPermissions})
+      na.grantPermission(grantPermission.Janis)
+    })
+  })
+
+  it('Grant CredentialIssuer.Admin permission to Janis (API Owner)', () => {
+    cy.get('@apiowner').then(({ grantPermission }: any) => {
+      na.clickGrantUserAccessButton()
+      na.grantPermission(grantPermission.Janis)
     })
   })
 
