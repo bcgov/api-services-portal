@@ -26,8 +26,6 @@ import startCase from 'lodash/startCase';
 import { uid } from 'react-uid';
 import {
   ConsumerPlugin,
-  GatewayPlugin,
-  GatewayPluginCreateInput,
   GatewayRoute,
   GatewayService,
 } from '@/shared/types/query.types';

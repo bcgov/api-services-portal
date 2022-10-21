@@ -10,9 +10,9 @@ import {
 } from '@chakra-ui/react';
 import Downshift, { StateChangeOptions } from 'downshift';
 
-import { SEARCH_DATASETS } from '@/shared/queries/dataset-queries';
 import { useApi } from '@/shared/services/api';
 import { Dataset } from '@/shared/types/query.types';
+import { gql } from 'graphql-request';
 
 interface DatasetInputProps {
   dataset?: Dataset;
@@ -22,10 +22,10 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
   const theme = useTheme();
   const [search, setSearch] = React.useState<string>('');
   const [selected, setSelected] = React.useState<Dataset | null>(dataset);
-  const { data, isLoading, isSuccess } = useApi(
+  const { data, isSuccess } = useApi(
     ['dataset-search', search],
     {
-      query: SEARCH_DATASETS,
+      query,
       variables: { search, first: 25 },
     },
     {
@@ -76,6 +76,11 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
               <FormLabel {...getLabelProps()}>
                 Link to BC Data Catalogue
               </FormLabel>
+              <FormHelperText mb={2}>
+                This value is the slug value of a corresponding BC Data
+                Catalogue entry: https://catalogue.data.gov.bc.ca/dataset/
+                <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
+              </FormHelperText>
               <Input
                 {...getRootProps(
                   { refKey: 'innerRef' },
@@ -142,19 +147,19 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
             </>
           )}
         </Downshift>
-        <FormHelperText>
-          <Text as="em">
-            https://catalogue.data.gov.bc.ca/dataset/
-            <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
-          </Text>
-        </FormHelperText>
-        <FormHelperText>
-          This value is the slug value of a corresponding BC Data Catalogue
-          entry
-        </FormHelperText>
       </FormControl>
     </>
   );
 };
 
 export default DatasetInput;
+
+const query = gql`
+  query GetAllDatasets($search: String!, $first: Int) {
+    allDatasets(search: $search, first: $first) {
+      id
+      name
+      title
+    }
+  }
+`;

@@ -1,133 +1,219 @@
 import * as React from 'react';
-import api from '@/shared/services/api';
-import { useAuth } from '@/shared/services/auth';
-import { Box, ButtonGroup, Center, Heading, Icon } from '@chakra-ui/react';
+import { useApi, useApiMutation } from '@/shared/services/api';
+import {
+  Box,
+  Button,
+  Flex,
+  Icon,
+  Link,
+  Tag,
+  Text,
+  Wrap,
+  WrapItem,
+} from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
-import EnvironmentsList from '@/components/environments-list';
+import { gql } from 'graphql-request';
 import NewProduct from '@/components/new-product';
-import { useQuery } from 'react-query';
-import type { Query } from '@/types/query.types';
-import { FaPlusCircle, FaFolder, FaFolderOpen } from 'react-icons/fa';
+import { FaPlusCircle } from 'react-icons/fa';
+import { Tr, Td } from '@chakra-ui/react';
+import Table from '@/components/table';
+import { getFlowText } from '@/shared/services/utils';
 
 import AddEnvironment from './add-environment';
-import { GET_LIST } from './queries';
 import EditProduct from './edit-product';
+import Card from '../card';
+import { Environment } from '@/shared/types/query.types';
+import EnvironmentEdit from '../environment-edit';
+import { QueryKey } from 'react-query';
+import NextLink from 'next/link';
+import DeleteEnvironment from './delete-environment';
 
-const ProductsList: React.FC = () => {
-  const { data } = useQuery<Query>(
-    'products',
-    async () => await api(GET_LIST, {}),
-    {
-      suspense: true,
-    }
-  );
+interface ProductsListProps {
+  queryKey: QueryKey;
+}
+
+const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
+  const { data } = useApi(queryKey, { query });
+
 
   if (data.allProductsByNamespace.length === 0) {
     return (
       <EmptyPane
         title="Make your first Product"
         message="You can create additional environments once a product has been made."
-        action={<NewProduct />}
+        action={<NewProduct queryKey={queryKey} />}
       />
     );
   }
 
   return (
-    <Box width="100%">
+    <>
       {data.allProductsByNamespace.map((d) => (
-        <Box key={d.id} mb={8} className="product-item">
-          <Box
-            as="header"
-            bgColor="white"
-            boxShadow="0 2px 5px rgba(0, 0, 0, 0.1)"
-          >
-            <Box
-              as="hgroup"
-              p={4}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              borderColor="gray.300"
-              borderBottomWidth={1}
-            >
-              <Box display="flex" alignItems="center">
-                <Icon
-                  as={d.environments.length > 0 ? FaFolder : FaFolderOpen}
-                  color={d.environments.length > 0 ? 'bc-blue-alt' : 'gray.200'}
-                  mr={4}
-                  boxSize="1.5rem"
-                />
-                <Heading as="h4" size="md">
-                  {d.name}
-                </Heading>
-              </Box>
-              <Box>
-                <ButtonGroup
-                  size="sm"
-                  opacity={data.allProductsByNamespace.length > 1 ? 0 : 1}
-                  transition="opacity ease-in 0.2s"
-                  position="relative"
+        <Card
+          key={d.id}
+          mb={8}
+          actions={
+            <>
+              <AddEnvironment
+                productId={d.id}
+                environments={d.environments.map((d) => d.name)}
+                productName={d.name}
+                productQueryKey={queryKey}
+              >
+                <Button
+                  leftIcon={<Icon as={FaPlusCircle} mr={2} />}
+                  variant="ghost"
                   sx={{
-                    '.product-item:hover &': {
-                      opacity: 1,
+                    _active: {
+                      boxShadow: 'none',
+                    },
+                    _focus: {
+                      boxShadow: 'none',
                     },
                   }}
                 >
-                  {d.environments.length < 6 && (
-                    <AddEnvironment
-                      productId={d.id}
-                      environments={d.environments.map((d) => d.name)}
-                      productName={d.name}
-                    >
-                      <Box
-                        as="span"
-                        display="flex"
-                        alignItems="center"
-                        bgColor="bc-link"
-                        py={1}
-                        px={2}
-                        height="100%"
-                        color="white"
-                        borderRadius={4}
-                      >
-                        <Icon as={FaPlusCircle} mr={2} />
-                        Add Env
-                      </Box>
-                    </AddEnvironment>
-                  )}
-                  <EditProduct data={d} />
-                </ButtonGroup>
-              </Box>
-            </Box>
-            <Box bgColor="white">
-              {d.environments.length === 0 && (
-                <Box
-                  py={4}
-                  bgColor="gray.100"
-                  boxShadow="inset 0 3px 5px rgba(0, 0, 0, 0.1)"
+                  Add Env
+                </Button>
+              </AddEnvironment>
+              <EditProduct data={d} queryKey={queryKey} />
+            </>
+          }
+          heading={
+            <>
+              {d.name}
+              {d.dataset && (
+                <NextLink
+                  passHref
+                  href={`/devportal/api-directory/${d.dataset.id}?preview=true`}
                 >
-                  <Center>
-                    <AddEnvironment
-                      productId={d.id}
-                      environments={d.environments.map((d) => d.name)}
-                      productName={d.name}
-                    >
-                      Add Environment
-                    </AddEnvironment>
-                  </Center>
-                </Box>
+                  <Link fontSize="sm" color="bc-blue" ml={4}>
+                    View Dataset
+                  </Link>
+                </NextLink>
               )}
-              {d.environments.length > 0 && (
-                <Box bgColor="blue.50">
-                  <EnvironmentsList data={d.environments} product={d} />
-                </Box>
+            </>
+          }
+        >
+          {d.environments.length === 0 && (
+            <EmptyPane
+              title="No environments"
+              message="Click Add Environment to add one"
+            />
+          )}
+          {d.environments.length > 0 && (
+            <Table
+              sortable
+              data={d.environments}
+              columns={[
+                { name: 'State', key: 'active', sortable: true },
+                { name: 'Environment', key: 'name', sortable: true },
+                { name: 'Authentication', key: 'flow', sortable: true },
+                { name: 'Services', key: 'credentialIssuer.name' },
+                { name: '', key: 'id' },
+              ]}
+            >
+              {(item: Environment, index) => (
+                <Tr key={index}>
+                  <Td>
+                    <Flex align="center">
+                      {item.active ? (
+                        <>
+                          <Box
+                            bgColor="bc-success"
+                            w="12px"
+                            h="12px"
+                            borderRadius="full"
+                            mr={2}
+                          />{' '}
+                          Active
+                        </>
+                      ) : (
+                          <>
+                            <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
+                          Inactive
+                        </>
+                        )}
+                    </Flex>
+                  </Td>
+                  <Td>
+                    <Tag colorScheme={item.name} variant="outline">
+                      {item.name}
+                    </Tag>
+                  </Td>
+                  <Td>{getFlowText(item.flow)}</Td>
+                  <Td>
+                    {!item.services.length && (
+                      <Text as="em" color="bc-empty">
+                        No services yet
+                      </Text>
+                    )}
+                    {item.services?.length > 0 && (
+                      <Wrap>
+                        {item.services?.map((s) => (
+                          <WrapItem key={s.id}>
+                            <Tag variant="outline">{s.name}</Tag>
+                          </WrapItem>
+                        ))}
+                      </Wrap>
+                    )}
+                  </Td>
+                  <Td textAlign="right" w="17%">
+                    <EnvironmentEdit
+                      data={item}
+                      product={d}
+                      productQueryKey={queryKey}
+                    />
+                    <DeleteEnvironment data={item} queryKey={queryKey} />
+                  </Td>
+                </Tr>
               )}
-            </Box>
-          </Box>
-        </Box>
+            </Table>
+          )}
+        </Card>
       ))}
-    </Box>
+    </>
   );
 };
 
 export default ProductsList;
+
+const query = gql`
+  query GetAllProducts {
+    allProductsByNamespace {
+      id
+      name
+      description
+      organization {
+        id
+        title
+      }
+      organizationUnit {
+        id
+        title
+      }
+      dataset {
+        id
+        name
+        title
+        notes
+        sector
+        license_title
+      }
+      environments {
+        id
+        name
+        active
+        flow
+        services {
+          id
+          name
+          host
+        }
+        credentialIssuer {
+          name
+        }
+      }
+    }
+  }
+`;
+

@@ -1,5 +1,5 @@
 
-  query GET {
+  query GetAllLegals {
     allLegals {
       id
       title

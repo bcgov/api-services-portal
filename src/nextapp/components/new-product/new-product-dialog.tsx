@@ -17,68 +17,65 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react';
-import { useQueryClient } from 'react-query';
-import {
-  ADD_ENVIRONMENT,
-  ADD_PRODUCT,
-} from '@/shared/queries/products-queries';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/types/query.types';
+import { gql } from 'graphql-request';
 
 interface NewProductDialogProps {
   open: boolean;
   onClose: () => void;
+  queryKey: QueryKey;
 }
 
 const NewProductDialog: React.FC<NewProductDialogProps> = ({
   open,
   onClose,
+  queryKey,
 }) => {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const productMutation = useApiMutation<{ name: string }>(ADD_PRODUCT);
+  const productMutation = useApiMutation<{ name: string }>(addProductMutation);
   const environmentMutation = useApiMutation<{
     product: string;
     name: string;
-  }>(ADD_ENVIRONMENT);
+  }>(addEnvironmentMutation);
   const form = React.useRef<HTMLFormElement>();
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createProduct();
-  };
-  const createProduct = async () => {
-    if (form.current) {
-      const data = new FormData(form.current);
+    const data = new FormData(form.current);
 
-      if (form.current.checkValidity()) {
-        try {
-          const productName = data.get('name') as string;
-          const environment = data.get('environment') as string;
-          const res: Mutation = await productMutation.mutateAsync({
-            name: productName,
-          });
-          await environmentMutation.mutateAsync({
-            product: res.createProduct.id,
-            name: environment,
-          });
+    if (form.current.checkValidity()) {
+      try {
+        const productName = data.get('name') as string;
+        const environment = data.get('environment') as string;
+        const res: Mutation = await productMutation.mutateAsync({
+          name: productName,
+        });
+        await environmentMutation.mutateAsync({
+          product: res.createProduct.id,
+          name: environment,
+        });
 
-          queryClient.invalidateQueries('products');
-          toast({
-            title: `Product ${productName} created!`,
-            description: 'You can now add more environments',
-            status: 'success',
-            isClosable: true,
-          });
-          onClose();
-        } catch {
-          toast({
-            title: 'Create failed',
-            status: 'error',
-            isClosable: true,
-          });
-        }
+        queryClient.invalidateQueries(queryKey);
+        toast({
+          title: `Product ${productName} created!`,
+          description: 'You can now add more environments',
+          status: 'success',
+          isClosable: true,
+        });
+        onClose();
+      } catch {
+        toast({
+          title: 'Create failed',
+          status: 'error',
+          isClosable: true,
+        });
       }
     }
+  };
+  const handleCreateClick = () => {
+    form.current?.requestSubmit();
   };
 
   return (
@@ -87,7 +84,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
       <ModalContent borderRadius="4px">
         <ModalHeader>Create Product</ModalHeader>
         <ModalBody>
-          <form ref={form} onSubmit={onSubmit}>
+          <form ref={form} onSubmit={handleSubmit}>
             <FormControl
               isRequired
               mb={4}
@@ -103,6 +100,9 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             </FormControl>
             <FormControl as="fieldset" isRequired>
               <FormLabel as="legend">Environment</FormLabel>
+              <FormHelperText>
+                Select the first environment for this product
+              </FormHelperText>
               <RadioGroup defaultValue="dev">
                 <Stack>
                   <Radio
@@ -142,9 +142,6 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                 </Stack>
               </RadioGroup>
-              <FormHelperText>
-                Select the first environment for this product
-              </FormHelperText>
             </FormControl>
           </form>
         </ModalBody>
@@ -159,7 +156,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
             </Button>
             <Button
               isLoading={productMutation.isLoading}
-              onClick={createProduct}
+              onClick={handleCreateClick}
               data-testid="prd-create-btn"
             >
               Create
@@ -172,3 +169,23 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
 };
 
 export default NewProductDialog;
+
+const addProductMutation = gql`
+  mutation AddProduct($name: String!) {
+    createProduct(data: { name: $name }) {
+      id
+      name
+    }
+  }
+`;
+
+const addEnvironmentMutation = gql`
+  mutation AddEnvironment($name: String!, $product: ID!) {
+    createEnvironment(
+      data: { name: $name, product: { connect: { id: $product } } }
+    ) {
+      id
+      name
+    }
+  }
+`;

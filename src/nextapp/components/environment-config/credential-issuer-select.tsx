@@ -3,18 +3,7 @@ import { Select } from '@chakra-ui/react';
 import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 
-const query = gql`
-  query GET($flow: String) {
-    allCredentialIssuersByNamespace(where: { flow: $flow }) {
-      id
-      name
-      environmentDetails
-    }
-  }
-`;
-
 interface CredentialIssuerSelectProps {
-  environmentId: string;
   flow: string;
   value?: string;
 }
@@ -23,39 +12,41 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
   flow,
   value,
 }) => {
-  const variables = { flow };
-  const { data, isLoading, isSuccess } = useApi(
+  const [credentialIssuer, setCredentialIssuer] = React.useState(value);
+  const { data, isLoading, isError } = useApi(
     ['environment-credential-users', flow],
     {
       query,
-      variables,
+      variables: { flow },
     },
     {
       suspense: false,
     }
   );
 
-  if (isLoading) {
-    return <></>;
-  }
+  const handleCredentialIssuerChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setCredentialIssuer(event.target.value);
+  };
 
   return (
     <Select
-      size="sm"
       name="credentialIssuer"
-      variant="filled"
-      width="auto"
-      ml={3}
       isLoading={isLoading}
-      isDisabled={!isSuccess}
-      defaultValue={value}
+      isDisabled={
+        isError || !/(client-credentials|authorization-code)/.test(flow)
+      }
+      onChange={handleCredentialIssuerChange}
+      value={credentialIssuer}
+      data-testid="edit-env-cred-issuer-select"
     >
-      <option></option>
+      <option value="">Select</option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
         <option key={d.id} value={d.id}>
           {d.name} (
           {JSON.parse(d.environmentDetails)
-            .map((e: any) => e.environment)
+            .map((e: { environment: string }) => e.environment)
             .join(',')}
           )
         </option>
@@ -65,3 +56,13 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
 };
 
 export default CredentialIssuerSelect;
+
+const query = gql`
+  query GetAllCredentialIssuersByNamespace($flow: String) {
+    allCredentialIssuersByNamespace(where: { flow: $flow }) {
+      id
+      name
+      environmentDetails
+    }
+  }
+`;

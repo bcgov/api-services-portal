@@ -43,6 +43,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
+
   it('Creates a new service account', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
@@ -50,6 +51,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     })
     sa.saveServiceAcctCreds()
   })
+
   it('Publishes a new API to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
@@ -59,6 +61,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       })
     })
   })
+  
   it('Creates a new product in the directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
@@ -90,14 +93,18 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   it('Adds environment with Client ID/Secret authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
+      debugger
       let product = clientCredentials.clientIdSecret.product
       let authProfile = clientCredentials.clientIdSecret.authProfile
+      debugger
       pd.editProductEnvironment(product.name, product.environment.name)
       product.environment.config.authIssuer = authProfile.name
       product.environment.config.authIssuerEnv = authProfile.environmentConfig.environment
       pd.editProductEnvironmentConfig(product.environment.config)
+      debugger
+      pd.generateKongPluginConfig(product.name, product.environment.name,'cc-service.yml')
     })
-    pd.generateKongPluginConfig('cc-service.yml')
+    // pd.generateKongPluginConfig('cc-service.yml')
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
@@ -120,8 +127,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       prod.environment.config.authIssuer = ap.name
       prod.environment.config.authIssuerEnv = ap.environmentConfig.environment
       pd.editProductEnvironmentConfig(prod.environment.config)
+      pd.generateKongPluginConfig(prod.name, prod.environment.name,'cc-service.yml')
     })
-    pd.generateKongPluginConfig('cc-service.yml')
   })
 
   it('Adds environment with JWT - JWKS URL authenticator to product', () => {
@@ -134,8 +141,9 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
       prod.environment.config.authIssuer = ap.name
       prod.environment.config.authIssuerEnv = ap.environmentConfig.environment
       pd.editProductEnvironmentConfig(prod.environment.config)
+      pd.generateKongPluginConfig(prod.name, prod.environment.name,'cc-service.yml')
+
     })
-    pd.generateKongPluginConfig('cc-service.yml')
   })
   
   it('Applies authorization plugin to service published to Kong Gateway', () => {
@@ -152,8 +160,8 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let product = clientCredentials.clientIdSecret.product
-      pd.editProductEnvironment(product.name, product.environment.name)
-      pd.activateService(clientCredentials)
+      // pd.editProductEnvironment(product.name, product.environment.name)
+      pd.activateService(product.name, product.environment.name,clientCredentials)
     })
   })
 
