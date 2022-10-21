@@ -1,0 +1,40 @@
+
+  query GetServices($days: [String!]) {
+    allGatewayServicesByNamespace(first: 200) {
+      id
+      name
+      updatedAt
+      environment {
+        id
+        name
+        active
+        flow
+        product {
+          name
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+      }
+      routes {
+        id
+        name
+      }
+      plugins {
+        id
+        name
+      }
+    }
+    allMetrics(
+      sortBy: day_ASC
+      where: {query: "kong_http_requests_hourly_namespace", day_in: $days}
+    ) {
+      query
+      day
+      metric
+      values
+    }
+  }
