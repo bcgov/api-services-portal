@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Box,
-  Table,
   Tr,
   Td,
   IconButton,
@@ -9,27 +8,19 @@ import {
   Tag,
   Center,
   CircularProgress,
-  Heading,
   Text,
-  Wrap,
-  WrapItem,
-  Badge,
-  Tbody,
-  Grid,
-  GridItem,
-  CircularProgressLabel,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
-import ServiceRoutes from '@/components/service-routes';
 import ApsTable from '@/components/table';
 import { GatewayService } from '@/shared/types/query.types';
 import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
 import { useApi } from '@/shared/services/api';
 
 import { dateRange, useTotalRequests } from './utils';
-import MetricGraph from './metric-graph';
+// import MetricGraph from './metric-graph';
 import ServiceDetail from './service-details';
+import ServicesListItemMetrics from './services-list-item-metrics';
 
 interface ServicesListProps {
   search?: string;
@@ -50,6 +41,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
       suspense: true,
     }
   );
+  // Filter out all namespace metrics to calculate average
   const totalNamespaceRequests = useTotalRequests(data);
   const filterServices = React.useCallback(
     (d) => {
@@ -81,22 +73,29 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
             <Tr key={d.id}>
               <Td>{d.name}</Td>
               <Td>
-                <Tag variant="outline">{d.environment?.name ?? '-'}</Tag>
+                {d.environment && (
+                  <Tag variant="outline">{d.environment.name}</Tag>
+                )}
+                {!d.environment && (
+                  <Text as="em" color="bc-component">
+                    No environment
+                  </Text>
+                )}
               </Td>
-              <Td>
-                <CircularProgress
-                  capIsRound
-                  size="56px"
-                  value={79}
-                  color="bc-success"
-                  thickness="10px"
-                >
-                  <CircularProgressLabel>
-                    <Text fontWeight="bold">{`${Math.floor(79)}%`}</Text>
-                  </CircularProgressLabel>
-                </CircularProgress>
-              </Td>
-              <Td>10</Td>
+              <React.Suspense
+                fallback={
+                  <>
+                    <Td>-</Td>
+                    <Td></Td>
+                  </>
+                }
+              >
+                <ServicesListItemMetrics
+                  days={range}
+                  service={d.name}
+                  totalRequests={totalNamespaceRequests}
+                />
+              </React.Suspense>
               <Td textAlign="right">
                 <IconButton
                   aria-label="toggle table"
@@ -145,7 +144,7 @@ export default ServicesList;
 
 const columns = [
   { name: 'Service Name', key: 'name' },
-  { name: 'Environment', key: 'environment', w: '10%' },
+  { name: 'Environment', key: 'environment', w: '20%' },
   { name: 'Traffic', key: 'id' },
   { name: 'Total Requests', key: 'id' },
   { name: '' },

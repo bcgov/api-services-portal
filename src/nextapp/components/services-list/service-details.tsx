@@ -152,14 +152,5 @@ const query = gql`
       }
       updatedAt
     }
-    allMetrics(
-      sortBy: day_ASC
-      where: { query: "kong_http_requests_daily_namespace", day_in: $days }
-    ) {
-      query
-      day
-      metric
-      values
-    }
   }
 `;
