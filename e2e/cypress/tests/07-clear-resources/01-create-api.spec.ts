@@ -90,8 +90,9 @@ describe('Create API Spec', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
       pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
       pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+      pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
     })
-    pd.generateKongPluginConfig('service-clear-resources.yml')
+ 
   })
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
