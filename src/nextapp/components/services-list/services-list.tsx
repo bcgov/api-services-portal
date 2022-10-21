@@ -23,7 +23,7 @@ import ServiceDetail from './service-details';
 import ServicesListItemMetrics from './services-list-item-metrics';
 
 interface ServicesListProps {
-  search?: string;
+  search: string;
 }
 
 const ServicesList: React.FC<ServicesListProps> = ({ search }) => {

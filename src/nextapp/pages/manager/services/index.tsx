@@ -74,7 +74,7 @@ const ServicesPage: React.FC<
                 <Skeleton key={d} height="72px" mb={2} />
               ))}
             >
-              <ServicesList />
+              <ServicesList search={search} />
             </ClientRequest>
           )}
         </Card>
