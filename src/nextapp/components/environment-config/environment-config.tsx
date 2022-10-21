@@ -36,6 +36,9 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [flow, setFlow] = React.useState<string>(data.flow);
+  const [credentialIssuer, setCredentialIssuer] = React.useState(
+    data.credentialIssuer?.id ?? ''
+  );
   const [isEditing, setEditing] = React.useState<boolean>(false);
 
   const handleToggleEditing = React.useCallback(() => {
@@ -50,6 +53,11 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   );
 
   // Events
+  const handleCredentialIssuerChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setCredentialIssuer(event.target.value);
+  };
   const onChange = React.useCallback(() => {
     if (!hasChanged) {
       setChanged(true);
@@ -236,8 +244,9 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                         flow === 'authorization-code') && (
                         <GridItem>
                           <CredentialIssuerSelect
-                            value={data.credentialIssuer?.id}
+                            value={credentialIssuer}
                             flow={flow}
+                            onChange={handleCredentialIssuerChange}
                             data-testid="prd-env-auth-issuer-select"
                           />
                         </GridItem>

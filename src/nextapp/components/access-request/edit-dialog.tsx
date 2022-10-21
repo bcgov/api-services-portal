@@ -131,10 +131,18 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const ipRestrictionForm = new FormData(
       ref?.current.querySelector('form[name="ipRestrictionsForm"]') || undefined
     );
+    const rateLimitingForm = new FormData(
+      ref?.current.querySelector('form[name="rateLimitingForm"]')
+    );
+    const rateLimitingFormValues = Object.fromEntries(rateLimitingForm);
+    const rateLimitingFormHasValues = ['second', 'minute', 'hour', 'day'].some(
+      (input) => !!rateLimitingFormValues[input]
+    );
 
     if (
-      Boolean(ipRestrictionForm.get('allow')) &&
-      ipRestrictionForm.get('allow') !== '[]'
+      (Boolean(ipRestrictionForm.get('allow')) &&
+        ipRestrictionForm.get('allow') !== '[]') ||
+      rateLimitingFormHasValues
     ) {
       setHasUnsavedChanges(true);
       return false;
@@ -260,16 +268,17 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
             </Tabs>
           </ModalHeader>
           <ModalCloseButton data-testid="consumer-edit-close-btn" />
+          {hasUnsavedChanges && (
+            <Alert status="error" variant="solid" mb={8}>
+              <AlertIcon />
+              <AlertDescription>
+                You have unapplied control settings. Reset or apply your
+                settings before saving.
+              </AlertDescription>
+            </Alert>
+          )}
           {isSuccess && (
             <ModalBody ref={ref}>
-              {hasUnsavedChanges && (
-                <Alert status="error" variant="solid" mb={8}>
-                  <AlertIcon />
-                  <AlertDescription>
-                    You have an unapplied IP Restrictions control.
-                  </AlertDescription>
-                </Alert>
-              )}
               <Box
                 hidden={tabIndex !== 0}
                 display={tabIndex === 0 ? 'block' : 'none'}

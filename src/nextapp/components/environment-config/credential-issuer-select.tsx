@@ -5,14 +5,15 @@ import { gql } from 'graphql-request';
 
 interface CredentialIssuerSelectProps {
   flow: string;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   value?: string;
 }
 
 const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
   flow,
+  onChange,
   value,
 }) => {
-  const [credentialIssuer, setCredentialIssuer] = React.useState(value);
   const { data, isLoading, isError } = useApi(
     ['environment-credential-users', flow],
     {
@@ -24,12 +25,6 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
     }
   );
 
-  const handleCredentialIssuerChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setCredentialIssuer(event.target.value);
-  };
-
   return (
     <Select
       name="credentialIssuer"
@@ -37,8 +32,8 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
       isDisabled={
         isError || !/(client-credentials|authorization-code)/.test(flow)
       }
-      onChange={handleCredentialIssuerChange}
-      value={credentialIssuer}
+      onChange={onChange}
+      value={value}
       data-testid="edit-env-cred-issuer-select"
     >
       <option value="">Select</option>
