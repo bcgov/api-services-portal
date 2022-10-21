@@ -55,17 +55,15 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
 
   return (
     <>
-      {data.allGatewayServicesByNamespace.length <= 0 && (
-        <Box gridColumnStart="1" gridColumnEnd="4">
+      <ApsTable
+        sortable
+        columns={columns}
+        emptyView={
           <EmptyPane
             title="No services created yet."
             message="You need to publish configuration to the API Gateway."
           />
-        </Box>
-      )}
-      <ApsTable
-        sortable
-        columns={columns}
+        }
         data={data.allGatewayServicesByNamespace.filter(filterServices)}
       >
         {(d: GatewayService) => (
