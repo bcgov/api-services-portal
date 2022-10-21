@@ -69,13 +69,14 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   const handleServiceSelect = (service: GatewayService) => () => {
     setActiveServices((state) => [...state, service]);
   };
-  const handleDragStart =
-    (d: GatewayService) => (event: React.DragEvent<HTMLDivElement>) => {
-      const data = JSON.stringify(d);
-      dragRef.current = data;
-      event.dataTransfer.setData(dataTransferType, data);
-      event.dataTransfer.effectAllowed = 'move';
-    };
+  const handleDragStart = (d: GatewayService) => (
+    event: React.DragEvent<HTMLDivElement>
+  ) => {
+    const data = JSON.stringify(d);
+    dragRef.current = data;
+    event.dataTransfer.setData(dataTransferType, data);
+    event.dataTransfer.effectAllowed = 'move';
+  };
   const handleDrop = () => {
     setActiveServices((state) => [...state, JSON.parse(dragRef.current)]);
     setDragTarget(true);
@@ -134,6 +135,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
                   variant={hasError ? 'outline' : 'solid'}
                   colorScheme={hasError ? 'red' : 'green'}
                   userSelect="none"
+                  data-testid={s.name}
                 >
                   <TagLabel>{s.name}</TagLabel>
                   <TagCloseButton onClick={handleRemoveService(s.id)} />
@@ -191,6 +193,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
                 onDragStart={handleDragStart(s)}
                 onClick={handleServiceSelect(s)}
                 variant="drag"
+                data-testid={s.name}
               >
                 <TagLabel
                   cursor="pointer"
