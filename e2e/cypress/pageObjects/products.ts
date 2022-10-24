@@ -10,11 +10,10 @@ class Products {
   orgDropDown: string = '[data-testid=prd-edit-org-dd]'
   orgUnitDropDown: string = '[data-testid=prd-edit-org-unit-dd]'
   updateBtn: string = '[data-testid=prd-edit-update-btn]'
-  editPrdEnvConfigBtn: string = '[data-testid=prd-env-config-edit-btn]'
+  editPrdEnvConfigBtn: string = '[data-testid="edit-env-active-checkbox"]'
   // envCfgActivateRadio: string = '[data-testid=prd-env-config-activate-radio]'
   envCfgActivateRadio: string = '[name="active"]'
-  // envCfgApprovalCheckbox: string = '[data-testid=prd-env-config-approval-checkbox]'
-  envCfgApprovalCheckbox: string = '[name="approval"]'
+  envCfgApprovalCheckbox: string = '[data-testid="edit-env-approval-checkbox"]'
   envCfgTermsDropdown: string = '[data-testid=legal-terms-dd]'
   envCfgOptText: string = '[data-testid=edit-env-additional-details-textarea]'
   envCfgAuthzDropdown: string = '[data-testid=edit-env-auth-flow-select]'
@@ -80,10 +79,6 @@ class Products {
 
   editProductEnvironmentConfig(config: any, invalid = false) {
 
-    // cy.get(this.editPrdEnvConfigBtn).click()
-    // cy.get(this.envCfgActivateRadio).click()
-    // cy.get(this.envCfgApprovalCheckbox).click()
-
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
     let authType = config.authorization
@@ -104,11 +99,9 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-    cy.contains('Require Approval').click()
-    cy.contains('Enable Environment').click()
+    cy.get(this.envCfgApprovalCheckbox).click()
+    cy.get(this.editPrdEnvConfigBtn).click()
     cy.wait(3000)
-    // cy.get(`[data-testid=${config.serviceName}`).click()
-    // cy.wait(3000)
     cy.get(this.envCfgApplyChangesContinueBtn).click()
     cy.get(this.envCfgApplyChangesBtn).click()
     cy.wait(3000)
@@ -168,7 +161,8 @@ class Products {
   }
 
   deleteProduct(productName: string) {
-    this.editProduct(productName)
+    // this.editProduct(productName)
+    cy.get(`[data-testid=${productName}-more-options-btn]`).first().click()
     cy.get(this.deleteProductBtn).click()
     cy.get(this.deleteProductConfirmationBtn).click()
   }

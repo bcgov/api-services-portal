@@ -85,24 +85,24 @@ describe('Create API Spec', () => {
     })
   })
   
-  it('publish product to directory', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
-      pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
-      pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
-      pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
-    })
- 
-  })
-  it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ deleteResources }: any) => {
-      cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-          cy.log(JSON.stringify(res.body))
-        })
-      })
-    })
-  })
+  // it('publish product to directory', () => {
+  //   cy.visit(pd.path)
+  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
+  //     pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
+  //     pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+  //     pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
+  //   })
+  // })
+
+  // it('applies authorization plugin to service published to Kong Gateway', () => {
+  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
+  //     cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
+  //       cy.get('@publishAPIResponse').then((res: any) => {
+  //         cy.log(JSON.stringify(res.body))
+  //       })
+  //     })
+  //   })
+  // })
 
   after(() => {
     cy.logout()
