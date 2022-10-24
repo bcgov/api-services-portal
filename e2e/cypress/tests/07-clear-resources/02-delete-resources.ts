@@ -57,7 +57,7 @@ describe('Delete created resources', () => {
   it('Delete Namespace', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
       cy.visit(ns.path)
-      ns.deleteNamespace(deleteResources.namespace)
+      // ns.deleteNamespace(deleteResources.namespace)
     })
   })
 
