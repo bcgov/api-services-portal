@@ -9,7 +9,7 @@ import { getResourceSets, getEnvironmentContext } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
-import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
+import { lookupUsersByUsernames } from '../../services/keystone';
 
 const logger = Logger('lists.umaticket');
 
@@ -143,7 +143,7 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const { email, scopes, resourceId } = args.data;
+              const scopes = args.data.scopes;
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
@@ -152,7 +152,8 @@ module.exports = {
 
               const resourceIds = await getResourceSets(envCtx);
               assert.strictEqual(
-                resourceIds.filter((rid) => rid === resourceId).length,
+                resourceIds.filter((rid) => rid === args.data.resourceId)
+                  .length,
                 1,
                 'Invalid Resource'
               );
@@ -162,14 +163,13 @@ module.exports = {
                 envCtx.issuerEnvConfig.clientId,
                 envCtx.issuerEnvConfig.clientSecret
               );
-              const user = await userApi.lookupUserByEmail(
+              const users = await userApi.lookupUsersByEmail(
                 args.data.email,
-                false,
-                ['idir']
+                false
               );
-              const displayName =
-                userApi.getOneAttributeValue(user, 'display_name') ||
-                user.email;
+              assert.strictEqual(users.length, 1, 'Unable to match email');
+              const user = users.pop();
+              const displayName = user.attributes.display_name || user.email;
 
               const result = [];
               const granted =
@@ -180,7 +180,7 @@ module.exports = {
               );
               for (const scope of scopes) {
                 const permission = await permissionApi.createOrUpdatePermission(
-                  resourceId,
+                  args.data.resourceId,
                   user.id,
                   granted,
                   scope
@@ -199,28 +199,6 @@ module.exports = {
                 displayName,
                 scopes
               );
-
-              // refresh the permissions for this user in TemporaryIdentity
-              try {
-                logger.info(
-                  'User matching %s with %j',
-                  user.id,
-                  context.req.user
-                );
-                if (user.id === context.req.user.sub) {
-                  const subjectToken =
-                    context.req.headers['x-forwarded-access-token'];
-
-                  await switchTo(
-                    context,
-                    context.authedItem['namespace'],
-                    subjectToken,
-                    context.req.user.jti,
-                    context.req.user.sub,
-                    context.req.user.provider
-                  );
-                }
-              } catch (err) {}
 
               return result;
             },
