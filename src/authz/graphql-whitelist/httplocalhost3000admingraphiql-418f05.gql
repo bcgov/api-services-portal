@@ -1,3 +1,4 @@
+
   query GetServices($days: [String!]) {
     allGatewayServicesByNamespace(first: 200) {
       id
