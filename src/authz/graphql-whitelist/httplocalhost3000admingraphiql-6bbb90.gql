@@ -1,0 +1,37 @@
+
+  query GetGatewayService($id: ID!, $days: [String!]) {
+    GatewayService(where: {id: $id}) {
+      id
+      name
+      namespace
+      tags
+      host
+      environment {
+        id
+        name
+        active
+        flow
+        product {
+          name
+          organization {
+            title
+          }
+          organizationUnit {
+            title
+          }
+        }
+      }
+      plugins {
+        id
+        name
+      }
+      routes {
+        id
+        name
+        hosts
+        paths
+        methods
+      }
+      updatedAt
+    }
+  }
