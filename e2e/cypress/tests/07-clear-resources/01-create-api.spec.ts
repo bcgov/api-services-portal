@@ -15,7 +15,7 @@ describe('Create API Spec', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
-    cy.resetState()
+    // cy.resetState()
   })
 
   beforeEach(() => {
@@ -33,9 +33,9 @@ describe('Create API Spec', () => {
 
   it('creates and activates new namespace', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ checkPermission }: any) => {
-        nameSpace = checkPermission.namespace
-        home.createNamespace(checkPermission.namespace)
+      cy.get('@apiowner').then(({ deleteResources }: any) => {
+        nameSpace = deleteResources.namespace
+        home.createNamespace(deleteResources.namespace)
         cy.get('@login').then(function (xhr: any) {
           userSession = xhr.response.headers['x-auth-request-access-token']
         })
@@ -45,26 +45,25 @@ describe('Create API Spec', () => {
 
   it('creates a new service account', () => {
     cy.visit(sa.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      sa.createServiceAccount(checkPermission.serviceAccount.scopes)
+    cy.get('@apiowner').then(({ serviceAccount }: any) => {
+      sa.createServiceAccount(serviceAccount.scopes)
     })
     sa.saveServiceAcctCreds()
   })
 
   it('publishes a new API to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
       })
     })
   })
-
   it('creates as new product in the directory', () => {
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.createNewProduct(checkPermission.product.name, checkPermission.product.environment.name)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.createNewProduct(deleteResources.product.name, deleteResources.product.environment.name)
     })
   })
 
@@ -79,29 +78,31 @@ describe('Create API Spec', () => {
   })
 
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
+
     cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.updateDatasetNameToCatelogue(checkPermission.product.name, checkPermission.product.environment.name)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.updateDatasetNameToCatelogue(deleteResources.product.name, deleteResources.product.environment.name)
     })
   })
   
-  it('publish product to directory', () => {
-    cy.visit(pd.path)
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      pd.editProductEnvironment(checkPermission.product.name, checkPermission.product.environment.name)
-      pd.editProductEnvironmentConfig(checkPermission.product.environment.config)
-    })
-    pd.generateKongPluginConfig('service-permission.yml')
-  })
+  // it('publish product to directory', () => {
+  //   cy.visit(pd.path)
+  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
+  //     pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
+  //     pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+  //     pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
+  //   })
+  // })
 
-  it('applies authorization plugin to service published to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ checkPermission }: any) => {
-      cy.publishApi('service-permission.yml', checkPermission.namespace).then(() => {
-        cy.get('@publishAPIResponse').then((res: any) => {
-        })
-      })
-    })
-  })
+  // it('applies authorization plugin to service published to Kong Gateway', () => {
+  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
+  //     cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
+  //       cy.get('@publishAPIResponse').then((res: any) => {
+  //         cy.log(JSON.stringify(res.body))
+  //       })
+  //     })
+  //   })
+  // })
 
   after(() => {
     cy.logout()

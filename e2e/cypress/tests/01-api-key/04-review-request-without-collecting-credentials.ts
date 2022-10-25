@@ -36,7 +36,6 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
   })
 
   it('verify that pending request is not displayed', () => {
-    debugger
     const flag = consumers.reviewThePendingRequest()
     assert.isFalse(flag, 'Review request popup is displayed')
   })

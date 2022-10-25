@@ -22,7 +22,7 @@ interface formDataRequestOptions {
   url: string
 }
 
-Cypress.Commands.add('login', (username: string, password: string) => {
+Cypress.Commands.add('login', (username: string, password: string, skipFlag = false) => {
   cy.log('< Log in with user ' + username)
   const login = new LoginPage()
   const home = new HomePage()
@@ -60,12 +60,14 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   //       cy.log("Trigger the block")
   //   })
   // })
-  cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
-    expect($el).to.exist
-    expect($el).to.be.visible
-    expect($el).contain('No Active Namespace')
-  })
-  cy.log('> Log in')
+  if (!skipFlag) {
+    cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
+      expect($el).to.exist
+      expect($el).to.be.visible
+      expect($el).contain('No Active Namespace')
+    })
+    cy.log('> Log in')
+  }
 })
 
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
@@ -111,6 +113,14 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
         userSession = xhr.response.headers['x-auth-request-access-token']
         return userSession
       })
+    })
+  })
+})
+
+Cypress.Commands.add('getUserSessionResponse', () => {
+  cy.getUserSession().then(() => {
+    cy.get('@login').then(function (xhr: any) {
+      return xhr
     })
   })
 })
@@ -253,7 +263,6 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   cy.fixture('state/regen').then((creds: any) => {
     cy.wait(2000)
     let token = key || creds.apikey
-    debugger
     const service = serviceName
     cy.log("Token->" + token)
     return cy.request({
@@ -346,7 +355,7 @@ Cypress.Commands.add('getUserSession', () => {
 })
 
 Cypress.Commands.add('verifyToastMessage', (msg: string) => {
-  cy.get('[role="alert"]',{timeout:2000}).closest('div').invoke('text')
+  cy.get('[role="alert"]', { timeout: 2000 }).closest('div').invoke('text')
     .then((text) => {
       const toastText = text;
       expect(toastText).to.contain(msg);
@@ -354,7 +363,6 @@ Cypress.Commands.add('verifyToastMessage', (msg: string) => {
 })
 
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
-  debugger
   let response = actualResponse
   if (indexFlag) {
     const index = actualResponse.findIndex((x: { name: string }) => x.name === expectedResponse.name);
@@ -365,7 +373,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       var objectValue1 = expectedResponse[p],
         objectValue2 = response[p];
       for (var value in objectValue1) {
-        if (!(['activityAt'].includes(value))) {
+        if (!(['activityAt', 'id'].includes(value))) {
           cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
         }
       }
@@ -375,7 +383,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
         response[p] = response[p]['name']
       }
-      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer'].includes(p))) {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer', 'id'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

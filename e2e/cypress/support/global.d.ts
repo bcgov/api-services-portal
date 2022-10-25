@@ -3,7 +3,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    login(username: string, password: string): Chainable<any>
+    login(username: string, password: string, skipFlag?: boolean): Chainable<any>
 
     resetCredential(accessRole: string): Chainable<any>
 
@@ -58,6 +58,8 @@ declare namespace Cypress {
     compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
 
     getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
+
+    getUserSessionResponse(): Chainable<Cypress.Response<any>>
 
     getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
 
