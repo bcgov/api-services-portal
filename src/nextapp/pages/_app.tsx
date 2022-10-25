@@ -34,20 +34,20 @@ import '../../mocks';
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
   {
-    href: '/about-us',
+    href: '/content/about-us',
     text: 'About',
   },
   {
-    href: '/terms-of-service',
+    href: '/content/terms-of-service',
     text: 'Terms',
   },
-  { href: '/privacy', text: 'Privacy' },
+  { href: '/content/privacy', text: 'Privacy' },
   {
-    href: '/accessibility',
+    href: '/content/accessibility',
     text: 'Accessibility',
   },
   {
-    href: '/copyright',
+    href: '/content/copyright',
     text: 'Copyright',
   },
   {
