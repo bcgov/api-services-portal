@@ -156,14 +156,16 @@ class Products {
   deleteProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
-    cy.get(`[data-testid=${pname}-${env}-edit-btn]`).siblings(this.deleteProductEnvBtn).click()
+    cy.get(`[data-testid=${pname}-${env}-more-options-btn]`).click()
+    cy.get(`[data-testid=${pname}-${env}-delete-btn]`).click()
     cy.get(this.deleteConfirmationBtn).click()
   }
 
   deleteProduct(productName: string) {
     // this.editProduct(productName)
-    cy.get(`[data-testid=${productName}-more-options-btn]`).first().click()
-    cy.get(this.deleteProductBtn).click()
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.get(`[data-testid=${pname}-edit-btn]`).first().click({force: true})
+    cy.get(`[data-testid=${pname}-delete-btn]`).first().click({force: true})
     cy.get(this.deleteProductConfirmationBtn).click()
   }
 
