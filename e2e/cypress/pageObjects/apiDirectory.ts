@@ -45,10 +45,8 @@ class ApiDirectoryPage {
   isProductDisplay(productName: string): Boolean {
     var flag = false;
     cy.get('body', {timeout: 6000}).then(($body) => {
-      debugger
       const pname: string = productName.toLowerCase().replaceAll(' ', '-')
       var ele : string = `[data-testid=api-${pname}]`
-      debugger
       cy.log('Body -> '+ $body)
       if ($body.find(ele).length > 0) {
         flag = true

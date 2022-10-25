@@ -27,7 +27,6 @@ class ApplicationPage {
   checkDeletedApplication(appName: any) {
     cy.get(this.applicationTbl).find('tr').each(($e1, index, $list) => {
       let applicationName = $e1.find('td:nth-child(1)').text()
-      debugger
       if (applicationName.toLowerCase() === appName.toLowerCase() ) {
         assert.fail("Application is not deleted")
       }

@@ -118,7 +118,6 @@ Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
 })
 
 Cypress.Commands.add('getUserSessionResponse', () => {
-  debugger
   cy.getUserSession().then(() => {
     cy.get('@login').then(function (xhr: any) {
       return xhr
@@ -264,7 +263,6 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   cy.fixture('state/regen').then((creds: any) => {
     cy.wait(2000)
     let token = key || creds.apikey
-    debugger
     const service = serviceName
     cy.log("Token->" + token)
     return cy.request({
@@ -365,7 +363,6 @@ Cypress.Commands.add('verifyToastMessage', (msg: string) => {
 })
 
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
-  debugger
   let response = actualResponse
   if (indexFlag) {
     const index = actualResponse.findIndex((x: { name: string }) => x.name === expectedResponse.name);
@@ -387,7 +384,6 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
         response[p] = response[p]['name']
       }
       if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer', 'id'].includes(p))) {
-        debugger
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }

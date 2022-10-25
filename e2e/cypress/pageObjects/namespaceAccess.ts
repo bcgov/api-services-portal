@@ -5,7 +5,6 @@ class NamespaceAccessPage {
 
   grantPermission(accessRqst: any) {
     cy.get(this.userNameInput,{ timeout: 2000 }).should('be.visible');
-    debugger
     cy.get(this.userNameInput).type(accessRqst.email);
     let accessRole: Array<string> = accessRqst.accessRole
     accessRole.forEach(function (accessName) {

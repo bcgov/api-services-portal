@@ -85,7 +85,6 @@ describe('Regenerate Credential for API Key', () => {
   it('Verify that API is not accessible with the old API Key', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET', existingAPIKey).then((response) => {
-        debugger
         expect(response.status).to.be.equal(500)
       })
     })

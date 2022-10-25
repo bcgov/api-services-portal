@@ -93,15 +93,12 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   it('Adds environment with Client ID/Secret authenticator to product', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      debugger
       let product = clientCredentials.clientIdSecret.product
       let authProfile = clientCredentials.clientIdSecret.authProfile
-      debugger
       pd.editProductEnvironment(product.name, product.environment.name)
       product.environment.config.authIssuer = authProfile.name
       product.environment.config.authIssuerEnv = authProfile.environmentConfig.environment
       pd.editProductEnvironmentConfig(product.environment.config)
-      debugger
       pd.generateKongPluginConfig(product.name, product.environment.name,'cc-service.yml')
     })
     // pd.generateKongPluginConfig('cc-service.yml')

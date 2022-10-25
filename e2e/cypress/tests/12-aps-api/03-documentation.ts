@@ -119,7 +119,6 @@ describe('API Tests for Deleting documentation', () => {
     })
 
     it('Delete the documentation', () => {
-        debugger
         cy.get('@api').then(({ documentation }: any) => {
             cy.makeAPIRequest(documentation.endPoint + '/' + slugValue, 'DELETE').then((response) => {
                 expect(response.status).to.be.equal(200)

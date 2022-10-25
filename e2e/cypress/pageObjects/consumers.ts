@@ -86,7 +86,6 @@ export default class ConsumersPage {
     // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-    debugger
     cy.wait(3000)
   }
 
@@ -180,7 +179,6 @@ export default class ConsumersPage {
     });
     cy.get(this.filterType).select(type).invoke('val')
     cy.get(this.filterValue).select(value).invoke('val')
-    debugger
     if (type == 'Labels') {
       cy.get(this.labelValueInput).type(labelValue)
     }
@@ -205,7 +203,6 @@ export default class ConsumersPage {
         expect($e1.next().text().trim()).to.eq('Dev')
       }
       if ($e1.text() === 'Application') {
-        debugger
         expect($e1.next().text().trim()).to.eq(applicationDetails.name)
       }
       if ($e1.text() === 'Instructions from the API Provider') {
@@ -219,7 +216,6 @@ export default class ConsumersPage {
 
   addGroupLabels(groupLabels: any) {
     Object.entries(groupLabels.labels).forEach((entry, index) => {
-      debugger
       cy.get(this.labelsGroupSelection).select('[+] Add New Label Group...').invoke('val')
       cy.get(this.labelName).type(entry[0])
       cy.contains('Add').click()
@@ -287,9 +283,7 @@ export default class ConsumersPage {
 
   addManageLabels() {
     cy.wait(2000)
-    debugger
     cy.get(this.manageLabelsBtn).parents('ul').find('li').then(($ele) => {
-      debugger
       const index = $ele.length - 1
       this.openManageLabelsWindow()
       cy.get(this.labelsGroupSelection).select('[+] Add New Label Group...').invoke('val')

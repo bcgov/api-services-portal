@@ -31,7 +31,6 @@ class Products {
   config: string | undefined
 
   getTestIdEnvName(env: string): string {
-    debugger
     switch (env) {
       case "Development":
         return "dev"
@@ -72,7 +71,6 @@ class Products {
 
   editProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-    debugger
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
   }
