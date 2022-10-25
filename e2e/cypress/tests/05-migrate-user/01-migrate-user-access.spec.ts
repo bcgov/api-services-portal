@@ -3,81 +3,81 @@ import LoginPage from '../../pageObjects/login'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 const { _, $ } = Cypress
 
-// describe('Assign Access to existing user Spec', () => {
-//   const login = new LoginPage()
-//   const home = new HomePage()
-//   const na = new NamespaceAccessPage()
+describe('Assign Access to existing user Spec', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  const na = new NamespaceAccessPage()
 
-//   before(() => {
-//     cy.visit('/')
-//     cy.deleteAllCookies()
-//     cy.reload()
-//   })
+  before(() => {
+    cy.visit('/')
+    cy.deleteAllCookies()
+    cy.reload()
+  })
 
-//   beforeEach(() => {
-//     cy.preserveCookies()
-//     cy.fixture('apiowner').as('apiowner')
-//     // cy.visit(login.path)
-//   })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('apiowner').as('apiowner')
+    // cy.visit(login.path)
+  })
 
-//   it('authenticates Janis (api owner)', () => {
-//     cy.get('@apiowner').then(({ user, namespace }: any) => {
-//       cy.login(user.credentials.username, user.credentials.password)
-//       cy.log('Logged in!')
-//       home.useNamespace(namespace)
-//     })
-//   })
+  it('authenticates Janis (api owner)', () => {
+    cy.get('@apiowner').then(({ user, namespace }: any) => {
+      cy.login(user.credentials.username, user.credentials.password)
+      cy.log('Logged in!')
+      home.useNamespace(namespace)
+    })
+  })
 
-//   it('Navigate to Namespace Access Page', () => {
-//     cy.visit(na.path)
-//     cy.wait(2000)
-//   })
+  it('Navigate to Namespace Access Page', () => {
+    cy.visit(na.path)
+    cy.wait(2000)
+  })
 
-//   it('Grant namespace access to Old User', () => {
-//     cy.get('@apiowner').then(({ grantPermission }: any) => {
-//       na.clickGrantUserAccessButton()
-//       na.grantPermission(grantPermission.OldUser)
-//     })
-//   })
+  it('Grant namespace access to Old User', () => {
+    cy.get('@apiowner').then(({ grantPermission }: any) => {
+      na.clickGrantUserAccessButton()
+      na.grantPermission(grantPermission.OldUser)
+    })
+  })
 
-//   after(() => {
-//     cy.logout()
-//     cy.clearLocalStorage({ log: true })
-//     cy.deleteAllCookies()
-//   })
-// })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+})
 
-// describe('Authernticate with old user to initiate migration', () => {
-//   const login = new LoginPage()
-//   const home = new HomePage()
-//   const na = new NamespaceAccessPage()
+describe('Authernticate with old user to initiate migration', () => {
+  const login = new LoginPage()
+  const home = new HomePage()
+  const na = new NamespaceAccessPage()
 
-//   before(() => {
-//     cy.visit('/')
-//     cy.deleteAllCookies()
-//     cy.reload()
-//   })
+  before(() => {
+    cy.visit('/')
+    cy.deleteAllCookies()
+    cy.reload()
+  })
 
-//   beforeEach(() => {
-//     cy.preserveCookies()
-//     cy.fixture('usermigration').as('usermigration')
-//     // cy.visit(login.path)
-//   })
+  beforeEach(() => {
+    cy.preserveCookies()
+    cy.fixture('usermigration').as('usermigration')
+    // cy.visit(login.path)
+  })
 
-//   it('authenticates with old user', () => {
-//     cy.get('@usermigration').then(({ oldUser, namespace }: any) => {
-//       cy.login(oldUser.credentials.username, oldUser.credentials.password)
-//       cy.log('Logged in!')
-//       home.useNamespace(namespace)
-//     })
-//   })
+  it('authenticates with old user', () => {
+    cy.get('@usermigration').then(({ oldUser, namespace }: any) => {
+      cy.login(oldUser.credentials.username, oldUser.credentials.password)
+      cy.log('Logged in!')
+      home.useNamespace(namespace)
+    })
+  })
 
-//   after(() => {
-//     cy.logout()
-//     cy.clearLocalStorage({ log: true })
-//     cy.deleteAllCookies()
-//   })
-// })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+})
 
 describe('Verify that permission of old user is migrated to new user', () => {
   const login = new LoginPage()

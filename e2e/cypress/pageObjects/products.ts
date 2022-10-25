@@ -1,3 +1,5 @@
+import { checkElementExists } from "../support"
+
 class Products {
   path: string = '/manager/products'
   newProductBtn: string = '[data-testid=prds-new-btn]'
@@ -8,13 +10,15 @@ class Products {
   orgDropDown: string = '[data-testid=prd-edit-org-dd]'
   orgUnitDropDown: string = '[data-testid=prd-edit-org-unit-dd]'
   updateBtn: string = '[data-testid=prd-edit-update-btn]'
-  editPrdEnvConfigBtn: string = '[data-testid=prd-env-config-edit-btn]'
-  envCfgActivateRadio: string = '[data-testid=prd-env-config-activate-radio]'
-  envCfgApprovalCheckbox: string = '[data-testid=prd-env-config-approval-checkbox]'
+  editPrdEnvConfigBtn: string = '[data-testid="edit-env-active-checkbox"]'
+  // envCfgActivateRadio: string = '[data-testid=prd-env-config-activate-radio]'
+  envCfgActivateRadio: string = '[name="active"]'
+  envCfgApprovalCheckbox: string = '[data-testid="edit-env-approval-checkbox"]'
   envCfgTermsDropdown: string = '[data-testid=legal-terms-dd]'
-  envCfgOptText: string = '[data-testid=prd-env-config-optional-text]'
-  envCfgAuthzDropdown: string = '[data-testid=prd-env-config-authz-dd]'
-  envCfgApplyChangesBtn: string = '[data-testid=prd-env-config-apply-btn]'
+  envCfgOptText: string = '[data-testid=edit-env-additional-details-textarea]'
+  envCfgAuthzDropdown: string = '[data-testid=edit-env-auth-flow-select]'
+  envCfgApplyChangesBtn: string = '[data-testid=edit-env-submit-button]'
+  envCfgApplyChangesContinueBtn: string = '[data-testid=edit-env-continue-button]'
   catelogueDropDown: string = '[id=downshift-0-input]'
   catelogueDropDownMenu: string = '[id=downshift-0-menu]'
   deleteProductEnvBtn: string = '[data-testid="prd-env-delete-btn"]'
@@ -22,6 +26,8 @@ class Products {
   deleteConfirmationBtn: string = '[data-testid="delete-env-confirmation-btn"]'
   deleteProductConfirmationBtn: string = '[data-testid="confirm-delete-product-btn"]'
   aclSwitch: string = '[data-testid="acls-switch"]'
+  viewTemplateBtn: string = '[data-testid="edit-env-view-plugin-template-btn"]'
+  configServiceTab: string = '[data-testid="edit-env-configure-services-tab"]'
   config: string | undefined
 
   getTestIdEnvName(env: string): string {
@@ -45,6 +51,7 @@ class Products {
 
   editProduct(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.get(`[data-testid=${pname}-more-options-btn]`).first().click()
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click()
     // cy.get(this.updateBtn).click()
   }
@@ -70,10 +77,6 @@ class Products {
 
   editProductEnvironmentConfig(config: any, invalid = false) {
 
-    cy.get(this.editPrdEnvConfigBtn).click()
-    cy.get(this.envCfgActivateRadio).click()
-    cy.get(this.envCfgApprovalCheckbox).click()
-
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
     let authType = config.authorization
@@ -94,20 +97,23 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
+    cy.get(this.envCfgApprovalCheckbox).click()
+    cy.get(this.editPrdEnvConfigBtn).click()
     cy.wait(3000)
-    // cy.get(`[data-testid=${config.serviceName}`).click()
-    // cy.wait(3000)
+    cy.get(this.envCfgApplyChangesContinueBtn).click()
     cy.get(this.envCfgApplyChangesBtn).click()
     cy.wait(3000)
     if (invalid) {
       // cy.verifyToastMessage("Environment updated")
     }
     else {
-      cy.verifyToastMessage("Environment updated")
+      cy.verifyToastMessage("Success")
     }
   }
 
-  generateKongPluginConfig(filename: string, flag?: boolean) {
+  generateKongPluginConfig(productName: string, envName: string, filename: string, flag?: boolean) {
+    this.editProductEnvironment(productName, envName)
+    cy.get(this.viewTemplateBtn).click()
     cy.get('.language-yaml').then(($el) => {
       cy.log($el.text())
       cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
@@ -121,6 +127,7 @@ class Products {
         }
       })
     })
+    cy.contains('Close').click()
   }
 
   updateDatasetNameToCatelogue(productName: string, env: string) {
@@ -147,13 +154,16 @@ class Products {
   deleteProductEnvironment(productName: string, envName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
-    cy.get(`[data-testid=${pname}-${env}-edit-btn]`).siblings(this.deleteProductEnvBtn).click()
+    cy.get(`[data-testid=${pname}-${env}-more-options-btn]`).click()
+    cy.get(`[data-testid=${pname}-${env}-delete-btn]`).click()
     cy.get(this.deleteConfirmationBtn).click()
   }
 
   deleteProduct(productName: string) {
-    this.editProduct(productName)
-    cy.get(this.deleteProductBtn).click()
+    // this.editProduct(productName)
+    const pname: string = productName.toLowerCase().replaceAll(' ', '-')
+    cy.get(`[data-testid=${pname}-edit-btn]`).first().click({force: true})
+    cy.get(`[data-testid=${pname}-delete-btn]`).first().click({force: true})
     cy.get(this.deleteProductConfirmationBtn).click()
   }
 
@@ -171,15 +181,23 @@ class Products {
     })
   }
 
-  activateService(config: any) {
+  activateService(productName: string, envName: string, config: any) {
+    this.editProductEnvironment(productName, envName)
+    cy.wait(2000)
+    cy.get(this.configServiceTab).click()
+    cy.wait(2000)
     cy.get(`[data-testid=${config.serviceName}`).click()
+    cy.get(this.envCfgApplyChangesBtn).click()
   }
 
-  getKongPluginConfig() {
+  getKongPluginConfig(productName: string, envName: string) {
+    this.editProductEnvironment(productName, envName)
+    cy.get(this.viewTemplateBtn).click()
     cy.get('.language-yaml').then(($el) => {
       this.config = $el.text()
       cy.wait(1000)
     })
+    cy.contains('Close').click()
   }
 }
 

@@ -11,7 +11,6 @@ class ActivityPage {
     this.setFilterCondition(filterCondition, value)
     var filteredResponse: any
     let result: any
-    debugger
     if (value == "") {
       filteredResponse = response
     }
@@ -28,7 +27,6 @@ class ActivityPage {
       cy.wrap($e1).find('p').invoke('text').then((text) => {
         activityText = text
         filteredResponse.forEach((record: any) => {
-          debugger
           responseText = record.message
           responseText = responseText.replaceAll("{", "${filteredResponse[index].params.")
           const regexp = /\${([^{]+)}/g;

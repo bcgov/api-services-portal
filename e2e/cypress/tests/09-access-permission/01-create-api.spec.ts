@@ -90,8 +90,8 @@ describe('Create API Spec', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       pd.editProductEnvironment(checkPermission.product.name, checkPermission.product.environment.name)
       pd.editProductEnvironmentConfig(checkPermission.product.environment.config)
+      pd.generateKongPluginConfig(checkPermission.product.name, checkPermission.product.environment.name,'service-permission.yml')
     })
-    pd.generateKongPluginConfig('service-permission.yml')
   })
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
