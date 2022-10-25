@@ -1,51 +1,97 @@
 import * as React from 'react';
-import { FormControl, FormLabel, HStack, Select } from '@chakra-ui/react';
+import { gql } from 'graphql-request';
+import { Grid, Select } from '@chakra-ui/react';
+import { useApi } from '@/shared/services/api';
+import { uid } from 'react-uid';
+import { useAuth } from '@/shared/services/auth';
 
-import ProductsFilter from './products-filter';
+interface ConsumerFiltersProps {
+  value?: string;
+}
 
-type Filters = 'all' | 'up' | 'down';
+const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
+  const { user } = useAuth();
 
-interface ServicesFiltersProps {}
+  const { data, isLoading, isSuccess } = useApi(
+    ['consumersFilter', value],
+    {
+      query: productsQuery,
+      variables: {
+        namespace: user?.namespace,
+      },
+    },
+    { enabled: Boolean(user?.namespace) }
+  );
+  const options: { name: string; id: string }[] = React.useMemo(() => {
+    if (isSuccess) {
+      switch (value) {
+        case 'products':
+          return data.allProductsByNamespace.map((f) => ({
+            id: f.id,
+            name: f.name,
+          }));
 
-const ServicesFilters: React.FC<ServicesFiltersProps> = () => {
-  const [filter, setFilter] = React.useState<Filters>('all');
-  const [product, setProduct] = React.useState<string>('');
-  const onFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilter(event.target.value as Filters);
-  };
+        case 'environments':
+          return data.allProductsByNamespace.reduce((memo, d) => {
+            if (d.environments?.length > 0) {
+              d.environments.forEach((e) => {
+                if (!memo.map((e) => e.id).includes(e.name)) {
+                  memo.push({
+                    id: e.name,
+                    name: e.name,
+                  });
+                }
+              });
+            }
+            return memo;
+          }, []);
+
+        case 'state':
+          return [
+            { id: true, name: 'Active' },
+            { id: false, name: 'Inactive' },
+          ];
+
+        default:
+          return [];
+      }
+    }
+    return [];
+  }, [data, isSuccess, value]);
 
   return (
-    <HStack display="flex" bgColor="gray.200" mb={4} p={4}>
-      <FormControl>
-        <FormLabel>Filter by Product</FormLabel>
-        <ProductsFilter onChange={setProduct} selected={product} />
-      </FormControl>
-      <FormControl>
-        <FormLabel>Filter by Environment</FormLabel>
-        <Select onChange={onFilterChange} variant="bc-input" size="sm">
-          <option value="">All Environments</option>
-          <option value="dev">Development</option>
-          <option value="prod">Production</option>
-          <option value="test">Test</option>
-          <option value="sandbox">Sandbox</option>
-          <option value="other">Other</option>
-        </Select>
-      </FormControl>
-      <FormControl>
-        <FormLabel>Filter by State</FormLabel>
-        <Select
-          onChange={onFilterChange}
-          value={filter}
-          variant="bc-input"
-          size="sm"
-        >
-          <option value="">All Services</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </Select>
-      </FormControl>
-    </HStack>
+    <Grid templateColumns="1fr" gap={4}>
+      <Select
+        isRequired
+        isDisabled={isLoading || options.length === 0}
+        name="value"
+        data-testid="consumer-filters-select"
+      >
+        {isSuccess &&
+          options.map((f) => (
+            <option key={uid(f)} value={f.id}>
+              {f.name}
+            </option>
+          ))}
+      </Select>
+    </Grid>
   );
 };
 
-export default ServicesFilters;
+export default ConsumerFilters;
+
+const productsQuery = gql`
+  query GetFilterConsumers($namespace: String!) {
+    allConsumerScopesAndRoles
+
+    allProductsByNamespace(where: { namespace: $namespace }) {
+      name
+      id
+      environments {
+        id
+        name
+      }
+    }
+    allConsumerScopesAndRoles
+  }
+`;

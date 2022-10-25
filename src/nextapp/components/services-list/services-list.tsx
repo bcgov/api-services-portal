@@ -17,16 +17,18 @@ import { GatewayService } from '@/shared/types/query.types';
 import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
 import { useApi } from '@/shared/services/api';
 
+import { FilterState } from './types';
 import { dateRange, useTotalRequests } from './utils';
 // import MetricGraph from './metric-graph';
 import ServiceDetail from './service-details';
 import ServicesListItemMetrics from './services-list-item-metrics';
 
 interface ServicesListProps {
+  filters: FilterState;
   search: string;
 }
 
-const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
+const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
   const [openId, setOpenId] = React.useState<string | null>(null);
   const range = dateRange();
   const { data } = useApi(
@@ -44,10 +46,29 @@ const ServicesList: React.FC<ServicesListProps> = ({ search }) => {
   // Filter out all namespace metrics to calculate average
   const totalNamespaceRequests = useTotalRequests(data);
   const filterServices = React.useCallback(
-    (d) => {
+    (d: GatewayService) => {
+      if (filters.environments.length > 0) {
+        return filters.environments
+          .map((e) => e.value)
+          .includes(d.environment?.name);
+      }
+
+      if (filters.products.length > 0) {
+        return filters.products
+          .map((p) => p.value)
+          .includes(d.environment?.product?.id);
+      }
+
+      if (filters.state.length > 0) {
+        if (filters.state[0]?.value === 'true') {
+          return d.environment?.active === true;
+        }
+        return d.environment?.active === false;
+      }
+
       return d.name.search(search) >= 0;
     },
-    [search]
+    [filters, search]
   );
   const handleDetailsDisclosure = (id: string) => () => {
     setOpenId((state) => (state !== id ? id : null));
@@ -159,6 +180,7 @@ const query = gql`
         active
         flow
         product {
+          id
           name
           organization {
             title

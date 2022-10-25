@@ -67,7 +67,11 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
         border="1px solid"
         borderRadius={4}
       >
-        <MetricGraph data={data.allMetrics} totalRequests={7} />
+        <MetricGraph
+          data={data.allMetrics}
+          service={data.GatewayService}
+          totalRequests={7}
+        />
       </Box>
       <Grid templateColumns="repeat(3, 1fr)" gap={8} mt={8}>
         <StatCard title="Stats">

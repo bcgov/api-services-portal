@@ -3,14 +3,17 @@ import { Button, Container, Icon, Skeleton, Text } from '@chakra-ui/react';
 import Card from '@/components/card';
 import ClientRequest from '@/components/client-request';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
+import Filters, { useFilters } from '@/components/filters';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
 import SearchInput from '@/components/search-input';
-// import ServicesFilters from '@/components/services-list/services-filters';
+import ServicesFilters from '@/components/services-list/services-filters';
 import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
+import { FilterState } from '@/components/services-list/types';
 
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
@@ -27,6 +30,19 @@ const ServicesPage: React.FC<
   const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);
   const { user } = useAuth();
   const [search, setSearch] = React.useState('');
+  const {
+    state,
+    addFilter,
+    clearFilters,
+    removeFilter,
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      state: [],
+    },
+    'gateway-services'
+  );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
@@ -58,6 +74,16 @@ const ServicesPage: React.FC<
             from Prometheus and gwa-api Status.
           </Text>
         </PageHeader>
+        <Filters
+          data={state as FilterState}
+          filterTypeOptions={filterTypeOptions}
+          onAddFilter={addFilter}
+          onClearFilters={clearFilters}
+          onRemoveFilter={removeFilter}
+          mb={4}
+        >
+          <ServicesFilters />
+        </Filters>
         <Card
           heading="7 Day Metrics"
           actions={
@@ -74,7 +100,7 @@ const ServicesPage: React.FC<
                 <Skeleton key={d} height="72px" mb={2} />
               ))}
             >
-              <ServicesList search={search} />
+              <ServicesList search={search} filters={state} />
             </ClientRequest>
           )}
         </Card>
@@ -84,3 +110,9 @@ const ServicesPage: React.FC<
 };
 
 export default ServicesPage;
+
+const filterTypeOptions = [
+  { name: 'Products', value: 'products' },
+  { name: 'Environment', value: 'environments' },
+  { name: 'State', value: 'state', multiple: false },
+];
