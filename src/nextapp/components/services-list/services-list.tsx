@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Box,
   Tr,
   Td,
   IconButton,
@@ -9,6 +8,9 @@ import {
   Center,
   CircularProgress,
   Text,
+  Alert,
+  AlertDescription,
+  AlertIcon,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
@@ -22,6 +24,7 @@ import { dateRange, useTotalRequests } from './utils';
 // import MetricGraph from './metric-graph';
 import ServiceDetail from './service-details';
 import ServicesListItemMetrics from './services-list-item-metrics';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface ServicesListProps {
   filters: FilterState;
@@ -136,19 +139,28 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
             {openId === d.id && (
               <Tr bgColor="#f6f6f6" boxShadow="inner">
                 <Td colSpan={columns.length}>
-                  <React.Suspense
-                    fallback={
-                      <Center>
-                        <CircularProgress isIndeterminate />
-                      </Center>
-                    }
-                  >
-                    <ServiceDetail
-                      id={d.id}
-                      days={range}
-                      totalNamespaceRequests={totalNamespaceRequests}
-                    />
-                  </React.Suspense>
+                  <ErrorBoundary fallback={
+                    <Alert m={4} status="error" variant="outline">
+                      <AlertIcon />
+                      <AlertDescription>
+                        Unable to load metrics. Please try again later.
+                    </AlertDescription>
+                    </Alert>
+                  }>
+                    <React.Suspense
+                      fallback={
+                        <Center>
+                          <CircularProgress isIndeterminate />
+                        </Center>
+                      }
+                    >
+                      <ServiceDetail
+                        id={d.id}
+                        days={range}
+                        totalNamespaceRequests={totalNamespaceRequests}
+                      />
+                    </React.Suspense>
+                  </ErrorBoundary>
                 </Td>
               </Tr>
             )}
@@ -164,8 +176,8 @@ export default ServicesList;
 const columns = [
   { name: 'Service Name', key: 'name' },
   { name: 'Environment', key: 'environment', w: '20%' },
-  { name: 'Traffic', key: 'id' },
-  { name: 'Total Requests', key: 'id' },
+  { name: 'Traffic', key: 'id', sortable: false },
+  { name: 'Total Requests', key: 'id', sortable: false },
   { name: '' },
 ];
 const query = gql`

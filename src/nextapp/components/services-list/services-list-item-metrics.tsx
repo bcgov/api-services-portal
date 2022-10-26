@@ -39,7 +39,7 @@ const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
     }
     return 0;
   }, [data]);
-  const value = (totalServiceRequests / totalRequests) * 100;
+  const value = totalServiceRequests && totalRequests ? (totalServiceRequests / totalRequests) * 100 : 0;
   const handleIntersection = React.useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
