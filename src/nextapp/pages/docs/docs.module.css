@@ -89,11 +89,12 @@
 }
   
 .markdown-body a {
-    color: #0366d6
+    color: #0366d6;
+    text-decoration: underline;
 }
 
 .markdown-body a:hover {
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 .markdown-body td {
