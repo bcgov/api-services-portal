@@ -38,8 +38,8 @@ const footerItems = [
     text: 'About',
   },
   {
-    href: '/content/terms-of-service',
-    text: 'Terms',
+    href: 'http://www2.gov.bc.ca/gov/content/home/disclaimer',
+    text: 'Disclaimer',
   },
   { href: '/content/privacy', text: 'Privacy' },
   {
