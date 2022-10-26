@@ -39,11 +39,7 @@ const AboutPage: React.FC = () => {
       <Head>
         <title>Copyright</title>
       </Head>
-      <FooterPage
-        pageHeader={pageHeader}
-        updateDate={updateDate}
-        content={content}
-      />
+      <FooterPage pageHeader={pageHeader} content={content} />
     </>
   );
 };

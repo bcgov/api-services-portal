@@ -3,7 +3,6 @@ import Head from 'next/head';
 
 const AboutPage: React.FC = () => {
   let pageHeader = 'Accessibility';
-  let updateDate = 'August 27, 2021';
   let content = `
   We're committed to providing accessible information and services for all British Columbians. This means working toward meeting the World Wide Web Consortium (W3C) Web Content Accessibility Guidelines (WCAG) 2.0 and 2.1 (AA).
   
@@ -29,11 +28,7 @@ const AboutPage: React.FC = () => {
       <Head>
         <title>Accessibility</title>
       </Head>
-      <FooterPage
-        pageHeader={pageHeader}
-        updateDate={updateDate}
-        content={content}
-      />
+      <FooterPage pageHeader={pageHeader} content={content} />
     </>
   );
 };

@@ -3,7 +3,6 @@ import Head from 'next/head';
 
 const AboutPage: React.FC = () => {
   let pageHeader = 'General Terms of Service';
-  let updateDate = 'August 27, 2021';
   let content = `
   DSS services encompass a comprehensive suite of hardware, security, software, application platforms, web services and databases. The Client is the user of the Services. Some terms may not be applicable to specific services.
   
@@ -77,11 +76,7 @@ const AboutPage: React.FC = () => {
       <Head>
         <title>Terms of Service</title>
       </Head>
-      <FooterPage
-        pageHeader={pageHeader}
-        updateDate={updateDate}
-        content={content}
-      />
+      <FooterPage pageHeader={pageHeader} content={content} />
     </>
   );
 };

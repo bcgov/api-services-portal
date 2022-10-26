@@ -3,7 +3,6 @@ import Head from 'next/head';
 
 const AboutPage: React.FC = () => {
   let pageHeader = 'About Us';
-  let updateDate = 'August 27, 2021';
   let content = `
   API Program Services (APS) is a centrally managed platform that delivers support for deploying and operating Application Programming Interface (API). The APS Platform enables government data providers to deliver services quickly using tools that provide security, authentication, routing, and publishing.
   
@@ -62,11 +61,7 @@ const AboutPage: React.FC = () => {
       <Head>
         <title>About Us</title>
       </Head>
-      <FooterPage
-        pageHeader={pageHeader}
-        updateDate={updateDate}
-        content={content}
-      />
+      <FooterPage pageHeader={pageHeader} content={content} />
     </>
   );
 };
