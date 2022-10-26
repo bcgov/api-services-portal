@@ -1,7 +1,7 @@
 import FooterPage from '@/components/footer-page';
 import Head from 'next/head';
 
-const AboutPage: React.FC = () => {
+const AccessibilityPage: React.FC = () => {
   let pageHeader = 'Accessibility';
   let content = `
   We're committed to providing accessible information and services for all British Columbians. This means working toward meeting the World Wide Web Consortium (W3C) Web Content Accessibility Guidelines (WCAG) 2.0 and 2.1 (AA).
@@ -33,4 +33,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default AccessibilityPage;

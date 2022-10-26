@@ -1,7 +1,7 @@
 import FooterPage from '@/components/footer-page';
 import Head from 'next/head';
 
-const AboutPage: React.FC = () => {
+const ToSPage: React.FC = () => {
   let pageHeader = 'General Terms of Service';
   let content = `
   DSS services encompass a comprehensive suite of hardware, security, software, application platforms, web services and databases. The Client is the user of the Services. Some terms may not be applicable to specific services.
@@ -81,4 +81,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default ToSPage;
