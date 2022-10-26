@@ -156,7 +156,6 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                     >
                       <ServiceDetail
                         id={d.id}
-                        days={range}
                         totalNamespaceRequests={totalNamespaceRequests}
                       />
                     </React.Suspense>

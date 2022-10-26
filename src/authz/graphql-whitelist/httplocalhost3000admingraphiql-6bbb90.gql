@@ -1,5 +1,5 @@
 
-  query GetGatewayService($id: ID!, $days: [String!]) {
+  query GetGatewayService($id: ID!) {
     GatewayService(where: {id: $id}) {
       id
       name
