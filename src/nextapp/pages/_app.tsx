@@ -51,7 +51,7 @@ const footerItems = [
     text: 'Copyright',
   },
   {
-    href: 'http://www2.gov.bc.ca/gov/content/home/contact-us',
+    href: '/content/contact',
     text: 'Contact Us',
   },
 ];

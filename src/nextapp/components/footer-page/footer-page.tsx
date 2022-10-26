@@ -1,7 +1,7 @@
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import styles from '../../pages/docs/docs.module.css';
 import gfm from 'remark-gfm';
-import { Box, Container, Text } from '@chakra-ui/react';
+import { Box, Container } from '@chakra-ui/react';
 import PageHeader from '@/components/page-header';
 
 interface FooterPageProps {

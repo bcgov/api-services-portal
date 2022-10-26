@@ -1,9 +1,8 @@
 import FooterPage from '@/components/footer-page';
 import Head from 'next/head';
 
-const AboutPage: React.FC = () => {
+const CopyrightPage: React.FC = () => {
   let pageHeader = 'Copyright';
-  let updateDate = 'August 27, 2021';
   let content = `
   The following policy governs the operation and management of the government's main website and all websites of ministries, and agencies reporting to ministries.
   
@@ -19,7 +18,7 @@ const AboutPage: React.FC = () => {
   
   ## Exceptions
   
-  For the reproduction of provincial legislation found on the BC Laws website, permission is subject to the terms of the Queen's Printer License - British Columbia.
+  For the reproduction of provincial legislation found on the BC Laws website, permission is subject to the terms of the King's Printer License - British Columbia.
   
   For the reproduction of specified b-roll, interview and podium video footage found on the BC Gov News website, permission is subject to the terms of the News Footage License - British Columbia.
   
@@ -44,4 +43,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default CopyrightPage;
