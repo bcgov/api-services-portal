@@ -1,0 +1,15 @@
+{
+  "oldUser": {
+    "credentials": {
+      "username": "olduser@idir",
+      "password": "awsummer"
+    }
+  },
+  "newUser": {
+    "credentials": {
+      "username": "220469e037c84a7abdfab15204a60701@olduser",
+      "password": "awsummer"
+    }
+  },
+  "namespace": "newplatform"
+}

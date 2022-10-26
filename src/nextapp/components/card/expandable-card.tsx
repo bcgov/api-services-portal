@@ -12,13 +12,17 @@ import { FaRegCircle } from 'react-icons/fa';
 
 interface ExpandableCardProps extends AccordionItemProps {
   icon?: React.FC;
+  isSingle?: boolean;
   heading: React.ReactNode;
+  onButtonClick?: () => void;
 }
 
 const ExpandableCard: React.FC<ExpandableCardProps> = ({
   children,
+  isSingle,
   icon = FaRegCircle,
   heading,
+  onButtonClick,
   ...props
 }) => {
   return (
@@ -41,7 +45,8 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
           borderColor="#e1e1e5"
           _hover={{
             bgColor: 'none',
-            color: 'bc-link',
+            color: isSingle ? 'inherit' : 'bc-link',
+            cursor: isSingle ? 'default' : undefined
           }}
           _focus={{
             outline: 'none',
@@ -51,12 +56,13 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
             borderBottomRadius: 0,
             pb: 7,
           }}
+          onClick={onButtonClick}
         >
           <Box flex="1" textAlign="left">
             <Icon as={icon} boxSize="5" color="bc-blue" mr={2.5} />
             {heading}
           </Box>
-          <AccordionIcon />
+          {!isSingle && <AccordionIcon />}
         </AccordionButton>
       </h2>
       <AccordionPanel

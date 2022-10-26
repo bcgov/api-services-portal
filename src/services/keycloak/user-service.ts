@@ -22,16 +22,16 @@ export class KeycloakUserService {
 
   public useAdminClient(client: KcAdminClient) {
     this.kcAdminClient = client;
+    return this;
   }
 
-  // public async findOne(id: string) {
-  //   logger.debug('[findOne] %s', id);
-  //   const user = await this.kcAdminClient.users.findOne({
-  //     id,
-  //   });
-  //   logger.debug('[findOne] : %j', user);
-  //   return user;
-  // }
+  public getOneAttributeValue(user: UserRepresentation, name: string): string {
+    return user.attributes &&
+      name in user.attributes &&
+      user.attributes[name].length > 0
+      ? user.attributes[name][0]
+      : undefined;
+  }
 
   public async lookupUserByUsername(username: string) {
     logger.debug('[lookupUserByUsername] %s', username);
@@ -58,23 +58,36 @@ export class KeycloakUserService {
     verified: boolean,
     identityProviders: string[]
   ): Promise<string> {
-    const user = (await this.lookupUsersByEmail(email, verified))
-      .filter(async (user) => {
-        const userWithAttributes = await this.lookupUserById(user.id);
-        return identityProviders.includes(
-          userWithAttributes.attributes.identity_provider
-        );
-      })
-      .pop();
-    assert.strictEqual(Boolean(user), true, `No suitable match for ${email}`);
-    return user.id;
+    return (await this.lookupUserByEmail(email, verified, identityProviders))
+      .id;
   }
 
-  public async lookupUsersByEmail(
+  public async lookupUserByEmail(
+    email: string,
+    verified: boolean,
+    identityProviders: string[]
+  ): Promise<UserRepresentation> {
+    const matchingUsers = await this.lookupActiveUsersByEmail(email, verified);
+    const user = matchingUsers
+      .filter((user) =>
+        identityProviders.includes(
+          this.getOneAttributeValue(user, 'identity_provider')
+        )
+      )
+      .pop();
+    assert.strictEqual(
+      Boolean(user),
+      true,
+      `No suitable match for ${identityProviders.join(',')} : ${email}`
+    );
+    return user;
+  }
+
+  public async lookupActiveUsersByEmail(
     email: string,
     verified: boolean
   ): Promise<UserRepresentation[]> {
-    logger.debug('[lookupUserByEmail] %s', email);
+    logger.debug('[lookupActiveUsersByEmail] %s', email);
     const users = (
       await this.kcAdminClient.users.find({
         exact: true,
@@ -85,7 +98,7 @@ export class KeycloakUserService {
       .filter(
         (user: UserRepresentation) => verified == false || user.emailVerified
       );
-    logger.debug('[lookupUserByEmail] : %j', users);
+    logger.debug('[lookupActiveUsersByEmail] : %j', users);
     assert.strictEqual(
       users.length > 0,
       true,

@@ -1,4 +1,7 @@
-export default function KongApiKeyAcl(namespace, appId) {
+export default function KongApiKeyAcl(
+  namespace: string,
+  appId: string
+): string {
   return `
   plugins:
   - name: key-auth
