@@ -4,7 +4,7 @@ import Head from 'next/head';
 const AboutPage: React.FC = () => {
   let pageHeader = 'About Us';
   let content = `
-  API Program Services (APS) is a centrally managed platform that delivers support for deploying and operating Application Programming Interface (API). The APS Platform enables government data providers to deliver services quickly using tools that provide security, authentication, routing, and publishing.
+  API Program Services (APS) is the team responsible for delivering services that enable ongoing access to public sector data by providing support for managing APIs. APS ensures the efficient development and operation of APIs through the APS Platform and API Services Portal.
   
   ## Improving data
   
