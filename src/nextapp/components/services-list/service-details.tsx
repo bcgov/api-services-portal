@@ -16,11 +16,13 @@ import { useApi } from '@/shared/services/api';
 import MetricGraph from './metric-graph';
 
 interface ServicesListProps {
+  days: string[]
   id: string;
   totalNamespaceRequests: number;
 }
 
 const ServiceDetail: React.FC<ServicesListProps> = ({
+  days,
   id,
   totalNamespaceRequests,
 }) => {
@@ -65,7 +67,7 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
         borderRadius={4}
       >
         <MetricGraph
-          data={data.allMetrics}
+          days={days}
           service={data.GatewayService}
           totalRequests={7}
         />
@@ -75,7 +77,7 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
           <MetricGraph
             alt
             service={data.GatewayService}
-            data={data.allMetrics}
+            days={days}
             totalRequests={totalNamespaceRequests}
           />
         </StatCard>

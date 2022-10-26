@@ -155,6 +155,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                       }
                     >
                       <ServiceDetail
+                        days={range}
                         id={d.id}
                         totalNamespaceRequests={totalNamespaceRequests}
                       />

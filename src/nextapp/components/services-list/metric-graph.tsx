@@ -27,6 +27,7 @@ import numeral from 'numeral';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import times from 'lodash/times';
+import useMetrics from './use-metrics';
 import { GatewayService, Metric } from '@/shared/types/query.types';
 // 1. Consumers
 // 2. Requests
@@ -45,7 +46,7 @@ interface DailyDatum {
 
 interface MetricGraphProps {
   alt?: boolean;
-  data: Metric[];
+  days: string[];
   height?: number;
   service: GatewayService;
   totalRequests: number;
@@ -53,19 +54,20 @@ interface MetricGraphProps {
 
 const MetricGraph: React.FC<MetricGraphProps> = ({
   alt,
-  data,
+  days,
   height = 100,
   service,
   totalRequests,
 }) => {
+  const { data } = useMetrics(service.name, days);
   const labelProps: StatLabelProps | TextProps = {
     fontSize: 'xs',
     color: 'gray.400',
     textTransform: 'none',
   };
-  const values: number[][] = data.slice(0, 5).map((metric) => {
+  const values: number[][] = data?.allMetrics.slice(0, 5).map((metric: Metric) => {
     return JSON.parse(metric.values);
-  });
+  }) ?? [];
   const dailies: DailyDatum[] = values.map((value: number[]) => {
     const firstDateValue = new Date(value[0][0] * 1000);
     const day = formatISO(firstDateValue, {
