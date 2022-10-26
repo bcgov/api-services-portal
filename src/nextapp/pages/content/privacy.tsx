@@ -6,7 +6,7 @@ const PrivacyPage: React.FC = () => {
   let content = `
   # Introduction
   
-  The British Columbia (B.C.) government is committed to protecting your privacy. The B.C. Government collects, uses and discloses your personal information in accordance with the Freedom of Information and Protection of Privacy Act (FOIPPA) and other applicable legislation. 'Personal information' is defined broadly in the Freedom of Information and Protection of Privacy Act as recorded information about an identifiable individual, other than contact information, which is the information used to contact a person at a place of business. The purpose of this privacy statement is to inform you of the personal information that may be collected from you when visiting a B.C. government website and how that information may be used.
+  The British Columbia (B.C.) government is committed to protecting your privacy. The B.C. Government collects, uses and discloses your personal information in accordance with the [Freedom of Information and Protection of Privacy Act](https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_00) (FOIPPA) and other applicable legislation. 'Personal information' is defined broadly in the Freedom of Information and Protection of Privacy Act as recorded information about an identifiable individual, other than contact information, which is the information used to contact a person at a place of business. The purpose of this privacy statement is to inform you of the personal information that may be collected from you when visiting a B.C. government website and how that information may be used.
   
   ## Scope
   
@@ -45,7 +45,7 @@ const PrivacyPage: React.FC = () => {
   
   ## How long is information retained?
   
-  Some cookies will remain on your computer for only as long as your browser remains open, or until you delete them off your computer. Other cookies will remain on your computer so that you may be recognized when you return to the website. These cookies will expire no later than 18 months from when they are first placed on your computer. Information collected as a part of a cookie or a security audit log is retained for 2 years. Information collected or created by the Government of B.C. is maintained in accordance with government's records retention schedules and other legislative requirements.
+  Some cookies will remain on your computer for only as long as your browser remains open, or until you delete them off your computer. Other cookies will remain on your computer so that you may be recognized when you return to the website. These cookies will expire no later than 18 months from when they are first placed on your computer. Information collected as a part of a cookie or a security audit log is retained for 2 years. Information collected or created by the Government of B.C. is maintained in accordance with [government's records retention schedules](https://www2.gov.bc.ca/gov/content/governments/services-for-government/information-management-technology/records-management) and other legislative requirements.
   
   ## How can I access and correct information I submit to a web site?
   
