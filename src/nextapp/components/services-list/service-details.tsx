@@ -17,13 +17,11 @@ import MetricGraph from './metric-graph';
 
 interface ServicesListProps {
   id: string;
-  days: string[];
   totalNamespaceRequests: number;
 }
 
 const ServiceDetail: React.FC<ServicesListProps> = ({
   id,
-  days,
   totalNamespaceRequests,
 }) => {
   const { data } = useApi(
@@ -32,7 +30,6 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
       query,
       variables: {
         id,
-        days,
       },
     },
     {
@@ -121,7 +118,7 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
 export default ServiceDetail;
 
 const query = gql`
-  query GetGatewayService($id: ID!, $days: [String!]) {
+  query GetGatewayService($id: ID!) {
     GatewayService(where: { id: $id }) {
       id
       name
