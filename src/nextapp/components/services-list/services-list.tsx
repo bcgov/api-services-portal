@@ -122,6 +122,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                 <IconButton
                   aria-label="toggle table"
                   variant="ghost"
+                  data-testid={`${d.name}-${d.environment?.name ?? 'noenv'}-metrics-details`}
                   onClick={handleDetailsDisclosure(d.id)}
                 >
                   <Icon
