@@ -2,6 +2,11 @@ import { graphql, rest } from 'msw';
 
 import { harley, mark } from './resolvers/personas';
 import {
+  allApplicationsHandler,
+  createApplicationHandler,
+  removeApplicationHandler,
+} from './resolvers/applications';
+import {
   allProductsByNamespaceHandler,
   accessRequestAuthHandler,
   deleteConsumersHandler,
@@ -33,6 +38,21 @@ import {
   revokeSAAccessHandler,
 } from './resolvers/namespace-access';
 import { getActivityHandler } from './resolvers/activity';
+import {
+  addEnvironmentHandler,
+  addProductHandler,
+  allProductsHandler,
+  allLegalsHandler,
+  getEnvironmentHandler,
+  getAllCredentialIssuersByNamespace,
+  allGatewayServicesHandler,
+  updateProductHandler,
+  updateEnvironmentHandler,
+  deleteEnvironmentHandler,
+  deleteProductHandler,
+} from './resolvers/products';
+import { handleAllDatasets } from './resolvers/datasets';
+
 import {
   createServiceAccountHandler,
   getAllServiceAccountsHandler,
@@ -112,10 +132,29 @@ export const handlers = [
   keystone.query('GetFilterConsumers', getConsumersFilterHandler),
   keystone.query('GetAllConsumerGroupLabels', getAllConsumerGroupLabelsHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
+  keystone.query('GetAllDatasets', handleAllDatasets),
+  keystone.query('GetAllProducts', allProductsHandler),
+  keystone.mutation('AddProduct', addProductHandler),
+  keystone.mutation('UpdateProduct', updateProductHandler),
+  keystone.mutation('RemoveProduct', deleteProductHandler),
+  keystone.mutation('AddEnvironment', addEnvironmentHandler),
+  keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
+  keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
+  keystone.query(
+    'GetAllCredentialIssuersByNamespace',
+    getAllCredentialIssuersByNamespace
+  ),
+  keystone.query('GetAllGatewayServices', allGatewayServicesHandler),
+  keystone.query('GetAllLegals', allLegalsHandler),
   keystone.query(
     'GetConsumerProductsAndEnvironments',
     allProductsByNamespaceHandler
   ),
+  keystone.mutation('UpdateEnvironment', updateEnvironmentHandler),
+  // Applications
+  keystone.query('MyApplications', allApplicationsHandler),
+  keystone.mutation('AddApplication', createApplicationHandler),
+  keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),

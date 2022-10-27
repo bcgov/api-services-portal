@@ -83,7 +83,7 @@ module.exports = {
     },
     title: {
       type: Text,
-      isRequired: false,
+      isRequired: true,
     },
     catalogContent: {
       type: Markdown,

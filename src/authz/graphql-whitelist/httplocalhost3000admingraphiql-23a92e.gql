@@ -1,0 +1,9 @@
+
+  mutation AddEnvironment($name: String!, $product: ID!) {
+    createEnvironment(
+      data: { name: $name, product: { connect: { id: $product } } }
+    ) {
+      id
+      name
+    }
+  }

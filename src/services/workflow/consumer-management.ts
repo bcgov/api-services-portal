@@ -95,6 +95,7 @@ import {
 import { getActivityByRefId } from '../keystone/activity';
 import { syncPlugins, trimPlugin } from './consumer-plugins';
 import { removeAllButKeys } from '../../batch/feed-worker';
+import { KeycloakClientRolesService } from '../keycloak/client-roles';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -636,109 +637,34 @@ export async function updateConsumerAccess(
         'Only clients (not users) support scopes'
       );
 
+      const clientScopes = selectedScopes.map((scope) => scope.name);
+      if (roles) {
+        clientScopes.push('roles');
+      }
+
       const changes = await kcClientRegService.syncAndApply(
         consumer.username,
-        selectedScopes.map((scope) => scope.name),
+        clientScopes,
         [] as string[]
       );
       changeList.push(...changes);
     }
 
     if (roles) {
-      const kcUserService = new KeycloakUserService(
+      const clientRolesService = new KeycloakClientRolesService(
         envCtx.issuerEnvConfig.issuerUrl
       );
-      await kcUserService.login(
+      await clientRolesService.login(
         envCtx.issuerEnvConfig.clientId,
         envCtx.issuerEnvConfig.clientSecret
       );
 
-      const client = await kcClientService.findByClientId(
-        envCtx.issuerEnvConfig.clientId
+      const changes = await clientRolesService.syncRoles(
+        envCtx.issuerEnvConfig.clientId,
+        roles,
+        consumer.username
       );
-
-      const availableRoles = await kcClientService.listRoles(client.id);
-
-      const selectedRoles = availableRoles
-        .filter((r: any) => roles.includes(r.name))
-        .map((r: any) => ({ id: r.id, name: r.name }));
-
-      assert.strictEqual(
-        selectedRoles.length,
-        roles.length,
-        'Role not found for client'
-      );
-
-      logger.debug('[] selected %j', selectedRoles);
-
-      const isClient = await kcClientService.isClient(consumer.username);
-
-      if (isClient) {
-        const consumerClient = await kcClientService.findByClientId(
-          consumer.username
-        );
-        const userId = await kcClientService.lookupServiceAccountUserId(
-          consumerClient.id
-        );
-
-        const userRoles = await kcUserService.listUserClientRoles(
-          userId,
-          client.id
-        );
-
-        const addRoles = selectedRoles
-          .filter(
-            (role) =>
-              userRoles.filter((urole: any) => urole.name === role.name)
-                .length == 0
-          )
-          .map((role) => ({ id: role.id, name: role.name }));
-
-        const delRoles = userRoles
-          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-          .map((role: any) => ({ id: role.id, name: role.name }));
-
-        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
-        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
-
-        await kcUserService.syncUserClientRoles(
-          userId,
-          client.id,
-          addRoles,
-          delRoles
-        );
-      } else {
-        const userId = await kcUserService.lookupUserByUsername(
-          consumer.username
-        );
-
-        const userRoles = await kcUserService.listUserClientRoles(
-          userId,
-          client.id
-        );
-
-        const addRoles = selectedRoles
-          .filter(
-            (role) =>
-              userRoles.filter((urole: any) => urole.name === role.name)
-                .length == 0
-          )
-          .map((role) => ({ id: role.id, name: role.name }));
-
-        const delRoles = userRoles
-          .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-          .map((role: any) => ({ id: role.id, name: role.name }));
-
-        changeList.push(...addRoles.map((r: any) => `Role Add ${r.name}`));
-        changeList.push(...delRoles.map((r: any) => `Role Remove ${r.name}`));
-
-        await kcUserService.syncUserClientRoles(
-          userId,
-          client.id,
-          addRoles,
-          delRoles
-        );
-      }
+      changeList.push(...changes);
     }
 
     if (changeList.length > 0) {

@@ -36,6 +36,18 @@ export const getAuthToken = (method: string): IconType => {
   }
 };
 
+export const getFlowText = (key: string): string => {
+  const dict = {
+    public: 'Public',
+    'authorization-code': 'OAuth2 Authorization Code Flow',
+    'client-credentials': 'OAuth2 Client Credentials Flow',
+    'kong-acl-only': 'Kong ACL Only',
+    'kong-api-key-only': 'Kong API Key Only',
+    'kong-api-key-acl': 'Kong API Key with ACL Flow',
+  };
+  return dict[key] ?? 'Unknown';
+};
+
 export const getProviderText = (provider: string): string => {
   switch (provider) {
     case 'bscs':

@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {
-  Box,
   Button,
   FormControl,
   FormLabel,
   FormHelperText,
-  Icon,
   Input,
   Modal,
   ModalOverlay,
@@ -16,28 +14,30 @@ import {
   useDisclosure,
   useToast,
   VStack,
+  MenuItem,
 } from '@chakra-ui/react';
-import { FaPenSquare } from 'react-icons/fa';
-import { useQueryClient } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
-import { UPDATE_PRODUCT } from '@/shared/queries/products-queries';
 import type { Product, ProductUpdateInput } from '@/shared/types/query.types';
 import kebabCase from 'lodash/kebabCase';
 import DatasetInput from './dataset-input';
 import DeleteProduct from './delete-product';
-import OrganizationSelect from './organization-select';
+import ActionsMenu from '../actions-menu';
+import { gql } from 'graphql-request';
 
 interface EditProductProps {
   data: Product;
+  queryKey: QueryKey;
 }
 
-const EditProduct: React.FC<EditProductProps> = ({ data }) => {
+const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
   const client = useQueryClient();
   const formRef = React.useRef<HTMLFormElement>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const mutation = useApiMutation<ProductUpdateInput>(UPDATE_PRODUCT);
-  const updateProduct = React.useCallback(async () => {
+  const deleteDisclosure = useDisclosure();
+  const mutate = useApiMutation<ProductUpdateInput>(mutation);
+  const updateProduct = async () => {
     try {
       const formData = new FormData(formRef.current);
       const payload: ProductUpdateInput = {
@@ -60,8 +60,8 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         }
       }
 
-      await mutation.mutateAsync({ id: data.id, data: payload });
-      client.invalidateQueries(['products']);
+      await mutate.mutateAsync({ id: data.id, data: payload });
+      await client.invalidateQueries(queryKey);
       onClose();
       toast({
         title: `${data.name} updated`,
@@ -69,46 +69,54 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
         isClosable: true,
       });
     } catch (err) {
-      console.error(err.message);
       toast({
         title: 'Update product failed',
         status: 'error',
+        description: err,
         isClosable: true,
       });
     }
-  }, [client, data, mutation, onClose, toast]);
-  const onUpdate = React.useCallback(() => {
-    if (formRef.current.checkValidity()) {
-      updateProduct();
-    }
-  }, [updateProduct]);
-  const onSubmit = React.useCallback(
-    (event) => {
-      event.preventDefault();
-      updateProduct;
-    },
-    [updateProduct]
-  );
+  };
+  const handleSaveClick = () => {
+    formRef.current?.requestSubmit();
+  };
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    updateProduct();
+  };
+  const dataTestIdName = kebabCase(data.name);
 
   return (
     <>
-      <Button
-        variant="tertiary"
-        leftIcon={<Icon as={FaPenSquare} />}
-        onClick={onOpen}
-        data-testid={`${kebabCase(data.name)}-edit-btn`}
-      >
-        Edit
-      </Button>
+      <ActionsMenu data-testid={`${dataTestIdName}-more-options-btn`}>
+        <MenuItem onClick={onOpen} data-testid={`${dataTestIdName}-edit-btn`}>
+          Edit Product
+        </MenuItem>
+        <MenuItem
+          color="bc-error"
+          data-testid={`${dataTestIdName}-delete-btn`}
+          onClick={deleteDisclosure.onOpen}
+        >
+          Delete Product...
+        </MenuItem>
+      </ActionsMenu>
+      <DeleteProduct
+        isOpen={deleteDisclosure.isOpen}
+        onClose={deleteDisclosure.onClose}
+        id={data.id}
+        onDeleted={deleteDisclosure.onClose}
+        queryKey={queryKey}
+      />
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>{`Edit ${data.name}`}</ModalHeader>
           <ModalBody>
-            <form ref={formRef} onSubmit={onSubmit}>
+            <form ref={formRef} onSubmit={handleSubmit}>
               <VStack spacing={4}>
                 <FormControl isRequired id="product-name">
                   <FormLabel>Product Name</FormLabel>
+                  <FormHelperText>Must be unique</FormHelperText>
                   <Input
                     type="text"
                     name="name"
@@ -116,7 +124,6 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
                     variant="bc-input"
                     data-testid="prd-edit-name-input"
                   />
-                  <FormHelperText>Must be unique</FormHelperText>
                 </FormControl>
                 <DatasetInput dataset={data.dataset} />
               </VStack>
@@ -124,16 +131,19 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
           </ModalBody>
 
           <ModalFooter>
-            <DeleteProduct id={data.id} onDeleted={onClose} />
-            <Box flex={1} />
-            <Button mr={3} onClick={onClose} data-testid="prd-edit-cancel-btn">
+            <Button
+              mr={3}
+              onClick={onClose}
+              data-testid="prd-edit-cancel-btn"
+              variant="secondary"
+            >
               Cancel
             </Button>
             <Button
-              isDisabled={mutation.isLoading}
-              isLoading={mutation.isLoading}
+              isDisabled={mutate.isLoading}
+              isLoading={mutate.isLoading}
               variant="primary"
-              onClick={onUpdate}
+              onClick={handleSaveClick}
               data-testid="prd-edit-update-btn"
             >
               Update
@@ -146,3 +156,11 @@ const EditProduct: React.FC<EditProductProps> = ({ data }) => {
 };
 
 export default EditProduct;
+
+const mutation = gql`
+  mutation UpdateProduct($id: ID!, $data: ProductUpdateInput) {
+    updateProduct(id: $id, data: $data) {
+      id
+    }
+  }
+`;

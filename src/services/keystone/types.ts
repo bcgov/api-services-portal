@@ -8268,7 +8268,7 @@ export type UmaPermissionTicket = {
 
 export type UmaPermissionTicketInput = {
   resourceId: Scalars['String'];
-  username: Scalars['String'];
+  email: Scalars['String'];
   granted?: Maybe<Scalars['Boolean']>;
   scopes: Array<Maybe<Scalars['String']>>;
 };

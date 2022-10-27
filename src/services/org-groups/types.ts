@@ -26,7 +26,6 @@ export interface GroupPermission {
 
 export interface UserReference {
   id?: string;
-  username: string;
   email?: string;
 }
 

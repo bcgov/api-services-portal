@@ -106,9 +106,9 @@ export async function getEnvironmentContext(
   };
 }
 
-async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
-  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
-
+export async function injectResSvrAccessTokenToContext(
+  envCtx: EnvironmentContext
+) {
   assert.strictEqual(
     isUserBasedResourceOwners(envCtx),
     false,
@@ -116,15 +116,20 @@ async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   );
 
   const issuerEnvConfig = envCtx.issuerEnvConfig;
-  //const resourceAccessScope =
-  //  envCtx.prodEnv.credentialIssuer.resourceAccessScope;
+
   const resSvrAccessToken = await new KeycloakTokenService(
     envCtx.openid.token_endpoint
   ).getKeycloakSession(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
   envCtx.accessToken = resSvrAccessToken;
+}
+
+async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
+  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
+
   const permApi = new UMAPermissionService(
     envCtx.uma2.permission_endpoint,
-    resSvrAccessToken
+    envCtx.accessToken
   );
   const permTicket = await permApi.requestTicket([
     {
@@ -169,6 +174,10 @@ export async function getResourceServerContext(
 
   const usesUma2 = isAuthzUsingUma2(prodEnv);
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+  if (openid == null) {
+    logger.error('[getResourceServerContext] Failed to reach IdP', prodEnv);
+    return null;
+  }
   const uma2 = usesUma2
     ? await getUma2FromIssuer(issuerEnvConfig.issuerUrl)
     : null;

@@ -138,9 +138,7 @@ describe('API Tests for Updating dataset', () => {
 
     it('Get the directory details (/directory) and verify the success code in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
-            debugger
             cy.makeAPIRequest(apiDirectory.directoryEndPoint, 'GET').then((res) => {
-                debugger
                 expect(res.status).to.be.equal(200)
                 response = res.body
                 directoryID = res.body[0].id
@@ -151,7 +149,6 @@ describe('API Tests for Updating dataset', () => {
 
     it('Verify the expected directory details are display in the response', () => {
         cy.get('@api').then(({ apiDirectory }: any) => {
-            debugger
             // cy.compareJSONObjects(response, apiDirectory.directory, true)
         })
     })

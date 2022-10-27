@@ -140,7 +140,7 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body);
+    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
   }
 
   /**
