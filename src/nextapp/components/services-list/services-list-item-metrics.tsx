@@ -6,19 +6,23 @@ import {
   Text,
 } from '@chakra-ui/react';
 import useMetrics from './use-metrics';
+import { Environment } from '@/shared/types/query.types';
 
 interface ServicesListItemMetricsProps {
   days: string[];
+  environment: Environment;
   service: string;
   totalRequests: number;
 }
 
 const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
   days,
+  environment,
   service,
   totalRequests,
 }) => {
   const ref = React.useRef(null);
+  const environmentName = environment?.name ?? 'no-env';
   const [enabled, setEnabled] = React.useState(false);
   const { data } = useMetrics(service, days, {
     enabled,
@@ -39,7 +43,10 @@ const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
     }
     return 0;
   }, [data]);
-  const value = totalServiceRequests && totalRequests ? (totalServiceRequests / totalRequests) * 100 : 0;
+  const value =
+    totalServiceRequests && totalRequests
+      ? (totalServiceRequests / totalRequests) * 100
+      : 0;
   const handleIntersection = React.useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -67,7 +74,10 @@ const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
 
   return (
     <>
-      <Td ref={ref}>
+      <Td
+        ref={ref}
+        data-testid={`${service}-${environmentName}-totalRequest-graph`}
+      >
         <CircularProgress
           capIsRound
           size="56px"
@@ -80,7 +90,9 @@ const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
           </CircularProgressLabel>
         </CircularProgress>
       </Td>
-      <Td>{Math.floor(totalServiceRequests)}</Td>
+      <Td data-testid={`${service}-${environmentName}-totalRequest`}>
+        {Math.floor(totalServiceRequests)}
+      </Td>
     </>
   );
 };

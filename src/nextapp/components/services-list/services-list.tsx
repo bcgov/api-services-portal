@@ -115,6 +115,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                 <ServicesListItemMetrics
                   days={range}
                   service={d.name}
+                  environment={d.environment}
                   totalRequests={totalNamespaceRequests}
                 />
               </React.Suspense>
@@ -122,7 +123,9 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                 <IconButton
                   aria-label="toggle table"
                   variant="ghost"
-                  data-testid={`${d.name}-${d.environment?.name ?? 'noenv'}-metrics-details`}
+                  data-testid={`${d.name}-${
+                    d.environment?.name ?? 'noenv'
+                  }-metrics-details`}
                   onClick={handleDetailsDisclosure(d.id)}
                 >
                   <Icon
@@ -140,14 +143,16 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
             {openId === d.id && (
               <Tr bgColor="#f6f6f6" boxShadow="inner">
                 <Td colSpan={columns.length}>
-                  <ErrorBoundary fallback={
-                    <Alert m={4} status="error" variant="outline">
-                      <AlertIcon />
-                      <AlertDescription>
-                        Unable to load metrics. Please try again later.
-                    </AlertDescription>
-                    </Alert>
-                  }>
+                  <ErrorBoundary
+                    fallback={
+                      <Alert m={4} status="error" variant="outline">
+                        <AlertIcon />
+                        <AlertDescription>
+                          Unable to load metrics. Please try again later.
+                        </AlertDescription>
+                      </Alert>
+                    }
+                  >
                     <React.Suspense
                       fallback={
                         <Center>
