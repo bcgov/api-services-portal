@@ -122,6 +122,7 @@
     "react-virtuoso": "^1.5.13",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
+    "remark-gfm": "^1.0.0",
     "slugify": "^1.4.6",
     "soap": "^0.43.0",
     "swagger-ui-express": "^4.3.0",

@@ -5,9 +5,6 @@ import {
   // FaUserSecret,
 } from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
-import fs from 'fs';
-import { join } from 'path';
-
 
 export const serializeFormData = (formData: FormData): unknown => {
   const response: unknown = {};
@@ -71,30 +68,3 @@ export const delay = async (timeout = 100): Promise<void> => {
     setTimeout(resolve, timeout);
   });
 };
-
-
-const postsDirectory = join(process.cwd(), 'nextapp', '_content')
-
-export function getDocSlugs() {
-  return fs.readdirSync(postsDirectory)
-}
-
-export function getAllDocs() {
-  const slugs = getDocSlugs()
-  const docs = slugs.map((slug) => getDocBySlug(slug))
-  return docs
-}
-
-interface DocProps {
-  slug: string
-  content: string
-}
-
-export function getDocBySlug(slug: string) : DocProps {
-  
-  const realSlug = slug.replace(/\.md$/, '')
-  const fullPath = join(postsDirectory, `${realSlug}.md`)
-  const fileContents = fs.readFileSync(fullPath, 'utf8')
-
-  return {slug: realSlug, content: fileContents}
-}

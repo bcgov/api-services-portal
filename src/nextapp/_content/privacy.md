@@ -1,7 +1,5 @@
 # B.C. Government Website Privacy Statement
 
-Updated August 27, 2021
-
 ## Introduction
 
 The British Columbia (B.C.) government is committed to protecting your privacy. The B.C. Government collects, uses and discloses your personal information in accordance with the [Freedom of Information and Protection of Privacy Act](https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_00) (FOIPPA) and other applicable legislation. 'Personal information' is defined broadly in the Freedom of Information and Protection of Privacy Act as recorded information about an identifiable individual, other than contact information, which is the information used to contact a person at a place of business. The purpose of this privacy statement is to inform you of the personal information that may be collected from you when visiting a B.C. government website and how that information may be used.
