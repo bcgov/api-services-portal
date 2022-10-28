@@ -16,7 +16,7 @@ const useMetrics = (
         days,
       },
     },
-    options
+    { ...options, suspense: true }
   );
 };
 

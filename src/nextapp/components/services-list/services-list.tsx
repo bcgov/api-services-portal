@@ -11,7 +11,9 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
+  Box,
 } from '@chakra-ui/react';
+import { ErrorBoundary } from 'react-error-boundary';
 import EmptyPane from '@/components/empty-pane';
 import { gql } from 'graphql-request';
 import ApsTable from '@/components/table';
@@ -21,10 +23,9 @@ import { useApi } from '@/shared/services/api';
 
 import { FilterState } from './types';
 import { dateRange, useTotalRequests } from './utils';
-// import MetricGraph from './metric-graph';
 import ServiceDetail from './service-details';
 import ServicesListItemMetrics from './services-list-item-metrics';
-import { ErrorBoundary } from 'react-error-boundary';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 interface ServicesListProps {
   filters: FilterState;
@@ -104,21 +105,40 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                   </Text>
                 )}
               </Td>
-              <React.Suspense
+              <ErrorBoundary
                 fallback={
                   <>
-                    <Td>-</Td>
-                    <Td></Td>
+                    <Td>
+                      <Box w="56px" textAlign="center">
+                        <Icon as={FaExclamationTriangle} color="bc-error" />
+                      </Box>
+                    </Td>
+                    <Td>
+                      <Icon as={FaExclamationTriangle} color="bc-error" />
+                    </Td>
                   </>
                 }
               >
-                <ServicesListItemMetrics
-                  days={range}
-                  service={d.name}
-                  environment={d.environment}
-                  totalRequests={totalNamespaceRequests}
-                />
-              </React.Suspense>
+                <React.Suspense
+                  fallback={
+                    <>
+                      <Td>
+                        <Box w="56px" textAlign="center">
+                          ...
+                        </Box>
+                      </Td>
+                      <Td>...</Td>
+                    </>
+                  }
+                >
+                  <ServicesListItemMetrics
+                    days={range}
+                    service={d.name}
+                    environment={d.environment}
+                    totalRequests={totalNamespaceRequests}
+                  />
+                </React.Suspense>
+              </ErrorBoundary>
               <Td textAlign="right">
                 <IconButton
                   aria-label="toggle table"
