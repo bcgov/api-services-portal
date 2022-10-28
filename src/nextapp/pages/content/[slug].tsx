@@ -1,56 +1,39 @@
-import {getDocBySlug, getAllDocs } from '../../shared/services/utils'
-import { remark } from 'remark';
-import html from 'remark-html';
+import { Box, Container } from '@chakra-ui/react';
+import Head from 'next/head';
+import ReactMarkdown from 'react-markdown';
+import fs from 'fs/promises';
+import { join } from 'path';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
-interface DocProps {
-    slug: string
-    content: string
-}
+import styles from './content.module.css';
 
-const ContentPage: React.FC<DocProps> = ({content}) => {
-  return (
-    <>
-      <div
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    </>
-  )
-}
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { slug } = context.query;
+  const postsDirectory = join(process.cwd(), 'nextapp', '_content');
+  const content = await fs.readFile(join(postsDirectory, `${slug}.md`), 'utf8');
 
-
-export const markdownToHtml = async (markdown: string): Promise<string> => {
-  const result = await remark().use(html).process(markdown)
-  return markdown.toString()
-};
-
-
-interface Params {
-  params: {
-    slug: string;
-    content: string;
+  return {
+    props: {
+      content,
+    },
   };
 };
 
-export async function getStaticProps({ params }: Params) {
-  const doc = getDocBySlug(params.slug);
-  const content = await markdownToHtml(doc.content || '');
-
-  return {props: { content }};
-}
-
-export async function getStaticPaths() {
-  const docs = getAllDocs();
-
-  return {
-    paths: docs.map((doc) => {
-      return {
-        params: {
-          slug: doc.slug,
-        },
-      }
-    }),
-    fallback: false,
-  }
-}
+const ContentPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ content }) => {
+  return (
+    <>
+      <Head>
+        <title>API Program Services | Content</title>
+      </Head>
+      <Container maxW="6xl">
+        <Box my={8} className={styles.content}>
+          <ReactMarkdown children={content} />
+        </Box>
+      </Container>
+    </>
+  );
+};
 
 export default ContentPage;

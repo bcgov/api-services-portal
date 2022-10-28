@@ -1,0 +1,58 @@
+.content {
+  color: #313132;
+}
+
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6,
+.content p {
+  margin-block: 1.5rem;
+}
+
+.content h1 {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 31.1px;
+  line-height: 41px;
+  margin-block-end: 0;
+}
+
+.content h2 {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 21.6px;
+  line-height: 24px;
+}
+
+.content p {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.content h1 + p {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #606060;
+  margin-top: 0;
+}
+
+.content ol,
+.content ul {
+  padding-inline: 4rem;
+}
+
+.content a {
+  color: #1a5a96;
+  text-decoration: underline;
+}
+
+.content a:hover {
+  text-decoration: none;
+}
