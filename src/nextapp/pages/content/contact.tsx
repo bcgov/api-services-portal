@@ -1,26 +1,9 @@
 import {
   Icon,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Text,
-  MenuDivider,
-  MenuGroup,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  Button,
   UnorderedList,
   ListItem,
   Link,
   Container,
-  Box,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
 import Head from 'next/head';
