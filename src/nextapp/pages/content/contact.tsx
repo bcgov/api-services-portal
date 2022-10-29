@@ -10,7 +10,7 @@ import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { useGlobal } from '@/shared/services/global';
 
-const ContactPage: React.FC = (props) => {
+const ContactPage: React.FC = () => {
   const data = useGlobal();
 
   return (

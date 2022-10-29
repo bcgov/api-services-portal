@@ -9,19 +9,25 @@ import styles from './content.module.css';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { slug } = context.query;
-  const postsDirectory = join(process.cwd(), 'nextapp', '_content');
-  const content = await fs.readFile(join(postsDirectory, `${slug}.md`), 'utf8');
-
-  return {
-    props: {
-      content,
-    },
-  };
+  const contentDirectory = join(process.cwd(), 'nextapp', '_content');
+  
+  try {
+    const content = await fs.readFile(join(contentDirectory, `${slug}.md`), 'utf8');
+    
+    return {
+      props: {
+        content,
+      }
+    };
+  } catch (err) {
+    context.res.writeHead(404, { location: '/404' }).end();
+  }
 };
 
 const ContentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ content }) => {
+
   return (
     <>
       <Head>

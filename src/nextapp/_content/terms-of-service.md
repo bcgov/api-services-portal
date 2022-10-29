@@ -1,3 +1,5 @@
+# General Terms of Service
+
 DSS services encompass a comprehensive suite of hardware, security, software, application platforms, web services and databases. The Client is the user of the Services. Some terms may not be applicable to specific services.
 
 DSS may make changes to these General Terms of Service at any time. By using the Services you acknowledge that you have read and agree to all the terms set out below.

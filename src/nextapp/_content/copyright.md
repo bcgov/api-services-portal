@@ -1,3 +1,5 @@
+# Copyright
+
 The following policy governs the operation and management of the government's main website and all websites of ministries, and agencies reporting to ministries.
 
 Copyright © 2021, Province of British Columbia.

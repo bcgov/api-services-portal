@@ -1,3 +1,5 @@
+# About Us
+
 API Program Services (APS) is the team responsible for delivering services that enable ongoing access to public sector data by providing support for managing APIs. APS ensures the efficient development and operation of APIs through the APS Platform and API Services Portal.
 
 ## Improving data

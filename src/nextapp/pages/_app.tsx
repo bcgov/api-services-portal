@@ -3,12 +3,13 @@ import {
   Box,
   ChakraProvider,
   Container,
-  Link,
+  // Link,
   List,
   ListItem,
   Text,
 } from '@chakra-ui/react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
@@ -36,10 +37,6 @@ const footerItems = [
   {
     href: '/content/about-us',
     text: 'About',
-  },
-  {
-    href: 'http://www2.gov.bc.ca/gov/content/home/disclaimer',
-    text: 'Disclaimer',
   },
   { href: '/content/privacy', text: 'Privacy' },
   {
@@ -137,18 +134,20 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   >
                     {footerItems.map((f) => (
                       <ListItem key={f.text}>
-                        <Link
-                          href={f.href}
-                          d="inline-block"
-                          fontSize="xs"
-                          borderRight={{
-                            base: 'none',
-                            md: '1px solid #4b5e7e',
-                          }}
-                          px="5px"
-                          py={{ base: '5px', md: 0 }}
-                        >
-                          {f.text}
+                        <Link href={f.href}>
+                          <Box
+                            display="inline-block"
+                            fontSize="xs"
+                            borderRight={{
+                              base: 'none',
+                              md: '1px solid #4b5e7e',
+                            }}
+                            px="5px"
+                            py={{ base: '5px', md: 0 }}
+                            cursor='pointer'
+                          >
+                            {f.text}
+                          </Box>
                         </Link>
                       </ListItem>
                     ))}

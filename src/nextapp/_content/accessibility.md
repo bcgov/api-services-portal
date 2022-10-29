@@ -1,3 +1,5 @@
+# Accessibility
+
 We're committed to providing accessible information and services for all British Columbians. This means working toward meeting the [World Wide Web Consortium (W3C) Web Content Accessibility Guidelines (WCAG) 2.0 and 2.1 (AA).](https://www.w3.org/WAI/standards-guidelines/wcag/)
 
 ## [Services](https://www2.gov.bc.ca/gov/content/home/accessible-government/accessibility-services)
