@@ -30,7 +30,6 @@
 .markdown-body h1 {
   font-size: 150%;
   font-weight: bold;
-  margin-bottom: 16px;
 }
 
 .markdown-body h2 {
@@ -89,12 +88,11 @@
 }
   
 .markdown-body a {
-    color: #1A5A96;
-    text-decoration: underline;
+    color: #0366d6
 }
 
 .markdown-body a:hover {
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 .markdown-body td {
