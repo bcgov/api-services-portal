@@ -8,46 +8,64 @@ import {
   VStack,
   StackDivider,
 } from '@chakra-ui/react';
-import { GatewayRoute, GatewayService } from '@/shared/types/query.types';
+import { GatewayService } from '@/shared/types/query.types';
+import { uid } from 'react-uid';
 
 interface ServiceRoutesProps {
   data: GatewayService;
 }
 
 const ServiceRoutes: React.FC<ServiceRoutesProps> = ({ data }) => {
+  const routes = React.useMemo(() => {
+    const result = data.routes.map((route) => {
+      const parsedMethods = JSON.parse(route.methods);
+      const methods =
+        Array.isArray(parsedMethods) && parsedMethods.length > 0
+          ? parsedMethods
+          : ['ALL'];
+      const hosts: string[] = JSON.parse(route.hosts);
+      const paths: string[] = JSON.parse(route.paths) ?? ['/'];
+      const hostPaths = hosts
+        .map((h: string) => paths.map((p) => `https://${h}${p}`))
+        .flat();
+
+      return {
+        id: route.id,
+        name: route.name,
+        hosts,
+        paths,
+        hostPaths,
+        methods,
+      };
+    });
+    return result ?? [];
+  }, [data.routes]);
+
   return (
     <>
-      {data.routes.map((route) => {
-        const _methods = JSON.parse(route.methods);
-        const methods =
-          Array.isArray(_methods) && _methods.length > 0 ? _methods : ['ALL'];
-        const hosts = JSON.parse(route.hosts);
-        const paths = JSON.parse(route.paths) ?? ['/'];
-        const hostPaths = hosts
-          .map((h) => paths.map((p) => `https://${h}${p}`))
-          .flat();
+      {routes.map((route) => {
         return (
           <VStack
             key={route.id}
             align="left"
             divider={<StackDivider borderColor="gray.200" />}
           >
-            {hostPaths.map((hp) => (
-              <SimpleGrid key={hp} columns={1}>
+            {route.hostPaths.map((h) => (
+              <SimpleGrid key={uid(h)} columns={1}>
                 <Stack
                   direction="row"
                   wrap="nowrap"
                   spacing={1}
                   shouldWrapChildren={true}
                 >
-                  {methods.map((p) => (
+                  {route.methods.map((m) => (
                     <Tag
-                      key={p}
+                      key={uid(m)}
                       size="sm"
                       colorScheme="green"
                       borderRadius="5px"
                     >
-                      <TagLabel>{p}</TagLabel>
+                      <TagLabel>{m}</TagLabel>
                     </Tag>
                   ))}
                 </Stack>
@@ -55,7 +73,7 @@ const ServiceRoutes: React.FC<ServiceRoutesProps> = ({ data }) => {
                   m={1}
                   data-testid={`${data.name}-service-details-${route.name}-route`}
                 >
-                  {hp}
+                  {h}
                 </Box>
               </SimpleGrid>
             ))}

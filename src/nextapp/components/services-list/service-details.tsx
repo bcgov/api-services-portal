@@ -41,17 +41,22 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
   function StatCard({ children, title }) {
     return (
       <GridItem
+        display="grid"
         bgColor="white"
         border="1px solid"
         borderColor="bc-background"
         borderRadius={4}
         overflowY="auto"
+        gridTemplateRows="35px 1fr"
+        height="190px"
       >
-        <Box as="header" px={4} pt={4}>
+        <GridItem as="header" px={4} pt={4}>
           <Heading size="sm">{title}</Heading>
-        </Box>
+        </GridItem>
 
-        <Box p={4}>{children}</Box>
+        <GridItem p={4} overflowY="auto">
+          {children}
+        </GridItem>
       </GridItem>
     );
   }
