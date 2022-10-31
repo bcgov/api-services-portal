@@ -138,7 +138,7 @@ const ServicePage: React.FC<
               <Tbody>
                 <Tr>
                   <Td>
-                    <ServiceRoutes routes={data?.GatewayService?.routes} />
+                    <ServiceRoutes data={data?.GatewayService} />
                   </Td>
                 </Tr>
               </Tbody>
