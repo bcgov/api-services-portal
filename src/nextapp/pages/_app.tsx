@@ -3,7 +3,6 @@ import {
   Box,
   ChakraProvider,
   Container,
-  // Link,
   List,
   ListItem,
   Text,
