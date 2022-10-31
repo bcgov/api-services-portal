@@ -16,7 +16,7 @@ import { useApi } from '@/shared/services/api';
 import MetricGraph from './metric-graph';
 
 interface ServicesListProps {
-  days: string[]
+  days: string[];
   id: string;
   totalNamespaceRequests: number;
 }
@@ -41,17 +41,22 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
   function StatCard({ children, title }) {
     return (
       <GridItem
+        display="grid"
         bgColor="white"
         border="1px solid"
         borderColor="bc-background"
         borderRadius={4}
         overflowY="auto"
+        gridTemplateRows="35px 1fr"
+        height="190px"
       >
-        <Box as="header" px={4} pt={4}>
+        <GridItem as="header" px={4} pt={4}>
           <Heading size="sm">{title}</Heading>
-        </Box>
+        </GridItem>
 
-        <Box p={4}>{children}</Box>
+        <GridItem p={4} overflowY="auto">
+          {children}
+        </GridItem>
       </GridItem>
     );
   }
@@ -82,7 +87,7 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
           />
         </StatCard>
         <StatCard title="Routes">
-          <ServiceRoutes routes={data.GatewayService.routes} />
+          <ServiceRoutes data={data.GatewayService} />
         </StatCard>
         <StatCard title="Details">
           <Box
@@ -97,13 +102,15 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
             <Text as="dt" fontWeight="bold">
               Host
             </Text>
-            <Text as="dd">{data.GatewayService.host}</Text>
+            <Text as="dd" data-testid={`${data.GatewayService.name}-host`}>
+              {data.GatewayService.host}
+            </Text>
             <Text as="dt" fontWeight="bold">
               Tags
             </Text>
-            <Text as="dd">
+            <Text as="dd" data-testid={`${data.GatewayService.name}-tags`}>
               <Wrap>
-                {JSON.parse(data.GatewayService.tags)?.map((t) => (
+                {JSON.parse(data.GatewayService.tags)?.map((t: string) => (
                   <WrapItem key={t}>
                     <Badge>{t}</Badge>
                   </WrapItem>

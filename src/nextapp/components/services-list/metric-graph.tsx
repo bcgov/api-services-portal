@@ -6,9 +6,12 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
+  Center,
   CircularProgress,
   CircularProgressLabel,
   Divider,
+  GridItem,
+  Icon,
   Stat,
   StatGroup,
   StatLabel,
@@ -29,6 +32,7 @@ import sum from 'lodash/sum';
 import times from 'lodash/times';
 import useMetrics from './use-metrics';
 import { GatewayService, Metric } from '@/shared/types/query.types';
+import { FaRegChartBar } from 'react-icons/fa';
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
@@ -65,9 +69,10 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     color: 'gray.400',
     textTransform: 'none',
   };
-  const values: number[][] = data?.allMetrics.slice(0, 5).map((metric: Metric) => {
-    return JSON.parse(metric.values);
-  }) ?? [];
+  const values: number[][] =
+    data?.allMetrics.slice(0, 5).map((metric: Metric) => {
+      return JSON.parse(metric.values);
+    }) ?? [];
   const dailies: DailyDatum[] = values.map((value: number[]) => {
     const firstDateValue = new Date(value[0][0] * 1000);
     const day = formatISO(firstDateValue, {
@@ -211,6 +216,19 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Alert>
       )}
       <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gridGap={1}>
+        {dailies.length === 0 && (
+          <GridItem colSpan={5}>
+            <Center color="bc-component" minH="160px">
+              <Box textAlign="center">
+                <Icon as={FaRegChartBar} boxSize="7" mb={4} />
+                <Text
+                  as="em"
+                  d="block"
+                >{`${service.name} has not recieved traffic yet`}</Text>
+              </Box>
+            </Center>
+          </GridItem>
+        )}
         {dailies.map((d, index) => (
           <Box key={index} flex={1}>
             <Box
