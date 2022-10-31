@@ -74,32 +74,26 @@ const ApsTable: React.FC<ApsTableProps> = ({
     <Table {...props}>
       <Thead>
         <Tr>
-          {columns.map(({ key, name, ...rest }) => (
+          {columns.map(({ key, name, sortable: sort, ...rest }) => (
             <Th
               key={uid(name)}
               {...rest}
               aria-label={
                 name ? `${name} column header` : 'none sortable table header'
               }
-              onClick={
-                rest.sortable !== false && key ? handleSort(key) : undefined
-              }
+              onClick={sort && key ? handleSort(key) : undefined}
               _hover={{
                 color: 'black',
                 cursor:
-                  rest.sortable !== false && sortable && name
-                    ? 'pointer'
-                    : undefined,
+                  sort !== false && sortable && name ? 'pointer' : undefined,
                 userSelect: 'none',
                 bgColor:
-                  rest.sortable !== false && sortable && name
-                    ? 'gray.50'
-                    : undefined,
+                  sort !== false && sortable && name ? 'gray.50' : undefined,
               }}
             >
               <Box pos="relative" d="inline">
                 {name}
-                {rest.sortable !== false && sortable && name && (
+                {sort !== false && sortable && name && (
                   <Box h="20px" pos="absolute" right={0} top="2px">
                     <Icon
                       as={TiArrowSortedUp}
