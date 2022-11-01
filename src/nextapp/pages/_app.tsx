@@ -5,10 +5,10 @@ import {
   Container,
   List,
   ListItem,
-  Text,
+  Link,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import Link from 'next/link';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
@@ -133,9 +133,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   >
                     {footerItems.map((f) => (
                       <ListItem key={f.text}>
-                        <Link href={f.href}>
-                          <Box
-                            display="inline-block"
+                        <NextLink passHref href={f.href}>
+                          <Link
                             fontSize="xs"
                             borderRight={{
                               base: 'none',
@@ -143,11 +142,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             }}
                             px="5px"
                             py={{ base: '5px', md: 0 }}
-                            cursor='pointer'
                           >
                             {f.text}
-                          </Box>
-                        </Link>
+                          </Link>
+                        </NextLink>
                       </ListItem>
                     ))}
                   </List>
