@@ -30,7 +30,7 @@ import {
   FaUserShield,
 } from 'react-icons/fa';
 import { gql } from 'graphql-request';
-import { restApi, useApiMutation, useApi } from '@/shared/services/api';
+import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';

@@ -28,6 +28,7 @@ import {
 } from './resolvers/consumers';
 import {
   getCurrentNamesSpaceHandler,
+  updateCurrentNamesSpaceHandler,
   getOrganizationGroupsPermissionsHandler,
   getResourceSetHandler,
   getServiceAccessPermissionsHandler,
@@ -170,6 +171,7 @@ export const handlers = [
   ),
   keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.mutation('UpdateCurrentNamespace', updateCurrentNamesSpaceHandler),
   keystone.mutation('GrantUserAccess', grantAccessHandler),
   keystone.mutation('GrantSAAccess', grantSAAccessHandler),
   keystone.mutation('RevokeAccess', revokeAccessHandler),

@@ -119,23 +119,33 @@ let umaPolicies = [
   },
 ];
 
+let currentNamespace = {
+  id: 'ns1',
+  name: 'aps-portal',
+  scopes: [
+    { name: 'GatewayConfig.Publish' },
+    { name: 'Namespace.Manage' },
+    { name: 'Access.Manage' },
+    { name: 'Namespace.View' },
+  ],
+  prodEnvId: 'p1',
+};
+
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   return res(
     ctx.delay(4500),
     ctx.data({
-      currentNamespace: {
-        id: 'ns1',
-        name: 'aps-portal',
-        scopes: [
-          { name: 'GatewayConfig.Publish' },
-          { name: 'Namespace.Manage' },
-          { name: 'Access.Manage' },
-          { name: 'Namespace.View' },
-        ],
-        prodEnvId: 'p1',
-      },
+      currentNamespace,
     })
   );
+};
+
+export const updateCurrentNamesSpaceHandler = (req, res, ctx) => {
+  currentNamespace = {
+    ...currentNamespace,
+    ...req.variables,
+  };
+  return res(ctx.data({}));
 };
 
 export const getUserPermissionsHandler = (_, res, ctx) => {

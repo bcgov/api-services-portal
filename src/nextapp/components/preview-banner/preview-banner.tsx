@@ -9,22 +9,21 @@ import {
   Link,
   Tooltip,
   useDisclosure,
+  Button,
 } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { ImInfo } from 'react-icons/im';
 import { useAuth } from '@/shared/services/auth';
 import { useApi } from '@/shared/services/api';
+import NewOrganizationForm from '../new-organization-form';
 
 const PreviewBanner: React.FC = () => {
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
+  const queryKey = ['currentNamespace'];
 
-  const { data, isSuccess } = useApi(
-    'currentNamespace',
-    { query },
-    { enabled: true }
-  );
+  const { data, isSuccess } = useApi(queryKey, { query }, { enabled: true });
 
   if (
     !user ||
@@ -36,36 +35,43 @@ const PreviewBanner: React.FC = () => {
   }
 
   return (
-    <Box width="100%" bgColor="#FCBA191A">
+    <Box width="100%" bgColor="bc-divider" boxShadow="md">
       <Container maxW="6xl" py={3}>
-        <Flex align="center">
-          <Tooltip
-            hasArrow
-            bg="black"
-            color="white"
-            label="Preview mode allows you to test and review your request access flow and dataset content before making it publicly available"
-            aria-label="Preview mode tooltip"
-            placement="right"
-          >
-            <div>
-              <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
-            </div>
-          </Tooltip>
-          <Text fontSize="sm">
-            Your products will remain in preview mode until you publish them in
-            the API Directory
-          </Text>
-          <IconButton
-            size="sm"
-            icon={<Icon as={isOpen ? BsChevronUp : BsChevronDown} />}
-            onClick={onToggle}
-            variant="ghost"
-            ml={2}
-            aria-label="toggle details button"
-          />
+        <Flex align="center" justify="space-between">
+          <Flex align="center">
+            <Tooltip
+              hasArrow
+              bg="black"
+              color="white"
+              label="Preview mode allows you to test and review your request access flow and dataset content before making it publicly available"
+              aria-label="Preview mode tooltip"
+              placement="right"
+            >
+              <div>
+                <Icon as={ImInfo} boxSize="5" mr={2} color="bc-blue" />
+              </div>
+            </Tooltip>
+            <Text fontSize="sm" fontWeight="bold">
+              Your APIs are in preview mode; add your Organization to publish
+              your APIs to the Directory.
+            </Text>
+          </Flex>
+          <Flex gridGap={4}>
+            <NewOrganizationForm queryKey={queryKey} />
+            <Button
+              size="sm"
+              onClick={onToggle}
+              variant="link"
+              ml={2}
+              textDecor="underline"
+              color="bc-link"
+            >
+              Learn More
+            </Button>
+          </Flex>
         </Flex>
         {isOpen && (
-          <Box>
+          <Box mt={4}>
             <Text fontSize="sm">
               If this is a new namespace, it must be approved and associated
               with an organization before you can enable your products in the
@@ -94,7 +100,7 @@ const PreviewBanner: React.FC = () => {
 export default PreviewBanner;
 
 const query = gql`
-  query GET {
+  query GetCurrentNamespace {
     currentNamespace {
       org
       orgUnit
