@@ -12,6 +12,13 @@ import {
   AlertDescription,
   AlertIcon,
   Box,
+  Tooltip,
+  Skeleton,
+  SkeletonCircle,
+  SkeletonText,
+  Link,
+  Flex,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { ErrorBoundary } from 'react-error-boundary';
 import EmptyPane from '@/components/empty-pane';
@@ -19,13 +26,26 @@ import { gql } from 'graphql-request';
 import ApsTable from '@/components/table';
 import { GatewayService } from '@/shared/types/query.types';
 import { HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
+import NextLink from 'next/link';
 import { useApi } from '@/shared/services/api';
 
 import { FilterState } from './types';
 import { dateRange, useTotalRequests } from './utils';
 import ServiceDetail from './service-details';
 import ServicesListItemMetrics from './services-list-item-metrics';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
+import SupportLinks from '../support-links';
+
+const InlineMetricsError: React.FC = () => (
+  <Tooltip
+    label="Metrics could not be reached"
+    aria-label="metrics error tooltip"
+  >
+    <span>
+      <Icon as={FaExclamationTriangle} color="bc-error" />
+    </span>
+  </Tooltip>
+);
 
 interface ServicesListProps {
   filters: FilterState;
@@ -33,6 +53,7 @@ interface ServicesListProps {
 }
 
 const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
+  const { isOpen, onClose, onOpen } = useDisclosure();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const range = dateRange();
   const { data } = useApi(
@@ -80,6 +101,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
 
   return (
     <>
+      <SupportLinks isOpen={isOpen} onClose={onClose} />
       <ApsTable
         sortable
         columns={columns}
@@ -109,12 +131,12 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                 fallback={
                   <>
                     <Td>
-                      <Box w="56px" textAlign="center">
-                        <Icon as={FaExclamationTriangle} color="bc-error" />
+                      <Box w="56px" textAlign="center" position="relative">
+                        <InlineMetricsError />
                       </Box>
                     </Td>
-                    <Td>
-                      <Icon as={FaExclamationTriangle} color="bc-error" />
+                    <Td position="relative">
+                      <InlineMetricsError />
                     </Td>
                   </>
                 }
@@ -124,10 +146,12 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                     <>
                       <Td>
                         <Box w="56px" textAlign="center">
-                          ...
+                          <SkeletonCircle size="50px" />
                         </Box>
                       </Td>
-                      <Td>...</Td>
+                      <Td>
+                        <Skeleton height="20px" />
+                      </Td>
                     </>
                   }
                 >
@@ -165,12 +189,27 @@ const ServicesList: React.FC<ServicesListProps> = ({ filters, search }) => {
                 <Td colSpan={columns.length}>
                   <ErrorBoundary
                     fallback={
-                      <Alert m={4} status="error" variant="outline">
-                        <AlertIcon />
-                        <AlertDescription>
-                          Unable to load metrics. Please try again later.
-                        </AlertDescription>
-                      </Alert>
+                      <Flex
+                        align="center"
+                        role="alert"
+                        color="bc-error"
+                        gridGap={4}
+                        py={4}
+                      >
+                        <Icon as={FaTimesCircle} />
+                        <Text>
+                          Unable to load metrics. Please try again later or{' '}
+                          <Link
+                            role="button"
+                            fontWeight="bold"
+                            textDecor="underline"
+                            onClick={onOpen}
+                          >
+                            contact us
+                          </Link>{' '}
+                          for assistance.
+                        </Text>
+                      </Flex>
                     }
                   >
                     <React.Suspense

@@ -21,6 +21,7 @@ import {
   TextProps,
   Tooltip,
 } from '@chakra-ui/react';
+import EmptyPane from '@/components/empty-pane';
 import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
@@ -36,6 +37,10 @@ import { FaRegChartBar } from 'react-icons/fa';
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
+
+const graphDate = new Intl.DateTimeFormat('en-CA', {
+  dateStyle: 'short',
+});
 
 interface DailyDatum {
   date: Date;
@@ -217,16 +222,11 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
       )}
       <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gridGap={1}>
         {dailies.length === 0 && (
-          <GridItem colSpan={5}>
-            <Center color="bc-component" minH="160px">
-              <Box textAlign="center">
-                <Icon as={FaRegChartBar} boxSize="7" mb={4} />
-                <Text
-                  as="em"
-                  d="block"
-                >{`${service.name} has not recieved traffic yet`}</Text>
-              </Box>
-            </Center>
+          <GridItem colSpan={5} color="bc-text">
+            <EmptyPane
+              title={`${service.name} has not received traffic yet`}
+              message="When this service has accumulated traffic, it will show up here"
+            />
           </GridItem>
         )}
         {dailies.map((d, index) => (

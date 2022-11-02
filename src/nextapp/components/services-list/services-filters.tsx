@@ -8,6 +8,7 @@ import { useAuth } from '@/shared/services/auth';
 interface ConsumerFiltersProps {
   value?: string;
 }
+// TODO filter out services that don't have traffic
 
 const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
   const { user } = useAuth();
