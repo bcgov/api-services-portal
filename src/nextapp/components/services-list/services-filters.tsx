@@ -89,8 +89,6 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetGatewayServiceFilters($namespace: String!) {
-    allConsumerScopesAndRoles
-
     allGatewayPlugins {
       id
       name
