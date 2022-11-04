@@ -79,11 +79,11 @@ const ApsTable: React.FC<ApsTableProps> = ({
             const sortProps = ['key', 'name', 'sortable'];
             const tableProps = pick(column, sortProps);
             const attrs = omit(column, sortProps);
-            const sort = tableProps.sort ?? true;
+            const sort = tableProps.sortable ?? true;
 
             return (
               <Th
-                key={uid(name)}
+                key={uid(tableProps)}
                 {...attrs}
                 aria-label={
                   tableProps.name
