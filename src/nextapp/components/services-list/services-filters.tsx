@@ -47,6 +47,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
             return memo;
           }, []);
 
+        case 'plugins':
+          return data.allGatewayPlugins.map((p) => ({
+            name: p.name,
+            id: p.name,
+          }));
+
         case 'state':
           return [
             { id: true, name: 'Active' },
@@ -82,8 +88,13 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
 export default ConsumerFilters;
 
 const productsQuery = gql`
-  query GetFilterConsumers($namespace: String!) {
+  query GetGatewayServiceFilters($namespace: String!) {
     allConsumerScopesAndRoles
+
+    allGatewayPlugins {
+      id
+      name
+    }
 
     allProductsByNamespace(where: { namespace: $namespace }) {
       name

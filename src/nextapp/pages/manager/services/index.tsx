@@ -39,6 +39,7 @@ const ServicesPage: React.FC<
     {
       products: [],
       environments: [],
+      plugins: [],
       state: [],
     },
     'gateway-services'
@@ -113,6 +114,7 @@ export default ServicesPage;
 
 const filterTypeOptions = [
   { name: 'Products', value: 'products' },
-  { name: 'Environment', value: 'environments' },
+  { name: 'Environments', value: 'environments' },
+  { name: 'Plugins', value: 'plugins' },
   { name: 'State', value: 'state', multiple: false },
 ];

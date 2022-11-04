@@ -6,12 +6,10 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
-  Center,
   CircularProgress,
   CircularProgressLabel,
   Divider,
   GridItem,
-  Icon,
   Stat,
   StatGroup,
   StatLabel,
@@ -25,28 +23,34 @@ import EmptyPane from '@/components/empty-pane';
 import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
-import format from 'date-fns/format';
 import differnceInDays from 'date-fns/differenceInDays';
-import numeral from 'numeral';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import times from 'lodash/times';
 import useMetrics from './use-metrics';
 import { GatewayService, Metric } from '@/shared/types/query.types';
-import { FaRegChartBar } from 'react-icons/fa';
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
 
+// Formatters
 const graphDate = new Intl.DateTimeFormat('en-CA', {
-  dateStyle: 'short',
+  dateStyle: 'medium',
+});
+const graphHour = new Intl.DateTimeFormat('en-CA', {
+  timeStyle: 'short',
+  hourCycle: 'h24',
+});
+const graphRequests = new Intl.NumberFormat('en-CA', {
+  style: 'decimal',
+  notation: 'compact',
 });
 
 interface DailyDatum {
   date: Date;
   day: string;
   dayFormatted: string;
-  dayFormattedShort: string;
+  // dayFormattedShort: string;
   downtime: number;
   requests: number[];
   total: number;
@@ -114,8 +118,9 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     return {
       day,
       date: firstDateValue,
-      dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
-      dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
+      dayFormatted: graphDate.format(firstDateValue),
+      // TODO: possibly remove, just keep around incase
+      // dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
       total,
       peak,
@@ -184,13 +189,13 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Avg</StatLabel>
             <StatNumber fontSize="21px">
-              {numeral(peakRequests).format('0.0a')}
+              {graphRequests.format(peakRequests)}
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
             <StatLabel {...labelProps}>Total Rq</StatLabel>
             <StatNumber fontSize="21px">
-              {numeral(totalDailyRequests).format('0.0a')}
+              {graphRequests.format(totalDailyRequests)}
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
@@ -262,7 +267,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}
-                  label={`${format(new Date(r[0] * 1000), 'HH:00')} - ${round(
+                  label={`${graphHour.format(new Date(r[0] * 1000))} - ${round(
                     r[1]
                   )} requests`}
                 >
