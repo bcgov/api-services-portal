@@ -4,6 +4,7 @@ import { transparentize } from '@chakra-ui/theme-tools';
 const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
+  'bc-yellow-light': transparentize('#FCBA19', 0.1)({}),
   text: '#313132',
   'bc-component': '#606060',
   'bc-empty': '#60606080',
@@ -480,7 +481,8 @@ const theme = extendTheme(
                 borderRadius: 4,
                 backgroundColor: getLabelBgColor(props.colorScheme),
                 border: '1px solid',
-                borderColor: props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
+                borderColor:
+                  props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
                 color: 'text',
                 boxShadow: 'none',
               },
