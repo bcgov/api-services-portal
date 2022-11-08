@@ -4,7 +4,8 @@
       id
       name
     }
-    allProductsByNamespace(where: {namespace: $namespace}) {
+
+    allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id
       environments {
