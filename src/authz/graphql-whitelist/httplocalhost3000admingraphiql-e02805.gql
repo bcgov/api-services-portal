@@ -1,0 +1,16 @@
+
+  query GetGatewayServiceFilters($namespace: String!) {
+    allGatewayPlugins {
+      id
+      name
+    }
+    allProductsByNamespace(where: {namespace: $namespace}) {
+      name
+      id
+      environments {
+        id
+        name
+      }
+    }
+    allConsumerScopesAndRoles
+  }
