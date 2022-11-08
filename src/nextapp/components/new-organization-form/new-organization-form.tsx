@@ -18,15 +18,11 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '@/shared/services/auth';
 import { useApiMutation } from '@/shared/services/api';
-import { QueryKey, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
+import { queryKey } from '@/shared/hooks/use-current-namespace';
 import { gql } from 'graphql-request';
 
-interface NewOrganizationFormProps {
-  queryKey: QueryKey;
-}
-const NewOrganizationForm: React.FC<NewOrganizationFormProps> = ({
-  queryKey,
-}) => {
+const NewOrganizationForm: React.FC = () => {
   const ref = React.useRef<HTMLFormElement>(null);
   const { user } = useAuth();
   const { isOpen, onClose, onOpen } = useDisclosure();

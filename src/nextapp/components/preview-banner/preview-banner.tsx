@@ -10,20 +10,17 @@ import {
   useDisclosure,
   Button,
 } from '@chakra-ui/react';
-import { gql } from 'graphql-request';
 import { ImInfo } from 'react-icons/im';
 import { useAuth } from '@/shared/services/auth';
-import { useApi } from '@/shared/services/api';
 import NewOrganizationForm from '../new-organization-form';
 import { FaClock } from 'react-icons/fa';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 const PreviewBanner: React.FC = () => {
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
   const toggleButtonText = isOpen ? 'Done' : 'Learn More';
-  const queryKey = ['currentNamespace'];
-
-  const { data, isSuccess } = useApi(queryKey, { query }, { enabled: true });
+  const { data, isSuccess } = useCurrentNamespace({ enabled: true });
 
   if (!user || !isSuccess || data.currentNamespace === null) {
     return null;
@@ -95,7 +92,7 @@ const PreviewBanner: React.FC = () => {
             </Text>
           </Flex>
           <Flex gridGap={4}>
-            <NewOrganizationForm queryKey={queryKey} />
+            <NewOrganizationForm />
             <Button
               size="sm"
               onClick={onToggle}
@@ -136,12 +133,3 @@ const PreviewBanner: React.FC = () => {
 };
 
 export default PreviewBanner;
-
-const query = gql`
-  query GetCurrentNamespace {
-    currentNamespace {
-      org
-      orgUnit
-    }
-  }
-`;
