@@ -131,6 +131,7 @@ let currentNamespace = {
   prodEnvId: 'p1',
   org: null,
   orgUnit: null,
+  orgEnabled: false,
   orgAdmins: ['Jim.Hopper@gov.bc.ca', 'bogus.secondone@gov.bc.ca'],
 };
 

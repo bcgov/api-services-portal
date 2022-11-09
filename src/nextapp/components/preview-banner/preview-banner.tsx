@@ -22,7 +22,12 @@ const PreviewBanner: React.FC = () => {
   const toggleButtonText = isOpen ? 'Done' : 'Learn More';
   const { data, isSuccess } = useCurrentNamespace({ enabled: true });
 
-  if (!user || !isSuccess || data.currentNamespace === null) {
+  if (
+    !user ||
+    !user.roles.includes('portal-user') ||
+    !isSuccess ||
+    data.currentNamespace === null
+  ) {
     return null;
   }
 
@@ -60,7 +65,15 @@ const PreviewBanner: React.FC = () => {
                 New namespaces must be reviewed by your Organization
                 Administrator before you can publish APIs to the Directory. Your
                 APIs are still in preview mode. For status inquiries, contact
-                your Organization Administrator.
+                your Organization Administrator{' '}
+                <Link
+                  href={`mailto:${data.currentNamespace?.orgAdmins[0]}`}
+                  color="bc-link"
+                  textDecor="underline"
+                >
+                  {data.currentNamespace?.orgAdmins[0]}
+                </Link>
+                .
               </Text>
             </Box>
           )}

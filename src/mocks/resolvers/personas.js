@@ -31,7 +31,7 @@ export const mark = {
   name: 'Mark Smith',
   username: 'markadmin',
   email: 'mark.smith@gov.ca',
-  roles: ['api-owner', 'portal-user'],
+  roles: ['api-owner'],
   isAdmin: false,
   namespace: 'aps-portal',
   groups: null,

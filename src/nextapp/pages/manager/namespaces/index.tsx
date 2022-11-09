@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ApproveBanner from '@/components/approve-banner';
 import {
   Button,
   Box,
@@ -13,6 +14,7 @@ import {
   useToast,
   VStack,
   useDisclosure,
+  Tooltip,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -24,6 +26,7 @@ import {
   FaChartBar,
   FaChevronRight,
   FaClock,
+  FaInfoCircle,
   FaShieldAlt,
   FaTrash,
   FaUserAlt,
@@ -110,6 +113,7 @@ const NamespacesPage: React.FC = () => {
   const currentOrg = React.useMemo(() => {
     if (namespace.isSuccess && namespace.data.currentNamespace.org) {
       return {
+        assigned: true,
         color: 'bc-text',
         iconColor: 'bc-blue',
         text: [
@@ -119,6 +123,7 @@ const NamespacesPage: React.FC = () => {
       };
     }
     return {
+      assigned: false,
       color: 'bc-component',
       iconColor: 'bc-component',
       text: 'Your Organization and Business Unit will appear here',
@@ -157,6 +162,7 @@ const NamespacesPage: React.FC = () => {
         </title>
       </Head>
 
+      <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl">
         <PageHeader
@@ -164,19 +170,42 @@ const NamespacesPage: React.FC = () => {
             hasNamespace ? (
               <>
                 {user.namespace}
-                <Text
-                  color={currentOrg.color}
-                  fontSize="sm"
-                  fontWeight="normal"
-                  fontStyle="italic"
-                  mt={4}
-                  d="flex"
-                  gridGap={2}
-                  alignItems="center"
-                >
-                  <Icon as={FaBuilding} color={currentOrg.iconColor} />
-                  {currentOrg.text}
-                </Text>
+                <Flex align="center" gridGap={4} mt={4}>
+                  <Text
+                    color={currentOrg.color}
+                    fontSize="sm"
+                    fontWeight="normal"
+                    fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
+                    d="flex"
+                    gridGap={2}
+                    alignItems="center"
+                  >
+                    <Icon as={FaBuilding} color={currentOrg.iconColor} />
+                    {currentOrg.text}
+                  </Text>
+                  <Tooltip
+                    closeOnClick
+                    hasArrow
+                    closeDelay={1500}
+                    pointerEvents="all"
+                    label={
+                      <>
+                        If you need to change the Organization or Business Unit
+                        for your Namespace, submit a request through the{' '}
+                        <Link
+                          href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
+                          textDecor="underline"
+                        >
+                          Data Systems and Services request system
+                        </Link>
+                      </>
+                    }
+                  >
+                    <Box d="inline-flex">
+                      <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
+                    </Box>
+                  </Tooltip>
+                </Flex>
               </>
             ) : (
               ''
