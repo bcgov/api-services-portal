@@ -81,14 +81,14 @@ const NewOrganizationForm: React.FC = () => {
                 <FormLabel>Organization</FormLabel>
                 <Select name="org">
                   <option value="">Select an Organization</option>
-                  <option value="1">Citizen's Service</option>
+                  <option value="Citizen's Service">Citizen's Service</option>
                 </Select>
               </FormControl>
               <FormControl isRequired>
                 <FormLabel>Business Unit</FormLabel>
                 <Select name="orgUnit">
                   <option value="">Select a Business Unit</option>
-                  <option value="1">DataBC Program</option>
+                  <option value="DataBC Program">DataBC Program</option>
                 </Select>
               </FormControl>
             </form>

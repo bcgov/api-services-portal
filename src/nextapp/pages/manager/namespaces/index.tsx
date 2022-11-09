@@ -20,6 +20,7 @@ import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { useAuth } from '@/shared/services/auth';
 import {
+  FaBuilding,
   FaChartBar,
   FaChevronRight,
   FaClock,
@@ -38,6 +39,7 @@ import { useRouter } from 'next/router';
 import EmptyPane from '@/components/empty-pane';
 import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
 import NewNamespace from '@/components/new-namespace';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 const actions = [
   {
@@ -103,7 +105,25 @@ const NamespacesPage: React.FC = () => {
   const toast = useToast();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
+  const namespace = useCurrentNamespace();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const currentOrg = React.useMemo(() => {
+    if (namespace.isSuccess && namespace.data.currentNamespace.org) {
+      return {
+        color: 'bc-text',
+        iconColor: 'bc-blue',
+        text: [
+          namespace.data.currentNamespace.org,
+          namespace.data.currentNamespace.orgUnit,
+        ].join(' - '),
+      };
+    }
+    return {
+      color: 'bc-component',
+      iconColor: 'bc-component',
+      text: 'Your Organization and Business Unit will appear here',
+    };
+  }, [namespace]);
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -139,7 +159,30 @@ const NamespacesPage: React.FC = () => {
 
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={hasNamespace ? user.namespace : ''} />
+        <PageHeader
+          title={
+            hasNamespace ? (
+              <>
+                {user.namespace}
+                <Text
+                  color={currentOrg.color}
+                  fontSize="sm"
+                  fontWeight="normal"
+                  fontStyle="italic"
+                  mt={4}
+                  d="flex"
+                  gridGap={2}
+                  alignItems="center"
+                >
+                  <Icon as={FaBuilding} color={currentOrg.iconColor} />
+                  {currentOrg.text}
+                </Text>
+              </>
+            ) : (
+              ''
+            )
+          }
+        />
         {!hasNamespace && (
           <EmptyPane
             message="To get started select a Namespace from the dropdown below or create a new Namespace"

@@ -108,22 +108,11 @@ const PreviewBanner: React.FC = () => {
         {isOpen && (
           <Box mt={4}>
             <Text fontSize="sm">
-              If this is a new namespace, it must be approved and associated
-              with an organization before you can enable your products in the
-              API Directory to make them visible to the public. You can still
-              configure your products but they will remain in preview mode.
-              Please open a ticket with the{' '}
-              <Link
-                color="bc-blue"
-                fontWeight="bold"
-                textDecor="underline"
-                href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
-                target="_blank"
-                rel="external noreferrer noopener"
-              >
-                Data Systems and Services request system
-              </Link>{' '}
-              for your namespace approval.
+              Preview mode allows you to test and preview your APIs to the
+              Directory prior to publishing. Publishing APIs to the Directory
+              makes them available so consumers find and request access. Add
+              your Organization to the namespace when you are ready to publish
+              your APIs.
             </Text>
           </Box>
         )}

@@ -129,11 +129,14 @@ let currentNamespace = {
     { name: 'Namespace.View' },
   ],
   prodEnvId: 'p1',
+  org: null,
+  orgUnit: null,
+  orgAdmins: ['Jim.Hopper@gov.bc.ca', 'bogus.secondone@gov.bc.ca'],
 };
 
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   return res(
-    ctx.delay(4500),
+    ctx.delay(400),
     ctx.data({
       currentNamespace,
     })
