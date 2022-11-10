@@ -81,7 +81,10 @@ const ProductsPage: React.FC = () => {
                 <Switch
                   id="orgEnabled"
                   isDisabled={!namespace.isSuccess || mutate.isLoading}
-                  isChecked={namespace.data?.currentNamespace.orgEnabled}
+                  isChecked={
+                    /* @ts-ignore-line */ namespace.data?.currentNamespace
+                      .orgEnabled
+                  }
                   onChange={handleOrgEnabledChanged}
                 />
               </GridItem>

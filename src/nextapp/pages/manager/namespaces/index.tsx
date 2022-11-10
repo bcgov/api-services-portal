@@ -242,7 +242,6 @@ const NamespacesPage: React.FC = () => {
                 </Heading>
               </Flex>
               <VStack spacing={5} align="stretch">
-                {console.log(actions)}
                 {actions
                   .filter(
                     (a) =>

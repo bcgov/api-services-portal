@@ -5,7 +5,7 @@ export const harley = {
     name: 'Harley Jones',
     username: 'harley@idir',
     email: 'harley@gov.ca',
-    roles: ['portal-user'],
+    roles: ['provider-user'],
     isAdmin: false,
     namespace: 'aps-portal',
     groups: null,

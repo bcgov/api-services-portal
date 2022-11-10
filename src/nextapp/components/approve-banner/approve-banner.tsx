@@ -1,13 +1,5 @@
 import * as React from 'react';
-import {
-  Box,
-  Container,
-  Flex,
-  Text,
-  Icon,
-  useDisclosure,
-  Button,
-} from '@chakra-ui/react';
+import { Box, Container, Flex, Text, Icon, Button } from '@chakra-ui/react';
 import { FaExclamationCircle } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAuth } from '@/shared/services/auth';
@@ -22,6 +14,7 @@ const ApproveBanner: React.FC = () => {
     !user.roles.includes('api-owner') ||
     !isSuccess ||
     data.currentNamespace === null ||
+    // @ts-ignore
     data.currentNamespace?.orgEnabled
   ) {
     return null;
@@ -38,8 +31,10 @@ const ApproveBanner: React.FC = () => {
               find and request access.
             </Text>
           </Flex>
-          <Link href="/manager/products">
-            <Button ml={2}>Enable Publishing</Button>
+          <Link passHref href="/manager/products">
+            <Button as="a" ml={2}>
+              Enable Publishing
+            </Button>
           </Link>
         </Flex>
       </Container>
