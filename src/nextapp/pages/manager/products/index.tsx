@@ -22,8 +22,10 @@ import useCurrentNamespace, {
 } from '@/shared/hooks/use-current-namespace';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
+import { useAuth } from '@/shared/services/auth';
 
 const ProductsPage: React.FC = () => {
+  const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
   const client = useQueryClient();
   const namespace = useCurrentNamespace();
@@ -73,30 +75,32 @@ const ProductsPage: React.FC = () => {
         </PageHeader>
 
         <Box mt={5}>
-          <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
-            <GridItem>
-              <Switch
-                id="orgEnabled"
-                isDisabled={!namespace.isSuccess || mutate.isLoading}
-                isChecked={namespace.data?.currentNamespace.orgEnabled}
-                onChange={handleOrgEnabledChanged}
-              />
-            </GridItem>
-            <GridItem>
-              <Heading
-                as="label"
-                htmlFor="orgEnabled"
-                size="sm"
-                lineHeight="24px"
-              >
-                Publish APIs
-              </Heading>
-              <Text>
-                By enabling Publish APIs, consumers can find and request access
-                to your APIs from the Directory.
-              </Text>
-            </GridItem>
-          </Grid>
+          {user?.roles.includes('api-owner') && (
+            <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
+              <GridItem>
+                <Switch
+                  id="orgEnabled"
+                  isDisabled={!namespace.isSuccess || mutate.isLoading}
+                  isChecked={namespace.data?.currentNamespace.orgEnabled}
+                  onChange={handleOrgEnabledChanged}
+                />
+              </GridItem>
+              <GridItem>
+                <Heading
+                  as="label"
+                  htmlFor="orgEnabled"
+                  size="sm"
+                  lineHeight="24px"
+                >
+                  Publish APIs
+                </Heading>
+                <Text>
+                  By enabling Publish APIs, consumers can find and request
+                  access to your APIs from the Directory.
+                </Text>
+              </GridItem>
+            </Grid>
+          )}
           <ClientRequest
             fallback={[1, 2, 3].map((d) => (
               <Skeleton

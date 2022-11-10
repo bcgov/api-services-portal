@@ -104,7 +104,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: { ...mark, namespace },
+        user: { ...harley.session, namespace },
       })
     );
   }),

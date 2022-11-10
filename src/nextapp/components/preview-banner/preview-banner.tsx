@@ -6,32 +6,41 @@ import {
   Text,
   Icon,
   Link,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
   Tooltip,
   useDisclosure,
   Button,
+  IconButton,
 } from '@chakra-ui/react';
 import { ImInfo } from 'react-icons/im';
 import { useAuth } from '@/shared/services/auth';
 import NewOrganizationForm from '../new-organization-form';
-import { FaClock } from 'react-icons/fa';
+import { FaCheckCircle, FaChevronDown, FaClock, FaTimes } from 'react-icons/fa';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 const PreviewBanner: React.FC = () => {
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
+  const bannerDisclosure = useDisclosure({ defaultIsOpen: true });
   const toggleButtonText = isOpen ? 'Done' : 'Learn More';
   const { data, isSuccess } = useCurrentNamespace({ enabled: true });
 
   if (
     !user ||
-    !user.roles.includes('portal-user') ||
+    !user.roles.includes('provider-user') ||
     !isSuccess ||
     data.currentNamespace === null
   ) {
     return null;
   }
 
-  if (data.currentNamespace.org) {
+  if (data.currentNamespace.org && !data.currentNamespace.orgEnabled) {
+    const firstAdminEmail = data.currentNamespace?.orgAdmins[0];
+    const otherAdmins = data.currentNamespace?.orgAdmins.slice(1);
+
     return (
       <Box
         width="100%"
@@ -67,12 +76,33 @@ const PreviewBanner: React.FC = () => {
                 APIs are still in preview mode. For status inquiries, contact
                 your Organization Administrator{' '}
                 <Link
-                  href={`mailto:${data.currentNamespace?.orgAdmins[0]}`}
+                  href={`mailto:${firstAdminEmail}`}
                   color="bc-link"
                   textDecor="underline"
                 >
-                  {data.currentNamespace?.orgAdmins[0]}
+                  {firstAdminEmail}
                 </Link>
+                {otherAdmins.length > 0 && (
+                  <Menu>
+                    <MenuButton
+                      as={Button}
+                      ml={4}
+                      size="sm"
+                      variant="link"
+                      color="bc-blue"
+                      rightIcon={<Icon as={FaChevronDown} />}
+                    >
+                      More admins
+                    </MenuButton>
+                    <MenuList>
+                      {otherAdmins.map((a: string) => (
+                        <MenuItem key={a} as="a" href={`mailto:${a}`}>
+                          {a}
+                        </MenuItem>
+                      ))}
+                    </MenuList>
+                  </Menu>
+                )}
                 .
               </Text>
             </Box>
@@ -80,6 +110,40 @@ const PreviewBanner: React.FC = () => {
         </Container>
       </Box>
     );
+  }
+
+  if (
+    data.currentNamespace.org &&
+    data.currentNamespace.orgEnabled &&
+    bannerDisclosure.isOpen
+  ) {
+    return (
+      <Box width="100%" bgColor="#E2F0DA" color="bc-success" boxShadow="md">
+        <Container maxW="6xl" py={6}>
+          <Flex align="center" justify="space-between" gridGap={8}>
+            <Flex align="center" gridGap={4}>
+              <Icon as={FaCheckCircle} />
+              <Text fontSize="sm" fontWeight="bold">
+                {`${user.namespace} namespace has been enabled to publish APIs to the Directory.`}
+              </Text>
+            </Flex>
+            <IconButton
+              icon={<Icon as={FaTimes} />}
+              aria-label="Close banner button"
+              onClick={bannerDisclosure.onClose}
+              variant="link"
+              ml={2}
+              textDecor="underline"
+              color="bc-link"
+            />
+          </Flex>
+        </Container>
+      </Box>
+    );
+  }
+
+  if (data.currentNamespace?.org) {
+    return null;
   }
 
   return (

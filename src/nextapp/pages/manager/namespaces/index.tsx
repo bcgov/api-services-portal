@@ -242,10 +242,11 @@ const NamespacesPage: React.FC = () => {
                 </Heading>
               </Flex>
               <VStack spacing={5} align="stretch">
+                {console.log(actions)}
                 {actions
                   .filter(
                     (a) =>
-                      a.roles.length == 0 ||
+                      a.roles.length === 0 ||
                       a.roles.filter((r) => user.roles.includes(r)).length > 0
                   )
                   .map((a) => (
