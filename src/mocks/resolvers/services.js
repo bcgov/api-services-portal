@@ -288,12 +288,9 @@ export const getGatewayServiceHandler = (req, res, ctx) => {
 export const getGatewayServiceFilterHandler = (req, res, ctx) => {
   return res(
     ctx.data({
-      allGatewayPlugins: uniqBy(
-        gatewayServices
-          .map((s) => s.plugins.map((p) => ({ name: p.name, id: p.id })))
-          .flat(),
-        'name'
-      ),
+      allGatewayPlugins: gatewayServices
+        .map((s) => s.plugins.map((p) => ({ name: p.name, id: p.id })))
+        .flat(),
       allProductsByNamespace,
       allConsumerScopesAndRoles: store.data.allConsumerScopesAndRoles,
     })

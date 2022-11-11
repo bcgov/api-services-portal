@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { gql } from 'graphql-request';
 import { Grid, Select } from '@chakra-ui/react';
+import { uniqBy } from 'lodash';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
@@ -48,7 +49,7 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
           }, []);
 
         case 'plugins':
-          return data.allGatewayPlugins.map((p) => ({
+          return uniqBy(data.allGatewayPlugins, 'name').map((p) => ({
             name: p.name,
             id: p.name,
           }));
