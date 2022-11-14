@@ -7,6 +7,7 @@ import {
   MenuItem,
   MenuList,
   MenuOptionGroup,
+  Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -15,9 +16,10 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
-import type { NamespaceData } from '@/shared/types/app.types';
 import NamespaceManager from '../namespace-manager';
 import NewNamespace from '../new-namespace';
+import type { NamespaceData } from '@/shared/types/app.types';
+import { differenceInDays } from 'date-fns';
 
 interface NamespaceMenuProps {
   user: UserData;
@@ -39,6 +41,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     { query },
     { suspense: false }
   );
+  const today = new Date();
 
   const handleNamespaceChange = React.useCallback(
     (namespace: NamespaceData) => async () => {
@@ -116,8 +119,24 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
                         data-testid={`ns-dropdown-item-${n.name}`}
+                        flexDir="column"
+                        alignItems="flex-start"
                       >
-                        {n.name}
+                        {differenceInDays(today, new Date(n.createdAt)) <=
+                          1 && (
+                          <Text color="bc-error" pos="absolute" right={4}>
+                            New
+                          </Text>
+                        )}
+                        <Text>{n.name}</Text>
+                        {
+                          /* @ts-ignore */
+                          !n.orgEnabled && (
+                            <Text fontSize="xs" color="bc-component">
+                              API Publishing Disabled
+                            </Text>
+                          )
+                        }
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>

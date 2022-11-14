@@ -1,4 +1,5 @@
 import { graphql, rest } from 'msw';
+import subDays from 'date-fns/subDays';
 
 import { harley, mark } from './resolvers/personas';
 import {
@@ -64,10 +65,20 @@ const allNamespaces = [
   {
     id: 'n1',
     name: 'aps-portal',
+    orgEnabled: true,
+    createdAt: subDays(new Date(), 20).toISOString(),
   },
   {
     id: 'n2',
     name: 'loc',
+    orgEnabled: false,
+    createdAt: subDays(new Date(), 5).toISOString(),
+  },
+  {
+    id: 'n3',
+    name: 'dss-app',
+    orgEnabled: true,
+    createdAt: new Date().toISOString(),
   },
 ];
 let namespace = mark.namespace;
