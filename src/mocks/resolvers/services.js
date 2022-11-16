@@ -6,7 +6,9 @@ const gatewayServices = [
     id: '123123',
     name: 'aps-example',
     updatedAt: '2022-10-21T15:55:35.732Z',
-    environment: null,
+    environment: {
+      name: 'prod',
+    },
     routes: [
       {
         id: '2034ur20',
@@ -24,7 +26,9 @@ const gatewayServices = [
     id: '32ejwij1j',
     name: 'a-service-for-aps-portal',
     updatedAt: '2022-10-21T15:55:36.842Z',
-    environment: null,
+    environment: {
+      name: 'dev',
+    },
     routes: [
       {
         id: '109ej23',
@@ -46,7 +50,9 @@ const gatewayServices = [
     id: '10idj03wiej',
     name: 'aps-portal',
     updatedAt: '2022-10-21T15:55:31.637Z',
-    environment: null,
+    environment: {
+      name: 'prod',
+    },
     routes: [
       {
         id: '90jwe0r9f',
