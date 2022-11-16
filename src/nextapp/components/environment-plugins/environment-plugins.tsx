@@ -21,21 +21,22 @@ import { useApi } from '@/shared/services/api';
 interface EnvironmentPluginsProps {
   environment: Environment;
   flow: string;
+  selectedIssuer: string;
 }
 
 const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
   environment,
   flow,
+  selectedIssuer,
 }) => {
-  const id = environment?.credentialIssuer?.id;
-  const { data, isLoading, isSuccess } = useApi(
-    ['environment-credential', environment?.credentialIssuer?.id],
+  const { data, isLoading } = useApi(
+    ['environment-credential', selectedIssuer],
     {
       query,
-      variables: { id },
+      variables: { id: selectedIssuer },
     },
     {
-      enabled: Boolean(id),
+      enabled: Boolean(selectedIssuer),
       suspense: false,
     }
   );
@@ -72,7 +73,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             <CircularProgress />
           </Center>
         )}
-        {flow === 'client-credentials' && !id && (
+        {flow === 'client-credentials' && !selectedIssuer && (
           <Alert
             status="info"
             variant="subtle"
@@ -85,7 +86,7 @@ const EnvironmentPlugins: React.FC<EnvironmentPluginsProps> = ({
             </AlertDescription>
           </Alert>
         )}
-        {doc && <YamlViewer doc={doc} />}{' '}
+        {doc && <YamlViewer doc={doc} />}
         {(!doc || data?.allCredentialIssuersByNamespace.length === 0) && (
           <Alert
             status="info"
