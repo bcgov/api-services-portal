@@ -252,3 +252,4 @@ select 'drop table "' || tablename || '" cascade;' from pg_tables where schemana
 ```
 
 In the mean time, it is possible to drop the tables and re-run the `init-aps-portal-keystonejs-batch-job`.
+
