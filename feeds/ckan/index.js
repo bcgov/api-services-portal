@@ -50,6 +50,31 @@ async function scopedSync(
   fs.rmdirSync(scopedDir, { recursive: true });
 }
 
+async function syncOrgs({ url, workingPath, destinationUrl }) {
+  fs.mkdirSync(workingPath + '/orgs', { recursive: true });
+
+  const exceptions = [];
+  const xfer = transfers(workingPath, url, exceptions);
+
+  await xfer.copy(
+    '/api/action/organization_list?limit=100&offset=0',
+    'organization-keys'
+  );
+  await xfer.concurrentWork(
+    getCkanDataProducer(
+      xfer,
+      'organization-keys',
+      '/api/action/organization_show',
+      'orgs/'
+    )
+  );
+  console.log('Exceptions? ' + (exceptions.length == 0 ? 'NO' : 'YES!'));
+  console.log(JSON.stringify(exceptions, null, 4));
+
+  // Now, send to portal
+  await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl));
+}
+
 async function sync({ url, workingPath, destinationUrl }) {
   fs.mkdirSync(workingPath + '/orgs', { recursive: true });
   fs.mkdirSync(workingPath + '/groups', { recursive: true });
@@ -201,5 +226,6 @@ function isOrgUnit(data) {
 
 module.exports = {
   sync,
+  syncOrgs,
   scopedSync,
 };
