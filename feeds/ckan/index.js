@@ -57,14 +57,14 @@ async function syncOrgs({ url, workingPath, destinationUrl }) {
   const xfer = transfers(workingPath, url, exceptions);
 
   await xfer.copy(
-    '/api/action/organization_list?limit=100&offset=0',
+    '/api/3/action/organization_list?limit=1000&offset=0',
     'organization-keys'
   );
   await xfer.concurrentWork(
     getCkanDataProducer(
       xfer,
       'organization-keys',
-      '/api/action/organization_show',
+      '/api/3/action/organization_show',
       'orgs/'
     )
   );
@@ -76,7 +76,6 @@ async function syncOrgs({ url, workingPath, destinationUrl }) {
 }
 
 async function sync({ url, workingPath, destinationUrl }) {
-  fs.mkdirSync(workingPath + '/orgs', { recursive: true });
   fs.mkdirSync(workingPath + '/groups', { recursive: true });
   fs.mkdirSync(workingPath + '/packages', { recursive: true });
 
@@ -84,10 +83,6 @@ async function sync({ url, workingPath, destinationUrl }) {
   const xfer = transfers(workingPath, url, exceptions);
 
   await xfer.copy('/api/action/group_list?limit=100&offset=0', 'group-keys');
-  await xfer.copy(
-    '/api/action/organization_list?limit=100&offset=0',
-    'organization-keys'
-  );
   await xfer.copy(
     '/api/action/package_list?limit=100&offset=0',
     'package-keys'
@@ -105,19 +100,10 @@ async function sync({ url, workingPath, destinationUrl }) {
     ),
     10
   );
-  await xfer.concurrentWork(
-    getCkanDataProducer(
-      xfer,
-      'organization-keys',
-      '/api/action/organization_show',
-      'orgs/'
-    )
-  );
   console.log('Exceptions? ' + (exceptions.length == 0 ? 'NO' : 'YES!'));
   console.log(JSON.stringify(exceptions, null, 4));
 
   // Now, send to portal
-  await xfer.concurrentWork(loadOrgProducer(xfer, workingPath, destinationUrl));
   await xfer.concurrentWork(
     loadDatasetProducer(xfer, workingPath, destinationUrl)
   );
