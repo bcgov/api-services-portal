@@ -160,6 +160,10 @@ function loadDatasetProducer(xfer, workingPath, destinationUrl) {
       fs.readFileSync(workingPath + '/' + 'packages' + '/' + file)
     )['result'];
     data['tags'] = data['tags'].map((tag) => tag.name);
+    data['org'] = data['extras'].filter((e) => e.key === 'org').pop()['value'];
+    data['sub_org'] = data['extras'].filter((e) => e.key === 'sub_org').pop()[
+      'value'
+    ];
     index++;
 
     console.log(new Date() + ' : ' + data['name']);
