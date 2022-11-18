@@ -21,6 +21,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
 
+      - name: Docker meta Feeder
+        id: docker_meta_feeder
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/bcgov/api-services-portal/data-feeder
+
       - name: Set DEPLOY_ID which will deploy a custom deploy to 'dev' environment
         run: |
           echo '::set-output name=DEPLOY_ID::${{ steps.docker_meta.outputs.version }}'
@@ -58,7 +64,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: feeds
           file: feeds/Dockerfile
-          tags: ${{ steps.docker_meta.outputs.tags }}
+          tags: ${{ steps.docker_meta_feeder.outputs.tags }}
           push: true
           build-args: |
             GITHUB_API_TOKEN=${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
