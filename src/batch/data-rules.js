@@ -64,9 +64,9 @@ const metadata = {
       resources: { name: 'toString' },
       organization: {
         name: 'connectOne',
-        key: 'org',
+        key: 'sub_org',
         list: 'allOrganizations',
-        refKey: 'extForeignKey',
+        refKey: 'orgUnits.extForeignKey',
       },
       organizationUnit: {
         name: 'connectOne',

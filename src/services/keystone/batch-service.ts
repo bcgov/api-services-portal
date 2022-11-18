@@ -99,6 +99,11 @@ export class BatchService {
     eid: string,
     fields: string[]
   ) {
+    const refKeys = refKey.split('.');
+    if (refKeys.length == 2) {
+      return this.lookupByChildItem(query, refKeys[0], refKeys[1], eid, fields);
+    }
+
     logger.debug('[lookup] : %s :: %s == %s', query, refKey, eid);
     const queryString = `query($id: String) {
       ${query}(where: { ${refKey} : $id }) {
@@ -117,6 +122,43 @@ export class BatchService {
       );
     }
     return result['data'][query].length == 0 ? null : result['data'][query][0];
+  }
+
+  public async lookupByChildItem(
+    query: string,
+    parent: string,
+    refKey: string,
+    eid: string,
+    fields: string[]
+  ) {
+    logger.debug(
+      '[lookupByChildItem] : %s :: %s.%s == %s',
+      query,
+      parent,
+      refKey,
+      eid
+    );
+    const queryString = `query($id: String) {
+      ${query}(where: { ${parent}_some: { ${refKey} : $id } }) {
+        ${parent} {
+          id, ${fields.join(',')}
+        }
+      }
+    }`;
+    logger.debug('[lookupByChildItem] %s', queryString);
+    const result = await this.context.executeGraphQL({
+      query: queryString,
+      variables: { id: eid },
+    });
+    logger.debug('[lookupByChildItem] RESULT %j', result);
+    if (result['data'][query] == null || result['data'][query].length > 1) {
+      throw Error(
+        'Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid
+      );
+    }
+    return result['data'][query].length == 0
+      ? null
+      : result['data'][query][0][parent][0];
   }
 
   public async create(entity: string, data: any) {
