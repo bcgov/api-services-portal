@@ -16,6 +16,7 @@ import NextLink from 'next/link';
 import { Dataset, Product } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
 import kebabCase from 'lodash/kebabCase';
+import uniq from 'lodash/uniq';
 
 interface DiscoveryDataset extends Dataset {
   products: Product[];
@@ -117,7 +118,7 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
         <Box>{data && <Badge color="bc-blue-alt">{data.sector}</Badge>}</Box>
         <Wrap spacing={2}>
           {data.products?.map((prod) =>
-            prod.environments.map((e) => (
+            uniq(prod.environments).map((e) => (
               <WrapItem key={e.id}>
                 <Badge colorScheme="green">{e.name}</Badge>
               </WrapItem>
