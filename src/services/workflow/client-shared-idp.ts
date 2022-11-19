@@ -1,39 +1,27 @@
-import { lookupCredentialIssuerById, addKongConsumer } from '../keystone';
-
+import { lookupCredentialIssuerById, lookupSharedIssuers } from '../keystone';
 import {
   KeycloakClientRegistrationService,
-  KeycloakClientService,
   KeycloakTokenService,
   getOpenidFromIssuer,
+  KeycloakClientService,
 } from '../keycloak';
-
 import { v4 as uuidv4 } from 'uuid';
-
 import { strict as assert } from 'assert';
-
 import { CredentialIssuer } from '../keystone/types';
 import {
   IssuerEnvironmentConfig,
   getIssuerEnvironmentConfig,
   RequestControls,
+  getAllIssuerEnvironmentConfigs,
 } from './types';
 import { ClientAuthenticator } from '../keycloak/client-registration-service';
 
-/**
- * Steps:
- * - create the Client in the idP
- * - create the corresponding Consumer in Kong
- * - sync the Kong Consumer in KeystoneJS
- *
- * @param {*} credentialIssuerPK
- * @param {*} newClientId
- */
-export async function registerClient(
+export async function syncClient(
   context: any,
   environment: string,
+  clientAuthenticator: ClientAuthenticator,
   credentialIssuerPK: string,
-  controls: RequestControls,
-  newClientId: string
+  controls: RequestControls
 ) {
   // Find the credential issuer and based on its type, go do the appropriate action
   const issuer: CredentialIssuer = await lookupCredentialIssuerById(
@@ -67,6 +55,13 @@ export async function registerClient(
   const clientMappers =
     issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
 
+  const clientId =
+    environment == 'prod'
+      ? issuer.clientId
+      : `${issuer.clientId}-${environment}`;
+
+  const baseUrl = `${process.env.EXTERNAL_URL}/ext/${clientAuthenticator}/ns/${issuer.namespace}/client/${clientId}`;
+
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
@@ -75,15 +70,16 @@ export async function registerClient(
     openid.registration_endpoint,
     token
   ).clientRegistration(
-    <ClientAuthenticator>issuer.clientAuthenticator,
-    newClientId,
+    clientAuthenticator,
+    clientId,
     uuidv4(),
     controls.clientCertificate,
     controls.jwksUrl,
     clientMappers,
-    false
+    true,
+    baseUrl
   );
-  assert.strictEqual(client.clientId, newClientId);
+  assert.strictEqual(client.clientId, clientId);
 
   return {
     openid,
@@ -91,42 +87,31 @@ export async function registerClient(
   };
 }
 
-export async function findClient(
-  context: any,
-  environment: string,
-  credentialIssuerPK: string,
-  clientId: string
-) {
-  // Find the credential issuer and based on its type, go do the appropriate action
+/**
+ * Whenever the CredentialIssuer is updated, and inheritFrom is set,
+ * then sync the Roles and Authz settings in the Client Registration
+ * @param context
+ * @param credentialIssuerPK
+ */
+export async function syncSharedIdp(context: any, credentialIssuerPK: string) {
   const issuer: CredentialIssuer = await lookupCredentialIssuerById(
     context,
     credentialIssuerPK
   );
 
-  const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(
-    issuer,
-    environment
-  );
+  const envConfigs = getAllIssuerEnvironmentConfigs(issuer);
 
-  const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-  // openid.issuer and issuerEnvConfig.issuerUrl may be different
-  // but for kcClientService we want to use the issuerEnvConfig.issuerUrl
-  // openid.issuer will be an externally accessible URL where is `issuerEnvConfig.issuerUrl`
-  // could be internal (similar to the openid.token_endpoint and registration_endpoint)
-  const kcClientService = new KeycloakClientService(
-    issuerEnvConfig.issuerUrl,
-    null
-  );
+  function updateClient(config: IssuerEnvironmentConfig) {
+    // get the Client in the remote IdP
+    // sync Roles
+  }
+}
 
-  await kcClientService.login(
-    issuerEnvConfig.clientId,
-    issuerEnvConfig.clientSecret
-  );
-
-  const client = await kcClientService.findByClientId(clientId);
-
-  return {
-    openid,
-    client,
-  };
+/**
+ * Get all the shared CredentialIssuers and return the environmentDetails
+ *
+ * @param context
+ */
+export async function previewSharedIdPs(context: any, clientId: string) {
+  const shared = await lookupSharedIssuers(context);
 }

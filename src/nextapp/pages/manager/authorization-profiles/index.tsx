@@ -248,6 +248,9 @@ const query = gql`
         email
       }
       environmentDetails
+      inheritFrom {
+        name
+      }
       availableScopes
       clientAuthenticator
       clientRoles

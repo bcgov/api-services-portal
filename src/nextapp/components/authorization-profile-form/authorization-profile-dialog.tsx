@@ -1,5 +1,7 @@
 import * as React from 'react';
 import {
+  Alert,
+  AlertIcon,
   Box,
   Flex,
   Modal,
@@ -15,7 +17,12 @@ import { gql } from 'graphql-request';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
-import { CredentialIssuer } from '@/shared/types/query.types';
+import {
+  CredentialIssuer,
+  CredentialIssuerCreateInput,
+  CredentialIssuerUpdateInput,
+  SharedIssuer,
+} from '@/shared/types/query.types';
 
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
@@ -24,6 +31,7 @@ import AuthenticationForm from './authentication-form';
 import AuthorizationForm from './authorization-form';
 import ClientManagement from './client-management';
 import { EnvironmentItem } from './types';
+import SharedIdP from './shared-idp';
 
 interface AuthorizationProfileDialogProps {
   data?: CredentialIssuer;
@@ -87,7 +95,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     setTabIndex(index);
   }, []);
   const handleCreateProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerCreateInput) => {
       try {
         await createMutate.mutateAsync({
           data: {
@@ -124,12 +132,13 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     ]
   );
   const handleSaveProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerUpdateInput) => {
       try {
         await editMutate.mutateAsync({
           id,
           data: {
             ...payload,
+            inheritFrom: undefined, // should never be sent when updating a profile
             flow: flowValue,
             clientAuthenticator,
             name,
@@ -169,7 +178,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       const [flow, clientAuthenticator] = formData.flow.split('.');
 
       const payload = {
-        ...data,
+        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
         ...formData,
         flow,
         clientAuthenticator,
@@ -190,8 +199,14 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleAuthorizationComplete = React.useCallback(
     (payload: FormData) => {
       const formData = Object.fromEntries(payload);
+      console.log('FORM DATA = ' + JSON.stringify(formData));
       if (id) {
-        handleSaveProfile({ ...data, ...formData });
+        handleSaveProfile({
+          ...(data as
+            | CredentialIssuerCreateInput
+            | CredentialIssuerUpdateInput),
+          ...formData,
+        });
       } else {
         newAuthorizationData.current = {
           ...newAuthorizationData.current,
@@ -203,9 +218,12 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     [data, handleSaveProfile, id]
   );
   const handleClientManagementComplete = React.useCallback(
-    (environments: EnvironmentItem[]) => {
+    (inheritFromId: string, environments: EnvironmentItem[]) => {
       const payload = {
-        ...data,
+        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
+        inheritFrom: inheritFromId
+          ? { connect: { id: inheritFromId } }
+          : undefined,
         environmentDetails: JSON.stringify(environments),
       };
 
@@ -276,12 +294,16 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
               />
             )}
             {tabIndex === 2 && (
-              <ClientManagement
-                data={data?.environmentDetails}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleClientManagementComplete}
-              />
+              <>
+                <ClientManagement
+                  data={data?.environmentDetails}
+                  inheritFrom={data?.inheritFrom}
+                  profileName={name}
+                  id={id}
+                  onCancel={handleClose}
+                  onComplete={handleClientManagementComplete}
+                />
+              </>
             )}
           </>
         )}

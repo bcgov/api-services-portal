@@ -24,6 +24,7 @@ const {
 } = require('../services/workflow');
 
 const { Logger } = require('../logger');
+const { kebabCase } = require('lodash');
 const logger = Logger('lists.credentialissuer');
 
 module.exports = {
@@ -149,6 +150,20 @@ module.exports = {
       isRequired: false,
       defaultValue: 'X-API-KEY',
     },
+    // Introduced to support shared IdP
+    isShared: {
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: false,
+    },
+    // Introduced to support shared IdP - 'environmentDetails' will be used from the inheritFrom Issuer
+    inheritFrom: {
+      type: Relationship,
+      ref: 'CredentialIssuer',
+      many: false,
+      isRequired: false,
+      access: { update: false },
+    },
     owner: {
       type: Relationship,
       ref: 'User',
@@ -173,6 +188,11 @@ module.exports = {
         if (context['authedItem'] && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
+        if ('inheritFrom' in resolvedData) {
+          // clientId is used when inheritFrom is set
+          // and it represents the client that Roles are managed for
+          resolvedData['clientId'] = kebabCase(resolvedData['name']);
+        }
       }
       if (operation == 'update' || operation == 'create') {
         // special handling of the environmentDetails
@@ -185,6 +205,27 @@ module.exports = {
       }
 
       return resolvedData;
+    },
+
+    validateInput: async function ({
+      operation,
+      existingItem,
+      originalInput,
+      resolvedData,
+      context,
+      addFieldValidationError, // Field hooks only
+      addValidationError, // List hooks only
+      listKey,
+      fieldPath, // Field hooks only
+    }) {
+      logger.debug('Validate Input %s %j', operation, originalInput);
+      if (operation === 'update') {
+        if ('inheritFrom' in originalInput || 'clientId' in originalInput) {
+          addValidationError(
+            'Some fields are only set during creation.  Failed to update.'
+          );
+        }
+      }
     },
 
     validateDelete: async function ({ existingItem, context }) {

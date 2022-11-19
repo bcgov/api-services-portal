@@ -8,14 +8,17 @@ node dist/test/integrated/keystonejs/credentialIssuer.js
 
 import InitKeystone from './init';
 import { o } from '../util';
-import { lookupCredentialIssuerById } from '../../../services/keystone';
+import {
+  lookupCredentialIssuerById,
+  lookupSharedIssuers,
+} from '../../../services/keystone';
 
 (async () => {
   const keystone = await InitKeystone();
   console.log('K = ' + keystone);
 
-  const ns = 'orgcontrol';
-  const skipAccessControl = true;
+  const ns = 'refactortime';
+  const skipAccessControl = false;
 
   const identity = {
     id: null,
@@ -31,5 +34,44 @@ import { lookupCredentialIssuerById } from '../../../services/keystone';
     authentication: { item: identity },
   });
 
+  if (false) {
+    const out = await ctx.executeGraphQL({
+      query: `
+   query abc {
+    allCredentialIssuersByNamespace {
+      id
+      name
+      flow
+      mode
+      owner {
+        name
+        username
+        email
+      }
+      environmentDetails
+      inheritFrom {
+        name
+      }
+      availableScopes
+      clientAuthenticator
+      clientRoles
+      clientMappers
+      apiKeyName
+      resourceType
+      resourceScopes
+      resourceAccessScope
+    }
+   }
+   
+  `,
+    });
+
+    o(out);
+  }
+
+  if (true) {
+    const res = await lookupSharedIssuers(ctx);
+    o(res);
+  }
   await keystone.disconnect();
 })();

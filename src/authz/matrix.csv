@@ -50,6 +50,7 @@ CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,update,,namespace,,,credential-admin,,,deny,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"create,read",namespace,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,sharedIdPs,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,allCredentialIssuersByNamespace,,,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
