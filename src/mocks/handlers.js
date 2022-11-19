@@ -1,7 +1,7 @@
 import { graphql, rest } from 'msw';
 import subDays from 'date-fns/subDays';
 
-import { harley, mark } from './resolvers/personas';
+import * as personas from './resolvers/personas';
 import {
   allApplicationsHandler,
   createApplicationHandler,
@@ -81,7 +81,8 @@ const allNamespaces = [
     createdAt: new Date().toISOString(),
   },
 ];
-let namespace = mark.namespace;
+let namespace = personas.mark.namespace;
+let user = { ...personas.mark, namespace };
 
 export function resetAll() {
   consumersStore.reset();
@@ -90,6 +91,10 @@ export function resetAll() {
 export const keystone = graphql.link('*/gql/api');
 
 export const handlers = [
+  rest.put('/dev/change-persona/:name', (req, res, ctx) => {
+    user = personas[req.params.name];
+    return res(ctx.text(`Persona changed to ${req.params.name}`));
+  }),
   rest.get('*/about', (_, res, ctx) => {
     return res(
       ctx.status(200),
@@ -115,7 +120,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: { ...harley.session, namespace },
+        user,
       })
     );
   }),
@@ -198,7 +203,8 @@ export const handlers = [
   keystone.mutation('RevokeAccessFromConsumer', revokeAccessFromConsumer),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     const { serviceAccessId } = req.variables;
-    const institution = serviceAccessId === 'd1' ? null : harley.business;
+    const institution =
+      serviceAccessId === 'd1' ? null : personas.harleyBusiness;
     return res(
       ctx.data({
         BusinessProfile: {
@@ -207,11 +213,11 @@ export const handlers = [
       })
     );
   }),
-  keystone.query('RequestDetailsBusinessProfile', (req, res, ctx) => {
+  keystone.query('RequestDetailsBusinessProfile', (_, res, ctx) => {
     return res(
       ctx.data({
         BusinessProfile: {
-          institution: harley.business,
+          institution: personas.harleyBusiness,
         },
       })
     );
