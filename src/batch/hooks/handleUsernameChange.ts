@@ -36,7 +36,7 @@ export async function handleUsernameChange(
   if (lkup == null || lkup['extForeignKey'] === eid) {
     // no work to do as the record either does not exist, or the external foreign key is still the same
   } else {
-    logger.debug(
+    logger.info(
       '[%s] name change detected - updating extForeignKey to %s',
       json['username'],
       eid
