@@ -160,7 +160,6 @@ function loadDatasetProducer(xfer, workingPath, destinationUrl) {
       fs.readFileSync(workingPath + '/' + 'packages' + '/' + file)
     )['result'];
     data['tags'] = data['tags'].map((tag) => tag.name);
-    data['sub_org'] = data['organization']['id'];
     index++;
 
     console.log(new Date() + ' : ' + data['name']);
