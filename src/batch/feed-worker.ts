@@ -10,7 +10,7 @@ import {
   toStringDefaultArray,
   toString,
 } from './transformations';
-import { handleNameChange } from './hooks';
+import { handleNameChange, handleUsernameChange } from './hooks';
 import YAML from 'js-yaml';
 import { BatchResult } from './types';
 import {
@@ -35,7 +35,7 @@ export function dot(value: any, _key: string) {
 const logger = Logger('batch.worker');
 
 const hooks = {
-  'pre-lookup': { handleNameChange },
+  'pre-lookup': { handleNameChange, handleUsernameChange },
 } as any;
 
 const transformations = {

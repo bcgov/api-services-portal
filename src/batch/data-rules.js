@@ -314,6 +314,7 @@ const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleUsernameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       aclGroups: { name: 'toStringDefaultArray' },

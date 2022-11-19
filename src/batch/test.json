@@ -1,0 +1,96 @@
+{
+  "route": {
+    "hosts": ["spt.apps.gov.bc.ca"],
+    "tags": ["ns.citz-gdx"],
+    "name": "apps-gdx-snplow-collector-play-gdx-snplow-collector-6b283-0",
+    "path_handling": "v0",
+    "strip_path": true,
+    "created_at": 1633559762,
+    "updated_at": 1663196101,
+    "request_buffering": true,
+    "response_buffering": true,
+    "ws_id": "dc1fa4f4-7083-4ce7-9fc0-dd1bea456e34",
+    "id": "fbc9840e-1392-417c-a04a-07e39cb2eb34",
+    "https_redirect_status_code": 426,
+    "preserve_host": false,
+    "regex_priority": 0,
+    "service": { "id": "d14dca17-d4ab-46e8-aa6f-e34d5f928eaf" },
+    "protocols": ["http", "https"]
+  },
+  "response": {
+    "headers": {
+      "access-control-allow-origin": "https://www2.gov.bc.ca",
+      "content-type": "text/plain; charset=UTF-8",
+      "server": "nginx",
+      "access-control-allow-credentials": "true",
+      "x-kong-upstream-latency": "62",
+      "x-kong-proxy-latency": "2",
+      "p3p": "policyref=\"/w3c/p3p.xml\", CP=\"NOI DSP COR NID PSA OUR IND COM NAV STA\"",
+      "date": "Thu, 15 Sep 2022 03:47:20 GMT",
+      "connection": "close",
+      "set-cookie": "sp=507654e6-ebc3-4cfc-8d7e-353c06f8e859; Expires=Fri, 15 Sep 2023 03:47:20 GMT; Domain=; Path=/; Secure; SameSite=None",
+      "content-length": "2"
+    },
+    "status": 200,
+    "size": 513
+  },
+  "upstream_uri": "/com.snowplowanalytics.snowplow/tp2",
+  "started_at": 1663213640121,
+  "tries": [
+    {
+      "balancer_start": 1663213640123,
+      "ip": "35.182.162.120",
+      "balancer_latency": 0,
+      "port": 443
+    }
+  ],
+  "latencies": { "proxy": 62, "kong": 2, "request": 64 },
+  "request": {
+    "size": 3070,
+    "querystring": {},
+    "url": "http://spt.apps.gov.bc.ca:80/com.snowplowanalytics.snowplow/tp2",
+    "headers": {
+      "sec-fetch-mode": "cors",
+      "x-forwarded-host": "spt.apps.gov.bc.ca",
+      "host": "spt.apps.gov.bc.ca",
+      "forwarded": "for=96.63.168.1;host=spt.apps.gov.bc.ca;proto=https",
+      "referer": "https://www2.gov.bc.ca/",
+      "x-forwarded-for": "96.63.168.1",
+      "sec-fetch-dest": "empty",
+      "content-length": "2189",
+      "x-forwarded-port": "443",
+      "sec-ch-ua": "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"",
+      "cookie": "sp=507654e6-ebc3-4cfc-8d7e-353c06f8e859",
+      "x-forwarded-proto": "https",
+      "sec-ch-ua-mobile": "?0",
+      "accept-encoding": "gzip, deflate, br",
+      "accept-language": "en-CA,en-GB;q=0.9,en-US;q=0.8,en;q=0.7",
+      "sec-fetch-site": "same-site",
+      "content-type": "application/json; charset=UTF-8",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "origin": "https://www2.gov.bc.ca",
+      "accept": "*/*"
+    },
+    "method": "POST",
+    "uri": "/com.snowplowanalytics.snowplow/tp2"
+  },
+  "service": {
+    "connect_timeout": 60000,
+    "retries": 5,
+    "read_timeout": 60000,
+    "updated_at": 1663196101,
+    "id": "d14dca17-d4ab-46e8-aa6f-e34d5f928eaf",
+    "name": "apps-gdx-snplow-collector-play",
+    "port": 443,
+    "host": "ca-bc-gov-main.collector.snplow.net",
+    "write_timeout": 60000,
+    "protocol": "https",
+    "enabled": true,
+    "created_at": 1614201372,
+    "tags": ["ns.citz-gdx", "serv-play"],
+    "ws_id": "dc1fa4f4-7083-4ce7-9fc0-dd1bea456e34"
+  },
+  "client_ip": "96.63.168.238",
+  "referer": "https://www2.gov.bc.ca/"
+}

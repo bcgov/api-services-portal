@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { strict as assert } from 'assert';
 
 const logger = Logger('ks.batch');
 
@@ -99,6 +100,12 @@ export class BatchService {
     eid: string,
     fields: string[]
   ) {
+    assert.strictEqual(
+      typeof eid != 'undefined' && eid != null,
+      true,
+      'Invalid key'
+    );
+
     const refKeys = refKey.split('.');
     if (refKeys.length == 2) {
       return this.lookupByChildItem(query, refKeys[0], refKeys[1], eid, fields);
