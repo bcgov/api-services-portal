@@ -478,7 +478,12 @@ export const syncRecords = async function (
             : undefined,
       };
     }
-    logger.debug('keys triggering update %j', Object.keys(data));
+    logger.info(
+      '[%s] [%s] keys triggering update %j',
+      entity,
+      localRecord.id,
+      Object.keys(data)
+    );
     const nr = await batchService.update(entity, localRecord.id, data);
     if (nr == null) {
       logger.error('UPDATE FAILED (%s) %j', nr, data);

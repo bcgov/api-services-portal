@@ -167,7 +167,11 @@ export class BatchService {
             }`,
       variables: { data },
     });
-    logger.debug('[create] RESULT %j', result);
+    if ('errors' in result) {
+      logger.error('[create] FAILED %j', result);
+    } else {
+      logger.debug('[create] RESULT %j', result);
+    }
 
     return 'errors' in result ? null : result['data'][`create${entity}`].id;
   }
@@ -182,7 +186,11 @@ export class BatchService {
             }`,
       variables: { id: id, data: data },
     });
-    logger.debug('[update] RESULT %j', result);
+    if ('errors' in result) {
+      logger.error('[update] FAILED %j', result);
+    } else {
+      logger.debug('[update] RESULT %j', result);
+    }
     return 'errors' in result ? null : result['data'][`update${entity}`].id;
   }
 
@@ -194,7 +202,11 @@ export class BatchService {
             }`,
       variables: { id: id },
     });
-    logger.debug('[remove] RESULT %j', result);
+    if ('errors' in result) {
+      logger.error('[remove] FAILED %j', result);
+    } else {
+      logger.debug('[remove] RESULT %j', result);
+    }
     return 'errors' in result ? null : result['data'][`delete${entity}`];
   }
 
@@ -206,9 +218,10 @@ export class BatchService {
             }`,
       variables: { ids: ids },
     });
-    logger.debug('[removeAll] RESULT %j', result);
     if ('errors' in result) {
-      logger.error('[removeAll] %j', result);
+      logger.error('[removeAll] FAILED %j', result);
+    } else {
+      logger.debug('[removeAll] RESULT %j', result);
     }
 
     return 'errors' in result ? null : result['data'][`delete${entity}s`];
