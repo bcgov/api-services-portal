@@ -2,7 +2,7 @@ import { BatchService } from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
 import { dot } from '../feed-worker';
 
-const logger = Logger('batch.handleNameChange');
+const logger = Logger('batch.handleUsernameChange');
 
 /**
  * This is needed in two scenarios:
