@@ -140,9 +140,7 @@ export class BatchService {
     );
     const queryString = `query($id: String) {
       ${query}(where: { ${parent}_some: { ${refKey} : $id } }) {
-        ${parent} {
-          id, ${fields.join(',')}
-        }
+        id, ${fields.join(',')}
       }
     }`;
     logger.debug('[lookupByChildItem] %s', queryString);
@@ -156,9 +154,7 @@ export class BatchService {
         'Expecting zero or one rows ' + query + ' ' + refKey + ' ' + eid
       );
     }
-    return result['data'][query].length == 0
-      ? null
-      : result['data'][query][0][parent][0];
+    return result['data'][query].length == 0 ? null : result['data'][query][0];
   }
 
   public async create(entity: string, data: any) {
