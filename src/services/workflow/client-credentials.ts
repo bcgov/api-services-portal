@@ -64,8 +64,18 @@ export async function registerClient(
       : issuerEnvConfig.initialAccessToken;
 
   // If there are any custom client Mappers, then include them
-  const clientMappers =
+  const clientMappers: [{ name: string; defaultValue: string }] =
     issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
+
+  if (issuer.inheritFrom) {
+    clientMappers.push({
+      name: 'audience',
+      defaultValue:
+        environment === 'prod'
+          ? issuer.clientId
+          : `${issuer.clientId}-${environment}`,
+    });
+  }
 
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 
