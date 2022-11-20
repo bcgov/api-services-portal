@@ -9,6 +9,7 @@ interface RadioCardGroupProps extends ChakraProps {
   defaultValue?: string;
   isRequired?: boolean;
   name: string;
+  align?: string;
   options: {
     title: string;
     description: React.ReactNode;
