@@ -33,7 +33,7 @@ import { dehydrate } from 'react-query/hydration';
 import ServiceAccountDelete from '@/components/service-account-delete/service-account-delete';
 import Table from '@/components/table';
 import { format } from 'date-fns';
-import { FaCheckCircle, FaKey } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
 import ServiceAccountCreate from '@/components/service-account-create';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
 
@@ -44,9 +44,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(query, {}, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        {},
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
@@ -98,14 +102,22 @@ const ServiceAccountsPage: React.FC<
         >
           <Box maxW="45%" mb={8}>
             <Text>
-              Service Accounts allow you to access BC Government APIs via the Gateway API or the Gateway CLI
-          </Text>
+              Service Accounts allow you to access BC Government APIs via the
+              Gateway API or the Gateway CLI
+            </Text>
           </Box>
         </PageHeader>
-        <Modal size="3xl" isOpen={Boolean(credentials)} onClose={() => setCredentials(null)}>
+        <Modal
+          size="3xl"
+          isOpen={Boolean(credentials)}
+          onClose={() => setCredentials(null)}
+        >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader display="flex" alignItems="center" gridGap={2}>New Service Account Created <Icon as={FaCheckCircle} color="green" /></ModalHeader>
+            <ModalHeader display="flex" alignItems="center" gridGap={2}>
+              New Service Account Created{' '}
+              <Icon as={FaCheckCircle} color="green" />
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               {credentials && (
@@ -114,16 +126,18 @@ const ServiceAccountsPage: React.FC<
                   <Alert status="warning" variant="outline" mt={8}>
                     <AlertIcon />
                     <AlertDescription>
-                      Please store your new service account tokens somewhere safe because as soon as you navigate away from this dialog, we will not be able to retrieve these tokens.
+                      Please store your new service account tokens somewhere
+                      safe because as soon as you navigate away from this
+                      dialog, we will not be able to retrieve these tokens.
                     </AlertDescription>
                   </Alert>
                 </>
               )}
             </ModalBody>
             <ModalFooter>
-              <Button mr={3} onClick={() => setCredentials(null)} >
+              <Button mr={3} onClick={() => setCredentials(null)}>
                 Close
-            </Button>
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
