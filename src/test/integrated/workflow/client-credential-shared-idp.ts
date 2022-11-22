@@ -8,7 +8,10 @@ node dist/test/integrated/workflow/client-credential-shared-idp.js
 
 import InitKeystone from '../keystonejs/init';
 import { o } from '../util';
-import { syncClient } from '../../../services/workflow/client-shared-idp';
+import {
+  addClientsToSharedIdP,
+  syncSharedIdp,
+} from '../../../services/workflow/client-shared-idp';
 import { RequestControls } from '../../../services/workflow/types';
 import { ClientAuthenticator } from '../../../services/keycloak';
 import { dynamicallySetEnvironmentDetails } from '../../../services/keystone/credential-issuer';
@@ -36,7 +39,7 @@ import { CredentialIssuer } from '../../../services/keystone/types';
     authentication: { item: identity },
   });
 
-  if (true) {
+  if (false) {
     const issuer: CredentialIssuer = {
       id: '002',
       inheritFrom: {
@@ -58,13 +61,18 @@ import { CredentialIssuer } from '../../../services/keystone/types';
 
     const credentialIssuerPK = '63602720512b5db8e79bc039';
 
-    const res = await syncClient(
+    const res = await addClientsToSharedIdP(
       ctx,
-      'dev',
-      ClientAuthenticator.SharedIdP,
-      credentialIssuerPK,
-      controls
+      ns,
+      'special1',
+      credentialIssuerPK
     );
+    o(res);
+  }
+  if (true) {
+    const credentialIssuerPK = '63602720512b5db8e79bc039';
+
+    const res = await syncSharedIdp(ctx, credentialIssuerPK);
     o(res);
   }
   await keystone.disconnect();

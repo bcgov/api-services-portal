@@ -1,39 +1,82 @@
-import { lookupCredentialIssuerById, lookupSharedIssuers } from '../keystone';
+import { lookupCredentialIssuerById } from '../keystone';
 import {
   KeycloakClientRegistrationService,
   KeycloakTokenService,
   getOpenidFromIssuer,
   KeycloakClientService,
+  OpenidWellKnown,
 } from '../keycloak';
 import { v4 as uuidv4 } from 'uuid';
 import { strict as assert } from 'assert';
 import { CredentialIssuer } from '../keystone/types';
 import {
   IssuerEnvironmentConfig,
-  getIssuerEnvironmentConfig,
   RequestControls,
   getAllIssuerEnvironmentConfigs,
 } from './types';
 import { ClientAuthenticator } from '../keycloak/client-registration-service';
+import { ClientRegResponse } from '../uma2';
+import { Logger } from '../../logger';
+import { KeycloakClientRolesService } from '../keycloak/client-roles';
 
-export async function syncClient(
+const logger = Logger('wf.SharedIdP');
+
+/**
+ * When a new CredentialIssuer is created where the inheritFrom is set
+ * then call this to reserve the client ID on the shared IdP
+ *
+ * @param context
+ * @param credentialIssuerPK
+ */
+export async function addClientsToSharedIdP(
   context: any,
-  environment: string,
-  clientAuthenticator: ClientAuthenticator,
-  credentialIssuerPK: string,
-  controls: RequestControls
+  namespace: string,
+  profileClientId: string,
+  inheritFromIssuerPK: string
 ) {
   // Find the credential issuer and based on its type, go do the appropriate action
-  const issuer: CredentialIssuer = await lookupCredentialIssuerById(
+  const inheritFromIssuer: CredentialIssuer = await lookupCredentialIssuerById(
     context,
-    credentialIssuerPK
+    inheritFromIssuerPK
   );
 
-  const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(
-    issuer,
-    environment
+  assert.strictEqual(
+    inheritFromIssuer.isShared,
+    false,
+    'Invalid IdP for Sharing'
   );
 
+  const envConfigs = getAllIssuerEnvironmentConfigs(inheritFromIssuer);
+
+  const controls: RequestControls = {};
+  const authenticator = ClientAuthenticator.SharedIdP;
+
+  for (const issuerEnvConfig of envConfigs) {
+    await addClientToSharedIdP(
+      namespace,
+      profileClientId,
+      issuerEnvConfig,
+      authenticator,
+      controls
+    );
+  }
+}
+
+/**
+ * @param namespace
+ * @param profileClientId
+ * @param issuerEnvConfig
+ * @param clientAuthenticator
+ * @param controls
+ * @returns
+ */
+async function addClientToSharedIdP(
+  namespace: string,
+  profileClientId: string,
+  issuerEnvConfig: IssuerEnvironmentConfig,
+  clientAuthenticator: ClientAuthenticator,
+  controls: RequestControls
+): Promise<{ openid: OpenidWellKnown; client: ClientRegResponse }> {
   const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
 
   // token is NULL if 'iat'
@@ -51,18 +94,25 @@ export async function syncClient(
         )
       : issuerEnvConfig.initialAccessToken;
 
-  // If there are any custom client Mappers, then include them
-  const clientMappers =
-    issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
+  const environment = issuerEnvConfig.environment;
 
   const clientId =
     environment == 'prod'
-      ? issuer.clientId
-      : `${issuer.clientId}-${environment}`;
+      ? `ap-${profileClientId}`
+      : `ap-${profileClientId}-${environment}`;
 
-  const baseUrl = `${process.env.EXTERNAL_URL}/ext/${clientAuthenticator}/ns/${issuer.namespace}/client/${clientId}`;
+  // If there are any custom client Mappers, then include them
+  const clientMappers: any[] = [];
+
+  const baseUrl = `${process.env.EXTERNAL_URL}/ext/${clientAuthenticator}/ns/${namespace}/client/${clientId}`;
 
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
+
+  const cliApi = await new KeycloakClientService(issuerEnvConfig.issuerUrl);
+  await cliApi.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
+  const exists = await cliApi.isClient(clientId);
+  assert.strictEqual(exists, false, 'Client already exists');
 
   // lookup Application and use the ID to make sure a corresponding Consumer exists (1 -- 1)
   const client = await new KeycloakClientRegistrationService(
@@ -101,17 +151,32 @@ export async function syncSharedIdp(context: any, credentialIssuerPK: string) {
 
   const envConfigs = getAllIssuerEnvironmentConfigs(issuer);
 
-  function updateClient(config: IssuerEnvironmentConfig) {
-    // get the Client in the remote IdP
-    // sync Roles
+  for (const issuerEnvConfig of envConfigs) {
+    const cliApi = await new KeycloakClientService(issuerEnvConfig.issuerUrl);
+    await cliApi.login(issuerEnvConfig.clientId, issuerEnvConfig.clientSecret);
+
+    const cliRoleApi = await new KeycloakClientRolesService(
+      issuerEnvConfig.issuerUrl
+    );
+
+    await cliRoleApi.login(
+      issuerEnvConfig.clientId,
+      issuerEnvConfig.clientSecret
+    );
+
+    const environment = issuerEnvConfig.environment;
+
+    const clientId = genClientId(environment, issuer.clientId);
+
+    const client = await cliApi.findByClientId(clientId);
+
+    await cliRoleApi.syncRoles(
+      client.id,
+      issuer.clientRoles ? JSON.parse(issuer.clientRoles) : []
+    );
   }
 }
 
-/**
- * Get all the shared CredentialIssuers and return the environmentDetails
- *
- * @param context
- */
-export async function previewSharedIdPs(context: any, clientId: string) {
-  const shared = await lookupSharedIssuers(context);
+export function genClientId(env: string, clientId: string) {
+  return env === 'prod' ? `ap-${clientId}` : `ap-${clientId}-${env}`;
 }

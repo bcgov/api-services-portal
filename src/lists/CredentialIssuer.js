@@ -22,7 +22,10 @@ const {
   DeleteIssuerValidate,
   StructuredActivityService,
 } = require('../services/workflow');
-
+const {
+  syncSharedIdp,
+  addClientsToSharedIdP,
+} = require('../services/workflow');
 const { Logger } = require('../logger');
 const { kebabCase } = require('lodash');
 const logger = Logger('lists.credentialissuer');
@@ -251,7 +254,32 @@ module.exports = {
       );
     },
 
-    afterChange: async function ({ operation, updatedItem, context }) {
+    beforeChange: async function ({
+      operation,
+      originalInput,
+      resolvedData,
+      context,
+    }) {
+      if (operation === 'create' && originalInput.inheritFrom) {
+        await addClientsToSharedIdP(
+          context,
+          resolvedData.namespace,
+          resolvedData.clientId,
+          resolvedData.inheritFrom
+        );
+      }
+    },
+
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      context,
+    }) {
+      if (updatedItem.inheritFrom) {
+        await syncSharedIdp(context, updatedItem.id);
+      }
+
       await new StructuredActivityService(
         context,
         context.authedItem['namespace']

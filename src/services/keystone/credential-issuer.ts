@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { genClientId } from '../workflow/client-shared-idp';
 import { IssuerEnvironmentConfig } from '../workflow/types';
 import { CredentialIssuer } from './types';
 
@@ -36,6 +37,7 @@ export async function lookupCredentialIssuerById(
                         namespace
                         flow
                         mode
+                        clientRoles
                         clientRegistration
                         clientAuthenticator
                         clientMappers
@@ -44,6 +46,7 @@ export async function lookupCredentialIssuerById(
                         inheritFrom {
                           environmentDetails
                         }
+                        isShared
                         clientId
                         environments {
                           id
@@ -137,7 +140,7 @@ export function generateEnvDetails(
         environment: env,
         issuerUrl: sharedEnv.issuerUrl,
         clientRegistration: 'shared-idp',
-        clientId: env === 'prod' ? clientId : `${clientId}-${env}`,
+        clientId: genClientId(env, clientId),
       });
     }
   });

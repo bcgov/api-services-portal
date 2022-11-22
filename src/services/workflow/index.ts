@@ -2,6 +2,8 @@ export { Apply } from './apply';
 
 export { CreateServiceAccount } from './create-service-account';
 
+export { addClientsToSharedIdP, syncSharedIdp } from './client-shared-idp';
+
 export {
   allConsumerGroupLabels,
   allScopesAndRoles,

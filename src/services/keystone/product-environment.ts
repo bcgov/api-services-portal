@@ -146,6 +146,11 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
                             resourceType
                             resourceAccessScope
                             environmentDetails
+                            clientId
+                            inheritFrom {
+                              name
+                              environmentDetails
+                            }
                         }
                     }
                 }`,

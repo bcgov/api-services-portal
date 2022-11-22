@@ -18,6 +18,7 @@ import {
   RequestControls,
 } from './types';
 import { ClientAuthenticator } from '../keycloak/client-registration-service';
+import { genClientId } from './client-shared-idp';
 
 /**
  * Steps:
@@ -70,10 +71,7 @@ export async function registerClient(
   if (issuer.inheritFrom) {
     clientMappers.push({
       name: 'audience',
-      defaultValue:
-        environment === 'prod'
-          ? issuer.clientId
-          : `${issuer.clientId}-${environment}`,
+      defaultValue: genClientId(environment, issuer.clientId),
     });
   }
 
