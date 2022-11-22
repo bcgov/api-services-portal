@@ -330,11 +330,13 @@ export interface CredentialIssuer {
   environmentDetails?: IssuerEnvironmentConfig[];
   resourceType?: string;
   resourceAccessScope?: string;
+  isShared?: boolean;
   apiKeyName?: string;
   availableScopes?: string[];
   resourceScopes?: string[];
   clientRoles?: string[];
   clientMappers?: string[];
+  inheritFrom?: CredentialIssuerRefID;
   owner?: UserRefID;
 }
 

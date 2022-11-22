@@ -185,6 +185,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CredentialIssuerRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -204,11 +209,13 @@ const models: TsoaRoute.Models = {
             "environmentDetails": {"dataType":"array","array":{"dataType":"refObject","ref":"IssuerEnvironmentConfig"}},
             "resourceType": {"dataType":"string"},
             "resourceAccessScope": {"dataType":"string"},
+            "isShared": {"dataType":"boolean"},
             "apiKeyName": {"dataType":"string"},
             "availableScopes": {"dataType":"array","array":{"dataType":"string"}},
             "resourceScopes": {"dataType":"array","array":{"dataType":"string"}},
             "clientRoles": {"dataType":"array","array":{"dataType":"string"}},
             "clientMappers": {"dataType":"array","array":{"dataType":"string"}},
+            "inheritFrom": {"ref":"CredentialIssuerRefID"},
             "owner": {"ref":"UserRefID"},
         },
         "additionalProperties": false,
@@ -322,11 +329,6 @@ const models: TsoaRoute.Models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CredentialIssuerRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
