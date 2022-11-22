@@ -82,6 +82,15 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
+        identities: {
+          developer: ['bcsc', 'bceid', 'idir', 'github'],
+          provider: ['idir'],
+        },
+        accountLinks: {
+          bceidUrl:
+            'https://www.test.bceid.ca/logon.aspx?returnUrl=/profile_management',
+          bcscUrl: 'https://idtest.gov.bc.ca/account/',
+        },
         version: 'v1.1.10',
         revision: '1932u12093u12093u12094u230eujdfweoifu09',
         cluster: 'gold',
@@ -103,7 +112,8 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: { ...mark, namespace },
+        user: null,
+        // user: { ...mark, namespace },
       })
     );
   }),

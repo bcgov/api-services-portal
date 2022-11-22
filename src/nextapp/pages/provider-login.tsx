@@ -6,19 +6,20 @@ import {
   Center,
   Container,
   Grid,
+  GridItem,
   Heading,
   Icon,
-  Link,
   Spinner,
   Text,
+  VStack,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import NextLink from 'next/link';
-import LoginButtons from '@/components/login-buttons';
+import { GiCapitol } from 'react-icons/gi';
 import { useAuth } from '@/shared/services/auth';
 import router from 'next/router';
 import { useGlobal } from '@/shared/services/global';
-import { FaCode } from 'react-icons/fa';
+import LoginButtons from '@/components/login-buttons';
+import { uid } from 'react-uid';
 
 const LoginPage: React.FC = () => {
   const { ok, isLoading } = useAuth();
@@ -35,7 +36,7 @@ const LoginPage: React.FC = () => {
       <Head>
         <title>API Program Services | Login</title>
       </Head>
-      <Container maxW="4xl">
+      <Container maxW="3xl">
         {isLoading && (
           <Center mt={12}>
             <Alert status="info" variant="outline" borderRadius="4">
@@ -48,25 +49,16 @@ const LoginPage: React.FC = () => {
           <>
             <Box as="header" mt={12} mb={6}>
               <Heading d="flex" alignItems="center" gridGap={4}>
-                <Icon as={FaCode} color="bc-blue" />
-                Login for Developers
+                <Icon as={GiCapitol} color="bc-blue" />
+                Login for API Providers
               </Heading>
             </Box>
             <Box mb={8}>
-              <Text>
-                Visit the{' '}
-                <NextLink passHref href="/devportal/api-directory">
-                  <Link color="bc-link" fontWeight="bold">
-                    Directory
-                  </Link>
-                </NextLink>{' '}
-                to see what APIs are available for integration or log in using
-                one of the options available below.
-              </Text>
+              <Text>Start building and sharing APIs from your Ministry.</Text>
             </Box>
-            <Grid templateColumns="repeat(2, 50%)" gap={8}>
-              <LoginButtons buttons={identities?.developer} />
-            </Grid>
+            <VStack as="section" align="stretch" spacing={6}>
+              <LoginButtons buttons={identities?.provider} />
+            </VStack>
           </>
         )}
       </Container>
