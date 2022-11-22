@@ -58,9 +58,9 @@ const Metric = ({ service }) => {
   const color = (v) => ranges.filter((r) => v <= r.max)[0].color;
 
   const metrics =
-    data.allMetrics.length == 0
+    data.allGatewayServiceMetricsByNamespace.length == 0
       ? [{ id: '00', values: JSON.stringify(noData) } as Metric]
-      : data.allMetrics;
+      : data.allGatewayServiceMetricsByNamespace;
 
   return (
     <Stack

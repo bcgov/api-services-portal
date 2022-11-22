@@ -111,8 +111,6 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetFilterConsumers($namespace: String!) {
-    allConsumerScopesAndRoles
-
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id

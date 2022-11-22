@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { gql } from 'graphql-request';
 import { Grid, Select } from '@chakra-ui/react';
+import { uniqBy } from 'lodash';
 import { useApi } from '@/shared/services/api';
 import { uid } from 'react-uid';
 import { useAuth } from '@/shared/services/auth';
@@ -8,6 +9,8 @@ import { useAuth } from '@/shared/services/auth';
 interface ConsumerFiltersProps {
   value?: string;
 }
+
+// TODO filter out services that don't have traffic
 
 const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
   const { user } = useAuth();
@@ -46,6 +49,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
             return memo;
           }, []);
 
+        case 'plugins':
+          return uniqBy(data.allGatewayPluginsByNamespace, 'name').map((p) => ({
+            name: p.name,
+            id: p.name,
+          }));
+
         case 'state':
           return [
             { id: true, name: 'Active' },
@@ -81,8 +90,11 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
 export default ConsumerFilters;
 
 const productsQuery = gql`
-  query GetFilterConsumers($namespace: String!) {
-    allConsumerScopesAndRoles
+  query GetGatewayServiceFilters($namespace: String!) {
+    allGatewayPluginsByNamespace {
+      id
+      name
+    }
 
     allProductsByNamespace(where: { namespace: $namespace }) {
       name

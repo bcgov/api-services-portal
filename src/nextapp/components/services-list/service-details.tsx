@@ -67,8 +67,8 @@ const ServiceDetail: React.FC<ServicesListProps> = ({
         width="100%"
         bgColor="white"
         p={4}
-        color="bc-background"
         border="1px solid"
+        borderColor="bc-background"
         borderRadius={4}
       >
         <MetricGraph

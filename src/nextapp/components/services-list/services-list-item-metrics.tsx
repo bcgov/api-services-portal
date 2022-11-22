@@ -28,8 +28,10 @@ const ServicesListItemMetrics: React.FC<ServicesListItemMetricsProps> = ({
     enabled,
   });
   const totalServiceRequests = React.useMemo(() => {
-    if (data?.allMetrics) {
-      const allValues = data.allMetrics.map((m) => JSON.parse(m.values));
+    if (data?.allGatewayServiceMetricsByNamespace) {
+      const allValues = data.allGatewayServiceMetricsByNamespace.map((m) =>
+        JSON.parse(m.values)
+      );
       const values = allValues.reduce((memo: number[], hour) => {
         hour.forEach((v: [string, number][]) => {
           const [_, hourTotal] = v;

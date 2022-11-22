@@ -13,9 +13,10 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
+import pick from 'lodash/pick';
 import sortBy from 'lodash/sortBy';
 import { uid } from 'react-uid';
-import { times } from 'lodash';
+import { omit, times } from 'lodash';
 
 interface Column extends TableColumnHeaderProps {
   name: React.ReactNode;
@@ -74,58 +75,75 @@ const ApsTable: React.FC<ApsTableProps> = ({
     <Table {...props}>
       <Thead>
         <Tr>
-          {columns.map(({ key, name, sortable: sort, ...rest }) => (
-            <Th
-              key={uid(name)}
-              {...rest}
-              aria-label={
-                name ? `${name} column header` : 'none sortable table header'
-              }
-              onClick={sort && key ? handleSort(key) : undefined}
-              _hover={{
-                color: 'black',
-                cursor:
-                  sort !== false && sortable && name ? 'pointer' : undefined,
-                userSelect: 'none',
-                bgColor:
-                  sort !== false && sortable && name ? 'gray.50' : undefined,
-              }}
-            >
-              <Box pos="relative" d="inline">
-                {name}
-                {sort !== false && sortable && name && (
-                  <Box h="20px" pos="absolute" right={0} top="2px">
-                    <Icon
-                      as={TiArrowSortedUp}
-                      aria-label="sort label up icon"
-                      boxSize="3"
-                      ml={2}
-                      pos="absolute"
-                      top={0}
-                      color={
-                        sortKey === key && sortDir === 'desc'
-                          ? 'gray.700'
-                          : 'gray.200'
-                      }
-                    />
-                    <Icon
-                      as={TiArrowSortedDown}
-                      aria-label="sort label down icon"
-                      boxSize="3"
-                      ml={2}
-                      pos="absolute"
-                      bottom={0}
-                      color={
-                        sortKey === key && sortDir === 'asc'
-                          ? 'gray.700'
-                          : 'gray.200'
-                      }
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Th>
-          ))}
+          {columns.map((column) => {
+            const sortProps = ['key', 'name', 'sortable'];
+            const tableProps = pick(column, sortProps);
+            const attrs = omit(column, sortProps);
+            const sort = tableProps.sortable ?? true;
+
+            return (
+              <Th
+                key={uid(tableProps)}
+                {...attrs}
+                aria-label={
+                  tableProps.name
+                    ? `${tableProps.name} column header`
+                    : 'none sortable table header'
+                }
+                onClick={
+                  sort && tableProps.key
+                    ? handleSort(tableProps.key)
+                    : undefined
+                }
+                _hover={{
+                  color: 'black',
+                  cursor:
+                    sort !== false && sortable && tableProps.name
+                      ? 'pointer'
+                      : undefined,
+                  userSelect: 'none',
+                  bgColor:
+                    sort !== false && sortable && tableProps.name
+                      ? 'gray.50'
+                      : undefined,
+                }}
+              >
+                <Box pos="relative" d="inline">
+                  {tableProps.name}
+                  {sort !== false && sortable && tableProps.name && (
+                    <Box h="20px" pos="absolute" right={0} top="2px">
+                      <Icon
+                        as={TiArrowSortedUp}
+                        aria-label="sort label up icon"
+                        boxSize="3"
+                        ml={2}
+                        pos="absolute"
+                        top={0}
+                        color={
+                          sortKey === tableProps.key && sortDir === 'desc'
+                            ? 'gray.700'
+                            : 'gray.200'
+                        }
+                      />
+                      <Icon
+                        as={TiArrowSortedDown}
+                        aria-label="sort label down icon"
+                        boxSize="3"
+                        ml={2}
+                        pos="absolute"
+                        bottom={0}
+                        color={
+                          sortKey === tableProps.key && sortDir === 'asc'
+                            ? 'gray.700'
+                            : 'gray.200'
+                        }
+                      />
+                    </Box>
+                  )}
+                </Box>
+              </Th>
+            );
+          })}
         </Tr>
       </Thead>
       <Tbody>

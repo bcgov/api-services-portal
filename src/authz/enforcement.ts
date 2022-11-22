@@ -59,6 +59,7 @@ const actions: any = {
   filterBySelf: require('./actions/filterBySelf'),
   filterByRequestor: filterByRequestor,
   filterByPackageNS: require('./actions/filterByPackageNS'),
+  filterByServiceNS: require('./actions/filterByServiceNS'),
   filterByProductNSOrActiveEnvironment: require('./actions/filterByProductNSOrActiveEnvironment'),
   filterByTemporaryIdentity: require('./actions/filterByTemporaryIdentity'),
   filterByUserNS: require('./actions/filterByUserNS'),

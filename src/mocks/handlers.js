@@ -61,6 +61,7 @@ import {
   allServicesHandler,
   getMetricsHandler,
   getGatewayServiceHandler,
+  getGatewayServiceFilterHandler,
 } from './resolvers/services';
 
 // Namespaces
@@ -162,10 +163,12 @@ export const handlers = [
   keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Services
   keystone.query('GetServices', allServicesHandler),
-  keystone.query('GetMetrics', allServicesHandler),
+
+  keystone.query('GetMetrics', getMetricsHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
   keystone.query('GetGatewayService', getGatewayServiceHandler),
+  keystone.query('GetGatewayServiceFilters', getGatewayServiceFilterHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
   // Namespace Access
   keystone.query('GetUserPermissions', getUserPermissionsHandler),
