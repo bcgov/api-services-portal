@@ -42,7 +42,7 @@ export async function addClientsToSharedIdP(
 
   assert.strictEqual(
     inheritFromIssuer.isShared,
-    false,
+    true,
     'Invalid IdP for Sharing'
   );
 
