@@ -49,7 +49,7 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({ value }) => {
           }, []);
 
         case 'plugins':
-          return uniqBy(data.allGatewayPlugins, 'name').map((p) => ({
+          return uniqBy(data.allGatewayPluginsByNamespace, 'name').map((p) => ({
             name: p.name,
             id: p.name,
           }));
@@ -90,7 +90,7 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetGatewayServiceFilters($namespace: String!) {
-    allGatewayPlugins {
+    allGatewayPluginsByNamespace {
       id
       name
     }

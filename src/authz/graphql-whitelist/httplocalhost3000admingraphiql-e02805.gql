@@ -1,6 +1,6 @@
 
   query GetGatewayServiceFilters($namespace: String!) {
-    allGatewayPlugins {
+    allGatewayPluginsByNamespace {
       id
       name
     }
