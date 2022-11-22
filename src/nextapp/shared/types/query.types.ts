@@ -6202,6 +6202,7 @@ export type Query = {
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
+  allGatewayPluginsByNamespace?: Maybe<Array<Maybe<GatewayPlugin>>>;
   allContentsByNamespace?: Maybe<Array<Maybe<Content>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
   allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
@@ -6842,6 +6843,14 @@ export type QueryAllGatewayRoutesByNamespaceArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<GatewayRouteWhereInput>;
+};
+
+
+export type QueryAllGatewayPluginsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<GatewayPluginWhereInput>;
 };
 
 
