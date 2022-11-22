@@ -302,8 +302,8 @@ const query = gql`
         name
       }
     }
-    allMetrics(
-      sortBy: day_ASC
+    allGatewayServiceMetricsByNamespace(
+      orderBy: "day_ASC"
       where: { query: "kong_http_requests_hourly_namespace", day_in: $days }
     ) {
       query

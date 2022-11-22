@@ -6203,6 +6203,7 @@ export type Query = {
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
   allGatewayPluginsByNamespace?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  allGatewayServiceMetricsByNamespace?: Maybe<Array<Maybe<Metric>>>;
   allContentsByNamespace?: Maybe<Array<Maybe<Content>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
   allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
@@ -6851,6 +6852,14 @@ export type QueryAllGatewayPluginsByNamespaceArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<GatewayPluginWhereInput>;
+};
+
+
+export type QueryAllGatewayServiceMetricsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<MetricWhereInput>;
 };
 
 

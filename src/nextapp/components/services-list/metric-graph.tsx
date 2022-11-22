@@ -79,9 +79,11 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     textTransform: 'none',
   };
   const values: number[][] =
-    data?.allMetrics.slice(0, 5).map((metric: Metric) => {
-      return JSON.parse(metric.values);
-    }) ?? [];
+    data?.allGatewayServiceMetricsByNamespace
+      .slice(0, 5)
+      .map((metric: Metric) => {
+        return JSON.parse(metric.values);
+      }) ?? [];
   const dailies: DailyDatum[] = values.map((value: number[]) => {
     const firstDateValue = new Date(value[0][0] * 1000);
     const day = formatISO(firstDateValue, {

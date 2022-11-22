@@ -24,8 +24,8 @@ export default useMetrics;
 
 const query = gql`
   query GetMetrics($service: String!, $days: [String!]) {
-    allMetrics(
-      sortBy: day_ASC
+    allGatewayServiceMetricsByNamespace(
+      orderBy: "day_ASC"
       where: {
         query: "kong_http_requests_hourly_service"
         day_in: $days
