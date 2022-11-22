@@ -50,14 +50,17 @@ const Metric = ({ service }) => {
     timeStyle: 'full',
     hour12: true,
   };
-  const dt = new Intl.DateTimeFormat('en', options as Intl.DateTimeFormatOptions);
+  const dt = new Intl.DateTimeFormat(
+    'en',
+    options as Intl.DateTimeFormatOptions
+  );
 
   const color = (v) => ranges.filter((r) => v <= r.max)[0].color;
 
   const metrics =
-    data.allMetrics.length == 0
+    data.allGatewayServiceMetricsByNamespace.length == 0
       ? [{ id: '00', values: JSON.stringify(noData) } as Metric]
-      : data.allMetrics;
+      : data.allGatewayServiceMetricsByNamespace;
 
   return (
     <Stack

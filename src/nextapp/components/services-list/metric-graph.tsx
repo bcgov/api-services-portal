@@ -9,6 +9,7 @@ import {
   CircularProgress,
   CircularProgressLabel,
   Divider,
+  GridItem,
   Stat,
   StatGroup,
   StatLabel,
@@ -18,26 +19,38 @@ import {
   TextProps,
   Tooltip,
 } from '@chakra-ui/react';
+import EmptyPane from '@/components/empty-pane';
 import { interpolateRdYlGn } from 'd3-scale-chromatic';
 import { scaleLinear } from 'd3-scale';
 import formatISO from 'date-fns/formatISO';
-import format from 'date-fns/format';
-import numeral from 'numeral';
+import differnceInDays from 'date-fns/differenceInDays';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import times from 'lodash/times';
-import { useApi } from '@/shared/services/api';
+import useMetrics from './use-metrics';
+import { GatewayService, Metric } from '@/shared/types/query.types';
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
 
-import { GET_METRICS } from '@/shared/queries/gateway-service-queries';
-import { GatewayService } from '@/shared/types/query.types';
+// Formatters
+const graphDate = new Intl.DateTimeFormat('en-CA', {
+  dateStyle: 'medium',
+});
+const graphHour = new Intl.DateTimeFormat('en-CA', {
+  timeStyle: 'short',
+  hourCycle: 'h24',
+});
+const graphRequests = new Intl.NumberFormat('en-CA', {
+  style: 'decimal',
+  notation: 'compact',
+});
 
 interface DailyDatum {
+  date: Date;
   day: string;
   dayFormatted: string;
-  dayFormattedShort: string;
+  // dayFormattedShort: string;
   downtime: number;
   requests: number[];
   total: number;
@@ -48,7 +61,6 @@ interface MetricGraphProps {
   alt?: boolean;
   days: string[];
   height?: number;
-  id: string;
   service: GatewayService;
   totalRequests: number;
 }
@@ -57,26 +69,21 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
   alt,
   days,
   height = 100,
-  id,
   service,
   totalRequests,
 }) => {
-  const { data } = useApi(['metric', id], {
-    query: GET_METRICS,
-    variables: {
-      service: id,
-      days,
-    },
-  });
+  const { data } = useMetrics(service.name, days);
   const labelProps: StatLabelProps | TextProps = {
-    textTransform: 'uppercase',
     fontSize: 'xs',
-    fontWeight: 'bold',
     color: 'gray.400',
+    textTransform: 'none',
   };
-  const values: number[][] = data.allMetrics.map((metric) => {
-    return JSON.parse(metric.values);
-  });
+  const values: number[][] =
+    data?.allGatewayServiceMetricsByNamespace
+      .slice(0, 5)
+      .map((metric: Metric) => {
+        return JSON.parse(metric.values);
+      }) ?? [];
   const dailies: DailyDatum[] = values.map((value: number[]) => {
     const firstDateValue = new Date(value[0][0] * 1000);
     const day = formatISO(firstDateValue, {
@@ -112,8 +119,10 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
 
     return {
       day,
-      dayFormatted: format(firstDateValue, 'E, LLL do, yyyy'),
-      dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
+      date: firstDateValue,
+      dayFormatted: graphDate.format(firstDateValue),
+      // TODO: possibly remove, just keep around incase
+      // dayFormattedShort: format(new Date(firstDateValue), 'LLL d'),
       downtime,
       total,
       peak,
@@ -140,13 +149,15 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
     }
     return memo;
   }, null);
-  const peakDayText = peakDay ? peakDay.dayFormattedShort : 'n/a';
+  const peakDayText = peakDay
+    ? differnceInDays(new Date(), new Date(peakDay.date))
+    : 'n/a';
   const usage = totalRequests > 0 ? totalDailyRequests / totalRequests : 0;
   const usagePercent = usage ? usage * 100 : 0;
   const color = usage ? interpolateRdYlGn(usage) : '#eee';
   const y = scaleLinear().range([0, height]).domain([0, 1]);
 
-  if (data.allMetrics) {
+  if (data) {
     const max = dailies.reduce((memo: number, d) => {
       if (Number(d.peak[1]) > memo) {
         return Number(d.peak[1]);
@@ -172,25 +183,31 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
             </CircularProgressLabel>
           </CircularProgress>
         </Box>
-        <StatGroup spacing={8} flexWrap="wrap">
+        <StatGroup
+          spacing={6}
+          flexWrap="wrap"
+          sx={{ '& > *': { overflow: 'hidden' } }}
+        >
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Hourly</StatLabel>
-            <StatNumber>{peakRequests}</StatNumber>
-          </Stat>
-          <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Daily</StatLabel>
-            <StatNumber>
-              {numeral(peakDay?.total ?? 0).format('0.0a')}
+            <StatLabel {...labelProps}>Avg</StatLabel>
+            <StatNumber fontSize="21px">
+              {graphRequests.format(peakRequests)}
             </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Peak Day</StatLabel>
-            <StatNumber>{peakDayText}</StatNumber>
+            <StatLabel {...labelProps}>Total Rq</StatLabel>
+            <StatNumber fontSize="21px">
+              {graphRequests.format(totalDailyRequests)}
+            </StatNumber>
           </Stat>
           <Stat flex="1 1 50%">
-            <StatLabel {...labelProps}>Total Req</StatLabel>
-            <StatNumber overflow="hidden">
-              {numeral(totalDailyRequests).format('0.0a')}
+            <StatLabel {...labelProps}>Days since</StatLabel>
+            <StatNumber fontSize="21px">{peakDayText}</StatNumber>
+          </Stat>
+          <Stat flex="1 1 50%">
+            <StatLabel {...labelProps}>Plugins</StatLabel>
+            <StatNumber fontSize="21px" overflow="hidden">
+              {service.plugins.length}
             </StatNumber>
           </Stat>
         </StatGroup>
@@ -211,6 +228,14 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
         </Alert>
       )}
       <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gridGap={1}>
+        {dailies.length === 0 && (
+          <GridItem colSpan={5} color="bc-text">
+            <EmptyPane
+              title={`${service.name} has not received traffic yet`}
+              message="When this service has accumulated traffic, it will show up here"
+            />
+          </GridItem>
+        )}
         {dailies.map((d, index) => (
           <Box key={index} flex={1}>
             <Box
@@ -244,7 +269,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
               {d.requests.map((r, index) => (
                 <Tooltip
                   key={index}
-                  label={`${format(new Date(r[0] * 1000), 'HH:00')} - ${round(
+                  label={`${graphHour.format(new Date(r[0] * 1000))} - ${round(
                     r[1]
                   )} requests`}
                 >

@@ -9,22 +9,12 @@ import {
   Text,
   MenuDivider,
   MenuGroup,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
-  Button,
-  UnorderedList,
-  ListItem,
-  Link,
 } from '@chakra-ui/react';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLinkExternal } from 'react-icons/bi';
 import { useGlobal } from '@/shared/services/global';
+import SupportLinks from '../support-links';
 
 const HelpMenu: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,63 +22,7 @@ const HelpMenu: React.FC = () => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Support Links</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <UnorderedList
-              spacing={4}
-              sx={{
-                '& a': {
-                  textDecor: 'underline',
-                  color: 'bc-link',
-                  _hover: {
-                    textDecor: 'none',
-                  },
-                },
-              }}
-            >
-              <ListItem>
-                <Link
-                  href={data?.helpLinks.helpDeskUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Submit product and service requests using the Data Systems and
-                  Services request system
-                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link
-                  href={data?.helpLinks.helpChatUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Chat with us in Rocket.Chat
-                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link
-                  href={data?.helpLinks.helpIssueUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Create an issue in GitHub
-                  <Icon as={BiLinkExternal} boxSize="4" ml={2} />
-                </Link>
-              </ListItem>
-            </UnorderedList>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button onClick={onClose}>Close</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <SupportLinks isOpen={isOpen} onClose={onClose} />
       <Box
         as="span"
         d="flex"

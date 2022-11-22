@@ -28,6 +28,16 @@ module.exports = {
           type: SchemaType.ListQuery,
         },
         {
+          gqlName: 'allGatewayPluginsByNamespace',
+          list: 'GatewayPlugin',
+          type: SchemaType.ListQuery,
+        },
+        {
+          gqlName: 'allGatewayServiceMetricsByNamespace',
+          list: 'Metric',
+          type: SchemaType.ListQuery,
+        },
+        {
           gqlName: 'allContentsByNamespace',
           list: 'Content',
           type: SchemaType.ListQuery,
