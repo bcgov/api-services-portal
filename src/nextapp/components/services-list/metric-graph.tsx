@@ -6,6 +6,7 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
+  Center,
   CircularProgress,
   CircularProgressLabel,
   Divider,
@@ -29,6 +30,7 @@ import sum from 'lodash/sum';
 import times from 'lodash/times';
 import useMetrics from './use-metrics';
 import { GatewayService, Metric } from '@/shared/types/query.types';
+
 // 1. Consumers
 // 2. Requests
 // 3. Update frequency
@@ -84,6 +86,7 @@ const MetricGraph: React.FC<MetricGraphProps> = ({
       .map((metric: Metric) => {
         return JSON.parse(metric.values);
       }) ?? [];
+
   const dailies: DailyDatum[] = values.map((value: number[]) => {
     const firstDateValue = new Date(value[0][0] * 1000);
     const day = formatISO(firstDateValue, {

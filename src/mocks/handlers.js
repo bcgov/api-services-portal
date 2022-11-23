@@ -163,6 +163,7 @@ export const handlers = [
   keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Services
   keystone.query('GetServices', allServicesHandler),
+
   keystone.query('GetMetrics', getMetricsHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
