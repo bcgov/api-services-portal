@@ -1,7 +1,7 @@
 import { BatchService } from '../../services/keystone/batch-service';
 import { Logger } from '../../logger';
 
-const logger = Logger('batch.handleNameChange');
+const logger = Logger('batch.handleUsernameChange');
 
 /**
  * This is needed in two scenarios:
@@ -17,7 +17,7 @@ const logger = Logger('batch.handleNameChange');
  * @param json
  * @returns
  */
-export async function handleNameChange(
+export async function handleUsernameChange(
   keystone: any,
   entity: string,
   md: any,
@@ -26,15 +26,16 @@ export async function handleNameChange(
 ): Promise<void> {
   const batchService = new BatchService(keystone);
 
-  const lkup = await batchService.lookup(md.query, 'name', json['name'], [
-    'extForeignKey',
-  ]);
-  if (lkup == null || lkup['extForeignKey'] === eid) {
-    // no work to do as the record either does not exist, or the external foreign key is still the same
-  } else {
+  const lkup = await batchService.lookup(
+    md.query,
+    'username',
+    json['username'],
+    ['extForeignKey']
+  );
+  if (lkup && lkup['extForeignKey'] != eid) {
     logger.info(
       '[%s] name change detected - updating extForeignKey to %s',
-      json['name'],
+      json['username'],
       eid
     );
     await batchService.update(entity, lkup['id'], { extForeignKey: eid });

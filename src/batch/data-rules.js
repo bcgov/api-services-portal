@@ -64,13 +64,13 @@ const metadata = {
       resources: { name: 'toString' },
       organization: {
         name: 'connectOne',
-        key: 'org',
+        key: 'organization.id',
         list: 'allOrganizations',
-        refKey: 'extForeignKey',
+        refKey: 'orgUnits.extForeignKey',
       },
       organizationUnit: {
         name: 'connectOne',
-        key: 'sub_org',
+        key: 'organization.id',
         list: 'allOrganizationUnits',
         refKey: 'extForeignKey',
       },
@@ -314,6 +314,7 @@ const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleUsernameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       aclGroups: { name: 'toStringDefaultArray' },

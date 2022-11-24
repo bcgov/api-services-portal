@@ -1,0 +1,22 @@
+{
+  "display_name": "Ministry of Citizens Services",
+  "description": "The Ministry of Citizens’ Services provides a wide range of services to British Columbians across the province, both in person and online. From BC Services Cards to freedom of information to information technology infrastructure, we help deliver services that people count on. ",
+  "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2020-01-23-182833.103016BCGov.png",
+  "url": "https://www2.gov.bc.ca/gov/content?id=EAD0DA87CFBA4CA0B020773C97AF86FB",
+  "package_count": 0,
+  "created": "2014-12-10T15:05:55.826685",
+  "name": "ministry-of-citizens-services",
+  "is_organization": true,
+  "state": "active",
+  "image_url": "2020-01-23-182833.103016BCGov.png",
+  "groups": [],
+  "type": "organization",
+  "title": "Ministry of Citizens Services",
+  "revision_id": "afc68a33-c6ae-4ac5-99a9-f3042b7fc6d3",
+  "num_followers": 0,
+  "id": "4f7ae636-4cdf-4273-b274-6608c615dba0",
+  "tags": [],
+  "approval_status": "approved",
+  "extSource": "ckan",
+  "extRecordHash": "0000"
+}
