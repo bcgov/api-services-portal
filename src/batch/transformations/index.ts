@@ -2,6 +2,8 @@ export { alwaysTrue } from './alwaysTrue';
 
 export { alwaysFalse } from './alwaysFalse';
 
+export { byKey } from './byKey';
+
 export { connectExclusiveList } from './connectExclusiveList';
 
 export { connectExclusiveOne } from './connectExclusiveOne';

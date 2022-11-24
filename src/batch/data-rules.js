@@ -176,6 +176,11 @@ const metadata = {
     transformations: {
       metric: { name: 'toString' },
       values: { name: 'toString' },
+      namespace: {
+        name: 'byKey',
+        key: 'metric.namespace',
+        refKey: 'namespace',
+      },
       service: {
         name: 'connectOne',
         key: 'metric.service',
