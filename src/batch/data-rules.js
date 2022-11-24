@@ -611,9 +611,14 @@ const metadata = {
       'namespace',
       'actor',
       'blob',
+      'filterKey1',
+      'filterKey2',
+      'filterKey3',
+      'filterKey4',
     ],
     transformations: {
       actor: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      context: { name: 'toString' },
       blob: {
         name: 'connectExclusiveOne',
         list: 'Blob',
