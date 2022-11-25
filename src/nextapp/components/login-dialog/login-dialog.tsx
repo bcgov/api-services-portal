@@ -5,12 +5,12 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
   Text,
   useDisclosure,
   ButtonProps,
+  Flex,
 } from '@chakra-ui/react';
 
 import LoginButtons from '../login-buttons';
@@ -59,9 +59,16 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
             </Text>
           </ModalBody>
 
-          <ModalFooter justifyContent="flex-start">
-            <LoginButtons identities={identities.developer} />
-          </ModalFooter>
+          <Flex
+            justifyContent="flex-start"
+            gridGap={2}
+            px={8}
+            pt={4}
+            pb={6}
+            wrap="wrap"
+          >
+            <LoginButtons identities={identities.developer} variant="inline" />
+          </Flex>
         </ModalContent>
       </Modal>
     </>
