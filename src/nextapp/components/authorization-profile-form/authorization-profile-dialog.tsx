@@ -115,6 +115,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile create failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -155,6 +156,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile save failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }

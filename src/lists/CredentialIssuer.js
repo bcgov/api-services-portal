@@ -22,6 +22,7 @@ const {
   DeleteIssuerValidate,
   StructuredActivityService,
 } = require('../services/workflow');
+const { regExprValidation } = require('../services/utils');
 const {
   syncSharedIdp,
   addClientsToSharedIdP,
@@ -228,6 +229,13 @@ module.exports = {
             'Some fields are only set during creation.  Failed to update.'
           );
         }
+      }
+      if ('name' in originalInput) {
+        regExprValidation(
+          '^[a-zA-Z][a-zA-Z0-9 -]{4,40}$',
+          originalInput['name'],
+          'Profile name must be between 5 and 40 alpha-numeric (or space, dash) characters and begin with an alphabet'
+        );
       }
     },
 
