@@ -60,7 +60,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
           </ModalBody>
 
           <ModalFooter justifyContent="flex-start">
-            <LoginButtons buttons={identities.developer} />
+            <LoginButtons identities={identities.developer} />
           </ModalFooter>
         </ModalContent>
       </Modal>

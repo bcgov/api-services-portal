@@ -12,17 +12,27 @@ import {
   Spinner,
   Text,
 } from '@chakra-ui/react';
+import { GiCapitol } from 'react-icons/gi';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import LoginButtons from '@/components/login-buttons';
 import { useAuth } from '@/shared/services/auth';
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { useGlobal } from '@/shared/services/global';
 import { FaCode } from 'react-icons/fa';
 
 const LoginPage: React.FC = () => {
   const { ok, isLoading } = useAuth();
   const { identities } = useGlobal();
+  const router = useRouter();
+  const isProvider = router.query.identity === 'provider';
+  const iconEl = isProvider ? GiCapitol : FaCode;
+  const headerText = isProvider ? 'API Providers' : 'Developers';
+  const selectedIdentities = isProvider
+    ? identities.provider
+    : identities.developer;
+  const maxW = isProvider ? '3xl' : '4xl';
+  const gridColumns = selectedIdentities.length > 3 ? 'repeat(2, 50%)' : '1fr';
 
   React.useEffect(() => {
     if (ok) {
@@ -35,7 +45,7 @@ const LoginPage: React.FC = () => {
       <Head>
         <title>API Program Services | Login</title>
       </Head>
-      <Container maxW="4xl">
+      <Container maxW={maxW}>
         {isLoading && (
           <Center mt={12}>
             <Alert status="info" variant="outline" borderRadius="4">
@@ -48,24 +58,30 @@ const LoginPage: React.FC = () => {
           <>
             <Box as="header" mt={12} mb={6}>
               <Heading d="flex" alignItems="center" gridGap={4}>
-                <Icon as={FaCode} color="bc-blue" />
-                Login for Developers
+                <Icon as={iconEl} color="bc-blue" />
+                {`Login for ${headerText}`}
               </Heading>
             </Box>
             <Box mb={8}>
               <Text>
-                Visit the{' '}
-                <NextLink passHref href="/devportal/api-directory">
-                  <Link color="bc-link" fontWeight="bold">
-                    Directory
-                  </Link>
-                </NextLink>{' '}
-                to see what APIs are available for integration or log in using
-                one of the options available below.
+                {isProvider ? (
+                  'Start building and sharing APIs from your Ministry.'
+                ) : (
+                  <>
+                    Visit the{' '}
+                    <NextLink passHref href="/devportal/api-directory">
+                      <Link color="bc-link" fontWeight="bold">
+                        Directory
+                      </Link>
+                    </NextLink>{' '}
+                    to see what APIs are available for integration or log in
+                    using one of the options available below.
+                  </>
+                )}
               </Text>
             </Box>
-            <Grid templateColumns="repeat(2, 50%)" gap={8}>
-              <LoginButtons buttons={identities?.developer} />
+            <Grid templateColumns={gridColumns} gap={8}>
+              <LoginButtons identities={selectedIdentities} />
             </Grid>
           </>
         )}

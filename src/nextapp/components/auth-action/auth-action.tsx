@@ -17,11 +17,13 @@ import {
   MenuDivider,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown, FaCode } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
 import { useGlobal } from '@/shared/services/global';
+import { GiCapitol } from 'react-icons/gi';
+import { useRouter } from 'next/router';
 
 interface AuthActionProps {
   site: string;
@@ -31,6 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
   const global = useGlobal();
+  const router = useRouter();
 
   if (site === 'redirect') {
     return <></>;
@@ -40,11 +43,55 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
-        <Link passHref href="/login">
-          <Button as="a" variant="secondary" data-testid="login-btn">
+        <Menu placement="bottom-end">
+          <MenuButton
+            px={2}
+            py={1}
+            transition="all 0.2s"
+            borderRadius={4}
+            _hover={{ bg: 'bc-link' }}
+            _expanded={{ bg: 'blue.400' }}
+            _focus={{ boxShadow: 'outline' }}
+            data-testid="login-dropdown-btn"
+          >
             Login
-          </Button>
-        </Link>
+            <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
+          </MenuButton>
+          <MenuList
+            color="bc-component"
+            sx={{
+              'p.chakra-menu__group__title': {
+                fontSize: 'md',
+                fontWeight: 'normal !important',
+                px: 1,
+              },
+            }}
+          >
+            <Link passHref href={`/login?identity=provider&f=${router.asPath}`}>
+              <MenuItem
+                as="a"
+                color="bc-blue"
+                icon={<Icon as={GiCapitol} />}
+                data-testid="help-menu-api-docs"
+              >
+                API Provider
+              </MenuItem>
+            </Link>
+            <Link
+              passHref
+              href={`/login?identity=developer&f=${router.asPath}`}
+            >
+              <MenuItem
+                as="a"
+                color="bc-blue"
+                data-testid="help-menu-aps-support"
+                icon={<Icon as={FaCode} />}
+              >
+                Developer
+              </MenuItem>
+            </Link>
+          </MenuList>
+        </Menu>
       </Flex>
     );
   }

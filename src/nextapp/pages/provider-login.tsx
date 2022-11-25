@@ -14,7 +14,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import { GiCapitol } from 'react-icons/gi';
 import { useAuth } from '@/shared/services/auth';
 import router from 'next/router';
 import { useGlobal } from '@/shared/services/global';
@@ -57,7 +56,7 @@ const LoginPage: React.FC = () => {
               <Text>Start building and sharing APIs from your Ministry.</Text>
             </Box>
             <VStack as="section" align="stretch" spacing={6}>
-              <LoginButtons buttons={identities?.provider} />
+              <LoginButtons identities={identities?.provider} />
             </VStack>
           </>
         )}
