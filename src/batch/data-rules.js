@@ -176,6 +176,11 @@ const metadata = {
     transformations: {
       metric: { name: 'toString' },
       values: { name: 'toString' },
+      namespace: {
+        name: 'byKey',
+        key: 'metric.namespace',
+        refKey: 'namespace',
+      },
       service: {
         name: 'connectOne',
         key: 'metric.service',
@@ -606,9 +611,14 @@ const metadata = {
       'namespace',
       'actor',
       'blob',
+      'filterKey1',
+      'filterKey2',
+      'filterKey3',
+      'filterKey4',
     ],
     transformations: {
       actor: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      context: { name: 'toString' },
       blob: {
         name: 'connectExclusiveOne',
         list: 'Blob',
