@@ -2,6 +2,10 @@ import { graphql, rest } from 'msw';
 
 import { harley, mark } from './resolvers/personas';
 import {
+  apiDirectoryHandler,
+  apiDirectoriesHandler,
+} from './resolvers/api-directory';
+import {
   allApplicationsHandler,
   createApplicationHandler,
   removeApplicationHandler,
@@ -122,6 +126,8 @@ export const handlers = [
       })
     );
   }),
+  rest.get('*/ds/api/directory', apiDirectoriesHandler),
+  rest.get('*/ds/api/v2/directory/:id', apiDirectoryHandler),
   keystone.query('GetNamespaces', (_, res, ctx) => {
     return res(
       ctx.data({

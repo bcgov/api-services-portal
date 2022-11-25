@@ -17,6 +17,7 @@ import { Dataset, Product } from '@/shared/types/query.types';
 import { FaBook } from 'react-icons/fa';
 import kebabCase from 'lodash/kebabCase';
 import uniq from 'lodash/uniq';
+import { uid } from 'react-uid';
 
 interface DiscoveryDataset extends Dataset {
   products: Product[];
@@ -117,13 +118,20 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
       <Flex p={4} bgColor="gray.50" justify="space-between">
         <Box>{data && <Badge color="bc-blue-alt">{data.sector}</Badge>}</Box>
         <Wrap spacing={2}>
-          {data.products?.map((prod) =>
-            uniq(prod.environments).map((e) => (
-              <WrapItem key={e.id}>
-                <Badge colorScheme="green">{e.name}</Badge>
+          {data.products
+            ?.reduce((memo, p) => {
+              p.environments?.forEach((e) => {
+                if (!memo.includes(e.name)) {
+                  memo.push(e.name);
+                }
+              });
+              return memo;
+            }, [])
+            .map((e) => (
+              <WrapItem key={uid(e)}>
+                <Badge colorScheme="green">{e}</Badge>
               </WrapItem>
-            ))
-          )}
+            ))}
         </Wrap>
       </Flex>
     </Flex>
