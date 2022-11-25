@@ -78,7 +78,7 @@ module.exports = {
       type: Select,
       emptyOption: false,
       dataType: 'string',
-      defaultValue: 'manual',
+      defaultValue: 'auto',
       options: [
         { value: 'manual', label: 'Manual' },
         { value: 'auto', label: 'Automatic' },
