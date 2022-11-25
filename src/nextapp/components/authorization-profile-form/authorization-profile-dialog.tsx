@@ -21,7 +21,6 @@ import {
   CredentialIssuer,
   CredentialIssuerCreateInput,
   CredentialIssuerUpdateInput,
-  SharedIssuer,
 } from '@/shared/types/query.types';
 
 import NewProfile from './new-profile';
@@ -31,7 +30,6 @@ import AuthenticationForm from './authentication-form';
 import AuthorizationForm from './authorization-form';
 import ClientManagement from './client-management';
 import { EnvironmentItem } from './types';
-import SharedIdP from './shared-idp';
 
 interface AuthorizationProfileDialogProps {
   data?: CredentialIssuer;
@@ -199,7 +197,6 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleAuthorizationComplete = React.useCallback(
     (payload: FormData) => {
       const formData = Object.fromEntries(payload);
-      console.log('FORM DATA = ' + JSON.stringify(formData));
       if (id) {
         handleSaveProfile({
           ...(data as
