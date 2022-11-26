@@ -222,7 +222,6 @@ module.exports = {
       listKey,
       fieldPath, // Field hooks only
     }) {
-      logger.debug('Validate Input %s %j', operation, originalInput);
       if (operation === 'update') {
         if ('inheritFrom' in originalInput || 'clientId' in originalInput) {
           addValidationError(
@@ -236,6 +235,17 @@ module.exports = {
           originalInput['name'],
           'Profile name must be between 5 and 40 alpha-numeric (or space, dash) characters and begin with an alphabet'
         );
+      }
+      const isSharedIdP =
+        operation === 'create'
+          ? 'inheritFrom' in resolvedData
+          : 'inheritFrom' in existingItem;
+      if (
+        isSharedIdP &&
+        'availableScopes' in originalInput &&
+        originalInput['availableScopes'] != '[]'
+      ) {
+        addValidationError('Client Scopes not supported with Shared IdP');
       }
     },
 
