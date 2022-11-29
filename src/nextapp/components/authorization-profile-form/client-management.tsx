@@ -23,6 +23,7 @@ import SharedIdP from './shared-idp';
 
 interface ClientManagementProps {
   data?: string;
+  hidden: boolean;
   inheritFrom?: CredentialIssuer;
   profileName: string;
   id?: string;
@@ -32,6 +33,7 @@ interface ClientManagementProps {
 
 const ClientManagement: React.FC<ClientManagementProps> = ({
   data = '',
+  hidden,
   inheritFrom,
   profileName,
   id,
@@ -82,7 +84,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
 
   return (
     <>
-      <ModalBody>
+      <ModalBody hidden={hidden}>
         {!id && (
           <SharedIdP
             idp={idp}
@@ -152,7 +154,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
           )}
         </Table>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button onClick={onCancel} variant="secondary">
             Cancel

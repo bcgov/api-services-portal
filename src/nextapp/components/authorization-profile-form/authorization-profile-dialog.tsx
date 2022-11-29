@@ -274,36 +274,31 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                 </TabList>
               </Tabs>
             </ModalHeader>
-            {tabIndex === 0 && (
-              <AuthenticationForm
-                id={id}
-                onChange={setFlow}
-                onCancel={handleClose}
-                onComplete={handleAuthenticationComplete}
-                value={flow}
-              />
-            )}
-            {tabIndex === 1 && (
-              <AuthorizationForm
-                data={data}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleAuthorizationComplete}
-                ownerName={user?.name}
-              />
-            )}
-            {tabIndex === 2 && (
-              <>
-                <ClientManagement
-                  data={data?.environmentDetails}
-                  inheritFrom={data?.inheritFrom}
-                  profileName={name}
-                  id={id}
-                  onCancel={handleClose}
-                  onComplete={handleClientManagementComplete}
-                />
-              </>
-            )}
+            <AuthenticationForm
+              hidden={tabIndex !== 0}
+              id={id}
+              onChange={setFlow}
+              onCancel={handleClose}
+              onComplete={handleAuthenticationComplete}
+              value={flow}
+            />
+            <AuthorizationForm
+              data={data}
+              hidden={tabIndex !== 1}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleAuthorizationComplete}
+              ownerName={user?.name}
+            />
+            <ClientManagement
+              data={data?.environmentDetails}
+              hidden={tabIndex !== 2}
+              inheritFrom={data?.inheritFrom}
+              profileName={name}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleClientManagementComplete}
+            />
           </>
         )}
       </ModalContent>
