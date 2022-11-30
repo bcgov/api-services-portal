@@ -27,6 +27,11 @@ const directories = [
             active: true,
             flow: 'public',
           },
+          {
+            name: 'sandbox',
+            active: true,
+            flow: 'public',
+          },
         ],
         dataset: null,
       },
@@ -63,6 +68,16 @@ const directories = [
           },
           {
             name: 'test',
+            active: false,
+            flow: 'kong-api-key-acl',
+          },
+          {
+            name: 'other',
+            active: false,
+            flow: 'kong-api-key-acl',
+          },
+          {
+            name: 'dev',
             active: false,
             flow: 'kong-api-key-acl',
           },

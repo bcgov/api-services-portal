@@ -28,6 +28,14 @@ interface DiscoveryListItemProps extends BoxProps {
   preview: boolean;
 }
 
+enum EnvironmentOrder {
+  dev,
+  sandbox,
+  test,
+  prod,
+  other,
+}
+
 const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
   data,
   preview,
@@ -127,6 +135,9 @@ const DiscoveryListItem: React.FC<DiscoveryListItemProps> = ({
               });
               return memo;
             }, [])
+            .sort((a: string, b: string) => {
+              return EnvironmentOrder[a] > EnvironmentOrder[b] ? 1 : -1;
+            })
             .map((e) => (
               <WrapItem key={uid(e)}>
                 <Badge colorScheme="green">{e}</Badge>
