@@ -15,6 +15,7 @@ import {
   StackDivider,
   Text,
   MenuDivider,
+  Divider,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
 import { FaChevronDown, FaCode } from 'react-icons/fa';
@@ -43,6 +44,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
+        <Divider orientation="vertical" color="white" height="32px" />
         <Menu placement="bottom-end">
           <MenuButton
             px={2}

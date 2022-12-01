@@ -1,5 +1,13 @@
 import * as React from 'react';
-import { Box, Button, Heading, Icon, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Heading,
+  Icon,
+  Link,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { uid } from 'react-uid';
 import { FaGithub } from 'react-icons/fa';
@@ -40,12 +48,34 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
     bceid: {
       href: buildUrl('bceid-business', forwardPath),
       text: 'BCeID',
-      description: 'BCeID description coming soon',
+      description:
+        'BCeID is an online service that makes it possible for you to access government services using a single identifier and password.',
+      helpText: (
+        <>
+          Don't have an account?{' '}
+          <Link
+            href="https://www.bceid.ca/register/"
+            color="bc-link"
+            textDecor="underline"
+          >
+            Register for a Business BCeID
+          </Link>
+        </>
+      ),
     },
     bcsc: {
       href: buildUrl('bcsc', forwardPath),
       text: 'BC Services Card',
-      description: 'BC Services Card description coming soon',
+      description: '',
+      helpText: (
+        <Link
+          href="https://id.gov.bc.ca/account/"
+          color="bc-link"
+          textDecor="underline"
+        >
+          Learn how to use your BC Services Card to log in
+        </Link>
+      ),
     },
     github: {
       props: {
@@ -56,11 +86,11 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
       },
       href: buildUrl('github', forwardPath),
       text: 'Github',
-      description: 'Github description coming soon',
+      description: '',
     },
   } as const;
 
-  const elements = identities.map((b) => {
+  const elements = identities.map((b, index) => {
     const button = buttonComponents[b];
     const isGitHub = b === 'github';
     const variant = isGitHub ? 'outline' : 'primary';
@@ -83,11 +113,11 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
     }
 
     return (
-      <Box key={uid(b)} bgColor="white" p={10}>
+      <Box key={uid(b)} bgColor="white" p={5}>
         <Heading size="md" mb={5} display="flex" alignItems="center">
-          Login with your {button.text}
+          {`Option ${index + 1} - Login with your ${button.text}`}
         </Heading>
-        <Text>{button.description}</Text>
+        {button.description && <Text>{button.description}</Text>}
         <Box mt={7}>
           <Button
             as="a"
@@ -101,6 +131,11 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
             Login with {button.text}
           </Button>
         </Box>
+        {button.helpText && (
+          <Box mt={4} textAlign="center">
+            {button.helpText}
+          </Box>
+        )}
       </Box>
     );
   });

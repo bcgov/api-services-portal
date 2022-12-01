@@ -31,7 +31,6 @@ const LoginPage: React.FC = () => {
   const selectedIdentities = isProvider
     ? identities.provider
     : identities.developer;
-  const maxW = isProvider ? '3xl' : '4xl';
   const gridColumns = selectedIdentities.length > 3 ? 'repeat(2, 50%)' : '1fr';
 
   React.useEffect(() => {
@@ -45,7 +44,7 @@ const LoginPage: React.FC = () => {
       <Head>
         <title>API Program Services | Login</title>
       </Head>
-      <Container maxW={maxW}>
+      <Container maxW="2xl">
         {isLoading && (
           <Center mt={12}>
             <Alert status="info" variant="outline" borderRadius="4">
@@ -80,7 +79,7 @@ const LoginPage: React.FC = () => {
                 )}
               </Text>
             </Box>
-            <Grid templateColumns={gridColumns} gap={8}>
+            <Grid gap={8}>
               <LoginButtons identities={selectedIdentities} />
             </Grid>
           </>
