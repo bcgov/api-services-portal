@@ -83,7 +83,7 @@ export const handlers = [
       ctx.status(200),
       ctx.json({
         identities: {
-          developer: ['bcsc', 'bceid', 'idir', 'github'],
+          developer: ['idir', 'bcsc', 'bceid', 'github'],
           provider: ['idir'],
         },
         accountLinks: {
