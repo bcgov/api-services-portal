@@ -2,6 +2,7 @@ import { strict as assert } from 'assert';
 import {
   alwaysTrue,
   alwaysFalse,
+  byKey,
   connectExclusiveList,
   connectExclusiveOne,
   connectMany,
@@ -41,6 +42,7 @@ const hooks = {
 const transformations = {
   toStringDefaultArray: toStringDefaultArray,
   toString: toString,
+  byKey: byKey,
   mapNamespace: mapNamespace,
   connectExclusiveList: connectExclusiveList,
   connectExclusiveOne: connectExclusiveOne,
