@@ -455,8 +455,13 @@ export interface Activity {
   refId?: string;
   namespace?: string;
   blob?: string;
+  filterKey1?: string;
+  filterKey2?: string;
+  filterKey3?: string;
+  filterKey4?: string;
   updatedAt?: DateTime;
   createdAt?: DateTime;
+  context?: any; // toString
   actor?: UserRefID;
 }
 
