@@ -1,7 +1,0 @@
-
-  mutation CreateNamespace($name: String!) {
-    createNamespace(namespace: $name) {
-      id
-      name
-    }
-  }

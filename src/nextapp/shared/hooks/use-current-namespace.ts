@@ -14,6 +14,9 @@ const query = gql`
       name
       org
       orgUnit
+      orgUpdatedAt
+      orgEnabled
+      orgAdmins
     }
   }
 `;

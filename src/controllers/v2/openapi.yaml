@@ -370,8 +370,21 @@ components:
                 $ref: '#/components/schemas/Maybe_Scalars-at-String_'
             type: array
             nullable: true
+        Maybe_Scalars-at-Float_:
+            type: number
+            format: double
+            nullable: true
+        Maybe_Scalars-at-Boolean_:
+            type: boolean
+            nullable: true
         Namespace:
             properties:
+                orgAdmins:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                orgEnabled:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                orgUpdatedAt:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Float_'
                 orgUnit:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 org:

@@ -122,8 +122,8 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         flexDir="column"
                         alignItems="flex-start"
                       >
-                        {differenceInDays(today, new Date(n.createdAt)) <=
-                          1 && (
+                        {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
+                          5 && (
                           <Text color="bc-error" pos="absolute" right={4}>
                             New
                           </Text>
@@ -189,6 +189,8 @@ const query = gql`
     allNamespaces {
       id
       name
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;

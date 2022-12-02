@@ -111,7 +111,7 @@ const NamespacesPage: React.FC = () => {
   const namespace = useCurrentNamespace();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const currentOrg = React.useMemo(() => {
-    if (namespace.isSuccess && namespace.data.currentNamespace.org) {
+    if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
       return {
         assigned: true,
         color: 'bc-text',

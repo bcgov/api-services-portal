@@ -41,6 +41,8 @@ import {
 import getSubjectToken from '../../auth/auth-token';
 import { NamespaceService } from '../../services/org-groups';
 import { IssuerEnvironmentConfig } from '@/services/workflow/types';
+import { Keystone } from '@keystonejs/keystone';
+import { merge } from 'lodash';
 
 const typeUserContact = `
   type UserContact {
@@ -59,8 +61,11 @@ type Namespace {
     permDomains: [String],
     permDataPlane: String,
     permProtectedNs: String,
-    org: String,
-    orgUnit: String
+    org: JSON,
+    orgUnit: JSON
+    orgUpdatedAt: Float,
+    orgEnabled: Boolean,
+    orgAdmins: [String],
 }
 `;
 
@@ -133,11 +138,19 @@ module.exports = {
                 );
                 return null;
               } else {
-                return await backfillGroupAttributes(
-                  context.req.user.namespace,
-                  matched[0],
+                const kcGroupService = await getKeycloakGroupApi(
                   envCtx.issuerEnvConfig
                 );
+
+                const merged = await backfillGroupAttributes(
+                  context.req.user.namespace,
+                  matched[0],
+                  kcGroupService
+                );
+                if (merged.org) {
+                  await transformOrgAndOrgUnit(context, merged);
+                }
+                return merged;
               }
             },
             access: EnforcementPoint,
@@ -173,12 +186,26 @@ module.exports = {
                 resourceIds
               );
 
-              return namespaces.map((ns: ResourceSet) => ({
+              const nsList = namespaces.map((ns: ResourceSet) => ({
                 id: ns.id,
                 name: ns.name,
                 scopes: ns.resource_scopes,
                 prodEnvId: prodEnv.id,
               }));
+
+              const kcGroupService = await getKeycloakGroupApi(
+                envCtx.issuerEnvConfig
+              );
+
+              return await Promise.all(
+                nsList.map(async (nsdata: any) => {
+                  return backfillGroupAttributes(
+                    nsdata.name,
+                    nsdata,
+                    kcGroupService
+                  );
+                })
+              );
             },
             access: EnforcementPoint,
           },
@@ -223,11 +250,19 @@ module.exports = {
                 }))
                 .pop();
 
+              const kcGroupService = await getKeycloakGroupApi(
+                envCtx.issuerEnvConfig
+              );
+
               const merged = await backfillGroupAttributes(
                 args.ns,
                 detail,
-                envCtx.issuerEnvConfig
+                kcGroupService
               );
+
+              if (merged.org) {
+                await transformOrgAndOrgUnit(context, merged);
+              }
 
               logger.debug('[namespace] Result %j', merged);
               return merged;
@@ -309,6 +344,30 @@ module.exports = {
           },
         ],
         mutations: [
+          {
+            schema:
+              'updateCurrentNamespace(orgEnabled: Boolean, org: String, orgUnit: String): Boolean',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              // The orgEnabled requires a user to have Organization Assign permission; they may have Namespace.View permission here
+
+              // org and orgUnit requires Namespace.Manage permission (role: api-owner)
+
+              return true;
+            },
+          },
           {
             schema: 'createNamespace(namespace: String!): Namespace',
             resolver: async (
@@ -493,17 +552,22 @@ module.exports = {
   ],
 };
 
-async function backfillGroupAttributes(
-  ns: string,
-  detail: any,
+async function getKeycloakGroupApi(
   issuerEnvConfig: IssuerEnvironmentConfig
-): Promise<any> {
+): Promise<KeycloakGroupService> {
   const kcGroupService = new KeycloakGroupService(issuerEnvConfig.issuerUrl);
   await kcGroupService.login(
     issuerEnvConfig.clientId,
     issuerEnvConfig.clientSecret
   );
+  return kcGroupService;
+}
 
+async function backfillGroupAttributes(
+  ns: string,
+  detail: any,
+  kcGroupService: KeycloakGroupService
+): Promise<any> {
   const nsPermissions = await kcGroupService.getGroup('ns', ns);
 
   transformSingleValueAttributes(nsPermissions.attributes, [
@@ -524,13 +588,36 @@ async function backfillGroupAttributes(
     ...detail,
     ...defaultSettings,
     ...nsPermissions.attributes,
+    ...{
+      'org-admins': ['none specified'],
+      'org-enabled': nsPermissions.attributes.org ? true : false,
+      'org-updated-at': new Date().getTime(),
+    },
   };
+
   camelCaseAttributes(merged, [
     'perm-domains',
     'perm-data-plane',
     'perm-protected-ns',
     'org',
     'org-unit',
+    'org-updated-at',
+    'org-enabled',
+    'org-admins',
   ]);
+
   return merged;
+}
+
+async function transformOrgAndOrgUnit(
+  context: Keystone,
+  merged: any
+): Promise<void> {
+  ['org', 'orgUnit'].forEach((key) => {
+    const name = merged[key];
+    merged[key] = {
+      name: name,
+      title: `Title of ${name}`,
+    };
+  });
 }
