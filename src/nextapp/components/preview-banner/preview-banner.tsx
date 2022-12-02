@@ -30,7 +30,7 @@ const PreviewBanner: React.FC = () => {
 
   if (
     !user ||
-    !user.roles.includes('provider-user') ||
+    !user.roles.includes('api-owner') ||
     !isSuccess ||
     data.currentNamespace === null
   ) {
