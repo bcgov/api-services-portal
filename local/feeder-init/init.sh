@@ -13,6 +13,7 @@ while true; do
         curl http://feeder.localtest.me:6000/push -F yaml=@developer-user.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@mark-user.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@platform-authz-profile.yaml
+        curl http://feeder.localtest.me:6000/push -F yaml=@shared-idp.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@platform-gwa-api.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@organization-unit.yaml
         curl http://feeder.localtest.me:6000/push -F yaml=@dataset-gwa.yaml
