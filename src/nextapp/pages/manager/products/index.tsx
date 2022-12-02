@@ -75,7 +75,9 @@ const ProductsPage: React.FC = () => {
         </PageHeader>
 
         <Box mt={5}>
-          {user?.roles.includes('api-owner') && (
+          {namespace.data?.currentNamespace?.orgAdmins.includes(
+            user?.email
+          ) && (
             <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
               <GridItem>
                 <Switch
