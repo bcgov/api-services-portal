@@ -11,9 +11,9 @@ const ApproveBanner: React.FC = () => {
 
   if (
     !user ||
-    !user.roles.includes('api-owner') ||
     !isSuccess ||
     data.currentNamespace === null ||
+    !data.currentNamespace?.orgAdmins.includes(user.email) ||
     // @ts-ignore
     data.currentNamespace?.orgEnabled
   ) {

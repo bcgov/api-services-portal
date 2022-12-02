@@ -370,6 +370,8 @@ components:
                 $ref: '#/components/schemas/Maybe_Scalars-at-String_'
             type: array
             nullable: true
+        Maybe_Scalars-at-JSON_:
+            nullable: true
         Maybe_Scalars-at-Float_:
             type: number
             format: double
@@ -386,9 +388,9 @@ components:
                 orgUpdatedAt:
                     $ref: '#/components/schemas/Maybe_Scalars-at-Float_'
                 orgUnit:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 org:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
