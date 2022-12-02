@@ -22,6 +22,7 @@ import { FaChevronDown, FaCode } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
+import NextLink from 'next/link';
 import { useGlobal } from '@/shared/services/global';
 import { GiCapitol } from 'react-icons/gi';
 import { useRouter } from 'next/router';
@@ -41,6 +42,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   }
 
   if (!user) {
+    const isDisabled = router.asPath.startsWith('/login');
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
@@ -55,6 +57,9 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             _expanded={{ bg: 'blue.400' }}
             _focus={{ boxShadow: 'outline' }}
             data-testid="login-dropdown-btn"
+            disabled={isDisabled}
+            cursor={isDisabled ? 'not-allowed' : undefined}
+            opacity={isDisabled ? 0.25 : undefined}
           >
             Login
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
@@ -69,7 +74,12 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               },
             }}
           >
-            <Link passHref href={`/login?identity=provider&f=${router.asPath}`}>
+            <NextLink
+              href={{
+                pathname: '/login',
+                query: { identity: 'provider', f: router.asPath },
+              }}
+            >
               <MenuItem
                 as="a"
                 color="bc-blue"
@@ -78,10 +88,15 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               >
                 API Provider
               </MenuItem>
-            </Link>
-            <Link
-              passHref
-              href={`/login?identity=developer&f=${router.asPath}`}
+            </NextLink>
+            <NextLink
+              href={{
+                pathname: '/login',
+                query: {
+                  identity: 'developer',
+                  f: router.asPath,
+                },
+              }}
             >
               <MenuItem
                 as="a"
@@ -91,7 +106,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               >
                 Developer
               </MenuItem>
-            </Link>
+            </NextLink>
           </MenuList>
         </Menu>
       </Flex>

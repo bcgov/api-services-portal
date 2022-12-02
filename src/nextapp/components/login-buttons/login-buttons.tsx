@@ -35,60 +35,63 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
   variant = 'block',
 }) => {
   const router = useRouter();
-  const forwardPath: string =
-    'f' in router?.query ? router.query.f.toString() : router?.asPath;
+  const forwardPath: string = router.query.f?.toString() ?? router?.asPath;
   const isInline = variant === 'inline';
+  console.log(forwardPath);
 
-  const buttonComponents = {
-    idir: {
-      href: buildUrl('idir', forwardPath),
-      text: 'IDIR',
-      description: 'Only available to B.C. government workers.',
-    },
-    bceid: {
-      href: buildUrl('bceid-business', forwardPath),
-      text: 'BCeID',
-      description:
-        'BCeID is an online service that makes it possible for you to access government services using a single identifier and password.',
-      helpText: (
-        <>
-          Don't have an account?{' '}
+  const buttonComponents = React.useMemo(
+    () => ({
+      idir: {
+        href: buildUrl('idir', forwardPath),
+        text: 'IDIR',
+        description: 'Only available to B.C. government workers.',
+      },
+      bceid: {
+        href: buildUrl('bceid-business', forwardPath),
+        text: 'BCeID',
+        description:
+          'BCeID is an online service that makes it possible for you to access government services using a single identifier and password.',
+        helpText: (
+          <>
+            Don't have an account?{' '}
+            <Link
+              href="https://www.bceid.ca/register/"
+              color="bc-link"
+              textDecor="underline"
+            >
+              Register for a Business BCeID
+            </Link>
+          </>
+        ),
+      },
+      bcsc: {
+        href: buildUrl('bcsc', forwardPath),
+        text: 'BC Services Card',
+        description: '',
+        helpText: (
           <Link
-            href="https://www.bceid.ca/register/"
+            href="https://id.gov.bc.ca/account/"
             color="bc-link"
             textDecor="underline"
           >
-            Register for a Business BCeID
+            Learn how to use your BC Services Card to log in
           </Link>
-        </>
-      ),
-    },
-    bcsc: {
-      href: buildUrl('bcsc', forwardPath),
-      text: 'BC Services Card',
-      description: '',
-      helpText: (
-        <Link
-          href="https://id.gov.bc.ca/account/"
-          color="bc-link"
-          textDecor="underline"
-        >
-          Learn how to use your BC Services Card to log in
-        </Link>
-      ),
-    },
-    github: {
-      props: {
-        variant: 'secondary',
-        bgColor: '#f5f5f5',
-        borderColor: '#333',
-        color: '#333',
+        ),
       },
-      href: buildUrl('github', forwardPath),
-      text: 'Github',
-      description: '',
-    },
-  } as const;
+      github: {
+        props: {
+          variant: 'secondary',
+          bgColor: '#f5f5f5',
+          borderColor: '#333',
+          color: '#333',
+        },
+        href: buildUrl('github', forwardPath),
+        text: 'Github',
+        description: '',
+      },
+    }),
+    [forwardPath]
+  );
 
   const elements = identities.map((b, index) => {
     const button = buttonComponents[b];
@@ -103,7 +106,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
           key={uid(b)}
           as="a"
           variant={variant}
-          href={buildUrl(b, button.forwardPath)}
+          href={buildUrl(b, forwardPath)}
           leftIcon={icon}
           bgColor={bgColor}
         >
@@ -123,7 +126,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
             as="a"
             key={uid(b)}
             variant={variant}
-            href={buildUrl(b, button.forwardPath)}
+            href={buildUrl(b, forwardPath)}
             w="100%"
             leftIcon={icon}
             bgColor={bgColor}
