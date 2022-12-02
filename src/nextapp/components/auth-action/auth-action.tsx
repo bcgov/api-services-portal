@@ -36,13 +36,26 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
   const global = useGlobal();
   const router = useRouter();
+  const providerUrl = React.useMemo(() => {
+    const providerUrl = new URL('/login', location.origin);
+    providerUrl.searchParams.set('identity', 'provider');
+    const f = router.asPath.startsWith('/login') ? '/' : router.asPath;
+    providerUrl.searchParams.set('f', f);
+    return providerUrl;
+  }, []);
+  const developerUrl = React.useMemo(() => {
+    const developerUrl = new URL('/login', location.origin);
+    developerUrl.searchParams.set('identity', 'developer');
+    const f = router.asPath.startsWith('/login') ? '/' : router.asPath;
+    developerUrl.searchParams.set('f', f);
+    return developerUrl;
+  }, []);
 
   if (site === 'redirect') {
     return <></>;
   }
 
   if (!user) {
-    const isDisabled = router.asPath.startsWith('/login');
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
@@ -57,9 +70,6 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             _expanded={{ bg: 'blue.400' }}
             _focus={{ boxShadow: 'outline' }}
             data-testid="login-dropdown-btn"
-            disabled={isDisabled}
-            cursor={isDisabled ? 'not-allowed' : undefined}
-            opacity={isDisabled ? 0.25 : undefined}
           >
             Login
             <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
@@ -74,12 +84,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               },
             }}
           >
-            <NextLink
-              href={{
-                pathname: '/login',
-                query: { identity: 'provider', f: router.asPath },
-              }}
-            >
+            <NextLink passHref href={providerUrl.href}>
               <MenuItem
                 as="a"
                 color="bc-blue"
@@ -89,15 +94,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                 API Provider
               </MenuItem>
             </NextLink>
-            <NextLink
-              href={{
-                pathname: '/login',
-                query: {
-                  identity: 'developer',
-                  f: router.asPath,
-                },
-              }}
-            >
+            <NextLink passHref href={developerUrl.href}>
               <MenuItem
                 as="a"
                 color="bc-blue"

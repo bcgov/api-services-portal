@@ -37,7 +37,6 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
   const router = useRouter();
   const forwardPath: string = router.query.f?.toString() ?? router?.asPath;
   const isInline = variant === 'inline';
-  console.log(forwardPath);
 
   const buttonComponents = React.useMemo(
     () => ({
