@@ -44,14 +44,14 @@ class ApiDirectoryPage {
 
   isProductDisplay(productName: string): Boolean {
     var flag = false;
-    cy.get('body', {timeout: 6000}).then(($body) => {
+    cy.get('body', { timeout: 6000 }).then(($body) => {
       const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-      var ele : string = `[data-testid=api-${pname}]`
-      cy.log('Body -> '+ $body)
+      var ele: string = `[data-testid=api-${pname}]`
+      cy.log('Body -> ' + $body)
       if ($body.find(ele).length > 0) {
         flag = true
       }
-      else{
+      else {
         flag = false
       }
     })
@@ -63,10 +63,25 @@ class ApiDirectoryPage {
     cy.wait(3000)
   }
 
-  selectProduct(productName: string){
+  selectProduct(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-    var ele : string = `[data-testid=api-${pname}]`
+    var ele: string = `[data-testid=api-${pname}]`
     cy.get(ele).click()
+  }
+
+  isEnvironmentDisplayInAPIDirectory(productconfig: any, flag: boolean) {
+    cy.get("[data-testid^='discovery-item']").find('a').each(($el, index, $list) => {
+      let productName = $el.text()
+      cy.log(productName)
+      if (productName === productconfig.name) {
+        cy.get(`[data-testid^=discovery-item-${index}]`).find('li').find('span').each(($el) => {
+          let envName = $el.text()
+          if (envName === productconfig.environment.name ) {
+            assert.isTrue(flag, "Environment displays")
+          }
+        })
+      }
+    })
   }
 }
 

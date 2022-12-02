@@ -2326,3 +2326,6 @@ ALTER TABLE public."Activity"
  ADD COLUMN "filterKey2" text,
  ADD COLUMN "filterKey3" text,
  ADD COLUMN "filterKey4" text;
+
+ALTER TABLE public."Metric"
+ ADD COLUMN "namespace" text;

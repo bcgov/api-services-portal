@@ -14,6 +14,8 @@ const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
+const YAML = require('yamljs');
+
 let headers: any
 
 let requestBody: any = {}
@@ -222,10 +224,11 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:boolean) => {
+  let fixtureFile = flag ? "state/regen":"state/store";
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
-  cy.fixture('state/store').then((creds: any) => {
+  cy.fixture(fixtureFile).then((creds: any) => {
     const serviceAcctCreds = JSON.parse(creds.credentials)
     cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
       () => {
@@ -389,6 +392,27 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       }
     }
   }
+})
+
+Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
+  debugger
+  cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
+    let newObj: any
+    newObj = YAML.parse($el)
+    cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+      debugger
+      let obj = YAML.parse(content)
+      const keys = Object.keys(obj);
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (obj.services[index].name == serviceName) {
+          debugger
+          obj.services[index].plugins = newObj.plugins
+        }
+      });
+      const yamlString = YAML.stringify(obj, 'utf8');
+      cy.writeFile('cypress/fixtures/' + filename, yamlString)
+    })
+  })
 })
 
 Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey: any) => {

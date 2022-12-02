@@ -37,8 +37,8 @@ describe('Filter Gateway Services Spec', () => {
   it('verify that Gateway service filters as per given parameter', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       gs.verifyFilterResultsForGatewayService('Products', product.name, '2')
-      gs.verifyFilterResultsForGatewayService('Environment', product.environment.name, '1')
-      gs.verifyFilterResultsForGatewayService('Environment', product.test_environment.name, '1')
+      gs.verifyFilterResultsForGatewayService('Environments', product.environment.name, '1')
+      gs.verifyFilterResultsForGatewayService('Environments', product.test_environment.name, '1')
     })
   })
 })
