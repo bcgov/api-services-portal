@@ -148,6 +148,8 @@ export const updateCurrentNamesSpaceHandler = (req, res, ctx) => {
   currentNamespace = {
     ...currentNamespace,
     ...req.variables,
+    org: req.variables.org ? { title: req.variables.org } : null,
+    orgUnit: req.variables.orgUnit ? { title: req.variables.orgUnit } : null,
   };
   return res(ctx.data({}));
 };

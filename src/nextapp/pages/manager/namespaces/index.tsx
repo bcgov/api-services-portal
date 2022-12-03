@@ -15,6 +15,14 @@ import {
   VStack,
   useDisclosure,
   Tooltip,
+  PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+  IconButton,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -117,8 +125,8 @@ const NamespacesPage: React.FC = () => {
         color: 'bc-text',
         iconColor: 'bc-blue',
         text: [
-          namespace.data.currentNamespace.org,
-          namespace.data.currentNamespace.orgUnit,
+          namespace.data.currentNamespace.org?.title,
+          namespace.data.currentNamespace.orgUnit?.title,
         ].join(' - '),
       };
     }
@@ -183,13 +191,25 @@ const NamespacesPage: React.FC = () => {
                     <Icon as={FaBuilding} color={currentOrg.iconColor} />
                     {currentOrg.text}
                   </Text>
-                  <Tooltip
-                    closeOnClick
-                    hasArrow
-                    closeDelay={1500}
-                    pointerEvents="all"
-                    label={
-                      <>
+                  <Popover trigger="hover">
+                    <PopoverTrigger>
+                      <IconButton aria-label="more info" variant="ghost">
+                        <Icon
+                          as={FaInfoCircle}
+                          color="bc-blue"
+                          boxSize="16px"
+                        />
+                      </IconButton>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      fontSize="sm"
+                      fontWeight="normal"
+                      color="white"
+                      bgColor="black"
+                      borderRadius={0}
+                    >
+                      <PopoverArrow bgColor="black" />
+                      <PopoverBody>
                         If you need to change the Organization or Business Unit
                         for your Namespace, submit a request through the{' '}
                         <Link
@@ -198,13 +218,9 @@ const NamespacesPage: React.FC = () => {
                         >
                           Data Systems and Services request system
                         </Link>
-                      </>
-                    }
-                  >
-                    <Box d="inline-flex">
-                      <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
-                    </Box>
-                  </Tooltip>
+                      </PopoverBody>
+                    </PopoverContent>
+                  </Popover>
                 </Flex>
               </>
             ) : (
