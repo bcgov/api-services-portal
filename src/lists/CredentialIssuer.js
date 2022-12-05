@@ -300,16 +300,20 @@ module.exports = {
 
       await new StructuredActivityService(
         context,
-        context.authedItem['namespace']
-      ).logListActivity(
-        true,
-        operation,
-        'authorization profile',
-        {
-          credentialIssuer: updatedItem,
-        },
-        '{actor} {action} {entity} {credentialIssuer}'
-      );
+        context.authedItem?.namespace
+      )
+        .logListActivity(
+          true,
+          operation,
+          'authorization profile',
+          {
+            credentialIssuer: updatedItem,
+          },
+          '{actor} {action} {entity} {credentialIssuer}'
+        )
+        .catch((e) => {
+          logger.error('[Activity] Failed to Record %s', e);
+        });
     },
   },
 };
