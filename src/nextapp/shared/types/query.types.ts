@@ -4040,6 +4040,7 @@ export type Metric = {
   day?: Maybe<Scalars['String']>;
   metric?: Maybe<Scalars['String']>;
   values?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayService>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   createdAt?: Maybe<Scalars['DateTime']>;
@@ -4051,6 +4052,7 @@ export type MetricCreateInput = {
   day?: Maybe<Scalars['String']>;
   metric?: Maybe<Scalars['String']>;
   values?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
 };
 
@@ -4060,6 +4062,7 @@ export type MetricUpdateInput = {
   day?: Maybe<Scalars['String']>;
   metric?: Maybe<Scalars['String']>;
   values?: Maybe<Scalars['String']>;
+  namespace?: Maybe<Scalars['String']>;
   service?: Maybe<GatewayServiceRelateToOneInput>;
 };
 
@@ -4160,6 +4163,24 @@ export type MetricWhereInput = {
   values_not_ends_with_i?: Maybe<Scalars['String']>;
   values_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   values_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace?: Maybe<Scalars['String']>;
+  namespace_not?: Maybe<Scalars['String']>;
+  namespace_contains?: Maybe<Scalars['String']>;
+  namespace_not_contains?: Maybe<Scalars['String']>;
+  namespace_starts_with?: Maybe<Scalars['String']>;
+  namespace_not_starts_with?: Maybe<Scalars['String']>;
+  namespace_ends_with?: Maybe<Scalars['String']>;
+  namespace_not_ends_with?: Maybe<Scalars['String']>;
+  namespace_i?: Maybe<Scalars['String']>;
+  namespace_not_i?: Maybe<Scalars['String']>;
+  namespace_contains_i?: Maybe<Scalars['String']>;
+  namespace_not_contains_i?: Maybe<Scalars['String']>;
+  namespace_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_not_starts_with_i?: Maybe<Scalars['String']>;
+  namespace_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_not_ends_with_i?: Maybe<Scalars['String']>;
+  namespace_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  namespace_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   service?: Maybe<GatewayServiceWhereInput>;
   service_is_null?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -6211,6 +6232,8 @@ export type Query = {
   allDiscoverableProducts?: Maybe<Array<Maybe<Product>>>;
   allGatewayServicesByNamespace?: Maybe<Array<Maybe<GatewayService>>>;
   allGatewayRoutesByNamespace?: Maybe<Array<Maybe<GatewayRoute>>>;
+  allGatewayPluginsByNamespace?: Maybe<Array<Maybe<GatewayPlugin>>>;
+  allGatewayServiceMetricsByNamespace?: Maybe<Array<Maybe<Metric>>>;
   allContentsByNamespace?: Maybe<Array<Maybe<Content>>>;
   allProductsByNamespace?: Maybe<Array<Maybe<Product>>>;
   allAccessRequestsByNamespace?: Maybe<Array<Maybe<AccessRequest>>>;
@@ -6851,6 +6874,22 @@ export type QueryAllGatewayRoutesByNamespaceArgs = {
   skip?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<Scalars['String']>;
   where?: Maybe<GatewayRouteWhereInput>;
+};
+
+
+export type QueryAllGatewayPluginsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<GatewayPluginWhereInput>;
+};
+
+
+export type QueryAllGatewayServiceMetricsByNamespaceArgs = {
+  first?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Scalars['String']>;
+  where?: Maybe<MetricWhereInput>;
 };
 
 
@@ -7749,6 +7788,8 @@ export enum SortMetricsBy {
   MetricDesc = 'metric_DESC',
   ValuesAsc = 'values_ASC',
   ValuesDesc = 'values_DESC',
+  NamespaceAsc = 'namespace_ASC',
+  NamespaceDesc = 'namespace_DESC',
   ServiceAsc = 'service_ASC',
   ServiceDesc = 'service_DESC',
   UpdatedAtAsc = 'updatedAt_ASC',

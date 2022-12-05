@@ -1,0 +1,197 @@
+{
+  "license_title": "Access Only",
+  "maintainer": null,
+  "publish_state": "PUBLISHED",
+  "relationships_as_object": [],
+  "view_audience": "Government",
+  "private": false,
+  "maintainer_email": null,
+  "num_tags": 9,
+  "id": "3dad0c30-ef32-4f4c-82fa-33787d5f85f8",
+  "metadata_created": "2016-03-17T19:02:04.367657",
+  "metadata_modified": "2022-02-17T19:37:18.637368",
+  "author": "db747fb6-7b96-4a8f-8f5d-95c1821fde0a",
+  "author_email": null,
+  "state": "active",
+  "version": null,
+  "license_id": "22",
+  "type": "bcdc_dataset",
+  "resources": [
+    {
+      "cache_last_updated": null,
+      "package_id": "3dad0c30-ef32-4f4c-82fa-33787d5f85f8",
+      "json_table_schema": {},
+      "datastore_active": "false",
+      "id": "82cd3194-0955-4d7e-b35a-78a98fda153a",
+      "size": null,
+      "spatial_datatype": "",
+      "iso_topic_category": [],
+      "temporal_extent": "{\"beginning_date\":\"\",\"end_date\":\"\",\"[object Object]\":\"\"}",
+      "state": "active",
+      "details": "",
+      "bcdc_type": "webservice",
+      "resource_access_method": "service",
+      "hash": "",
+      "description": "Description not provided.",
+      "format": "openapi-json",
+      "projection_name": "",
+      "cache_url": "null",
+      "preview_info": "",
+      "tracking_summary": {
+        "total": 36,
+        "recent": 1
+      },
+      "mimetype_inner": "null",
+      "geographic_extent": "",
+      "url_type": "",
+      "mimetype": "null",
+      "resource_storage_location": "na",
+      "name": "API Specification",
+      "created": "2016-03-17T12:04:28.837000",
+      "url": "https://raw.githubusercontent.com/bcgov/api-specs/master/router/router.json",
+      "last_modified": null,
+      "supplemental_info": "",
+      "resource_update_cycle": "asNeeded",
+      "position": 0,
+      "revision_id": "e2905bdc-4bcc-4a62-97d1-6e2c48903e86",
+      "resource_type": "data"
+    }
+  ],
+  "more_info": "[{\"description\":\"\",\"url\":\"https://github.com/bcgov/api-specs/blob/master/router/glossary.md\"},{\"description\":\"\",\"url\":\"https://github.com/bcgov/api-specs/blob/master/router/router-developer-guide.md\"},{\"description\":\"\",\"url\":\"https://catalogue.data.gov.bc.ca/dataset/digital-road-atlas-dra-master-partially-attributed-roads\"}]",
+  "num_resources": 1,
+  "tags": [
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "API",
+      "id": "4bd16f13-e4af-48ab-9676-255d04600fd4",
+      "name": "API"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "OpenAPI spec",
+      "id": "5c1e7cd0-d772-4430-8efd-63bb6954f803",
+      "name": "OpenAPI spec"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "REST",
+      "id": "3c1f901b-36e5-4816-bbaa-58c85924e59e",
+      "name": "REST"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "directions",
+      "id": "41977bd2-6daa-41a3-84c8-c9c615b5b81f",
+      "name": "directions"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "key-mandatory",
+      "id": "65925e26-da0d-4b1a-af4a-6b834755ea56",
+      "name": "key-mandatory"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "location services",
+      "id": "455d862e-6af7-433a-a588-386864ab4725",
+      "name": "location services"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "route",
+      "id": "455a97f6-3e8d-472a-9184-ee02e1e455ca",
+      "name": "route"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "router",
+      "id": "fe06ce99-1648-4657-8e00-48efb559999e",
+      "name": "router"
+    },
+    {
+      "vocabulary_id": null,
+      "state": "active",
+      "display_name": "travel planning",
+      "id": "eb901bcd-12dd-4667-91fe-011b148329a9",
+      "name": "travel planning"
+    }
+  ],
+  "contacts": "[{\"name\":\"DataBC Operations\",\"email\":\"data@gov.bc.ca\",\"org\":\"d2e433a1-b785-4d03-8a2b-392069175eb4\",\"role\":\"pointOfContact\",\"displayed\":true}]",
+  "resource_status": "completed",
+  "tracking_summary": {
+    "total": 917,
+    "recent": 5
+  },
+  "groups": [
+    {
+      "display_name": "BC Government API Registry",
+      "description": "An API Registry for BC Government, [click here for BC Government API Guidelines](https://developer.gov.bc.ca/Data-and-APIs/BC-Government-API-Guidelines)",
+      "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2018-02-21-215929.13946617069795.png",
+      "title": "BC Government API Registry",
+      "id": "65c44d61-ff6e-418f-b1aa-6023c3f7ed4c",
+      "name": "bc-government-api-registry"
+    }
+  ],
+  "creator_user_id": "db747fb6-7b96-4a8f-8f5d-95c1821fde0a",
+  "download_audience": "Government",
+  "retention_expiry_date": "",
+  "replacement_record": "",
+  "relationships_as_subject": [],
+  "name": "bc-route-planner",
+  "security_class": "PUBLIC",
+  "dates": "[{\"type\":\"Created\",\"date\":\"2016-03-17\"}]",
+  "organization": {
+    "description": "[DataBC](http://www.data.gov.bc.ca/) helps the Province manage data as an asset. It enables public servants and citizens to share and use data. DataBC delivers on this mandate by providing leadership in : data governance and custodianship; data licensing; literacy and outreach; data cataloging; data provisioning; geographic data integration and management; location based services and web mapping applications.\n\n**Data Custodian:** Alex Ritchie\n",
+    "created": "2014-12-10T15:05:57.849695",
+    "title": "DataBC Program",
+    "full_title": "DataBC Program",
+    "name": "databc",
+    "is_organization": true,
+    "state": "active",
+    "image_url": "2018-07-19-230622.091907bcanddatabcsmallwhite.png",
+    "revision_id": "146f0e6f-a32c-40ee-b365-be0dc95b0de4",
+    "type": "organization",
+    "id": "d2e433a1-b785-4d03-8a2b-392069175eb4",
+    "approval_status": "approved"
+  },
+  "record_publish_date": "2016-03-23",
+  "isopen": false,
+  "url": null,
+  "source_data_path": "",
+  "notes": "The BC Route Planner is a REST web service that offers vehicle route plans that are based on the BC Digital Road Atlas (DRA). The BC Route Planner computes the shortest or fastest route between start and end points and returns the route, distance, time, and directions.\r\n\r\nFor more information please see the [glossary](https://github.com/bcgov/api-specs/blob/master/router/glossary.md) and the [Router Developer Guide](https://github.com/bcgov/api-specs/blob/master/router/router-developer-guide.md).\r\n\r\n\r\n\r\n\r\nThe BC Route Planner is limited to use by the Government of BC. Please contact DataBC to arrange access to this web service.",
+  "owner_org": "d2e433a1-b785-4d03-8a2b-392069175eb4",
+  "record_last_modified": "2022-02-17",
+  "extras": [
+    {
+      "key": "image_display_url",
+      "value": ""
+    },
+    {
+      "key": "org",
+      "value": "4f7ae636-4cdf-4273-b274-6608c615dba0"
+    },
+    {
+      "key": "sector",
+      "value": "Service"
+    },
+    {
+      "key": "sub_org",
+      "value": "d2e433a1-b785-4d03-8a2b-392069175eb4"
+    }
+  ],
+  "license_url": "https://www2.gov.bc.ca/gov/content?id=1AAACC9C65754E4D89A118B875E0FBDA",
+  "metadata_visibility": "Public",
+  "title": "BC Route Planner 2",
+  "revision_id": "82dab3bc-2aac-4eac-8ce9-e4b25841b146",
+  "record_create_date": "2016-03-17",
+  "extSource": "ckan",
+  "extRecordHash": "0000"
+}

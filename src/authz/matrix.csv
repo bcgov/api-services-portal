@@ -199,6 +199,8 @@ Portal User,,regenerateCredentials,,,,,,,portal-user,,,allow,filterByAppOwner
 Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allGatewayPluginsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
+API Owner Role Rules,,allGatewayServiceMetricsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS

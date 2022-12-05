@@ -64,13 +64,13 @@ const metadata = {
       resources: { name: 'toString' },
       organization: {
         name: 'connectOne',
-        key: 'org',
+        key: 'organization.id',
         list: 'allOrganizations',
-        refKey: 'extForeignKey',
+        refKey: 'orgUnits.extForeignKey',
       },
       organizationUnit: {
         name: 'connectOne',
-        key: 'sub_org',
+        key: 'organization.id',
         list: 'allOrganizationUnits',
         refKey: 'extForeignKey',
       },
@@ -176,6 +176,11 @@ const metadata = {
     transformations: {
       metric: { name: 'toString' },
       values: { name: 'toString' },
+      namespace: {
+        name: 'byKey',
+        key: 'metric.namespace',
+        refKey: 'namespace',
+      },
       service: {
         name: 'connectOne',
         key: 'metric.service',
@@ -314,6 +319,7 @@ const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleUsernameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       aclGroups: { name: 'toStringDefaultArray' },
@@ -613,9 +619,14 @@ const metadata = {
       'namespace',
       'actor',
       'blob',
+      'filterKey1',
+      'filterKey2',
+      'filterKey3',
+      'filterKey4',
     ],
     transformations: {
       actor: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      context: { name: 'toString' },
       blob: {
         name: 'connectExclusiveOne',
         list: 'Blob',

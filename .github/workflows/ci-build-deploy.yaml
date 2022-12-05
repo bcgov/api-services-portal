@@ -97,7 +97,7 @@ jobs:
           image:
             registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 4.4-ea993071
+            tag: 4.4.15-2941ec1e
             pullPolicy: IfNotPresent
             pullSecrets:
               - dev-github-read-packages-creds
@@ -188,7 +188,7 @@ jobs:
               client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
               oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
+              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|/content|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
