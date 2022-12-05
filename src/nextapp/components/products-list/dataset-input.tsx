@@ -99,7 +99,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
               <Box
                 {...getMenuProps()}
                 border="2px solid"
-                borderColor="bc-border-focus"
+                borderColor="bc-blue"
                 borderTop="none"
                 borderBottomRightRadius={4}
                 borderBottomLeftRadius={4}
@@ -107,13 +107,19 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 zIndex={2}
                 width="100%"
                 minHeight="5px"
+                maxHeight="300px"
+                overflowY="auto"
                 marginTop="-5px"
                 display={isOpen ? 'block' : 'none'}
               >
                 {isOpen &&
                   isSuccess &&
                   data.allDatasets
-                    .filter((d) => !inputValue || d.title.includes(inputValue))
+                    .filter(
+                      (d) =>
+                        !inputValue ||
+                        d.title.toLowerCase().includes(inputValue.toLowerCase())
+                    )
                     .map((d, index, arr) => (
                       <Box
                         key={d.id}
@@ -156,7 +162,7 @@ export default DatasetInput;
 
 const query = gql`
   query GetAllDatasets($search: String!, $first: Int) {
-    allDatasets(search: $search, first: $first) {
+    allDatasets(where: { title_contains: $search }, first: $first) {
       id
       name
       title

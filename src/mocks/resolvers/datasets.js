@@ -7,8 +7,8 @@ export const handleAllDatasets = (req, res, ctx) => {
   times(100, () => {
     allDatasets.push({
       id: casual.uuid,
-      name: casual.name,
-      title: casual.name,
+      name: `My Test Dataset ${casual.word}`,
+      title: `My Test Dataset ${casual.word}`,
     });
   });
 
