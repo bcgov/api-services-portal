@@ -1,35 +1,14 @@
 import * as React from 'react';
-import { CredentialIssuer, SharedIssuer } from '@/shared/types/query.types';
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Checkbox,
-  FormControl,
-  FormLabel,
-  GridItem,
-  Heading,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import RadioCardGroup from '../radio-card-group';
-import { gql } from 'graphql-request';
-import { useApi } from '@/shared/services/api';
 
 interface SharedIdPProps {
   profileName: string;
   idp: string;
-  onChange: (idp: string, issuer: SharedIssuer) => void;
+  onChange: (idp: string) => void;
 }
 
-const SharedIdP: React.FC<SharedIdPProps> = ({
-  profileName,
-  idp,
-  onChange,
-}) => {
+const SharedIdP: React.FC<SharedIdPProps> = ({ idp, onChange }) => {
   function Legend({ children }: { children: React.ReactNode }) {
     return (
       <Heading as="legend" size="sm" fontWeight="normal" mb={2}>
@@ -37,27 +16,6 @@ const SharedIdP: React.FC<SharedIdPProps> = ({
       </Heading>
     );
   }
-
-  const { data } = useApi(
-    ['sharedIssuers', profileName],
-    {
-      query,
-      variables: { profileName },
-    },
-    { suspense: false }
-  );
-
-  React.useEffect(() => {
-    if (idp === 'shared') {
-      onChange(idp, data?.sharedIdPs[0]);
-    } else {
-      onChange('custom', undefined);
-    }
-  }, [data]);
-
-  const onIdpSelection = (idp: string) => {
-    onChange(idp, idp === 'custom' ? undefined : data?.sharedIdPs[0]);
-  };
 
   return (
     <Box
@@ -77,33 +35,34 @@ const SharedIdP: React.FC<SharedIdPProps> = ({
           defaultValue={idp}
           data-testid="ap-idp"
           align="stretch"
-          onChange={onIdpSelection}
+          onChange={onChange}
           options={[
             {
               title: 'Custom',
-              description: `You have a Keycloak IdP available for issuing Client Credentials.`,
+              description:
+                'Custom means you have a Keycloak IdP available for issuing Client Credentials. Full self-serve configuration management: roles, scopes, flows are available.',
               value: 'custom',
             },
             {
               title: 'Shared',
-              description: `You would like to use a shared IdP.`,
+              description:
+                'Shared has pre-configured default settings and a secure way to manage Client Credentials. No setup or administration of an IdP is required.',
               value: 'shared',
             },
           ]}
         />
       </fieldset>
+      {idp === 'shared' && (
+        <Box minHeight="32px">
+          <Text color="bc-component" mb={4}>
+            <Text as="strong">Note:</Text> You will not be able to change the
+            IdP type after you create an Authorization Profile with a Shared
+            IdP.
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };
 
 export default SharedIdP;
-
-const query = gql`
-  query SharedIdPPreview($profileName: String) {
-    sharedIdPs(profileName: $profileName) {
-      id
-      name
-      environmentDetails
-    }
-  }
-`;

@@ -11,6 +11,7 @@ import {
   ModalFooter,
   Td,
   Tr,
+  Text,
 } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { uid } from 'react-uid';
@@ -20,6 +21,8 @@ import EnvironmentForm from './environment-form';
 import { EnvironmentItem } from './types';
 import { CredentialIssuer, SharedIssuer } from '@/shared/types/query.types';
 import SharedIdP from './shared-idp';
+import { useApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 interface ClientManagementProps {
   data?: string;
@@ -40,12 +43,19 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
   onCancel,
   onComplete,
 }) => {
+  const sharedIssuer = useApi(
+    ['sharedIssuers', profileName],
+    {
+      query,
+      variables: { profileName },
+    },
+    { suspense: false, enabled: !hidden }
+  );
+
   const [idp, setIdp] = React.useState<string>(
     inheritFrom ? 'shared' : 'custom'
   );
-
   const [newInheritFrom, setNewInheritFrom] = React.useState<string>(undefined);
-
   const [environments, setEnvironments] = React.useState<EnvironmentItem[]>(
     () => {
       try {
@@ -81,7 +91,20 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
   const handleCreate = React.useCallback(() => {
     onComplete(newInheritFrom, environments);
   }, [environments, onComplete]);
+  const handleChange = (value: string) => {
+    setIdp(value);
 
+    if (sharedIssuer.isSuccess && sharedIssuer.data.sharedIdPs[0]) {
+      setNewInheritFrom(sharedIssuer.data.sharedIdPs[0].id);
+      setEnvironments(
+        JSON.parse(sharedIssuer.data.sharedIdPs[0].environmentDetails)
+      );
+    }
+
+    if (idp === 'shared' && value === 'custom') {
+      setEnvironments([]);
+    }
+  };
   return (
     <>
       <ModalBody hidden={hidden}>
@@ -89,14 +112,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
           <SharedIdP
             idp={idp}
             profileName={profileName}
-            onChange={(idp: string, sharedIssuer: SharedIssuer) => {
-              setIdp(idp);
-
-              if (sharedIssuer) {
-                setNewInheritFrom(sharedIssuer.id);
-                setEnvironments(JSON.parse(sharedIssuer.environmentDetails));
-              }
-            }}
+            onChange={handleChange}
           />
         )}
         {inheritFrom?.name && (
@@ -169,3 +185,13 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
 };
 
 export default ClientManagement;
+
+const query = gql`
+  query SharedIdPPreview($profileName: String) {
+    sharedIdPs(profileName: $profileName) {
+      id
+      name
+      environmentDetails
+    }
+  }
+`;
