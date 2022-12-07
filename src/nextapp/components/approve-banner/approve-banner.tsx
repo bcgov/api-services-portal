@@ -15,7 +15,8 @@ const ApproveBanner: React.FC = () => {
     data.currentNamespace === null ||
     !data.currentNamespace?.orgAdmins.includes(user.email) ||
     // @ts-ignore
-    data.currentNamespace?.orgEnabled
+    data.currentNamespace?.orgEnabled ||
+    data.currentNamespace?.org === null
   ) {
     return null;
   }

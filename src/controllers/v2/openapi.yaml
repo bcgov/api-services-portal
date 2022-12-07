@@ -514,9 +514,16 @@ components:
                     type: string
                 orgUnit:
                     type: string
+                enabled:
+                    type: boolean
+                updatedAt:
+                    type: number
+                    format: double
             required:
                 - name
                 - orgUnit
+                - enabled
+                - updatedAt
             type: object
             additionalProperties: false
         DraftDatasetRefID:

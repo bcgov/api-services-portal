@@ -20,7 +20,7 @@ import { QueryKey, useQueryClient } from 'react-query';
 import useCurrentNamespace, {
   queryKey as currentNamespaceQueryKey,
 } from '@/shared/hooks/use-current-namespace';
-import { useApiMutation } from '@/shared/services/api';
+import { useRestMutationApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { useAuth } from '@/shared/services/auth';
 
@@ -30,24 +30,30 @@ const ProductsPage: React.FC = () => {
   const client = useQueryClient();
   const namespace = useCurrentNamespace();
   const queryKey: QueryKey = ['allProducts'];
-  const mutate = useApiMutation(mutation);
+  const mutate = useRestMutationApi();
   const toast = useToast();
 
   const handleOrgEnabledChanged = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const enable = event.target.checked;
+    const { name, org, orgUnit } = namespace.data?.currentNamespace;
     try {
-      await mutate.mutateAsync({ orgEnabled: event.target.checked });
+      await mutate.mutateAsync({
+        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}`,
+        options: { method: enable ? 'PUT' : 'DELETE' },
+      });
+
       await client.invalidateQueries(currentNamespaceQueryKey);
       toast({
         status: 'success',
         title: 'Success',
-        description: 'You have enabled Publish APIs',
+        description: `You have ${enable ? 'enabled' : 'disabled'} Publish APIs`,
       });
     } catch (err) {
       toast({
         title: 'Publish settings change failed',
-        description: err,
+        description: `${err}`,
         status: 'error',
       });
     }
@@ -75,37 +81,36 @@ const ProductsPage: React.FC = () => {
         </PageHeader>
 
         <Box mt={5}>
-          {namespace.data?.currentNamespace?.orgAdmins.includes(
-            user?.email
-          ) && (
-            <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
-              <GridItem>
-                <Switch
-                  id="orgEnabled"
-                  isDisabled={!namespace.isSuccess || mutate.isLoading}
-                  isChecked={
-                    /* @ts-ignore-line */ namespace.data?.currentNamespace
-                      .orgEnabled
-                  }
-                  onChange={handleOrgEnabledChanged}
-                />
-              </GridItem>
-              <GridItem>
-                <Heading
-                  as="label"
-                  htmlFor="orgEnabled"
-                  size="sm"
-                  lineHeight="24px"
-                >
-                  Publish APIs
-                </Heading>
-                <Text>
-                  By enabling Publish APIs, consumers can find and request
-                  access to your APIs from the Directory.
-                </Text>
-              </GridItem>
-            </Grid>
-          )}
+          {namespace.data?.currentNamespace?.orgAdmins.includes(user?.email) &&
+            namespace.data?.currentNamespace?.org && (
+              <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
+                <GridItem>
+                  <Switch
+                    id="orgEnabled"
+                    isDisabled={!namespace.isSuccess}
+                    isChecked={
+                      /* @ts-ignore-line */ namespace.data?.currentNamespace
+                        .orgEnabled
+                    }
+                    onChange={handleOrgEnabledChanged}
+                  />
+                </GridItem>
+                <GridItem>
+                  <Heading
+                    as="label"
+                    htmlFor="orgEnabled"
+                    size="sm"
+                    lineHeight="24px"
+                  >
+                    Publish APIs
+                  </Heading>
+                  <Text>
+                    By enabling Publish APIs, consumers can find and request
+                    access to your APIs from the Directory.
+                  </Text>
+                </GridItem>
+              </Grid>
+            )}
           <ClientRequest
             fallback={[1, 2, 3].map((d) => (
               <Skeleton

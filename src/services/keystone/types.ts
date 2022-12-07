@@ -5281,7 +5281,6 @@ export type MutationRegenerateCredentialsArgs = {
 
 
 export type MutationUpdateCurrentNamespaceArgs = {
-  orgEnabled?: Maybe<Scalars['Boolean']>;
   org?: Maybe<Scalars['String']>;
   orgUnit?: Maybe<Scalars['String']>;
 };

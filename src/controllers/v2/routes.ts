@@ -327,6 +327,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
+            "enabled": {"dataType":"boolean","required":true},
+            "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },

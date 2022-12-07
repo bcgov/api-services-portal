@@ -1,24 +1,7 @@
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
-import KeycloakAdminClient, {
-  default as KcAdminClient,
-} from '@keycloak/keycloak-admin-client';
-import {
-  KeycloakClientPolicyService,
-  KeycloakClientService,
-  KeycloakGroupService,
-} from '../keycloak';
-import GroupRepresentation from '@keycloak/keycloak-admin-client/lib/defs/groupRepresentation';
-import ClientScopeRepresentation from '@keycloak/keycloak-admin-client/lib/defs/clientScopeRepresentation';
-import PolicyRepresentation, {
-  DecisionStrategy,
-  Logic,
-} from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
-import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRepresentation';
-import ResourceServerRepresentation from '@keycloak/keycloak-admin-client/lib/defs/resourceServerRepresentation';
-import { GroupAccess, GroupRole, OrgNamespace } from './types';
-import { OrganizationGroup, OrgGroupService } from './org-group-service';
-import { leaf, parent, root, convertToOrgGroup } from './group-converter-utils';
+import { KeycloakGroupService } from '../keycloak';
+import { OrgNamespace } from './types';
 
 const logger = Logger('org-group.ns');
 
@@ -31,6 +14,31 @@ export class NamespaceService {
 
   async login(clientId: string, clientSecret: string) {
     await this.groupService.login(clientId, clientSecret);
+  }
+
+  async updateNamespaceOrganization(ns: string, org: string, orgUnit: string) {
+    const group = await this.groupService.getGroup('ns', ns);
+
+    logger.debug('[updateNamespaceOrganization] %s - Group = %j', ns, group);
+
+    assert.strictEqual(group === null, false, 'Namespace not found');
+
+    assert.strictEqual(
+      'org' in group.attributes && org != group.attributes['org'],
+      false,
+      `[${ns}] Org Already assigned`
+    );
+    assert.strictEqual(
+      'org-unit' in group.attributes && orgUnit != group.attributes['org-unit'],
+      false,
+      `[${ns}] Org Unit Already assigned`
+    );
+
+    group.attributes['org'] = [org];
+    group.attributes['org-unit'] = [orgUnit];
+    group.attributes['org-updated-at'] = [new Date().getTime()];
+    await this.groupService.updateGroup(group);
+    return true;
   }
 
   /*
@@ -62,14 +70,21 @@ export class NamespaceService {
       'org' in group.attributes &&
       group.attributes['org'][0] === org &&
       'org-unit' in group.attributes &&
-      group.attributes['org-unit'][0] === orgUnit
+      group.attributes['org-unit'][0] === orgUnit &&
+      'org-enabled' in group.attributes &&
+      group.attributes['org-enabled'][0] === 'true'
     ) {
-      logger.debug('[assignNamespaceToOrganization] %s - Already assigned', ns);
+      logger.debug(
+        '[assignNamespaceToOrganization] %s - Already assigned and enabled',
+        ns
+      );
       return false;
     }
 
     group.attributes['org'] = [org];
     group.attributes['org-unit'] = [orgUnit];
+    group.attributes['org-enabled'] = ['true'];
+    group.attributes['org-updated-at'] = [new Date().getTime()];
     await this.groupService.updateGroup(group);
     return true;
   }
@@ -97,8 +112,10 @@ export class NamespaceService {
         '[unassignNamespaceFromOrganization] %s - Matched assignment - removing',
         ns
       );
-      delete group.attributes['org'];
-      delete group.attributes['org-unit'];
+      //delete group.attributes['org'];
+      //delete group.attributes['org-unit'];
+      delete group.attributes['org-enabled'];
+      delete group.attributes['org-updated-at'];
       await this.groupService.updateGroup(group);
       return true;
     }
@@ -146,8 +163,37 @@ export class NamespaceService {
       .map((group) => ({
         name: group.name,
         orgUnit: group.attributes['org-unit'][0],
+        enabled:
+          'org-enabled' in group.attributes
+            ? group.attributes['org-enabled'][0] === 'true'
+            : false,
+        updatedAt:
+          'org-updated-at' in group.attributes
+            ? Number(group.attributes['org-updated-at'].pop())
+            : 0,
       }));
     logger.debug('[listAssignedNamespaces] [%s] Result %j', org, matches);
     return matches;
+  }
+
+  async getNamespaceOrganizationDetails(ns: string): Promise<OrgNamespace> {
+    const nsGroup = await this.groupService.findByName('ns', ns, false);
+
+    if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
+      return {
+        name: nsGroup.attributes['org'].pop(),
+        orgUnit: nsGroup.attributes['org-unit'].pop(),
+        enabled:
+          'org-enabled' in nsGroup.attributes
+            ? nsGroup.attributes['org-enabled'][0] === 'true'
+            : false,
+        updatedAt:
+          'org-updated-at' in nsGroup.attributes
+            ? Number(nsGroup.attributes['org-updated-at'].pop())
+            : 0,
+      };
+    } else {
+      return undefined;
+    }
   }
 }

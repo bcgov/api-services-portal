@@ -346,7 +346,7 @@ module.exports = {
         mutations: [
           {
             schema:
-              'updateCurrentNamespace(orgEnabled: Boolean, org: String, orgUnit: String): Boolean',
+              'updateCurrentNamespace(org: String, orgUnit: String): Boolean',
             resolver: async (
               item: any,
               args: any,
@@ -361,11 +361,34 @@ module.exports = {
                 return null;
               }
 
-              // The orgEnabled requires a user to have Organization Assign permission; they may have Namespace.View permission here
-
               // org and orgUnit requires Namespace.Manage permission (role: api-owner)
+              // It can not be changed if it has already been set
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
 
-              return true;
+              const nsService = new NamespaceService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+
+              return nsService.updateNamespaceOrganization(
+                context.req.user?.namespace,
+                args.org,
+                args.orgUnit
+              );
             },
           },
           {
@@ -575,23 +598,36 @@ async function backfillGroupAttributes(
     'perm-protected-ns',
     'org',
     'org-unit',
+    'org-enabled',
+    'org-updated-at',
   ]);
 
-  logger.debug('[namespace] %j', nsPermissions.attributes);
+  logger.debug(
+    '[backfillGroupAttributes] %s attributes %j',
+    ns,
+    nsPermissions.attributes
+  );
 
   const client = new GWAService(process.env.GWA_API_URL);
   const defaultSettings = await client.getDefaultNamespaceSettings();
 
-  logger.debug('[namespace] Default Settings %j', defaultSettings);
+  logger.debug(
+    '[backfillGroupAttributes] Default Settings %j',
+    defaultSettings
+  );
 
   const merged = {
     ...detail,
     ...defaultSettings,
+    ...{ 'org-enabled': false },
     ...nsPermissions.attributes,
     ...{
-      'org-admins': ['none specified'],
-      'org-enabled': nsPermissions.attributes.org ? true : false,
-      'org-updated-at': new Date().getTime(),
+      'org-enabled':
+        'org-enabled' in nsPermissions.attributes &&
+        nsPermissions.attributes['org-enabled'] === 'true'
+          ? true
+          : false,
+      'org-admins': ['acope@nowhere.com'],
     },
   };
 
