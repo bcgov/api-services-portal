@@ -16,31 +16,6 @@ export class NamespaceService {
     await this.groupService.login(clientId, clientSecret);
   }
 
-  // async updateNamespaceOrganization(ns: string, org: string, orgUnit: string) {
-  //   const group = await this.groupService.getGroup('ns', ns);
-
-  //   logger.debug('[updateNamespaceOrganization] %s - Group = %j', ns, group);
-
-  //   assert.strictEqual(group === null, false, 'Namespace not found');
-
-  //   assert.strictEqual(
-  //     'org' in group.attributes && org != group.attributes['org'],
-  //     false,
-  //     `[${ns}] Org Already assigned`
-  //   );
-  //   assert.strictEqual(
-  //     'org-unit' in group.attributes && orgUnit != group.attributes['org-unit'],
-  //     false,
-  //     `[${ns}] Org Unit Already assigned`
-  //   );
-
-  //   group.attributes['org'] = [org];
-  //   group.attributes['org-unit'] = [orgUnit];
-  //   group.attributes['org-updated-at'] = [new Date().getTime()];
-  //   await this.groupService.updateGroup(group);
-  //   return true;
-  // }
-
   /*
     Update the Group attributes for org and org-unit
   */
