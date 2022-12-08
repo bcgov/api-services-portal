@@ -662,7 +662,7 @@ async function backfillGroupAttributes(
         nsPermissions.attributes['org-enabled'] === 'true'
           ? true
           : false,
-      'org-admins': ['acope@nowhere.com'],
+      'org-admins': [],
     },
   };
 
