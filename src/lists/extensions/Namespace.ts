@@ -45,6 +45,8 @@ import { IssuerEnvironmentConfig } from '../../services/workflow/types';
 import { Keystone } from '@keystonejs/keystone';
 import { Logger } from '../../logger';
 import { getGwaProductEnvironment } from '../../services/workflow';
+import { NotificationService } from '../../services/notification/notification.service';
+import { ConfigService } from '../../services/config.service';
 
 const logger = Logger('ext.Namespace');
 
@@ -367,12 +369,61 @@ module.exports = {
 
               const ns = context.req.user?.namespace;
 
-              const prodEnv = await getGwaProductEnvironment(context, false);
+              const prodEnv = await getGwaProductEnvironment(context, true);
               const envConfig = prodEnv.issuerEnvConfig;
 
               const svc = new GroupAccessService(prodEnv.uma2);
               await svc.login(envConfig.clientId, envConfig.clientSecret);
-              return await svc.assignNamespace(ns, org, orgUnit, false);
+              const result = await svc.assignNamespace(ns, org, orgUnit, false);
+
+              if (result) {
+                logger.info(
+                  '[updateCurrentNamespace] Sending Notifications for %s',
+                  ns
+                );
+
+                const nc = new NotificationService(new ConfigService());
+
+                const resourceIds = await getNamespaceResourceSets(prodEnv); // sets accessToken
+                const resourcesApi = new UMAResourceRegistrationService(
+                  prodEnv.uma2.resource_registration_endpoint,
+                  prodEnv.accessToken
+                );
+                const namespaces = await resourcesApi.listResourcesByIdList(
+                  resourceIds
+                );
+
+                const detail = namespaces
+                  .filter((resns) => resns.name === ns)
+                  .map((resns: ResourceSet) => ({
+                    id: resns.id,
+                  }))
+                  .pop();
+
+                const orgPolicies = await getOrgPoliciesForResource(
+                  prodEnv,
+                  detail.id
+                );
+                const orgAdmins: string[] = [];
+                orgPolicies.map((policy) => {
+                  orgAdmins.push(...policy.users);
+                });
+                const userContactList: string[] = [...new Set(orgAdmins)];
+                logger.info(
+                  '[updateCurrentNamespace] Sending Notifications to %j',
+                  userContactList
+                );
+
+                userContactList.forEach((contact) => {
+                  nc.notify(
+                    { email: contact, name: contact, username: '' },
+                    {
+                      template: 'new-namespace-approval',
+                      subject: `New Namespace Approval - ${ns}`,
+                    }
+                  );
+                });
+              }
             },
           },
           {
