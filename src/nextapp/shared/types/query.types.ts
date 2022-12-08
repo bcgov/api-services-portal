@@ -4474,7 +4474,7 @@ export type Mutation = {
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
-  updateCurrentNamespace?: Maybe<Scalars['Boolean']>;
+  updateCurrentNamespace?: Maybe<Scalars['String']>;
   createNamespace?: Maybe<Namespace>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;

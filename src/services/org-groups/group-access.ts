@@ -105,13 +105,15 @@ export class GroupAccessService {
   async assignNamespace(
     namespace: string,
     org: string,
-    orgUnit: string
+    orgUnit: string,
+    orgEnabled: boolean
   ): Promise<boolean> {
     if (
       await this.namespaceService.assignNamespaceToOrganization(
         namespace,
         org,
-        orgUnit
+        orgUnit,
+        orgEnabled
       )
     ) {
       const access = buildGroupAccess(
@@ -140,6 +142,15 @@ export class GroupAccessService {
     } else {
       return false;
     }
+  }
+
+  async disableNamespace(namespace: string, org: string, orgUnit: string) {
+    await this.namespaceService.assignNamespaceToOrganization(
+      namespace,
+      org,
+      orgUnit,
+      false
+    );
   }
 
   async unassignNamespace(namespace: string, org: string, orgUnit: string) {

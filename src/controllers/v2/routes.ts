@@ -1315,6 +1315,7 @@ export function RegisterRoutes(app: express.Router) {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     orgUnit: {"in":"path","name":"orgUnit","required":true,"dataType":"string"},
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    enable: {"default":true,"in":"query","name":"enable","dataType":"boolean"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -1,25 +1,10 @@
 const { EnforcementPoint } = require('../../authz/enforcement');
-
 import {
-  UMAPolicyService,
-  Policy,
-  PolicyQuery,
-  UMAResourceRegistrationService,
-  ResourceSetQuery,
-  ResourceSet,
-} from '../../services/uma2';
-
-import {
-  getSuitableOwnerToken,
   getEnvironmentContext,
   getResourceSets,
+  getOrgPoliciesForResource,
 } from './Common';
-import type { TokenExchangeResult } from './Common';
 import { strict as assert } from 'assert';
-import { OrgGroupService } from '../../services/org-groups';
-import { Logger } from '../../logger';
-
-const logger = Logger('List.Ext.OrgPolicy');
 
 module.exports = {
   extensions: [
@@ -50,21 +35,7 @@ module.exports = {
                 'Invalid Resource'
               );
 
-              const orgGroupService = new OrgGroupService(envCtx.uma2.issuer);
-              await orgGroupService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
-              await orgGroupService.backfillGroups();
-
-              try {
-                return await orgGroupService.getGroupPermissionsByResource(
-                  args.resourceId
-                );
-              } catch (ex) {
-                logger.error('[getOrgPoliciesForResource] %j', ex.toJSON());
-                throw ex;
-              }
+              return await getOrgPoliciesForResource(envCtx, args.resourceId);
             },
             access: EnforcementPoint,
           },

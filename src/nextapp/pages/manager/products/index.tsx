@@ -40,8 +40,8 @@ const ProductsPage: React.FC = () => {
     const { name, org, orgUnit } = namespace.data?.currentNamespace;
     try {
       await mutate.mutateAsync({
-        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}`,
-        options: { method: enable ? 'PUT' : 'DELETE' },
+        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}?enable=${enable}`,
+        options: { method: 'PUT' },
       });
 
       await client.invalidateQueries(currentNamespaceQueryKey);

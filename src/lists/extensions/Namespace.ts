@@ -7,10 +7,10 @@ import {
   ResourceSetInput,
 } from '../../services/uma2';
 import {
+  getOrganizationUnit,
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
   recordActivity,
-  recordActivityWithBlob,
 } from '../../services/keystone';
 import {
   getEnvironmentContext,
@@ -18,16 +18,14 @@ import {
   getNamespaceResourceSets,
   isUserBasedResourceOwners,
   doClientLoginForCredentialIssuer,
+  EnvironmentContext,
+  getOrgPoliciesForResource,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
 import {
   KeycloakPermissionTicketService,
   KeycloakGroupService,
 } from '../../services/keycloak';
-import { Logger } from '../../logger';
-
-const logger = Logger('ext.Namespace');
-
 import { strict as assert } from 'assert';
 import {
   DeleteNamespace,
@@ -39,10 +37,16 @@ import {
   transformSingleValueAttributes,
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
-import { NamespaceService } from '../../services/org-groups';
-import { IssuerEnvironmentConfig } from '@/services/workflow/types';
+import {
+  GroupAccessService,
+  NamespaceService,
+} from '../../services/org-groups';
+import { IssuerEnvironmentConfig } from '../../services/workflow/types';
 import { Keystone } from '@keystonejs/keystone';
-import { merge } from 'lodash';
+import { Logger } from '../../logger';
+import { getGwaProductEnvironment } from '../../services/workflow';
+
+const logger = Logger('ext.Namespace');
 
 const typeUserContact = `
   type UserContact {
@@ -148,7 +152,7 @@ module.exports = {
                   kcGroupService
                 );
                 if (merged.org) {
-                  await transformOrgAndOrgUnit(context, merged);
+                  await transformOrgAndOrgUnit(context, envCtx, merged);
                 }
                 return merged;
               }
@@ -261,7 +265,7 @@ module.exports = {
               );
 
               if (merged.org) {
-                await transformOrgAndOrgUnit(context, merged);
+                await transformOrgAndOrgUnit(context, envCtx, merged);
               }
 
               logger.debug('[namespace] Result %j', merged);
@@ -346,10 +350,10 @@ module.exports = {
         mutations: [
           {
             schema:
-              'updateCurrentNamespace(org: String, orgUnit: String): Boolean',
+              'updateCurrentNamespace(org: String, orgUnit: String): String',
             resolver: async (
               item: any,
-              args: any,
+              { org, orgUnit }: any,
               context: any,
               info: any,
               { query, access }: any
@@ -361,34 +365,14 @@ module.exports = {
                 return null;
               }
 
-              // org and orgUnit requires Namespace.Manage permission (role: api-owner)
-              // It can not be changed if it has already been set
-              const noauthContext = context.createContext({
-                skipAccessControl: true,
-              });
-              const prodEnv = await lookupProductEnvironmentServicesBySlug(
-                noauthContext,
-                process.env.GWA_PROD_ENV_SLUG
-              );
-              const envCtx = await getEnvironmentContext(
-                context,
-                prodEnv.id,
-                access
-              );
+              const ns = context.req.user?.namespace;
 
-              const nsService = new NamespaceService(
-                envCtx.issuerEnvConfig.issuerUrl
-              );
-              await nsService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
+              const prodEnv = await getGwaProductEnvironment(context, false);
+              const envConfig = prodEnv.issuerEnvConfig;
 
-              return nsService.updateNamespaceOrganization(
-                context.req.user?.namespace,
-                args.org,
-                args.orgUnit
-              );
+              const svc = new GroupAccessService(prodEnv.uma2);
+              await svc.login(envConfig.clientId, envConfig.clientSecret);
+              return await svc.assignNamespace(ns, org, orgUnit, false);
             },
           },
           {
@@ -647,13 +631,21 @@ async function backfillGroupAttributes(
 
 async function transformOrgAndOrgUnit(
   context: Keystone,
+  envCtx: EnvironmentContext,
   merged: any
 ): Promise<void> {
-  ['org', 'orgUnit'].forEach((key) => {
-    const name = merged[key];
-    merged[key] = {
-      name: name,
-      title: `Title of ${name}`,
-    };
+  const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
+  merged['org'] = { name: orgInfo.name, title: orgInfo.title };
+  merged['orgUnit'] = {
+    name: orgInfo.orgUnits[0].name,
+    title: orgInfo.orgUnits[0].title,
+  };
+
+  // lookup org admins from
+  const orgPolicies = await getOrgPoliciesForResource(envCtx, merged.id);
+  const orgAdmins: string[] = [];
+  orgPolicies.map((policy) => {
+    orgAdmins.push(...policy.users);
   });
+  merged['orgAdmins'] = [...new Set(orgAdmins)];
 }

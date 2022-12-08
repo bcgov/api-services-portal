@@ -16,30 +16,30 @@ export class NamespaceService {
     await this.groupService.login(clientId, clientSecret);
   }
 
-  async updateNamespaceOrganization(ns: string, org: string, orgUnit: string) {
-    const group = await this.groupService.getGroup('ns', ns);
+  // async updateNamespaceOrganization(ns: string, org: string, orgUnit: string) {
+  //   const group = await this.groupService.getGroup('ns', ns);
 
-    logger.debug('[updateNamespaceOrganization] %s - Group = %j', ns, group);
+  //   logger.debug('[updateNamespaceOrganization] %s - Group = %j', ns, group);
 
-    assert.strictEqual(group === null, false, 'Namespace not found');
+  //   assert.strictEqual(group === null, false, 'Namespace not found');
 
-    assert.strictEqual(
-      'org' in group.attributes && org != group.attributes['org'],
-      false,
-      `[${ns}] Org Already assigned`
-    );
-    assert.strictEqual(
-      'org-unit' in group.attributes && orgUnit != group.attributes['org-unit'],
-      false,
-      `[${ns}] Org Unit Already assigned`
-    );
+  //   assert.strictEqual(
+  //     'org' in group.attributes && org != group.attributes['org'],
+  //     false,
+  //     `[${ns}] Org Already assigned`
+  //   );
+  //   assert.strictEqual(
+  //     'org-unit' in group.attributes && orgUnit != group.attributes['org-unit'],
+  //     false,
+  //     `[${ns}] Org Unit Already assigned`
+  //   );
 
-    group.attributes['org'] = [org];
-    group.attributes['org-unit'] = [orgUnit];
-    group.attributes['org-updated-at'] = [new Date().getTime()];
-    await this.groupService.updateGroup(group);
-    return true;
-  }
+  //   group.attributes['org'] = [org];
+  //   group.attributes['org-unit'] = [orgUnit];
+  //   group.attributes['org-updated-at'] = [new Date().getTime()];
+  //   await this.groupService.updateGroup(group);
+  //   return true;
+  // }
 
   /*
     Update the Group attributes for org and org-unit
@@ -47,7 +47,8 @@ export class NamespaceService {
   async assignNamespaceToOrganization(
     ns: string,
     org: string,
-    orgUnit: string
+    orgUnit: string,
+    orgEnabled: boolean
   ): Promise<boolean> {
     const group = await this.groupService.getGroup('ns', ns);
 
@@ -72,19 +73,23 @@ export class NamespaceService {
       'org-unit' in group.attributes &&
       group.attributes['org-unit'][0] === orgUnit &&
       'org-enabled' in group.attributes &&
-      group.attributes['org-enabled'][0] === 'true'
+      group.attributes['org-enabled'][0] === `${orgEnabled}`
     ) {
       logger.debug(
-        '[assignNamespaceToOrganization] %s - Already assigned and enabled',
-        ns
+        '[assignNamespaceToOrganization] %s - Already assigned and %s',
+        ns,
+        orgEnabled ? 'enabled' : 'disabled'
       );
       return false;
     }
 
     group.attributes['org'] = [org];
     group.attributes['org-unit'] = [orgUnit];
-    group.attributes['org-enabled'] = ['true'];
-    group.attributes['org-updated-at'] = [new Date().getTime()];
+    group.attributes['org-enabled'] = [orgEnabled];
+    if (!('org-updated-at' in group.attributes)) {
+      // only update the first time that org and org unit are set
+      group.attributes['org-updated-at'] = [new Date().getTime()];
+    }
     await this.groupService.updateGroup(group);
     return true;
   }
@@ -112,8 +117,8 @@ export class NamespaceService {
         '[unassignNamespaceFromOrganization] %s - Matched assignment - removing',
         ns
       );
-      //delete group.attributes['org'];
-      //delete group.attributes['org-unit'];
+      delete group.attributes['org'];
+      delete group.attributes['org-unit'];
       delete group.attributes['org-enabled'];
       delete group.attributes['org-updated-at'];
       await this.groupService.updateGroup(group);
