@@ -105,6 +105,19 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
       setEnvironments([]);
     }
   };
+
+  React.useEffect(() => {
+    if (idp === 'shared' && sharedIssuer.data) {
+      const environmentDetails = JSON.parse(
+        sharedIssuer.data.sharedIdPs[0].environmentDetails
+      );
+
+      if (environmentDetails && environments[0]) {
+        setEnvironments(environmentDetails);
+      }
+    }
+  }, [idp, sharedIssuer.data]);
+
   return (
     <>
       <ModalBody hidden={hidden}>

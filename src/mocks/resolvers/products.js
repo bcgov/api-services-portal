@@ -452,14 +452,23 @@ export const deleteProductHandler = (req, res, ctx) => {
 };
 
 export const getSharedIdpPreview = (req, res, ctx) => {
+  const { profileName } = req.variables;
+
   return res(
     ctx.data({
       sharedIdPs: [
         {
           id: 'sidp-1',
           name: 'Silver Dev Shared IdP',
-          environmentDetails:
-            '[{"exists":true,"environment":"dev","issuerUrl":"https://loginproxy.dev/auth/realms/api","clientRegistration":"shared-idp","clientId":"w089u0w9suf023j"}]',
+          environmentDetails: JSON.stringify([
+            {
+              exists: true,
+              environment: 'dev',
+              issuerUrl: 'https://loginproxy.dev/auth/realms/api',
+              clientRegistration: 'shared-idp',
+              clientId: `ab-${profileName}-dev`,
+            },
+          ]),
         },
       ],
     })
