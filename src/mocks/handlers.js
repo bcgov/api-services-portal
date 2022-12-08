@@ -86,6 +86,28 @@ export const handlers = [
           developer: ['idir', 'bcsc', 'bceid', 'github'],
           provider: ['idir'],
         },
+        identityContent: {
+          idir: {
+            text: 'IDIR',
+            description: 'Only available to B.C. government workers.',
+          },
+          bcsc: {
+            text: 'BC Services Card',
+            description: '',
+            helpLink: 'https://id.gov.bc.ca/account/',
+          },
+          bceid: {
+            text: 'BCeID',
+            url: 'bceid-business',
+            description:
+              'BCeID is an online service that makes it possible for you to access government services using a single identifier and password.',
+            helpLink: 'https://www.bceid.ca/register/',
+          },
+          github: {
+            text: 'Github',
+            description: '',
+          },
+        },
         accountLinks: {
           bceidUrl:
             'https://www.test.bceid.ca/logon.aspx?returnUrl=/profile_management',

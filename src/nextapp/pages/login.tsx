@@ -20,18 +20,29 @@ import { useAuth } from '@/shared/services/auth';
 import { useRouter } from 'next/router';
 import { useGlobal } from '@/shared/services/global';
 import { FaCode } from 'react-icons/fa';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { restApi } from '@/shared/services/api';
 
-const LoginPage: React.FC = () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const data = await restApi('/about');
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+const LoginPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ data }) => {
   const { ok, isLoading } = useAuth();
-  const { identities } = useGlobal();
   const router = useRouter();
   const isProvider = router.query.identity === 'provider';
   const iconEl = isProvider ? GiCapitol : FaCode;
   const headerText = isProvider ? 'API Providers' : 'Developers';
   const selectedIdentities = isProvider
-    ? identities.provider
-    : identities.developer;
-  const gridColumns = selectedIdentities.length > 3 ? 'repeat(2, 50%)' : '1fr';
+    ? data.identities.provider
+    : data.identities.developer;
 
   React.useEffect(() => {
     if (ok) {
@@ -80,7 +91,10 @@ const LoginPage: React.FC = () => {
               </Text>
             </Box>
             <Grid gap={8}>
-              <LoginButtons identities={selectedIdentities} />
+              <LoginButtons
+                identities={selectedIdentities}
+                identityContent={data.identityContent as Record<string, any>}
+              />
             </Grid>
           </>
         )}

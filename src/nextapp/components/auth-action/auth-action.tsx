@@ -19,7 +19,11 @@ import {
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
 import { FaChevronDown, FaCode } from 'react-icons/fa';
-import { useAuth } from '@/shared/services/auth';
+import {
+  ignoredRedirects,
+  makeRedirectUrl,
+  useAuth,
+} from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
 import NextLink from 'next/link';
@@ -39,14 +43,14 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const providerUrl = React.useMemo(() => {
     const providerUrl = new URL('/login', location.origin);
     providerUrl.searchParams.set('identity', 'provider');
-    const f = router.asPath.startsWith('/login') ? '/' : router.asPath;
+    const f = makeRedirectUrl(router.asPath);
     providerUrl.searchParams.set('f', f);
     return providerUrl;
   }, []);
   const developerUrl = React.useMemo(() => {
     const developerUrl = new URL('/login', location.origin);
     developerUrl.searchParams.set('identity', 'developer');
-    const f = router.asPath.startsWith('/login') ? '/' : router.asPath;
+    const f = makeRedirectUrl(router.asPath);
     developerUrl.searchParams.set('f', f);
     return developerUrl;
   }, []);
