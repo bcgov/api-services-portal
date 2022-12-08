@@ -45,7 +45,8 @@ export class GroupAccessService {
 
   async createOrUpdateGroupAccess(
     groupMembership: GroupMembership,
-    validIdentityProviders: string[]
+    validIdentityProviders: string[] = [],
+    syncMembers: boolean = true
   ): Promise<void> {
     const access = buildGroupAccess(
       groupMembership.name,
@@ -87,11 +88,13 @@ export class GroupAccessService {
         );
       }
 
-      await this.orgGroupService.syncMembers(
-        orgGroup,
-        buildUserReference(groupRole.name, groupMembership.members),
-        validIdentityProviders
-      );
+      if (syncMembers) {
+        await this.orgGroupService.syncMembers(
+          orgGroup,
+          buildUserReference(groupRole.name, groupMembership.members),
+          validIdentityProviders
+        );
+      }
 
       // TODO: Delete any Permissions that are no longer specified for the Policy
       // role.permissions = await this.orgGroupService.getPermissionsForGroupPolicy(
@@ -116,6 +119,9 @@ export class GroupAccessService {
         orgEnabled
       )
     ) {
+      // build the policies if they do not exist
+      await this.buildGroupHierarchyIfMissing(org, orgUnit);
+
       const access = buildGroupAccess(
         orgUnit,
         `/ca.bc.gov/${org}`,
@@ -141,6 +147,25 @@ export class GroupAccessService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  async buildGroupHierarchyIfMissing(org: string, orgUnit: string) {
+    const check = await this.orgAuthzService.resourceExists(orgUnit);
+
+    if (!check) {
+      logger.info('[buildGroupHierarchyIfMissing] ADDING %s %s', org, orgUnit);
+      const orgGroupL1: OrganizationGroup = {
+        name: org,
+        parent: `/ca.bc.gov`,
+      };
+      await this.createOrUpdateGroupAccess(orgGroupL1, undefined, false);
+
+      const orgGroupL2: OrganizationGroup = {
+        name: orgUnit,
+        parent: `/ca.bc.gov/${org}`,
+      };
+      await this.createOrUpdateGroupAccess(orgGroupL2, undefined, false);
     }
   }
 
