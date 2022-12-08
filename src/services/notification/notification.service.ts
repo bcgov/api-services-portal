@@ -24,12 +24,14 @@ export class NotificationService {
   }
 
   public async notify(user: User, email: EmailNotification) {
+    const { logger } = this;
+
     try {
       if (!this.notifyConfig.enabled) {
         return;
       }
 
-      this.logger.verbose('Notification triggered', user);
+      logger.debug('Notification triggered', user);
 
       //we don't notify the active user at all as they made the change
       var emailContent = this.templateToContent(user, email.template);
@@ -66,7 +68,7 @@ export class NotificationService {
 
       await transporter.sendMail(mailOptions);
 
-      console.log('[SUCCESS] Notification sent to ' + user.email);
+      logger.debug('[SUCCESS] Notification sent to ' + user.email);
 
       // , function (error : any, info : any) {
       //     if (error) {
@@ -76,7 +78,7 @@ export class NotificationService {
       //     this.logger.debug("Email sent: " + info.response);
       // })
     } catch (err) {
-      console.log('[ERROR] Sending notification failed!' + err);
+      logger.error('Sending notification to %s failed - %s', user.email, err);
     }
   }
 
