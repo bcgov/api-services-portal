@@ -68,7 +68,7 @@ export class NotificationService {
 
       await transporter.sendMail(mailOptions);
 
-      logger.debug('[SUCCESS] Notification sent to ' + user.email);
+      logger.info('[SUCCESS] Notification sent to ' + user.email);
 
       // , function (error : any, info : any) {
       //     if (error) {
