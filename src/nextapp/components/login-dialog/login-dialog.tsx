@@ -26,7 +26,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
   buttonVariant,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { identities } = useGlobal();
+  const { identities, identityContent } = useGlobal();
   const size = identities.developer.length > 2 ? '2xl' : 'lg';
   const isInline = buttonVariant === 'link';
   const buttonProps = !isInline
@@ -67,7 +67,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
             pb={6}
             wrap="wrap"
           >
-            <LoginButtons identities={identities.developer} variant="inline" />
+            <LoginButtons
+              identities={identities.developer}
+              identityContent={identityContent}
+              variant="inline"
+            />
           </Flex>
         </ModalContent>
       </Modal>
