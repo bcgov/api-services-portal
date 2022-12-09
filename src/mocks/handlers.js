@@ -38,6 +38,8 @@ import {
   grantSAAccessHandler,
   revokeAccessHandler,
   revokeSAAccessHandler,
+  getListOrganizationsHandler,
+  getListOrganizationUnitsHandler,
 } from './resolvers/namespace-access';
 import { getActivityHandler } from './resolvers/activity';
 import {
@@ -140,6 +142,22 @@ export const handlers = [
       })
     );
   }),
+  keystone.mutation('CreateNamespace', (req, res, ctx) => {
+    const { name } = req.variables;
+    const id = `ns-${allNamespaces.length + 1}`;
+    const namespace = {
+      name,
+      id,
+    };
+
+    allNamespaces.push(namespace);
+
+    req(
+      ctx.data({
+        createNamespace: namespace,
+      })
+    );
+  }),
   keystone.query('GetActivity', getActivityHandler),
   keystone.query('GetConsumers', getConsumersHandler),
   keystone.query('GetConsumer', getConsumerHandler),
@@ -187,6 +205,8 @@ export const handlers = [
   ),
   keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.query('ListOrganizations', getListOrganizationsHandler),
+  keystone.query('ListOrganizationUnits', getListOrganizationUnitsHandler),
   keystone.mutation('UpdateCurrentNamespace', updateCurrentNamesSpaceHandler),
   keystone.mutation('GrantUserAccess', grantAccessHandler),
   keystone.mutation('GrantSAAccess', grantSAAccessHandler),

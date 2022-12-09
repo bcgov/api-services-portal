@@ -26,12 +26,15 @@ const PreviewBanner: React.FC = () => {
   const { isOpen, onToggle } = useDisclosure();
   const bannerDisclosure = useDisclosure({ defaultIsOpen: true });
   const toggleButtonText = isOpen ? 'Done' : 'Learn More';
-  const { data, isSuccess } = useCurrentNamespace({ enabled: true });
+  const { data, isSuccess, isLoading, isFetching } = useCurrentNamespace({
+    enabled: true,
+  });
 
   if (
     !user ||
     !user.roles.includes('api-owner') ||
-    !isSuccess ||
+    isLoading ||
+    isFetching ||
     data.currentNamespace === null
   ) {
     return null;

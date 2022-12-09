@@ -7,11 +7,15 @@ import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 const ApproveBanner: React.FC = () => {
   const { user } = useAuth();
-  const { data, isSuccess } = useCurrentNamespace({ enabled: true });
+  const { data, isSuccess, isLoading, isFetching } = useCurrentNamespace({
+    enabled: true,
+  });
 
   if (
     !user ||
     !isSuccess ||
+    isLoading ||
+    isFetching ||
     data.currentNamespace === null ||
     !data.currentNamespace?.orgAdmins.includes(user.email) ||
     // @ts-ignore
