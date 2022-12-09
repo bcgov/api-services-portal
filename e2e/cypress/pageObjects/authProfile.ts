@@ -28,6 +28,7 @@ class AuthorizationProfile {
   kongAPIKeyFlow: string = '[data-testid="kong-api-key-chkBox"]'
   clientCredentialFlow: string = '[data-testid="cc-id-secret-chkBox"]'
   clientScopeInput: string = '[data-testid="ap-authorization-scopes-input"]'
+  clientManagementTable: string = '[role=table]'
 
 
   createAuthProfile(authProfile: any, isCreated=true) {
@@ -79,32 +80,39 @@ class AuthorizationProfile {
         cy.get(this.resourceAccessScope).type(authProfile.resourceAccessScope)
 
       if (authProfile.environmentConfig) {
-        cy.get(this.addEnvBtn).click()
-
-        if (authProfile.environmentConfig.environment)
-          cy.get(this.envSelector)
-            .select(authProfile.environmentConfig.environment)
-            .invoke('val')
-
-        cy.get(this.idpIssuerUrl).click().type(authProfile.environmentConfig.idpIssuerUrl)
-
-        let clientReg = authProfile.environmentConfig.clientRegistration
-
-        cy.get(this.clientRegistration).select(clientReg).invoke('val')
-
-        if (clientReg === 'Initial Access Token')
-          cy.get(this.initAccessToken)
-            .click()
-            .type(authProfile.environmentConfig.initAccessToken)
-
-        if (clientReg === 'Managed') {
-
-          cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId)
-          cy.get(this.clientSecret)
-            .click()
-            .type(authProfile.environmentConfig.clientSecret)
+        if(authProfile.environmentConfig.isShardIDP)
+        {
+          this.selectIDPType('Shared')
         }
-        cy.get(this.envAddBtn).click()
+        else{
+          this.selectIDPType('Custom')
+          cy.get(this.addEnvBtn).click()
+
+          if (authProfile.environmentConfig.environment)
+            cy.get(this.envSelector)
+              .select(authProfile.environmentConfig.environment)
+              .invoke('val')
+
+          cy.get(this.idpIssuerUrl).click().type(authProfile.environmentConfig.idpIssuerUrl)
+
+          let clientReg = authProfile.environmentConfig.clientRegistration
+
+          cy.get(this.clientRegistration).select(clientReg).invoke('val')
+
+          if (clientReg === 'Initial Access Token')
+            cy.get(this.initAccessToken)
+              .click()
+              .type(authProfile.environmentConfig.initAccessToken)
+
+          if (clientReg === 'Managed') {
+
+            cy.get(this.clientId).click().type(authProfile.environmentConfig.clientId)
+            cy.get(this.clientSecret)
+              .click()
+              .type(authProfile.environmentConfig.clientSecret)
+          }
+          cy.get(this.envAddBtn).click()
+        }
       }
     }
     cy.get(this.createBtn).click()
@@ -112,6 +120,33 @@ class AuthorizationProfile {
       cy.get(this.profileTable).contains(authProfile.name).should('exist')
     else
       cy.get(this.profileTable).should('not.exist')
+  }
+
+  selectIDPType(type:string)
+  {
+    cy.get('[data-testid="ap-idp"]').find('label').each(($e1) => {
+      cy.wrap($e1).find('hgroup').invoke('text').then((text) => {
+        if(text==type)
+        cy.wrap($e1).find('hgroup').click()
+      })
+    })
+  }
+
+  editAuthorizationProfile(profileName:string)
+  {
+    cy.get(this.profileTable).find('tr').each(($e1) => {
+      let authProfileName = $e1.find('td:nth-child(1)').text()
+      if (authProfileName.toLowerCase() === profileName.toLowerCase()) {
+        cy.wrap($e1).find('button').first().click()
+      }
+    })
+  }
+
+  verifyAuthorizationProfileIssuerURL(issuerURL:string)
+  {
+    debugger
+    cy.contains('Client Management').click()
+    cy.contains(issuerURL).should('exist')
   }
 }
 
