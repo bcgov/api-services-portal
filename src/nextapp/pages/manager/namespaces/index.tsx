@@ -23,6 +23,8 @@ import {
   PopoverHeader,
   PopoverBody,
   IconButton,
+  SkeletonText,
+  Skeleton,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -160,7 +162,58 @@ const NamespacesPage: React.FC = () => {
       }
     }
   }, [client, mutate, router, toast, user]);
+  const title = (
+    <>
+      {user.namespace}
+      {(namespace.isFetching || namespace.isLoading) && (
+        <Skeleton width="400px" height="20px" mt={4} />
+      )}
+      {namespace.isSuccess && !namespace.isFetching && (
+        <Flex align="center" gridGap={4} mt={4}>
+          <Text
+            color={currentOrg.color}
+            fontSize="sm"
+            fontWeight="normal"
+            fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
+            d="flex"
+            gridGap={2}
+            alignItems="center"
+          >
+            <Icon as={FaBuilding} color={currentOrg.iconColor} />
+            {currentOrg.text}
+          </Text>
+          <Popover trigger="hover">
+            <PopoverTrigger>
+              <IconButton aria-label="more info" variant="ghost">
+                <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
+              </IconButton>
+            </PopoverTrigger>
+            <PopoverContent
+              fontSize="sm"
+              fontWeight="normal"
+              color="white"
+              bgColor="black"
+              borderRadius={0}
+            >
+              <PopoverArrow bgColor="black" />
+              <PopoverBody>
+                If you need to change the Organization or Business Unit for your
+                Namespace, submit a request through the{' '}
+                <Link
+                  href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
+                  textDecor="underline"
+                >
+                  Data Systems and Services request system
+                </Link>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        </Flex>
+      )}
+    </>
+  );
 
+  console.log(hasNamespace, namespace.isLoading, namespace.isFetching);
   return (
     <>
       <Head>
@@ -169,65 +222,10 @@ const NamespacesPage: React.FC = () => {
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
-
       <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader
-          title={
-            hasNamespace ? (
-              <>
-                {user.namespace}
-                <Flex align="center" gridGap={4} mt={4}>
-                  <Text
-                    color={currentOrg.color}
-                    fontSize="sm"
-                    fontWeight="normal"
-                    fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
-                    d="flex"
-                    gridGap={2}
-                    alignItems="center"
-                  >
-                    <Icon as={FaBuilding} color={currentOrg.iconColor} />
-                    {currentOrg.text}
-                  </Text>
-                  <Popover trigger="hover">
-                    <PopoverTrigger>
-                      <IconButton aria-label="more info" variant="ghost">
-                        <Icon
-                          as={FaInfoCircle}
-                          color="bc-blue"
-                          boxSize="16px"
-                        />
-                      </IconButton>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      fontSize="sm"
-                      fontWeight="normal"
-                      color="white"
-                      bgColor="black"
-                      borderRadius={0}
-                    >
-                      <PopoverArrow bgColor="black" />
-                      <PopoverBody>
-                        If you need to change the Organization or Business Unit
-                        for your Namespace, submit a request through the{' '}
-                        <Link
-                          href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
-                          textDecor="underline"
-                        >
-                          Data Systems and Services request system
-                        </Link>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </Popover>
-                </Flex>
-              </>
-            ) : (
-              ''
-            )
-          }
-        />
+        <PageHeader title={hasNamespace ? title : ''} />
         {!hasNamespace && (
           <EmptyPane
             message="To get started select a Namespace from the dropdown below or create a new Namespace"
