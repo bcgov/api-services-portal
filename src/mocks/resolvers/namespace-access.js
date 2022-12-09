@@ -139,7 +139,7 @@ let currentNamespace = {
 
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   return res(
-    ctx.delay(7000),
+    // ctx.delay(7000),
     ctx.data({
       currentNamespace,
     })

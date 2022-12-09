@@ -25,7 +25,6 @@ const PreviewBanner: React.FC = () => {
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
   const bannerDisclosure = useDisclosure({ defaultIsOpen: true });
-  const toggleButtonText = isOpen ? 'Done' : 'Learn More';
   const { data, isSuccess, isLoading, isFetching } = useCurrentNamespace({
     enabled: true,
   });
@@ -71,7 +70,7 @@ const PreviewBanner: React.FC = () => {
               textDecor="underline"
               color="bc-link"
             >
-              {toggleButtonText}
+              Learn More
             </Button>
           </Flex>
           {isOpen && (
@@ -185,12 +184,12 @@ const PreviewBanner: React.FC = () => {
               textDecor="underline"
               color="bc-link"
             >
-              {toggleButtonText}
+              Learn More
             </Button>
           </Flex>
         </Flex>
         {isOpen && (
-          <Box mt={4}>
+          <Box maxW="65%">
             <Text fontSize="sm">
               Preview mode allows you to test and preview your APIs to the
               Directory prior to publishing. Publishing APIs to the Directory

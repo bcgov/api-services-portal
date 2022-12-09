@@ -14,17 +14,14 @@ import {
   useToast,
   VStack,
   useDisclosure,
-  Tooltip,
   PopoverTrigger,
   Popover,
   PopoverContent,
   PopoverArrow,
-  PopoverCloseButton,
-  PopoverHeader,
   PopoverBody,
   IconButton,
-  SkeletonText,
   Skeleton,
+  Tooltip,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -34,6 +31,7 @@ import { useAuth } from '@/shared/services/auth';
 import {
   FaBuilding,
   FaChartBar,
+  FaCheckCircle,
   FaChevronRight,
   FaClock,
   FaInfoCircle,
@@ -164,7 +162,19 @@ const NamespacesPage: React.FC = () => {
   }, [client, mutate, router, toast, user]);
   const title = (
     <>
-      {user.namespace}
+      <Flex align="center" gridGap={4}>
+        {user.namespace}
+        {!namespace.data?.currentNamespace.orgEnabled && (
+          <Tooltip
+            hasArrow
+            label={`${user.namespace} is enabled to publish APIs to the directory`}
+          >
+            <Box display="flex">
+              <Icon as={FaCheckCircle} color="bc-success" boxSize="0.65em" />
+            </Box>
+          </Tooltip>
+        )}
+      </Flex>
       {(namespace.isFetching || namespace.isLoading) && (
         <Skeleton width="400px" height="20px" mt={4} />
       )}
@@ -192,10 +202,11 @@ const NamespacesPage: React.FC = () => {
               fontSize="sm"
               fontWeight="normal"
               color="white"
-              bgColor="black"
+              bgColor="#373d3f"
               borderRadius={0}
+              mt="-15px"
             >
-              <PopoverArrow bgColor="black" />
+              <PopoverArrow bgColor="#373d3f" />
               <PopoverBody>
                 If you need to change the Organization or Business Unit for your
                 Namespace, submit a request through the{' '}
@@ -213,7 +224,6 @@ const NamespacesPage: React.FC = () => {
     </>
   );
 
-  console.log(hasNamespace, namespace.isLoading, namespace.isFetching);
   return (
     <>
       <Head>
