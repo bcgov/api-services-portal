@@ -16,7 +16,7 @@ class Products {
   editPrdEnvConfigBtn: string = '[data-testid="edit-env-active-checkbox"]'
   // envCfgActivateRadio: string = '[data-testid=prd-env-config-activate-radio]'
   envCfgActivateRadio: string = '[name="active"]'
-  envCfgApprovalCheckbox: string = '[data-testid="edit-env-approval-checkbox"]'
+  envCfgApprovalCheckbox: string = '[name="approval"]'
   envCfgTermsDropdown: string = '[data-testid=legal-terms-dd]'
   envCfgOptText: string = '[data-testid=edit-env-additional-details-textarea]'
   envCfgAuthzDropdown: string = '[data-testid=edit-env-auth-flow-select]'
@@ -81,7 +81,7 @@ class Products {
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
   }
 
-  editProductEnvironmentConfig(config: any, invalid = false) {
+  editProductEnvironmentConfig(config: any, invalid = false, isApproved=true) {
 
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
@@ -121,7 +121,24 @@ class Products {
             .check({ force: true });
         }
       });
-    cy.get(this.envCfgApprovalCheckbox).click()
+      cy
+      .get(this.envCfgApprovalCheckbox)
+      .as('checkbox')
+      .invoke('is', ':checked')
+      .then(checked => {
+        debugger
+        if (!isApproved) {
+          cy
+            .get('@checkbox')
+            .uncheck({ force: true });
+        }
+        else {
+          cy
+            .get('@checkbox')
+            .check({ force: true });
+        }
+      });
+    // cy.get(this.envCfgApprovalCheckbox).click()
     // cy.get(this.editPrdEnvConfigBtn).click()
     cy.wait(3000)
     cy.get(this.envCfgApplyChangesContinueBtn).click()

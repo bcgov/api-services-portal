@@ -54,8 +54,16 @@ describe('Apply multiple services to the product environment', () => {
   it('Update kong plugin for both the services', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {
-      pd.generateKongPluginConfigForAuthScope(product.name, product.test_environment.name, 'service-plugin.yml', product.environment.config.serviceName)
-      // pd.generateKongPluginConfig(product.name, product.test_environment.name,'service-test.yml')
+      pd.editProductEnvironment(product.name, product.test_environment.name)
+      cy.get('@apiowner').then(({ clientCredentials }: any) => {
+        let prod = clientCredentials.clientIdSecret_KongKeyToCC.product
+        let authProfile = clientCredentials.clientIdSecret_KongKeyToCC.authProfile
+        prod.environment.config.authIssuer = authProfile.name
+        prod.environment.config.authIssuerEnv = authProfile.environmentConfig.environment
+        pd.editProductEnvironmentConfig(prod.environment.config, false ,false)
+        pd.generateKongPluginConfigForAuthScope(product.name, product.test_environment.name, 'service-plugin.yml', product.environment.config.serviceName)
+        // pd.generateKongPluginConfig(product.name, product.test_environment.name,'service-test.yml')
+      })
     })
   })
 
@@ -86,7 +94,7 @@ describe('Apply multiple services to the product environment', () => {
 
 })
 
-describe('Make an API request using Client ID, Secret, and Access Token', () => {
+describe('Verify that the service is accessible using existing Client ID, Secret, and Access Token', () => {
   let token: string
   it('Get access token using client ID and secret; make API request for test', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
@@ -128,7 +136,7 @@ describe('Make an API request using Client ID, Secret, and Access Token', () => 
       expect(res.status).to.eq(200)
     })
   })
-  
+
 })
 
 
@@ -232,7 +240,7 @@ describe('Access manager approves developer access request for Client ID/Secret 
   })
 })
 
-describe('Make an API request using Client ID, Secret, and Access Token', () => {
+describe('Verify that the service is accessible using new Client ID, Secret, and Access Token', () => {
   let token: string
   it('Get access token using client ID and secret; make API request for test', () => {
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
