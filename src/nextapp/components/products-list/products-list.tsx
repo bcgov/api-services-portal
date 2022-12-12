@@ -35,13 +35,13 @@ interface ProductsListProps {
 const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
   const { data } = useApi(queryKey, { query });
 
-
   if (data.allProductsByNamespace.length === 0) {
     return (
       <EmptyPane
         title="Make your first Product"
         message="You can create additional environments once a product has been made."
         action={<NewProduct queryKey={queryKey} />}
+        boxProps={{ mx: 0 }}
       />
     );
   }
@@ -128,11 +128,11 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                           Active
                         </>
                       ) : (
-                          <>
-                            <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
+                        <>
+                          <Box bgColor="bc-error" w="12px" h="12px" mr={2} />{' '}
                           Inactive
                         </>
-                        )}
+                      )}
                     </Flex>
                   </Td>
                   <Td>
@@ -216,4 +216,3 @@ const query = gql`
     }
   }
 `;
-

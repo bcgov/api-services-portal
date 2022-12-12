@@ -179,7 +179,7 @@ const NamespacesPage: React.FC = () => {
         <Skeleton width="400px" height="20px" mt={4} />
       )}
       {namespace.isSuccess && !namespace.isFetching && (
-        <Flex align="center" gridGap={4} mt={4}>
+        <Flex align="center" mt={4}>
           <Text
             color={currentOrg.color}
             fontSize="sm"

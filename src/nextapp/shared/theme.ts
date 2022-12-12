@@ -503,6 +503,11 @@ const theme = extendTheme(
           },
         },
       },
+      Tooltip: {
+        baseStyle: {
+          bgColor: '#373d3f',
+        },
+      },
     },
   },
   withDefaultVariant({
