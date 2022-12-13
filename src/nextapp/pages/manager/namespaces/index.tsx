@@ -34,6 +34,7 @@ import {
   FaCheckCircle,
   FaChevronRight,
   FaClock,
+  FaExternalLinkAlt,
   FaInfoCircle,
   FaShieldAlt,
   FaTrash,
@@ -212,9 +213,12 @@ const NamespacesPage: React.FC = () => {
                 Namespace, submit a request through the{' '}
                 <Link
                   href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   textDecor="underline"
                 >
                   Data Systems and Services request system
+                  <Icon as={FaExternalLinkAlt} ml={1} />
                 </Link>
               </PopoverBody>
             </PopoverContent>
