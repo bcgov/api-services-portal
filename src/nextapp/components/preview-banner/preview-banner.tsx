@@ -39,11 +39,8 @@ const PreviewBanner: React.FC = () => {
     return null;
   }
 
-  // @ts-ignore
   if (data.currentNamespace.org && !data.currentNamespace.orgEnabled) {
-    // @ts-ignore
     const firstAdminEmail = data.currentNamespace?.orgAdmins[0];
-    // @ts-ignore
     const otherAdmins = data.currentNamespace?.orgAdmins.slice(1);
 
     return (
@@ -74,7 +71,7 @@ const PreviewBanner: React.FC = () => {
             </Button>
           </Flex>
           {isOpen && (
-            <Box mt={4}>
+            <Box mt={4} maxW="80%">
               <Text fontSize="sm">
                 New namespaces must be reviewed by your Organization
                 Administrator before you can publish APIs to the Directory. Your
@@ -119,7 +116,6 @@ const PreviewBanner: React.FC = () => {
 
   if (
     data.currentNamespace.org &&
-    // @ts-ignore
     data.currentNamespace.orgEnabled &&
     bannerDisclosure.isOpen
   ) {

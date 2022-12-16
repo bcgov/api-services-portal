@@ -112,7 +112,12 @@ const NewOrganizationForm: React.FC = () => {
               </FormControl>
               <FormControl isRequired>
                 <FormLabel>Business Unit</FormLabel>
-                <Select name="orgUnit">
+                <Select
+                  isDisabled={
+                    orgResult.data?.allOrganizationUnits?.length === 0
+                  }
+                  name="orgUnit"
+                >
                   <option value="">Select a Business Unit</option>
                   {orgResult.isSuccess &&
                     orgResult.data.allOrganizations.length === 1 &&
