@@ -111,7 +111,8 @@ jobs:
           rbac:
               create: true
 
-          strategyType: Recreate
+          strategy:
+            type: Recreate
 
           persistence:
               enabled: true
