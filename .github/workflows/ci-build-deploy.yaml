@@ -112,7 +112,10 @@ jobs:
               create: true
 
           strategy:
-            type: Recreate
+            type: rollingUpdate
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 100%
 
           readinessProbe:
             timeoutSeconds: 20
