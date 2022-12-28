@@ -2,6 +2,7 @@ import { strict as assert } from 'assert';
 import {
   alwaysTrue,
   alwaysFalse,
+  byKey,
   connectExclusiveList,
   connectExclusiveOne,
   connectMany,
@@ -10,7 +11,7 @@ import {
   toStringDefaultArray,
   toString,
 } from './transformations';
-import { handleNameChange } from './hooks';
+import { handleNameChange, handleUsernameChange } from './hooks';
 import YAML from 'js-yaml';
 import { BatchResult } from './types';
 import {
@@ -35,12 +36,13 @@ export function dot(value: any, _key: string) {
 const logger = Logger('batch.worker');
 
 const hooks = {
-  'pre-lookup': { handleNameChange },
+  'pre-lookup': { handleNameChange, handleUsernameChange },
 } as any;
 
 const transformations = {
   toStringDefaultArray: toStringDefaultArray,
   toString: toString,
+  byKey: byKey,
   mapNamespace: mapNamespace,
   connectExclusiveList: connectExclusiveList,
   connectExclusiveOne: connectExclusiveOne,
@@ -478,7 +480,12 @@ export const syncRecords = async function (
             : undefined,
       };
     }
-    logger.debug('keys triggering update %j', Object.keys(data));
+    logger.info(
+      '[%s] [%s] keys triggering update %j',
+      entity,
+      localRecord.id,
+      Object.keys(data)
+    );
     const nr = await batchService.update(entity, localRecord.id, data);
     if (nr == null) {
       logger.error('UPDATE FAILED (%s) %j', nr, data);

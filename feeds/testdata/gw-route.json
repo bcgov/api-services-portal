@@ -1,0 +1,53 @@
+{
+  "id": "04e5541b-a191-4a7a-9baf-f28f7f867dbe",
+  "updated_at": 1661807988,
+  "https_redirect_status_code": 426,
+  "preserve_host": true,
+  "name": "aps-gwa-owner",
+  "service": {
+    "id": "0bd61fd0-70e0-41dc-ba13-30252eb62134"
+  },
+  "request_buffering": true,
+  "response_buffering": true,
+  "snis": null,
+  "protocols": ["http"],
+  "paths": ["/int"],
+  "tags": ["ns.platform.dev", "ns.platform"],
+  "sources": null,
+  "destinations": null,
+  "path_handling": "v0",
+  "headers": null,
+  "regex_priority": 0,
+  "strip_path": false,
+  "created_at": 1661807988,
+  "methods": null,
+  "hosts": ["gwa-apps-gov-bc-ca.dev.api.gov.bc.ca"],
+  "extSource": "kong",
+  "extRecordHash": "0000",
+  "plugins": [
+    {
+      "id": "0126756d-4eb6-487a-b4cf-8950a93ae685",
+      "protocols": ["https"],
+      "enabled": false,
+      "tags": ["ns.bcstats-callweb"],
+      "name": "ip-restriction",
+      "created_at": 1667989017,
+      "service": null,
+      "route": null,
+      "config": {
+        "allow": [
+          "142.35.211.0/26",
+          "142.32.49.161/27",
+          "142.36.240.0/24",
+          "142.32.85.192/26"
+        ],
+        "message": null,
+        "deny": null,
+        "status": null
+      },
+      "consumer": null,
+      "extSource": "kong",
+      "extRecordHash": "0000"
+    }
+  ]
+}
