@@ -165,7 +165,7 @@ const NamespacesPage: React.FC = () => {
     <>
       <Flex align="center" gridGap={4}>
         {user.namespace}
-        {namespace.data?.currentNamespace.orgEnabled && (
+        {namespace.data?.currentNamespace?.orgEnabled && (
           <Tooltip
             hasArrow
             label={`${user.namespace} is enabled to publish APIs to the directory`}
