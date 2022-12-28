@@ -59,7 +59,6 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
         }
         return false;
       });
-      console.log('hi', result);
 
       if (result) {
         setSelected(result);
@@ -76,7 +75,6 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
   });
 
   const isInvalid = search.length > 0 && !selected;
-  console.log(selected);
 
   return (
     <>
