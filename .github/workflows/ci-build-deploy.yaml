@@ -97,7 +97,7 @@ jobs:
           image:
             registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 4.4-ea993071
+            tag: 5.0-7a639fba
             pullPolicy: IfNotPresent
             pullSecrets:
               - dev-github-read-packages-creds
