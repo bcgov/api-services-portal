@@ -35,6 +35,8 @@ export {
   isServiceMissingAllPluginsHandler,
 } from './validate-active-environment';
 
+export { ValidateIssuer } from './validate-issuer';
+
 export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 
 export {
