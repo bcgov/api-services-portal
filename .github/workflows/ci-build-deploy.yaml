@@ -111,8 +111,8 @@ jobs:
           rbac:
               create: true
 
-          strategy:
-            type: rollingUpdate
+          updateStrategy:
+            type: RollingUpdate
             rollingUpdate:
               maxSurge: 0
               maxUnavailable: 100%
