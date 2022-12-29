@@ -15,13 +15,21 @@ import {
   StackDivider,
   Text,
   MenuDivider,
+  Divider,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
-import { FaChevronDown } from 'react-icons/fa';
-import { useAuth } from '@/shared/services/auth';
+import { FaChevronDown, FaCode } from 'react-icons/fa';
+import {
+  ignoredRedirects,
+  makeRedirectUrl,
+  useAuth,
+} from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
+import NextLink from 'next/link';
 import { useGlobal } from '@/shared/services/global';
+import { GiCapitol } from 'react-icons/gi';
+import { useRouter } from 'next/router';
 
 interface AuthActionProps {
   site: string;
@@ -31,6 +39,21 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
   const global = useGlobal();
+  const router = useRouter();
+  const providerUrl = React.useMemo(() => {
+    const providerUrl = new URL('/login', location.origin);
+    providerUrl.searchParams.set('identity', 'provider');
+    const f = makeRedirectUrl(router.asPath);
+    providerUrl.searchParams.set('f', f);
+    return providerUrl;
+  }, []);
+  const developerUrl = React.useMemo(() => {
+    const developerUrl = new URL('/login', location.origin);
+    developerUrl.searchParams.set('identity', 'developer');
+    const f = makeRedirectUrl(router.asPath);
+    developerUrl.searchParams.set('f', f);
+    return developerUrl;
+  }, []);
 
   if (site === 'redirect') {
     return <></>;
@@ -40,11 +63,53 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     return (
       <Flex align="center" gridGap={4}>
         <HelpMenu />
-        <Link passHref href="/login">
-          <Button as="a" variant="secondary" data-testid="login-btn">
+        <Divider orientation="vertical" color="white" height="32px" />
+        <Menu placement="bottom-end">
+          <MenuButton
+            px={2}
+            py={1}
+            transition="all 0.2s"
+            borderRadius={4}
+            _hover={{ bg: 'bc-link' }}
+            _expanded={{ bg: 'blue.400' }}
+            _focus={{ boxShadow: 'outline' }}
+            data-testid="login-dropdown-btn"
+          >
             Login
-          </Button>
-        </Link>
+            <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
+          </MenuButton>
+          <MenuList
+            color="bc-component"
+            sx={{
+              'p.chakra-menu__group__title': {
+                fontSize: 'md',
+                fontWeight: 'normal !important',
+                px: 1,
+              },
+            }}
+          >
+            <NextLink passHref href={providerUrl.href}>
+              <MenuItem
+                as="a"
+                color="bc-blue"
+                icon={<Icon as={GiCapitol} />}
+                data-testid="login-api-provider-btn"
+              >
+                API Provider
+              </MenuItem>
+            </NextLink>
+            <NextLink passHref href={developerUrl.href}>
+              <MenuItem
+                as="a"
+                color="bc-blue"
+                data-testid="login-api-developer-btn"
+                icon={<Icon as={FaCode} />}
+              >
+                Developer
+              </MenuItem>
+            </NextLink>
+          </MenuList>
+        </Menu>
       </Flex>
     );
   }
