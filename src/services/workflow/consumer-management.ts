@@ -96,6 +96,7 @@ import { getActivityByRefId } from '../keystone/activity';
 import { syncPlugins, trimPlugin } from './consumer-plugins';
 import { removeAllButKeys } from '../../batch/feed-worker';
 import { KeycloakClientRolesService } from '../keycloak/client-roles';
+import { genClientId } from './client-shared-idp';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -659,8 +660,19 @@ export async function updateConsumerAccess(
         envCtx.issuerEnvConfig.clientSecret
       );
 
-      const changes = await clientRolesService.syncRoles(
-        envCtx.issuerEnvConfig.clientId,
+      const issuer = envCtx.prodEnv.credentialIssuer;
+      const environment = prodEnvAccessItem.environment.name;
+      const rolesClientIdForSharedIdP = genClientId(
+        environment,
+        issuer.clientId
+      );
+
+      const rolesClientId = issuer.inheritFrom
+        ? rolesClientIdForSharedIdP
+        : envCtx.issuerEnvConfig.clientId;
+
+      const changes = await clientRolesService.syncAssignedRoles(
+        rolesClientId,
         roles,
         consumer.username
       );

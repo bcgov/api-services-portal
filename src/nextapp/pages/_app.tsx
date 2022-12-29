@@ -3,12 +3,12 @@ import {
   Box,
   ChakraProvider,
   Container,
-  Link,
   List,
   ListItem,
-  Text,
+  Link,
 } from '@chakra-ui/react';
 import Head from 'next/head';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
@@ -34,24 +34,20 @@ import '../../mocks';
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
   {
-    href: 'http://www2.gov.bc.ca/gov/content/about-gov-bc-ca',
-    text: 'About gov.bc.ca',
+    href: '/content/about-us',
+    text: 'About',
   },
+  { href: '/content/privacy', text: 'Privacy' },
   {
-    href: 'http://www2.gov.bc.ca/gov/content/home/disclaimer',
-    text: 'Disclaimer',
-  },
-  { href: 'http://www2.gov.bc.ca/gov/content/home/privacy', text: 'Privacy' },
-  {
-    href: 'http://www2.gov.bc.ca/gov/content/home/accessibility',
+    href: '/content/accessibility',
     text: 'Accessibility',
   },
   {
-    href: 'http://www2.gov.bc.ca/gov/content/home/copyright',
+    href: '/content/copyright',
     text: 'Copyright',
   },
   {
-    href: 'http://www2.gov.bc.ca/gov/content/home/contact-us',
+    href: '/content/contact',
     text: 'Contact Us',
   },
 ];
@@ -137,19 +133,19 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   >
                     {footerItems.map((f) => (
                       <ListItem key={f.text}>
-                        <Link
-                          href={f.href}
-                          d="inline-block"
-                          fontSize="xs"
-                          borderRight={{
-                            base: 'none',
-                            md: '1px solid #4b5e7e',
-                          }}
-                          px="5px"
-                          py={{ base: '5px', md: 0 }}
-                        >
-                          {f.text}
-                        </Link>
+                        <NextLink passHref href={f.href}>
+                          <Link
+                            fontSize="xs"
+                            borderRight={{
+                              base: 'none',
+                              md: '1px solid #4b5e7e',
+                            }}
+                            px="5px"
+                            py={{ base: '5px', md: 0 }}
+                          >
+                            {f.text}
+                          </Link>
+                        </NextLink>
                       </ListItem>
                     ))}
                   </List>

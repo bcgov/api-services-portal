@@ -1,9 +1,11 @@
 import { UserData } from '@/types';
 import {
+  Box,
   Icon,
   Menu,
   MenuButton,
   MenuDivider,
+  MenuGroup,
   MenuItem,
   MenuList,
   MenuOptionGroup,
@@ -107,7 +109,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <>
+              <Box maxHeight="calc(100vh / 2)" overflowY="auto">
                 <MenuOptionGroup
                   title={isNamespaceSelector ? '' : 'Switch Namespace'}
                 >
@@ -140,7 +142,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>
-              </>
+              </Box>
             )}
           </>
           {!isNamespaceSelector && (

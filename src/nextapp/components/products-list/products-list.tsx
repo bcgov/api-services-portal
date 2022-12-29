@@ -18,6 +18,7 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { Tr, Td } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { getFlowText } from '@/shared/services/utils';
+import kebabCase from 'lodash/kebabCase';
 
 import AddEnvironment from './add-environment';
 import EditProduct from './edit-product';
@@ -103,12 +104,13 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
           {d.environments.length > 0 && (
             <Table
               sortable
+              data-testid={`${kebabCase(d.name)}-table`}
               data={d.environments}
               columns={[
                 { name: 'State', key: 'active', sortable: true },
                 { name: 'Environment', key: 'name', sortable: true },
                 { name: 'Authentication', key: 'flow', sortable: true },
-                { name: 'Services', key: 'credentialIssuer.name' },
+                { name: 'Services', key: 'services[0].name' },
                 { name: '', key: 'id' },
               ]}
             >

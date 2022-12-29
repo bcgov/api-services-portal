@@ -1,6 +1,8 @@
 import * as React from 'react';
 import ActionsMenu from '@/components/actions-menu';
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   ButtonGroup,
@@ -9,6 +11,7 @@ import {
   ModalFooter,
   Td,
   Tr,
+  Text,
 } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { uid } from 'react-uid';
@@ -16,20 +19,43 @@ import { uid } from 'react-uid';
 import EmptyPane from '../empty-pane';
 import EnvironmentForm from './environment-form';
 import { EnvironmentItem } from './types';
+import { CredentialIssuer, SharedIssuer } from '@/shared/types/query.types';
+import SharedIdP from './shared-idp';
+import { useApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 interface ClientManagementProps {
   data?: string;
+  hidden: boolean;
+  inheritFrom?: CredentialIssuer;
+  profileName: string;
   id?: string;
   onCancel: () => void;
-  onComplete: (environments: EnvironmentItem[]) => void;
+  onComplete: (newInheritFrom: string, environments: EnvironmentItem[]) => void;
 }
 
 const ClientManagement: React.FC<ClientManagementProps> = ({
   data = '',
+  hidden,
+  inheritFrom,
+  profileName,
   id,
   onCancel,
   onComplete,
 }) => {
+  const sharedIssuer = useApi(
+    ['sharedIssuers', profileName],
+    {
+      query,
+      variables: { profileName },
+    },
+    { suspense: false, enabled: !hidden }
+  );
+
+  const [idp, setIdp] = React.useState<string>(
+    inheritFrom ? 'shared' : 'custom'
+  );
+  const [newInheritFrom, setNewInheritFrom] = React.useState<string>(undefined);
   const [environments, setEnvironments] = React.useState<EnvironmentItem[]>(
     () => {
       try {
@@ -42,7 +68,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
   const columns = React.useMemo(
     () => [
       { name: 'Environment', key: 'environment' },
-      { name: 'idP Issuer URL', key: 'issuerUrl' },
+      { name: 'IdP Issuer URL', key: 'issuerUrl' },
       { name: 'Registration', key: 'registration' },
       { name: 'Client ID', key: 'clientId' },
       { name: '', key: 'id' },
@@ -63,15 +89,60 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
     []
   );
   const handleCreate = React.useCallback(() => {
-    onComplete(environments);
+    onComplete(newInheritFrom, environments);
   }, [environments, onComplete]);
+  const handleChange = (value: string) => {
+    setIdp(value);
+
+    if (sharedIssuer.isSuccess && sharedIssuer.data.sharedIdPs[0]) {
+      setNewInheritFrom(sharedIssuer.data.sharedIdPs[0].id);
+      setEnvironments(
+        JSON.parse(sharedIssuer.data.sharedIdPs[0].environmentDetails)
+      );
+    }
+
+    if (idp === 'shared' && value === 'custom') {
+      setEnvironments([]);
+    }
+  };
+
+  React.useEffect(() => {
+    if (idp === 'shared' && sharedIssuer.data) {
+      const environmentDetails = JSON.parse(
+        sharedIssuer.data.sharedIdPs[0].environmentDetails
+      );
+
+      if (environmentDetails && environments[0]) {
+        setEnvironments(environmentDetails);
+      }
+    }
+  }, [idp, sharedIssuer.data]);
 
   return (
     <>
-      <ModalBody>
-        <Box as="header" mb={4}>
-          <EnvironmentForm onSubmit={handleNewEnvironment} />
-        </Box>
+      <ModalBody hidden={hidden}>
+        {!id && (
+          <SharedIdP
+            idp={idp}
+            profileName={profileName}
+            onChange={handleChange}
+          />
+        )}
+        {inheritFrom?.name && (
+          <Box>
+            <Box pl={0} pr={0}>
+              <Alert status="info" variant="subtle">
+                <AlertIcon />
+                Using Shared Identity Provider "{inheritFrom.name}"
+              </Alert>
+            </Box>
+          </Box>
+        )}
+        {idp === 'custom' && (
+          <Box as="header" mb={4}>
+            <EnvironmentForm onSubmit={handleNewEnvironment} />
+          </Box>
+        )}
         <Table
           columns={columns}
           data={environments}
@@ -100,15 +171,19 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
               </Td>
               <Td width="20%">{d.clientId}</Td>
               <Td>
-                <ActionsMenu placement="bottom-end">
-                  <MenuItem onClick={handleDelete(index)} color="bc-error">Delete</MenuItem>
-                </ActionsMenu>
+                {idp === 'custom' && (
+                  <ActionsMenu placement="bottom-end">
+                    <MenuItem onClick={handleDelete(index)} color="bc-error">
+                      Delete
+                    </MenuItem>
+                  </ActionsMenu>
+                )}
               </Td>
             </Tr>
           )}
         </Table>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button onClick={onCancel} variant="secondary">
             Cancel
@@ -123,3 +198,13 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
 };
 
 export default ClientManagement;
+
+const query = gql`
+  query SharedIdPPreview($profileName: String) {
+    sharedIdPs(profileName: $profileName) {
+      id
+      name
+      environmentDetails
+    }
+  }
+`;

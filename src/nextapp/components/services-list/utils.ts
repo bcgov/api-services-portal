@@ -27,8 +27,8 @@ export function useTotalRequests(data: Query): number {
       try {
         const { namespace } = user;
 
-        if (data?.allMetrics) {
-          data.allMetrics.forEach((m) => {
+        if (data?.allGatewayServiceMetricsByNamespace) {
+          data.allGatewayServiceMetricsByNamespace.forEach((m) => {
             const metric = JSON.parse(m.metric);
 
             if (metric.namespace === namespace) {

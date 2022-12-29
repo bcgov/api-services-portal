@@ -1,0 +1,8 @@
+
+  query SharedIdPPreview($profileName: String) {
+    sharedIdPs(profileName: $profileName) {
+      id
+      name
+      environmentDetails
+    }
+  }

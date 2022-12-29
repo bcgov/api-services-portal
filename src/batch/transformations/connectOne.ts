@@ -12,6 +12,8 @@ export async function connectOne(
   _fieldKey: string
 ) {
   const batchService = new BatchService(keystone);
+
+  // fieldKey: The field that has the new value in the input
   const fieldKey = 'key' in transformInfo ? transformInfo['key'] : _fieldKey;
 
   const value = dot(inputData, fieldKey);
@@ -20,7 +22,11 @@ export async function connectOne(
   if (typeof value === 'undefined') {
     return null;
   } else if (value == null) {
-    return { disconnectAll: true };
+    if (currentData == null || currentData[_fieldKey] == null) {
+      return null;
+    } else {
+      return { disconnectAll: true };
+    }
   }
 
   const lkup = await batchService.lookup(
@@ -36,9 +42,9 @@ export async function connectOne(
     throw Error('Failed to find ' + value + ' in ' + transformInfo['list']);
   } else if (
     currentData != null &&
-    currentData[fieldKey] &&
-    'id' in currentData[fieldKey] &&
-    currentData[fieldKey]['id'] == lkup['id']
+    currentData[_fieldKey] &&
+    'id' in currentData[_fieldKey] &&
+    currentData[_fieldKey]['id'] == lkup['id']
   ) {
     return null;
   } else {

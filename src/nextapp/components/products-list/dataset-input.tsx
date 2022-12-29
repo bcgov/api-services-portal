@@ -51,10 +51,34 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
     },
     [setSearch]
   );
+  const handleBlur = () => {
+    if (search.trim()) {
+      const result = data?.allDatasets.find((d) => {
+        if (search.trim()) {
+          return d.title.toLowerCase() === search.toLowerCase();
+        }
+        return false;
+      });
+
+      if (result) {
+        setSelected(result);
+      } else {
+        setSelected(null);
+      }
+    }
+  };
+  const results = data?.allDatasets.filter((d) => {
+    if (search.trim()) {
+      return d.title.toLowerCase().includes(search.toLowerCase());
+    }
+    return true;
+  });
+
+  const isInvalid = search.length > 0 && !selected;
 
   return (
     <>
-      <FormControl id="dataset" position="relative">
+      <FormControl id="dataset" position="relative" isInvalid={isInvalid}>
         <Downshift
           initialInputValue={dataset?.title}
           itemToString={(item) => (item ? item.title : '')}
@@ -88,6 +112,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 )}
                 {...getInputProps()}
                 defaultValue={dataset?.id}
+                onBlur={handleBlur}
                 variant="bc-input"
               />
               <input
@@ -99,7 +124,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
               <Box
                 {...getMenuProps()}
                 border="2px solid"
-                borderColor="bc-border-focus"
+                borderColor="bc-blue"
                 borderTop="none"
                 borderBottomRightRadius={4}
                 borderBottomLeftRadius={4}
@@ -107,46 +132,47 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 zIndex={2}
                 width="100%"
                 minHeight="5px"
+                maxHeight="300px"
+                overflowY="auto"
                 marginTop="-5px"
                 display={isOpen ? 'block' : 'none'}
               >
                 {isOpen &&
                   isSuccess &&
-                  data.allDatasets
-                    .filter((d) => !inputValue || d.title.includes(inputValue))
-                    .map((d, index, arr) => (
-                      <Box
-                        key={d.id}
-                        px={4}
-                        py={2}
-                        borderBottomRightRadius={
-                          index === arr.length - 1 ? 2 : 0
-                        }
-                        borderBottomLeftRadius={
-                          index === arr.length - 1 ? 2 : 0
-                        }
-                        {...getItemProps({
-                          key: d.id,
-                          index,
-                          item: d,
-                          style: {
-                            color:
-                              highlightedIndex === index ? 'white' : 'inherit',
-                            backgroundColor:
-                              highlightedIndex === index
-                                ? theme.colors['bc-link']
-                                : 'white',
-                            fontWeight: selectedItem === d ? 'bold' : 'normal',
-                          },
-                        })}
-                      >
-                        <Text fontSize="md">{d.title}</Text>
-                      </Box>
-                    ))}
+                  results.map((d, index, arr) => (
+                    <Box
+                      key={d.id}
+                      px={4}
+                      py={2}
+                      borderBottomRightRadius={index === arr.length - 1 ? 2 : 0}
+                      borderBottomLeftRadius={index === arr.length - 1 ? 2 : 0}
+                      {...getItemProps({
+                        key: d.id,
+                        index,
+                        item: d,
+                        style: {
+                          color:
+                            highlightedIndex === index ? 'white' : 'inherit',
+                          backgroundColor:
+                            highlightedIndex === index
+                              ? theme.colors['bc-link']
+                              : 'white',
+                          fontWeight: selectedItem === d ? 'bold' : 'normal',
+                        },
+                      })}
+                    >
+                      <Text fontSize="md">{d.title}</Text>
+                    </Box>
+                  ))}
               </Box>
             </>
           )}
         </Downshift>
+        {isInvalid && (
+          <FormHelperText color="bc-error">
+            Must use an existing dataset to link to product
+          </FormHelperText>
+        )}
       </FormControl>
     </>
   );
@@ -156,7 +182,7 @@ export default DatasetInput;
 
 const query = gql`
   query GetAllDatasets($search: String!, $first: Int) {
-    allDatasets(search: $search, first: $first) {
+    allDatasets(where: { title_contains: $search }, first: $first) {
       id
       name
       title
