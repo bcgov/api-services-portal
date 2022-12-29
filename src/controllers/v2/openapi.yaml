@@ -389,6 +389,8 @@ components:
             properties:
                 orgAdmins:
                     $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                orgNoticeViewed:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
                 orgEnabled:
                     $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
                 orgUpdatedAt:

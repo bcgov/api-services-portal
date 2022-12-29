@@ -4503,6 +4503,7 @@ export type Mutation = {
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
+  markNamespaceNotificationViewed?: Maybe<Scalars['Boolean']>;
   updateCurrentNamespace?: Maybe<Scalars['String']>;
   createNamespace?: Maybe<Namespace>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
@@ -5390,6 +5391,7 @@ export type Namespace = {
   orgUnit?: Maybe<Scalars['JSON']>;
   orgUpdatedAt?: Maybe<Scalars['Float']>;
   orgEnabled?: Maybe<Scalars['Boolean']>;
+  orgNoticeViewed?: Maybe<Scalars['Boolean']>;
   orgAdmins?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 

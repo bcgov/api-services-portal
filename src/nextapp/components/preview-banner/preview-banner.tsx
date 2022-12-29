@@ -117,6 +117,7 @@ const PreviewBanner: React.FC = () => {
   if (
     data.currentNamespace.org &&
     data.currentNamespace.orgEnabled &&
+    data.currentNamespace.orgNoticeViewed == false &&
     bannerDisclosure.isOpen
   ) {
     return (

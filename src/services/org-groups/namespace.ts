@@ -16,6 +16,16 @@ export class NamespaceService {
     await this.groupService.login(clientId, clientSecret);
   }
 
+  async markNotification(ns: string, viewed: boolean): Promise<void> {
+    const group = await this.groupService.getGroup('ns', ns);
+
+    group.attributes['org-notice-viewed'] = [`${viewed}`];
+
+    logger.debug('[markNotification] %s - %s', ns, viewed);
+
+    await this.groupService.updateGroup(group);
+  }
+
   /*
     Update the Group attributes for org and org-unit
   */
@@ -65,6 +75,13 @@ export class NamespaceService {
       // only update the first time that org and org unit are set
       group.attributes['org-updated-at'] = [new Date().getTime()];
     }
+    if (
+      orgEnabled &&
+      (!('org-enabled' in group.attributes) ||
+        group.attributes['org-enabled'][0] != `${orgEnabled}`)
+    ) {
+      group.attributes['org-notice-viewed'] = ['false'];
+    }
     await this.groupService.updateGroup(group);
     return true;
   }
@@ -95,6 +112,7 @@ export class NamespaceService {
       delete group.attributes['org'];
       delete group.attributes['org-unit'];
       delete group.attributes['org-enabled'];
+      delete group.attributes['org-notice-viewed'];
       delete group.attributes['org-updated-at'];
       await this.groupService.updateGroup(group);
       return true;

@@ -71,6 +71,7 @@ type Namespace {
     orgUnit: JSON
     orgUpdatedAt: Float,
     orgEnabled: Boolean,
+    orgNoticeViewed: Boolean,
     orgAdmins: [String],
 }
 `;
@@ -344,6 +345,41 @@ module.exports = {
           },
         ],
         mutations: [
+          {
+            schema: 'markNamespaceNotificationViewed: Boolean',
+            resolver: async (
+              item: any,
+              { org, orgUnit }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const selectedNS = context.req.user.namespace;
+
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
+
+              const nsService = new NamespaceService(envCtx.openid.issuer);
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+
+              await nsService.markNotification(selectedNS, true);
+
+              return true;
+            },
+          },
           {
             schema:
               'updateCurrentNamespace(org: String, orgUnit: String): String',
@@ -630,6 +666,7 @@ async function backfillGroupAttributes(
     'org',
     'org-unit',
     'org-enabled',
+    'org-notice-viewed',
     'org-updated-at',
   ]);
 
@@ -650,6 +687,9 @@ async function backfillGroupAttributes(
         nsPermissions.attributes['org-enabled'] === 'true'
           ? true
           : false,
+      'org-notice-viewed':
+        'org-notice-viewed' in nsPermissions.attributes &&
+        nsPermissions.attributes['org-notice-viewed'] === 'true',
       'org-admins': null,
     },
   };
@@ -662,6 +702,7 @@ async function backfillGroupAttributes(
     'org-unit',
     'org-updated-at',
     'org-enabled',
+    'org-notice-viewed',
     'org-admins',
   ]);
 
