@@ -3,6 +3,10 @@ import subDays from 'date-fns/subDays';
 
 import * as personas from './resolvers/personas';
 import {
+  apiDirectoryHandler,
+  apiDirectoriesHandler,
+} from './resolvers/api-directory';
+import {
   allApplicationsHandler,
   createApplicationHandler,
   removeApplicationHandler,
@@ -48,12 +52,16 @@ import {
   allProductsHandler,
   allLegalsHandler,
   getEnvironmentHandler,
+  getAllCredentialIssuers,
   getAllCredentialIssuersByNamespace,
+  getSharedIdpPreview,
   allGatewayServicesHandler,
+  updateAuthzProfile,
   updateProductHandler,
   updateEnvironmentHandler,
   deleteEnvironmentHandler,
   deleteProductHandler,
+  createAuthzProfile,
 } from './resolvers/products';
 import { handleAllDatasets } from './resolvers/datasets';
 
@@ -61,6 +69,12 @@ import {
   createServiceAccountHandler,
   getAllServiceAccountsHandler,
 } from './resolvers/service-accounts';
+import {
+  allServicesHandler,
+  getMetricsHandler,
+  getGatewayServiceHandler,
+  getGatewayServiceFilterHandler,
+} from './resolvers/services';
 
 // Namespaces
 const allNamespaces = [
@@ -135,6 +149,8 @@ export const handlers = [
       })
     );
   }),
+  rest.get('*/ds/api/directory', apiDirectoriesHandler),
+  rest.get('*/ds/api/v2/directory/:id', apiDirectoryHandler),
   keystone.query('GetNamespaces', (_, res, ctx) => {
     return res(
       ctx.data({
@@ -175,10 +191,11 @@ export const handlers = [
   keystone.mutation('AddEnvironment', addEnvironmentHandler),
   keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
-  keystone.query(
-    'GetAllCredentialIssuersByNamespace',
-    getAllCredentialIssuersByNamespace
-  ),
+  keystone.query('GetAllCredentialIssuers', getAllCredentialIssuersByNamespace),
+  keystone.query('GetCredentialIssuers', getAllCredentialIssuers),
+  keystone.query('SharedIdPPreview', getSharedIdpPreview),
+  keystone.mutation('CreateAuthzProfile', createAuthzProfile),
+  keystone.mutation('UpdateAuthzProfile', updateAuthzProfile),
   keystone.query('GetAllGatewayServices', allGatewayServicesHandler),
   keystone.query('GetAllLegals', allLegalsHandler),
   keystone.query(
@@ -190,8 +207,14 @@ export const handlers = [
   keystone.query('MyApplications', allApplicationsHandler),
   keystone.mutation('AddApplication', createApplicationHandler),
   keystone.mutation('RemoveApplication', removeApplicationHandler),
+  // Services
+  keystone.query('GetServices', allServicesHandler),
+
+  keystone.query('GetMetrics', getMetricsHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
+  keystone.query('GetGatewayService', getGatewayServiceHandler),
+  keystone.query('GetGatewayServiceFilters', getGatewayServiceFilterHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
   // Namespace Access
   keystone.query('GetUserPermissions', getUserPermissionsHandler),

@@ -1,27 +1,19 @@
 import * as React from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  SimpleGrid,
-  Skeleton,
-} from '@chakra-ui/react';
+import { Button, Container, Icon, Skeleton, Text } from '@chakra-ui/react';
+import Card from '@/components/card';
 import ClientRequest from '@/components/client-request';
 import { FaExternalLinkSquareAlt } from 'react-icons/fa';
+import Filters, { useFilters } from '@/components/filters';
+import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ServicesList from '@/components/services-list';
-import { useAuth /*, withAuth*/ } from '@/shared/services/auth';
 import SearchInput from '@/components/search-input';
-import { FaCaretSquareUp, FaFilter } from 'react-icons/fa';
 import ServicesFilters from '@/components/services-list/services-filters';
+import { useAuth } from '@/shared/services/auth';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
-import Head from 'next/head';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
+import { FilterState } from '@/components/services-list/types';
 
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
@@ -34,18 +26,33 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const ServicesPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ metricsUrl }) => {
-  const breadcrumb = useNamespaceBreadcrumbs();
+  const title = 'Gateway Services';
+  const breadcrumb = useNamespaceBreadcrumbs([{ text: title }]);
   const { user } = useAuth();
-  const [search, setSearch] = React.useState<string>('');
-  const [showFilters, setShowFilters] = React.useState<boolean>(false);
-  const onFilterClick = () => {
-    setShowFilters((state) => !state);
+  const [search, setSearch] = React.useState('');
+  const {
+    state,
+    addFilter,
+    clearFilters,
+    removeFilter,
+  } = useFilters<FilterState>(
+    {
+      products: [],
+      environments: [],
+      plugins: [],
+      state: [],
+    },
+    'gateway-services'
+  );
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
   };
 
   return (
     <>
       <Head>
-        <title>API Program Services | Services</title>
+        <title>{`API Program Services | ${title}`}</title>
       </Head>
       <Container maxW="6xl">
         <PageHeader
@@ -56,59 +63,58 @@ const ServicesPage: React.FC<
               href={metricsUrl}
               rightIcon={<Icon as={FaExternalLinkSquareAlt} mt={-1} />}
             >
-              View Full Metrics
+              View metrics in real-time
             </Button>
           }
-          title="Services"
+          title={title}
           breadcrumb={breadcrumb}
         >
-          <p>
-            List of services from the API Owner perspective. This should pull in
-            details from Prometheus and gwa-api Status.
-          </p>
+          <Text maxW="65%">
+            Gateway Services allow you to access summarized metrics for the
+            services that you configure on the Gateway. This pulls in details
+            from Prometheus and gwa-api Status.
+          </Text>
         </PageHeader>
-        <Divider my={4} />
-        <Box d="flex" flexDir="column">
-          <Box
-            as="header"
-            my={4}
-            d="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Heading as="h3" size="md">
-              7 Day Metrics
-            </Heading>
-            <HStack>
-              <SearchInput
-                onChange={setSearch}
-                placeholder="Search Gateway Services"
-                value={search}
-              />
-              <IconButton
-                aria-label="Show Filters"
-                icon={<Icon as={showFilters ? FaCaretSquareUp : FaFilter} />}
-                variant="primary"
-                onClick={onFilterClick}
-              />
-            </HStack>
-          </Box>
-          {showFilters && <ServicesFilters />}
+        <Filters
+          data={state as FilterState}
+          filterTypeOptions={filterTypeOptions}
+          onAddFilter={addFilter}
+          onClearFilters={clearFilters}
+          onRemoveFilter={removeFilter}
+          mb={4}
+        >
+          <ServicesFilters />
+        </Filters>
+        <Card
+          heading="7 Day Metrics"
+          actions={
+            <SearchInput
+              placeholder="Search for Service"
+              value={search}
+              onChange={setSearch}
+            />
+          }
+        >
           {user && (
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4} mb={8}>
-              <ClientRequest
-                fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
-                  <Skeleton key={d} height="200px" />
-                ))}
-              >
-                <ServicesList search={search} />
-              </ClientRequest>
-            </SimpleGrid>
+            <ClientRequest
+              fallback={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((d) => (
+                <Skeleton key={d} height="72px" mb={2} />
+              ))}
+            >
+              <ServicesList search={search} filters={state} />
+            </ClientRequest>
           )}
-        </Box>
+        </Card>
       </Container>
     </>
   );
 };
 
 export default ServicesPage;
+
+const filterTypeOptions = [
+  { name: 'Products', value: 'products' },
+  { name: 'Environments', value: 'environments' },
+  { name: 'Plugins', value: 'plugins' },
+  { name: 'State', value: 'state', multiple: false },
+];

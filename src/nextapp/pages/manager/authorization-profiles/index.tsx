@@ -95,6 +95,7 @@ const AuthorizationProfiles: React.FC<
         toast({
           title: 'Unable to delete Credential Issuer',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -248,6 +249,9 @@ const query = gql`
         email
       }
       environmentDetails
+      inheritFrom {
+        name
+      }
       availableScopes
       clientAuthenticator
       clientRoles

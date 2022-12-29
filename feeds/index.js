@@ -11,7 +11,7 @@ const port = 6000;
 
 const replay = require('./utils/replay');
 const push = require('./utils/push');
-require('dotenv').config()
+require('dotenv').config();
 
 assert.strictEqual(
   'WORKING_PATH' in process.env,
@@ -35,6 +35,11 @@ const config = {
     workingPath: process.env.WORKING_PATH + '/ckan',
     url: process.env.CKAN_URL,
   },
+  ckan_org: {
+    destinationUrl: process.env.DESTINATION_URL,
+    workingPath: process.env.WORKING_PATH + '/ckan',
+    url: process.env.CKAN_URL,
+  },
   keycloak: {
     destinationUrl: process.env.DESTINATION_URL,
     workingPath: process.env.WORKING_PATH + '/keycloak',
@@ -54,9 +59,12 @@ const config = {
   },
 };
 
+const ckan = require('./ckan');
+
 const sources = {
   kong: require('./kong'),
-  ckan: require('./ckan'),
+  ckan,
+  ckan_org: { sync: ckan.syncOrgs },
   prometheus: require('./prometheus'),
 };
 

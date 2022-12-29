@@ -86,12 +86,10 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
   return (
     <>
       <Button
-        leftIcon={<Icon as={FaPlusCircle} />}
-        variant="primary"
         onClick={onOpen}
         data-testid="sa-create-second-btn"
       >
-        New Service Account
+        Create New Service Account
       </Button>
       <Modal
         isOpen={isOpen}
@@ -102,7 +100,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            <Text>Assign scopes for the new service account</Text>
+            Create New Service Account
           </ModalHeader>
           <ModalBody>
             {isLoading && (
@@ -114,9 +112,9 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
               <form ref={formRef} onSubmit={handleSubmit}>
                 <VStack spacing={4}>
                   <FormControl>
-                    <FormLabel>Permissions</FormLabel>
+                    <FormLabel mb={8}>Assign scopes</FormLabel>
                     <CheckboxGroup>
-                      <Wrap spacing={4}>
+                      <VStack align="flex-start" spacing={4}>
                         {data.currentNamespace?.scopes?.map((s) => (
                           <WrapItem key={s.name}>
                             <Checkbox value={s.name} name="scopes">
@@ -124,7 +122,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
                             </Checkbox>
                           </WrapItem>
                         ))}
-                      </Wrap>
+                      </VStack>
                     </CheckboxGroup>
                   </FormControl>
                 </VStack>

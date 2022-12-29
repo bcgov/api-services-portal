@@ -2326,3 +2326,23 @@ ALTER TABLE public."Activity"
  ADD COLUMN "filterKey2" text,
  ADD COLUMN "filterKey3" text,
  ADD COLUMN "filterKey4" text;
+
+ALTER TABLE public."Metric"
+ ADD COLUMN "namespace" text;
+
+ALTER TABLE public."CredentialIssuer"
+ ADD COLUMN "isShared" boolean NOT NULL DEFAULT false,
+ ADD COLUMN "inheritFrom" integer;
+
+--
+-- Name: credentialissuer_inheritfrom_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX credentialissuer_inheritfrom_index ON public."CredentialIssuer" USING btree ("inheritFrom");
+
+--
+-- Name: CredentialIssuer credentialissuer_inheritfrom_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."CredentialIssuer"
+    ADD CONSTRAINT credentialissuer_inheritfrom_foreign FOREIGN KEY ("inheritFrom") REFERENCES public."CredentialIssuer"(id);

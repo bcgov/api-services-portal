@@ -1,4 +1,4 @@
-const { lookupCredentialIssuerById, addKongConsumer } = require('../keystone');
+import { lookupCredentialIssuerById, addKongConsumer } from '../keystone';
 
 import {
   KeycloakClientRegistrationService,
@@ -18,6 +18,7 @@ import {
   RequestControls,
 } from './types';
 import { ClientAuthenticator } from '../keycloak/client-registration-service';
+import { genClientId } from './client-shared-idp';
 
 /**
  * Steps:
@@ -64,8 +65,15 @@ export async function registerClient(
       : issuerEnvConfig.initialAccessToken;
 
   // If there are any custom client Mappers, then include them
-  const clientMappers =
+  const clientMappers: [{ name: string; defaultValue: string }] =
     issuer.clientMappers == null ? [] : JSON.parse(issuer.clientMappers);
+
+  if (issuer.inheritFrom) {
+    clientMappers.push({
+      name: 'audience',
+      defaultValue: genClientId(environment, issuer.clientId),
+    });
+  }
 
   // Find the Client ID for the ProductEnvironment - that will be used to associated the clientRoles
 

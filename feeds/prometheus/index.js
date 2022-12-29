@@ -10,7 +10,7 @@ const queries = [
     id: 'kong_http_requests_daily_service_code',
   },
   {
-    query: 'sum(increase(kong_http_status[60m])) by (service)',
+    query: 'sum(increase(kong_http_status[60m])) by (service,namespace)',
     step: 60 * 60,
     id: 'kong_http_requests_hourly_service',
   },

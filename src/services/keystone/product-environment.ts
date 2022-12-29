@@ -37,6 +37,10 @@ export async function lookupProductEnvironmentServices(
                             id
                             flow
                             environmentDetails
+                            inheritFrom {
+                              environmentDetails
+                            }
+                            clientId
                         }
                         services {
                             name
@@ -142,6 +146,11 @@ export async function lookupEnvironmentAndIssuerUsingWhereClause(
                             resourceType
                             resourceAccessScope
                             environmentDetails
+                            clientId
+                            inheritFrom {
+                              name
+                              environmentDetails
+                            }
                         }
                     }
                 }`,
@@ -227,6 +236,10 @@ export async function lookupEnvironmentAndIssuerById(
                             flow
                             mode
                             environmentDetails
+                            inheritFrom {
+                              environmentDetails
+                            }
+                            clientId
                             resourceType
                             resourceAccessScope
                         }

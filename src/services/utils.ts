@@ -1,6 +1,7 @@
 import format from 'date-fns/format';
 import subDays from 'date-fns/subDays';
 import times from 'lodash/times';
+import { strict as assert } from 'assert';
 
 export function dateRange(days = 5): string[] {
   const result = [] as string[];
@@ -48,4 +49,14 @@ export function camelCaseAttributes(object: any, keys: string[]): void {
       }
     }
   });
+}
+
+export function regExprValidation(
+  rule: string,
+  value: string,
+  errorMessage: string
+) {
+  const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
+  const re = new RegExp(rule);
+  assert.strictEqual(re.test(value), true, errorMessage);
 }

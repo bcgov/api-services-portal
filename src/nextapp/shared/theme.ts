@@ -265,13 +265,15 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
-          borderColor: 'bc-component',
           '& label': {
             borderColor: 'bc-component',
           },
           borderRadius: 0,
           '.chakra-checkbox__control': {
             borderRadius: 0,
+          },
+          control: {
+            borderColor: 'bc-component',
           },
         },
         defaultProps: {
