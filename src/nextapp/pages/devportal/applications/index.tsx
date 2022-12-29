@@ -151,6 +151,7 @@ const ApplicationsPage: React.FC<
         <Card>
           <Table
             sortable
+            data-testid="my-applications-table"
             columns={columns}
             data={data?.myApplications ?? []}
             emptyView={empty}

@@ -42,13 +42,21 @@ const ApsTable: React.FC<ApsTableProps> = ({
   sortable,
   ...props
 }) => {
+  const sortSettings: string[] = React.useMemo(() => {
+    const id = props['id'] ?? props['data-testid'];
+    const cached = sessionStorage.getItem(id);
+    if (cached) {
+      return cached.split(',');
+    }
+    return [columns[0]?.key ?? '', 'asc'];
+  }, [columns, props['data-testid']]);
   const [sortKey, setSortKey] = React.useState<string>(() => {
     if (sortable) {
-      return columns[0]?.key;
+      return sortSettings[0] ?? columns[0]?.key;
     }
     return '';
   });
-  const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
+  const [sortDir, setSortDir] = React.useState<string>(sortSettings[1]);
   const sorted = React.useMemo(() => {
     if (!sortKey) {
       return data;
@@ -70,6 +78,15 @@ const ApsTable: React.FC<ApsTableProps> = ({
     },
     [setSortDir, setSortKey, sortKey]
   );
+
+  React.useEffect(() => {
+    if (props['data-testid']) {
+      sessionStorage.setItem(
+        props['data-testid'],
+        [sortKey, sortDir].join(',')
+      );
+    }
+  }, [sortKey, sortDir]);
 
   return (
     <Table {...props}>

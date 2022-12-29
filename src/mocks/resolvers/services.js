@@ -84,7 +84,7 @@ export const allServicesHandler = (req, res, ctx) => {
   return res(
     ctx.data({
       allGatewayServicesByNamespace: gatewayServices,
-      allMetrics: [
+      allGatewayServiceMetricsByNamespace: [
         {
           query: 'kong_http_requests_hourly_namespace',
           day: '2022-10-17',
@@ -246,13 +246,13 @@ export const getMetricsHandler = (req, res, ctx) => {
   if (cached[service]) {
     return res(
       ctx.data({
-        allMetrics: cached[service],
+        allGatewayServiceMetricsByNamespace: cached[service],
       })
     );
   }
   return res(
     ctx.data({
-      allMetrics: [],
+      allGatewayServiceMetricsByNamespace: [],
     })
   );
 };

@@ -387,6 +387,7 @@ export const addEnvironmentHandler = (req, res, ctx) => {
     name: req.variables.name,
     services: [],
     flow: 'public',
+    active: false,
   };
   const environmentProduct = products.get(product);
 

@@ -122,7 +122,7 @@ jobs:
 
           livenessProbe:
             timeoutSeconds: 20
-
+            
           persistence:
               enabled: true
               size: 2Gi

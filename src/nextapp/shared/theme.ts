@@ -264,13 +264,15 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
-          borderColor: 'bc-component',
           '& label': {
             borderColor: 'bc-component',
           },
           borderRadius: 0,
           '.chakra-checkbox__control': {
             borderRadius: 0,
+          },
+          control: {
+            borderColor: 'bc-component',
           },
         },
         defaultProps: {
@@ -480,7 +482,8 @@ const theme = extendTheme(
                 borderRadius: 4,
                 backgroundColor: getLabelBgColor(props.colorScheme),
                 border: '1px solid',
-                borderColor: props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
+                borderColor:
+                  props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
                 color: 'text',
                 boxShadow: 'none',
               },

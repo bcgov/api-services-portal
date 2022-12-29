@@ -48,7 +48,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({ buttons }) => {
     bcsc: (
       <Button
         as="a"
-        key="bscs"
+        key="bcsc"
         variant="primary"
         href={buildUrl('bcsc', forwardPath)}
       >
