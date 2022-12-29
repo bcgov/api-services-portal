@@ -356,7 +356,10 @@ export async function getOrgPoliciesForResource(
   try {
     return await orgGroupService.getGroupPermissionsByResource(resourceId);
   } catch (ex) {
-    logger.error('[getOrgPoliciesForResource] %j', ex.toJSON());
+    logger.error('[getOrgPoliciesForResource] %s', ex);
+    if (ex.toJSON) {
+      logger.error('[getOrgPoliciesForResource] %j', ex.toJSON());
+    }
     throw ex;
   }
 }

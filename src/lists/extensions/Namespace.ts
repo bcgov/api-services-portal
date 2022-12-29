@@ -107,6 +107,8 @@ module.exports = {
                 return null;
               }
 
+              const selectedNS = context.req.user.namespace;
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
@@ -120,44 +122,28 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getNamespaceResourceSets(envCtx);
-              const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-              const namespaces = <ResourceSet[]>(
-                await resourcesApi.listResourcesByIdList(resourceIds)
+              const kcGroupService = await getKeycloakGroupApi(
+                envCtx.issuerEnvConfig
               );
 
-              const matched = namespaces
-                .filter((ns) => ns.name == context.req.user.namespace)
-                .map((ns) => ({
-                  id: ns.id,
-                  name: ns.name,
-                  scopes: ns.resource_scopes,
-                  prodEnvId: prodEnv.id,
-                }));
-              if (matched.length == 0) {
-                logger.warn(
-                  '[currentNamespace] NOT FOUND! %j',
-                  context.req.user
-                );
-                return null;
-              } else {
-                const kcGroupService = await getKeycloakGroupApi(
-                  envCtx.issuerEnvConfig
-                );
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
 
-                const merged = await backfillGroupAttributes(
-                  context.req.user.namespace,
-                  matched[0],
-                  kcGroupService
+              const merged = await backfillGroupAttributes(
+                selectedNS,
+                { name: selectedNS },
+                defaultSettings,
+                kcGroupService
+              );
+              if (merged.org) {
+                await transformOrgAndOrgUnit(
+                  context,
+                  envCtx,
+                  merged,
+                  merged.orgEnabled == false
                 );
-                if (merged.org) {
-                  await transformOrgAndOrgUnit(context, envCtx, merged);
-                }
-                return merged;
               }
+              return merged;
             },
             access: EnforcementPoint,
           },
@@ -203,11 +189,15 @@ module.exports = {
                 envCtx.issuerEnvConfig
               );
 
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
+
               return await Promise.all(
                 nsList.map(async (nsdata: any) => {
                   return backfillGroupAttributes(
                     nsdata.name,
                     nsdata,
+                    defaultSettings,
                     kcGroupService
                   );
                 })
@@ -260,14 +250,18 @@ module.exports = {
                 envCtx.issuerEnvConfig
               );
 
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
+
               const merged = await backfillGroupAttributes(
                 args.ns,
                 detail,
+                defaultSettings,
                 kcGroupService
               );
 
               if (merged.org) {
-                await transformOrgAndOrgUnit(context, envCtx, merged);
+                await transformOrgAndOrgUnit(context, envCtx, merged, true);
               }
 
               logger.debug('[namespace] Result %j', merged);
@@ -618,12 +612,14 @@ async function getKeycloakGroupApi(
     issuerEnvConfig.clientId,
     issuerEnvConfig.clientSecret
   );
+  await kcGroupService.cacheGroups();
   return kcGroupService;
 }
 
 async function backfillGroupAttributes(
   ns: string,
   detail: any,
+  defaultSettings: any,
   kcGroupService: KeycloakGroupService
 ): Promise<any> {
   const nsPermissions = await kcGroupService.getGroup('ns', ns);
@@ -643,14 +639,6 @@ async function backfillGroupAttributes(
     nsPermissions.attributes
   );
 
-  const client = new GWAService(process.env.GWA_API_URL);
-  const defaultSettings = await client.getDefaultNamespaceSettings();
-
-  logger.debug(
-    '[backfillGroupAttributes] Default Settings %j',
-    defaultSettings
-  );
-
   const merged = {
     ...detail,
     ...defaultSettings,
@@ -662,7 +650,7 @@ async function backfillGroupAttributes(
         nsPermissions.attributes['org-enabled'] === 'true'
           ? true
           : false,
-      'org-admins': [],
+      'org-admins': null,
     },
   };
 
@@ -683,7 +671,8 @@ async function backfillGroupAttributes(
 async function transformOrgAndOrgUnit(
   context: Keystone,
   envCtx: EnvironmentContext,
-  merged: any
+  merged: any,
+  getOrgAdmins: boolean
 ): Promise<void> {
   const orgInfo = await getOrganizationUnit(context, merged.orgUnit);
   if (orgInfo) {
@@ -698,10 +687,12 @@ async function transformOrgAndOrgUnit(
   }
 
   // lookup org admins from
-  const orgPolicies = await getOrgPoliciesForResource(envCtx, merged.id);
-  const orgAdmins: string[] = [];
-  orgPolicies.map((policy) => {
-    orgAdmins.push(...policy.users);
-  });
-  merged['orgAdmins'] = [...new Set(orgAdmins)];
+  if (getOrgAdmins) {
+    const orgPolicies = await getOrgPoliciesForResource(envCtx, merged.id);
+    const orgAdmins: string[] = [];
+    orgPolicies.map((policy) => {
+      orgAdmins.push(...policy.users);
+    });
+    merged['orgAdmins'] = [...new Set(orgAdmins)];
+  }
 }

@@ -17,10 +17,9 @@ const ApproveBanner: React.FC = () => {
     isLoading ||
     isFetching ||
     data.currentNamespace === null ||
-    !data.currentNamespace?.orgAdmins.includes(user.email) ||
-    // @ts-ignore
+    data.currentNamespace?.org === null ||
     data.currentNamespace?.orgEnabled ||
-    data.currentNamespace?.org === null
+    !data.currentNamespace?.orgAdmins.includes(user.email)
   ) {
     return null;
   }
