@@ -135,6 +135,7 @@ let currentNamespace = {
   orgUnit: null,
   orgEnabled: false,
   orgAdmins: ['Jim.Hopper@gov.bc.ca', 'bogus.secondone@gov.bc.ca'],
+  orgNoticeViewed: false,
 };
 
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
@@ -142,6 +143,18 @@ export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
     // ctx.delay(7000),
     ctx.data({
       currentNamespace,
+    })
+  );
+};
+
+export const updateNamespaceNotificationViewed = (_, res, ctx) => {
+  currentNamespace = {
+    ...currentNamespace,
+    orgNoticeViewed: true,
+  };
+  return res(
+    ctx.data({
+      markNamespaceNotificationViewed: true,
     })
   );
 };

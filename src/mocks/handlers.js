@@ -33,6 +33,7 @@ import {
 } from './resolvers/consumers';
 import {
   getCurrentNamesSpaceHandler,
+  updateNamespaceNotificationViewed,
   updateCurrentNamesSpaceHandler,
   getOrganizationGroupsPermissionsHandler,
   getResourceSetHandler,
@@ -228,6 +229,10 @@ export const handlers = [
   ),
   keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.mutation(
+    'MarkNamespaceNotificationViewed',
+    updateNamespaceNotificationViewed
+  ),
   keystone.query('ListOrganizations', getListOrganizationsHandler),
   keystone.query('ListOrganizationUnits', getListOrganizationUnitsHandler),
   keystone.mutation('UpdateCurrentNamespace', updateCurrentNamesSpaceHandler),

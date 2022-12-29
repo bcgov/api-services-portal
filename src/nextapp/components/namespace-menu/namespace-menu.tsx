@@ -123,13 +123,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         data-testid={`ns-dropdown-item-${n.name}`}
                         flexDir="column"
                         alignItems="flex-start"
+                        pos="relative"
                       >
                         {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
                           5 && (
-                          <Text color="bc-error" pos="absolute" right={4}>
-                            New
-                          </Text>
-                        )}
+                            <Text color="bc-error" pos="absolute" right={4}>
+                              New
+                            </Text>
+                          )}
                         <Text>{n.name}</Text>
                         {
                           /* @ts-ignore */

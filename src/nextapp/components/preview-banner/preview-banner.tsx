@@ -20,14 +20,39 @@ import { useAuth } from '@/shared/services/auth';
 import NewOrganizationForm from '../new-organization-form';
 import { FaCheckCircle, FaChevronDown, FaClock, FaTimes } from 'react-icons/fa';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
+import { gql } from 'graphql-request';
+import { useApiMutation } from '@/shared/services/api';
 
 const PreviewBanner: React.FC = () => {
+  const rendered = React.useRef(false);
   const { user } = useAuth();
   const { isOpen, onToggle } = useDisclosure();
   const bannerDisclosure = useDisclosure({ defaultIsOpen: true });
-  const { data, isSuccess, isLoading, isFetching } = useCurrentNamespace({
+  const { data, isLoading, isFetching } = useCurrentNamespace({
     enabled: true,
   });
+  const mutate = useApiMutation(mutation);
+
+  const handleClose = async () => {
+    await mutate.mutateAsync(true);
+    bannerDisclosure.onClose();
+  };
+
+  React.useEffect(() => {
+    if (
+      data?.currentNamespace.org &&
+      data?.currentNamespace.orgEnabled &&
+      !data?.currentNamespace.orgNoticeViewed
+    ) {
+      rendered.current = true;
+    }
+
+    return () => {
+      if (rendered.current && bannerDisclosure.isOpen) {
+        mutate.mutate(true);
+      }
+    };
+  }, [data]);
 
   if (
     !user ||
@@ -117,7 +142,7 @@ const PreviewBanner: React.FC = () => {
   if (
     data.currentNamespace.org &&
     data.currentNamespace.orgEnabled &&
-    data.currentNamespace.orgNoticeViewed == false &&
+    !data.currentNamespace.orgNoticeViewed &&
     bannerDisclosure.isOpen
   ) {
     return (
@@ -133,7 +158,7 @@ const PreviewBanner: React.FC = () => {
             <IconButton
               icon={<Icon as={FaTimes} />}
               aria-label="Close banner button"
-              onClick={bannerDisclosure.onClose}
+              onClick={handleClose}
               variant="link"
               ml={2}
               textDecor="underline"
@@ -202,3 +227,9 @@ const PreviewBanner: React.FC = () => {
 };
 
 export default PreviewBanner;
+
+const mutation = gql`
+  mutation MarkNamespaceNotificationViewed {
+    markNamespaceNotificationViewed
+  }
+`;
