@@ -270,6 +270,50 @@ export const getEnvironmentHandler = (req, res, ctx) => {
   );
 };
 
+const _credentialIssuers = [
+  {
+    id: 'c11',
+    name: 'abc 1234',
+    flow: 'client-credentials',
+    mode: 'auto',
+    owner: {
+      name: 'Harley Jones',
+      username: 'harley@idir',
+      email: 'harley@gov.ca',
+    },
+    environmentDetails:
+      '[{"exists":true,"environment":"dev","issuerUrl":"https://dev.loginproxy.site/auth/realms/test","clientRegistration":"shared-idp","clientId":"asdkfj0f-9sdf-as90df"}]',
+    inheritFrom: {
+      name: 'Silver Dev Shared IdP',
+    },
+    availableScopes: '[]',
+    clientAuthenticator: 'client-secret',
+    clientRoles: '[]',
+    clientMappers: '[{"name":"audience","defaultValue":""}]',
+    apiKeyName: 'X-API-KEY',
+    resourceType: '',
+    resourceScopes: '[]',
+    resourceAccessScope: '',
+  },
+];
+
+export const getAllCredentialIssuers = (_, res, ctx) => {
+  return res(
+    ctx.data({
+      allCredentialIssuersByNamespace: _credentialIssuers,
+    })
+  );
+};
+
+export const createAuthzProfile = (req, res, ctx) => {
+  return res(ctx.data({}));
+};
+
+export const updateAuthzProfile = (req, res, ctx) => {
+  console.log(req.variables);
+  return res(ctx.data({}));
+};
+
 export const getAllCredentialIssuersByNamespace = (req, res, ctx) => {
   const { id } = req.variables;
   return res(
@@ -406,4 +450,28 @@ export const deleteProductHandler = (req, res, ctx) => {
   const { id } = req.variables;
   products.delete(id);
   return res(ctx.data({}));
+};
+
+export const getSharedIdpPreview = (req, res, ctx) => {
+  const { profileName } = req.variables;
+
+  return res(
+    ctx.data({
+      sharedIdPs: [
+        {
+          id: 'sidp-1',
+          name: 'Silver Dev Shared IdP',
+          environmentDetails: JSON.stringify([
+            {
+              exists: true,
+              environment: 'dev',
+              issuerUrl: 'https://loginproxy.dev/auth/realms/api',
+              clientRegistration: 'shared-idp',
+              clientId: `ab-${profileName}-dev`,
+            },
+          ]),
+        },
+      ],
+    })
+  );
 };

@@ -24,7 +24,7 @@ export const ListQuery = (keystone: any, alias: AliasConfig) => {
           const vars = mergeWhereClause(args, other.access);
           const records = await a.listQuery(vars, context, gqlName, info);
           //logger.debug('Records %j', records);
-          return alias.hook ? alias.hook(records) : records;
+          return alias.hook ? await alias.hook(context, records) : records;
         },
         access: EnforcementPoint,
       },

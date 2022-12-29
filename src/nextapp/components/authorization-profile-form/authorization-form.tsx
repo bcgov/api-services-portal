@@ -16,6 +16,7 @@ import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationFormProps {
   data?: CredentialIssuer;
+  hidden: boolean;
   id?: string;
   onCancel: () => void;
   onComplete: (payload: FormData) => void;
@@ -24,6 +25,7 @@ interface AuthorizationFormProps {
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   data,
+  hidden,
   id,
   onCancel,
   onComplete,
@@ -72,6 +74,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   return (
     <>
       <ModalBody
+        hidden={hidden}
         sx={{
           '& fieldset': { mb: 8 },
           '& fieldset legend + div': { mt: 1 },
@@ -80,7 +83,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           },
         }}
       >
-        <form ref={formRef} onSubmit={handleSubmit}>
+        <form name="authorizationForm" ref={formRef} onSubmit={handleSubmit}>
           <fieldset>
             <Legend>Mode</Legend>
             <RadioCardGroup
@@ -184,7 +187,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           </fieldset>
         </form>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button
             onClick={onCancel}

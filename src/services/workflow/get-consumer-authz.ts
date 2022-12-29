@@ -2,6 +2,7 @@ import { KeycloakClientService, KeycloakUserService } from '../keycloak';
 
 import { Logger } from '../../logger';
 import { EnvironmentContext } from './get-namespaces';
+import { genClientId } from './client-shared-idp';
 
 const logger = Logger('wf.getconsumerauthz');
 
@@ -26,9 +27,15 @@ export async function getConsumerAuthz(
       envCtx.issuerEnvConfig.clientSecret
     );
 
-    const client = await kcClientService.findByClientId(
-      envCtx.issuerEnvConfig.clientId
-    );
+    const environment = envCtx.prodEnv.name;
+    const issuer = envCtx.prodEnv.credentialIssuer;
+    const rolesClientIdForSharedIdP = genClientId(environment, issuer.clientId);
+
+    const rolesClientId = issuer.inheritFrom
+      ? rolesClientIdForSharedIdP
+      : envCtx.issuerEnvConfig.clientId;
+
+    const client = await kcClientService.findByClientId(rolesClientId);
 
     const isClient = await kcClientService.isClient(consumerUsername);
 

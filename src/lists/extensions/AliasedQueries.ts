@@ -1,12 +1,5 @@
-import { CredentialIssuer, Environment } from '@/services/keystone/types';
-import { IssuerEnvironmentConfig } from '@/services/workflow/types';
-import {
-  ListQuery,
-  ItemQuery,
-  SchemaType,
-  AliasType,
-  AliasConfig,
-} from './resolvers';
+import { ListQuery, ItemQuery, SchemaType, AliasConfig } from './resolvers';
+import CredentialIssuerHook from './hooks/CredentialIssuerHook';
 
 module.exports = {
   extensions: [
@@ -61,21 +54,7 @@ module.exports = {
           gqlName: 'allCredentialIssuersByNamespace',
           list: 'CredentialIssuer',
           type: SchemaType.ListQuery,
-          hook: (issuers: CredentialIssuer[]) => {
-            issuers.forEach((data) => {
-              const envDetails = JSON.parse(data.environmentDetails);
-              envDetails.forEach(function (env: IssuerEnvironmentConfig) {
-                if (env.clientSecret) {
-                  env.clientSecret = '****';
-                } else if (env.initialAccessToken) {
-                  env.initialAccessToken = '****';
-                }
-                env.exists = true;
-              });
-              data.environmentDetails = JSON.stringify(envDetails);
-            });
-            return issuers;
-          },
+          hook: CredentialIssuerHook,
         },
         {
           gqlName: 'allNamespaceServiceAccounts',
@@ -96,49 +75,6 @@ module.exports = {
           gqlName: 'OwnedEnvironment',
           list: 'Environment',
           type: SchemaType.ItemQuery,
-          // hook: (data: Environment) => {
-          //   if (
-          //     data.credentialIssuer == null ||
-          //     data.credentialIssuer.environmentDetails == null
-          //   ) {
-          //     return data;
-          //   }
-          //   const envDetails = JSON.parse(
-          //     data.credentialIssuer.environmentDetails
-          //   );
-          //   envDetails.forEach(function (env: IssuerEnvironmentConfig) {
-          //     if (env.clientId || env.clientSecret) {
-          //       env.clientId = '****';
-          //       env.clientSecret = '****';
-          //     } else if (env.initialAccessToken) {
-          //       env.initialAccessToken = '****';
-          //     }
-          //     env.exists = true;
-          //   });
-          //   data.credentialIssuer.environmentDetails = JSON.stringify(
-          //     envDetails
-          //   );
-          //   return data;
-          // },
-        },
-        {
-          gqlName: 'OwnedCredentialIssuer',
-          list: 'CredentialIssuer',
-          type: SchemaType.ItemQuery,
-          hook: (data: CredentialIssuer) => {
-            const envDetails = JSON.parse(data.environmentDetails);
-            envDetails.forEach(function (env: IssuerEnvironmentConfig) {
-              if (env.clientId || env.clientSecret) {
-                env.clientId = '****';
-                env.clientSecret = '****';
-              } else if (env.initialAccessToken) {
-                env.initialAccessToken = '****';
-              }
-              env.exists = true;
-            });
-            data.environmentDetails = JSON.stringify(envDetails);
-            return data;
-          },
         },
         {
           gqlName: 'CredentialIssuerSummary',

@@ -141,63 +141,75 @@ export const DeleteAccess = async (context: any, keys: any) => {
         'customId',
       ]);
 
-    // Asynchronously do the deletion of the backend IdP and Kong
-    svc.consumer != null &&
+    if (
+      svc.consumer != null &&
       svc.consumerType == 'client' &&
       svc.consumer.username != 'anonymous' &&
-      svc.productEnvironment &&
-      kongApi.deleteConsumer(svc.consumer.extForeignKey).then(async () => {
-        if (flow == 'client-credentials') {
-          const issuer = await lookupCredentialIssuerById(
-            context,
-            svc.productEnvironment.credentialIssuer.id
-          );
-          const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(
-            issuer,
-            svc.productEnvironment.name
-          );
-          const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
-          const uma2 = await getUma2FromIssuer(issuerEnvConfig.issuerUrl);
-          const token =
-            issuerEnvConfig.clientRegistration == 'anonymous'
-              ? null
-              : issuerEnvConfig.clientRegistration == 'managed'
-              ? await new KeycloakTokenService(
-                  openid.token_endpoint
-                ).getKeycloakSession(
-                  issuerEnvConfig.clientId,
-                  issuerEnvConfig.clientSecret
-                )
-              : issuerEnvConfig.initialAccessToken;
-
-          // Delete the Policies that are associated with the client!!
-          // Use the kcprotect service to find the UMA Policies that have this client ID
-          // and then delete each one
-          // Only do the below if this authorization profile has UMA resources
-          if (issuer.resourceType != null && issuer.resourceType != '') {
-            logger.debug('Deleting policies for %s', svc.consumer.customId);
-            const policyApi = new UMAPolicyService(uma2.policy_endpoint, token);
-            const relatedPolicies = await policyApi.listPolicies({
-              name: svc.consumer.customId,
-            });
-            for (const policy of relatedPolicies.filter(
-              (p) => p.name == svc.consumer.customId
-            )) {
-              await policyApi.deleteUmaPolicy(policy.id);
-            }
-          } else {
-            logger.debug(
-              'Non-UMA Profile so skipping policy cleanup for %s',
-              svc.consumer.customId
+      svc.productEnvironment
+    ) {
+      // Asynchronously do the deletion of the backend IdP and Kong
+      kongApi
+        .deleteConsumer(svc.consumer.extForeignKey)
+        .then(async () => {
+          if (flow == 'client-credentials') {
+            const issuer = await lookupCredentialIssuerById(
+              context,
+              svc.productEnvironment.credentialIssuer.id
             );
-          }
+            const issuerEnvConfig: IssuerEnvironmentConfig = getIssuerEnvironmentConfig(
+              issuer,
+              svc.productEnvironment.name
+            );
+            const openid = await getOpenidFromIssuer(issuerEnvConfig.issuerUrl);
+            const uma2 = await getUma2FromIssuer(issuerEnvConfig.issuerUrl);
+            const token =
+              issuerEnvConfig.clientRegistration == 'anonymous'
+                ? null
+                : issuerEnvConfig.clientRegistration == 'managed'
+                ? await new KeycloakTokenService(
+                    openid.token_endpoint
+                  ).getKeycloakSession(
+                    issuerEnvConfig.clientId,
+                    issuerEnvConfig.clientSecret
+                  )
+                : issuerEnvConfig.initialAccessToken;
 
-          await new KeycloakClientRegistrationService(
-            issuerEnvConfig.issuerUrl,
-            openid.registration_endpoint,
-            token
-          ).deleteClientRegistration(svc.consumer.customId);
-        }
-      });
+            // Delete the Policies that are associated with the client!!
+            // Use the kcprotect service to find the UMA Policies that have this client ID
+            // and then delete each one
+            // Only do the below if this authorization profile has UMA resources
+            if (issuer.resourceType != null && issuer.resourceType != '') {
+              logger.debug('Deleting policies for %s', svc.consumer.customId);
+              const policyApi = new UMAPolicyService(
+                uma2.policy_endpoint,
+                token
+              );
+              const relatedPolicies = await policyApi.listPolicies({
+                name: svc.consumer.customId,
+              });
+              for (const policy of relatedPolicies.filter(
+                (p) => p.name == svc.consumer.customId
+              )) {
+                await policyApi.deleteUmaPolicy(policy.id);
+              }
+            } else {
+              logger.debug(
+                'Non-UMA Profile so skipping policy cleanup for %s',
+                svc.consumer.customId
+              );
+            }
+
+            await new KeycloakClientRegistrationService(
+              issuerEnvConfig.issuerUrl,
+              openid.registration_endpoint,
+              token
+            ).deleteClientRegistration(svc.consumer.customId);
+          }
+        })
+        .catch((err) => {
+          logger.error('[DeleteAccessFromIdP] Error deleting');
+          logger.error('[DeleteAccessFromIdP] Reason %s', err);
+        });
+    }
   }
 };

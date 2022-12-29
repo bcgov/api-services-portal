@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 
 interface AuthenticationFormProps {
+  hidden: boolean;
   id?: string;
   onChange: (value: string) => void;
   onCancel: () => void;
@@ -22,6 +23,7 @@ interface AuthenticationFormProps {
 }
 
 const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
+  hidden,
   id,
   onChange,
   onCancel,
@@ -45,7 +47,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
 
   return (
     <>
-      <ModalBody>
+      <ModalBody hidden={hidden}>
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={4}>
             <FormLabel fontWeight="bold" mb={6}>
@@ -95,7 +97,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
           implements the OAuth2 Authorization Code Flow
         </Text>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button
             onClick={onCancel}

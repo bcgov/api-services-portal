@@ -11,6 +11,7 @@ export async function connectExclusiveList(
   inputData: any,
   fieldKey: string
 ) {
+  logger.debug('%s %j %j', fieldKey, currentData, inputData);
   if (
     currentData != null &&
     fieldKey in currentData &&

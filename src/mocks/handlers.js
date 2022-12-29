@@ -48,12 +48,16 @@ import {
   allProductsHandler,
   allLegalsHandler,
   getEnvironmentHandler,
+  getAllCredentialIssuers,
   getAllCredentialIssuersByNamespace,
+  getSharedIdpPreview,
   allGatewayServicesHandler,
+  updateAuthzProfile,
   updateProductHandler,
   updateEnvironmentHandler,
   deleteEnvironmentHandler,
   deleteProductHandler,
+  createAuthzProfile,
 } from './resolvers/products';
 import { handleAllDatasets } from './resolvers/datasets';
 
@@ -152,10 +156,11 @@ export const handlers = [
   keystone.mutation('AddEnvironment', addEnvironmentHandler),
   keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
-  keystone.query(
-    'GetAllCredentialIssuersByNamespace',
-    getAllCredentialIssuersByNamespace
-  ),
+  keystone.query('GetAllCredentialIssuers', getAllCredentialIssuersByNamespace),
+  keystone.query('GetCredentialIssuers', getAllCredentialIssuers),
+  keystone.query('SharedIdPPreview', getSharedIdpPreview),
+  keystone.mutation('CreateAuthzProfile', createAuthzProfile),
+  keystone.mutation('UpdateAuthzProfile', updateAuthzProfile),
   keystone.query('GetAllGatewayServices', allGatewayServicesHandler),
   keystone.query('GetAllLegals', allLegalsHandler),
   keystone.query(

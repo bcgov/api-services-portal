@@ -50,6 +50,7 @@ CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,update,,namespace,,,credential-admin,,,deny,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"create,read",namespace,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,sharedIdPs,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,allCredentialIssuersByNamespace,,,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
@@ -199,7 +200,7 @@ Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allGatewayRoutesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allGatewayPluginsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
-API Owner Role Rules,,allGatewayServiceMetricsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByServiceNS
+API Owner Role Rules,,allGatewayServiceMetricsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allProductsByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allNamespaceServiceAccounts,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS
 API Owner Role Rules,,allCredentialIssuersByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS

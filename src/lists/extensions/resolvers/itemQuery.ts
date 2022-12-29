@@ -36,7 +36,7 @@ export const ItemQuery = (keystone: any, alias: AliasConfig) => {
           try {
             // note: only has the root List data, not the relationships
             logger.debug('Record %j', record);
-            return alias.hook ? alias.hook(record) : record;
+            return alias.hook ? await alias.hook(context, record) : record;
           } catch (e) {
             logger.error('Failed to process hook - %s', e);
             throw e;

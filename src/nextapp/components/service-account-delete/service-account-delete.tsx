@@ -46,10 +46,11 @@ const ServiceAccountDelete: React.FC<ServiceAccountDeleteProps> = ({
       });
       onClose();
       onDelete();
-    } catch {
+    } catch (err) {
       toast({
         title: 'Service Account delete failed',
         status: 'error',
+        description: err,
         isClosable: true,
       });
     }

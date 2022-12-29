@@ -277,6 +277,8 @@ components:
                 clientRegistration: managed
                 clientId: a-client-id
                 clientSecret: a-client-secret
+        CredentialIssuerRefID:
+            type: string
         UserRefID:
             type: string
         CredentialIssuer:
@@ -315,6 +317,8 @@ components:
                     type: string
                 resourceAccessScope:
                     type: string
+                isShared:
+                    type: boolean
                 apiKeyName:
                     type: string
                 availableScopes:
@@ -333,6 +337,8 @@ components:
                     items:
                         type: string
                     type: array
+                inheritFrom:
+                    $ref: '#/components/schemas/CredentialIssuerRefID'
                 owner:
                     $ref: '#/components/schemas/UserRefID'
             type: object
@@ -507,8 +513,6 @@ components:
         DraftDatasetRefID:
             type: string
         LegalRefID:
-            type: string
-        CredentialIssuerRefID:
             type: string
         Environment:
             properties:
