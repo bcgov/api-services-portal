@@ -93,7 +93,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
                 as="a"
                 color="bc-blue"
                 icon={<Icon as={GiCapitol} />}
-                data-testid="help-menu-api-docs"
+                data-testid="login-api-provider-btn"
               >
                 API Provider
               </MenuItem>
@@ -102,7 +102,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
               <MenuItem
                 as="a"
                 color="bc-blue"
-                data-testid="help-menu-aps-support"
+                data-testid="login-api-developer-btn"
                 icon={<Icon as={FaCode} />}
               >
                 Developer
