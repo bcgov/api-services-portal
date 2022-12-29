@@ -15,6 +15,7 @@ import {
   removeKeys,
 } from '../../../batch/feed-worker';
 import { o } from '../util';
+import { BatchService } from '../../../services/keystone/batch-service';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -43,12 +44,12 @@ import { o } from '../util';
   //   variables: { org: 'ministry-of-citizens-services' },
   // });
 
-  const records = await getRecords(
-    ctx,
-    'Content',
-    'allContentsByNamespace',
-    []
-  );
+  // const records = await getRecords(
+  //   ctx,
+  //   'Content',
+  //   'allContentsByNamespace',
+  //   []
+  // );
 
   // const records = await getRecords(ctx, 'Product', 'allProductsByNamespace', [
   //   'environments',
@@ -68,29 +69,38 @@ import { o } from '../util';
   //   []
   // );
 
-  const data = records
-    .map((o) => removeEmpty(o))
-    .map((o) => transformAllRefID(o, ['organization', 'organizationUnit']))
-    .map((o) =>
-      parseJsonString(o, [
-        'tags',
-        'availableScopes',
-        'resourceScopes',
-        'clientRoles',
-        'environmentDetails',
-      ])
-    )
-    .map((o) =>
-      removeKeys(o, [
-        'id',
-        'namespace',
-        'extSource',
-        'extForeignKey',
-        'extRecordHash',
-      ])
-    );
+  // const data = records
+  //   .map((o) => removeEmpty(o))
+  //   .map((o) => transformAllRefID(o, ['organization', 'organizationUnit']))
+  //   .map((o) =>
+  //     parseJsonString(o, [
+  //       'tags',
+  //       'availableScopes',
+  //       'resourceScopes',
+  //       'clientRoles',
+  //       'environmentDetails',
+  //     ])
+  //   )
+  //   .map((o) =>
+  //     removeKeys(o, [
+  //       'id',
+  //       'namespace',
+  //       'extSource',
+  //       'extForeignKey',
+  //       'extRecordHash',
+  //     ])
+  //   );
 
-  o(data);
+  //  o(data);
 
+  const bapi = new BatchService(ctx);
+
+  const res = await bapi.lookup(
+    'allOrganizations',
+    'orgUnits.name',
+    'heritage',
+    []
+  );
+  o(res);
   await keystone.disconnect();
 })();

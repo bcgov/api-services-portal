@@ -10,7 +10,6 @@ import {
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
   recordActivity,
-  recordActivityWithBlob,
 } from '../../services/keystone';
 import {
   getEnvironmentContext,
@@ -40,7 +39,7 @@ import {
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
 import { NamespaceService } from '../../services/org-groups';
-import { IssuerEnvironmentConfig } from '@/services/workflow/types';
+import { IssuerEnvironmentConfig } from '../../services/workflow/types';
 
 const typeUserContact = `
   type UserContact {

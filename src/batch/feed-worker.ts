@@ -469,6 +469,7 @@ export const syncRecords = async function (
       }
     }
     if (Object.keys(data).length === 0) {
+      logger.debug('[%s] [%s] no update', entity, localRecord.id);
       return {
         status: 200,
         result: 'no-change',

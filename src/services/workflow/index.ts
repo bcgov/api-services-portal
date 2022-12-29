@@ -2,6 +2,8 @@ export { Apply } from './apply';
 
 export { CreateServiceAccount } from './create-service-account';
 
+export { addClientsToSharedIdP, syncSharedIdp } from './client-shared-idp';
+
 export {
   allConsumerGroupLabels,
   allScopesAndRoles,
@@ -32,6 +34,8 @@ export {
   ValidateActiveEnvironment,
   isServiceMissingAllPluginsHandler,
 } from './validate-active-environment';
+
+export { ValidateIssuer } from './validate-issuer';
 
 export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 
