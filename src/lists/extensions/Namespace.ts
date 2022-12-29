@@ -137,6 +137,10 @@ module.exports = {
                 kcGroupService
               );
               if (merged.org) {
+                if (merged.orgEnabled == false) {
+                  const resource: any = await getResource(selectedNS, envCtx);
+                  merged['id'] = resource['id'];
+                }
                 await transformOrgAndOrgUnit(
                   context,
                   envCtx,
@@ -228,24 +232,8 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getNamespaceResourceSets(envCtx);
-              const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-              const namespaces = await resourcesApi.listResourcesByIdList(
-                resourceIds
-              );
-
-              const detail = namespaces
-                .filter((ns) => ns.name === args.ns)
-                .map((ns: ResourceSet) => ({
-                  id: ns.id,
-                  name: ns.name,
-                  scopes: ns.resource_scopes,
-                  prodEnvId: prodEnv.id,
-                }))
-                .pop();
+              const detail: any = await getResource(args.ns, envCtx);
+              detail['prodEnvId'] = prodEnv.id;
 
               const kcGroupService = await getKeycloakGroupApi(
                 envCtx.issuerEnvConfig
@@ -728,7 +716,7 @@ async function transformOrgAndOrgUnit(
   }
 
   // lookup org admins from
-  if (getOrgAdmins) {
+  if (getOrgAdmins && merged.id) {
     const orgPolicies = await getOrgPoliciesForResource(envCtx, merged.id);
     const orgAdmins: string[] = [];
     orgPolicies.map((policy) => {
@@ -736,4 +724,22 @@ async function transformOrgAndOrgUnit(
     });
     merged['orgAdmins'] = [...new Set(orgAdmins)];
   }
+}
+
+async function getResource(selectedNS: string, envCtx: EnvironmentContext) {
+  const resourceIds = await getNamespaceResourceSets(envCtx);
+  const resourcesApi = new UMAResourceRegistrationService(
+    envCtx.uma2.resource_registration_endpoint,
+    envCtx.accessToken
+  );
+  const namespaces = await resourcesApi.listResourcesByIdList(resourceIds);
+
+  return namespaces
+    .filter((ns) => ns.name === selectedNS)
+    .map((ns: ResourceSet) => ({
+      id: ns.id,
+      name: ns.name,
+      scopes: ns.resource_scopes,
+    }))
+    .pop();
 }

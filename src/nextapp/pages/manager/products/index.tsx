@@ -81,8 +81,10 @@ const ProductsPage: React.FC = () => {
         </PageHeader>
 
         <Box mt={5}>
-          {namespace.data?.currentNamespace?.orgAdmins.includes(user?.email) &&
-            namespace.data?.currentNamespace?.org && (
+          {namespace.data?.currentNamespace?.org &&
+            namespace.data?.currentNamespace?.orgAdmins?.includes(
+              user?.email
+            ) && (
               <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
                 <GridItem>
                   <Switch
