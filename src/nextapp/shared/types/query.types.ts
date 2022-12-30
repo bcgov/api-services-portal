@@ -5382,7 +5382,7 @@ export type Namespace = {
   __typename?: 'Namespace';
   id: Scalars['String'];
   name: Scalars['String'];
-  scopes: Array<Maybe<UmaScope>>;
+  scopes?: Maybe<Array<Maybe<UmaScope>>>;
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
   permDataPlane?: Maybe<Scalars['String']>;
