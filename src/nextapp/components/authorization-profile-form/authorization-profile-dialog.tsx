@@ -1,5 +1,7 @@
 import * as React from 'react';
 import {
+  Alert,
+  AlertIcon,
   Box,
   Flex,
   Modal,
@@ -15,7 +17,11 @@ import { gql } from 'graphql-request';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
-import { CredentialIssuer } from '@/shared/types/query.types';
+import {
+  CredentialIssuer,
+  CredentialIssuerCreateInput,
+  CredentialIssuerUpdateInput,
+} from '@/shared/types/query.types';
 
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
@@ -87,7 +93,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     setTabIndex(index);
   }, []);
   const handleCreateProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerCreateInput) => {
       try {
         await createMutate.mutateAsync({
           data: {
@@ -109,6 +115,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile create failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -124,12 +131,13 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     ]
   );
   const handleSaveProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerUpdateInput) => {
       try {
         await editMutate.mutateAsync({
           id,
           data: {
             ...payload,
+            inheritFrom: undefined, // should never be sent when updating a profile
             flow: flowValue,
             clientAuthenticator,
             name,
@@ -148,6 +156,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile save failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -169,7 +178,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       const [flow, clientAuthenticator] = formData.flow.split('.');
 
       const payload = {
-        ...data,
+        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
         ...formData,
         flow,
         clientAuthenticator,
@@ -191,7 +200,12 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     (payload: FormData) => {
       const formData = Object.fromEntries(payload);
       if (id) {
-        handleSaveProfile({ ...data, ...formData });
+        handleSaveProfile({
+          ...(data as
+            | CredentialIssuerCreateInput
+            | CredentialIssuerUpdateInput),
+          ...formData,
+        });
       } else {
         newAuthorizationData.current = {
           ...newAuthorizationData.current,
@@ -203,9 +217,12 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     [data, handleSaveProfile, id]
   );
   const handleClientManagementComplete = React.useCallback(
-    (environments: EnvironmentItem[]) => {
+    (inheritFromId: string, environments: EnvironmentItem[]) => {
       const payload = {
-        ...data,
+        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
+        inheritFrom: inheritFromId
+          ? { connect: { id: inheritFromId } }
+          : undefined,
         environmentDetails: JSON.stringify(environments),
       };
 
@@ -257,32 +274,31 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                 </TabList>
               </Tabs>
             </ModalHeader>
-            {tabIndex === 0 && (
-              <AuthenticationForm
-                id={id}
-                onChange={setFlow}
-                onCancel={handleClose}
-                onComplete={handleAuthenticationComplete}
-                value={flow}
-              />
-            )}
-            {tabIndex === 1 && (
-              <AuthorizationForm
-                data={data}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleAuthorizationComplete}
-                ownerName={user?.name}
-              />
-            )}
-            {tabIndex === 2 && (
-              <ClientManagement
-                data={data?.environmentDetails}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleClientManagementComplete}
-              />
-            )}
+            <AuthenticationForm
+              hidden={tabIndex !== 0}
+              id={id}
+              onChange={setFlow}
+              onCancel={handleClose}
+              onComplete={handleAuthenticationComplete}
+              value={flow}
+            />
+            <AuthorizationForm
+              data={data}
+              hidden={tabIndex !== 1}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleAuthorizationComplete}
+              ownerName={user?.name}
+            />
+            <ClientManagement
+              data={data?.environmentDetails}
+              hidden={tabIndex !== 2}
+              inheritFrom={data?.inheritFrom}
+              profileName={name}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleClientManagementComplete}
+            />
           </>
         )}
       </ModalContent>

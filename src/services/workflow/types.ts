@@ -97,13 +97,21 @@ export interface IssuerEnvironmentConfig {
   initialAccessToken?: string;
 }
 
+export function getAllIssuerEnvironmentConfigs(
+  issuer: CredentialIssuer
+): IssuerEnvironmentConfig[] {
+  const details: IssuerEnvironmentConfig[] = issuer.inheritFrom
+    ? JSON.parse(issuer.inheritFrom.environmentDetails)
+    : JSON.parse(issuer.environmentDetails);
+  return details;
+}
+
 export function checkIssuerEnvironmentConfig(
   issuer: CredentialIssuer,
   environment: string
 ) {
-  const details: IssuerEnvironmentConfig[] = JSON.parse(
-    issuer.environmentDetails
-  );
+  const details = getAllIssuerEnvironmentConfigs(issuer);
+
   const env = details.filter((c) => c.environment === environment);
   return env.length == 1 ? env[0] : null;
 }

@@ -1,0 +1,11 @@
+
+  query GetCurrentNamespace {
+    currentNamespace {
+      name
+      org
+      orgUnit
+      orgUpdatedAt
+      orgEnabled
+      orgAdmins
+    }
+  }

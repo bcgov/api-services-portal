@@ -26,7 +26,8 @@ import { KeycloakGroupService } from '../../../services/keycloak';
     await kc.assignNamespaceToOrganization(
       'feature-myacc',
       'ministry-citizens-services',
-      'databc'
+      'databc',
+      true
     );
   }
 

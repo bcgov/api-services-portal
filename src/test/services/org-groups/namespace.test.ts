@@ -30,7 +30,8 @@ describe('Org Group Namespace Service', function () {
     const result = await kc.assignNamespaceToOrganization(
       'orgcontrol_2',
       'ministry-of-citizens-services',
-      'databc'
+      'databc',
+      true
     );
     expect(result).toBe(false);
   });
@@ -45,7 +46,8 @@ describe('Org Group Namespace Service', function () {
     const result = await kc.assignNamespaceToOrganization(
       'orgcontrol',
       'ministry-of-citizens-services',
-      'databc'
+      'databc',
+      true
     );
     expect(result).toBe(true);
   });

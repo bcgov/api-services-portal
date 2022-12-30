@@ -1,16 +1,64 @@
 import * as React from 'react';
-import { Box, Container, Skeleton, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Container,
+  Grid,
+  GridItem,
+  Heading,
+  Skeleton,
+  Switch,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ProductsList from '@/components/products-list';
 import NewProduct from '@/components/new-product';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
-import { QueryKey } from 'react-query';
+import { QueryKey, useQueryClient } from 'react-query';
+import useCurrentNamespace, {
+  queryKey as currentNamespaceQueryKey,
+} from '@/shared/hooks/use-current-namespace';
+import { useRestMutationApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
+import { useAuth } from '@/shared/services/auth';
 
-const PackagingPage: React.FC = () => {
+const ProductsPage: React.FC = () => {
+  const { user } = useAuth();
   const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
+  const client = useQueryClient();
+  const namespace = useCurrentNamespace();
   const queryKey: QueryKey = ['allProducts'];
+  const mutate = useRestMutationApi();
+  const toast = useToast();
+
+  const handleOrgEnabledChanged = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const enable = event.target.checked;
+    const { name, org, orgUnit } = namespace.data?.currentNamespace;
+    try {
+      await mutate.mutateAsync({
+        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}?enable=${enable}`,
+        options: { method: 'PUT' },
+      });
+
+      await client.invalidateQueries(currentNamespaceQueryKey);
+      toast({
+        status: 'success',
+        title: 'Success',
+        description: `You have ${enable ? 'enabled' : 'disabled'} Publish APIs`,
+      });
+    } catch (err) {
+      toast({
+        title: 'Publish settings change failed',
+        description: `${err}`,
+        status: 'error',
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -33,6 +81,38 @@ const PackagingPage: React.FC = () => {
         </PageHeader>
 
         <Box mt={5}>
+          {namespace.data?.currentNamespace?.org &&
+            namespace.data?.currentNamespace?.orgAdmins?.includes(
+              user?.email
+            ) && (
+              <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
+                <GridItem>
+                  <Switch
+                    id="orgEnabled"
+                    isDisabled={!namespace.isSuccess}
+                    isChecked={
+                      /* @ts-ignore-line */ namespace.data?.currentNamespace
+                        .orgEnabled
+                    }
+                    onChange={handleOrgEnabledChanged}
+                  />
+                </GridItem>
+                <GridItem>
+                  <Heading
+                    as="label"
+                    htmlFor="orgEnabled"
+                    size="sm"
+                    lineHeight="24px"
+                  >
+                    Publish APIs
+                  </Heading>
+                  <Text>
+                    By enabling Publish APIs, consumers can find and request
+                    access to your APIs from the Directory.
+                  </Text>
+                </GridItem>
+              </Grid>
+            )}
           <ClientRequest
             fallback={[1, 2, 3].map((d) => (
               <Skeleton
@@ -52,4 +132,10 @@ const PackagingPage: React.FC = () => {
   );
 };
 
-export default PackagingPage;
+export default ProductsPage;
+
+const mutation = gql`
+  mutation UpdateCurrentNamespace {
+    updateCurrentNamespace
+  }
+`;

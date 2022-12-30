@@ -163,6 +163,7 @@ export async function restApi<T>(
   url: string,
   options?: RequestInit
 ): Promise<T>;
+
 export async function restApi(
   url: string,
   options?: RequestInit
@@ -202,11 +203,22 @@ export async function restApi(
 export const useRestApi = <T>(
   key: QueryKey,
   url: string,
-  queryOptions: UseQueryOptions<T> = { suspense: true }
+  queryOptions: UseQueryOptions<T> = { suspense: true },
+  options?: RequestInit
 ): UseQueryResult<T> => {
   return useQuery<T, Error>(
     key,
-    async () => await restApi<T>(url),
+    async () => await restApi<T>(url, options),
+    queryOptions
+  );
+};
+
+export const useRestMutationApi = <T>(
+  queryOptions: UseQueryOptions<T> = { suspense: true }
+): UseMutationResult<T> => {
+  return useMutation(
+    async (info: { url: string; options?: RequestInit }) =>
+      await restApi<any>(info.url, info.options),
     queryOptions
   );
 };

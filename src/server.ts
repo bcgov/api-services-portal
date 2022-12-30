@@ -171,6 +171,7 @@ for (const _list of [
   'ConsumerProducts',
   'ConsumerScopesAndRoles',
   'CredentialRegenerate',
+  'CredentialIssuerExt',
   'Namespace',
   'NamespaceActivity',
   'OrganizationPolicy',
@@ -246,7 +247,7 @@ const apps = [
         const error = formatError(err);
 
         const data = error.extensions?.exception?.response?.data;
-        if (error.extensions?.exception) {
+        if (!dev && error.extensions?.exception) {
           logger.warn('Removing exception details from error response');
           delete error.extensions['exception'];
         }
