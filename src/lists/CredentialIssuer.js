@@ -21,9 +21,14 @@ const { updateEnvironmentDetails } = require('../services/keystone');
 const {
   DeleteIssuerValidate,
   StructuredActivityService,
+  ValidateIssuer,
 } = require('../services/workflow');
-
+const {
+  syncSharedIdp,
+  addClientsToSharedIdP,
+} = require('../services/workflow');
 const { Logger } = require('../logger');
+const { kebabCase } = require('lodash');
 const logger = Logger('lists.credentialissuer');
 
 module.exports = {
@@ -74,7 +79,7 @@ module.exports = {
       type: Select,
       emptyOption: false,
       dataType: 'string',
-      defaultValue: 'manual',
+      defaultValue: 'auto',
       options: [
         { value: 'manual', label: 'Manual' },
         { value: 'auto', label: 'Automatic' },
@@ -149,6 +154,21 @@ module.exports = {
       isRequired: false,
       defaultValue: 'X-API-KEY',
     },
+    // Introduced to support shared IdP
+    isShared: {
+      type: Checkbox,
+      isRequired: true,
+      defaultValue: false,
+      access: { update: false },
+    },
+    // Introduced to support shared IdP - 'environmentDetails' will be used from the inheritFrom Issuer
+    inheritFrom: {
+      type: Relationship,
+      ref: 'CredentialIssuer',
+      many: false,
+      isRequired: false,
+      access: { update: false },
+    },
     owner: {
       type: Relationship,
       ref: 'User',
@@ -173,6 +193,11 @@ module.exports = {
         if (context['authedItem'] && 'namespace' in context['authedItem']) {
           resolvedData['namespace'] = context['authedItem']['namespace'];
         }
+        if ('inheritFrom' in resolvedData) {
+          // clientId is used when inheritFrom is set
+          // and it represents the client that Roles are managed for
+          resolvedData['clientId'] = kebabCase(resolvedData['name']);
+        }
       }
       if (operation == 'update' || operation == 'create') {
         // special handling of the environmentDetails
@@ -185,6 +210,34 @@ module.exports = {
       }
 
       return resolvedData;
+    },
+
+    validateInput: async function ({
+      operation,
+      existingItem,
+      originalInput,
+      resolvedData,
+      context,
+      addFieldValidationError, // Field hooks only
+      addValidationError, // List hooks only
+      listKey,
+      fieldPath, // Field hooks only
+    }) {
+      if (operation === 'update') {
+        if ('inheritFrom' in originalInput || 'clientId' in originalInput) {
+          addValidationError(
+            'Some fields are only set during creation.  Failed to update.'
+          );
+        }
+      }
+      await ValidateIssuer(
+        context.createContext({ skipAccessControl: true }),
+        operation,
+        existingItem,
+        originalInput,
+        resolvedData,
+        addValidationError
+      );
     },
 
     validateDelete: async function ({ existingItem, context }) {
@@ -210,19 +263,48 @@ module.exports = {
       );
     },
 
-    afterChange: async function ({ operation, updatedItem, context }) {
+    beforeChange: async function ({
+      operation,
+      originalInput,
+      resolvedData,
+      context,
+    }) {
+      if (operation === 'create' && originalInput.inheritFrom) {
+        await addClientsToSharedIdP(
+          context,
+          resolvedData.namespace,
+          resolvedData.clientId,
+          resolvedData.inheritFrom
+        );
+      }
+    },
+
+    afterChange: async function ({
+      operation,
+      existingItem,
+      updatedItem,
+      context,
+    }) {
+      if (updatedItem.inheritFrom) {
+        await syncSharedIdp(context, updatedItem.id);
+      }
+
       await new StructuredActivityService(
         context,
-        context.authedItem['namespace']
-      ).logListActivity(
-        true,
-        operation,
-        'authorization profile',
-        {
-          credentialIssuer: updatedItem,
-        },
-        '{actor} {action} {entity} {credentialIssuer}'
-      );
+        context.authedItem?.namespace
+      )
+        .logListActivity(
+          true,
+          operation,
+          'authorization profile',
+          {
+            credentialIssuer: updatedItem,
+          },
+          '{actor} {action} {entity} {credentialIssuer}'
+        )
+        .catch((e) => {
+          logger.error('[Activity] Failed to Record %s', e);
+        });
     },
   },
 };

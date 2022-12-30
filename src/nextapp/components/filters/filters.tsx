@@ -166,7 +166,7 @@ const Filters: React.FC<FiltersProps> = ({
             <GridItem d="flex" alignItems="center">
               <Wrap>
                 {filters.map((f) => (
-                  <WrapItem key={uid(f.id)}>
+                  <WrapItem key={uid(f)}>
                     <Tag variant="outline">
                       {f.value}
                       <TagCloseButton onClick={handleRemove(f)} />

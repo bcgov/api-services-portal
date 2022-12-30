@@ -54,6 +54,10 @@ export class KeycloakClientService {
     return lkup[0];
   }
 
+  public async findOne(id: string) {
+    return await this.kcAdminClient.clients.findOne({ id });
+  }
+
   public async lookupServiceAccountUserId(id: string) {
     const us = await this.kcAdminClient.clients.getServiceAccountUser({ id });
     logger.debug('[lookupServiceAccountUserId] (%s) RESULT %j', id, us);

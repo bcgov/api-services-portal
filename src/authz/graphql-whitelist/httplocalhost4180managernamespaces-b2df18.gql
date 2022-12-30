@@ -1,0 +1,9 @@
+
+  query GetNamespaces {
+    allNamespaces {
+      id
+      name
+      orgEnabled
+      orgUpdatedAt
+    }
+  }

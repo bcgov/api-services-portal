@@ -107,7 +107,7 @@ const EditProduct: React.FC<EditProductProps> = ({ data, queryKey }) => {
         onDeleted={deleteDisclosure.onClose}
         queryKey={queryKey}
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>{`Edit ${data.name}`}</ModalHeader>

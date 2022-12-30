@@ -50,11 +50,11 @@ export const getFlowText = (key: string): string => {
 
 export const getProviderText = (provider: string): string => {
   switch (provider) {
-    case 'bscs':
+    case 'bcsc':
       return 'BC Services Card';
     case 'idir':
       return 'IDIR';
-    case 'bceid':
+    case 'bceid-business':
       return 'Business BCeID';
     case 'github':
       return 'Github';

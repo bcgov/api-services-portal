@@ -1,7 +1,5 @@
 
   query GetFilterConsumers($namespace: String!) {
-    allConsumerScopesAndRoles
-
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id
@@ -10,4 +8,5 @@
         name
       }
     }
+    allConsumerScopesAndRoles
   }

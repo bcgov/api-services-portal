@@ -43,7 +43,21 @@ export class OrgAuthzService {
     return await svc.findResourceByUri(uri);
   }
 
-  async createIfMissingResource(org: string): Promise<string> {
+  async resourceExists(org: string): Promise<boolean> {
+    const svc = new UMAResourceRegistrationService(
+      this.uma2.resource_registration_endpoint,
+      this.accessToken
+    );
+
+    const resourceName = `org/${org}`;
+
+    const res = await svc.findResourceByName(resourceName);
+    return Boolean(res);
+  }
+
+  async createIfMissingResource(
+    org: string
+  ): Promise<{ id: string; created: boolean }> {
     logger.debug('[createIfMissingResource] %s', org);
 
     const svc = new UMAResourceRegistrationService(
@@ -59,7 +73,7 @@ export class OrgAuthzService {
         "[createIfMissingResource] '%s' already exists",
         resourceName
       );
-      return res.id;
+      return { id: res.id, created: false };
     } else {
       const created = await svc.createResourceSet({
         name: resourceName,
@@ -68,7 +82,7 @@ export class OrgAuthzService {
         ownerManagedAccess: true,
       });
       logger.debug("[createIfMissingResource] '%s' CREATED", resourceName);
-      return created.id;
+      return { id: created.id, created: true };
     }
   }
 }

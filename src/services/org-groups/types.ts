@@ -32,4 +32,6 @@ export interface UserReference {
 export interface OrgNamespace {
   name: string;
   orgUnit: string;
+  enabled: boolean;
+  updatedAt: number;
 }

@@ -11,6 +11,9 @@
         email
       }
       environmentDetails
+      inheritFrom {
+        environmentDetails
+      }
       availableScopes
       clientAuthenticator
       clientRoles

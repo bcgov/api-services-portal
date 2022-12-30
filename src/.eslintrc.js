@@ -24,5 +24,12 @@ module.exports = {
   },
   rules: {
     'react/prop-types': ['off'],
+    'no-unused-vars': [
+      'error',
+      {
+        destructuredArrayIgnorePattern: '^_',
+        argsIgnorePattern: '^_',
+      },
+    ],
   },
 };

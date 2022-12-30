@@ -1,0 +1,28 @@
+{
+  "id": "04e5541b-a191-4a7a-9baf-f28f7f867dbe",
+  "updated_at": 1661807988,
+  "https_redirect_status_code": 426,
+  "preserve_host": true,
+  "name": "aps-gwa-owner",
+  "service": {
+    "id": "0bd61fd0-70e0-41dc-ba13-30252eb62134"
+  },
+  "request_buffering": true,
+  "response_buffering": true,
+  "snis": null,
+  "protocols": ["http"],
+  "paths": ["/int"],
+  "tags": ["ns.platform.dev", "ns.platform"],
+  "sources": null,
+  "destinations": null,
+  "path_handling": "v0",
+  "headers": null,
+  "regex_priority": 0,
+  "strip_path": false,
+  "created_at": 1661807988,
+  "methods": null,
+  "hosts": ["gwa-apps-gov-bc-ca.dev.api.gov.bc.ca"],
+  "extSource": "kong",
+  "extRecordHash": "0000",
+  "plugins": []
+}

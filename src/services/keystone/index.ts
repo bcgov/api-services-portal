@@ -14,8 +14,12 @@ export { lookupApplication, lookupMyApplicationsById } from './application';
 export { deleteRecord, deleteRecords } from './common-delete-record';
 
 export {
+  lookupSharedIssuers,
   lookupCredentialIssuerById,
   updateEnvironmentDetails,
+  maskEnvironmentDetails,
+  dynamicallySetEnvironmentDetails,
+  generateEnvDetails,
 } from './credential-issuer';
 
 export {
