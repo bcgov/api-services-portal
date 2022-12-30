@@ -60,7 +60,7 @@ const typeUserContact = `
 
 const typeNamespace = `
 type Namespace {
-    id: String!
+    id: String
     name: String!,
     scopes: [UMAScope],
     prodEnvId: String,
