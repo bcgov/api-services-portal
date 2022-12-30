@@ -60,9 +60,9 @@ const typeUserContact = `
 
 const typeNamespace = `
 type Namespace {
-    id: String!
+    id: String
     name: String!,
-    scopes: [UMAScope]!,
+    scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
     permDataPlane: String,
@@ -132,16 +132,18 @@ module.exports = {
 
               const merged = await backfillGroupAttributes(
                 selectedNS,
-                { name: selectedNS },
+                { name: selectedNS, prodEnvId: prodEnv.id },
                 defaultSettings,
                 kcGroupService
               );
+              const getOrgAdmins = true;
+              if (getOrgAdmins) {
+                const resource: any = await getResource(selectedNS, envCtx);
+                merged['id'] = resource['id'];
+                merged['scopes'] = resource['scopes'];
+              }
+
               if (merged.org) {
-                const getOrgAdmins = true;
-                if (getOrgAdmins) {
-                  const resource: any = await getResource(selectedNS, envCtx);
-                  merged['id'] = resource['id'];
-                }
                 await transformOrgAndOrgUnit(
                   context,
                   envCtx,
