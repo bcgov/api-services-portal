@@ -31,9 +31,14 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
 
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-
-      cy.get(login.loginButton).click()
-      cy.contains('Github').click()
+      cy.get(login.loginDropDown).click()
+      if(username.includes('idir')){
+        login.selectAPIProviderLoginOption()
+      }
+      else
+      {
+        login.selectDeveloperLoginOption()
+      }
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',

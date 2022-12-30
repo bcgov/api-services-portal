@@ -66,5 +66,7 @@ declare namespace Cypress {
     verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
 
     updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+
+    // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }
