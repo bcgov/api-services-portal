@@ -40,6 +40,7 @@ const PreviewBanner: React.FC = () => {
 
   React.useEffect(() => {
     if (
+      data?.currentNamespace &&
       data?.currentNamespace.org &&
       data?.currentNamespace.orgEnabled &&
       !data?.currentNamespace.orgNoticeViewed
