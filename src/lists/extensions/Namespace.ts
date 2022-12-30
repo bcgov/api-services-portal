@@ -137,7 +137,8 @@ module.exports = {
                 kcGroupService
               );
               if (merged.org) {
-                if (merged.orgEnabled == false) {
+                const getOrgAdmins = true;
+                if (getOrgAdmins) {
                   const resource: any = await getResource(selectedNS, envCtx);
                   merged['id'] = resource['id'];
                 }
@@ -145,7 +146,7 @@ module.exports = {
                   context,
                   envCtx,
                   merged,
-                  merged.orgEnabled == false
+                  getOrgAdmins
                 );
               }
               return merged;
