@@ -132,7 +132,7 @@ module.exports = {
 
               const merged = await backfillGroupAttributes(
                 selectedNS,
-                { name: selectedNS },
+                { name: selectedNS, prodEnvId: prodEnv.id },
                 defaultSettings,
                 kcGroupService
               );
