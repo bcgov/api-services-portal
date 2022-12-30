@@ -62,7 +62,7 @@ const typeNamespace = `
 type Namespace {
     id: String!
     name: String!,
-    scopes: [UMAScope]!,
+    scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
     permDataPlane: String,
@@ -141,6 +141,7 @@ module.exports = {
                 if (getOrgAdmins) {
                   const resource: any = await getResource(selectedNS, envCtx);
                   merged['id'] = resource['id'];
+                  merged['scopes'] = resource['scopes'];
                 }
                 await transformOrgAndOrgUnit(
                   context,
