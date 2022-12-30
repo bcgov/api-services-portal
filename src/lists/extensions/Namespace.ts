@@ -136,13 +136,14 @@ module.exports = {
                 defaultSettings,
                 kcGroupService
               );
+              const getOrgAdmins = true;
+              if (getOrgAdmins) {
+                const resource: any = await getResource(selectedNS, envCtx);
+                merged['id'] = resource['id'];
+                merged['scopes'] = resource['scopes'];
+              }
+
               if (merged.org) {
-                const getOrgAdmins = true;
-                if (getOrgAdmins) {
-                  const resource: any = await getResource(selectedNS, envCtx);
-                  merged['id'] = resource['id'];
-                  merged['scopes'] = resource['scopes'];
-                }
                 await transformOrgAndOrgUnit(
                   context,
                   envCtx,
