@@ -34,7 +34,7 @@ const PreviewBanner: React.FC = () => {
   const mutate = useApiMutation(mutation);
 
   const handleClose = async () => {
-    await mutate.mutateAsync(true);
+    await mutate.mutateAsync({});
     bannerDisclosure.onClose();
   };
 
@@ -50,7 +50,7 @@ const PreviewBanner: React.FC = () => {
 
     return () => {
       if (rendered.current && bannerDisclosure.isOpen) {
-        mutate.mutate(true);
+        mutate.mutate({});
       }
     };
   }, [data]);
