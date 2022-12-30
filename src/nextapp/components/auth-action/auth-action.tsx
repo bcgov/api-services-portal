@@ -17,11 +17,13 @@ import {
   MenuDivider,
 } from '@chakra-ui/react';
 import { BiLinkExternal } from 'react-icons/bi';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown, FaCog } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 import NamespaceMenu from '../namespace-menu';
 import HelpMenu from './help-menu';
 import { useGlobal } from '@/shared/services/global';
+
+import DevMenu from './dev-menu';
 
 interface AuthActionProps {
   site: string;
@@ -31,6 +33,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
   const { user } = useAuth();
   const isBCeIDUser = user?.roles.includes('bceid-business-user');
   const global = useGlobal();
+  const isDev = process.env.NODE_ENV === 'development';
 
   if (site === 'redirect') {
     return <></>;
@@ -134,6 +137,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             </MenuItem>
           </MenuList>
         </Menu>
+        {isDev && <DevMenu />}
       </Box>
     </HStack>
   );

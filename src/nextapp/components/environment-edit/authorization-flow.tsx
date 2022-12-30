@@ -17,12 +17,15 @@ import {
   Select,
   Textarea,
   useDisclosure,
+  Tooltip,
+  Box,
 } from '@chakra-ui/react';
 import { uid } from 'react-uid';
 import CredentialIssuerSelect from '../environment-config/credential-issuer-select';
 import { Environment } from '@/shared/types/query.types';
 import LegalSelect from '../environment-config/legal-select';
 import EnvironmentPlugins from '../environment-plugins';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
 
 interface AuthorizationFlowProps {
   environment: Environment;
@@ -48,6 +51,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
     }
     return flow === 'public';
   }, [flow, credentialIssuer]);
+  const { data, isSuccess } = useCurrentNamespace();
 
   const handleCredentialIssuerChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -136,14 +140,23 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
             >
               Require Approval
             </Checkbox>
-            <Checkbox
-              defaultChecked={environment.active}
-              name="active"
-              value="true"
-              data-testid="edit-env-active-checkbox"
+            <Tooltip
+              hasArrow
+              isDisabled={Boolean(data?.currentNamespace.org)}
+              label="Available after an Organization has been associated to your namespace."
             >
-              Enable Environment
-            </Checkbox>
+              <Box>
+                <Checkbox
+                  defaultChecked={environment.active}
+                  isDisabled={!isSuccess || !data?.currentNamespace.org}
+                  name="active"
+                  value="true"
+                  data-testid="edit-env-active-checkbox"
+                >
+                  Enable Environment
+                </Checkbox>
+              </Box>
+            </Tooltip>
           </Flex>
         </GridItem>
         <GridItem>

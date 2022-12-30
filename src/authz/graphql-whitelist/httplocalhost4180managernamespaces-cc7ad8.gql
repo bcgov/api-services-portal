@@ -1,4 +1,0 @@
-
-  mutation DeleteNamespace($name: String!) {
-    deleteNamespace(namespace: $name)
-  }

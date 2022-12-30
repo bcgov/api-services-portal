@@ -42,6 +42,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
         title="Make your first Product"
         message="You can create additional environments once a product has been made."
         action={<NewProduct queryKey={queryKey} />}
+        boxProps={{ mx: 0 }}
       />
     );
   }

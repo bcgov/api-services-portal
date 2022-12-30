@@ -41,7 +41,7 @@ function camelize(str: string) {
 
 export function camelCaseAttributes(object: any, keys: string[]): void {
   keys.forEach((k) => {
-    if (object[k]) {
+    if (k in object) {
       const newKey = camelize(k);
       if (newKey != k) {
         object[newKey] = object[k];

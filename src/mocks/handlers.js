@@ -1,6 +1,7 @@
 import { graphql, rest } from 'msw';
+import subDays from 'date-fns/subDays';
 
-import { harley, mark } from './resolvers/personas';
+import * as personas from './resolvers/personas';
 import {
   apiDirectoryHandler,
   apiDirectoriesHandler,
@@ -32,6 +33,8 @@ import {
 } from './resolvers/consumers';
 import {
   getCurrentNamesSpaceHandler,
+  updateNamespaceNotificationViewed,
+  updateCurrentNamesSpaceHandler,
   getOrganizationGroupsPermissionsHandler,
   getResourceSetHandler,
   getServiceAccessPermissionsHandler,
@@ -40,6 +43,8 @@ import {
   grantSAAccessHandler,
   revokeAccessHandler,
   revokeSAAccessHandler,
+  getListOrganizationsHandler,
+  getListOrganizationUnitsHandler,
 } from './resolvers/namespace-access';
 import { getActivityHandler } from './resolvers/activity';
 import {
@@ -77,13 +82,24 @@ const allNamespaces = [
   {
     id: 'n1',
     name: 'aps-portal',
+    orgEnabled: true,
+    createdAt: subDays(new Date(), 20).toISOString(),
   },
   {
     id: 'n2',
     name: 'loc',
+    orgEnabled: false,
+    createdAt: subDays(new Date(), 5).toISOString(),
+  },
+  {
+    id: 'n3',
+    name: 'dss-app',
+    orgEnabled: true,
+    createdAt: new Date().toISOString(),
   },
 ];
-let namespace = mark.namespace;
+let namespace = personas.mark.namespace;
+let user = { ...personas.mark, namespace };
 
 export function resetAll() {
   consumersStore.reset();
@@ -92,6 +108,10 @@ export function resetAll() {
 export const keystone = graphql.link('*/gql/api');
 
 export const handlers = [
+  rest.put('/dev/change-persona/:name', (req, res, ctx) => {
+    user = personas[req.params.name];
+    return res(ctx.text(`Persona changed to ${req.params.name}`));
+  }),
   rest.get('*/about', (_, res, ctx) => {
     return res(
       ctx.status(200),
@@ -117,7 +137,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: { ...mark, namespace },
+        user,
       })
     );
   }),
@@ -136,6 +156,22 @@ export const handlers = [
     return res(
       ctx.data({
         allNamespaces,
+      })
+    );
+  }),
+  keystone.mutation('CreateNamespace', (req, res, ctx) => {
+    const { name } = req.variables;
+    const id = `ns-${allNamespaces.length + 1}`;
+    const namespace = {
+      name,
+      id,
+    };
+
+    allNamespaces.push(namespace);
+
+    req(
+      ctx.data({
+        createNamespace: namespace,
       })
     );
   }),
@@ -193,6 +229,13 @@ export const handlers = [
   ),
   keystone.query('GetResourceSet', getResourceSetHandler),
   keystone.query('GetCurrentNamespace', getCurrentNamesSpaceHandler),
+  keystone.mutation(
+    'MarkNamespaceNotificationViewed',
+    updateNamespaceNotificationViewed
+  ),
+  keystone.query('ListOrganizations', getListOrganizationsHandler),
+  keystone.query('ListOrganizationUnits', getListOrganizationUnitsHandler),
+  keystone.mutation('UpdateCurrentNamespace', updateCurrentNamesSpaceHandler),
   keystone.mutation('GrantUserAccess', grantAccessHandler),
   keystone.mutation('GrantSAAccess', grantSAAccessHandler),
   keystone.mutation('RevokeAccess', revokeAccessHandler),
@@ -208,7 +251,8 @@ export const handlers = [
   keystone.mutation('RevokeAccessFromConsumer', revokeAccessFromConsumer),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     const { serviceAccessId } = req.variables;
-    const institution = serviceAccessId === 'd1' ? null : harley.business;
+    const institution =
+      serviceAccessId === 'd1' ? null : personas.harleyBusiness;
     return res(
       ctx.data({
         BusinessProfile: {
@@ -217,11 +261,11 @@ export const handlers = [
       })
     );
   }),
-  keystone.query('RequestDetailsBusinessProfile', (req, res, ctx) => {
+  keystone.query('RequestDetailsBusinessProfile', (_, res, ctx) => {
     return res(
       ctx.data({
         BusinessProfile: {
-          institution: harley.business,
+          institution: personas.harleyBusiness,
         },
       })
     );

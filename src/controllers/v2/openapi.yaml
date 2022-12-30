@@ -376,12 +376,29 @@ components:
                 $ref: '#/components/schemas/Maybe_Scalars-at-String_'
             type: array
             nullable: true
+        Maybe_Scalars-at-JSON_:
+            nullable: true
+        Maybe_Scalars-at-Float_:
+            type: number
+            format: double
+            nullable: true
+        Maybe_Scalars-at-Boolean_:
+            type: boolean
+            nullable: true
         Namespace:
             properties:
+                orgAdmins:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                orgNoticeViewed:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                orgEnabled:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                orgUpdatedAt:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Float_'
                 orgUnit:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 org:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
@@ -505,9 +522,16 @@ components:
                     type: string
                 orgUnit:
                     type: string
+                enabled:
+                    type: boolean
+                updatedAt:
+                    type: number
+                    format: double
             required:
                 - name
                 - orgUnit
+                - enabled
+                - updatedAt
             type: object
             additionalProperties: false
         DraftDatasetRefID:
@@ -1439,6 +1463,13 @@ paths:
                     required: true
                     schema:
                         type: string
+                -
+                    in: query
+                    name: enable
+                    required: false
+                    schema:
+                        default: true
+                        type: boolean
         delete:
             operationId: unassign-namespace-from-organization
             responses:

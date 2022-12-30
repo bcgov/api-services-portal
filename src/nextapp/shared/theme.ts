@@ -4,6 +4,7 @@ import { transparentize } from '@chakra-ui/theme-tools';
 const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
+  'bc-yellow-light': transparentize('#FCBA19', 0.1)({}),
   text: '#313132',
   'bc-component': '#606060',
   'bc-empty': '#60606080',
@@ -502,6 +503,11 @@ const theme = extendTheme(
               color: 'bc-component',
             },
           },
+        },
+      },
+      Tooltip: {
+        baseStyle: {
+          bgColor: '#373d3f',
         },
       },
     },

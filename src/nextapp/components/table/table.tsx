@@ -186,7 +186,7 @@ const ApsTable: React.FC<ApsTableProps> = ({
             });
             return elements;
           })()}
-        {!data.length && !isUpdating && (
+        {!data?.length && !isUpdating && (
           <Tr>
             <Td colSpan={columns.length} textAlign="center">
               {emptyView}
