@@ -241,9 +241,24 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_Scalars-at-String_"}},{"dataType":"enum","enums":[null]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-JSON_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"any"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-Float_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-Boolean_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Namespace": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgUnit":{"ref":"Maybe_Scalars-at-String_"},"org":{"ref":"Maybe_Scalars-at-String_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ActivityDetail": {
@@ -319,6 +334,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
+            "enabled": {"dataType":"boolean","required":true},
+            "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -1300,6 +1317,7 @@ export function RegisterRoutes(app: express.Router) {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     orgUnit: {"in":"path","name":"orgUnit","required":true,"dataType":"string"},
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    enable: {"default":true,"in":"query","name":"enable","dataType":"boolean"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

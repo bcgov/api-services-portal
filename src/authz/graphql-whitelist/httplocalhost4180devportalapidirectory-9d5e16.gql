@@ -1,6 +1,7 @@
 
-  query GET {
+  query GetCurrentNamespace {
     currentNamespace {
+      name
       org
       orgUnit
     }

@@ -24,7 +24,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   title,
 }) => {
   return (
-    <Box bg="bc-gray" pt={!breadcrumb ? 10 : 4} pb={4}>
+    <Box pt={!breadcrumb ? 10 : 4} pb={4}>
       <Box as="header" display="flex" flexDirection="column" mb={4}>
         {breadcrumb && (
           <Box as="hgroup" mb={2}>

@@ -1,0 +1,4 @@
+
+  mutation UpdateCurrentNamespace($org: String!, $orgUnit: String!) {
+    updateCurrentNamespace(org: $org, orgUnit: $orgUnit)
+  }

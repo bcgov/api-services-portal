@@ -69,7 +69,7 @@ describe('Change Product environment from active to inactive', () => {
     cy.visit(appDir.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let prod = clientCredentials.clientIdSecret_KongKeyToCC.product
-      apiDir.isEnvironmentDisplayInAPIDirectory(prod, false)
+      // apiDir.isEnvironmentDisplayInAPIDirectory(prod, false)
     })
   })
 

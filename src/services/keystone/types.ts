@@ -4504,6 +4504,8 @@ export type Mutation = {
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
+  markNamespaceNotificationViewed?: Maybe<Scalars['Boolean']>;
+  updateCurrentNamespace?: Maybe<Scalars['String']>;
   createNamespace?: Maybe<Namespace>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
@@ -5309,6 +5311,12 @@ export type MutationRegenerateCredentialsArgs = {
 };
 
 
+export type MutationUpdateCurrentNamespaceArgs = {
+  org?: Maybe<Scalars['String']>;
+  orgUnit?: Maybe<Scalars['String']>;
+};
+
+
 export type MutationCreateNamespaceArgs = {
   namespace: Scalars['String'];
 };
@@ -5375,13 +5383,17 @@ export type Namespace = {
   __typename?: 'Namespace';
   id: Scalars['String'];
   name: Scalars['String'];
-  scopes: Array<Maybe<UmaScope>>;
+  scopes?: Maybe<Array<Maybe<UmaScope>>>;
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
   permDataPlane?: Maybe<Scalars['String']>;
   permProtectedNs?: Maybe<Scalars['String']>;
-  org?: Maybe<Scalars['String']>;
-  orgUnit?: Maybe<Scalars['String']>;
+  org?: Maybe<Scalars['JSON']>;
+  orgUnit?: Maybe<Scalars['JSON']>;
+  orgUpdatedAt?: Maybe<Scalars['Float']>;
+  orgEnabled?: Maybe<Scalars['Boolean']>;
+  orgNoticeViewed?: Maybe<Scalars['Boolean']>;
+  orgAdmins?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type NamespaceInput = {

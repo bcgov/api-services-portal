@@ -222,6 +222,9 @@ const item = gql`
       permProtectedNs
       org
       orgUnit
+      orgUpdatedAt
+      orgEnabled
+      orgAdmins
     }
   }
 `;

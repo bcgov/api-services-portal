@@ -16,6 +16,7 @@ interface RadioCardGroupProps extends ChakraProps {
     value: string;
   }[];
   onChange?: (value: string) => void;
+  value?: string;
 }
 
 const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
@@ -24,6 +25,7 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
   name,
   options,
   onChange,
+  value,
   ...props
 }) => {
   const { getRootProps, getRadioProps } = useRadioGroup({
@@ -34,9 +36,10 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
   const group = getRootProps();
 
   return (
-    <HStack {...group} {...props} spacing={4}>
+    <HStack {...group} {...props} spacing={4} sx={{ '& > *': { flex: 1 } }}>
       {options.map(({ description, title, value }) => {
         const radio = getRadioProps({ value });
+
         return (
           <RadioCard
             key={value}

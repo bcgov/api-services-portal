@@ -31,6 +31,8 @@ import { useGlobal } from '@/shared/services/global';
 import { GiCapitol } from 'react-icons/gi';
 import { useRouter } from 'next/router';
 
+import DevMenu from './dev-menu';
+
 interface AuthActionProps {
   site: string;
 }
@@ -54,6 +56,8 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
     developerUrl.searchParams.set('f', f);
     return developerUrl;
   }, []);
+
+  const isDev = process.env.NODE_ENV === 'development';
 
   if (site === 'redirect') {
     return <></>;
@@ -199,6 +203,7 @@ const Signin: React.FC<AuthActionProps> = ({ site }) => {
             </MenuItem>
           </MenuList>
         </Menu>
+        {isDev && <DevMenu />}
       </Box>
     </HStack>
   );
