@@ -118,8 +118,7 @@ jobs:
           containerPort: 6000
 
           serviceAccount:
-            create: true
-            name: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            create: false
 
           env:
             TZ:

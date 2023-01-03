@@ -190,6 +190,9 @@ jobs:
               cpu: 100m
               memory: 800M
 
+          serviceAccount:
+            create: false
+
           oauthProxy:
             enabled: true
             image:
