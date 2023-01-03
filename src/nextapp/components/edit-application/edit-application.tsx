@@ -123,7 +123,7 @@ const EditApplication: React.FC<EditApplicationProps> = ({
 export default EditApplication;
 
 const mutation = gql`
-  mutation UpdateApplication($id: String, $data: ApplicationUpdateInput) {
+  mutation UpdateApplication($id: ID!, $data: ApplicationUpdateInput) {
     updateApplication(id: $id, data: $data) {
       id
     }

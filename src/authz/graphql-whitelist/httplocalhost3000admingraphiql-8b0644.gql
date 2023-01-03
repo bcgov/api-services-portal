@@ -1,5 +1,5 @@
 
-  mutation UpdateApplication($id: String, $data: ApplicationUpdateInput) {
+  mutation UpdateApplication($id: ID!, $data: ApplicationUpdateInput) {
     updateApplication(id: $id, data: $data) {
       id
     }
