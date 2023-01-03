@@ -9,7 +9,9 @@ import {
 import {
   allApplicationsHandler,
   createApplicationHandler,
+  getApplicationServicesHandler,
   removeApplicationHandler,
+  updateApplicationHandler,
 } from './resolvers/applications';
 import {
   allProductsByNamespaceHandler,
@@ -168,8 +170,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: null,
-        // user: { ...mark, namespace },
+        user: { ...personas.mark, namespace },
       })
     );
   }),
@@ -238,7 +239,9 @@ export const handlers = [
   keystone.mutation('UpdateEnvironment', updateEnvironmentHandler),
   // Applications
   keystone.query('MyApplications', allApplicationsHandler),
+  keystone.query('GetApplicationServices', getApplicationServicesHandler),
   keystone.mutation('AddApplication', createApplicationHandler),
+  keystone.mutation('UpdateApplication', updateApplicationHandler),
   keystone.mutation('RemoveApplication', removeApplicationHandler),
   // Services
   keystone.query('GetServices', allServicesHandler),
