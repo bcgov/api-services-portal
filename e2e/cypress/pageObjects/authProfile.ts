@@ -144,7 +144,6 @@ class AuthorizationProfile {
 
   verifyAuthorizationProfileIssuerURL(issuerURL:string)
   {
-    debugger
     cy.contains('Client Management').click()
     cy.contains(issuerURL).should('exist')
   }

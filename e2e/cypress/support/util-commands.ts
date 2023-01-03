@@ -41,7 +41,6 @@ Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean, i
   cy.log(key, value)
   let newState
   const keyValue = key.toLowerCase()
-  debugger
   if (isGlobal) {
     let currState: any
     currState = Cypress.env(key)

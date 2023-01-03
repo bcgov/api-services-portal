@@ -53,7 +53,6 @@ class GatewayServicePage {
   verifyRouteName(service: string, route: string) {
     cy.get(`[data-testid^=${service}-service-details`).then(($value) => {
       let routeValue = $value.text()
-      debugger
       assert.equal(routeValue, route)
     })
   }

@@ -400,17 +400,14 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
 })
 
 Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
-  debugger
   cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
     let newObj: any
     newObj = YAML.parse($el)
     cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
-      debugger
       let obj = YAML.parse(content)
       const keys = Object.keys(obj);
       Object.keys(obj.services).forEach(function (key, index) {
         if (obj.services[index].name == serviceName) {
-          debugger
           obj.services[index].plugins = newObj.plugins
         }
       });

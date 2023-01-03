@@ -35,7 +35,6 @@ class Products {
   config: string | undefined
 
   getTestIdEnvName(env: string): string {
-    debugger
     switch (env) {
       case "Development":
         return "dev"
@@ -75,7 +74,6 @@ class Products {
   }
 
   editProductEnvironment(productName: string, envName: string) {
-    debugger
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
@@ -94,7 +92,6 @@ class Products {
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
         ) {
-          debugger
           let env = this.getTestIdEnvName(config.authIssuerEnv)
           cy.get('[name="credentialIssuer"]').select(
             `${config.authIssuer} (${env})`
@@ -109,7 +106,6 @@ class Products {
       .as('checkbox')
       .invoke('is', ':checked')
       .then(checked => {
-        debugger
         if (invalid) {
           cy
             .get('@checkbox')
@@ -126,7 +122,6 @@ class Products {
       .as('checkbox')
       .invoke('is', ':checked')
       .then(checked => {
-        debugger
         if (!isApproved) {
           cy
             .get('@checkbox')
@@ -169,7 +164,6 @@ class Products {
   }
 
   generateKongPluginConfigForAuthScope(productName: string, envName: string, filename: string, serviceName: string) {
-    debugger
     this.editProductEnvironment(productName, envName)
     cy.get(this.viewTemplateBtn).click()
     cy.get('.language-yaml').then(($el) => {
@@ -177,12 +171,10 @@ class Products {
       let newObj: any
       newObj = YAML.parse($el.text())
       cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
-        debugger
         let obj = YAML.parse(content)
         const keys = Object.keys(obj);
         Object.keys(obj.services).forEach(function (key, index) {
           if (obj.services[index].name == serviceName) {
-            debugger
             obj.services[index].plugins = newObj.plugins
           }
         });

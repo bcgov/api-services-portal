@@ -77,7 +77,6 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
         prod.environment.config.authIssuer = authProfile.name
         prod.environment.config.authIssuerEnv = authProfile.environmentConfig.environment
         pd.editProductEnvironmentConfig(prod.environment.config)
-        debugger
         pd.generateKongPluginConfigForAuthScope(product.name, product.test_environment.name, 'service-plugin.yml',product.test_environment.config.serviceName)
         // pd.generateKongPluginConfig(product.name, product.test_environment.name,'service-test.yml')
       })
@@ -88,7 +87,6 @@ describe('Change Authorization profile from Kong ACL-API to Client Credential', 
     cy.get('@apiowner').then(({ namespace }: any) => {
       cy.publishApi('service-plugin.yml', nameSpace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
-          debugger
           cy.log(JSON.stringify(res.body))
           expect(res.body.message).to.contains("Sync successful")
         })
@@ -164,9 +162,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
       cy.contains('Client ID').should('be.visible')
       cy.contains('Client Secret').should('be.visible')
       cy.contains('Token Endpoint').should('be.visible')
-      debugger
       cy.log(Cypress.env('clientidsecret'))
-      debugger
       ma.saveClientCredentials(false, true)
     })
   })
@@ -226,10 +222,8 @@ describe('Make an API request using Client ID, Secret, and Access Token', () => 
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
       let cc = JSON.parse(store_res.clientidsecret)
-      debugger
       // let cc = JSON.parse(Cypress.env('clientidsecret'))
       cy.log('cc-->' + cc.clientSecret)
-      debugger
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
         cy.get('@accessTokenResponse').then((token_res: any) => {
           let token = token_res.body.access_token

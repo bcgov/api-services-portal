@@ -114,7 +114,6 @@ describe('Update IDP issuer for shared IDP profile', () => {
       authProfile.editAuthorizationProfile(ap.name)
       cy.wait(2000)
       cy.get('@api').then(({ authorizationProfiles }: any) => {
-        debugger
         authProfile.verifyAuthorizationProfileIssuerURL(authorizationProfiles.shared_IDP_body.environmentDetails[0].issuerUrl)
       })
     })

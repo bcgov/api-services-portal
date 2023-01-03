@@ -100,10 +100,8 @@ describe('Verify that the service is accessible using existing Client ID, Secret
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
       let cc = JSON.parse(store_res.clientidsecret)
-      debugger
       // let cc = JSON.parse(Cypress.env('clientidsecret'))
       cy.log('cc-->' + cc.clientSecret)
-      debugger
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
         cy.get('@accessTokenResponse').then((token_res: any) => {
           token = token_res.body.access_token
@@ -183,9 +181,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
       cy.contains('Client ID').should('be.visible')
       cy.contains('Client Secret').should('be.visible')
       cy.contains('Token Endpoint').should('be.visible')
-      debugger
       cy.log(Cypress.env('clientidsecret'))
-      debugger
       ma.saveClientCredentials(false, true)
     })
   })
@@ -246,10 +242,8 @@ describe('Verify that the service is accessible using new Client ID, Secret, and
     cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
       let cc = JSON.parse(store_res.clientidsecret)
-      debugger
       // let cc = JSON.parse(Cypress.env('clientidsecret'))
       cy.log('cc-->' + cc.clientSecret)
-      debugger
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
         cy.get('@accessTokenResponse').then((token_res: any) => {
           token = token_res.body.access_token
