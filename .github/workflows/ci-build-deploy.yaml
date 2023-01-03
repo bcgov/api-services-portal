@@ -117,6 +117,9 @@ jobs:
           auth:
               rootPassword: "s3cr3t"
 
+          serviceAccount:
+              create: false
+
           arbiter:
               enabled: false
 
