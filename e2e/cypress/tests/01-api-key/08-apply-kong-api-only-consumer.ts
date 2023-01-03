@@ -12,8 +12,9 @@ describe('Apply Kong API key only plugin', () => {
   })
 
   it('Apply Key-auth only authorization plugin to Kong Gateway', () => {
-    cy.get('@apiowner').then(({ namespace }: any) => {
-      cy.publishApi('service-plugin-key-auth-only.yml', namespace).then(() => {
+    cy.get('@apiowner').then(({ namespace, product }: any) => {
+      cy.updatePluginFile('service-plugin.yml',product.environment.config.serviceName,'service-plugin-key-auth-only.yml')
+      cy.publishApi('service-plugin.yml', namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })

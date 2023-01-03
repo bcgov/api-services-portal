@@ -9,5 +9,5 @@ record:
   license_title: "Access Only"
   view_audience: "Government"
   security_class: "LOW-PUBLIC"
-  org: "7a66db63-26f4-4052-9cd5-3272b63910f8"
-  sub_org: "319b3297-846d-4b97-8095-ceb3ec505fb8"
+  organization:
+    id: "319b3297-846d-4b97-8095-ceb3ec505fb8"

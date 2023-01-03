@@ -125,4 +125,10 @@ describe('Regenerate Credential for Client Credentials- Client ID/Secret', () =>
       })
     })
   })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
 })

@@ -1504,6 +1504,7 @@ export type CredentialIssuerUpdateInput = {
   resourceType?: Maybe<Scalars['String']>;
   resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
+  isShared?: Maybe<Scalars['Boolean']>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 

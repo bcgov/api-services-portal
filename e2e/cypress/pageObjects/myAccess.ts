@@ -42,7 +42,31 @@ class myAccessPage {
     cy.get(this.regenerateCredentialCloseBtn).click()
   }
 
-  saveClientCredentials(flag?: boolean): void {
+  saveClientCredentials(flag?: boolean, isGlobal?:boolean): void {
+    cy.get(this.clientId).invoke('val').then(($clientId: any) => {
+      cy.get(this.clientSecret).invoke('val').then(($clientSecret: any) => {
+        cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {
+          cy.saveState(
+            'clientidsecret',
+            '{"clientId": "' +
+            $clientId +
+            '", "clientSecret": "' +
+            $clientSecret +
+            '", "tokenEndpoint": "' +
+            $tokenEndpoint +
+            '"}', flag, isGlobal
+          )
+        })
+      })
+    })
+    if(flag)
+      cy.get(this.regenerateCredentialCloseBtn).click()
+    else
+      cy.get(this.closeRequestAccesss).click()
+    cy.wait(1000)
+  }
+
+  saveClientCredentialsOnGlobalVariable(flag?: boolean): void {
     cy.get(this.clientId).invoke('val').then(($clientId: any) => {
       cy.get(this.clientSecret).invoke('val').then(($clientSecret: any) => {
         cy.get(this.tokenEndpoint).invoke('val').then(($tokenEndpoint: any) => {

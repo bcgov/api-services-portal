@@ -139,7 +139,7 @@ describe('Delete application which has approved request spec', () => {
   it('Verify that API is not accessible with the generated API Key when the application is deleted', () => {
     cy.get('@apiowner').then(({ product }: any) => {
       cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-        expect(response.status).to.be.equal(500)
+        expect(response.status).to.be.equal(401)
       })
     })
   })

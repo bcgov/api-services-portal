@@ -49,14 +49,15 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
     })
-    sa.saveServiceAcctCreds()
+    sa.saveServiceAcctCreds(true)
   })
 
   it('Publishes a new API to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
+      cy.publishApi('cc-service.yml', clientCredentials.namespace, true).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
+          expect(res.body.message).to.contains("Sync successful")
         })
       })
     })
@@ -106,9 +107,10 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
 
   it('applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      cy.publishApi('cc-service.yml', clientCredentials.namespace).then(() => {
+      cy.publishApi('cc-service.yml', clientCredentials.namespace,true).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
+          expect(res.body.message).to.contains("Sync successful")
         })
       })
     })
@@ -145,9 +147,10 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   
   it('Applies authorization plugin to service published to Kong Gateway', () => {
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
-      cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace).then(() => {
+      cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace, true).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
+          expect(res.body.message).to.contains("Sync successful")
         })
       })
     })
