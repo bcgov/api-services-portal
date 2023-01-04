@@ -464,6 +464,8 @@ const metadata = {
       'resourceScopes',
       'resourceType',
       'resourceAccessScope',
+      'isShared',
+      'inheritFrom',
       'apiKeyName',
       'owner',
     ],
@@ -473,9 +475,15 @@ const metadata = {
       clientRoles: { name: 'toStringDefaultArray' },
       clientMappers: { name: 'toStringDefaultArray' },
       environmentDetails: { name: 'toString' },
+      inheritFrom: {
+        name: 'connectOne',
+        list: 'allCredentialIssuers',
+        refKey: 'name',
+      },
       owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
     },
     validations: {
+      isShared: { type: 'boolean' },
       flow: {
         type: 'enum',
         values: ['client-credentials'],

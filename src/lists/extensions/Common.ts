@@ -27,6 +27,7 @@ import {
   lookupEnvironmentAndIssuerById,
   lookupEnvironmentAndIssuerUsingWhereClause,
 } from '../../services/keystone';
+import { OrgGroupService } from '../../services/org-groups';
 
 const logger = Logger('List.Ext.Common');
 export interface TokenExchangeResult {
@@ -339,4 +340,26 @@ export async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
     allowedResources
   );
   return allowedResources.map((res) => res.rsid);
+}
+
+export async function getOrgPoliciesForResource(
+  envCtx: EnvironmentContext,
+  resourceId: string
+) {
+  const orgGroupService = new OrgGroupService(envCtx.uma2.issuer);
+  await orgGroupService.login(
+    envCtx.issuerEnvConfig.clientId,
+    envCtx.issuerEnvConfig.clientSecret
+  );
+  await orgGroupService.backfillGroups();
+
+  try {
+    return await orgGroupService.getGroupPermissionsByResource(resourceId);
+  } catch (ex) {
+    logger.error('[getOrgPoliciesForResource] %s', ex);
+    if (ex.toJSON) {
+      logger.error('[getOrgPoliciesForResource] %j', ex.toJSON());
+    }
+    throw ex;
+  }
 }

@@ -22,7 +22,7 @@ import { o } from '../util';
 
   const username = '84280EBD-287149E4F9884407';
   const roleNames = ['role-1', 'role-2'];
-  const changes = await clientRolesService.syncRoles(
+  const changes = await clientRolesService.syncAssignedRoles(
     'aps-pharmanet',
     roleNames,
     username

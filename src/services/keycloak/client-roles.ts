@@ -12,6 +12,9 @@ import RoleRepresentation from '@keycloak/keycloak-admin-client/lib/defs/roleRep
 
 const logger = Logger('kc.roles');
 
+const hasRole = (roles: any, name: string) =>
+  roles.filter((urole: any) => urole.name === name).length != 0;
+
 export class KeycloakClientRolesService {
   private kcAdminClient: KeycloakAdminClient;
   private kcClientService: KeycloakClientService;
@@ -49,7 +52,7 @@ export class KeycloakClientRolesService {
     return this;
   }
 
-  public async syncRoles(
+  public async syncAssignedRoles(
     clientId: string,
     clientRoles: string[],
     consumerUsername: string
@@ -86,9 +89,6 @@ export class KeycloakClientRolesService {
         userId,
         client.id
       );
-
-      const hasRole = (roles: any, name: string) =>
-        roles.filter((urole: any) => urole.name === name).length != 0;
 
       const addRoles = selectedRoles
         .filter((role) => !hasRole(currentRoles, role.name))
@@ -157,5 +157,54 @@ export class KeycloakClientRolesService {
       rolesClient,
       roles
     );
+  }
+
+  public async syncRoles(
+    clientId: string,
+    clientRoles: string[]
+  ): Promise<string[]> {
+    const changeList: string[] = [];
+    const client = await this.kcClientService.findOne(clientId);
+
+    const availableRoles = await this.kcClientService.listRoles(client.id);
+
+    // Add any new Roles
+    await Promise.all(
+      clientRoles
+        .filter(
+          (role) =>
+            availableRoles.filter((arole) => arole.name === role).length == 0
+        )
+        .map(async (roleName) => {
+          changeList.push(`Role Add ${roleName}`);
+
+          return this.kcAdminClient.clients.createRole({
+            id: client.id,
+            name: roleName,
+          });
+        })
+    );
+
+    // Remove any old Roles
+    await Promise.all(
+      availableRoles
+        .filter(
+          (role) =>
+            clientRoles.filter((arole) => arole === role.name).length == 0
+        )
+        .map(async (role) => {
+          changeList.push(`Role Remove ${role.name}`);
+
+          return this.kcAdminClient.clients.delRole({
+            id: client.id,
+            roleName: role.name,
+          });
+        })
+    );
+
+    if (changeList.length > 0) {
+      logger.info('[syncRoles] %s : Changes: %j', clientId, changeList);
+    }
+    return [];
   }
 }

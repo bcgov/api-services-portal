@@ -36,11 +36,17 @@ Cypress.Commands.add('preserveCookiesDefaults', () => {
   cy.log('> Saving Cookies')
 })
 
-Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean) => {
+Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean, isGlobal?: boolean) => {
   cy.log('< Saving State')
   cy.log(key, value)
   let newState
   const keyValue = key.toLowerCase()
+  if (isGlobal) {
+    let currState: any
+    currState = Cypress.env(key)
+    // currState[keyValue] = value
+    Cypress.env(key, value)
+  }
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {

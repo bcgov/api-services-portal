@@ -6,25 +6,43 @@ import {
   Center,
   Container,
   Grid,
-  GridItem,
   Heading,
   Icon,
   Link,
   Spinner,
   Text,
 } from '@chakra-ui/react';
-import Head from 'next/head';
-import { RiCodeSSlashLine } from 'react-icons/ri';
 import { GiCapitol } from 'react-icons/gi';
+import Head from 'next/head';
 import NextLink from 'next/link';
 import LoginButtons from '@/components/login-buttons';
 import { useAuth } from '@/shared/services/auth';
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { useGlobal } from '@/shared/services/global';
+import { FaCode } from 'react-icons/fa';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { restApi } from '@/shared/services/api';
 
-const LoginPage: React.FC = () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const data = await restApi('/about');
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+const LoginPage: React.FC<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ data }) => {
   const { ok, isLoading } = useAuth();
-  const { identities } = useGlobal();
+  const router = useRouter();
+  const isProvider = router.query.identity === 'provider';
+  const iconEl = isProvider ? GiCapitol : FaCode;
+  const headerText = isProvider ? 'API Providers' : 'Developers';
+  const selectedIdentities = isProvider
+    ? data.identities.provider
+    : data.identities.developer;
 
   React.useEffect(() => {
     if (ok) {
@@ -37,7 +55,7 @@ const LoginPage: React.FC = () => {
       <Head>
         <title>API Program Services | Login</title>
       </Head>
-      <Container maxW="6xl">
+      <Container maxW="2xl">
         {isLoading && (
           <Center mt={12}>
             <Alert status="info" variant="outline" borderRadius="4">
@@ -49,60 +67,34 @@ const LoginPage: React.FC = () => {
         {!isLoading && (
           <>
             <Box as="header" mt={12} mb={6}>
-              <Heading>Login Options</Heading>
+              <Heading d="flex" alignItems="center" gridGap={4}>
+                <Icon as={iconEl} color="bc-blue" />
+                {`Login for ${headerText}`}
+              </Heading>
             </Box>
-            <Grid as="section" mb={14} templateColumns="1fr 1fr" gap={6}>
-              <GridItem>
-                <Text mb={4}>
-                  Choose which of the options you want to authenticate with. You
-                  will go to a secure website to log in and automatically
-                  return.
-                </Text>
-
-                <Text>
-                  Access to certain features of the APS portal will be based on
-                  the account type that you choose.
-                </Text>
-              </GridItem>
-            </Grid>
-            <Grid as="section" flex={1} templateColumns="1fr 1fr" gap={6}>
-              <GridItem bgColor="white" p={10}>
-                <Heading size="md" mb={5} display="flex" alignItems="center">
-                  <Icon
-                    as={RiCodeSSlashLine}
-                    color="bc-blue"
-                    mr={3}
-                    boxSize="6"
-                  />{' '}
-                  For Developers
-                </Heading>
-                <Text>
-                  Visit the{' '}
-                  <NextLink passHref href="/devportal/api-directory">
-                    <Link color="bc-blue" fontWeight="bold">
-                      Directory
-                    </Link>
-                  </NextLink>{' '}
-                  to see what APIs are available for integration or log in using
-                  one of the options available below.
-                </Text>
-                <Box mt={7}>
-                  <LoginButtons buttons={identities.developer} />
-                </Box>
-              </GridItem>
-              <GridItem bgColor="white" p={10}>
-                <Heading size="md" mb={5} display="flex" alignItems="center">
-                  <Icon as={GiCapitol} color="bc-blue" mr={3} boxSize="6" /> For
-                  API Providers
-                </Heading>
-                <Text>
-                  Start building and sharing APIs from your Ministry. Use your
-                  IDIR to login to the APS Portal.
-                </Text>
-                <Box mt={7}>
-                  <LoginButtons buttons={identities.provider} />
-                </Box>
-              </GridItem>
+            <Box mb={8}>
+              <Text>
+                {isProvider ? (
+                  'Start building and sharing APIs from your Ministry.'
+                ) : (
+                  <>
+                    Visit the{' '}
+                    <NextLink passHref href="/devportal/api-directory">
+                      <Link color="bc-link" fontWeight="bold">
+                        Directory
+                      </Link>
+                    </NextLink>{' '}
+                    to see what APIs are available for integration or log in
+                    using one of the options available below.
+                  </>
+                )}
+              </Text>
+            </Box>
+            <Grid gap={8}>
+              <LoginButtons
+                identities={selectedIdentities}
+                identityContent={data.identityContent as Record<string, any>}
+              />
             </Grid>
           </>
         )}

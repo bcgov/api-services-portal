@@ -1414,6 +1414,8 @@ export type CredentialIssuer = {
   resourceType?: Maybe<Scalars['String']>;
   resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
+  isShared?: Maybe<Scalars['Boolean']>;
+  inheritFrom?: Maybe<CredentialIssuer>;
   owner?: Maybe<User>;
   environments: Array<Environment>;
   _environmentsMeta?: Maybe<_QueryMeta>;
@@ -1467,6 +1469,8 @@ export type CredentialIssuerCreateInput = {
   resourceType?: Maybe<Scalars['String']>;
   resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
+  isShared?: Maybe<Scalars['Boolean']>;
+  inheritFrom?: Maybe<CredentialIssuerRelateToOneInput>;
   owner?: Maybe<UserRelateToOneInput>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
@@ -1500,6 +1504,7 @@ export type CredentialIssuerUpdateInput = {
   resourceType?: Maybe<Scalars['String']>;
   resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
+  isShared?: Maybe<Scalars['Boolean']>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -1832,6 +1837,10 @@ export type CredentialIssuerWhereInput = {
   apiKeyName_not_ends_with_i?: Maybe<Scalars['String']>;
   apiKeyName_in?: Maybe<Array<Maybe<Scalars['String']>>>;
   apiKeyName_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  isShared?: Maybe<Scalars['Boolean']>;
+  isShared_not?: Maybe<Scalars['Boolean']>;
+  inheritFrom?: Maybe<CredentialIssuerWhereInput>;
+  inheritFrom_is_null?: Maybe<Scalars['Boolean']>;
   owner?: Maybe<UserWhereInput>;
   owner_is_null?: Maybe<Scalars['Boolean']>;
   /**  condition must be true for all nodes  */
@@ -4495,6 +4504,8 @@ export type Mutation = {
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
   regenerateCredentials?: Maybe<AccessRequest>;
+  markNamespaceNotificationViewed?: Maybe<Scalars['Boolean']>;
+  updateCurrentNamespace?: Maybe<Scalars['String']>;
   createNamespace?: Maybe<Namespace>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
@@ -5300,6 +5311,12 @@ export type MutationRegenerateCredentialsArgs = {
 };
 
 
+export type MutationUpdateCurrentNamespaceArgs = {
+  org?: Maybe<Scalars['String']>;
+  orgUnit?: Maybe<Scalars['String']>;
+};
+
+
 export type MutationCreateNamespaceArgs = {
   namespace: Scalars['String'];
 };
@@ -5366,13 +5383,17 @@ export type Namespace = {
   __typename?: 'Namespace';
   id: Scalars['String'];
   name: Scalars['String'];
-  scopes: Array<Maybe<UmaScope>>;
+  scopes?: Maybe<Array<Maybe<UmaScope>>>;
   prodEnvId?: Maybe<Scalars['String']>;
   permDomains?: Maybe<Array<Maybe<Scalars['String']>>>;
   permDataPlane?: Maybe<Scalars['String']>;
   permProtectedNs?: Maybe<Scalars['String']>;
-  org?: Maybe<Scalars['String']>;
-  orgUnit?: Maybe<Scalars['String']>;
+  org?: Maybe<Scalars['JSON']>;
+  orgUnit?: Maybe<Scalars['JSON']>;
+  orgUpdatedAt?: Maybe<Scalars['Float']>;
+  orgEnabled?: Maybe<Scalars['Boolean']>;
+  orgNoticeViewed?: Maybe<Scalars['Boolean']>;
+  orgAdmins?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type NamespaceInput = {
@@ -6233,7 +6254,6 @@ export type Query = {
   allNamespaceServiceAccounts?: Maybe<Array<Maybe<ServiceAccess>>>;
   OwnedEnvironment?: Maybe<Environment>;
   DiscoverableProduct?: Maybe<Product>;
-  OwnedCredentialIssuer?: Maybe<CredentialIssuer>;
   CredentialIssuerSummary?: Maybe<CredentialIssuer>;
   myServiceAccesses?: Maybe<Array<Maybe<ServiceAccess>>>;
   myAccessRequests?: Maybe<Array<Maybe<AccessRequest>>>;
@@ -6247,6 +6267,7 @@ export type Query = {
   getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
   getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
+  sharedIdPs?: Maybe<Array<Maybe<SharedIssuer>>>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
   namespace?: Maybe<Namespace>;
@@ -6942,11 +6963,6 @@ export type QueryDiscoverableProductArgs = {
 };
 
 
-export type QueryOwnedCredentialIssuerArgs = {
-  where?: Maybe<CredentialIssuerWhereInput>;
-};
-
-
 export type QueryCredentialIssuerSummaryArgs = {
   where?: Maybe<CredentialIssuerWhereInput>;
 };
@@ -7013,6 +7029,11 @@ export type QueryGetConsumerProdEnvAccessArgs = {
 export type QueryConsumerScopesAndRolesArgs = {
   prodEnvId: Scalars['ID'];
   consumerUsername: Scalars['ID'];
+};
+
+
+export type QuerySharedIdPsArgs = {
+  profileName?: Maybe<Scalars['String']>;
 };
 
 
@@ -7291,6 +7312,13 @@ export type ServiceAccountInput = {
   scopes?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
+export type SharedIssuer = {
+  __typename?: 'SharedIssuer';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  environmentDetails: Scalars['String'];
+};
+
 export enum SortAccessRequestsBy {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
@@ -7496,6 +7524,10 @@ export enum SortCredentialIssuersBy {
   ResourceAccessScopeDesc = 'resourceAccessScope_DESC',
   ApiKeyNameAsc = 'apiKeyName_ASC',
   ApiKeyNameDesc = 'apiKeyName_DESC',
+  IsSharedAsc = 'isShared_ASC',
+  IsSharedDesc = 'isShared_DESC',
+  InheritFromAsc = 'inheritFrom_ASC',
+  InheritFromDesc = 'inheritFrom_DESC',
   OwnerAsc = 'owner_ASC',
   OwnerDesc = 'owner_DESC',
   EnvironmentsAsc = 'environments_ASC',

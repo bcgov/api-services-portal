@@ -4,6 +4,7 @@ import { transparentize } from '@chakra-ui/theme-tools';
 const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
+  'bc-yellow-light': transparentize('#FCBA19', 0.1)({}),
   text: '#313132',
   'bc-component': '#606060',
   'bc-empty': '#60606080',
@@ -264,13 +265,15 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
-          borderColor: 'bc-component',
           '& label': {
             borderColor: 'bc-component',
           },
           borderRadius: 0,
           '.chakra-checkbox__control': {
             borderRadius: 0,
+          },
+          control: {
+            borderColor: 'bc-component',
           },
         },
         defaultProps: {
@@ -480,7 +483,8 @@ const theme = extendTheme(
                 borderRadius: 4,
                 backgroundColor: getLabelBgColor(props.colorScheme),
                 border: '1px solid',
-                borderColor: props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
+                borderColor:
+                  props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
                 color: 'text',
                 boxShadow: 'none',
               },
@@ -499,6 +503,11 @@ const theme = extendTheme(
               color: 'bc-component',
             },
           },
+        },
+      },
+      Tooltip: {
+        baseStyle: {
+          bgColor: '#373d3f',
         },
       },
     },

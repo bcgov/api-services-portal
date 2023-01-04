@@ -1,14 +1,28 @@
 class LoginPage {
   path: string = '/'
 
-  loginButton: string = '[data-testid=login-btn]'
+  loginDropDown: string = '[data-testid=login-dropdown-btn]'
   usernameInput: string = '[id=username]'
   passwordInput: string = '[id=password]'
   loginSubmitButton: string = '[id=kc-login]'
+  apiProviderBtn : string ='[data-testid="login-api-provider-btn"]'
+  developerBtn : string ='[data-testid="login-api-developer-btn"]'
+  developerLoginBtn : string ='[data-testid="login-with-github"]'
+  apiProviderLoginBtn : string ='[data-testid="login-with-idir"]'
 
   checkUnsuccessfulSignIn(){
     cy.contains('Account is disabled, contact your administrator.').should('be.visible')
     cy.get(this.loginSubmitButton).should('be.visible')
+  }
+
+  selectAPIProviderLoginOption(){
+    cy.get(this.apiProviderBtn).click()
+    cy.get(this.apiProviderLoginBtn).click()
+  }
+
+  selectDeveloperLoginOption(){
+    cy.get(this.developerBtn).click()
+    cy.get(this.developerLoginBtn).click()
   }
 }
 

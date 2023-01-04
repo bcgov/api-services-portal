@@ -1,0 +1,9 @@
+
+  query ListOrganizationUnits($org: String!) {
+    allOrganizations(where: { name: $org }) {
+      orgUnits {
+        name
+        title
+      }
+    }
+  }

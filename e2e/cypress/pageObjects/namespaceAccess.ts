@@ -4,6 +4,7 @@ class NamespaceAccessPage {
   grantUserAccessBtn: string = '[data-testid="nsa-grant-access-btn"]'
 
   grantPermission(accessRqst: any) {
+    cy.wait(2000)
     cy.get(this.userNameInput,{ timeout: 2000 }).should('be.visible');
     cy.get(this.userNameInput).type(accessRqst.email);
     let accessRole: Array<string> = accessRqst.accessRole
@@ -41,6 +42,7 @@ class NamespaceAccessPage {
   path: string = '/manager/namespace-access'
 
   clickGrantUserAccessButton() {
+    cy.wait(3000)
     cy.get('[data-testid="nsa-users-table-row-0-menu"]',{ timeout: 5000 }).should('be.visible');
     cy.get(this.grantUserAccessBtn).first().click({force:true})
   }

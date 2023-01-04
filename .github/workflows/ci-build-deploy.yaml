@@ -127,8 +127,18 @@ jobs:
           rbac:
               create: true
 
-          strategyType: Recreate
-
+          updateStrategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 100%
+              
+          readinessProbe:
+            timeoutSeconds: 20
+            
+          livenessProbe:
+            timeoutSeconds: 20
+            
           persistence:
               enabled: true
               size: 2Gi

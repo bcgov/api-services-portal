@@ -3,7 +3,8 @@ class GatewayServicePage {
   path: string = '/manager/services'
   userNameInput: string = '[data-testid="nsa-gua-email-field"]'
   grantUserAccessBtn: string = '[data-testid="nsa-grant-access-btn"]'
-  serviceTable: string = '[data-testid="matrixDetailsTable"]'
+  // serviceTable: string = '[data-testid="matrixDetailsTable"]'
+  serviceTable: string = '[role="table"]'
   clearAllFilterBtn: string = '[data-testid="btn-filter-clear-all"]'
   filterType: string = '[data-testid="filter-type-select"]'
   filterValue: string = '[data-testid="consumer-filters-select"]'
@@ -52,7 +53,6 @@ class GatewayServicePage {
   verifyRouteName(service: string, route: string) {
     cy.get(`[data-testid^=${service}-service-details`).then(($value) => {
       let routeValue = $value.text()
-      debugger
       assert.equal(routeValue, route)
     })
   }

@@ -11,6 +11,7 @@ type GlobalContent = {
     developer: string[];
     provider: string[];
   };
+  readonly identityContent: Record<string, any>;
 };
 
 const defaultState = {
@@ -21,6 +22,7 @@ const defaultState = {
     developer: ['idir'],
     provider: ['idir'],
   },
+  identityContent: {},
   accountLinks: {},
   helpLinks: {},
 };
