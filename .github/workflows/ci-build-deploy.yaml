@@ -119,6 +119,7 @@ jobs:
 
           serviceAccount:
               create: false
+              name: proto-asp-dev-db-mongodb
 
           arbiter:
               enabled: false
@@ -192,7 +193,7 @@ jobs:
 
           serviceAccount:
             create: false
-            name: proto-asp-dev-db-mongodb
+            name: proto-asp-dev-generic-api
 
           oauthProxy:
             enabled: true
