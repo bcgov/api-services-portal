@@ -192,6 +192,7 @@ jobs:
 
           serviceAccount:
             create: false
+            name: proto-asp-dev-db-mongodb
 
           oauthProxy:
             enabled: true
