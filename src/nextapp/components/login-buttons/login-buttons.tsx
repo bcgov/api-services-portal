@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { uid } from 'react-uid';
 import { FaGithub } from 'react-icons/fa';
 import { makeRedirectUrl } from '@/shared/services/auth';
+import kebabCase from 'lodash/kebabCase';
 
 function buildUrl(hint: string, path: string) {
   const redirectPath = makeRedirectUrl(path);
@@ -82,6 +83,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
           href={href}
           leftIcon={icon}
           bgColor={bgColor}
+          data-testid={`login-with-${kebabCase(button.text)}`}
         >
           Login with {button.text}
         </Button>
@@ -103,6 +105,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
             w="100%"
             leftIcon={icon}
             bgColor={bgColor}
+            data-testid={`login-with-${kebabCase(button.text)}`}
           >
             Login with {button.text}
           </Button>
