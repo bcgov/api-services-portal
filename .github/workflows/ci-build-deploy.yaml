@@ -102,18 +102,6 @@ jobs:
             pullSecrets:
               - dev-github-read-packages-creds
 
-          updateStrategy:
-            type: RollingUpdate
-            rollingUpdate:
-              maxSurge: 0
-              maxUnavailable: 100%
-
-          readinessProbe:
-            timeoutSeconds: 20
-
-          livenessProbe:
-            timeoutSeconds: 20
-
           auth:
               rootPassword: "s3cr3t"
 
