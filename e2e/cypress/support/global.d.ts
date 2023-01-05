@@ -13,6 +13,8 @@ declare namespace Cypress {
 
     logout(): void
 
+    keycloakLogout(): void
+
     deleteAllCookies(): void
 
     preserveCookies(): void
@@ -66,6 +68,8 @@ declare namespace Cypress {
     verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
 
     updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+
+    keycloakLogin(username: string, password: string): Chainable<any>
 
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }

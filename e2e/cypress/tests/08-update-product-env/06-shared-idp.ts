@@ -3,16 +3,73 @@ import ApplicationPage from '../../pageObjects/applications'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 import ConsumersPage from '../../pageObjects/consumers'
 import HomePage from '../../pageObjects/home'
+import keycloakGroupPage from '../../pageObjects/keycloakGroup'
+import KeycloakUserGroupPage from '../../pageObjects/keycloakUserGroup'
 import LoginPage from '../../pageObjects/login'
 import MyAccessPage from '../../pageObjects/myAccess'
 import Products from '../../pageObjects/products'
 
+// describe('Apply Shared IDP while creating Authorization Profile', () => {
+//   const userGroups = new KeycloakUserGroupPage()
+//   const groups = new keycloakGroupPage()
+//   var nameSpace: string
+//   const home = new HomePage()
+//   const authProfile = new AuthorizationProfile()
+
+//   before(() => {
+//     cy.visit(Cypress.env('KEYCLOAK_URL'))
+//     cy.deleteAllCookies()
+//     cy.reload()
+//   })
+
+//   beforeEach(() => {
+//     cy.preserveCookies()
+//     cy.fixture('developer').as('developer')
+//     cy.fixture('apiowner').as('apiowner')
+//     cy.fixture('state/regen').as('regen')
+//     cy.fixture('admin').as('admin')
+//   })
+
+//   it('Authenticates Admin owner', () => {
+//     cy.get('@admin').then(({ user }: any) => {
+//       cy.contains('Administration Console').click({force:true})
+//       cy.keycloakLogin(user.credentials.username, user.credentials.password)
+//     })
+//   })
+
+//   it('Navigate to User Groups', () => {
+//     cy.contains('Groups').click()
+//   })
+
+//   it('Edit the namespace from the tree view', () => {
+//     cy.get('@admin').then(({ namespace }: any) => {
+//       cy.contains(namespace).click()
+//       userGroups.clickOnEditButton()
+//     })
+//   })
+
+//   it('Navigate to attribute tab', () => {
+//     userGroups.selectTab('Attributes')
+//   })
+
+//   it('Set the Attributes', () => {
+//     groups.setAttribute('perm-protected-ns','allow')
+//   })
+
+//   after(() => {
+//     cy.keycloakLogout()
+//     cy.clearLocalStorage({ log: true })
+//     cy.deleteAllCookies()
+//   })
+
+// })
 
 describe('Apply Shared IDP while creating Authorization Profile', () => {
   const login = new LoginPage()
   var nameSpace: string
   const home = new HomePage()
   const authProfile = new AuthorizationProfile()
+  let userSession: string
 
   before(() => {
     cy.visit('/')
@@ -24,25 +81,41 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
     cy.preserveCookies()
     cy.fixture('developer').as('developer')
     cy.fixture('apiowner').as('apiowner')
+    cy.fixture('api').as('api')
     cy.fixture('state/regen').as('regen')
     cy.visit(login.path)
   })
 
-  it('Authenticates api owner', () => {
-    cy.get('@apiowner').then(({ user }: any) => {
-      cy.login(user.credentials.username, user.credentials.password)
-    })
-  })
-  it('Activates the namespace', () => {
+  it('authenticates Janis (api owner) to get the user session token', () => {
     cy.getUserSession().then(() => {
-      cy.get('@apiowner').then(({ namespace }: any) => {
-        nameSpace = namespace
+      cy.get('@apiowner').then(({ user, namespace }: any) => {
+        cy.login(user.credentials.username, user.credentials.password)
         home.useNamespace(namespace)
+        cy.get('@login').then(function (xhr: any) {
+          userSession = xhr.response.headers['x-auth-request-access-token']
+        })
       })
     })
   })
 
-  it('Create an authorization profile', () => {
+  it('Prepare the Request Specification for the API', () => {
+    cy.get('@api').then(({ authorizationProfiles }: any) => {
+      cy.setHeaders(authorizationProfiles.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.setRequestBody(authorizationProfiles.shared_IDP_body)
+    })
+  })
+
+  it('Publish the Shared IDP profile', () => {
+    cy.get('@apiowner').then(({ namespace }: any) => {
+      cy.makeAPIRequest('ds/api/v2/namespaces/'+namespace+'/issuers', 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+        expect(response.body.result).to.be.contain('created')
+      })
+    })
+  })
+
+  it('Create an authorization profile and associate it with shared IPD', () => {
     cy.visit(authProfile.path)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       let ap = clientCredentials.sharedIDP.authProfile
@@ -95,7 +168,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.get('@api').then(({ authorizationProfiles }: any) => {
       cy.setHeaders(authorizationProfiles.headers)
       cy.setAuthorizationToken(userSession)
-      cy.setRequestBody(authorizationProfiles.shared_IDP_body)
+      cy.setRequestBody(authorizationProfiles.shared_IDP_update_body)
     })
   })
 
@@ -114,7 +187,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
       authProfile.editAuthorizationProfile(ap.name)
       cy.wait(2000)
       cy.get('@api').then(({ authorizationProfiles }: any) => {
-        authProfile.verifyAuthorizationProfileIssuerURL(authorizationProfiles.shared_IDP_body.environmentDetails[0].issuerUrl)
+        authProfile.verifyAuthorizationProfileIssuerURL(authorizationProfiles.shared_IDP_update_body.environmentDetails[0].issuerUrl)
       })
     })
   })
