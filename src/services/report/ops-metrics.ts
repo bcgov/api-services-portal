@@ -69,26 +69,26 @@ export class OpsMetrics {
     // collectDefaultMetrics({ register });
 
     this.gNamespaces = new Gauge({
-      name: 'namespaces',
+      name: 'ops_metrics_namespaces',
       help: 'namespace counts',
       labelNames: ['namespace'],
     });
 
     this.gNamespaceAccess = new Gauge({
-      name: 'namespace_access',
+      name: 'ops_metrics_namespace_access',
       help: 'namespace access counts',
       labelNames: ['namespace', 'subject', 'permission'],
     });
 
     this.gEmailList = new Gauge({
-      name: 'email_list',
+      name: 'ops_metrics_email_list',
       help: 'email list for distribution',
       labelNames: ['namespace', 'email', 'provider'],
     });
 
     this.gActivity = new Gauge({
-      name: 'activity_summary',
-      help: 'activity_summary',
+      name: 'ops_metrics_activity_summary',
+      help: 'Activity Summary',
       labelNames: ['namespace', 'actor', 'activity', 'date'],
     });
   }
@@ -200,7 +200,7 @@ export class OpsMetrics {
             actor,
             namespace: data.namespace,
             activity,
-            date: new Date(data.createdAt).toISOString().substring(0, 7),
+            date: new Date(data.createdAt).toISOString(),
           },
           1
         );
