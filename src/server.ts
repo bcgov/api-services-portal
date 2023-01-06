@@ -351,7 +351,7 @@ const configureExpress = (app: any) => {
     await opsMetrics.store();
 
     res.set('Content-Type', 'application/json');
-    res.end({});
+    res.end('{}');
   });
 
   app.get('/about', (req: any, res: any) => {
