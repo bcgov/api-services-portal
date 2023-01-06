@@ -16,12 +16,8 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: Install docker and start colima
-        run: |
-          brew install docker
-          colima start
       - name: Build GWA API Image
         run: |
           git clone https://github.com/bcgov/gwa-api.git -b master
