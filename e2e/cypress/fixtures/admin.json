@@ -1,0 +1,9 @@
+{
+  "user": {
+    "credentials": {
+      "username": "local",
+      "password": "local"
+    }
+  },
+  "namespace": "newplatform"
+}
