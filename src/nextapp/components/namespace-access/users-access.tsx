@@ -19,16 +19,12 @@ import NamespaceAccessDialog from './namespace-access-dialog';
 import SearchInput from '@/components/search-input';
 import Table from '@/components/table';
 import { useApi, useApiMutation } from '@/shared/services/api';
-import { UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 import { uid } from 'react-uid';
 import ActionsMenu from '../actions-menu';
+import { AccessItem } from './types';
+import type { UmaScope } from '@/shared/types/query.types';
 
-type AccessItem = {
-  requesterName: string;
-  tickets: string[];
-  scopes: { id: string; name: string }[];
-};
 interface UsersAccessProps {
   resourceScopes: UmaScope[];
   resourceId: string;
@@ -41,6 +37,7 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   prodEnvId,
 }) => {
   const queryKey = ['namespaceAccessUsers', resourceId];
+  const [editing, setEditing] = React.useState<AccessItem | null>(null);
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
   const grant = useApiMutation(mutation);
@@ -122,6 +119,9 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       });
     }
   };
+  const handleEditAccess = (d: AccessItem) => async () => {
+    setEditing(d);
+  };
   const handleRevokeAccess = (d: AccessItem) => async () => {
     try {
       await revoke.mutateAsync({
@@ -152,6 +152,15 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
 
   return (
     <>
+      {editing && (
+        <NamespaceAccessDialog
+          {...accessRequestDialogProps}
+          accessItem={editing}
+          buttonVariant={null}
+          onCancel={() => setEditing(null)}
+        />
+      )}
+
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading
           size="sm"
@@ -223,6 +232,12 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
                 placement="bottom-end"
                 data-testid={`nsa-users-table-row-${index}-menu`}
               >
+                <MenuItem
+                  onClick={handleEditAccess(d)}
+                  data-testid={`nsa-users-table-row-${index}-edit-btn`}
+                >
+                  Edit Access
+                </MenuItem>
                 <MenuItem
                   color="bc-error"
                   onClick={handleRevokeAccess(d)}
