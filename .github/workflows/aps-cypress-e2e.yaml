@@ -16,8 +16,12 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
+      - name: Install docker and start colima
+        run: |
+          brew install docker
+          colima start
       - name: Build GWA API Image
         run: |
           git clone https://github.com/bcgov/gwa-api.git -b master
@@ -36,13 +40,13 @@ jobs:
           export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
-          docker-compose up -d
+          docker compose up -d
       - name: Execute Tests & Clean Up
         run: |
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               # cleanup
-              docker-compose down
+              docker compose down
               break
             else
               echo  "Waiting for Cypress to Complete E2E Tests....."
