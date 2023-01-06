@@ -254,6 +254,7 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:b
     const serviceAcctCreds = JSON.parse(creds.credentials)
     cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
       () => {
+        cy.wait(3000)
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
