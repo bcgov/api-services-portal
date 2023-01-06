@@ -46,6 +46,7 @@ class Gauge {
       for (const [key, value] of Object.entries(this._values[k].labels)) {
         record[key] = value;
       }
+      return record;
     });
   }
 }
