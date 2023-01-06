@@ -12,6 +12,7 @@ class ServiceAccountsPage {
     cy.get(this.newServiceAccountBtn).first().click()
     this.selectPermissions(scopes)
     cy.get(this.shareBtn).click()
+    cy.wait(8000)
   }
 
 checkServiceAccountNotExist() : void
