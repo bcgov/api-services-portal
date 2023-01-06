@@ -146,6 +146,7 @@ describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles t
   })
   
   it('Applies authorization plugin to service published to Kong Gateway', () => {
+    cy.wait(8000)
     cy.get('@apiowner').then(({ clientCredentials }: any) => {
       cy.publishApi('cc-service-plugin.yml', clientCredentials.namespace, true).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
