@@ -101,6 +101,7 @@ Cypress.Commands.add('resetState', () => {
   cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
     currState = {}
     cy.writeFile('cypress/fixtures/state/store.json', currState)
+    cy.writeFile('cypress/fixtures/state/regen.json', currState)
   })
   cy.log('Test state was reset')
 })
