@@ -28,8 +28,8 @@ class Gauge {
   public inc(labels: any, inc: number = 1) {
     const val = this._values[JSON.stringify(labels)]
       ? this._values[JSON.stringify(labels)]
-      : 0;
-    this._values[JSON.stringify(labels)] = { value: val + inc, labels };
+      : { value: 0 };
+    this._values[JSON.stringify(labels)] = { value: val.value + inc, labels };
   }
 
   public reset() {
