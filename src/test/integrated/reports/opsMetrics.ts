@@ -4,7 +4,7 @@ export TOK="<token from portal>"
 To run:
 npm run ts-build
 npm run ts-watch
-node dist/test/integrated/reports/promMetrics.js
+node dist/test/integrated/reports/opsMetrics.js
 */
 
 import InitKeystone from '../keystonejs/init';
@@ -16,7 +16,7 @@ import {
   injectResSvrAccessTokenToContext,
 } from '../../../services/workflow';
 import { lookupProductEnvironmentServicesBySlug } from '../../../services/keystone';
-import { PromMetrics } from '../../../services/report/prom-metrics';
+import { OpsMetrics } from '../../../services/report/ops-metrics';
 
 const logger = Logger('test.reports');
 
@@ -49,13 +49,15 @@ const logger = Logger('test.reports');
 
   ctx.req.user = { sub: '15a3cbbe-95b5-49f0-84ee-434a9b92d04a' };
 
-  const promMetrics = new PromMetrics(keystone);
-  promMetrics.initialize();
-  //await promMetrics.generateEmailList();
-  await promMetrics.generateActivityMetrics();
-  //await promMetrics.generateMetrics();
+  const opsMetrics = new OpsMetrics(keystone);
+  opsMetrics.initialize();
+  //await opsMetrics.generateEmailList();
+  //await opsMetrics.generateActivityMetrics();
+  await opsMetrics.generateMetrics();
 
-  o(await promMetrics.getRegister().metrics());
+  //  o(await opsMetrics.getRegister().metrics());
+
+  await opsMetrics.store();
 
   await keystone.disconnect();
 })();

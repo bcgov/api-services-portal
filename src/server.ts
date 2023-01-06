@@ -15,7 +15,7 @@ const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
 
-const { PromMetrics } = require('./services/report/prom-metrics');
+const { OpsMetrics } = require('./services/report/ops-metrics');
 
 const initialiseData = require('./initial-data');
 const session = require('express-session');
@@ -343,17 +343,15 @@ const configureExpress = (app: any) => {
     res.status(200).json({ result: 'ok' });
   });
 
-  const promMetrics = new PromMetrics(keystone);
-  promMetrics.initialize();
+  const opsMetrics = new OpsMetrics(keystone);
+  opsMetrics.initialize();
 
   app.get('/metrics', async (req: any, res: any) => {
-    await promMetrics.generateMetrics();
-    await promMetrics.generateEmailList();
-    await promMetrics.generateActivityMetrics();
+    await opsMetrics.generateMetrics();
+    await opsMetrics.store();
 
-    const register = promMetrics.getRegister();
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
+    res.set('Content-Type', 'application/json');
+    res.end({});
   });
 
   app.get('/about', (req: any, res: any) => {

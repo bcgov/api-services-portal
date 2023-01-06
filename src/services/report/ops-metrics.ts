@@ -1,5 +1,5 @@
 import { Keystone } from '@keystonejs/keystone';
-import prom, { Gauge } from 'prom-client';
+//import prom, { Gauge } from 'prom-client';
 import { BatchService } from '../keystone/batch-service';
 import { Activity, TemporaryIdentity } from '../keystone/types';
 import {
@@ -9,7 +9,48 @@ import {
 import { getNamespaceResourceSetDetails } from '../workflow/get-namespaces';
 import { getNamespaceAccess } from './data';
 
-export class PromMetrics {
+import { Logger } from '../../logger';
+
+const logger = Logger('report.OpsMetrics');
+
+class Gauge {
+  _name: string;
+  _values: { [key: string]: any } = {};
+
+  constructor(config: { name: string; help: string; labelNames: string[] }) {
+    this._name = config.name;
+  }
+
+  public set(labels: any, value: number) {
+    this._values[JSON.stringify(labels)] = { value, labels };
+  }
+
+  public inc(labels: any, inc: number = 1) {
+    const val = this._values[JSON.stringify(labels)]
+      ? this._values[JSON.stringify(labels)]
+      : 0;
+    this._values[JSON.stringify(labels)] = { value: val + inc, labels };
+  }
+
+  public reset() {
+    this._values = {};
+  }
+
+  public name() {
+    return this._name;
+  }
+
+  public data() {
+    return Object.keys(this._values).map((k: string) => {
+      const record: any = { value: this._values[k].value };
+      for (const [key, value] of Object.entries(this._values[k].labels)) {
+        record[key] = value;
+      }
+    });
+  }
+}
+
+export class OpsMetrics {
   keystone: any;
   gNamespaces: Gauge;
   gNamespaceAccess: Gauge;
@@ -21,41 +62,77 @@ export class PromMetrics {
   }
 
   public initialize() {
-    const collectDefaultMetrics = prom.collectDefaultMetrics;
-    const Registry = prom.Registry;
-    const register = new Registry();
-    collectDefaultMetrics({ register });
+    // const collectDefaultMetrics = prom.collectDefaultMetrics;
+    // const Registry = prom.Registry;
+    // const register = new Registry();
+    // collectDefaultMetrics({ register });
 
-    this.gNamespaces = new prom.Gauge({
+    this.gNamespaces = new Gauge({
       name: 'namespaces',
       help: 'namespace counts',
       labelNames: ['namespace'],
     });
 
-    this.gNamespaceAccess = new prom.Gauge({
+    this.gNamespaceAccess = new Gauge({
       name: 'namespace_access',
       help: 'namespace access counts',
       labelNames: ['namespace', 'subject', 'permission'],
     });
 
-    this.gEmailList = new prom.Gauge({
+    this.gEmailList = new Gauge({
       name: 'email_list',
       help: 'email list for distribution',
       labelNames: ['namespace', 'email', 'provider'],
     });
 
-    this.gActivity = new prom.Gauge({
+    this.gActivity = new Gauge({
       name: 'activity_summary',
       help: 'activity_summary',
       labelNames: ['namespace', 'actor', 'activity', 'date'],
     });
   }
 
-  public getRegister() {
-    return prom.register;
+  // public getRegister() {
+  //   return prom.register;
+  // }
+
+  public async generateMetrics() {
+    await this.generateAccessMetrics();
+    await this.generateEmailList();
+    await this.generateActivityMetrics();
   }
 
-  public async generateEmailList() {
+  public async store() {
+    const ctx = this.keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: {} },
+    });
+    const batch = new BatchService(ctx);
+
+    for (const metric of [
+      this.gEmailList,
+      this.gNamespaces,
+      this.gNamespaceAccess,
+      this.gActivity,
+    ]) {
+      const existing = await batch.lookup('allBlobs', 'ref', metric.name(), []);
+      if (existing) {
+        await batch.update('Blob', existing.id, {
+          ref: metric.name(),
+          type: 'json',
+          blob: JSON.stringify(metric.data()),
+        });
+      } else {
+        await batch.create('Blob', {
+          ref: metric.name(),
+          type: 'json',
+          blob: JSON.stringify(metric.data()),
+        });
+      }
+    }
+  }
+
+  async generateEmailList() {
     const { gEmailList } = this;
     const ctx = this.keystone.createContext({
       skipAccessControl: true,
@@ -88,7 +165,7 @@ export class PromMetrics {
     await recurse();
   }
 
-  public async generateActivityMetrics() {
+  async generateActivityMetrics() {
     const { gActivity } = this;
     const ctx = this.keystone.createContext({
       skipAccessControl: true,
@@ -134,7 +211,7 @@ export class PromMetrics {
     await recurse();
   }
 
-  public async generateMetrics() {
+  async generateAccessMetrics() {
     const ctx = this.keystone.createContext({
       skipAccessControl: true,
       authentication: { item: {} },
