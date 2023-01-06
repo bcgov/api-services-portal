@@ -46,6 +46,7 @@ export default async function InitKeystone(
     'Dataset',
     'Legal',
     'User',
+    'Metric',
     'CredentialIssuer',
     'Product',
     'Environment',
@@ -54,6 +55,7 @@ export default async function InitKeystone(
     'GatewayPlugin',
     'GatewayConsumer',
     'ServiceAccess',
+    'TemporaryIdentity',
     'Label',
   ]) {
     const list = require('../../../lists/' + _list);

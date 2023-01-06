@@ -18,19 +18,21 @@ export class BatchService {
   public async listAll(
     query: any,
     fields: string[],
-    where: BatchWhereClause = undefined
+    where: BatchWhereClause = undefined,
+    skip: number = 0,
+    first: number = 50
   ) {
     logger.debug('[listAll] : %s', query);
     let queryString;
     if (where) {
       queryString = `query(${where.query}) {
-        ${query}(where: ${where.clause}) {
+        ${query}(where: ${where.clause}, first: ${first}, skip: ${skip}) {
           id, ${fields.join(',')}
         }
       }`;
     } else {
       queryString = `query {
-        ${query} {
+        ${query}(first: ${first}, skip: ${skip}) {
           id, ${fields.join(',')}
         }
       }`;
