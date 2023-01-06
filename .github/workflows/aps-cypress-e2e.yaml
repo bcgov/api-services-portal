@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['test']
+    branches: ['macos-test']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -16,7 +16,7 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Build GWA API Image
         run: |
