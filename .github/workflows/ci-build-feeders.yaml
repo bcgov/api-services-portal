@@ -119,7 +119,7 @@ jobs:
 
           serviceAccount:
             create: false
-            name: proto-asp-dev
+            name: feature-service-account
 
           env:
             TZ:
