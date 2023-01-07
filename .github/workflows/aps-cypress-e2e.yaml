@@ -18,11 +18,17 @@ jobs:
   cypress-run:
     runs-on: macos-latest
     steps:
-      - name: Install docker
-        uses: douglascamata/setup-docker-macos-action@v1-alpha
-
-      - name: Install docker-compose
-        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install docker-compose
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Docker on macOS using Colima, Lima-VM, and Homebrew.
+        uses: ./ # Uses an action in the root directory
+        id: docker
+      - name: Get the Docker client version
+        run: |
+          echo "Docker client version: ${{ steps.docker.outputs.docker-client-version }}"
+      - name: Get the Colima version
+        run: |
+          echo "Colima version: ${{ steps.docker.outputs.colima-version }}"
 
       - name: Build GWA API Image
         run: |
