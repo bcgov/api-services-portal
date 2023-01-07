@@ -107,7 +107,7 @@ jobs:
 
           serviceAccount:
               create: false
-              name: feature-service-account
+              name: asp-service-account
 
           arbiter:
               enabled: false
@@ -191,7 +191,7 @@ jobs:
 
           serviceAccount:
             create: false
-            name: feature-service-account
+            name: asp-service-account
 
           oauthProxy:
             enabled: true
