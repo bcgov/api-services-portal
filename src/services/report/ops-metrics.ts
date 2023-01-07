@@ -1,55 +1,35 @@
 import { Keystone } from '@keystonejs/keystone';
 //import prom, { Gauge } from 'prom-client';
 import { BatchService } from '../keystone/batch-service';
-import { Activity, TemporaryIdentity } from '../keystone/types';
+import {
+  Activity,
+  Environment,
+  Namespace,
+  TemporaryIdentity,
+} from '../keystone/types';
 import {
   getGwaProductEnvironment,
   injectResSvrAccessTokenToContext,
 } from '../workflow';
-import { getNamespaceResourceSetDetails } from '../workflow/get-namespaces';
+import {
+  getEnvironmentContext,
+  getNamespaceResourceSetDetails,
+} from '../workflow/get-namespaces';
 import { getNamespaceAccess } from './data';
-
+import { Gauge } from './gauge';
 import { Logger } from '../../logger';
+import { lookupProductEnvironmentServicesBySlug } from '../keystone';
+// import {
+//   getEnvironmentContext,
+//   getNamespaceResourceSets,
+// } from '../../lists/extensions/Common';
+import { ResourceSet, UMAResourceRegistrationService } from '../uma2';
+import {
+  getAllNamespaces,
+  transformOrgAndOrgUnit,
+} from '../keycloak/namespace-details';
 
 const logger = Logger('report.OpsMetrics');
-
-class Gauge {
-  _name: string;
-  _values: { [key: string]: any } = {};
-
-  constructor(config: { name: string; help: string; labelNames: string[] }) {
-    this._name = config.name;
-  }
-
-  public set(labels: any, value: number) {
-    this._values[JSON.stringify(labels)] = { value, labels };
-  }
-
-  public inc(labels: any, inc: number = 1) {
-    const val = this._values[JSON.stringify(labels)]
-      ? this._values[JSON.stringify(labels)]
-      : { value: 0 };
-    this._values[JSON.stringify(labels)] = { value: val.value + inc, labels };
-  }
-
-  public reset() {
-    this._values = {};
-  }
-
-  public name() {
-    return this._name;
-  }
-
-  public data() {
-    return Object.keys(this._values).map((k: string) => {
-      const record: any = { value: this._values[k].value };
-      for (const [key, value] of Object.entries(this._values[k].labels)) {
-        record[key] = value;
-      }
-      return record;
-    });
-  }
-}
 
 export class OpsMetrics {
   keystone: any;
@@ -57,6 +37,8 @@ export class OpsMetrics {
   gNamespaceAccess: Gauge;
   gEmailList: Gauge;
   gActivity: Gauge;
+  gConsumers: Gauge;
+  gProducts: Gauge;
 
   constructor(keystone: Keystone) {
     this.keystone = keystone;
@@ -71,7 +53,14 @@ export class OpsMetrics {
     this.gNamespaces = new Gauge({
       name: 'ops_metrics_namespaces',
       help: 'namespace counts',
-      labelNames: ['namespace'],
+      labelNames: [
+        'namespace',
+        'org',
+        'org_unit',
+        'org_enabled',
+        'data_plane',
+        'prod_in_directory',
+      ],
     });
 
     this.gNamespaceAccess = new Gauge({
@@ -91,6 +80,34 @@ export class OpsMetrics {
       help: 'Activity Summary',
       labelNames: ['namespace', 'actor', 'activity', 'date'],
     });
+
+    this.gProducts = new Gauge({
+      name: 'ops_metrics_products',
+      help: 'Product information for tracking API Directory',
+      labelNames: [
+        'namespace',
+        'product',
+        'environment',
+        'flow',
+        'issuer',
+        'enabled',
+      ],
+    });
+
+    this.gConsumers = new Gauge({
+      name: 'ops_metrics_consumers',
+      help: 'Consumer Access',
+      labelNames: [
+        'consumer',
+        'application',
+        'namespace',
+        'product',
+        'environment',
+        'flow',
+        'issuer',
+        'date',
+      ],
+    });
   }
 
   // public getRegister() {
@@ -100,7 +117,10 @@ export class OpsMetrics {
   public async generateMetrics() {
     await this.generateAccessMetrics();
     await this.generateEmailList();
+    await this.generateNamespaceMetrics();
     await this.generateActivityMetrics();
+    await this.generateConsumerMetrics();
+    await this.generateProductMetrics();
   }
 
   public async store() {
@@ -218,6 +238,7 @@ export class OpsMetrics {
       authentication: { item: {} },
     });
 
+    // ctx.executeGraphQL(``);
     const envCtx = await getGwaProductEnvironment(ctx, false);
 
     await injectResSvrAccessTokenToContext(envCtx);
@@ -236,7 +257,6 @@ export class OpsMetrics {
     const result = await getNamespaceAccess(ctx, envCtx, nsResList);
 
     result.forEach((r) => {
-      this.gNamespaces.set({ namespace: r.namespace }, 1);
       this.gNamespaceAccess.set(
         {
           namespace: r.namespace,
@@ -247,4 +267,100 @@ export class OpsMetrics {
       );
     });
   }
+
+  async generateNamespaceMetrics() {
+    const ctx = this.keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: {} },
+    });
+    //const envCtx = await getGwaProductEnvironment(ctx, false);
+    const result = await getNamespaces(ctx);
+
+    const allEnvs = await getAllProdEnvironments(ctx);
+    const nsInDirectory: { [key: string]: boolean } = {};
+    allEnvs.forEach((env: Environment) => {
+      nsInDirectory[env.product?.namespace] = true;
+    });
+
+    result.forEach((r) => {
+      this.gNamespaces.set(
+        {
+          namespace: r.name,
+          org: r.org?.title,
+          org_unit: r.orgUnit?.title,
+          org_enabled: r.orgEnabled,
+          data_plane: r.permDataPlane,
+          prod_in_directory: r.name in nsInDirectory,
+        },
+        1
+      );
+    });
+    console.log(JSON.stringify(this.gNamespaces.data(), null, 4));
+  }
+
+  /*
+        'consumer',
+        'application',
+        'namespace',
+        'product',
+        'environment',
+        'flow',
+        'issuer',
+        'date',
+  */
+  async generateConsumerMetrics() {
+    const ctx = this.keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: {} },
+    });
+  }
+
+  /*
+          'namespace',
+        'product',
+        'environment',
+        'flow',
+        'issuer',
+        'enabled',
+  */
+  async generateProductMetrics() {
+    const ctx = this.keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: {} },
+    });
+  }
+}
+
+export async function getNamespaces(context: any): Promise<Namespace[]> {
+  const envCtx = await getGwaProductEnvironment(context, false);
+
+  await injectResSvrAccessTokenToContext(envCtx);
+
+  envCtx.subjectToken = envCtx.accessToken;
+  //  const envCtx = await getEnvironmentContext(context, prodEnv.id, {}, false);
+
+  const nsList = await getAllNamespaces(envCtx);
+  return Promise.all(
+    nsList.map(async (ns: any) => {
+      if (ns.org) {
+        await transformOrgAndOrgUnit(context, envCtx, ns, false);
+      }
+      return ns;
+    })
+  );
+}
+
+async function getAllProdEnvironments(ctx: any) {
+  const batch = new BatchService(ctx);
+
+  // Limiting to 1000 is not great!  We should really recurse until we get to the end!
+  const allEnvs = await batch.listAll(
+    'allEnvironments',
+    ['name', 'product { namespace }'],
+    undefined,
+    0,
+    1000
+  );
+
+  return allEnvs.filter((env: Environment) => env.name === 'prod');
 }

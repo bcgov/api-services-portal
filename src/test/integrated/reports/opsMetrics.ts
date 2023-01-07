@@ -53,11 +53,12 @@ const logger = Logger('test.reports');
   opsMetrics.initialize();
   //await opsMetrics.generateEmailList();
   //await opsMetrics.generateActivityMetrics();
-  await opsMetrics.generateMetrics();
+  //await opsMetrics.generateMetrics();
+  await opsMetrics.generateNamespaceMetrics();
 
   //  o(await opsMetrics.getRegister().metrics());
 
-  await opsMetrics.store();
+  //await opsMetrics.store();
 
   await keystone.disconnect();
 })();

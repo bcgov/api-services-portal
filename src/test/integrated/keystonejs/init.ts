@@ -80,6 +80,29 @@ export default async function InitKeystone(
     }
   }
 
+  for (const _list of [
+    'AliasedQueries',
+    'BusinessProfile',
+    'ConsumerGroups',
+    'ConsumerProducts',
+    'ConsumerScopesAndRoles',
+    'CredentialRegenerate',
+    'CredentialIssuerExt',
+    'Namespace',
+    'NamespaceActivity',
+    'OrganizationPolicy',
+    'ServiceAccount',
+    'UMAPolicy',
+    'UMAResourceSet',
+    'UMAPermissionTicket',
+  ]) {
+    const list = require('../../../lists/extensions/' + _list);
+    if ('extensions' in list) {
+      console.log('Registering Extension!');
+      list.extensions.map((ext: any) => ext(keystone));
+    }
+  }
+
   const apps = [new GraphQLApp()];
 
   await keystone.prepare({
