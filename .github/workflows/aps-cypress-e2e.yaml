@@ -19,12 +19,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install docker
-        run: |
-          mkdir -p ~/.docker/machine/cache
-          curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
-          brew install docker docker-machine
-          docker-machine create --driver virtualbox default
-          docker-machine env default
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
+
+      - name: Install docker-compose
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install docker-compose
+
       - name: Build GWA API Image
         run: |
           git clone https://github.com/bcgov/gwa-api.git -b master
