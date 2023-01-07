@@ -2,7 +2,7 @@ name: Build and Deploy Cypress and Execute Tests
 
 on:
   push:
-    branches: ['macos-test']
+    branches: ['test']
 
 env:
   DASHBOARD_PROJECT_ID: ${{ secrets.CY_DASHBOARD_PRJ_ID }}
@@ -16,20 +16,8 @@ env:
 
 jobs:
   cypress-run:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Docker on macOS using Colima, Lima-VM, and Homebrew.
-        uses: ./ # Uses an action in the root directory
-        id: docker
-      - name: Get the Docker client version
-        run: |
-          echo "Docker client version: ${{ steps.docker.outputs.docker-client-version }}"
-      - name: Get the Colima version
-        run: |
-          echo "Colima version: ${{ steps.docker.outputs.colima-version }}"
-
       - name: Build GWA API Image
         run: |
           git clone https://github.com/bcgov/gwa-api.git -b master
@@ -48,19 +36,20 @@ jobs:
           export CY_COMMIT_MESSAGE="${{ env.GIT_COMMIT_MESSAGE }}"
           export CY_REPO_URL=${{ env.GIT_REPO_URL }}
           export CY_COMMIT_AUTHOR_EMAIL=$(git --no-pager show -s --format='%ae' ${{ env.GIT_COMMIT_SHA }})
-          docker compose up -d
+          docker-compose up -d
       - name: Execute Tests & Clean Up
         run: |
           while true; do
             if [ "$(docker ps -aq -f status=exited -f name=cypress-e2e)" ]; then
               # cleanup
-              docker compose down
+              docker-compose down
               break
             else
               echo  "Waiting for Cypress to Complete E2E Tests....."
               sleep 1m
             fi
           done
+
       - name: Upload E2E Test Results Report
         uses: actions/upload-artifact@v2
         with:
@@ -76,6 +65,7 @@ jobs:
       - name: Format LCOV Report
         run: |
           sudo sed  -i -r 's/\.*\/app\/nextapp\///g' ./e2e/coverage/lcov.info
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
