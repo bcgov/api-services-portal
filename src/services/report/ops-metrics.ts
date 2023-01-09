@@ -209,19 +209,22 @@ export class OpsMetrics {
     });
     const batch = new BatchService(ctx);
 
+    gActivity.reset();
+
     async function recurse(skip = 0) {
       const data = await batch.listAll(
         'allActivities',
-        ['namespace', 'context', 'createdAt'],
+        ['namespace', 'message', 'context', 'createdAt'],
         undefined,
         skip,
         50
       );
-      gActivity.reset();
 
       data.forEach((data: Activity) => {
         const context =
-          Boolean(data.context) == false ? {} : JSON.parse(data.context);
+          Boolean(data.context) == false
+            ? { message: data.message }
+            : JSON.parse(data.context);
         const actor = Boolean(context.params?.actor)
           ? context.params.actor
           : 'unknown';
@@ -229,7 +232,9 @@ export class OpsMetrics {
         const activity = Boolean(context?.params?.action)
           ? `${context.params.action} ${context.params.entity}`
           : context.message;
-        console.log(activity);
+        if (Boolean(activity) == false) {
+          logger.warn("Context didn't produce anything meaningful %j", data);
+        }
         gActivity.inc(
           {
             actor,
@@ -456,7 +461,7 @@ async function getAllConsumers(ctx: any) {
       'active',
       'consumer { username }',
       'application { name, owner { name }}',
-      'productEnvironment { namespace, name, product { name, namespace } }',
+      'productEnvironment { namespace, name, flow, product { name, namespace } }',
       'createdAt',
     ],
     undefined,
