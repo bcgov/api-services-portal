@@ -18,7 +18,10 @@ import {
 import { getNamespaceAccess } from './data';
 import { Gauge } from './gauge';
 import { Logger } from '../../logger';
-import { getIssuerEnvironmentConfig } from '../../services/workflow/types';
+import {
+  getIssuerEnvironmentConfig,
+  checkIssuerEnvironmentConfig,
+} from '../../services/workflow/types';
 import { lookupProductEnvironmentServicesBySlug } from '../keystone';
 // import {
 //   getEnvironmentContext,
@@ -332,10 +335,11 @@ export class OpsMetrics {
     });
     const prods = await getAllProdEnvironments(ctx);
     prods.forEach((prodEnv: Environment) => {
-      const issuer = prodEnv.credentialIssuer
-        ? getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
-            .issuerUrl
+      const env = prodEnv.credentialIssuer
+        ? checkIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
         : null;
+
+      const issuer = env ? env.issuerUrl : null;
 
       this.gProducts.set(
         {
