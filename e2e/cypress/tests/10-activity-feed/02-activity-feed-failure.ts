@@ -51,7 +51,8 @@ describe('Make the access request for invalid profile', () => {
 
       apiDir.createAccessRequest(product, app, accessRequest)
       ma.clickOnGenerateSecretButton()
-      ma.closeRequestAccessPopUp()
+      cy.wait(8000)
+      // ma.closeRequestAccessPopUp()
       cy.on('uncaught:exception', (err, runnable) => {
         expect(err.message).to.include('The following error originated from your application code, not from Cypress')
         done()
