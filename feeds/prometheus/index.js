@@ -31,6 +31,12 @@ const queries = [
   },
   {
     query:
+      'sum(increase(konglog_service_consumer_counter[1d])) by (consumer,namespace)',
+    step: 60 * 60,
+    id: 'konglog_namespace_consumer_daily',
+  },
+  {
+    query:
       'sum(increase(konglog_service_consumer_counter[60m])) by (consumer,service)',
     step: 60 * 60,
     id: 'konglog_service_consumer_hourly',
