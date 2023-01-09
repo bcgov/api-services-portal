@@ -34,6 +34,11 @@ import {
   getAllNamespaces,
   transformOrgAndOrgUnit,
 } from '../keycloak/namespace-details';
+import {
+  calculateStats,
+  getAllConsumerDailyMetrics,
+} from '../keystone/metrics';
+import { dateRange } from '../utils';
 
 const logger = Logger('report.OpsMetrics');
 
@@ -112,6 +117,7 @@ export class OpsMetrics {
         'environment',
         'flow',
         'issuer',
+        'requests_30_day',
         'date',
       ],
     });
@@ -313,6 +319,7 @@ export class OpsMetrics {
         'product',
         'environment',
         'flow',
+        'requests_30_day',
         'date',
   */
   async generateConsumerMetrics() {
@@ -321,6 +328,18 @@ export class OpsMetrics {
       authentication: { item: {} },
     });
     const allConsumers = await getAllConsumers(ctx);
+
+    const days = dateRange(30);
+    const metrics = await getAllConsumerDailyMetrics(ctx, days);
+
+    function calcMetrics(ns: string, consumer: string) {
+      const nsMetrics = metrics.filter((m) => {
+        const metric = JSON.parse(m.metric);
+        return metric.namespace === ns && metric.consumer === consumer;
+      });
+
+      return calculateStats(nsMetrics);
+    }
 
     allConsumers
       .filter((sa: ServiceAccess) => sa.active)
@@ -334,6 +353,10 @@ export class OpsMetrics {
             product: sa.productEnvironment?.product?.name,
             environment: sa.productEnvironment?.name,
             flow: sa.productEnvironment?.flow,
+            requests_30_day: calcMetrics(
+              sa.productEnvironment?.product?.namespace,
+              sa.consumer?.username
+            ).totalRequests,
             date: sa.createdAt,
           },
           1
