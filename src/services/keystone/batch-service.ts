@@ -49,7 +49,7 @@ export class BatchService {
       return null;
     }
 
-    logger.debug('[listAll] RESULT %j', result);
+    logger.debug('[listAll] RESULT COUNT %d', result['data'][query].length);
     return result['data'][query].length == 0 ? [] : result['data'][query];
   }
 

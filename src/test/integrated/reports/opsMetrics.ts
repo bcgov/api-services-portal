@@ -55,11 +55,12 @@ const logger = Logger('test.reports');
   //await opsMetrics.generateActivityMetrics();
   //await opsMetrics.generateMetrics();
   //await opsMetrics.generateNamespaceMetrics();
-  await opsMetrics.generateProductMetrics();
+  //await opsMetrics.generateProductMetrics();
+  await opsMetrics.generateConsumerMetrics();
 
-  //o(await opsMetrics.getRegister().metrics());
+  o(opsMetrics.gConsumers.data());
 
-  await opsMetrics.store();
+  //await opsMetrics.store();
 
   await keystone.disconnect();
 })();

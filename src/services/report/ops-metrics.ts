@@ -4,7 +4,9 @@ import { BatchService } from '../keystone/batch-service';
 import {
   Activity,
   Environment,
+  GatewayConsumer,
   Namespace,
+  ServiceAccess,
   TemporaryIdentity,
 } from '../keystone/types';
 import {
@@ -104,6 +106,7 @@ export class OpsMetrics {
       labelNames: [
         'consumer',
         'application',
+        'application_owner',
         'namespace',
         'product',
         'environment',
@@ -310,7 +313,6 @@ export class OpsMetrics {
         'product',
         'environment',
         'flow',
-        'issuer',
         'date',
   */
   async generateConsumerMetrics() {
@@ -318,6 +320,25 @@ export class OpsMetrics {
       skipAccessControl: true,
       authentication: { item: {} },
     });
+    const allConsumers = await getAllConsumers(ctx);
+
+    allConsumers
+      .filter((sa: ServiceAccess) => sa.active)
+      .forEach((sa: ServiceAccess) => {
+        this.gConsumers.set(
+          {
+            consumer: sa.consumer?.username,
+            application: sa.application?.name,
+            application_owner: sa.application?.owner?.name,
+            namespace: sa.productEnvironment?.product?.namespace,
+            product: sa.productEnvironment?.product?.name,
+            environment: sa.productEnvironment?.name,
+            flow: sa.productEnvironment?.flow,
+            date: sa.createdAt,
+          },
+          1
+        );
+      });
   }
 
   /*
@@ -333,7 +354,7 @@ export class OpsMetrics {
       skipAccessControl: true,
       authentication: { item: {} },
     });
-    const prods = await getAllProdEnvironments(ctx);
+    const prods = await getAllEnvironments(ctx);
     prods.forEach((prodEnv: Environment) => {
       const env = prodEnv.credentialIssuer
         ? checkIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
@@ -376,6 +397,12 @@ export async function getNamespaces(context: any): Promise<Namespace[]> {
 }
 
 async function getAllProdEnvironments(ctx: any) {
+  return (await getAllEnvironments(ctx)).filter(
+    (env: Environment) => env.name === 'prod'
+  );
+}
+
+async function getAllEnvironments(ctx: any) {
   const batch = new BatchService(ctx);
 
   // Limiting to 1000 is not great!  We should really recurse until we get to the end!
@@ -384,7 +411,7 @@ async function getAllProdEnvironments(ctx: any) {
     [
       'name',
       'flow',
-      'enabled',
+      'active',
       'product { name, namespace }',
       'credentialIssuer { name, environmentDetails, inheritFrom { environmentDetails } }',
     ],
@@ -392,6 +419,27 @@ async function getAllProdEnvironments(ctx: any) {
     0,
     1000
   );
+  return allEnvs;
+}
 
-  return allEnvs.filter((env: Environment) => env.name === 'prod');
+async function getAllConsumers(ctx: any) {
+  const batch = new BatchService(ctx);
+
+  // Limiting to 1000 is not great!  We should really recurse until we get to the end!
+  const allConsumers = await batch.listAll(
+    'allServiceAccesses',
+    [
+      'namespace',
+      'active',
+      'consumer { username }',
+      'application { name, owner { name }}',
+      'productEnvironment { namespace, name, product { name, namespace } }',
+      'createdAt',
+    ],
+    undefined,
+    0,
+    1000
+  );
+
+  return allConsumers;
 }
