@@ -54,11 +54,12 @@ const logger = Logger('test.reports');
   //await opsMetrics.generateEmailList();
   //await opsMetrics.generateActivityMetrics();
   //await opsMetrics.generateMetrics();
-  await opsMetrics.generateNamespaceMetrics();
+  //await opsMetrics.generateNamespaceMetrics();
+  await opsMetrics.generateProductMetrics();
 
-  //  o(await opsMetrics.getRegister().metrics());
+  //o(await opsMetrics.getRegister().metrics());
 
-  //await opsMetrics.store();
+  await opsMetrics.store();
 
   await keystone.disconnect();
 })();

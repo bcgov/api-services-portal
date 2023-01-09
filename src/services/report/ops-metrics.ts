@@ -18,6 +18,7 @@ import {
 import { getNamespaceAccess } from './data';
 import { Gauge } from './gauge';
 import { Logger } from '../../logger';
+import { getIssuerEnvironmentConfig } from '../../services/workflow/types';
 import { lookupProductEnvironmentServicesBySlug } from '../keystone';
 // import {
 //   getEnvironmentContext,
@@ -135,6 +136,8 @@ export class OpsMetrics {
       this.gNamespaces,
       this.gNamespaceAccess,
       this.gActivity,
+      this.gProducts,
+      this.gConsumers,
     ]) {
       const existing = await batch.lookup('allBlobs', 'ref', metric.name(), []);
       if (existing) {
@@ -295,7 +298,6 @@ export class OpsMetrics {
         1
       );
     });
-    console.log(JSON.stringify(this.gNamespaces.data(), null, 4));
   }
 
   /*
@@ -316,7 +318,7 @@ export class OpsMetrics {
   }
 
   /*
-          'namespace',
+        'namespace',
         'product',
         'environment',
         'flow',
@@ -327,6 +329,25 @@ export class OpsMetrics {
     const ctx = this.keystone.createContext({
       skipAccessControl: true,
       authentication: { item: {} },
+    });
+    const prods = await getAllProdEnvironments(ctx);
+    prods.forEach((prodEnv: Environment) => {
+      const issuer = prodEnv.credentialIssuer
+        ? getIssuerEnvironmentConfig(prodEnv.credentialIssuer, prodEnv.name)
+            .issuerUrl
+        : null;
+
+      this.gProducts.set(
+        {
+          namespace: prodEnv.product?.namespace,
+          product: prodEnv.product?.name,
+          environment: prodEnv.name,
+          flow: prodEnv.flow,
+          issuer,
+          enabled: prodEnv.active,
+        },
+        1
+      );
     });
   }
 }
@@ -356,7 +377,13 @@ async function getAllProdEnvironments(ctx: any) {
   // Limiting to 1000 is not great!  We should really recurse until we get to the end!
   const allEnvs = await batch.listAll(
     'allEnvironments',
-    ['name', 'product { namespace }'],
+    [
+      'name',
+      'flow',
+      'enabled',
+      'product { name, namespace }',
+      'credentialIssuer { name, environmentDetails, inheritFrom { environmentDetails } }',
+    ],
     undefined,
     0,
     1000
