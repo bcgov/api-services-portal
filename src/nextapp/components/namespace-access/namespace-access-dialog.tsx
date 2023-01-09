@@ -18,10 +18,11 @@ import {
   VStack,
   WrapItem,
   ButtonProps,
+  Text,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
 import startCase from 'lodash/startCase';
-import { UmaScope } from '@/shared/types/query.types';
+import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { AccessItem, Scope } from './types';
 
 interface NamespaceAccessDialogProps {
@@ -30,6 +31,7 @@ interface NamespaceAccessDialogProps {
   data: UmaScope[];
   onCancel?: () => void;
   onSubmit: (formData: FormData) => void;
+  serviceAccount?: UmaPolicy;
   variant: 'user' | 'service';
 }
 
@@ -39,17 +41,29 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
   data = [],
   onCancel,
   onSubmit,
+  serviceAccount,
   variant = 'user',
 }) => {
-  const title =
-    variant === 'user' ? 'Grant user access' : 'Grant service account access';
-  const formRef = React.useRef<HTMLFormElement>();
-  const [selected, setSelected] = React.useState<string[]>(() => {
+  const isEditing = Boolean(accessItem) ?? Boolean(serviceAccount);
+  const title = React.useMemo(() => {
     if (accessItem) {
-      return accessItem.scopes.map((s) => s.name);
+      return 'Edit access';
+    }
+    if (variant === 'user') {
+      return 'Grant user access';
+    }
+    return 'Grant service account access';
+  }, [variant, accessItem]);
+  const formRef = React.useRef<HTMLFormElement>();
+  const getDefault = () => {
+    if (variant === 'user' && accessItem) {
+      return accessItem.scopes.map((s: Scope) => s.name);
+    } else if (variant === 'service' && serviceAccount) {
+      return serviceAccount?.scopes;
     }
     return [];
-  });
+  };
+  const [selected, setSelected] = React.useState<string[]>(getDefault);
   const { isOpen, onClose, onOpen } = useDisclosure();
 
   // Events
@@ -59,7 +73,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
       formData.append('scopes', scope);
     });
     onSubmit(formData);
-    if (accessItem) {
+    if (accessItem || serviceAccount) {
       onCancel();
     } else {
       onClose();
@@ -73,9 +87,11 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
     formRef.current?.requestSubmit();
   };
   const handleCancel = () => {
-    if (accessItem) {
+    if (accessItem || serviceAccount) {
+      setSelected(getDefault());
       onCancel();
     } else {
+      setSelected([]);
       onClose();
     }
   };
@@ -93,7 +109,8 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
         </Button>
       )}
       <Modal
-        isOpen={Boolean(accessItem) || isOpen}
+        closeOnOverlayClick={false}
+        isOpen={Boolean(accessItem) || Boolean(serviceAccount) || isOpen}
         onClose={onClose}
         scrollBehavior="inside"
         size="xl"
@@ -109,7 +126,10 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                     {variant === 'user' ? 'Email' : 'Service Account'}
                   </FormLabel>
                   <Input
-                    defaultValue={accessItem?.requesterName}
+                    readOnly={isEditing}
+                    defaultValue={
+                      accessItem?.requesterEmail ?? serviceAccount?.name
+                    }
                     name="email"
                     type="text"
                     data-testid="nsa-gua-email-field"
@@ -120,7 +140,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                   <CheckboxGroup>
                     <VStack spacing={4} align="start">
                       {data.map((r) => (
-                        <WrapItem key={r.name}>
+                        <WrapItem key={r.name} d="flex" flexDir="column">
                           <Checkbox
                             onChange={(event) => {
                               if (event.target.checked) {
@@ -135,6 +155,10 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                           >
                             {r.name}
                           </Checkbox>
+                          <Text fontSize="sm" color="bc-component" ml={6}>
+                            Can approve/reject access requests to your APIs that
+                            you make discoverable.
+                          </Text>
                         </WrapItem>
                       ))}
                     </VStack>
@@ -157,7 +181,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                 onClick={handleSubmitClick}
                 data-testid="nsa-gua-share-btn"
               >
-                {accessItem ? 'Update' : 'Share'}
+                {accessItem ? 'Save' : 'Share'}
               </Button>
             </ButtonGroup>
           </ModalFooter>

@@ -4,7 +4,9 @@ export type Scope = {
 };
 
 export type AccessItem = {
-  requesterName: string;
-  tickets: string[];
+  id?: string;
+  name?: string;
+  requesterName?: string;
+  tickets?: string[];
   scopes: Scope[];
 };

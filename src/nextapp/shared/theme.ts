@@ -265,6 +265,9 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
+          label: {
+            color: 'text',
+          },
           '& label': {
             borderColor: 'bc-component',
           },

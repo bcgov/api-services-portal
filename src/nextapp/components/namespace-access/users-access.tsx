@@ -13,6 +13,7 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
+import get from 'lodash/get';
 import { gql } from 'graphql-request';
 import groupBy from 'lodash/groupBy';
 import NamespaceAccessDialog from './namespace-access-dialog';
@@ -22,7 +23,7 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
 import { uid } from 'react-uid';
 import ActionsMenu from '../actions-menu';
-import { AccessItem } from './types';
+import { AccessItem, Scope } from './types';
 import type { UmaScope } from '@/shared/types/query.types';
 
 interface UsersAccessProps {
@@ -74,8 +75,14 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       );
       const result = Object.keys(groupedByRequester).map((r) => {
         const requesterName = r.split('|')[1];
+        const requesterEmail = get(
+          groupedByRequester[r],
+          '[0].requesterEmail',
+          requesterName
+        );
         return {
           requesterName,
+          requesterEmail,
           scopes: groupedByRequester[r].map((d) => ({
             id: d.scope,
             name: d.scopeName,
@@ -160,7 +167,6 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
           onCancel={() => setEditing(null)}
         />
       )}
-
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading
           size="sm"
