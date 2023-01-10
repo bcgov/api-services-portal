@@ -78,7 +78,7 @@ export class OpsMetrics {
     this.gNamespaceAccess = new Gauge({
       name: 'ops_metrics_namespace_access',
       help: 'namespace access counts',
-      labelNames: ['namespace', 'subject', 'subjectEmail', 'permission'],
+      labelNames: ['namespace', 'subject', 'subject_email', 'permission'],
     });
 
     this.gEmailList = new Gauge({
@@ -285,7 +285,7 @@ export class OpsMetrics {
           {
             namespace: r.namespace,
             subject: r.subjectName ? r.subjectName : r.subject,
-            subjectEmail: r.subjectEmail,
+            subject_email: r.subjectEmail,
             permission: r.scope,
           },
           1
