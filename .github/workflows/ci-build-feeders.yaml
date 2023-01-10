@@ -118,8 +118,8 @@ jobs:
           containerPort: 6000
 
           serviceAccount:
-            create: true
-            name: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            create: false
+            name: asp-service-account
 
           env:
             TZ:
@@ -139,4 +139,4 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml --history-max 3 bcgov/generic-api
