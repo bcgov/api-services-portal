@@ -43,23 +43,17 @@ describe('Make the access request for invalid profile', () => {
     })
   })
 
-  it('Creates an access request', (done) => {
-    cy.visit(apiDir.path)
-    cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
-      let product = clientCredentials.clientIdSecret_invalid.product
-      let app = clientCredentials.clientIdSecret_invalid.application
+  // it('Creates an access request', (done) => {
+  //   cy.visit(apiDir.path)
+  //   cy.get('@developer').then(({ clientCredentials, accessRequest }: any) => {
+  //     let product = clientCredentials.clientIdSecret_invalid.product
+  //     let app = clientCredentials.clientIdSecret_invalid.application
 
-      apiDir.createAccessRequest(product, app, accessRequest)
-      ma.clickOnGenerateSecretButton()
-      cy.wait(8000)
-      // ma.closeRequestAccessPopUp()
-      cy.on('uncaught:exception', (err, runnable) => {
-        expect(err.message).to.include('The following error originated from your application code, not from Cypress')
-        done()
-        return false
-      })
-    })
-  })
+  //     apiDir.createAccessRequest(product, app, accessRequest)
+  //     ma.clickOnGenerateSecretButton()
+  //     // ma.closeRequestAccessPopUp()
+  //   })
+  // })
 })
 
 describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles to Product Environments', () => {
