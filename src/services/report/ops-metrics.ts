@@ -214,7 +214,7 @@ export class OpsMetrics {
     async function recurse(skip = 0) {
       const data = await batch.listAll(
         'allActivities',
-        ['namespace', 'message', 'context', 'createdAt'],
+        ['namespace', 'action', 'type', 'context', 'createdAt'],
         undefined,
         skip,
         50
@@ -231,7 +231,7 @@ export class OpsMetrics {
 
         const activity = Boolean(context?.params?.action)
           ? `${context.params.action} ${context.params.entity}`
-          : context.message;
+          : `${data.action} ${data.type}`;
         if (Boolean(activity) == false) {
           logger.warn("Context didn't produce anything meaningful %j", data);
         }
@@ -337,6 +337,7 @@ export class OpsMetrics {
     const days = dateRange(30);
     const metrics = await getAllConsumerDailyMetrics(ctx, days);
 
+    //logger.debug(JSON.stringify(metrics, null, 5));
     function calcMetrics(ns: string, consumer: string) {
       const nsMetrics = metrics.filter((m) => {
         const metric = JSON.parse(m.metric);
