@@ -66,7 +66,7 @@
     "clientIdSecret_invalid": {
       "product": {
         "name": "Client Credentials Test Product",
-        "environment": "other"
+        "environment": "sandbox"
       },
       "application": {
         "name": "Client ID and Secret App for invalid auth",
