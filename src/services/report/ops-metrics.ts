@@ -39,6 +39,7 @@ import {
   getAllConsumerDailyMetrics,
 } from '../keystone/metrics';
 import { dateRange } from '../utils';
+import { KeycloakUserService } from '../keycloak';
 
 const logger = Logger('report.OpsMetrics');
 
@@ -77,7 +78,7 @@ export class OpsMetrics {
     this.gNamespaceAccess = new Gauge({
       name: 'ops_metrics_namespace_access',
       help: 'namespace access counts',
-      labelNames: ['namespace', 'subject', 'permission'],
+      labelNames: ['namespace', 'subject', 'subjectEmail', 'permission'],
     });
 
     this.gEmailList = new Gauge({
@@ -261,7 +262,6 @@ export class OpsMetrics {
       authentication: { item: {} },
     });
 
-    // ctx.executeGraphQL(``);
     const envCtx = await getGwaProductEnvironment(ctx, false);
 
     await injectResSvrAccessTokenToContext(envCtx);
@@ -279,16 +279,19 @@ export class OpsMetrics {
 
     const result = await getNamespaceAccess(ctx, envCtx, nsResList);
 
-    result.forEach((r) => {
-      this.gNamespaceAccess.set(
-        {
-          namespace: r.namespace,
-          subject: r.subjectName ? r.subjectName : r.subject,
-          permission: r.scope,
-        },
-        1
-      );
-    });
+    await Promise.all(
+      result.map(async (r) => {
+        this.gNamespaceAccess.set(
+          {
+            namespace: r.namespace,
+            subject: r.subjectName ? r.subjectName : r.subject,
+            subjectEmail: r.subjectEmail,
+            permission: r.scope,
+          },
+          1
+        );
+      })
+    );
   }
 
   async generateNamespaceMetrics() {
