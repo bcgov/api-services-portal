@@ -50,8 +50,8 @@ async function sync(
   { workingPath, url, destinationUrl },
   params = { numDays: 5 }
 ) {
-  await syncQueryRanges({ workingPath, url, destinationUrl }, params);
   await syncQueries({ workingPath, url, destinationUrl }, params);
+  await syncQueryRanges({ workingPath, url, destinationUrl }, params);
 }
 
 async function syncQueryRanges(
