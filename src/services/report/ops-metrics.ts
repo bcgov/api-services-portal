@@ -110,9 +110,11 @@ export class OpsMetrics {
       help: 'Consumer Access',
       labelNames: [
         'consumer',
+        'consumerType',
         'application',
         'application_owner',
         'namespace',
+        'dataset',
         'product',
         'environment',
         'flow',
@@ -353,9 +355,11 @@ export class OpsMetrics {
         this.gConsumers.set(
           {
             consumer: sa.consumer?.username,
+            consumerType: sa.consumerType,
             application: sa.application?.name,
             application_owner: sa.application?.owner?.name,
             namespace: sa.productEnvironment?.product?.namespace,
+            dataset: sa.productEnvironment?.product?.dataset?.title,
             product: sa.productEnvironment?.product?.name,
             environment: sa.productEnvironment?.name,
             flow: sa.productEnvironment?.flow,
@@ -460,9 +464,10 @@ async function getAllConsumers(ctx: any) {
     [
       'namespace',
       'active',
+      'consumerType',
       'consumer { username }',
       'application { name, owner { name }}',
-      'productEnvironment { namespace, name, flow, product { name, namespace } }',
+      'productEnvironment { namespace, name, flow, product { name, namespace, dataset { title } } }',
       'createdAt',
     ],
     undefined,
