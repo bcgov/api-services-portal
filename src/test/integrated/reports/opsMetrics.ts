@@ -52,13 +52,13 @@ const logger = Logger('test.reports');
   const opsMetrics = new OpsMetrics(keystone);
   opsMetrics.initialize();
   //await opsMetrics.generateEmailList();
-  await opsMetrics.generateActivityMetrics();
+  //await opsMetrics.generateActivityMetrics();
   //await opsMetrics.generateMetrics();
   //await opsMetrics.generateNamespaceMetrics();
   //await opsMetrics.generateProductMetrics();
-  //await opsMetrics.generateConsumerMetrics();
+  await opsMetrics.generateConsumerMetrics();
 
-  o(opsMetrics.gActivity.data());
+  o(opsMetrics.gConsumers.data());
 
   //await opsMetrics.store();
 

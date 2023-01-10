@@ -97,6 +97,7 @@ export class OpsMetrics {
       help: 'Product information for tracking API Directory',
       labelNames: [
         'namespace',
+        'dataset',
         'product',
         'environment',
         'flow',
@@ -110,7 +111,7 @@ export class OpsMetrics {
       help: 'Consumer Access',
       labelNames: [
         'consumer',
-        'consumerType',
+        'consumer_type',
         'application',
         'application_owner',
         'namespace',
@@ -355,7 +356,7 @@ export class OpsMetrics {
         this.gConsumers.set(
           {
             consumer: sa.consumer?.username,
-            consumerType: sa.consumerType,
+            consumer_type: sa.consumerType,
             application: sa.application?.name,
             application_owner: sa.application?.owner?.name,
             namespace: sa.productEnvironment?.product?.namespace,
@@ -398,6 +399,7 @@ export class OpsMetrics {
       this.gProducts.set(
         {
           namespace: prodEnv.product?.namespace,
+          dataset: prodEnv.product?.dataset?.title,
           product: prodEnv.product?.name,
           environment: prodEnv.name,
           flow: prodEnv.flow,
@@ -445,7 +447,7 @@ async function getAllEnvironments(ctx: any) {
       'name',
       'flow',
       'active',
-      'product { name, namespace }',
+      'product { name, namespace, dataset { title } }',
       'credentialIssuer { name, environmentDetails, inheritFrom { environmentDetails } }',
     ],
     undefined,
