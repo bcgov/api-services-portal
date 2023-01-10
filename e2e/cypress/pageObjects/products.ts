@@ -187,18 +187,19 @@ class Products {
 
   updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
-    const search_input: string = productName.slice(0, 1)
-    cy.get(this.catelogueDropDown).type(search_input + '{enter}', {
+    const search_input: string = productName.slice(0, 3)
+    cy.get(this.catelogueDropDown).type(search_input + '{downArrow}' + '{enter}', {
       force: true,
-    })
-    cy.get(this.catelogueDropDownMenu)
-      .find('div')
-      .find('p')
-      .each(($e1, index, $list) => {
-        if ($e1.text() === productName) {
-          cy.wrap($e1).click()
-        }
-      })
+      delay: 500
+    }, )
+    // cy.get(this.catelogueDropDownMenu)
+    //   .find('div')
+    //   .find('p')
+    //   .each(($e1, index, $list) => {
+    //     if ($e1.text() === productName) {
+    //       cy.wrap($e1).click()
+    //     }
+    //   })
     this.updateProduct()
   }
 

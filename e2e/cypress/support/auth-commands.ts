@@ -77,6 +77,15 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
   }
 })
 
+Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
+  cy.log('< Log in with user ' + username)
+  const login = new LoginPage()
+  const home = new HomePage()
+  cy.get(login.usernameInput).click().type(username)
+  cy.get(login.passwordInput).click().type(password)
+  cy.get(login.loginSubmitButton).click()
+})
+
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
   const login = new LoginPage()
   const home = new HomePage()
@@ -193,6 +202,14 @@ Cypress.Commands.add('logout', () => {
   cy.log('> Logging out')
 })
 
+Cypress.Commands.add('keycloakLogout', () => {
+
+  cy.log('< Logging out')
+  cy.get('.dropdown-toggle.ng-binding').click()
+  cy.contains('Sign Out').click()
+  cy.log('> Logging out')
+})
+
 Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string) => {
   cy.log('< Get Token')
   cy.request({
@@ -237,6 +254,7 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:b
     const serviceAcctCreds = JSON.parse(creds.credentials)
     cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
       () => {
+        cy.wait(3000)
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',

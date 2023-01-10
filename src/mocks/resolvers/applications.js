@@ -53,6 +53,37 @@ export const allApplicationsHandler = (req, res, ctx) => {
   );
 };
 
+export const getApplicationServicesHandler = (req, res, ctx) => {
+  if (req.variables.appId !== 'ABC123') {
+    return res(
+      ctx.data({
+        myServiceAccesses: [],
+      })
+    );
+  }
+  return res(
+    ctx.data({
+      myServiceAccesses: [
+        {
+          id: 'sa1',
+          name: '123123-123ADSFSD',
+          active: true,
+          application: {
+            name: 'Demo App',
+          },
+          productEnvironment: {
+            id: 'pe1',
+            name: 'dev',
+            product: {
+              name: 'My Pharma API',
+            },
+          },
+        },
+      ],
+    })
+  );
+};
+
 export const createApplicationHandler = (req, res, ctx) => {
   if (req.variables.name === 'error') {
     return res(
@@ -71,6 +102,24 @@ export const createApplicationHandler = (req, res, ctx) => {
   return res(
     ctx.data({
       createApplication: record,
+    })
+  );
+};
+
+export const updateApplicationHandler = (req, res, ctx) => {
+  const { id, data } = req.variables;
+  const cached = applications.get(id);
+
+  applications.set(id, {
+    ...cached,
+    ...data,
+  });
+
+  return res(
+    ctx.data({
+      updateApplication: {
+        id,
+      },
     })
   );
 };
