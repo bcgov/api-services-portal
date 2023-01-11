@@ -100,8 +100,9 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 Link to BC Data Catalogue
               </FormLabel>
               <FormHelperText mb={2}>
-                This value is the slug value of a corresponding BC Data
-                Catalogue entry: https://catalogue.data.gov.bc.ca/dataset/
+                Enter an existing dataset. This value is the slug value of a
+                corresponding BCDC entry:
+                https://catalogue.data.gov.bc.ca/dataset/
                 <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
               </FormHelperText>
               <Input
