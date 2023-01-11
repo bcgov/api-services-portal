@@ -105,6 +105,10 @@ jobs:
           auth:
               rootPassword: "s3cr3t"
 
+          serviceAccount:
+              create: false
+              name: asp-service-account
+
           arbiter:
               enabled: false
 
@@ -144,7 +148,7 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 12.1.31 -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 12.1.31 -f values.yaml --history-max 3 bitnami/mongodb
 
       - name: 'Deploy Backend'
         if: github.ref != 'refs/heads/dev'
@@ -184,6 +188,10 @@ jobs:
             limits:
               cpu: 100m
               memory: 800M
+
+          serviceAccount:
+            create: false
+            name: asp-service-account
 
           oauthProxy:
             enabled: true
@@ -302,7 +310,7 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml --history-max 3 bcgov/generic-api
 
       - name: 'Deploy Routes'
         if: github.ref != 'refs/heads/dev'
@@ -319,7 +327,7 @@ jobs:
                 termination: edge
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml --history-max 3 bcgov/ocp-route
 
       - name: 'Seed Data'
         if: github.ref != 'refs/heads/dev'

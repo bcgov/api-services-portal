@@ -3,7 +3,7 @@ const moment = require('moment');
 const { transfers } = require('../utils/transfers');
 const { portal } = require('../utils/portal');
 
-const queries = [
+const queryRanges = [
   {
     query: 'sum(increase(kong_http_status[1d])) by (service,code)',
     step: 60 * 60 * 24,
@@ -37,7 +37,61 @@ const queries = [
   },
 ];
 
+const queries = [
+  {
+    query:
+      'sum(increase(konglog_service_consumer_counter[1d])) by (consumer,namespace)',
+    step: 60 * 60 * 24,
+    id: 'konglog_namespace_consumer_daily',
+  },
+];
+
 async function sync(
+  { workingPath, url, destinationUrl },
+  params = { numDays: 5 }
+) {
+  await syncQueries({ workingPath, url, destinationUrl }, params);
+  await syncQueryRanges({ workingPath, url, destinationUrl }, params);
+}
+
+async function syncQueryRanges(
+  { workingPath, url, destinationUrl },
+  params = { numDays: 5 }
+) {
+  console.log(
+    'Prometheus SYNC syncQueryRanges (DAYS=' + params.numDays + ') ' + url
+  );
+  const exceptions = [];
+  xfer = transfers(workingPath, url, exceptions);
+
+  // run all queries for last 3 days
+  for (var d = 0; d < params.numDays; d++) {
+    const target = moment().add(-d, 'days').format('YYYY-MM-DD');
+
+    for (_query of queryRanges) {
+      const query = _query.query;
+
+      var day = moment(target);
+
+      const params = {
+        query: query,
+        start: day.unix(),
+        end: day.add(24, 'hour').add(-1, 'second').unix(),
+        step: _query.step,
+        _: moment().valueOf(),
+      };
+      console.log(day.fromNow());
+      const path = '/api/v1/query_range?' + querystring.stringify(params);
+
+      await xfer.copy(path, 'query-' + _query.id + '-' + target);
+    }
+  }
+
+  // Now, send to portal
+  await xfer.concurrentWork(producer(xfer, params.numDays, destinationUrl));
+}
+
+async function syncQueries(
   { workingPath, url, destinationUrl },
   params = { numDays: 5 }
 ) {
@@ -56,13 +110,11 @@ async function sync(
 
       const params = {
         query: query,
-        start: day.unix(),
-        end: day.add(24, 'hour').add(-1, 'second').unix(),
+        time: day.add(24, 'hour').add(-1, 'second').unix(),
         step: _query.step,
         _: moment().valueOf(),
       };
-      console.log(day.fromNow());
-      const path = '/api/v1/query_range?' + querystring.stringify(params);
+      const path = '/api/v1/query?' + querystring.stringify(params);
 
       await xfer.copy(path, 'query-' + _query.id + '-' + target);
     }
@@ -107,6 +159,11 @@ function producer(xfer, numDays, destinationUrl) {
     item.metric['query'] = item.query.id;
     // convert the time from seconds to milliseconds
     //item.metric['values'].map ( value => { value[0] = moment(value[0]).local().valueOf() } )
+
+    //console.log(JSON.stringify(item, null, 4));
+    if ('value' in item.metric) {
+      item.metric['values'] = [item.metric['value']];
+    }
 
     return destination
       .fireAndForget('/feed/Metric', item.metric)
