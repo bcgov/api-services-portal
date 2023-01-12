@@ -47,7 +47,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
 
   return (
     <>
-      <ModalBody hidden={hidden}>
+      <ModalBody hidden={hidden} className="authProfileFormContainer">
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={4}>
             <FormLabel fontWeight="bold" mb={6}>

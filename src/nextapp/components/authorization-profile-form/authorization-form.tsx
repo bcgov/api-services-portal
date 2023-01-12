@@ -74,6 +74,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   return (
     <>
       <ModalBody
+        className="authProfileFormContainer"
         hidden={hidden}
         sx={{
           '& fieldset': { mb: 8 },
@@ -83,7 +84,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           },
         }}
       >
-        <form name="authorizationForm" ref={formRef} onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleSubmit}>
           <fieldset>
             <Legend>Mode</Legend>
             <RadioCardGroup

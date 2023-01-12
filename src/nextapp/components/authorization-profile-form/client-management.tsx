@@ -120,7 +120,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
 
   return (
     <>
-      <ModalBody hidden={hidden}>
+      <ModalBody hidden={hidden} className="authProfileFormContainer">
         {!id && (
           <SharedIdP
             idp={idp}

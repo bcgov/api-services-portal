@@ -44,6 +44,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   open,
   onClose,
 }) => {
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   // Cache the authorization page data so we don't loose it between steps while not having to
   // manage the state of the form
@@ -90,6 +91,12 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     setName(value);
   }, []);
   const handleTabChange = React.useCallback((index) => {
+    const openForm: HTMLFormElement = contentRef?.current.querySelector(
+      '.authProfileFormContainer:not([hidden]) > form'
+    );
+    if (openForm) {
+      openForm.requestSubmit();
+    }
     setTabIndex(index);
   }, []);
   const handleCreateProfile = React.useCallback(
@@ -248,7 +255,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent ref={contentRef}>
         {!showTabs && (
           <NewProfile onCancel={onClose} onComplete={handleProfileNameCreate} />
         )}
