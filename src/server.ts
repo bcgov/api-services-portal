@@ -376,6 +376,8 @@ const configureExpress = (app: any) => {
         helpSupportUrl: process.env.NEXT_PUBLIC_HELP_SUPPORT_URL,
         helpReleaseUrl: process.env.NEXT_PUBLIC_HELP_RELEASE_URL,
         helpStatusUrl: process.env.NEXT_PUBLIC_HELP_STATUS_URL,
+        helpAddOrgUrl: process.env.NEXT_PUBLIC_HELP_ADD_ORG_URL,
+        helpChangeOrgUrl: process.env.NEXT_PUBLIC_CHANGE_ORG_URL,
       },
     });
   });
