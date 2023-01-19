@@ -477,10 +477,10 @@ const metadata = {
       environmentDetails: { name: 'toString' },
       inheritFrom: {
         name: 'connectOne',
-        list: 'allCredentialIssuers',
+        list: 'allSharedIdPs',
         refKey: 'name',
       },
-      owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      owner: { name: 'connectOne', list: 'allProviderUsers', refKey: 'email' },
     },
     validations: {
       isShared: { type: 'boolean' },

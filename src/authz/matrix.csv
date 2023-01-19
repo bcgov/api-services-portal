@@ -47,10 +47,12 @@ ACCESS MANAGER,,,GatewayConsumer,read,,,,,access-manager,,,allow,
 ACCESS MANAGER,,BusinessProfile,,,,,,,access-manager,,,allow,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"update,delete",,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,CredentialIssuer,create,,,,,credential-admin,,,allow,
-CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNS
+CREDENTIAL ADMIN,,,CredentialIssuer,read,,,,,credential-admin,,,allow,filterByUserNSorSharedTrue
 CREDENTIAL ADMIN,,,CredentialIssuer,update,,namespace,,,credential-admin,,,deny,
 CREDENTIAL ADMIN,,,CredentialIssuer,,"create,read",namespace,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,sharedIdPs,,,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,allSharedIdPs,,,,,,,credential-admin,,,allow,
+CREDENTIAL ADMIN,,allProviderUsers,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,OwnedCredentialIssuer,,,,,,,credential-admin,,,allow,
 CREDENTIAL ADMIN,,allCredentialIssuersByNamespace,,,,,,,credential-admin,,,allow,filterByUserNS
 CREDENTIAL ADMIN,,,User,read,,,,,credential-admin,,,allow,
