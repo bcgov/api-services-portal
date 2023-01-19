@@ -134,6 +134,8 @@ const NewOrganizationForm: React.FC = () => {
               listed, please submit a request through the{' '}
               <Link
                 href={global.helpLinks.helpAddOrgUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 color="bc-link"
                 textDecor="underline"
               >
