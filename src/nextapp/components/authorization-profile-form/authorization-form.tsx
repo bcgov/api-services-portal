@@ -33,6 +33,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const submitButtonText = id ? 'Save' : 'Continue';
+  const cancelButtonText = id ? 'Close' : 'Cancel';
   const parseClientMappers = (value = '') => {
     try {
       const config = JSON.parse(value);
@@ -195,7 +196,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             variant="secondary"
             data-testid="ap-authorization-form-cancel-btn"
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button
             onClick={handleCreate}

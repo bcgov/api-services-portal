@@ -1,7 +1,5 @@
 import * as React from 'react';
 import {
-  Alert,
-  AlertIcon,
   Box,
   Flex,
   Modal,
@@ -14,6 +12,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
+import merge from 'lodash/merge';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
@@ -44,6 +43,8 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   open,
   onClose,
 }) => {
+  const submitInteractionRef = React.useRef<string>(null);
+  const editRef = React.useRef(new Map());
   const contentRef = React.useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   // Cache the authorization page data so we don't loose it between steps while not having to
@@ -85,6 +86,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     }
     setTabIndex(0);
     setFlow('client-credentials.client-secret');
+    editRef.current.clear();
     onClose();
   }, [id, onClose]);
   const handleProfileNameCreate = React.useCallback((value: string) => {
@@ -94,10 +96,12 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     const openForm: HTMLFormElement = contentRef?.current.querySelector(
       '.authProfileFormContainer:not([hidden]) > form'
     );
+    submitInteractionRef.current = 'tab';
     if (openForm) {
       openForm.requestSubmit();
     }
     setTabIndex(index);
+    submitInteractionRef.current = null;
   }, []);
   const handleCreateProfile = React.useCallback(
     async (payload: CredentialIssuerCreateInput) => {
@@ -140,10 +144,18 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleSaveProfile = React.useCallback(
     async (payload: CredentialIssuerUpdateInput) => {
       try {
+        let data = payload;
+        Array.from(editRef.current?.keys()).forEach((k) => {
+          if (k !== tabIndex) {
+            const entries = editRef.current.get(k);
+            data = merge({}, entries, data);
+            debugger;
+          }
+        });
         await editMutate.mutateAsync({
           id,
           data: {
-            ...payload,
+            ...data,
             inheritFrom: undefined, // should never be sent when updating a profile
             flow: flowValue,
             clientAuthenticator,
@@ -158,7 +170,10 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
           isClosable: true,
         });
         client.invalidateQueries();
-        handleClose();
+        if (tabIndex == 2) {
+          handleClose();
+        }
+        submitInteractionRef.current = null;
       } catch (err) {
         toast({
           title: 'Profile save failed',
@@ -176,6 +191,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       handleClose,
       id,
       name,
+      tabIndex,
       toast,
     ]
   );
@@ -185,14 +201,18 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       const [flow, clientAuthenticator] = formData.flow.split('.');
 
       const payload = {
-        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
+        // ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
         ...formData,
         flow,
         clientAuthenticator,
       };
 
       if (id) {
-        handleSaveProfile(payload);
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         if (isKongFlow) {
           handleCreateProfile(payload);
@@ -207,12 +227,17 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     (payload: FormData) => {
       const formData = Object.fromEntries(payload);
       if (id) {
-        handleSaveProfile({
-          ...(data as
-            | CredentialIssuerCreateInput
-            | CredentialIssuerUpdateInput),
+        const payload = {
+          // ...(data as
+          //   | CredentialIssuerCreateInput
+          //   | CredentialIssuerUpdateInput),
           ...formData,
-        });
+        };
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         newAuthorizationData.current = {
           ...newAuthorizationData.current,
@@ -226,7 +251,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   const handleClientManagementComplete = React.useCallback(
     (inheritFromId: string, environments: EnvironmentItem[]) => {
       const payload = {
-        ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
+        // ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
         inheritFrom: inheritFromId
           ? { connect: { id: inheritFromId } }
           : undefined,
@@ -234,7 +259,11 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       };
 
       if (id) {
-        handleSaveProfile(payload);
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         handleCreateProfile(payload);
       }

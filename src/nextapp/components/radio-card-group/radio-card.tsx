@@ -17,6 +17,7 @@ const RadioCard: React.FC<RadioCardProps> = (props) => {
       <input {...input} />
       <Box
         {...checkbox}
+        height="100%"
         cursor="pointer"
         borderWidth="1px"
         borderRadius="md"
