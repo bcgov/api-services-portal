@@ -119,7 +119,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     .map((n) => (
                       <MenuItem
                         key={n.id}
-                        onClick={handleNamespaceChange(n)}
+                        onClick={handleNamespaceChange(n as any)}
                         data-testid={`ns-dropdown-item-${n.name}`}
                         flexDir="column"
                         alignItems="flex-start"
@@ -127,10 +127,10 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                       >
                         {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
                           5 && (
-                            <Text color="bc-error" pos="absolute" right={4}>
-                              New
-                            </Text>
-                          )}
+                          <Text color="bc-error" pos="absolute" right={4}>
+                            New
+                          </Text>
+                        )}
                         <Text>{n.name}</Text>
                         {
                           /* @ts-ignore */
