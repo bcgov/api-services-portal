@@ -5,7 +5,6 @@ import {
   Menu,
   MenuButton,
   MenuDivider,
-  MenuGroup,
   MenuItem,
   MenuList,
   MenuOptionGroup,
@@ -18,10 +17,11 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
+import { differenceInDays } from 'date-fns';
+import { Namespace } from '@/shared/types/query.types';
+
 import NamespaceManager from '../namespace-manager';
 import NewNamespace from '../new-namespace';
-import type { NamespaceData } from '@/shared/types/app.types';
-import { differenceInDays } from 'date-fns';
 
 interface NamespaceMenuProps {
   user: UserData;
@@ -46,7 +46,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
   const today = new Date();
 
   const handleNamespaceChange = React.useCallback(
-    (namespace: NamespaceData) => async () => {
+    (namespace: Namespace) => async () => {
       toast({
         title: `Switching to  ${namespace.name} namespace`,
         status: 'info',
