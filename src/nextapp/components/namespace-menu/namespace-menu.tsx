@@ -119,7 +119,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                     .map((n) => (
                       <MenuItem
                         key={n.id}
-                        onClick={handleNamespaceChange(n as any)}
+                        onClick={handleNamespaceChange(n)}
                         data-testid={`ns-dropdown-item-${n.name}`}
                         flexDir="column"
                         alignItems="flex-start"
