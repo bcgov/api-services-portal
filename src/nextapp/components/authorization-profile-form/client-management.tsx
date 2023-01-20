@@ -11,7 +11,6 @@ import {
   ModalFooter,
   Td,
   Tr,
-  Text,
 } from '@chakra-ui/react';
 import Table from '@/components/table';
 import { uid } from 'react-uid';
@@ -19,7 +18,7 @@ import { uid } from 'react-uid';
 import EmptyPane from '../empty-pane';
 import EnvironmentForm from './environment-form';
 import { EnvironmentItem } from './types';
-import { CredentialIssuer, SharedIssuer } from '@/shared/types/query.types';
+import { CredentialIssuer } from '@/shared/types/query.types';
 import SharedIdP from './shared-idp';
 import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
@@ -76,6 +75,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
     []
   );
   const submitButtonText = id ? 'Save' : 'Create';
+  const cancelButtonText = id ? 'Close' : 'Cancel';
 
   // Events
   const handleNewEnvironment = React.useCallback((payload: FormData) => {
@@ -120,7 +120,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
 
   return (
     <>
-      <ModalBody hidden={hidden}>
+      <ModalBody hidden={hidden} className="authProfileFormContainer">
         {!id && (
           <SharedIdP
             idp={idp}
@@ -186,7 +186,7 @@ const ClientManagement: React.FC<ClientManagementProps> = ({
       <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button onClick={onCancel} variant="secondary">
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button onClick={handleCreate} data-testid="ap-create-btn">
             {submitButtonText}

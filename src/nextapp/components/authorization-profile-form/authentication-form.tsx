@@ -4,7 +4,6 @@ import {
   ButtonGroup,
   FormControl,
   FormLabel,
-  Input,
   ModalBody,
   ModalFooter,
   Radio,
@@ -34,6 +33,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
   const isKong = value === 'kong-api-key-acl';
   const createText = isKong ? 'Create' : 'Continue';
   const submitButtonText = id ? 'Save' : createText;
+  const cancelButtonText = id ? 'Close' : 'Cancel';
 
   // Events
   const handleCreate = () => {
@@ -47,7 +47,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
 
   return (
     <>
-      <ModalBody hidden={hidden}>
+      <ModalBody hidden={hidden} className="authProfileFormContainer">
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={4}>
             <FormLabel fontWeight="bold" mb={6}>
@@ -104,7 +104,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
             variant="secondary"
             data-testid="ap-authentication-form-cancel-btn"
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button
             onClick={handleCreate}
