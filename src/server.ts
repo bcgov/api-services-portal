@@ -181,6 +181,7 @@ for (const _list of [
   'UMAPolicy',
   'UMAResourceSet',
   'UMAPermissionTicket',
+  'UserExt',
 ]) {
   const list = require('./lists/extensions/' + _list);
   if ('extensions' in list) {

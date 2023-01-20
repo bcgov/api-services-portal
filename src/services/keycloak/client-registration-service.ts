@@ -126,10 +126,12 @@ export class KeycloakClientRegistrationService {
 
     clientMappers
       .filter((mapper) => mapper.defaultValue !== '')
-      .forEach((mapper) => {
+      .forEach((mapper, index) => {
         if (mapper.name == 'audience') {
           logger.debug('[clientRegistration] adding mapper %s', mapper);
-          body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+          body.protocolMappers.push(
+            AudienceMapper(`audience-rule-${index + 1}`, mapper.defaultValue)
+          );
         } else {
           logger.warn(
             '[clientRegistration] skipping unknown mapper %s',

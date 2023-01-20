@@ -147,6 +147,31 @@ export async function lookupUsersByNamespace(
   return result.data.usersByNamespace;
 }
 
+export async function lookupProviderUserByEmail(
+  context: any,
+  email: string
+): Promise<User> {
+  const result = await context.executeGraphQL({
+    query: `query LookupProviderByEmail($email: String!, $providers: [String]!) {
+                    allUsers(where: { email: $email, provider_in: $providers }) {
+                      id
+                      name
+                      username
+                      email
+                    }
+                  }`,
+    variables: {
+      email,
+      providers: ['idir'],
+    },
+  });
+  logger.debug('Query [lookupProviderUserByEmail] result %j', result);
+
+  return !result.errors && result.data.allUsers.length === 1
+    ? result.data.allUsers[0]
+    : null;
+}
+
 export async function changeUsername(
   context: any,
   userId: string,
