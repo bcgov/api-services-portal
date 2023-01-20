@@ -505,7 +505,7 @@ const metadata = {
       clientAuthenticator: 'client-secret',
       mode: 'auto',
       environmentDetails: [],
-      owner: 'acope@idir',
+      owner: 'janis@gov.bc.ca',
     },
   },
   IssuerEnvironmentConfig: {
