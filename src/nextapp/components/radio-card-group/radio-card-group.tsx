@@ -52,7 +52,6 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
             {...radio}
             title={title}
             isRequired={isRequired}
-            height="100%"
           >
             {description}
           </RadioCard>

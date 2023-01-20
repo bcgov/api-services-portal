@@ -286,9 +286,9 @@ const _credentialIssuers = [
     inheritFrom: {
       name: 'Silver Dev Shared IdP',
     },
-    availableScopes: '[]',
+    availableScopes: '["Namespace.Write"]',
     clientAuthenticator: 'client-secret',
-    clientRoles: '[]',
+    clientRoles: '["read", "write"]',
     clientMappers: '[{"name":"audience","defaultValue":""}]',
     apiKeyName: 'X-API-KEY',
     resourceType: '',
