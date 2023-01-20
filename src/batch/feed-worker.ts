@@ -335,173 +335,183 @@ export const syncRecords = async function (
     buildQueryResponse(md)
   );
   if (localRecord == null) {
-    const data: any = {};
-    for (const field of md.sync) {
-      if (field in json) {
-        data[field] = json[field];
-      }
-    }
-
-    if ('transformations' in md) {
-      for (const transformKey of Object.keys(md.transformations)) {
-        const transformInfo = md.transformations[transformKey];
-        if (transformInfo.syncFirst) {
-          // handle these children independently first - return a list of IDs
-          const allIds = await syncListOfRecords(
-            context,
-            transformInfo,
-            json[transformKey]
-          );
-          logger.debug('CHILDREN [%s] %j', transformKey, allIds);
-          assert.strictEqual(
-            allIds.filter((record) => record.status != 200).length,
-            0,
-            'Failed updating children'
-          );
-          assert.strictEqual(
-            allIds.filter((record) => typeof record.ownedBy != 'undefined')
-              .length,
-            0,
-            'There are some child records that have exclusive ownership already!'
-          );
-          json[transformKey + '_ids'] = allIds.map((status) => status.id);
-
-          childResults.push(...allIds);
-        }
-        const transformMutation = await transformations[transformInfo.name](
-          context,
-          transformInfo,
-          null,
-          json,
-          transformKey
-        );
-        if (transformMutation != null) {
-          logger.debug(
-            ' -- Updated [' +
-              transformKey +
-              '] ' +
-              JSON.stringify(data[transformKey]) +
-              ' to ' +
-              JSON.stringify(transformMutation)
-          );
-          data[transformKey] = transformMutation;
-        }
-      }
-    }
-    data[md.refKey] = eid;
-    const nr = await batchService.create(entity, data);
-    if (nr == null) {
-      logger.error('CREATE FAILED (%s) %j', nr, data);
-      return { status: 400, result: 'create-failed', childResults };
-    } else {
-      return { status: 200, result: 'created', id: nr, childResults };
-    }
-  } else {
-    const transformKeys =
-      'transformations' in md ? Object.keys(md.transformations) : [];
-    const data: any = {};
-
-    for (const field of md.sync) {
-      if (!transformKeys.includes(field)) {
-        logger.debug(
-          ' -- changed? (%s) %j -> %j',
-          field,
-          localRecord[field],
-          json[field]
-        );
-        if (field in json && json[field] !== localRecord[field]) {
-          logger.debug(' -- updated');
+    try {
+      const data: any = {};
+      for (const field of md.sync) {
+        if (field in json) {
           data[field] = json[field];
         }
       }
-    }
 
-    if ('transformations' in md) {
-      for (const transformKey of transformKeys) {
-        logger.debug(' -- changed trans? (%s)', transformKey);
-        // unset transformKey from data[]
-        delete data[transformKey];
-        const transformInfo = md.transformations[transformKey];
-        if (transformInfo.syncFirst) {
-          // handle these children independently first - return a list of IDs
-          const allIds = await syncListOfRecords(
+      if ('transformations' in md) {
+        for (const transformKey of Object.keys(md.transformations)) {
+          const transformInfo = md.transformations[transformKey];
+          if (transformInfo.syncFirst) {
+            // handle these children independently first - return a list of IDs
+            const allIds = await syncListOfRecords(
+              context,
+              transformInfo,
+              json[transformKey]
+            );
+            logger.debug('CHILDREN [%s] %j', transformKey, allIds);
+            assert.strictEqual(
+              allIds.filter((record) => record.status != 200).length,
+              0,
+              'Failed updating children'
+            );
+            assert.strictEqual(
+              allIds.filter((record) => typeof record.ownedBy != 'undefined')
+                .length,
+              0,
+              'There are some child records that have exclusive ownership already!'
+            );
+            json[transformKey + '_ids'] = allIds.map((status) => status.id);
+
+            childResults.push(...allIds);
+          }
+          const transformMutation = await transformations[transformInfo.name](
             context,
             transformInfo,
-            json[transformKey]
+            null,
+            json,
+            transformKey
           );
-          logger.debug('CHILDREN [%s] %j', transformKey, allIds);
-          assert.strictEqual(
-            allIds.filter((record) => record.status != 200).length,
-            0,
-            'Failed updating children'
-          );
-          logger.debug('%j', localRecord);
-          assert.strictEqual(
-            allIds.filter(
-              (record) =>
-                typeof record.ownedBy != 'undefined' &&
-                record.ownedBy != localRecord.id
-            ).length,
-            0,
-            'There are some child records that had ownership already (w/ local record)!'
-          );
-
-          json[transformKey + '_ids'] = allIds.map((status) => status.id);
-          childResults.push(...allIds);
-        }
-
-        const transformMutation = await transformations[transformInfo.name](
-          context,
-          transformInfo,
-          localRecord,
-          json,
-          transformKey
-        );
-        if (transformMutation && transformMutation != null) {
-          logger.debug(
-            ' -- updated trans (%s) %j -> %j',
-            transformKey,
-            localRecord[transformKey],
-            transformMutation
-          );
-          data[transformKey] = transformMutation;
+          if (transformMutation != null) {
+            logger.debug(
+              ' -- Updated [' +
+                transformKey +
+                '] ' +
+                JSON.stringify(data[transformKey]) +
+                ' to ' +
+                JSON.stringify(transformMutation)
+            );
+            data[transformKey] = transformMutation;
+          }
         }
       }
+      data[md.refKey] = eid;
+      const nr = await batchService.create(entity, data);
+      if (nr == null) {
+        logger.error('CREATE FAILED (%s) %j', nr, data);
+        return { status: 400, result: 'create-failed', childResults };
+      } else {
+        return { status: 200, result: 'created', id: nr, childResults };
+      }
+    } catch (ex) {
+      logger.error('Caught exception %s', ex);
+      return { status: 400, result: 'create-failed', childResults };
     }
-    if (Object.keys(data).length === 0) {
-      logger.debug('[%s] [%s] no update', entity, localRecord.id);
-      return {
-        status: 200,
-        result: 'no-change',
-        id: localRecord['id'],
-        childResults,
-        ownedBy:
-          md.ownedBy && localRecord[md.ownedBy]
-            ? localRecord[md.ownedBy].id
-            : undefined,
-      };
-    }
-    logger.info(
-      '[%s] [%s] keys triggering update %j',
-      entity,
-      localRecord.id,
-      Object.keys(data)
-    );
-    const nr = await batchService.update(entity, localRecord.id, data);
-    if (nr == null) {
-      logger.error('UPDATE FAILED (%s) %j', nr, data);
+  } else {
+    try {
+      const transformKeys =
+        'transformations' in md ? Object.keys(md.transformations) : [];
+      const data: any = {};
+
+      for (const field of md.sync) {
+        if (!transformKeys.includes(field)) {
+          logger.debug(
+            ' -- changed? (%s) %j -> %j',
+            field,
+            localRecord[field],
+            json[field]
+          );
+          if (field in json && json[field] !== localRecord[field]) {
+            logger.debug(' -- updated');
+            data[field] = json[field];
+          }
+        }
+      }
+
+      if ('transformations' in md) {
+        for (const transformKey of transformKeys) {
+          logger.debug(' -- changed trans? (%s)', transformKey);
+          // unset transformKey from data[]
+          delete data[transformKey];
+          const transformInfo = md.transformations[transformKey];
+          if (transformInfo.syncFirst) {
+            // handle these children independently first - return a list of IDs
+            const allIds = await syncListOfRecords(
+              context,
+              transformInfo,
+              json[transformKey]
+            );
+            logger.debug('CHILDREN [%s] %j', transformKey, allIds);
+            assert.strictEqual(
+              allIds.filter((record) => record.status != 200).length,
+              0,
+              'Failed updating children'
+            );
+            logger.debug('%j', localRecord);
+            assert.strictEqual(
+              allIds.filter(
+                (record) =>
+                  typeof record.ownedBy != 'undefined' &&
+                  record.ownedBy != localRecord.id
+              ).length,
+              0,
+              'There are some child records that had ownership already (w/ local record)!'
+            );
+
+            json[transformKey + '_ids'] = allIds.map((status) => status.id);
+            childResults.push(...allIds);
+          }
+
+          const transformMutation = await transformations[transformInfo.name](
+            context,
+            transformInfo,
+            localRecord,
+            json,
+            transformKey
+          );
+          if (transformMutation && transformMutation != null) {
+            logger.debug(
+              ' -- updated trans (%s) %j -> %j',
+              transformKey,
+              localRecord[transformKey],
+              transformMutation
+            );
+            data[transformKey] = transformMutation;
+          }
+        }
+      }
+      if (Object.keys(data).length === 0) {
+        logger.debug('[%s] [%s] no update', entity, localRecord.id);
+        return {
+          status: 200,
+          result: 'no-change',
+          id: localRecord['id'],
+          childResults,
+          ownedBy:
+            md.ownedBy && localRecord[md.ownedBy]
+              ? localRecord[md.ownedBy].id
+              : undefined,
+        };
+      }
+      logger.info(
+        '[%s] [%s] keys triggering update %j',
+        entity,
+        localRecord.id,
+        Object.keys(data)
+      );
+      const nr = await batchService.update(entity, localRecord.id, data);
+      if (nr == null) {
+        logger.error('UPDATE FAILED (%s) %j', nr, data);
+        return { status: 400, result: 'update-failed', childResults };
+      } else {
+        return {
+          status: 200,
+          result: 'updated',
+          id: nr,
+          childResults,
+          ownedBy:
+            md.ownedBy && localRecord[md.ownedBy]
+              ? localRecord[md.ownedBy].id
+              : undefined,
+        };
+      }
+    } catch (ex) {
+      logger.error('Caught exception %s', ex);
       return { status: 400, result: 'update-failed', childResults };
-    } else {
-      return {
-        status: 200,
-        result: 'updated',
-        id: nr,
-        childResults,
-        ownedBy:
-          md.ownedBy && localRecord[md.ownedBy]
-            ? localRecord[md.ownedBy].id
-            : undefined,
-      };
     }
   }
 };
