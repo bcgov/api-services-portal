@@ -5,8 +5,6 @@ import {
   Button,
   Container,
   Text,
-  Divider,
-  Heading,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -36,6 +34,7 @@ import { format } from 'date-fns';
 import { FaCheckCircle } from 'react-icons/fa';
 import ServiceAccountCreate from '@/components/service-account-create';
 import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'getServiceAccounts';
@@ -146,6 +145,13 @@ const ServiceAccountsPage: React.FC<
           <Table
             sortable
             data={data.allNamespaceServiceAccounts}
+            emptyView={
+              <EmptyPane
+                title="Create your first Service Account"
+                message="Service Accounts can be used to access our API for functions like publish gateway configuration."
+                action={<ServiceAccountCreate onCreate={handleCreate} />}
+              />
+            }
             columns={[
               { name: 'ID', key: 'active', sortable: true },
               { name: 'Created On', key: 'name', sortable: true },

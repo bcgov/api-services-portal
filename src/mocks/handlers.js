@@ -101,7 +101,7 @@ const allNamespaces = [
   },
 ];
 let namespace = personas.mark.namespace;
-let user = { ...personas.mark, namespace };
+let user = { ...personas.harley, namespace };
 
 export function resetAll() {
   consumersStore.reset();
@@ -170,7 +170,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        user: { ...personas.mark, namespace },
+        user: { ...user, namespace },
       })
     );
   }),

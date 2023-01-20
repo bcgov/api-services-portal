@@ -25,6 +25,7 @@ import {
   recordActivity,
   recordActivityWithBlob,
 } from '../../../services/keystone/activity';
+import { lookupProviderUserByEmail } from '../../../services/keystone/user';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -47,9 +48,11 @@ import {
     authentication: { item: identity },
   });
 
-  const record = await getRecord(ctx, 'User', 'acope@idir');
+  // const record = await getRecord(ctx, 'User', 'acope@idir');
 
-  o([record].map((o) => removeEmpty(o)));
+  // o([record].map((o) => removeEmpty(o)));
 
+  const result = await lookupProviderUserByEmail(ctx, 'aidan.cope@gmail.com');
+  o(result);
   await keystone.disconnect();
 })();

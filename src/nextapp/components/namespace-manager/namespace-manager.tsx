@@ -15,12 +15,12 @@ import {
   ModalCloseButton,
   Checkbox,
 } from '@chakra-ui/react';
-import type { NamespaceData } from '@/shared/types/app.types';
+import { Namespace } from '@/shared/types/query.types';
 
 import ExportReport from './export-report';
 
 interface NamespaceManagerProps {
-  data: NamespaceData[];
+  data: Namespace[];
   isOpen: boolean;
   onClose: () => void;
 }
