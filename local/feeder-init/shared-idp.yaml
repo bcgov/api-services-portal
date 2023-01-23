@@ -9,7 +9,7 @@ record:
   authPlugin: jwt-keycloak
   clientRoles: []
   availableScopes: []
-  owner: janis@gov.bc.ca
+  owner: janis@testmail.com
   isShared: true
   environmentDetails:
     - environment: prod
