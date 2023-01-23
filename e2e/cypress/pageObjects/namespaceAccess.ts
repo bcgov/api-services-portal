@@ -4,6 +4,7 @@ class NamespaceAccessPage {
   grantUserAccessBtn: string = '[data-testid="nsa-grant-access-btn"]'
 
   grantPermission(accessRqst: any) {
+    cy.wait(2000)
     cy.get(this.userNameInput,{ timeout: 2000 }).should('be.visible');
     cy.get(this.userNameInput).type(accessRqst.email);
     let accessRole: Array<string> = accessRqst.accessRole
@@ -17,14 +18,12 @@ class NamespaceAccessPage {
       })
     })
     cy.contains("Share").click()
-    cy.wait(2000)
   }
 
   revokePermission(revokePermission: any) {
     let accessRole: Array<string> = revokePermission.accessRole
     accessRole.forEach(function (accessName) {
-      // cy.contains(revokePermission.userName).parents('tr').find('td:nth-child(2)').each(($e1, index, $list) => {
-        cy.contains(revokePermission.userName).parents('tr').find('td:nth-child(2)').find('span').each(($e1, index, $list) => {
+      cy.contains(revokePermission.userName).parents('tr').find('td:nth-child(2)').find('span').each(($e1, index, $list) => {
         const text = $e1.text()
         if (text === accessName) {
           cy.wrap($e1).find('button').click()
@@ -38,15 +37,14 @@ class NamespaceAccessPage {
   {
     cy.contains(user).parents('tr').find('td:nth-child(3)').children('button').click()
     cy.get('[data-testid$="-revoke-btn"]').filter(':visible').first().click()
-    cy.wait(2000)
   }
   
   path: string = '/manager/namespace-access'
 
   clickGrantUserAccessButton() {
+    cy.wait(3000)
     cy.get('[data-testid="nsa-users-table-row-0-menu"]',{ timeout: 5000 }).should('be.visible');
     cy.get(this.grantUserAccessBtn).first().click({force:true})
-    cy.wait(2000)
   }
 }
 export default NamespaceAccessPage

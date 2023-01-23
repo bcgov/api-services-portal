@@ -71,7 +71,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   </Text>
                 )}
               </Text>
-              {data.provider !== 'bscs' && (
+              {data.provider !== 'bcsc' && (
                 <Text
                   color="bc-component"
                   data-testid={`${testId}-email`}

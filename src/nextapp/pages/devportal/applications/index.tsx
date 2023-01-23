@@ -15,6 +15,7 @@ import {
   GridItem,
   Flex,
 } from '@chakra-ui/react';
+import EditApplication from '@/components/edit-application';
 import get from 'lodash/get';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
@@ -58,6 +59,7 @@ const ApplicationsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
   const toast = useToast();
+  const [editing, setEditing] = React.useState<Application | null>(null);
   const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
   const { data } = useApi(
@@ -93,6 +95,12 @@ const ApplicationsPage: React.FC<
       queryClient.refetchQueries(queryKey);
     },
   });
+  const handleEdit = (data: Application) => () => {
+    setEditing(data);
+  };
+  const handleCloseEditDialog = () => {
+    setEditing(null);
+  };
   const handleDelete = (id: string) => async () => {
     try {
       if (openId === id) {
@@ -133,6 +141,12 @@ const ApplicationsPage: React.FC<
       <Head>
         <title>API Program Services | Applications</title>
       </Head>
+      <EditApplication
+        data={editing}
+        open={Boolean(editing)}
+        onClose={handleCloseEditDialog}
+        refreshQueryKey={queryKey}
+      />
       <Container maxW="6xl">
         {data?.allApplications?.length === 0 && (
           <Alert status="warning">
@@ -151,6 +165,7 @@ const ApplicationsPage: React.FC<
         <Card>
           <Table
             sortable
+            data-testid="my-applications-table"
             columns={columns}
             data={data?.myApplications ?? []}
             emptyView={empty}
@@ -165,6 +180,12 @@ const ApplicationsPage: React.FC<
                       aria-label={`${d.name} actions menu button`}
                       placement="bottom-end"
                     >
+                      <MenuItem
+                        data-testid="edit-application-btn"
+                        onClick={handleEdit(d)}
+                      >
+                        Edit Application
+                      </MenuItem>
                       <MenuItem
                         color="red.500"
                         data-testid="delete-application-btn"

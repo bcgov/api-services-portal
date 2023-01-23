@@ -35,7 +35,7 @@ const ApplicationServices: React.FC<ApplicationServicesProps> = ({ appId }) => {
 export default ApplicationServices;
 
 const query = gql`
-  query GET_APPLICATION_SERVICES($appId: String!) {
+  query GetApplicationServices($appId: String!) {
     myServiceAccesses(where: { application: { appId: $appId } }) {
       id
       name

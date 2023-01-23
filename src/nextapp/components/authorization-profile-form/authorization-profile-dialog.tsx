@@ -12,10 +12,15 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { gql } from 'graphql-request';
+import merge from 'lodash/merge';
 import { useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import { useAuth } from '@/shared/services/auth';
-import { CredentialIssuer } from '@/shared/types/query.types';
+import {
+  CredentialIssuer,
+  CredentialIssuerCreateInput,
+  CredentialIssuerUpdateInput,
+} from '@/shared/types/query.types';
 
 import NewProfile from './new-profile';
 import ProfileNameControl from './profile-name-control';
@@ -38,6 +43,9 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
   open,
   onClose,
 }) => {
+  const submitInteractionRef = React.useRef<string>(null);
+  const editRef = React.useRef(new Map());
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   // Cache the authorization page data so we don't loose it between steps while not having to
   // manage the state of the form
@@ -78,16 +86,25 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     }
     setTabIndex(0);
     setFlow('client-credentials.client-secret');
+    editRef.current.clear();
     onClose();
   }, [id, onClose]);
   const handleProfileNameCreate = React.useCallback((value: string) => {
     setName(value);
   }, []);
   const handleTabChange = React.useCallback((index) => {
+    const openForm: HTMLFormElement = contentRef?.current.querySelector(
+      '.authProfileFormContainer:not([hidden]) > form'
+    );
+    submitInteractionRef.current = 'tab';
+    if (openForm) {
+      openForm.requestSubmit();
+    }
     setTabIndex(index);
+    submitInteractionRef.current = null;
   }, []);
   const handleCreateProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerCreateInput) => {
       try {
         await createMutate.mutateAsync({
           data: {
@@ -109,6 +126,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
         toast({
           title: 'Profile create failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -124,12 +142,21 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     ]
   );
   const handleSaveProfile = React.useCallback(
-    async (payload: CredentialIssuer) => {
+    async (payload: CredentialIssuerUpdateInput) => {
       try {
+        let data = payload;
+        Array.from(editRef.current?.keys()).forEach((k) => {
+          if (k !== tabIndex) {
+            const entries = editRef.current.get(k);
+            data = merge({}, entries, data);
+            debugger;
+          }
+        });
         await editMutate.mutateAsync({
           id,
           data: {
-            ...payload,
+            ...data,
+            inheritFrom: undefined, // should never be sent when updating a profile
             flow: flowValue,
             clientAuthenticator,
             name,
@@ -143,11 +170,15 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
           isClosable: true,
         });
         client.invalidateQueries();
-        handleClose();
+        if (tabIndex == 2) {
+          handleClose();
+        }
+        submitInteractionRef.current = null;
       } catch (err) {
         toast({
           title: 'Profile save failed',
           status: 'error',
+          description: err,
           isClosable: true,
         });
       }
@@ -160,6 +191,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       handleClose,
       id,
       name,
+      tabIndex,
       toast,
     ]
   );
@@ -169,14 +201,18 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       const [flow, clientAuthenticator] = formData.flow.split('.');
 
       const payload = {
-        ...data,
+        // ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
         ...formData,
         flow,
         clientAuthenticator,
       };
 
       if (id) {
-        handleSaveProfile(payload);
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         if (isKongFlow) {
           handleCreateProfile(payload);
@@ -191,7 +227,17 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     (payload: FormData) => {
       const formData = Object.fromEntries(payload);
       if (id) {
-        handleSaveProfile({ ...data, ...formData });
+        const payload = {
+          // ...(data as
+          //   | CredentialIssuerCreateInput
+          //   | CredentialIssuerUpdateInput),
+          ...formData,
+        };
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         newAuthorizationData.current = {
           ...newAuthorizationData.current,
@@ -203,14 +249,21 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
     [data, handleSaveProfile, id]
   );
   const handleClientManagementComplete = React.useCallback(
-    (environments: EnvironmentItem[]) => {
+    (inheritFromId: string, environments: EnvironmentItem[]) => {
       const payload = {
-        ...data,
+        // ...(data as CredentialIssuerCreateInput | CredentialIssuerUpdateInput),
+        inheritFrom: inheritFromId
+          ? { connect: { id: inheritFromId } }
+          : undefined,
         environmentDetails: JSON.stringify(environments),
       };
 
       if (id) {
-        handleSaveProfile(payload);
+        if (submitInteractionRef?.current === 'tab') {
+          editRef.current.set(tabIndex, payload);
+        } else {
+          handleSaveProfile(payload);
+        }
       } else {
         handleCreateProfile(payload);
       }
@@ -231,7 +284,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent ref={contentRef}>
         {!showTabs && (
           <NewProfile onCancel={onClose} onComplete={handleProfileNameCreate} />
         )}
@@ -257,32 +310,31 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                 </TabList>
               </Tabs>
             </ModalHeader>
-            {tabIndex === 0 && (
-              <AuthenticationForm
-                id={id}
-                onChange={setFlow}
-                onCancel={handleClose}
-                onComplete={handleAuthenticationComplete}
-                value={flow}
-              />
-            )}
-            {tabIndex === 1 && (
-              <AuthorizationForm
-                data={data}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleAuthorizationComplete}
-                ownerName={user?.name}
-              />
-            )}
-            {tabIndex === 2 && (
-              <ClientManagement
-                data={data?.environmentDetails}
-                id={id}
-                onCancel={handleClose}
-                onComplete={handleClientManagementComplete}
-              />
-            )}
+            <AuthenticationForm
+              hidden={tabIndex !== 0}
+              id={id}
+              onChange={setFlow}
+              onCancel={handleClose}
+              onComplete={handleAuthenticationComplete}
+              value={flow}
+            />
+            <AuthorizationForm
+              data={data}
+              hidden={tabIndex !== 1}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleAuthorizationComplete}
+              ownerName={user?.name}
+            />
+            <ClientManagement
+              data={data?.environmentDetails}
+              hidden={tabIndex !== 2}
+              inheritFrom={data?.inheritFrom}
+              profileName={name}
+              id={id}
+              onCancel={handleClose}
+              onComplete={handleClientManagementComplete}
+            />
           </>
         )}
       </ModalContent>

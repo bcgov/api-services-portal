@@ -1,0 +1,62 @@
+{
+  "display_name": "Ministry of Citizens Services",
+  "description": "The Ministry of Citizens’ Services provides a wide range of services to British Columbians across the province, both in person and online. From BC Services Cards to freedom of information to information technology infrastructure, we help deliver services that people count on. ",
+  "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2020-01-23-182833.103016BCGov.png",
+  "url": "https://www2.gov.bc.ca/gov/content?id=EAD0DA87CFBA4CA0B020773C97AF86FB",
+  "package_count": 0,
+  "created": "2014-12-10T15:05:55.826685",
+  "name": "ministry-of-citizens-services",
+  "is_organization": true,
+  "state": "active",
+  "image_url": "2020-01-23-182833.103016BCGov.png",
+  "groups": [],
+  "type": "organization",
+  "title": "Ministry of Citizens Services",
+  "revision_id": "afc68a33-c6ae-4ac5-99a9-f3042b7fc6d3",
+  "num_followers": 0,
+  "id": "4f7ae636-4cdf-4273-b274-6608c615dba0",
+  "tags": [],
+  "approval_status": "approved",
+  "extSource": "ckan",
+  "extRecordHash": "0000",
+  "orgUnits": [
+    {
+      "display_name": "DataBC Program",
+      "description": "[DataBC](http://www.data.gov.bc.ca/) helps the Province manage data as an asset. It enables public servants and citizens to share and use data. DataBC delivers on this mandate by providing leadership in : data governance and custodianship; data licensing; literacy and outreach; data cataloging; data provisioning; geographic data integration and management; location based services and web mapping applications.\n\n**Data Custodian:** Eowynn Bosomworth\n\n**Editor Approver:** Annika Livingston\n",
+      "short_name": "",
+      "image_display_url": "https://catalogue.data.gov.bc.ca/uploads/group/2018-07-19-230622.091907bcanddatabcsmallwhite.png",
+      "url": "http://www.data.gov.bc.ca/",
+      "package_count": 39,
+      "created": "2014-12-10T15:05:57.849695",
+      "name": "databc",
+      "is_organization": true,
+      "state": "active",
+      "extras": [
+        {
+          "value": "Service",
+          "state": "active",
+          "key": "sector",
+          "revision_id": "f6b39f7f-fa9a-4b7a-809e-1670ddfedad8",
+          "group_id": "d2e433a1-b785-4d03-8a2b-392069175eb4",
+          "id": "cd465aaf-36b5-47b7-8762-40ac88036303"
+        }
+      ],
+      "image_url": "2018-07-19-230622.091907bcanddatabcsmallwhite.png",
+      "groups": [
+        {
+          "capacity": "public",
+          "name": "ministry-of-citizens-services"
+        }
+      ],
+      "type": "organization",
+      "title": "DataBC Program",
+      "revision_id": "b0099ef7-a60e-4f11-a658-c9c7edd2e03e",
+      "num_followers": 0,
+      "id": "d2e433a1-b785-4d03-8a2b-392069175eb4",
+      "tags": [],
+      "approval_status": "approved",
+      "extSource": "ckan",
+      "extRecordHash": "0000"
+    }
+  ]
+}

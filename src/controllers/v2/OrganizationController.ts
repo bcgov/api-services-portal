@@ -167,7 +167,8 @@ export class OrganizationController extends Controller {
   public async assignNamespace(
     @Path() org: string,
     @Path() orgUnit: string,
-    @Path() ns: string
+    @Path() ns: string,
+    @Query() enable: boolean = true
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
@@ -182,7 +183,7 @@ export class OrganizationController extends Controller {
 
     const svc = new GroupAccessService(prodEnv.uma2);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const answer = await svc.assignNamespace(ns, org, orgUnit);
+    const answer = await svc.assignNamespace(ns, org, orgUnit, enable);
     return {
       result: answer
         ? 'namespace-assigned'

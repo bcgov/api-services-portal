@@ -13,7 +13,7 @@ export interface UserData {
 }
 
 export interface NamespaceData {
-  id: string;
+  id?: string;
   name: string;
 }
 

@@ -12,6 +12,7 @@ class ServiceAccountsPage {
     cy.get(this.newServiceAccountBtn).first().click()
     this.selectPermissions(scopes)
     cy.get(this.shareBtn).click()
+    cy.wait(8000)
   }
 
 checkServiceAccountNotExist() : void
@@ -19,7 +20,7 @@ checkServiceAccountNotExist() : void
     cy.get(this.newServiceAccountBtn).should('not.exist')
   }
 
-  saveServiceAcctCreds(): void {
+  saveServiceAcctCreds(flag?:boolean): void {
     cy.get(this.clientId).invoke('val').then(($clientId) => {
       cy.get(this.clientSecret).invoke('val').then(($clientSecret) => {
         cy.saveState(
@@ -28,7 +29,7 @@ checkServiceAccountNotExist() : void
             $clientId +
             '", "clientSecret": "' +
             $clientSecret +
-            '"}'
+            '"}',flag
         )
       })
     })

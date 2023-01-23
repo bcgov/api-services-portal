@@ -8,6 +8,8 @@ import { strict as assert } from 'assert';
 
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
+import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
+import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
 
 import KeycloakAdminClient, {
   default as KcAdminClient,
@@ -36,6 +38,8 @@ export enum ClientAuthenticator {
   ClientJWT = 'client-jwt',
   ClientJWTwithJWKS = 'client-jwt-jwks-url',
   ClientSecret = 'client-secret',
+  SharedIdP = 'shared-idp',
+  SharedIdPWithAuthz = 'shared-idp-authz',
 }
 
 export class KeycloakClientRegistrationService {
@@ -69,39 +73,65 @@ export class KeycloakClientRegistrationService {
     certificate: string,
     jwksUrl: string,
     clientMappers: ClientMapper[],
-    enabled: boolean = false
+    enabled: boolean = false,
+    baseUrl: string = undefined
   ): Promise<ClientRegResponse> {
-    const body =
-      authenticator === ClientAuthenticator.ClientSecret
-        ? Object.assign(JSON.parse(clientTemplateClientSecret), {
-            enabled,
-            clientId,
-            secret: clientSecret,
-          })
-        : authenticator === ClientAuthenticator.ClientJWT
-        ? Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': certificate,
-            },
-          })
-        : Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': '',
-              'jwks.url': jwksUrl,
-              'use.jwks.url': 'true',
-            },
-          });
+    let body: any;
+    switch (authenticator) {
+      case ClientAuthenticator.ClientSecret:
+        body = Object.assign(JSON.parse(clientTemplateClientSecret), {
+          enabled,
+          clientId,
+          secret: clientSecret,
+        });
+        break;
+      case ClientAuthenticator.ClientJWT:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': certificate,
+          },
+        });
+        break;
+      case ClientAuthenticator.SharedIdP:
+        body = Object.assign(JSON.parse(clientTemplateSharedIdP), {
+          enabled,
+          clientId,
+          baseUrl,
+          attributes: {},
+        });
+        break;
+      case ClientAuthenticator.SharedIdPWithAuthz:
+        body = Object.assign(JSON.parse(clientTemplateSharedIdPAuthz), {
+          enabled,
+          clientId,
+          baseUrl,
+          attributes: {},
+        });
+        break;
+
+      default:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': '',
+            'jwks.url': jwksUrl,
+            'use.jwks.url': 'true',
+          },
+        });
+        break;
+    }
 
     clientMappers
       .filter((mapper) => mapper.defaultValue !== '')
-      .forEach((mapper) => {
+      .forEach((mapper, index) => {
         if (mapper.name == 'audience') {
           logger.debug('[clientRegistration] adding mapper %s', mapper);
-          body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+          body.protocolMappers.push(
+            AudienceMapper(`audience-rule-${index + 1}`, mapper.defaultValue)
+          );
         } else {
           logger.warn(
             '[clientRegistration] skipping unknown mapper %s',

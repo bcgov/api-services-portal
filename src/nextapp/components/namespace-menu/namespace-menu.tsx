@@ -1,5 +1,6 @@
 import { UserData } from '@/types';
 import {
+  Box,
   Icon,
   Menu,
   MenuButton,
@@ -7,6 +8,7 @@ import {
   MenuItem,
   MenuList,
   MenuOptionGroup,
+  Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -15,7 +17,9 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
-import type { NamespaceData } from '@/shared/types/app.types';
+import { differenceInDays } from 'date-fns';
+import { Namespace } from '@/shared/types/query.types';
+
 import NamespaceManager from '../namespace-manager';
 import NewNamespace from '../new-namespace';
 
@@ -39,9 +43,10 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
     { query },
     { suspense: false }
   );
+  const today = new Date();
 
   const handleNamespaceChange = React.useCallback(
-    (namespace: NamespaceData) => async () => {
+    (namespace: Namespace) => async () => {
       toast({
         title: `Switching to  ${namespace.name} namespace`,
         status: 'info',
@@ -104,7 +109,7 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <>
+              <Box maxHeight="calc(100vh / 2)" overflowY="auto">
                 <MenuOptionGroup
                   title={isNamespaceSelector ? '' : 'Switch Namespace'}
                 >
@@ -116,12 +121,29 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
                         data-testid={`ns-dropdown-item-${n.name}`}
+                        flexDir="column"
+                        alignItems="flex-start"
+                        pos="relative"
                       >
-                        {n.name}
+                        {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
+                          5 && (
+                          <Text color="bc-error" pos="absolute" right={4}>
+                            New
+                          </Text>
+                        )}
+                        <Text>{n.name}</Text>
+                        {
+                          /* @ts-ignore */
+                          !n.orgEnabled && (
+                            <Text fontSize="xs" color="bc-component">
+                              API Publishing Disabled
+                            </Text>
+                          )
+                        }
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>
-              </>
+              </Box>
             )}
           </>
           {!isNamespaceSelector && (
@@ -170,6 +192,8 @@ const query = gql`
     allNamespaces {
       id
       name
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;

@@ -14,6 +14,8 @@ const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
 
+const YAML = require('yamljs');
+
 let headers: any
 
 let requestBody: any = {}
@@ -29,9 +31,14 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
 
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-
-      cy.get(login.loginButton).click()
-      cy.contains('Github').click()
+      cy.get(login.loginDropDown).click()
+      if(username.includes('idir')){
+        login.selectAPIProviderLoginOption()
+      }
+      else
+      {
+        login.selectDeveloperLoginOption()
+      }
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',
@@ -68,6 +75,15 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
     })
     cy.log('> Log in')
   }
+})
+
+Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
+  cy.log('< Log in with user ' + username)
+  const login = new LoginPage()
+  const home = new HomePage()
+  cy.get(login.usernameInput).click().type(username)
+  cy.get(login.passwordInput).click().type(password)
+  cy.get(login.loginSubmitButton).click()
 })
 
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
@@ -186,6 +202,14 @@ Cypress.Commands.add('logout', () => {
   cy.log('> Logging out')
 })
 
+Cypress.Commands.add('keycloakLogout', () => {
+
+  cy.log('< Logging out')
+  cy.get('.dropdown-toggle.ng-binding').click()
+  cy.contains('Sign Out').click()
+  cy.log('> Logging out')
+})
+
 Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string) => {
   cy.log('< Get Token')
   cy.request({
@@ -222,13 +246,15 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:boolean) => {
+  let fixtureFile = flag ? "state/regen":"state/store";
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
-  cy.fixture('state/store').then((creds: any) => {
+  cy.fixture(fixtureFile).then((creds: any) => {
     const serviceAcctCreds = JSON.parse(creds.credentials)
     cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
       () => {
+        cy.wait(3000)
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
@@ -389,6 +415,24 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       }
     }
   }
+})
+
+Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
+  cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
+    let newObj: any
+    newObj = YAML.parse($el)
+    cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+      let obj = YAML.parse(content)
+      const keys = Object.keys(obj);
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (obj.services[index].name == serviceName) {
+          obj.services[index].plugins = newObj.plugins
+        }
+      });
+      const yamlString = YAML.stringify(obj, 'utf8');
+      cy.writeFile('cypress/fixtures/' + filename, yamlString)
+    })
+  })
 })
 
 Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey: any) => {

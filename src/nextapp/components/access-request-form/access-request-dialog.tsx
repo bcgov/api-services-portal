@@ -71,11 +71,11 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
   const buttonProps = !isInline
     ? {}
     : {
-      fontWeight: 'normal',
-      fontSize: 'inherit',
-      color: 'bc-link',
-      textDecor: 'underline',
-    };
+        fontWeight: 'normal',
+        fontSize: 'inherit',
+        color: 'bc-link',
+        textDecor: 'underline',
+      };
 
   // Events
   const handleAccessSubmit = React.useCallback(
@@ -171,7 +171,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         </Button>
       )}
       {!auth.user && (
-        <LoginDialog buttonText="Request Access" buttonVariant="link" />
+        <LoginDialog buttonText="Request Access" buttonVariant="primary" />
       )}
       <Modal
         isOpen={open || isOpen}

@@ -16,6 +16,7 @@ import { CredentialIssuer } from '@/shared/types/query.types';
 
 interface AuthorizationFormProps {
   data?: CredentialIssuer;
+  hidden: boolean;
   id?: string;
   onCancel: () => void;
   onComplete: (payload: FormData) => void;
@@ -24,6 +25,7 @@ interface AuthorizationFormProps {
 
 const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   data,
+  hidden,
   id,
   onCancel,
   onComplete,
@@ -31,6 +33,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const submitButtonText = id ? 'Save' : 'Continue';
+  const cancelButtonText = id ? 'Close' : 'Cancel';
   const parseClientMappers = (value = '') => {
     try {
       const config = JSON.parse(value);
@@ -72,6 +75,8 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   return (
     <>
       <ModalBody
+        className="authProfileFormContainer"
+        hidden={hidden}
         sx={{
           '& fieldset': { mb: 8 },
           '& fieldset legend + div': { mt: 1 },
@@ -184,14 +189,14 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           </fieldset>
         </form>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button
             onClick={onCancel}
             variant="secondary"
             data-testid="ap-authorization-form-cancel-btn"
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button
             onClick={handleCreate}

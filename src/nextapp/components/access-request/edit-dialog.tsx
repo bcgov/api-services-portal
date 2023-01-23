@@ -132,7 +132,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       ref?.current.querySelector('form[name="ipRestrictionsForm"]') || undefined
     );
     const rateLimitingForm = new FormData(
-      ref?.current.querySelector('form[name="rateLimitingForm"]')
+      ref?.current.querySelector('form[name="rateLimitingForm"]') || undefined
     );
     const rateLimitingFormValues = Object.fromEntries(rateLimitingForm);
     const rateLimitingFormHasValues = ['second', 'minute', 'hour', 'day'].some(

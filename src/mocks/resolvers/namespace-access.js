@@ -1,3 +1,5 @@
+import { shuffle } from 'lodash';
+
 let permissions = [
   {
     id: 'perm1',
@@ -119,21 +121,271 @@ let umaPolicies = [
   },
 ];
 
+let currentNamespace = {
+  id: 'ns1',
+  name: 'aps-portal',
+  scopes: [
+    { name: 'GatewayConfig.Publish' },
+    { name: 'Namespace.Manage' },
+    { name: 'Access.Manage' },
+    { name: 'Namespace.View' },
+  ],
+  prodEnvId: 'p1',
+  org: null,
+  orgUnit: null,
+  orgEnabled: false,
+  orgAdmins: ['Jim.Hopper@gov.bc.ca', 'bogus.secondone@gov.bc.ca'],
+  orgNoticeViewed: false,
+};
+
 export const getCurrentNamesSpaceHandler = (_, res, ctx) => {
   return res(
-    ctx.delay(4500),
+    // ctx.delay(7000),
     ctx.data({
-      currentNamespace: {
-        id: 'ns1',
-        name: 'aps-portal',
-        scopes: [
-          { name: 'GatewayConfig.Publish' },
-          { name: 'Namespace.Manage' },
-          { name: 'Access.Manage' },
-          { name: 'Namespace.View' },
-        ],
-        prodEnvId: 'p1',
-      },
+      currentNamespace,
+    })
+  );
+};
+
+export const updateNamespaceNotificationViewed = (_, res, ctx) => {
+  currentNamespace = {
+    ...currentNamespace,
+    orgNoticeViewed: true,
+  };
+  return res(
+    ctx.data({
+      markNamespaceNotificationViewed: true,
+    })
+  );
+};
+
+export const updateCurrentNamesSpaceHandler = (req, res, ctx) => {
+  currentNamespace = {
+    ...currentNamespace,
+    ...req.variables,
+    org: req.variables.org ? { title: req.variables.org } : null,
+    orgUnit: req.variables.orgUnit ? { title: req.variables.orgUnit } : null,
+  };
+  return res(ctx.data({}));
+};
+
+export const getListOrganizationsHandler = (req, res, ctx) => {
+  return res(
+    ctx.data({
+      allOrganizations: [
+        {
+          name: 'bc-agency',
+          title: 'Crown Corporations and Agencies',
+        },
+        {
+          name: 'government-communications-and-public-engagement',
+          title: 'Government Communications and Public Engagement',
+        },
+        {
+          name: 'government-of-canada',
+          title: 'Government of Canada',
+        },
+        {
+          name: 'local-government',
+          title: 'Local Government',
+        },
+        {
+          name: 'ministry-of-advanced-education-and-skills-training',
+          title: 'Ministry of Advanced Education and Skills Training',
+        },
+        {
+          name: 'ministry-of-agriculture',
+          title: 'Ministry of Agriculture and Food',
+        },
+        {
+          name: 'ministry-of-attorney-general',
+          title: 'Ministry of Attorney General',
+        },
+        {
+          name: 'ministry-of-children-and-family-development',
+          title: 'Ministry of Children and Family Development',
+        },
+        {
+          name: 'ministry-of-citizens-services',
+          title: 'Ministry of Citizens Services',
+        },
+        {
+          name: 'ministry-of-citizens-services',
+          title: 'Ministry of Citizens Services',
+        },
+        {
+          name: 'ministry-of-education',
+          title: 'Ministry of Education and Child Care',
+        },
+        {
+          name: 'ministry-of-energy-mines-and-low-carbon-innovation',
+          title: 'Ministry of Energy, Mines and Low Carbon Innovation',
+        },
+        {
+          name: 'ministry-of-environment-and-climate-change-strategy',
+          title: 'Ministry of Environment and Climate Change Strategy',
+        },
+        {
+          name: 'ministry-of-finance',
+          title: 'Ministry of Finance',
+        },
+        {
+          name: 'ministry-of-forests',
+          title: 'Ministry of Forests',
+        },
+        {
+          name:
+            'ministry-of-forests-lands-natural-resource-operations-and-rural-development',
+          title:
+            'Ministry of Forests, Lands, Natural Resource Operations and Rural Development',
+        },
+        {
+          name: 'ministry-of-indigenous-relations-and-reconciliation',
+          title: 'Ministry of Indigenous Relations and Reconciliation',
+        },
+        {
+          name: 'ministry-of-jobs-economic-recovery-and-innovation',
+          title: 'Ministry of Jobs, Economic Recovery and Innovation',
+        },
+        {
+          name: 'ministry-of-labour',
+          title: 'Ministry of Labour',
+        },
+        {
+          name: 'ministry-of-land-water-and-resource-stewardship',
+          title: 'Ministry of Land, Water and Resource Stewardship',
+        },
+        {
+          name: 'ministry-of-mental-health-and-addictions',
+          title: 'Ministry of Mental Health and Addictions',
+        },
+        {
+          name: 'ministry-of-municipal-affairs',
+          title: 'Ministry of Municipal Affairs',
+        },
+        {
+          name:
+            'ministry-of-public-safety-and-solicitor-general-and-emergency-bc',
+          title:
+            'Ministry of Public Safety and Solicitor General and Emergency BC',
+        },
+        {
+          name: 'ministry-of-social-development-and-poverty-reduction',
+          title: 'Ministry of Social Development and Poverty Reduction',
+        },
+        {
+          name: 'ministry-of-tourism-arts-culture-and-sports',
+          title: 'Ministry of Tourism, Arts, Culture and Sport',
+        },
+        {
+          name: 'ministry-of-transportation-and-infrastructure',
+          title: 'Ministry of Transportation and Infrastructure',
+        },
+        {
+          name: 'office-of-the-premier-and-cabinet-office',
+          title: 'Office of the Premier and Cabinet Office',
+        },
+      ],
+    })
+  );
+};
+
+const orgUnits = [
+  {
+    name: 'agricultural-land-commission',
+    title: 'Agricultural Land Commission',
+  },
+  {
+    name: 'bc-arts-council',
+    title: 'BC Arts Council',
+  },
+  {
+    name: 'bc-assessment-authority',
+    title: 'BC Assessment Authority',
+  },
+  {
+    name: 'bc-games-society',
+    title: 'BC Games Society',
+  },
+  {
+    name: 'bc-housing-management-commission',
+    title: 'BC Housing Management Commission',
+  },
+  {
+    name: 'bc-hydro-and-power-authority',
+    title: 'BC Hydro and Power Authority',
+  },
+  {
+    name: 'bc-oil-and-gas-commission',
+    title: 'BC Oil and Gas Commission',
+  },
+  {
+    name: 'bc-public-service-agency',
+    title: 'BC Public Service Agency',
+  },
+  {
+    name: 'british-columbia-container-trucking-commissioner',
+    title: 'British Columbia Container Trucking Commissioner',
+  },
+  {
+    name: 'business-information-and-analysis-statistical-services',
+    title: 'Business Information and Analysis Statistical Services',
+  },
+  {
+    name: 'community-living-bc',
+    title: 'Community Living BC',
+  },
+  {
+    name: 'destination-bc',
+    title: 'Destination BC',
+  },
+  {
+    name: 'elections-bc',
+    title: 'Elections BC',
+  },
+  {
+    name: 'health-authority-interior',
+    title: 'Health Authority - Interior',
+  },
+  {
+    name: 'health-authority-provincial-health-services-authority',
+    title: 'Health Authority - Provincial Health Services Authority',
+  },
+  {
+    name: 'industry-training-authority',
+    title: 'Industry Training Authority',
+  },
+  {
+    name: 'insurance-corporation-of-british-columbia',
+    title: 'Insurance Corporation of British Columbia',
+  },
+  {
+    name: 'integrated-cadastral-information-society',
+    title: 'Integrated Cadastral Information Society',
+  },
+  {
+    name: 'ltsa',
+    title: 'Land Title and Survey Authority of BC - LTSA',
+  },
+  {
+    name: 'translink',
+    title: 'TransLink',
+  },
+  {
+    name: 'worksafebc',
+    title: 'WorkSafeBC',
+  },
+];
+
+export const getListOrganizationUnitsHandler = (req, res, ctx) => {
+  const result = shuffle(orgUnits).slice(0, 5);
+  return res(
+    ctx.data({
+      allOrganizations: [
+        {
+          orgUnits: result,
+        },
+      ],
     })
   );
 };

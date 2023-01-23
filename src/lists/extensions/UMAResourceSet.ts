@@ -1,34 +1,7 @@
-const { Text, Checkbox, Relationship } = require('@keystonejs/fields');
-const { Markdown } = require('@keystonejs/fields-markdown');
-
-const { EnforcementPoint } = require('../../authz/enforcement');
+import { EnforcementPoint } from '../../authz/enforcement';
 import { strict as assert } from 'assert';
-import {
-  UMAResourceRegistrationService,
-  ResourceSetQuery,
-} from '../../services/uma2';
-
-import {
-  KeycloakTokenService,
-  getOpenidFromIssuer,
-} from '../../services/keycloak';
-
-import {
-  IssuerEnvironmentConfig,
-  getIssuerEnvironmentConfig,
-} from '../../services/workflow/types';
-
-import {
-  isUserBasedResourceOwners,
-  getSuitableOwnerToken,
-  getResourceSets,
-  getEnvironmentContext,
-} from './Common';
-import type { TokenExchangeResult } from './Common';
-
-import { mergeWhereClause } from '@keystonejs/utils';
-
-const keystoneApi = require('../../services/keystone');
+import { UMAResourceRegistrationService } from '../../services/uma2';
+import { getResourceSets, getEnvironmentContext } from './Common';
 
 const typeUMAScope = `
 type UMAScope {
@@ -44,8 +17,8 @@ type UMAResourceSet {
     ownerManagedAccess: Boolean,
     uris: [String]
     resource_scopes: [UMAScope]
-}
-`;
+}`;
+
 module.exports = {
   extensions: [
     (keystone: any) => {

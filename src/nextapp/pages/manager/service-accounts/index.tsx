@@ -2,32 +2,39 @@ import * as React from 'react';
 import api, { useApi } from '@/shared/services/api';
 import {
   Box,
+  Button,
   Container,
   Text,
-  Divider,
-  Heading,
-  Table,
-  Thead,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
   Tr,
-  Th,
-  Tbody,
   Td,
-  Center,
   Icon,
+  Alert,
+  AlertDescription,
+  AlertIcon,
 } from '@chakra-ui/react';
+import Card from '@/components/card';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import { QueryClient, useQueryClient } from 'react-query';
-import { Query } from '@/shared/types/query.types';
+import { Query, ServiceAccess } from '@/shared/types/query.types';
 import ViewSecret from '@/components/view-secret';
 import { dehydrate } from 'react-query/hydration';
 import ServiceAccountDelete from '@/components/service-account-delete/service-account-delete';
+import Table from '@/components/table';
 import { format } from 'date-fns';
-import { FaKey } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
 import ServiceAccountCreate from '@/components/service-account-create';
-import breadcrumbs from '@/components/ns-breadcrumb';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryKey = 'getServiceAccounts';
@@ -36,9 +43,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await queryClient.prefetchQuery(
     queryKey,
     async () =>
-      await api<Query>(query, {}, {
-        headers: context.req.headers as HeadersInit,
-      })
+      await api<Query>(
+        query,
+        {},
+        {
+          headers: context.req.headers as HeadersInit,
+        }
+      )
   );
 
   return {
@@ -52,6 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const ServiceAccountsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey }) => {
+  const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Service Accounts' }]);
   const client = useQueryClient();
   const [credentials, setCredentials] = React.useState<Record<string, string>>(
     null
@@ -83,86 +95,80 @@ const ServiceAccountsPage: React.FC<
       </Head>
       <Container maxW="6xl">
         <PageHeader
-          breadcrumb={breadcrumbs()}
+          breadcrumb={breadcrumbs}
           actions={<ServiceAccountCreate onCreate={handleCreate} />}
           title="Service Accounts"
         >
-          <Text>
-            Service Accounts allow you to access BC Government APIs via the
-            Gateway API or the Gateway CLI.
-          </Text>
+          <Box maxW="45%" mb={8}>
+            <Text>
+              Service Accounts allow you to access BC Government APIs via the
+              Gateway API or the Gateway CLI
+            </Text>
+          </Box>
         </PageHeader>
-
-        {credentials && (
-          <Box my={4} bgColor="white">
-            <Box p={4} display="flex" alignItems="center">
-              <Icon as={FaKey} mr={2} color="bc-yellow" />
-              <Heading size="md">New Service Account Tokens</Heading>
-            </Box>
-            <Divider />
-            <Box p={4}>
-              <Text mb={4}>
-                These are your tokens. Copy and paste them somewhere safe like a
-                text file.
-              </Text>
-            </Box>
-            <Box p={4}>
-              <ViewSecret credentials={credentials} />
-            </Box>
-          </Box>
-        )}
-        <Box bgColor="white" mb={4}>
-          <Box
-            p={4}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Heading size="md">All Service Accounts</Heading>
-          </Box>
-          <Divider />
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>ID</Th>
-                <Th>Created At</Th>
-                <Th textAlign="right">Action</Th>
-              </Tr>
-            </Thead>
-            <Tbody data-testid="service-account-table">
-              {data.allNamespaceServiceAccounts?.length === 0 && (
-                <Tr>
-                  <Td colSpan={5}>
-                    <Center>
-                      <Box m={8} textAlign="center">
-                        <Heading mb={2} size="md">
-                          Create your first Service Account
-                        </Heading>
-                        <Text color="gray.600">
-                          Service Accounts can be used to access our API for
-                          functions like publish gateway configuration.
-                        </Text>
-                        <Box mt={4}>
-                          <ServiceAccountCreate onCreate={handleCreate} />
-                        </Box>
-                      </Box>
-                    </Center>
-                  </Td>
-                </Tr>
+        <Modal
+          size="3xl"
+          isOpen={Boolean(credentials)}
+          onClose={() => setCredentials(null)}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader display="flex" alignItems="center" gridGap={2}>
+              New Service Account Created{' '}
+              <Icon as={FaCheckCircle} color="green" />
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {credentials && (
+                <>
+                  <ViewSecret credentials={credentials} />
+                  <Alert status="warning" variant="outline" mt={8}>
+                    <AlertIcon />
+                    <AlertDescription>
+                      Please store your new service account tokens somewhere
+                      safe because as soon as you navigate away from this
+                      dialog, we will not be able to retrieve these tokens.
+                    </AlertDescription>
+                  </Alert>
+                </>
               )}
+            </ModalBody>
+            <ModalFooter>
+              <Button mr={3} onClick={() => setCredentials(null)}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-              {data.allNamespaceServiceAccounts?.map((d) => (
-                <Tr key={d.id}>
-                  <Td>{d.name}</Td>
-                  <Td>{format(new Date(d.createdAt), 'MMM do, yyyy')}</Td>
-                  <Td textAlign="right">
-                    <ServiceAccountDelete id={d.id} onDelete={handleDelete} />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
+        <Card mb={8}>
+          <Table
+            sortable
+            data={data.allNamespaceServiceAccounts}
+            emptyView={
+              <EmptyPane
+                title="Create your first Service Account"
+                message="Service Accounts can be used to access our API for functions like publish gateway configuration."
+                action={<ServiceAccountCreate onCreate={handleCreate} />}
+              />
+            }
+            columns={[
+              { name: 'ID', key: 'active', sortable: true },
+              { name: 'Created On', key: 'name', sortable: true },
+              { name: '', key: 'id' },
+            ]}
+          >
+            {(d: ServiceAccess) => (
+              <Tr key={d.id}>
+                <Td>{d.name}</Td>
+                <Td>{format(new Date(d.createdAt), 'MMM do, yyyy')}</Td>
+                <Td textAlign="right">
+                  <ServiceAccountDelete id={d.id} onDelete={handleDelete} />
+                </Td>
+              </Tr>
+            )}
           </Table>
-        </Box>
+        </Card>
       </Container>
     </>
   );

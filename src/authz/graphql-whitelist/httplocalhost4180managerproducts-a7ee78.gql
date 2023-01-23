@@ -1,6 +1,6 @@
 
   query GetAllDatasets($search: String!, $first: Int) {
-    allDatasets(search: $search, first: $first) {
+    allDatasets(where: { title_contains: $search }, first: $first) {
       id
       name
       title

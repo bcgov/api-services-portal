@@ -97,7 +97,7 @@ jobs:
           image:
             registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 4.4-ea993071
+            tag: 5.0-7a639fba
             pullPolicy: IfNotPresent
             pullSecrets:
               - dev-github-read-packages-creds
@@ -105,14 +105,28 @@ jobs:
           auth:
               rootPassword: "s3cr3t"
 
+          serviceAccount:
+              create: false
+              name: asp-service-account
+
           arbiter:
               enabled: false
 
           rbac:
               create: true
 
-          strategyType: Recreate
-
+          updateStrategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 100%
+              
+          readinessProbe:
+            timeoutSeconds: 20
+            
+          livenessProbe:
+            timeoutSeconds: 20
+            
           persistence:
               enabled: true
               size: 2Gi
@@ -134,7 +148,7 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 10.31.5 -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 12.1.31 -f values.yaml --history-max 3 bitnami/mongodb
 
       - name: 'Deploy Backend'
         if: github.ref != 'refs/heads/dev'
@@ -175,6 +189,10 @@ jobs:
               cpu: 100m
               memory: 800M
 
+          serviceAccount:
+            create: false
+            name: asp-service-account
+
           oauthProxy:
             enabled: true
             image:
@@ -188,7 +206,7 @@ jobs:
               client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
               oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
+              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|/content|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
@@ -292,7 +310,7 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml --history-max 3 bcgov/generic-api
 
       - name: 'Deploy Routes'
         if: github.ref != 'refs/heads/dev'
@@ -309,7 +327,7 @@ jobs:
                 termination: edge
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml --history-max 3 bcgov/ocp-route
 
       - name: 'Seed Data'
         if: github.ref != 'refs/heads/dev'

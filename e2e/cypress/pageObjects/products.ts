@@ -1,4 +1,7 @@
 import { checkElementExists } from "../support"
+import { updateYamlDocument } from "@atomist/yaml-updater";
+import _ = require("cypress/types/lodash");
+const YAML = require('yamljs');
 
 class Products {
   path: string = '/manager/products'
@@ -13,7 +16,7 @@ class Products {
   editPrdEnvConfigBtn: string = '[data-testid="edit-env-active-checkbox"]'
   // envCfgActivateRadio: string = '[data-testid=prd-env-config-activate-radio]'
   envCfgActivateRadio: string = '[name="active"]'
-  envCfgApprovalCheckbox: string = '[data-testid="edit-env-approval-checkbox"]'
+  envCfgApprovalCheckbox: string = '[name="approval"]'
   envCfgTermsDropdown: string = '[data-testid=legal-terms-dd]'
   envCfgOptText: string = '[data-testid=edit-env-additional-details-textarea]'
   envCfgAuthzDropdown: string = '[data-testid=edit-env-auth-flow-select]'
@@ -28,6 +31,7 @@ class Products {
   aclSwitch: string = '[data-testid="acls-switch"]'
   viewTemplateBtn: string = '[data-testid="edit-env-view-plugin-template-btn"]'
   configServiceTab: string = '[data-testid="edit-env-configure-services-tab"]'
+  activeServicesScope: string = '[data-testid="edit-env-active-services"]'
   config: string | undefined
 
   getTestIdEnvName(env: string): string {
@@ -75,7 +79,7 @@ class Products {
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
   }
 
-  editProductEnvironmentConfig(config: any, invalid = false) {
+  editProductEnvironmentConfig(config: any, invalid = false, isApproved=true) {
 
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
@@ -97,25 +101,54 @@ class Products {
       })
 
     cy.get(this.envCfgOptText).type(config.optionalInstructions)
-    cy.get(this.envCfgApprovalCheckbox).click()
-    cy.get(this.editPrdEnvConfigBtn).click()
+    cy
+      .get('[name="active"]')
+      .as('checkbox')
+      .invoke('is', ':checked')
+      .then(checked => {
+        if (invalid) {
+          cy
+            .get('@checkbox')
+            .uncheck({ force: true });
+        }
+        else {
+          cy
+            .get('@checkbox')
+            .check({ force: true });
+        }
+      });
+      cy
+      .get(this.envCfgApprovalCheckbox)
+      .as('checkbox')
+      .invoke('is', ':checked')
+      .then(checked => {
+        if (!isApproved) {
+          cy
+            .get('@checkbox')
+            .uncheck({ force: true });
+        }
+        else {
+          cy
+            .get('@checkbox')
+            .check({ force: true });
+        }
+      });
+    // cy.get(this.envCfgApprovalCheckbox).click()
+    // cy.get(this.editPrdEnvConfigBtn).click()
     cy.wait(3000)
     cy.get(this.envCfgApplyChangesContinueBtn).click()
     cy.get(this.envCfgApplyChangesBtn).click()
+    // cy.verifyToastMessage("Environment updated")
     cy.wait(3000)
-    if (invalid) {
-      // cy.verifyToastMessage("Environment updated")
-    }
-    else {
-      cy.verifyToastMessage("Success")
-    }
+    cy.verifyToastMessage("Success")
+
   }
 
   generateKongPluginConfig(productName: string, envName: string, filename: string, flag?: boolean) {
     this.editProductEnvironment(productName, envName)
     cy.get(this.viewTemplateBtn).click()
     cy.get('.language-yaml').then(($el) => {
-      cy.log($el.text())
+      cy.log('language-yaml--->' + $el.text())
       cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
         let pluginFilename = filename.replace('.', '-plugin.')
         if (flag) {
@@ -130,20 +163,43 @@ class Products {
     cy.contains('Close').click()
   }
 
+  generateKongPluginConfigForAuthScope(productName: string, envName: string, filename: string, serviceName: string) {
+    this.editProductEnvironment(productName, envName)
+    cy.get(this.viewTemplateBtn).click()
+    cy.get('.language-yaml').then(($el) => {
+      cy.log($el.text())
+      let newObj: any
+      newObj = YAML.parse($el.text())
+      cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+        let obj = YAML.parse(content)
+        const keys = Object.keys(obj);
+        Object.keys(obj.services).forEach(function (key, index) {
+          if (obj.services[index].name == serviceName) {
+            obj.services[index].plugins = newObj.plugins
+          }
+        });
+        const yamlString = YAML.stringify(obj, 'utf8');
+        cy.writeFile('cypress/fixtures/' + filename, yamlString)
+      })
+      cy.contains('Close').click()
+    })
+  }
+
   updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
-    const search_input: string = productName.slice(0, 1)
-    cy.get(this.catelogueDropDown).type(search_input + '{enter}', {
+    const search_input: string = productName.slice(0, 3)
+    cy.get(this.catelogueDropDown).type(search_input + '{downArrow}' + '{enter}', {
       force: true,
-    })
-    cy.get(this.catelogueDropDownMenu)
-      .find('div')
-      .find('p')
-      .each(($e1, index, $list) => {
-        if ($e1.text() === productName) {
-          cy.wrap($e1).click()
-        }
-      })
+      delay: 500
+    }, )
+    // cy.get(this.catelogueDropDownMenu)
+    //   .find('div')
+    //   .find('p')
+    //   .each(($e1, index, $list) => {
+    //     if ($e1.text() === productName) {
+    //       cy.wrap($e1).click()
+    //     }
+    //   })
     this.updateProduct()
   }
 
@@ -162,8 +218,8 @@ class Products {
   deleteProduct(productName: string) {
     // this.editProduct(productName)
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-    cy.get(`[data-testid=${pname}-edit-btn]`).first().click({force: true})
-    cy.get(`[data-testid=${pname}-delete-btn]`).first().click({force: true})
+    cy.get(`[data-testid=${pname}-edit-btn]`).first().click({ force: true })
+    cy.get(`[data-testid=${pname}-delete-btn]`).first().click({ force: true })
     cy.get(this.deleteProductConfirmationBtn).click()
   }
 
@@ -187,6 +243,21 @@ class Products {
     cy.get(this.configServiceTab).click()
     cy.wait(2000)
     cy.get(`[data-testid=${config.serviceName}`).click()
+    cy.get(this.envCfgApplyChangesBtn).click()
+  }
+
+  deactivateService(productName: string, envName: string, config: any) {
+    this.editProductEnvironment(productName, envName)
+    cy.wait(2000)
+    cy.get(this.configServiceTab).click()
+    cy.wait(2000)
+    cy.get(this.activeServicesScope)
+      .within(() => {
+        // we are trying to return something
+        // from the .within callback,
+        // but it won't have any effect
+        return cy.contains(`${config.serviceName}`)
+      }).find('button').click()
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 

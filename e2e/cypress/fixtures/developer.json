@@ -33,10 +33,40 @@
         "description": "Application for testing client credential flow."
       }
     },
+    "clientIdSecret_KongKeyToCC": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Authorization",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "kongAPI_ACL_authProfile": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Kong Authorization",
+        "description": "Application for testing Kong API and ACL flow."
+      }
+    },
+    "clientIdSecret_multiService": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Multi Services",
+        "description": "Application for testing client credential flow."
+      }
+    },
     "clientIdSecret_invalid": {
       "product": {
         "name": "Client Credentials Test Product",
-        "environment": "other"
+        "environment": "sandbox"
       },
       "application": {
         "name": "Client ID and Secret App for invalid auth",

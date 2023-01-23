@@ -1,0 +1,19 @@
+entity: CredentialIssuer
+record:
+  id: 'Sample Shared IdP'
+  namespace: newplatform
+  description: 'A Shared IdP for Teams to use'
+  flow: client-credentials
+  mode: auto
+  clientAuthenticator: client-secret
+  authPlugin: jwt-keycloak
+  clientRoles: []
+  availableScopes: []
+  owner: janis@idir
+  isShared: true
+  environmentDetails:
+    - environment: prod
+      issuerUrl: http://keycloak.localtest.me:9080/auth/realms/master
+      clientId: gwa-api
+      clientRegistration: managed
+      clientSecret: '18900468-3db1-43f7-a8af-e75f079eb742'

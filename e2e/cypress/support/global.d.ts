@@ -13,6 +13,8 @@ declare namespace Cypress {
 
     logout(): void
 
+    keycloakLogout(): void
+
     deleteAllCookies(): void
 
     preserveCookies(): void
@@ -21,7 +23,7 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
-    saveState(key: string, value: string, flag?: boolean): Chainable<any>
+    saveState(key: string, value: string, flag?: boolean, isGlobal?: boolean): Chainable<any>
 
     getState(key: string): Chainable<any>
 
@@ -32,7 +34,7 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
-    publishApi(content: any, namespace: string): Chainable<Cypress.Response<any>>
+    publishApi(fileName: string, namespace: string, flag?:boolean): Chainable<Cypress.Response<any>>
     
     getServiceOrRouteID(configType: string
     ): Chainable<Cypress.Response<any>>
@@ -64,5 +66,11 @@ declare namespace Cypress {
     getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
 
     verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
+
+    updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+
+    keycloakLogin(username: string, password: string): Chainable<any>
+
+    // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }

@@ -157,6 +157,40 @@
       ],
       "owner": "janis@idir"
     },
+    "shared_IDP_update_body": {
+      "name": "Sample Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+          {
+              "environment": "prod",
+              "issuerUrl": "http://keycloak.test.localtest.me:9080/auth/realms/master",
+              "clientRegistration": "managed",
+              "clientId": "gwa-api",
+              "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+          }
+      ],
+      "isShared": true
+    },
+    "shared_IDP_body": {
+      "name": "Sample Shared IdP",
+      "description": "A Shared IdP for Teams to use",
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "mode": "auto",
+      "environmentDetails": [
+          {
+              "environment": "prod",
+              "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+              "clientRegistration": "managed",
+              "clientId": "gwa-api",
+              "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
+          }
+      ],
+      "isShared": true
+    },
     "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
     "headers": {
       "accept": "application/json",

@@ -1,7 +1,0 @@
-
-  query GET {
-    currentNamespace {
-      org
-      orgUnit
-    }
-  }

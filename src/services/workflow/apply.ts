@@ -31,6 +31,7 @@ import { syncPlugins } from './consumer-plugins';
 import { saveConsumerLabels } from './consumer-management';
 import { StructuredActivityService } from './namespace-activity';
 import { KeycloakClientRolesService } from '../keycloak/client-roles';
+import { genClientId } from './client-shared-idp';
 
 const logger = Logger('wf.Apply');
 
@@ -362,8 +363,17 @@ async function setupAuthorizationAndEnable(
         issuerEnvConfig.clientSecret
       );
 
-      const rolesClientId = issuerEnvConfig.clientId;
-      await clientRolesService.syncRoles(
+      const environment = prodEnv.name;
+      const rolesClientIdForSharedIdP = genClientId(
+        environment,
+        issuer.clientId
+      );
+
+      const rolesClientId = issuer.inheritFrom
+        ? rolesClientIdForSharedIdP
+        : issuerEnvConfig.clientId;
+
+      await clientRolesService.syncAssignedRoles(
         rolesClientId,
         controls.roles,
         clientId

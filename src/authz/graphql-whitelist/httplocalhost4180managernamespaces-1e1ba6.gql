@@ -1,0 +1,7 @@
+
+  query ListOrganizations {
+    allOrganizations(sortBy: title_ASC) {
+      name
+      title
+    }
+  }

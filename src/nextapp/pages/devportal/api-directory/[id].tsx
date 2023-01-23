@@ -141,9 +141,9 @@ const ApiPage: React.FC<
         <Grid my={5} gap={4} templateColumns="repeat(12, 1fr)">
           <GridItem as="article" colSpan={9}>
             <Box as="header">
-              <Heading size="xs">About This Dataset</Heading>
+              <Heading size="sm">About This Dataset</Heading>
             </Box>
-            <Box my={9}>
+            <Box mt={5} mb={9} sx={{ p: { marginBottom: 4 } }}>
               <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
                 {data?.notes}
               </ReactMarkdownWithHtml>
