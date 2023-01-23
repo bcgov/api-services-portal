@@ -22,6 +22,7 @@
     "delay": 2500
   },
   "scripts": {
+    "prepare": "cd .. && husky install src/.husky && husky install",
     "prebuild": "tslint -p tsconfig.json --fix",
     "ts-watch": "tsc --watch --jsx react-jsx",
     "ts-build": "tsc",
@@ -179,6 +180,7 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^8.0.3",
     "identity-obj-proxy": "^3.0.0",
     "istanbul-lib-coverage": "^3.2.0",
     "jest": "^27.5.1",
