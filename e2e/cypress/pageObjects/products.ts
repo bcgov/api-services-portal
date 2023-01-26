@@ -1,4 +1,4 @@
-import { checkElementExists } from "../support"
+
 import { updateYamlDocument } from "@atomist/yaml-updater";
 import _ = require("cypress/types/lodash");
 const YAML = require('yamljs');

@@ -4,9 +4,9 @@ import LoginPage from '../pageObjects/login'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
-import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
+import { checkElementExists } from './e2e'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
