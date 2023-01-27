@@ -13,7 +13,7 @@
 
 require('dotenv').config()
 
-module.exports = (on:any, config:any) => {
+module.exports = (on: any, config:any) => {
   on('task', require('@cypress/code-coverage/task'))
 }
 // AFTER

@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "cy:open": "cypress open --config-file=cypress.config.ts",
-    "cy:run": "cypress run --config-file cypress.json --env TransferProtocol='http' --browser chrome",
+    "cy:run": "npx cypress run --config-file cypress.config.ts --env TransferProtocol='http' --browser chrome",
     "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@atomist/yaml-updater": "^1.0.2",
-    "@cypress/code-coverage": "^3.10.0",
+    "@cypress/code-coverage": "^3.10.12",
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
