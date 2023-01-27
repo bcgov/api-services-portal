@@ -273,46 +273,19 @@ const query = gql`
       ownerName
       requester
       requesterName
+      requesterEmail
       resource
       resourceName
       scope
       scopeName
       granted
     }
-
-    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-      id
-      name
-      description
-      type
-      logic
-      decisionStrategy
-      owner
-      clients
-      users
-      groups
-      scopes
-    }
-
-    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-      id
-      name
-      description
-      type
-      logic
-      decisionStrategy
-      owner
-      clients
-      users
-      groups
-      scopes
-    }
   }
 `;
 
 const mutation = gql`
-  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
-    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
+  mutation UpdateUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+    updatePermissions(prodEnvId: $prodEnvId, data: $data) {
       id
     }
   }

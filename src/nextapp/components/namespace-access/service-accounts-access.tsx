@@ -77,7 +77,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     return [];
   }, [data, isSuccess, search]);
   const handleGrantAccess = async (form: FormData) => {
-    const name = form.get('username') as string;
+    const name = form.get('email') as string;
     const scopes = form.getAll('scopes') as string[];
 
     try {
@@ -261,7 +261,7 @@ const mutation = gql`
     $resourceId: String!
     $data: UMAPolicyInput!
   ) {
-    createUmaPolicy(
+    updateUmaPolicy(
       prodEnvId: $prodEnvId
       resourceId: $resourceId
       data: $data

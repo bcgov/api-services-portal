@@ -287,7 +287,7 @@ export class StructuredActivityService {
 
   public async logNamespaceAccess(
     success: boolean,
-    grantRevoke: 'granted' | 'revoked',
+    grantRevoke: 'granted' | 'updated' | 'revoked',
     entity: string,
     subjectType: 'user' | 'client',
     subject: string,

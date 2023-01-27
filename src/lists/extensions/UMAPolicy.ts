@@ -4,6 +4,13 @@ import { getEnvironmentContext, getResourceSets } from './Common';
 import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
+import {
+  createUmaPolicy,
+  updateUmaPolicy,
+  revokeUmaPolicy,
+} from '../../services/workflow/ns-uma-policy-access';
+import PolicyRepresentation from '@keycloak/keycloak-admin-client/lib/defs/policyRepresentation';
+import { UmaPolicyInput } from '../../services/keystone/types';
 
 const logger = Logger('lists.umapolicy');
 
@@ -91,37 +98,48 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
-              assert.strictEqual(
-                resourceIds.filter((rid) => rid === args.resourceId).length,
-                1,
-                'Invalid Resource'
-              );
+              const input: UmaPolicyInput = args.data;
 
-              const policyApi = new UMAPolicyService(
-                envCtx.uma2.policy_endpoint,
-                envCtx.accessToken
-              );
-
-              // name, scopes
-              const umaPolicy = await policyApi.createUmaPolicy(
+              const umaPolicy: Policy = {
+                name: input.name,
+                description: `Service Acct ${input.name}`,
+                clients: [input.name],
+                scopes: args.data.scopes,
+              };
+              return await createUmaPolicy(
+                context,
+                envCtx,
                 args.resourceId,
-                args.data as Policy
+                umaPolicy
+              );
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'updateUmaPolicy(prodEnvId: ID!, resourceId: String!, data: UMAPolicyInput!): UMAPolicy',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
               );
 
-              await new StructuredActivityService(
-                context.sudo(),
-                context.authedItem['namespace']
-              ).logNamespaceAccess(
-                true,
-                'granted',
-                'namespace access',
-                'client',
-                args.data.name,
-                args.data.scopes
-              );
+              const input: UmaPolicyInput = args.data;
 
-              return umaPolicy;
+              return await updateUmaPolicy(
+                context,
+                envCtx,
+                args.resourceId,
+                input.name,
+                input.scopes
+              );
             },
             access: EnforcementPoint,
           },
@@ -141,36 +159,11 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
-              assert.strictEqual(
-                resourceIds.filter((rid) => rid === args.resourceId).length,
-                1,
-                'Invalid Resource'
-              );
-
-              const policyApi = new UMAPolicyService(
-                envCtx.uma2.policy_endpoint,
-                envCtx.accessToken
-              );
-
-              const policy = await policyApi.findPolicyByResource(
+              await revokeUmaPolicy(
+                context,
+                envCtx,
                 args.resourceId,
                 args.policyId
-              );
-              logger.warn('Policy %j', policy);
-
-              await policyApi.deleteUmaPolicy(args.policyId);
-
-              await new StructuredActivityService(
-                context.sudo(),
-                context.authedItem['namespace']
-              ).logNamespaceAccess(
-                true,
-                'revoked',
-                'namespace access',
-                'client',
-                policy.name,
-                policy.scopes
               );
 
               return true;

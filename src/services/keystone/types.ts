@@ -1504,7 +1504,6 @@ export type CredentialIssuerUpdateInput = {
   resourceType?: Maybe<Scalars['String']>;
   resourceAccessScope?: Maybe<Scalars['String']>;
   apiKeyName?: Maybe<Scalars['String']>;
-  isShared?: Maybe<Scalars['Boolean']>;
   environments?: Maybe<EnvironmentRelateToManyInput>;
 };
 
@@ -4510,8 +4509,10 @@ export type Mutation = {
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
+  updateUmaPolicy?: Maybe<UmaPolicy>;
   deleteUmaPolicy?: Maybe<Scalars['Boolean']>;
   grantPermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
+  updatePermissions?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   revokePermissions?: Maybe<Scalars['Boolean']>;
   approvePermissions?: Maybe<Scalars['Boolean']>;
   /**  Authenticate and generate a token for a TemporaryIdentity with the Password Authentication Strategy.  */
@@ -5341,6 +5342,13 @@ export type MutationCreateUmaPolicyArgs = {
 };
 
 
+export type MutationUpdateUmaPolicyArgs = {
+  prodEnvId: Scalars['ID'];
+  resourceId: Scalars['String'];
+  data: UmaPolicyInput;
+};
+
+
 export type MutationDeleteUmaPolicyArgs = {
   prodEnvId: Scalars['ID'];
   resourceId: Scalars['String'];
@@ -5349,6 +5357,12 @@ export type MutationDeleteUmaPolicyArgs = {
 
 
 export type MutationGrantPermissionsArgs = {
+  prodEnvId: Scalars['ID'];
+  data: UmaPermissionTicketInput;
+};
+
+
+export type MutationUpdatePermissionsArgs = {
   prodEnvId: Scalars['ID'];
   data: UmaPermissionTicketInput;
 };
@@ -5381,7 +5395,7 @@ export type MutationUpdateAuthenticatedTemporaryIdentityArgs = {
 
 export type Namespace = {
   __typename?: 'Namespace';
-  id: Scalars['String'];
+  id?: Maybe<Scalars['String']>;
   name: Scalars['String'];
   scopes?: Maybe<Array<Maybe<UmaScope>>>;
   prodEnvId?: Maybe<Scalars['String']>;
@@ -8334,6 +8348,7 @@ export type UmaPermissionTicket = {
   resourceName: Scalars['String'];
   requester: Scalars['String'];
   requesterName: Scalars['String'];
+  requesterEmail?: Maybe<Scalars['String']>;
   owner: Scalars['String'];
   ownerName: Scalars['String'];
   granted: Scalars['Boolean'];
