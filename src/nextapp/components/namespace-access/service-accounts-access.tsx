@@ -21,6 +21,7 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 import ActionsMenu from '../actions-menu';
+import { AccessItem } from './types';
 
 interface ServiceAccountsAccessProps {
   resourceScopes: UmaScope[];
@@ -38,6 +39,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
   const grant = useApiMutation(mutation);
   const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
+  const [editing, setEditing] = React.useState<UmaPolicy | null>(null);
   const [search, setSearch] = React.useState('');
   const { data, isSuccess, isLoading } = useApi(
     queryKey,
@@ -75,7 +77,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     return [];
   }, [data, isSuccess, search]);
   const handleGrantAccess = async (form: FormData) => {
-    const name = form.get('username') as string;
+    const name = form.get('email') as string;
     const scopes = form.getAll('scopes') as string[];
 
     try {
@@ -101,6 +103,9 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
         description: err,
       });
     }
+  };
+  const handleEditAccess = (d: UmaPolicy) => async () => {
+    setEditing(d);
   };
   const handleRevokeAccess = (policyId: string) => async () => {
     try {
@@ -133,6 +138,14 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 
   return (
     <>
+      {editing && (
+        <NamespaceAccessDialog
+          {...accessRequestDialogProps}
+          serviceAccount={editing}
+          buttonVariant={null}
+          onCancel={() => setEditing(null)}
+        />
+      )}
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
           {requests?.length ?? '0'} service accounts
@@ -201,6 +214,12 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
                 data-testid={`nsa-sa-table-row-${index}-menu`}
               >
                 <MenuItem
+                  onClick={handleEditAccess(d)}
+                  data-testid={`nsa-sa-table-row-${index}-edit-btn`}
+                >
+                  Edit Access
+                </MenuItem>
+                <MenuItem
                   color="bc-error"
                   onClick={handleRevokeAccess(d.id)}
                   data-testid={`nsa-sa-table-row-${index}-revoke-btn`}
@@ -242,7 +261,7 @@ const mutation = gql`
     $resourceId: String!
     $data: UMAPolicyInput!
   ) {
-    createUmaPolicy(
+    updateUmaPolicy(
       prodEnvId: $prodEnvId
       resourceId: $resourceId
       data: $data
