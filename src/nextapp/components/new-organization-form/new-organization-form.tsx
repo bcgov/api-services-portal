@@ -21,10 +21,12 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
 import { queryKey } from '@/shared/hooks/use-current-namespace';
 import { gql } from 'graphql-request';
+import { useGlobal } from '@/shared/services/global';
 
 const NewOrganizationForm: React.FC = () => {
   const ref = React.useRef<HTMLFormElement>(null);
   const { user } = useAuth();
+  const global = useGlobal();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
@@ -130,7 +132,13 @@ const NewOrganizationForm: React.FC = () => {
             <Text fontSize="sm" mt={8}>
               If you don’t know your Organization or Business Unit or it is not
               listed, please submit a request through the{' '}
-              <Link color="bc-link" textDecor="underline">
+              <Link
+                href={global.helpLinks.helpAddOrgUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="bc-link"
+                textDecor="underline"
+              >
                 Data Systems and Services request system
               </Link>
             </Text>

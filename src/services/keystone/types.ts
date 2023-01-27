@@ -6281,6 +6281,7 @@ export type Query = {
   getNamespaceConsumerAccess?: Maybe<ConsumerAccess>;
   getConsumerProdEnvAccess?: Maybe<ConsumerProdEnvAccess>;
   consumerScopesAndRoles?: Maybe<ConsumerScopesAndRoles>;
+  allSharedIdPs?: Maybe<Array<Maybe<SharedIssuer>>>;
   sharedIdPs?: Maybe<Array<Maybe<SharedIssuer>>>;
   currentNamespace?: Maybe<Namespace>;
   allNamespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -6293,6 +6294,7 @@ export type Query = {
   getResourceSet?: Maybe<UmaResourceSet>;
   allPermissionTickets?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
   getPermissionTicketsForResource?: Maybe<Array<Maybe<UmaPermissionTicket>>>;
+  allProviderUsers?: Maybe<Array<Maybe<User>>>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
   authenticatedTemporaryIdentity?: Maybe<TemporaryIdentity>;
@@ -7046,6 +7048,11 @@ export type QueryConsumerScopesAndRolesArgs = {
 };
 
 
+export type QueryAllSharedIdPsArgs = {
+  where?: Maybe<CredentialIssuerWhereInput>;
+};
+
+
 export type QuerySharedIdPsArgs = {
   profileName?: Maybe<Scalars['String']>;
 };
@@ -7101,6 +7108,11 @@ export type QueryAllPermissionTicketsArgs = {
 export type QueryGetPermissionTicketsForResourceArgs = {
   prodEnvId: Scalars['ID'];
   resourceId: Scalars['String'];
+};
+
+
+export type QueryAllProviderUsersArgs = {
+  where?: Maybe<UserWhereInput>;
 };
 
 /**  A keystone list  */
@@ -7330,7 +7342,7 @@ export type SharedIssuer = {
   __typename?: 'SharedIssuer';
   id: Scalars['ID'];
   name: Scalars['String'];
-  environmentDetails: Scalars['String'];
+  environmentDetails?: Maybe<Scalars['String']>;
 };
 
 export enum SortAccessRequestsBy {

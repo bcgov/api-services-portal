@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HStack } from '@chakra-ui/layout';
+import { Grid, GridItem, HStack } from '@chakra-ui/layout';
 import { useRadioGroup } from '@chakra-ui/radio';
 
 import RadioCard from './radio-card';
@@ -36,7 +36,13 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
   const group = getRootProps();
 
   return (
-    <HStack {...group} {...props} spacing={4} sx={{ '& > *': { flex: 1 } }}>
+    <Grid
+      {...group}
+      {...props}
+      templateColumns={`repeat(${options.length}, 1fr)`}
+      gap={4}
+      sx={{ '& > *': { flex: 1 } }}
+    >
       {options.map(({ description, title, value }) => {
         const radio = getRadioProps({ value });
 
@@ -51,7 +57,7 @@ const RadioCardGroup: React.FC<RadioCardGroupProps> = ({
           </RadioCard>
         );
       })}
-    </HStack>
+    </Grid>
   );
 };
 

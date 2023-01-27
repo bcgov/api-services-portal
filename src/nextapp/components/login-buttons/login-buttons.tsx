@@ -83,6 +83,7 @@ const LoginButtons: React.FC<LoginButtonsProps> = ({
           href={href}
           leftIcon={icon}
           bgColor={bgColor}
+          w="100%"
           data-testid={`login-with-${kebabCase(button.text)}`}
         >
           Login with {button.text}

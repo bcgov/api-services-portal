@@ -52,6 +52,7 @@ import EmptyPane from '@/components/empty-pane';
 import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
 import NewNamespace from '@/components/new-namespace';
 import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
+import { useGlobal } from '@/shared/services/global';
 
 const actions = [
   {
@@ -119,6 +120,7 @@ const NamespacesPage: React.FC = () => {
   const client = useQueryClient();
   const namespace = useCurrentNamespace();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const global = useGlobal();
   const currentOrg = React.useMemo(() => {
     if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
       return {
@@ -193,36 +195,38 @@ const NamespacesPage: React.FC = () => {
             <Icon as={FaBuilding} color={currentOrg.iconColor} />
             {currentOrg.text}
           </Text>
-          <Popover trigger="hover">
-            <PopoverTrigger>
-              <IconButton aria-label="more info" variant="ghost">
-                <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
-              </IconButton>
-            </PopoverTrigger>
-            <PopoverContent
-              fontSize="sm"
-              fontWeight="normal"
-              color="white"
-              bgColor="#373d3f"
-              borderRadius={0}
-              mt="-15px"
-            >
-              <PopoverArrow bgColor="#373d3f" />
-              <PopoverBody>
-                If you need to change the Organization or Business Unit for your
-                Namespace, submit a request through the{' '}
-                <Link
-                  href="https://dpdd.atlassian.net/servicedesk/customer/portal/1/group/2/create/118"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  textDecor="underline"
-                >
-                  Data Systems and Services request system
-                  <Icon as={FaExternalLinkAlt} ml={1} />
-                </Link>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
+          {user?.roles.includes('api-owner') && (
+            <Popover trigger="hover">
+              <PopoverTrigger>
+                <IconButton aria-label="more info" variant="ghost">
+                  <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
+                </IconButton>
+              </PopoverTrigger>
+              <PopoverContent
+                fontSize="sm"
+                fontWeight="normal"
+                color="white"
+                bgColor="#373d3f"
+                borderRadius={0}
+                mt="-15px"
+              >
+                <PopoverArrow bgColor="#373d3f" />
+                <PopoverBody>
+                  If you need to change the Organization or Business Unit for
+                  your Namespace, submit a request through the{' '}
+                  <Link
+                    href={global.helpLinks.helpChangeOrgUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    textDecor="underline"
+                  >
+                    Data Systems and Services request system
+                    <Icon as={FaExternalLinkAlt} ml={1} />
+                  </Link>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          )}
         </Flex>
       )}
     </>

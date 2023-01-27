@@ -1,4 +1,5 @@
 import { CredentialIssuer } from '@/shared/types/query.types';
+import { stringify } from 'querystring';
 
 export default function JwtKeycloak(
   namespace: string,
@@ -8,14 +9,22 @@ export default function JwtKeycloak(
   if (!issuer || !issuer.environmentDetails) {
     return '';
   }
-  const envDetails: { environment: string; issuerUrl: string }[] = JSON.parse(
-    issuer.environmentDetails
-  );
+  const envDetails: {
+    environment: string;
+    clientRegistration: string;
+    clientId: string;
+    issuerUrl: string;
+  }[] = JSON.parse(issuer.environmentDetails);
   const env = envDetails.find((e) => e.environment === envName);
 
   if (!env) {
     return '';
   }
+
+  const allowedAud =
+    env.clientRegistration === 'shared-idp'
+      ? `allowed_aud: ${env.clientId}`
+      : '';
 
   return `
   plugins:
@@ -23,13 +32,13 @@ export default function JwtKeycloak(
     tags: [ ns.${namespace} ]
     enabled: true
     config:
-      algorithm: RS256
-      well_known_template: ${env.issuerUrl}/.well-known/openid-configuration
       allowed_iss:
       - ${env.issuerUrl}
+      ${allowedAud}
       run_on_preflight: true
       iss_key_grace_period: 10
       maximum_expiration: 0
+      algorithm: RS256
       claims_to_verify:
       - exp
       uri_param_names:

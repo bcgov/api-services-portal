@@ -33,6 +33,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const submitButtonText = id ? 'Save' : 'Continue';
+  const cancelButtonText = id ? 'Close' : 'Cancel';
   const parseClientMappers = (value = '') => {
     try {
       const config = JSON.parse(value);
@@ -74,6 +75,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
   return (
     <>
       <ModalBody
+        className="authProfileFormContainer"
         hidden={hidden}
         sx={{
           '& fieldset': { mb: 8 },
@@ -83,7 +85,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
           },
         }}
       >
-        <form name="authorizationForm" ref={formRef} onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={handleSubmit}>
           <fieldset>
             <Legend>Mode</Legend>
             <RadioCardGroup
@@ -194,7 +196,7 @@ const AuthorizationForm: React.FC<AuthorizationFormProps> = ({
             variant="secondary"
             data-testid="ap-authorization-form-cancel-btn"
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button
             onClick={handleCreate}

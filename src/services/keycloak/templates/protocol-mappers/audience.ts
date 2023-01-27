@@ -1,6 +1,6 @@
-export function AudienceMapper(value: string) {
+export function AudienceMapper(name: string, value: string) {
   return {
-    name: 'audience',
+    name,
     protocol: 'openid-connect',
     protocolMapper: 'oidc-audience-mapper',
     consentRequired: false,

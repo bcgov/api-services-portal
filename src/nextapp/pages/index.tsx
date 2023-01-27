@@ -4,18 +4,13 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import Card from '@/components/card';
 import GridLayout from '@/layouts/grid';
-import {
-  FaBook,
-  FaDatabase,
-  FaServer,
-  FaShieldAlt,
-  FaToolbox,
-} from 'react-icons/fa';
+import { FaBook, FaToolbox } from 'react-icons/fa';
 import { useAuth } from '@/shared/services/auth';
 
 type HomeActions = {
   title: string;
   url: string;
+  fallbackUrl?: string;
   icon: React.ComponentType;
   roles: string[];
   description: string;
@@ -31,6 +26,7 @@ const actions: HomeActions[] = [
   {
     title: 'For API Providers',
     url: '/manager/namespaces',
+    fallbackUrl: '/login?identity=provider&f=%2F',
     icon: FaToolbox,
     roles: [],
     description:
@@ -40,6 +36,7 @@ const actions: HomeActions[] = [
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
+  const isLoggedOut = !user;
 
   return (
     <>
@@ -78,7 +75,14 @@ const HomePage: React.FC = () => {
               <Card key={action.url}>
                 <Box p={4}>
                   <Heading size="md" mb={2}>
-                    <NextLink passHref href={action.url}>
+                    <NextLink
+                      passHref
+                      href={
+                        isLoggedOut && action.fallbackUrl
+                          ? action.fallbackUrl
+                          : action.url
+                      }
+                    >
                       <Link color="bc-link" display="flex" alignItems="center">
                         <Icon as={action.icon} color="bc-yellow" mr={2} />
                         {action.title}

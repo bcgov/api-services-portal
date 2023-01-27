@@ -91,7 +91,6 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
             getLabelProps,
             getMenuProps,
             isOpen,
-            inputValue,
             highlightedIndex,
             selectedItem,
             getRootProps,
@@ -101,8 +100,9 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                 Link to BC Data Catalogue
               </FormLabel>
               <FormHelperText mb={2}>
-                This value is the slug value of a corresponding BC Data
-                Catalogue entry: https://catalogue.data.gov.bc.ca/dataset/
+                Enter an existing dataset. This value is the slug value of a
+                corresponding BCDC entry:
+                https://catalogue.data.gov.bc.ca/dataset/
                 <Text as="mark">{selected ? selected.name : '<not set>'}</Text>
               </FormHelperText>
               <Input
@@ -123,18 +123,15 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
               />
               <Box
                 {...getMenuProps()}
-                border="2px solid"
-                borderColor="bc-blue"
-                borderTop="none"
-                borderBottomRightRadius={4}
-                borderBottomLeftRadius={4}
+                borderRadius={4}
+                boxShadow="lg"
                 position="absolute"
                 zIndex={2}
                 width="100%"
                 minHeight="5px"
                 maxHeight="300px"
                 overflowY="auto"
-                marginTop="-5px"
+                marginTop={0}
                 display={isOpen ? 'block' : 'none'}
               >
                 {isOpen &&
@@ -164,6 +161,13 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                       <Text fontSize="md">{d.title}</Text>
                     </Box>
                   ))}
+                {isOpen && isSuccess && !results.length && (
+                  <Box px={4} py={2} bgColor="white">
+                    <Text fontSize="md" color="bc-component">
+                      No results found
+                    </Text>
+                  </Box>
+                )}
               </Box>
             </>
           )}

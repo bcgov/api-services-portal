@@ -15,6 +15,8 @@ const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
 
+const { OpsMetrics } = require('./services/report/ops-metrics');
+
 const initialiseData = require('./initial-data');
 const session = require('express-session');
 
@@ -179,6 +181,7 @@ for (const _list of [
   'UMAPolicy',
   'UMAResourceSet',
   'UMAPermissionTicket',
+  'UserExt',
 ]) {
   const list = require('./lists/extensions/' + _list);
   if ('extensions' in list) {
@@ -341,6 +344,17 @@ const configureExpress = (app: any) => {
     res.status(200).json({ result: 'ok' });
   });
 
+  const opsMetrics = new OpsMetrics(keystone);
+  opsMetrics.initialize();
+
+  app.get('/metrics', async (req: any, res: any) => {
+    await opsMetrics.generateMetrics();
+    await opsMetrics.store();
+
+    res.set('Content-Type', 'text/plain');
+    res.end('');
+  });
+
   app.get('/about', (req: any, res: any) => {
     res.status(200).json({
       version: process.env.NEXT_PUBLIC_APP_VERSION,
@@ -363,6 +377,8 @@ const configureExpress = (app: any) => {
         helpSupportUrl: process.env.NEXT_PUBLIC_HELP_SUPPORT_URL,
         helpReleaseUrl: process.env.NEXT_PUBLIC_HELP_RELEASE_URL,
         helpStatusUrl: process.env.NEXT_PUBLIC_HELP_STATUS_URL,
+        helpAddOrgUrl: process.env.NEXT_PUBLIC_HELP_ADD_ORG_URL,
+        helpChangeOrgUrl: process.env.NEXT_PUBLIC_CHANGE_ORG_URL,
       },
     });
   });

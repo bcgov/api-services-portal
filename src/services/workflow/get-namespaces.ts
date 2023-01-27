@@ -124,6 +124,37 @@ export async function injectResSvrAccessTokenToContext(
   envCtx.accessToken = resSvrAccessToken;
 }
 
+export async function getNamespaceResourceSetDetails(
+  envCtx: EnvironmentContext
+) {
+  logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
+
+  const permApi = new UMAPermissionService(
+    envCtx.uma2.permission_endpoint,
+    envCtx.accessToken
+  );
+  const permTicket = await permApi.requestTicket([
+    {
+      resource_scopes: [
+        'Namespace.View',
+        'Namespace.Manage',
+        'CredentialIssuer.Admin',
+        'Access.Manage',
+      ],
+    },
+  ]);
+  const tokenApi = new UMA2TokenService(envCtx.uma2.token_endpoint);
+  const allowedResources = await tokenApi.getPermittedResourcesUsingTicket(
+    envCtx.subjectToken,
+    permTicket
+  );
+  logger.debug(
+    '[getNamespaceResourceSets] (ResSvrBased) RETURN %j',
+    allowedResources
+  );
+  return allowedResources;
+}
+
 async function getNamespaceResourceSets(envCtx: EnvironmentContext) {
   logger.debug('[getNamespaceResourceSets] for %s', envCtx.prodEnv.id);
 
