@@ -175,10 +175,8 @@ export const ValidateActiveEnvironment = async (
 
         const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler(
-          ['jwt-keycloak'],
-          (plugin: any) =>
-            plugin.config['well_known_template'].startsWith(envConfig.issuerUrl)
+        const isServiceMissingAllPlugins = getFuncForMissingJwtKeycloakPlugin(
+          envConfig.issuerUrl
         );
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -246,10 +244,15 @@ export function isServiceMissingAllPluginsHandler(
       svc.plugins.filter(
         (plugin: any) =>
           requiredPlugins.includes(plugin.name) && additionalValidation(plugin)
-      ).length == requiredPlugins.length;
+      ).length === requiredPlugins.length;
     if (serviceLevel) {
+      logger.debug('Service Level had all plugins');
       return false;
+    } else if (svc.routes.length === 0) {
+      logger.debug('Service Level missing plugins, and no routes');
+      return true;
     } else {
+      logger.debug('Service Level missing plugins %d', requiredPlugins.length);
       // check that at least one route has these plugins
       return (
         svc.routes.filter(
@@ -276,4 +279,20 @@ async function getNamespaceOrganizationDetails(
   await svc.login(envConfig.clientId, envConfig.clientSecret);
 
   return await svc.getNamespaceOrganizationDetails(ns);
+}
+
+export function getFuncForMissingJwtKeycloakPlugin(issuerUrl: string) {
+  const isWellKnownUndefined = (url: string) => {
+    return (
+      Boolean(url) == false || url === '%s/.well-known/openid-configuration'
+    );
+  };
+
+  return isServiceMissingAllPluginsHandler(
+    ['jwt-keycloak'],
+    (plugin: any) =>
+      plugin.config['well_known_template']?.startsWith(issuerUrl) ||
+      (isWellKnownUndefined(plugin.config['well_known_template']) &&
+        plugin.config['allowed_iss']?.includes(issuerUrl))
+  );
 }

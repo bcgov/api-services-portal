@@ -9,6 +9,8 @@ node dist/test/integrated/workflow/validate-environment.js
 import InitKeystone from '../keystonejs/init';
 import { o } from '../util';
 import { ValidateActiveEnvironment } from '../../../services/workflow';
+import { getFuncForMissingJwtKeycloakPlugin } from '../../../services/workflow/validate-active-environment';
+import { strict as assert } from 'assert';
 
 (async () => {
   const keystone = await InitKeystone();
@@ -58,7 +60,7 @@ import { ValidateActiveEnvironment } from '../../../services/workflow';
     // await new Promise((r) => setTimeout(r, 10000));
   }
 
-  if (true) {
+  if (false) {
     const operation = 'create';
     const existingItem = null as any;
     const originalInput = {
@@ -84,6 +86,23 @@ import { ValidateActiveEnvironment } from '../../../services/workflow';
       )
     );
     // await new Promise((r) => setTimeout(r, 10000));
+  }
+
+  if (true) {
+    const issuerUrl = 'https://auth.local/realms/myrealm';
+    const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+      plugins: [
+        {
+          name: 'jwt-keycloak',
+          config: {
+            well_known_template: null,
+            allowed_iss: ['https://auth.local/realms/myrealm'],
+          },
+        },
+      ],
+      routes: [],
+    } as any);
+    assert.strictEqual(test, false);
   }
 
   await keystone.disconnect();
