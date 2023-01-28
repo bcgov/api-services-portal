@@ -2,7 +2,7 @@ entity: CredentialIssuer
 record:
   id: 'Shared IdP'
   namespace: platform
-  description: 'Shared IdP Authorization Profile`
+  description: 'Shared IdP Authorization Profile'
   flow: client-credentials
   mode: auto
   clientAuthenticator: client-secret
