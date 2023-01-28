@@ -6,6 +6,8 @@ python scripts/template.py scripts/feeder-init/platform-authz-profile-shared.yam
 python scripts/template.py scripts/feeder-init/platform-dataset.yaml platform-dataset.yaml
 python scripts/template.py scripts/feeder-init/platform-gwa-api.yaml platform-gwa-api.yaml
 
+sleep 15
+
 while true; do
     status=$(curl -o /dev/null -Isw '%{http_code}\n' ${PORTAL_URL}/health)
     echo "$status"
