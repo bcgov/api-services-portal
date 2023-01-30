@@ -30,7 +30,6 @@
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "cypress": "^12.4.0",
-    "cypress-keycloak": "^1.7.0",
     "cypress-v10-preserve-cookie": "^1.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-chai-friendly": "^0.7.1",
