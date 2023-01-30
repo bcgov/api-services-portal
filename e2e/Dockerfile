@@ -11,6 +11,6 @@ COPY package-lock.json /e2e
 COPY entrypoint.sh /tmp
 ADD cypress /e2e/cypress
 
-RUN npm install --dev
+RUN npm install
 
 ENTRYPOINT ["npm", "run", "cy:run:html"]
