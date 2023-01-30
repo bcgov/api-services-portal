@@ -39,4 +39,11 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
     const flag = consumers.reviewThePendingRequest()
     assert.isFalse(flag, 'Review request popup is displayed')
   })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+  
 })

@@ -47,6 +47,7 @@ describe('Delete application which has approved request spec', () => {
   })
 
   after(() => {
+    cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
   })

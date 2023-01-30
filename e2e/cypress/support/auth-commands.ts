@@ -272,6 +272,8 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:b
 
 Cypress.Commands.add('deleteAllCookies', () => {
   cy.clearCookies()
+  cy.clearAllLocalStorage()
+  cy.clearAllSessionStorage()
   cy.clearCookie('keystone.sid')
   cy.clearCookie('_oauth2_proxy')
   cy.exec('npm cache clear --force')

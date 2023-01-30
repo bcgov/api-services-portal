@@ -16,7 +16,7 @@ class HomePage {
     cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
     cy.get(this.nsCreateBtn).click()
     cy.verifyToastMessage("Namespace "+name+" created!")
-    cy.wait(2000) // wait for dropdown to have latest text
+    cy.wait(5000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el).contain(name)
     })

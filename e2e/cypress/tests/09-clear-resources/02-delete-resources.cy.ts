@@ -67,4 +67,9 @@ describe('Delete created resources', () => {
   //     assert.equal(flag, false)
   //   })
   // })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({log:true})
+    cy.deleteAllCookies()
+  })
 })
