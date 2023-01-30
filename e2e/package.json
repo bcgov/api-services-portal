@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@atomist/yaml-updater": "^1.0.2",
-    "@cypress/code-coverage": "^3.10.12",
+    "@cypress/code-coverage": "^3.9.12",
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
