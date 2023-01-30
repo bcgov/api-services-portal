@@ -1,16 +1,25 @@
-FROM cypress/included:12.4.0
+# Dockerfile
+# Use Cypress's base image to help set up the environment/dependencies
+FROM cypress/base:12.4.0
 
-WORKDIR /e2e
+# This helps to clean up the console output
+ENV CI=1 
 
-RUN apt-get -y update; apt-get -y install curl
+# Proceed with installing Node dependencies
+RUN mkdir -p /opt/frontendapp/
+WORKDIR /opt/frontendapp/
 
-COPY cypress.config.ts /e2e
-COPY tsconfig.json /e2e
-COPY package.json /e2e
-COPY package-lock.json /e2e
-COPY entrypoint.sh /tmp
-ADD cypress /e2e/cypress
+COPY package.json /opt/frontendapp/
+COPY package-lock.json /opt/frontendapp/
 
-RUN npm install
+RUN npm ci
+
+# Copy over application code and installed node_modules
+COPY . /opt/frontendapp
+WORKDIR /opt/frontendapp
+
+# Verify Cypress installation worked
+RUN ./node_modules/.bin/cypress verify
+
 
 ENTRYPOINT ["npm", "run", "cy:run:html"]
