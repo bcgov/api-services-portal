@@ -23,7 +23,7 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { useQueryClient } from 'react-query';
 import { uid } from 'react-uid';
 import ActionsMenu from '../actions-menu';
-import { AccessItem, Scope } from './types';
+import { AccessItem } from './types';
 import type { UmaScope } from '@/shared/types/query.types';
 
 interface UsersAccessProps {
@@ -41,7 +41,8 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   const [editing, setEditing] = React.useState<AccessItem | null>(null);
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
-  const grant = useApiMutation(mutation);
+  const grant = useApiMutation(create);
+  const update = useApiMutation(mutation);
   const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
   const { data, isLoading, isSuccess } = useApi(
@@ -126,6 +127,34 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       });
     }
   };
+  const handleUpdateAccess = async (form: FormData) => {
+    const email = form.get('email') as string;
+    const scopes = form.getAll('scopes') as string[];
+
+    try {
+      await update.mutateAsync({
+        prodEnvId,
+        data: {
+          resourceId,
+          email,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access updated',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Unable to update user access',
+        description: err,
+        isClosable: true,
+      });
+    }
+  };
   const handleEditAccess = (d: AccessItem) => async () => {
     setEditing(d);
   };
@@ -151,9 +180,17 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       });
     }
   };
+  const handleSubmit = (formData: FormData) => {
+    if (editing) {
+      handleUpdateAccess(formData);
+    } else {
+      handleGrantAccess(formData);
+    }
+  };
+
   const accessRequestDialogProps = {
     data: resourceScopes,
-    onSubmit: handleGrantAccess,
+    onSubmit: handleSubmit,
     variant: 'user',
   } as const;
 
@@ -279,6 +316,14 @@ const query = gql`
       scope
       scopeName
       granted
+    }
+  }
+`;
+
+const create = gql`
+  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
+      id
     }
   }
 `;

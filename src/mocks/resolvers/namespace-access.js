@@ -573,6 +573,11 @@ export const grantAccessHandler = (req, res, ctx) => {
   );
 };
 
+export const updateAccessHandler = (req, res, ctx) => {
+  console.log(req.variables);
+  return res(ctx.data({}));
+};
+
 export const grantSAAccessHandler = (req, res, ctx) => {
   if (req.variables.data.name === 'fail') {
     return res(
@@ -620,6 +625,9 @@ export const grantSAAccessHandler = (req, res, ctx) => {
   );
 };
 
+export const updateSAAccessHandler = (req, res, ctx) => {
+  return res(ctx.data({}));
+};
 export const revokeAccessHandler = (req, res, ctx) => {
   const { tickets } = req.variables;
   permissions = permissions.filter((p) => !tickets.includes(p.scope));

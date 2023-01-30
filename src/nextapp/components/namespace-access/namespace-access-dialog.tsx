@@ -181,7 +181,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                 onClick={handleSubmitClick}
                 data-testid="nsa-gua-share-btn"
               >
-                {accessItem ? 'Save' : 'Share'}
+                {accessItem || serviceAccount ? 'Save' : 'Share'}
               </Button>
             </ButtonGroup>
           </ModalFooter>
