@@ -156,8 +156,7 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
                             {r.name}
                           </Checkbox>
                           <Text fontSize="sm" color="bc-component" ml={6}>
-                            Can approve/reject access requests to your APIs that
-                            you make discoverable.
+                            {permissionHelpTextLookup[r.name] ?? ''}
                           </Text>
                         </WrapItem>
                       ))}
@@ -192,3 +191,16 @@ const NamespaceAccessDialog: React.FC<NamespaceAccessDialogProps> = ({
 };
 
 export default React.memo(NamespaceAccessDialog);
+
+const permissionHelpTextLookup = {
+  'Access.Manage':
+    'Can approve/reject access requests to your APIs that you make discoverable.',
+  'Content.Publish': 'Can update the documentation on the portal.',
+  'CredentialIssuer.Admin':
+    'Can create Authorization Profiles so that they are available to be used when configuring Product Environments.',
+  'GatewayConfig.Publish':
+    'Can publish gateway configuration to Kong and to view the status of the upstreams.',
+  'Namespace.Manage':
+    'Can update the Access Control List for controlling access to viewing metrics, service configuration and service account management. This is a superuser for the Namespace.',
+  'Namespace.View': 'Read-only access to the namespace.',
+};
