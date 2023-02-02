@@ -3,7 +3,7 @@ import LoginPage from '../../pageObjects/login'
 import Products from '../../pageObjects/products'
 import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
-describe('Create API Spec', () => {
+describe('Create API Spec for Delete Resources', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const sa = new ServiceAccountsPage()
@@ -22,7 +22,7 @@ describe('Create API Spec', () => {
     cy.preserveCookies()
     cy.fixture('apiowner').as('apiowner')
     cy.fixture('api').as('api')
-    cy.visit(login.path)
+    // cy.visit(login.path)
   })
 
   it('authenticates Janis (api owner)', () => {
@@ -53,7 +53,7 @@ describe('Create API Spec', () => {
 
   it('publishes a new API to Kong Gateway', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
-      cy.publishApi('service.yml', deleteResources.namespace).then(() => {
+      cy.publishApi('service-clear-resources.yml', deleteResources.namespace).then(() => {
         cy.get('@publishAPIResponse').then((res: any) => {
           cy.log(JSON.stringify(res.body))
         })
@@ -85,24 +85,33 @@ describe('Create API Spec', () => {
     })
   })
   
-  // it('publish product to directory', () => {
-  //   cy.visit(pd.path)
-  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
-  //     pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
-  //     pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
-  //     pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
-  //   })
-  // })
+  it('publish product to directory', () => {
+    cy.visit(sa.path)
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.editProductEnvironment(deleteResources.product.name, deleteResources.product.environment.name)
+      pd.editProductEnvironmentConfig(deleteResources.product.environment.config)
+      pd.generateKongPluginConfig(deleteResources.product.name, deleteResources.product.environment.name,'service-clear-resources.yml')
+    })
+  })
 
-  // it('applies authorization plugin to service published to Kong Gateway', () => {
-  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
-  //     cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
-  //       cy.get('@publishAPIResponse').then((res: any) => {
-  //         cy.log(JSON.stringify(res.body))
-  //       })
-  //     })
-  //   })
-  // })
+  it('applies authorization plugin to service published to Kong Gateway', () => {
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      cy.publishApi('service-clear-resources-plugin.yml', deleteResources.namespace).then(() => {
+        cy.get('@publishAPIResponse').then((res: any) => {
+          cy.log(JSON.stringify(res.body))
+        })
+      })
+    })
+  })
+
+  it('activate the service for Dev environment', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      pd.activateService(deleteResources.product.name, deleteResources.product.environment.name,deleteResources.product.environment.config)
+      cy.wait(3000)
+    })
+  })
 
   after(() => {
     cy.logout()

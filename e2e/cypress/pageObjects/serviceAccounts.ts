@@ -4,7 +4,7 @@ class ServiceAccountsPage {
   newServiceAccountBtn: string = '[data-testid=sa-create-second-btn]'
   clientId: string = '[data-testid=sa-new-creds-client-id]'
   clientSecret: string = '[data-testid=sa-new-creds-client-secret]'
-  serviceAccountTbl: string = '[data-testid="service-account-table"]'
+  serviceAccountTbl: string = '[role="table"]'
   serviceAcctDeleteBtn: string = '[data-testid=service-account-delete-btn]'
   deleteServiceAcctConfirmationBtn: string = '[data-testid="confirm-delete-service-acct-btn"]'
 

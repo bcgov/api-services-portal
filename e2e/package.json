@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "cy:open": "cypress open --config-file=cypress.config.ts",
-    "cy:run": "npx cypress run --config-file cypress.config.ts --env TransferProtocol='http' --browser chrome",
+    "cy:run": "npx cypress run --headed --config-file cypress.config.ts --env TransferProtocol='http' --browser chrome",
     "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
@@ -30,6 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "cypress": "^12.4.0",
+    "cypress-mochawesome-reporter": "^3.2.3",
     "cypress-v10-preserve-cookie": "^1.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-chai-friendly": "^0.7.1",

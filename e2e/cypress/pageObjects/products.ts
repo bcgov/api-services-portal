@@ -77,6 +77,7 @@ class Products {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-edit-btn]`).click()
+    cy.wait(2000)
   }
 
   editProductEnvironmentConfig(config: any, invalid = false, isApproved=true) {

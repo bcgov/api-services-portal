@@ -62,4 +62,10 @@ describe('Grant Access Spec', () => {
     })
   })
 
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+
 })
