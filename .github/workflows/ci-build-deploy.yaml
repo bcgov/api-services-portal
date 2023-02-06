@@ -283,7 +283,6 @@ jobs:
               value: '${{ secrets.OIDC_CLIENT_ID }}'
             GWA_RES_SVR_CLIENT_SECRET:
               value: '${{ secrets.OIDC_CLIENT_SECRET }}'
-              secure: true
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
