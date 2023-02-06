@@ -11,7 +11,7 @@
     "cy:run:rcd": "npm run cy:run -- --record",
     "moch:json": "mochawesome-merge -f results/*.json -o results/bcgov-aps-e2e-report.json",
     "cy:chromium": "cypress open --browser /usr/bin/chromium",
-    "cy:edge": "npx cypress run --browser edge",
+    "cy:edge": "npx cypress run --headed --browser edge",
     "moch:html": "marge results/bcgov-aps-e2e-report.json --reportDir results/report -i -t \"API Services Portal E2E Test Report\"",
     "cy:chrome": "cypress run --headed --env TransferProtocol='http' --browser chrome",
     "cy:run:html": "run-s --continue-on-error cy:run moch:json moch:html",

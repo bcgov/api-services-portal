@@ -26,7 +26,7 @@ class HomePage {
     var flag = new Boolean(false);
     cy.get(this.nsDropdown).click()
     cy.get(this.getNamespaceTestId(name)).click()
-    cy.wait(2000) // wait for dropdown to have latest text
+    cy.wait(5000) // wait for dropdown to have latest text
     cy.get(this.nsDropdown).then(($el) => {
       expect($el.text().trim()).to.eq(name)
       flag = true

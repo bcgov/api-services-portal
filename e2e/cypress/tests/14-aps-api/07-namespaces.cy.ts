@@ -198,4 +198,10 @@ describe('API Tests for Deleting Namespace', () => {
     //         })
     //     })
     // })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({log:true})
+        cy.deleteAllCookies()
+      })
 })

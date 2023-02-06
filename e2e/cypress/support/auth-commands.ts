@@ -194,6 +194,7 @@ Cypress.Commands.add('logout', () => {
 
   cy.log('< Logging out')
   cy.getSession().then(() => {
+    cy.visit('/')
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.contains('Logout').click()

@@ -32,6 +32,7 @@ class Products {
   viewTemplateBtn: string = '[data-testid="edit-env-view-plugin-template-btn"]'
   configServiceTab: string = '[data-testid="edit-env-configure-services-tab"]'
   activeServicesScope: string = '[data-testid="edit-env-active-services"]'
+  credentialIssuer: string = '[name="credentialIssuer"]'
   config: string | undefined
 
   getTestIdEnvName(env: string): string {
@@ -60,6 +61,21 @@ class Products {
     // cy.get(this.updateBtn).click()
   }
 
+  updateCredentialIssuer(issuerName: any) {
+    cy.get(this.credentialIssuer).select(`${issuerName.name} (${issuerName.environmentDetails[0].environment})`)
+    cy
+      .get(this.envCfgApprovalCheckbox)
+      .as('checkbox')
+      .invoke('is', ':checked')
+      .then(checked => {
+        cy
+          .get('@checkbox')
+          .uncheck({ force: true });
+      })
+    cy.get(this.envCfgApplyChangesContinueBtn).click()
+    cy.get(this.envCfgApplyChangesBtn).click()
+  }
+
   updateOrg(orgName: string, orgUnitName: string) {
     cy.get(this.orgDropDown).select(orgName)
     cy.get(this.orgUnitDropDown).select(orgUnitName)
@@ -80,7 +96,7 @@ class Products {
     cy.wait(2000)
   }
 
-  editProductEnvironmentConfig(config: any, invalid = false, isApproved=true) {
+  editProductEnvironmentConfig(config: any, invalid = false, isApproved = true) {
 
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
@@ -94,7 +110,7 @@ class Products {
           authType === 'Oauth2 Client Credentials Flow'
         ) {
           let env = this.getTestIdEnvName(config.authIssuerEnv)
-          cy.get('[name="credentialIssuer"]').select(
+          cy.get(this.credentialIssuer).select(
             `${config.authIssuer} (${env})`
           )
         }
@@ -118,7 +134,7 @@ class Products {
             .check({ force: true });
         }
       });
-      cy
+    cy
       .get(this.envCfgApprovalCheckbox)
       .as('checkbox')
       .invoke('is', ':checked')
@@ -192,7 +208,7 @@ class Products {
     cy.get(this.catelogueDropDown).type(search_input + '{downArrow}' + '{enter}', {
       force: true,
       delay: 500
-    }, )
+    })
     // cy.get(this.catelogueDropDownMenu)
     //   .find('div')
     //   .find('p')
