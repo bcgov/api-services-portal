@@ -195,7 +195,7 @@ const NamespacesPage: React.FC = () => {
             <Icon as={FaBuilding} color={currentOrg.iconColor} />
             {currentOrg.text}
           </Text>
-          {user?.roles.includes('api-owner') && (
+          {currentOrg.assigned && (
             <Popover trigger="hover">
               <PopoverTrigger>
                 <IconButton aria-label="more info" variant="ghost">
