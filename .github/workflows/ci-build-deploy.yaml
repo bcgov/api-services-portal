@@ -122,10 +122,10 @@ jobs:
               maxUnavailable: 100%
               
           readinessProbe:
-            timeoutSeconds: 30
+            timeoutSeconds: 20
             
           livenessProbe:
-            timeoutSeconds: 30
+            timeoutSeconds: 20
             
           persistence:
               enabled: true
