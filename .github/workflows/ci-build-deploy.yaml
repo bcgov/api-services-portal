@@ -281,8 +281,10 @@ jobs:
               value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
               value: '${{ secrets.OIDC_CLIENT_ID }}'
+              secure: true
             GWA_RES_SVR_CLIENT_SECRET:
               value: '${{ secrets.OIDC_CLIENT_SECRET }}'
+              secure: true
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
