@@ -21,6 +21,7 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { UmaPolicy, UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 import ActionsMenu from '../actions-menu';
+import { AccessItem } from './types';
 
 interface ServiceAccountsAccessProps {
   resourceScopes: UmaScope[];
@@ -35,9 +36,11 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
 }) => {
   const queryKey = 'namespaceAccessServiceAccounts';
   const client = useQueryClient();
-  const grant = useApiMutation(mutation);
+  const grant = useApiMutation(create);
+  const update = useApiMutation(mutation);
   const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
+  const [editing, setEditing] = React.useState<UmaPolicy | null>(null);
   const [search, setSearch] = React.useState('');
   const { data, isSuccess, isLoading } = useApi(
     queryKey,
@@ -75,7 +78,7 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
     return [];
   }, [data, isSuccess, search]);
   const handleGrantAccess = async (form: FormData) => {
-    const name = form.get('username') as string;
+    const name = form.get('email') as string;
     const scopes = form.getAll('scopes') as string[];
 
     try {
@@ -102,6 +105,37 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
       });
     }
   };
+  const handleUpdateAccess = async (form: FormData) => {
+    const name = form.get('email') as string;
+    const scopes = form.getAll('scopes') as string[];
+
+    try {
+      await update.mutateAsync({
+        prodEnvId,
+        resourceId,
+        data: {
+          name,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access updated',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        isClosable: true,
+        status: 'error',
+        title: 'Unable to update access',
+        description: err,
+      });
+    }
+  };
+  const handleEditAccess = (d: UmaPolicy) => async () => {
+    setEditing(d);
+  };
   const handleRevokeAccess = (policyId: string) => async () => {
     try {
       await revoke.mutateAsync({
@@ -124,15 +158,30 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
       });
     }
   };
+  const handleSubmit = (form: FormData) => {
+    if (editing) {
+      handleUpdateAccess(form);
+    } else {
+      handleGrantAccess(form);
+    }
+  };
 
   const accessRequestDialogProps = {
     data: resourceScopes,
-    onSubmit: handleGrantAccess,
+    onSubmit: handleSubmit,
     variant: 'service',
   } as const;
 
   return (
     <>
+      {editing && (
+        <NamespaceAccessDialog
+          {...accessRequestDialogProps}
+          serviceAccount={editing}
+          buttonVariant={null}
+          onCancel={() => setEditing(null)}
+        />
+      )}
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading size="sm" fontWeight="normal" data-testid="nsa-sa-count-text">
           {requests?.length ?? '0'} service accounts
@@ -201,6 +250,12 @@ const ServiceAccountsAccess: React.FC<ServiceAccountsAccessProps> = ({
                 data-testid={`nsa-sa-table-row-${index}-menu`}
               >
                 <MenuItem
+                  onClick={handleEditAccess(d)}
+                  data-testid={`nsa-sa-table-row-${index}-edit-btn`}
+                >
+                  Edit Access
+                </MenuItem>
+                <MenuItem
                   color="bc-error"
                   onClick={handleRevokeAccess(d.id)}
                   data-testid={`nsa-sa-table-row-${index}-revoke-btn`}
@@ -236,13 +291,29 @@ const query = gql`
   }
 `;
 
-const mutation = gql`
+const create = gql`
   mutation GrantSAAccess(
     $prodEnvId: ID!
     $resourceId: String!
     $data: UMAPolicyInput!
   ) {
     createUmaPolicy(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      data: $data
+    ) {
+      id
+    }
+  }
+`;
+
+const mutation = gql`
+  mutation UpdateSAAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $data: UMAPolicyInput!
+  ) {
+    updateUmaPolicy(
       prodEnvId: $prodEnvId
       resourceId: $resourceId
       data: $data

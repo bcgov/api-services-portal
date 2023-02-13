@@ -13,22 +13,19 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import EmptyPane from '@/components/empty-pane';
+import get from 'lodash/get';
 import { gql } from 'graphql-request';
 import groupBy from 'lodash/groupBy';
 import NamespaceAccessDialog from './namespace-access-dialog';
 import SearchInput from '@/components/search-input';
 import Table from '@/components/table';
 import { useApi, useApiMutation } from '@/shared/services/api';
-import { UmaScope } from '@/shared/types/query.types';
 import { useQueryClient } from 'react-query';
 import { uid } from 'react-uid';
 import ActionsMenu from '../actions-menu';
+import { AccessItem } from './types';
+import type { UmaScope } from '@/shared/types/query.types';
 
-type AccessItem = {
-  requesterName: string;
-  tickets: string[];
-  scopes: { id: string; name: string }[];
-};
 interface UsersAccessProps {
   resourceScopes: UmaScope[];
   resourceId: string;
@@ -41,9 +38,11 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
   prodEnvId,
 }) => {
   const queryKey = ['namespaceAccessUsers', resourceId];
+  const [editing, setEditing] = React.useState<AccessItem | null>(null);
   const [search, setSearch] = React.useState('');
   const client = useQueryClient();
-  const grant = useApiMutation(mutation);
+  const grant = useApiMutation(create);
+  const update = useApiMutation(mutation);
   const revoke = useApiMutation(revokeMutation);
   const toast = useToast();
   const { data, isLoading, isSuccess } = useApi(
@@ -77,8 +76,14 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       );
       const result = Object.keys(groupedByRequester).map((r) => {
         const requesterName = r.split('|')[1];
+        const requesterEmail = get(
+          groupedByRequester[r],
+          '[0].requesterEmail',
+          requesterName
+        );
         return {
           requesterName,
+          requesterEmail,
           scopes: groupedByRequester[r].map((d) => ({
             id: d.scope,
             name: d.scopeName,
@@ -122,6 +127,37 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       });
     }
   };
+  const handleUpdateAccess = async (form: FormData) => {
+    const email = form.get('email') as string;
+    const scopes = form.getAll('scopes') as string[];
+
+    try {
+      await update.mutateAsync({
+        prodEnvId,
+        data: {
+          resourceId,
+          email,
+          scopes,
+        },
+      });
+      toast({
+        title: 'Access updated',
+        status: 'success',
+        isClosable: true,
+      });
+      client.invalidateQueries(queryKey);
+    } catch (err) {
+      toast({
+        status: 'error',
+        title: 'Unable to update user access',
+        description: err,
+        isClosable: true,
+      });
+    }
+  };
+  const handleEditAccess = (d: AccessItem) => async () => {
+    setEditing(d);
+  };
   const handleRevokeAccess = (d: AccessItem) => async () => {
     try {
       await revoke.mutateAsync({
@@ -144,14 +180,30 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
       });
     }
   };
+  const handleSubmit = (formData: FormData) => {
+    if (editing) {
+      handleUpdateAccess(formData);
+    } else {
+      handleGrantAccess(formData);
+    }
+  };
+
   const accessRequestDialogProps = {
     data: resourceScopes,
-    onSubmit: handleGrantAccess,
+    onSubmit: handleSubmit,
     variant: 'user',
   } as const;
 
   return (
     <>
+      {editing && (
+        <NamespaceAccessDialog
+          {...accessRequestDialogProps}
+          accessItem={editing}
+          buttonVariant={null}
+          onCancel={() => setEditing(null)}
+        />
+      )}
       <Flex as="header" justify="space-between" px={8} align="center">
         <Heading
           size="sm"
@@ -224,6 +276,12 @@ const UsersAccess: React.FC<UsersAccessProps> = ({
                 data-testid={`nsa-users-table-row-${index}-menu`}
               >
                 <MenuItem
+                  onClick={handleEditAccess(d)}
+                  data-testid={`nsa-users-table-row-${index}-edit-btn`}
+                >
+                  Edit Access
+                </MenuItem>
+                <MenuItem
                   color="bc-error"
                   onClick={handleRevokeAccess(d)}
                   data-testid={`nsa-users-table-row-${index}-revoke-btn`}
@@ -252,46 +310,27 @@ const query = gql`
       ownerName
       requester
       requesterName
+      requesterEmail
       resource
       resourceName
       scope
       scopeName
       granted
     }
+  }
+`;
 
-    getUmaPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
+const create = gql`
+  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
       id
-      name
-      description
-      type
-      logic
-      decisionStrategy
-      owner
-      clients
-      users
-      groups
-      scopes
-    }
-
-    getOrgPoliciesForResource(prodEnvId: $prodEnvId, resourceId: $resourceId) {
-      id
-      name
-      description
-      type
-      logic
-      decisionStrategy
-      owner
-      clients
-      users
-      groups
-      scopes
     }
   }
 `;
 
 const mutation = gql`
-  mutation GrantUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
-    grantPermissions(prodEnvId: $prodEnvId, data: $data) {
+  mutation UpdateUserAccess($prodEnvId: ID!, $data: UMAPermissionTicketInput!) {
+    updatePermissions(prodEnvId: $prodEnvId, data: $data) {
       id
     }
   }

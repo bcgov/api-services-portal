@@ -1,0 +1,19 @@
+
+  query GetUserPermissions($resourceId: String!, $prodEnvId: ID!) {
+    getPermissionTicketsForResource(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+    ) {
+      id
+      owner
+      ownerName
+      requester
+      requesterName
+      requesterEmail
+      resource
+      resourceName
+      scope
+      scopeName
+      granted
+    }
+  }

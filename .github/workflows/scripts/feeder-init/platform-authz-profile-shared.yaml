@@ -1,24 +1,15 @@
 entity: CredentialIssuer
 record:
-  id: 'Gateway Services Resource Server'
+  id: 'Shared IdP'
   namespace: platform
-  description: 'Authorization Profile for protecting the Gateway Services API'
+  description: 'Shared IdP Authorization Profile'
   flow: client-credentials
   mode: auto
   clientAuthenticator: client-secret
   authPlugin: jwt-keycloak
   clientRoles: []
-  availableScopes: [Sample.*]
-  resourceType: platform
-  resourceAccessScope: Namespace.Manage
-  resourceScopes:
-    - Namespace.Manage
-    - Namespace.View
-    - Access.Manage
-    - GatewayConfig.Publish
-    - Content.Publish
-    - CredentialIssuer.Admin
   owner: api-owner@local
+  isShared: true
   environmentDetails:
     - environment: prod
       issuerUrl: '{OIDC_ISSUER}'
