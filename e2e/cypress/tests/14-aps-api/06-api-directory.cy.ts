@@ -232,4 +232,10 @@ describe('API Tests for Updating dataset', () => {
             })
         })
     })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({log:true})
+        cy.deleteAllCookies()
+      })
 })

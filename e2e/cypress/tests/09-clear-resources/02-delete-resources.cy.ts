@@ -10,6 +10,7 @@ describe('Delete created resources', () => {
   const sa = new ServiceAccountsPage()
   const pd = new Products()
   const ns = new NameSpacePage
+  let flag: boolean
 
   before(() => {
     cy.visit('/')
@@ -49,22 +50,35 @@ describe('Delete created resources', () => {
     })
   })
 
-  // it('Delete Service Accounts', () => {
-  //   cy.visit(sa.path)
-  //   sa.deleteAllServiceAccounts()
-  // })
+  it('Delete Service Accounts', () => {
+    cy.visit(sa.path)
+    sa.deleteAllServiceAccounts()
+  })
 
   it('Delete Namespace', () => {
     cy.get('@apiowner').then(({ deleteResources }: any) => {
       cy.visit(ns.path)
-      // ns.deleteNamespace(deleteResources.namespace)
+      ns.deleteNamespace(deleteResources.namespace)
     })
   })
 
-  // it('Verify that the deleted namespace does not display in namespace list', () => {
-  //   cy.get('@apiowner').then(({ deleteResources }: any) => {
-  //     const flag = home.useNamespace(deleteResources.namespace)
-  //     assert.equal(flag, false)
-  //   })
-  // })
+  it('Verify that the deleted namespace does not display in namespace list', () => {
+    cy.on('fail', (err, runnable) => {
+      flag = false
+    })
+    cy.get('@apiowner').then(({ deleteResources }: any) => {
+      flag = true
+      home.useNamespace(deleteResources.namespace)
+    })
+  })
+
+  it('Verify that the namespace is deleted', () => {
+    assert.equal(flag, false)
+  })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
 })

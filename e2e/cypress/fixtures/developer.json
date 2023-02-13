@@ -63,6 +63,16 @@
         "description": "Application for testing client credential flow."
       }
     },
+    "clientIdSecret_sharedIDP": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Shared IDP",
+        "description": "Application for testing client credential flow."
+      }
+    },
     "clientIdSecret_invalid": {
       "product": {
         "name": "Client Credentials Test Product",

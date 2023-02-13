@@ -1,7 +1,7 @@
 import { Assertion } from "chai"
 import { wrap } from "module"
 import dateformat from 'dateformat'
-import { checkElementExists } from "../support"
+import { checkElementExists } from "../support/e2e"
 
 export default class ConsumersPage {
   path: string = '/manager/consumers'

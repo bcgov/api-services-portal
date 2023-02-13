@@ -21,7 +21,7 @@
           "terms": "Terms of Use for API Gateway",
           "authorization": "Kong API Key with ACL Flow",
           "optionalInstructions": "This is a automation test",
-          "serviceName": "a-service-for-deleteplatform"
+          "serviceName": "service-for-deleteplatform"
         }
       }
     }

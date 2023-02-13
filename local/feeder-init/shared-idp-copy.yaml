@@ -1,26 +1,19 @@
 entity: CredentialIssuer
 record:
-  id: 'Gateway Services Resource Server'
-  namespace: newplatform
-  description: 'Authorization Profile for protecting the Gateway Services API'
+  id: 'Sample Shared IdP'
+  namespace: ccplatform
+  description: 'A Shared IdP for Teams to use'
   flow: client-credentials
   mode: auto
   clientAuthenticator: client-secret
   authPlugin: jwt-keycloak
   clientRoles: []
   availableScopes: []
-  resourceType: platform
-  resourceAccessScope: Namespace.Manage
-  resourceScopes:
-    - Namespace.Manage
-    - Namespace.View
-    - Access.Manage
-    - GatewayConfig.Publish
-    - Content.Publish
-    - Namespace.Assign
+  clientMappers: [{"name": "audience","defaultValue": "test2"}]
   owner: janis@testmail.com
+  isShared: true
   environmentDetails:
-    - environment: prod
+    - environment: test
       issuerUrl: http://keycloak.localtest.me:9080/auth/realms/master
       clientId: gwa-api
       clientRegistration: managed

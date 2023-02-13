@@ -1,3 +1,4 @@
+import 'cypress-v10-preserve-cookie'
 const listOfCookies = [
   'AUTH_SESSION_ID_LEGACY',
   'KC_RESTART',
@@ -12,7 +13,7 @@ const listOfCookies = [
 
 Cypress.Commands.add('preserveCookies', () => {
   cy.log('< Saving Cookies')
-  Cypress.Cookies.preserveOnce(...listOfCookies)
+  cy.preserveCookieOnce(...listOfCookies)
   Cypress.Cookies.debug(true)
   cy.log('> Saving Cookies')
 })
@@ -51,7 +52,7 @@ Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean, i
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       let newState = currState
-      _.set(newState, keyItems, value)
+      Cypress._.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
   }
@@ -88,7 +89,7 @@ Cypress.Commands.add('getState', (key: string) => {
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((state) => {
-      return _.get(state, keyItems)
+      return Cypress._.get(state, keyItems)
     })
   } else {
     cy.readFile('cypress/fixtures/state/store.json').then((state) => {

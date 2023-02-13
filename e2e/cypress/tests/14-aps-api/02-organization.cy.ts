@@ -244,4 +244,10 @@ describe('Add and Get Organization Access', () => {
             cy.compareJSONObjects(response, organization.body)
         })
     })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({log:true})
+        cy.deleteAllCookies()
+      })    
 })
