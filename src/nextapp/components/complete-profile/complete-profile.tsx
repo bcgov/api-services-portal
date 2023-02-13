@@ -37,6 +37,10 @@ const CompleteProfile: React.FC = () => {
     }
   }
 
+  if (!user) {
+    return <></>;
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />

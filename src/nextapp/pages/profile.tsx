@@ -21,9 +21,12 @@ import {
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import { FaPen } from 'react-icons/fa';
+import { useApiMutation } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const mutate = useApiMutation(mutation);
   const inputRef = React.useRef(null);
   const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
 
@@ -72,10 +75,11 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  function handleSubmit(value: string) {
+  async function handleSubmit(value: string) {
     const email = value.trim();
     if (email && inputRef.current?.checkValidity()) {
       setIsInvalid(false);
+      await mutate.mutateAsync({ email });
       return false;
     }
     setIsInvalid(true);
@@ -126,5 +130,13 @@ const ProfilePage: React.FC = () => {
     </>
   );
 };
+
+const mutation = gql`
+  mutation UpdateUserEmail($email: String!) {
+    updateEmail(email: $email) {
+      email
+    }
+  }
+`;
 
 export default ProfilePage;
