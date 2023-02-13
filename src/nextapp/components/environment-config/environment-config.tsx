@@ -240,8 +240,7 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                           ))}
                         </Select>
                       </GridItem>
-                      {(flow === 'client-credentials' ||
-                        flow === 'authorization-code') && (
+                      {flow === 'client-credentials' && (
                         <GridItem>
                           <CredentialIssuerSelect
                             value={credentialIssuer}
