@@ -24,6 +24,7 @@ describe('Org Group Access Service', function () {
     const kc = new OrgAuthzService(uma2);
 
     const result = await kc.createIfMissingResource('newresource');
-    expect(result).toBe('0001');
+    expect(result.created).toBe(true);
+    expect(result.id).toBe('0001');
   });
 });
