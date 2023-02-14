@@ -19,6 +19,7 @@ import {
   saveConsumerLabels,
   allConsumerGroupLabels,
   allScopesAndRoles,
+  revokeAllConsumerAccess,
 } from '../../../services/workflow';
 import {
   RequestControls,
@@ -29,6 +30,10 @@ import {
 import { doFiltering } from '../../../services/workflow/consumer-filters';
 import { syncPlugins } from '../../../services/workflow/consumer-plugins';
 import { lookupConsumerPlugins } from '../../../services/keystone';
+import { Logger } from '../../../logger';
+import { Environment } from '../../../services/keystone/types';
+
+const logger = Logger('test.intg');
 
 (async () => {
   const keystone = await InitKeystone();
@@ -39,11 +44,13 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
 
   const identity = {
     id: null,
+    name: 'Sample User',
     username: 'sample_username',
     namespace: ns,
     roles: JSON.stringify(['access-manager']),
     scopes: [],
-    userId: '60c9124f3518951bb519084d',
+    //userId: '60c9124f3518951bb519084d',
+    userId: '60c9124f3518951bb519084d', // acope@idir
   } as any;
 
   const ctx = keystone.createContext({
@@ -92,52 +99,63 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumer);
   }
 
-  if (true) {
+  if (false) {
+    const cid = '62f55c9cc56563de1c514e1b';
+    const id = '629fccaf76e9e65444ca6a43';
+    const res = await getConsumerProdEnvAccess(ctx, ns, cid, id).catch((e) => {
+      logger.error('Caught error: %s', e.message);
+    });
+    o(res);
+  }
+  if (false) {
     const id = '62a18b772da3cdea467b10fd';
     const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
     o(consumerAccess);
 
     // only enriches with Authorization and Access Request details
-    // const envPromises = consumerAccess.prodEnvAccess
-    //   .filter((a) => a.plugins.length > 0)
-    //   .map(async (p: any) => {
-    //     const res = await getConsumerProdEnvAccess(
-    //       ctx,
-    //       ns,
-    //       consumerAccess.consumer.id,
-    //       p.environment.id
-    //     );
-    //     o(res);
-    //   });
-    // await Promise.all(envPromises);
+    const envPromises = consumerAccess.prodEnvAccess
+      .filter((a) => a.plugins.length > 0)
+      .map(async (p: any) => {
+        const res = await getConsumerProdEnvAccess(
+          ctx,
+          ns,
+          consumerAccess.consumer.id,
+          p.environment.id
+        );
+        o(res);
+      });
+    await Promise.all(envPromises);
   }
-  if (false) {
+  if (true) {
     const id = '62a18b772da3cdea467b10fd';
     const consumer = await lookupConsumerPlugins(ctx, id);
 
     const plugins: ConsumerPlugin[] = [
       {
-        id: '62e30200b16aa6aa9e87ea56',
+        //id: '6329575b31550937833b1a23',
         name: 'ip-restriction',
-        config: { deny: null, allow: ['1.1.1.1'] },
+        config: { deny: null, allow: ['7.1.1.1'] },
         service: {
           id: '61816208655ef5aad5968c5c',
-          name: 'a-service-for-refactortime-2',
         },
       },
-      {
-        id: '62e30200b16aa6aa9e87ea57',
-        name: 'rate-limiting',
-        config: { second: 10, minute: null, policy: 'redis' },
-        route: null,
-        service: {
-          id: '61816208655ef5aad5968c5c',
-          name: 'a-service-for-refactortime-2',
-        },
-      },
+      // {
+      //   // id: '62e30200b16aa6aa9e87ea57',
+      //   name: 'rate-limiting',
+      //   config: { second: 20, minute: null, policy: 'redis' },
+      //   route: null,
+      //   service: {
+      //     id: '61816208655ef5aad5968c5c',
+      //     name: 'a-service-for-refactortime-2',
+      //   },
+      // },
     ];
 
-    await syncPlugins(ctx, ns, consumer, plugins);
+    const prodEnv = {
+      name: 'dev',
+      product: { name: 'abc' },
+    } as Environment;
+    await syncPlugins(ctx, ns, consumer, prodEnv, []);
   }
   if (false) {
     const cids = await doFiltering(ctx, ns, {
@@ -166,7 +184,7 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
   // } as ConsumerQueryFilter);
   // o(consumers);
 
-  if (true) {
+  if (false) {
     const consumers = await getFilteredNamespaceConsumers(
       ctx,
       ns,
@@ -175,7 +193,51 @@ import { lookupConsumerPlugins } from '../../../services/keystone';
     o(consumers);
   }
 
-  if (true) {
+  if (false) {
+    const id = '62b40afce12d4941e6f4088b';
+
+    await revokeAllConsumerAccess(ctx, ns, id);
+  }
+  if (false) {
+    const id = '63293b8f31550937833b1333';
+    const consumerAccess = await getNamespaceConsumerAccess(ctx, ns, id);
+    o(consumerAccess);
+    const envId = '629fccaf76e9e65444ca6a43';
+
+    const controls: RequestControls = {
+      //plugins: [
+      // {
+      //   name: 'rate-limiting',
+      //   config: { second: 20, policy: 'local' },
+      //   route: null,
+      //   service: {
+      //     id: '61816208655ef5aad5968c5c',
+      //     name: 'a-service-for-refactortime-2',
+      //   },
+      // },
+      //],
+      defaultClientScopes: ['write'],
+    };
+
+    await updateConsumerAccess(
+      ctx,
+      ns,
+      consumerAccess.consumer.id,
+      envId,
+      controls
+    );
+
+    //await revokeAccessFromConsumer(ctx, ns, consumerAccess.consumer.id, envId);
+    // await grantAccessToConsumer(
+    //   ctx,
+    //   ns,
+    //   consumerAccess.consumer.id,
+    //   envId,
+    //   controls
+    // );
+  }
+
+  if (false) {
     const consumers = await getFilteredNamespaceConsumers(
       ctx,
       ns,

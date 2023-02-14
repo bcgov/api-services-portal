@@ -92,23 +92,26 @@ class ApiOpenapiApp {
           code: err.code,
           message: err.message,
         });
-      }
-      if (err instanceof ValidateError) {
+      } else if (err instanceof ValidateError) {
         console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
         return res.status(422).json({
           message: 'Validation Failed',
           details: err?.fields,
         });
-      }
-      if (err instanceof AssertionError) {
-        logger.error(err);
-        logger.error('AssertionError PATH: %s', req.path);
-        return res.status(422).json({
-          message: err.message,
-        });
-      }
-
-      if (err instanceof Error) {
+      } else if (err instanceof AssertionError) {
+        // For some reason `message` is what the `stack` is normally
+        // so just grab the first line and return that
+        const response = {
+          message: 'Failed an assertion',
+        };
+        try {
+          logger.warn('Error message %s', err.message);
+          response.message = err.message.split('\n')[0];
+        } catch (e) {
+          logger.warn('Failed to parse error message %s', e);
+        }
+        return res.status(422).json(response);
+      } else if (err instanceof Error) {
         logger.error(err);
         logger.error('Error PATH: %s', req.path);
         return res.status(500).json({

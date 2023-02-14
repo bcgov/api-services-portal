@@ -111,14 +111,14 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string"},
             "license_title": {"dataType":"string"},
-            "security_class": {"dataType":"string"},
-            "view_audience": {"dataType":"string"},
-            "download_audience": {"dataType":"string"},
+            "security_class": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["HIGH-CABINET"]},{"dataType":"enum","enums":["HIGH-CONFIDENTIAL"]},{"dataType":"enum","enums":["HIGH-SENSITIVITY"]},{"dataType":"enum","enums":["MEDIUM-SENSITIVITY"]},{"dataType":"enum","enums":["MEDIUM-PERSONAL"]},{"dataType":"enum","enums":["LOW-SENSITIVITY"]},{"dataType":"enum","enums":["LOW-PUBLIC"]},{"dataType":"enum","enums":["PUBLIC"]},{"dataType":"enum","enums":["PROTECTED A"]},{"dataType":"enum","enums":["PROTECTED B"]},{"dataType":"enum","enums":["PROTECTED C"]}]},
+            "view_audience": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["Public"]},{"dataType":"enum","enums":["Government"]},{"dataType":"enum","enums":["Named users"]},{"dataType":"enum","enums":["Government and Business BCeID"]}]},
+            "download_audience": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["Public"]},{"dataType":"enum","enums":["Government"]},{"dataType":"enum","enums":["Named users"]},{"dataType":"enum","enums":["Government and Business BCeID"]}]},
             "record_publish_date": {"dataType":"string"},
             "notes": {"dataType":"string"},
             "title": {"dataType":"string"},
-            "isInCatalog": {"dataType":"string"},
-            "isDraft": {"dataType":"string"},
+            "isInCatalog": {"dataType":"boolean"},
+            "isDraft": {"dataType":"boolean"},
             "contacts": {"dataType":"string"},
             "resources": {"dataType":"string"},
             "tags": {"dataType":"array","array":{"dataType":"string"}},
@@ -185,6 +185,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CredentialIssuerRefID": {
+        "dataType": "refAlias",
+        "type": {"dataType":"string","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
@@ -204,14 +209,21 @@ const models: TsoaRoute.Models = {
             "environmentDetails": {"dataType":"array","array":{"dataType":"refObject","ref":"IssuerEnvironmentConfig"}},
             "resourceType": {"dataType":"string"},
             "resourceAccessScope": {"dataType":"string"},
+            "isShared": {"dataType":"boolean"},
             "apiKeyName": {"dataType":"string"},
             "availableScopes": {"dataType":"array","array":{"dataType":"string"}},
             "resourceScopes": {"dataType":"array","array":{"dataType":"string"}},
             "clientRoles": {"dataType":"array","array":{"dataType":"string"}},
             "clientMappers": {"dataType":"array","array":{"dataType":"string"}},
+            "inheritFrom": {"ref":"CredentialIssuerRefID"},
             "owner": {"ref":"UserRefID"},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-String_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UmaScope": {
@@ -224,9 +236,9 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"UmaScope"},{"dataType":"enum","enums":[null]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Maybe_Scalars-at-String_": {
+    "Maybe_Array_Maybe_UmaScope___": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"}},{"dataType":"enum","enums":[null]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Maybe_Array_Maybe_Scalars-at-String___": {
@@ -234,31 +246,34 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_Scalars-at-String_"}},{"dataType":"enum","enums":[null]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-JSON_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"any"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-Float_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Maybe_Scalars-at-Boolean_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Namespace": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgUnit":{"ref":"Maybe_Scalars-at-String_"},"org":{"ref":"Maybe_Scalars-at-String_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"dataType":"array","array":{"dataType":"refAlias","ref":"Maybe_UmaScope_"},"required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"orgAdmins":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"orgNoticeViewed":{"ref":"Maybe_Scalars-at-Boolean_"},"orgEnabled":{"ref":"Maybe_Scalars-at-Boolean_"},"orgUpdatedAt":{"ref":"Maybe_Scalars-at-Float_"},"orgUnit":{"ref":"Maybe_Scalars-at-JSON_"},"org":{"ref":"Maybe_Scalars-at-JSON_"},"permProtectedNs":{"ref":"Maybe_Scalars-at-String_"},"permDataPlane":{"ref":"Maybe_Scalars-at-String_"},"permDomains":{"ref":"Maybe_Array_Maybe_Scalars-at-String___"},"prodEnvId":{"ref":"Maybe_Scalars-at-String_"},"scopes":{"ref":"Maybe_Array_Maybe_UmaScope___"},"name":{"dataType":"string","required":true},"id":{"ref":"Maybe_Scalars-at-String_"},"__typename":{"dataType":"enum","enums":["Namespace"]}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "DateTime": {
-        "dataType": "refAlias",
-        "type": {"dataType":"any","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Activity": {
+    "ActivityDetail": {
         "dataType": "refObject",
         "properties": {
-            "extRefId": {"dataType":"string"},
-            "type": {"dataType":"string"},
-            "name": {"dataType":"string"},
-            "action": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["add"]},{"dataType":"enum","enums":["update"]},{"dataType":"enum","enums":["create"]},{"dataType":"enum","enums":["delete"]},{"dataType":"enum","enums":["validate"]},{"dataType":"enum","enums":["publish"]}]},
-            "result": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":[""]},{"dataType":"enum","enums":["received"]},{"dataType":"enum","enums":["failed"]},{"dataType":"enum","enums":["completed"]},{"dataType":"enum","enums":["success"]}]},
-            "message": {"dataType":"string"},
-            "refId": {"dataType":"string"},
-            "namespace": {"dataType":"string"},
-            "blob": {"dataType":"string"},
-            "updatedAt": {"ref":"DateTime"},
-            "createdAt": {"ref":"DateTime"},
-            "actor": {"ref":"UserRefID"},
+            "id": {"dataType":"string"},
+            "message": {"dataType":"string","required":true},
+            "params": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"string"},"required":true},
+            "activityAt": {"dataType":"any","required":true},
+            "blob": {"dataType":"any"},
         },
         "additionalProperties": false,
     },
@@ -295,7 +310,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string"},
-            "username": {"dataType":"string","required":true},
             "email": {"dataType":"string"},
         },
         "additionalProperties": false,
@@ -325,6 +339,8 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "orgUnit": {"dataType":"string","required":true},
+            "enabled": {"dataType":"boolean","required":true},
+            "updatedAt": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -335,11 +351,6 @@ const models: TsoaRoute.Models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LegalRefID": {
-        "dataType": "refAlias",
-        "type": {"dataType":"string","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CredentialIssuerRefID": {
         "dataType": "refAlias",
         "type": {"dataType":"string","validators":{}},
     },
@@ -510,7 +521,7 @@ export function RegisterRoutes(app: express.Router) {
             async function OrgDatasetController_putDataset(request: any, response: any, next: any) {
             const args = {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"ref":"Dataset"},
+                    body: {"in":"body","name":"body","required":true,"ref":"DraftDataset"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -1311,6 +1322,7 @@ export function RegisterRoutes(app: express.Router) {
                     org: {"in":"path","name":"org","required":true,"dataType":"string"},
                     orgUnit: {"in":"path","name":"orgUnit","required":true,"dataType":"string"},
                     ns: {"in":"path","name":"ns","required":true,"dataType":"string"},
+                    enable: {"default":true,"in":"query","name":"enable","dataType":"boolean"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

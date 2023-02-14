@@ -14,8 +14,12 @@ export { lookupApplication, lookupMyApplicationsById } from './application';
 export { deleteRecord, deleteRecords } from './common-delete-record';
 
 export {
+  lookupSharedIssuers,
   lookupCredentialIssuerById,
   updateEnvironmentDetails,
+  maskEnvironmentDetails,
+  dynamicallySetEnvironmentDetails,
+  generateEnvDetails,
 } from './credential-issuer';
 
 export {
@@ -76,3 +80,9 @@ export {
 export { getOrganizations, getOrganizationUnit } from './organization';
 
 export { getConsumerLabels } from './labels';
+
+export {
+  assignNamespace,
+  clearNamespace,
+  switchTo,
+} from './temporary-identity';

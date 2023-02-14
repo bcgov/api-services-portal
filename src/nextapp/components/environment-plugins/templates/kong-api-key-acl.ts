@@ -1,4 +1,7 @@
-export default function KongApiKeyAcl(namespace, appId) {
+export default function KongApiKeyAcl(
+  namespace: string,
+  appId: string
+): string {
   return `
   plugins:
   - name: key-auth
@@ -13,6 +16,6 @@ export default function KongApiKeyAcl(namespace, appId) {
     tags: [ ns.${namespace} ]
     config:
       hide_groups_header: true
-      allow: [ ${appId} ]
+      allow: [ "${appId}" ]
 `;
 }

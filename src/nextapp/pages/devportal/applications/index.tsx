@@ -15,6 +15,7 @@ import {
   GridItem,
   Flex,
 } from '@chakra-ui/react';
+import EditApplication from '@/components/edit-application';
 import get from 'lodash/get';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
@@ -34,9 +35,8 @@ import EmptyPane from '@/components/empty-pane';
 import ApplicationServices from '@/components/application-services';
 import { ErrorBoundary } from 'react-error-boundary';
 
-const queryKey = 'allApplications';
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const queryKey = 'allApplications';
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
@@ -50,14 +50,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
+      queryKey,
     },
   };
 };
 
 const ApplicationsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = () => {
+> = ({ queryKey }) => {
   const toast = useToast();
+  const [editing, setEditing] = React.useState<Application | null>(null);
   const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
   const { data } = useApi(
@@ -75,28 +77,50 @@ const ApplicationsPage: React.FC<
     },
     [setOpenId]
   );
-  const deleteMutation = useApiMutation<{ id: string }>(mutation);
-  const handleDelete = React.useCallback(
-    (id: string) => async () => {
-      try {
-        if (openId === id) {
-          setOpenId(null);
-        }
-        await deleteMutation.mutateAsync({ id });
-        queryClient.invalidateQueries('allApplications');
-        toast({
-          title: 'Application deleted',
-          status: 'success',
-        });
-      } catch {
-        toast({
-          title: 'Application delete failed',
-          status: 'error',
-        });
-      }
+  const deleteMutation = useApiMutation<{ id: string }>(mutation, {
+    onMutate: async ({ id }) => {
+      const previousApps = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, (old: any) => ({
+        ...old,
+        myApplications: old.myApplications.filter(
+          (a: Application) => a.id !== id
+        ),
+      }));
+      return { previousApps };
     },
-    [deleteMutation, openId, queryClient, setOpenId, toast]
-  );
+    onError: (_, __, context) => {
+      queryClient.setQueryData(queryKey, context.previousApps);
+    },
+    onSettled() {
+      queryClient.refetchQueries(queryKey);
+    },
+  });
+  const handleEdit = (data: Application) => () => {
+    setEditing(data);
+  };
+  const handleCloseEditDialog = () => {
+    setEditing(null);
+  };
+  const handleDelete = (id: string) => async () => {
+    try {
+      if (openId === id) {
+        setOpenId(null);
+      }
+      await deleteMutation.mutateAsync({ id });
+      toast({
+        title: 'Application deleted',
+        status: 'success',
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Application delete failed',
+        description: err,
+        status: 'error',
+        isClosable: true,
+      });
+    }
+  };
 
   // Table props
   const columns = [
@@ -117,6 +141,12 @@ const ApplicationsPage: React.FC<
       <Head>
         <title>API Program Services | Applications</title>
       </Head>
+      <EditApplication
+        data={editing}
+        open={Boolean(editing)}
+        onClose={handleCloseEditDialog}
+        refreshQueryKey={queryKey}
+      />
       <Container maxW="6xl">
         {data?.allApplications?.length === 0 && (
           <Alert status="warning">
@@ -135,6 +165,7 @@ const ApplicationsPage: React.FC<
         <Card>
           <Table
             sortable
+            data-testid="my-applications-table"
             columns={columns}
             data={data?.myApplications ?? []}
             emptyView={empty}
@@ -149,7 +180,17 @@ const ApplicationsPage: React.FC<
                       aria-label={`${d.name} actions menu button`}
                       placement="bottom-end"
                     >
-                      <MenuItem color="red.500" onClick={handleDelete(d.id)}>
+                      <MenuItem
+                        data-testid="edit-application-btn"
+                        onClick={handleEdit(d)}
+                      >
+                        Edit Application
+                      </MenuItem>
+                      <MenuItem
+                        color="red.500"
+                        data-testid="delete-application-btn"
+                        onClick={handleDelete(d.id)}
+                      >
                         Delete Application
                       </MenuItem>
                     </ActionsMenu>
@@ -235,7 +276,7 @@ const query = gql`
 `;
 
 const mutation = gql`
-  mutation Remove($id: ID!) {
+  mutation RemoveApplication($id: ID!) {
     deleteApplication(id: $id) {
       name
       id

@@ -1,11 +1,8 @@
 import * as React from 'react';
 import {
   Button,
-  Checkbox,
   FormControl,
   FormLabel,
-  FormErrorMessage,
-  FormHelperText,
   Icon,
   Modal,
   ModalOverlay,
@@ -14,7 +11,6 @@ import {
   ModalFooter,
   ModalBody,
   useDisclosure,
-  Input,
   IconButton,
   Select,
   VStack,
@@ -81,7 +77,7 @@ const EditEnvironment: React.FC<EditEnvironmentProps> = ({ data }) => {
                       <FormLabel>Auth Method</FormLabel>
                       <Select defaultValue={data.flow}>
                         {flowTypes.map((f) => (
-                          <option value={f.value}>{f.label}</option>
+                          <option key={f.value} value={f.value}>{f.label}</option>
                         ))}
                       </Select>
                     </FormControl>

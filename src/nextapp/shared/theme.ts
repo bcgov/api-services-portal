@@ -4,8 +4,10 @@ import { transparentize } from '@chakra-ui/theme-tools';
 const colors = {
   'bc-blue': '#003366',
   'bc-yellow': '#FCBA19',
+  'bc-yellow-light': transparentize('#FCBA19', 0.1)({}),
   text: '#313132',
   'bc-component': '#606060',
+  'bc-empty': '#60606080',
   'bc-link': '#1A5A96',
   'bc-blue-alt': '#38598A',
   'bc-light-blue': '#77ACF1',
@@ -53,7 +55,7 @@ const _focus = {
   // outlineColor: 'bc-border-focus',
   outline: 'none',
   borderColor: 'bc-blue-alt',
-  boxShadow: 'lg',
+  boxShadow: 'sm',
 };
 const _disabled = {
   opacity: 0.3,
@@ -136,6 +138,26 @@ const buttonVariants = {
       },
     },
   },
+  success: {
+    bg: 'bc-success',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-success',
+      },
+    },
+  },
+  danger: {
+    bg: 'bc-error',
+    color: 'white',
+    _disabled: {
+      ..._disabled,
+      _hover: {
+        background: 'bc-error',
+      },
+    },
+  },
   header: {
     bg: 'bc-yellow',
     color: 'white',
@@ -163,6 +185,8 @@ const buttonVariants = {
   ghost: {
     color: 'bc-blue',
     borderColor: 'transparent',
+    boxShadow: 'none',
+    px: 3,
     _hover: {
       bgColor: 'transparent',
       textDecor: 'none',
@@ -241,13 +265,18 @@ const theme = extendTheme(
       },
       Checkbox: {
         baseStyle: {
-          borderColor: 'bc-component',
+          label: {
+            color: 'text',
+          },
           '& label': {
             borderColor: 'bc-component',
           },
           borderRadius: 0,
           '.chakra-checkbox__control': {
             borderRadius: 0,
+          },
+          control: {
+            borderColor: 'bc-component',
           },
         },
         defaultProps: {
@@ -445,6 +474,8 @@ const theme = extendTheme(
                   return '#f59b7c40';
                 case 'other':
                   return '#f1f48730';
+                case 'red':
+                  return transparentize('bc-error', 0.1)(theme);
                 default:
                   return '#e9f0f8';
               }
@@ -454,7 +485,9 @@ const theme = extendTheme(
               container: {
                 borderRadius: 4,
                 backgroundColor: getLabelBgColor(props.colorScheme),
-                border: '1px solid #8e8e8e30',
+                border: '1px solid',
+                borderColor:
+                  props.colorScheme === 'red' ? 'bc-error' : '#8e8e8e30',
                 color: 'text',
                 boxShadow: 'none',
               },
@@ -473,6 +506,11 @@ const theme = extendTheme(
               color: 'bc-component',
             },
           },
+        },
+      },
+      Tooltip: {
+        baseStyle: {
+          bgColor: '#373d3f',
         },
       },
     },

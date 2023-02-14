@@ -31,6 +31,7 @@ const NavBar: React.FC<NavBarProps> = ({ site, links, pathname }) => {
   const { user } = useAuth();
   const authenticatedLinks = links
     .filter((link) => link.sites.includes(site))
+    .filter((link) => link.url)
     .filter(
       (link) =>
         link.access.length === 0 ||

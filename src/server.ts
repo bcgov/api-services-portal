@@ -1,17 +1,12 @@
 /// <reference types="node" />
 /// <reference types="express" />
 import 'reflect-metadata';
-import express from 'express';
-import request from 'graphql-request';
+const { formatError } = require('./services/keystone_overrides/formatError');
 const { Keystone } = require('@keystonejs/keystone');
-const { Checkbox, Password, Select } = require('@keystonejs/fields');
-//import Oauth2ProxyAuthStrategy from './auth/auth-oauth2-proxy'
 const { Oauth2ProxyAuthStrategy } = require('./auth/auth-oauth2-proxy');
 const { PasswordAuthStrategy } = require('@keystonejs/auth-password');
 const { AdminUIApp } = require('@keystonejs/app-admin-ui');
 const { generate } = require('@graphql-codegen/cli');
-//const { AdminUIApp } = require('@keystone-next/admin-ui');
-const { StaticApp } = require('@keystonejs/app-static');
 const { NextApp } = require('@keystonejs/app-next');
 const { ApiProxyApp } = require('./api-proxy');
 const { ApiGraphqlWhitelistApp } = require('./api-graphql-whitelist');
@@ -20,19 +15,13 @@ const { MaintenanceApp } = require('./api-maintpage');
 const { ApiOpenapiApp } = require('./api-openapi');
 const { ApiDSProxyApp } = require('./api-proxy-ds');
 
-var Keycloak = require('keycloak-connect');
+const { OpsMetrics } = require('./services/report/ops-metrics');
 
 const initialiseData = require('./initial-data');
-const { startAuthedSession } = require('@keystonejs/session');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
 
 const redis = require('redis');
 let RedisStore = require('connect-redis')(session);
-
-const { Strategy, Issuer, Client } = require('openid-client');
-
-const { staticRoute, staticPath, distDir } = require('./config');
 
 const {
   putFeedWorker,
@@ -41,10 +30,7 @@ const {
 } = require('./batch/feed-worker');
 const { Retry } = require('./services/tasked');
 
-const {
-  FieldEnforcementPoint,
-  EnforcementPoint,
-} = require('./authz/enforcement');
+const { EnforcementPoint } = require('./authz/enforcement');
 
 const { loadRulesAndWatch } = require('./authz/enforcement');
 
@@ -187,12 +173,15 @@ for (const _list of [
   'ConsumerProducts',
   'ConsumerScopesAndRoles',
   'CredentialRegenerate',
+  'CredentialIssuerExt',
   'Namespace',
+  'NamespaceActivity',
   'OrganizationPolicy',
   'ServiceAccount',
   'UMAPolicy',
   'UMAResourceSet',
   'UMAPermissionTicket',
+  'UserExt',
 ]) {
   const list = require('./lists/extensions/' + _list);
   if ('extensions' in list) {
@@ -248,13 +237,6 @@ const authStrategy =
       });
 
 const { pages } = require('./admin-hooks.js');
-//const tasked = require('./services/tasked');
-
-const {
-  checkWhitelist,
-  loadWhitelistAndWatch,
-  addToWhitelist,
-} = require('./authz/whitelist');
 
 const apps = [
   new ApiHealthApp(state),
@@ -262,6 +244,22 @@ const apps = [
   new MaintenanceApp(),
   new ApiGraphqlWhitelistApp({
     apiPath,
+    apollo: {
+      formatError: (err: any) => {
+        logger.error('GraphQL Error: %s', err);
+        const error = formatError(err);
+
+        const data = error.extensions?.exception?.response?.data;
+        if (!dev && error.extensions?.exception) {
+          logger.warn('Removing exception details from error response');
+          delete error.extensions['exception'];
+        }
+        if (data) {
+          logger.error('  %s', data);
+        }
+        return error;
+      },
+    },
   }),
   new AdminUIApp({
     name: PROJECT_NAME,
@@ -271,11 +269,6 @@ const apps = [
     authStrategy,
     pages: pages,
     enableDefaultRoute: false,
-    isAccessAllowed: (user: any) => {
-      // console.log('isAllowed?');
-      // console.log(JSON.stringify(user));
-      return true;
-    },
   }),
   new ApiDSProxyApp({ url: process.env.SSR_API_ROOT }),
   new ApiProxyApp({ gwaApiUrl: process.env.GWA_API_URL }),
@@ -300,7 +293,10 @@ const configureExpress = (app: any) => {
     });
   });
   app.put('/feed/:entity', (req: any, res: any) => {
-    const context = keystone.createContext({ skipAccessControl: true });
+    const context = keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: { name: 'Feeder Bot' } },
+    });
     putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });
@@ -351,6 +347,17 @@ const configureExpress = (app: any) => {
     res.status(200).json({ result: 'ok' });
   });
 
+  const opsMetrics = new OpsMetrics(keystone);
+  opsMetrics.initialize();
+
+  app.get('/metrics', async (req: any, res: any) => {
+    await opsMetrics.generateMetrics();
+    await opsMetrics.store();
+
+    res.set('Content-Type', 'text/plain');
+    res.end('');
+  });
+
   app.get('/about', (req: any, res: any) => {
     res.status(200).json({
       version: process.env.NEXT_PUBLIC_APP_VERSION,
@@ -360,6 +367,7 @@ const configureExpress = (app: any) => {
         developer: (process.env.NEXT_PUBLIC_DEVELOPER_IDS || '').split(','),
         provider: (process.env.NEXT_PUBLIC_PROVIDER_IDS || '').split(','),
       },
+      identityContent: require('./auth/methods.json'),
       accountLinks: {
         bceidUrl: process.env.NEXT_PUBLIC_ACCOUNT_BCEID_URL,
         bcscUrl: process.env.NEXT_PUBLIC_ACCOUNT_BCSC_URL,
@@ -372,6 +380,8 @@ const configureExpress = (app: any) => {
         helpSupportUrl: process.env.NEXT_PUBLIC_HELP_SUPPORT_URL,
         helpReleaseUrl: process.env.NEXT_PUBLIC_HELP_RELEASE_URL,
         helpStatusUrl: process.env.NEXT_PUBLIC_HELP_STATUS_URL,
+        helpAddOrgUrl: process.env.NEXT_PUBLIC_HELP_ADD_ORG_URL,
+        helpChangeOrgUrl: process.env.NEXT_PUBLIC_CHANGE_ORG_URL,
       },
     });
   });

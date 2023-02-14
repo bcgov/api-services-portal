@@ -42,7 +42,7 @@ services:
         aliases:
           - keycloak.localtest.me
   oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.0
     container_name: oauth2-proxy
     command: --config ./oauth2-proxy.cfg
     depends_on:
@@ -143,7 +143,7 @@ services:
     networks:
       - aps-net
   kong-migrations:
-    image: kong:latest
+    image: kong:kong-local
     command: kong migrations bootstrap
     depends_on:
       - kong-db
@@ -151,24 +151,25 @@ services:
     networks:
       - aps-net
     restart: on-failure
+    build:
+      context: local/kong
+      dockerfile: Dockerfile
   kong-migrations-up:
-    image: kong:latest
+    image: kong:kong-local
     command: kong migrations up && kong migrations finish
     depends_on:
       - kong-db
+      - kong-migrations
     environment: *common-variables
     networks:
       - aps-net
     restart: on-failure
   kong:
-    image: kong:latest
+    image: kong:kong-local
     container_name: kong
     depends_on:
       - kong-migrations
       - kong-migrations-up
-    build:
-      context: local/kong
-      dockerfile: Dockerfile
     environment:
       <<: *common-variables
       KONG_ADMIN_ACCESS_LOG: /dev/stdout

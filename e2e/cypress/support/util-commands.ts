@@ -1,3 +1,4 @@
+import 'cypress-v10-preserve-cookie'
 const listOfCookies = [
   'AUTH_SESSION_ID_LEGACY',
   'KC_RESTART',
@@ -12,7 +13,7 @@ const listOfCookies = [
 
 Cypress.Commands.add('preserveCookies', () => {
   cy.log('< Saving Cookies')
-  Cypress.Cookies.preserveOnce(...listOfCookies)
+  cy.preserveCookieOnce(...listOfCookies)
   Cypress.Cookies.debug(true)
   cy.log('> Saving Cookies')
 })
@@ -36,16 +37,22 @@ Cypress.Commands.add('preserveCookiesDefaults', () => {
   cy.log('> Saving Cookies')
 })
 
-Cypress.Commands.add('saveState', (key: string, value: string) => {
+Cypress.Commands.add('saveState', (key: string, value: string, flag?: boolean, isGlobal?: boolean) => {
   cy.log('< Saving State')
   cy.log(key, value)
   let newState
   const keyValue = key.toLowerCase()
+  if (isGlobal) {
+    let currState: any
+    currState = Cypress.env(key)
+    // currState[keyValue] = value
+    Cypress.env(key, value)
+  }
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       let newState = currState
-      _.set(newState, keyItems, value)
+      Cypress._.set(newState, keyItems, value)
       cy.writeFile('cypress/fixtures/state/store.json', newState)
     })
   }
@@ -56,10 +63,22 @@ Cypress.Commands.add('saveState', (key: string, value: string) => {
         cy.writeFile('cypress/fixtures/manage-control/kong-plugin-config.json', currState)
       }
     )
-  } else {
+  } else if (flag) {
+    cy.readFile('cypress/fixtures/state/regen.json').then((currState) => {
+      currState[keyValue] = value
+      cy.writeFile('cypress/fixtures/state/regen.json', currState)
+    })
+  }
+  else {
     cy.readFile('cypress/fixtures/state/store.json').then((currState) => {
       currState[keyValue] = value
       cy.writeFile('cypress/fixtures/state/store.json', currState)
+    })
+  }
+  if (key == 'apikey' || key == 'consumernumber') {
+    cy.readFile('cypress/fixtures/state/regen.json').then((currState) => {
+      currState[keyValue] = value
+      cy.writeFile('cypress/fixtures/state/regen.json', currState)
     })
   }
 
@@ -70,7 +89,7 @@ Cypress.Commands.add('getState', (key: string) => {
   if (key.includes('>')) {
     let keyItems = key.split('>')
     cy.readFile('cypress/fixtures/state/store.json').then((state) => {
-      return _.get(state, keyItems)
+      return Cypress._.get(state, keyItems)
     })
   } else {
     cy.readFile('cypress/fixtures/state/store.json').then((state) => {

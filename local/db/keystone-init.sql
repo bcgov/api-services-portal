@@ -19,7 +19,6 @@ SET row_security = off;
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: keystonejsuser
 --
-
 -- extra line added to make it compitible for local docker run
 \c keystonejs;
 
@@ -53,6 +52,7 @@ CREATE TABLE public."AccessRequest" (
     "isIssued" boolean NOT NULL,
     "isComplete" boolean NOT NULL,
     credential text,
+    labels text,
     controls text NOT NULL,
     "additionalDetails" text,
     requestor integer,
@@ -732,8 +732,10 @@ ALTER TABLE public."GatewayService_plugins_many" OWNER TO keystonejsuser;
 
 CREATE TABLE public."Label" (
     id integer NOT NULL,
+    namespace text NOT NULL,
     name text NOT NULL,
-    value text NOT NULL
+    value text NOT NULL,
+    consumer integer
 );
 
 
@@ -2288,6 +2290,20 @@ ALTER TABLE ONLY public."ServiceAccess_labels_many"
 ALTER TABLE ONLY public."ServiceAccess"
     ADD CONSTRAINT serviceaccess_productenvironment_foreign FOREIGN KEY ("productEnvironment") REFERENCES public."Environment"(id);
 
+--
+-- Name: label_consumer_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX label_consumer_index ON public."Label" USING btree (consumer);
+
+--
+-- Name: Label label_consumer_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."Label"
+    ADD CONSTRAINT label_consumer_foreign FOREIGN KEY (consumer) REFERENCES public."GatewayConsumer"(id);
+
+
 
 --
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: keystonejsuser
@@ -2302,3 +2318,31 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
+
+
+
+ALTER TABLE public."Activity"
+ ADD COLUMN "filterKey1" text,
+ ADD COLUMN "filterKey2" text,
+ ADD COLUMN "filterKey3" text,
+ ADD COLUMN "filterKey4" text;
+
+ALTER TABLE public."Metric"
+ ADD COLUMN "namespace" text;
+
+ALTER TABLE public."CredentialIssuer"
+ ADD COLUMN "isShared" boolean NOT NULL DEFAULT false,
+ ADD COLUMN "inheritFrom" integer;
+
+--
+-- Name: credentialissuer_inheritfrom_index; Type: INDEX; Schema: public; Owner: keystonejsuser
+--
+
+CREATE INDEX credentialissuer_inheritfrom_index ON public."CredentialIssuer" USING btree ("inheritFrom");
+
+--
+-- Name: CredentialIssuer credentialissuer_inheritfrom_foreign; Type: FK CONSTRAINT; Schema: public; Owner: keystonejsuser
+--
+
+ALTER TABLE ONLY public."CredentialIssuer"
+    ADD CONSTRAINT credentialissuer_inheritfrom_foreign FOREIGN KEY ("inheritFrom") REFERENCES public."CredentialIssuer"(id);

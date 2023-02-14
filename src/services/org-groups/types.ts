@@ -26,11 +26,12 @@ export interface GroupPermission {
 
 export interface UserReference {
   id?: string;
-  username: string;
   email?: string;
 }
 
 export interface OrgNamespace {
   name: string;
   orgUnit: string;
+  enabled: boolean;
+  updatedAt: number;
 }

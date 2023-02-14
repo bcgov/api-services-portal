@@ -12,7 +12,6 @@ const { maintenance } = require('../services/maintenance');
 
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
-const jwtDecoder = require('jwt-decode');
 const { deriveRoleFromIdP, scopesToRoles } = require('./scope-role-utils');
 
 const proxy = process.env.EXTERNAL_URL;
@@ -25,6 +24,13 @@ const { Logger } = require('../logger');
 
 const { UMA2TokenService } = require('../services/uma2');
 const { getUma2FromIssuer, Uma2WellKnown } = require('../services/keycloak');
+const {
+  clearNamespace,
+  assignNamespace,
+  switchTo,
+} = require('../services/keystone');
+
+const { MigrateAuthzUser, MigratePortalUser } = require('../services/workflow');
 
 const toJson = (val) => (val ? JSON.parse(val) : null);
 
@@ -193,11 +199,14 @@ class Oauth2ProxyAuthStrategy {
             jti,
             req.user.jti === jti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
           );
-          await this.assign_namespace(req.user.jti, jti, identityProvider, {
-            rsname: null,
-            scopes: [],
-          });
-          res.json({ switch: true });
+          const switched = await clearNamespace(
+            this.keystone,
+            req.user.jti,
+            jti,
+            identityProvider
+          );
+
+          res.json({ switch: switched });
         } catch (err) {
           logger.error('Error clearing namespace %s', err);
           res.status(400).json({ switch: false, error: 'ns_cleared_fail' });
@@ -211,76 +220,28 @@ class Oauth2ProxyAuthStrategy {
       async (req, res, next) => {
         // Switch namespace
         // - Get a Requestor Party Token for the particular Resource
-        const subjectToken = req.headers['x-forwarded-access-token'];
-        const uma2 = await getUma2FromIssuer(process.env.OIDC_ISSUER);
-        const accessToken = await new UMA2TokenService(uma2.token_endpoint)
-          .getRequestingPartyToken(
-            process.env.GWA_RES_SVR_CLIENT_ID,
-            process.env.GWA_RES_SVR_CLIENT_SECRET,
-            subjectToken,
-            req.params['ns']
-          )
-          .catch((err) => {
-            logger.error('Error getting new RPT %s', err);
-            res.status(400).json({ switch: false, error: 'rpt_fail' });
-            return;
-          });
         try {
-          const rpt = jwtDecoder(accessToken);
           const jti = req['oauth_user']['jti']; // JWT ID - Unique Identifier for the token
-          const username = req['oauth_user']['preferred_username']; // Username included in token
-          // The oauth2_proxy is handling the refresh token; so there can be a new jti
-          logger.info(
-            '[ns-switch] %s -> %s : %s',
+          const identityProvider = req['oauth_user']['identity_provider']; // Identity Provider included in token
+
+          const subjectToken = req.headers['x-forwarded-access-token'];
+
+          const result = await switchTo(
+            this.keystone,
+            req.params['ns'],
+            subjectToken,
             req.user.jti,
             jti,
-            req.user.jti === jti ? 'SAME TOKEN' : 'REFRESHED TOKEN!'
+            identityProvider
           );
-          await this.assign_namespace(
-            req.user.jti,
-            jti,
-            username,
-            rpt['authorization']['permissions'][0]
-          );
-          res.json({ switch: true });
+          res.status(200).json({ switch: result });
         } catch (err) {
-          logger.error('Error evaluating new access token %s', err);
+          logger.error(err);
           res.status(400).json({ switch: false, error: 'ns_assign_fail' });
         }
       }
     );
     return app;
-  }
-
-  async assign_namespace(jti, newJti, identityProvider, umaAuthDetails) {
-    const namespace = umaAuthDetails['rsname'];
-    const scopes = umaAuthDetails['scopes'];
-    const _roles = scopesToRoles(identityProvider, scopes);
-
-    const roles = JSON.stringify(_roles);
-
-    // should be TemporaryIdentity
-    const idList = this.keystone.getListByKey(this.listKey);
-    let results = await idList.adapter.find({ jti: jti });
-    let tempId = results[0]['id'];
-
-    const { errors } = await this.keystone.executeGraphQL({
-      context: this.keystone.createContext({ skipAccessControl: true }),
-      query: `mutation ($tempId: ID!, $newJti: String, $namespace: String, $roles: String, $scopes: String) {
-                    updateTemporaryIdentity(id: $tempId, data: {jti: $newJti, namespace: $namespace, roles: $roles, scopes: $scopes }) {
-                        id
-                } }`,
-      variables: {
-        tempId,
-        newJti,
-        namespace,
-        roles,
-        scopes: JSON.stringify(scopes),
-      },
-    });
-    if (errors) {
-      logger.error('assign_namespace - NO! Something went wrong %j', errors);
-    }
   }
 
   async register_user(req, res, next) {
@@ -354,6 +315,44 @@ class Oauth2ProxyAuthStrategy {
 
     let _results = await _users.adapter.find({ username: username });
 
+    const oldUsername = `${providerUsername}@${identityProvider}`.toLowerCase();
+
+    logger.info('[migration] ? %s != %s : %j', username, oldUsername, _results);
+    if (_results.length == 0 && username != oldUsername) {
+      logger.info(
+        '[migration] %s not found.  Migrate %s access to %s',
+        username,
+        oldUsername,
+        username
+      );
+      try {
+        _results = await _users.adapter.find({
+          username: oldUsername,
+        });
+        if (_results.length == 1) {
+          const oldUser = _results[0];
+          const suctx = this.keystone.createContext({
+            skipAccessControl: true,
+          });
+          // check to see if we need to migrate
+          await MigrateAuthzUser(suctx, oldUser.username, username, true);
+          await MigratePortalUser(suctx, oldUser.username, username);
+        } else {
+          logger.warn(
+            '[migration] Username %s not found - so assume nothing to migrate.',
+            oldUsername
+          );
+        }
+      } catch (err) {
+        logger.error(
+          '[migration] Error during migration (%s) %s',
+          username,
+          err
+        );
+        throw new Error('User migration error');
+      }
+    }
+
     let userId = _results.length == 0 ? null : _results[0].id;
 
     if (_results.length == 0) {
@@ -391,22 +390,25 @@ class Oauth2ProxyAuthStrategy {
         saved.providerUsername != providerUsername
       ) {
         logger.info(
-          'register_user - updating name (%s), email (%s), providerUserGuid (%s), providerUsername (%s) for %s',
+          'register_user - updating name (%s), email (%s), provider (%s), providerUserGuid (%s), providerUsername (%s) for %s',
           name,
           email,
+          identityProvider,
           providerUserGuid,
           providerUsername,
           username
         );
         const { data, errors } = await this.keystone.executeGraphQL({
           context: this.keystone.createContext({ skipAccessControl: true }),
-          query: `mutation ($name: String, $email: String, $providerUsername: String, $userId: ID!) {
-                          updateUser(id: $userId, data: {name: $name, email: $email, providerUsername: $providerUsername }) {
+          query: `mutation ($name: String, $email: String, $identityProvider: String, $providerUserGuid: String, $providerUsername: String, $userId: ID!) {
+                          updateUser(id: $userId, data: {name: $name, email: $email, provider: $identityProvider, providerUserGuid: $providerUserGuid, providerUsername: $providerUsername }) {
                               id
                       } }`,
           variables: {
             name,
             email: Boolean(email) ? email : saved.email,
+            identityProvider,
+            providerUserGuid,
             providerUsername,
             userId,
           },

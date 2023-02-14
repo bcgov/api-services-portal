@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   CheckboxGroup,
+  CircularProgress,
   Modal,
   ModalBody,
   ModalContent,
@@ -16,10 +17,10 @@ import {
   useDisclosure,
   VStack,
   useToast,
-  Box,
   Text,
   WrapItem,
   Wrap,
+  Center,
 } from '@chakra-ui/react';
 import { FaPlusCircle } from 'react-icons/fa';
 import { gql } from 'graphql-request';
@@ -34,7 +35,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
   onCreate,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { data, isSuccess } = useApi(
+  const { data, isLoading, isSuccess } = useApi(
     'currentNamespace',
     { query },
     {
@@ -57,17 +58,26 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
       }
 
       toast({
-        title: 'Service Account Created',
+        title: 'Service account created',
         status: 'success',
+        isClosable: true,
       });
       onClose();
     } catch (err) {
       toast({
         title: 'Could not create Service Account',
+        description: err,
         status: 'error',
+        isClosable: true,
       });
     }
-  }, [credentialGenerator, onClose, onCreate, toast]);
+  }, [
+    credentialGenerator,
+    data?.currentNamespace.id,
+    onClose,
+    onCreate,
+    toast,
+  ]);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     handleCreate();
@@ -76,12 +86,10 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
   return (
     <>
       <Button
-        leftIcon={<Icon as={FaPlusCircle} />}
-        variant="primary"
         onClick={onOpen}
         data-testid="sa-create-second-btn"
       >
-        New Service Account
+        Create New Service Account
       </Button>
       <Modal
         isOpen={isOpen}
@@ -92,34 +100,41 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            <Text>Assign scopes for the new service account</Text>
+            Create New Service Account
           </ModalHeader>
           <ModalBody>
-            <form ref={formRef} onSubmit={handleSubmit}>
-              <VStack spacing={4}>
-                <FormControl>
-                  <FormLabel>Permissions</FormLabel>
-                  <CheckboxGroup>
-                    <Wrap spacing={4}>
-                      {isSuccess &&
-                        data?.currentNamespace?.scopes?.map((s) => (
+            {isLoading && (
+              <Center minH="200px">
+                <CircularProgress isIndeterminate />
+              </Center>
+            )}
+            {isSuccess && (
+              <form ref={formRef} onSubmit={handleSubmit}>
+                <VStack spacing={4}>
+                  <FormControl>
+                    <FormLabel mb={8}>Assign scopes</FormLabel>
+                    <CheckboxGroup>
+                      <VStack align="flex-start" spacing={4}>
+                        {data.currentNamespace?.scopes?.map((s) => (
                           <WrapItem key={s.name}>
                             <Checkbox value={s.name} name="scopes">
                               {s.name}
                             </Checkbox>
                           </WrapItem>
                         ))}
-                    </Wrap>
-                  </CheckboxGroup>
-                </FormControl>
-              </VStack>
-            </form>
+                      </VStack>
+                    </CheckboxGroup>
+                  </FormControl>
+                </VStack>
+              </form>
+            )}
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
               <Button
                 isDisabled={credentialGenerator.isLoading}
                 onClick={onClose}
+                variant="secondary"
                 data-testid="sa-scopes-cancel-btn"
               >
                 Cancel
@@ -143,7 +158,7 @@ const ServiceAccountCreate: React.FC<ServiceAccountCreateProps> = ({
 export default ServiceAccountCreate;
 
 const query = gql`
-  query GET {
+  query GetCurrentNamespace {
     currentNamespace {
       id
       name

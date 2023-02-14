@@ -88,14 +88,14 @@ export interface Dataset {
 export interface DraftDataset {
   name?: string; // Primary Key
   license_title?: string;
-  security_class?: string;
-  view_audience?: string;
-  download_audience?: string;
+  security_class?: "HIGH-CABINET" | "HIGH-CONFIDENTIAL" | "HIGH-SENSITIVITY" | "MEDIUM-SENSITIVITY" | "MEDIUM-PERSONAL" | "LOW-SENSITIVITY" | "LOW-PUBLIC" | "PUBLIC" | "PROTECTED A" | "PROTECTED B" | "PROTECTED C";
+  view_audience?: "Public" | "Government" | "Named users" | "Government and Business BCeID";
+  download_audience?: "Public" | "Government" | "Named users" | "Government and Business BCeID";
   record_publish_date?: string;
   notes?: string;
   title?: string;
-  isInCatalog?: string;
-  isDraft?: string;
+  isInCatalog?: boolean;
+  isDraft?: boolean;
   contacts?: string;
   resources?: string;
   tags?: string[];
@@ -330,11 +330,13 @@ export interface CredentialIssuer {
   environmentDetails?: IssuerEnvironmentConfig[];
   resourceType?: string;
   resourceAccessScope?: string;
+  isShared?: boolean;
   apiKeyName?: string;
   availableScopes?: string[];
   resourceScopes?: string[];
   clientRoles?: string[];
   clientMappers?: string[];
+  inheritFrom?: CredentialIssuerRefID;
   owner?: UserRefID;
 }
 
@@ -455,8 +457,13 @@ export interface Activity {
   refId?: string;
   namespace?: string;
   blob?: string;
+  filterKey1?: string;
+  filterKey2?: string;
+  filterKey3?: string;
+  filterKey4?: string;
   updatedAt?: DateTime;
   createdAt?: DateTime;
+  context?: any; // toString
   actor?: UserRefID;
 }
 

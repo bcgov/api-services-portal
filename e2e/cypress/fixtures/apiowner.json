@@ -2,10 +2,12 @@
   "user": {
     "credentials": {
       "username": "janis@idir",
+      "email":"janis@testmail.com",
       "password": "awsummer"
     }
   },
   "namespace": "newplatform",
+  "invalid_namespace": ["test_1234", "New_napespace", "Government"],
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
@@ -19,7 +21,7 @@
           "terms": "Terms of Use for API Gateway",
           "authorization": "Kong API Key with ACL Flow",
           "optionalInstructions": "This is a automation test",
-          "serviceName": "a-service-for-deleteplatform"
+          "serviceName": "service-for-deleteplatform"
         }
       }
     }
@@ -37,15 +39,35 @@
         "optionalInstructions": "This is a automation test",
         "serviceName": "a-service-for-newplatform"
       }
+    },
+    "test_environment": {
+      "name": "test",
+      "config": {
+        "terms": "Terms of Use for API Gateway",
+        "authorization": "Kong API Key with ACL Flow",
+        "optionalInstructions": "This is a automation test",
+        "serviceName": "a-service-for-newplatform-test"
+      }
     }
   },
   "clientCredentials": {
     "namespace": "ccplatform",
+    "serviceName": "cc-service-for-platform",
+    "Mark": {
+      "userName": "mark",
+      "email":"mark@gmail.com",
+      "accessRole": ["Access.Manage"]
+    },
+    "Wendy": {
+      "userName": "wendy",
+      "email":"wendy@test.com",
+      "accessRole": ["CredentialIssuer.Admin"]
+    },
     "jwtKeyPair": {
       "authProfile": {
         "name": "cy-jwt-kp-auth",
         "flow": "Client Credential Flow",
-        "element":"cc-jwt-key",
+        "element": "cc-jwt-key",
         "clientAuthenticator": "Signed JWT - Generated Key Pair",
         "environmentConfig": {
           "environment": "Development",
@@ -71,7 +93,7 @@
       "authProfile": {
         "name": "cy-jwks-url-auth",
         "flow": "Client Credential Flow",
-        "element":"cc-jwt-jwks",
+        "element": "cc-jwt-jwks",
         "clientAuthenticator": "Signed JWT with JWKS URL",
         "environmentConfig": {
           "environment": "Sandbox",
@@ -93,6 +115,34 @@
         }
       }
     },
+    "invalidClientIdSecret": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "other",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      },
+      "authProfile": {
+        "name": "invalid-auth-profile",
+        "flow": "Client Credential Flow",
+        "element": "cc-id-secret",
+        "clientAuthenticator": "Client ID and Secret",
+        "environmentConfig": {
+          "environment": "Other",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "invalid-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-1234"
+        }
+      }
+    },
     "clientIdSecret": {
       "product": {
         "name": "Client Credentials Test Product",
@@ -110,7 +160,8 @@
       "authProfile": {
         "name": "cy-client-id-secret-auth",
         "flow": "Client Credential Flow",
-        "element":"cc-id-secret",
+        "element": "cc-id-secret",
+        "scopes":["System.Write"],
         "clientAuthenticator": "Client ID and Secret",
         "environmentConfig": {
           "environment": "Test",
@@ -120,10 +171,87 @@
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
       }
+    },
+    "clientIdSecret_authProfile": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Kong API Key with ACL Flow",
+            "optionalInstructions": "This is a automation test",
+            "serviceName": "cc-service-for-platform"
+          }
+        }
+      }
+    },
+    "clientIdSecret_KongKeyToCC": {
+      "product": {
+        "name": "Auto Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Oauth2 Client Credentials Flow",
+            "optionalInstructions": "Editing dev environment"
+          }
+        }
+      },
+      "authProfile": {
+        "name": "cy-client-id-secret-auth-updated",
+        "flow": "Client Credential Flow",
+        "element": "cc-id-secret",
+        "scopes":["System.Write"],
+        "clientAuthenticator": "Client ID and Secret",
+        "environmentConfig": {
+          "environment": "Test",
+          "clientRegistration": "Managed",
+          "idpIssuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+          "clientId": "cypress-auth-profile",
+          "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
+        }
+      }
+    },
+    "sharedIDP": {
+      "authProfile": {
+        "name": "cy-client-id-secret-shared-idp",
+        "flow": "Client Credential Flow",
+        "element": "cc-id-secret",
+        "clientAuthenticator": "Client ID and Secret",
+        "environmentConfig": {
+          "isShardIDP":true
+        }
+      }
+    }
+  },
+  "namespacePreview": {
+    "namespace": "previewmode",
+    "serviceAccount": {
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
+    },
+    "product": {
+      "name": "Namespace Preview Test Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-previewmode"
+        }
+      }
     }
   },
   "checkPermission": {
     "namespace": "permission",
+    "serviceAccount": {
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
+    },
     "product": {
       "name": "New-Auto Test Product",
       "environment": {
@@ -137,59 +265,289 @@
       }
     },
     "grantPermission": {
-      "Mark":{
-        "userName" :"mark",
-        "accessRole" :["Access.Manage","Namespace.View"]
+      "Mark": {
+        "userName": "Mark F Mark L",
+        "email":"mark@gmail.com",
+        "accessRole": ["Access.Manage"]
       },
-      "Wendy":{
-        "userName" :"wendy",
-        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
+      "Mark_NV": {
+        "userName": "Mark F Mark L",
+        "email":"mark@gmail.com",
+        "accessRole": ["Namespace.View"]
       },
-      "Wendy_GC":{
-        "userName" :"wendy",
-        "accessRole" :["GatewayConfig.Publish","Namespace.View"]
+      "Wendy": {
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
+        "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       },
-      "Janis":{
-        "userName" :"janis@idir",
-        "accessRole" :["Namespace.Manage","CredentialIssuer.Admin"]
-      }  
+      "Wendy_CA": {
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
+        "accessRole": ["CredentialIssuer.Admin"]
+      },
+      "Wendy_GC": {
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
+        "accessRole": ["GatewayConfig.Publish", "Namespace.View"]
+      },
+      "Janis": {
+        "userName": "Janis Smith",
+        "email":"janis@testmail.com",
+        "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
+      }
     },
     "revokePermission": {
-      "Mark":{
-        "userName" :"mark",
-        "accessRole" :["Namespace.View","Access.Manage"]
+      "Mark": {
+        "userName": "mark",
+        "accessRole": ["Namespace.View", "Access.Manage"]
       },
-      "Mark_AM":{
-        "userName" :"mark",
-        "accessRole" :["Access.Manage"]
+      "Mark_AM": {
+        "userName": "mark",
+        "accessRole": ["Access.Manage"]
       },
-      "Wendy":{
-        "userName" :"wendy",
-        "accessRole" :["Namespace.Manage"]
+      "Wendy": {
+        "userName": "wendy",
+        "accessRole": ["Namespace.Manage"]
       },
-      "Wendy_ci":{
-        "userName" :"wendy",
-        "accessRole" :["CredentialIssuer.Admin"]
+      "Wendy_ci": {
+        "userName": "wendy",
+        "accessRole": ["CredentialIssuer.Admin"]
       },
       "serviceAccount": {
-        "scopes": ["Namespace.Manage", "Content.Publish"]  
+        "scopes": ["Namespace.Manage", "Content.Publish"]
       }
     }
   },
   "grantPermission": {
-    "Mark":{
-      "userName" :"mark",
-      "accessRole" :["Access.Manage","Namespace.View"]
-    } 
+    "Mark": {
+      "userName": "mark",
+      "email": "mark@gmail.com",
+      "accessRole": ["Access.Manage", "Namespace.View"]
+    },
+    "Janis": {
+      "userName": "janis@idir",
+      "email": "janis@testmail.com",
+      "accessRole": ["CredentialIssuer.Admin"]
+    },
+    "OldUser": {
+      "userName": "olduser@idir",
+      "email": "olduser@testmail.com",
+      "accessRole": ["Access.Manage", "Namespace.View","Namespace.Manage"]
+    }
   },
   "permission": {
-    "Mark":{
-      "userName" :"mark",
-      "accessRole" :["Access.Manage","Namespace.View"]
-    } 
+    "Mark": {
+      "userName": "mark",
+      "accessRole": ["Access.Manage", "Namespace.View"]
+    }
   },
   "apiTest": {
     "namespace": "apiplatform",
-    "delete_namespace": "deleteplatform1"
-  }
+    "delete_namespace": "testplatform",
+    "product": {
+      "name": "API Auto Test Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-apiplatform"
+        }
+      }
+    }
+  },
+  "expectedActivitiesResponse":[
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {application} ({consumer}) to access {product} {environment}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "approved",
+            "entity": "access request",
+            "accessRequest": "2",
+            "environment": "dev",
+            "product": "Auto Test Product",
+            "application": "Auto Test App to check labels",
+            "consumer": "9C3EFC92-8F3DE9D3B74"
+        },
+        "activityAt": "2022-09-20T20:39:05.318Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} for {application} ({consumer}) to access {product} {environment} ({note})",
+        "params": {
+            "actor": "Harley Jones",
+            "action": "received credentials",
+            "entity": "access",
+            "note": "access pending approval",
+            "accessRequest": "2",
+            "environment": "dev",
+            "product": "Auto Test Product",
+            "application": "Auto Test App to check labels",
+            "consumer": "9C3EFC92-8F3DE9D3B73"
+        },
+        "activityAt": "2022-09-20T20:38:40.857Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:19.732Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:19.678Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:14.706Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:12.664Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:08.054Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:07.996Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:38:00.947Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:38:00.899Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:56.316Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:56.252Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:56.192Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:47.630Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:47.574Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:47.516Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:38.815Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:38.763Z"
+    },
+    {
+        "result": "completed",
+        "message": "GatewayConsumerPlugin Update",
+        "params": {
+            "actor": "Unknown Actor"
+        },
+        "activityAt": "2022-09-20T20:37:38.696Z"
+    },
+    {
+        "result": "success",
+        "message": "{actor} {action} {entity} for {consumer}",
+        "params": {
+            "actor": "Mark F Mark L",
+            "action": "update",
+            "entity": "consumer control"
+        },
+        "activityAt": "2022-09-20T20:37:30.570Z"
+    }
+]
 }

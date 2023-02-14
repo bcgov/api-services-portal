@@ -4,7 +4,6 @@ import {
   ButtonGroup,
   FormControl,
   FormLabel,
-  Input,
   ModalBody,
   ModalFooter,
   Radio,
@@ -14,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 
 interface AuthenticationFormProps {
+  hidden: boolean;
   id?: string;
   onChange: (value: string) => void;
   onCancel: () => void;
@@ -22,6 +22,7 @@ interface AuthenticationFormProps {
 }
 
 const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
+  hidden,
   id,
   onChange,
   onCancel,
@@ -32,6 +33,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
   const isKong = value === 'kong-api-key-acl';
   const createText = isKong ? 'Create' : 'Continue';
   const submitButtonText = id ? 'Save' : createText;
+  const cancelButtonText = id ? 'Close' : 'Cancel';
 
   // Events
   const handleCreate = () => {
@@ -45,7 +47,7 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
 
   return (
     <>
-      <ModalBody>
+      <ModalBody hidden={hidden} className="authProfileFormContainer">
         <form ref={form} onSubmit={handleSubmit}>
           <FormControl isRequired mb={4}>
             <FormLabel fontWeight="bold" mb={6}>
@@ -95,14 +97,14 @@ const AuthenticationForm: React.FC<AuthenticationFormProps> = ({
           implements the OAuth2 Authorization Code Flow
         </Text>
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter hidden={hidden}>
         <ButtonGroup>
           <Button
             onClick={onCancel}
             variant="secondary"
             data-testid="ap-authentication-form-cancel-btn"
           >
-            Cancel
+            {cancelButtonText}
           </Button>
           <Button
             onClick={handleCreate}

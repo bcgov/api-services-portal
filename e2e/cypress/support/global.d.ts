@@ -3,7 +3,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    login(username: string, password: string): Chainable<any>
+    login(username: string, password: string, skipFlag?: boolean): Chainable<any>
 
     resetCredential(accessRole: string): Chainable<any>
 
@@ -13,6 +13,8 @@ declare namespace Cypress {
 
     logout(): void
 
+    keycloakLogout(): void
+
     deleteAllCookies(): void
 
     preserveCookies(): void
@@ -21,7 +23,7 @@ declare namespace Cypress {
 
     preserveCookiesDefaults(): void
 
-    saveState(key: string, value: string): Chainable<any>
+    saveState(key: string, value: string, flag?: boolean, isGlobal?: boolean): Chainable<any>
 
     getState(key: string): Chainable<any>
 
@@ -32,7 +34,7 @@ declare namespace Cypress {
       client_secret: string
     ): Chainable<Cypress.Response<any>>
 
-    publishApi(content: any, namespace: string): Chainable<Cypress.Response<any>>
+    publishApi(fileName: string, namespace: string, flag?:boolean): Chainable<Cypress.Response<any>>
     
     getServiceOrRouteID(configType: string
     ): Chainable<Cypress.Response<any>>
@@ -57,7 +59,18 @@ declare namespace Cypress {
 
     compareJSONObjects(actualResponse: any, expectedResponse:any, indexFlag?: boolean) : Chainable<Cypress.Response<any>>
 
-    getUserSessionTokenValue(): Chainable<Cypress.Response<any>>
+    getUserSessionTokenValue(namespace: string): Chainable<Cypress.Response<any>>
 
+    getUserSessionResponse(): Chainable<Cypress.Response<any>>
+
+    getTokenUsingJWKCredentials(credential: any, privateKey: any):Chainable<Cypress.Response<any>>
+
+    verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
+
+    updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+
+    keycloakLogin(username: string, password: string): Chainable<any>
+
+    // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }

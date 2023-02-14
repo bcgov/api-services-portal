@@ -12,6 +12,7 @@ import { KeystoneService } from '../ioc/keystoneInjector';
 import { inject, injectable } from 'tsyringe';
 import { transform, transformSetAnonymous } from './DirectoryController';
 import { gql } from 'graphql-request';
+import { strict as assert } from 'assert';
 
 @injectable()
 @Route('/namespaces/{ns}/directory')
@@ -47,9 +48,11 @@ export class NamespaceDirectoryController extends Controller {
       variables: { id },
     });
 
-    if (result.data.allProductsByNamespace.length == 0) {
-      return null;
-    }
+    assert.strictEqual(
+      result.data.allProductsByNamespace?.length == 0,
+      false,
+      'No products for dataset found'
+    );
 
     return transform(
       transformSetAnonymous(result.data.allProductsByNamespace)

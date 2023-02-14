@@ -96,7 +96,12 @@ const ConsumerFilters: React.FC<ConsumerFiltersProps> = ({
           ))}
       </Select>
       {value === 'labels' && (
-        <Input isRequired placeholder="Label Value" name="labelValue" />
+        <Input
+          isRequired
+          placeholder="Label Value"
+          name="labelValue"
+          data-testid="consumer-filters-label-input"
+        />
       )}
     </Grid>
   );
@@ -106,8 +111,6 @@ export default ConsumerFilters;
 
 const productsQuery = gql`
   query GetFilterConsumers($namespace: String!) {
-    allConsumerScopesAndRoles
-
     allProductsByNamespace(where: { namespace: $namespace }) {
       name
       id

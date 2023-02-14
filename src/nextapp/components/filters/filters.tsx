@@ -17,6 +17,12 @@ import {
 import { FaTimes } from 'react-icons/fa';
 import { uid } from 'react-uid';
 
+interface LabelValue {
+  labelGroup: string;
+  value: string;
+  multiple?: boolean;
+}
+
 interface FilterTag {
   id: string;
   value: string;
@@ -24,9 +30,12 @@ interface FilterTag {
 
 interface FiltersProps extends BoxProps {
   data: unknown;
-  filterTypeOptions: { name: string; value: string }[];
+  filterTypeOptions: { name: string; value: string; multiple?: boolean }[];
   filterValueOptions?: Record<string, { name: string; value: string }[]>;
-  onAddFilter: (key: string, payload: Record<string, string>) => void;
+  onAddFilter: (
+    key: string,
+    payload: Record<string, string | LabelValue | boolean>
+  ) => void;
   onClearFilters: () => void;
   onRemoveFilter: (key: string, value: string) => void;
 }
@@ -70,10 +79,11 @@ const Filters: React.FC<FiltersProps> = ({
     event.preventDefault();
     const form = new FormData(event.target);
     const filterType = form.get('type') as string;
-    let filterValue: any = form.get('value') as string;
-    const filterName = event.target.querySelector(
-      `select[name="value"] option[value="${filterValue}"]`
-    )?.textContent;
+    let filterValue: string | LabelValue = form.get('value') as string;
+    const filterName =
+      event.target.querySelector(
+        `select[name="value"] option[value="${filterValue}"]`
+      )?.textContent ?? event.target.querySelector('input').value;
     if (filterType === 'labels') {
       const value = form.get('labelValue') as string;
       filterValue = {
@@ -81,12 +91,17 @@ const Filters: React.FC<FiltersProps> = ({
         value,
       };
     }
-    onAddFilter(filterType, { value: filterValue, name: filterName });
+    const multiple =
+      filterTypeOptions.find((f) => f.value === filterType)?.multiple ?? true;
+    onAddFilter(filterType, {
+      value: filterValue,
+      name: filterName,
+      multiple,
+    });
     event.currentTarget.reset();
   };
   const handleRemove = (filter: FilterTag) => () => {
     const [key] = filter.value.split(' = ');
-    console.log(key, filter.id);
     onRemoveFilter(key, filter.id);
   };
   const handleClear = () => {
@@ -135,7 +150,9 @@ const Filters: React.FC<FiltersProps> = ({
           </Select>
         )}
         <GridItem>
-          <Button type="submit">Apply</Button>
+          <Button type="submit" data-testid="btn-filter-apply">
+            Apply
+          </Button>
         </GridItem>
       </Grid>
       <Box>
@@ -149,7 +166,7 @@ const Filters: React.FC<FiltersProps> = ({
             <GridItem d="flex" alignItems="center">
               <Wrap>
                 {filters.map((f) => (
-                  <WrapItem key={uid(f.id)}>
+                  <WrapItem key={uid(f)}>
                     <Tag variant="outline">
                       {f.value}
                       <TagCloseButton onClick={handleRemove(f)} />
@@ -165,6 +182,7 @@ const Filters: React.FC<FiltersProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleClear}
+                data-testid="btn-filter-clear-all"
               >
                 Clear All
               </Button>

@@ -37,14 +37,16 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
       toast({
         title: 'Profile deleted',
         status: 'success',
+        isClosable: true,
       });
       onClose();
       router.push('/manager/authorization-profiles');
-    } catch (e) {
+    } catch (err) {
       toast({
         title: 'Profile deletion failed',
         status: 'error',
-        description: Array.isArray(e) ? e[0].message : '',
+        description: err,
+        isClosable: true,
       });
     }
   };
@@ -52,7 +54,7 @@ const DeleteAuthorizationProfile: React.FC<DeleteAuthorizationProfileProps> = ({
   return (
     <>
       <Button colorScheme="red" onClick={onOpen} size="sm">
-        Delete Profile
+        Delete Profile...
       </Button>
       <AlertDialog
         isCentered

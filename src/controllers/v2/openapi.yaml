@@ -124,10 +124,32 @@ components:
                     type: string
                 security_class:
                     type: string
+                    enum:
+                        - HIGH-CABINET
+                        - HIGH-CONFIDENTIAL
+                        - HIGH-SENSITIVITY
+                        - MEDIUM-SENSITIVITY
+                        - MEDIUM-PERSONAL
+                        - LOW-SENSITIVITY
+                        - LOW-PUBLIC
+                        - PUBLIC
+                        - 'PROTECTED A'
+                        - 'PROTECTED B'
+                        - 'PROTECTED C'
                 view_audience:
                     type: string
+                    enum:
+                        - Public
+                        - Government
+                        - 'Named users'
+                        - 'Government and Business BCeID'
                 download_audience:
                     type: string
+                    enum:
+                        - Public
+                        - Government
+                        - 'Named users'
+                        - 'Government and Business BCeID'
                 record_publish_date:
                     type: string
                 notes:
@@ -135,9 +157,9 @@ components:
                 title:
                     type: string
                 isInCatalog:
-                    type: string
+                    type: boolean
                 isDraft:
-                    type: string
+                    type: boolean
                 contacts:
                     type: string
                 resources:
@@ -255,6 +277,8 @@ components:
                 clientRegistration: managed
                 clientId: a-client-id
                 clientSecret: a-client-secret
+        CredentialIssuerRefID:
+            type: string
         UserRefID:
             type: string
         CredentialIssuer:
@@ -293,6 +317,8 @@ components:
                     type: string
                 resourceAccessScope:
                     type: string
+                isShared:
+                    type: boolean
                 apiKeyName:
                     type: string
                 availableScopes:
@@ -311,6 +337,8 @@ components:
                     items:
                         type: string
                     type: array
+                inheritFrom:
+                    $ref: '#/components/schemas/CredentialIssuerRefID'
                 owner:
                     $ref: '#/components/schemas/UserRefID'
             type: object
@@ -323,6 +351,9 @@ components:
                 mode: auto
                 environmentDetails: []
                 owner: acope@idir
+        Maybe_Scalars-at-String_:
+            type: string
+            nullable: true
         UmaScope:
             properties:
                 name:
@@ -340,20 +371,39 @@ components:
                 -
                     $ref: '#/components/schemas/UmaScope'
             nullable: true
-        Maybe_Scalars-at-String_:
-            type: string
+        Maybe_Array_Maybe_UmaScope___:
+            items:
+                $ref: '#/components/schemas/Maybe_UmaScope_'
+            type: array
             nullable: true
         Maybe_Array_Maybe_Scalars-at-String___:
             items:
                 $ref: '#/components/schemas/Maybe_Scalars-at-String_'
             type: array
             nullable: true
+        Maybe_Scalars-at-JSON_:
+            nullable: true
+        Maybe_Scalars-at-Float_:
+            type: number
+            format: double
+            nullable: true
+        Maybe_Scalars-at-Boolean_:
+            type: boolean
+            nullable: true
         Namespace:
             properties:
+                orgAdmins:
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_Scalars-at-String___'
+                orgNoticeViewed:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                orgEnabled:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Boolean_'
+                orgUpdatedAt:
+                    $ref: '#/components/schemas/Maybe_Scalars-at-Float_'
                 orgUnit:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 org:
-                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
+                    $ref: '#/components/schemas/Maybe_Scalars-at-JSON_'
                 permProtectedNs:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 permDataPlane:
@@ -363,78 +413,38 @@ components:
                 prodEnvId:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 scopes:
-                    items:
-                        $ref: '#/components/schemas/Maybe_UmaScope_'
-                    type: array
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_UmaScope___'
                 name:
                     type: string
                 id:
-                    type: string
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 __typename:
                     type: string
                     enum:
                         - Namespace
                     nullable: false
             required:
-                - scopes
                 - name
-                - id
             type: object
-        DateTime:
-            description: '*****************************************'
-        Activity:
+        ActivityDetail:
             properties:
-                extRefId:
+                id:
                     type: string
-                type:
-                    type: string
-                name:
-                    type: string
-                action:
-                    type: string
-                    enum:
-                        - add
-                        - update
-                        - create
-                        - delete
-                        - validate
-                        - publish
-                result:
-                    type: string
-                    enum:
-                        - ""
-                        - received
-                        - failed
-                        - completed
-                        - success
                 message:
                     type: string
-                refId:
-                    type: string
-                namespace:
-                    type: string
-                blob:
-                    type: string
-                updatedAt:
-                    $ref: '#/components/schemas/DateTime'
-                createdAt:
-                    $ref: '#/components/schemas/DateTime'
-                actor:
-                    $ref: '#/components/schemas/UserRefID'
+                params:
+                    properties: {}
+                    additionalProperties:
+                        type: string
+                    type: object
+                activityAt: {}
+                blob: {}
+            required:
+                - message
+                - params
+                - activityAt
             type: object
             additionalProperties: false
-            example:
-                type: Namespace
-                name: 'delete Namespace[ns_x]'
-                action: delete
-                refId: ns_x
-                result: success
-                message: 'Deleted ns_x namespace'
-                actor:
-                    name: 'XT:Blink, James CITZ:IN'
-                blob: {}
-                createdAt: '2022-03-11T00:47:42.947Z'
-                updatedAt: '2022-03-11T00:47:42.947Z'
         GroupPermission:
             properties:
                 resource:
@@ -478,12 +488,8 @@ components:
             properties:
                 id:
                     type: string
-                username:
-                    type: string
                 email:
                     type: string
-            required:
-                - username
             type: object
             additionalProperties: false
         GroupMember:
@@ -517,16 +523,21 @@ components:
                     type: string
                 orgUnit:
                     type: string
+                enabled:
+                    type: boolean
+                updatedAt:
+                    type: number
+                    format: double
             required:
                 - name
                 - orgUnit
+                - enabled
+                - updatedAt
             type: object
             additionalProperties: false
         DraftDatasetRefID:
             type: string
         LegalRefID:
-            type: string
-        CredentialIssuerRefID:
             type: string
         Environment:
             properties:
@@ -761,7 +772,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Dataset'
+                            $ref: '#/components/schemas/DraftDataset'
     '/organizations/{org}/datasets/{name}':
         delete:
             operationId: delete-dataset
@@ -1195,7 +1206,7 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    $ref: '#/components/schemas/Activity'
+                                    $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.View'
             summary: 'Get Namespace Activity for this namespace'
@@ -1453,6 +1464,13 @@ paths:
                     required: true
                     schema:
                         type: string
+                -
+                    in: query
+                    name: enable
+                    required: false
+                    schema:
+                        default: true
+                        type: boolean
         delete:
             operationId: unassign-namespace-from-organization
             responses:
@@ -1502,7 +1520,7 @@ paths:
                         application/json:
                             schema:
                                 items:
-                                    $ref: '#/components/schemas/Activity'
+                                    $ref: '#/components/schemas/ActivityDetail'
                                 type: array
             description: '> `Required Scope:` Namespace.Assign'
             summary: 'Get Namespace Activity for namespaces associated with this Organization Unit'

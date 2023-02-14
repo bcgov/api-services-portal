@@ -1,5 +1,6 @@
 import { UserData } from '@/types';
 import {
+  Box,
   Icon,
   Menu,
   MenuButton,
@@ -7,6 +8,7 @@ import {
   MenuItem,
   MenuList,
   MenuOptionGroup,
+  Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -15,16 +17,23 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApi } from '@/shared/services/api';
-import type { NamespaceData } from '@/shared/types/app.types';
+import { differenceInDays } from 'date-fns';
+import { Namespace } from '@/shared/types/query.types';
 
 import NamespaceManager from '../namespace-manager';
 import NewNamespace from '../new-namespace';
 
 interface NamespaceMenuProps {
   user: UserData;
+  variant?: string;
+  buttonMessage?: string;
 }
 
-const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
+const NamespaceMenu: React.FC<NamespaceMenuProps> = ({
+  user,
+  variant,
+  buttonMessage,
+}) => {
   const client = useQueryClient();
   const toast = useToast();
   const newNamespaceDisclosure = useDisclosure();
@@ -34,12 +43,14 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
     { query },
     { suspense: false }
   );
+  const today = new Date();
 
   const handleNamespaceChange = React.useCallback(
-    (namespace: NamespaceData) => async () => {
+    (namespace: Namespace) => async () => {
       toast({
         title: `Switching to  ${namespace.name} namespace`,
         status: 'info',
+        isClosable: true,
       });
       try {
         await restApi(`/admin/switch/${namespace.id}`, { method: 'PUT' });
@@ -48,32 +59,38 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
         toast({
           title: `Switched to  ${namespace.name} namespace`,
           status: 'success',
+          isClosable: true,
         });
       } catch (err) {
         toast.closeAll();
         toast({
           title: 'Unable to switch namespaces',
           status: 'error',
+          isClosable: true,
         });
       }
     },
     [client, toast]
   );
 
+  const isNamespaceSelector = variant === 'ns-selector';
+
   return (
     <>
       <Menu placement="bottom-end">
         <MenuButton
-          px={2}
-          py={1}
+          data-testid="ns-dropdown-btn"
+          px={isNamespaceSelector ? 5 : 2}
+          py={isNamespaceSelector ? 2 : 1}
           transition="all 0.2s"
           borderRadius={4}
-          _hover={{ bg: 'bc-link' }}
-          _expanded={{ bg: 'blue.400' }}
+          border={isNamespaceSelector ? '2px solid black' : ''}
+          borderColor={isNamespaceSelector ? 'bc-component' : ''}
+          _hover={isNamespaceSelector ? { boxShadow: 'md' } : { bg: 'bc-link' }}
+          _expanded={isNamespaceSelector ? {} : { bg: 'blue.400' }}
           _focus={{ boxShadow: 'outline' }}
-          data-testid="ns-dropdown-btn"
         >
-          {user?.namespace ?? 'No Active Namespace'}{' '}
+          {user?.namespace ?? buttonMessage ?? 'No Active Namespace'}{' '}
           <Icon as={FaChevronDown} ml={2} aria-label="chevron down icon" />
         </MenuButton>
         <MenuList
@@ -92,8 +109,10 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
               <MenuItem isDisabled>Namespaces Failed to Load</MenuItem>
             )}
             {isSuccess && data.allNamespaces.length > 0 && (
-              <>
-                <MenuOptionGroup title="Switch Namespace">
+              <Box maxHeight="calc(100vh / 2)" overflowY="auto">
+                <MenuOptionGroup
+                  title={isNamespaceSelector ? '' : 'Switch Namespace'}
+                >
                   {data.allNamespaces
                     .filter((n) => n.name !== user.namespace)
                     .sort((a, b) => a.name.localeCompare(b.name))
@@ -102,32 +121,53 @@ const NamespaceMenu: React.FC<NamespaceMenuProps> = ({ user }) => {
                         key={n.id}
                         onClick={handleNamespaceChange(n)}
                         data-testid={`ns-dropdown-item-${n.name}`}
+                        flexDir="column"
+                        alignItems="flex-start"
+                        pos="relative"
                       >
-                        {n.name}
+                        {differenceInDays(today, new Date(n.orgUpdatedAt)) <=
+                          5 && (
+                          <Text color="bc-error" pos="absolute" right={4}>
+                            New
+                          </Text>
+                        )}
+                        <Text>{n.name}</Text>
+                        {
+                          /* @ts-ignore */
+                          !n.orgEnabled && (
+                            <Text fontSize="xs" color="bc-component">
+                              API Publishing Disabled
+                            </Text>
+                          )
+                        }
                       </MenuItem>
                     ))}
                 </MenuOptionGroup>
-                <MenuDivider />
-              </>
+              </Box>
             )}
           </>
-          <MenuOptionGroup title="Namespace Actions">
-            <MenuItem
-              onClick={newNamespaceDisclosure.onOpen}
-              color="bc-blue-alt"
-              data-testid="ns-dropdown-create-btn"
-            >
-              Create New Namespace
-            </MenuItem>
-            <MenuItem
-              isDisabled={!data}
-              color="bc-blue-alt"
-              onClick={managerDisclosure.onOpen}
-              data-testid="ns-dropdown-manage-btn"
-            >
-              Export Namespace Report
-            </MenuItem>
-          </MenuOptionGroup>
+          {!isNamespaceSelector && (
+            <>
+              <MenuDivider />
+              <MenuOptionGroup title="Namespace Actions">
+                <MenuItem
+                  onClick={newNamespaceDisclosure.onOpen}
+                  color="bc-blue-alt"
+                  data-testid="ns-dropdown-create-btn"
+                >
+                  Create New Namespace
+                </MenuItem>
+                <MenuItem
+                  isDisabled={!data}
+                  color="bc-blue-alt"
+                  onClick={managerDisclosure.onOpen}
+                  data-testid="ns-dropdown-manage-btn"
+                >
+                  Export Namespace Report
+                </MenuItem>
+              </MenuOptionGroup>
+            </>
+          )}
         </MenuList>
       </Menu>
       <NewNamespace
@@ -152,6 +192,8 @@ const query = gql`
     allNamespaces {
       id
       name
+      orgEnabled
+      orgUpdatedAt
     }
   }
 `;

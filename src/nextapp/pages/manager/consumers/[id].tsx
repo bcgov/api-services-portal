@@ -23,7 +23,6 @@ import {
   MenuItem,
   useToast,
 } from '@chakra-ui/react';
-import breadcrumbs from '@/components/ns-breadcrumb';
 import Card from '@/components/card';
 import groupBy from 'lodash/groupBy';
 import PageHeader from '@/components/page-header';
@@ -43,6 +42,8 @@ import GrantAccessDialog from '@/components/access-request/grant-access-dialog';
 import EnvironmentTag from '@/components/environment-tag';
 import ManageLabels from '@/components/manage-labels';
 import ActionsMenu from '@/components/actions-menu';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import EmptyPane from '@/components/empty-pane';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params;
@@ -87,6 +88,12 @@ const ConsumerPage: React.FC<
   const consumer = data?.getNamespaceConsumerAccess;
   const application = data?.getNamespaceConsumerAccess?.application;
   const products = Object.keys(groupBy(consumer?.prodEnvAccess, 'productName'));
+  const breadcrumbs = useNamespaceBreadcrumbs([
+    { href: '/manager/consumers', text: 'Consumers' },
+    {
+      text: consumer.consumer?.username,
+    },
+  ]);
 
   const revokeMutation = useApiMutation(mutation);
   const handleRevoke = (consumerId: string, prodEnvId: string) => async () => {
@@ -144,13 +151,12 @@ const ConsumerPage: React.FC<
       />
       <Container maxW="6xl">
         <PageHeader
-          actions={<Button onClick={onToggle}>Grant Access</Button>}
-          breadcrumb={breadcrumbs([
-            { href: '/manager/consumers', text: 'Consumers' },
-            {
-              text: consumer.consumer?.username,
-            },
-          ])}
+          actions={
+            <Button data-testid="consumer-grant-btn" onClick={onToggle}>
+              Grant Access
+            </Button>
+          }
+          breadcrumb={breadcrumbs}
           title={consumer.consumer?.username}
         />
         <Box as="section" mb={9}>
@@ -181,7 +187,12 @@ const ConsumerPage: React.FC<
           )}
           <Flex bgColor="white">
             <Detail title="Labels">
-              <Wrap spacing={2.5}>
+              <Wrap spacing={2.5} align="center">
+                {!consumer.labels?.length && (
+                  <Text as="em" color="bc-empty">
+                    Labels will appear here
+                  </Text>
+                )}
                 {consumer.labels.map((label) => (
                   <WrapItem key={uid(label)}>
                     <Tag bgColor="white" variant="outline">
@@ -189,6 +200,7 @@ const ConsumerPage: React.FC<
                     </Tag>
                   </WrapItem>
                 ))}
+
                 <WrapItem>
                   <ManageLabels
                     data={consumer.labels}
@@ -200,7 +212,7 @@ const ConsumerPage: React.FC<
             </Detail>
             <Detail>
               <ClientRequest fallback="loading...">
-                <BusinessProfile serviceAccessId={id} />
+                <BusinessProfile consumerId={consumer.consumer?.id} />
               </ClientRequest>
             </Detail>
           </Flex>
@@ -209,9 +221,17 @@ const ConsumerPage: React.FC<
           <Box as="header" mb={4}>
             <Heading size="md">{`Products (${products.length ?? 0})`}</Heading>
           </Box>
+          {!products.length && (
+            <Card>
+              <EmptyPane
+                title="Consumer has no product yet"
+                message="Products that have their access will appear here"
+              />
+            </Card>
+          )}
           {products.map((p) => (
             <Card key={uid(p)} heading={p} mb={9}>
-              <Table>
+              <Table data-testid="product-list-table">
                 <Thead>
                   <Tr>
                     <Th width="25%">Environment</Th>
@@ -237,7 +257,7 @@ const ConsumerPage: React.FC<
                             </Wrap>
                           )}
                           {d.plugins.length === 0 && (
-                            <Text as="em" color="bc-component">
+                            <Text as="em" color="bc-component" opacity={0.6}>
                               No restrictions added
                             </Text>
                           )}
@@ -289,7 +309,7 @@ const query = gql`
       }
       owner {
         name
-        username
+        providerUsername
         email
       }
       labels {

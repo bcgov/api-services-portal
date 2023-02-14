@@ -34,6 +34,7 @@ export interface PermissionTicket {
   resourceName?: string;
   ownerName?: string;
   requesterName?: string;
+  requesterEmail?: string; // not part of keycloak API but injected after
 }
 
 export class KeycloakPermissionTicketService {
@@ -143,6 +144,7 @@ export class KeycloakPermissionTicketService {
       method: 'delete',
       headers: headers(this.accessToken) as any,
     }).then(checkStatus);
+    logger.debug('[deletePermission] DELETED %s', id);
   }
 
   public async getPermission(id: string): Promise<PermissionTicket> {

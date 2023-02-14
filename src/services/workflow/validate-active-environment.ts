@@ -11,6 +11,8 @@ import { Environment, GatewayService } from '../keystone/types';
 import { getGwaProductEnvironment } from '.';
 import { Keystone } from '@keystonejs/keystone';
 import { KeycloakGroupService } from '../keycloak';
+import { NamespaceService } from '../org-groups';
+import { OrgNamespace } from '../org-groups/types';
 
 const logger = Logger('wf.ValidateActiveEnv');
 
@@ -69,14 +71,14 @@ export const ValidateActiveEnvironment = async (
           envServices.product.namespace
         );
         addValidationError(
-          `[dataset] Namespace must be assigned to an Organization before an Environment can be active (E2).`
+          `[dataset] Unexpected error finding namespace.  Unable to complete request.`
         );
-      } else if (typeof nsOrgDetails.org === 'undefined') {
+      } else if (nsOrgDetails.enabled === false) {
         addValidationError(
           `[dataset] Namespace must be assigned to an Organization before an Environment can be active.`
         );
       } else if (
-        nsOrgDetails.org === envDataset?.organization?.name &&
+        nsOrgDetails.name === envDataset?.organization?.name &&
         nsOrgDetails.orgUnit === envDataset?.organizationUnit?.name
       ) {
       } else {
@@ -173,10 +175,8 @@ export const ValidateActiveEnvironment = async (
 
         const envConfig = getIssuerEnvironmentConfig(issuer, envName);
 
-        const isServiceMissingAllPlugins = isServiceMissingAllPluginsHandler(
-          ['jwt-keycloak'],
-          (plugin: any) =>
-            plugin.config['well_known_template'].startsWith(envConfig.issuerUrl)
+        const isServiceMissingAllPlugins = getFuncForMissingJwtKeycloakPlugin(
+          envConfig.issuerUrl
         );
 
         // If we are changing the service list, then use that to look for violations, otherwise use what is current
@@ -244,10 +244,15 @@ export function isServiceMissingAllPluginsHandler(
       svc.plugins.filter(
         (plugin: any) =>
           requiredPlugins.includes(plugin.name) && additionalValidation(plugin)
-      ).length == requiredPlugins.length;
+      ).length === requiredPlugins.length;
     if (serviceLevel) {
+      logger.debug('Service Level had all plugins');
       return false;
+    } else if (svc.routes.length === 0) {
+      logger.debug('Service Level missing plugins, and no routes');
+      return true;
     } else {
+      logger.debug('Service Level missing plugins %d', requiredPlugins.length);
       // check that at least one route has these plugins
       return (
         svc.routes.filter(
@@ -263,21 +268,31 @@ export function isServiceMissingAllPluginsHandler(
   };
 }
 
-async function getNamespaceOrganizationDetails(ctx: Keystone, ns: string) {
+async function getNamespaceOrganizationDetails(
+  ctx: Keystone,
+  ns: string
+): Promise<OrgNamespace> {
   const prodEnv = await getGwaProductEnvironment(ctx, false);
   const envConfig = prodEnv.issuerEnvConfig;
 
-  const svc = new KeycloakGroupService(envConfig.issuerUrl);
+  const svc = new NamespaceService(envConfig.issuerUrl);
   await svc.login(envConfig.clientId, envConfig.clientSecret);
 
-  const nsGroup = await svc.findByName('ns', ns, false);
+  return await svc.getNamespaceOrganizationDetails(ns);
+}
 
-  if ('org' in nsGroup.attributes && 'org-unit' in nsGroup.attributes) {
-    return {
-      org: nsGroup.attributes['org'].pop(),
-      orgUnit: nsGroup.attributes['org-unit'].pop(),
-    };
-  } else {
-    return undefined;
-  }
+export function getFuncForMissingJwtKeycloakPlugin(issuerUrl: string) {
+  const isWellKnownUndefined = (url: string) => {
+    return (
+      Boolean(url) == false || url === '%s/.well-known/openid-configuration'
+    );
+  };
+
+  return isServiceMissingAllPluginsHandler(
+    ['jwt-keycloak'],
+    (plugin: any) =>
+      plugin.config['well_known_template']?.startsWith(issuerUrl) ||
+      (isWellKnownUndefined(plugin.config['well_known_template']) &&
+        plugin.config['allowed_iss']?.includes(issuerUrl))
+  );
 }

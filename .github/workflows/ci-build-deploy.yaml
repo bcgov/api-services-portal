@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [dev, test, main, feature/*]
+    branches: [feature/*, dev, test]
 
 env:
   REGISTRY: ghcr.io
@@ -83,11 +83,13 @@ jobs:
         run: docker push ${{ steps.docker_meta.outputs.tags }}
 
       - name: 'Get Helm'
+        if: github.ref != 'refs/heads/dev'
         run: |
           curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
           tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
       - name: 'Deploy Database'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -95,7 +97,7 @@ jobs:
           image:
             registry: docker.pkg.github.com
             repository: bcgov-dss/api-serv-infra/mongodb
-            tag: 4.4-ea993071
+            tag: 5.0-7a639fba
             pullPolicy: IfNotPresent
             pullSecrets:
               - dev-github-read-packages-creds
@@ -103,25 +105,39 @@ jobs:
           auth:
               rootPassword: "s3cr3t"
 
+          serviceAccount:
+              create: false
+              name: asp-service-account
+
           arbiter:
               enabled: false
 
           rbac:
               create: true
 
-          strategyType: Recreate
-
+          updateStrategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 100%
+              
+          readinessProbe:
+            timeoutSeconds: 20
+            
+          livenessProbe:
+            timeoutSeconds: 20
+            
           persistence:
               enabled: true
               size: 2Gi
 
           resources:
+            requests:
+              cpu: 85m
+              memory: 480M
             limits:
               cpu: 300m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi    
+              memory: 720M
 
           podSecurityContext:
               enabled: true
@@ -132,9 +148,10 @@ jobs:
               runAsUser: ${{ secrets.RUNNING_UID_GID }}
           ' > values.yaml
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 10.31.5 -f values.yaml bitnami/mongodb
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-db --version 12.1.31 -f values.yaml --history-max 3 bitnami/mongodb
 
       - name: 'Deploy Backend'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -145,8 +162,8 @@ jobs:
           replicaCount: 1
 
           rollingUpdate:
-            maxUnavailable: 50%
-            maxSurge: 50%
+            maxUnavailable: 100%
+            maxSurge: 0%
 
           image:
             repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
@@ -164,6 +181,18 @@ jobs:
 
           containerPort: 3000
 
+          resources:
+            requests:
+              cpu: 20m
+              memory: 400M
+            limits:
+              cpu: 100m
+              memory: 800M
+
+          serviceAccount:
+            create: false
+            name: asp-service-account
+
           oauthProxy:
             enabled: true
             image:
@@ -177,7 +206,7 @@ jobs:
               client-secret: ${{ secrets.OIDC_CLIENT_SECRET }}
               oidc-issuer-url: ${{ secrets.OIDC_ISSUER }}
               redirect-url: https://api-services-portal-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}.apps.silver.devops.gov.bc.ca/oauth2/callback
-              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|^[/]$'
+              skip-auth-regex: '/login|/health|/public|/docs|/redirect|/_next|/images|/devportal|/manager|/about|/maintenance|/admin/session|/ds/api|/feed/|/signout|/content|^[/]$'
               whitelist-domain: authz-apps-gov-bc-ca.dev.api.gov.bc.ca
               skip-provider-button: 'true'
               profile-url: ${{ secrets.OIDC_ISSUER }}/protocol/openid-connect/userinfo
@@ -189,7 +218,6 @@ jobs:
               skip-jwt-bearer-tokens: 'false'
               set-authorization-header: 'false'
               pass-authorization-header: 'false'
-
           env:
             SESSION_SECRET:
               value: '234873290483290'
@@ -253,13 +281,19 @@ jobs:
               value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
               value: '${{ secrets.OIDC_CLIENT_ID }}'
+              secure: true
             GWA_RES_SVR_CLIENT_SECRET:
               value: '${{ secrets.OIDC_CLIENT_SECRET }}'
+              secure: true
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:
               value: '${{ secrets.KEYCLOAK_REALM }}'
             COOKIE_SECURE:
+              value: 'true'
+            LOG_LEVEL:
+              value: 'debug'
+            DISABLE_LOGGING:
               value: 'true'
             EMAIL_ENABLED:
               value: 'true'
@@ -278,9 +312,10 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }} -f values.yaml --history-max 3 bcgov/generic-api
 
       - name: 'Deploy Routes'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -294,9 +329,10 @@ jobs:
                 termination: edge
           " > values.yaml
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml bcgov/ocp-route
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-routes -f values.yaml --history-max 3 bcgov/ocp-route
 
       - name: 'Seed Data'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 

@@ -94,6 +94,22 @@ export class UMAPolicyService {
     return result;
   }
 
+  public async updateUmaPolicy(
+    permissionId: string,
+    body: Policy
+  ): Promise<void> {
+    const url = `${this.policyEndpoint}/${permissionId}`;
+    logger.debug('[updateUmaPolicy] %s', url);
+    const result = await fetch(url, {
+      method: 'put',
+      body: JSON.stringify(body),
+      headers: headers(this.accessToken) as any,
+    })
+      .then(checkStatus)
+      .then((res) => res.text);
+    logger.debug('[updateUmaPolicy] RESULT %j', result);
+  }
+
   public async deleteUmaPolicy(policyId: string) {
     const url = `${this.policyEndpoint}/${policyId}`;
     logger.debug('[deleteUmaPolicy] %s', url);

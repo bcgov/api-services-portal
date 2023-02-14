@@ -5,6 +5,7 @@ import {
   Environment,
   GatewayConsumer,
   GatewayPlugin,
+  Scalars,
   User,
 } from '../keystone/types';
 import { strict as assert } from 'assert';
@@ -19,6 +20,11 @@ export interface NewCredential {
   apiKey?: string;
   clientPublicKey?: string;
   clientPrivateKey?: string;
+}
+
+export interface CredentialReference {
+  keyAuthPK?: string;
+  clientId?: string;
 }
 
 // Subject Identity when a Product is requested using the Authentication Code Flow
@@ -60,6 +66,14 @@ export interface ConsumerPlugin {
   service?: KeystoneItemID;
   route?: KeystoneItemID;
 }
+
+export interface ConsumerPluginInput {
+  operation: 'added' | 'removed' | 'updated';
+  name: string;
+  serviceOrRouteName: string;
+  config: PluginConfig;
+}
+
 export interface PluginConfig {
   second?: number;
   minute?: number;
@@ -83,13 +97,21 @@ export interface IssuerEnvironmentConfig {
   initialAccessToken?: string;
 }
 
+export function getAllIssuerEnvironmentConfigs(
+  issuer: CredentialIssuer
+): IssuerEnvironmentConfig[] {
+  const details: IssuerEnvironmentConfig[] = issuer.inheritFrom
+    ? JSON.parse(issuer.inheritFrom.environmentDetails)
+    : JSON.parse(issuer.environmentDetails);
+  return details;
+}
+
 export function checkIssuerEnvironmentConfig(
   issuer: CredentialIssuer,
   environment: string
 ) {
-  const details: IssuerEnvironmentConfig[] = JSON.parse(
-    issuer.environmentDetails
-  );
+  const details = getAllIssuerEnvironmentConfigs(issuer);
+
   const env = details.filter((c) => c.environment === environment);
   return env.length == 1 ? env[0] : null;
 }
@@ -169,4 +191,21 @@ export interface ConsumerFullPluginDetails {
   config: string;
   service?: KeystoneItemID;
   route?: KeystoneItemID;
+}
+
+export interface ActivityQueryFilter {
+  timeZone?: string;
+  users?: string[];
+  serviceAccounts?: string[];
+  consumers?: string[];
+  activityDate?: string;
+}
+
+export interface ActivitySummary {
+  id: string;
+  result: string;
+  message: string;
+  params: { [key: string]: string };
+  activityAt: Scalars['DateTime'];
+  blob?: any;
 }

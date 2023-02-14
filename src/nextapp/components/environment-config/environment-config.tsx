@@ -36,15 +36,10 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   const toast = useToast();
   const [hasChanged, setChanged] = React.useState<boolean>(false);
   const [flow, setFlow] = React.useState<string>(data.flow);
+  const [credentialIssuer, setCredentialIssuer] = React.useState(
+    data.credentialIssuer?.id ?? ''
+  );
   const [isEditing, setEditing] = React.useState<boolean>(false);
-  const flowTypes: { value: string; label: string }[] = [
-    { value: 'public', label: 'Public' },
-    { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
-    { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
-    { value: 'kong-acl-only', label: 'Kong ACL Only' },
-    { value: 'kong-api-key-only', label: 'Kong API Key Only' },
-    { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
-  ];
 
   const handleToggleEditing = React.useCallback(() => {
     setEditing((state) => !state);
@@ -58,6 +53,11 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
   );
 
   // Events
+  const handleCredentialIssuerChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setCredentialIssuer(event.target.value);
+  };
   const onChange = React.useCallback(() => {
     if (!hasChanged) {
       setChanged(true);
@@ -92,18 +92,15 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
       });
       client.invalidateQueries(['environment', data.id]);
       toast({
-        title: 'Environment Updated',
+        title: 'Environment updated',
         status: 'success',
+        isClosable: true,
       });
       setEditing(false);
     } catch (err) {
       toast({
-        title: 'Environment Update Failed',
-        description: err
-          .map((e) =>
-            e.data?.messages ? e.data.messages.join(',') : e.message
-          )
-          .join(', '),
+        title: 'Environment update failed',
+        description: err,
         isClosable: true,
         status: 'error',
       });
@@ -243,13 +240,12 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
                           ))}
                         </Select>
                       </GridItem>
-                      {(flow === 'client-credentials' ||
-                        flow === 'authorization-code') && (
+                      {flow === 'client-credentials' && (
                         <GridItem>
                           <CredentialIssuerSelect
-                            value={data.credentialIssuer?.id}
-                            environmentId={data.id}
+                            value={credentialIssuer}
                             flow={flow}
+                            onChange={handleCredentialIssuerChange}
                             data-testid="prd-env-auth-issuer-select"
                           />
                         </GridItem>
@@ -301,3 +297,12 @@ const EnvironmentConfig: React.FC<EnvironmentConfigProps> = ({ data = {} }) => {
 };
 
 export default EnvironmentConfig;
+
+const flowTypes: { value: string; label: string }[] = [
+  { value: 'public', label: 'Public' },
+  { value: 'authorization-code', label: 'Oauth2 Authorization Code Flow' },
+  { value: 'client-credentials', label: 'Oauth2 Client Credentials Flow' },
+  { value: 'kong-acl-only', label: 'Kong ACL Only' },
+  { value: 'kong-api-key-only', label: 'Kong API Key Only' },
+  { value: 'kong-api-key-acl', label: 'Kong API Key with ACL Flow' },
+];

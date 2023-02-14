@@ -1,22 +1,63 @@
 import * as React from 'react';
 import {
-  Alert,
-  AlertIcon,
   Box,
   Container,
-  VStack,
+  Grid,
+  GridItem,
+  Heading,
   Skeleton,
+  Switch,
+  Text,
+  useToast,
 } from '@chakra-ui/react';
 import ClientRequest from '@/components/client-request';
 import Head from 'next/head';
 import PageHeader from '@/components/page-header';
 import ProductsList from '@/components/products-list';
 import NewProduct from '@/components/new-product';
+import { useNamespaceBreadcrumbs } from '@/shared/hooks';
+import { QueryKey, useQueryClient } from 'react-query';
+import useCurrentNamespace, {
+  queryKey as currentNamespaceQueryKey,
+} from '@/shared/hooks/use-current-namespace';
+import { useRestMutationApi } from '@/shared/services/api';
+import { gql } from 'graphql-request';
+import { useAuth } from '@/shared/services/auth';
 
-import breadcrumbs from '@/components/ns-breadcrumb'
+const ProductsPage: React.FC = () => {
+  const { user } = useAuth();
+  const breadcrumbs = useNamespaceBreadcrumbs([{ text: 'Products' }]);
+  const client = useQueryClient();
+  const namespace = useCurrentNamespace();
+  const queryKey: QueryKey = ['allProducts'];
+  const mutate = useRestMutationApi();
+  const toast = useToast();
 
-const PackagingPage: React.FC = () => {
-  const actionElements = <NewProduct />;
+  const handleOrgEnabledChanged = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const enable = event.target.checked;
+    const { name, org, orgUnit } = namespace.data?.currentNamespace;
+    try {
+      await mutate.mutateAsync({
+        url: `/ds/api/v2/organizations/${org.name}/${orgUnit.name}/namespaces/${name}?enable=${enable}`,
+        options: { method: 'PUT' },
+      });
+
+      await client.invalidateQueries(currentNamespaceQueryKey);
+      toast({
+        status: 'success',
+        title: 'Success',
+        description: `You have ${enable ? 'enabled' : 'disabled'} Publish APIs`,
+      });
+    } catch (err) {
+      toast({
+        title: 'Publish settings change failed',
+        description: `${err}`,
+        status: 'error',
+      });
+    }
+  };
 
   return (
     <>
@@ -24,22 +65,66 @@ const PackagingPage: React.FC = () => {
         <title>API Program Services | Products</title>
       </Head>
       <Container maxW="6xl">
-
-        <PageHeader title="Products" actions={actionElements} breadcrumb={breadcrumbs()}>
-          <p>
-            <strong>Products</strong> are groups of APIs that are protected in
-            the same way, and are discoverable by Citizens through the BC Data
-            Catalog, or by invitation from an API Manager.
-          </p>
+        <PageHeader
+          title="Products"
+          actions={<NewProduct queryKey={queryKey} />}
+          breadcrumb={breadcrumbs}
+        >
+          <Box maxW="65%">
+            <Text>
+              <Text as="strong">Products</Text> are groups of APIs that are
+              protected in the same way, and are discoverable by Citizens
+              through the BC Data Catalogue, or by invitation from an API
+              Manager.
+            </Text>
+          </Box>
         </PageHeader>
 
         <Box mt={5}>
+          {namespace.data?.currentNamespace?.org &&
+            namespace.data?.currentNamespace?.orgAdmins?.includes(
+              user?.email
+            ) && (
+              <Grid mb={5} bgColor="white" p={4} templateColumns="50px 1fr">
+                <GridItem>
+                  <Switch
+                    id="orgEnabled"
+                    isDisabled={!namespace.isSuccess}
+                    isChecked={
+                      /* @ts-ignore-line */ namespace.data?.currentNamespace
+                        .orgEnabled
+                    }
+                    onChange={handleOrgEnabledChanged}
+                  />
+                </GridItem>
+                <GridItem>
+                  <Heading
+                    as="label"
+                    htmlFor="orgEnabled"
+                    size="sm"
+                    lineHeight="24px"
+                  >
+                    Publish APIs
+                  </Heading>
+                  <Text>
+                    By enabling Publish APIs, consumers can find and request
+                    access to your APIs from the Directory.
+                  </Text>
+                </GridItem>
+              </Grid>
+            )}
           <ClientRequest
-            fallback={[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-              <Skeleton key={d} width="100%" height="160px" mb={2} />
+            fallback={[1, 2, 3].map((d) => (
+              <Skeleton
+                key={d}
+                width="100%"
+                height="160px"
+                mb={2}
+                bgColor="white"
+              />
             ))}
           >
-            <ProductsList />
+            <ProductsList queryKey={queryKey} />
           </ClientRequest>
         </Box>
       </Container>
@@ -47,4 +132,10 @@ const PackagingPage: React.FC = () => {
   );
 };
 
-export default PackagingPage;
+export default ProductsPage;
+
+const mutation = gql`
+  mutation UpdateCurrentNamespace {
+    updateCurrentNamespace
+  }
+`;

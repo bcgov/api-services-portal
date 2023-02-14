@@ -7,10 +7,10 @@ import {
   MenuItem,
   useToast,
 } from '@chakra-ui/react';
-import { useQueryClient } from 'react-query';
-import { ADD_ENVIRONMENT } from '@/shared/queries/products-queries';
+import { QueryKey, useQueryClient } from 'react-query';
 import { useApiMutation } from '@/shared/services/api';
 import kebabCase from 'lodash/kebabCase';
+import { gql } from 'graphql-request';
 
 const options: { name: string; value: string }[] = [
   { name: 'Development', value: 'dev' },
@@ -25,6 +25,7 @@ interface AddEnvironmentProps {
   environments: string[];
   productId: string;
   productName: string;
+  productQueryKey: QueryKey;
 }
 
 const AddEnvironment: React.FC<AddEnvironmentProps> = ({
@@ -32,26 +33,31 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
   environments,
   productId,
   productName,
+  productQueryKey,
 }) => {
   const toast = useToast();
   const client = useQueryClient();
-  const mutation = useApiMutation<{ product: string; name: string }>(
-    ADD_ENVIRONMENT
+  const mutate = useApiMutation<{ product: string; name: string }>(mutation);
+  const availableOptions = options.filter(
+    (e) => !environments.includes(e.value)
   );
+
   const onSelect = (value: string) => async () => {
     try {
-      await mutation.mutateAsync({ product: productId, name: value });
-      client.invalidateQueries('products');
+      await mutate.mutateAsync({ product: productId, name: value });
+      client.invalidateQueries(productQueryKey);
       toast({
-        title: 'Environment Added',
+        title: 'Environment added',
         description: 'You may now configure it. By default it is not enabled.',
         status: 'success',
+        isClosable: true,
       });
     } catch {
       toast({
-        title: 'Action Failed',
+        title: 'Action failed',
         description: 'Environment could not be added',
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -60,27 +66,42 @@ const AddEnvironment: React.FC<AddEnvironmentProps> = ({
     <Menu>
       <MenuButton
         as={Button}
+        isDisabled={availableOptions.length === 0}
+        title={
+          availableOptions.length === 0
+            ? 'Available environments limit reached'
+            : 'Add environment'
+        }
         variant="unstyled"
         data-testid={`${kebabCase(productName)}-add-env-btn`}
       >
         {children}
       </MenuButton>
       <MenuList>
-        {options
-          .filter((e) => !environments.includes(e.value))
-          .map((e) => (
-            <MenuItem
-              key={e.value}
-              onClick={onSelect(e.value)}
-              value={e.value}
-              data-testid={`${kebabCase(productName)}-prd-env-item-${e.value}`}
-            >
-              {e.name}
-            </MenuItem>
-          ))}
+        {availableOptions.map((e) => (
+          <MenuItem
+            key={e.value}
+            onClick={onSelect(e.value)}
+            value={e.value}
+            data-testid={`${kebabCase(productName)}-prd-env-item-${e.value}`}
+          >
+            {e.name}
+          </MenuItem>
+        ))}
       </MenuList>
     </Menu>
   );
 };
 
 export default AddEnvironment;
+
+const mutation = gql`
+  mutation AddEnvironment($name: String!, $product: ID!) {
+    createEnvironment(
+      data: { name: $name, product: { connect: { id: $product } } }
+    ) {
+      id
+      name
+    }
+  }
+`;

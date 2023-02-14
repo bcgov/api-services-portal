@@ -20,6 +20,7 @@ export async function getAccessRequestsByNamespace(
         isIssued
         isComplete
         requestor {
+          name
           username
         }
         application {
@@ -140,12 +141,14 @@ export async function lookupEnvironmentAndApplicationByAccessRequest(
                               id
                           }
                           product {
+                              name
                               namespace
                           }
                       }
                       application {
                           id
                           appId
+                          name
                       }
                       serviceAccess {
                           id

@@ -64,13 +64,13 @@ const metadata = {
       resources: { name: 'toString' },
       organization: {
         name: 'connectOne',
-        key: 'org',
+        key: 'organization.id',
         list: 'allOrganizations',
-        refKey: 'extForeignKey',
+        refKey: 'orgUnits.extForeignKey',
       },
       organizationUnit: {
         name: 'connectOne',
-        key: 'sub_org',
+        key: 'organization.id',
         list: 'allOrganizationUnits',
         refKey: 'extForeignKey',
       },
@@ -113,7 +113,7 @@ const metadata = {
       },
       isInCatalog: { name: 'alwaysFalse' },
     },
-    validation: {
+    validations: {
       /* Ref: https://github.com/bcgov/ckanext-bcgov/blob/main/ckanext/bcgov/scripts/data/edc-vocabs.json */
       /* db.datasets.aggregate({ $group : { _id: "$view_audience", count: { $sum: 1 } } }) */
       security_class: {
@@ -176,6 +176,11 @@ const metadata = {
     transformations: {
       metric: { name: 'toString' },
       values: { name: 'toString' },
+      namespace: {
+        name: 'byKey',
+        key: 'metric.namespace',
+        refKey: 'namespace',
+      },
       service: {
         name: 'connectOne',
         key: 'metric.service',
@@ -314,6 +319,7 @@ const metadata = {
       'extSource',
       'extRecordHash',
     ],
+    hooks: ['handleUsernameChange'],
     transformations: {
       tags: { name: 'toStringDefaultArray' },
       aclGroups: { name: 'toStringDefaultArray' },
@@ -458,6 +464,8 @@ const metadata = {
       'resourceScopes',
       'resourceType',
       'resourceAccessScope',
+      'isShared',
+      'inheritFrom',
       'apiKeyName',
       'owner',
     ],
@@ -467,9 +475,15 @@ const metadata = {
       clientRoles: { name: 'toStringDefaultArray' },
       clientMappers: { name: 'toStringDefaultArray' },
       environmentDetails: { name: 'toString' },
-      owner: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      inheritFrom: {
+        name: 'connectOne',
+        list: 'allSharedIdPs',
+        refKey: 'name',
+      },
+      owner: { name: 'connectOne', list: 'allProviderUsers', refKey: 'email' },
     },
     validations: {
+      isShared: { type: 'boolean' },
       flow: {
         type: 'enum',
         values: ['client-credentials'],
@@ -491,7 +505,7 @@ const metadata = {
       clientAuthenticator: 'client-secret',
       mode: 'auto',
       environmentDetails: [],
-      owner: 'acope@idir',
+      owner: 'janis@gov.bc.ca',
     },
   },
   IssuerEnvironmentConfig: {
@@ -605,9 +619,14 @@ const metadata = {
       'namespace',
       'actor',
       'blob',
+      'filterKey1',
+      'filterKey2',
+      'filterKey3',
+      'filterKey4',
     ],
     transformations: {
       actor: { name: 'connectOne', list: 'allUsers', refKey: 'username' },
+      context: { name: 'toString' },
       blob: {
         name: 'connectExclusiveOne',
         list: 'Blob',
@@ -649,7 +668,7 @@ const metadata = {
   User: {
     query: 'allUsers',
     refKey: 'username',
-    sync: ['name', 'username', 'email', 'legalsAgreed'],
+    sync: ['name', 'username', 'email', 'legalsAgreed', 'provider'],
     transformations: {
       legalsAgreed: { name: 'toStringDefaultArray' },
     },

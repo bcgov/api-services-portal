@@ -1,8 +1,10 @@
 import { GraphQLClient } from 'graphql-request';
 import {
   QueryKey,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   useMutation,
-  UseMutationOptions,
   UseMutationResult,
   useQuery,
   UseQueryOptions,
@@ -12,6 +14,7 @@ import omit from 'lodash/omit';
 import { Query } from '@/types/query.types';
 
 import { apiHost, apiInternalHost, env } from '../config';
+import { last } from 'lodash';
 
 interface ApiOptions {
   ssr?: boolean;
@@ -62,7 +65,11 @@ const api = async <T extends ApiResponse>(
     const data = await apiClient.request<T>(query, variables);
 
     if (data.errors) {
-      throw data.errors;
+      let errorMessage = data.errors[0]?.message;
+      if (data.errors[0]?.data?.messages) {
+        errorMessage = data.errors[0]?.data.messages.join('\n');
+      }
+      throw errorMessage;
     }
 
     return data;
@@ -70,7 +77,14 @@ const api = async <T extends ApiResponse>(
     if (settings.ssr) {
       console.error(`Error querying ${err}`);
     } else {
-      throw err.response.errors;
+      const hasErrors = Boolean(err?.response?.errors);
+      if (hasErrors) {
+        if (err.response.errors[0]?.data?.messages) {
+          throw err.response.errors[0]?.data?.messages.join('\n');
+        }
+        throw err.response.errors?.map((e) => e.message).join('\n');
+      }
+      throw err;
     }
     // If content is gathered at build time using this api, the first time doing a
     // deployment the backend won't be there, so catch the error and return empty
@@ -97,6 +111,36 @@ export const useApi = (
   );
 };
 
+const PER_PAGE = 25;
+export const useInfiniteApi = (
+  key: QueryKey,
+  query: UseApiOptions,
+  queryOptions: UseInfiniteQueryOptions = { suspense: true }
+): UseInfiniteQueryResult<Query> => {
+  return useInfiniteQuery<Query>(
+    key,
+    async ({ pageParam }) => {
+      const skip = pageParam ? pageParam * PER_PAGE : 0;
+      const variables = (query.variables as Record<string, string>) ?? {};
+      return api<Query>(
+        query.query,
+        { ...variables, skip, first: PER_PAGE },
+        { ssr: false }
+      );
+    },
+    {
+      ...queryOptions,
+      getNextPageParam: (lastPage, pages) => {
+        const lastArray = Object.values(lastPage)[0];
+        if (Array.isArray(lastArray) && lastArray.length !== PER_PAGE) {
+          return undefined;
+        }
+        return pages.length;
+      },
+    }
+  );
+};
+
 export const useApiMutation = <T>(
   mutation: string,
   options = {}
@@ -119,6 +163,7 @@ export async function restApi<T>(
   url: string,
   options?: RequestInit
 ): Promise<T>;
+
 export async function restApi(
   url: string,
   options?: RequestInit
@@ -158,11 +203,22 @@ export async function restApi(
 export const useRestApi = <T>(
   key: QueryKey,
   url: string,
-  queryOptions: UseQueryOptions<T> = { suspense: true }
+  queryOptions: UseQueryOptions<T> = { suspense: true },
+  options?: RequestInit
 ): UseQueryResult<T> => {
   return useQuery<T, Error>(
     key,
-    async () => await restApi<T>(url),
+    async () => await restApi<T>(url, options),
+    queryOptions
+  );
+};
+
+export const useRestMutationApi = <T>(
+  queryOptions: UseQueryOptions<T> = { suspense: true }
+): UseMutationResult<T> => {
+  return useMutation(
+    async (info: { url: string; options?: RequestInit }) =>
+      await restApi<any>(info.url, info.options),
     queryOptions
   );
 };

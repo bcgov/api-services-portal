@@ -13,6 +13,7 @@ import UserRepresentation from '@keycloak/keycloak-admin-client/lib/defs/userRep
 const logger = Logger('kc.group');
 
 export class KeycloakGroupService {
+  private allGroups: any = undefined;
   private kcAdminClient: KeycloakAdminClient;
 
   constructor(issuerUrl: string) {
@@ -20,6 +21,10 @@ export class KeycloakGroupService {
     const realmName = issuerUrl.substr(issuerUrl.lastIndexOf('/') + 1);
     logger.debug('%s %s', baseUrl, realmName);
     this.kcAdminClient = new KcAdminClient({ baseUrl, realmName });
+  }
+
+  public async cacheGroups() {
+    this.allGroups = await this.getAllGroups();
   }
 
   public async login(
@@ -159,7 +164,10 @@ export class KeycloakGroupService {
   }
 
   public async getGroup(parentGroupName: string, groupName: string) {
-    const groups = (await this.kcAdminClient.groups.find()).filter(
+    const listOfGroups = this.allGroups
+      ? this.allGroups
+      : await this.kcAdminClient.groups.find();
+    const groups = listOfGroups.filter(
       (group: GroupRepresentation) => group.name == parentGroupName
     );
     if (
@@ -197,13 +205,13 @@ export class KeycloakGroupService {
     return this.kcAdminClient.users.delFromGroup({ id, groupId });
   }
 
-  public async lookupMemberByUsername(username: string): Promise<string> {
+  public async lookupMemberByEmail(email: string): Promise<string> {
     const foundUsers = await this.kcAdminClient.users.find({
-      username,
+      email,
       exact: true,
     });
     if (foundUsers.length == 0) {
-      logger.warn('[lookupMemberByUsername] User not found %s', username);
+      logger.warn('[lookupMemberByEmail] User not found %s', email);
     }
     return foundUsers.length == 0 ? null : foundUsers[0].id;
   }

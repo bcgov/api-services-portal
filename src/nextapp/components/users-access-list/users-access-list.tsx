@@ -99,13 +99,15 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
       };
       await grant.mutateAsync(payload);
       toast({
-        title: 'Access Granted',
+        title: 'Access granted',
         status: 'success',
+        isClosable: true,
       });
     } catch (err) {
       toast({
-        title: 'Access Granted Failed',
+        title: 'Access granted failed',
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -114,15 +116,17 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
       const tickets = Array.isArray(id) ? id : [id];
       await revoke.mutateAsync({ prodEnvId, resourceId, tickets });
       toast({
-        title: 'Access Revoked',
+        title: 'Access revoked',
         status: 'success',
+        isClosable: true,
       });
       client.invalidateQueries(queryKey);
     } catch (err) {
       toast({
-        title: 'Revoke Access Scope Failed',
-        description: err?.message,
+        title: 'Revoke access scope failed',
+        description: err,
         status: 'error',
+        isClosable: true,
       });
     }
   };
@@ -200,8 +204,16 @@ const UsersAccessList: React.FC<UsersAccessListProps> = ({
 export default UsersAccessList;
 
 const revokeMutation = gql`
-  mutation RevokeAccess($prodEnvId: ID!, $resourceId: String!, $tickets: [String]!) {
-    revokePermissions(prodEnvId: $prodEnvId, resourceId: $resourceId, ids: $tickets)
+  mutation RevokeAccess(
+    $prodEnvId: ID!
+    $resourceId: String!
+    $tickets: [String]!
+  ) {
+    revokePermissions(
+      prodEnvId: $prodEnvId
+      resourceId: $resourceId
+      ids: $tickets
+    )
   }
 `;
 

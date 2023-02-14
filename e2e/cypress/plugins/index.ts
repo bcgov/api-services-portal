@@ -13,7 +13,11 @@
 
 require('dotenv').config()
 
-module.exports = (on: any, config: any) => {
+module.exports = (on: any, config:any) => {
+  on('task', require('@cypress/code-coverage/task'))
+}
+// AFTER
+module.exports = (on:any, config:any) => {
   require('@cypress/code-coverage/task')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables

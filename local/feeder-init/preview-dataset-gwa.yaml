@@ -1,0 +1,13 @@
+entity: Dataset
+record:
+  id: "B234567890000562"
+  name: "namespace-preview-test-product"
+  title: "Namespace Preview Test Product"
+  notes: "API Gateway Services provides a way to configure services on the API Gateway, manage access to APIs and get insight into the use of them."
+  tags: [ 'gateway', 'kong', 'openapi' ]
+  sector: "Service"
+  license_title: "Access Only"
+  view_audience: "Government"
+  security_class: "LOW-PUBLIC"
+  organization:
+    id: "319b3297-846d-4b97-8095-ceb3ec505fb8"

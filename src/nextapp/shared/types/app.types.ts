@@ -2,6 +2,7 @@ export interface UserData {
   sub: string;
   name: string;
   businessName: string;
+  provider: string;
   providerUsername: string;
   username: string;
   roles: string[];
@@ -12,7 +13,7 @@ export interface UserData {
 }
 
 export interface NamespaceData {
-  id: string;
+  id?: string;
   name: string;
 }
 

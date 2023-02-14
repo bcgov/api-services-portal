@@ -37,16 +37,18 @@ describe('Activity Message Formatting', function () {
         result: 'Mark rejected access to Demo API (dev) for consumer 11111111',
       },
       {
-        message: '{actor} {action} for {resource} ({note})',
+        message:
+          '{actor} {action} for {application} to access {resource} ({note})',
         params: {
           actor: 'Harley',
           action: 'received credentials',
           entity: 'access',
+          application: 'App 1234',
           resource: 'Demo API (dev)',
-          note: 'access approved',
+          note: 'access pending approval',
         },
         result:
-          'Harley received credentials for Demo API (dev) (access approved)',
+          'Harley received credentials for App 1234 to access Demo API (dev) (access pending approval)',
       },
       {
         message: '{actor} {action} {resource}',

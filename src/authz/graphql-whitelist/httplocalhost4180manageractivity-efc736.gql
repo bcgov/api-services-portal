@@ -1,0 +1,17 @@
+
+  query GetActivity(
+    $first: Int
+    $skip: Int
+    $filter: ActivityQueryFilterInput
+  ) {
+    getFilteredNamespaceActivity(first: $first, skip: $skip, filter: $filter) {
+      id
+      message
+      result
+      params
+      activityAt
+      blob {
+        id
+      }
+    }
+  }

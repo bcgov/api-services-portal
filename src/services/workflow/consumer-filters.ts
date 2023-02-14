@@ -92,7 +92,10 @@ async function filterByProductAndEnvironment(
   );
 
   const aclBasedConsumerIds = await queryACLConsumerIds(context, filteredEnvs);
-  logger.debug('[filterByProductAndEnvironment] %j', aclBasedConsumerIds);
+  logger.debug(
+    '[filterByProductAndEnvironment] aclBasedConsumerIds=%j',
+    aclBasedConsumerIds
+  );
 
   // Now get Consumers from the ServiceAccess matching the envs
   const serviceAccessBasedIds = await queryServiceAccessConsumerIds(
@@ -100,7 +103,10 @@ async function filterByProductAndEnvironment(
     ns,
     filteredEnvs
   );
-  logger.debug('[filterByProductAndEnvironment] %j', serviceAccessBasedIds);
+  logger.debug(
+    '[filterByProductAndEnvironment] serviceAccessBasedIds=%j',
+    serviceAccessBasedIds
+  );
 
   return aclBasedConsumerIds.concat(serviceAccessBasedIds);
 }
@@ -115,7 +121,7 @@ async function queryACLConsumerIds(
   envs: Environment[]
 ): Promise<string[]> {
   const envAppIds = envs
-    .filter((e) => e.flow === 'kong-api-key-acl')
+    .filter((e) => e.flow === 'kong-api-key-acl' || e.flow === 'kong-acl-only')
     .map((e) => e.appId);
 
   if (envAppIds.length == 0) {

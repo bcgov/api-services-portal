@@ -59,9 +59,11 @@ const actions: any = {
   filterBySelf: require('./actions/filterBySelf'),
   filterByRequestor: filterByRequestor,
   filterByPackageNS: require('./actions/filterByPackageNS'),
+  filterByServiceNS: require('./actions/filterByServiceNS'),
   filterByProductNSOrActiveEnvironment: require('./actions/filterByProductNSOrActiveEnvironment'),
   filterByTemporaryIdentity: require('./actions/filterByTemporaryIdentity'),
   filterByUserNS: require('./actions/filterByUserNS'),
+  filterByUserNSorSharedTrue: require('./actions/filterByUserNSorSharedTrue'),
   filterByUserNSOrNull: require('./actions/filterByUserNSOrNull'),
   filterByActive: require('./actions/filterByActive'),
   filterByActiveEnvironment: require('./actions/filterByActiveEnvironment'),
@@ -117,6 +119,28 @@ export function EnforcementPoint(params: any) {
       ' by ' +
       (item == null ? 'ANON' : item.username)
   );
+
+  function logContextAsWarning() {
+    logger.warn(
+      '*** ACCESS *** (' +
+        gqlName +
+        '):(' +
+        context.baseQueryName +
+        ') L=' +
+        listKey +
+        ' F=' +
+        fieldKey +
+        ' [' +
+        (itemId == null ? '' : itemId) +
+        ', ' +
+        itemIds +
+        '] ' +
+        operation +
+        ' by ' +
+        (item == null ? 'ANON' : item.username)
+    );
+  }
+
   try {
     if (fs.statSync(rules.rulePath).mtimeMs != rules.ts) {
       refreshRules();
@@ -224,12 +248,14 @@ export function EnforcementPoint(params: any) {
         return result;
       }
     }
-    logger.debug('--> DENY : No RULES FOUND');
-    logger.debug('%j', ctx);
+    logContextAsWarning();
+    logger.warn('--> DENY : No RULES FOUND');
+    logger.warn('%j', ctx);
     return false;
   } catch (err) {
-    logger.debug('--> DENY : ERROR');
-    logger.debug('Unexpected Error - %s', err);
+    logContextAsWarning();
+    logger.error('--> DENY : ERROR');
+    logger.error('Unexpected Error - %s', err);
     return false;
   }
 }

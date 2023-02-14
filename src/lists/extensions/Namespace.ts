@@ -7,8 +7,10 @@ import {
   ResourceSetInput,
 } from '../../services/uma2';
 import {
+  getOrganizationUnit,
   lookupProductEnvironmentServicesBySlug,
   lookupUsersByUsernames,
+  recordActivity,
 } from '../../services/keystone';
 import {
   getEnvironmentContext,
@@ -16,16 +18,14 @@ import {
   getNamespaceResourceSets,
   isUserBasedResourceOwners,
   doClientLoginForCredentialIssuer,
+  EnvironmentContext,
+  getOrgPoliciesForResource,
 } from './Common';
 import type { TokenExchangeResult } from './Common';
 import {
   KeycloakPermissionTicketService,
   KeycloakGroupService,
 } from '../../services/keycloak';
-import { Logger } from '../../logger';
-
-const logger = Logger('ext.Namespace');
-
 import { strict as assert } from 'assert';
 import {
   DeleteNamespace,
@@ -37,28 +37,49 @@ import {
   transformSingleValueAttributes,
 } from '../../services/utils';
 import getSubjectToken from '../../auth/auth-token';
-import { NamespaceService } from '../../services/org-groups';
-import { IssuerEnvironmentConfig } from '@/services/workflow/types';
+import {
+  GroupAccessService,
+  NamespaceService,
+} from '../../services/org-groups';
+import { IssuerEnvironmentConfig } from '../../services/workflow/types';
+import { Keystone } from '@keystonejs/keystone';
+import { Logger } from '../../logger';
+import { getGwaProductEnvironment } from '../../services/workflow';
+import { NotificationService } from '../../services/notification/notification.service';
+import { ConfigService } from '../../services/config.service';
+import {
+  backfillGroupAttributes,
+  getAllNamespaces,
+  getKeycloakGroupApi,
+  getResource,
+  transformOrgAndOrgUnit,
+} from '../../services/keycloak/namespace-details';
+
+const logger = Logger('ext.Namespace');
 
 const typeUserContact = `
   type UserContact {
     id: ID!
     name: String!
     username: String!
-    email: String!
+    email: String
   }`;
 
 const typeNamespace = `
 type Namespace {
-    id: String!
+    id: String
     name: String!,
-    scopes: [UMAScope]!,
+    scopes: [UMAScope],
     prodEnvId: String,
     permDomains: [String],
     permDataPlane: String,
     permProtectedNs: String,
-    org: String,
-    orgUnit: String
+    org: JSON,
+    orgUnit: JSON
+    orgUpdatedAt: Float,
+    orgEnabled: Boolean,
+    orgNoticeViewed: Boolean,
+    orgAdmins: [String],
 }
 `;
 
@@ -87,6 +108,15 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              const selectedNS = context.req.user.namespace;
+
               const noauthContext = context.createContext({
                 skipAccessControl: true,
               });
@@ -100,36 +130,35 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getNamespaceResourceSets(envCtx);
-              const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-              const namespaces = <ResourceSet[]>(
-                await resourcesApi.listResourcesByIdList(resourceIds)
+              const kcGroupService = await getKeycloakGroupApi(
+                envCtx.issuerEnvConfig
               );
 
-              const matched = namespaces
-                .filter((ns) => ns.name == context.req.user.namespace)
-                .map((ns) => ({
-                  id: ns.id,
-                  name: ns.name,
-                  scopes: ns.resource_scopes,
-                  prodEnvId: prodEnv.id,
-                }));
-              if (matched.length == 0) {
-                logger.warn(
-                  '[currentNamespace] NOT FOUND! %j',
-                  context.req.user
-                );
-                return null;
-              } else {
-                return await backfillGroupAttributes(
-                  context.req.user.namespace,
-                  matched[0],
-                  envCtx.issuerEnvConfig
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
+
+              const merged = await backfillGroupAttributes(
+                selectedNS,
+                { name: selectedNS, prodEnvId: prodEnv.id },
+                defaultSettings,
+                kcGroupService
+              );
+              const getOrgAdmins = true;
+              if (getOrgAdmins) {
+                const resource: any = await getResource(selectedNS, envCtx);
+                merged['id'] = resource['id'];
+                merged['scopes'] = resource['scopes'];
+              }
+
+              if (merged.org) {
+                await transformOrgAndOrgUnit(
+                  context,
+                  envCtx,
+                  merged,
+                  getOrgAdmins
                 );
               }
+              return merged;
             },
             access: EnforcementPoint,
           },
@@ -154,22 +183,7 @@ module.exports = {
                 prodEnv.id,
                 access
               );
-
-              const resourceIds = await getNamespaceResourceSets(envCtx);
-              const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-              const namespaces = await resourcesApi.listResourcesByIdList(
-                resourceIds
-              );
-
-              return namespaces.map((ns: ResourceSet) => ({
-                id: ns.id,
-                name: ns.name,
-                scopes: ns.resource_scopes,
-                prodEnvId: prodEnv.id,
-              }));
+              return await getAllNamespaces(envCtx);
             },
             access: EnforcementPoint,
           },
@@ -195,30 +209,26 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getNamespaceResourceSets(envCtx);
-              const resourcesApi = new UMAResourceRegistrationService(
-                envCtx.uma2.resource_registration_endpoint,
-                envCtx.accessToken
-              );
-              const namespaces = await resourcesApi.listResourcesByIdList(
-                resourceIds
+              const detail: any = await getResource(args.ns, envCtx);
+              detail['prodEnvId'] = prodEnv.id;
+
+              const kcGroupService = await getKeycloakGroupApi(
+                envCtx.issuerEnvConfig
               );
 
-              const detail = namespaces
-                .filter((ns) => ns.name === args.ns)
-                .map((ns: ResourceSet) => ({
-                  id: ns.id,
-                  name: ns.name,
-                  scopes: ns.resource_scopes,
-                  prodEnvId: prodEnv.id,
-                }))
-                .pop();
+              const client = new GWAService(process.env.GWA_API_URL);
+              const defaultSettings = await client.getDefaultNamespaceSettings();
 
               const merged = await backfillGroupAttributes(
                 args.ns,
                 detail,
-                envCtx.issuerEnvConfig
+                defaultSettings,
+                kcGroupService
               );
+
+              if (merged.org) {
+                await transformOrgAndOrgUnit(context, envCtx, merged, true);
+              }
 
               logger.debug('[namespace] Result %j', merged);
               return merged;
@@ -300,6 +310,117 @@ module.exports = {
           },
         ],
         mutations: [
+          {
+            schema: 'markNamespaceNotificationViewed: Boolean',
+            resolver: async (
+              item: any,
+              { org, orgUnit }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              const selectedNS = context.req.user.namespace;
+
+              const noauthContext = context.createContext({
+                skipAccessControl: true,
+              });
+              const prodEnv = await lookupProductEnvironmentServicesBySlug(
+                noauthContext,
+                process.env.GWA_PROD_ENV_SLUG
+              );
+              const envCtx = await getEnvironmentContext(
+                context,
+                prodEnv.id,
+                access
+              );
+
+              const nsService = new NamespaceService(envCtx.openid.issuer);
+              await nsService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+
+              await nsService.markNotification(selectedNS, true);
+
+              return true;
+            },
+          },
+          {
+            schema:
+              'updateCurrentNamespace(org: String, orgUnit: String): String',
+            resolver: async (
+              item: any,
+              { org, orgUnit }: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ): Promise<boolean> => {
+              if (
+                context.req.user?.namespace == null ||
+                typeof context.req.user?.namespace === 'undefined'
+              ) {
+                return null;
+              }
+
+              const ns = context.req.user?.namespace;
+
+              const prodEnv = await getGwaProductEnvironment(context, true);
+              const envConfig = prodEnv.issuerEnvConfig;
+
+              const svc = new GroupAccessService(prodEnv.uma2);
+              await svc.login(envConfig.clientId, envConfig.clientSecret);
+              const result = await svc.assignNamespace(ns, org, orgUnit, false);
+
+              if (result) {
+                logger.info(
+                  '[updateCurrentNamespace] Sending Notifications for %s',
+                  ns
+                );
+
+                const nc = new NotificationService(new ConfigService());
+
+                const resourceIds = await getNamespaceResourceSets(prodEnv); // sets accessToken
+                const resourcesApi = new UMAResourceRegistrationService(
+                  prodEnv.uma2.resource_registration_endpoint,
+                  prodEnv.accessToken
+                );
+                const namespaces = await resourcesApi.listResourcesByIdList(
+                  resourceIds
+                );
+
+                const detail = namespaces
+                  .filter((resns) => resns.name === ns)
+                  .map((resns: ResourceSet) => ({
+                    id: resns.id,
+                  }))
+                  .pop();
+
+                const orgPolicies = await getOrgPoliciesForResource(
+                  prodEnv,
+                  detail.id
+                );
+                const orgAdmins: string[] = [];
+                orgPolicies.map((policy) => {
+                  orgAdmins.push(...policy.users);
+                });
+                const userContactList: string[] = [...new Set(orgAdmins)];
+                logger.info(
+                  '[updateCurrentNamespace] Sending Notifications to %j',
+                  userContactList
+                );
+
+                userContactList.forEach((contact) => {
+                  nc.notify(
+                    { email: contact, name: contact, username: '' },
+                    {
+                      template: 'new-namespace-approval',
+                      subject: `New Namespace Approval - ${ns}`,
+                    }
+                  );
+                });
+              }
+            },
+          },
           {
             schema: 'createNamespace(namespace: String!): Namespace',
             resolver: async (
@@ -388,6 +509,27 @@ module.exports = {
 
               await kcGroupService.createIfMissing('ns', args.namespace);
 
+              await recordActivity(
+                context.sudo(),
+                'create',
+                'Namespace',
+                args.namespace,
+                `Created ${args.namespace} namespace`,
+                'success',
+                JSON.stringify({
+                  message: '{actor} created {ns} namespace',
+                  params: {
+                    actor: context.authedItem.name,
+                    ns: args.namespace,
+                  },
+                }),
+                args.namespace,
+                [
+                  `Namespace:${args.namespace}`,
+                  `actor:${context.authedItem.name}`,
+                ]
+              );
+
               return rset;
             },
             access: EnforcementPoint,
@@ -437,7 +579,7 @@ module.exports = {
                 );
               }
               await DeleteNamespace(
-                context.createContext({ skipAccessControl: true }),
+                context.sudo(),
                 getSubjectToken(context.req),
                 args.namespace
               );
@@ -462,45 +604,3 @@ module.exports = {
     },
   ],
 };
-
-async function backfillGroupAttributes(
-  ns: string,
-  detail: any,
-  issuerEnvConfig: IssuerEnvironmentConfig
-): Promise<any> {
-  const kcGroupService = new KeycloakGroupService(issuerEnvConfig.issuerUrl);
-  await kcGroupService.login(
-    issuerEnvConfig.clientId,
-    issuerEnvConfig.clientSecret
-  );
-
-  const nsPermissions = await kcGroupService.getGroup('ns', ns);
-
-  transformSingleValueAttributes(nsPermissions.attributes, [
-    'perm-data-plane',
-    'perm-protected-ns',
-    'org',
-    'org-unit',
-  ]);
-
-  logger.debug('[namespace] %j', nsPermissions.attributes);
-
-  const client = new GWAService(process.env.GWA_API_URL);
-  const defaultSettings = await client.getDefaultNamespaceSettings();
-
-  logger.debug('[namespace] Default Settings %j', defaultSettings);
-
-  const merged = {
-    ...detail,
-    ...defaultSettings,
-    ...nsPermissions.attributes,
-  };
-  camelCaseAttributes(merged, [
-    'perm-domains',
-    'perm-data-plane',
-    'perm-protected-ns',
-    'org',
-    'org-unit',
-  ]);
-  return merged;
-}

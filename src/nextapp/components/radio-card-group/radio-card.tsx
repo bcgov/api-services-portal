@@ -13,10 +13,11 @@ const RadioCard: React.FC<RadioCardProps> = (props) => {
   const checkbox = getCheckboxProps();
 
   return (
-    <Box as="label">
+    <Box as="label" height="100%">
       <input {...input} />
       <Box
         {...checkbox}
+        height="100%"
         cursor="pointer"
         borderWidth="1px"
         borderRadius="md"

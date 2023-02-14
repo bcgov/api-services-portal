@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { checkKeystoneStatus } from '../checkKeystoneStatus';
 import { User } from './types';
 
 const assert = require('assert').strict;
@@ -168,4 +169,51 @@ export async function lookupUsersByNamespace(
   });
   logger.debug('Query [lookupUsersByNamespace] result %j', result);
   return result.data.usersByNamespace;
+}
+
+export async function lookupProviderUserByEmail(
+  context: any,
+  email: string
+): Promise<User> {
+  const result = await context.executeGraphQL({
+    query: `query LookupProviderByEmail($email: String!, $providers: [String]!) {
+                    allUsers(where: { email: $email, provider_in: $providers }) {
+                      id
+                      name
+                      username
+                      email
+                    }
+                  }`,
+    variables: {
+      email,
+      providers: ['idir'],
+    },
+  });
+  logger.debug('Query [lookupProviderUserByEmail] result %j', result);
+
+  return !result.errors && result.data.allUsers.length === 1
+    ? result.data.allUsers[0]
+    : null;
+}
+
+export async function changeUsername(
+  context: any,
+  userId: string,
+  newUsername: string
+): Promise<void> {
+  const result = await context.executeGraphQL({
+    query: `mutation ChangeUsername($userId: ID!, $newUsername: String!) {
+                      updateUser(id: $userId, data: { username: $newUsername } ) {
+                          id
+                          username
+                      }
+                  }`,
+    variables: { userId, newUsername },
+  });
+  if ('errors' in result) {
+    logger.error('[changeUsername] %s : %s', newUsername, userId);
+    throw new Error('Failed to change username');
+  }
+
+  logger.info('[changeUsername] RESULT %j', result);
 }

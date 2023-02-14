@@ -37,9 +37,9 @@ describe('Org Group Resource Service', function () {
   scopes:
     - Namespace.View
   users:
-    - user1
-    - user2
-    - user3
+    - user1@local
+    - user2@local
+    - user3@local
   groups:
     - /organization-admin
     - /organization-admin/ministry-citizens-services

@@ -28,7 +28,10 @@ import {
   leaf,
   NamespaceService,
 } from '../../services/org-groups';
-import { getGwaProductEnvironment } from '../../services/workflow';
+import {
+  getGwaProductEnvironment,
+  transformActivity,
+} from '../../services/workflow';
 import {
   GroupAccess,
   GroupMembership,
@@ -38,6 +41,8 @@ import { getOrganizations, getOrganizationUnit } from '../../services/keystone';
 import { getActivity } from '../../services/keystone/activity';
 import { Activity } from './types';
 import { isParent } from '../../services/org-groups/group-converter-utils';
+import { ActivitySummary } from '../../services/keystone/types';
+import { ActivityDetail } from './types-extra';
 
 @injectable()
 @Route('/organizations')
@@ -135,7 +140,7 @@ export class OrganizationController extends Controller {
     const groupAccessService = new GroupAccessService(prodEnv.uma2);
     await groupAccessService.login(envConfig.clientId, envConfig.clientSecret);
 
-    await groupAccessService.createOrUpdateGroupAccess(body);
+    await groupAccessService.createOrUpdateGroupAccess(body, ['idir']);
   }
 
   /**
@@ -162,7 +167,8 @@ export class OrganizationController extends Controller {
   public async assignNamespace(
     @Path() org: string,
     @Path() orgUnit: string,
-    @Path() ns: string
+    @Path() ns: string,
+    @Query() enable: boolean = true
   ): Promise<{ result: string }> {
     const ctx = this.keystone.sudo();
     const orgLookup = await getOrganizationUnit(ctx, orgUnit);
@@ -177,7 +183,7 @@ export class OrganizationController extends Controller {
 
     const svc = new GroupAccessService(prodEnv.uma2);
     await svc.login(envConfig.clientId, envConfig.clientSecret);
-    const answer = await svc.assignNamespace(ns, org, orgUnit);
+    const answer = await svc.assignNamespace(ns, org, orgUnit, enable);
     return {
       result: answer
         ? 'namespace-assigned'
@@ -233,7 +239,7 @@ export class OrganizationController extends Controller {
     @Path() org: string,
     @Query() first: number = 20,
     @Query() skip: number = 0
-  ): Promise<Activity[]> {
+  ): Promise<ActivityDetail[]> {
     const ctx = this.keystone.sudo();
     //const org = await getOrganizationUnit(ctx, orgUnit);
     //assert.strictEqual(org != null, true, 'Invalid Organization Unit');
@@ -247,12 +253,14 @@ export class OrganizationController extends Controller {
     const records = await getActivity(
       ctx,
       assignedNamespaces.map((n) => n.name),
-      first > 50 ? 50 : first,
+      undefined,
+      first > 100 ? 100 : first,
       skip
     );
-    return records
+
+    return transformActivity(records)
       .map((o) => removeEmpty(o))
       .map((o) => transformAllRefID(o, ['blob']))
-      .map((o) => parseJsonString(o, ['context', 'blob']));
+      .map((o) => parseJsonString(o, ['blob']));
   }
 }

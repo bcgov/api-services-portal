@@ -21,7 +21,7 @@
       "clientAuthenticator": "client-secret",
       "name": "my-auth-client-secret",
       "description": "Auth connection to my IdP",
-      "owner": "janis@idir"
+      "owner": "janis@testmail.com"
     }
   },
   {
@@ -40,7 +40,7 @@
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
       ],
-      "owner": "janis@idir"
+      "owner": "janis@testmail.com"
     }
   },
   {
@@ -59,7 +59,7 @@
           "clientSecret": "43badfc1-c06f-4bec-bab6-ccdc764071ac"
         }
       ],
-      "owner": "janis@idir"
+      "owner": "janis@testmail.com"
     }
   }
 ]

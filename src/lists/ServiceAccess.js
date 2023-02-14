@@ -10,7 +10,7 @@ const {
   EnforcementPoint,
 } = require('../authz/enforcement');
 
-const { DeleteAccess } = require('../services/workflow');
+const { DeleteAccess, AfterDeleteAccess } = require('../services/workflow');
 
 // const regenerateApiKey = async function(context, consumer) {
 //     const kongConsumerId = await lookupKongConsumerIdByName(context, appId)
@@ -90,11 +90,18 @@ module.exports = {
       listKey,
       fieldPath, // exists only for field hooks
     }) {
-      await DeleteAccess(
-        context.createContext({ skipAccessControl: true }),
-        operation,
-        { serviceAccess: existingItem.id }
-      );
+      await DeleteAccess(context.sudo(), {
+        serviceAccess: existingItem.id,
+      });
+    },
+    afterDelete: async function ({
+      operation,
+      existingItem,
+      context,
+      listKey,
+      fieldPath, // exists only for field hooks
+    }) {
+      await AfterDeleteAccess(context.sudo(), existingItem);
     },
   },
 };

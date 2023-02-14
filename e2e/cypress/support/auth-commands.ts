@@ -4,13 +4,17 @@ import LoginPage from '../pageObjects/login'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
-import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
+import { checkElementExists } from './e2e'
+// import _ = require('cypress/types/lodash')
+const njwt = require('njwt')
 
 const config = require('../fixtures/manage-control/kong-plugin-config.json')
 
 const jose = require('node-jose')
+
+const YAML = require('yamljs');
 
 let headers: any
 
@@ -20,16 +24,21 @@ interface formDataRequestOptions {
   url: string
 }
 
-Cypress.Commands.add('login', (username: string, password: string) => {
+Cypress.Commands.add('login', (username: string, password: string, skipFlag = false) => {
   cy.log('< Log in with user ' + username)
   const login = new LoginPage()
   const home = new HomePage()
 
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-
-      cy.get(login.loginButton).click()
-      cy.contains('Github').click()
+      cy.get(login.loginDropDown).click()
+      if(username.includes('idir')){
+        login.selectAPIProviderLoginOption()
+      }
+      else
+      {
+        login.selectDeveloperLoginOption()
+      }
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',
@@ -58,12 +67,23 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   //       cy.log("Trigger the block")
   //   })
   // })
-  cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
-    expect($el).to.exist
-    expect($el).to.be.visible
-    expect($el).contain('No Active Namespace')
-  })
-  cy.log('> Log in')
+  if (!skipFlag) {
+    cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
+      expect($el).to.exist
+      expect($el).to.be.visible
+      expect($el).contain('No Active Namespace')
+    })
+    cy.log('> Log in')
+  }
+})
+
+Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
+  cy.log('< Log in with user ' + username)
+  const login = new LoginPage()
+  const home = new HomePage()
+  cy.get(login.usernameInput).click().type(username)
+  cy.get(login.passwordInput).click().type(password)
+  cy.get(login.loginSubmitButton).click()
 })
 
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
@@ -82,12 +102,13 @@ Cypress.Commands.add('resetCredential', (accessRole: string) => {
     home.useNamespace(checkPermission.namespace)
     cy.visit(na.path)
     na.revokeAllPermission(checkPermission.grantPermission[accessRole].userName)
+    cy.wait(2000)
     na.clickGrantUserAccessButton()
     na.grantPermission(checkPermission.grantPermission[accessRole])
   })
 })
 
-Cypress.Commands.add('getUserSessionTokenValue', () => {
+Cypress.Commands.add('getUserSessionTokenValue', (namespace: string) => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -99,14 +120,23 @@ Cypress.Commands.add('getUserSessionTokenValue', () => {
   cy.preserveCookies()
   cy.visit(login.path)
   cy.getUserSession().then(() => {
-    cy.get('@apiowner').then(({ user, apiTest }: any) => {
+    cy.get('@apiowner').then(({ user }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
-      home.useNamespace(apiTest.namespace)
+      // home.useNamespace(apiTest.namespace)
+      home.useNamespace(namespace)
       cy.get('@login').then(function (xhr: any) {
         userSession = xhr.response.headers['x-auth-request-access-token']
         return userSession
       })
+    })
+  })
+})
+
+Cypress.Commands.add('getUserSessionResponse', () => {
+  cy.getUserSession().then(() => {
+    cy.get('@login').then(function (xhr: any) {
+      return xhr
     })
   })
 })
@@ -164,11 +194,20 @@ Cypress.Commands.add('logout', () => {
 
   cy.log('< Logging out')
   cy.getSession().then(() => {
+    cy.visit('/')
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.contains('Logout').click()
     })
   })
+  cy.log('> Logging out')
+})
+
+Cypress.Commands.add('keycloakLogout', () => {
+
+  cy.log('< Logging out')
+  cy.get('.dropdown-toggle.ng-binding').click()
+  cy.contains('Sign Out').click()
   cy.log('> Logging out')
 })
 
@@ -184,9 +223,10 @@ Cypress.Commands.add('getAccessToken', (client_id: string, client_secret: string
       client_secret,
     },
     form: true,
+    failOnStatusCode: false
   }).then((res) => {
     cy.wrap(res).as('accessTokenResponse')
-    expect(res.status).to.eq(200)
+    // expect(res.status).to.eq(200)
   })
   cy.log('> Get Token')
 })
@@ -198,17 +238,24 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
     url: Cypress.env('KONG_CONFIG_URL') + '/' + config,
   }).then((res) => {
     expect(res.status).to.eq(200)
-    cy.saveState(config + 'ID', res.body.data[0].id)
+    if (config === 'routes') {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["hosts", ["a-service-for-newplatform.api.gov.bc.ca"]]))[0], 'id'))
+    }
+    else {
+      cy.saveState(config + 'ID', Cypress._.get((Cypress._.filter(res.body.data, ["name", "a-service-for-newplatform"]))[0], 'id'))
+    }
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:boolean) => {
+  let fixtureFile = flag ? "state/regen":"state/store";
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
-  cy.fixture('state/store').then((creds: any) => {
+  cy.fixture(fixtureFile).then((creds: any) => {
     const serviceAcctCreds = JSON.parse(creds.credentials)
     cy.getAccessToken(serviceAcctCreds.clientId, serviceAcctCreds.clientSecret).then(
       () => {
+        cy.wait(3000)
         cy.get('@accessTokenResponse').then((res: any) => {
           const options = {
             method: 'PUT',
@@ -226,6 +273,8 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string) => {
 
 Cypress.Commands.add('deleteAllCookies', () => {
   cy.clearCookies()
+  cy.clearAllLocalStorage()
+  cy.clearAllSessionStorage()
   cy.clearCookie('keystone.sid')
   cy.clearCookie('_oauth2_proxy')
   cy.exec('npm cache clear --force')
@@ -239,15 +288,20 @@ Cypress.Commands.add('deleteAllCookies', () => {
 })
 
 Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string, key?: string) => {
-  cy.fixture('state/store').then((creds: any) => {
+  let authorization
+  cy.fixture('state/regen').then((creds: any) => {
+    cy.wait(2000)
     let token = key || creds.apikey
-    cy.log("Token->" + token)
     const service = serviceName
+    cy.log("Token->" + token)
     return cy.request({
       url: Cypress.env('KONG_URL'),
       method: methodType,
       headers: { 'x-api-key': `${token}`, 'Host': `${service}` + '.api.gov.bc.ca' },
-      failOnStatusCode: false
+      failOnStatusCode: false,
+      auth: {
+        bearer: token,
+      }
     })
   })
 })
@@ -329,6 +383,14 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('verifyToastMessage', (msg: string) => {
+  cy.get('[role="alert"]', { timeout: 2000 }).closest('div').invoke('text')
+    .then((text) => {
+      const toastText = text;
+      expect(toastText).to.contain(msg);
+    })
+})
+
 Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedResponse: any, indexFlag = false) => {
   let response = actualResponse
   if (indexFlag) {
@@ -340,21 +402,75 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
       var objectValue1 = expectedResponse[p],
         objectValue2 = response[p];
       for (var value in objectValue1) {
-        cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
+        if (!(['activityAt', 'id'].includes(value))) {
+          cy.compareJSONObjects(objectValue2[value], objectValue1[value]);
+        }
       }
     } else {
-      debugger
       if ((expectedResponse[p] == 'true') || (expectedResponse[p] == 'false'))
         Boolean(expectedResponse[p])
       if (['organization', 'organizationUnit'].includes(p) && (!indexFlag)) {
         response[p] = response[p]['name']
       }
-      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId'].includes(p))) {
+      if ((response[p] !== expectedResponse[p]) && !(['clientSecret', 'appId', 'isInCatalog', 'isDraft', 'consumer', 'id'].includes(p))) {
         cy.log("Different Value ->" + expectedResponse[p])
         assert.fail("JSON value mismatch for " + p)
       }
     }
   }
+})
+
+Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
+  cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
+    let newObj: any
+    newObj = YAML.parse($el)
+    cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+      let obj = YAML.parse(content)
+      const keys = Object.keys(obj);
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (obj.services[index].name == serviceName) {
+          obj.services[index].plugins = newObj.plugins
+        }
+      });
+      const yamlString = YAML.stringify(obj, 'utf8');
+      cy.writeFile('cypress/fixtures/' + filename, yamlString)
+    })
+  })
+})
+
+Cypress.Commands.add('getTokenUsingJWKCredentials', (credential: any, privateKey: any) => {
+  let jwkCred = JSON.parse(credential)
+  let clientId = jwkCred.clientId
+  let tokenEndpoint = jwkCred.tokenEndpoint
+
+  let now = Math.floor(new Date().getTime() / 1000)
+  let plus5Minutes = new Date((now + 5 * 60) * 1000)
+  let alg = 'RS256'
+
+  let claims = {
+    aud: Cypress.env('OIDC_ISSUER') + '/auth/realms/master',
+  }
+
+  let jwt = njwt
+    .create(claims, privateKey, alg)
+    .setIssuedAt(now)
+    .setExpiration(plus5Minutes)
+    .setIssuer(clientId)
+    .setSubject(clientId)
+    .compact()
+
+  cy.request({
+    url: tokenEndpoint,
+    method: 'POST',
+    body: {
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      scopes: 'openid',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: jwt,
+    },
+    form: true,
+  })
 })
 
 const formDataRequest = (

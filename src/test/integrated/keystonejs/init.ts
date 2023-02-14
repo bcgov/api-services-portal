@@ -46,6 +46,7 @@ export default async function InitKeystone(
     'Dataset',
     'Legal',
     'User',
+    'Metric',
     'CredentialIssuer',
     'Product',
     'Environment',
@@ -54,6 +55,7 @@ export default async function InitKeystone(
     'GatewayPlugin',
     'GatewayConsumer',
     'ServiceAccess',
+    'TemporaryIdentity',
     'Label',
   ]) {
     const list = require('../../../lists/' + _list);
@@ -71,6 +73,29 @@ export default async function InitKeystone(
   }
 
   for (const _list of ['AliasedQueries']) {
+    const list = require('../../../lists/extensions/' + _list);
+    if ('extensions' in list) {
+      console.log('Registering Extension!');
+      list.extensions.map((ext: any) => ext(keystone));
+    }
+  }
+
+  for (const _list of [
+    'AliasedQueries',
+    'BusinessProfile',
+    'ConsumerGroups',
+    'ConsumerProducts',
+    'ConsumerScopesAndRoles',
+    'CredentialRegenerate',
+    'CredentialIssuerExt',
+    'Namespace',
+    'NamespaceActivity',
+    'OrganizationPolicy',
+    'ServiceAccount',
+    'UMAPolicy',
+    'UMAResourceSet',
+    'UMAPermissionTicket',
+  ]) {
     const list = require('../../../lists/extensions/' + _list);
     if ('extensions' in list) {
       console.log('Registering Extension!');

@@ -2,7 +2,7 @@ name: Build Data-Feeder
 
 on:
   push:
-    branches: [dev, main, feature/*]
+    branches: [feature/*, dev, test]
 
 env:
   REGISTRY: ghcr.io
@@ -25,6 +25,9 @@ jobs:
           echo '::set-output name=APP_VERSION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.version'] }}'
           echo '::set-output name=APP_REVISION::${{ fromJSON(steps.docker_meta.outputs.json).labels['org.opencontainers.image.revision'] }}'
         id: set-deploy-id
+
+      - name: Get deploy ID
+        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
 
       - uses: actions/checkout@v2
 
@@ -80,14 +83,13 @@ jobs:
           namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
       - name: 'Get Helm'
+        if: github.ref != 'refs/heads/dev'
         run: |
           curl -L -O https://get.helm.sh/helm-v3.4.2-linux-amd64.tar.gz
           tar -xf helm-v3.4.2-linux-amd64.tar.gz
 
-      - name: Get deploy ID
-        run: echo "The DEPLOY_ID is ${{ steps.set-deploy-id.outputs.DEPLOY_ID }}"
-
       - name: 'Deploy Feeder'
+        if: github.ref != 'refs/heads/dev'
         run: |
           export PATH=$PATH:`pwd`/linux-amd64
 
@@ -118,8 +120,8 @@ jobs:
           containerPort: 6000
 
           serviceAccount:
-            create: true
-            name: proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}
+            create: false
+            name: asp-service-account
 
           env:
             TZ:
@@ -139,4 +141,20 @@ jobs:
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
-          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml bcgov/generic-api
+          helm upgrade --install proto-asp-${{ steps.set-deploy-id.outputs.DEPLOY_ID }}-feeder -f values.yaml --history-max 3 bcgov/generic-api
+
+
+      - name: Authenticate to Gold and set context
+        if: github.ref == 'refs/heads/test'
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_GOLD_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+
+      - name: 'Restart Portal Feeder in Gold Test Namespace'
+        if: github.ref == 'refs/heads/test'
+        run: |
+          oc rollout restart deployment/bcgov-aps-portal-feeder-generic-api -n ${{ secrets.OPENSHIFT_GOLD_TEST_NAMESPACE }}
+

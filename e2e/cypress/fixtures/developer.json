@@ -14,6 +14,10 @@
     "name": "Auto Test App",
     "description": "Test application for auto test"
   },
+  "applicationLabels": {
+    "name": "Auto Test App to check labels",
+    "description": "Test application for label verification"
+  },
   "accessRequest": {
     "notes": "This is test access request"
   },
@@ -26,6 +30,56 @@
       },
       "application": {
         "name": "Client ID and Secret App",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "clientIdSecret_KongKeyToCC": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Authorization",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "kongAPI_ACL_authProfile": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Kong Authorization",
+        "description": "Application for testing Kong API and ACL flow."
+      }
+    },
+    "clientIdSecret_multiService": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Multi Services",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "clientIdSecret_sharedIDP": {
+      "product": {
+        "name": "Auto Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Shared IDP",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "clientIdSecret_invalid": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "sandbox"
+      },
+      "application": {
+        "name": "Client ID and Secret App for invalid auth",
         "description": "Application for testing client credential flow."
       }
     },
@@ -58,6 +112,20 @@
     "product": {
       "name": "New-Auto Test Product",
       "environment": "dev"
+    }
+  },
+  "deleteApplication":{
+    "application": {
+      "name": "delete-application-without-access",
+      "description": "Test application for auto test"
+    },
+    "pendingRequest": {
+      "name": "delete-application-with-pending-request",
+      "description": "Test application for auto test"
+    },
+    "approvedRequest": {
+      "name": "delete-application-with-approved-request",
+      "description": "Test application for auto test"
     }
   }
 }

@@ -14,7 +14,6 @@ import {
   TabList,
   Tab,
   useToast,
-  Flex,
 } from '@chakra-ui/react';
 import { AccessRequest, Query } from '@/shared/types/query.types';
 
@@ -68,7 +67,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       }));
       return { prevAccessRequests };
     },
-    onError: (err: Error, context) => {
+    onError: (_: Error, context: { prevAccessRequests: unknown }) => {
       client.setQueryData(accessRequestsQueryKey, context.prevAccessRequests);
     },
     onSettled: () => {
@@ -89,7 +88,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       });
       toast({
         status: 'warning',
-        title: 'Access Request Rejected',
+        title: 'Access request rejected',
         description: 'The consumer will not be able to access your API',
         duration: null,
         isClosable: true,
@@ -97,8 +96,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     } catch (err) {
       toast({
         status: 'error',
-        title: 'Access Rejection Failed',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        title: 'Access rejection failed',
+        description: err,
       });
     }
   };
@@ -134,7 +133,7 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
       client.invalidateQueries(['allConsumers']);
       toast({
         status: 'success',
-        title: 'Access Request Approved',
+        title: 'Access request approved',
         description: 'The consumer can now access your API',
         duration: null,
         isClosable: true,
@@ -142,8 +141,8 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
     } catch (err) {
       toast({
         status: 'error',
-        title: 'Access Approval Failed',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        title: 'Access approval failed',
+        description: err,
       });
     }
   };
@@ -211,16 +210,14 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
         <ModalFooter>
           <ButtonGroup>
             <Button
-              variant="solid"
-              colorScheme="green"
+              variant="success"
               onClick={handleAccept}
               data-testid="ar-approve-btn"
             >
-              Accept
+              Approve
             </Button>
             <Button
-              variant="solid"
-              colorScheme="red"
+              variant="danger"
               onClick={handleReject}
               data-testid="ar-reject-btn"
             >

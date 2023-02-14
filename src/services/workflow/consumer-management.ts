@@ -73,12 +73,14 @@ import { Logger } from '../../logger';
 import { strict as assert } from 'assert';
 import { getEnvironmentContext } from './get-namespaces';
 import { doFiltering } from './consumer-filters';
-import { getConsumerAuthz } from '.';
+import { getConsumerAuthz, StructuredActivityService } from '.';
 import {
+  Activity,
   Environment,
   GatewayConsumer,
   LabelCreateInput,
   LabelUpdateInput,
+  Product,
 } from '../keystone/types';
 import {
   KeycloakClientRegistrationService,
@@ -93,6 +95,8 @@ import {
 import { getActivityByRefId } from '../keystone/activity';
 import { syncPlugins, trimPlugin } from './consumer-plugins';
 import { removeAllButKeys } from '../../batch/feed-worker';
+import { KeycloakClientRolesService } from '../keycloak/client-roles';
+import { genClientId } from './client-shared-idp';
 
 const logger = Logger('wf.ConsumerMgmt');
 
@@ -144,7 +148,6 @@ export async function allScopesAndRoles(
   envs
     .filter((env) => env.credentialIssuer)
     .forEach((env) => {
-      logger.debug('[allScopesAndRoles] %j', env.credentialIssuer);
       result.scopes.push(...JSON.parse(env.credentialIssuer.availableScopes));
       result.roles.push(...JSON.parse(env.credentialIssuer.clientRoles));
     });
@@ -228,7 +231,8 @@ export async function getNamespaceConsumerAccess(
     owner: {
       id: serviceAccess.application?.owner.id,
       name: serviceAccess.application?.owner.name,
-      username: serviceAccess.application?.owner.username,
+      provider: serviceAccess.application?.owner.provider,
+      providerUsername: serviceAccess.application?.owner.providerUsername,
       email: serviceAccess.application?.owner.email,
     },
     labels: labels.map(
@@ -409,13 +413,20 @@ export async function getConsumerProdEnvAccess(
       access.serviceAccessId
     );
 
-    const activity = await getActivityByRefId(context, access.request.id);
+    const activity = await getActivityByRefId(
+      context,
+      `accessRequest:${access.request.id}`
+    );
     logger.debug('Activity %j', activity);
 
-    if (activity.length > 0) {
+    const match: Activity[] = activity.filter(
+      (a: Activity) => a.action === 'rejected' || a.action === 'approved'
+    );
+    if (match.length > 0) {
+      const context = JSON.parse(match[0].context);
       access.requestApprover = {
         id: '',
-        name: activity[0].actor.name,
+        name: context.params.actor,
       };
     }
   }
@@ -459,8 +470,18 @@ export async function grantAccessToConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.assignConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    true,
+    true,
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer: consumer,
+    }
+  );
+
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(context, ns, consumer, prodEnv, plugins);
   }
 }
 
@@ -515,7 +536,17 @@ export async function revokeAccessFromConsumer(
   const kongApi = new KongConsumerService(process.env.KONG_URL);
   await kongApi.removeConsumerACL(consumer.extForeignKey, ns, prodEnv.appId);
 
-  await syncPlugins(context, ns, consumer, []);
+  await new StructuredActivityService(context, ns).logGrantRevokeConsumerAccess(
+    true,
+    false,
+    {
+      environment: prodEnv,
+      product: prodEnv.product,
+      consumer,
+    }
+  );
+
+  await syncPlugins(context, ns, consumer, prodEnv, []);
 }
 
 /**
@@ -552,6 +583,8 @@ export async function updateConsumerAccess(
   );
 
   const prodEnvAccessItem = prodEnvAccessFilter[0];
+
+  const changeList: string[] = [];
 
   if (prodEnvAccessItem.environment.flow === 'client-credentials') {
     const envCtx = await getEnvironmentContext(
@@ -605,99 +638,80 @@ export async function updateConsumerAccess(
         'Only clients (not users) support scopes'
       );
 
-      await kcClientRegService.syncAndApply(
+      const clientScopes = selectedScopes.map((scope) => scope.name);
+      if (roles) {
+        clientScopes.push('roles');
+      }
+
+      const changes = await kcClientRegService.syncAndApply(
         consumer.username,
-        selectedScopes.map((scope) => scope.name),
+        clientScopes,
         [] as string[]
       );
+      changeList.push(...changes);
     }
 
     if (roles) {
-      const kcUserService = new KeycloakUserService(
+      const clientRolesService = new KeycloakClientRolesService(
         envCtx.issuerEnvConfig.issuerUrl
       );
-      await kcUserService.login(
+      await clientRolesService.login(
         envCtx.issuerEnvConfig.clientId,
         envCtx.issuerEnvConfig.clientSecret
       );
 
-      const client = await kcClientService.findByClientId(
-        envCtx.issuerEnvConfig.clientId
+      const issuer = envCtx.prodEnv.credentialIssuer;
+      const environment = prodEnvAccessItem.environment.name;
+      const rolesClientIdForSharedIdP = genClientId(
+        environment,
+        issuer.clientId
       );
 
-      const availableRoles = await kcClientService.listRoles(client.id);
+      const rolesClientId = issuer.inheritFrom
+        ? rolesClientIdForSharedIdP
+        : envCtx.issuerEnvConfig.clientId;
 
-      const selectedRoles = availableRoles
-        .filter((r: any) => roles.includes(r.name))
-        .map((r: any) => ({ id: r.id, name: r.name }));
-
-      assert.strictEqual(
-        selectedRoles.length,
-        roles.length,
-        'Role not found for client'
+      const changes = await clientRolesService.syncAssignedRoles(
+        rolesClientId,
+        roles,
+        consumer.username
       );
+      changeList.push(...changes);
+    }
 
-      logger.debug('[] selected %j', selectedRoles);
+    if (changeList.length > 0) {
+      logger.info('[%s] %j', consumer.username, changeList);
 
-      const isClient = await kcClientService.isClient(consumer.username);
+      const accessUpdates = [];
+      defaultClientScopes &&
+        accessUpdates.push(`Scopes:${defaultClientScopes?.join(', ')}`);
+      roles && accessUpdates.push(`Roles:${roles?.join(', ')}`);
+      const accessUpdate = accessUpdates.join(', ');
 
-      if (isClient) {
-        const consumerClient = await kcClientService.findByClientId(
-          consumer.username
-        );
-        const userId = await kcClientService.lookupServiceAccountUserId(
-          consumerClient.id
-        );
-
-        const userRoles = await kcUserService.listUserClientRoles(
-          userId,
-          client.id
-        );
-
-        await kcUserService.syncUserClientRoles(
-          userId,
-          client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
-        );
-      } else {
-        const userId = await kcUserService.lookupUserByUsername(
-          consumer.username
-        );
-
-        const userRoles = await kcUserService.listUserClientRoles(
-          userId,
-          client.id
-        );
-
-        await kcUserService.syncUserClientRoles(
-          userId,
-          client.id,
-          selectedRoles
-            .filter(
-              (role) =>
-                userRoles.filter((urole: any) => urole.name === role.name)
-                  .length == 0
-            )
-            .map((role) => ({ id: role.id, name: role.name })),
-          userRoles
-            .filter((urole: any) => selectedRoles.includes(urole.name) == false)
-            .map((role: any) => ({ id: role.id, name: role.name }))
-        );
-      }
+      await new StructuredActivityService(context, ns).logUpdateConsumerAccess(
+        true,
+        {
+          prodEnvAccessItem,
+          environment: prodEnvAccessItem.environment,
+          productName: prodEnvAccessItem.productName,
+          consumer,
+        },
+        accessUpdate
+      );
     }
   }
 
   if (plugins) {
-    await syncPlugins(context, ns, consumer, plugins);
+    await syncPlugins(
+      context,
+      ns,
+      consumer,
+      {
+        name: prodEnvAccessItem.environment.name,
+        product: { name: prodEnvAccessItem.productName },
+      } as Environment,
+      plugins
+    );
   }
 }
 
@@ -735,6 +749,13 @@ export async function revokeAllConsumerAccess(
 
   const serviceAccessId = prodEnvAccess[0].serviceAccessId;
   await deleteServiceAccess(context, serviceAccessId);
+
+  await new StructuredActivityService(context, ns).logRevokeAllConsumerAccess(
+    true,
+    {
+      consumer,
+    }
+  );
 }
 
 /**

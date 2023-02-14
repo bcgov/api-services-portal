@@ -26,11 +26,6 @@ import { useApi, useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { QueryKey, useQueryClient } from 'react-query';
 
-const defaultLabelGroup: ConsumerLabel = {
-  labelGroup: '',
-  values: [],
-};
-
 interface ManageLabelsProps {
   data: ConsumerLabel[];
   id: string;
@@ -57,7 +52,24 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
     return [];
   });
 
-  const handleLabelGroupChange = (event) => {
+  const handleLabelChange = (index: number) => (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setLabels((state) =>
+      state.map((l, i) => {
+        if (i === index) {
+          return {
+            ...l,
+            labelGroup: event.target.value,
+          };
+        }
+        return l;
+      })
+    );
+  };
+  const handleLabelGroupChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     if (event.target.value !== '+') {
       setLabels((state) => [
         ...state,
@@ -74,7 +86,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
   const handleCancelAddLabel = () => {
     setIsAddingNewLabel(false);
   };
-  const handleAddNewLabelGroup = (event) => {
+  const handleAddNewLabelGroup = () => {
     const formData = new FormData(form.current);
     const labelGroup = formData.get('newLabelGroup') as string;
     if (!labelGroup.trim()) {
@@ -89,6 +101,10 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
       },
     ]);
     setIsAddingNewLabel(false);
+  };
+  const handleCancel = () => {
+    setLabels(data);
+    onClose();
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -134,6 +150,7 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
         size="sm"
         variant="link"
         color="bc-blue"
+        data-testid="manage-labels-btn"
       >
         Manage Labels
       </Button>
@@ -172,7 +189,12 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
               {labels.map((l, index) => (
                 <React.Fragment key={uid(l, index)}>
                   <GridItem d="flex" alignItems="center">
-                    <Input readOnly name="labelGroup" value={l.labelGroup} />
+                    <Input
+                      name="labelGroup"
+                      data-testid={`labels-groups-${index}`}
+                      value={l.labelGroup}
+                      onChange={handleLabelChange(index)}
+                    />
                   </GridItem>
                   <GridItem>
                     <TagInput
@@ -235,10 +257,14 @@ const ManageLabels: React.FC<ManageLabelsProps> = ({ data, id, queryKey }) => {
             </Grid>
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} onClick={onClose} variant="secondary">
+            <Button mr={3} onClick={handleCancel} variant="secondary">
               Cancel
             </Button>
-            <Button isDisabled={isAddingNewLabel} onClick={handleSave}>
+            <Button
+              data-testid="groups-labels-save-btn"
+              isDisabled={isAddingNewLabel}
+              onClick={handleSave}
+            >
               Save
             </Button>
           </ModalFooter>

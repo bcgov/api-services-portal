@@ -19,12 +19,11 @@ import {
   Grid,
   useToast,
   Flex,
+  Alert,
+  AlertDescription,
+  AlertIcon,
 } from '@chakra-ui/react';
-import {
-  ConsumerPlugin,
-  GatewayPlugin,
-  GatewayPluginCreateInput,
-} from '@/shared/types/query.types';
+import { ConsumerPlugin } from '@/shared/types/query.types';
 import EnvironmentTag from '@/components/environment-tag';
 import format from 'date-fns/format';
 import { FaPen } from 'react-icons/fa';
@@ -56,6 +55,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     { suspense: false, enabled: isOpen }
   );
   const [tabIndex, setTabIndex] = React.useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const restrictions = React.useState<ConsumerPlugin[]>(() => {
     return (
       data?.getConsumerProdEnvAccess.plugins
@@ -93,6 +93,7 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
   const handleClose = () => {
     const [, setRestrictions] = restrictions;
     const [, setRateLimits] = rateLimits;
+    setHasUnsavedChanges(false);
     setRestrictions(
       data?.getConsumerProdEnvAccess.plugins
         .filter((p) => p.name === 'ip-restriction')
@@ -124,10 +125,29 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
     const data = {
       plugins: [...restrictsionsData, ...rateLimitsData],
     };
-
     const authorizationForm = ref?.current.querySelector(
       'form[name="authorizationForm"]'
     );
+    const ipRestrictionForm = new FormData(
+      ref?.current.querySelector('form[name="ipRestrictionsForm"]') || undefined
+    );
+    const rateLimitingForm = new FormData(
+      ref?.current.querySelector('form[name="rateLimitingForm"]') || undefined
+    );
+    const rateLimitingFormValues = Object.fromEntries(rateLimitingForm);
+    const rateLimitingFormHasValues = ['second', 'minute', 'hour', 'day'].some(
+      (input) => !!rateLimitingFormValues[input]
+    );
+
+    if (
+      (Boolean(ipRestrictionForm.get('allow')) &&
+        ipRestrictionForm.get('allow') !== '[]') ||
+      rateLimitingFormHasValues
+    ) {
+      setHasUnsavedChanges(true);
+      return false;
+    }
+
     if (authorizationForm) {
       const authorizationFormData = new FormData(authorizationForm);
       const defaultClientScopes = authorizationFormData.getAll(
@@ -153,10 +173,11 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
       client.invalidateQueries(['consumerEdit', prodEnvId, consumerId]);
       onClose();
       setTabIndex(0);
+      setHasUnsavedChanges(false);
     } catch (err) {
       toast({
         title: 'Request save failed',
-        description: Array.isArray(err) ? err[0].message : err?.message,
+        description: err,
         status: 'error',
       });
     }
@@ -247,6 +268,15 @@ const ConsumerEditDialog: React.FC<ConsumerEditDialogProps> = ({
             </Tabs>
           </ModalHeader>
           <ModalCloseButton data-testid="consumer-edit-close-btn" />
+          {hasUnsavedChanges && (
+            <Alert status="error" variant="solid" mb={8}>
+              <AlertIcon />
+              <AlertDescription>
+                You have unapplied control settings. Reset or apply your
+                settings before saving.
+              </AlertDescription>
+            </Alert>
+          )}
           {isSuccess && (
             <ModalBody ref={ref}>
               <Box

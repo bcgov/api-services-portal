@@ -213,7 +213,7 @@ const query = gql`
 `;
 
 const mutation = gql`
-  mutation Add($name: String!, $description: String) {
+  mutation AddApplication($name: String!, $description: String) {
     createApplication(data: { name: $name, description: $description }) {
       id
       appId

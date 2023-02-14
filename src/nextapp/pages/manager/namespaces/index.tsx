@@ -1,8 +1,8 @@
 import * as React from 'react';
+import ApproveBanner from '@/components/approve-banner';
 import {
   Button,
   Box,
-  Center,
   Container,
   Heading,
   Flex,
@@ -14,6 +14,14 @@ import {
   useToast,
   VStack,
   useDisclosure,
+  PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
+  IconButton,
+  Skeleton,
+  Tooltip,
 } from '@chakra-ui/react';
 import ConfirmationDialog from '@/components/confirmation-dialog';
 import Head from 'next/head';
@@ -21,10 +29,13 @@ import NextLink from 'next/link';
 import PageHeader from '@/components/page-header';
 import { useAuth } from '@/shared/services/auth';
 import {
-  FaArrowUp,
+  FaBuilding,
   FaChartBar,
+  FaCheckCircle,
   FaChevronRight,
   FaClock,
+  FaExternalLinkAlt,
+  FaInfoCircle,
   FaShieldAlt,
   FaTrash,
   FaUserAlt,
@@ -34,10 +45,14 @@ import {
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import { RiApps2Fill } from 'react-icons/ri';
-import NewNamespace from '@/components/new-namespace';
 import PreviewBanner from '@/components/preview-banner';
 import { useQueryClient } from 'react-query';
 import { useRouter } from 'next/router';
+import EmptyPane from '@/components/empty-pane';
+import NamespaceMenu from '@/components/namespace-menu/namespace-menu';
+import NewNamespace from '@/components/new-namespace';
+import useCurrentNamespace from '@/shared/hooks/use-current-namespace';
+import { useGlobal } from '@/shared/services/global';
 
 const actions = [
   {
@@ -67,7 +82,7 @@ const actions = [
 const secondaryActions = [
   {
     title: 'Activity',
-    url: '/manager/poc/activity',
+    url: '/manager/activity',
     icon: FaClock,
     roles: ['api-owner', 'provider-user', 'access-manager'],
     description: 'View all the activity within your namepace.',
@@ -103,7 +118,28 @@ const NamespacesPage: React.FC = () => {
   const toast = useToast();
   const mutate = useApiMutation(mutation);
   const client = useQueryClient();
+  const namespace = useCurrentNamespace();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const global = useGlobal();
+  const currentOrg = React.useMemo(() => {
+    if (namespace.isSuccess && namespace.data.currentNamespace?.org) {
+      return {
+        assigned: true,
+        color: 'bc-text',
+        iconColor: 'bc-blue',
+        text: [
+          namespace.data.currentNamespace.org?.title,
+          namespace.data.currentNamespace.orgUnit?.title,
+        ].join(' - '),
+      };
+    }
+    return {
+      assigned: false,
+      color: 'bc-component',
+      iconColor: 'bc-component',
+      text: 'Your Organization and Business Unit will appear here',
+    };
+  }, [namespace]);
 
   const handleDelete = React.useCallback(async () => {
     if (user?.namespace) {
@@ -113,18 +149,88 @@ const NamespacesPage: React.FC = () => {
         router?.push('/manager');
 
         toast({
-          title: ' Namespace Deleted',
+          title: ' Namespace deleted',
           status: 'success',
+          isClosable: true,
         });
         client.invalidateQueries();
       } catch (err) {
         toast({
-          title: 'Delete Namespace Failed',
+          title: 'Delete namespace failed',
           status: 'error',
+          isClosable: true,
         });
       }
     }
   }, [client, mutate, router, toast, user]);
+  const title = (
+    <>
+      <Flex align="center" gridGap={4}>
+        {user.namespace}
+        {namespace.data?.currentNamespace?.orgEnabled && (
+          <Tooltip
+            hasArrow
+            label={`${user.namespace} is enabled to publish APIs to the directory`}
+          >
+            <Box display="flex">
+              <Icon as={FaCheckCircle} color="bc-success" boxSize="0.65em" />
+            </Box>
+          </Tooltip>
+        )}
+      </Flex>
+      {(namespace.isFetching || namespace.isLoading) && (
+        <Skeleton width="400px" height="20px" mt={4} />
+      )}
+      {namespace.isSuccess && !namespace.isFetching && (
+        <Flex align="center" mt={4}>
+          <Text
+            color={currentOrg.color}
+            fontSize="sm"
+            fontWeight="normal"
+            fontStyle={currentOrg.assigned ? 'normal' : 'italic'}
+            d="flex"
+            gridGap={2}
+            alignItems="center"
+          >
+            <Icon as={FaBuilding} color={currentOrg.iconColor} />
+            {currentOrg.text}
+          </Text>
+          {currentOrg.assigned && (
+            <Popover trigger="hover">
+              <PopoverTrigger>
+                <IconButton aria-label="more info" variant="ghost">
+                  <Icon as={FaInfoCircle} color="bc-blue" boxSize="16px" />
+                </IconButton>
+              </PopoverTrigger>
+              <PopoverContent
+                fontSize="sm"
+                fontWeight="normal"
+                color="white"
+                bgColor="#373d3f"
+                borderRadius={0}
+                mt="-15px"
+              >
+                <PopoverArrow bgColor="#373d3f" />
+                <PopoverBody>
+                  If you need to change the Organization or Business Unit for
+                  your Namespace, submit a request through the{' '}
+                  <Link
+                    href={global.helpLinks.helpChangeOrgUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    textDecor="underline"
+                  >
+                    Data Systems and Services request system
+                    <Icon as={FaExternalLinkAlt} ml={1} />
+                  </Link>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          )}
+        </Flex>
+      )}
+    </>
+  );
 
   return (
     <>
@@ -134,30 +240,30 @@ const NamespacesPage: React.FC = () => {
           {hasNamespace ? ` | ${user.namespace}` : ''}
         </title>
       </Head>
-
+      <ApproveBanner />
       <PreviewBanner />
       <Container maxW="6xl">
-        <PageHeader title={user?.namespace} />
+        <PageHeader title={hasNamespace ? title : ''} />
         {!hasNamespace && (
-          <>
-            <Center minHeight={300}>
-              <Box p={4} bgColor="white" textAlign="center" maxW={350}>
-                <Box mb={4}>
-                  <Heading size="sm" mb={2}>
-                    No Active Namespace
-                  </Heading>
-                  <Text fontSize="sm">
-                    Select a namespace in the toolbar above{' '}
-                    <Icon as={FaArrowUp} /> or create a new namspace here.
-                  </Text>
-                </Box>
-                <Button onClick={onOpen} variant="primary">
-                  Create New Namespace
-                </Button>
-              </Box>
-            </Center>
+          <EmptyPane
+            message="To get started select a Namespace from the dropdown below or create a new Namespace"
+            title="No Namespace selected yet"
+            boxProps={{ borderRadius: 0, mx: 0 }}
+            my={0}
+          >
+            <Flex justifyContent="center" alignItems="center" gridGap={4}>
+              <NamespaceMenu
+                user={user}
+                variant="ns-selector"
+                buttonMessage="Select a Namespace"
+              />
+              <Text>or</Text>
+              <Button variant="primary" onClick={onOpen}>
+                Create New Namespace
+              </Button>
+            </Flex>
             <NewNamespace isOpen={isOpen} onClose={onClose} />
-          </>
+          </EmptyPane>
         )}
         {hasNamespace && (
           <Grid gap={10} templateColumns="1fr 292px" mb={8}>
@@ -171,7 +277,7 @@ const NamespacesPage: React.FC = () => {
                 {actions
                   .filter(
                     (a) =>
-                      a.roles.length == 0 ||
+                      a.roles.length === 0 ||
                       a.roles.filter((r) => user.roles.includes(r)).length > 0
                   )
                   .map((a) => (
@@ -294,7 +400,7 @@ const NamespacesPage: React.FC = () => {
                     >
                       <Flex align="center">
                         <Icon as={FaTrash} boxSize={5} mr={3} />
-                        <Text>Delete Namespace</Text>
+                        <Text>Delete Namespace...</Text>
                       </Flex>
                     </Flex>
                   </ConfirmationDialog>

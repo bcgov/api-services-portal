@@ -8,6 +8,8 @@ import { strict as assert } from 'assert';
 
 import { clientTemplateClientSecret } from './templates/client-template-client-secret';
 import { clientTemplateClientJwt } from './templates/client-template-client-jwt';
+import { clientTemplateSharedIdP } from './templates/client-template-shared-idp';
+import { clientTemplateSharedIdPAuthz } from './templates/client-template-shared-idp-authz';
 
 import KeycloakAdminClient, {
   default as KcAdminClient,
@@ -36,6 +38,8 @@ export enum ClientAuthenticator {
   ClientJWT = 'client-jwt',
   ClientJWTwithJWKS = 'client-jwt-jwks-url',
   ClientSecret = 'client-secret',
+  SharedIdP = 'shared-idp',
+  SharedIdPWithAuthz = 'shared-idp-authz',
 }
 
 export class KeycloakClientRegistrationService {
@@ -69,39 +73,65 @@ export class KeycloakClientRegistrationService {
     certificate: string,
     jwksUrl: string,
     clientMappers: ClientMapper[],
-    enabled: boolean = false
+    enabled: boolean = false,
+    baseUrl: string = undefined
   ): Promise<ClientRegResponse> {
-    const body =
-      authenticator === ClientAuthenticator.ClientSecret
-        ? Object.assign(JSON.parse(clientTemplateClientSecret), {
-            enabled,
-            clientId,
-            secret: clientSecret,
-          })
-        : authenticator === ClientAuthenticator.ClientJWT
-        ? Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': certificate,
-            },
-          })
-        : Object.assign(JSON.parse(clientTemplateClientJwt), {
-            enabled,
-            clientId,
-            attributes: {
-              'jwt.credential.public.key': '',
-              'jwks.url': jwksUrl,
-              'use.jwks.url': 'true',
-            },
-          });
+    let body: any;
+    switch (authenticator) {
+      case ClientAuthenticator.ClientSecret:
+        body = Object.assign(JSON.parse(clientTemplateClientSecret), {
+          enabled,
+          clientId,
+          secret: clientSecret,
+        });
+        break;
+      case ClientAuthenticator.ClientJWT:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': certificate,
+          },
+        });
+        break;
+      case ClientAuthenticator.SharedIdP:
+        body = Object.assign(JSON.parse(clientTemplateSharedIdP), {
+          enabled,
+          clientId,
+          baseUrl,
+          attributes: {},
+        });
+        break;
+      case ClientAuthenticator.SharedIdPWithAuthz:
+        body = Object.assign(JSON.parse(clientTemplateSharedIdPAuthz), {
+          enabled,
+          clientId,
+          baseUrl,
+          attributes: {},
+        });
+        break;
+
+      default:
+        body = Object.assign(JSON.parse(clientTemplateClientJwt), {
+          enabled,
+          clientId,
+          attributes: {
+            'jwt.credential.public.key': '',
+            'jwks.url': jwksUrl,
+            'use.jwks.url': 'true',
+          },
+        });
+        break;
+    }
 
     clientMappers
       .filter((mapper) => mapper.defaultValue !== '')
-      .forEach((mapper) => {
+      .forEach((mapper, index) => {
         if (mapper.name == 'audience') {
           logger.debug('[clientRegistration] adding mapper %s', mapper);
-          body.protocolMappers.push(AudienceMapper(mapper.defaultValue));
+          body.protocolMappers.push(
+            AudienceMapper(`audience-rule-${index + 1}`, mapper.defaultValue)
+          );
         } else {
           logger.warn(
             '[clientRegistration] skipping unknown mapper %s',
@@ -250,28 +280,68 @@ export class KeycloakClientRegistrationService {
     clientId: string,
     desiredSetOfDefaultScopes: string[],
     desiredSetOfOptionalScopes: string[]
-  ) {
-    logger.debug(
+  ): Promise<string[]> {
+    return await this.doSyncAndApply(
+      clientId,
+      desiredSetOfDefaultScopes,
+      desiredSetOfOptionalScopes
+    ).catch((e) => {
+      logger.error(
+        '[syncAndApply] Failed %s %s',
+        e.request?.method,
+        e.request?.path
+      );
+      logger.error(
+        '[syncAndApply]   %s %s',
+        e.response?.status,
+        e.response?.statusText
+      );
+      throw e;
+    });
+  }
+
+  async doSyncAndApply(
+    clientId: string,
+    desiredSetOfDefaultScopes: string[],
+    desiredSetOfOptionalScopes: string[]
+  ): Promise<string[]> {
+    logger.info(
       '[syncAndApply] %s %j %j',
       clientId,
       desiredSetOfDefaultScopes,
       desiredSetOfOptionalScopes
     );
+    const changeList: string[] = [];
     const lkup = await this.kcAdminClient.clients.find({ clientId: clientId });
     assert.strictEqual(lkup.length, 1, 'Client ID not found ' + clientId);
     const clientPK = lkup[0].id;
-    const changes = await this.syncScopes(
+    const changes: string[][] = await this.syncScopes(
       clientPK,
       desiredSetOfDefaultScopes,
       false
     );
+    changes[0].forEach((scope) => changeList.push(`DefaultScope Add ${scope}`));
+    changes[1].forEach((scope) =>
+      changeList.push(`DefaultScope Remove ${scope}`)
+    );
+
     await this.applyChanges(clientPK, changes, false);
-    const changesOptional = await this.syncScopes(
+
+    const changesOptional: string[][] = await this.syncScopes(
       clientPK,
       desiredSetOfOptionalScopes,
       true
     );
+    changesOptional[0].forEach((scope) =>
+      changeList.push(`OptionalScope Add ${scope}`)
+    );
+    changesOptional[1].forEach((scope) =>
+      changeList.push(`OptionalScope Remove ${scope}`)
+    );
+
     await this.applyChanges(clientPK, changesOptional, true);
+
+    return changeList;
   }
 
   public async login(clientId: string, clientSecret: string): Promise<void> {

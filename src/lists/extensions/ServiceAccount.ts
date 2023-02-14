@@ -81,13 +81,11 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const noAuthContext = keystone.createContext({
-                skipAccessControl: true,
-              });
+              context.skipAccessControl = true;
 
               const productEnvironmentSlug = process.env.GWA_PROD_ENV_SLUG;
-              const result = await CreateServiceAccount(
-                noAuthContext,
+              const { newCredentials } = await CreateServiceAccount(
+                context,
                 productEnvironmentSlug,
                 context.req.user.namespace,
                 args.resourceId,
@@ -98,9 +96,9 @@ module.exports = {
                 throw err;
               });
               return {
-                id: result.clientId,
-                name: result.clientId,
-                credentials: JSON.stringify(result),
+                id: newCredentials.clientId,
+                name: newCredentials.clientId,
+                credentials: JSON.stringify(newCredentials),
               };
             },
             access: EnforcementPoint,

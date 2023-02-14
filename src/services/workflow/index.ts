@@ -2,6 +2,8 @@ export { Apply } from './apply';
 
 export { CreateServiceAccount } from './create-service-account';
 
+export { addClientsToSharedIdP, syncSharedIdp } from './client-shared-idp';
+
 export {
   allConsumerGroupLabels,
   allScopesAndRoles,
@@ -15,7 +17,7 @@ export {
   saveConsumerLabels,
 } from './consumer-management';
 
-export { DeleteAccess } from './delete-access';
+export { DeleteAccess, AfterDeleteAccess } from './delete-access';
 
 export { DeleteIssuerValidate } from './delete-issuer';
 
@@ -33,13 +35,24 @@ export {
   isServiceMissingAllPluginsHandler,
 } from './validate-active-environment';
 
+export { ValidateIssuer } from './validate-issuer';
+
 export { LinkConsumerToNamespace } from './link-consumer-to-namespace';
 
 export {
   getGwaProductEnvironment,
   getMyNamespaces,
+  injectResSvrAccessTokenToContext,
   getResourceServerContext,
   getEnvironmentContext,
 } from './get-namespaces';
 
 export { getConsumerAuthz } from './get-consumer-authz';
+
+export {
+  getFilteredNamespaceActivity,
+  transformActivity,
+  StructuredActivityService,
+} from './namespace-activity';
+
+export { MigrateAuthzUser, MigratePortalUser } from './migrate-user';

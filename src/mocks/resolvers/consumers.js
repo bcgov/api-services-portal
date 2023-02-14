@@ -20,7 +20,8 @@ export const harleyAccessRequest = {
   requestor: {
     id: 'u1',
     name: 'Harley Jones',
-    username: 'harley123',
+    providerUsername: 'harley123',
+    provider: 'github',
     email: 'harley@easymart.store',
   },
   application: {
@@ -215,24 +216,28 @@ class Store {
 export const store = new Store(consumers);
 
 export const getConsumersHandler = (req, res, ctx) => {
-  return res(ctx.delay(), ctx.data({ ...store.data, allConsumerGroupLabels }));
+  return res(
+    ctx.delay(2000),
+    ctx.data({ ...store.data, allConsumerGroupLabels })
+  );
 };
 
 export const getConsumerHandler = (req, res, ctx) => {
-  const { serviceAccessId } = req.variables;
+  const { consumerId } = req.variables;
   const consumer = store.data.getFilteredNamespaceConsumers.find(
-    (d) => d.id === serviceAccessId
+    (d) => d.id === consumerId
   );
   const owner = {
     name: harleyAccessRequest.requestor.name,
-    username: 'harley123',
+    providerUsername: 'harley123',
+    provider: 'github',
     email: 'harley@easymart.store',
   };
   return res(
     ctx.data({
       getNamespaceConsumerAccess: {
         application:
-          serviceAccessId === 'd1'
+          consumerId === 'd1'
             ? null
             : {
                 id: 'a1',
@@ -323,6 +328,7 @@ export const getConsumerHandler = (req, res, ctx) => {
 
 export const getAccessRequestsHandler = (req, res, ctx) => {
   return res(
+    ctx.delay(1000),
     ctx.data({
       allAccessRequestsByNamespace: store.data.allAccessRequestsByNamespace,
     })

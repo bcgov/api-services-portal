@@ -6,7 +6,8 @@
     "allowJs": true,
     "noImplicitAny": true,
     "strict": true,
-    "module": "commonjs"
+    "module": "commonjs",
+    "baseUrl": "http://oauth2proxy.localtest.me:4180/"
   },
   "include": ["./cypress/**/*.ts", "**/*.d.ts"],
   "exclude": [],

@@ -19,6 +19,7 @@ import {
   Input,
   FormHelperText,
 } from '@chakra-ui/react';
+import { getProviderText } from '@/shared/services/utils';
 import Head from 'next/head';
 import { FaPen } from 'react-icons/fa';
 import { useApiMutation } from '@/shared/services/api';
@@ -102,6 +103,18 @@ const ProfilePage: React.FC = () => {
             gridRowGap={8}
             gap={8}
           >
+            {fields.map((f) => (
+              <GridItem key={uid(f)}>
+                <Text color="bc-component" opacity={0.6}>
+                  {f.name}
+                </Text>
+                <Text>
+                  {f.key === 'provider'
+                    ? getProviderText(user[f.key])
+                    : user[f.key] ?? '-'}
+                </Text>
+              </GridItem>
+            ))}
             <Figure label="Name">{user.name}</Figure>
             <Figure label="Email">
               <Editable

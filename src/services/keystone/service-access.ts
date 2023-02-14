@@ -186,6 +186,7 @@ export async function lookupServiceAccessesByEnvironment(
                           }
                         }
                         productEnvironment {
+                          id
                           name
                           flow
                           product {
@@ -300,6 +301,8 @@ export async function lookupLabeledServiceAccessesForNamespace(
                       name
                       owner {
                         name
+                        provider
+                        providerUsername
                         username
                         email
                       }
