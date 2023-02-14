@@ -404,7 +404,12 @@ class Oauth2ProxyAuthStrategy {
                           updateUser(id: $userId, data: {name: $name, email: $email, providerUsername: $providerUsername }) {
                               id
                       } }`,
-          variables: { name, email, providerUsername, userId },
+          variables: {
+            name,
+            email: Boolean(email) ? email : saved.email,
+            providerUsername,
+            userId,
+          },
         });
         if (errors) {
           logger.error(
