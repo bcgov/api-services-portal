@@ -4,25 +4,87 @@ import {
   Avatar,
   Box,
   Container,
+  Editable,
+  EditableInput,
+  EditablePreview,
   Flex,
   Grid,
   GridItem,
   Heading,
   Text,
+  ButtonGroup,
+  Button,
+  useEditableControls,
+  Icon,
+  Input,
+  FormHelperText,
 } from '@chakra-ui/react';
 import { getProviderText } from '@/shared/services/utils';
 import Head from 'next/head';
-import { uid } from 'react-uid';
-
-const fields = [
-  { name: 'Name', key: 'name' },
-  { name: 'Email', key: 'email' },
-  { name: 'Username', key: 'providerUsername' },
-  { name: 'Provider', key: 'provider' },
-];
+import { FaPen } from 'react-icons/fa';
+import { useApiMutation } from '@/shared/services/api';
+import { gql } from 'graphql-request';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const mutate = useApiMutation(mutation);
+  const inputRef = React.useRef(null);
+  const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
+
+  function Figure({
+    children,
+    label,
+  }: {
+    children: React.ReactNode;
+    label: string;
+  }) {
+    return (
+      <GridItem>
+        <Text color="bc-component" opacity={0.6}>
+          {label}
+        </Text>
+        <Text>{children}</Text>
+      </GridItem>
+    );
+  }
+  function EditableControls() {
+    const {
+      isEditing,
+      getSubmitButtonProps,
+      getCancelButtonProps,
+      getEditButtonProps,
+    } = useEditableControls();
+
+    return isEditing ? (
+      <ButtonGroup justifyContent="center" size="sm" ml={2}>
+        <Button {...getCancelButtonProps()} variant="secondary">
+          Cancel
+        </Button>
+        <Button {...getSubmitButtonProps()}>Done</Button>
+      </ButtonGroup>
+    ) : (
+      <Box d="inline-flex" justifyContent="center" ml={2}>
+        <Button
+          leftIcon={<Icon as={FaPen} />}
+          size="sm"
+          variant="ghost"
+          {...getEditButtonProps()}
+        >
+          Edit
+        </Button>
+      </Box>
+    );
+  }
+
+  async function handleSubmit(value: string) {
+    const email = value.trim();
+    if (email && inputRef.current?.checkValidity()) {
+      setIsInvalid(false);
+      await mutate.mutateAsync({ email });
+      return false;
+    }
+    setIsInvalid(true);
+  }
 
   return (
     <>
@@ -53,11 +115,41 @@ const ProfilePage: React.FC = () => {
                 </Text>
               </GridItem>
             ))}
+            <Figure label="Name">{user.name}</Figure>
+            <Figure label="Email">
+              <Editable
+                isRequired
+                submitOnBlur={false}
+                defaultValue={user?.email}
+                onSubmit={handleSubmit}
+              >
+                <EditablePreview />
+                <Input
+                  isRequired
+                  ref={inputRef}
+                  as={EditableInput}
+                  width="auto"
+                  type="email"
+                />
+                <EditableControls />
+              </Editable>
+              {isInvalid && <Text color="bc-error">Invalid Email</Text>}
+            </Figure>
+            <Figure label="Username">{user.username}</Figure>
+            <Figure label="Authentication">BC Services Card</Figure>
           </Grid>
         </Flex>
       </Container>
     </>
   );
 };
+
+const mutation = gql`
+  mutation UpdateUserEmail($email: String!) {
+    updateEmail(email: $email) {
+      email
+    }
+  }
+`;
 
 export default ProfilePage;

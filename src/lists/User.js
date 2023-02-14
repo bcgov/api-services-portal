@@ -11,6 +11,7 @@ const { EnforcementPoint } = require('../authz/enforcement');
 const {
   lookupEnvironmentAndIssuerById,
   updateUserLegalAccept,
+  updateUserEmail,
 } = require('../services/keystone');
 
 // Access control functions
@@ -103,6 +104,17 @@ module.exports = {
               } else {
                 return null;
               }
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema: 'updateEmail(email: String!): User',
+            resolver: async (item, args, context, info, { query, access }) => {
+              return await updateUserEmail(
+                context,
+                context.authedItem.userId,
+                args.email
+              );
             },
             access: EnforcementPoint,
           },

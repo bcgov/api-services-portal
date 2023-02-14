@@ -246,7 +246,7 @@ class Oauth2ProxyAuthStrategy {
 
   async register_user(req, res, next) {
     const _users = this.keystone.getListByKey('User');
-    const users = this.keystone.getListByKey(this.listKey);
+    const identityList = this.keystone.getListByKey(this.listKey);
 
     // If no user in session but we are authenticated, then redirect to /admin/signin
     const allRoles = [
@@ -385,7 +385,7 @@ class Oauth2ProxyAuthStrategy {
       const saved = _results[0];
       if (
         saved.name != name ||
-        saved.email != email ||
+        (Boolean(email) && saved.email != email) ||
         saved.identityProvider === null ||
         saved.providerUsername != providerUsername
       ) {
@@ -406,7 +406,7 @@ class Oauth2ProxyAuthStrategy {
                       } }`,
           variables: {
             name,
-            email,
+            email: Boolean(email) ? email : saved.email,
             identityProvider,
             providerUserGuid,
             providerUsername,
@@ -422,7 +422,7 @@ class Oauth2ProxyAuthStrategy {
       }
     }
 
-    let results = await users.adapter.find({ jti: jti });
+    let results = await identityList.adapter.find({ jti });
 
     var operation = 'update';
 
@@ -453,7 +453,7 @@ class Oauth2ProxyAuthStrategy {
       if (errors) {
         logger.error('register_user - NO! Something went wrong %j', errors);
       }
-      results = await users.adapter.find({ ['jti']: jti });
+      results = await identityList.adapter.find({ ['jti']: jti });
       operation = 'create';
     }
 
