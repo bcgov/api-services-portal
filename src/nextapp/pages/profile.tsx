@@ -24,6 +24,14 @@ import Head from 'next/head';
 import { FaPen } from 'react-icons/fa';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
+import { uid } from 'react-uid';
+
+const fields = [
+  { name: 'Name', key: 'name' },
+  { name: 'Email', key: 'email' },
+  { name: 'Username', key: 'providerUsername' },
+  { name: 'Provider', key: 'provider' },
+];
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
