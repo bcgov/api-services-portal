@@ -59,6 +59,16 @@ jobs:
           name: test-results
           path: ${{ github.workspace }}/e2e/results/report
 
+      - name: Upload E2E Code Coverage Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: ${{ github.workspace }}/e2e/coverage
+
+      - name: Format LCOV Report
+        run: |
+          sudo sed  -i -r 's/\.*\/app\/nextapp\///g' ./e2e/coverage/lcov.info
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
