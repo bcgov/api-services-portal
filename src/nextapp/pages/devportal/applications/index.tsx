@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Alert,
   AlertIcon,
+  Button,
   Container,
   Text,
   Heading,
@@ -14,6 +15,13 @@ import {
   Grid,
   GridItem,
   Flex,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogHeader,
 } from '@chakra-ui/react';
 import EditApplication from '@/components/edit-application';
 import get from 'lodash/get';
@@ -57,8 +65,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const ApplicationsPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ queryKey }) => {
+> = ({ queryKey }): JSX.Element => {
   const toast = useToast();
+  const cancelRef = React.useRef();
+  const [idToDelete, setIdToDelete] = React.useState<string | null>(null);
   const [editing, setEditing] = React.useState<Application | null>(null);
   const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
@@ -101,12 +111,19 @@ const ApplicationsPage: React.FC<
   const handleCloseEditDialog = () => {
     setEditing(null);
   };
-  const handleDelete = (id: string) => async () => {
+  const handleSelectToDelete = (id: string) => () => {
+    setIdToDelete(id);
+  };
+  const handleClose = () => {
+    setIdToDelete(null);
+  };
+  const handleDelete = async () => {
+    setIdToDelete(null);
     try {
-      if (openId === id) {
+      if (openId === idToDelete) {
         setOpenId(null);
       }
-      await deleteMutation.mutateAsync({ id });
+      await deleteMutation.mutateAsync({ id: idToDelete });
       toast({
         title: 'Application deleted',
         status: 'success',
@@ -147,6 +164,37 @@ const ApplicationsPage: React.FC<
         onClose={handleCloseEditDialog}
         refreshQueryKey={queryKey}
       />
+      <AlertDialog
+        isCentered
+        motionPreset="slideInBottom"
+        leastDestructiveRef={cancelRef}
+        onClose={handleClose}
+        isOpen={Boolean(idToDelete)}
+      >
+        <AlertDialogOverlay />
+        <AlertDialogContent>
+          <AlertDialogHeader>Delete Application</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            You are about to delete Easy Mart Store 122. Deleting an application
+            will delete all related credentials found under "My Access". This
+            action cannot be undone.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={handleClose} variant="secondary">
+              Cancel
+            </Button>
+            <Button
+              colorScheme="red"
+              ml={3}
+              onClick={handleDelete}
+              variant="solid"
+            >
+              Yes, Delete Application
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Container maxW="6xl">
         {data?.allApplications?.length === 0 && (
           <Alert status="warning">
@@ -189,7 +237,7 @@ const ApplicationsPage: React.FC<
                       <MenuItem
                         color="red.500"
                         data-testid="delete-application-btn"
-                        onClick={handleDelete(d.id)}
+                        onClick={handleSelectToDelete(d.id)}
                       >
                         Delete Application
                       </MenuItem>

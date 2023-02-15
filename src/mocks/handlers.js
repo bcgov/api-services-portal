@@ -196,6 +196,18 @@ export const handlers = [
   }),
   keystone.mutation('CreateNamespace', (req, res, ctx) => {
     const { name } = req.variables;
+
+    if (allNamespaces.map((n) => n.name).includes(name)) {
+      return res(
+        ctx.data({
+          errors: [
+            {
+              message: 'Namespace already exists',
+            },
+          ],
+        })
+      );
+    }
     const id = `ns-${allNamespaces.length + 1}`;
     const namespace = {
       name,
