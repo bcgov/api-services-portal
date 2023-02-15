@@ -263,7 +263,9 @@ class Oauth2ProxyAuthStrategy {
     const jti = oauthUser['jti']; // JWT ID - Unique Identifier for the token
     const sub = oauthUser['sub']; // Subject ID - Whom the token refers to
 
-    const name = oauthUser['name'];
+    const name = Boolean(oauthUser['name'])
+      ? oauthUser['name']
+      : oauthUser['provider_username'];
     const identityProvider = oauthUser['identity_provider'];
     const providerUserGuid = oauthUser['provider_user_guid'];
     const providerUsername = oauthUser['provider_username'];
