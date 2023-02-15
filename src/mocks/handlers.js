@@ -104,6 +104,7 @@ const allNamespaces = [
 ];
 let namespace = personas.mark.namespace;
 let user = { ...personas.harley, namespace };
+let email = null;
 
 export function resetAll() {
   consumersStore.reset();
@@ -204,7 +205,7 @@ export const handlers = [
 
     allNamespaces.push(namespace);
 
-    req(
+    res(
       ctx.data({
         createNamespace: namespace,
       })
@@ -288,6 +289,16 @@ export const handlers = [
   keystone.mutation('SaveConsumerLabels', saveConsumerLabels),
   keystone.mutation('GrantAccessToConsumer', grantAccessToConsumerHandler),
   keystone.mutation('RevokeAccessFromConsumer', revokeAccessFromConsumer),
+  keystone.mutation('UpdateUserEmail', (req, res, ctx) => {
+    email = req.variables.email;
+    return res(
+      ctx.data({
+        updateEmail: {
+          email,
+        },
+      })
+    );
+  }),
   keystone.query('GetBusinessProfile', (req, res, ctx) => {
     const { serviceAccessId } = req.variables;
     const institution =

@@ -15,17 +15,26 @@ import {
   FormHelperText,
 } from '@chakra-ui/react';
 import { useAuth } from '@/shared/services/auth';
+import { useApiMutation } from '@/shared/services/api';
+import { gql } from 'graphql-request';
+import { useQueryClient } from 'react-query';
 
 const CompleteProfile: React.FC = () => {
   const form = React.useRef(null);
+  const mutate = useApiMutation(mutation);
+  const client = useQueryClient();
   const { user } = useAuth();
   const { isOpen, onClose } = useDisclosure({
     isOpen: !user?.email,
   });
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (form.current?.checkValidity()) {
+      const data = new FormData(form.current);
+      const email = data.get('email');
+      await mutate.mutateAsync({ email });
+      client.invalidateQueries('user');
       onClose();
     }
   }
@@ -72,3 +81,11 @@ const CompleteProfile: React.FC = () => {
 };
 
 export default CompleteProfile;
+
+const mutation = gql`
+  mutation UpdateUserEmail($email: String!) {
+    updateEmail(email: $email) {
+      email
+    }
+  }
+`;

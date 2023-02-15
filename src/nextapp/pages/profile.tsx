@@ -17,25 +17,17 @@ import {
   useEditableControls,
   Icon,
   Input,
-  FormHelperText,
+  useToast,
 } from '@chakra-ui/react';
-import { getProviderText } from '@/shared/services/utils';
 import Head from 'next/head';
 import { FaPen } from 'react-icons/fa';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
-import { uid } from 'react-uid';
-
-const fields = [
-  { name: 'Name', key: 'name' },
-  { name: 'Email', key: 'email' },
-  { name: 'Username', key: 'providerUsername' },
-  { name: 'Provider', key: 'provider' },
-];
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const mutate = useApiMutation(mutation);
+  const toast = useToast();
   const inputRef = React.useRef(null);
   const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
 
@@ -87,9 +79,23 @@ const ProfilePage: React.FC = () => {
   async function handleSubmit(value: string) {
     const email = value.trim();
     if (email && inputRef.current?.checkValidity()) {
-      setIsInvalid(false);
-      await mutate.mutateAsync({ email });
-      return false;
+      try {
+        setIsInvalid(false);
+        await mutate.mutateAsync({ email });
+        toast({
+          status: 'success',
+          title: 'Email updated',
+          isClosable: true,
+        });
+        return false;
+      } catch (err) {
+        toast({
+          status: 'error',
+          title: 'Unable to update email',
+          description: err,
+          isClosable: true,
+        });
+      }
     }
     setIsInvalid(true);
   }
@@ -111,18 +117,6 @@ const ProfilePage: React.FC = () => {
             gridRowGap={8}
             gap={8}
           >
-            {fields.map((f) => (
-              <GridItem key={uid(f)}>
-                <Text color="bc-component" opacity={0.6}>
-                  {f.name}
-                </Text>
-                <Text>
-                  {f.key === 'provider'
-                    ? getProviderText(user[f.key])
-                    : user[f.key] ?? '-'}
-                </Text>
-              </GridItem>
-            ))}
             <Figure label="Name">{user.name}</Figure>
             <Figure label="Email">
               <Editable
