@@ -123,9 +123,11 @@ jobs:
               
           readinessProbe:
             timeoutSeconds: 30
+            periodSeconds: 120
             
           livenessProbe:
             timeoutSeconds: 30
+            periodSeconds: 120
             
           persistence:
               enabled: true
