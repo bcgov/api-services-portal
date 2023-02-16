@@ -183,8 +183,23 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
 
   log.info('[producer] %s : %d records', file, items.length);
 
+  const results = {
+    'no-change': 0,
+    created: 0,
+    'created-failed': 0,
+    updated: 0,
+    deleted: 0,
+    'updated-failed': 0,
+    'deleted-failed': 0,
+  };
+
   return () => {
     if (index == items.length) {
+      Object.keys(results)
+        .filter((r) => results[r] != 0)
+        .forEach((r) => {
+          log.info('[%s] %d', String(r).padStart(15, ' '), results[r]);
+        });
       log.info('Finished producing ' + index + ' records.');
       return null;
     }
@@ -228,8 +243,14 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
     }
     return destination
       .fireAndForget(feedPath, item)
-      .then((result) => log.debug('%s -> %s OK', file, result))
-      .catch((err) => log.error(`[${nm}] ERR ${err}`));
+      .then((result) => {
+        results[result['result']]++;
+
+        log.debug('%s -> %s OK', file, result);
+      })
+      .catch((err) => {
+        log.error(`[${nm}] ERR ${err}`);
+      });
   };
 }
 
@@ -261,8 +282,24 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
   log.info('[loadGroupsProducer] (%s) %d records', feedPath, items.length);
 
   let index = 0;
+
+  const results = {
+    'no-change': 0,
+    created: 0,
+    'created-failed': 0,
+    updated: 0,
+    deleted: 0,
+    'updated-failed': 0,
+    'deleted-failed': 0,
+  };
+
   return () => {
     if (index == items.length) {
+      Object.keys(results)
+        .filter((r) => results[r] != 0)
+        .forEach((r) => {
+          log.info('[%s] %d', String(r).padStart(15, ' '), results[r]);
+        });
       log.info('Finished producing ' + index + ' records.');
       return null;
     }
@@ -278,8 +315,13 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
 
     return destination
       .fireAndForget(feedPath, item)
-      .then((result) => log.debug('%s -> %s OK', feedPath, result))
-      .catch((err) => log.error(`[${nm}] ERR ${err}`));
+      .then((result) => {
+        results[result['result']]++;
+        log.debug('%s -> %s OK', feedPath, result);
+      })
+      .catch((err) => {
+        log.error(`[${nm}] ERR ${err}`);
+      });
   };
 }
 

@@ -78,7 +78,7 @@ function transfers(workingPath, baseUrl, exceptions) {
       // Wait for the pool to settle.
       return poolPromise.then(
         function () {
-          log.debug('All promises fulfilled');
+          log.info('All promises fulfilled');
         },
         function (error) {
           log.error('Some promise rejected: ' + error.message);
