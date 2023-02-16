@@ -4,6 +4,7 @@ const url = require('url');
 const PromisePool = require('es6-promise-pool');
 const { checkStatus } = require('./checkStatus');
 const { Logger } = require('../logger');
+const stringify = require('json-stable-stringify');
 
 const log = Logger('utils.xfer');
 
@@ -163,7 +164,7 @@ function transfers(workingPath, baseUrl, exceptions) {
 
     inject_hash_and_source: function (source, payload) {
       const crypto = require('crypto');
-      const body = JSON.stringify(payload);
+      const body = stringify(payload);
 
       payload['extSource'] = source;
       payload['extRecordHash'] = crypto
