@@ -240,6 +240,10 @@ export const handlers = [
   keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
   keystone.query('GetAllCredentialIssuers', getAllCredentialIssuersByNamespace),
+  keystone.query(
+    'GetAllCredentialIssuersByNamespace',
+    getAllCredentialIssuersByNamespace
+  ),
   keystone.query('GetCredentialIssuers', getAllCredentialIssuers),
   keystone.query('SharedIdPPreview', getSharedIdpPreview),
   keystone.mutation('CreateAuthzProfile', createAuthzProfile),
