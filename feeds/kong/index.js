@@ -1,12 +1,11 @@
 const fs = require('fs');
 const { transfers } = require('../utils/transfers');
 const { portal } = require('../utils/portal');
-
 const { v4: uuidv4 } = require('uuid');
-
-const assert = require('assert').strict;
-
 const mask = require('./mask');
+const { Logger } = require('../logger');
+
+const log = Logger('kong');
 
 async function scopedSync(
   { url, workingPath, destinationUrl },
@@ -90,8 +89,8 @@ async function scopedSyncByNamespace(
       const nm = item.entity + ':' + cur.extForeignKey;
       await destination
         .fireAndForgetDeletion('/feed/' + item.entity + '/' + cur.extForeignKey)
-        .then((result) => console.log(`[${nm}] DELETED`))
-        .catch((err) => console.log(`[${nm}] DELETION ERR ${err}`));
+        .then((result) => log.debug(`[${nm}] DELETED`))
+        .catch((err) => log.error(`[${nm}] DELETION ERR ${err}`));
     }
   }
 
@@ -181,9 +180,12 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
   const allACLs =
     type == 'consumer' ? xfer.get_json_content('gw-acls')['data'] : null;
   let index = 0;
+
+  log.info('[producer] %s : %d records', file, items.length);
+
   return () => {
     if (index == items.length) {
-      console.log('Finished producing ' + index + ' records.');
+      log.info('Finished producing ' + index + ' records.');
       return null;
     }
     const item = items[index];
@@ -212,7 +214,7 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
     // if (item['plugins'].length == 0) {
     //     return new Promise ((resolve, reject) => resolve())
     // }
-    console.log(nm + ` with ${item['plugins'].length} plugins`);
+    // log.debug(nm + ` with ${item['plugins'].length} plugins`);
 
     if (type == 'consumer') {
       item['aclGroups'] = allACLs
@@ -226,8 +228,8 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
     }
     return destination
       .fireAndForget(feedPath, item)
-      .then((result) => console.log(`[${nm}] OK`, result))
-      .catch((err) => console.log(`[${nm}] ERR ${err}`));
+      .then((result) => log.debug('%s -> %s OK', file, result))
+      .catch((err) => log.error(`[${nm}] ERR ${err}`));
   };
 }
 
@@ -256,10 +258,12 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
       });
     });
 
+  log.info('[loadGroupsProducer] (%s) %d records', feedPath, items.length);
+
   let index = 0;
   return () => {
     if (index == items.length) {
-      console.log('Finished producing ' + index + ' records.');
+      log.info('Finished producing ' + index + ' records.');
       return null;
     }
     const item = items[index];
@@ -274,8 +278,8 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
 
     return destination
       .fireAndForget(feedPath, item)
-      .then((result) => console.log(`[${nm}] OK`, result))
-      .catch((err) => console.log(`[${nm}] ERR ${err}`));
+      .then((result) => log.debug('%s -> %s OK', feedPath, result))
+      .catch((err) => log.error(`[${nm}] ERR ${err}`));
   };
 }
 
@@ -283,72 +287,72 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
    Use a mapping file to map Service -> Product Name
 
 */
-function loadServiceAccessProducer(xfer, destinationUrl, file, feedPath) {
-  const destination = portal(destinationUrl);
-  const items = [];
-  const allACLS = xfer.get_json_content('gw-acls')['data'];
+// function loadServiceAccessProducer(xfer, destinationUrl, file, feedPath) {
+//   const destination = portal(destinationUrl);
+//   const items = [];
+//   const allACLS = xfer.get_json_content('gw-acls')['data'];
 
-  const allPlugins = xfer.get_json_content('gw-plugins')['data'].map(mask);
-  const nsGroups = [];
-  allPlugins
-    .filter((p) => p.name == 'acl')
-    .map((p) => {
-      return p.config.allow.map((a) => {
-        nsGroups.push({
-          namespace: toNamespace(p.tags),
-          name: a,
-          service: p.service,
-          route: p.route,
-        });
-      });
-    });
+//   const allPlugins = xfer.get_json_content('gw-plugins')['data'].map(mask);
+//   const nsGroups = [];
+//   allPlugins
+//     .filter((p) => p.name == 'acl')
+//     .map((p) => {
+//       return p.config.allow.map((a) => {
+//         nsGroups.push({
+//           namespace: toNamespace(p.tags),
+//           name: a,
+//           service: p.service,
+//           route: p.route,
+//         });
+//       });
+//     });
 
-  xfer.get_json_content(file)['data'].map((item) => {
-    // Create an application of any Consumer that has atleast one ACL Group
-    const acls = allACLS
-      .filter(
-        (acl) => acl.group != 'idir' && acl.group != 'gwa_github_developer'
-      )
-      .filter((acl) => acl.consumer.id == item.id);
+//   xfer.get_json_content(file)['data'].map((item) => {
+//     // Create an application of any Consumer that has atleast one ACL Group
+//     const acls = allACLS
+//       .filter(
+//         (acl) => acl.group != 'idir' && acl.group != 'gwa_github_developer'
+//       )
+//       .filter((acl) => acl.consumer.id == item.id);
 
-    const consumerType =
-      item.username.endsWith('@sm-idir') ||
-      item.username.endsWith('@idir') ||
-      item.username.endsWith('@github')
-        ? 'user'
-        : 'client';
+//     const consumerType =
+//       item.username.endsWith('@sm-idir') ||
+//       item.username.endsWith('@idir') ||
+//       item.username.endsWith('@github')
+//         ? 'user'
+//         : 'client';
 
-    if (acls.length > 0) {
-      const acl_groups = acls.map((acl) => acl.group).join(', ');
-      // need to have it so that a ServiceAccess is created by each namespace that it relates to
-      //
-      items.push({
-        id: 'mig-' + item.username + '-' + item.id,
-        active: true,
-        aclEnabled: true,
-        consumerType: consumerType,
-        consumer: item.username,
-        productEnvironment: '6053d7858bd8930018423480',
-      });
-    }
-  });
+//     if (acls.length > 0) {
+//       const acl_groups = acls.map((acl) => acl.group).join(', ');
+//       // need to have it so that a ServiceAccess is created by each namespace that it relates to
+//       //
+//       items.push({
+//         id: 'mig-' + item.username + '-' + item.id,
+//         active: true,
+//         aclEnabled: true,
+//         consumerType: consumerType,
+//         consumer: item.username,
+//         productEnvironment: '6053d7858bd8930018423480',
+//       });
+//     }
+//   });
 
-  let index = 0;
-  return () => {
-    if (index == items.length) {
-      console.log('Finished producing ' + index + ' records.');
-      return null;
-    }
-    const item = items[index];
-    index++;
-    const nm = item['id'];
+//   let index = 0;
+//   return () => {
+//     if (index == items.length) {
+//       console.log('Finished producing ' + index + ' records.');
+//       return null;
+//     }
+//     const item = items[index];
+//     index++;
+//     const nm = item['id'];
 
-    return destination
-      .fireAndForget(feedPath, item)
-      .then((result) => console.log(`[${nm}] OK`, result))
-      .catch((err) => console.log(`[${nm}] ERR ${err}`));
-  };
-}
+//     return destination
+//       .fireAndForget(feedPath, item)
+//       .then((result) => console.log(`[${nm}] OK`, result))
+//       .catch((err) => console.log(`[${nm}] ERR ${err}`));
+//   };
+// }
 
 function findAllPlugins(
   allPlugins,

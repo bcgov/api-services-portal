@@ -2,6 +2,9 @@ const querystring = require('querystring');
 const moment = require('moment');
 const { transfers } = require('../utils/transfers');
 const { portal } = require('../utils/portal');
+const { Logger } = require('../logger');
+
+const log = Logger('prometheus');
 
 const queryRanges = [
   {
@@ -58,9 +61,7 @@ async function syncQueryRanges(
   { workingPath, url, destinationUrl },
   params = { numDays: 5 }
 ) {
-  console.log(
-    'Prometheus SYNC syncQueryRanges (DAYS=' + params.numDays + ') ' + url
-  );
+  log.info('[syncQueryRanges] (DAYS=' + params.numDays + ') ' + url);
   const exceptions = [];
   xfer = transfers(workingPath, url, exceptions);
 
@@ -80,7 +81,6 @@ async function syncQueryRanges(
         step: _query.step,
         _: moment().valueOf(),
       };
-      console.log(day.fromNow());
       const path = '/api/v1/query_range?' + querystring.stringify(params);
 
       await xfer.copy(path, 'query-' + _query.id + '-' + target);
@@ -88,14 +88,16 @@ async function syncQueryRanges(
   }
 
   // Now, send to portal
-  await xfer.concurrentWork(producer(xfer, params.numDays, destinationUrl));
+  await xfer.concurrentWork(
+    producer(xfer, 'query_range', params.numDays, destinationUrl)
+  );
 }
 
 async function syncQueries(
   { workingPath, url, destinationUrl },
   params = { numDays: 5 }
 ) {
-  console.log('Prometheus SYNC (DAYS=' + params.numDays + ') ' + url);
+  log.info('[syncQueries] (DAYS=' + params.numDays + ') ' + url);
   const exceptions = [];
   xfer = transfers(workingPath, url, exceptions);
 
@@ -121,27 +123,38 @@ async function syncQueries(
   }
 
   // Now, send to portal
-  await xfer.concurrentWork(producer(xfer, params.numDays, destinationUrl));
+  await xfer.concurrentWork(
+    producer(xfer, 'query', params.numDays, destinationUrl)
+  );
 }
 
-function producer(xfer, numDays, destinationUrl) {
+function producer(xfer, queryType, numDays, destinationUrl) {
   const destination = portal(destinationUrl);
 
   const work = [];
   for (var d = 0; d < numDays; d++) {
     const target = moment().add(-d, 'days').format('YYYY-MM-DD');
-    for (_query of queries) {
-      xfer
-        .get_json_content('query-' + _query.id + '-' + target)
-        ['data'][0]['result'].map((metric) => {
-          work.push({ target: target, query: _query, metric: metric });
-        });
+    for (_query of queryType === 'query' ? queries : queryRanges) {
+      const json = xfer.get_json_content('query-' + _query.id + '-' + target);
+      const results = Array.isArray(json['data'])
+        ? json['data'][0]['result']
+        : json['data']['result'];
+      log.info(
+        '[producer] %s %s : %d records',
+        target,
+        _query.id,
+        results.length
+      );
+      results.map((metric) => {
+        work.push({ target: target, query: _query, metric: metric });
+      });
     }
   }
+
   let index = 0;
   return () => {
     if (index == work.length) {
-      console.log('Finished producing ' + index + ' records.');
+      log.info('Finished producing ' + index + ' records.');
       return null;
     }
     const item = work[index];
@@ -167,8 +180,8 @@ function producer(xfer, numDays, destinationUrl) {
 
     return destination
       .fireAndForget('/feed/Metric', item.metric)
-      .then((result) => console.log(`[${name}] OK`, result))
-      .catch((err) => console.log(`[${name}] ERR ${err}`));
+      .then((result) => log.debug(`[${name}] OK`, result))
+      .catch((err) => log.error(`[${name}] ERR ${err}`));
   };
 }
 
