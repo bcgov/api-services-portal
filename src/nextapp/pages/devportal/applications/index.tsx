@@ -68,7 +68,9 @@ const ApplicationsPage: React.FC<
 > = ({ queryKey }): JSX.Element => {
   const toast = useToast();
   const cancelRef = React.useRef();
-  const [idToDelete, setIdToDelete] = React.useState<string | null>(null);
+  const [appToDelete, setAppToDelete] = React.useState<Application | null>(
+    null
+  );
   const [editing, setEditing] = React.useState<Application | null>(null);
   const [openId, setOpenId] = React.useState<string | null>();
   const queryClient = useQueryClient();
@@ -111,19 +113,19 @@ const ApplicationsPage: React.FC<
   const handleCloseEditDialog = () => {
     setEditing(null);
   };
-  const handleSelectToDelete = (id: string) => () => {
-    setIdToDelete(id);
+  const handleSelectToDelete = (app: Application) => () => {
+    setAppToDelete(app);
   };
   const handleClose = () => {
-    setIdToDelete(null);
+    setAppToDelete(null);
   };
   const handleDelete = async () => {
-    setIdToDelete(null);
+    setAppToDelete(null);
     try {
-      if (openId === idToDelete) {
+      if (openId === appToDelete.id) {
         setOpenId(null);
       }
-      await deleteMutation.mutateAsync({ id: idToDelete });
+      await deleteMutation.mutateAsync({ id: appToDelete.id });
       toast({
         title: 'Application deleted',
         status: 'success',
@@ -169,14 +171,14 @@ const ApplicationsPage: React.FC<
         motionPreset="slideInBottom"
         leastDestructiveRef={cancelRef}
         onClose={handleClose}
-        isOpen={Boolean(idToDelete)}
+        isOpen={Boolean(appToDelete)}
       >
         <AlertDialogOverlay />
         <AlertDialogContent>
           <AlertDialogHeader>Delete Application</AlertDialogHeader>
           <AlertDialogCloseButton />
           <AlertDialogBody>
-            You are about to delete Easy Mart Store 122. Deleting an application
+            You are about to delete {appToDelete?.name} Deleting an application
             will delete all related credentials found under "My Access". This
             action cannot be undone.
           </AlertDialogBody>
@@ -237,9 +239,9 @@ const ApplicationsPage: React.FC<
                       <MenuItem
                         color="red.500"
                         data-testid="delete-application-btn"
-                        onClick={handleSelectToDelete(d.id)}
+                        onClick={handleSelectToDelete(d)}
                       >
-                        Delete Application
+                        Delete Application...
                       </MenuItem>
                     </ActionsMenu>
                     <IconButton
