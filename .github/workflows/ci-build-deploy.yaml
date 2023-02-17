@@ -120,14 +120,6 @@ jobs:
             rollingUpdate:
               maxSurge: 0
               maxUnavailable: 100%
-              
-          readinessProbe:
-            timeoutSeconds: 30
-            initialDelaySeconds: 120
-            
-          livenessProbe:
-            timeoutSeconds: 30
-            initialDelaySeconds: 120
             
           persistence:
               enabled: true
