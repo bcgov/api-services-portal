@@ -5,6 +5,7 @@ import {
   Activity,
   Environment,
   GatewayConsumer,
+  GatewayRoute,
   Namespace,
   ServiceAccess,
   TemporaryIdentity,
@@ -51,6 +52,7 @@ export class OpsMetrics {
   gActivity: Gauge;
   gConsumers: Gauge;
   gProducts: Gauge;
+  gGatewayRoutes: Gauge;
 
   constructor(keystone: Keystone) {
     this.keystone = keystone;
@@ -108,7 +110,6 @@ export class OpsMetrics {
     });
 
     // value = 'requests_30_day'
-
     this.gConsumers = new Gauge({
       name: 'ops_metrics_consumers',
       help: 'Consumer Access',
@@ -126,6 +127,12 @@ export class OpsMetrics {
         'date',
       ],
     });
+
+    this.gGatewayRoutes = new Gauge({
+      name: 'ops_metrics_routes',
+      help: 'Gateway Service Route information',
+      labelNames: ['namespace', 'service', 'route', 'host_path', 'methods'],
+    });
   }
 
   // public getRegister() {
@@ -139,6 +146,7 @@ export class OpsMetrics {
     await this.generateActivityMetrics();
     await this.generateConsumerMetrics();
     await this.generateProductMetrics();
+    await this.generateRouteMetrics();
   }
 
   public async store() {
@@ -155,6 +163,7 @@ export class OpsMetrics {
       this.gActivity,
       this.gProducts,
       this.gConsumers,
+      this.gGatewayRoutes,
     ]) {
       const existing = await batch.lookup('allBlobs', 'ref', metric.name(), []);
       if (existing) {
@@ -413,6 +422,42 @@ export class OpsMetrics {
       );
     });
   }
+
+  /*
+      name: 'ops_metrics_routes',
+      help: 'Gateway Service Route information',
+      labelNames: ['namespace', 'service', 'route', 'host_path', 'methods'],
+  */
+  async generateRouteMetrics() {
+    const ctx = this.keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: {} },
+    });
+    const routes = await getAllRoutes(ctx);
+    routes.forEach((route: GatewayRoute) => {
+      const hosts = JSON.parse(route.hosts);
+      const paths = route.paths ? JSON.parse(route.paths) : [];
+      const methods =
+        route.methods && route.methods != '[]'
+          ? JSON.parse(route.methods)
+          : ['*'];
+
+      for (const host of hosts) {
+        for (const path of paths) {
+          this.gGatewayRoutes.set(
+            {
+              namespace: route.namespace,
+              route: route.name,
+              service: route.service?.name,
+              host_path: `${host}${path}`,
+              methods: JSON.stringify(methods),
+            },
+            1
+          );
+        }
+      }
+    });
+  }
 }
 
 export async function getNamespaces(context: any): Promise<Namespace[]> {
@@ -453,6 +498,20 @@ async function getAllEnvironments(ctx: any) {
       'product { name, namespace, dataset { title } }',
       'credentialIssuer { name, environmentDetails, inheritFrom { environmentDetails } }',
     ],
+    undefined,
+    0,
+    1000
+  );
+  return allEnvs;
+}
+
+async function getAllRoutes(ctx: any) {
+  const batch = new BatchService(ctx);
+
+  // Limiting to 1000 is not great!  We should really recurse until we get to the end!
+  const allEnvs = await batch.listAll(
+    'allGatewayRoutes',
+    ['name', 'namespace', 'hosts', 'paths', 'methods', 'service { name }'],
     undefined,
     0,
     1000
