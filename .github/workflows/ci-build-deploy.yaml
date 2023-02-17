@@ -121,6 +121,14 @@ jobs:
               maxSurge: 0
               maxUnavailable: 100%
             
+          readinessProbe:
+            timeoutSeconds: 30
+            periodSeconds: 120
+            
+          livenessProbe:
+            timeoutSeconds: 30
+            periodSeconds: 120
+
           persistence:
               enabled: true
               size: 2Gi
