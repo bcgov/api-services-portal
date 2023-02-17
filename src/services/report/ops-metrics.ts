@@ -107,6 +107,8 @@ export class OpsMetrics {
       ],
     });
 
+    // value = 'requests_30_day'
+
     this.gConsumers = new Gauge({
       name: 'ops_metrics_consumers',
       help: 'Consumer Access',
@@ -121,7 +123,6 @@ export class OpsMetrics {
         'environment',
         'flow',
         'issuer',
-        'requests_30_day',
         'date',
       ],
     });
@@ -367,13 +368,12 @@ export class OpsMetrics {
             product: sa.productEnvironment?.product?.name,
             environment: sa.productEnvironment?.name,
             flow: sa.productEnvironment?.flow,
-            requests_30_day: calcMetrics(
-              sa.productEnvironment?.product?.namespace,
-              sa.consumer?.username
-            ).totalRequests,
             date: sa.createdAt,
           },
-          1
+          calcMetrics(
+            sa.productEnvironment?.product?.namespace,
+            sa.consumer?.username
+          ).totalRequests
         );
       });
   }
