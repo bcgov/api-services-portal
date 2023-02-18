@@ -32,11 +32,10 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
       cy.get(login.loginDropDown).click()
-      if(username.includes('idir')){
+      if (username.includes('idir')) {
         login.selectAPIProviderLoginOption()
       }
-      else
-      {
+      else {
         login.selectDeveloperLoginOption()
       }
       const log = Cypress.log({
@@ -247,8 +246,8 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:boolean) => {
-  let fixtureFile = flag ? "state/regen":"state/store";
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: boolean) => {
+  let fixtureFile = flag ? "state/regen" : "state/store";
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
   cy.fixture(fixtureFile).then((creds: any) => {
@@ -319,6 +318,30 @@ Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName: s
     body: body,
     form: true,
     failOnStatusCode: false
+  })
+})
+
+Cypress.Commands.add('makeKongGatewayRequestUsingClientIDSecret', (hostURL: string, methodType='GET') => {
+  cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
+
+    let cc = JSON.parse(store_res.clientidsecret)
+
+    cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
+      cy.get('@accessTokenResponse').then((token_res: any) => {
+        let token = token_res.body.access_token
+        cy.request({
+          method: methodType,
+          url: Cypress.env('KONG_URL'),
+          failOnStatusCode: false,
+          headers: {
+            Host: hostURL,
+          },
+          auth: {
+            bearer: token,
+          },
+        })
+      })
+    })
   })
 })
 
@@ -420,7 +443,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
   }
 })
 
-Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
+Cypress.Commands.add('updatePluginFile', (filename: string, serviceName: string, pluginFileName: string) => {
   cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
     let newObj: any
     newObj = YAML.parse($el)
@@ -435,6 +458,24 @@ Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, 
       const yamlString = YAML.stringify(obj, 'utf8');
       cy.writeFile('cypress/fixtures/' + filename, yamlString)
     })
+  })
+})
+
+Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: string, propertyValue: any) => {
+  cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+    debugger
+    let obj = YAML.parse(content)
+    const keys = Object.keys(obj);
+    Object.keys(obj.services).forEach(function (key, index) {
+      if (propertyName == "methods") {
+        obj.services[0].routes[0].methods = propertyValue
+      }
+      else {
+        obj.services[0].plugins[0].config[propertyName] = propertyValue
+      }
+    });
+    const yamlString = YAML.stringify(obj, 'utf8');
+    cy.writeFile('cypress/fixtures/' + filename, yamlString)
   })
 })
 

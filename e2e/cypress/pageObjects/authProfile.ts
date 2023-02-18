@@ -29,6 +29,8 @@ class AuthorizationProfile {
   clientCredentialFlow: string = '[data-testid="cc-id-secret-chkBox"]'
   clientScopeInput: string = '[data-testid="ap-authorization-scopes-input"]'
   clientManagementTable: string = '[role=table]'
+  authProfileTbl: string = '[data-testid="ap-all-profiles-table"]'
+  clientRoleInput: string = '[data-testid="ap-authorization-client-roles"]'
 
 
   createAuthProfile(authProfile: any, isCreated=true) {
@@ -132,14 +134,27 @@ class AuthorizationProfile {
     })
   }
 
-  editAuthorizationProfile(profileName:string)
-  {
-    cy.get(this.profileTable).find('tr').each(($e1) => {
+  editAuthorizationProfile(authName: any) {
+    cy.get(this.authProfileTbl).find('tr').each(($e1) => {
       let authProfileName = $e1.find('td:nth-child(1)').text()
-      if (authProfileName.toLowerCase() === profileName.toLowerCase()) {
+      if (authProfileName.toLowerCase() === authName.toLowerCase() ) {
         cy.wrap($e1).find('button').first().click()
       }
     })
+  }
+
+  clearClientScope(){
+    cy.get('button').contains('Authorization').click()
+    cy.get(this.scopes).find('button').first().click()
+    cy.get(this.authorizationContinueBtn).click()
+  }
+
+  setClientRoles(roles : any){
+    cy.get('button').contains('Authorization').click()
+    roles.forEach((role: string) => {
+      cy.get(this.clientRoleInput).click().type(`${role}{enter}`)
+    })
+    cy.get(this.authorizationContinueBtn).click()
   }
 
   verifyAuthorizationProfileIssuerURL(issuerURL:string)
