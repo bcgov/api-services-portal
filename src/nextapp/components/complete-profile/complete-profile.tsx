@@ -46,7 +46,7 @@ const CompleteProfile: React.FC = () => {
     }
   }
 
-  if (!user) {
+  if (user?.provider !== 'bcsc' || !user) {
     return <></>;
   }
 
