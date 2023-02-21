@@ -30,6 +30,7 @@ const ProfilePage: React.FC = () => {
   const toast = useToast();
   const inputRef = React.useRef(null);
   const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
+  const isEditEmailDisabled = user?.provider === 'idir';
 
   function Figure({
     children,
@@ -119,22 +120,25 @@ const ProfilePage: React.FC = () => {
           >
             <Figure label="Name">{user.name}</Figure>
             <Figure label="Email">
-              <Editable
-                isRequired
-                submitOnBlur={false}
-                defaultValue={user?.email}
-                onSubmit={handleSubmit}
-              >
-                <EditablePreview />
-                <Input
+              {isEditEmailDisabled && (user.email ?? '-')}
+              {!isEditEmailDisabled && (
+                <Editable
                   isRequired
-                  ref={inputRef}
-                  as={EditableInput}
-                  width="auto"
-                  type="email"
-                />
-                <EditableControls />
-              </Editable>
+                  submitOnBlur={false}
+                  defaultValue={user?.email}
+                  onSubmit={handleSubmit}
+                >
+                  <EditablePreview />
+                  <Input
+                    isRequired
+                    ref={inputRef}
+                    as={EditableInput}
+                    width="auto"
+                    type="email"
+                  />
+                  <EditableControls />
+                </Editable>
+              )}
               {isInvalid && <Text color="bc-error">Invalid Email</Text>}
             </Figure>
             <Figure label="Username">{user.username}</Figure>
