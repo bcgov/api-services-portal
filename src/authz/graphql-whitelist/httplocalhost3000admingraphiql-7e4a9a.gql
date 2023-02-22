@@ -1,0 +1,6 @@
+
+  mutation UpdateSAAccess($prodEnvId: ID!, $resourceId: String!, $data: UMAPolicyInput!) {
+    updateUmaPolicy(prodEnvId: $prodEnvId, resourceId: $resourceId, data: $data) {
+      id
+    }
+  }

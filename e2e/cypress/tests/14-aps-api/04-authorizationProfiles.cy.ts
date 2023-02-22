@@ -91,4 +91,9 @@ testData.forEach((testCase: any) => {
             })
         })
     })
+
+    after(() => {
+        cy.clearLocalStorage({log:true})
+        cy.deleteAllCookies()
+      })
 })

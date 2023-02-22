@@ -1,3 +1,4 @@
+const { logger } = require('./logger');
 const express = require('express');
 const fetch = require('node-fetch');
 const YAML = require('js-yaml');
@@ -173,7 +174,7 @@ if (process.env.SCHEDULE == 'true') {
 }
 
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}`);
+  logger.info(`Listening at http://localhost:${port}`);
 });
 
 process.on('SIGINT', () => process.kill(process.pid, 'SIGTERM'));

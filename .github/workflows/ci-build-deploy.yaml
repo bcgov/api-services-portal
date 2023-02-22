@@ -122,10 +122,12 @@ jobs:
               maxUnavailable: 100%
               
           readinessProbe:
-            timeoutSeconds: 20
+            timeoutSeconds: 30
+            periodSeconds: 120
             
           livenessProbe:
-            timeoutSeconds: 20
+            timeoutSeconds: 30
+            periodSeconds: 120
             
           persistence:
               enabled: true
@@ -162,8 +164,8 @@ jobs:
           replicaCount: 1
 
           rollingUpdate:
-            maxUnavailable: 50%
-            maxSurge: 50%
+            maxUnavailable: 100%
+            maxSurge: 0%
 
           image:
             repository: ${{ env.REGISTRY }}/bcgov/api-services-portal/api-services-portal
@@ -281,8 +283,10 @@ jobs:
               value: 'FB000000'
             GWA_RES_SVR_CLIENT_ID:
               value: '${{ secrets.OIDC_CLIENT_ID }}'
+              secure: true
             GWA_RES_SVR_CLIENT_SECRET:
               value: '${{ secrets.OIDC_CLIENT_SECRET }}'
+              secure: true
             KEYCLOAK_AUTH_URL:
               value: '${{ secrets.KEYCLOAK_AUTH }}'
             KEYCLOAK_REALM:

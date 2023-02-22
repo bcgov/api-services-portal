@@ -10,6 +10,10 @@ import { strict as assert } from 'assert';
 import { Logger } from '../../logger';
 import { StructuredActivityService } from '../../services/workflow';
 import { lookupUsersByUsernames, switchTo } from '../../services/keystone';
+import {
+  revokePermissions,
+  updatePermissions,
+} from '../../services/workflow/ns-uma-perm-access';
 
 const logger = Logger('lists.umaticket');
 
@@ -22,6 +26,7 @@ type UMAPermissionTicket {
     resourceName: String!,
     requester: String!,
     requesterName: String!,
+    requesterEmail: String,
     owner: String!,
     ownerName: String!,
     granted: Boolean!
@@ -126,6 +131,7 @@ module.exports = {
                   .filter((u) => u.username == perm.requesterName)
                   .pop();
                 perm.requesterName = user?.name || perm.requesterName;
+                perm.requesterEmail = user?.email;
               });
               return permissions;
             },
@@ -143,71 +149,62 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const { email, scopes, resourceId } = args.data;
               const envCtx = await getEnvironmentContext(
                 context,
                 args.prodEnvId,
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
-              assert.strictEqual(
-                resourceIds.filter((rid) => rid === resourceId).length,
-                1,
-                'Invalid Resource'
+              const { email, scopes, resourceId } = args.data;
+
+              const { result } = await updatePermissions(
+                context,
+                envCtx,
+                email,
+                scopes,
+                resourceId,
+                'grant'
               );
 
-              const userApi = new KeycloakUserService(envCtx.openid.issuer);
-              await userApi.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
+              return result;
+            },
+            access: EnforcementPoint,
+          },
+          {
+            schema:
+              'updatePermissions(prodEnvId: ID!, data: UMAPermissionTicketInput! ): [UMAPermissionTicket]',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const envCtx = await getEnvironmentContext(
+                context,
+                args.prodEnvId,
+                access
               );
-              const user = await userApi.lookupUserByEmail(
-                args.data.email,
-                false,
-                ['idir']
-              );
-              const displayName =
-                userApi.getOneAttributeValue(user, 'display_name') ||
-                user.email;
 
-              const result = [];
-              const granted =
-                'granted' in args.data ? args.data['granted'] : true;
-              const permissionApi = new KeycloakPermissionTicketService(
-                envCtx.openid.issuer,
-                envCtx.accessToken
-              );
-              for (const scope of scopes) {
-                const permission = await permissionApi.createOrUpdatePermission(
-                  resourceId,
-                  user.id,
-                  granted,
-                  scope
-                );
-                result.push({ id: permission.id });
-              }
+              const { email, scopes, resourceId } = args.data;
 
-              await new StructuredActivityService(
-                context.sudo(),
-                context.authedItem['namespace']
-              ).logNamespaceAccess(
-                true,
-                'granted',
-                'namespace access',
-                'user',
-                displayName,
-                scopes
+              const { userId, result } = await updatePermissions(
+                context,
+                envCtx,
+                email,
+                scopes,
+                resourceId,
+                'update'
               );
 
               // refresh the permissions for this user in TemporaryIdentity
               try {
                 logger.info(
                   'User matching %s with %j',
-                  user.id,
+                  userId,
                   context.req.user
                 );
-                if (user.id === context.req.user.sub) {
+                if (userId === context.req.user.sub) {
                   const subjectToken =
                     context.req.headers['x-forwarded-access-token'];
 
@@ -220,7 +217,9 @@ module.exports = {
                     context.req.user.provider
                   );
                 }
-              } catch (err) {}
+              } catch (err) {
+                logger.warn('[updatePermissions] switch failed %s', err);
+              }
 
               return result;
             },
@@ -242,54 +241,14 @@ module.exports = {
                 access
               );
 
-              const resourceIds = await getResourceSets(envCtx);
-              assert.strictEqual(
-                resourceIds.filter((rid) => rid === args.resourceId).length,
-                1,
-                'Invalid Resource'
+              const { resourceId, ids } = args;
+
+              const { userId } = await revokePermissions(
+                context,
+                envCtx,
+                resourceId,
+                ids
               );
-
-              const permissionApi = new KeycloakPermissionTicketService(
-                envCtx.openid.issuer,
-                envCtx.accessToken
-              );
-
-              const perms = await permissionApi.listPermissions({
-                resourceId: args.resourceId,
-                returnNames: true,
-              });
-
-              const requesterIds = [];
-              const deletedScopes = [];
-              for (const permId of args.ids) {
-                const foundPerms = perms.filter((perm) => perm.id === permId);
-                assert.strictEqual(foundPerms.length, 1, 'Invalid Permission');
-                deletedScopes.push(foundPerms[0].scopeName);
-                requesterIds.push(foundPerms[0].requester);
-                await permissionApi.deletePermission(permId);
-              }
-
-              const userApi = new KeycloakUserService(envCtx.openid.issuer);
-              await userApi.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
-              const user = await userApi.lookupUserById(requesterIds.pop());
-              const displayName = user.attributes.display_name || user.email;
-
-              await new StructuredActivityService(
-                context.sudo(),
-                context.authedItem['namespace']
-              ).logNamespaceAccess(
-                true,
-                'revoked',
-                'namespace access',
-                'user',
-                displayName,
-                deletedScopes
-              );
-
-              logger.warn('[revokePermissions] %j', perms);
 
               return true;
             },

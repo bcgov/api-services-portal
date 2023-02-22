@@ -216,7 +216,10 @@ class Store {
 export const store = new Store(consumers);
 
 export const getConsumersHandler = (req, res, ctx) => {
-  return res(ctx.delay(), ctx.data({ ...store.data, allConsumerGroupLabels }));
+  return res(
+    ctx.delay(2000),
+    ctx.data({ ...store.data, allConsumerGroupLabels })
+  );
 };
 
 export const getConsumerHandler = (req, res, ctx) => {
@@ -325,6 +328,7 @@ export const getConsumerHandler = (req, res, ctx) => {
 
 export const getAccessRequestsHandler = (req, res, ctx) => {
   return res(
+    ctx.delay(1000),
     ctx.data({
       allAccessRequestsByNamespace: store.data.allAccessRequestsByNamespace,
     })

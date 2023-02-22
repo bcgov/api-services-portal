@@ -351,6 +351,9 @@ components:
                 mode: auto
                 environmentDetails: []
                 owner: acope@idir
+        Maybe_Scalars-at-String_:
+            type: string
+            nullable: true
         UmaScope:
             properties:
                 name:
@@ -368,8 +371,10 @@ components:
                 -
                     $ref: '#/components/schemas/UmaScope'
             nullable: true
-        Maybe_Scalars-at-String_:
-            type: string
+        Maybe_Array_Maybe_UmaScope___:
+            items:
+                $ref: '#/components/schemas/Maybe_UmaScope_'
+            type: array
             nullable: true
         Maybe_Array_Maybe_Scalars-at-String___:
             items:
@@ -408,22 +413,18 @@ components:
                 prodEnvId:
                     $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 scopes:
-                    items:
-                        $ref: '#/components/schemas/Maybe_UmaScope_'
-                    type: array
+                    $ref: '#/components/schemas/Maybe_Array_Maybe_UmaScope___'
                 name:
                     type: string
                 id:
-                    type: string
+                    $ref: '#/components/schemas/Maybe_Scalars-at-String_'
                 __typename:
                     type: string
                     enum:
                         - Namespace
                     nullable: false
             required:
-                - scopes
                 - name
-                - id
             type: object
         ActivityDetail:
             properties:

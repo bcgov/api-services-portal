@@ -1,4 +1,5 @@
 import { shuffle } from 'lodash';
+import casual from 'casual-browserify';
 
 let permissions = [
   {
@@ -7,6 +8,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'wolfeschlegelsteinhausen@idir',
+    requesterEmail: 'wolfeschlegelsteinhausen@domain.com',
     resource: 'r1',
     resourceName: 'aps-portal',
     scope: 's1',
@@ -19,6 +21,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'wolfeschlegelsteinhausen@idir',
+    requesterEmail: 'wolfeschlegelsteinhausen@domain.com',
     resource: 'r1',
     resourceName: 'aps-portal',
     scope: 's2',
@@ -31,6 +34,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'wolfeschlegelsteinhausen@idir',
+    requesterEmail: 'wolfeschlegelsteinhausen@domain.com',
     resource: 'r1',
     resourceName: 'aps-portal',
     scope: 's3',
@@ -43,6 +47,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'wolfeschlegelsteinhausen@idir',
+    requesterEmail: 'wolfeschlegelsteinhausen@domain.com',
     resource: 'r1',
     resourceName: 'aps-portal',
     scope: 's5',
@@ -55,6 +60,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'wolfeschlegelsteinhausen@idir',
+    requesterEmail: 'wolfeschlegelsteinhausen@domain.com',
     resource: 'r1',
     resourceName: 'aps-portal',
     scope: 's1',
@@ -67,6 +73,7 @@ let permissions = [
     ownerName: 'aps',
     requester: '123',
     requesterName: 'elischen@idir',
+    requesterEmail: 'elischen@domain.com',
     resource: 'r2',
     resourceName: 'aps-portal',
     scope: 's4',
@@ -495,7 +502,14 @@ export const getResourceSetHandler = (_, res, ctx) => {
 };
 
 export const grantAccessHandler = (req, res, ctx) => {
-  if (req.variables.data.username === 'fail') {
+  const { email, scopes } = req.variables.data;
+  const names = new Map([
+    ['elischen@domain.com', 'elischen@idir'],
+    ['wolfeschlegelsteinhausen@domain.com', 'wolfeschlegelsteinhausen@idir'],
+    ['harley@gov.ca', 'harley@idir'],
+  ]);
+
+  if (!names.has(email)) {
     return res(
       ctx.data({
         errors: [
@@ -521,25 +535,47 @@ export const grantAccessHandler = (req, res, ctx) => {
       })
     );
   }
-  req.variables.data.scopes.forEach((scope) => {
-    permissions.push({
-      id: `perm${permissions.length + 1}`,
-      owner: 'o1',
-      ownerName: 'aps',
-      requester: '123',
-      requesterName: req.variables.data.username,
-      resource: 'r1',
-      resourceName: 'aps-portal',
-      scope: 's1',
-      scopeName: scope,
-      granted: false,
+
+  if (permissions.some((p) => p.requesterEmail === email)) {
+    permissions = permissions.filter((p) => {
+      if (p.requesterEmail === email) {
+        return scopes.includes(p.scope);
+      }
+      return true;
     });
+  }
+
+  scopes.forEach((scope) => {
+    const existingScope = permissions.findIndex(
+      (p) => p.requesterEmail === email && p.scope === scope
+    );
+    if (existingScope < 0) {
+      permissions.push({
+        id: `perm${permissions.length + 1}`,
+        owner: 'o1',
+        ownerName: 'aps',
+        requester: '123',
+        requesterName: names.get(email),
+        requesterEmail: email,
+        resource: 'r1',
+        resourceName: 'aps-portal',
+        scope: 's1',
+        scopeName: scope,
+        granted: false,
+      });
+    }
   });
+
   return res(
     ctx.data({
       id: 'a4',
     })
   );
+};
+
+export const updateAccessHandler = (req, res, ctx) => {
+  console.log(req.variables);
+  return res(ctx.data({}));
 };
 
 export const grantSAAccessHandler = (req, res, ctx) => {
@@ -589,6 +625,9 @@ export const grantSAAccessHandler = (req, res, ctx) => {
   );
 };
 
+export const updateSAAccessHandler = (req, res, ctx) => {
+  return res(ctx.data({}));
+};
 export const revokeAccessHandler = (req, res, ctx) => {
   const { tickets } = req.variables;
   permissions = permissions.filter((p) => !tickets.includes(p.scope));

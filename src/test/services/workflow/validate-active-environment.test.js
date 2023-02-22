@@ -4,6 +4,7 @@ import {
   ValidateActiveEnvironment,
   isServiceMissingAllPluginsHandler,
 } from '../../../services/workflow';
+import { getFuncForMissingJwtKeycloakPlugin } from '../../../services/workflow/validate-active-environment';
 
 import { json } from './utils';
 
@@ -136,6 +137,144 @@ describe('Validate Active Environment', function () {
       };
       const result = isServiceMissingAllPluginsHandler(['acl'])(svc);
       expect(result).toBe(false);
+    });
+
+    it('service plugin is valid - good allowed_iss', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template: null,
+              allowed_iss: ['https://auth.local/realms/myrealm'],
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(false);
+    });
+
+    it('service plugin is valid - good well known', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template:
+                'https://auth.local/realms/myrealm/.well-known/openid-configuration',
+              allowed_iss: [],
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(false);
+    });
+
+    it('service route plugin is valid - good well known', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [],
+        routes: [
+          {
+            plugins: [
+              {
+                name: 'jwt-keycloak',
+                config: {
+                  well_known_template:
+                    'https://auth.local/realms/myrealm/.well-known/openid-configuration',
+                  allowed_iss: [],
+                },
+              },
+            ],
+          },
+        ],
+      });
+      expect(test).toBe(false);
+    });
+
+    it('service plugin is valid - well known default', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template: '%s/.well-known/openid-configuration',
+              allowed_iss: ['https://auth.local/realms/myrealm'],
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(false);
+    });
+
+    it('service plugin is invalid - different realm', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template: null,
+              allowed_iss: ['https://auth.local/realms/anotherrealm'],
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(true);
+    });
+
+    it('service plugin is invalid - no well known', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template: null,
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(true);
+    });
+
+    it('service plugin is invalid - missing plugin', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'acl',
+            config: {},
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(true);
+    });
+
+    it('service plugin is invalid - well known mismatch', function () {
+      const issuerUrl = 'https://auth.local/realms/myrealm';
+      const test = getFuncForMissingJwtKeycloakPlugin(issuerUrl)({
+        plugins: [
+          {
+            name: 'jwt-keycloak',
+            config: {
+              well_known_template: 'https://blahblah',
+              allowed_iss: ['https://auth.local/realms/myrealm'],
+            },
+          },
+        ],
+        routes: [],
+      });
+      expect(test).toBe(true);
     });
   });
   /*

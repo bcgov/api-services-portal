@@ -1,5 +1,6 @@
 {
-  "apikey": "NjR2PniJ6ToOVP9O7nJ5QfQiqDUhUEjq",
-  "consumernumber": "3CBD4EB1-9E07D3FBF2F",
-  "clientidsecret": "{\"clientId\": \"B297ECBB-F562BDAE027\", \"clientSecret\": \"8473aa8e-5cfd-403c-b4f6-c4ee88fc038d\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}"
+  "apikey": "qiHHqk9lIzTgP1j94nHp5C1bNVJBOWnG",
+  "consumernumber": "B15172D9-F103D11A9A1",
+  "clientidsecret": "{\"clientId\": \"A7D72430-52CD37B2420\", \"clientSecret\": \"282718d8-d0c2-45a0-8885-3539f0ca5fea\", \"tokenEndpoint\": \"http://keycloak.localtest.me:9080/auth/realms/master/protocol/openid-connect/token\"}",
+  "credentials": "{\"clientId\": \"sa-ccplatform-e0000000-d339cbfcda5e\", \"clientSecret\": \"f5127730-df13-453d-ace0-a30a1255e30d\"}"
 }
