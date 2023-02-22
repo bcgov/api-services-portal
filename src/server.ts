@@ -293,7 +293,10 @@ const configureExpress = (app: any) => {
     });
   });
   app.put('/feed/:entity', (req: any, res: any) => {
-    const context = keystone.createContext({ skipAccessControl: true });
+    const context = keystone.createContext({
+      skipAccessControl: true,
+      authentication: { item: { name: 'Feeder Bot' } },
+    });
     putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);
       res.status(400).json({ result: 'error', error: '' + err });

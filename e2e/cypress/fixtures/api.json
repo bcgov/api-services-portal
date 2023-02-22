@@ -165,8 +165,8 @@
       "mode": "auto",
       "environmentDetails": [
           {
-              "environment": "prod",
-              "issuerUrl": "http://keycloak.test.localtest.me:9080/auth/realms/master",
+              "environment": "test",
+              "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
               "clientRegistration": "managed",
               "clientId": "gwa-api",
               "clientSecret": "18900468-3db1-43f7-a8af-e75f079eb742"
@@ -182,7 +182,7 @@
       "mode": "auto",
       "environmentDetails": [
           {
-              "environment": "prod",
+              "environment": "test",
               "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
               "clientRegistration": "managed",
               "clientId": "gwa-api",

@@ -195,10 +195,12 @@ const ConsumersPage: React.FC<
           breadcrumb={breadcrumbs}
           actions={<LinkConsumer queryKey={queryKey} />}
         />
-        <AccessRequestsList
-          labels={data?.allConsumerGroupLabels}
-          queryKey={queryKey}
-        />
+        {isSuccess && (
+          <AccessRequestsList
+            labels={data?.allConsumerGroupLabels}
+            queryKey={queryKey}
+          />
+        )}
         <Filters
           data={state as FilterState}
           filterTypeOptions={filterTypeOptions}

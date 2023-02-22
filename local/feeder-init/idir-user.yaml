@@ -3,4 +3,5 @@ record:
   id: 'janis@idir'
   name: 'Janis Smith'
   email: 'janis@testmail.com'
+  provider: 'idir'
   isAdmin: false

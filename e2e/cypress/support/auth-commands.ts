@@ -4,9 +4,9 @@ import LoginPage from '../pageObjects/login'
 import request = require('request')
 import { method } from 'cypress/types/bluebird'
 import { url } from 'inspector'
-import { checkElementExists } from '.'
 import NamespaceAccessPage from '../pageObjects/namespaceAccess'
 import _ = require('cypress/types/lodash')
+import { checkElementExists } from './e2e'
 // import _ = require('cypress/types/lodash')
 const njwt = require('njwt')
 
@@ -194,6 +194,7 @@ Cypress.Commands.add('logout', () => {
 
   cy.log('< Logging out')
   cy.getSession().then(() => {
+    cy.visit('/')
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.contains('Logout').click()
@@ -272,6 +273,8 @@ Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:b
 
 Cypress.Commands.add('deleteAllCookies', () => {
   cy.clearCookies()
+  cy.clearAllLocalStorage()
+  cy.clearAllSessionStorage()
   cy.clearCookie('keystone.sid')
   cy.clearCookie('_oauth2_proxy')
   cy.exec('npm cache clear --force')

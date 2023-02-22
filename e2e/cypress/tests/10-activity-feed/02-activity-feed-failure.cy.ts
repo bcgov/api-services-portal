@@ -54,6 +54,11 @@ describe('Make the access request for invalid profile', () => {
   //     // ma.closeRequestAccessPopUp()
   //   })
   // })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({log:true})
+    cy.deleteAllCookies()
+  })
 })
 
 describe('Create API, Product, and Authorization Profiles; Apply Auth Profiles to Product Environments', () => {

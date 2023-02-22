@@ -1,4 +1,3 @@
-import { checkElementExists } from '../support'
 
 class ApiDirectoryPage {
   path: string = '/devportal/api-directory'

@@ -102,9 +102,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
           </FormControl>
         </GridItem>
         <GridItem>
-          <FormControl
-            isRequired={/(client-credentials|authorization-code)/.test(flow)}
-          >
+          <FormControl isRequired={flow === 'client-credentials'}>
             <FormLabel>Issuer</FormLabel>
             <CredentialIssuerSelect
               flow={flow}

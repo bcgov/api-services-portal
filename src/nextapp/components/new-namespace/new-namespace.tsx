@@ -3,17 +3,21 @@ import {
   Button,
   ButtonGroup,
   FormControl,
+  FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Input,
+  ListItem,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { gql } from 'graphql-request';
 import { restApi, useApiMutation } from '@/shared/services/api';
 import type { Mutation } from '@/types/query.types';
@@ -23,6 +27,7 @@ interface NewNamespace {
 }
 
 const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
+  const [error, setError] = React.useState<string | null>(null);
   const toast = useToast();
   const queryClient = useQueryClient();
   const createMutation = useApiMutation(mutation);
@@ -58,34 +63,45 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
           });
           onClose();
         } catch (err) {
-          toast({
-            title: 'Namespace create failed',
-            description: err,
-            status: 'error',
-            isClosable: true,
-          });
+          setError(err);
+          // toast({
+          //   title: 'Namespace create failed',
+          //   description: err,
+          //   status: 'error',
+          //   isClosable: true,
+          // });
         }
       }
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
       <ModalContent borderRadius="4px">
         <ModalHeader>Create Namespace</ModalHeader>
         <ModalBody>
           <form ref={form} onSubmit={onSubmit}>
-            <FormControl isRequired mb={4}>
-              <FormLabel>Namespace</FormLabel>
+            <FormControl isRequired mb={4} isInvalid={Boolean(error)}>
+              <FormLabel>Namespace Name</FormLabel>
               <Input
                 isDisabled={createMutation.isLoading}
-                placeholder="Enter a unique namespace name"
                 name="name"
                 type="text"
                 variant="bc-input"
                 data-testid="ns-modal-name-input"
               />
+              {error && <FormErrorMessage>{error}</FormErrorMessage>}
+              <FormHelperText fontSize="14px" color="text" lineHeight="6">
+                Names must be:
+                <UnorderedList>
+                  <ListItem>
+                    Alphanumeric (letters and numbers only, no special
+                    characters)
+                  </ListItem>
+                  <ListItem>Unique to all other namespaces</ListItem>
+                </UnorderedList>
+              </FormHelperText>
             </FormControl>
           </form>
         </ModalBody>
@@ -104,7 +120,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
               onClick={handleCreateNamespace}
               data-testid="ns-modal-create-btn"
             >
-              Create
+              Create Namespace
             </Button>
           </ButtonGroup>
         </ModalFooter>

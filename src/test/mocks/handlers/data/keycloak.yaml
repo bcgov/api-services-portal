@@ -38,6 +38,7 @@ groupDetails:
     attributes:
       org: ['ministry-of-citizens-services']
       'org-unit': ['databc']
+      'org-enabled': ['true']
 
 groups:
   - id: a6902d51-38c1-43ca-8748-8d2c7209b1e1

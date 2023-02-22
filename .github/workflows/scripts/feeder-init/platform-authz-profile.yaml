@@ -18,7 +18,7 @@ record:
     - GatewayConfig.Publish
     - Content.Publish
     - CredentialIssuer.Admin
-  owner: user_api-owner
+  owner: api-owner@local
   environmentDetails:
     - environment: prod
       issuerUrl: '{OIDC_ISSUER}'

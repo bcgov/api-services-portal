@@ -668,7 +668,7 @@ const metadata = {
   User: {
     query: 'allUsers',
     refKey: 'username',
-    sync: ['name', 'username', 'email', 'legalsAgreed'],
+    sync: ['name', 'username', 'email', 'legalsAgreed', 'provider'],
     transformations: {
       legalsAgreed: { name: 'toStringDefaultArray' },
     },

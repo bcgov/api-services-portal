@@ -1,4 +1,5 @@
 import { Logger } from '../../logger';
+import { parsePluginConfig } from './gateway-service';
 import {
   Environment,
   EnvironmentWhereInput,
@@ -67,9 +68,8 @@ export async function lookupProductEnvironmentServices(
     'ProductEnvironmentNotFound ' + prodEnvId
   );
 
-  result.data.allEnvironments[0].services.map((svc: GatewayService) =>
-    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)))
-  );
+  parsePluginConfig(result.data.allEnvironments[0].services);
+
   return result.data.allEnvironments[0];
 }
 
@@ -117,9 +117,9 @@ export async function lookupProductEnvironmentServicesBySlug(
     1,
     'ProductEnvironmentNotFound By Slug ' + appId
   );
-  result.data.allEnvironments[0].services.map((svc: GatewayService) =>
-    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)))
-  );
+
+  parsePluginConfig(result.data.allEnvironments[0].services);
+
   return result.data.allEnvironments[0];
 }
 

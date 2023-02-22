@@ -34,6 +34,7 @@ export interface PermissionTicket {
   resourceName?: string;
   ownerName?: string;
   requesterName?: string;
+  requesterEmail?: string; // not part of keycloak API but injected after
 }
 
 export class KeycloakPermissionTicketService {

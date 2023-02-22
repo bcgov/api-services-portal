@@ -224,4 +224,10 @@ describe('API Tests to verify Get documentation content', () => {
             })
         })
     })
+
+    after(() => {
+        cy.logout()
+        cy.clearLocalStorage({log:true})
+        cy.deleteAllCookies()
+      })
 })
