@@ -20,14 +20,16 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import Head from 'next/head';
-import { FaPen } from 'react-icons/fa';
+import { FaExclamationTriangle, FaPen } from 'react-icons/fa';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
+import { useQueryClient } from 'react-query';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const mutate = useApiMutation(mutation);
   const toast = useToast();
+  const client = useQueryClient();
   const inputRef = React.useRef(null);
   const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
   const isEditEmailDisabled = user?.provider === 'idir';
@@ -83,6 +85,7 @@ const ProfilePage: React.FC = () => {
       try {
         setIsInvalid(false);
         await mutate.mutateAsync({ email });
+        client.invalidateQueries('user');
         toast({
           status: 'success',
           title: 'Email updated',
@@ -124,6 +127,7 @@ const ProfilePage: React.FC = () => {
               {!isEditEmailDisabled && (
                 <Editable
                   isRequired
+                  startWithEditView={!user?.email}
                   submitOnBlur={false}
                   defaultValue={user?.email}
                   onSubmit={handleSubmit}
@@ -138,6 +142,12 @@ const ProfilePage: React.FC = () => {
                   />
                   <EditableControls />
                 </Editable>
+              )}
+              {!user?.email && (
+                <Flex gridGap={1} align="center">
+                  <Icon as={FaExclamationTriangle} color="bc-error" />
+                  <Text color="bc-error">Email is Required</Text>
+                </Flex>
               )}
               {isInvalid && <Text color="bc-error">Invalid Email</Text>}
             </Figure>

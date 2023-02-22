@@ -25,7 +25,7 @@ const CompleteProfile: React.FC = () => {
   const client = useQueryClient();
   const { user } = useAuth();
   const { isOpen, onClose } = useDisclosure({
-    isOpen: !user?.email,
+    defaultIsOpen: !user?.email,
   });
 
   async function handleSubmit(event: React.FormEvent) {
