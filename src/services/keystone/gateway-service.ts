@@ -3,6 +3,18 @@ import { GatewayRoute, GatewayService } from './types';
 
 const logger = Logger('keystone.gw-service');
 
+export function parsePluginConfig(services: GatewayService[]) {
+  services.map((svc: GatewayService) => {
+    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)));
+
+    svc.routes?.map((route) => {
+      route.plugins?.map(
+        (plugin) => (plugin.config = JSON.parse(plugin.config))
+      );
+    });
+  });
+}
+
 export async function lookupServices(
   context: any,
   serviceIds: string[]
@@ -30,9 +42,8 @@ export async function lookupServices(
     variables: { services: serviceIds },
   });
   logger.debug('Query result %j', result);
-  result.data.allGatewayServices.map((svc: GatewayService) =>
-    svc.plugins?.map((plugin) => (plugin.config = JSON.parse(plugin.config)))
-  );
+  parsePluginConfig(result.data.allGatewayServices);
+
   return result.data.allGatewayServices;
 }
 

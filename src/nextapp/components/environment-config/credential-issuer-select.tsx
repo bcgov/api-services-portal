@@ -14,7 +14,7 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
   onChange,
   value,
 }) => {
-  const isEnabled = flow !== 'client-credentials';
+  const isEnabled = flow === 'client-credentials';
   const { data, isLoading, isError } = useApi(
     ['environment-credential-users', flow],
     {
@@ -31,12 +31,12 @@ const CredentialIssuerSelect: React.FC<CredentialIssuerSelectProps> = ({
     <Select
       name="credentialIssuer"
       isLoading={isLoading}
-      isDisabled={isEnabled || isError}
+      isDisabled={!isEnabled || isLoading || isError}
       onChange={onChange}
       value={value}
       data-testid="edit-env-cred-issuer-select"
     >
-      <option value="">Select</option>
+      <option value="">{isLoading ? 'Loading...' : 'Select'}</option>
       {data?.allCredentialIssuersByNamespace.map((d) => (
         <option key={d.id} value={d.id}>
           {d.name} (

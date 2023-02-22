@@ -196,6 +196,18 @@ export const handlers = [
   }),
   keystone.mutation('CreateNamespace', (req, res, ctx) => {
     const { name } = req.variables;
+
+    if (allNamespaces.map((n) => n.name).includes(name)) {
+      return res(
+        ctx.data({
+          errors: [
+            {
+              message: 'Namespace already exists',
+            },
+          ],
+        })
+      );
+    }
     const id = `ns-${allNamespaces.length + 1}`;
     const namespace = {
       name,
@@ -228,6 +240,10 @@ export const handlers = [
   keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
   keystone.query('GetAllCredentialIssuers', getAllCredentialIssuersByNamespace),
+  keystone.query(
+    'GetAllCredentialIssuersByNamespace',
+    getAllCredentialIssuersByNamespace
+  ),
   keystone.query('GetCredentialIssuers', getAllCredentialIssuers),
   keystone.query('SharedIdPPreview', getSharedIdpPreview),
   keystone.mutation('CreateAuthzProfile', createAuthzProfile),
