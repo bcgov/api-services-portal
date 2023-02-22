@@ -53,4 +53,9 @@ describe('Manage/Edit labels spec', () => {
   it('Verify that labels can be added', () => {
     consumers.addManageLabels()
   })
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
 })

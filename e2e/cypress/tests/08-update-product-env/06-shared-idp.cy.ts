@@ -20,6 +20,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
+    cy.clearAllCookies()
   })
 
   beforeEach(() => {
@@ -56,6 +57,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
       cy.makeAPIRequest('ds/api/v2/namespaces/' + namespace + '/issuers', 'PUT').then((response) => {
         expect(response.status).to.be.equal(200)
         expect(response.body.result).to.be.contain('created')
+        cy.wait(5000)
       })
     })
   })
@@ -73,6 +75,7 @@ describe('Apply Shared IDP while creating Authorization Profile', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.clearCookies()
   })
 
 })
@@ -141,6 +144,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.clearCookies()
   })
 
 })
@@ -157,6 +161,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
+    cy.clearCookies()
   })
 
   beforeEach(() => {
@@ -189,6 +194,7 @@ describe('Update IDP issuer for shared IDP profile', () => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.clearCookies()
   })
 })
 
@@ -202,6 +208,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
     cy.visit('/')
     cy.deleteAllCookies()
     cy.reload()
+    cy.clearCookies()
   })
 
   beforeEach(() => {
@@ -244,6 +251,7 @@ describe('Developer creates an access request for Client ID/Secret authenticator
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
+    cy.clearCookies()
   })
 })
 

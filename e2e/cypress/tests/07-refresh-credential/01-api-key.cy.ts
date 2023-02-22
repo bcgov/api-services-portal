@@ -90,4 +90,10 @@ describe('Regenerate Credential for API Key', () => {
       })
     })
   })
+
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
 })

@@ -84,7 +84,9 @@ class AuthorizationProfile {
       if (authProfile.environmentConfig) {
         if(authProfile.environmentConfig.isShardIDP)
         {
+          cy.wait(3000)
           this.selectIDPType('Shared')
+          cy.wait(2000)
         }
         else{
           this.selectIDPType('Custom')
@@ -161,6 +163,7 @@ class AuthorizationProfile {
   {
     cy.contains('Client Management').click()
     cy.contains(issuerURL).should('exist')
+    cy.visit(this.path)
   }
 }
 

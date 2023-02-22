@@ -109,12 +109,12 @@ describe('Access manager apply "Write" role and approves developer access reques
   })
 })
 
-describe('Update Kong plugin and verify that ', () => {
+describe('Update Kong plugin and verify that only only PUT and POST methods are allowed for Read role', () => {
   beforeEach(() => {
     cy.fixture('apiowner').as('apiowner')
   })
 
-  it('Set allowed method "GET" in kong plugin ', () => {
+  it('Set allowed methods "PUT" and "POST" in kong plugin ', () => {
     const roles = [
       "PUT", "POST"
     ]
@@ -126,7 +126,7 @@ describe('Update Kong plugin and verify that ', () => {
     ]
     cy.updatePropertiesOfPluginFile('cc-service-plugin.yml', 'client_roles', authProfile)
   })
-  it('Set alloed audience in plugin file', () => {
+  it('Set allowed audience in plugin file', () => {
     cy.updatePropertiesOfPluginFile('cc-service-plugin.yml', 'allowed_aud', 'cypress-auth-profile')
   })
 

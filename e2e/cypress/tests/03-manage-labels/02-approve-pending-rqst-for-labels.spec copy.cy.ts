@@ -60,6 +60,13 @@ describe('Approve Pending Request Spec', () => {
       })
     })
   })
+  
+  after(() => {
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
+  })
+  
 })
 
 // describe('Turn off the Authentication', () => {

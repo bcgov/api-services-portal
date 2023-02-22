@@ -118,7 +118,7 @@ describe('Make an API request using Client ID, Secret, and Access Token', () => 
   })
 })
 
-describe('Update Kong plugin and verify that ', () => {
+describe('Update Kong plugin and verify that only only GET method is allowed for Read role', () => {
   beforeEach(() => {
     cy.fixture('apiowner').as('apiowner')
   })
@@ -135,7 +135,7 @@ describe('Update Kong plugin and verify that ', () => {
     ]
     cy.updatePropertiesOfPluginFile('cc-service-plugin.yml', 'client_roles', authProfile)
   })
-  it('Set alloed audience in plugin file', () => {
+  it('Set allowed audience in plugin file', () => {
     cy.updatePropertiesOfPluginFile('cc-service-plugin.yml', 'allowed_aud', 'cypress-auth-profile')
   })
 
@@ -150,13 +150,13 @@ describe('Update Kong plugin and verify that ', () => {
     })
   })
 
-  it('Get access token using client ID and secret; make API request', () => {
+  it('Make "GET" call and verify that Kong allows user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(200)
     })
   })
-  it('Get access token using client ID and secret; make API request', () => {
+  it('Make "POST" call and verify that Kong does not allow user to access the resources', () => {
     cy.makeKongGatewayRequestUsingClientIDSecret('cc-service-for-platform.api.gov.bc.ca', 'POST').then((response) => {
       cy.log(response)
       expect(response.status).to.be.equal(404)

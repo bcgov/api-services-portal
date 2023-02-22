@@ -74,6 +74,7 @@ class Products {
       })
     cy.get(this.envCfgApplyChangesContinueBtn).click()
     cy.get(this.envCfgApplyChangesBtn).click()
+    cy.wait(2000)
   }
 
   updateOrg(orgName: string, orgUnitName: string) {

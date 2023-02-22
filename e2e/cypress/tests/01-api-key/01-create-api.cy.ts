@@ -75,15 +75,15 @@ describe('Create API Spec', () => {
     })
   })
 
-  // it('Associate Namespace to the organization Unit', () => {
-  //   cy.get('@api').then(({ organization }: any) => {
-  //     cy.setHeaders(organization.headers)
-  //     cy.setAuthorizationToken(userSession)
-  //     cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
-  //       expect(response.status).to.be.equal(200)
-  //     })
-  //   })
-  // })
+  it('Associate Namespace to the organization Unit', () => {
+    cy.get('@api').then(({ organization }: any) => {
+      cy.setHeaders(organization.headers)
+      cy.setAuthorizationToken(userSession)
+      cy.makeAPIRequest(organization.endPoint + '/' + organization.orgName + '/' + organization.orgExpectedList.name + '/namespaces/' + nameSpace, 'PUT').then((response) => {
+        expect(response.status).to.be.equal(200)
+      })
+    })
+  })
 
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
     cy.visit(pd.path)

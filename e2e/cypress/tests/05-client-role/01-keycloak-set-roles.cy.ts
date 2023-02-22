@@ -10,7 +10,8 @@ import LoginPage from '../../pageObjects/login'
 import MyAccessPage from '../../pageObjects/myAccess'
 import Products from '../../pageObjects/products'
 
-describe('Apply Shared IDP config at Keycloak user group', () => {
+
+describe('Set roles in Keycloak auth client', () => {
   const clients = new keycloakClientsPage()
   const groups = new keycloakGroupPage()
 

@@ -3,7 +3,8 @@ import HomePage from '../../pageObjects/home'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 
-describe('Generate Authorization Profiles', () => {
+
+describe('Apply client roles to the Authorization Profile', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
