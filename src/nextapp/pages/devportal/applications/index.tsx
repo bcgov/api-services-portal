@@ -178,7 +178,7 @@ const ApplicationsPage: React.FC<
           <AlertDialogHeader>Delete Application</AlertDialogHeader>
           <AlertDialogCloseButton />
           <AlertDialogBody>
-            You are about to delete {appToDelete?.name} Deleting an application
+            You are about to delete <strong>{appToDelete?.name}</strong>. Deleting an application
             will delete all related credentials found under "My Access". This
             action cannot be undone.
           </AlertDialogBody>
