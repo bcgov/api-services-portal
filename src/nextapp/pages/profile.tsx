@@ -24,6 +24,7 @@ import { FaExclamationTriangle, FaPen } from 'react-icons/fa';
 import { useApiMutation } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { useQueryClient } from 'react-query';
+import { getProviderText } from '@/shared/services/utils';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -152,7 +153,9 @@ const ProfilePage: React.FC = () => {
               {isInvalid && <Text color="bc-error">Invalid Email</Text>}
             </Figure>
             <Figure label="Username">{user.username}</Figure>
-            <Figure label="Authentication">BC Services Card</Figure>
+            <Figure label="Authentication">
+              {getProviderText(user.provider)}
+            </Figure>
           </Grid>
         </Flex>
       </Container>
