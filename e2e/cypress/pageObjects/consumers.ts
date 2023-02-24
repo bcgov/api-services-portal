@@ -314,4 +314,12 @@ export default class ConsumersPage {
       cy.wait(1000)
     })
   }
+
+  selectClientRole(roles: any) {
+    cy.contains("Authorization").click()
+    roles.forEach(function (role: string) {
+      cy.get('[data-testid="client-role-'+role.toLocaleLowerCase()+'"]').click()
+      cy.wait(1000)
+    })
+  }
 }

@@ -21,6 +21,8 @@ declare namespace Cypress {
 
     makeKongRequest(serviceName : string, methodType : string, key?: string): Chainable<any>
 
+    makeKongGatewayRequestUsingClientIDSecret(hostURL: string, methodType?: string): Chainable<any>
+
     preserveCookiesDefaults(): void
 
     saveState(key: string, value: string, flag?: boolean, isGlobal?: boolean): Chainable<any>
@@ -68,6 +70,8 @@ declare namespace Cypress {
     verifyToastMessage(msg: string):Chainable<Cypress.Response<any>>
 
     updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
+
+    updatePropertiesOfPluginFile(filename: string, propertyName: string, propertyValue: any):Chainable<Cypress.Response<any>>
 
     keycloakLogin(username: string, password: string): Chainable<any>
 
