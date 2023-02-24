@@ -27,7 +27,6 @@ describe('Get the user session token', () => {
             })
         })
     })
-
 })
 
 testData.forEach((testCase: any) => {
@@ -93,7 +92,7 @@ testData.forEach((testCase: any) => {
     })
 
     after(() => {
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 })

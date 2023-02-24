@@ -191,6 +191,7 @@ const ApplicationsPage: React.FC<
               ml={3}
               onClick={handleDelete}
               variant="solid"
+              data-testid="delete-application-confirmation"
             >
               Yes, Delete Application
             </Button>

@@ -5,6 +5,7 @@ import MyProfilePage from '../../pageObjects/myProfile'
 import ToolBar from '../../pageObjects/toolbar'
 import AuthorizationProfile from '../../pageObjects/authProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import { slowCypressDown } from 'cypress-slow-down'
 
 describe('Grant Namespace Manage Role', () => {
   const login = new LoginPage()
@@ -34,10 +35,11 @@ describe('Grant Namespace Manage Role', () => {
   it('Grant only "Namespace.Manage" permission to Wendy', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokeAllPermission('Wendy F Wendy L')
+      // na.revokeAllPermission('wendy@idir')
       // na.revokePermission(checkPermission.revokePermission.Wendy_ci)
-      na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Wendy)
+      // na.clickGrantUserAccessButton()
+      // na.grantPermission(checkPermission.grantPermission.Wendy)
+      na.editPermission(checkPermission.grantPermission.Wendy_NM)
     })
   })
 
@@ -89,5 +91,8 @@ describe('Verify that Wendy is able to see all the options for the Namespace', (
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
     cy.resetCredential('Wendy')
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

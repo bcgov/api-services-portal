@@ -96,5 +96,8 @@ describe('Verify that Wendy is able to generate authorization profile', () => {
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
     cy.resetCredential('Wendy')
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

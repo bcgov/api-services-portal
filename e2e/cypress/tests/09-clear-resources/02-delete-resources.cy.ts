@@ -10,7 +10,7 @@ describe('Delete created resources', () => {
   const sa = new ServiceAccountsPage()
   const pd = new Products()
   const ns = new NameSpacePage
-  let flag: boolean
+  let flag : boolean
 
   before(() => {
     cy.visit('/')
@@ -26,7 +26,7 @@ describe('Delete created resources', () => {
   })
 
   it('authenticates Janis (api owner)', () => {
-    cy.get('@apiowner').then(({ user, deleteResources }: any) => {
+    cy.get('@apiowner').then(({ user , deleteResources}: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       home.useNamespace(deleteResources.namespace);
     })
@@ -70,6 +70,7 @@ describe('Delete created resources', () => {
       flag = true
       home.useNamespace(deleteResources.namespace)
     })
+    
   })
 
   it('Verify that the namespace is deleted', () => {

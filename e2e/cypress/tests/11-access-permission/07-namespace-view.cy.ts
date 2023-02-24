@@ -103,5 +103,8 @@ describe('Verify that Mark is unable to create service account', () => {
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
     cy.resetCredential('Mark')
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

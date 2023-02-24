@@ -280,6 +280,11 @@
         "email":"wendy@test.com",
         "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
       },
+      "Wendy_NM": {
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
+        "accessRole": ["Namespace.Manage"]
+      },
       "Wendy_CA": {
         "userName": "Wendy F Wendy L",
         "email":"wendy@test.com",
@@ -325,9 +330,9 @@
       "accessRole": ["Access.Manage", "Namespace.View"]
     },
     "Janis": {
-      "userName": "janis@idir",
+      "userName": "Janis Smith",
       "email": "janis@testmail.com",
-      "accessRole": ["CredentialIssuer.Admin"]
+      "accessRole": ["CredentialIssuer.Admin","Namespace.Manage"]
     },
     "OldUser": {
       "userName": "olduser@idir",

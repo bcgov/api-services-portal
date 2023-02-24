@@ -170,7 +170,7 @@ describe('API Tests for Delete Products', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 })
