@@ -107,9 +107,7 @@ class ApiDirectoryPage {
   }
 
   getPlainText(text :string): string{ 
-    text = text.replace(/[\r\n]/g, '')
-    text = text.replace(/\s+/g, " ")
-    return text
+    return text.replace(/[\r\n]/g, '').replace(/\s+/g, " ")
   }
 }
 

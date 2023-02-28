@@ -72,7 +72,6 @@ describe('Add Organization to publish API', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ orgAssignment }: any) => {
       pd.editProductEnvironment(orgAssignment.product.name, orgAssignment.product.environment.name)
-      debugger
       pd.editProductEnvironmentConfig(orgAssignment.product.environment.config)
       pd.generateKongPluginConfig(orgAssignment.product.name, orgAssignment.product.environment.name, 'org-service.yml')
     })
