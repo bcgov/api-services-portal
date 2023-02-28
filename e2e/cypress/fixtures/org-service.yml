@@ -1,0 +1,19 @@
+services:
+- name: a-service-for-orgassignment
+  host: httpbin.org
+  tags: [ns.orgassignment]
+  port: 443
+  protocol: https
+  retries: 0
+  routes:
+  - name: a-service-for-orgassignment-route
+    tags: [ns.orgassignment]
+    hosts:
+      - a-service-for-orgassignment.api.gov.bc.ca
+    paths:
+      - /
+    methods:
+      - GET
+    strip_path: false
+    https_redirect_status_code: 426
+    path_handling: v0

@@ -10,7 +10,8 @@ export default defineConfig({
 
       // // It's IMPORTANT to return the config object
       // // with any changed environment variables
-      config.specPattern=['./cypress/tests/01-*/*.ts',
+      config.specPattern=[
+      './cypress/tests/01-*/*.ts',
       './cypress/tests/02-*/*.ts',
       './cypress/tests/03-*/*.ts',
       './cypress/tests/04-*/*.ts',
@@ -23,7 +24,9 @@ export default defineConfig({
       './cypress/tests/11-*/*.ts',
       './cypress/tests/12-*/*.ts',
       './cypress/tests/13-*/*.ts',                      
-      './cypress/tests/14-*/*.ts'
+      './cypress/tests/14-*/*.ts',
+      './cypress/tests/15-*/*.ts',
+      './cypress/tests/16-*/*.ts'
     ]
       return config
     },

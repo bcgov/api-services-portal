@@ -34,6 +34,7 @@ class Products {
   activeServicesScope: string = '[data-testid="edit-env-active-services"]'
   credentialIssuer: string = '[name="credentialIssuer"]'
   config: string | undefined
+  publishAPI: string = '[id="orgEnabled"]'
 
   getTestIdEnvName(env: string): string {
     switch (env) {
@@ -97,7 +98,7 @@ class Products {
   }
 
   editProductEnvironmentConfig(config: any, invalid = false, isApproved = true) {
-
+    let flag = true;
     cy.get(this.envCfgTermsDropdown).select(config.terms, { force: true }).invoke('val')
 
     let authType = config.authorization
@@ -109,56 +110,70 @@ class Products {
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
         ) {
+          debugger
           let env = this.getTestIdEnvName(config.authIssuerEnv)
-          cy.get(this.credentialIssuer).select(
+          cy.get('[name="credentialIssuer"]').select(
             `${config.authIssuer} (${env})`
           )
         }
 
+        cy.get(this.envCfgOptText).type(config.optionalInstructions)
+        cy.get('[name="active"]').then($button => {
+          debugger
+          if ($button.is(':disabled')) {
+            flag = false
+          }
+          else {
+            cy
+              .get('[name="active"]')
+              .as('checkbox')
+              .invoke('is', ':checked')
+              .then(checked => {
+                debugger
+                if (invalid) {
+                  cy
+                    .get('@checkbox')
+                    .uncheck({ force: true });
+                }
+                else {
+                  cy
+                    .get('@checkbox')
+                    .check({ force: true });
+                }
+              });
+          }
+
+          cy
+            .get(this.envCfgApprovalCheckbox)
+            .as('checkbox')
+            .invoke('is', ':checked')
+            .then(checked => {
+              debugger
+              if (!isApproved) {
+                cy
+                  .get('@checkbox')
+                  .uncheck({ force: true });
+              }
+              else {
+                cy
+                  .get('@checkbox')
+                  .check({ force: true });
+              }
+            });
+
+          // cy.get(this.envCfgApprovalCheckbox).click()
+          // cy.get(this.editPrdEnvConfigBtn).click()
+          cy.wait(3000)
+          debugger
+          if (flag) {
+            cy.get(this.envCfgApplyChangesContinueBtn).click()
+          }
+          cy.get(this.envCfgApplyChangesBtn).click()
+          // cy.verifyToastMessage("Environment updated")
+          cy.wait(3000)
+          cy.verifyToastMessage("Success")
+        })
       })
-
-    cy.get(this.envCfgOptText).type(config.optionalInstructions)
-    cy
-      .get('[name="active"]')
-      .as('checkbox')
-      .invoke('is', ':checked')
-      .then(checked => {
-        if (invalid) {
-          cy
-            .get('@checkbox')
-            .uncheck({ force: true });
-        }
-        else {
-          cy
-            .get('@checkbox')
-            .check({ force: true });
-        }
-      });
-    cy
-      .get(this.envCfgApprovalCheckbox)
-      .as('checkbox')
-      .invoke('is', ':checked')
-      .then(checked => {
-        if (!isApproved) {
-          cy
-            .get('@checkbox')
-            .uncheck({ force: true });
-        }
-        else {
-          cy
-            .get('@checkbox')
-            .check({ force: true });
-        }
-      });
-    // cy.get(this.envCfgApprovalCheckbox).click()
-    // cy.get(this.editPrdEnvConfigBtn).click()
-    cy.wait(3000)
-    cy.get(this.envCfgApplyChangesContinueBtn).click()
-    cy.get(this.envCfgApplyChangesBtn).click()
-    // cy.verifyToastMessage("Environment updated")
-    cy.wait(3000)
-    cy.verifyToastMessage("Success")
-
   }
 
   generateKongPluginConfig(productName: string, envName: string, filename: string, flag?: boolean) {
@@ -286,6 +301,26 @@ class Products {
       cy.wait(1000)
     })
     cy.contains('Close').click()
+  }
+
+  changePublishAPIStatus(status: boolean) {
+    cy
+      .get(this.publishAPI)
+      .as('checkbox')
+      .invoke('is', ':checked')
+      .then(checked => {
+        debugger
+        if (status) {
+          cy
+            .get('@checkbox')
+            .check({ force: true });
+        }
+        else {
+          cy
+            .get('@checkbox')
+            .uncheck({ force: true });
+        }
+      });
   }
 }
 

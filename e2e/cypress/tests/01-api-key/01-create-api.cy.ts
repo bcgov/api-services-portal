@@ -54,6 +54,7 @@ describe('Create API Spec', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
+      cy.wait(6000)
     })
     sa.saveServiceAcctCreds()
   })

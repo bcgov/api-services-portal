@@ -147,5 +147,15 @@
       "name": "delete-application-with-approved-request",
       "description": "Test application for auto test"
     }
+  },
+  "orgAssignment": {
+    "product": {
+      "name": "Org Assignment Product",
+      "environment": "dev"
+    },
+    "application": {
+      "name": "Org Assignment App",
+      "description": "Application for testing Org Assignment"
+    }
   }
 }
