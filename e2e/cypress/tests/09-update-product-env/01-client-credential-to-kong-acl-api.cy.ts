@@ -91,13 +91,16 @@ describe('Change Authorization profile', () => {
   })
 
   it('Verify that service is not accessible with existing Client ID - Secret credentials', () => {
-    cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
-
+    cy.readFile('cypress/fixtures/state/regen.json').then((store_res) => {
       let cc = JSON.parse(store_res.clientidsecret)
-      cy.wait(2000)
       cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
         cy.get('@accessTokenResponse').then((token_res: any) => {
-          expect(token_res.status).to.eq(401)
+          let token = token_res.body.access_token
+          cy.get('@apiowner').then(({ clientCredentials }: any) => {
+            cy.makeKongRequest(clientCredentials.serviceName, 'GET', token).then((response) => {
+              expect(response.status).to.be.equal(401)
+            })
+          })
         })
       })
     })

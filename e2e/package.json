@@ -21,6 +21,7 @@
     "cy:firefox:headless": "cypress run --env TransferProtocol='http' --browser firefox --headless"
   },
   "devDependencies": {
+    "@cypress/code-coverage": "^3.10.0",
     "@types/dateformat": "^5.0.0",
     "@types/jsonwebtoken": "^8.5.4",
     "@types/mocha": "^8.2.3",
@@ -31,6 +32,7 @@
     "@typescript-eslint/parser": "^4.28.1",
     "cypress": "^12.4.0",
     "cypress-mochawesome-reporter": "^3.2.3",
+    "cypress-slow-down": "^1.2.1",
     "cypress-v10-preserve-cookie": "^1.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-chai-friendly": "^0.7.1",
@@ -41,7 +43,6 @@
   },
   "dependencies": {
     "@atomist/yaml-updater": "^1.0.2",
-    "@cypress/code-coverage": "^3.9.12",
     "@cypress/instrument-cra": "^1.4.0",
     "cypress-xpath": "^1.6.2",
     "dotenv": "^10.0.0",
