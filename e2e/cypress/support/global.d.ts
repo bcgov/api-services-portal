@@ -75,6 +75,8 @@ declare namespace Cypress {
 
     keycloakLogin(username: string, password: string): Chainable<any>
 
+    selectLoginOptions(username: string): Chainable<any>
+
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }
