@@ -18,6 +18,8 @@ const YAML = require('yamljs');
 
 let headers: any
 
+const login = new LoginPage()
+
 let requestBody: any = {}
 interface formDataRequestOptions {
   method: string
@@ -26,23 +28,23 @@ interface formDataRequestOptions {
 
 Cypress.Commands.add('login', (username: string, password: string, skipFlag = false) => {
   cy.log('< Log in with user ' + username)
-  const login = new LoginPage()
   const home = new HomePage()
 
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-      cy.get(login.loginDropDown).click()
-      if (username.includes('idir')) {
-        login.selectAPIProviderLoginOption()
-      }
-      else {
-        login.selectDeveloperLoginOption()
-      }
+      cy.selectLoginOptions(username)
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',
         message: [`🔐 Authenticating | ${username}`],
         autoEnd: false,
+      })
+      cy.get('body').then(($body) => {
+        if (!($body.find(login.usernameInput).length > 0)) {
+          cy.get('[data-testid=auth-menu-user]').click({ force: true })
+          cy.contains('Logout').click()
+          cy.selectLoginOptions(username)
+        }
       })
       cy.get(login.usernameInput).click().type(username)
       cy.get(login.passwordInput).click().type(password)
@@ -320,7 +322,7 @@ Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName: s
   })
 })
 
-Cypress.Commands.add('makeKongGatewayRequestUsingClientIDSecret', (hostURL: string, methodType='GET') => {
+Cypress.Commands.add('makeKongGatewayRequestUsingClientIDSecret', (hostURL: string, methodType = 'GET') => {
   cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
 
     let cc = JSON.parse(store_res.clientidsecret)
@@ -405,6 +407,16 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('selectLoginOptions', (username: string) => {
+  cy.get(login.loginDropDown).click()
+  if (username.includes('idir')) {
+    login.selectAPIProviderLoginOption()
+  }
+  else {
+    login.selectDeveloperLoginOption()
+  }
+})
+
 Cypress.Commands.add('verifyToastMessage', (msg: string) => {
   cy.get('[role="alert"]', { timeout: 2000 }).closest('div').invoke('text')
     .then((text) => {
@@ -462,7 +474,6 @@ Cypress.Commands.add('updatePluginFile', (filename: string, serviceName: string,
 
 Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: string, propertyValue: any) => {
   cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
-    debugger
     let obj = YAML.parse(content)
     const keys = Object.keys(obj);
     Object.keys(obj.services).forEach(function (key, index) {
