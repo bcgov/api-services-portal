@@ -1,10 +1,13 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import NameSpacePage from '../../pageObjects/namespace'
 import MyProfilePage from '../../pageObjects/myProfile'
-import ConsumersPage from '../../pageObjects/consumers'
+import ToolBar from '../../pageObjects/toolbar'
+import AuthorizationProfile from '../../pageObjects/authProfile'
+import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import { slowCypressDown } from 'cypress-slow-down'
 
-describe('Grant Access Manager Role', () => {
+describe('Grant Namespace Manage Role', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -21,7 +24,7 @@ describe('Grant Access Manager Role', () => {
     cy.visit(login.path)
   })
 
-  it('authenticates Janis (api owner)', () => {
+  it('Authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -29,11 +32,14 @@ describe('Grant Access Manager Role', () => {
     })
   })
 
-  it('Grant "Access.Manager" access to Mark (access manager)', () => {
+  it('Grant only "Namespace.Manage" permission to Wendy', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Mark)
+      // na.revokeAllPermission('wendy@idir')
+      // na.revokePermission(checkPermission.revokePermission.Wendy_ci)
+      // na.clickGrantUserAccessButton()
+      // na.grantPermission(checkPermission.grantPermission.Wendy)
+      na.editPermission(checkPermission.grantPermission.Wendy_NM)
     })
   })
 
@@ -44,14 +50,14 @@ describe('Grant Access Manager Role', () => {
   })
 })
 
-describe('Verify that Mark is able to view the pending request', () => {
+describe('Verify that Wendy is able to see all the options for the Namespace', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const consumers = new ConsumersPage()
+  const ns = new NameSpacePage()
   const mp = new MyProfilePage()
-  const na = new NamespaceAccessPage()
-  
+  const tb = new ToolBar()
+  const authProfile = new AuthorizationProfile()
 
   before(() => {
     cy.visit('/')
@@ -61,11 +67,12 @@ describe('Verify that Mark is able to view the pending request', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
-    cy.fixture('access-manager').as('access-manager')
+    cy.fixture('credential-issuer').as('credential-issuer')
+    cy.fixture('apiowner').as('apiowner')
   })
 
-  it('Authenticates Mark (Access-Manager)', () => {
-    cy.get('@access-manager').then(({ user, checkPermission }: any) => {
+  it('Authenticates Wendy (Credential-Issuer)', () => {
+    cy.get('@credential-issuer').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -74,18 +81,18 @@ describe('Verify that Mark is able to view the pending request', () => {
     })
   })
 
-  it('Navigate to Consumer Page to see the Approve Request option', ()=> {
-    cy.visit(consumers.path)
-  })
-
-  it('Verify that the option to approve request is displayed', ()=> {
-      consumers.isApproveAccessEnabled(true)
+  it('Verify that all the namespace options and activities are displayed', () => {
+    cy.visit(ns.path)
+    ns.verifyThatAllOptionsAreDisplayed()
   })
 
   after(() => {
     cy.logout()
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
-    cy.resetCredential('Mark')
+    cy.resetCredential('Wendy')
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

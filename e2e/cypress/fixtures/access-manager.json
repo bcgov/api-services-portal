@@ -15,10 +15,28 @@
   "serviceAccount": {
     "scopes": ["GatewayConfig.Publish", "Namespace.Manage", "Content.Publish"]
   },
-  "labels_consumer1":{
-    "labels":{"Name": "LondonDrug#6445", "Phone": "4523145232", "Manager": "John Smith"}
+  "labels_consumer1": {
+    "labels": {
+      "Name": "LondonDrug#6445",
+      "Phone": "4523145232",
+      "Manager": "John Smith"
+    }
   },
-  "labels_consumer2":{
-    "labels":{"Name": "LondonDrug#7865", "Phone": "6043445434", "Manager": "John Smith"}
+  "labels_consumer2": {
+    "labels": {
+      "Name": "LondonDrug#7865",
+      "Phone": "6043445434",
+      "Manager": "John Smith"
+    }
+  },
+  "clientIdSecret_readRole": {
+    "authProfile": {
+      "roles": ["read"]
+    }
+  },
+  "clientIdSecret_writeRole": {
+    "authProfile": {
+      "roles": ["write"]
+    }
   }
 }

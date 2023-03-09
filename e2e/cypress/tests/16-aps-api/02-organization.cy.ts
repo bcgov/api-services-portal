@@ -87,7 +87,6 @@ describe('Get the user session token', () => {
             })
         })
     })
-
 })
 
 describe('Get the Organization Role', () => {

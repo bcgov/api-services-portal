@@ -4,6 +4,7 @@ class ApplicationPage {
   appName: string = '[data-testid=create-app-name-input]'
   appDescription: string = '[data-testid=create-app-description-input]'
   createAppSubmitBtn: string = '[data-testid=create-app-submit-btn]'
+  deleteConfirmationBtn: string = '[data-testid="delete-application-confirmation"]'
   applicationTbl = '[role="table"]'
 
   createApplication(app: any) {
@@ -20,6 +21,7 @@ class ApplicationPage {
       if (applicationName.toLowerCase() === appName.toLowerCase() ) {
         cy.wrap($e1).find('button').first().click()
         cy.get('[data-testid="delete-application-btn"]').filter(':visible').first().click()
+        cy.get(this.deleteConfirmationBtn).click()
       }
     })
   }

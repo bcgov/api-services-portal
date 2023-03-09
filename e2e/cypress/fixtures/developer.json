@@ -33,6 +33,26 @@
         "description": "Application for testing client credential flow."
       }
     },
+    "clientIdSecret_readRole": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Read operation",
+        "description": "Application for testing client credential flow."
+      }
+    },
+    "clientIdSecret_writeRole": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "environment": "test"
+      },
+      "application": {
+        "name": "Client ID and Secret App for Write operation",
+        "description": "Application for testing client credential flow."
+      }
+    },
     "clientIdSecret_KongKeyToCC": {
       "product": {
         "name": "Auto Test Product",
@@ -126,6 +146,16 @@
     "approvedRequest": {
       "name": "delete-application-with-approved-request",
       "description": "Test application for auto test"
+    }
+  },
+  "orgAssignment": {
+    "product": {
+      "name": "Org Assignment Product",
+      "environment": "dev"
+    },
+    "application": {
+      "name": "Org Assignment App",
+      "description": "Application for testing Org Assignment"
     }
   }
 }

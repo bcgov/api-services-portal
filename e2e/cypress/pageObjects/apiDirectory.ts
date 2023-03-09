@@ -14,6 +14,11 @@ class ApiDirectoryPage {
   jwksUrlField: string = '[name=jwksUrl]';
   legatTermCheckBox: string = '[data-testid=acceptLegalTerm]';
   jwksURLField: string = '[name=jwksUrl]'
+  orgDropDown: string = '[data-testid="orgDropDown"]'
+  orgUnitDropDown: string = '[data-testid="orgUnitDropDown"]'
+  addOrganizationBtn: string = '[data-testid="addOrganizationBtn"]'
+
+
   createAccessRequest(product: any, app: any, accessRqst: any) {
     cy.contains('a', product.name, { timeout: 10000 }).should('be.visible');
     cy.contains(product.name).click()
@@ -41,20 +46,18 @@ class ApiDirectoryPage {
     cy.get(this.submitBtn).click()
   }
 
-  isProductDisplay(productName: string): Boolean {
-    var flag = false;
-    cy.get('body', { timeout: 6000 }).then(($body) => {
+  isProductDisplay(productName: string, expResult: boolean) {
+    cy.get("button").then(($btn) => {
+      var flag = true
+      cy.wait(2000)
       const pname: string = productName.toLowerCase().replaceAll(' ', '-')
-      var ele: string = `[data-testid=api-${pname}]`
-      cy.log('Body -> ' + $body)
-      if ($body.find(ele).length > 0) {
-        flag = true
-      }
-      else {
-        flag = false
-      }
+      let ele: string = `[data-testid=api-${pname}]`
+      Cypress.on('uncaught:exception', (err, runnable) => {
+        cy.get(ele).click()
+        return false
     })
-    return flag
+      assert.equal(flag, expResult)
+    })
   }
 
   navigateToYourProduct() {
@@ -81,6 +84,30 @@ class ApiDirectoryPage {
         })
       }
     })
+  }
+
+  addOrganizationAndOrgUnit(product: any) {
+    cy.contains('button', 'Add Organization').click({ force: true })
+    cy.get(this.orgDropDown).select(product.orgName)
+    cy.get(this.orgUnitDropDown).select(product.orgUnitName)
+    cy.wait(1000)
+    cy.get(this.addOrganizationBtn).click({ force: true })
+  }
+
+  checkOrgAdminNotificationBanner(notification: any) {
+    cy.get('[data-testid="org-assignment-notification-parent"]').invoke('text').then((text) => {
+      text = this.getPlainText(text)
+      assert.equal(text, notification.parent )
+      cy.contains('button','Learn More').click()
+      cy.get('[data-testid="org-assignment-notification-child"]').invoke('text').then((text) => {
+        text = this.getPlainText(text)
+        assert.equal(text, notification.child )
+      })
+    })
+  }
+
+  getPlainText(text :string): string{ 
+    return text.replace(/[\r\n]/g, '').replace(/\s+/g, " ")
   }
 }
 

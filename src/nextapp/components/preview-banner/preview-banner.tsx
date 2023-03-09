@@ -79,8 +79,8 @@ const PreviewBanner: React.FC = () => {
         <Container maxW="6xl" py={6}>
           <Flex align="center" justify="space-between" gridGap={8}>
             <Flex align="center" gridGap={4}>
-              <Icon as={FaClock} color="bc-yellow" />
-              <Text fontSize="sm" fontWeight="bold">
+              <Icon as={FaClock} color="bc-yellow"/>
+              <Text fontSize="sm" fontWeight="bold" data-testid="org-assignment-notification-parent">
                 {`Your Organization Administrator has been notified to enable API
                 Publishing to the Directory for the ${user.namespace} namespace.`}
               </Text>
@@ -98,7 +98,7 @@ const PreviewBanner: React.FC = () => {
           </Flex>
           {isOpen && (
             <Box mt={4} maxW="80%">
-              <Text fontSize="sm">
+              <Text fontSize="sm" data-testid="org-assignment-notification-child">
                 New namespaces must be reviewed by your Organization
                 Administrator before you can publish APIs to the Directory. Your
                 APIs are still in preview mode. For status inquiries, contact
