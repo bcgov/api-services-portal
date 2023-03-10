@@ -13,6 +13,9 @@ const {
   updateUserLegalAccept,
   updateUserEmail,
 } = require('../services/keystone');
+const {
+  updateUserProfileDetails,
+} = require('../services/keystone/temporary-identity');
 
 // Access control functions
 const userIsAdmin = ({ authentication: { item: user } }) => {
@@ -110,11 +113,17 @@ module.exports = {
           {
             schema: 'updateEmail(email: String!): User',
             resolver: async (item, args, context, info, { query, access }) => {
-              return await updateUserEmail(
+              const user = await updateUserEmail(
                 context,
                 context.authedItem.userId,
                 args.email
               );
+              await updateUserProfileDetails(
+                context,
+                context.authedItem.jti,
+                args.email
+              );
+              return user;
             },
             access: EnforcementPoint,
           },

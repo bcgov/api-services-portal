@@ -357,6 +357,12 @@ class Oauth2ProxyAuthStrategy {
 
     let userId = _results.length == 0 ? null : _results[0].id;
 
+    // if the email is passed, then treat that as the source of truth
+    let userEmail = email;
+    if (!Boolean(email) && _results.length != 0) {
+      userEmail = _results[0].email;
+    }
+
     if (_results.length == 0) {
       // auto-create a user record
       const { data, errors } = await this.keystone.executeGraphQL({
@@ -367,7 +373,7 @@ class Oauth2ProxyAuthStrategy {
                     } }`,
         variables: {
           name,
-          email,
+          userEmail,
           username,
           identityProvider,
           providerUserGuid,
@@ -394,7 +400,7 @@ class Oauth2ProxyAuthStrategy {
         logger.info(
           'register_user - updating name (%s), email (%s), provider (%s), providerUserGuid (%s), providerUsername (%s) for %s',
           name,
-          email,
+          userEmail,
           identityProvider,
           providerUserGuid,
           providerUsername,
@@ -408,7 +414,7 @@ class Oauth2ProxyAuthStrategy {
                       } }`,
           variables: {
             name,
-            email: Boolean(email) ? email : saved.email,
+            email: userEmail,
             identityProvider,
             providerUserGuid,
             providerUsername,
@@ -440,7 +446,7 @@ class Oauth2ProxyAuthStrategy {
           jti,
           sub,
           name,
-          email,
+          email: userEmail,
           username,
           identityProvider,
           providerUserGuid,
