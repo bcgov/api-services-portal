@@ -50,9 +50,7 @@ const links: NavLink[] = [
   {
     name: 'Namespaces',
     url: '/manager/namespaces',
-    access: [
-      'portal-user'
-    ],
+    access: ['portal-user'],
     sites: ['devportal'],
   },
   {
@@ -122,13 +120,13 @@ const links: NavLink[] = [
     access: ['api-owner'],
     sites: ['manager'],
   },
-  {
-    name: 'Documentation',
-    url: '/docs',
-    altUrls: ['/docs/[slug]'],
-    access: [],
-    sites: ['devportal'],
-  },
+  // {
+  //   name: 'Documentation',
+  //   url: '/docs',
+  //   altUrls: ['/docs/[slug]'],
+  //   access: [],
+  //   sites: ['devportal'],
+  // },
   {
     name: 'APS Admin',
     url: '/admin',

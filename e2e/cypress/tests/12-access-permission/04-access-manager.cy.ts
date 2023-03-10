@@ -1,12 +1,10 @@
 import LoginPage from '../../pageObjects/login'
 import HomePage from '../../pageObjects/home'
-import MyProfilePage from '../../pageObjects/myProfile'
 import NamespaceAccessPage from '../../pageObjects/namespaceAccess'
+import MyProfilePage from '../../pageObjects/myProfile'
 import ConsumersPage from '../../pageObjects/consumers'
-import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 
-
-describe('Grant Namespace View Role to Mark', () => {
+describe('Grant Access Manager Role', () => {
   const login = new LoginPage()
   const home = new HomePage()
   const na = new NamespaceAccessPage()
@@ -23,7 +21,7 @@ describe('Grant Namespace View Role to Mark', () => {
     cy.visit(login.path)
   })
 
-  it('Authenticates Janis (api owner)', () => {
+  it('authenticates Janis (api owner)', () => {
     cy.get('@apiowner').then(({ user, checkPermission }: any) => {
       cy.login(user.credentials.username, user.credentials.password)
       cy.log('Logged in!')
@@ -31,12 +29,11 @@ describe('Grant Namespace View Role to Mark', () => {
     })
   })
 
-  it('Grant only "Namespace.View" permission to Mark', () => {
+  it('Grant "Access.Manager" access to Mark (access manager)', () => {
     cy.get('@apiowner').then(({ checkPermission }: any) => {
       cy.visit(na.path)
-      na.revokeAllPermission(checkPermission.grantPermission.Mark.userName)
       na.clickGrantUserAccessButton()
-      na.grantPermission(checkPermission.grantPermission.Mark_NV)
+      na.grantPermission(checkPermission.grantPermission.Mark)
     })
   })
 
@@ -47,13 +44,14 @@ describe('Grant Namespace View Role to Mark', () => {
   })
 })
 
-describe('Verify that Mark is unable to create service account', () => {
+describe('Verify that Mark is able to view the pending request', () => {
 
   const login = new LoginPage()
   const home = new HomePage()
-  const mp = new MyProfilePage()
   const consumers = new ConsumersPage()
-  const sa = new ServiceAccountsPage()
+  const mp = new MyProfilePage()
+  const na = new NamespaceAccessPage()
+  
 
   before(() => {
     cy.visit('/')
@@ -63,11 +61,10 @@ describe('Verify that Mark is unable to create service account', () => {
 
   beforeEach(() => {
     cy.preserveCookies()
-    cy.fixture('credential-issuer').as('credential-issuer')
     cy.fixture('access-manager').as('access-manager')
   })
 
-  it('authenticates Mark', () => {
+  it('Authenticates Mark (Access-Manager)', () => {
     cy.get('@access-manager').then(({ user, checkPermission }: any) => {
       cy.visit(login.path)
       cy.login(user.credentials.username, user.credentials.password)
@@ -77,25 +74,12 @@ describe('Verify that Mark is unable to create service account', () => {
     })
   })
 
-  it('Navigate to Consumer Page to see the Approve Request option', () => {
+  it('Navigate to Consumer Page to see the Approve Request option', ()=> {
     cy.visit(consumers.path)
   })
 
-  it('Verify that the option to approve request is not displayed', () => {
-    consumers.isApproveAccessEnabled(false)
-  })
-
-  it('Navigate to Consumer Page to see the Approve Request option', () => {
-    cy.visit(consumers.path)
-  })
-
-  it('Verify that service accounts are not created', () => {
-    cy.visit(sa.path)
-    cy.get('@access-manager').then(({ serviceAccount }: any) => {
-      sa.createServiceAccount(serviceAccount.scopes)
-      sa.isShareButtonVisible(true)
-      cy.visit(consumers.path)
-    })
+  it('Verify that the option to approve request is displayed', ()=> {
+      consumers.isApproveAccessEnabled(true)
   })
 
   after(() => {
@@ -103,5 +87,8 @@ describe('Verify that Mark is unable to create service account', () => {
     cy.clearLocalStorage({ log: true })
     cy.deleteAllCookies()
     cy.resetCredential('Mark')
+    cy.logout()
+    cy.clearLocalStorage({ log: true })
+    cy.deleteAllCookies()
   })
 })

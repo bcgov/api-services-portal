@@ -27,6 +27,7 @@ describe('Get the user session token', () => {
             })
         })
     })
+
 })
 
 describe('API Tests for Updating dataset', () => {
@@ -235,7 +236,7 @@ describe('API Tests for Updating dataset', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 })

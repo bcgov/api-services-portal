@@ -54,7 +54,11 @@ class HomePage {
       cy.get(this.namespaceNameInput).type(accessName)
       cy.get(this.nsCreateBtn).click()
       cy.wait(1000)
-      cy.verifyToastMessage("Namespace create failed")
+      cy.get(this.namespaceNameInput).next('div').then(($ele) => {
+        let validationMessage = $ele.text()
+        assert.equal(validationMessage,"Namespace name must be between 5 and 15 alpha-numeric lowercase characters and begin with an alphabet.")
+      })
+      // cy.verifyToastMessage("Namespace create failed")
     })
     cy.get(this.namespaceCancelBtn).click()
   }

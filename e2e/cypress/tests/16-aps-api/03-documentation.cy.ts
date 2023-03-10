@@ -27,7 +27,6 @@ describe('Get the user session token', () => {
             })
         })
     })
-
 })
 
 describe('API Tests for Updating documentation', () => {
@@ -111,7 +110,7 @@ describe('API Tests for Deleting documentation', () => {
 
     it('Verify the status code and response message for invalid slugvalue', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.endPoint + '/platform_test' , 'DELETE').then((response) => {      
+            cy.makeAPIRequest(documentation.endPoint + '/platform_test', 'DELETE').then((response) => {
                 expect(response.status).to.be.oneOf([404, 422])
                 expect(response.body.message).to.be.equal("Content not found")
             })
@@ -208,7 +207,7 @@ describe('API Tests to verify Get documentation content', () => {
 
     it('Verify the status code and response message for invalid slug id', () => {
         cy.get('@api').then(({ documentation }: any) => {
-            cy.makeAPIRequest(documentation.getDocumentation_endPoint+'/998898', 'GET').then((response) => {     
+            cy.makeAPIRequest(documentation.getDocumentation_endPoint + '/998898', 'GET').then((response) => {
                 expect(response.status).to.be.oneOf([404, 422])
                 expect(response.body.message).to.be.contains("Not Found")
             })
@@ -227,7 +226,7 @@ describe('API Tests to verify Get documentation content', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 })

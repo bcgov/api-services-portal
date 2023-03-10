@@ -247,6 +247,34 @@
       }
     }
   },
+  "orgAssignment": {
+    "namespace": "orgassignment",
+    "serviceName": "a-service-for-orgassignment",
+    "Mark": {
+      "userName": "mark",
+      "email":"mark@gmail.com",
+      "accessRole": ["Access.Manage"]
+    },
+    "serviceAccount": {
+      "scopes": ["GatewayConfig.Publish", "Namespace.Manage"]
+    },
+    "product": {
+      "name": "Org Assignment Product",
+      "environment": {
+        "name": "dev",
+        "config": {
+          "terms": "Terms of Use for API Gateway",
+          "authorization": "Kong API Key with ACL Flow",
+          "optionalInstructions": "This is a automation test",
+          "serviceName": "a-service-for-orgassignment"
+        }
+      }
+    },
+    "orgAdminNotification":{
+      "parent" : "Your Organization Administrator has been notified to enable API Publishing to the Directory for the orgassignment namespace.",
+      "child" : "New namespaces must be reviewed by your Organization Administrator before you can publish APIs to the Directory. Your APIs are still in preview mode. For status inquiries, contact your Organization Administrator benny@test.com."
+    }
+  },
   "checkPermission": {
     "namespace": "permission",
     "serviceAccount": {
@@ -279,6 +307,11 @@
         "userName": "Wendy F Wendy L",
         "email":"wendy@test.com",
         "accessRole": ["Namespace.Manage", "CredentialIssuer.Admin"]
+      },
+      "Wendy_NM": {
+        "userName": "Wendy F Wendy L",
+        "email":"wendy@test.com",
+        "accessRole": ["Namespace.Manage"]
       },
       "Wendy_CA": {
         "userName": "Wendy F Wendy L",
@@ -325,9 +358,9 @@
       "accessRole": ["Access.Manage", "Namespace.View"]
     },
     "Janis": {
-      "userName": "janis@idir",
+      "userName": "Janis Smith",
       "email": "janis@testmail.com",
-      "accessRole": ["CredentialIssuer.Admin"]
+      "accessRole": ["CredentialIssuer.Admin","Namespace.Manage"]
     },
     "OldUser": {
       "userName": "olduser@idir",

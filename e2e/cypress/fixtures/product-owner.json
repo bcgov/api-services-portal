@@ -1,0 +1,13 @@
+{
+  "user": {
+    "credentials": {
+      "username": "benny@idir",
+      "password": "benny"
+    }
+  },
+  "namespace": "orgassignment",
+  "product": {
+    "name": "Org Assignment Product",
+    "environment": "dev"
+  }
+}

@@ -187,7 +187,7 @@ describe('API Tests for Deleting Namespace', () => {
         })
     })
 
-//need to confirm with Aidan - service returns 500 status code if there is no any namespaces
+    //need to confirm with Aidan - service returns 500 status code if there is no any namespaces
     // it('Verify that deleted namespace does not display in Get namespace list', () => {
     //     let response: any
     //     cy.get('@api').then(({ namespaces }: any) => {
@@ -201,7 +201,7 @@ describe('API Tests for Deleting Namespace', () => {
 
     after(() => {
         cy.logout()
-        cy.clearLocalStorage({log:true})
+        cy.clearLocalStorage({ log: true })
         cy.deleteAllCookies()
-      })
+    })
 })

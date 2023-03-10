@@ -18,6 +18,8 @@ const YAML = require('yamljs');
 
 let headers: any
 
+const login = new LoginPage()
+
 let requestBody: any = {}
 interface formDataRequestOptions {
   method: string
@@ -26,24 +28,23 @@ interface formDataRequestOptions {
 
 Cypress.Commands.add('login', (username: string, password: string, skipFlag = false) => {
   cy.log('< Log in with user ' + username)
-  const login = new LoginPage()
   const home = new HomePage()
 
   cy.get('header').then(($a) => {
     if ($a.text().includes('Login')) {
-      cy.get(login.loginDropDown).click()
-      if(username.includes('idir')){
-        login.selectAPIProviderLoginOption()
-      }
-      else
-      {
-        login.selectDeveloperLoginOption()
-      }
+      cy.selectLoginOptions(username)
       const log = Cypress.log({
         name: 'Login to Dev',
         displayName: 'LOGIN_DEV',
         message: [`🔐 Authenticating | ${username}`],
         autoEnd: false,
+      })
+      cy.get('body').then(($body) => {
+        if (!($body.find(login.usernameInput).length > 0)) {
+          cy.get('[data-testid=auth-menu-user]').click({ force: true })
+          cy.contains('Logout').click()
+          cy.selectLoginOptions(username)
+        }
       })
       cy.get(login.usernameInput).click().type(username)
       cy.get(login.passwordInput).click().type(password)
@@ -194,7 +195,6 @@ Cypress.Commands.add('logout', () => {
 
   cy.log('< Logging out')
   cy.getSession().then(() => {
-    cy.visit('/')
     cy.get('@session').then((res: any) => {
       cy.get('[data-testid=auth-menu-user]').click({ force: true })
       cy.contains('Logout').click()
@@ -247,8 +247,8 @@ Cypress.Commands.add('getServiceOrRouteID', (configType: string) => {
   })
 })
 
-Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?:boolean) => {
-  let fixtureFile = flag ? "state/regen":"state/store";
+Cypress.Commands.add('publishApi', (fileName: string, namespace: string, flag?: boolean) => {
+  let fixtureFile = flag ? "state/regen" : "state/store";
   cy.log('< Publish API')
   const requestName: string = 'publishAPI'
   cy.fixture(fixtureFile).then((creds: any) => {
@@ -322,6 +322,30 @@ Cypress.Commands.add('makeKongGatewayRequest', (endpoint: string, requestName: s
   })
 })
 
+Cypress.Commands.add('makeKongGatewayRequestUsingClientIDSecret', (hostURL: string, methodType = 'GET') => {
+  cy.readFile('cypress/fixtures/state/store.json').then((store_res) => {
+
+    let cc = JSON.parse(store_res.clientidsecret)
+
+    cy.getAccessToken(cc.clientId, cc.clientSecret).then(() => {
+      cy.get('@accessTokenResponse').then((token_res: any) => {
+        let token = token_res.body.access_token
+        cy.request({
+          method: methodType,
+          url: Cypress.env('KONG_URL'),
+          failOnStatusCode: false,
+          headers: {
+            Host: hostURL,
+          },
+          auth: {
+            bearer: token,
+          },
+        })
+      })
+    })
+  })
+})
+
 Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endPoint?: string, verb = 'POST') => {
   cy.fixture('state/store').then((creds: any) => {
     let body = {}
@@ -383,6 +407,16 @@ Cypress.Commands.add('getUserSession', () => {
   cy.intercept(Cypress.config('baseUrl') + '/admin/session').as('login')
 })
 
+Cypress.Commands.add('selectLoginOptions', (username: string) => {
+  cy.get(login.loginDropDown).click()
+  if (username.includes('idir')) {
+    login.selectAPIProviderLoginOption()
+  }
+  else {
+    login.selectDeveloperLoginOption()
+  }
+})
+
 Cypress.Commands.add('verifyToastMessage', (msg: string) => {
   cy.get('[role="alert"]', { timeout: 2000 }).closest('div').invoke('text')
     .then((text) => {
@@ -420,7 +454,7 @@ Cypress.Commands.add('compareJSONObjects', (actualResponse: any, expectedRespons
   }
 })
 
-Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, pluginFileName: string) => {
+Cypress.Commands.add('updatePluginFile', (filename: string, serviceName: string, pluginFileName: string) => {
   cy.readFile('cypress/fixtures/' + pluginFileName).then(($el) => {
     let newObj: any
     newObj = YAML.parse($el)
@@ -435,6 +469,23 @@ Cypress.Commands.add('updatePluginFile',(filename: string, serviceName: string, 
       const yamlString = YAML.stringify(obj, 'utf8');
       cy.writeFile('cypress/fixtures/' + filename, yamlString)
     })
+  })
+})
+
+Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: string, propertyValue: any) => {
+  cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
+    let obj = YAML.parse(content)
+    const keys = Object.keys(obj);
+    Object.keys(obj.services).forEach(function (key, index) {
+      if (propertyName == "methods") {
+        obj.services[0].routes[0].methods = propertyValue
+      }
+      else {
+        obj.services[0].plugins[0].config[propertyName] = propertyValue
+      }
+    });
+    const yamlString = YAML.stringify(obj, 'utf8');
+    cy.writeFile('cypress/fixtures/' + filename, yamlString)
   })
 })
 

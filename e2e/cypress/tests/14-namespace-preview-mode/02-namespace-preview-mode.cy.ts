@@ -45,7 +45,7 @@ describe('Verify Products when namespace in Preview Mode', () => {
   it('Verify that created Product is not displayed under API Directory', () => {
     cy.get('@apiowner').then(({ namespacePreview }: any) => {
       let product = namespacePreview.product.name
-      assert.isFalse(apiDir.isProductDisplay(product))
+      apiDir.isProductDisplay(product, true)
     })
   })
 

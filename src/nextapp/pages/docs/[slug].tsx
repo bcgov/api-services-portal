@@ -56,91 +56,93 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 const DocsContentPage: React.FC<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ queryKey, sideNavQueryKey, slug }) => {
-  const router = useRouter();
-  const { data } = useRestApi<DocumentationArticle>(
-    queryKey,
-    `/ds/api/documentation/${slug}`,
-    {
-      suspense: false,
-    }
-  );
-  const allArticles = useRestApi<DocumentationArticle[]>(
-    sideNavQueryKey,
-    '/ds/api/documentation',
-    {
-      suspense: false,
-    }
-  );
+  // const router = useRouter();
+  // const { data } = useRestApi<DocumentationArticle>(
+  //   queryKey,
+  //   `/ds/api/documentation/${slug}`,
+  //   {
+  //     suspense: false,
+  //   }
+  // );
+  // const allArticles = useRestApi<DocumentationArticle[]>(
+  //   sideNavQueryKey,
+  //   '/ds/api/documentation',
+  //   {
+  //     suspense: false,
+  //   }
+  // );
+  //
+  // const renderers = {
+  //   link: InternalLink,
+  //   heading: DocHeader,
+  // };
 
-  const renderers = {
-    link: InternalLink,
-    heading: DocHeader,
-  };
+  return <></>;
 
-  return (
-    <>
-      <Head>
-        <title>API Program Services | Documentation | {data.title}</title>
-      </Head>
-      <Container maxW="6xl">
-        <PageHeader
-          breadcrumb={[{ text: 'Documentation Home', href: '/docs' }]}
-          title={data.title}
-        >
-          {data?.publishDate && (
-            <Text className="text-sm text-gray-500" d="inline">
-              {`Published ${formatDistanceToNow(
-                new Date(data.publishDate)
-              )} ago`}
-            </Text>
-          )}
-          <Wrap spacing={2} d="inline-flex" ml={4}>
-            {data.tags?.map((tag: string) => (
-              <WrapItem key={tag}>
-                <Badge colorScheme="green">{tag}</Badge>
-              </WrapItem>
-            ))}
-          </Wrap>
-        </PageHeader>
-        <Grid gridTemplateColumns="1fr 300px" bgColor="white">
-          <Box
-            borderRight="1px solid"
-            borderColor="#f1f1f1"
-            p={4}
-            overflow="hidden"
-            className={styles['markdown-body']}
-          >
-            <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
-              {data?.content}
-            </ReactMarkdownWithHtml>
-          </Box>
-
-          <Box as="aside" p={4}>
-            <Box as="header" mt={2} mb={4}>
-              <Heading size="sm">Other Help Documents</Heading>
-            </Box>
-            <List as="nav">
-              {allArticles.data?.map((page) => (
-                <ListItem key={page.id} fontSize="sm" mb={2}>
-                  <NextLink passHref href={page.slug}>
-                    <Link
-                      fontWeight={
-                        router?.asPath === `/docs/${page.slug}`
-                          ? 'bold'
-                          : 'normal'
-                      }
-                    >
-                      {page.title}
-                    </Link>
-                  </NextLink>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Grid>
-      </Container>
-    </>
-  );
+  // return (
+  //   <>
+  //     <Head>
+  //       <title>API Program Services | Documentation | {data.title}</title>
+  //     </Head>
+  //     <Container maxW="6xl">
+  //       <PageHeader
+  //         breadcrumb={[{ text: 'Documentation Home', href: '/docs' }]}
+  //         title={data.title}
+  //       >
+  //         {data?.publishDate && (
+  //           <Text className="text-sm text-gray-500" d="inline">
+  //             {`Published ${formatDistanceToNow(
+  //               new Date(data.publishDate)
+  //             )} ago`}
+  //           </Text>
+  //         )}
+  //         <Wrap spacing={2} d="inline-flex" ml={4}>
+  //           {data.tags?.map((tag: string) => (
+  //             <WrapItem key={tag}>
+  //               <Badge colorScheme="green">{tag}</Badge>
+  //             </WrapItem>
+  //           ))}
+  //         </Wrap>
+  //       </PageHeader>
+  //       <Grid gridTemplateColumns="1fr 300px" bgColor="white">
+  //         <Box
+  //           borderRight="1px solid"
+  //           borderColor="#f1f1f1"
+  //           p={4}
+  //           overflow="hidden"
+  //           className={styles['markdown-body']}
+  //         >
+  //           <ReactMarkdownWithHtml renderers={renderers} plugins={[gfm]}>
+  //             {data?.content}
+  //           </ReactMarkdownWithHtml>
+  //         </Box>
+  //
+  //         <Box as="aside" p={4}>
+  //           <Box as="header" mt={2} mb={4}>
+  //             <Heading size="sm">Other Help Documents</Heading>
+  //           </Box>
+  //           <List as="nav">
+  //             {allArticles.data?.map((page) => (
+  //               <ListItem key={page.id} fontSize="sm" mb={2}>
+  //                 <NextLink passHref href={page.slug}>
+  //                   <Link
+  //                     fontWeight={
+  //                       router?.asPath === `/docs/${page.slug}`
+  //                         ? 'bold'
+  //                         : 'normal'
+  //                     }
+  //                   >
+  //                     {page.title}
+  //                   </Link>
+  //                 </NextLink>
+  //               </ListItem>
+  //             ))}
+  //           </List>
+  //         </Box>
+  //       </Grid>
+  //     </Container>
+  //   </>
+  // );
 };
 
 export default DocsContentPage;

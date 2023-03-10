@@ -102,6 +102,7 @@ const NewOrganizationForm: React.FC = () => {
                 <FormLabel>Organization</FormLabel>
                 <Select
                   name="org"
+                  data-testid="orgDropDown"
                   disabled={!isSuccess}
                   onChange={(event) => setOrg(event.target.value)}
                 >
@@ -119,6 +120,7 @@ const NewOrganizationForm: React.FC = () => {
                     orgResult.data?.allOrganizationUnits?.length === 0
                   }
                   name="orgUnit"
+                  data-testid="orgUnitDropDown"
                 >
                   <option value="">Select a Business Unit</option>
                   {orgResult.isSuccess &&
@@ -148,7 +150,7 @@ const NewOrganizationForm: React.FC = () => {
             <Button mr={2} onClick={onClose} variant="secondary">
               Cancel
             </Button>
-            <Button onClick={handleSubmitClick}>Add</Button>
+            <Button data-testid="addOrganizationBtn" onClick={handleSubmitClick}>Add</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
