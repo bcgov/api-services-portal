@@ -2,6 +2,7 @@ import { Logger } from '../../logger';
 import { scopesToRoles } from '../../auth/scope-role-utils';
 import { getUma2FromIssuer } from '../keycloak';
 import { UMA2TokenService } from '../uma2';
+import { strict as assert } from 'assert';
 import jwtDecoder from 'jwt-decode';
 import { TemporaryIdentity } from './types';
 
@@ -100,6 +101,35 @@ export async function assignNamespace(
   return Boolean(errors) == false;
 }
 
+export async function updateUserProfileDetails(
+  context: any,
+  jti: string,
+  email: string
+): Promise<boolean> {
+  const noauthContext = context.createContext({
+    skipAccessControl: true,
+  });
+
+  const ident = await getIdentityByJti(noauthContext, jti);
+  let tempId = ident.id;
+
+  const { errors } = await context.executeGraphQL({
+    context: noauthContext,
+    query: `mutation ($tempId: ID!, $email: String) {
+                  updateTemporaryIdentity(id: $tempId, data: {email: $email }) {
+                      id
+              } }`,
+    variables: {
+      tempId,
+      email,
+    },
+  });
+  if (errors) {
+    logger.error('[updateUserProfileDetails] %s %j', jti, errors);
+  }
+  return Boolean(errors) == false;
+}
+
 async function getIdentityByJti(
   context: any,
   jti: string
@@ -114,5 +144,15 @@ async function getIdentityByJti(
     },
   });
   logger.debug('[getIdentityByJti] %j', result);
+
+  if (result.errors) {
+    logger.error('[getIdentityByJti] %s %j', jti, result);
+  }
+  assert.strictEqual(
+    result.data?.allTemporaryIdentities?.length,
+    1,
+    'Unable to get identity information'
+  );
+
   return result.data.allTemporaryIdentities[0];
 }
