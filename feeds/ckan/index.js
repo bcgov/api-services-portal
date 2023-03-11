@@ -47,7 +47,7 @@ async function scopedSync(
     loadDatasetProducer(xfer, scopedDir, destinationUrl)
   );
 
-  fs.rmdirSync(scopedDir, { recursive: true });
+  fs.rmSync(scopedDir, { recursive: true });
 }
 
 async function syncOrgs({ url, workingPath, destinationUrl }) {

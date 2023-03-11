@@ -4,6 +4,7 @@ const { portal } = require('../utils/portal');
 const { v4: uuidv4 } = require('uuid');
 const mask = require('./mask');
 const { Logger } = require('../logger');
+const { ResultsService } = require('../utils/results');
 
 const log = Logger('kong');
 
@@ -70,6 +71,8 @@ async function scopedSyncByNamespace(
     loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
   );
 
+  xfer.resultCollector().output();
+
   // remove any GatewayService or GatewayRoutes that no longer exist in Kong
   const destination = portal(destinationUrl);
 
@@ -94,7 +97,7 @@ async function scopedSyncByNamespace(
     }
   }
 
-  fs.rmdirSync(scopedDir, { recursive: true });
+  fs.rmSync(scopedDir, { recursive: true });
 }
 
 async function scopedSyncByConsumer(
@@ -122,7 +125,9 @@ async function scopedSyncByConsumer(
     )
   );
 
-  fs.rmdirSync(scopedDir, { recursive: true });
+  xfer.resultCollector().output();
+
+  fs.rmSync(scopedDir, { recursive: true });
 }
 
 async function sync({ url, workingPath, destinationUrl }) {
@@ -166,9 +171,13 @@ async function sync({ url, workingPath, destinationUrl }) {
       '/feed/GatewayConsumer'
     )
   );
+
   await xfer.concurrentWork(
     loadGroupsProducer(xfer, destinationUrl, '/feed/GatewayGroup')
   );
+
+  xfer.resultCollector().output();
+
   //await xfer.concurrentWork(loadProducer(xfer, destinationUrl, 'gw-products', 'name', 'product', '/feed/Product'))
   //await xfer.concurrentWork(loadServiceAccessProducer(xfer, destinationUrl, 'gw-consumers', '/feed/ServiceAccess'))
 }
@@ -181,26 +190,11 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
     type == 'consumer' ? xfer.get_json_content('gw-acls')['data'] : null;
   let index = 0;
 
-  log.info('[producer] %s : %d records', file, items.length);
-
-  const results = {
-    'no-change': 0,
-    created: 0,
-    'created-failed': 0,
-    updated: 0,
-    deleted: 0,
-    'updated-failed': 0,
-    'deleted-failed': 0,
-  };
+  log.debug('[producer] %s : %d records', file, items.length);
 
   return () => {
     if (index == items.length) {
-      Object.keys(results)
-        .filter((r) => results[r] != 0)
-        .forEach((r) => {
-          log.info('[%s] %d', String(r).padStart(15, ' '), results[r]);
-        });
-      log.info('Finished producing ' + index + ' records.');
+      log.info('[producer] %s : Finished %d records', file, items.length);
       return null;
     }
     const item = items[index];
@@ -244,12 +238,14 @@ function loadProducer(xfer, destinationUrl, file, name, type, feedPath) {
     return destination
       .fireAndForget(feedPath, item)
       .then((result) => {
-        results[result['result']]++;
+        xfer.resultCollector().inc(result['result']);
 
         log.debug('%s -> %s OK', file, result);
       })
       .catch((err) => {
-        log.error(`[${nm}] ERR ${err}`);
+        xfer.resultCollector().inc('exception');
+        log.error('%s', err);
+        log.error('%j', item);
       });
   };
 }
@@ -279,28 +275,17 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
       });
     });
 
-  log.info('[loadGroupsProducer] (%s) %d records', feedPath, items.length);
+  log.debug('[loadGroupsProducer] (%s) %d records', feedPath, items.length);
 
   let index = 0;
 
-  const results = {
-    'no-change': 0,
-    created: 0,
-    'created-failed': 0,
-    updated: 0,
-    deleted: 0,
-    'updated-failed': 0,
-    'deleted-failed': 0,
-  };
-
   return () => {
     if (index == items.length) {
-      Object.keys(results)
-        .filter((r) => results[r] != 0)
-        .forEach((r) => {
-          log.info('[%s] %d', String(r).padStart(15, ' '), results[r]);
-        });
-      log.info('Finished producing ' + index + ' records.');
+      log.info(
+        '[loadGroupsProducer] %s : Finished %d records',
+        feedPath,
+        items.length
+      );
       return null;
     }
     const item = items[index];
@@ -316,10 +301,11 @@ function loadGroupsProducer(xfer, destinationUrl, feedPath) {
     return destination
       .fireAndForget(feedPath, item)
       .then((result) => {
-        results[result['result']]++;
+        xfer.resultCollector().inc(result['result']);
         log.debug('%s -> %s OK', feedPath, result);
       })
       .catch((err) => {
+        xfer.resultCollector().inc('exception');
         log.error(`[${nm}] ERR ${err}`);
       });
   };
