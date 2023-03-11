@@ -4,7 +4,6 @@ const { portal } = require('../utils/portal');
 const { v4: uuidv4 } = require('uuid');
 const mask = require('./mask');
 const { Logger } = require('../logger');
-const { ResultsService } = require('../utils/results');
 
 const log = Logger('kong');
 
