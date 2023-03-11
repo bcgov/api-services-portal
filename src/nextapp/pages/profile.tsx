@@ -152,7 +152,7 @@ const ProfilePage: React.FC = () => {
               )}
               {isInvalid && <Text color="bc-error">Invalid Email</Text>}
             </Figure>
-            <Figure label="Username">{user.username}</Figure>
+            <Figure label="Username">{user.providerUsername}</Figure>
             <Figure label="Authentication">
               {getProviderText(user.provider)}
             </Figure>

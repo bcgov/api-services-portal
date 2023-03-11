@@ -92,7 +92,7 @@ export class OpsMetrics {
     this.gActivity = new Gauge({
       name: 'ops_metrics_activity_summary',
       help: 'Activity Summary',
-      labelNames: ['namespace', 'actor', 'activity', 'date'],
+      labelNames: ['namespace', 'actor', 'activity', 'result', 'date'],
     });
 
     this.gProducts = new Gauge({
@@ -228,7 +228,7 @@ export class OpsMetrics {
     async function recurse(skip = 0) {
       const data = await batch.listAll(
         'allActivities',
-        ['namespace', 'action', 'type', 'context', 'createdAt'],
+        ['namespace', 'action', 'result', 'type', 'context', 'createdAt'],
         undefined,
         skip,
         50
@@ -249,11 +249,13 @@ export class OpsMetrics {
         if (Boolean(activity) == false) {
           logger.warn("Context didn't produce anything meaningful %j", data);
         }
+        const result = data.result;
         gActivity.inc(
           {
             actor,
             namespace: data.namespace,
             activity,
+            result,
             date: new Date(data.createdAt).toISOString(),
           },
           1
