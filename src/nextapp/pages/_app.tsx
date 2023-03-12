@@ -30,6 +30,7 @@ import '@/shared/styles/global.css';
 // const SiteContext = createContext({site: 'devportal'});
 import { AppWrapper } from './context';
 import '../../mocks';
+import CompleteProfile from '@/components/complete-profile';
 
 const footerItems = [
   { href: 'http://www2.gov.bc.ca/gov/content/home', text: 'Home' },
@@ -98,6 +99,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                   type="image/x-icon"
                 />
               </Head>
+              <CompleteProfile />
               <MaintenanceBanner />
               <Header site={site}>
                 <AuthAction site={site} />

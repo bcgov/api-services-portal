@@ -224,5 +224,6 @@ Portal User or Guest,,allContents,,,,,,,,,"portal-user,guest",allow,
 Portal User or Guest,,DiscoverableProduct,,,,,,,,,"portal-user,guest",allow,
 Portal User or Guest,,services,,,,,,,,,"portal-user,guest",allow,
 ALL USERS,,mySelf,,,,,,,,,,allow,filterBySelf
+ALL USERS,,updateEmail,,,,,,,,,,allow,filterBySelf
 ALL USERS,,acceptLegal,,,,,,,,,,allow,
-ALL USERS,,,User,update,,,,,,,,allow,
+ALL USERS,,,User,update,,,,,,,,allow,filterBySelf

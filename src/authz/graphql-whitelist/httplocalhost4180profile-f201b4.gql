@@ -1,0 +1,6 @@
+
+  mutation UpdateUserEmail($email: String!) {
+    updateEmail(email: $email) {
+      email
+    }
+  }

@@ -4493,6 +4493,7 @@ export type Mutation = {
   deleteUsers?: Maybe<Array<Maybe<User>>>;
   forceDeleteEnvironment?: Maybe<Scalars['Boolean']>;
   acceptLegal?: Maybe<User>;
+  updateEmail?: Maybe<User>;
   updateConsumerGroupMembership?: Maybe<Scalars['Boolean']>;
   grantAccessToConsumer?: Maybe<Scalars['Boolean']>;
   revokeAccessFromConsumer?: Maybe<Scalars['Boolean']>;
@@ -5244,6 +5245,11 @@ export type MutationForceDeleteEnvironmentArgs = {
 export type MutationAcceptLegalArgs = {
   productEnvironmentId: Scalars['ID'];
   acceptLegal: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateEmailArgs = {
+  email: Scalars['String'];
 };
 
 
