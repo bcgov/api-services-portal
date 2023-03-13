@@ -98,6 +98,7 @@
     "graphql-tools": "^7.0.2",
     "http-proxy-middleware": "^1.1.2",
     "isomorphic-unfetch": "^3.1.0",
+    "json-stable-stringify": "^1.0.2",
     "js-yaml": "^4.1.0",
     "jwks-rsa": "^2.0.5",
     "jwt-decode": "^3.1.2",

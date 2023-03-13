@@ -91,6 +91,8 @@ async function syncQueryRanges(
   await xfer.concurrentWork(
     producer(xfer, 'query_range', params.numDays, destinationUrl)
   );
+
+  xfer.resultCollector().output();
 }
 
 async function syncQueries(
@@ -126,6 +128,8 @@ async function syncQueries(
   await xfer.concurrentWork(
     producer(xfer, 'query', params.numDays, destinationUrl)
   );
+
+  xfer.resultCollector().output();
 }
 
 function producer(xfer, queryType, numDays, destinationUrl) {
@@ -139,7 +143,7 @@ function producer(xfer, queryType, numDays, destinationUrl) {
       const results = Array.isArray(json['data'])
         ? json['data'][0]['result']
         : json['data']['result'];
-      log.info(
+      log.debug(
         '[producer] %s %s : %d records',
         target,
         _query.id,
@@ -180,8 +184,16 @@ function producer(xfer, queryType, numDays, destinationUrl) {
 
     return destination
       .fireAndForget('/feed/Metric', item.metric)
-      .then((result) => log.debug(`[${name}] OK`, result))
-      .catch((err) => log.error(`[${name}] ERR ${err}`));
+      .then((result) => {
+        xfer.resultCollector().inc(result['result']);
+
+        log.debug('%s -> %s OK', name, result);
+      })
+      .catch((err) => {
+        xfer.resultCollector().inc('exception');
+        log.error('%s', err);
+        log.error('%j', item);
+      });
   };
 }
 

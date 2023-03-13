@@ -246,7 +246,7 @@ class Oauth2ProxyAuthStrategy {
 
   async register_user(req, res, next) {
     const _users = this.keystone.getListByKey('User');
-    const users = this.keystone.getListByKey(this.listKey);
+    const identityList = this.keystone.getListByKey(this.listKey);
 
     // If no user in session but we are authenticated, then redirect to /admin/signin
     const allRoles = [
@@ -263,7 +263,9 @@ class Oauth2ProxyAuthStrategy {
     const jti = oauthUser['jti']; // JWT ID - Unique Identifier for the token
     const sub = oauthUser['sub']; // Subject ID - Whom the token refers to
 
-    const name = oauthUser['name'];
+    const name = Boolean(oauthUser['name'])
+      ? oauthUser['name']
+      : oauthUser['provider_username'];
     const identityProvider = oauthUser['identity_provider'];
     const providerUserGuid = oauthUser['provider_user_guid'];
     const providerUsername = oauthUser['provider_username'];
@@ -355,6 +357,12 @@ class Oauth2ProxyAuthStrategy {
 
     let userId = _results.length == 0 ? null : _results[0].id;
 
+    // if the email is passed, then treat that as the source of truth
+    let userEmail = email;
+    if (!Boolean(email) && _results.length != 0) {
+      userEmail = _results[0].email;
+    }
+
     if (_results.length == 0) {
       // auto-create a user record
       const { data, errors } = await this.keystone.executeGraphQL({
@@ -365,7 +373,7 @@ class Oauth2ProxyAuthStrategy {
                     } }`,
         variables: {
           name,
-          email,
+          userEmail,
           username,
           identityProvider,
           providerUserGuid,
@@ -385,14 +393,14 @@ class Oauth2ProxyAuthStrategy {
       const saved = _results[0];
       if (
         saved.name != name ||
-        saved.email != email ||
+        (Boolean(email) && saved.email != email) ||
         saved.identityProvider === null ||
         saved.providerUsername != providerUsername
       ) {
         logger.info(
           'register_user - updating name (%s), email (%s), provider (%s), providerUserGuid (%s), providerUsername (%s) for %s',
           name,
-          email,
+          userEmail,
           identityProvider,
           providerUserGuid,
           providerUsername,
@@ -406,7 +414,7 @@ class Oauth2ProxyAuthStrategy {
                       } }`,
           variables: {
             name,
-            email,
+            email: userEmail,
             identityProvider,
             providerUserGuid,
             providerUsername,
@@ -422,7 +430,7 @@ class Oauth2ProxyAuthStrategy {
       }
     }
 
-    let results = await users.adapter.find({ jti: jti });
+    let results = await identityList.adapter.find({ jti });
 
     var operation = 'update';
 
@@ -438,7 +446,7 @@ class Oauth2ProxyAuthStrategy {
           jti,
           sub,
           name,
-          email,
+          email: userEmail,
           username,
           identityProvider,
           providerUserGuid,
@@ -453,7 +461,7 @@ class Oauth2ProxyAuthStrategy {
       if (errors) {
         logger.error('register_user - NO! Something went wrong %j', errors);
       }
-      results = await users.adapter.find({ ['jti']: jti });
+      results = await identityList.adapter.find({ ['jti']: jti });
       operation = 'create';
     }
 

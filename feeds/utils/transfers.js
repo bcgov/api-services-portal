@@ -5,13 +5,19 @@ const PromisePool = require('es6-promise-pool');
 const { checkStatus } = require('./checkStatus');
 const { Logger } = require('../logger');
 const stringify = require('json-stable-stringify');
+const { ResultsService } = require('./results');
 
 const log = Logger('utils.xfer');
 
 function transfers(workingPath, baseUrl, exceptions) {
   fs.mkdirSync(workingPath, { recursive: true });
 
+  const resultCollector = new ResultsService();
+  resultCollector.init();
+
   return {
+    resultCollector: () => resultCollector,
+
     copy: async function (_url, filename, index = 0) {
       log.debug('[copy] %s%s', baseUrl, _url);
       const out = workingPath + '/' + filename + '-' + index + '.json';
@@ -79,7 +85,7 @@ function transfers(workingPath, baseUrl, exceptions) {
       // Wait for the pool to settle.
       return poolPromise.then(
         function () {
-          log.info('All promises fulfilled');
+          log.debug('All promises fulfilled');
         },
         function (error) {
           log.error('Some promise rejected: ' + error.message);

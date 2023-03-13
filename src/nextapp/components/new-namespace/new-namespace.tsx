@@ -96,7 +96,7 @@ const NewNamespace: React.FC<NewNamespace> = ({ isOpen, onClose }) => {
                 Names must be:
                 <UnorderedList>
                   <ListItem>
-                    Alphanumeric (letters and numbers only, no special
+                    Alphanumeric (letters, numbers and dashes only, no special
                     characters)
                   </ListItem>
                   <ListItem>Unique to all other namespaces</ListItem>
