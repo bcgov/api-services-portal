@@ -12,6 +12,8 @@ export interface ResourceSetQuery {
   owner?: string;
   type?: string;
   scope?: string;
+  first?: number;
+  max?: number;
 }
 
 export interface ResourceScope {
@@ -100,7 +102,12 @@ export class UMAResourceRegistrationService {
   }
 
   public async listResources(query: ResourceSetQuery): Promise<string[]> {
-    const requestQuery = querystring.stringify(query as any);
+    // TODO: Really should do graceful paging, but will be awhile before
+    // there are 1000+ namespaces!
+    const requestQuery = querystring.stringify({
+      ...{ first: 0, max: 1000 },
+      ...query,
+    } as any);
     const url = `${this.resourceRegistrationEndpoint}?${requestQuery}`;
     logger.debug('[listResources] %s', url);
     const result = await fetch(url, {

@@ -14,12 +14,16 @@ export function Logger(category: string) {
     level: process.env.LOG_LEVEL || 'debug',
     format: winston.format.combine(
       enumerateErrorFormat(),
+      winston.format.timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss',
+      }),
       process.env.NODE_ENV === 'production'
         ? winston.format.uncolorize()
         : winston.format.colorize(),
       winston.format.splat(),
       winston.format.printf(
-        ({ level, message, stack }) => `${level}: [${category}] ${message}`
+        ({ timestamp, level, message, stack }) =>
+          `${timestamp} ${level}: [${category}] ${message}`
       )
     ),
     transports: [
