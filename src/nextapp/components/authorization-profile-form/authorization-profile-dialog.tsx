@@ -305,7 +305,7 @@ const AuthorizationProfileDialog: React.FC<AuthorizationProfileDialogProps> = ({
                   </Tab>
                   <Box flex={1} />
                   <Box p="relative" mt={-10} mb={2}>
-                    <UserProfile data={user} />
+                    <UserProfile data={data?.owner} />
                   </Box>
                 </TabList>
               </Tabs>
