@@ -134,6 +134,16 @@
       "environment": "dev"
     }
   },
+  "elevatedAccess":{
+    "application": {
+      "name": "Request for Elevated Acess",
+      "description": "Test application for auto test"
+    },
+    "product": {
+      "name": "Auto Test Product",
+      "environment": "dev"
+    }
+  },
   "deleteApplication":{
     "application": {
       "name": "delete-application-without-access",

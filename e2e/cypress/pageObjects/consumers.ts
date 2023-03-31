@@ -98,8 +98,6 @@ export default class ConsumersPage {
       cy.contains('span', 'Route').click({ force: true })
     }
     cy.get(this.applyBtn).click()
-    // cy.contains('h2', 'ip-restriction').should('be.visible')
-    // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
     cy.wait(1000)
   }

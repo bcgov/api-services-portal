@@ -48,7 +48,7 @@ class Products {
   }
 
   createNewProduct(productName: string, env: string) {
-    cy.get(this.newProductBtn).click()
+    cy.get(this.newProductBtn).first().click()
     cy.get(this.productNameInput).type(productName)
     cy.get(`[data-testid=prd-env-${env}-radio]`).click()
     cy.get(this.createBtn).click()
@@ -224,14 +224,6 @@ class Products {
       force: true,
       delay: 500
     })
-    // cy.get(this.catelogueDropDownMenu)
-    //   .find('div')
-    //   .find('p')
-    //   .each(($e1, index, $list) => {
-    //     if ($e1.text() === productName) {
-    //       cy.wrap($e1).click()
-    //     }
-    //   })
     this.updateProduct()
   }
 
