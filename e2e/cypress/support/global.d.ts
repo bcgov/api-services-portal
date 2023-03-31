@@ -71,7 +71,9 @@ declare namespace Cypress {
 
     updatePluginFile (filename: string, serviceName: string, pluginFileName: string):Chainable<Cypress.Response<any>>
 
-    updatePropertiesOfPluginFile(filename: string, propertyName: string, propertyValue: any):Chainable<Cypress.Response<any>>
+    updateElementsInPluginFile(filename: string, elementName: string, elementValue: string):Chainable<Cypress.Response<any>>
+
+    updatePropertiesOfPluginFile(filename: string, propertyName: any, propertyValue: any):Chainable<Cypress.Response<any>>
 
     keycloakLogin(username: string, password: string): Chainable<any>
 

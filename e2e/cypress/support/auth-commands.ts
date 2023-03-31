@@ -472,18 +472,25 @@ Cypress.Commands.add('updatePluginFile', (filename: string, serviceName: string,
   })
 })
 
-Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: string, propertyValue: any) => {
+
+
+Cypress.Commands.add('updatePropertiesOfPluginFile', (filename: string, propertyName: any, propertyValue: any) => {
   cy.readFile('cypress/fixtures/' + filename).then((content: any) => {
     let obj = YAML.parse(content)
     const keys = Object.keys(obj);
-    Object.keys(obj.services).forEach(function (key, index) {
-      if (propertyName == "methods") {
-        obj.services[0].routes[0].methods = propertyValue
-      }
-      else {
-        obj.services[0].plugins[0].config[propertyName] = propertyValue
-      }
-    });
+    if (propertyName === "config.anonymous") {
+      obj.plugins[0].config.anonymous = propertyValue
+    }
+    else {
+      Object.keys(obj.services).forEach(function (key, index) {
+        if (propertyName == "methods") {
+          obj.services[0].routes[0].methods = propertyValue
+        }
+        else {
+          obj.services[0].plugins[0].config[propertyName] = propertyValue
+        }
+      });
+    }
     const yamlString = YAML.stringify(obj, 'utf8');
     cy.writeFile('cypress/fixtures/' + filename, yamlString)
   })
