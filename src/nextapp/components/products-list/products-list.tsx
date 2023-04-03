@@ -165,7 +165,11 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                       product={d}
                       productQueryKey={queryKey}
                     />
-                    <DeleteEnvironment data={item} queryKey={queryKey} />
+                    <DeleteEnvironment
+                      data={item}
+                      productName={d.name}
+                      queryKey={queryKey}
+                    />
                   </Td>
                 </Tr>
               )}

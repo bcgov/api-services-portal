@@ -436,6 +436,15 @@ export const updateEnvironmentHandler = (req, res, ctx) => {
 
 export const deleteEnvironmentHandler = (req, res, ctx) => {
   const { id } = req.variables;
+
+  if (id === 'e3') {
+    return res(
+      ctx.data({
+        errors: [{ message: 'Permission denied' }],
+      })
+    );
+  }
+
   const environment = environments.get(id);
   const product = products.get(environment.product.id);
   products.set(environment.product.id, {

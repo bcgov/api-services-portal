@@ -9,6 +9,7 @@ import {
   Button,
   Icon,
   IconButton,
+  Tag,
   useToast,
 } from '@chakra-ui/react';
 import { FaTrash } from 'react-icons/fa';
@@ -18,9 +19,15 @@ import { useApiMutation } from '@/shared/services/api';
 
 interface DeleteEnvironmentProps {
   id: string;
+  name: string;
+  productName: string;
 }
 
-const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
+const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
+  id,
+  name,
+  productName,
+}) => {
   const client = useQueryClient();
   const toast = useToast();
   const mutation = useApiMutation<{ id: string }>(REMOVE_ENVIRONMENT);
@@ -74,7 +81,8 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure? You can not undo this action afterwards.
+              You are about to delete {productName} <Tag>{name}</Tag> This
+              action cannot be undone.
             </AlertDialogBody>
 
             <AlertDialogFooter>
@@ -87,7 +95,7 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({ id }) => {
                 onClick={onDelete}
                 ml={3}
               >
-                Delete
+                Yes, Delete Environment
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

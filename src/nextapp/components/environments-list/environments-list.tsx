@@ -135,7 +135,11 @@ const EnvironmentsList: React.FC<EnvironmentsListProps> = ({
                   Edit
                 </Button>
               </Link>
-              <DeleteEnvironment id={e.id} />
+              <DeleteEnvironment
+                id={e.id}
+                productName={product.name}
+                name={e.name}
+              />
             </ButtonGroup>
           </Box>
         </Box>

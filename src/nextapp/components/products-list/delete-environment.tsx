@@ -8,9 +8,12 @@ import {
   AlertDialogOverlay,
   Button,
   MenuItem,
+  Tag,
+  Text,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import Link from 'next/link';
 import { gql } from 'graphql-request';
 import { useApiMutation } from '@/shared/services/api';
 import { Environment } from '@/shared/types/query.types';
@@ -21,13 +24,16 @@ import { QueryKey, useQueryClient } from 'react-query';
 interface DeleteEnvironmentProps {
   data: Environment;
   queryKey: QueryKey;
+  productName: string;
 }
 
 const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
   data,
+  productName,
   queryKey,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const [isFailed, setFailed] = React.useState(false);
   const client = useQueryClient();
   const deleteEnvironment = useApiMutation(deleteMutation);
   const toast = useToast();
@@ -43,12 +49,13 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
         isClosable: true,
       });
     } catch (err) {
-      toast({
-        status: 'error',
-        title: 'Environment deletion failed',
-        description: err,
-        isClosable: true,
-      });
+      setFailed(true);
+      // toast({
+      //   status: 'error',
+      //   title: 'Environment deletion failed',
+      //   description: err,
+      //   isClosable: true,
+      // });
     }
   };
 
@@ -69,24 +76,54 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
         isOpen={isOpen}
         leastDestructiveRef={cancelRef}
         onClose={onClose}
+        size="lg"
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Environment
+              {isFailed
+                ? 'You cannot delete an Environment in use'
+                : 'Delete Environment'}
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure? You can't undo this action afterwards.
+              {isFailed && (
+                <>
+                  The <Text as="strong">{productName}</Text>{' '}
+                  <Tag variant="outline">{data.name}</Tag> environment cannot be
+                  deleted as there are consumer credentials associated with it.
+                  Please remove all consumers linked to this environment before
+                  proceeding with the deletion.
+                </>
+              )}
+              {!isFailed && (
+                <>
+                  You are about to delete <Text as="strong">{productName}</Text>{' '}
+                  <Tag variant="outline">{data.name}</Tag> This action cannot be
+                  undone.
+                </>
+              )}
             </AlertDialogBody>
 
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose} variant="secondary">
                 Cancel
               </Button>
-              <Button variant="danger" onClick={handleDeleteEnvironment} ml={3} data-testid="delete-env-confirmation-btn">
-                Delete
-              </Button>
+              {isFailed && (
+                <Link href="/manager/consumers">
+                  <Button ml={3}>Manage Consumers</Button>
+                </Link>
+              )}
+              {!isFailed && (
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteEnvironment}
+                  ml={3}
+                  data-testid="delete-env-confirmation-btn"
+                >
+                  Yes, Delete Environment
+                </Button>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>
