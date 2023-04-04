@@ -434,6 +434,29 @@ export const updateEnvironmentHandler = (req, res, ctx) => {
   return res(ctx.data(result.get(id)));
 };
 
+export const checkDeleteEnvHandler = (req, res, ctx) => {
+  const { id } = req.variables;
+  if (id === 'e3') {
+    return res(
+      ctx.delay(2000),
+      ctx.data({
+        deleteEnvironmentPermissions: {
+          allowed: false,
+          reason:
+            'The PharmaNet Electronic Prescribing other environment cannot be deleted as there are consumer credentials associated with it. Please remove all consumers linked to this environment before proceeding with the deletion.',
+        },
+      })
+    );
+  }
+  return res(
+    ctx.data({
+      deleteEnvironmentPermissions: {
+        allowed: true,
+      },
+    })
+  );
+};
+
 export const deleteEnvironmentHandler = (req, res, ctx) => {
   const { id } = req.variables;
 

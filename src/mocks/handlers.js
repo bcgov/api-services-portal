@@ -65,6 +65,7 @@ import {
   updateProductHandler,
   updateEnvironmentHandler,
   deleteEnvironmentHandler,
+  checkDeleteEnvHandler,
   deleteProductHandler,
   createAuthzProfile,
 } from './resolvers/products';
@@ -238,6 +239,7 @@ export const handlers = [
   keystone.mutation('RemoveProduct', deleteProductHandler),
   keystone.mutation('AddEnvironment', addEnvironmentHandler),
   keystone.mutation('DeleteEnvironment', deleteEnvironmentHandler),
+  keystone.query('CheckDeleteEnvironment', checkDeleteEnvHandler),
   keystone.query('GetOwnedEnvironment', getEnvironmentHandler),
   keystone.query('GetAllCredentialIssuers', getAllCredentialIssuersByNamespace),
   keystone.query(

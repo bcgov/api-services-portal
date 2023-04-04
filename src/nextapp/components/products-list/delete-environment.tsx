@@ -6,7 +6,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
+  Box,
   Button,
+  Center,
+  CircularProgress,
   MenuItem,
   Tag,
   Text,
@@ -15,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { gql } from 'graphql-request';
-import { useApiMutation } from '@/shared/services/api';
+import { useApi, useApiMutation } from '@/shared/services/api';
 import { Environment } from '@/shared/types/query.types';
 
 import ActionsMenu from '../actions-menu';
@@ -33,11 +36,24 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
   queryKey,
 }) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [isFailed, setFailed] = React.useState(false);
+  const permissionQuery = useApi(
+    ['deletePermissions', data.id],
+    {
+      query,
+      variables: {
+        id: data.id,
+      },
+    },
+    {
+      enabled: isOpen,
+    }
+  );
   const client = useQueryClient();
   const deleteEnvironment = useApiMutation(deleteMutation);
   const toast = useToast();
   const cancelRef = React.useRef();
+  const canDelete = permissionQuery.data?.deleteEnvironmentPermissions.allowed;
+  const reason = permissionQuery.data?.deleteEnvironmentPermissions.reason;
 
   const handleDeleteEnvironment = async () => {
     try {
@@ -49,13 +65,12 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
         isClosable: true,
       });
     } catch (err) {
-      setFailed(true);
-      // toast({
-      //   status: 'error',
-      //   title: 'Environment deletion failed',
-      //   description: err,
-      //   isClosable: true,
-      // });
+      toast({
+        status: 'error',
+        title: 'Environment deletion failed',
+        description: err,
+        isClosable: true,
+      });
     }
   };
 
@@ -81,22 +96,22 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              {isFailed
+              {!canDelete
                 ? 'You cannot delete an Environment in use'
                 : 'Delete Environment'}
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              {isFailed && (
-                <>
-                  The <Text as="strong">{productName}</Text>{' '}
-                  <Tag variant="outline">{data.name}</Tag> environment cannot be
-                  deleted as there are consumer credentials associated with it.
-                  Please remove all consumers linked to this environment before
-                  proceeding with the deletion.
-                </>
+              {permissionQuery.isLoading && (
+                <Center>
+                  <Box textAlign="center">
+                    <CircularProgress isIndeterminate />
+                    <Text>Fetching permissions</Text>
+                  </Box>
+                </Center>
               )}
-              {!isFailed && (
+              {!canDelete && reason}
+              {canDelete && (
                 <>
                   You are about to delete <Text as="strong">{productName}</Text>{' '}
                   <Tag variant="outline">{data.name}</Tag> This action cannot be
@@ -109,12 +124,12 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
               <Button ref={cancelRef} onClick={onClose} variant="secondary">
                 Cancel
               </Button>
-              {isFailed && (
+              {!canDelete && (
                 <Link href="/manager/consumers">
                   <Button ml={3}>Manage Consumers</Button>
                 </Link>
               )}
-              {!isFailed && (
+              {canDelete && (
                 <Button
                   variant="danger"
                   onClick={handleDeleteEnvironment}
@@ -133,6 +148,15 @@ const DeleteEnvironment: React.FC<DeleteEnvironmentProps> = ({
 };
 
 export default DeleteEnvironment;
+
+const query = gql`
+  query CheckDeleteEnvironment($id: ID!) {
+    deleteEnvironmentPermissions(id: $id) {
+      allowed
+      reason
+    }
+  }
+`;
 
 const deleteMutation = gql`
   mutation DeleteEnvironment($id: ID!, $force: Boolean!) {
