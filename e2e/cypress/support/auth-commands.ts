@@ -354,7 +354,7 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
     let endpoint
     if (pluginName == '')
       endpoint = 'plugins'
-    else
+    else if(id !== undefined)
       endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
     endpoint = (typeof endPoint !== 'undefined') ? endPoint : endpoint
     body = config[name]

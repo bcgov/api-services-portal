@@ -1,10 +1,10 @@
-  plugins:
-  - name: key-auth
-    tags: [ ns.newplatform ]
-    protocols: [ http, https ]
-    config:
-      key_names: ["X-API-KEY"]
-      run_on_preflight: true
-      hide_credentials: true
-      key_in_body: false
-
+plugins:
+    -
+        name: key-auth
+        tags:
+            - ns.newplatform
+        protocols:
+            - http
+            - https
+        config:
+            anonymous: 3f521c8c-83b2-4b5e-a9a4-f0de910bb061

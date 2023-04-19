@@ -69,7 +69,17 @@ export default class ConsumersPage {
       cy.get(this.consumerDialogCancelBtn).click()
       this.editConsumerDialog()
     }
-    // cy.wait(1000)
+    cy.wait(1000)
+    this.setRateLimitingWithOutConsumerID(requestCount,scope,policy)
+    // cy.wait(500)
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
+    cy.wait(3000)
+  }
+
+  setRateLimitingWithOutConsumerID(requestCount: string, scope?: string , policy?: string){
+    scope = scope || 'Service'
+    policy = policy || 'Local'
     this.clickOnRateLimitingOption()
     cy.wait(3000)
    
@@ -83,10 +93,6 @@ export default class ConsumersPage {
       cy.get(this.policyDropDown).select(policy, { force: true }).invoke('val')
     }
     cy.get(this.rateLimitingApplyBtn).click()
-    // cy.wait(500)
-    cy.get(this.consumerDialogSaveBtn).click()
-    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-    cy.wait(3000)
   }
 
   setAllowedIPAddress(allowIP: string, scope = 'Service') {

@@ -117,7 +117,7 @@ class Products {
           )
         }
 
-        cy.get(this.envCfgOptText).type(config.optionalInstructions)
+        cy.get(this.envCfgOptText).clear().type(config.optionalInstructions)
         cy.get('[name="active"]').then($button => {
           debugger
           if ($button.is(':disabled')) {
