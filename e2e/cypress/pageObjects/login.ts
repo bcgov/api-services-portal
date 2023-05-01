@@ -17,11 +17,13 @@ class LoginPage {
 
   selectAPIProviderLoginOption(){
     cy.get(this.apiProviderBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.apiProviderLoginBtn).click()
   }
 
   selectDeveloperLoginOption(){
     cy.get(this.developerBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.developerLoginBtn).click()
   }
 }

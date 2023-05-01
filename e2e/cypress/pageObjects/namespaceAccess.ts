@@ -18,6 +18,7 @@ class NamespaceAccessPage {
         }
       })
     })
+    cy.checkA11yIssue()
     cy.contains("Share").click()
   }
 
@@ -39,6 +40,7 @@ class NamespaceAccessPage {
         }
       })
     })
+    cy.checkA11yIssue()
     cy.get(this.saveUserAccessBtn).click()
   }
 
@@ -48,6 +50,7 @@ class NamespaceAccessPage {
       cy.contains(revokePermission.userName).parents('tr').find('td:nth-child(2)').find('span').each(($e1, index, $list) => {
         const text = $e1.text()
         if (text === accessName) {
+          cy.checkA11yIssue()
           cy.wrap($e1).find('button').click()
         }
       })
@@ -57,11 +60,13 @@ class NamespaceAccessPage {
 
   revokeAllPermission(user: string) {
     cy.contains(user).parents('tr').find('td:nth-child(3)').children('button').click()
+    cy.checkA11yIssue()
     cy.get('[data-testid$="-revoke-btn"]').filter(':visible').first().click()
   }
 
   editAccess(user: string) {
     cy.contains(user).parents('tr').find('td:nth-child(3)').children('button').click()
+    cy.checkA11yIssue()
     cy.get('[data-testid$="-edit-btn"]').filter(':visible').first().click()
   }
 

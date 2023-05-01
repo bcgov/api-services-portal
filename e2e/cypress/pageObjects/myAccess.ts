@@ -17,15 +17,18 @@ class myAccessPage {
 
   clickOnGenerateSecretButton() {
     cy.get(this.generateSecretsBtn).click()
+    cy.checkA11yIssue()
   }
 
   clickOnCollectCredentialButton() {
     cy.get(this.collectCredentialsBtn).click()
+    cy.checkA11yIssue()
   }
 
   saveAPIKeyValue(): void {
     cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
       cy.saveState('apikey', $apiKey)
+      cy.checkA11yIssue()
       cy.contains('Done').click()
     })
   }
@@ -39,6 +42,7 @@ class myAccessPage {
     cy.get(this.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
       cy.saveState('newApiKey', $apiKey)
     })
+    cy.checkA11yIssue()
     cy.get(this.regenerateCredentialCloseBtn).click()
   }
 
@@ -83,6 +87,7 @@ class myAccessPage {
         })
       })
     })
+    cy.checkA11yIssue()
     if(flag)
       cy.get(this.regenerateCredentialCloseBtn).click()
     else
@@ -144,6 +149,7 @@ class myAccessPage {
       let environment = $e1.find('td:nth-child(2)').find('span').text()
       if (applicationName.toLowerCase() === appName.toLowerCase() && environment.toLowerCase() === env.toLowerCase()) {
         cy.wrap($e1).find('button').first().click()
+        cy.checkA11yIssue()
         cy.get(this.regenerateCredentialBtn).filter(':visible').first().click()
       }
     })

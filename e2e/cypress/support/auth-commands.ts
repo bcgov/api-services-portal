@@ -41,6 +41,7 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
       })
       cy.get('body').then(($body) => {
         if (!($body.find(login.usernameInput).length > 0)) {
+          cy.checkA11yIssue()
           cy.get('[data-testid=auth-menu-user]').click({ force: true })
           cy.contains('Logout').click()
           cy.selectLoginOptions(username)
@@ -409,6 +410,7 @@ Cypress.Commands.add('getUserSession', () => {
 
 Cypress.Commands.add('selectLoginOptions', (username: string) => {
   cy.get(login.loginDropDown).click()
+  cy.checkA11yIssue()
   if (username.includes('idir')) {
     login.selectAPIProviderLoginOption()
   }

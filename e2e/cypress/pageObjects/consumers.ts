@@ -41,17 +41,20 @@ export default class ConsumersPage {
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
+    cy.checkA11yIssue()
     this.deleteRateLimitControl()
   }
 
   clickOnIPRestrictionOption() {
     cy.get(this.ipRestrictionOption, { timeout: 3000 }).should('be.visible');
     cy.get(this.ipRestrictionOption, { timeout: 2000 }).click()
+    cy.checkA11yIssue()
     this.deleteIPRestrictionControl()
   }
 
 
   clickOnTheFirstConsumerID() {
+    cy.checkA11yIssue()
     cy.get(this.allConsumerTable).find('a').last().click()
     // cy.contains('Add Controls').should('be.visible')
   }
@@ -64,6 +67,7 @@ export default class ConsumersPage {
 
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
     this.editConsumerDialog()
+    cy.checkA11yIssue()
     cy.wait(2000)
     if (!checkElementExists(this.rateLimitingOption)){
       cy.get(this.consumerDialogCancelBtn).click()
@@ -85,6 +89,7 @@ export default class ConsumersPage {
     cy.get(this.rateLimitingApplyBtn).click()
     // cy.wait(500)
     cy.get(this.consumerDialogSaveBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
     cy.wait(3000)
   }
@@ -98,6 +103,7 @@ export default class ConsumersPage {
       cy.contains('span', 'Route').click({ force: true })
     }
     cy.get(this.applyBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.consumerDialogSaveBtn).click()
     cy.wait(1000)
   }
@@ -111,6 +117,7 @@ export default class ConsumersPage {
     cy.get("body").then($body => {
       if ($body.find(this.removeIPRestrictionButton).length > 0) {
         cy.wait(2000)
+        cy.checkA11yIssue()
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).should('be.visible');
         cy.get(this.removeIPRestrictionButton, { timeout: 3000 }).click()
       }
@@ -122,6 +129,7 @@ export default class ConsumersPage {
     cy.get("body").then($body => {
       if ($body.find(this.removeRateLimitControlButton).length > 0) {
         cy.wait(2000)
+        cy.checkA11yIssue()
         cy.get(this.removeRateLimitControlButton, { timeout: 3000 }).should('be.visible');
         cy.get(this.removeRateLimitControlButton, { timeout: 2000 }).click()
       }
@@ -146,6 +154,7 @@ export default class ConsumersPage {
   approvePendingRequest() {
     cy.get(this.approveBtn).click({ force: true })
     cy.wait(1000)
+    cy.checkA11yIssue()
     cy.verifyToastMessage("Access request approved")
   }
 
@@ -187,6 +196,7 @@ export default class ConsumersPage {
     cy.get('[data-testid="product-list-table"]').then($button => {
       if ($button.is(':visible')) {
         cy.contains('Edit').first().click()
+        cy.checkA11yIssue()
       }
     })
   }
@@ -219,6 +229,7 @@ export default class ConsumersPage {
       cy.contains('Add').click()
       cy.get('[data-testid="labels-values-' + index + '-input"]').type(entry[1])
       cy.contains('Add more labels').click()
+      cy.checkA11yIssue()
     })
     cy.wait(1000)
   }
@@ -227,6 +238,7 @@ export default class ConsumersPage {
     cy.wait(2000)
     this.filterConsumerByTypeAndValue(filterType, filterValue, labelValue)
     cy.wait(2000)
+    cy.checkA11yIssue()
     cy.get(this.allConsumerTable).find("tbody").find("tr").then((row) => {
       expect(row.length.toString()).eq(expectedResult)
     })
@@ -234,6 +246,7 @@ export default class ConsumersPage {
 
   openManageLabelsWindow() {
     cy.wait(1000)
+    cy.checkA11yIssue()
     cy.get(this.manageLabelsBtn).then($el => {
       cy.wrap($el).click()
     })
@@ -301,6 +314,7 @@ export default class ConsumersPage {
   grantAccessToGivenProductEnvironment(product: string, environment: string) {
     cy.get(this.grantAccessProduct).select(product).invoke('val')
     cy.get(this.grantAccessEnvironment).select(environment).invoke('val')
+    cy.checkA11yIssue()
     cy.get(this.grantAccessBtn).click()
     cy.wait(1000)
   }
@@ -309,6 +323,7 @@ export default class ConsumersPage {
     cy.contains("Authorization").click()
     scopes.forEach(function (scope: string) {
       cy.get('[data-testid="client-scope-'+scope+'"]').click()
+      cy.checkA11yIssue()
       cy.wait(1000)
     })
   }
@@ -317,6 +332,7 @@ export default class ConsumersPage {
     cy.contains("Authorization").click()
     roles.forEach(function (role: string) {
       cy.get('[data-testid="client-role-'+role.toLocaleLowerCase()+'"]').click()
+      cy.checkA11yIssue()
       cy.wait(1000)
     })
   }

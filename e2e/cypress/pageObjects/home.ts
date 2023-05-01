@@ -13,6 +13,7 @@ class HomePage {
   createNamespace(name: string): void {
     cy.get(this.nsDropdown).click()
     cy.get(this.nsDropdownCreateNsBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.namespaceNameInput).type(name) // using `platform` as a default ns as its being seeding through feeder
     cy.get(this.nsCreateBtn).click()
     cy.verifyToastMessage("Namespace "+name+" created!")

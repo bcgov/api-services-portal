@@ -36,7 +36,9 @@ class AuthorizationProfile {
   createAuthProfile(authProfile: any, isCreated=true) {
     cy.get(this.newProfileBtn).first().click()
     cy.get(this.nameField).click().type(authProfile.name)
+    cy.checkA11yIssue()
     cy.get(this.continueBtn).click()
+    cy.checkA11yIssue()
     let flow = authProfile.flow
 
     if (flow === 'Kong API Key') {
@@ -44,8 +46,10 @@ class AuthorizationProfile {
       cy.get(this.authenticationContinueBtn).click()
       cy.get(this.kongApiKey).type(authProfile.apiKey)
       cy.get(this.authenticationContinueBtn).click()
+      cy.checkA11yIssue()
     } else if (flow === 'Client Credential Flow') {
       cy.get('[data-testid='+ authProfile.element + '-chkBox]').click()
+      cy.checkA11yIssue()
       cy.get(this.authenticationContinueBtn).click()
       // TODO Currently not working. Unable to find '[data-testid="ap-authorization-scopes"]' ID
       if (authProfile.scopes) {
@@ -53,6 +57,7 @@ class AuthorizationProfile {
           cy.get(this.clientScopeInput).click().type(`${scope}{enter}`)
         })
       }
+      cy.checkA11yIssue()
       cy.get(this.authorizationContinueBtn).click()
       // cy.get(this.clientAuthenticator).contains(authProfile.clientAuthenticator).click()
       if (authProfile.mode) cy.get(this.mode).contains(authProfile.mode).click()
@@ -85,6 +90,7 @@ class AuthorizationProfile {
         if(authProfile.environmentConfig.isShardIDP)
         {
           cy.wait(3000)
+          cy.checkA11yIssue()
           this.selectIDPType('Shared')
           cy.wait(2000)
         }
@@ -119,6 +125,7 @@ class AuthorizationProfile {
         }
       }
     }
+    cy.checkA11yIssue()
     cy.get(this.createBtn).click()
     if (isCreated === true)
       cy.get(this.profileTable).contains(authProfile.name).should('exist')
@@ -140,6 +147,7 @@ class AuthorizationProfile {
     cy.get(this.authProfileTbl).find('tr').each(($e1) => {
       let authProfileName = $e1.find('td:nth-child(1)').text()
       if (authProfileName.toLowerCase() === authName.toLowerCase() ) {
+        cy.checkA11yIssue()
         cy.wrap($e1).find('button').first().click()
       }
     })
@@ -148,11 +156,13 @@ class AuthorizationProfile {
   clearClientScope(){
     cy.get('button').contains('Authorization').click()
     cy.get(this.scopes).find('button').first().click()
+    cy.checkA11yIssue()
     cy.get(this.authorizationContinueBtn).click()
   }
 
   setClientRoles(roles : any){
     cy.get('button').contains('Authorization').click()
+    cy.checkA11yIssue()
     roles.forEach((role: string) => {
       cy.get(this.clientRoleInput).click().type(`${role}{enter}`)
     })

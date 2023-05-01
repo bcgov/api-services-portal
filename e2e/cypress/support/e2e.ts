@@ -3,6 +3,9 @@ import 'cypress-xpath'
 import './auth-commands'
 import './util-commands'
 import '@cypress/code-coverage/support'
+import 'cypress-axe';
+// import 'cypress-axe-core'
+// import '@types/cypress-axe';
 const _ = require('lodash')
 const YAML = require('yamljs')
 

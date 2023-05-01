@@ -79,6 +79,9 @@ declare namespace Cypress {
 
     selectLoginOptions(username: string): Chainable<any>
 
+    terminalLog(violations:any[]): Chainable<any>
+
+    checkA11yIssue(failTest?: boolean): Chainable<any>
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }

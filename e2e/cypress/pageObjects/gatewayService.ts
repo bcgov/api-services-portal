@@ -24,6 +24,7 @@ class GatewayServicePage {
   expandServiceDetails(productName: string, envName: string) {
     let pname: string = productName.toLowerCase().replaceAll(' ', '-')
     let env = this.getTestIdEnvName(envName);
+    cy.checkA11yIssue()
     cy.get(`[data-testid=${pname}-${env}-metrics-details]`).click()
   }
 
@@ -61,6 +62,7 @@ class GatewayServicePage {
     cy.wait(2000)
     this.filterGatewayServiceByTypeAndValue(filterType, filterValue)
     cy.wait(2000)
+    cy.checkA11yIssue()
     cy.get(this.serviceTable).find("tbody").find("tr").then((row) => {
       expect(row.length.toString()).eq(expectedResult)
       if (filterType === 'Environment') {
@@ -79,6 +81,7 @@ class GatewayServicePage {
     });
     cy.get(this.filterType).select(type).invoke('val')
     cy.get(this.filterValue).select(value).invoke('val')
+    cy.checkA11yIssue()
     cy.get(this.filterApplyBtn).click()
   }
 }

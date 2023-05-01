@@ -12,6 +12,7 @@ class ApplicationPage {
     cy.get(this.appName).type(app.name)
     cy.get(this.appDescription).type(app.description)
     cy.get(this.createAppSubmitBtn).click()
+    cy.checkA11yIssue()
     cy.get('table').contains('td', app.name).should('be.visible');
   }
 
@@ -21,6 +22,7 @@ class ApplicationPage {
       if (applicationName.toLowerCase() === appName.toLowerCase() ) {
         cy.wrap($e1).find('button').first().click()
         cy.get('[data-testid="delete-application-btn"]').filter(':visible').first().click()
+        cy.checkA11yIssue()
         cy.get(this.deleteConfirmationBtn).click()
       }
     })

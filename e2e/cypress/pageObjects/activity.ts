@@ -52,6 +52,7 @@ class ActivityPage {
     cy.get("body").then($body => {
       if ($body.find(this.clearAllBtn).length > 0) {
         cy.get(this.clearAllBtn, { timeout: 2000 }).click()
+        cy.checkA11yIssue()
       }
     })
     cy.get('[data-testid="filter-type-select"]').select(filterBy, { force: true }).invoke('val')
@@ -65,6 +66,7 @@ class ActivityPage {
       if ($body.find(this.loadButton).length > 0) {
         cy.get(this.loadButton).click({ force: true })
         cy.wait(2000)
+        cy.checkA11yIssue()
       }
     })
   }

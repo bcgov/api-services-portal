@@ -11,8 +11,10 @@ class ServiceAccountsPage {
   createServiceAccount(scopes: string[]): void {
     cy.get(this.newServiceAccountBtn).first().click()
     this.selectPermissions(scopes)
+    cy.checkA11yIssue()
     cy.get(this.shareBtn).click()
     cy.wait(8000)
+    cy.checkA11yIssue()
   }
 
   checkServiceAccountNotExist(): void {
@@ -58,6 +60,7 @@ class ServiceAccountsPage {
       if (namespaceText.startsWith('sa')) {
         cy.wrap($e1).find('button').first().click()
         cy.wrap($e1).find(this.serviceAcctDeleteBtn).first().click()
+        cy.checkA11yIssue()
         cy.get(this.deleteServiceAcctConfirmationBtn).click()
       }
     })
@@ -72,6 +75,7 @@ class ServiceAccountsPage {
       if (namespaceText===clientId) {
         cy.wrap($e1).find('button').first().click()
         cy.wrap($e1).find(this.serviceAcctDeleteBtn).first().click()
+        cy.checkA11yIssue()
         cy.get(this.deleteServiceAcctConfirmationBtn).click()
         return false
       }

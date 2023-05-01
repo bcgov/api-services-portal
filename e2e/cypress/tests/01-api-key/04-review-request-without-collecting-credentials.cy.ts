@@ -37,6 +37,7 @@ describe('Approve Pending Request without collecting credentials Spec', () => {
 
   it('verify that pending request is not displayed', () => {
     const flag = consumers.reviewThePendingRequest()
+    cy.checkA11yIssue()
     assert.isFalse(flag, 'Review request popup is displayed')
   })
 

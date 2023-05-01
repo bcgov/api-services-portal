@@ -49,6 +49,7 @@ class Products {
 
   createNewProduct(productName: string, env: string) {
     cy.get(this.newProductBtn).first().click()
+    cy.checkA11yIssue()
     cy.get(this.productNameInput).type(productName)
     cy.get(`[data-testid=prd-env-${env}-radio]`).click()
     cy.get(this.createBtn).click()
@@ -58,6 +59,7 @@ class Products {
   editProduct(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-more-options-btn]`).first().click()
+    cy.checkA11yIssue()
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click()
     // cy.get(this.updateBtn).click()
   }
@@ -74,6 +76,7 @@ class Products {
           .uncheck({ force: true });
       })
     cy.get(this.envCfgApplyChangesContinueBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.envCfgApplyChangesBtn).click()
   }
 
@@ -192,6 +195,7 @@ class Products {
         }
       })
     })
+    cy.checkA11yIssue()
     cy.contains('Close').click()
   }
 
@@ -219,6 +223,7 @@ class Products {
 
   updateDatasetNameToCatelogue(productName: string, env: string) {
     this.editProduct(productName)
+    cy.checkA11yIssue()
     const search_input: string = productName.slice(0, 3)
     cy.get(this.catelogueDropDown).type(search_input + '{downArrow}' + '{enter}', {
       force: true,
@@ -236,6 +241,7 @@ class Products {
     let env = this.getTestIdEnvName(envName);
     cy.get(`[data-testid=${pname}-${env}-more-options-btn]`).click()
     cy.get(`[data-testid=${pname}-${env}-delete-btn]`).click()
+    cy.checkA11yIssue()
     cy.get(this.deleteConfirmationBtn).click()
   }
 
@@ -244,6 +250,7 @@ class Products {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     cy.get(`[data-testid=${pname}-edit-btn]`).first().click({ force: true })
     cy.get(`[data-testid=${pname}-delete-btn]`).first().click({ force: true })
+    cy.checkA11yIssue()
     cy.get(this.deleteProductConfirmationBtn).click()
   }
 
@@ -266,6 +273,7 @@ class Products {
     cy.wait(2000)
     cy.get(this.configServiceTab).click()
     cy.wait(2000)
+    cy.checkA11yIssue()
     cy.get(`[data-testid=${config.serviceName}`).click()
     cy.get(this.envCfgApplyChangesBtn).click()
   }

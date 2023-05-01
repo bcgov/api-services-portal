@@ -1,3 +1,4 @@
+/// <reference types="cypress"/>
 import HomePage from '../../pageObjects/home'
 import LoginPage from '../../pageObjects/login'
 import Products from '../../pageObjects/products'

@@ -26,6 +26,7 @@ class ApiDirectoryPage {
       cy.contains('For elevated access, please Request Access').should('be.visible');
     }
     cy.get(this.rqstAccessBtn).click()
+    cy.checkA11yIssue()
     cy.get(this.appSelect).select(app.name)
     cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').click()
 
@@ -46,6 +47,7 @@ class ApiDirectoryPage {
     //   }
     // })
     cy.get(this.additionalNotes).type(accessRqst.notes)
+    cy.checkA11yIssue()
     cy.get(this.submitBtn).click()
   }
 
@@ -57,6 +59,7 @@ class ApiDirectoryPage {
       let ele: string = `[data-testid=api-${pname}]`
       Cypress.on('uncaught:exception', (err, runnable) => {
         cy.get(ele).click()
+        cy.checkA11yIssue()
         return false
     })
       assert.equal(flag, expResult)
@@ -66,12 +69,14 @@ class ApiDirectoryPage {
   navigateToYourProduct() {
     cy.contains("Your Products").click()
     cy.wait(3000)
+    cy.checkA11yIssue()
   }
 
   selectProduct(productName: string) {
     const pname: string = productName.toLowerCase().replaceAll(' ', '-')
     var ele: string = `[data-testid=api-${pname}]`
     cy.get(ele).click()
+    cy.checkA11yIssue()
   }
 
   isEnvironmentDisplayInAPIDirectory(productconfig: any, flag: boolean) {
@@ -94,6 +99,7 @@ class ApiDirectoryPage {
     cy.get(this.orgDropDown).select(product.orgName)
     cy.get(this.orgUnitDropDown).select(product.orgUnitName)
     cy.wait(1000)
+    cy.checkA11yIssue()
     cy.get(this.addOrganizationBtn).click({ force: true })
   }
 

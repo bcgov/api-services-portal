@@ -30,6 +30,7 @@ describe('Team Access Spec', () => {
   it('Navigate to Namespace Access Page', () => {
     cy.visit(na.path)
     cy.wait(2000)
+    cy.checkA11yIssue()
   })
 
   it('Grant namespace access to Mark (access manager)', () => {

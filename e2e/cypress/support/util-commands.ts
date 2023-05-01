@@ -105,3 +105,34 @@ Cypress.Commands.add('resetState', () => {
   })
   cy.log('Test state was reset')
 })
+
+Cypress.Commands.add('terminalLog', (violations:any[]) => {
+  cy.task(
+    "log",
+    `${violations.length} accessibility violation${
+      violations.length === 1 ? "" : "s"
+    } ${violations.length === 1 ? "was" : "were"} detected`
+  );
+  // pluck specific keys to keep the table readable
+  const violationData = violations.map(
+    ({ id, impact, description, nodes }) => ({
+      id,
+      impact,
+      description,
+      nodes: nodes.length,
+    })
+  );
+
+  cy.task("table", violationData);
+})
+
+Cypress.Commands.add('checkA11yIssue', (failTest?: boolean) => {
+  let falg = true || failTest
+  cy.injectAxe()
+  cy.checkA11y(undefined, {
+    runOnly: {
+        type: 'tag',
+        values: ['wcag2aa','wcag2aaa']
+    }
+}, cy.terminalLog, falg)
+})
