@@ -3,6 +3,7 @@ import AccessRequest from './access-request';
 import { useApi } from '@/shared/services/api';
 import { gql } from 'graphql-request';
 import { QueryKey } from 'react-query';
+import InvalidRequest from './invalid-request.tsx';
 
 interface AccessRequestsListProps {
   labels: string[];
@@ -23,6 +24,9 @@ const AccessRequestsList: React.FC<AccessRequestsListProps> = ({
   );
   return (
     <>
+      {data?.allAccessRequestsByNamespace.map((a) => (
+        <InvalidRequest key={a.id} data={a} />
+      ))}
       {data?.allAccessRequestsByNamespace.map((a) => (
         <AccessRequest
           key={a.id}
