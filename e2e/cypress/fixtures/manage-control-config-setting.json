@@ -2,7 +2,8 @@
     "rateLimiting": {
         "requestPerHour_Consumer" : "1",
         "requestPerHour_Global" : "2",
-        "rateLimiting_hour": "25"
+        "rateLimiting_hour": "25",
+        "requestPerHour_Elevated" : "250"
     },
     "ipRestriction" :{
         "ipRange_valid" : "192.168.0.1/0",

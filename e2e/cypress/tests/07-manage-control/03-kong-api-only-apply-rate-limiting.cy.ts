@@ -114,7 +114,7 @@ describe('Check the API key for free access', () => {
     cy.get('@apiowner').then(async ({ product }: any) => {
       cy.fixture('state/store').then((creds: any) => {
         const key = creds.consumerKey
-        cy.makeKongRequest(product.environment.config.serviceName, 'GET', key).then((response) => {
+        cy.makeKongRequest(product.environment.config.serviceName, 'GET','').then((response) => {
           expect(response.status).to.be.equal(200)
           expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(99)
         })
@@ -218,7 +218,7 @@ describe('Approve Pending Request Spec', () => {
 
   it('Set Rate Limiting', () => {
     cy.get('@manage-control-config-setting').then(({ rateLimiting }: any) => {
-      consumers.setRateLimitingWithOutConsumerID(rateLimiting.requestPerHour_Consumer,'Route')
+      consumers.setRateLimitingWithOutConsumerID(rateLimiting.requestPerHour_Elevated, 'Route')
     })
   })
 
@@ -227,10 +227,13 @@ describe('Approve Pending Request Spec', () => {
   })
 
   it('Verify that API is accessible with the generated API Key', () => {
-    cy.get('@apiowner').then(({ product }: any) => {
-      cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-        cy.log(response)
-        expect(response.status).to.be.equal(200)
+    cy.get('@apiowner').then(async ({ product }: any) => {
+      cy.fixture('state/store').then((creds: any) => {
+        const key = creds.consumerKey
+        cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
+          expect(response.status).to.be.equal(200)
+          expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(249)
+        })
       })
     })
   })
