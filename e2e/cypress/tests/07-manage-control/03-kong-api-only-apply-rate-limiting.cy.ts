@@ -6,6 +6,7 @@ import LoginPage from "../../pageObjects/login"
 import Products from "../../pageObjects/products"
 import MyAccessPage from '../../pageObjects/myAccess'
 import ConsumersPage from "../../pageObjects/consumers"
+let apiKey: any
 
 describe('Apply Kong API key only plugin', () => {
   var consumerID: string
@@ -157,10 +158,13 @@ describe('Check the API key for Elevated access', () => {
 
   it('Collect the credentials', () => {
     cy.visit(apiDir.path)
-    cy.get('@developer').then(({ elevatedAccess, accessRequest }: any) => {
+    cy.get('@developer').then(async ({ elevatedAccess, accessRequest }: any) => {
       apiDir.createAccessRequest(elevatedAccess.product, elevatedAccess.application, accessRequest, true)
       ma.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
+      cy.get(ma.apiKyeValueTxt).invoke('val').then(($apiKey: any) => {
+        apiKey = $apiKey
+      })
       ma.saveAPIKeyValue()
     })
   })
@@ -228,12 +232,9 @@ describe('Approve Pending Request Spec', () => {
 
   it('Verify that API is accessible with the generated API Key', () => {
     cy.get('@apiowner').then(async ({ product }: any) => {
-      cy.fixture('state/store').then((creds: any) => {
-        const key = creds.consumerKey
-        cy.makeKongRequest(product.environment.config.serviceName, 'GET').then((response) => {
-          expect(response.status).to.be.equal(200)
-          expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(249)
-        })
+      cy.makeKongRequest(product.environment.config.serviceName, 'GET', apiKey).then((response) => {
+        expect(response.status).to.be.equal(200)
+        expect(parseInt(response.headers["x-ratelimit-remaining-hour"])).to.be.equal(249)
       })
     })
   })
