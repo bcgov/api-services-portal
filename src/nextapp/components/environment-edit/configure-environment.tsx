@@ -156,6 +156,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
             data-testid="edit-env-services-search-input"
           />
           <Select
+            aria-label="sort by select"
             onChange={handleSortChange}
             value={sort}
             data-testid="edit-env-services-sort-select"

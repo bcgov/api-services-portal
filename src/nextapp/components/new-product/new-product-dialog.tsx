@@ -107,6 +107,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                 <Stack>
                   <Radio
                     name="environment"
+                    id="env-dev"
                     value="dev"
                     data-testid="prd-env-dev-radio"
                   >
@@ -114,6 +115,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                   <Radio
                     name="environment"
+                    id="env-test"
                     value="test"
                     data-testid="prd-env-test-radio"
                   >
@@ -121,6 +123,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                   <Radio
                     name="environment"
+                    id="env-sandbox"
                     value="sandbox"
                     data-testid="prd-env-sb-radio"
                   >
@@ -128,6 +131,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                   <Radio
                     name="environment"
+                    id="env-prod"
                     value="prod"
                     data-testid="prd-env-prod-radio"
                   >
@@ -135,6 +139,7 @@ const NewProductDialog: React.FC<NewProductDialogProps> = ({
                   </Radio>
                   <Radio
                     name="environment"
+                    id="env-other"
                     value="other"
                     data-testid="prd-env-other-radio"
                   >

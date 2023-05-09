@@ -71,7 +71,7 @@ const AuthorizationFlow: React.FC<AuthorizationFlowProps> = ({
         <ModalContent>
           <ModalHeader>Plugin Template</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody tabIndex={0}>
             <EnvironmentPlugins
               environment={environment}
               flow={flow}

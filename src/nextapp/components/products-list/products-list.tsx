@@ -61,20 +61,10 @@ const ProductsList: React.FC<ProductsListProps> = ({ queryKey }) => {
                 productName={d.name}
                 productQueryKey={queryKey}
               >
-                <Button
-                  leftIcon={<Icon as={FaPlusCircle} mr={2} />}
-                  variant="ghost"
-                  sx={{
-                    _active: {
-                      boxShadow: 'none',
-                    },
-                    _focus: {
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
+                <Flex align="center" color="bc-blue" px={2}>
+                  {<Icon as={FaPlusCircle} mr={2} />}
                   Add Env
-                </Button>
+                </Flex>
               </AddEnvironment>
               <EditProduct data={d} queryKey={queryKey} />
             </>
