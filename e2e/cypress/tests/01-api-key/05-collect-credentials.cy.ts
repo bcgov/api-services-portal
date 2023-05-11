@@ -40,6 +40,7 @@ describe('Collect credential Spec', () => {
       myAccessPage.clickOnCollectCredentialButton()
       myAccessPage.clickOnGenerateSecretButton()
       cy.contains("API Key").should('be.visible')
+      myAccessPage.saveClientIDValue()
       myAccessPage.saveAPIKeyValue()
   })
 

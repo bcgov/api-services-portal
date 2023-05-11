@@ -2,8 +2,12 @@ import { Assertion } from "chai"
 import { wrap } from "module"
 import dateformat from 'dateformat'
 import { checkElementExists } from "../support/e2e"
+import { String } from "cypress/types/lodash"
+import { StringLiteral } from "typescript"
+import { truncate } from "fs/promises"
 
 export default class ConsumersPage {
+
   path: string = '/manager/consumers'
   rateLimitHourInput: string = '[data-testid="ratelimit-hour-input"]'
   ipRestrictionAllowInput: string = '[data-testid="allow-ip-restriction-input-input"]'
@@ -38,6 +42,9 @@ export default class ConsumersPage {
   removeRateLimitControlButton: string = '[data-testid="ratelimit-item-delete-btn-0"]'
   rateLimitRouteRadioBtn: string = '[data-testid="ratelimit-route-radio"]'
   consumerDialogCancelBtn: string = '[data-testid="edit-consumer-dialog-edit-cancel-btn"]'
+  linkConsumerToNamespaceBtn: string = '[data-testid="link-consumer-namespace"]'
+  userNameTxt: string = '[data-testid="link-consumer-username"]'
+  linkBtn: string = '[data-testid="link-consumer-link-btn"]'
 
   clickOnRateLimitingOption() {
     cy.get(this.rateLimitingOption, { timeout: 2000 }).click()
@@ -65,14 +72,24 @@ export default class ConsumersPage {
   setRateLimiting(requestCount: string, scope = 'Service', policy = 'Local') {
     this.editConsumerDialog()
     cy.wait(2000)
-    if (!checkElementExists(this.rateLimitingOption)){
+    if (!checkElementExists(this.rateLimitingOption)) {
       cy.get(this.consumerDialogCancelBtn).click()
       this.editConsumerDialog()
     }
-    // cy.wait(1000)
+    cy.wait(1000)
+    this.setRateLimitingWithOutConsumerID(requestCount, scope, policy)
+    // cy.wait(500)
+    cy.get(this.consumerDialogSaveBtn).click()
+    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
+    cy.wait(3000)
+  }
+
+  setRateLimitingWithOutConsumerID(requestCount: string, scope?: string, policy?: string) {
+    scope = scope || 'Service'
+    policy = policy || 'Local'
     this.clickOnRateLimitingOption()
     cy.wait(3000)
-   
+
 
     cy.get(this.rateLimitHourInput, { timeout: 5000 }).click()
     cy.get(this.rateLimitHourInput, { timeout: 2000 }).type(requestCount)
@@ -83,10 +100,6 @@ export default class ConsumersPage {
       cy.get(this.policyDropDown).select(policy, { force: true }).invoke('val')
     }
     cy.get(this.rateLimitingApplyBtn).click()
-    // cy.wait(500)
-    cy.get(this.consumerDialogSaveBtn).click()
-    cy.get(this.consumerDialogSaveBtn, { timeout: 2000 }).should('not.exist')
-    cy.wait(3000)
   }
 
   setAllowedIPAddress(allowIP: string, scope = 'Service') {
@@ -149,7 +162,7 @@ export default class ConsumersPage {
     cy.verifyToastMessage("Access request approved")
   }
 
-  reviewThePendingRequest() : Boolean{
+  reviewThePendingRequest(): Boolean {
     cy.wait(3000)
     var flag = false;
     cy.get("body").then($body => {
@@ -308,7 +321,7 @@ export default class ConsumersPage {
   selectAuthorizationScope(scopes: any) {
     cy.contains("Authorization").click()
     scopes.forEach(function (scope: string) {
-      cy.get('[data-testid="client-scope-'+scope+'"]').click()
+      cy.get('[data-testid="client-scope-' + scope + '"]').click()
       cy.wait(1000)
     })
   }
@@ -316,8 +329,31 @@ export default class ConsumersPage {
   selectClientRole(roles: any) {
     cy.contains("Authorization").click()
     roles.forEach(function (role: string) {
-      cy.get('[data-testid="client-role-'+role.toLocaleLowerCase()+'"]').click()
+      cy.get('[data-testid="client-role-' + role.toLocaleLowerCase() + '"]').click()
       cy.wait(1000)
     })
+  }
+
+  deleteConsumer(consumerID: any) {
+    cy.get(this.allConsumerTable).find('tr').each(($row, index) => {
+      cy.log($row.find('td:nth-child(1)').text())
+      if ($row.find('td:nth-child(1)').text() == consumerID) {
+        cy.wrap($row).find('button').first().click()
+        cy.get('[data-testid="consumer-delete-menuitem"]').last().click({force:true})
+      }
+    })
+  }
+
+  clickOnLinkConsumerToNamespaceBtn() {
+    cy.get(this.linkConsumerToNamespaceBtn).click({force:true})
+  }
+
+  linkTheConsumerToNamespace(consumerID: any) {
+    cy.get(this.userNameTxt).type(consumerID)
+    cy.get(this.linkBtn).click({force:true})
+  }
+
+  getText(){
+    cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').as('inputValue')
   }
 }

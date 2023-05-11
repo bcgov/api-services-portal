@@ -79,6 +79,8 @@ declare namespace Cypress {
 
     selectLoginOptions(username: string): Chainable<any>
 
+    getLastConsumerID(): Chainable<any>
+
     // isProductDisplay(productName: string, expResult : boolean) :Chainable<Cypress.Response<any>>
   }
 }

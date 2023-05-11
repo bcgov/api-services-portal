@@ -59,15 +59,6 @@ Cypress.Commands.add('login', (username: string, password: string, skipFlag = fa
     cy.get(login.loginSubmitButton).click()
   }
 
-  // log.end()
-  // cy.getLoginCallback().then(() => {
-  //   cy.get('@login1').should((response :any) => {
-  //     debugger
-  //     if (response.status == 403)
-  //       cy.wait(60000);
-  //       cy.log("Trigger the block")
-  //   })
-  // })
   if (!skipFlag) {
     cy.get(home.nsDropdown, { timeout: 6000 }).then(($el) => {
       expect($el).to.exist
@@ -85,6 +76,14 @@ Cypress.Commands.add('keycloakLogin', (username: string, password: string) => {
   cy.get(login.usernameInput).click().type(username)
   cy.get(login.passwordInput).click().type(password)
   cy.get(login.loginSubmitButton).click()
+})
+
+Cypress.Commands.add('getLastConsumerID',()  =>{
+  let id : any
+  cy.get('[data-testid="all-consumer-control-tbl"]').find('tr').last().find('td').first().find('a').then(($text)=>{
+    id = $text.text()
+    return id
+  })
 })
 
 Cypress.Commands.add('resetCredential', (accessRole: string) => {
@@ -291,7 +290,11 @@ Cypress.Commands.add('makeKongRequest', (serviceName: string, methodType: string
   let authorization
   cy.fixture('state/regen').then((creds: any) => {
     cy.wait(2000)
-    let token = key || creds.apikey
+    let token = key
+    if (key==undefined)
+    {
+      token = creds.apikey
+    }
     const service = serviceName
     cy.log("Token->" + token)
     return cy.request({
@@ -354,7 +357,7 @@ Cypress.Commands.add('updateKongPlugin', (pluginName: string, name: string, endP
     let endpoint
     if (pluginName == '')
       endpoint = 'plugins'
-    else
+    else if(id !== undefined)
       endpoint = pluginName.toLowerCase() + '/' + id.toString() + '/' + 'plugins'
     endpoint = (typeof endPoint !== 'undefined') ? endPoint : endpoint
     body = config[name]

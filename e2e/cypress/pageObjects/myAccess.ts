@@ -1,4 +1,5 @@
 class myAccessPage {
+
   generateSecretsBtn: string = '[data-testid=generate-secrets-button]'
   apiKyeValueTxt: string = '[data-testid=sa-new-creds-api-key]'
   clientId: string = '[data-testid=sa-new-creds-client-id]'
@@ -12,6 +13,7 @@ class myAccessPage {
   regenerateCredentialBtn: string = '[data-testid=regenerate-credentials-btn]'
   regenerateCredentialCloseBtn: string = '[data-testid=regenerate-credentials-done-button]'
   collectCredentialsBtn: string = '[data-testid="generate-credentials-button"]'
+  clientIDValueTxt: string = '[data-testid="sa-new-creds-client-id"]'
   path: string = '/devportal/access'
 
 
@@ -156,6 +158,12 @@ class myAccessPage {
       if (applicationName.toLowerCase() === appName.toLowerCase() && environment.toLowerCase() === env.toLowerCase()) {
         assert.equal($e1.find('td:nth-child(1)').find('p').text(),requestStatus)
       }
+    })
+  }
+
+  saveClientIDValue() {
+    cy.get(this.clientIDValueTxt).invoke('val').then(($clientID: any) => {
+      cy.saveState('clientID', $clientID)
     })
   }
 }
