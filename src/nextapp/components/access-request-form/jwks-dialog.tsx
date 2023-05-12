@@ -15,7 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import CopyButton from '../copy-button/copy-button.tsx';
+import CopyButton from '../copy-button/copy-button';
 
 interface JwksDialogProps {
   id: string;
