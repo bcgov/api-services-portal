@@ -62,6 +62,21 @@ class ServiceAccountsPage {
       }
     })
   }
+
+  deleteServiceAccount(clientId : string) {
+    cy.wait(2000)
+    let namespaceText
+    cy.get(this.serviceAccountTbl).find('tr').each(($e1, index, $list) => {
+      namespaceText = $e1.find('td:nth-child(1)').text();
+      cy.log('namespaceText --> '+namespaceText)
+      if (namespaceText===clientId) {
+        cy.wrap($e1).find('button').first().click()
+        cy.wrap($e1).find(this.serviceAcctDeleteBtn).first().click()
+        cy.get(this.deleteServiceAcctConfirmationBtn).click()
+        return false
+      }
+    })
+  }
 }
 
 export default ServiceAccountsPage

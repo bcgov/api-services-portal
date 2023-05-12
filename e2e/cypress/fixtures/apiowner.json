@@ -188,6 +188,38 @@
         }
       }
     },
+    "clientIdSecret_publicProfile": {
+      "product": {
+        "name": "Client Credentials Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "test",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Public",
+            "optionalInstructions": "This is a automation test",
+            "serviceName": "cc-service-for-platform"
+          }
+        }
+      }
+    },
+    "KongApiOnly": {
+      "product": {
+        "name": "Auto Test Product",
+        "orgName": "Ministry of Health",
+        "orgUnitName": "Planning and Innovation Division",
+        "environment": {
+          "name": "dev",
+          "config": {
+            "terms": "Terms of Use for API Gateway",
+            "authorization": "Kong API Key Only",
+            "optionalInstructions": "This is a automation test",
+            "serviceName": "a-service-for-newplatform"
+          }
+        }
+      }
+    },
     "clientIdSecret_KongKeyToCC": {
       "product": {
         "name": "Auto Test Product",

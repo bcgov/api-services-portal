@@ -35,6 +35,7 @@ class Products {
   credentialIssuer: string = '[name="credentialIssuer"]'
   config: string | undefined
   publishAPI: string = '[id="orgEnabled"]'
+  messageForNotDataset: string = '[data-testid="no-result-for-dataset"]'
 
   getTestIdEnvName(env: string): string {
     switch (env) {
@@ -48,7 +49,7 @@ class Products {
   }
 
   createNewProduct(productName: string, env: string) {
-    cy.get(this.newProductBtn).click()
+    cy.get(this.newProductBtn).first().click()
     cy.get(this.productNameInput).type(productName)
     cy.get(`[data-testid=prd-env-${env}-radio]`).click()
     cy.get(this.createBtn).click()
@@ -110,16 +111,14 @@ class Products {
           authType === 'Oauth2 Authorization Code Flow' ||
           authType === 'Oauth2 Client Credentials Flow'
         ) {
-          debugger
           let env = this.getTestIdEnvName(config.authIssuerEnv)
           cy.get('[name="credentialIssuer"]').select(
             `${config.authIssuer} (${env})`
           )
         }
 
-        cy.get(this.envCfgOptText).type(config.optionalInstructions)
+        cy.get(this.envCfgOptText).clear().type(config.optionalInstructions)
         cy.get('[name="active"]').then($button => {
-          debugger
           if ($button.is(':disabled')) {
             flag = false
           }
@@ -129,7 +128,6 @@ class Products {
               .as('checkbox')
               .invoke('is', ':checked')
               .then(checked => {
-                debugger
                 if (invalid) {
                   cy
                     .get('@checkbox')
@@ -148,7 +146,6 @@ class Products {
             .as('checkbox')
             .invoke('is', ':checked')
             .then(checked => {
-              debugger
               if (!isApproved) {
                 cy
                   .get('@checkbox')
@@ -164,7 +161,6 @@ class Products {
           // cy.get(this.envCfgApprovalCheckbox).click()
           // cy.get(this.editPrdEnvConfigBtn).click()
           cy.wait(3000)
-          debugger
           if (flag) {
             cy.get(this.envCfgApplyChangesContinueBtn).click()
           }
@@ -224,14 +220,6 @@ class Products {
       force: true,
       delay: 500
     })
-    // cy.get(this.catelogueDropDownMenu)
-    //   .find('div')
-    //   .find('p')
-    //   .each(($e1, index, $list) => {
-    //     if ($e1.text() === productName) {
-    //       cy.wrap($e1).click()
-    //     }
-    //   })
     this.updateProduct()
   }
 
@@ -308,8 +296,7 @@ class Products {
       .get(this.publishAPI)
       .as('checkbox')
       .invoke('is', ':checked')
-      .then(checked => {
-        debugger
+      .then(checked => {      
         if (status) {
           cy
             .get('@checkbox')
@@ -321,6 +308,16 @@ class Products {
             .uncheck({ force: true });
         }
       });
+  }
+
+  checkMessageForNoDataset(productName: string,search_input: string ) {
+    this.editProduct(productName)
+    cy.get(this.catelogueDropDown).type(search_input + '{downArrow}' + '{enter}', {
+      force: true,
+      delay: 500
+    })
+    cy.get(this.messageForNotDataset).should('be.visible');
+
   }
 }
 

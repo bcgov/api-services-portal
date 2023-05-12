@@ -13,10 +13,10 @@ export default defineConfig({
       config.specPattern=[
       './cypress/tests/01-*/*.ts',
       './cypress/tests/02-*/*.ts',
+      './cypress/tests/06-*/*.ts',
       './cypress/tests/03-*/*.ts',
       './cypress/tests/04-*/*.ts',
       './cypress/tests/05-*/*.ts',
-      './cypress/tests/06-*/*.ts',
       './cypress/tests/07-*/*.ts',
       './cypress/tests/08-*/*.ts',
       './cypress/tests/09-*/*.ts',
