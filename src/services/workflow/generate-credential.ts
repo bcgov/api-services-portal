@@ -124,8 +124,6 @@ export const generateCredential = async (
       clientSigning.publicKey = publicKey;
       clientSigning.privateKey = privateKey;
       controls.clientCertificate = clientSigning.publicKey;
-    } else {
-      controls.clientCertificate = null;
     }
     const newClient = await registerClient(
       context,
@@ -180,7 +178,10 @@ export const generateCredential = async (
       clientSecret: controls.clientGenCertificate
         ? null
         : newClient.client.clientSecret,
-      issuer: controls.jwksUrl ? newClient.openid.issuer : null,
+      issuer:
+        controls.jwksUrl || controls.clientCertificate
+          ? newClient.openid.issuer
+          : null,
       tokenEndpoint: newClient.openid.token_endpoint,
       clientPublicKey: clientSigning.publicKey,
       clientPrivateKey: clientSigning.privateKey,

@@ -156,7 +156,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
                 <Textarea
                   isRequired
                   height="64px"
-                  name="publicKey"
+                  name="clientCertificate"
                   variant="bc-input"
                 />
               </Box>
@@ -211,8 +211,9 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
       <input
         type="hidden"
         name="name"
-        value={`${dataset.name} FOR ${requestor.name ?? requestor.providerUsername
-          }`}
+        value={`${dataset.name} FOR ${
+          requestor.name ?? requestor.providerUsername
+        }`}
       />
       <input
         type="hidden"
