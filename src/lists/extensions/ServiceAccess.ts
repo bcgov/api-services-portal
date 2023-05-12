@@ -28,7 +28,7 @@ module.exports = {
   extensions: [
     (keystone: any) => {
       keystone.extendGraphQLSchema({
-        types: [typeCredentialReferenceUpdateInput],
+        types: [{ type: typeCredentialReferenceUpdateInput }],
         queries: [],
         mutations: [
           {
