@@ -79,7 +79,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   };
   const handleDrop = () => {
     setActiveServices((state) => [...state, JSON.parse(dragRef.current)]);
-    setDragTarget(true);
+    setDragTarget(false);
   };
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -93,6 +93,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
   const handleRemoveService = (id: string) => () => {
     setActiveServices((state) => state.filter((s) => s.id !== id));
   };
+  const handleDragLeave = () => setDragTarget(false);
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
@@ -107,8 +108,9 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
       </Heading>
       <Box
         border="1px dashed"
-        borderColor={hasDragTarget ? 'bc-blue' : 'bc-component'}
-        bgColor="bc-gray"
+        borderColor={hasDragTarget ? 'bc-success' : 'bc-component'}
+        bgColor={hasDragTarget ? '#2E85401A' : 'bc-gray'}
+        color={hasDragTarget ? 'bc-success' : undefined}
         borderRadius="4px"
         p={8}
         mb={8}
@@ -116,6 +118,7 @@ const ConfigureEnvironment: React.FC<ConfigureEnvironmentProps> = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragExit={handleDragExit}
+        onDragLeave={handleDragLeave}
         data-testid="edit-env-active-services"
       >
         {activeServices.length <= 0 && (

@@ -163,7 +163,7 @@ const DatasetInput: React.FC<DatasetInputProps> = ({ dataset }) => {
                   ))}
                 {isOpen && isSuccess && !results.length && (
                   <Box px={4} py={2} bgColor="white">
-                    <Text fontSize="md" color="bc-component">
+                    <Text data-testid="no-result-for-dataset" fontSize="md" color="bc-component">
                       No results found
                     </Text>
                   </Box>
