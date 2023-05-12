@@ -23,8 +23,11 @@ export interface NewCredential {
 }
 
 export interface CredentialReference {
+  id?: string;
   keyAuthPK?: string;
   clientId?: string;
+  clientCertificate?: string;
+  jwksUrl?: string;
 }
 
 // Subject Identity when a Product is requested using the Authentication Code Flow

@@ -46,7 +46,9 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
     },
     [onRevoke]
   );
-  const controls = data?.controls ? JSON.parse(data.controls) : {};
+  const controls = data?.credentialReference
+    ? JSON.parse(data.credentialReference)
+    : {};
 
   return (
     <Tr>
@@ -67,7 +69,7 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
         </Tag>
       </Td>
       <Td>{data.application?.name}</Td>
-      <Td color="bc-blue">{data.productEnvironment.clientId}</Td>
+      <Td color="bc-blue">{data.name}</Td>
       <Td isNumeric data-testid={`access-generate-credentials-${index}`}>
         {(has(data, 'isApproved') ||
           has(data, 'isIssued') ||
@@ -80,8 +82,18 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
           isOpen={isOpen}
           onClose={onClose}
         />
-        <JwksDialog id={data.id} isOpen={jwksDialog.isOpen} onClose={jwksDialog.onClose}/>
-        <PublicKeyDialog id={data.id} isOpen={publicKeyDialog.isOpen} onClose={publicKeyDialog.onClose}/>
+        <JwksDialog
+          id={data.id}
+          jwksUrl={controls.jwksUrl}
+          isOpen={jwksDialog.isOpen}
+          onClose={jwksDialog.onClose}
+        />
+        <PublicKeyDialog
+          id={data.id}
+          clientCertificate={controls.clientCertificate}
+          isOpen={publicKeyDialog.isOpen}
+          onClose={publicKeyDialog.onClose}
+        />
         <Menu placement="bottom-end">
           <MenuButton
             as={IconButton}
@@ -95,30 +107,36 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
               'kong-api-key-only',
               'kong-api-key-acl',
               'client-credentials',
-            ].includes(data.productEnvironment.flow) && (
+            ].includes(data.productEnvironment.flow) ||
+              (data.productEnvironment?.credentialIssuer
+                ?.clientAuthenticator === 'client-secret' && (
                 <MenuItem
                   data-testid="regenerate-credentials-btn"
                   onClick={onOpen}
                 >
                   Regenerate Credentials
                 </MenuItem>
+              ))}
+            {data.productEnvironment?.credentialIssuer?.clientAuthenticator ===
+              'client-jwt-jwks-url' &&
+              controls.jwksUrl && (
+                <MenuItem
+                  data-testid="update-jwksurl-btn"
+                  onClick={jwksDialog.onOpen}
+                >
+                  Update JWKS URL
+                </MenuItem>
               )}
-            {data.productEnvironment?.flow === 'client-jwt-jwks-url' && controls.jwksUrl && (
-              <MenuItem
-                data-testid="regenerate-credentials-btn"
-                onClick={jwksDialog.onOpen}
-              >
-                Update JWKS URL
-              </MenuItem>
-            )}
-            {data.productEnvironment?.flow === 'client-jwt-jwks-url' && controls.publicKey && (
-              <MenuItem
-                data-testid="regenerate-credentials-btn"
-                onClick={publicKeyDialog.onOpen}
-              >
-                Update Public Key
-              </MenuItem>
-            )}
+            {data.productEnvironment?.credentialIssuer?.clientAuthenticator ===
+              'client-jwt-jwks-url' &&
+              controls.clientCertificate && (
+                <MenuItem
+                  data-testid="update-pubkey-btn"
+                  onClick={publicKeyDialog.onOpen}
+                >
+                  Update Public Key
+                </MenuItem>
+              )}
             <MenuItem
               color="bc-error"
               onClick={handleRevoke(data.id, has(data, 'isIssued'))}

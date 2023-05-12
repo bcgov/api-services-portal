@@ -144,9 +144,11 @@ export const generateCredential = async (
       consumer.id
     );
 
-    const credentialReference = {
+    const credentialReference: CredentialReference = {
       id: newClient.client.id,
       clientId: newClient.client.clientId,
+      clientCertificate: controls.clientCertificate,
+      jwksUrl: controls.jwksUrl,
     };
     // Create a ServiceAccess record
     const consumerType = 'client';

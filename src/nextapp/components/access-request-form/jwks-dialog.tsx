@@ -19,11 +19,17 @@ import CopyButton from '../copy-button/copy-button.tsx';
 
 interface JwksDialogProps {
   id: string;
+  jwksUrl: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const JwksDialog: React.FC<JwksDialogProps> = ({ id, isOpen, onClose }) => {
+const JwksDialog: React.FC<JwksDialogProps> = ({
+  id,
+  jwksUrl,
+  isOpen,
+  onClose,
+}) => {
   return (
     <>
       <Modal
@@ -51,7 +57,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({ id, isOpen, onClose }) => {
                   name="jwksUrl"
                   variant="bc-input"
                   type="url"
-                  value="https://example.com/.well-known/jwks.json"
+                  value={jwksUrl}
                 />
               </FormControl>
               <FormControl mb={4}>
@@ -104,7 +110,9 @@ const JwksDialog: React.FC<JwksDialogProps> = ({ id, isOpen, onClose }) => {
           </ModalBody>
           <ModalFooter>
             <ButtonGroup>
-              <Button variant="secondary" onClick={onClose}>Cancel</Button>
+              <Button variant="secondary" onClick={onClose}>
+                Cancel
+              </Button>
               <Button onClick={onClose} data-testid="jwks-update-button">
                 Update
               </Button>

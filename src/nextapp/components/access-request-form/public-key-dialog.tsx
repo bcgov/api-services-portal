@@ -20,12 +20,14 @@ import CopyButton from '../copy-button/copy-button';
 
 interface PublicKeyDialogProps {
   id: string;
+  clientCertificate: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
   id,
+  clientCertificate,
   isOpen,
   onClose,
 }) => {
@@ -55,6 +57,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                     height="64px"
                     name="publicKey"
                     variant="bc-input"
+                    value={clientCertificate}
                   />
                   <CopyButton value="alskdfjalsjfalskdfjlsdkj" />
                 </Flex>
