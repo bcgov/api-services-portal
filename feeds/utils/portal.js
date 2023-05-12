@@ -1,5 +1,8 @@
 const fs = require('fs');
 const fetch = require('node-fetch');
+const { Logger } = require('../logger');
+
+const log = Logger('utils.portal');
 
 const checkStatus = require('./checkStatus').checkStatus;
 
@@ -25,7 +28,7 @@ function portal(baseUrl, logFeeds = _logFeeds) {
       let retry = attempts;
       while (retry <= attempts) {
         retry != attempts &&
-          console.log('Retrying [' + (attempts - retry) + '] ' + url);
+          log.error('Retrying [' + (attempts - retry) + '] ' + url);
         try {
           return await fetch(baseUrl + url, {
             method: 'put',
@@ -47,7 +50,7 @@ function portal(baseUrl, logFeeds = _logFeeds) {
       let retry = attempts;
       while (retry <= attempts) {
         retry != attempts &&
-          console.log('Retrying [' + (attempts - retry) + '] ' + url);
+          log.error('Retrying [' + (attempts - retry) + '] ' + url);
         try {
           return await fetch(baseUrl + url, {
             method: 'delete',

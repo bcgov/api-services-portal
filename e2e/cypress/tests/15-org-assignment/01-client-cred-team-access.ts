@@ -9,7 +9,6 @@ import ServiceAccountsPage from '../../pageObjects/serviceAccounts'
 import MyAccessPage from '../../pageObjects/myAccess'
 import ConsumersPage from '../../pageObjects/consumers'
 
-
 describe('Add Organization to publish API', () => {
   const login = new LoginPage()
   const home = new HomePage()
@@ -48,7 +47,6 @@ describe('Add Organization to publish API', () => {
     cy.visit(sa.path)
     cy.get('@apiowner').then(({ serviceAccount }: any) => {
       sa.createServiceAccount(serviceAccount.scopes)
-      cy.wait(6000)
     })
     sa.saveServiceAcctCreds()
   })

@@ -203,7 +203,7 @@ function buildQueryResponse(md: any, children: string[] = undefined): string[] {
   const relationshipFields = Object.keys(
     md.transformations
   ).filter((tranField: any) =>
-    ['connectOne', 'connectExclusiveList', 'connectMany'].includes(
+    ['byKey', 'connectOne', 'connectExclusiveList', 'connectMany'].includes(
       md.transformations[tranField].name
     )
   );

@@ -57,7 +57,7 @@ export const getProviderText = (provider: string): string => {
     case 'bceid-business':
       return 'Business BCeID';
     case 'github':
-      return 'Github';
+      return 'GitHub';
     default:
       return '';
   }

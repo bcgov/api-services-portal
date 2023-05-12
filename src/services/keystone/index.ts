@@ -63,6 +63,7 @@ export {
 export {
   lookupUserLegals,
   updateUserLegalAccept,
+  updateUserEmail,
   LegalAgreed,
   lookupUserByUsername,
   lookupUsersByUsernames,

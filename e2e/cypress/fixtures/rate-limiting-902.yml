@@ -1,0 +1,8 @@
+  plugins:
+  - name: rate-limiting_902
+    tags: [ns.newplatform]
+    config:
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: service
+      minute: 30

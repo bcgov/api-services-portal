@@ -19,9 +19,12 @@ class ApiDirectoryPage {
   addOrganizationBtn: string = '[data-testid="addOrganizationBtn"]'
 
 
-  createAccessRequest(product: any, app: any, accessRqst: any) {
+  createAccessRequest(product: any, app: any, accessRqst: any, elevatedAccess?: boolean) {
     cy.contains('a', product.name, { timeout: 10000 }).should('be.visible');
     cy.contains(product.name).click()
+    if(elevatedAccess){
+      cy.contains('For elevated access, please Request Access').should('be.visible');
+    }
     cy.get(this.rqstAccessBtn).click()
     cy.get(this.appSelect).select(app.name)
     cy.get('[data-testid=access-rqst-app-env-' + product.environment + ']').click()

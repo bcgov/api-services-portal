@@ -29,6 +29,30 @@ export async function lookupUserLegals(
   return JSON.parse(result.data.User.legalsAgreed);
 }
 
+export async function updateUserEmail(
+  context: any,
+  userId: string,
+  email: string
+): Promise<User> {
+  const result = await context.executeGraphQL({
+    query: `mutation UpdateUserEmail($userId: ID!, $email: String!) {
+                        updateUser(id: $userId, data: { email: $email } ) {
+                            id
+                            email
+                        }
+                    }`,
+    variables: { userId, email },
+  });
+
+  logger.debug('[updateUserEmail] RESULT %j', result);
+  assert.strictEqual(
+    result.data.updateUser != null,
+    true,
+    'Failed to update user email'
+  );
+  return result.data.updateUser;
+}
+
 export async function updateUserLegalAccept(
   context: any,
   userId: string,
