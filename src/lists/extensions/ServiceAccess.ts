@@ -5,21 +5,96 @@ import {
   lookupCredentialReferenceByServiceAccess,
 } from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
-import { KeycloakClientService } from '../../services/keycloak';
+import {
+  ClientAuthenticator,
+  KeycloakClientService,
+} from '../../services/keycloak';
 import {
   CredentialReference,
   NewCredential,
 } from '../../services/workflow/types';
 import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
+import { strict as assert } from 'assert';
+
+const typeCredentialReferenceUpdateInput = `
+input CredentialReferenceUpdateInput {
+    clientCertificate: String,
+    jwksUrl: String
+}
+`;
 
 module.exports = {
   extensions: [
     (keystone: any) => {
       keystone.extendGraphQLSchema({
-        types: [],
+        types: [typeCredentialReferenceUpdateInput],
         queries: [],
         mutations: [
+          {
+            schema:
+              'updateServiceAccessCredential(id: ID!, controls: CredentialReferenceUpdateInput): AccessRequest',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              const serviceAccess = await lookupCredentialReferenceByServiceAccess(
+                context,
+                args.id
+              );
+
+              const flow = serviceAccess.productEnvironment.flow;
+              const clientAuthenticator =
+                serviceAccess.productEnvironment?.credentialIssuer
+                  ?.clientAuthenticator;
+
+              assert.strictEqual(
+                flow === 'client-credentials' &&
+                  clientAuthenticator === ClientAuthenticator.ClientJWTwithJWKS,
+                true,
+                'Unsupported authenticator type'
+              );
+
+              const noauthContext = keystone.createContext({
+                skipAccessControl: true,
+              });
+              const envCtx = await getEnvironmentContext(
+                noauthContext,
+                serviceAccess.productEnvironment.id,
+                {},
+                false
+              );
+
+              const kcClientService = new KeycloakClientService(
+                envCtx.issuerEnvConfig.issuerUrl
+              );
+              await kcClientService.login(
+                envCtx.issuerEnvConfig.clientId,
+                envCtx.issuerEnvConfig.clientSecret
+              );
+
+              const client = await kcClientService.findByClientId(
+                serviceAccess.consumer.customId
+              );
+
+              const newCredential = {
+                flow: serviceAccess.productEnvironment.flow,
+                clientId: serviceAccess.consumer.customId,
+                issuer: envCtx.openid.issuer,
+                tokenEndpoint: envCtx.openid.token_endpoint,
+              } as NewCredential;
+
+              //TODO: Perform actual update
+              //await kcClientService.uploadCertificate(client.id, publicKey);
+
+              return {
+                credential: JSON.stringify(newCredential),
+              };
+            },
+          },
           {
             schema: 'regenerateCredentials(id: ID!): AccessRequest',
             resolver: async (
