@@ -191,6 +191,51 @@
       ],
       "isShared": true
     },
+    "shared_IDP_inheritFrom": {
+      "environmentDetails": [
+      ],
+      "mode": "auto",
+      "clientRoles": [
+          "administrator"
+      ],
+      "clientMappers": [
+          "test-audience"
+      ],
+      "flow": "client-credentials",
+      "clientAuthenticator": "client-secret",
+      "name": "my-auth-client-secret-1",
+      "description": "Auth connection to my IdP",
+      "owner": "janis@testmail.com",
+      "inheritFrom": "Sample Shared IdP"
+    },
+    "shared_IDP_inheritFrom_expectedResponse":{
+      "name": "my-auth-client-secret-1",
+      "description": "Auth connection to my IdP",
+      "flow": "client-credentials",
+      "mode": "auto",
+      "clientAuthenticator": "client-secret",
+      "environmentDetails": [
+          {
+              "exists": true,
+              "environment": "test",
+              "issuerUrl": "http://keycloak.localtest.me:9080/auth/realms/master",
+              "clientRegistration": "shared-idp",
+              "clientId": "ap-my-auth-client-secret-1-test"
+          }
+      ],
+      "clientRoles": [
+          "administrator"
+      ],
+      "clientMappers": [
+          "test-audience"
+      ],
+      "isShared": false,
+      "apiKeyName": "X-API-KEY",
+      "inheritFrom": {
+          "name": "Sample Shared IdP"
+      },
+      "owner": "janis@testmail.com"
+    },
     "endPoint": "ds/api/v2/namespaces/apiplatform/issuers",
     "headers": {
       "accept": "application/json",
