@@ -30,6 +30,16 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
   isOpen,
   onClose,
 }) => {
+  const formRef = React.useRef(null);
+  const handleSubmitClick = () => {
+    if (formRef?.current.checkValidity()) {
+      const form = new FormData(formRef?.current);
+      const payload = Object.fromEntries(form);
+      onClose();
+    } else {
+      formRef?.current.reportValidity();
+    }
+  };
   return (
     <>
       <Modal
@@ -43,6 +53,8 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
           <ModalHeader>Update JWKS URL</ModalHeader>
           <ModalBody>
             <Box
+              as="form"
+              ref={formRef}
               p={4}
               borderRadius={4}
               border="1px solid"
@@ -50,28 +62,27 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
             >
               <FormControl mb={4}>
                 <FormLabel>Current JWKS URL</FormLabel>
+                <Flex>
+                  <Input
+                    isRequired
+                    readOnly
+                    placeholder="https://"
+                    variant="bc-input"
+                    type="url"
+                    value={jwksUrl}
+                  />
+                  <CopyButton value={jwksUrl} />
+                </Flex>
+              </FormControl>
+              <FormControl mb={4}>
+                <FormLabel>New JWKS URL</FormLabel>
                 <Input
                   isRequired
-                  readOnly
                   placeholder="https://"
                   name="jwksUrl"
                   variant="bc-input"
                   type="url"
-                  value={jwksUrl}
                 />
-              </FormControl>
-              <FormControl mb={4}>
-                <FormLabel>New JWKS URL</FormLabel>
-                <Flex>
-                  <Input
-                    isRequired
-                    placeholder="https://"
-                    name="jwksUrl"
-                    variant="bc-input"
-                    type="url"
-                  />
-                  <CopyButton value="hasdlfkasdlkfj" />
-                </Flex>
               </FormControl>
               <Heading size="sm" mb={2}>
                 Client ID
@@ -113,7 +124,10 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
               <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={onClose} data-testid="jwks-update-button">
+              <Button
+                onClick={handleSubmitClick}
+                data-testid="jwks-update-button"
+              >
                 Update
               </Button>
             </ButtonGroup>

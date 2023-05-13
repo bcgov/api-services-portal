@@ -262,6 +262,7 @@ export const handlers = [
   // Applications
   keystone.query('MyApplications', allApplicationsHandler),
   keystone.query('GetApplicationServices', getApplicationServicesHandler),
+  keystone.query('ApplicationSelectApplications', allApplicationsHandler),
   keystone.mutation('AddApplication', createApplicationHandler),
   keystone.mutation('UpdateApplication', updateApplicationHandler),
   keystone.mutation('RemoveApplication', removeApplicationHandler),

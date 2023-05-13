@@ -31,6 +31,16 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
   isOpen,
   onClose,
 }) => {
+  const formRef = React.useRef(null);
+  const handleSubmitClick = () => {
+    if (formRef?.current.checkValidity()) {
+      const form = new FormData(formRef?.current);
+      const payload = Object.fromEntries(form);
+      onClose();
+    } else {
+      formRef?.current.reportValidity();
+    }
+  };
   return (
     <>
       <Modal
@@ -44,6 +54,8 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
           <ModalHeader>Update JWKS URL</ModalHeader>
           <ModalBody>
             <Box
+              as="form"
+              ref={formRef}
               p={4}
               borderRadius={4}
               border="1px solid"
@@ -55,11 +67,10 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                   <Textarea
                     isRequired
                     height="64px"
-                    name="publicKey"
                     variant="bc-input"
                     value={clientCertificate}
                   />
-                  <CopyButton value="alskdfjalsjfalskdfjlsdkj" />
+                  <CopyButton value={clientCertificate} />
                 </Flex>
               </FormControl>
               <FormControl mb={4}>
@@ -71,7 +82,6 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                     name="publicKey"
                     variant="bc-input"
                   />
-                  <CopyButton value="alskdfjalsjfalskdfjlsdkj" />
                 </Flex>
               </FormControl>
             </Box>
@@ -81,7 +91,10 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
               <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={onClose} data-testid="public-key-update-button">
+              <Button
+                onClick={handleSubmitClick}
+                data-testid="public-key-update-button"
+              >
                 Update
               </Button>
             </ButtonGroup>
