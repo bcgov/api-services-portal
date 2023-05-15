@@ -13,10 +13,13 @@ import {
   ModalHeader,
   ModalOverlay,
   Textarea,
+  useToast,
 } from '@chakra-ui/react';
 
-import AccessRequestCredentials from './access-request-credentials';
 import CopyButton from '../copy-button/copy-button';
+import { useApiMutation } from '@/shared/services/api';
+import { controlsMutation } from './shared';
+import { useQueryClient } from 'react-query';
 
 interface PublicKeyDialogProps {
   id: string;
@@ -31,16 +34,42 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
   isOpen,
   onClose,
 }) => {
+  const client = useQueryClient();
+  const mutate = useApiMutation(controlsMutation);
+  const toast = useToast();
+
   const formRef = React.useRef(null);
-  const handleSubmitClick = () => {
+  const handleSubmitClick = async () => {
     if (formRef?.current.checkValidity()) {
-      const form = new FormData(formRef?.current);
-      const payload = Object.fromEntries(form);
+      try {
+        const form = new FormData(formRef?.current);
+        const controls = Object.fromEntries(form);
+        const payload = {
+          id,
+          controls,
+        };
+        await mutate.mutateAsync(payload);
+        toast({
+          title: 'controls updated',
+          status: 'success',
+          isClosable: true,
+        });
+        client.invalidateQueries('allServiceAccesses');
+        onClose();
+      } catch (err) {
+        toast({
+          title: 'Update failed',
+          description: err,
+          status: 'error',
+          isClosable: true,
+        });
+      }
       onClose();
     } else {
       formRef?.current.reportValidity();
     }
   };
+
   return (
     <>
       <Modal
@@ -66,6 +95,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                 <Flex>
                   <Textarea
                     isRequired
+                    isDisabled={mutate.isLoading}
                     height="64px"
                     variant="bc-input"
                     value={clientCertificate}
@@ -92,10 +122,11 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                 Cancel
               </Button>
               <Button
+                isDisabled={mutate.isLoading}
                 onClick={handleSubmitClick}
                 data-testid="public-key-update-button"
               >
-                Update
+                {mutate.isLoading ? 'Updating...' : 'Update'}
               </Button>
             </ButtonGroup>
           </ModalFooter>

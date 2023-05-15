@@ -74,6 +74,7 @@ import { handleAllDatasets } from './resolvers/datasets';
 import {
   createServiceAccountHandler,
   getAllServiceAccountsHandler,
+  updateMyServiceAccessHandlers,
   getMyServiceAccessHandlers,
 } from './resolvers/service-accounts';
 import {
@@ -273,6 +274,10 @@ export const handlers = [
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
   keystone.query('GetMyServiceAccesses', getMyServiceAccessHandlers),
+  keystone.mutation(
+    'UpdateServiceAccessCredential',
+    updateMyServiceAccessHandlers
+  ),
   keystone.query('GetGatewayService', getGatewayServiceHandler),
   keystone.query('GetGatewayServiceFilters', getGatewayServiceFilterHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),

@@ -161,3 +161,7 @@ asdf0jas0dfja0sdfj0as9dfja0sd9fj09sdfj0asjdf0as9jf09asjf0a9sjfa0s9djf0asdjf0asdj
     })
   );
 };
+
+export const updateMyServiceAccessHandlers = (req, res, ctx) => {
+  return res(ctx.data({}));
+};

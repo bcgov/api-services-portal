@@ -14,8 +14,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  useToast,
 } from '@chakra-ui/react';
 import CopyButton from '../copy-button/copy-button';
+import { useApiMutation } from '@/shared/services/api';
+import { controlsMutation } from './shared';
+import { useQueryClient } from 'react-query';
 
 interface JwksDialogProps {
   id: string;
@@ -30,16 +34,40 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
   isOpen,
   onClose,
 }) => {
+  const client = useQueryClient();
+  const mutate = useApiMutation(controlsMutation);
+  const toast = useToast();
   const formRef = React.useRef(null);
-  const handleSubmitClick = () => {
+  const handleSubmitClick = async () => {
     if (formRef?.current.checkValidity()) {
-      const form = new FormData(formRef?.current);
-      const payload = Object.fromEntries(form);
-      onClose();
+      try {
+        const form = new FormData(formRef?.current);
+        const controls = Object.fromEntries(form);
+        const payload = {
+          id,
+          controls,
+        };
+        await mutate.mutateAsync(payload);
+        toast({
+          title: 'controls updated',
+          status: 'success',
+          isClosable: true,
+        });
+        client.invalidateQueries('allServiceAccesses');
+        onClose();
+      } catch (err) {
+        toast({
+          title: 'Update failed',
+          description: err,
+          status: 'error',
+          isClosable: true,
+        });
+      }
     } else {
       formRef?.current.reportValidity();
     }
   };
+
   return (
     <>
       <Modal
@@ -78,6 +106,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
                 <FormLabel>New JWKS URL</FormLabel>
                 <Input
                   isRequired
+                  isDisabled={mutate.isLoading}
                   placeholder="https://"
                   name="jwksUrl"
                   variant="bc-input"
@@ -125,10 +154,11 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
                 Cancel
               </Button>
               <Button
+                isDisabled={mutate.isLoading}
                 onClick={handleSubmitClick}
                 data-testid="jwks-update-button"
               >
-                Update
+                {mutate.isLoading ? 'Updating...' : 'Update'}
               </Button>
             </ButtonGroup>
           </ModalFooter>
