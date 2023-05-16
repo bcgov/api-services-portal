@@ -310,7 +310,9 @@ jobs:
               - sh
               - -c
               - 'state=\$(curl -XGET -m 2 --silent -f -H \"Accept: application/json\" http://localhost:3000/health | jq -r \".status | ascii_downcase\"); if [ ! \"\$state\" == \"ready\" ]; then exit 1; fi'
-
+            timeoutSeconds: 3
+            periodSeconds: 10
+        
           " > values.yaml
 
           helm repo add bcgov http://bcgov.github.io/helm-charts
