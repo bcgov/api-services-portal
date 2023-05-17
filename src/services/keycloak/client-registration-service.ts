@@ -116,9 +116,9 @@ export class KeycloakClientRegistrationService {
           enabled,
           clientId,
           attributes: {
-            'jwt.credential.public.key': '',
-            'jwks.url': jwksUrl,
-            'use.jwks.url': 'true',
+            'jwt.credential.public.key': certificate ?? '',
+            'jwks.url': jwksUrl ?? '',
+            'use.jwks.url': jwksUrl ? 'true' : 'false',
           },
         });
         break;

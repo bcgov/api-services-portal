@@ -111,6 +111,28 @@ export class KeycloakClientService {
     return cred.value;
   }
 
+  public async updateJwksUrl(
+    client: ClientRepresentation,
+    jwksUrl: string
+  ): Promise<void> {
+    client.attributes['jwks.url'] = jwksUrl;
+    client.attributes['jwt.credential.public.key'] = '';
+    client.attributes['use.jwks.url'] = 'true';
+
+    await this.kcAdminClient.clients.update({ id: client.id }, client);
+  }
+
+  public async updateCertificate(
+    client: ClientRepresentation,
+    certificate: string
+  ): Promise<void> {
+    client.attributes['jwks.url'] = '';
+    client.attributes['jwt.credential.public.key'] = certificate;
+    client.attributes['use.jwks.url'] = 'false';
+
+    await this.kcAdminClient.clients.update({ id: client.id }, client);
+  }
+
   public async uploadCertificate(
     id: string,
     publicKey: string

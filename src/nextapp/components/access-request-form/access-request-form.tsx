@@ -22,6 +22,7 @@ import { Environment } from '@/shared/types/query.types';
 
 import Fieldset from './access-request-fieldset';
 import ApplicationSelect from './application-select';
+import { publicKeyPlaceholder } from './shared';
 
 interface AccessRequestFormProps {
   id: string;
@@ -39,6 +40,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
     variables: { id },
   });
   const [environment, setEnvironment] = React.useState<string>('');
+  const [authMethod, setAuthMethod] = React.useState('publicKey');
   const itemList = preview
     ? data.allProductsByNamespace
     : data.allDiscoverableProducts;
@@ -112,17 +114,55 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
         </RadioGroup>
         {clientAuthenticator === 'client-jwt-jwks-url' && (
           <Box ml={2} pl={4} borderColor="bc-component" borderLeft="1px solid">
-            <FormLabel>Public Key URL</FormLabel>
-            <FormHelperText>
-              A URL to a JWKS formatted document for signed JWT authentication
-            </FormHelperText>
-            <Input
-              isRequired
-              placeholder="https://"
-              name="jwksUrl"
-              variant="bc-input"
-              type="url"
-            />
+            <RadioGroup
+              name=""
+              value={authMethod}
+              onChange={setAuthMethod}
+              my={2}
+            >
+              <Stack direction="column">
+                <Radio
+                  value="publicKey"
+                  data-testid={`access-rqst-app-env-public-key`}
+                >
+                  Public Key
+                </Radio>
+                {authMethod === 'publicKey' && (
+                  <Box ml={2} mb={4} pl={6}>
+                    <FormHelperText mt={0} mb={2} color="bc-component">
+                      Enter the public key for authentication.
+                    </FormHelperText>
+                    <Textarea
+                      isRequired
+                      height="64px"
+                      name="clientCertificate"
+                      variant="code"
+                      placeholder={publicKeyPlaceholder}
+                    />
+                  </Box>
+                )}
+                <Radio
+                  value="jwks"
+                  data-testid={`access-rqst-app-env-jwks-url`}
+                >
+                  JWKS URL
+                </Radio>
+                {authMethod === 'jwks' && (
+                  <Box ml={2} mb={4} pl={7}>
+                    <FormHelperText mt={0} mb={2} color="bc-component">
+                      Enter the URL where the JWKS is hosted for authentication.
+                    </FormHelperText>
+                    <Input
+                      isRequired
+                      placeholder="https://"
+                      name="jwksUrl"
+                      variant="bc-input"
+                      type="url"
+                    />
+                  </Box>
+                )}
+              </Stack>
+            </RadioGroup>
           </Box>
         )}
       </Fieldset>
@@ -190,7 +230,7 @@ const AccessRequestForm: React.FC<AccessRequestFormProps> = ({
 export default AccessRequestForm;
 
 const query = gql`
-  query Get($id: ID!) {
+  query GetAccessRequestForm($id: ID!) {
     allProductsByNamespace(where: { id: $id }) {
       id
       name

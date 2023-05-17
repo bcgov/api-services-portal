@@ -71,6 +71,7 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
         leftIcon={<Icon as={FaPlusCircle} />}
         onClick={onOpen}
         variant="primary"
+        data-testid="link-consumer-namespace"
       >
         {title}
       </Button>
@@ -97,6 +98,7 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
                     name="username"
                     type="text"
                     placeholder="Enter username of the Consumer you would like to link"
+                    data-testid="link-consumer-username"
                   />
                 </FormControl>
               </VStack>
@@ -107,7 +109,7 @@ const LinkConsumerDialog: React.FC<LinkConsumerDialogProps> = ({
               <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmitClick}>Link</Button>
+              <Button data-testid="link-consumer-link-btn" onClick={handleSubmitClick}>Link</Button>
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

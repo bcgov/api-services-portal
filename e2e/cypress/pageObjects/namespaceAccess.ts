@@ -29,7 +29,6 @@ class NamespaceAccessPage {
     // cy.get(this.userNameInput).type(editPermission.email);
     let accessRole: Array<string> = editPermission.accessRole
     accessRole.forEach(function (accessName) {
-      debugger
       cy.contains("Permissions").next().find('li').find('label').each(($el, index, $list) => {
         // cy.wrap($el).find('input').uncheck({ force: true });
         const textAccessRoleName = $el.text()

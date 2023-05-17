@@ -20,6 +20,7 @@ import {
   fullfillRequestHandler,
   gatewayServicesHandler,
   getAccessRequestsHandler,
+  getAccessRequestForm,
   getAllConsumerGroupLabelsHandler,
   getConsumersHandler,
   getConsumerHandler,
@@ -73,6 +74,8 @@ import { handleAllDatasets } from './resolvers/datasets';
 import {
   createServiceAccountHandler,
   getAllServiceAccountsHandler,
+  updateMyServiceAccessHandlers,
+  getMyServiceAccessHandlers,
 } from './resolvers/service-accounts';
 import {
   allServicesHandler,
@@ -229,6 +232,7 @@ export const handlers = [
   keystone.query('GetAccessRequests', getAccessRequestsHandler),
   keystone.query('GetConsumerEditDetails', getConsumerProdEnvAccessHandler),
   keystone.query('GetAccessRequestAuth', accessRequestAuthHandler),
+  keystone.query('GetAccessRequestForm', getAccessRequestForm),
   keystone.query('GetFilterConsumers', getConsumersFilterHandler),
   keystone.query('GetAllConsumerGroupLabels', getAllConsumerGroupLabelsHandler),
   keystone.query('GetControlContent', gatewayServicesHandler),
@@ -259,6 +263,7 @@ export const handlers = [
   // Applications
   keystone.query('MyApplications', allApplicationsHandler),
   keystone.query('GetApplicationServices', getApplicationServicesHandler),
+  keystone.query('ApplicationSelectApplications', allApplicationsHandler),
   keystone.mutation('AddApplication', createApplicationHandler),
   keystone.mutation('UpdateApplication', updateApplicationHandler),
   keystone.mutation('RemoveApplication', removeApplicationHandler),
@@ -268,6 +273,11 @@ export const handlers = [
   keystone.query('GetMetrics', getMetricsHandler),
   // Service accounts
   keystone.query('GetAllServiceAccounts', getAllServiceAccountsHandler),
+  keystone.query('GetMyServiceAccesses', getMyServiceAccessHandlers),
+  keystone.mutation(
+    'UpdateServiceAccessCredential',
+    updateMyServiceAccessHandlers
+  ),
   keystone.query('GetGatewayService', getGatewayServiceHandler),
   keystone.query('GetGatewayServiceFilters', getGatewayServiceFilterHandler),
   keystone.mutation('CreateServiceAccount', createServiceAccountHandler),
