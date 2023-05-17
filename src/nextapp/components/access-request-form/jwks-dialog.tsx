@@ -121,36 +121,43 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
               <Heading size="sm" mb={2}>
                 Issuer
               </Heading>
-              <Box
-                h="40px"
-                d="flex"
-                alignItems="center"
-                backgroundColor="#C2ED9850"
-                border="1px solid"
-                borderColor="#C2ED98"
-                px={4}
-                py={1}
-                borderRadius={4}
-                mb={4}
-              >
-                {issuer}
-              </Box>
+              <Flex align="center" mb={4}>
+                <Box
+                  h="40px"
+                  d="flex"
+                  alignItems="center"
+                  backgroundColor="#C2ED9850"
+                  border="2px solid"
+                  borderColor="#C2ED98"
+                  px={4}
+                  py={1}
+                  borderRadius={4}
+                  flex="1"
+                >
+                  {issuer}
+                </Box>
+                <CopyButton value={issuer} />
+              </Flex>
               <Heading size="sm" mb={2}>
                 Token Endpoint
               </Heading>
-              <Box
-                h="40px"
-                d="flex"
-                alignItems="center"
-                backgroundColor="#C2ED9850"
-                border="1px solid"
-                borderColor="#C2ED98"
-                px={4}
-                py={1}
-                borderRadius={4}
-              >
-                {tokenEndpoint}
-              </Box>
+              <Flex align="center">
+                <Box
+                  h="40px"
+                  d="flex"
+                  alignItems="center"
+                  backgroundColor="#C2ED9850"
+                  border="2px solid"
+                  borderColor="#C2ED98"
+                  px={4}
+                  py={1}
+                  flex="1"
+                  borderRadius={4}
+                >
+                  {tokenEndpoint}
+                </Box>
+                <CopyButton value={tokenEndpoint} />
+              </Flex>
             </Box>
           </ModalBody>
           <ModalFooter>
