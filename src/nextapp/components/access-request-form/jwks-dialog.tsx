@@ -23,6 +23,8 @@ import { useQueryClient } from 'react-query';
 
 interface JwksDialogProps {
   id: string;
+  issuer: string;
+  tokenEndpoint: string;
   jwksUrl: string;
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +32,8 @@ interface JwksDialogProps {
 
 const JwksDialog: React.FC<JwksDialogProps> = ({
   id,
+  issuer,
+  tokenEndpoint,
   jwksUrl,
   isOpen,
   onClose,
@@ -49,7 +53,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
         };
         await mutate.mutateAsync(payload);
         toast({
-          title: 'controls updated',
+          title: 'JWKS Url updated',
           status: 'success',
           isClosable: true,
         });
@@ -114,7 +118,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
                 />
               </FormControl>
               <Heading size="sm" mb={2}>
-                Client ID
+                Issuer
               </Heading>
               <Box
                 h="40px"
@@ -128,7 +132,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
                 borderRadius={4}
                 mb={4}
               >
-                c7e5189b-675e-4701-95b8-f684ca8497de
+                {issuer}
               </Box>
               <Heading size="sm" mb={2}>
                 Token Endpoint
@@ -144,7 +148,7 @@ const JwksDialog: React.FC<JwksDialogProps> = ({
                 py={1}
                 borderRadius={4}
               >
-                c7e5189b-675e-4701-95b8-f684ca8497de
+                {tokenEndpoint}
               </Box>
             </Box>
           </ModalBody>

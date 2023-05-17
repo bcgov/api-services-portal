@@ -15,6 +15,7 @@ import { registerClient } from './client-credentials';
 import { registerApiKey } from './kong-api-key';
 import { Logger } from '../../logger';
 import { AccessRequest } from '../keystone/types';
+import { IsCertificateValid, IsJWKSURLValid } from './update-credential';
 
 const logger = Logger('wf.RegenCreds');
 
@@ -125,6 +126,7 @@ export const generateCredential = async (
       clientSigning.privateKey = privateKey;
       controls.clientCertificate = clientSigning.publicKey;
     }
+
     const newClient = await registerClient(
       context,
       productEnvironment.name,
@@ -149,7 +151,13 @@ export const generateCredential = async (
       clientId: newClient.client.clientId,
       clientCertificate: controls.clientCertificate,
       jwksUrl: controls.jwksUrl,
+      issuer:
+        controls.jwksUrl || controls.clientCertificate
+          ? newClient.openid.issuer
+          : null,
+      tokenEndpoint: newClient.openid.token_endpoint,
     };
+
     // Create a ServiceAccess record
     const consumerType = 'client';
     const aclEnabled =

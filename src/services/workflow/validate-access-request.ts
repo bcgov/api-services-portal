@@ -8,10 +8,15 @@ import {
   lookupKongConsumerByCustomId,
   lookupMyApplicationsById,
 } from '../keystone';
-import { IssuerEnvironmentConfig, getIssuerEnvironmentConfig } from './types';
+import {
+  IssuerEnvironmentConfig,
+  getIssuerEnvironmentConfig,
+  CredentialReference,
+} from './types';
 import { isUpdatingToIssued, isRequested, isBlank } from './common';
 import { getOpenidFromIssuer } from '../keycloak';
 import { Logger } from '../../logger';
+import { IsCertificateValid, IsJWKSURLValid } from './update-credential';
 
 const logger = Logger('wf.Validate');
 
@@ -111,6 +116,22 @@ export const Validate = async (
         true,
         'This application already has access.'
       );
+
+      const controls: CredentialReference = JSON.parse(resolvedData.controls);
+
+      if (controls.jwksUrl) {
+        assert.strictEqual(
+          await IsJWKSURLValid(controls.jwksUrl),
+          true,
+          'JWKS Url failed validation.'
+        );
+      } else if (controls.clientCertificate) {
+        assert.strictEqual(
+          IsCertificateValid(controls.clientCertificate),
+          true,
+          'Certificate failed validation.'
+        );
+      }
     } else if (isUpdatingToIssued(existingItem, resolvedData)) {
       assert.strictEqual(requestDetails != null, true, errors.WF01);
       assert.strictEqual(

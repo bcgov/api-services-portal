@@ -6,6 +6,7 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  Heading,
   Modal,
   ModalBody,
   ModalContent,
@@ -23,6 +24,8 @@ import { useQueryClient } from 'react-query';
 
 interface PublicKeyDialogProps {
   id: string;
+  issuer: string;
+  tokenEndpoint: string;
   clientCertificate: string;
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +33,8 @@ interface PublicKeyDialogProps {
 
 const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
   id,
+  issuer,
+  tokenEndpoint,
   clientCertificate,
   isOpen,
   onClose,
@@ -50,7 +55,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
         };
         await mutate.mutateAsync(payload);
         toast({
-          title: 'controls updated',
+          title: 'Public Key updated',
           status: 'success',
           isClosable: true,
         });
@@ -64,7 +69,6 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
           isClosable: true,
         });
       }
-      onClose();
     } else {
       formRef?.current.reportValidity();
     }
@@ -80,7 +84,7 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
       >
         <ModalOverlay />
         <ModalContent minW="75%">
-          <ModalHeader>Update JWKS URL</ModalHeader>
+          <ModalHeader>Update Public Key</ModalHeader>
           <ModalBody>
             <Box
               as="form"
@@ -109,11 +113,44 @@ const PublicKeyDialog: React.FC<PublicKeyDialogProps> = ({
                   <Textarea
                     isRequired
                     height="64px"
-                    name="publicKey"
+                    name="clientCertificate"
                     variant="bc-input"
                   />
                 </Flex>
               </FormControl>
+              <Heading size="sm" mb={2}>
+                Issuer
+              </Heading>
+              <Box
+                h="40px"
+                d="flex"
+                alignItems="center"
+                backgroundColor="#C2ED9850"
+                border="1px solid"
+                borderColor="#C2ED98"
+                px={4}
+                py={1}
+                borderRadius={4}
+                mb={4}
+              >
+                {issuer}
+              </Box>
+              <Heading size="sm" mb={2}>
+                Token Endpoint
+              </Heading>
+              <Box
+                h="40px"
+                d="flex"
+                alignItems="center"
+                backgroundColor="#C2ED9850"
+                border="1px solid"
+                borderColor="#C2ED98"
+                px={4}
+                py={1}
+                borderRadius={4}
+              >
+                {tokenEndpoint}
+              </Box>
             </Box>
           </ModalBody>
           <ModalFooter>

@@ -200,6 +200,7 @@ API Owner Role - All Fields,,,,,read,,*,,,,"api-owner,provider-user",allow,
 API Owner Role - All Fields,,,,,"update,create",,*,,api-owner,,,allow,
 Portal User,,DiscoverableProduct,,,,,,,portal-user,,,allow,
 Portal User,,myServiceAccesses,,,,,,,portal-user,,,allow,filterByAppOwner
+Portal User,,updateServiceAccessCredential,,,,,,,portal-user,,,allow,filterByAppOwner
 Portal User,,regenerateCredentials,,,,,,,portal-user,,,allow,filterByAppOwner
 Portal User,,myApplications,,,,,,,portal-user,,,allow,filterByOwner
 API Owner Role Rules,,allGatewayServicesByNamespace,,,,,,,,,"api-owner,provider-user",allow,filterByUserNS

@@ -28,6 +28,8 @@ export interface CredentialReference {
   clientId?: string;
   clientCertificate?: string;
   jwksUrl?: string;
+  issuer?: string;
+  tokenEndpoint?: string;
 }
 
 // Subject Identity when a Product is requested using the Authentication Code Flow

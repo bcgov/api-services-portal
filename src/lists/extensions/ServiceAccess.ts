@@ -16,6 +16,7 @@ import {
 import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
 import { strict as assert } from 'assert';
+import { UpdateCredentials } from '../../services/workflow';
 
 const typeCredentialReferenceUpdateInput = `
 input CredentialReferenceUpdateInput {
@@ -41,59 +42,9 @@ module.exports = {
               info: any,
               { query, access }: any
             ) => {
-              const serviceAccess = await lookupCredentialReferenceByServiceAccess(
-                context,
-                args.id
-              );
-
-              const flow = serviceAccess.productEnvironment.flow;
-              const clientAuthenticator =
-                serviceAccess.productEnvironment?.credentialIssuer
-                  ?.clientAuthenticator;
-
-              assert.strictEqual(
-                flow === 'client-credentials' &&
-                  clientAuthenticator === ClientAuthenticator.ClientJWTwithJWKS,
-                true,
-                'Unsupported authenticator type'
-              );
-
-              const noauthContext = keystone.createContext({
-                skipAccessControl: true,
-              });
-              const envCtx = await getEnvironmentContext(
-                noauthContext,
-                serviceAccess.productEnvironment.id,
-                {},
-                false
-              );
-
-              const kcClientService = new KeycloakClientService(
-                envCtx.issuerEnvConfig.issuerUrl
-              );
-              await kcClientService.login(
-                envCtx.issuerEnvConfig.clientId,
-                envCtx.issuerEnvConfig.clientSecret
-              );
-
-              const client = await kcClientService.findByClientId(
-                serviceAccess.consumer.customId
-              );
-
-              const newCredential = {
-                flow: serviceAccess.productEnvironment.flow,
-                clientId: serviceAccess.consumer.customId,
-                issuer: envCtx.openid.issuer,
-                tokenEndpoint: envCtx.openid.token_endpoint,
-              } as NewCredential;
-
-              //TODO: Perform actual update
-              //await kcClientService.uploadCertificate(client.id, publicKey);
-
-              return {
-                credential: JSON.stringify(newCredential),
-              };
+              return await UpdateCredentials(context, args.id, args.controls);
             },
+            access: EnforcementPoint,
           },
           {
             schema: 'regenerateCredentials(id: ID!): AccessRequest',

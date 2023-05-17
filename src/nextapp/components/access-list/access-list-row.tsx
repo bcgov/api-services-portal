@@ -84,12 +84,16 @@ const AccessListRow: React.FC<AccessListRowProps> = ({
         />
         <JwksDialog
           id={data.id}
+          issuer={controls.issuer}
+          tokenEndpoint={controls.tokenEndpoint}
           jwksUrl={controls.jwksUrl}
           isOpen={jwksDialog.isOpen}
           onClose={jwksDialog.onClose}
         />
         <PublicKeyDialog
           id={data.id}
+          issuer={controls.issuer}
+          tokenEndpoint={controls.tokenEndpoint}
           clientCertificate={controls.clientCertificate}
           isOpen={publicKeyDialog.isOpen}
           onClose={publicKeyDialog.onClose}

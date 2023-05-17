@@ -1,6 +1,4 @@
-import { gql } from 'graphql-request';
 
-export const controlsMutation = gql`
   mutation UpdateServiceAccessCredential(
     $id: ID!
     $controls: CredentialReferenceUpdateInput
@@ -9,4 +7,3 @@ export const controlsMutation = gql`
       credential
     }
   }
-`;

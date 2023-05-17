@@ -1,6 +1,7 @@
 import format from 'date-fns/format';
 import subDays from 'date-fns/subDays';
 import times from 'lodash/times';
+import fetch from 'node-fetch';
 import { strict as assert } from 'assert';
 
 export function dateRange(days = 5): string[] {
@@ -59,4 +60,19 @@ export function regExprValidation(
   const namespaceValidationRule = '^[a-z][a-z0-9-]{4,14}$';
   const re = new RegExp(rule);
   assert.strictEqual(re.test(value), true, errorMessage);
+}
+
+export async function fetchWithTimeout(resource: string, options: any = {}) {
+  const { timeout = 8000 } = options;
+
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal,
+  });
+  clearTimeout(id);
+
+  return response;
 }
