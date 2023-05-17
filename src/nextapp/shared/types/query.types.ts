@@ -1883,6 +1883,11 @@ export type CredentialIssuersUpdateInput = {
   data?: Maybe<CredentialIssuerUpdateInput>;
 };
 
+export type CredentialReferenceUpdateInput = {
+  clientCertificate?: Maybe<Scalars['String']>;
+  jwksUrl?: Maybe<Scalars['String']>;
+};
+
 /**  A keystone list  */
 export type Dataset = {
   __typename?: 'Dataset';
@@ -4503,11 +4508,12 @@ export type Mutation = {
   linkConsumerToNamespace?: Maybe<Scalars['Boolean']>;
   updateConsumerRoleAssignment?: Maybe<Scalars['Boolean']>;
   updateConsumerScopeAssignment?: Maybe<Scalars['Boolean']>;
-  regenerateCredentials?: Maybe<AccessRequest>;
   markNamespaceNotificationViewed?: Maybe<Scalars['Boolean']>;
   updateCurrentNamespace?: Maybe<Scalars['String']>;
   createNamespace?: Maybe<Namespace>;
   forceDeleteNamespace?: Maybe<Scalars['Boolean']>;
+  updateServiceAccessCredential?: Maybe<AccessRequest>;
+  regenerateCredentials?: Maybe<AccessRequest>;
   createServiceAccount?: Maybe<ServiceAccount>;
   createUmaPolicy?: Maybe<UmaPolicy>;
   updateUmaPolicy?: Maybe<UmaPolicy>;
@@ -5313,11 +5319,6 @@ export type MutationUpdateConsumerScopeAssignmentArgs = {
 };
 
 
-export type MutationRegenerateCredentialsArgs = {
-  id: Scalars['ID'];
-};
-
-
 export type MutationUpdateCurrentNamespaceArgs = {
   org?: Maybe<Scalars['String']>;
   orgUnit?: Maybe<Scalars['String']>;
@@ -5332,6 +5333,17 @@ export type MutationCreateNamespaceArgs = {
 export type MutationForceDeleteNamespaceArgs = {
   namespace: Scalars['String'];
   force: Scalars['Boolean'];
+};
+
+
+export type MutationUpdateServiceAccessCredentialArgs = {
+  id: Scalars['ID'];
+  controls?: Maybe<CredentialReferenceUpdateInput>;
+};
+
+
+export type MutationRegenerateCredentialsArgs = {
+  id: Scalars['ID'];
 };
 
 

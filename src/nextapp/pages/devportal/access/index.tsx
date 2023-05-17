@@ -88,6 +88,7 @@ const query = gql`
       id
       name
       active
+      credentialReference
       application {
         name
       }
@@ -98,6 +99,9 @@ const query = gql`
         product {
           id
           name
+        }
+        credentialIssuer {
+          clientAuthenticator
         }
       }
     }

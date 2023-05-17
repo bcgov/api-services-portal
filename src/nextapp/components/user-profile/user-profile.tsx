@@ -26,6 +26,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
   ...props
 }) => {
   const testId = props['data-testid'] ?? 'user-profile';
+  if (!data) {
+    return null;
+  }
+
   return (
     <Box {...props}>
       <Heading size="sm" mb={3.5}>

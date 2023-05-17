@@ -86,6 +86,13 @@ describe('Create API Spec', () => {
     })
   })
 
+  it('Verify the message when no dataset is linked to BCDC', () => {
+    cy.visit(pd.path)
+    cy.get('@apiowner').then(({ product }: any) => {
+      pd.checkMessageForNoDataset(product.name,"health")
+    })
+  })
+
   it('update the Dataset in BC Data Catelogue to appear the API in the Directory', () => {
     cy.visit(pd.path)
     cy.get('@apiowner').then(({ product }: any) => {

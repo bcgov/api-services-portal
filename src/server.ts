@@ -172,11 +172,11 @@ for (const _list of [
   'ConsumerGroups',
   'ConsumerProducts',
   'ConsumerScopesAndRoles',
-  'CredentialRegenerate',
   'CredentialIssuerExt',
   'Namespace',
   'NamespaceActivity',
   'OrganizationPolicy',
+  'ServiceAccess',
   'ServiceAccount',
   'UMAPolicy',
   'UMAResourceSet',
@@ -295,7 +295,9 @@ const configureExpress = (app: any) => {
   app.put('/feed/:entity', (req: any, res: any) => {
     const context = keystone.createContext({
       skipAccessControl: true,
-      authentication: { item: { name: 'Feeder Bot' } },
+      authentication: {
+        item: { name: 'Feeder Bot', namespace: req.body?.namespace },
+      },
     });
     putFeedWorker(context, req, res).catch((err: any) => {
       console.log(err);

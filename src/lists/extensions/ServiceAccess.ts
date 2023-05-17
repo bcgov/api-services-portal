@@ -5,21 +5,47 @@ import {
   lookupCredentialReferenceByServiceAccess,
 } from '../../services/keystone';
 import { EnforcementPoint } from '../../authz/enforcement';
-import { KeycloakClientService } from '../../services/keycloak';
+import {
+  ClientAuthenticator,
+  KeycloakClientService,
+} from '../../services/keycloak';
 import {
   CredentialReference,
   NewCredential,
 } from '../../services/workflow/types';
 import { getEnvironmentContext } from '../../services/workflow/get-namespaces';
 import { replaceApiKey } from '../../services/workflow/kong-api-key-replace';
+import { strict as assert } from 'assert';
+import { UpdateCredentials } from '../../services/workflow';
+
+const typeCredentialReferenceUpdateInput = `
+input CredentialReferenceUpdateInput {
+    clientCertificate: String,
+    jwksUrl: String
+}
+`;
 
 module.exports = {
   extensions: [
     (keystone: any) => {
       keystone.extendGraphQLSchema({
-        types: [],
+        types: [{ type: typeCredentialReferenceUpdateInput }],
         queries: [],
         mutations: [
+          {
+            schema:
+              'updateServiceAccessCredential(id: ID!, controls: CredentialReferenceUpdateInput): AccessRequest',
+            resolver: async (
+              item: any,
+              args: any,
+              context: any,
+              info: any,
+              { query, access }: any
+            ) => {
+              return await UpdateCredentials(context, args.id, args.controls);
+            },
+            access: EnforcementPoint,
+          },
           {
             schema: 'regenerateCredentials(id: ID!): AccessRequest',
             resolver: async (

@@ -248,7 +248,7 @@ const ConsumersPage: React.FC<
                 key: 'tags',
                 sortable: false,
               },
-              { name: 'Updated', key: 'sortDate' },
+              { name: 'Updated', key: 'sortDate', sortKey: 'updatedAt' },
             ]}
             data={consumers}
             data-testid="all-consumer-control-tbl"

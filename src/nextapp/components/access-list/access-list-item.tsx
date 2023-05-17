@@ -88,6 +88,7 @@ const AccessListItem: React.FC<AccessListItemProps> = ({
             <Th>Status</Th>
             <Th>Environments</Th>
             <Th>Application</Th>
+            <Th>Client ID</Th>
             <Th />
           </Tr>
         </Thead>
