@@ -339,6 +339,17 @@ const theme = extendTheme(
             _invalid,
             _valid,
           },
+          code: {
+            bg: 'white',
+            border: '2px solid',
+            borderColor: 'bc-component',
+            fontFamily: 'Consolas,Lucida Console,Menlo,Monaco,monospace',
+            borderRadius: '4px',
+            _focus,
+            _disabled,
+            _invalid,
+            _valid,
+          },
         },
       },
       FormLabel: {
@@ -352,6 +363,9 @@ const theme = extendTheme(
             mt: -2,
             color: 'bc-component',
           },
+        },
+        helperText: {
+          color: 'bc-component',
         },
       },
       FormError: {

@@ -56,3 +56,5 @@ export {
 } from './namespace-activity';
 
 export { MigrateAuthzUser, MigratePortalUser } from './migrate-user';
+
+export { UpdateCredentials } from './update-credential';

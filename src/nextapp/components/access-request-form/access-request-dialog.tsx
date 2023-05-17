@@ -95,6 +95,10 @@ const AccessRequestDialog: React.FC<AccessRequestDialogProps> = ({
                 formData.get('clientAuthenticator') === 'client-jwt-jwks-url'
                   ? formData.get('jwksUrl')
                   : '',
+              clientCertificate:
+                formData.get('clientAuthenticator') === 'client-jwt-jwks-url'
+                  ? formData.get('clientCertificate')
+                  : '',
             }),
             requestor: formData.get('requestor'),
             applicationId: formData.get('applicationId'),

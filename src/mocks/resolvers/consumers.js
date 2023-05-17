@@ -607,3 +607,70 @@ export const getAllConsumerGroupLabelsHandler = (_, res, ctx) => {
     })
   );
 };
+
+export const getAccessRequestForm = (_, res, ctx) => {
+  return res(
+    ctx.data({
+      allProductsByNamespace: [],
+      allDiscoverableProducts: [
+        {
+          id: 'p1',
+          name: 'eRX Demo API',
+          environments: [
+            {
+              id: 'e1',
+              approval: true,
+              name: 'dev',
+              active: true,
+              flow: 'kong-api-key-acl',
+              additionalDetailsToRequest: '',
+              legal: {
+                title: 'Terms of Use for API Gateway',
+                description: null,
+                link:
+                  'https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information',
+                reference: 'terms-of-use-for-api-gateway-1',
+              },
+              credentialIssuer: null,
+            },
+            {
+              id: 'e2',
+              approval: true,
+              name: 'prod',
+              active: true,
+              flow: 'client-credentials',
+              additionalDetailsToRequest: '',
+              legal: null,
+              credentialIssuer: {
+                clientAuthenticator: 'client-jwt-jwks-url',
+              },
+            },
+          ],
+        },
+      ],
+      myApplications: [
+        {
+          id: '111',
+          appId: 'appID1111',
+          name: 'Demo App',
+          owner: {
+            name: 'XT:Jones, Joshua CITZ:IN',
+          },
+        },
+      ],
+      mySelf: {
+        legalsAgreed:
+          '[{"reference":"terms-of-use-for-api-gateway-1","agreedTimestamp":"2023-05-01T18:02:22.973Z"}]',
+      },
+      allTemporaryIdentities: [
+        {
+          id: 'temp1',
+          userId: '2',
+          name: 'XT:Jones, Joshua CITZ:IN',
+          providerUsername: 'JOSHJONE',
+          email: 'joshua@general-metrics.com',
+        },
+      ],
+    })
+  );
+};
